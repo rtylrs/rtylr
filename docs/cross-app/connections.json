@@ -40,10 +40,7 @@
       "flows": "employment status change (terminated, contract ended) revokes app access",
       "class": "MUST",
       "necessity": "Essential",
-      "why": [
-        4,
-        6
-      ],
+      "why": [4, 6],
       "shape": 3,
       "gap": "needs-endpoint",
       "status": "proposed",
@@ -59,11 +56,7 @@
       "flows": "supplier identity and name for accounts-payable bills",
       "class": "MUST",
       "necessity": "Essential",
-      "why": [
-        2,
-        3,
-        8
-      ],
+      "why": [2, 3, 8],
       "shape": 1,
       "gap": "available-today",
       "status": "proposed",
@@ -79,10 +72,7 @@
       "flows": "billable logged hours per project, so hours can be invoiced and unbilled time surfaced",
       "class": "CAN",
       "necessity": "Essential",
-      "why": [
-        1,
-        7
-      ],
+      "why": [1, 7],
       "shape": 1,
       "gap": "needs-contract-field",
       "status": "proposed",
@@ -98,10 +88,7 @@
       "flows": "employee pay rate, aggregated server-side into a project labour cost",
       "class": "CAN",
       "necessity": "High value",
-      "why": [
-        1,
-        7
-      ],
+      "why": [1, 7],
       "shape": 2,
       "gap": "needs-endpoint",
       "status": "proposed",
@@ -117,10 +104,7 @@
       "flows": "approved leave dates, to warn before assigning work due during them",
       "class": "CAN",
       "necessity": "High value",
-      "why": [
-        6,
-        5
-      ],
+      "why": [6, 5],
       "shape": 1,
       "gap": "needs-contract-field",
       "status": "proposed",
@@ -136,10 +120,7 @@
       "flows": "signed contract (plan, mrr, seats, customer) to draft an invoice",
       "class": "CAN",
       "necessity": "Essential",
-      "why": [
-        2,
-        4
-      ],
+      "why": [2, 4],
       "shape": 1,
       "gap": "needs-contract-field",
       "status": "proposed",
@@ -155,11 +136,7 @@
       "flows": "customer identity for invoices, replacing four free-text client fields",
       "class": "MUST",
       "necessity": "Essential",
-      "why": [
-        2,
-        3,
-        8
-      ],
+      "why": [2, 3, 8],
       "shape": 5,
       "gap": "needs-contract-field",
       "status": "proposed",
@@ -175,10 +152,7 @@
       "flows": "outstanding and overdue balance on the customer page, and before extending credit",
       "class": "CAN",
       "necessity": "High value",
-      "why": [
-        5,
-        6
-      ],
+      "why": [5, 6],
       "shape": 1,
       "gap": "needs-contract-field",
       "status": "proposed",
@@ -194,9 +168,7 @@
       "flows": "open ticket count and last ticket date on the customer page",
       "class": "IS",
       "necessity": "High value",
-      "why": [
-        5
-      ],
+      "why": [5],
       "shape": 1,
       "gap": "needs-contract-field",
       "status": "proposed",
@@ -212,11 +184,7 @@
       "flows": "one stock quantity and one cost price per sellable item, instead of two independent numbers",
       "class": "MUST",
       "necessity": "Essential",
-      "why": [
-        3,
-        1,
-        6
-      ],
+      "why": [3, 1, 6],
       "shape": 5,
       "gap": "needs-contract-field",
       "status": "proposed",
@@ -232,9 +200,7 @@
       "flows": "current assigned workload on the employee page, before assigning more",
       "class": "CAN",
       "necessity": "Nice to have",
-      "why": [
-        5
-      ],
+      "why": [5],
       "shape": 1,
       "gap": "available-today",
       "status": "rejected",
@@ -249,10 +215,7 @@
       "flows": "budget consumed against a project",
       "class": "CAN",
       "necessity": "High value",
-      "why": [
-        5,
-        1
-      ],
+      "why": [5, 1],
       "shape": 2,
       "gap": "needs-new-concept",
       "status": "rejected",
@@ -266,9 +229,7 @@
       "flows": "bill and payment history on the supplier page",
       "class": "CAN",
       "necessity": "High value",
-      "why": [
-        5
-      ],
+      "why": [5],
       "shape": 1,
       "gap": "needs-contract-field",
       "status": "proposed",
@@ -284,10 +245,7 @@
       "flows": "inventory valuation total for the balance sheet",
       "class": "CAN",
       "necessity": "High value",
-      "why": [
-        1,
-        7
-      ],
+      "why": [1, 7],
       "shape": 1,
       "gap": "available-today",
       "status": "proposed",
@@ -303,11 +261,7 @@
       "flows": "hired candidate becomes an employee record without retyping the person",
       "class": "CAN",
       "necessity": "Essential",
-      "why": [
-        2,
-        4,
-        8
-      ],
+      "why": [2, 4, 8],
       "shape": 1,
       "gap": "needs-endpoint",
       "status": "proposed",
@@ -323,10 +277,7 @@
       "flows": "one resolver so a person or company means one thing product-wide",
       "class": "MUST",
       "necessity": "Essential",
-      "why": [
-        8,
-        3
-      ],
+      "why": [8, 3],
       "shape": 6,
       "gap": "needs-new-concept",
       "status": "proposed",
@@ -340,10 +291,7 @@
       "flows": "collapse hr_staff and hr_employees into one person record with one pay rate",
       "class": "MUST",
       "necessity": "Essential",
-      "why": [
-        3,
-        8
-      ],
+      "why": [3, 8],
       "shape": 6,
       "gap": "needs-new-concept",
       "status": "proposed",
@@ -357,10 +305,7 @@
       "flows": "day-close takings posted to the journal",
       "class": "CAN",
       "necessity": "High value",
-      "why": [
-        2,
-        4
-      ],
+      "why": [2, 4],
       "shape": 3,
       "gap": "needs-endpoint",
       "status": "rejected",
@@ -374,9 +319,7 @@
       "flows": "zero stock or passed expiry blocks a sale",
       "class": "MUST",
       "necessity": "Essential",
-      "why": [
-        6
-      ],
+      "why": [6],
       "shape": 2,
       "gap": "needs-contract-field",
       "status": "rejected",
@@ -390,10 +333,7 @@
       "flows": "labour cost per period for the cost side of every margin metric",
       "class": "CAN",
       "necessity": "High value",
-      "why": [
-        1,
-        7
-      ],
+      "why": [1, 7],
       "shape": 2,
       "gap": "needs-endpoint",
       "status": "proposed",
@@ -409,9 +349,7 @@
       "flows": "appointment history as customer activity",
       "class": "CAN",
       "necessity": "Nice to have",
-      "why": [
-        5
-      ],
+      "why": [5],
       "shape": 1,
       "gap": "needs-contract-field",
       "status": "rejected",
@@ -425,9 +363,7 @@
       "flows": "project hours and delivery metrics in the analytics app",
       "class": "IS",
       "necessity": "Nice to have",
-      "why": [
-        7
-      ],
+      "why": [7],
       "shape": 1,
       "gap": "available-today",
       "status": "rejected",
@@ -442,10 +378,7 @@
       "flows": "tenant, user, team, app entitlement and config",
       "class": "IS",
       "necessity": "Essential",
-      "why": [
-        3,
-        8
-      ],
+      "why": [3, 8],
       "shape": 1,
       "gap": "available-today",
       "status": "existing",
@@ -458,10 +391,7 @@
       "flows": "purchase order received-but-unbilled and outstanding commitments, for the payables picture",
       "class": "CAN",
       "necessity": "High value",
-      "why": [
-        1,
-        7
-      ],
+      "why": [1, 7],
       "shape": 1,
       "gap": "available-today",
       "status": "proposed",
@@ -477,10 +407,7 @@
       "flows": "bill approved and paid, so a purchase order stops looking outstanding",
       "class": "CAN",
       "necessity": "High value",
-      "why": [
-        2,
-        4
-      ],
+      "why": [2, 4],
       "shape": 3,
       "gap": "needs-contract-field",
       "status": "proposed",
@@ -496,9 +423,7 @@
       "flows": "reorder suggestions already exist; surface them where purchasing happens",
       "class": "IS",
       "necessity": "Nice to have",
-      "why": [
-        5
-      ],
+      "why": [5],
       "shape": 1,
       "gap": "available-today",
       "status": "rejected",
@@ -512,9 +437,7 @@
       "flows": "cost to serve a customer, from support time logged against them",
       "class": "CAN",
       "necessity": "Nice to have",
-      "why": [
-        1
-      ],
+      "why": [1],
       "shape": 2,
       "gap": "needs-new-concept",
       "status": "rejected",
@@ -528,9 +451,7 @@
       "flows": "ticket volume and resolution time as an operations metric",
       "class": "CAN",
       "necessity": "Nice to have",
-      "why": [
-        7
-      ],
+      "why": [7],
       "shape": 1,
       "gap": "available-today",
       "status": "rejected",
@@ -544,10 +465,7 @@
       "flows": "staff availability and shift coverage behind a bookable slot",
       "class": "CAN",
       "necessity": "High value",
-      "why": [
-        6,
-        1
-      ],
+      "why": [6, 1],
       "shape": 2,
       "gap": "needs-endpoint",
       "status": "rejected",
@@ -561,9 +479,7 @@
       "flows": "cycle commitments vs scheduled shifts, to catch overtime committed twice",
       "class": "CAN",
       "necessity": "Nice to have",
-      "why": [
-        6
-      ],
+      "why": [6],
       "shape": 2,
       "gap": "needs-new-concept",
       "status": "rejected",
@@ -577,9 +493,7 @@
       "flows": "revenue actuals as the numerator for every margin metric",
       "class": "IS",
       "necessity": "High value",
-      "why": [
-        7
-      ],
+      "why": [7],
       "shape": 1,
       "gap": "available-today",
       "status": "rejected",
@@ -593,10 +507,7 @@
       "flows": "order history and lifetime spend on the customer page",
       "class": "IS",
       "necessity": "High value",
-      "why": [
-        5,
-        1
-      ],
+      "why": [5, 1],
       "shape": 1,
       "gap": "needs-endpoint",
       "status": "proposed",
@@ -612,9 +523,7 @@
       "flows": "sales by item and by hour for the analytics app",
       "class": "IS",
       "necessity": "Nice to have",
-      "why": [
-        7
-      ],
+      "why": [7],
       "shape": 1,
       "gap": "available-today",
       "status": "rejected",
@@ -629,10 +538,7 @@
       "flows": "product cost, to turn revenue-by-product into margin-by-product",
       "class": "CAN",
       "necessity": "High value",
-      "why": [
-        1,
-        7
-      ],
+      "why": [1, 7],
       "shape": 2,
       "gap": "needs-endpoint",
       "status": "proposed",
@@ -648,10 +554,7 @@
       "flows": "team member invited in dash becomes an employee record",
       "class": "CAN",
       "necessity": "Nice to have",
-      "why": [
-        2,
-        4
-      ],
+      "why": [2, 4],
       "shape": 3,
       "gap": "needs-endpoint",
       "status": "rejected",
@@ -666,10 +569,7 @@
       "flows": "unpaid subscription suspends app access",
       "class": "CAN",
       "necessity": "Nice to have",
-      "why": [
-        6,
-        4
-      ],
+      "why": [6, 4],
       "shape": 3,
       "gap": "needs-endpoint",
       "status": "rejected",
@@ -684,9 +584,7 @@
       "flows": "customer counts, churn and segment size",
       "class": "IS",
       "necessity": "Nice to have",
-      "why": [
-        7
-      ],
+      "why": [7],
       "shape": 1,
       "gap": "available-today",
       "status": "rejected",
@@ -701,11 +599,7 @@
       "flows": "payroll run total posted to the journal as a labour expense",
       "class": "CAN",
       "necessity": "Essential",
-      "why": [
-        2,
-        4,
-        7
-      ],
+      "why": [2, 4, 7],
       "shape": 3,
       "gap": "available-today",
       "status": "proposed",
@@ -721,9 +615,7 @@
       "flows": "product catalogue inside campaign composition",
       "class": "CAN",
       "necessity": "Nice to have",
-      "why": [
-        5
-      ],
+      "why": [5],
       "shape": 1,
       "gap": "available-today",
       "status": "rejected",
@@ -738,10 +630,7 @@
       "flows": "terminated employee loses terminal access",
       "class": "MUST",
       "necessity": "Essential",
-      "why": [
-        6,
-        4
-      ],
+      "why": [6, 4],
       "shape": 3,
       "gap": "needs-endpoint",
       "status": "rejected",

@@ -1,7 +1,4 @@
 import { unwrap } from '@voxire/api';
-import type { CreateCampaignRequest } from '@voxire/voxie/crm/campaign/v1/types';
-import type { UpdateCampaignRequest } from '@voxire/voxie/crm/campaign/v1/types';
-import type { UpdateCampaignStatusRequest } from '@voxire/voxie/crm/campaign/v1/types';
 import {
   useMutation,
   useQuery,
@@ -12,7 +9,7 @@ import {
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-import { safe } from '../../lib/api';
+import { crmApi } from '../../services/crmApi';
 import { unwrapList } from '../../lib/unwrapList';
 import { campaignSchema, campaignStatsSchema } from '../../schemas/campaigns';
 import type { Campaign, CampaignStats } from '../../schemas/campaigns';
@@ -37,7 +34,7 @@ export const useListCampaigns = (limit = 100, offset = 0): UseQueryResult<Campai
   useQuery<Campaign[]>({
     queryKey: ['crm-campaigns', { limit, offset }],
     queryFn: async (): Promise<Campaign[]> => {
-      const res = await unwrap(safe.get<unknown>('/crm/campaigns', { params: { limit, offset } }));
+      const res = await unwrap(crmApi.getCampaigns(limit, offset));
       return z.array(campaignSchema).parse(unwrapList(res, 'campaigns'));
     },
   });
@@ -46,7 +43,7 @@ export const useGetCampaign = (id: number | undefined): UseQueryResult<Campaign>
   useQuery<Campaign>({
     queryKey: ['crm-campaign', id],
     queryFn: async (): Promise<Campaign> => {
-      const res = await unwrap(safe.get<unknown>(`/crm/campaigns/${id}`));
+      const res = await unwrap(crmApi.getCampaignById(id ?? 0));
       const envelope = (res ?? {}) as { campaign?: unknown };
       return campaignSchema.parse(envelope.campaign ?? res);
     },
@@ -57,9 +54,7 @@ export const useCampaignStats = (id: number | undefined): UseQueryResult<Campaig
   useQuery<CampaignStats>({
     queryKey: ['crm-campaign', id, 'stats'],
     queryFn: async (): Promise<CampaignStats> => {
-      const res = await unwrap(
-        safe.get<unknown>('/crm/campaigns/stats', { params: { campaign_id: id } })
-      );
+      const res = await unwrap(crmApi.getCampaignStats(id ?? 0));
       const envelope = (res ?? {}) as { stats?: unknown };
       return campaignStatsSchema.parse(envelope.stats ?? res);
     },
@@ -76,8 +71,12 @@ export const useCreateCampaign = (): UseMutationResult<
   return useMutation<CampaignMutationResponse, unknown, Partial<Campaign>>({
     mutationFn: async (data: Partial<Campaign>): Promise<CampaignMutationResponse> => {
       const res = (await unwrap(
-        safe.post<unknown>('/crm/campaigns', data as CreateCampaignRequest)
-      )) as { campaignId?: number; campaign_id?: number; message?: string };
+        crmApi.createCampaign(data as unknown as Partial<import('../../services/crmApi').Campaign>)
+      )) as {
+        campaignId?: number;
+        campaign_id?: number;
+        message?: string;
+      };
       const campaignId = res.campaignId ?? res.campaign_id;
       return { campaignId, campaign_id: campaignId, message: res.message };
     },
@@ -101,10 +100,10 @@ export const useUpdateCampaign = (): UseMutationResult<
   return useMutation<CampaignMutationResponse, unknown, UpdateCampaignPayload>({
     mutationFn: async (payload: UpdateCampaignPayload): Promise<CampaignMutationResponse> => {
       const res = await unwrap(
-        safe.put<CampaignMutationResponse>(`/crm/campaigns/${payload.id}`, {
-          id: String(payload.id),
-          ...payload.data,
-        } as UpdateCampaignRequest)
+        crmApi.updateCampaign(
+          payload.id,
+          payload.data as unknown as Partial<import('../../services/crmApi').Campaign>
+        )
       );
       return res as CampaignMutationResponse;
     },
@@ -123,7 +122,7 @@ export const useDeleteCampaign = (): UseMutationResult<unknown, unknown, number>
   const qc = useQueryClient();
   const { t } = useTranslation();
   return useMutation<unknown, unknown, number>({
-    mutationFn: (id: number): Promise<unknown> => unwrap(safe.delete(`/crm/campaigns/${id}`)),
+    mutationFn: (id: number): Promise<unknown> => unwrap(crmApi.deleteCampaign(id)),
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-campaigns'] });
       toast.success(t('crm.campaigns.deleted'));
@@ -143,12 +142,7 @@ export const useUpdateCampaignStatus = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<unknown, unknown, CampaignStatusPayload>({
     mutationFn: (payload: CampaignStatusPayload): Promise<unknown> => {
-      return unwrap(
-        safe.put(`/crm/campaigns/${payload.id}/status`, {
-          id: String(payload.id),
-          status: payload.status,
-        } as UpdateCampaignStatusRequest)
-      );
+      return unwrap(crmApi.updateCampaignStatus(payload.id, payload.status));
     },
     onSuccess: (_data: unknown, variables: CampaignStatusPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-campaigns'] });

@@ -13,7 +13,7 @@ interface UseIsVisibleOptions {
  */
 export function useIsVisible<T extends Element>(
   options: UseIsVisibleOptions = {}
-): [React.RefObject<T>, boolean] {
+): [React.RefObject<T | null>, boolean] {
   const { threshold = 0, rootMargin = '0px', once = false } = options;
   const ref = useRef<T>(null);
   const [isVisible, setIsVisible] = useState(false);

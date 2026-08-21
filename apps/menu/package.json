@@ -7,9 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit -p tsconfig.app.json --types node,vite/client"
   },
   "dependencies": {
+    "@voxire/api": "workspace:*",
     "@voxire/auth": "workspace:*",
     "@voxire/components": "workspace:*",
     "@voxire/config": "workspace:*",
@@ -18,7 +19,7 @@
     "@voxire/observability": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",
     "@voxire/ui": "workspace:*",
-    "axios": "^1.19.0",
+    "@voxire/voxie": "workspace:*",
     "i18next": "^26.0.6",
     "lodash": "^4.18.1",
     "lucide-react": "^1.8.0",

@@ -6,7 +6,7 @@ import type {
 } from '@voxire/voxie/hr/employees/payroll/runs/v1/types';
 import type { TriggerPayrollRunRequest } from '@voxire/voxie/hr/employees/payroll/runs/v1/types';
 import type { ListPayrollRunsResponse } from '@voxire/voxie/hr/employees/payroll/runs/v1/types';
-import { safe } from '../../lib/api';
+import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -74,7 +74,7 @@ export const useGetPayrollConfig = () => {
     queryKey: ['payroll-config'],
     queryFn: async (): Promise<PayrollConfigData> => {
       try {
-        const res = await unwrap(safe.get<Record<string, unknown>>('/hr/payroll/config'));
+        const res = await unwrap(hrTransport.get<Record<string, unknown>>('/hr/payroll/config'));
         const raw = ((res as any)?.config || res || {}) as Record<string, unknown>;
         return {
           grossModel:
@@ -106,7 +106,7 @@ export const useUpsertPayrollConfig = () => {
   return useMutation({
     mutationFn: async (data: UpsertPayrollConfigRequest): Promise<PayrollConfigData> => {
       const res = await unwrap(
-        safe.put<{ config: PayrollConfigData }>('/hr/payroll/config', {
+        hrTransport.put<{ config: PayrollConfigData }>('/hr/payroll/config', {
           periodType: data.period,
           overtimeEnabled: data.overtimeEnabled,
           grossModel: data.grossModel,
@@ -136,7 +136,9 @@ export const useListPayrollRuns = (
   return useQuery<ListPayrollRunsResponse>({
     queryKey: ['payroll-runs', params],
     queryFn: async (): Promise<ListPayrollRunsResponse> => {
-      const res = await unwrap(safe.get<ListPayrollRunsResponse>('/hr/payroll/runs', { params }));
+      const res = await unwrap(
+        hrTransport.get<ListPayrollRunsResponse>('/hr/payroll/runs', { params })
+      );
       return res as ListPayrollRunsResponse;
     },
     enabled: options?.enabled ?? true,
@@ -147,7 +149,9 @@ export const useGetPayrollRun = (id: number | undefined, options?: PayrollQueryO
   return useQuery<PayrollRunPayload>({
     queryKey: ['payroll-run', id],
     queryFn: async (): Promise<PayrollRunPayload> => {
-      const res = await unwrap(safe.get<{ run: PayrollRunPayload }>(`/hr/payroll/runs/${id}`));
+      const res = await unwrap(
+        hrTransport.get<{ run: PayrollRunPayload }>(`/hr/payroll/runs/${id}`)
+      );
       return (res as { run: PayrollRunPayload }).run;
     },
     enabled: !!id && (options?.enabled ?? true),
@@ -174,7 +178,7 @@ export const useListMyPayrollRuns = (
     queryKey: ['my-payroll-runs', params],
     queryFn: async (): Promise<ListPayrollRunsResponse> => {
       const res = await unwrap(
-        safe.get<ListPayrollRunsResponse>('/hr/payroll/my-runs', { params })
+        hrTransport.get<ListPayrollRunsResponse>('/hr/payroll/my-runs', { params })
       );
       return res as ListPayrollRunsResponse;
     },
@@ -190,7 +194,9 @@ export const useGetMyPayrollRun = (id: number | undefined, options?: PayrollQuer
   return useQuery<PayrollRunPayload>({
     queryKey: ['my-payroll-run', id],
     queryFn: async (): Promise<PayrollRunPayload> => {
-      const res = await unwrap(safe.get<{ run: PayrollRunPayload }>(`/hr/payroll/my-runs/${id}`));
+      const res = await unwrap(
+        hrTransport.get<{ run: PayrollRunPayload }>(`/hr/payroll/my-runs/${id}`)
+      );
       return (res as { run: PayrollRunPayload }).run;
     },
     enabled: !!id && (options?.enabled ?? true),
@@ -204,7 +210,7 @@ export const useTriggerPayrollRun = (enabled = true) => {
   return useMutation({
     mutationFn: async (data: TriggerPayrollRunRequest): Promise<void> => {
       if (!enabled) return;
-      await unwrap(safe.post('/hr/payroll/runs/trigger', data));
+      await unwrap(hrTransport.post('/hr/payroll/runs/trigger', data));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payroll-runs'] });
@@ -223,7 +229,7 @@ export const useApprovePayrollRun = (enabled = true) => {
   return useMutation({
     mutationFn: async (data: ApprovePayrollRunRequest): Promise<void> => {
       if (!enabled) return;
-      await unwrap(safe.post(`/hr/payroll/runs/${data.runId}/approve`, data));
+      await unwrap(hrTransport.post(`/hr/payroll/runs/${data.runId}/approve`, data));
     },
     onSuccess: (_data: void, variables: ApprovePayrollRunRequest) => {
       queryClient.invalidateQueries({ queryKey: ['payroll-runs'] });

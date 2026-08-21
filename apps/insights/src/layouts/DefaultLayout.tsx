@@ -5,10 +5,9 @@ import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
-import { unwrap } from '@voxire/api';
 import { LicenseBanner } from '@voxire/components';
 import { CaretPanel, buildCaretRouteContext, useCaretStore } from '@voxire/caret';
-import { safe } from '../shared/lib/api';
+import { licenseClient, userClient } from '../shared/lib/clients';
 import { getPageTitle, routeLabels } from '../shared/lib/nav';
 import {
   TrendingUp,
@@ -89,10 +88,11 @@ const DefaultLayout: React.FC = () => {
 
   useEffect(() => {
     if (insightsUser?.name || insightsUser?.email) return;
-    unwrap(safe.get<{ user: { id: number; name: string; email: string } | null }>('/account'))
+    userClient
+      .getMe({})
       .then((res) => {
-        if (res?.user) {
-          setAuthUser({ id: String(res.user.id), name: res.user.name, email: res.user.email });
+        if (res?.id) {
+          setAuthUser({ id: String(res.id), name: res.fullName ?? '', email: res.email ?? '' });
         }
       })
       .catch(() => undefined);
@@ -447,7 +447,7 @@ const DefaultLayout: React.FC = () => {
         </div>
       </header>
 
-      <LicenseBanner safe={safe} />
+      <LicenseBanner client={licenseClient} />
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}

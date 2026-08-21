@@ -24,15 +24,15 @@ that can disagree.
 **Single source of truth, violated inside a single domain.** HR stores a person
 twice, in two tables, each with its own pay fields.
 
-|                 | `hr_staff`                                                                | `hr_employees`                                                              |
-| --------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Declared as     | `hr.Staff` (`packages/voxie/api/hr/staff/v1/models.onk:4`)                | `hr.EmployeePayload` (`packages/voxie/api/hr/employee/v1/models.onk:4`)     |
-| Schema          | `~/Development/onion/internal/platform/database/schemas/hr/schema.sql:15` | `~/Development/onion/internal/platform/database/schemas/hr_core/schema.sql` |
-| `user_id`       | yes                                                                       | yes                                                                         |
-| `salary`        | yes (`~/Development/onion/internal/platform/database/schemas/hr/schema.sql:29`)                                                     | yes                                                                         |
-| `hourly_rate`   | yes (`~/Development/onion/internal/platform/database/schemas/hr/schema.sql:30`)                                                     | yes (`~/Development/onion/internal/platform/database/schemas/hr_core/schema.sql:91`)                                               |
-| `overtime_rate` | yes (`~/Development/onion/internal/platform/database/schemas/hr/schema.sql:31`)                                                     | yes (`~/Development/onion/internal/platform/database/schemas/hr_core/schema.sql:92`)                                               |
-| Bridge          | `employee_id BIGINT DEFAULT NULL` (`~/Development/onion/internal/platform/database/schemas/hr/schema.sql:20`)                       |                                                                             |
+|                 | `hr_staff`                                                                                                    | `hr_employees`                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Declared as     | `hr.Staff` (`packages/voxie/api/hr/staff/v1/models.onk:4`)                                                    | `hr.EmployeePayload` (`packages/voxie/api/hr/employee/v1/models.onk:4`)              |
+| Schema          | `~/Development/onion/internal/platform/database/schemas/hr/schema.sql:15`                                     | `~/Development/onion/internal/platform/database/schemas/hr_core/schema.sql`          |
+| `user_id`       | yes                                                                                                           | yes                                                                                  |
+| `salary`        | yes (`~/Development/onion/internal/platform/database/schemas/hr/schema.sql:29`)                               | yes                                                                                  |
+| `hourly_rate`   | yes (`~/Development/onion/internal/platform/database/schemas/hr/schema.sql:30`)                               | yes (`~/Development/onion/internal/platform/database/schemas/hr_core/schema.sql:91`) |
+| `overtime_rate` | yes (`~/Development/onion/internal/platform/database/schemas/hr/schema.sql:31`)                               | yes (`~/Development/onion/internal/platform/database/schemas/hr_core/schema.sql:92`) |
+| Bridge          | `employee_id BIGINT DEFAULT NULL` (`~/Development/onion/internal/platform/database/schemas/hr/schema.sql:20`) |                                                                                      |
 
 The bridge is **nullable**. Two records for one person, two pay rates, and a
 link that may not be set.

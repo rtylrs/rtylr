@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
-import { safe } from '../lib/api';
+import { hrCompatibilityClient } from '../lib/clients';
 import { myEmployeeSchema } from '../schemas/employee';
 
 /**
@@ -13,8 +12,8 @@ export function useMyEmployeeId() {
   return useQuery({
     queryKey: ['my-employee-id'],
     queryFn: async () => {
-      const res = await unwrap(safe.get<unknown>('/hr/employees/me'));
-      const parsed = myEmployeeSchema.parse((res as { employee: unknown }).employee);
+      const res = await hrCompatibilityClient.getMyEmployee({});
+      const parsed = myEmployeeSchema.parse(res.employee);
       return parsed.id;
     },
   });

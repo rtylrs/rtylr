@@ -13,13 +13,13 @@ vi.mock('@voxire/components', () => ({
 const navigateSpy = vi.hoisted(() => vi.fn());
 vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ id: '999' }),
-  useRouterState: () => '',
+  useRouterState: () => '?businessId=1',
   useNavigate: () => navigateSpy,
 }));
 
 const apiGet = vi.hoisted(() => vi.fn());
-vi.mock('../../shared/lib/api', () => ({
-  default: { get: apiGet },
+vi.mock('../../shared/lib/clients', () => ({
+  orderClient: { getPublicOrderStatus: apiGet },
 }));
 
 import OrderStatus from './OrderStatus';

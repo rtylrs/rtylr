@@ -2,7 +2,6 @@ import React, { useRef } from 'react';
 import { useNavigate, Link, useRouterState } from '@tanstack/react-router';
 import { useForesightLinks } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
-import { safe } from '../shared/lib/api';
 import { APP_URLS, getAvatarUrl, resolveAppUrl } from '@voxire/config';
 import { signOut } from '@voxire/auth';
 import {
@@ -53,6 +52,7 @@ import { isAddonEnabled, useAddons } from '../shared/hooks/queries/useAddons';
 import BusinessSwitcher from '../features/business-switcher/BusinessSwitcher';
 import { buildDashPageContext, buildDashSystemContext } from '../shared/lib/dashCaretContext';
 import { useTranslation } from 'react-i18next';
+import { licenseClient } from '../shared/lib/clients';
 
 interface NavItem {
   key: string;
@@ -564,7 +564,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         {/* Main content + Caret AI inline column */}
         <div className="flex flex-1 min-w-0 overflow-hidden">
           <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-            <LicenseBanner safe={safe} />
+            <LicenseBanner client={licenseClient} />
             {/* Topbar */}
             <header
               className="dash-topbar h-11 flex items-center justify-between px-4 sm:px-6 shrink-0"

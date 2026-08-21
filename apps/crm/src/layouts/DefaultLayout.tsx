@@ -30,12 +30,12 @@ import {
 } from 'lucide-react';
 import { useShortcuts } from '../shared/components/ShortcutsProvider';
 import { useForesightLinks } from '@voxire/utils';
-import { safe } from '../shared/lib/api';
 import { createOneKitClient } from '@voxire/api';
 import { LicenseBanner } from '@voxire/components';
 import { AppServiceClient } from '@voxire/voxie/hub/app/v1/client';
 import type { Addon } from '@voxire/voxie/hub/app/v1/types';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
+import { licenseClient } from '../shared/lib/clients';
 import { toast } from 'sonner';
 
 const ACCENT = '#3b82f6';
@@ -650,7 +650,7 @@ const DefaultLayout: React.FC = () => {
             </header>
 
             {/* Content */}
-            <LicenseBanner safe={safe} />
+            <LicenseBanner client={licenseClient} />
             <TrialBanner />
             <AnimatePresence mode="wait">
               <motion.main

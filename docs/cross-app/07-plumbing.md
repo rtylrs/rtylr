@@ -18,8 +18,8 @@ That shape 4 is empty is a result, not an oversight; see below.
 | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
 | `AppFlagGuard` / `resolveFlag`      | whether an app is **launched** at all, resolved from PostHog, then a `VITE_APP_*_ENABLED` env var, then a hard-coded default | `packages/config/src/appGuards.tsx:44`       |
 | `hub.App.is_enabled` / `listAddons` | whether **this tenant** has the app or add-on                                                                                | `packages/voxie/api/hub/app/v1/models.onk:8` |
-| `APP_CONFIG[app].allowedRoles` | **nothing. It is dead code**, never consulted outside its own declaration; already filed as issue #795 | `packages/config/src/apps.ts:34` |
-| the per-user `apps` array | the **real** app-entry boundary: owner and admin bypass, everyone else needs the app id in their own `apps` array | `packages/auth/src/guards/AppGuard.tsx:173` |
+| `APP_CONFIG[app].allowedRoles`      | **nothing. It is dead code**, never consulted outside its own declaration; already filed as issue #795                       | `packages/config/src/apps.ts:34`             |
+| the per-user `apps` array           | the **real** app-entry boundary: owner and admin bypass, everyone else needs the app id in their own `apps` array            | `packages/auth/src/guards/AppGuard.tsx:173`  |
 
 The brief asks for degrade behaviour to be checked against `AppFlagGuard` and
 `APP_CONFIG`. Neither is the per-tenant licence, and one of them is not a gate

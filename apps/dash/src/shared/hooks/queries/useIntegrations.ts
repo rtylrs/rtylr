@@ -1,7 +1,6 @@
-import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
-import { safe } from '../../lib/api';
+import { integrationClient } from '../../lib/clients';
 import { integrationSchema } from '../../schemas/integrations';
 import { toast } from 'sonner';
 import i18next from 'i18next';
@@ -12,8 +11,8 @@ export const useIntegrations = () => {
   return useQuery({
     queryKey: ['integrations'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/hub/integration/v1/integrations'));
-      const raw = res?.integrations ?? res;
+      const res = await integrationClient.listIntegrations({});
+      const raw = res.integrations ?? [];
       return z.array(integrationSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });
@@ -23,7 +22,7 @@ export const useConnectIntegration = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.post('/hub/integration/v1/integrations/connect', { provider: id }));
+      await integrationClient.connectIntegration({ provider: id });
       return id;
     },
     onSuccess: () => {
@@ -39,7 +38,7 @@ export const useDisconnectIntegration = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.post('/hub/integration/v1/integrations/disconnect', { id: Number(id) }));
+      await integrationClient.disconnectIntegration({ id });
       return id;
     },
     onSuccess: () => {

@@ -2,38 +2,27 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Package, AlertTriangle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { toFiniteNumber, unwrap } from '@voxire/api';
+import { toFiniteNumber } from '@voxire/api';
 import { EmptyState } from '@voxire/ui';
-import { safe } from '../../../../shared/lib/api';
+import { inventoryClient } from '../../../../shared/lib/clients';
 import WidgetHeader from './WidgetHeader';
 
 interface StockItem {
   productName?: string;
-  product_name?: string;
-  name?: string;
-  stockQuantity?: number | string;
-  stock_quantity?: number | string;
-  stock?: number | string;
-}
-
-interface LowStockResponse {
-  items?: StockItem[];
-  products?: StockItem[];
+  stockQuantity?: number;
 }
 
 const LowStockWidget: React.FC = () => {
   const { t } = useTranslation();
   const { data: raw, refetch } = useQuery({
     queryKey: ['low-stock-widget'],
-    queryFn: async () => {
-      const res = await unwrap(
-        safe.get<LowStockResponse | StockItem[]>('/erp/inventory/v1/low-stock')
-      );
-      return (Array.isArray(res) ? res : (res.items ?? res.products)) ?? [];
+    queryFn: async (): Promise<StockItem[]> => {
+      const res = await inventoryClient.getLowStock({});
+      return (res.items ?? []).slice(0, 6);
     },
     staleTime: 60_000,
   });
-  const items: StockItem[] = Array.isArray(raw) ? (raw as StockItem[]).slice(0, 6) : [];
+  const items: StockItem[] = raw ?? [];
 
   return (
     <div className="flex flex-col h-full">
@@ -57,14 +46,14 @@ const LowStockWidget: React.FC = () => {
               <AlertTriangle size={12} style={{ color: 'var(--aging-critical)' }} />
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium truncate" style={{ color: 'var(--dash-text)' }}>
-                  {p.productName ?? p.product_name ?? p.name}
+                  {p.productName ?? 'Product'}
                 </p>
               </div>
               <span
                 className="text-[10px] font-semibold"
                 style={{ color: 'var(--aging-critical)' }}
               >
-                {toFiniteNumber(p.stockQuantity ?? p.stock_quantity ?? p.stock)} left
+                {toFiniteNumber(p.stockQuantity)} left
               </span>
             </div>
           ))

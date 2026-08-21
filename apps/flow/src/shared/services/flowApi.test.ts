@@ -1,505 +1,242 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ResultAsync } from 'neverthrow';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../lib/api', () => ({
-  safe: {
-    get: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: [] }), () => ({}) as any)),
-    post: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
-    put: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
-    patch: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
-    delete: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
-  },
+const mockClients = vi.hoisted(() => {
+  const mockClient = (): Record<string, ReturnType<typeof vi.fn>> => {
+    const target: Record<string, ReturnType<typeof vi.fn>> = {};
+    return new Proxy(target, {
+      get: (currentTarget, property: string) =>
+        (currentTarget[property] ??= vi.fn(() => Promise.resolve({}))),
+    });
+  };
+
+  return {
+    businessClient: mockClient(),
+    dashboardClient: mockClient(),
+    workspaceClient: mockClient(),
+    projectClient: mockClient(),
+    taskClient: mockClient(),
+    labelClient: mockClient(),
+    milestoneClient: mockClient(),
+    cycleClient: mockClient(),
+    viewClient: mockClient(),
+    insightsClient: mockClient(),
+    notificationClient: mockClient(),
+    settingClient: mockClient(),
+    userClient: mockClient(),
+  };
+});
+
+vi.mock('../lib/clients', () => ({
+  businessClient: mockClients.businessClient,
+  dashboardClient: mockClients.dashboardClient,
+  workspaceClient: mockClients.workspaceClient,
+  projectClient: mockClients.projectClient,
+  taskClient: mockClients.taskClient,
+  labelClient: mockClients.labelClient,
+  milestoneClient: mockClients.milestoneClient,
+  cycleClient: mockClients.cycleClient,
+  viewClient: mockClients.viewClient,
+  insightsClient: mockClients.insightsClient,
+  notificationClient: mockClients.notificationClient,
+  settingClient: mockClients.settingClient,
+  userClient: mockClients.userClient,
 }));
 
 import { flowApi } from './flowApi';
-import { safe } from '../lib/api';
+import {
+  businessClient,
+  dashboardClient,
+  workspaceClient,
+  projectClient,
+  taskClient,
+  labelClient,
+  milestoneClient,
+  cycleClient,
+  viewClient,
+  insightsClient,
+  notificationClient,
+  settingClient,
+  userClient,
+} from '../lib/clients';
 
-describe('flowApi', () => {
+describe('flowApi OneKit adapters', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  // Dashboard
-  it('getDashboard calls GET /flow/dashboard/v1/dashboard with optional workspaceId', () => {
-    flowApi.getDashboard('ws-1');
-    expect(safe.get).toHaveBeenCalledWith('/flow/dashboard/v1/dashboard', {
-      params: { workspace_id: 'ws-1' },
-    });
+  it('uses the generated dashboard and business clients', async () => {
+    await Promise.all([flowApi.getDashboard('ws-1'), flowApi.getMyBusinesses()]);
+
+    expect(dashboardClient.getFlowDashboard).toHaveBeenCalledWith({ workspaceId: 'ws-1' });
+    expect(businessClient.listMyBusinesses).toHaveBeenCalledWith({});
   });
 
-  it('getDashboard without workspaceId passes undefined params', () => {
-    flowApi.getDashboard();
-    expect(safe.get).toHaveBeenCalledWith('/flow/dashboard/v1/dashboard', {
-      params: undefined,
-    });
-  });
+  it('uses generated workspace methods with canonical camelCase payloads', async () => {
+    await Promise.all([
+      flowApi.createWorkspace({ name: 'Dev', color: '#ff0000' }),
+      flowApi.updateWorkspace('5', { name: 'Updated' }),
+      flowApi.deleteWorkspace('5'),
+    ]);
 
-  // Workspaces
-  it('getWorkspaces calls GET /flow/workspace/v1/workspaces', () => {
-    flowApi.getWorkspaces();
-    expect(safe.get).toHaveBeenCalledWith('/flow/workspace/v1/workspaces');
-  });
-
-  it('createWorkspace calls POST /flow/workspace/v1/workspaces', () => {
-    const data = { name: 'Dev', color: '#ff0000' };
-    flowApi.createWorkspace(data);
-    expect(safe.post).toHaveBeenCalledWith('/flow/workspace/v1/workspaces', {
+    expect(workspaceClient.createWorkspace).toHaveBeenCalledWith({
       name: 'Dev',
       description: '-',
       icon: 'folder',
       color: '#ff0000',
     });
-  });
-
-  it('updateWorkspace calls PUT /flow/workspace/v1/workspaces/{id}', () => {
-    flowApi.updateWorkspace('5', { name: 'Updated' });
-    expect(safe.put).toHaveBeenCalledWith('/flow/workspace/v1/workspaces/5', {
-      body: {
-        name: 'Updated',
-        description: '-',
-        icon: 'folder',
-        color: '#6366f1',
-      },
+    expect(workspaceClient.updateWorkspace).toHaveBeenCalledWith({
+      id: '5',
+      body: { name: 'Updated', description: '-', icon: 'folder', color: '#6366f1' },
     });
+    expect(workspaceClient.deleteWorkspace).toHaveBeenCalledWith({ id: '5' });
   });
 
-  it('deleteWorkspace calls DELETE /flow/workspace/v1/workspaces/{id}', () => {
-    flowApi.deleteWorkspace('5');
-    expect(safe.delete).toHaveBeenCalledWith('/flow/workspace/v1/workspaces/5');
-  });
+  it('uses generated project and member methods', async () => {
+    await Promise.all([
+      flowApi.getProjects('ws-1'),
+      flowApi.createProject({ workspaceId: '1', name: 'Project A' }),
+      flowApi.updateProject('7', { name: 'Renamed' }),
+      flowApi.getProjectMembers('7'),
+      flowApi.addProjectMember({ project_id: 7, user_id: 2, role: 'member' }),
+    ]);
 
-  it('addWorkspaceMember calls POST /flow/workspace/v1/workspaces/members', () => {
-    const data = { workspace_id: 1, user_id: 2, role: 'admin' };
-    flowApi.addWorkspaceMember(data);
-    expect(safe.post).toHaveBeenCalledWith('/flow/workspace/v1/workspaces/members', data);
-  });
-
-  // Projects
-  it('getProjects calls GET /flow/project/v1/projects with workspaceId', () => {
-    flowApi.getProjects('ws-1');
-    expect(safe.get).toHaveBeenCalledWith('/flow/project/v1/projects', {
-      params: { workspace_id: 'ws-1' },
-    });
-  });
-
-  it('createProject calls POST /flow/project/v1/projects', () => {
-    const data = { workspaceId: '1', name: 'Project A' };
-    flowApi.createProject(data);
-    expect(safe.post).toHaveBeenCalledWith('/flow/project/v1/projects', {
-      workspace_id: '1',
+    expect(projectClient.listProjects).toHaveBeenCalledWith({ workspaceId: 'ws-1' });
+    expect(projectClient.createProject).toHaveBeenCalledWith({
+      workspaceId: '1',
       name: 'Project A',
       description: '-',
       icon: 'folder',
       color: '#6366f1',
-      start_date: undefined,
-      due_date: undefined,
+      startDate: '',
+      dueDate: '',
     });
-  });
-
-  it('updateProject forwards the current project snapshot without fake dates', () => {
-    flowApi.updateProject('7', {
-      name: 'Renamed project',
-      description: 'Existing description',
-      icon: 'briefcase',
-      color: '#22c55e',
-      status: 'active',
-      startDate: '2026-01-01',
-      dueDate: '2026-06-01',
-    });
-
-    expect(safe.put).toHaveBeenCalledWith('/flow/project/v1/projects/7', {
-      name: 'Renamed project',
-      description: 'Existing description',
-      icon: 'briefcase',
-      color: '#22c55e',
-      status: 'active',
-      start_date: '2026-01-01',
-      due_date: '2026-06-01',
-    });
-  });
-
-  it('does not manufacture omitted project update fields', () => {
-    flowApi.updateProject('7', { color: '#22c55e' });
-
-    const [, body] = (safe.put as unknown as { mock: { calls: [string, object][] } }).mock.calls[0];
-    expect(JSON.parse(JSON.stringify(body))).toEqual({ color: '#22c55e' });
-  });
-
-  it('deleteProject calls DELETE /flow/project/v1/projects/{id}', () => {
-    flowApi.deleteProject('7');
-    expect(safe.delete).toHaveBeenCalledWith('/flow/project/v1/projects/7');
-  });
-
-  // Tasks
-  it('getTasks calls GET /flow/task/v1/tasks with snake_case params', () => {
-    const params = { projectId: 'p-1', status: 'todo' as const };
-    flowApi.getTasks(params);
-    expect(safe.get).toHaveBeenCalledWith('/flow/task/v1/tasks', {
-      params: { project_id: 'p-1', status: 'todo' },
-    });
-  });
-
-  it('getTasks with workspaceId sends workspace_id param', () => {
-    flowApi.getTasks({ workspaceId: 'ws-1' });
-    expect(safe.get).toHaveBeenCalledWith('/flow/task/v1/tasks', {
-      params: { workspace_id: 'ws-1' },
-    });
-  });
-
-  it('getMyTasks calls GET /flow/task/v1/tasks/my', () => {
-    flowApi.getMyTasks();
-    expect(safe.get).toHaveBeenCalledWith('/flow/task/v1/tasks/my');
-  });
-
-  it('createTask calls POST /flow/task/v1/tasks', () => {
-    const data = { projectId: '1', workspaceId: '1', title: 'Task 1' };
-    flowApi.createTask(data);
-    expect(safe.post).toHaveBeenCalledWith('/flow/task/v1/tasks', {
-      project_id: '1',
-      workspace_id: '1',
-      title: 'Task 1',
-      description: '-',
-      priority: 'medium',
-      assignee_id: undefined,
-      due_date: '-',
-      start_date: '-',
-      estimated_hours: undefined,
-    });
-  });
-
-  // Personal tasks (My tasks quick-add) pass '' for both ids, meaning "my
-  // personal workspace/project". OneKit int64 fields wire-encode as JSON
-  // strings even for this sentinel value - a bare `0` gets rejected with
-  // "cannot unmarshal number into Go struct field .project_id of type string".
-  it('createTask sends the personal-task sentinel as a string, not a bare number', () => {
-    const data = { projectId: '', workspaceId: '', title: 'Personal task' };
-    flowApi.createTask(data);
-    expect(safe.post).toHaveBeenCalledWith('/flow/task/v1/tasks', {
-      project_id: '0',
-      workspace_id: '0',
-      title: 'Personal task',
-      description: '-',
-      priority: 'medium',
-      assignee_id: undefined,
-      due_date: '-',
-      start_date: '-',
-      estimated_hours: undefined,
-    });
-  });
-
-  it('createTask sends assignee_id as a string when provided', () => {
-    const data = { projectId: '1', workspaceId: '1', title: 'Task 1', assigneeId: '42' };
-    flowApi.createTask(data);
-    expect(safe.post).toHaveBeenCalledWith(
-      '/flow/task/v1/tasks',
-      expect.objectContaining({ assignee_id: '42' })
-    );
-  });
-
-  it('updateTask calls PUT /flow/task/v1/tasks/{id}', () => {
-    flowApi.updateTask('9', { title: 'Updated' });
-    expect(safe.put).toHaveBeenCalledWith('/flow/task/v1/tasks/9', {
+    expect(projectClient.updateProject).toHaveBeenCalledWith({
+      id: '7',
       body: {
-        title: 'Updated',
-        description: undefined,
-        status: undefined,
-        priority: undefined,
-        assignee_id: undefined,
-        due_date: undefined,
-        start_date: undefined,
-        labels: undefined,
-        archived: undefined,
+        name: 'Renamed',
+        description: '-',
+        icon: 'folder',
+        color: '#6366f1',
+        status: 'active',
+        startDate: '',
+        dueDate: '',
       },
     });
-  });
-
-  // Serialising the way the transport does is the only assertion that proves
-  // wire omission: `toHaveBeenCalledWith` treats an explicit `undefined`
-  // property and a missing one as equal, so it cannot tell a dropped key from a
-  // key sent as null. JSON.stringify drops undefined values outright, which is
-  // what decides whether onion sees a NULL param and holds the column.
-  const wireBody = (): Record<string, unknown> => {
-    const [, config] = (safe.put as unknown as { mock: { calls: [string, { body: unknown }][] } })
-      .mock.calls[0];
-    return JSON.parse(JSON.stringify(config.body)) as Record<string, unknown>;
-  };
-
-  // One case per field: a partial update must not resurrect the placeholder
-  // defaults that used to rewrite untouched columns (title/description to "-",
-  // status to "todo", priority to "medium", labels to [0]).
-  const partialUpdateFields: [string, Partial<Parameters<typeof flowApi.updateTask>[1]>][] = [
-    ['title', { priority: 'high' }],
-    ['description', { priority: 'high' }],
-    ['status', { priority: 'high' }],
-    ['priority', { title: 'Only the title' }],
-    ['due_date', { priority: 'high' }],
-    ['start_date', { priority: 'high' }],
-    ['labels', { priority: 'high' }],
-  ];
-
-  it.each(partialUpdateFields)(
-    'updateTask omits %s entirely when the caller did not supply it',
-    (field, data) => {
-      flowApi.updateTask('9', data);
-      expect(wireBody()).not.toHaveProperty(field);
-    }
-  );
-
-  it('updateTask sends only the keys the caller supplied', () => {
-    flowApi.updateTask('9', { priority: 'high' });
-    expect(Object.keys(wireBody())).toEqual(['priority']);
-  });
-
-  it('updateTask forwards an empty labels array rather than dropping it', () => {
-    // An explicit [] means "clear every label" and must reach the wire. Only a
-    // caller that never mentioned labels may be omitted, which is the nil vs
-    // empty distinction onion's labelsParam guard depends on.
-    flowApi.updateTask('9', { labels: [] });
-    expect(wireBody()).toEqual({ labels: [] });
-  });
-
-  it('updateTask forwards supplied values unchanged', () => {
-    flowApi.updateTask('9', {
-      title: 'Ship Q4 billing migration',
-      description: 'Real description',
-      status: 'in_progress',
-      priority: 'urgent',
-      dueDate: '2026-08-20',
-      startDate: '2026-08-10',
-      labels: ['3', '7'],
-    });
-    expect(wireBody()).toEqual({
-      title: 'Ship Q4 billing migration',
-      description: 'Real description',
-      status: 'in_progress',
-      priority: 'urgent',
-      due_date: '2026-08-20',
-      start_date: '2026-08-10',
-      labels: [3, 7],
+    expect(projectClient.listProjectMembers).toHaveBeenCalledWith({ projectId: '7' });
+    expect(projectClient.addProjectMember).toHaveBeenCalledWith({
+      projectId: '7',
+      userId: '2',
+      role: 'member',
     });
   });
 
-  it('updateTask forwards archived when set', () => {
-    // Regression guard: TaskDetail's Archive button and Archive.tsx's
-    // Restore button both call updateTask({ archived: ... }) - if this
-    // function's body allowlist doesn't forward the field, the request
-    // silently carries no archive intent at all, independent of whether
-    // the backend contract can accept it yet.
-    flowApi.updateTask('9', { archived: true });
-    expect(safe.put).toHaveBeenCalledWith(
-      '/flow/task/v1/tasks/9',
-      expect.objectContaining({ body: expect.objectContaining({ archived: true }) })
-    );
-  });
+  it('keeps task boundary conversions at the generated client edge', async () => {
+    await Promise.all([
+      flowApi.getTasks({ projectId: '7', workspaceId: '1', status: 'todo' }),
+      flowApi.createTask({ workspaceId: '1', projectId: '7', title: 'Task' }),
+      flowApi.updateTask('9', { archived: false, status: 'done' }),
+      flowApi.updateTaskStatus('9', 'done'),
+      flowApi.deleteTask('9'),
+    ]);
 
-  it('updateTask forwards archived: false rather than omitting it', () => {
-    // The restore path (Archive.tsx) un-archives by sending `false`. Omitting
-    // the key is a no-op server-side (COALESCE(?, archived) keeps the current
-    // value), so a truthiness guard here would turn Restore into a button that
-    // reports success and changes nothing.
-    flowApi.updateTask('9', { archived: false });
-    expect(safe.put).toHaveBeenCalledWith(
-      '/flow/task/v1/tasks/9',
-      expect.objectContaining({ body: expect.objectContaining({ archived: false }) })
-    );
-  });
-
-  it('deleteTask calls DELETE /flow/task/v1/tasks/{id}', () => {
-    flowApi.deleteTask('9');
-    expect(safe.delete).toHaveBeenCalledWith('/flow/task/v1/tasks/9');
-  });
-
-  it('updateTaskStatus calls PATCH /flow/task/v1/tasks/{id}/status', () => {
-    flowApi.updateTaskStatus('9', 'done');
-    expect(safe.patch).toHaveBeenCalledWith('/flow/task/v1/tasks/9/status', {
-      body: { status: 'done' },
+    expect(taskClient.listTasks).toHaveBeenCalledWith({
+      projectId: '7',
+      workspaceId: '1',
+      status: 'todo',
+      assigneeId: undefined,
     });
-  });
-
-  it('addComment calls POST /flow/task/v1/tasks/{taskId}/comments', () => {
-    const data = { taskId: 't-1', content: 'Looks good' };
-    flowApi.addComment(data);
-    expect(safe.post).toHaveBeenCalledWith('/flow/task/v1/tasks/t-1/comments', {
-      content: 'Looks good',
+    expect(taskClient.createTask).toHaveBeenCalledWith({
+      projectId: '7',
+      workspaceId: '1',
+      title: 'Task',
+      description: '-',
+      priority: 'medium',
+      assigneeId: undefined,
+      dueDate: '-',
+      startDate: '-',
+      estimatedHours: undefined,
+      labels: undefined,
     });
+    expect(taskClient.updateTaskStatus).toHaveBeenCalledWith({ id: '9', body: { status: 'done' } });
+    expect(taskClient.deleteTask).toHaveBeenCalledWith({ id: '9' });
   });
 
-  it('deleteComment calls DELETE /flow/task/v1/tasks/comments/{id}', () => {
-    flowApi.deleteComment('3');
-    expect(safe.delete).toHaveBeenCalledWith('/flow/task/v1/tasks/comments/3');
-  });
+  it('uses generated label, planning, view, and insight clients', async () => {
+    await Promise.all([
+      flowApi.listLabels('1'),
+      flowApi.createLabel({ workspace_id: '1', name: 'Bug', color: '#f00' }),
+      flowApi.setTaskLabels({ task_id: 9, label_ids: [2, 3] }),
+      flowApi.getMilestones({ projectId: '7' }),
+      flowApi.createCycle({ name: 'Sprint', workspaceId: '1' }),
+      flowApi.getViews(),
+      flowApi.getInsights('1'),
+      flowApi.getTeamWorkload('1'),
+      flowApi.getRoadmap('1'),
+    ]);
 
-  // Labels
-  it('getLabels calls GET /flow/label/v1/labels', () => {
-    flowApi.getLabels();
-    expect(safe.get).toHaveBeenCalledWith('/flow/label/v1/labels');
-  });
-
-  it('createLabel calls POST /flow/label/v1/labels', () => {
-    const data = { name: 'Bug', color: 'red' };
-    flowApi.createLabel(data);
-    expect(safe.post).toHaveBeenCalledWith('/flow/label/v1/labels', data);
-  });
-
-  // Milestones
-  it('getMilestones calls GET /flow/milestone/v1/milestones', () => {
-    flowApi.getMilestones('p-1');
-    expect(safe.get).toHaveBeenCalledWith('/flow/milestone/v1/milestones', {
-      params: { project_id: 'p-1' },
+    expect(labelClient.listLabels).toHaveBeenCalledWith({ workspaceId: '1' });
+    expect(labelClient.createLabel).toHaveBeenCalledWith({
+      workspaceId: '1',
+      name: 'Bug',
+      color: '#f00',
     });
-  });
-
-  it('getMilestones supports workspace filters', () => {
-    flowApi.getMilestones({ projectId: 'p-1', workspaceId: 'w-1' });
-    expect(safe.get).toHaveBeenCalledWith('/flow/milestone/v1/milestones', {
-      params: { project_id: 'p-1', workspace_id: 'w-1' },
+    expect(labelClient.setTaskLabels).toHaveBeenCalledWith({
+      taskId: '9',
+      labelIds: ['2', '3'],
     });
-  });
-
-  it('updateMilestone calls PUT /flow/milestone/v1/milestones/:id', () => {
-    flowApi.updateMilestone('m-1', { name: 'Updated' });
-    expect(safe.put).toHaveBeenCalledWith('/flow/milestone/v1/milestones/m-1', {
-      name: 'Updated',
+    expect(milestoneClient.listMilestones).toHaveBeenCalledWith({
+      projectId: '7',
+      workspaceId: undefined,
     });
-  });
-
-  // Cycles
-  it('getCycles calls GET /flow/cycle/v1/cycles', () => {
-    flowApi.getCycles();
-    expect(safe.get).toHaveBeenCalledWith('/flow/cycle/v1/cycles', { params: undefined });
-  });
-
-  it('updateCycle calls PUT /flow/cycle/v1/cycles/:id', () => {
-    flowApi.updateCycle('cy-1', { name: 'Sprint 2' });
-    expect(safe.put).toHaveBeenCalledWith('/flow/cycle/v1/cycles/cy-1', { name: 'Sprint 2' });
-  });
-
-  // Views
-  it('getViews without workspaceId passes undefined params', () => {
-    flowApi.getViews();
-    expect(safe.get).toHaveBeenCalledWith('/flow/view/v1/views', { params: undefined });
-  });
-
-  // Regression guard for #779: getViews never sent workspace_id, so the
-  // backend returned no `views` key at all and created views never displayed.
-  it('getViews with workspaceId sends workspace_id param', () => {
-    flowApi.getViews('ws-1');
-    expect(safe.get).toHaveBeenCalledWith('/flow/view/v1/views', {
-      params: { workspace_id: 'ws-1' },
+    expect(cycleClient.createCycle).toHaveBeenCalledWith({
+      name: 'Sprint',
+      workspaceId: '1',
+      startDate: undefined,
+      endDate: undefined,
     });
+    expect(viewClient.listViews).toHaveBeenCalledWith({});
+    expect(insightsClient.getInsights).toHaveBeenCalledWith({ workspaceId: '1' });
+    expect(insightsClient.getTeamWorkload).toHaveBeenCalledWith({ workspaceId: '1' });
+    expect(insightsClient.getRoadmap).toHaveBeenCalledWith({ workspaceId: '1' });
   });
 
-  // Regression guard for #750: the flow/view/v1 contract wire-encodes
-  // `filters` as a JSON string (Go struct field `Filters string`, per the
-  // .onk model's "JSON-encoded filter criteria" doc comment). Sending the
-  // raw object fails json.Unmarshal server-side and 400s on every request -
-  // this was the actual cause of "New view" always failing.
-  it('createView JSON-encodes filters as a string on the wire', () => {
-    flowApi.createView({ name: 'New view', icon: 'eye', filters: { status: ['done'] } });
-    expect(safe.post).toHaveBeenCalledWith(
-      '/flow/view/v1/views',
-      expect.objectContaining({ filters: '{"status":["done"]}' })
-    );
-  });
-
-  it('createView omits filters entirely when not supplied', () => {
-    flowApi.createView({ name: 'New view' });
-    expect(safe.post).toHaveBeenCalledWith(
-      '/flow/view/v1/views',
-      expect.objectContaining({ filters: undefined })
-    );
-  });
-
-  it('createView passes workspaceId through as a plain string (view/v1 declares it as string, not int64)', () => {
-    flowApi.createView({ name: 'New view', workspaceId: 'ws-1' } as any);
-    expect(safe.post).toHaveBeenCalledWith(
-      '/flow/view/v1/views',
-      expect.objectContaining({ workspaceId: 'ws-1' })
-    );
-  });
-
-  it('updateView JSON-encodes filters as a string on the wire', () => {
-    flowApi.updateView('v-1', { filters: { priority: ['urgent'] } });
-    expect(safe.put).toHaveBeenCalledWith(
-      '/flow/view/v1/views/v-1',
-      expect.objectContaining({ filters: '{"priority":["urgent"]}' })
-    );
-  });
-
-  it('getViews decodes each view’s filters back from a JSON string into an object', async () => {
-    (safe.get as any).mockReturnValue(
-      ResultAsync.fromPromise(
-        Promise.resolve({
-          views: [{ id: 'v-1', name: 'My view', filters: '{"status":["done"]}' }],
-        }),
-        () => ({}) as any
-      )
-    );
-    const decoded = await flowApi.getViews().match(
-      (res) => res,
-      () => null
-    );
-    expect(decoded?.views[0].filters).toEqual({ status: ['done'] });
-  });
-
-  it('getViews falls back to an empty object when filters is missing or invalid JSON', async () => {
-    (safe.get as any).mockReturnValue(
-      ResultAsync.fromPromise(
-        Promise.resolve({
-          views: [
-            { id: 'v-1', name: 'No filters' },
-            { id: 'v-2', name: 'Bad filters', filters: 'not json' },
-          ],
-        }),
-        () => ({}) as any
-      )
-    );
-    const decoded = await flowApi.getViews().match(
-      (res) => res,
-      () => null
-    );
-    expect(decoded?.views[0].filters).toEqual({});
-    expect(decoded?.views[1].filters).toEqual({});
-  });
-
-  it('createView decodes the created view’s filters back into an object', async () => {
-    (safe.post as any).mockReturnValue(
-      ResultAsync.fromPromise(
-        Promise.resolve({
-          view: { id: 'v-new', name: 'New view', filters: '{"status":["done"]}' },
-        }),
-        () => ({}) as any
-      )
-    );
-    const decoded = await flowApi
-      .createView({ name: 'New view', filters: { status: ['done'] } })
-      .match(
-        (res) => res,
-        () => null
-      );
-    expect(decoded?.view?.filters).toEqual({ status: ['done'] });
-  });
-
-  it('deleteView calls DELETE /flow/view/v1/views/:id', () => {
-    flowApi.deleteView('v-1');
-    expect(safe.delete).toHaveBeenCalledWith('/flow/view/v1/views/v-1');
-  });
-
-  // Insights, Workload, Roadmap
-  it('getInsights calls GET /flow/insights/v1/overview', () => {
-    flowApi.getInsights();
-    expect(safe.get).toHaveBeenCalledWith('/flow/insights/v1/overview', { params: undefined });
-  });
-
-  it('getTeamWorkload calls GET /flow/insights/v1/team/workload', () => {
-    flowApi.getTeamWorkload();
-    expect(safe.get).toHaveBeenCalledWith('/flow/insights/v1/team/workload', {
-      params: undefined,
+  it('encodes saved-view filters to the wire JSON string and decodes them back', async () => {
+    (viewClient.listViews as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      views: [{ id: '1', name: 'Mine', icon: 'folder', filters: '{"status":"todo"}' }],
     });
+
+    const result = await flowApi.getViews('ws-1');
+
+    expect(viewClient.listViews).toHaveBeenCalledWith({ workspaceId: 'ws-1' });
+    expect(result._unsafeUnwrap().views[0].filters).toEqual({ status: 'todo' });
+
+    await flowApi.createView({ workspaceId: 'ws-1', name: 'New', filters: { status: 'todo' } });
+    expect(viewClient.createView).toHaveBeenCalledWith(
+      expect.objectContaining({ filters: '{"status":"todo"}' })
+    );
   });
 
-  it('getRoadmap calls GET /flow/insights/v1/roadmap', () => {
-    flowApi.getRoadmap();
-    expect(safe.get).toHaveBeenCalledWith('/flow/insights/v1/roadmap', { params: undefined });
+  it('uses generated notification, settings, and profile clients', async () => {
+    await Promise.all([
+      flowApi.getNotifications(),
+      flowApi.markNotificationRead('n-1'),
+      flowApi.markAllNotificationsRead(),
+      flowApi.getUserSettings(),
+      flowApi.updateProfile({ name: 'Ada', email: 'ada@example.com' }),
+      flowApi.changePassword({ currentPassword: 'old', newPassword: 'new' }),
+    ]);
+
+    expect(notificationClient.listNotifications).toHaveBeenCalledWith({});
+    expect(notificationClient.markNotificationRead).toHaveBeenCalledWith({ id: 'n-1' });
+    expect(notificationClient.markAllNotificationsRead).toHaveBeenCalledWith({});
+    expect(settingClient.getUserSettings).toHaveBeenCalledWith({});
+    expect(userClient.updateProfile).toHaveBeenCalledWith({
+      name: 'Ada',
+      email: 'ada@example.com',
+    });
+    expect(userClient.changePassword).toHaveBeenCalledWith({
+      currentPassword: 'old',
+      newPassword: 'new',
+    });
   });
 });

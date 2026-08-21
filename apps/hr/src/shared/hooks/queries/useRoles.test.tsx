@@ -9,8 +9,8 @@ const mocks = vi.hoisted(() => ({
   put: vi.fn(),
 }));
 
-vi.mock('../../lib/api', () => ({
-  safe: { get: mocks.get, post: mocks.post, put: mocks.put },
+vi.mock('../../lib/clients', () => ({
+  hrTransport: { get: mocks.get, post: mocks.post, put: mocks.put },
 }));
 
 vi.mock('@voxire/api', () => ({

@@ -36,16 +36,6 @@ async function stubPublicMenuAPIs(page: import('@playwright/test').Page): Promis
       }),
     })
   );
-
-  // Any other /menu/* calls (old mongo flow). Default empty so the
-  // legacy store's background fetches don't error out.
-  await page.route(/\/menu\/\d+/, (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ items: [] }),
-    })
-  );
 }
 
 test.describe('Public menu (POS-backed)', () => {

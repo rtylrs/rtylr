@@ -19,7 +19,7 @@ import type {
 } from '@voxire/voxie/hr/performance/v1/types';
 import type { ListReviewCyclesResponse } from '@voxire/voxie/hr/performance/v1/types';
 import type { ListGoalsRequest, ListGoalsResponse } from '@voxire/voxie/hr/performance/v1/types';
-import { safe } from '../../lib/api';
+import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -90,7 +90,7 @@ export const useListReviewCycles = (params?: ListReviewCyclesParams) => {
     queryKey: ['review-cycles', 'filter', params],
     queryFn: async (): Promise<ListReviewCyclesResponse> => {
       const res = await unwrap(
-        safe.get<ListReviewCyclesResponse>('/hr/performance/cycles', { params })
+        hrTransport.get<ListReviewCyclesResponse>('/hr/performance/cycles', { params })
       );
       return res as ListReviewCyclesResponse;
     },
@@ -102,7 +102,7 @@ export const useGetReviewCycle = (id: number | undefined) => {
     queryKey: ['review-cycle', id],
     queryFn: async (): Promise<ReviewCyclePayload> => {
       const res = await unwrap(
-        safe.get<{ cycle: ReviewCyclePayload }>(`/hr/performance/cycles/${id}`)
+        hrTransport.get<{ cycle: ReviewCyclePayload }>(`/hr/performance/cycles/${id}`)
       );
       return (res as { cycle: ReviewCyclePayload }).cycle;
     },
@@ -119,7 +119,7 @@ export const useCreateReviewCycle = () => {
       data: CreateReviewCycleMutationInput
     ): Promise<ReviewCyclePayload | undefined> => {
       const res = await unwrap(
-        safe.post<CreateReviewCycleResponse>('/hr/performance/cycles', {
+        hrTransport.post<CreateReviewCycleResponse>('/hr/performance/cycles', {
           name: data.name,
           cycleType: data.cycleType ?? data.type,
           periodStart: data.periodStart,
@@ -146,7 +146,7 @@ export const useOpenReviewCycle = () => {
   return useMutation({
     mutationFn: async (data: OpenReviewCycleRequest): Promise<ReviewCyclePayload | undefined> => {
       const res = await unwrap(
-        safe.post<OpenReviewCycleResponse>(`/hr/performance/cycles/${data.cycleId}/open`, {
+        hrTransport.post<OpenReviewCycleResponse>(`/hr/performance/cycles/${data.cycleId}/open`, {
           id: data.cycleId,
         })
       );
@@ -167,7 +167,9 @@ export const useListGoals = (params?: ListGoalsRequest) => {
   return useQuery<ListGoalsResponse>({
     queryKey: ['review-goals', 'filter', params],
     queryFn: async (): Promise<ListGoalsResponse> => {
-      const res = await unwrap(safe.get<ListGoalsResponse>('/hr/performance/goals', { params }));
+      const res = await unwrap(
+        hrTransport.get<ListGoalsResponse>('/hr/performance/goals', { params })
+      );
       return res as ListGoalsResponse;
     },
   });
@@ -179,7 +181,7 @@ export const useCreateGoal = () => {
 
   return useMutation({
     mutationFn: async (data: CreateGoalRequest): Promise<ReviewGoalPayload> => {
-      const res = await unwrap(safe.post<CreateGoalResponse>('/hr/performance/goals', data));
+      const res = await unwrap(hrTransport.post<CreateGoalResponse>('/hr/performance/goals', data));
       return (res as CreateGoalResponse).goal;
     },
     onSuccess: () => {
@@ -200,7 +202,7 @@ export const useUpdateGoal = () => {
     mutationFn: async (data: UpdateGoalRequest): Promise<ReviewGoalPayload> => {
       const source = data as UpdateGoalRequest & { successCriteria?: string };
       const res = await unwrap(
-        safe.put<UpdateGoalResponse>(`/hr/performance/goals/${data.goalId}`, {
+        hrTransport.put<UpdateGoalResponse>(`/hr/performance/goals/${data.goalId}`, {
           id: data.goalId,
           title: data.title,
           description: data.description,
@@ -226,7 +228,7 @@ export const useListReviews = (params?: ListPerformanceReviewsParams) => {
     queryKey: ['performance-reviews', 'filter', params],
     queryFn: async (): Promise<ListPerformanceReviewsResponse> => {
       const res = await unwrap(
-        safe.get<ListPerformanceReviewsResponse>('/hr/performance/reviews', { params })
+        hrTransport.get<ListPerformanceReviewsResponse>('/hr/performance/reviews', { params })
       );
       return res as ListPerformanceReviewsResponse;
     },
@@ -247,7 +249,7 @@ export const useSubmitReview = () => {
         overallRating?: number;
       };
       const res = await unwrap(
-        safe.post<SubmitReviewResponse>(`/hr/performance/reviews/${data.reviewId}/submit`, {
+        hrTransport.post<SubmitReviewResponse>(`/hr/performance/reviews/${data.reviewId}/submit`, {
           id: data.reviewId,
           rating: source.rating ?? String(source.overallRating ?? ''),
           narrative: source.narrative,
@@ -272,7 +274,7 @@ export const useShareReview = () => {
   return useMutation({
     mutationFn: async (data: ShareReviewRequest): Promise<PerformanceReviewPayload> => {
       const res = await unwrap(
-        safe.post<ShareReviewResponse>(`/hr/performance/reviews/${data.reviewId}/share`, {
+        hrTransport.post<ShareReviewResponse>(`/hr/performance/reviews/${data.reviewId}/share`, {
           id: data.reviewId,
         })
       );

@@ -6,7 +6,7 @@ import React from 'react';
 const mockStaffClient = vi.hoisted(() => ({
   listStaff: vi.fn(),
 }));
-const mockSafe = vi.hoisted(() => ({
+const mockHrTransport = vi.hoisted(() => ({
   get: vi.fn(),
   post: vi.fn(),
 }));
@@ -20,7 +20,7 @@ vi.mock('@voxire/api', () => ({
   getOneKitErrorMessage: (_error: unknown, fallback: string) => fallback,
 }));
 
-vi.mock('../../lib/api', () => ({ safe: mockSafe }));
+vi.mock('../../lib/clients', () => ({ hrTransport: mockHrTransport }));
 
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() },
@@ -54,22 +54,22 @@ describe('useAvailability', () => {
   // a view parameter, so it returned a shift list that the array guard then
   // discarded, leaving a permanently empty table.
   it('reads the availability endpoint with explicit pagination', async () => {
-    mockSafe.get.mockResolvedValue({ entries: [], total: 0, limit: 200, offset: 0 });
+    mockHrTransport.get.mockResolvedValue({ entries: [], total: 0, limit: 200, offset: 0 });
 
     const { result } = renderHook(() => useAvailability(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(mockSafe.get).toHaveBeenCalledWith('/hr/shifts/availability', {
+    expect(mockHrTransport.get).toHaveBeenCalledWith('/hr/shifts/availability', {
       params: { limit: 200, offset: 0 },
     });
-    expect(mockSafe.get).not.toHaveBeenCalledWith(
+    expect(mockHrTransport.get).not.toHaveBeenCalledWith(
       '/hr/shifts',
       expect.objectContaining({ params: expect.objectContaining({ view: 'availability' }) })
     );
   });
 
   it('joins the staff name onto a recurring weekly window', async () => {
-    mockSafe.get.mockResolvedValue({
+    mockHrTransport.get.mockResolvedValue({
       entries: [
         {
           id: '1',
@@ -106,7 +106,7 @@ describe('useAvailability', () => {
   // is_available never arrives. Treating the absent key as undefined would show
   // a deliberately blocked window as available.
   it('reads an absent isAvailable as blocked rather than available', async () => {
-    mockSafe.get.mockResolvedValue({
+    mockHrTransport.get.mockResolvedValue({
       entries: [
         {
           id: '2',
@@ -129,7 +129,7 @@ describe('useAvailability', () => {
   });
 
   it('falls back to a staff id label when the join misses', async () => {
-    mockSafe.get.mockResolvedValue({
+    mockHrTransport.get.mockResolvedValue({
       entries: [
         {
           id: '3',
@@ -160,7 +160,7 @@ describe('useSetAvailability', () => {
   // The old call was PUT /hr/shifts with a shift-shaped body: it sent the
   // weekday under a `date` key and never sent is_available at all.
   it('posts the contract field set for a recurring window', async () => {
-    mockSafe.post.mockResolvedValue({ entry: {} });
+    mockHrTransport.post.mockResolvedValue({ entry: {} });
 
     const { result } = renderHook(() => useSetAvailability(), { wrapper: createWrapper() });
     await act(async () => {
@@ -173,7 +173,7 @@ describe('useSetAvailability', () => {
       });
     });
 
-    expect(mockSafe.post).toHaveBeenCalledWith('/hr/shifts/availability', {
+    expect(mockHrTransport.post).toHaveBeenCalledWith('/hr/shifts/availability', {
       id: undefined,
       staffId: '4',
       dayOfWeek: 2,
@@ -185,7 +185,7 @@ describe('useSetAvailability', () => {
   });
 
   it('sends the id as a string when replacing an existing window', async () => {
-    mockSafe.post.mockResolvedValue({ entry: {} });
+    mockHrTransport.post.mockResolvedValue({ entry: {} });
 
     const { result } = renderHook(() => useSetAvailability(), { wrapper: createWrapper() });
     await act(async () => {
@@ -198,7 +198,7 @@ describe('useSetAvailability', () => {
       });
     });
 
-    expect(mockSafe.post).toHaveBeenCalledWith(
+    expect(mockHrTransport.post).toHaveBeenCalledWith(
       '/hr/shifts/availability',
       expect.objectContaining({ id: '7', specificDate: '2026-08-17', dayOfWeek: undefined })
     );

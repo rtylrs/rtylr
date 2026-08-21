@@ -5,21 +5,17 @@ import { FullScreenLoader, HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import { SearchX } from 'lucide-react';
 import { usePublicBusinessBySlug } from '../../../shared/hooks/usePublicMenu';
-import Menu from '../Menu/Menu';
 
 /**
  * Single screen mounted at `/:slugOrId`. Tries the new slug lookup
- * first. If that 404s and the param looks like a legacy mongo id,
- * falls back to the old menu renderer so existing QR codes keep
- * resolving.
+ * first. Legacy Mongo menu URLs are no longer resolved because their
+ * transport has no OneKit contract.
  *
  * On hit, renders a location picker (or, if there's exactly one,
  * deep-links straight into it). `/:slugOrId/:location` is handled
  * by a sibling screen that re-resolves the slug + picks the
  * matching location by slug.
  */
-
-const isMongoId = (s: string): boolean => /^[a-f0-9]{24}$/i.test(s);
 
 const SlugLanding: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation('sluglanding');
@@ -33,14 +29,19 @@ const SlugLanding: React.FC = (): React.JSX.Element => {
   React.useEffect(() => {
     if (data && data.locations.length === 1) {
       const loc = data.locations[0];
-      if (loc.slug) navigate({ to: `/${slug}/${loc.slug}`, replace: true });
+      if (loc.slug) {
+        navigate({
+          to: '/$slug/$location',
+          params: { slug, location: loc.slug },
+          replace: true,
+        });
+      }
     }
   }, [data, slug, navigate]);
 
   if (isLoading) return <FullScreenLoader />;
 
   if (isError) {
-    if (isMongoId(slug)) return <Menu id={slug} />;
     return (
       <div
         style={{
@@ -108,7 +109,8 @@ const SlugLanding: React.FC = (): React.JSX.Element => {
           {data.locations.map((loc) => (
             <li key={loc.id}>
               <Link
-                to={`/${slug}/${loc.slug}`}
+                to="/$slug/$location"
+                params={{ slug, location: loc.slug }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',

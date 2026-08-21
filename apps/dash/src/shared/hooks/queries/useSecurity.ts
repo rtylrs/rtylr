@@ -1,6 +1,5 @@
-import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { safe } from '../../lib/api';
+import { securityClient } from '../../lib/clients';
 import { securityStateSchema } from '../../schemas/security';
 import { toast } from 'sonner';
 import i18next from 'i18next';
@@ -11,8 +10,8 @@ export const useSecurity = () => {
   return useQuery({
     queryKey: ['security'],
     queryFn: async () => {
-      const res = await unwrap(safe.get<{ state?: unknown }>('/hub/security/v1/state'));
-      return securityStateSchema.parse(res?.state ?? res);
+      const res = await securityClient.getSecurityState({});
+      return securityStateSchema.parse(res.state ?? res);
     },
   });
 };
@@ -21,7 +20,7 @@ export const useToggleTwoFactor = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (enabled: boolean) => {
-      await unwrap(safe.patch('/hub/security/v1/2fa', { enabled }));
+      await securityClient.update2FA({ enabled });
       return enabled;
     },
     onSuccess: (enabled) => {
@@ -43,7 +42,7 @@ export const useRevokeSession = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (_id: string) => {
-      await unwrap(safe.post('/hub/security/v1/invalidate-sessions'));
+      await securityClient.invalidateSessions({});
     },
     onSuccess: () => {
       toast.success(i18next.t('toasts.signedOutSessions', 'Signed out of all sessions'));

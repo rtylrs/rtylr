@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
-import { safe } from '../../lib/api';
+import { businessClient, userClient } from '../../lib/clients';
 import { useConfigStore } from '../../stores/configStore';
 import { useUserStore } from '../../stores/userStore';
 
@@ -14,39 +13,28 @@ export interface OwnedBusiness {
   isOwned?: boolean;
 }
 
-interface ListMyBusinessesResponse {
-  businesses?: Array<OwnedBusiness & { id?: number | string; parentId?: number | string }>;
-}
-
 interface CreateSubBusinessRequest {
   name: string;
   parentBusinessId: number;
-}
-
-interface CreateSubBusinessResponse {
-  id: number;
-}
-
-interface SwitchBusinessResponse {
-  token: string;
 }
 
 export const useListMyBusinesses = () =>
   useQuery({
     queryKey: ['businesses', 'mine'],
     queryFn: async () => {
-      const response = await unwrap(
-        safe.get<ListMyBusinessesResponse>('/hub/business/v1/businesses/mine')
-      );
+      const response = await businessClient.listMyBusinesses({});
 
       return {
         businesses: (response.businesses ?? []).map((business) => ({
           ...business,
           id: Number(business.id),
+          name: business.name ?? '',
+          logoUrl: business.logoUrl ?? '',
           parentId: Number(business.parentId ?? 0),
+          isActive: business.isActive ?? true,
           isOwned: business.isOwned ?? true,
         })),
-      } satisfies ListMyBusinessesResponse;
+      };
     },
     staleTime: 30_000,
   });
@@ -55,15 +43,13 @@ export const useCreateSubBusiness = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateSubBusinessRequest) =>
-      unwrap(
-        safe.post<CreateSubBusinessResponse>('/hub/business/v1/businesses', {
-          name: data.name,
-          // OneKit wire-encodes int64 request fields as JSON strings. A bare
-          // number 400s with "cannot unmarshal number into Go struct field
-          // .parent_business_id of type string", same as switch-business.
-          parentBusinessId: String(data.parentBusinessId),
-        })
-      ),
+      businessClient.createSubBusiness({
+        name: data.name,
+        // OneKit wire-encodes int64 request fields as JSON strings. A bare
+        // number 400s with "cannot unmarshal number into Go struct field
+        // .parent_business_id of type string", same as switch-business.
+        parentBusinessId: String(data.parentBusinessId),
+      }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['businesses', 'mine'] });
       void queryClient.invalidateQueries({ queryKey: ['business'] });
@@ -81,12 +67,7 @@ export const useRenameBusiness = () => {
 
   return useMutation({
     mutationFn: ({ businessId, name }: RenameBusinessRequest) =>
-      unwrap(
-        safe.patch<{ business?: unknown }>(
-          `/hub/business/v1/businesses/${encodeURIComponent(String(businessId))}/name`,
-          { name }
-        )
-      ),
+      businessClient.renameBusiness({ businessId: String(businessId), name }),
     onSuccess: (_response, variables) => {
       void queryClient.invalidateQueries({ queryKey: ['businesses', 'mine'] });
       void queryClient.invalidateQueries({ queryKey: ['business'] });
@@ -114,12 +95,7 @@ export const useSetBusinessLogo = () => {
 
   return useMutation({
     mutationFn: ({ businessId, logoUrl }: SetBusinessLogoRequest) =>
-      unwrap(
-        safe.patch<{ business?: unknown }>(
-          `/hub/business/v1/businesses/${encodeURIComponent(String(businessId))}/logo`,
-          { logoUrl }
-        )
-      ),
+      businessClient.setLogo({ businessId: String(businessId), logoUrl }),
     onSuccess: (_response, variables) => {
       void queryClient.invalidateQueries({ queryKey: ['businesses', 'mine'] });
       void queryClient.invalidateQueries({ queryKey: ['business'] });
@@ -142,7 +118,7 @@ export const useDeleteBusiness = () => {
 
   return useMutation({
     mutationFn: (businessId: number) =>
-      unwrap(safe.delete(`/hub/business/v1/businesses/${encodeURIComponent(String(businessId))}`)),
+      businessClient.deleteBusiness({ businessId: String(businessId) }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['businesses', 'mine'] });
       void queryClient.invalidateQueries({ queryKey: ['business'] });
@@ -154,13 +130,11 @@ export const useDeleteBusiness = () => {
 export const useSwitchBusiness = () =>
   useMutation({
     mutationFn: (businessId: number) =>
-      unwrap(
-        safe.post<SwitchBusinessResponse>('/hub/user/v1/users/switch-business', {
-          // OneKit serializes int64 request fields as JSON strings so values
-          // remain lossless across JavaScript clients and the Go server.
-          business_id: String(businessId),
-        })
-      ),
+      userClient.switchBusiness({
+        // OneKit serializes int64 request fields as JSON strings so values
+        // remain lossless across JavaScript clients and the Go server.
+        businessId: String(businessId),
+      }),
   });
 
 interface OnboardBusinessResponse {
@@ -171,12 +145,7 @@ interface OnboardBusinessResponse {
 export const useBusinessExists = (name: string) =>
   useQuery({
     queryKey: ['business-exists', name.trim()],
-    queryFn: () =>
-      unwrap(
-        safe.get<{ exists: boolean }>('/hub/business/v1/businesses/name-exists', {
-          params: { name: name.trim() },
-        })
-      ),
+    queryFn: () => businessClient.checkBusinessNameExists({ name: name.trim() }),
     enabled: name.trim().length > 1,
     staleTime: 10_000,
   });
@@ -185,6 +154,5 @@ export const useBusinessExists = (name: string) =>
 // carrying the new business_id.
 export const useOnboardBusiness = () =>
   useMutation({
-    mutationFn: (name: string) =>
-      unwrap(safe.post<OnboardBusinessResponse>('/hub/business/v1/businesses/onboard', { name })),
+    mutationFn: (name: string) => businessClient.onboardBusiness({ name }),
   });

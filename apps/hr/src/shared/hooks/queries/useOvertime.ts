@@ -7,7 +7,7 @@ import type {
   ApproveOvertimeRequest,
   OvertimeRequestPayload,
 } from '@voxire/voxie/hr/overtime/v1/types';
-import { safe } from '../../lib/api';
+import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -75,7 +75,9 @@ export const useGetOvertimeConfig = () => {
   return useQuery<OvertimeConfigData>({
     queryKey: ['overtime-config'],
     queryFn: async (): Promise<OvertimeConfigData> => {
-      const res = await unwrap(safe.get<{ config: OvertimeConfigData }>('/hr/overtime/config'));
+      const res = await unwrap(
+        hrTransport.get<{ config: OvertimeConfigData }>('/hr/overtime/config')
+      );
       return (res as { config: OvertimeConfigData }).config;
     },
   });
@@ -88,7 +90,7 @@ export const useUpdateOvertimeConfig = () => {
   return useMutation({
     mutationFn: async (data: UpdateOvertimeConfigData): Promise<void> => {
       await unwrap(
-        safe.put('/hr/overtime/config', {
+        hrTransport.put('/hr/overtime/config', {
           dailyThresholdMinutes: data.dailyOtThresholdMinutes,
           defaultMultiplier: data.defaultMultiplier,
           autoDetectEnabled: true,

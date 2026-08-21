@@ -15,9 +15,11 @@ vi.mock('@voxire/api', () => ({
   },
 }));
 
-const mockGet = vi.fn();
-vi.mock('../../../../shared/lib/api', () => ({
-  safe: { get: (...args: unknown[]) => mockGet(...args) },
+const mockGetTopCustomers = vi.fn();
+vi.mock('../../../../shared/lib/clients', () => ({
+  insightsCustomerClient: {
+    getTopCustomers: (...args: unknown[]) => mockGetTopCustomers(...args),
+  },
 }));
 
 import TopCustomersWidget from './TopCustomersWidget';
@@ -37,7 +39,7 @@ beforeEach(() => {
 
 describe('TopCustomersWidget empty state', () => {
   it('shows the illustration, title and a refresh call-to-action when there are no customers', async () => {
-    mockGet.mockResolvedValue({ customers: [] });
+    mockGetTopCustomers.mockResolvedValue({ customers: [] });
 
     renderWithClient();
 
@@ -48,21 +50,21 @@ describe('TopCustomersWidget empty state', () => {
   });
 
   it('refetches when the refresh call-to-action is clicked', async () => {
-    mockGet.mockResolvedValue({ customers: [] });
+    mockGetTopCustomers.mockResolvedValue({ customers: [] });
 
     renderWithClient();
 
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'common.refresh' })).toBeInTheDocument()
     );
-    const callsBefore = mockGet.mock.calls.length;
+    const callsBefore = mockGetTopCustomers.mock.calls.length;
     fireEvent.click(screen.getByRole('button', { name: 'common.refresh' }));
 
-    await waitFor(() => expect(mockGet.mock.calls.length).toBeGreaterThan(callsBefore));
+    await waitFor(() => expect(mockGetTopCustomers.mock.calls.length).toBeGreaterThan(callsBefore));
   });
 
   it('does not show the empty state when there are top customers', async () => {
-    mockGet.mockResolvedValue({
+    mockGetTopCustomers.mockResolvedValue({
       customers: [{ id: 1, name: 'Alex', lifetimeSpendMinorUnits: 5000, orderCount: 3 }],
     });
 

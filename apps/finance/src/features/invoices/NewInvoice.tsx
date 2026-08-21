@@ -22,7 +22,8 @@ import {
 } from '../../shared/lib/tokens';
 import { useSettings } from '../../shared/lib/settings';
 import { unwrap } from '@voxire/api';
-import { safe } from '../../shared/lib/api';
+import { listCrmCustomers } from '../../shared/lib/clients';
+import { parseClientsResponse } from '../../shared/schemas/clients';
 
 const newInvoiceRoute = getRouteApi('/layout/invoices/new');
 
@@ -76,8 +77,9 @@ const NewInvoice: React.FC = () => {
 
   useEffect(() => {
     if (!clientId || clone) return;
-    void unwrap(safe.get<Client[]>('/crm/customers'))
-      .then((clients) => {
+    void unwrap(listCrmCustomers())
+      .then((data) => {
+        const clients = parseClientsResponse(data);
         const selected = (clients ?? []).find((entry) => entry.id === clientId);
         if (selected) setClient(selected);
       })

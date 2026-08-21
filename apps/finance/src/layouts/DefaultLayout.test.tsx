@@ -22,7 +22,6 @@ vi.mock('@tanstack/react-router', () => ({
     select({ location: mocks.router }),
 }));
 
-vi.mock('@voxire/api', () => ({ unwrap: (value: unknown) => value }));
 vi.mock('@voxire/auth', () => ({
   signOut: mocks.signOut,
   useUserStore: (
@@ -51,7 +50,10 @@ vi.mock('@voxire/ui', () => ({
 vi.mock('@voxire/utils', () => ({ useForesightLinks: () => undefined }));
 vi.mock('../shared/components/GlobalSearch', () => ({ default: () => null }));
 vi.mock('../shared/components/TrialBanner', () => ({ default: () => null }));
-vi.mock('../shared/lib/api', () => ({ safe: { get: () => Promise.resolve({ user: null }) } }));
+vi.mock('../shared/lib/clients', () => ({
+  licenseClient: { getLicenseState: () => Promise.resolve({ status: 'hosted', valid: true }) },
+  userClient: { getMe: () => Promise.resolve({}) },
+}));
 vi.mock('motion/react', () => {
   const Motion = ({
     children,

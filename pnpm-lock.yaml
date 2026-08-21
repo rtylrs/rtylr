@@ -1250,6 +1250,9 @@ importers:
       '@tanstack/react-router':
         specifier: ^1.170.8
         version: 1.170.8(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      '@voxire/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@voxire/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -1274,9 +1277,9 @@ importers:
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      axios:
-        specifier: ^1.19.0
-        version: 1.19.0
+      '@voxire/voxie':
+        specifier: workspace:*
+        version: link:../../packages/voxie
       i18next:
         specifier: ^26.0.6
         version: 26.0.6(typescript@6.0.3)
@@ -1343,6 +1346,9 @@ importers:
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@voxire/voxie':
+        specifier: workspace:*
+        version: link:../../packages/voxie
       axios:
         specifier: ^1.19.0
         version: 1.19.0

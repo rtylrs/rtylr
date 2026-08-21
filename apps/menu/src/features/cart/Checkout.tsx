@@ -1,38 +1,17 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
+import type { CreatePublicOrderRequest } from '@voxire/voxie/pos/orders/v1/types';
 import { EmptyState } from '@voxire/ui';
 import { ShoppingCart } from 'lucide-react';
-import api from '../../shared/lib/api';
+import { orderClient } from '../../shared/lib/clients';
 import { useCartStore } from '../../shared/stores/cartStore';
-
-interface OrderItem {
-  menu_item_id: number;
-  name: string;
-  quantity: number;
-  unit_price: number;
-  notes: string;
-}
-
-interface PlaceOrderRequest {
-  owner_id: number;
-  location_id?: number;
-  customer_name: string;
-  customer_email: string;
-  customer_phone: string;
-  notes: string;
-  items: OrderItem[];
-}
-
-interface PlaceOrderResponse {
-  order_id: number;
-  order_number: string;
-}
 
 const Checkout = (): React.JSX.Element => {
   const navigate = useNavigate();
-  const { items, businessId, locationId, total, setItemNote, clearCart } = useCartStore();
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
+  const { items, businessId, total, setItemNote, clearCart } = useCartStore();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -96,31 +75,34 @@ const Checkout = (): React.JSX.Element => {
 
     setSubmitting(true);
 
-    const body: PlaceOrderRequest = {
-      owner_id: businessId,
-      location_id: locationId || undefined,
-      customer_name: name.trim(),
-      customer_email: email.trim(),
-      customer_phone: phone.trim(),
+    const request: CreatePublicOrderRequest = {
+      ownerId: String(businessId),
+      customerName: name.trim(),
+      customerEmail: email.trim(),
+      customerPhone: phone.trim(),
       notes: orderNotes.trim(),
-      items: items.map((i) => ({
-        menu_item_id: i.menuItemId,
-        name: i.name,
-        quantity: i.quantity,
-        unit_price: i.unitPrice,
-        notes: i.notes,
+      items: items.map((item) => ({
+        menuItemId: String(item.menuItemId),
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        notes: item.notes,
       })),
     };
 
     try {
-      const res = await api.post<PlaceOrderResponse>('/pos/orders/v1/orders/public', body);
-      const { order_id, order_number } = res.data;
+      const response = await orderClient.createPublicOrder(request);
+      const { orderId, orderNumber } = response;
+      if (!orderId || !orderNumber) throw new Error('Incomplete order response');
+
       clearCart();
-      const bId = body.business_id ? `&business_id=${encodeURIComponent(body.business_id)}` : '';
-      const slug = (search as any)?.slug;
+      const businessQuery = businessId
+        ? `&business_id=${encodeURIComponent(String(businessId))}`
+        : '';
+      const slug = new URLSearchParams(searchStr).get('slug');
       const slugQuery = slug ? `&slug=${encodeURIComponent(slug)}` : '';
       void navigate({
-        to: `/order-status/${order_id}?number=${encodeURIComponent(order_number)}${bId}${slugQuery}`,
+        to: `/order-status/${orderId}?number=${encodeURIComponent(orderNumber)}${businessQuery}${slugQuery}`,
       });
     } catch {
       setErrorMessage('Failed to place order. Please try again.');
@@ -137,8 +119,10 @@ const Checkout = (): React.JSX.Element => {
           style={{
             minHeight: '100vh',
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
+            gap: 16,
             padding: '0 20px',
           }}
         >

@@ -9,14 +9,14 @@ import {
 import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import { AppGuard } from '@voxire/auth';
 import { ErrorBoundary } from '@voxire/ui';
-import { unwrap, createOneKitClient } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
 import { AppServiceClient } from '@voxire/voxie/hub/app/v1/client';
 import type { Addon } from '@voxire/voxie/hub/app/v1/types';
 import { FullScreenLoader } from '@voxire/components';
 import { z } from 'zod';
 import { ShortcutsProvider } from './shared/components/ShortcutsProvider';
-import { safe } from './shared/lib/api';
+import { userClient } from './shared/lib/clients';
 import DefaultLayout from './layouts/DefaultLayout';
 
 const Dashboard = React.lazy(() => import('./features/dashboard/Dashboard'));
@@ -55,8 +55,8 @@ const rootRoute = createRootRoute({
     <ErrorBoundary>
       <AppGuard
         appId="crm"
-        fetchUser={(): Promise<Record<string, unknown>> =>
-          unwrap(safe.get<Record<string, unknown>>('/hub/user/v1/users/me'))
+        fetchUser={async (): Promise<Record<string, unknown>> =>
+          (await userClient.getMe({})) as unknown as Record<string, unknown>
         }
       >
         <AppFlagGuard flag={FLAG_KEYS.APP_CRM}>

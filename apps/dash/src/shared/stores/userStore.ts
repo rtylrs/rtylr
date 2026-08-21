@@ -44,7 +44,7 @@ interface UserActions {
   setUser: (user: StoredUser) => void;
   setUserId: (userId: string) => void;
   setAddons: (addons: Addons) => void;
-  setVisits: (visits: any[]) => void;
+  setVisits: (visits: unknown[]) => void;
 }
 
 const initialState: UserState = {

@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
 import { z } from 'zod';
-import { safe } from '../../lib/api';
+import { configClient } from '../../lib/clients';
 
 const industryTypeSchema = z.object({
   slug: z.string(),
@@ -25,8 +24,7 @@ export const useIndustries = () => {
   return useQuery({
     queryKey: ['industries'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/hub/config/v1/industries'));
-      return industriesResponseSchema.parse(res);
+      return industriesResponseSchema.parse(await configClient.getIndustries({}));
     },
     staleTime: 24 * 60 * 60 * 1000,
   });

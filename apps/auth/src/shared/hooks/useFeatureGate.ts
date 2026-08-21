@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { unwrap } from '@voxire/api';
-import { safe } from '../lib/api';
+import { featureClient } from '../lib/clients';
 import { storageGet, storageSet } from '../lib/storage';
 
 const AUTH_FEATURE_SUBJECT_KEY = 'auth_feature_subject';
@@ -36,12 +35,10 @@ export function useFeatureGate(key: string, defaultEnabled = true): boolean {
     const resolveGate = async (): Promise<void> => {
       try {
         const subject = getOrCreateFeatureSubject();
-        const res = await unwrap(
-          safe.post<FeaturesResponse>('/hub/feature/v1/features', {
-            subject,
-            attributes: { app: 'auth' },
-          })
-        );
+        const res = (await featureClient.resolveFeatures({
+          subject,
+          attributes: { app: 'auth' },
+        })) as FeaturesResponse;
         const features = res.features ?? {};
         const next = features[key]?.enabled ?? features[responseKeyFor(key)]?.enabled;
         if (mounted && typeof next === 'boolean') {

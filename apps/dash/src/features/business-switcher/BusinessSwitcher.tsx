@@ -75,6 +75,10 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
     if (business.id === currentBusinessId) return;
     switchMutation.mutate(business.id, {
       onSuccess: ({ token }) => {
+        if (!token) {
+          toast.error(t('businesses.switchError'));
+          return;
+        }
         removeCookie('token', { domain: getDefaultCookieDomain() });
         removeCookie('token');
         setCookie('token', token, {

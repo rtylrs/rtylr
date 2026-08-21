@@ -390,9 +390,7 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
   it('does not show a call-site toast when removing a member fails - the hook already shows one', () => {
     renderProjectSettings();
     fireEvent.click(screen.getByRole('button', { name: 'Members' }));
-    fireEvent.click(
-      screen.getByRole('button', { name: 'flow.projectSettings.removeMemberLabel' })
-    );
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.removeMemberLabel' }));
 
     const [, options] = removeMemberMutate.mock.calls[0];
     act(() => options.onError?.(new Error('boom')));

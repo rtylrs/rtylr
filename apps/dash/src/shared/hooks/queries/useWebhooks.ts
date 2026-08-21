@@ -1,7 +1,6 @@
-import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
-import { safe } from '../../lib/api';
+import { developerClient } from '../../lib/clients';
 import { webhookSchema } from '../../schemas/webhooks';
 import { toast } from 'sonner';
 import i18next from 'i18next';
@@ -13,8 +12,8 @@ export const useWebhooks = () => {
   return useQuery<Webhook[]>({
     queryKey: ['webhooks'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/hub/developer/v1/webhooks'));
-      const raw = res?.webhooks ?? res;
+      const res = await developerClient.listWebhooks({});
+      const raw = res.webhooks ?? [];
       return z.array(webhookSchema).parse(Array.isArray(raw) ? raw : []);
     },
   });
@@ -24,8 +23,7 @@ export const useCreateWebhook = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { url: string; events: string[] }) => {
-      const res = await unwrap(safe.post('/hub/developer/v1/webhooks', payload));
-      return res as { id: number; secret?: string; message?: string };
+      return developerClient.createWebhook(payload);
     },
     onSuccess: () => {
       toast.success(i18next.t('toasts.webhookCreated', 'Webhook created'));
@@ -41,7 +39,7 @@ export const useDeleteWebhook = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.delete(`/hub/developer/v1/webhooks/${encodeURIComponent(id)}`));
+      await developerClient.deleteWebhook({ id });
       return id;
     },
     onSuccess: () => {

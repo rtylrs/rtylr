@@ -4,21 +4,14 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
-vi.mock('../../shared/lib/api', () => ({
-  safe: {
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn(),
+vi.mock('../../shared/lib/clients', () => ({
+  financeDashboardClient: {
+    getFinanceDashboard: vi.fn(),
   },
 }));
 
-vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((val: unknown) => Promise.resolve(val)),
-}));
-
 import { useFinanceDashboard } from './useDashboard';
-import { safe } from '../../shared/lib/api';
+import { financeDashboardClient } from '../../shared/lib/clients';
 
 const createWrapper = () => {
   const client = new QueryClient({
@@ -42,23 +35,25 @@ describe('useFinanceDashboard', () => {
       totalExpensesMtd: 20000,
       netProfitMtd: 30000,
     };
-    (safe.get as ReturnType<typeof vi.fn>).mockResolvedValue(data);
+    vi.mocked(financeDashboardClient.getFinanceDashboard).mockResolvedValue(data);
     const { result } = renderHook(() => useFinanceDashboard(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(safe.get).toHaveBeenCalledWith('/finance/dashboard');
+    expect(financeDashboardClient.getFinanceDashboard).toHaveBeenCalledWith({});
     expect(result.current.data?.netProfitMtd).toBe(30000);
   });
 
   it('starts in loading state', () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockReturnValue(new Promise(() => {}));
+    vi.mocked(financeDashboardClient.getFinanceDashboard).mockReturnValue(new Promise(() => {}));
     const { result } = renderHook(() => useFinanceDashboard(), { wrapper: createWrapper() });
     expect(result.current.isLoading).toBe(true);
   });
 
   it('handles error state', async () => {
-    (safe.get as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Network error'));
+    vi.mocked(financeDashboardClient.getFinanceDashboard).mockRejectedValue(
+      new Error('Network error')
+    );
     const { result } = renderHook(() => useFinanceDashboard(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isError).toBe(true));
-    expect(result.current.error).toBeInstanceOf(Error);
+    expect(result.current.error).toMatchObject({ code: 'UNKNOWN' });
   });
 });

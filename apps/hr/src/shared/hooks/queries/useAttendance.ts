@@ -6,7 +6,7 @@ import type {
 } from '@voxire/voxie/hr/attendance/v1/types';
 import type { AttendanceClockInResponse } from '@voxire/voxie/hr/attendance/v1/types';
 import type { AttendanceClockOutResponse } from '@voxire/voxie/hr/attendance/v1/types';
-import { safe } from '../../lib/api';
+import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -56,7 +56,9 @@ export const useGetMyAttendance = (params: ListAttendanceRequest) => {
   return useQuery<ListAttendanceResponse>({
     queryKey: ['attendance', 'filter', params],
     queryFn: async (): Promise<ListAttendanceResponse> => {
-      const res = await unwrap(safe.get<ListAttendanceResponse>('/hr/attendance', { params }));
+      const res = await unwrap(
+        hrTransport.get<ListAttendanceResponse>('/hr/attendance', { params })
+      );
       return res as ListAttendanceResponse;
     },
   });
@@ -69,7 +71,7 @@ export const useClockIn = () => {
   return useMutation({
     mutationFn: async (data: ClockInPayload): Promise<AttendanceClockInResponse> => {
       const res = await unwrap(
-        safe.post<AttendanceClockInResponse>(
+        hrTransport.post<AttendanceClockInResponse>(
           '/hr/attendance/clock-in',
           toBackendClockInPayload(data)
         )
@@ -91,7 +93,7 @@ export const useSetPin = () => {
 
   return useMutation({
     mutationFn: async (data: SetPinPayload): Promise<{ success: boolean }> => {
-      const res = await unwrap(safe.put<{ success: boolean }>('/hr/employees/me/pin', data));
+      const res = await unwrap(hrTransport.put<{ success: boolean }>('/hr/employees/me/pin', data));
       return res as { success: boolean };
     },
     onSuccess: () => {
@@ -110,7 +112,7 @@ export const useClockOut = () => {
   return useMutation({
     mutationFn: async (data: ClockOutPayload): Promise<AttendanceClockOutResponse> => {
       const res = await unwrap(
-        safe.post<AttendanceClockOutResponse>('/hr/attendance/clock-out', data)
+        hrTransport.post<AttendanceClockOutResponse>('/hr/attendance/clock-out', data)
       );
       return res as AttendanceClockOutResponse;
     },

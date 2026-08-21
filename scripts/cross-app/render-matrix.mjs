@@ -112,8 +112,7 @@ if (productWide.length) {
   lines.push('');
   lines.push('| Id | Flows | Class | Status |');
   lines.push('| --- | --- | --- | --- |');
-  for (const c of productWide)
-    lines.push(`| ${c.id} | ${c.flows} | ${c.class} | ${c.status} |`);
+  for (const c of productWide) lines.push(`| ${c.id} | ${c.flows} | ${c.class} | ${c.status} |`);
   lines.push('');
 }
 if (intraDomain.length) {

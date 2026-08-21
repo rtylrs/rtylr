@@ -69,8 +69,8 @@ vi.mock('@voxire/config', () => ({
   FLAG_KEYS: { APP_FLOW_PREVIEW_ROUTES: 'app.flow.previewRoutes' },
   getAvatarUrl: () => '',
   resolveAppUrl: () => '',
-  // Pulled in transitively: '../shared/lib/api' calls createApiClient() at
-  // module scope, which calls this to resolve the axios baseURL.
+  // Pulled in transitively: '@voxire/api' resolves its base URL at module
+  // scope when the generated clients are constructed.
   resolveApiBase: () => 'https://api.test/',
 }));
 

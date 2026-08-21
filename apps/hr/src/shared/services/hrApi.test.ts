@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ResultAsync } from 'neverthrow';
 
-vi.mock('../lib/api', () => ({
-  safe: {
+vi.mock('../lib/clients', () => ({
+  hrTransport: {
     get: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: [] }), () => ({}) as any)),
     post: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
     put: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
@@ -11,7 +11,7 @@ vi.mock('../lib/api', () => ({
 }));
 
 import { hrApi } from './hrApi';
-import { safe } from '../lib/api';
+import { hrTransport } from '../lib/clients';
 
 describe('hrApi', () => {
   beforeEach(() => {
@@ -28,7 +28,7 @@ describe('hrApi', () => {
       employmentType: 'Full-time' as const,
     };
     hrApi.createStaff(data);
-    expect(safe.post).toHaveBeenCalledWith('/hr/staff', {
+    expect(hrTransport.post).toHaveBeenCalledWith('/hr/staff', {
       firstName: 'Alice',
       lastName: 'Alice',
       email: 'a@test.com',
@@ -39,36 +39,36 @@ describe('hrApi', () => {
 
   it('deleteStaff calls DELETE /hr/staff', () => {
     hrApi.deleteStaff(5);
-    expect(safe.delete).toHaveBeenCalledWith('/hr/staff', { data: { id: 5 } });
+    expect(hrTransport.delete).toHaveBeenCalledWith('/hr/staff', { data: { id: 5 } });
   });
 
   it('clockIn calls POST /hr/staff/clock-in', () => {
     hrApi.clockIn(3);
-    expect(safe.post).toHaveBeenCalledWith('/hr/staff/clock-in', { staffId: 3 });
+    expect(hrTransport.post).toHaveBeenCalledWith('/hr/staff/clock-in', { staffId: 3 });
   });
 
   it('clockOut calls POST /hr/staff/clock-out', () => {
     hrApi.clockOut(3);
-    expect(safe.post).toHaveBeenCalledWith('/hr/staff/clock-out', { staffId: 3 });
+    expect(hrTransport.post).toHaveBeenCalledWith('/hr/staff/clock-out', { staffId: 3 });
   });
 
   // Shifts
   it('listShifts maps filters to the snake_case keys the API binds', () => {
     hrApi.listShifts({ day: '2026-06-01', staffId: 4101 });
-    expect(safe.get).toHaveBeenCalledWith('/hr/shifts', {
+    expect(hrTransport.get).toHaveBeenCalledWith('/hr/shifts', {
       params: { date: '2026-06-01', staff_id: 4101 },
     });
   });
 
   it('listShifts omits filters that were not supplied', () => {
     hrApi.listShifts();
-    expect(safe.get).toHaveBeenCalledWith('/hr/shifts', { params: {} });
+    expect(hrTransport.get).toHaveBeenCalledWith('/hr/shifts', { params: {} });
   });
 
   it('createShift calls POST /hr/shifts with snake_case keys', () => {
     const data = { staffId: 1, start: '09:00', end: '17:00', day: '2026-06-01' };
     hrApi.createShift(data);
-    expect(safe.post).toHaveBeenCalledWith('/hr/shifts', {
+    expect(hrTransport.post).toHaveBeenCalledWith('/hr/shifts', {
       staff_id: 1,
       date: '2026-06-01',
       start_time: '09:00',
@@ -78,7 +78,7 @@ describe('hrApi', () => {
 
   it('updateShift calls PUT /hr/shifts with snake_case keys', () => {
     hrApi.updateShift({ id: 7, start: '10:00', end: '18:00', day: '2026-06-02' });
-    expect(safe.put).toHaveBeenCalledWith('/hr/shifts', {
+    expect(hrTransport.put).toHaveBeenCalledWith('/hr/shifts', {
       id: 7,
       date: '2026-06-02',
       start_time: '10:00',
@@ -100,6 +100,6 @@ describe('hrApi', () => {
   // Dashboard
   it('getDashboard calls GET /hr/dashboard/v1/dashboard', () => {
     hrApi.getDashboard();
-    expect(safe.get).toHaveBeenCalledWith('/hr/dashboard/v1/dashboard');
+    expect(hrTransport.get).toHaveBeenCalledWith('/hr/dashboard/v1/dashboard');
   });
 });

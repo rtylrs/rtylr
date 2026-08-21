@@ -73,7 +73,7 @@ import { isDueToday, isQuietNow } from '../shared/lib/lifeRhythm';
 import { useNotifications } from '../features/inbox/useNotifications';
 import { apiProjectToProject, apiWorkspaceToWorkspace } from '../shared/lib/projectMapper';
 import { LicenseBanner } from '@voxire/components';
-import { safe } from '../shared/lib/api';
+import { licenseClient } from '../shared/lib/clients';
 import { useFlowBusinessName } from '../shared/hooks/useFlowBusinessName';
 import { useLayoutRealtime } from '../shared/lib/useLayoutRealtime';
 import { useRealtimeReconnectRefetch, useRealtimeStatus } from '../shared/lib/realtime';
@@ -1443,7 +1443,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                 })}
               </div>
             )}
-            <LicenseBanner safe={safe} />
+            <LicenseBanner client={licenseClient} />
             <AnimatePresence mode="wait">
               <motion.main
                 key={location.pathname}

@@ -1,5 +1,5 @@
-import { safe } from '../lib/api';
-import { toOptionalFiniteNumber, unwrap } from '@voxire/api';
+import { fromOneKitJson, oneKitResult, toOneKitJson, toOptionalFiniteNumber } from '@voxire/api';
+import { crmCompatibilityClient, crmCustomerClient, crmSegmentClient } from '../lib/clients';
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -54,6 +54,9 @@ export interface Customer {
 export interface CustomersParams {
   search?: string;
   tier?: string;
+  tag?: string;
+  page?: number;
+  pageSize?: number;
   limit?: number;
   offset?: number;
 }
@@ -573,148 +576,271 @@ export function toContractUpdatePayload(data: UpdateContractRequest): ContractMu
 
 // ── Service ──────────────────────────────────────────────────────
 
+function compatResult<T>(operation: () => Promise<unknown>) {
+  return oneKitResult(operation).map((value) => fromOneKitJson<T>(value));
+}
+
+function body(value: unknown) {
+  return { body: toOneKitJson(value) };
+}
+
 export const crmApi = {
   // Dashboard
-  getDashboard: () => safe.get<DashboardStats>('/crm/dashboard'),
+  getDashboard: () => compatResult<DashboardStats>(() => crmCompatibilityClient.getDashboard({})),
 
   // Customers
-  getCustomers: (params?: CustomersParams) => safe.get<Customer[]>('/crm/customers', { params }),
+  getCustomers: (params?: CustomersParams) =>
+    compatResult<Customer[]>(() => crmCompatibilityClient.listCustomers(params ?? {})),
 
   getCustomerDetail: (id: number) =>
-    safe.get<Customer>('/crm/customers/detail', { params: { id } }),
+    compatResult<Customer>(() => crmCompatibilityClient.getCustomer({ id })),
 
-  getCustomerTimeline: (id: number) =>
-    safe.get<TimelineEntry[]>('/crm/customers/timeline', { params: { id } }),
+  getCustomerFull: (id: number) =>
+    compatResult<Customer>(() => crmCompatibilityClient.getCustomerFull({ id })),
+
+  getCustomerTimeline: (
+    id: number,
+    options?: { customerId?: number; cursor?: string; limit?: number }
+  ) =>
+    compatResult<TimelineEntry[]>(() =>
+      crmCompatibilityClient.getCustomerTimeline({
+        id,
+        customerId: options?.customerId,
+        cursor: options?.cursor,
+        limit: options?.limit,
+      })
+    ),
 
   createCustomer: (data: Partial<Customer>) =>
-    safe.post<Customer>('/crm/customers', toCustomerMutationPayload(data)),
+    compatResult<Customer>(() =>
+      crmCompatibilityClient.createCustomer(body(toCustomerMutationPayload(data)))
+    ),
 
   updateCustomer: (id: number, data: Partial<Customer>) =>
-    safe.put<Customer>('/crm/customers', { id, ...toCustomerMutationPayload(data) }),
+    compatResult<Customer>(() =>
+      crmCompatibilityClient.updateCustomer(body({ id, ...toCustomerMutationPayload(data) }))
+    ),
 
-  deleteCustomer: (id: number) => safe.delete('/crm/customers', { data: { id } }),
+  deleteCustomer: (id: number) =>
+    oneKitResult(() => crmCustomerClient.deleteCustomer({ id: String(id) })),
 
-  recordVisit: (customerId: number) => safe.post('/crm/customers/record-visit', { customerId }),
+  recordVisit: (customerId: number) =>
+    compatResult<unknown>(() => crmCompatibilityClient.recordVisit(body({ customerId }))),
 
   importCustomers: (customers: Record<string, unknown>[], _dedupe?: boolean) =>
-    safe.post('/crm/customers/import', { customers } satisfies ImportCustomersPayload),
+    compatResult<unknown>(() =>
+      crmCompatibilityClient.importCustomers(body({ customers } satisfies ImportCustomersPayload))
+    ),
 
   mergeCustomers: (primaryId: number, secondaryId: number) =>
-    safe.post('/crm/customers/merge', { primaryId, secondaryId }),
+    compatResult<unknown>(() =>
+      crmCompatibilityClient.mergeCustomers(body({ primaryId, secondaryId }))
+    ),
 
-  exportCustomerData: (id: number) => safe.get('/crm/customers/export', { params: { id } }),
+  exportCustomerData: (id: number, useCustomerId = false) =>
+    compatResult<unknown>(() =>
+      crmCompatibilityClient.exportCustomer(useCustomerId ? { customerId: id } : { id })
+    ),
 
   // Loyalty
   awardPoints: (customerId: number, points: number, reason?: string) =>
-    safe.post('/crm/loyalty/award', { customerId, points, description: reason }),
+    compatResult<unknown>(() =>
+      crmCompatibilityClient.awardPoints(
+        body({ customerId, points, description: reason, referenceType: 'manual' })
+      )
+    ),
 
   redeemPoints: (customerId: number, points: number, reason?: string) =>
-    safe.post('/crm/loyalty/redeem', { customerId, points, description: reason }),
+    compatResult<unknown>(() =>
+      crmCompatibilityClient.redeemPoints(
+        body({ customerId, points, description: reason, referenceType: 'manual' })
+      )
+    ),
 
-  getLoyaltyConfig: () => safe.get<LoyaltyConfig>('/crm/loyalty/config'),
+  getLoyaltyConfig: () =>
+    compatResult<LoyaltyConfig>(() => crmCompatibilityClient.getLoyaltyConfig({})),
 
   updateLoyaltyConfig: (config: Partial<LoyaltyConfig>) =>
-    safe.put<LoyaltyConfig>('/crm/loyalty/config', toLoyaltyConfigPayload(config)),
+    compatResult<LoyaltyConfig>(() =>
+      crmCompatibilityClient.updateLoyaltyConfig(body(toLoyaltyConfigPayload(config)))
+    ),
 
-  getLoyaltyTransactions: () => safe.get<LoyaltyTransaction[]>('/crm/loyalty/transactions'),
+  getLoyaltyTransactions: (customerId?: number, limit?: number, offset?: number) =>
+    compatResult<LoyaltyTransaction[]>(() =>
+      crmCompatibilityClient.getLoyaltyTransactions({ customerId, limit, offset })
+    ),
 
-  getLoyaltyMembers: () => safe.get<LoyaltyMember[]>('/crm/loyalty/members'),
+  getLoyaltyMembers: (limit?: number, offset?: number) =>
+    compatResult<LoyaltyMember[]>(() =>
+      crmCompatibilityClient.getLoyaltyMembers({ limit, offset })
+    ),
 
-  getLoyaltyRewards: () => safe.get<LoyaltyReward[]>('/crm/loyalty/rewards'),
+  getLoyaltyRewards: () =>
+    compatResult<LoyaltyReward[]>(() => crmCompatibilityClient.getLoyaltyRewards({})),
 
-  getLoyaltyTiers: () => safe.get<LoyaltyTier[]>('/crm/loyalty/tiers'),
+  getLoyaltyTiers: () =>
+    compatResult<LoyaltyTier[]>(() => crmCompatibilityClient.getLoyaltyTiers({})),
 
   updateLoyaltyTier: (id: number, data: Partial<LoyaltyTier>) =>
-    safe.put('/crm/loyalty/tiers', { id, ...data }),
+    compatResult<unknown>(() => crmCompatibilityClient.updateLoyaltyTier(body({ id, ...data }))),
+
+  createLoyaltyTier: (data: Partial<LoyaltyTier>) =>
+    compatResult<unknown>(() => crmCompatibilityClient.createLoyaltyTier(body(data))),
+
+  upsertLoyaltyReward: (id: number | undefined, data: Partial<LoyaltyReward>) =>
+    compatResult<unknown>(() =>
+      crmCompatibilityClient.upsertLoyaltyReward(body(id ? { id, ...data } : data))
+    ),
 
   // Segments
-  getSegments: () => safe.get<Segment[]>('/crm/segments'),
+  getSegments: () => compatResult<Segment[]>(() => crmCompatibilityClient.listSegments({})),
 
-  getSegmentById: (id: number) => safe.get<Segment>('/crm/segments/detail', { params: { id } }),
+  getSegmentById: (id: number) =>
+    compatResult<Segment>(() => crmCompatibilityClient.getSegment({ id })),
 
   getSegmentCustomers: (id: number) =>
-    safe.get<Customer[]>('/crm/segments/customers', { params: { segment_id: id } }),
+    compatResult<Customer[]>(() => crmCompatibilityClient.getSegmentCustomers({ segmentId: id })),
 
   createSegment: (data: Partial<Segment>) =>
-    safe.post<Segment>('/crm/segments', toSegmentMutationPayload(data)),
+    compatResult<Segment>(() =>
+      crmCompatibilityClient.createSegment(body(toSegmentMutationPayload(data)))
+    ),
 
   updateSegment: (id: number, data: Partial<Segment>) =>
-    safe.put<Segment>('/crm/segments', { id, ...data }),
+    compatResult<Segment>(() => crmCompatibilityClient.updateSegment(body({ id, ...data }))),
 
-  deleteSegment: (id: number) => safe.delete('/crm/segments', { data: { id } }),
+  deleteSegment: (id: number) =>
+    oneKitResult(() => crmSegmentClient.deleteSegment({ id: String(id) })),
 
   // Campaigns
-  getCampaigns: () => safe.get<Campaign[]>('/crm/campaigns'),
+  getCampaigns: (limit?: number, offset?: number) =>
+    compatResult<Campaign[]>(() => crmCompatibilityClient.listCampaigns({ limit, offset })),
 
-  getCampaignById: (id: number) => safe.get<Campaign>('/crm/campaigns/detail', { params: { id } }),
+  getCampaignById: (id: number) =>
+    compatResult<Campaign>(() => crmCompatibilityClient.getCampaign({ id })),
 
   getCampaignStats: (id: number) =>
-    safe.get<CampaignStats>('/crm/campaigns/stats', { params: { campaign_id: id } }),
+    compatResult<CampaignStats>(() => crmCompatibilityClient.getCampaignStats({ campaignId: id })),
 
   createCampaign: (data: Partial<Campaign>) =>
-    safe.post<Campaign>('/crm/campaigns', toCampaignMutationPayload(data)),
+    compatResult<Campaign>(() =>
+      crmCompatibilityClient.createCampaign(body(toCampaignMutationPayload(data)))
+    ),
 
   updateCampaign: (id: number, data: Partial<Campaign>) =>
-    safe.put<Campaign>(`/crm/campaigns/${id}`, toCampaignMutationPayload(data)),
+    compatResult<Campaign>(() =>
+      crmCompatibilityClient.updateCampaign({
+        id: String(id),
+        ...body(toCampaignMutationPayload(data)),
+      })
+    ),
 
   updateCampaignStatus: (id: number, status: string) =>
-    safe.put(`/crm/campaigns/${id}/status`, { status }),
+    compatResult<unknown>(() =>
+      crmCompatibilityClient.updateCampaignStatus({
+        id: String(id),
+        ...body({ id: String(id), status }),
+      })
+    ),
 
-  deleteCampaign: (id: number) => safe.delete(`/crm/campaigns/${id}`),
+  deleteCampaign: (id: number) =>
+    compatResult<unknown>(() => crmCompatibilityClient.deleteCampaign({ id: String(id) })),
 
   // Automations
-  getAutomations: () => safe.get<Automation[]>('/crm/automations'),
+  getAutomations: () =>
+    compatResult<Automation[]>(() => crmCompatibilityClient.listAutomations({})),
+
+  getAutomation: (id: number) =>
+    compatResult<Automation>(() => crmCompatibilityClient.getAutomation({ id: String(id) })),
 
   createAutomation: (data: Partial<Automation>) =>
-    safe.post<Automation>('/crm/automations', toAutomationMutationPayload(data)),
+    compatResult<Automation>(() =>
+      crmCompatibilityClient.createAutomation(body(toAutomationMutationPayload(data)))
+    ),
 
   updateAutomation: (id: number, data: Partial<Automation>) =>
-    safe.put<Automation>(`/crm/automations/${id}`, toAutomationMutationPayload(data)),
+    compatResult<Automation>(() =>
+      crmCompatibilityClient.updateAutomation({
+        id: String(id),
+        ...body(toAutomationMutationPayload(data)),
+      })
+    ),
 
-  deleteAutomation: (id: number) => safe.delete(`/crm/automations/${id}`),
+  deleteAutomation: (id: number) =>
+    compatResult<unknown>(() => crmCompatibilityClient.deleteAutomation({ id: String(id) })),
 
   // Templates
-  getTemplates: () => safe.get<Template[]>('/crm/templates'),
+  getTemplates: () => compatResult<Template[]>(() => crmCompatibilityClient.listTemplates({})),
 
   createTemplate: (data: Omit<Template, 'id' | 'updatedAt'>) =>
-    safe.post<Template>('/crm/templates', { ...data, type: data.channel }),
+    compatResult<Template>(() =>
+      crmCompatibilityClient.createTemplate(body({ ...data, type: data.channel }))
+    ),
 
   // Feedback
-  getFeedback: () => safe.get<FeedbackItem[]>('/crm/feedback'),
+  getFeedback: () => compatResult<FeedbackItem[]>(() => crmCompatibilityClient.listFeedback({})),
 
   // Settings
-  getSettings: () => safe.get<Settings>('/crm/settings'),
+  getSettings: () => compatResult<Settings>(() => crmCompatibilityClient.getSettings({})),
 
   updateSettings: (data: Partial<Settings>) =>
-    safe.put<Settings>('/crm/settings', toSettingsMutationPayload(data)),
+    compatResult<Settings>(() =>
+      crmCompatibilityClient.updateSettings(body(toSettingsMutationPayload(data)))
+    ),
 
   // Sales Pipeline
-  getSalesPipeline: () => safe.get<PipelineColumn[]>('/crm/sales/pipeline'),
-  getLeads: () => safe.get<Lead[]>('/crm/sales/leads'),
-  getLead: (id: number) => safe.get<Lead>(`/crm/sales/leads/${id}`),
+  getSalesPipeline: () =>
+    compatResult<PipelineColumn[]>(() => crmCompatibilityClient.getSalesPipeline({})),
+  getLeads: (limit?: number, offset?: number) =>
+    compatResult<Lead[]>(() => crmCompatibilityClient.listLeads({ limit, offset })),
+  getLead: (id: number) =>
+    compatResult<Lead>(() => crmCompatibilityClient.getLead({ id: String(id) })),
   createLead: (data: CreateLeadRequest) =>
-    safe.post<Lead>('/crm/sales/leads', toLeadMutationPayload(data)),
+    compatResult<Lead>(() => crmCompatibilityClient.createLead(body(toLeadMutationPayload(data)))),
   updateLead: (id: number, data: UpdateLeadRequest) =>
-    safe.put<Lead>(`/crm/sales/leads/${id}`, toLeadMutationPayload(data)),
-  deleteLead: (id: number) => safe.delete(`/crm/sales/leads/${id}`),
+    compatResult<Lead>(() =>
+      crmCompatibilityClient.updateLead({
+        id: String(id),
+        ...body(toLeadMutationPayload(data)),
+      })
+    ),
+  deleteLead: (id: number) =>
+    compatResult<unknown>(() => crmCompatibilityClient.deleteLead({ id: String(id) })),
   getLeadTouchpoints: (leadId: number) =>
-    safe.get<Touchpoint[]>(`/crm/sales/leads/${leadId}/touchpoints`),
+    compatResult<Touchpoint[]>(() =>
+      crmCompatibilityClient.listTouchpoints({ id: String(leadId) })
+    ),
   createTouchpoint: (data: CreateTouchpointRequest) =>
-    safe.post<Touchpoint>('/crm/sales/touchpoints', toTouchpointMutationPayload(data)),
-  deleteTouchpoint: (id: number) => safe.delete(`/crm/sales/touchpoints/${id}`),
-  getContacts: (leadId?: number) =>
-    safe.get<SalesContact[]>('/crm/sales/contacts', {
-      params: leadId ? { lead_id: leadId } : {},
-    }),
+    compatResult<Touchpoint>(() =>
+      crmCompatibilityClient.createTouchpoint(body(toTouchpointMutationPayload(data)))
+    ),
+  deleteTouchpoint: (id: number) =>
+    compatResult<unknown>(() => crmCompatibilityClient.deleteTouchpoint({ id: String(id) })),
+  getContacts: (leadId?: number, limit = 100, offset = 0) =>
+    compatResult<SalesContact[]>(() =>
+      crmCompatibilityClient.listContacts({ leadId, limit, offset })
+    ),
   createContact: (data: CreateContactRequest) =>
-    safe.post<SalesContact>('/crm/sales/contacts', data),
+    compatResult<SalesContact>(() => crmCompatibilityClient.createContact(body(data))),
   updateContact: (id: number, data: UpdateContactRequest) =>
-    safe.put<SalesContact>(`/crm/sales/contacts/${id}`, data),
-  deleteContact: (id: number) => safe.delete(`/crm/sales/contacts/${id}`),
-  getContracts: () => safe.get<Contract[]>('/crm/sales/contracts'),
-  getContract: (id: number) => safe.get<Contract>(`/crm/sales/contracts/${id}`),
+    compatResult<SalesContact>(() =>
+      crmCompatibilityClient.updateContact({ id: String(id), ...body(data) })
+    ),
+  deleteContact: (id: number) =>
+    compatResult<unknown>(() => crmCompatibilityClient.deleteContact({ id: String(id) })),
+  getContracts: (limit?: number, offset?: number) =>
+    compatResult<Contract[]>(() => crmCompatibilityClient.listContracts({ limit, offset })),
+  getContract: (id: number) =>
+    compatResult<Contract>(() => crmCompatibilityClient.getContract({ id: String(id) })),
   createContract: (data: CreateContractRequest) =>
-    safe.post<Contract>('/crm/sales/contracts', toCreateContractPayload(data)),
+    compatResult<Contract>(() =>
+      crmCompatibilityClient.createContract(body(toCreateContractPayload(data)))
+    ),
   updateContract: (id: number, data: UpdateContractRequest) =>
-    safe.put<Contract>(`/crm/sales/contracts/${id}`, toContractUpdatePayload(data)),
+    compatResult<Contract>(() =>
+      crmCompatibilityClient.updateContract({
+        id: String(id),
+        ...body(toContractUpdatePayload(data)),
+      })
+    ),
 };

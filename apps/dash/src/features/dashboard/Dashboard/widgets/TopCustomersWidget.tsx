@@ -2,9 +2,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Crown } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { toFiniteNumber, unwrap } from '@voxire/api';
+import { toFiniteNumber } from '@voxire/api';
 import { EmptyState } from '@voxire/ui';
-import { safe } from '../../../../shared/lib/api';
+import { insightsCustomerClient } from '../../../../shared/lib/clients';
 import WidgetHeader from './WidgetHeader';
 
 interface TopCustomer {
@@ -40,16 +40,12 @@ const TopCustomersWidget: React.FC = (): React.JSX.Element => {
     queryKey: ['insights-top-customers', { limit: 5 }],
     queryFn: async (): Promise<TopCustomer[]> => {
       try {
-        const res = await unwrap(
-          safe.get<ApiResponse>('/insights/customer/v1/top', { params: { limit: 5 } })
-        );
+        const res = await insightsCustomerClient.getTopCustomers({ limit: 5 });
         return (res.customers ?? []).map((customer) => ({
           id: toFiniteNumber(customer.id),
           name: customer.name ?? 'Customer',
-          lifetimeSpendMinorUnits: toFiniteNumber(
-            customer.lifetimeSpendMinorUnits ?? customer.lifetime_spend_minor_units
-          ),
-          orderCount: toFiniteNumber(customer.orderCount ?? customer.order_count),
+          lifetimeSpendMinorUnits: toFiniteNumber(customer.totalSpent),
+          orderCount: toFiniteNumber(customer.orderCount),
         }));
       } catch {
         return [];

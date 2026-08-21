@@ -1,0 +1,57 @@
+import { createOneKitClient } from '@voxire/api';
+import { AiServiceClient } from '@voxire/voxie/hub/ai/v1/client';
+import { AppServiceClient } from '@voxire/voxie/hub/app/v1/client';
+import { BusinessServiceClient } from '@voxire/voxie/hub/business/v1/client';
+import { ConfigServiceClient } from '@voxire/voxie/hub/config/v1/client';
+import { DashboardServiceClient } from '@voxire/voxie/hub/dashboard/v1/client';
+import { DeveloperServiceClient } from '@voxire/voxie/hub/developer/v1/client';
+import { IntegrationServiceClient } from '@voxire/voxie/hub/integration/v1/client';
+import { NotificationServiceClient } from '@voxire/voxie/hub/notification/v1/client';
+import { PermissionServiceClient } from '@voxire/voxie/hub/permission/v1/client';
+import { SecurityServiceClient } from '@voxire/voxie/hub/security/v1/client';
+import { SubscriptionServiceClient } from '@voxire/voxie/hub/subscription/v1/client';
+import { AccessServiceClient } from '@voxire/voxie/hub/team/access/v1/client';
+import { GroupsServiceClient } from '@voxire/voxie/hub/team/groups/v1/client';
+import { OnboardingServiceClient } from '@voxire/voxie/hub/team/onboarding/v1/client';
+import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
+import { CustomerServiceClient as InsightsCustomerServiceClient } from '@voxire/voxie/insights/customer/v1/client';
+import { FinancialServiceClient } from '@voxire/voxie/insights/financial/v1/client';
+import { ProductServiceClient as InsightsProductServiceClient } from '@voxire/voxie/insights/product/v1/client';
+import { RevenueServiceClient } from '@voxire/voxie/insights/revenue/v1/client';
+import { InventoryServiceClient } from '@voxire/voxie/erp/inventory/v1/client';
+import { TimeOffServiceClient } from '@voxire/voxie/hr/time_off/v1/client';
+import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
+import { CompatibilityServiceClient as OrdersCompatibilityServiceClient } from '@voxire/voxie/pos/orders/compat/v1/client';
+import { TableServiceClient } from '@voxire/voxie/pos/table/v1/client';
+import { LicenseServiceClient } from '@voxire/voxie/license/v1/client';
+import { CompatibilityServiceClient as EmailCompatibilityServiceClient } from '@voxire/voxie/hub/settings/compat/v1/client';
+
+export const aiClient = createOneKitClient(AiServiceClient, 'dash');
+export const appClient = createOneKitClient(AppServiceClient, 'dash');
+export const businessClient = createOneKitClient(BusinessServiceClient, 'dash');
+export const configClient = createOneKitClient(ConfigServiceClient, 'dash');
+export const dashboardClient = createOneKitClient(DashboardServiceClient, 'dash');
+export const developerClient = createOneKitClient(DeveloperServiceClient, 'dash');
+export const integrationClient = createOneKitClient(IntegrationServiceClient, 'dash');
+export const notificationClient = createOneKitClient(NotificationServiceClient, 'dash');
+export const permissionClient = createOneKitClient(PermissionServiceClient, 'dash');
+export const securityClient = createOneKitClient(SecurityServiceClient, 'dash');
+export const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'dash');
+export const accessClient = createOneKitClient(AccessServiceClient, 'dash');
+export const groupsClient = createOneKitClient(GroupsServiceClient, 'dash');
+export const onboardingClient = createOneKitClient(OnboardingServiceClient, 'dash');
+export const userClient = createOneKitClient(UserServiceClient, 'dash');
+export const insightsCustomerClient = createOneKitClient(InsightsCustomerServiceClient, 'dash');
+export const insightsFinancialClient = createOneKitClient(FinancialServiceClient, 'dash');
+export const insightsProductClient = createOneKitClient(InsightsProductServiceClient, 'dash');
+export const revenueClient = createOneKitClient(RevenueServiceClient, 'dash');
+export const inventoryClient = createOneKitClient(InventoryServiceClient, 'dash');
+export const timeOffClient = createOneKitClient(TimeOffServiceClient, 'dash');
+export const orderClient = createOneKitClient(OrderServiceClient, 'dash');
+export const ordersCompatibilityClient = createOneKitClient(
+  OrdersCompatibilityServiceClient,
+  'dash'
+);
+export const tableClient = createOneKitClient(TableServiceClient, 'dash');
+export const licenseClient = createOneKitClient(LicenseServiceClient, 'dash');
+export const emailCompatibilityClient = createOneKitClient(EmailCompatibilityServiceClient, 'dash');

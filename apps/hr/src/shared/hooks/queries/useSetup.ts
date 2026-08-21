@@ -4,7 +4,7 @@ import type {
   GetSetupStatusResponse,
   HRCompanyConfigPayload,
 } from '@voxire/voxie/hr/setup/v1/types';
-import { safe } from '../../lib/api';
+import { hrTransport } from '../../lib/clients';
 import { useHRConfigStore } from '../../stores/hrConfigStore';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +13,7 @@ export const useGetSetupStatus = () => {
   return useQuery<GetSetupStatusResponse>({
     queryKey: ['hr-setup-status'],
     queryFn: async (): Promise<GetSetupStatusResponse> => {
-      const res = await unwrap(safe.get<GetSetupStatusResponse>('/hr/setup/status'));
+      const res = await unwrap(hrTransport.get<GetSetupStatusResponse>('/hr/setup/status'));
       return res as GetSetupStatusResponse;
     },
   });
@@ -30,7 +30,7 @@ export const useCompleteSetupStep = () => {
 
   return useMutation({
     mutationFn: async ({ stepKey, data }: CompleteStepInput): Promise<void> => {
-      await unwrap(safe.post(`/hr/setup/steps/${stepKey}/complete`, data ?? {}));
+      await unwrap(hrTransport.post(`/hr/setup/steps/${stepKey}/complete`, data ?? {}));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hr-setup-status'] });
@@ -45,7 +45,7 @@ export const useGetHRConfig = () => {
   return useQuery<HRCompanyConfigPayload>({
     queryKey: ['hr-config'],
     queryFn: async (): Promise<HRCompanyConfigPayload> => {
-      const res = await unwrap(safe.get<{ config: HRCompanyConfigPayload }>('/hr/config'));
+      const res = await unwrap(hrTransport.get<{ config: HRCompanyConfigPayload }>('/hr/config'));
       return (res as { config: HRCompanyConfigPayload }).config;
     },
   });
@@ -58,7 +58,9 @@ export const useUpsertHRConfig = () => {
 
   return useMutation({
     mutationFn: async (data: Partial<HRCompanyConfigPayload>): Promise<HRCompanyConfigPayload> => {
-      const res = await unwrap(safe.put<{ config: HRCompanyConfigPayload }>('/hr/config', data));
+      const res = await unwrap(
+        hrTransport.put<{ config: HRCompanyConfigPayload }>('/hr/config', data)
+      );
       return (res as { config: HRCompanyConfigPayload }).config;
     },
     onSuccess: (config: HRCompanyConfigPayload) => {

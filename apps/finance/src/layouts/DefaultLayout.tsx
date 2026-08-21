@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Avatar } from '@voxire/ui';
 import { signOut, useUserStore } from '@voxire/auth';
-import { unwrap } from '@voxire/api';
 import { LicenseBanner } from '@voxire/components';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import TrialBanner from '../shared/components/TrialBanner';
-import { safe } from '../shared/lib/api';
+import { licenseClient, userClient } from '../shared/lib/clients';
 import { useForesightLinks } from '@voxire/utils';
 import { useNavigate, Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
@@ -254,10 +253,11 @@ const DefaultLayout: React.FC = () => {
 
   useEffect(() => {
     if (financeUser?.name || financeUser?.email) return;
-    unwrap(safe.get<{ user: { id: number; name: string; email: string } | null }>('/account'))
+    userClient
+      .getMe({})
       .then((res) => {
-        if (res?.user) {
-          setAuthUser({ id: String(res.user.id), name: res.user.name, email: res.user.email });
+        if (res?.id) {
+          setAuthUser({ id: String(res.id), name: res.fullName ?? '', email: res.email ?? '' });
         }
       })
       .catch(() => undefined);
@@ -649,7 +649,7 @@ const DefaultLayout: React.FC = () => {
               </div>
             </header>
 
-            <LicenseBanner safe={safe} />
+            <LicenseBanner client={licenseClient} />
             <TrialBanner />
             <AnimatePresence mode="wait">
               <motion.main

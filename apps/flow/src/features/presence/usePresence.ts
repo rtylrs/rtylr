@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
-import { safe } from '../../shared/lib/api';
+import { flowPresenceClient } from '../../shared/lib/clients';
 import { presenceResponseSchema } from '../../shared/schemas/presence';
 
 /**
@@ -12,7 +11,7 @@ export function usePresence() {
   return useQuery({
     queryKey: ['presence-today'],
     queryFn: async () => {
-      const res = await unwrap(safe.get<unknown>('/flow/presence/today'));
+      const res = await flowPresenceClient.getPresence({});
       return presenceResponseSchema.parse(res);
     },
   });

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ResultAsync } from 'neverthrow';
 
-vi.mock('../lib/api', () => ({
-  safe: {
+vi.mock('../lib/clients', () => ({
+  hrTransport: {
     get: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: [] }), () => ({}) as any)),
     post: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
     put: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
@@ -11,7 +11,7 @@ vi.mock('../lib/api', () => ({
 }));
 
 import { hrExtras } from './hrExtras';
-import { safe } from '../lib/api';
+import { hrTransport } from '../lib/clients';
 
 describe('hrExtras schedule calls', () => {
   beforeEach(() => {
@@ -29,7 +29,7 @@ describe('hrExtras schedule calls', () => {
       start: '09:00',
       end: '17:00',
     });
-    expect(safe.post).toHaveBeenCalledWith('/hr/shifts', {
+    expect(hrTransport.post).toHaveBeenCalledWith('/hr/shifts', {
       staff_id: 4101,
       date: '2026-06-01',
       start_time: '09:00',
@@ -47,7 +47,7 @@ describe('hrExtras schedule calls', () => {
       start: '10:00',
       end: '18:00',
     });
-    expect(safe.put).toHaveBeenCalledWith('/hr/shifts', {
+    expect(hrTransport.put).toHaveBeenCalledWith('/hr/shifts', {
       id: 7,
       date: '2026-06-02',
       start_time: '10:00',
@@ -68,13 +68,13 @@ describe('hrExtras schedule calls', () => {
       end: '17:00',
       published: true,
     });
-    const payload = (safe.post as unknown as ReturnType<typeof vi.fn>).mock.calls[0][1];
+    const payload = (hrTransport.post as unknown as ReturnType<typeof vi.fn>).mock.calls[0][1];
     expect(payload).not.toHaveProperty('status');
   });
 
   it('lists the schedule using the date filter the API binds', () => {
     hrExtras.listSchedule('2026-06-01');
-    expect(safe.get).toHaveBeenCalledWith('/hr/shifts', { params: { date: '2026-06-01' } });
+    expect(hrTransport.get).toHaveBeenCalledWith('/hr/shifts', { params: { date: '2026-06-01' } });
   });
 
   // Publishing is a POST to its own endpoint. This used to GET /hr/shifts with
@@ -82,14 +82,14 @@ describe('hrExtras schedule calls', () => {
   // reported success.
   it('publishes a week through the roster publish endpoint', () => {
     hrExtras.publishWeek('2026-09-07');
-    expect(safe.post).toHaveBeenCalledWith('/hr/shifts/roster/publish', {
+    expect(hrTransport.post).toHaveBeenCalledWith('/hr/shifts/roster/publish', {
       week_start: '2026-09-07',
     });
   });
 
   it('deletes a schedule shift by id', () => {
     hrExtras.deleteScheduleShift(19);
-    expect(safe.delete).toHaveBeenCalledWith('/hr/shifts', { data: { id: 19 } });
+    expect(hrTransport.delete).toHaveBeenCalledWith('/hr/shifts', { data: { id: 19 } });
   });
 
   it('sends every edited HR settings field instead of an empty payload', () => {
@@ -104,7 +104,7 @@ describe('hrExtras schedule calls', () => {
 
     hrExtras.updateSettings(settings);
 
-    expect(safe.put).toHaveBeenCalledWith('/hr/config', settings);
-    expect(safe.put).not.toHaveBeenCalledWith('/hr/config', {});
+    expect(hrTransport.put).toHaveBeenCalledWith('/hr/config', settings);
+    expect(hrTransport.put).not.toHaveBeenCalledWith('/hr/config', {});
   });
 });

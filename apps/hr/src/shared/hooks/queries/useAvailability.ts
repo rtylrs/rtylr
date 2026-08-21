@@ -8,7 +8,7 @@ import type {
 import { StaffServiceClient } from '@voxire/voxie/hr/staff/v1/client';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { safe } from '../../lib/api';
+import { hrTransport } from '../../lib/clients';
 import { availabilitySchema, type Availability } from '../../schemas/shifts';
 
 // The staff module mounts its generated server, so the generated client's
@@ -66,7 +66,7 @@ export const useAvailability = () =>
       // joined in from the staff service, as useTimeOff does for its requests.
       const [res, staffRes] = await Promise.all([
         unwrap(
-          safe.get<ListAvailabilityResponse>(AVAILABILITY_PATH, {
+          hrTransport.get<ListAvailabilityResponse>(AVAILABILITY_PATH, {
             params: { limit: AVAILABILITY_PAGE_SIZE, offset: 0 },
           })
         ),
@@ -112,7 +112,7 @@ export const useSetAvailability = () => {
         endTime: input.endTime,
         isAvailable: input.isAvailable,
       };
-      return unwrap(safe.post<SetAvailabilityResponse>(AVAILABILITY_PATH, body));
+      return unwrap(hrTransport.post<SetAvailabilityResponse>(AVAILABILITY_PATH, body));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['availability'] });

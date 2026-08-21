@@ -9,7 +9,7 @@ import type {
   InviteEmployeeResponse,
 } from '@voxire/voxie/hr/employee/v1/types';
 import type { EmployeeFormData } from '../../schemas/employeeSchema';
-import { safe } from '../../lib/api';
+import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -59,7 +59,7 @@ export const useListEmployees = (params: ListEmployeesParams) => {
   return useQuery<ListEmployeesResponse>({
     queryKey: ['employees', 'filter', params],
     queryFn: async (): Promise<ListEmployeesResponse> => {
-      const res = await unwrap(safe.get<ListEmployeesResponse>('/hr/employees', { params }));
+      const res = await unwrap(hrTransport.get<ListEmployeesResponse>('/hr/employees', { params }));
       return res as ListEmployeesResponse;
     },
   });
@@ -69,7 +69,9 @@ export const useGetEmployee = (id: number | undefined) => {
   return useQuery<EmployeePayload>({
     queryKey: ['employee', id],
     queryFn: async (): Promise<EmployeePayload> => {
-      const res = await unwrap(safe.get<{ employee: EmployeePayload }>(`/hr/employees/${id}`));
+      const res = await unwrap(
+        hrTransport.get<{ employee: EmployeePayload }>(`/hr/employees/${id}`)
+      );
       return (res as { employee: EmployeePayload }).employee;
     },
     enabled: !!id,
@@ -82,7 +84,7 @@ export const useCreateEmployee = () => {
 
   return useMutation({
     mutationFn: async (data: CreateEmployeePayload): Promise<CreateEmployeeResponse> => {
-      const res = await unwrap(safe.post<CreateEmployeeResponse>('/hr/employees', data));
+      const res = await unwrap(hrTransport.post<CreateEmployeeResponse>('/hr/employees', data));
       return res as CreateEmployeeResponse;
     },
     onSuccess: () => {
@@ -102,7 +104,9 @@ export const useUpdateEmployee = () => {
   return useMutation({
     mutationFn: async (data: UpdateEmployeePayload): Promise<UpdateEmployeeResponse> => {
       const { id, ...body } = data;
-      const res = await unwrap(safe.put<UpdateEmployeeResponse>(`/hr/employees/${id}`, body));
+      const res = await unwrap(
+        hrTransport.put<UpdateEmployeeResponse>(`/hr/employees/${id}`, body)
+      );
       return res as UpdateEmployeeResponse;
     },
     onSuccess: (_data: UpdateEmployeeResponse, variables: UpdateEmployeePayload) => {
@@ -132,7 +136,7 @@ export const useInviteEmployee = () => {
         locationId?: number;
       };
       const res = await unwrap(
-        safe.post<InviteEmployeeResponse>('/hr/employees/invite', {
+        hrTransport.post<InviteEmployeeResponse>('/hr/employees/invite', {
           firstName: source.firstName,
           lastName: source.lastName,
           email: source.email,

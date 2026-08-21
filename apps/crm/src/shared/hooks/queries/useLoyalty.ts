@@ -9,7 +9,7 @@ import {
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-import { safe } from '../../lib/api';
+import { crmApi } from '../../services/crmApi';
 import { unwrapList } from '../../lib/unwrapList';
 import {
   loyaltyConfigSchema,
@@ -77,7 +77,7 @@ export const useLoyaltyConfig = (): UseQueryResult<LoyaltyConfig> =>
   useQuery<LoyaltyConfig>({
     queryKey: ['crm-loyalty-config'],
     queryFn: async (): Promise<LoyaltyConfig> => {
-      const res = await unwrap(safe.get<unknown>('/crm/loyalty/config'));
+      const res = await unwrap(crmApi.getLoyaltyConfig());
       const envelope = (res ?? {}) as { config?: unknown };
       return loyaltyConfigSchema.parse(envelope.config ?? res);
     },
@@ -87,7 +87,7 @@ export const useLoyaltyTiers = (): UseQueryResult<LoyaltyTier[]> =>
   useQuery<LoyaltyTier[]>({
     queryKey: ['crm-loyalty-tiers'],
     queryFn: async (): Promise<LoyaltyTier[]> => {
-      const res = await unwrap(safe.get<unknown>('/crm/loyalty/tiers'));
+      const res = await unwrap(crmApi.getLoyaltyTiers());
       return z.array(loyaltyTierSchema).parse(unwrapList(res, 'tiers'));
     },
   });
@@ -96,9 +96,7 @@ export const useLoyaltyMembers = (limit = 100, offset = 0): UseQueryResult<Loyal
   useQuery<LoyaltyMember[]>({
     queryKey: ['crm-loyalty-members', { limit, offset }],
     queryFn: async (): Promise<LoyaltyMember[]> => {
-      const res = await unwrap(
-        safe.get<unknown>('/crm/loyalty/members', { params: { limit, offset } })
-      );
+      const res = await unwrap(crmApi.getLoyaltyMembers(limit, offset));
       return z.array(loyaltyMemberSchema).parse(unwrapList(res, 'members'));
     },
   });
@@ -107,7 +105,7 @@ export const useLoyaltyRewards = (): UseQueryResult<LoyaltyReward[]> =>
   useQuery<LoyaltyReward[]>({
     queryKey: ['crm-loyalty-rewards'],
     queryFn: async (): Promise<LoyaltyReward[]> => {
-      const res = await unwrap(safe.get<unknown>('/crm/loyalty/rewards'));
+      const res = await unwrap(crmApi.getLoyaltyRewards());
       return z.array(loyaltyRewardSchema).parse(unwrapList(res, 'rewards'));
     },
   });
@@ -117,11 +115,7 @@ export const useLoyaltyTransactions = (customerId?: number): UseQueryResult<Loya
     queryKey: ['crm-loyalty-transactions', customerId],
     queryFn: async (): Promise<LoyaltyTransaction[]> => {
       if (!customerId) return [];
-      const res = await unwrap(
-        safe.get<unknown>('/crm/loyalty/transactions', {
-          params: { customer_id: customerId, page: 1, page_size: 100 },
-        })
-      );
+      const res = await unwrap(crmApi.getLoyaltyTransactions(customerId, 100, 0));
       return z.array(loyaltyTransactionSchema).parse(unwrapList(res, 'transactions'));
     },
     enabled: typeof customerId === 'number' && customerId > 0,
@@ -140,7 +134,7 @@ export const useUpdateLoyaltyConfig = (): UseMutationResult<
     mutationFn: async (config: Partial<LoyaltyConfig>): Promise<LoyaltyConfig> => {
       const current = qc.getQueryData<LoyaltyConfig>(['crm-loyalty-config']) ?? {};
       const request = toUpdateLoyaltyConfigRequest({ ...current, ...config });
-      await unwrap(safe.put('/crm/loyalty/config', request));
+      await unwrap(crmApi.updateLoyaltyConfig(request));
       return loyaltyConfigSchema.parse({ ...current, ...config });
     },
     onSuccess: (): void => {
@@ -163,8 +157,8 @@ export const useUpsertTier = (): UseMutationResult<unknown, unknown, UpsertTierP
         ?.find((tier) => tier.id === payload.id);
       const request = { id: payload.id, ...toLoyaltyTierRequest({ ...current, ...payload.data }) };
       return payload.id
-        ? unwrap(safe.put('/crm/loyalty/tiers', request))
-        : unwrap(safe.post('/crm/loyalty/tiers', request));
+        ? unwrap(crmApi.updateLoyaltyTier(payload.id, request))
+        : unwrap(crmApi.createLoyaltyTier(request));
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-loyalty-tiers'] });
@@ -182,9 +176,9 @@ export const useUpsertReward = (): UseMutationResult<unknown, unknown, UpsertRew
   return useMutation<unknown, unknown, UpsertRewardPayload>({
     mutationFn: (payload: UpsertRewardPayload): Promise<unknown> =>
       unwrap(
-        safe.post(
-          '/crm/loyalty/rewards/upsert',
-          payload.id ? { id: payload.id, ...payload.data } : payload.data
+        crmApi.upsertLoyaltyReward(
+          payload.id,
+          payload.data as unknown as Partial<import('../../services/crmApi').LoyaltyReward>
         )
       ),
     onSuccess: (): void => {
@@ -202,13 +196,7 @@ export const useAwardPoints = (): UseMutationResult<unknown, unknown, AwardRedee
   const { t } = useTranslation();
   return useMutation<unknown, unknown, AwardRedeemPayload>({
     mutationFn: (payload: AwardRedeemPayload): Promise<unknown> => {
-      const request = {
-        customerId: payload.customerId,
-        points: payload.points,
-        description: payload.reason ?? '',
-        referenceType: 'manual',
-      };
-      return unwrap(safe.post('/crm/loyalty/award', request));
+      return unwrap(crmApi.awardPoints(payload.customerId, payload.points, payload.reason));
     },
     onSuccess: (_data: unknown, variables: AwardRedeemPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-loyalty-transactions'] });
@@ -227,13 +215,7 @@ export const useRedeemPoints = (): UseMutationResult<unknown, unknown, AwardRede
   const { t } = useTranslation();
   return useMutation<unknown, unknown, AwardRedeemPayload>({
     mutationFn: (payload: AwardRedeemPayload): Promise<unknown> => {
-      const request = {
-        customerId: payload.customerId,
-        points: payload.points,
-        description: payload.reason ?? '',
-        referenceType: 'manual',
-      };
-      return unwrap(safe.post('/crm/loyalty/redeem', request));
+      return unwrap(crmApi.redeemPoints(payload.customerId, payload.points, payload.reason));
     },
     onSuccess: (_data: unknown, variables: AwardRedeemPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-loyalty-transactions'] });

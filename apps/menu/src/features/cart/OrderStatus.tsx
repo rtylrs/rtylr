@@ -4,7 +4,7 @@ import { HelmetContainer } from '@voxire/components';
 import { useParams, useRouterState, useNavigate } from '@tanstack/react-router';
 import { EmptyState } from '@voxire/ui';
 import { PackageX } from 'lucide-react';
-import api from '../../shared/lib/api';
+import { orderClient } from '../../shared/lib/clients';
 import { useCartStore } from '../../shared/stores/cartStore';
 
 // The backend returns the internal pos_orders enum, not the FE's display steps.
@@ -19,11 +19,6 @@ type BackendOrderStatus =
   | 'cancelled'
   | 'refunded'
   | 'voided';
-
-interface OrderStatusResponse {
-  order_number: string;
-  status: BackendOrderStatus | string;
-}
 
 const POLL_INTERVAL_MS = 30_000;
 
@@ -75,24 +70,26 @@ const OrderStatus = (): React.JSX.Element => {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchStatus = useCallback(async (): Promise<void> => {
-    if (!id) return;
+    if (!id || !businessId) return;
     try {
-      const params = businessId ? { business_id: businessId } : undefined;
-      const res = await api.get<OrderStatusResponse>(`/pos/orders/v1/orders/${id}/public-status`, {
-        params,
-      });
-      setStatus(res.data.status);
+      const res = await orderClient.getPublicOrderStatus({ orderId: id, businessId });
+      const nextStatus = res.status ?? '';
+      setStatus(nextStatus);
       setFetchError(false);
       setNotFound(false);
 
       // Stop polling once the order reaches a terminal state (done/cancelled).
-      if (isTerminal(res.data.status) && intervalRef.current) {
+      if (isTerminal(nextStatus) && intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
     } catch (err: unknown) {
-      const status = (err as { response?: { status?: number } })?.response?.status;
-      if (status === 404) {
+      // Generated onekit clients throw an ApiError with `statusCode`;
+      // legacy axios-style errors carry `response.status`.
+      const statusCode =
+        (err as { statusCode?: number })?.statusCode ??
+        (err as { response?: { status?: number } })?.response?.status;
+      if (statusCode === 404) {
         setNotFound(true);
         setFetchError(false);
         if (intervalRef.current) {

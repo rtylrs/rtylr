@@ -1,7 +1,7 @@
-import { unwrap } from '@voxire/api';
+import { oneKitResult, unwrap } from '@voxire/api';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
-import { safe } from '../../shared/lib/api';
+import { financialCompatibilityClient } from '../../shared/lib/clients';
 import { cashFlowSeriesPointSchema } from '../../shared/schemas/cashFlow';
 import type { CashFlowPoint } from '../../shared/components/CashFlowChart';
 import { unwrapList } from '../../shared/lib/unwrapList';
@@ -44,7 +44,7 @@ export function useCashFlow(options?: UseCashFlowOptions) {
       // Backend cash-flow time series lives at /insights/financial/cash-flow and
       // returns { series: [{ date, inflowMinorUnits, outflowMinorUnits }] }.
       const res = await unwrap(
-        safe.get<unknown>('/insights/financial/cash-flow', { params: { from, to } })
+        oneKitResult(() => financialCompatibilityClient.getCashFlow({ from, to }))
       );
       const series = z.array(cashFlowSeriesPointSchema).parse(unwrapList(res, 'series'));
       return series.map((p) => ({

@@ -217,7 +217,11 @@ for (const mod of moduleNames) {
 }
 const unserved = new Set();
 for (const r of appRequests) {
-  if (r.capability && [...servedCaps].some((c) => c.replaceAll('-', '_') === r.capability.replaceAll('-', '_'))) continue;
+  if (
+    r.capability &&
+    [...servedCaps].some((c) => c.replaceAll('-', '_') === r.capability.replaceAll('-', '_'))
+  )
+    continue;
   let hit = false;
   for (const lp of servedLegacy) {
     const a = lp.split('/');

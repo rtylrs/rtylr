@@ -11,7 +11,7 @@ import { AppGuard } from '@voxire/auth';
 import { CookieBanner } from '@voxire/consent';
 import { ErrorBoundary } from '@voxire/ui';
 import { unwrap } from '@voxire/api';
-import { safe } from './shared/lib/api';
+import { userClient } from './shared/lib/clients';
 
 import RootLanding from './features/public/RootLanding';
 import CareersIndex from './features/public/CareersIndex';
@@ -75,7 +75,7 @@ const adminGuardRoute = createRoute({
     <AppGuard
       appId="recruit"
       fetchUser={(): Promise<Record<string, unknown>> =>
-        unwrap(safe.get<Record<string, unknown>>('/hub/user/v1/users/me'))
+        userClient.getMe({}).then((response) => response as unknown as Record<string, unknown>)
       }
     >
       <Outlet />

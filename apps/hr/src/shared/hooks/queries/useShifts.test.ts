@@ -3,7 +3,7 @@ import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
-const mockSafe = vi.hoisted(() => ({
+const mockHrTransport = vi.hoisted(() => ({
   get: vi.fn(),
   post: vi.fn(),
   put: vi.fn(),
@@ -16,7 +16,7 @@ const mockToast = vi.hoisted(() => ({
 }));
 
 vi.mock('@voxire/api', () => ({ unwrap: vi.fn((val) => val) }));
-vi.mock('../../lib/api', () => ({ safe: mockSafe }));
+vi.mock('../../lib/clients', () => ({ hrTransport: mockHrTransport }));
 vi.mock('sonner', () => ({ toast: mockToast }));
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -46,7 +46,7 @@ describe('useCreateShiftAssignment', () => {
   // created. Dropping the field would leave the roster silently holding a shift
   // that clashes with the assignee's stated availability.
   it('surfaces each availability warning returned with a created assignment', async () => {
-    mockSafe.post.mockResolvedValue({
+    mockHrTransport.post.mockResolvedValue({
       assignment: { id: '1' },
       warnings: [
         'Jane Doe is unavailable 09:00-12:00 on 2026-08-20',
@@ -65,7 +65,7 @@ describe('useCreateShiftAssignment', () => {
   });
 
   it('stays quiet when the assignment raised no warnings', async () => {
-    mockSafe.post.mockResolvedValue({ assignment: { id: '1' }, warnings: [] });
+    mockHrTransport.post.mockResolvedValue({ assignment: { id: '1' }, warnings: [] });
 
     await assign();
 
@@ -76,7 +76,7 @@ describe('useCreateShiftAssignment', () => {
   // A backend that predates the warnings field omits it entirely, which must not
   // throw on the way to the success toast.
   it('tolerates a response with no warnings field', async () => {
-    mockSafe.post.mockResolvedValue({ assignment: { id: '1' } });
+    mockHrTransport.post.mockResolvedValue({ assignment: { id: '1' } });
 
     await assign();
 

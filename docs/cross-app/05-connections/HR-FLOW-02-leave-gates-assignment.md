@@ -63,7 +63,7 @@ another tab, or does not.
 | `employee_id`            | hr leave request | `~/Development/onion/internal/platform/database/schemas/hr_leave/schema.sql:24` |
 | `start_date`, `end_date` | hr leave request | `~/Development/onion/internal/platform/database/schemas/hr_leave/schema.sql:26` |
 | `status`                 | hr leave request | `~/Development/onion/internal/platform/database/schemas/hr_leave/schema.sql:30` |
-| assignee, due date       | flow task        | `packages/voxie/api/flow/task/v1/models.onk:23`                    |
+| assignee, due date       | flow task        | `packages/voxie/api/flow/task/v1/models.onk:23`                                 |
 
 Rule, not formula:
 

@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 
 interface UseFocusReturn<T extends HTMLElement> {
-  ref: React.RefObject<T>;
+  ref: React.RefObject<T | null>;
   isFocused: boolean;
   focus: () => void;
   blur: () => void;

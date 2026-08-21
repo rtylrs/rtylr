@@ -2,9 +2,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Clock, CheckCircle2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { toFiniteNumber, unwrap } from '@voxire/api';
+import { toFiniteNumber } from '@voxire/api';
 import { EmptyState } from '@voxire/ui';
-import { safe } from '../../../../shared/lib/api';
+import { insightsFinancialClient } from '../../../../shared/lib/clients';
 import WidgetHeader from './WidgetHeader';
 
 /**
@@ -20,15 +20,6 @@ interface Bucket {
   label: string;
   amountMinorUnits: number;
   count: number;
-}
-
-interface ApiResponse {
-  buckets?: {
-    label: string;
-    amountMinorUnits?: number | string;
-    amount_minor_units?: number | string;
-    count: number | string;
-  }[];
 }
 
 const BUCKET_COLOUR: Record<string, string> = {
@@ -54,10 +45,10 @@ const InvoiceAgingWidget: React.FC = (): React.JSX.Element => {
   } = useQuery({
     queryKey: ['insights-invoice-aging'],
     queryFn: async (): Promise<Bucket[]> => {
-      const res = await unwrap(safe.get<ApiResponse>('/insights/financial/v1/invoice-aging'));
-      return (res.buckets ?? []).map((b) => ({
-        label: b.label,
-        amountMinorUnits: toFiniteNumber(b.amountMinorUnits ?? b.amount_minor_units),
+      const res = await insightsFinancialClient.getInvoiceAging({});
+      return (res.aging?.buckets ?? []).map((b) => ({
+        label: b.bucket ?? '',
+        amountMinorUnits: toFiniteNumber(b.amount),
         count: toFiniteNumber(b.count),
       }));
     },

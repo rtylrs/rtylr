@@ -4,21 +4,17 @@ import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useWebhooks, useCreateWebhook, useDeleteWebhook } from './useWebhooks';
 
-const mockGet = vi.fn();
-const mockPost = vi.fn();
-const mockDelete = vi.fn();
+const mockDeveloperClient = vi.hoisted(() => ({
+  listWebhooks: vi.fn(),
+  createWebhook: vi.fn(),
+  deleteWebhook: vi.fn(),
+}));
 
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((value) => value),
 }));
 
-vi.mock('../../lib/api', () => ({
-  safe: {
-    get: (...args: unknown[]) => mockGet(...args),
-    post: (...args: unknown[]) => mockPost(...args),
-    delete: (...args: unknown[]) => mockDelete(...args),
-  },
-}));
+vi.mock('../../lib/clients', () => ({ developerClient: mockDeveloperClient }));
 
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
@@ -35,7 +31,7 @@ describe('useWebhooks', () => {
   });
 
   it('fetches webhooks successfully', async () => {
-    mockGet.mockResolvedValue({
+    mockDeveloperClient.listWebhooks.mockResolvedValue({
       webhooks: [{ id: 1, url: 'https://example.com/wh', events: ['order.created'] }],
     });
 
@@ -51,7 +47,7 @@ describe('useWebhooks', () => {
   });
 
   it('creates a webhook successfully', async () => {
-    mockPost.mockResolvedValue({ id: 1, secret: 'sec_123' });
+    mockDeveloperClient.createWebhook.mockResolvedValue({ id: 1, secret: 'sec_123' });
 
     const client = new QueryClient({
       defaultOptions: { mutations: { retry: false } },
@@ -64,14 +60,14 @@ describe('useWebhooks', () => {
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockPost).toHaveBeenCalledWith('/hub/developer/v1/webhooks', {
+    expect(mockDeveloperClient.createWebhook).toHaveBeenCalledWith({
       url: 'https://example.com/wh',
       events: ['order.created'],
     });
   });
 
   it('deletes a webhook successfully', async () => {
-    mockDelete.mockResolvedValue({ success: true });
+    mockDeveloperClient.deleteWebhook.mockResolvedValue({ success: true });
 
     const client = new QueryClient({
       defaultOptions: { mutations: { retry: false } },
@@ -84,6 +80,6 @@ describe('useWebhooks', () => {
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockDelete).toHaveBeenCalledWith('/hub/developer/v1/webhooks/12');
+    expect(mockDeveloperClient.deleteWebhook).toHaveBeenCalledWith({ id: '12' });
   });
 });

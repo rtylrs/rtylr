@@ -9,7 +9,7 @@ import type {
   CreateTimeEntryResponse,
 } from '@voxire/voxie/hr/time_entry/v1/types';
 import type { TimeEntryPayload } from '@voxire/voxie/hr/time_entry/v1/types';
-import { safe } from '../../lib/api';
+import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -21,7 +21,9 @@ export const useListTimeEntries = (
     queryKey: ['time-entries', 'filter', params],
     enabled: options?.enabled ?? true,
     queryFn: async (): Promise<ListTimeEntriesResponse> => {
-      const res = await unwrap(safe.get<ListTimeEntriesResponse>('/hr/time-entries', { params }));
+      const res = await unwrap(
+        hrTransport.get<ListTimeEntriesResponse>('/hr/time-entries', { params })
+      );
       return res as ListTimeEntriesResponse;
     },
   });
@@ -33,7 +35,7 @@ export const useCreateTimeEntry = () => {
 
   return useMutation({
     mutationFn: async (data: CreateTimeEntryRequest): Promise<CreateTimeEntryResponse> => {
-      const res = await unwrap(safe.post<CreateTimeEntryResponse>('/hr/time-entries', data));
+      const res = await unwrap(hrTransport.post<CreateTimeEntryResponse>('/hr/time-entries', data));
       return res as CreateTimeEntryResponse;
     },
     onSuccess: () => {
@@ -57,7 +59,7 @@ export const useUpdateTimeEntry = () => {
     ): Promise<TimeEntryPayload> => {
       const { id, ...body } = data;
       const res = await unwrap(
-        safe.put<{ entry: TimeEntryPayload }>(`/hr/time-entries/${id}`, body)
+        hrTransport.put<{ entry: TimeEntryPayload }>(`/hr/time-entries/${id}`, body)
       );
       return (res as { entry: TimeEntryPayload }).entry;
     },
@@ -78,7 +80,7 @@ export const useDeleteTimeEntry = () => {
 
   return useMutation({
     mutationFn: async (id: number): Promise<void> => {
-      await unwrap(safe.delete(`/hr/time-entries/${id}`));
+      await unwrap(hrTransport.delete(`/hr/time-entries/${id}`));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['time-entries'] });

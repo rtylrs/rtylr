@@ -30,6 +30,10 @@ const CreateBusinessOnboarding: React.FC = (): React.JSX.Element => {
     if (!canSubmit) return;
     onboard.mutate(name.trim(), {
       onSuccess: ({ token }) => {
+        if (!token) {
+          toast.error(t('onboarding.createError'));
+          return;
+        }
         removeCookie('token', { domain: getDefaultCookieDomain() });
         removeCookie('token');
         setCookie('token', token, {

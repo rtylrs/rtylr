@@ -6,7 +6,7 @@ import React from 'react';
 import { APP_URLS } from '@voxire/config';
 import { useApps } from './useApps';
 
-const mockGet = vi.fn();
+const mockAppClient = vi.hoisted(() => ({ listApps: vi.fn() }));
 
 vi.mock('@voxire/api', async (importOriginal) => {
   const actual = await importOriginal<object>();
@@ -16,9 +16,7 @@ vi.mock('@voxire/api', async (importOriginal) => {
   };
 });
 
-vi.mock('../../lib/api', () => ({
-  safe: { get: (...args: unknown[]) => mockGet(...args) },
-}));
+vi.mock('../../lib/clients', () => ({ appClient: mockAppClient }));
 
 let queryClient: QueryClient;
 
@@ -35,7 +33,7 @@ describe('useApps', () => {
   });
 
   it('fetches and maps apps correctly', async () => {
-    mockGet.mockResolvedValue({
+    mockAppClient.listApps.mockResolvedValue({
       apps: [
         { id: 'pos', name: 'Point of Sale', description: 'POS app', isEnabled: true },
         { id: 'erp', name: 'ERP', description: 'ERP system', isEnabled: false },
@@ -53,7 +51,7 @@ describe('useApps', () => {
   });
 
   it('maps disabled apps as coming_soon', async () => {
-    mockGet.mockResolvedValue({
+    mockAppClient.listApps.mockResolvedValue({
       apps: [{ id: 'erp', name: 'ERP', description: 'ERP', isEnabled: false }],
     });
 
@@ -64,7 +62,7 @@ describe('useApps', () => {
   });
 
   it('returns empty array when response is not an array', async () => {
-    mockGet.mockResolvedValue({ apps: 'not an array' });
+    mockAppClient.listApps.mockResolvedValue({ apps: 'not an array' });
 
     const { result } = renderHook(() => useApps(), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -73,7 +71,7 @@ describe('useApps', () => {
   });
 
   it('returns empty array when res is null', async () => {
-    mockGet.mockResolvedValue(null);
+    mockAppClient.listApps.mockResolvedValue(null);
 
     const { result } = renderHook(() => useApps(), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -82,7 +80,7 @@ describe('useApps', () => {
   });
 
   it('uses fallback metadata for unknown app ids', async () => {
-    mockGet.mockResolvedValue({
+    mockAppClient.listApps.mockResolvedValue({
       apps: [{ id: 'unknown_app', name: 'Unknown', isEnabled: true }],
     });
 
@@ -95,7 +93,7 @@ describe('useApps', () => {
   });
 
   it('handles API error', async () => {
-    mockGet.mockRejectedValue(new Error('Network error'));
+    mockAppClient.listApps.mockRejectedValue(new Error('Network error'));
 
     const { result } = renderHook(() => useApps(), { wrapper });
     await waitFor(() => expect(result.current.isError).toBe(true));
@@ -104,7 +102,7 @@ describe('useApps', () => {
   });
 
   it('handles flat array response (no .apps wrapper)', async () => {
-    mockGet.mockResolvedValue([{ id: 'crm', name: 'CRM', isEnabled: true }]);
+    mockAppClient.listApps.mockResolvedValue([{ id: 'crm', name: 'CRM', isEnabled: true }]);
 
     const { result } = renderHook(() => useApps(), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -113,10 +111,10 @@ describe('useApps', () => {
     expect(result.current.data![0].key).toBe('crm');
   });
 
-  it('calls safe.get with /hub/app/v1/apps', async () => {
-    mockGet.mockResolvedValue({ apps: [] });
+  it('calls the generated app client', async () => {
+    mockAppClient.listApps.mockResolvedValue({ apps: [] });
 
     renderHook(() => useApps(), { wrapper });
-    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/hub/app/v1/apps'));
+    await waitFor(() => expect(mockAppClient.listApps).toHaveBeenCalledWith({}));
   });
 });

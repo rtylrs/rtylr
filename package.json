@@ -15,6 +15,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "contracts:audit-requests": "./scripts/check-packages-ref.sh && node scripts/audit-request-contracts.mjs --fail-on-errors",
+    "contracts:enforce": "node scripts/enforce-onekit-boundary.mjs --changed-only",
+    "contracts:enforce:all": "node scripts/enforce-onekit-boundary.mjs --all",
     "contracts:sync": "./scripts/check-packages-ref.sh && pnpm --filter @voxire/voxie typecheck",
     "docs:verify-citations": "node scripts/cross-app/verify-citations.mjs",
     "prepare": "husky",

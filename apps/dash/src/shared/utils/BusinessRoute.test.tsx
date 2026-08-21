@@ -4,19 +4,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BusinessRoute } from './BusinessRoute';
 import { useUserStore } from '../stores/userStore';
 
-const mockGet = vi.fn();
-const mockPost = vi.fn();
+const mockGetMe = vi.fn();
+const mockGetConfig = vi.fn();
 const routerState = vi.hoisted(() => ({ pathname: '/' }));
 
-vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((promise) => promise),
-}));
-
-vi.mock('../lib/api', () => ({
-  safe: {
-    get: (...args: unknown[]) => mockGet(...args),
-    post: (...args: unknown[]) => mockPost(...args),
-  },
+vi.mock('../lib/clients', () => ({
+  userClient: { getMe: (...args: unknown[]) => mockGetMe(...args) },
+  configClient: { getConfig: (...args: unknown[]) => mockGetConfig(...args) },
+  accessClient: { requestAccess: vi.fn() },
 }));
 
 vi.mock('@voxire/ui', () => ({
@@ -50,19 +45,15 @@ describe('BusinessRoute', () => {
     useUserStore.setState({ user: null, token: null });
     document.cookie = 'token=test-token; path=/';
     routerState.pathname = '/';
+    mockGetConfig.mockResolvedValue({ business: {} });
   });
 
   it('renders onboarding if user has no businessId', async () => {
-    mockGet.mockImplementation((url: string) => {
-      if (url === '/hub/user/v1/users/me') {
-        return Promise.resolve({
-          id: 1,
-          email: 'test@example.com',
-          businessId: 0,
-          isOwner: true,
-        });
-      }
-      return Promise.resolve({ business: {} });
+    mockGetMe.mockResolvedValue({
+      id: 1,
+      email: 'test@example.com',
+      businessId: 0,
+      isOwner: true,
     });
 
     render(<BusinessRoute />);
@@ -73,18 +64,14 @@ describe('BusinessRoute', () => {
   });
 
   it('renders Outlet if user has businessId and is owner', async () => {
-    mockGet.mockImplementation((url: string) => {
-      if (url === '/hub/user/v1/users/me') {
-        return Promise.resolve({
-          id: 1,
-          email: 'test@example.com',
-          businessId: 10,
-          isOwner: true,
-          role: 'owner',
-        });
-      }
-      return Promise.resolve({ business: { name: 'Acme Corp' } });
+    mockGetMe.mockResolvedValue({
+      id: 1,
+      email: 'test@example.com',
+      businessId: 10,
+      isOwner: true,
+      role: 'owner',
     });
+    mockGetConfig.mockResolvedValue({ business: { name: 'Acme Corp' } });
 
     render(<BusinessRoute />);
 
@@ -94,7 +81,7 @@ describe('BusinessRoute', () => {
   });
 
   it('renders StaffView if non-owner staff has no management role', async () => {
-    const staffUser = {
+    mockGetMe.mockResolvedValue({
       id: 2,
       email: 'staff@example.com',
       fullName: 'Staff User',
@@ -102,13 +89,6 @@ describe('BusinessRoute', () => {
       isOwner: false,
       role: 'staff',
       apps: [],
-    };
-
-    mockGet.mockImplementation((url: string) => {
-      if (url === '/hub/user/v1/users/me') {
-        return Promise.resolve(staffUser);
-      }
-      return Promise.resolve({ business: {} });
     });
 
     render(<BusinessRoute />);
@@ -119,18 +99,13 @@ describe('BusinessRoute', () => {
   });
 
   it('renders Outlet for a non-owner operator on an unscoped route (full route access)', async () => {
-    mockGet.mockImplementation((url: string) => {
-      if (url === '/hub/user/v1/users/me') {
-        return Promise.resolve({
-          id: 3,
-          email: 'op@example.com',
-          businessId: 10,
-          isOwner: false,
-          role: 'operator',
-          apps: [],
-        });
-      }
-      return Promise.resolve({ business: {} });
+    mockGetMe.mockResolvedValue({
+      id: 3,
+      email: 'op@example.com',
+      businessId: 10,
+      isOwner: false,
+      role: 'operator',
+      apps: [],
     });
     routerState.pathname = '/team';
 
@@ -142,19 +117,14 @@ describe('BusinessRoute', () => {
   });
 
   it('renders StaffView for a non-owner billing user on an out-of-scope route', async () => {
-    mockGet.mockImplementation((url: string) => {
-      if (url === '/hub/user/v1/users/me') {
-        return Promise.resolve({
-          id: 4,
-          email: 'billing@example.com',
-          fullName: 'Billing User',
-          businessId: 10,
-          isOwner: false,
-          role: 'billing',
-          apps: [],
-        });
-      }
-      return Promise.resolve({ business: {} });
+    mockGetMe.mockResolvedValue({
+      id: 4,
+      email: 'billing@example.com',
+      fullName: 'Billing User',
+      businessId: 10,
+      isOwner: false,
+      role: 'billing',
+      apps: [],
     });
     routerState.pathname = '/team';
 
@@ -166,18 +136,13 @@ describe('BusinessRoute', () => {
   });
 
   it('renders Outlet for a non-owner billing user on their scoped billing route', async () => {
-    mockGet.mockImplementation((url: string) => {
-      if (url === '/hub/user/v1/users/me') {
-        return Promise.resolve({
-          id: 5,
-          email: 'billing@example.com',
-          businessId: 10,
-          isOwner: false,
-          role: 'billing',
-          apps: [],
-        });
-      }
-      return Promise.resolve({ business: {} });
+    mockGetMe.mockResolvedValue({
+      id: 5,
+      email: 'billing@example.com',
+      businessId: 10,
+      isOwner: false,
+      role: 'billing',
+      apps: [],
     });
     routerState.pathname = '/settings/billing';
 
@@ -189,19 +154,14 @@ describe('BusinessRoute', () => {
   });
 
   it('renders StaffView for a non-owner menu_manager user on an out-of-scope route', async () => {
-    mockGet.mockImplementation((url: string) => {
-      if (url === '/hub/user/v1/users/me') {
-        return Promise.resolve({
-          id: 6,
-          email: 'menu@example.com',
-          fullName: 'Menu Manager User',
-          businessId: 10,
-          isOwner: false,
-          role: 'menu_manager',
-          apps: [],
-        });
-      }
-      return Promise.resolve({ business: {} });
+    mockGetMe.mockResolvedValue({
+      id: 6,
+      email: 'menu@example.com',
+      fullName: 'Menu Manager User',
+      businessId: 10,
+      isOwner: false,
+      role: 'menu_manager',
+      apps: [],
     });
     routerState.pathname = '/settings/billing';
 
@@ -213,18 +173,13 @@ describe('BusinessRoute', () => {
   });
 
   it('renders Outlet for a non-owner menu_manager user on their scoped design route', async () => {
-    mockGet.mockImplementation((url: string) => {
-      if (url === '/hub/user/v1/users/me') {
-        return Promise.resolve({
-          id: 7,
-          email: 'menu@example.com',
-          businessId: 10,
-          isOwner: false,
-          role: 'menu_manager',
-          apps: [],
-        });
-      }
-      return Promise.resolve({ business: {} });
+    mockGetMe.mockResolvedValue({
+      id: 7,
+      email: 'menu@example.com',
+      businessId: 10,
+      isOwner: false,
+      role: 'menu_manager',
+      apps: [],
     });
     routerState.pathname = '/design';
 
@@ -236,19 +191,14 @@ describe('BusinessRoute', () => {
   });
 
   it('renders StaffView for a non-owner store_manager user (POS-location-scoped, not global to Dash)', async () => {
-    mockGet.mockImplementation((url: string) => {
-      if (url === '/hub/user/v1/users/me') {
-        return Promise.resolve({
-          id: 8,
-          email: 'store@example.com',
-          fullName: 'Store Manager User',
-          businessId: 10,
-          isOwner: false,
-          role: 'store_manager',
-          apps: [],
-        });
-      }
-      return Promise.resolve({ business: {} });
+    mockGetMe.mockResolvedValue({
+      id: 8,
+      email: 'store@example.com',
+      fullName: 'Store Manager User',
+      businessId: 10,
+      isOwner: false,
+      role: 'store_manager',
+      apps: [],
     });
     routerState.pathname = '/team';
 

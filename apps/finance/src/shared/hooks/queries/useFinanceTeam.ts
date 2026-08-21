@@ -1,8 +1,8 @@
-import { getOneKitErrorMessage, unwrap } from '@voxire/api';
+import { getOneKitErrorMessage, oneKitResult, unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { safe } from '../../lib/api';
+import { teamCompatibilityClient } from '../../lib/clients';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -32,7 +32,9 @@ export const useFinanceTeam = (): UseQueryResult<FinanceTeamMember[]> =>
   useQuery<FinanceTeamMember[]>({
     queryKey: ['finance-team'],
     queryFn: async (): Promise<FinanceTeamMember[]> => {
-      const res = await unwrap(safe.get<ListMembersResponse>('/team/members'));
+      const res = await unwrap(
+        oneKitResult(() => teamCompatibilityClient.listMembers({}) as Promise<ListMembersResponse>)
+      );
       const raw: FinanceTeamMember[] = res?.users ?? res?.members ?? [];
       return raw.map((m) => ({ ...m, name: (m.name as string) || (m.email as string) }));
     },
@@ -43,7 +45,13 @@ export const useFinanceInviteMember = (): UseMutationResult<unknown, unknown, In
   const qc = useQueryClient();
   return useMutation<unknown, unknown, InvitePayload>({
     mutationFn: (payload: InvitePayload): Promise<unknown> =>
-      unwrap(safe.post('/team/invite', { ...payload, apps: ['finance'] })),
+      unwrap(
+        oneKitResult(() =>
+          teamCompatibilityClient.inviteMember({
+            body: { ...payload, apps: ['finance'] },
+          })
+        )
+      ),
     onSuccess: (): void => {
       toast.success('Invitation sent');
       void qc.invalidateQueries({ queryKey: ['finance-team'] });
@@ -58,7 +66,7 @@ export const useFinanceDeactivateMember = (): UseMutationResult<unknown, unknown
   const qc = useQueryClient();
   return useMutation<unknown, unknown, string>({
     mutationFn: (id: string): Promise<unknown> =>
-      unwrap(safe.patch(`/team/members/${id}/deactivate`, {})),
+      unwrap(oneKitResult(() => teamCompatibilityClient.deactivateMember({ id, body: {} }))),
     onSuccess: (): void => {
       toast.success('Member removed');
       void qc.invalidateQueries({ queryKey: ['finance-team'] });

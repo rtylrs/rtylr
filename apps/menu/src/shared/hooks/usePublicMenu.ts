@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { cdnImageUrl } from '@voxire/config';
-import { z } from 'zod';
-import api from '../lib/api';
+import { businessClient, menuItemClient } from '../lib/clients';
 
 export interface PublicBusiness {
   id: number;
@@ -24,64 +23,22 @@ export interface PublicMenuItem {
   updatedAt: string;
 }
 
-interface BusinessApiResponse {
-  id: number;
-  name: string;
-  logo_url: string;
-  currency: string;
-  timezone: string;
-}
-
-interface MenuApiResponse {
-  items: {
-    id: number;
-    owner_id: number;
-    category_id: number;
-    name: string;
-    sku: string;
-    sale_price: number;
-    image?: string;
-    image_url?: string;
-    is_active: boolean;
-    created_at: string;
-    updated_at: string;
-  }[];
-}
-
-const publicBusinessSchema = z.object({
-  id: z.number().catch(0),
-  name: z.string().catch(''),
-  logo_url: z.string().catch(''),
-  currency: z.string().catch('USD'),
-  timezone: z.string().catch('UTC'),
-});
-
-const publicMenuItemSchema = z.object({
-  id: z.number().catch(0),
-  owner_id: z.number().catch(0),
-  category_id: z.number().catch(0),
-  name: z.string().catch(''),
-  sku: z.string().catch(''),
-  sale_price: z.number().catch(0),
-  image: z.string().optional(),
-  image_url: z.string().optional(),
-  is_active: z.boolean().catch(true),
-  created_at: z.string().catch(''),
-  updated_at: z.string().catch(''),
-});
+const toNumber = (value: string | undefined, fallback = 0): number => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
 
 async function fetchPublicBusiness(businessId: number): Promise<PublicBusiness> {
-  const res = await api.get<{ business: BusinessApiResponse }>(
-    '/hub/business/v1/businesses/public',
-    { params: { business_id: businessId } }
-  );
-  const data = publicBusinessSchema.parse(res.data.business ?? {});
+  const response = await businessClient.getPublicBusiness({ businessId: String(businessId) });
+  const business = response.business;
+  if (!business) throw new Error('Public business was not returned');
+
   return {
-    id: data.id,
-    name: data.name,
-    logoUrl: cdnImageUrl(data.logo_url) ?? '',
-    currency: data.currency,
-    timezone: data.timezone,
+    id: toNumber(business.id, businessId),
+    name: business.name ?? '',
+    logoUrl: business.logoUrl ? (cdnImageUrl(business.logoUrl) ?? '') : '',
+    currency: business.currency ?? 'USD',
+    timezone: business.timezone ?? 'UTC',
   };
 }
 
@@ -89,21 +46,22 @@ async function fetchPublicMenu(
   businessId: number,
   locationId?: number | null
 ): Promise<PublicMenuItem[]> {
-  const params: Record<string, number> = { business_id: businessId };
-  if (locationId && locationId > 0) params.location_id = locationId;
-  const res = await api.get<MenuApiResponse>('/pos/menu-item/v1/menu-items/public', { params });
-  const items = (res.data.items ?? []).map((item) => publicMenuItemSchema.parse(item));
-  return items.map((i) => ({
-    id: i.id,
-    ownerId: i.owner_id,
-    categoryId: i.category_id,
-    name: i.name,
-    sku: i.sku,
-    salePrice: i.sale_price,
-    imageUrl: cdnImageUrl(i.image_url || i.image),
-    isActive: i.is_active,
-    createdAt: i.created_at,
-    updatedAt: i.updated_at,
+  const response = await menuItemClient.listPublicMenuItems({
+    businessId: String(businessId),
+    ...(locationId && locationId > 0 ? { locationId: String(locationId) } : {}),
+  });
+
+  return (response.items ?? []).map((item) => ({
+    id: toNumber(item.id),
+    ownerId: toNumber(item.ownerId),
+    categoryId: toNumber(item.categoryId),
+    name: item.name ?? '',
+    sku: item.sku ?? '',
+    salePrice: item.salePrice ?? 0,
+    imageUrl: item.imageUrl ? (cdnImageUrl(item.imageUrl) ?? undefined) : undefined,
+    isActive: item.isActive ?? true,
+    createdAt: item.createdAt ?? '',
+    updatedAt: item.updatedAt ?? '',
   }));
 }
 
@@ -126,25 +84,6 @@ export interface PublicBusinessBySlugBundle {
   locations: PublicLocationSummary[];
 }
 
-interface PublicBusinessBySlugApi {
-  business: {
-    id: number;
-    name: string;
-    slug: string;
-    logo_url: string;
-    currency: string;
-    timezone: string;
-  };
-  locations: {
-    id: number;
-    name: string;
-    slug: string;
-    address: string;
-    timezone: string;
-    is_active: boolean;
-  }[];
-}
-
 export function usePublicBusinessBySlug(slug: string | null): {
   data: PublicBusinessBySlugBundle | undefined;
   isLoading: boolean;
@@ -154,31 +93,34 @@ export function usePublicBusinessBySlug(slug: string | null): {
     queryKey: ['public-business-by-slug', slug],
     queryFn: async (): Promise<PublicBusinessBySlugBundle> => {
       if (!slug) throw new Error('slug required');
-      const res = await api.get<PublicBusinessBySlugApi>('/hub/business/v1/businesses/by-slug', {
-        params: { slug },
-      });
+
+      const response = await businessClient.lookupBusinessBySlug({ slug });
+      const business = response.business;
+      if (!business) throw new Error('Public business was not returned');
+
       return {
         business: {
-          id: res.data.business.id,
-          name: res.data.business.name,
-          slug: res.data.business.slug,
-          logoUrl: cdnImageUrl(res.data.business.logo_url) ?? '',
-          currency: res.data.business.currency,
-          timezone: res.data.business.timezone,
+          id: toNumber(business.id),
+          name: business.name ?? '',
+          slug: business.slug ?? slug,
+          logoUrl: business.logoUrl ? (cdnImageUrl(business.logoUrl) ?? '') : '',
+          currency: business.currency ?? 'USD',
+          timezone: business.timezone ?? 'UTC',
         },
-        locations: (res.data.locations ?? []).map((l) => ({
-          id: l.id,
-          name: l.name,
-          slug: l.slug,
-          address: l.address,
-          timezone: l.timezone,
-          isActive: l.is_active,
+        locations: (response.locations ?? []).map((location) => ({
+          id: toNumber(location.id),
+          name: location.name ?? '',
+          slug: location.slug ?? '',
+          address: location.address ?? '',
+          timezone: location.timezone ?? 'UTC',
+          isActive: location.isActive ?? true,
         })),
       };
     },
     enabled: !!slug,
     staleTime: 60_000,
   });
+
   return {
     data: query.data,
     isLoading: query.isLoading,
@@ -200,10 +142,9 @@ export function usePublicMenu(
       if (businessId == null) {
         throw new Error('business_id required');
       }
-      // Two-trip parallel. If either fails the whole bundle fails -
-      // a menu without a business header renders poorly and vice
-      // versa, so we'd rather show the error state once than half-
-      // render.
+
+      // Two-trip parallel. If either fails the whole bundle fails - a menu
+      // without a business header renders poorly and vice versa.
       const [business, items] = await Promise.all([
         fetchPublicBusiness(businessId),
         fetchPublicMenu(businessId, locationId),
@@ -213,6 +154,7 @@ export function usePublicMenu(
     enabled: businessId != null && Number.isFinite(businessId),
     staleTime: 60_000,
   });
+
   return {
     data: query.data,
     isLoading: query.isLoading,

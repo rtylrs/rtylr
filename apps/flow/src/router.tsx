@@ -8,11 +8,10 @@ import {
 } from '@tanstack/react-router';
 import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import { ErrorBoundary } from '@voxire/ui';
-import { unwrap } from '@voxire/api';
 import { AppGuard } from '@voxire/auth';
 import FlowLayout from './layouts/FlowLayout';
 import { PERSONAL_WORKSPACE_ID } from './shared/lib/personalWorkspace';
-import { safe } from './shared/lib/api';
+import { userClient } from './shared/lib/clients';
 import PreviewRouteUnavailable from './shared/components/PreviewRouteUnavailable';
 import { settingsSearchSchema } from './shared/schemas/settings';
 import { myDaySearchSchema } from './shared/schemas/time';
@@ -96,8 +95,8 @@ const rootRoute = createRootRoute({
     <ErrorBoundary>
       <AppGuard
         appId="flow"
-        fetchUser={(): Promise<Record<string, unknown>> =>
-          unwrap(safe.get<Record<string, unknown>>('/hub/user/v1/users/me'))
+        fetchUser={async (): Promise<Record<string, unknown>> =>
+          (await userClient.getMe({})) as unknown as Record<string, unknown>
         }
       >
         <Outlet />

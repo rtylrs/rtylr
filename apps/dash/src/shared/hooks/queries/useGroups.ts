@@ -1,8 +1,8 @@
-import { unwrap, createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import i18next from 'i18next';
-import { safe } from '../../lib/api';
+import { groupsClient } from '../../lib/clients';
 import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/client';
 
 const invitationsClient = createOneKitClient(InvitationsServiceClient, 'dash');
@@ -56,8 +56,8 @@ export const useGroups = (): ReturnType<typeof useQuery<Group[]>> =>
   useQuery<Group[]>({
     queryKey: ['groups'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/hub/team/groups/v1/groups'));
-      return (res as { groups?: Group[] })?.groups ?? [];
+      const res = await groupsClient.listGroups({});
+      return (res.groups ?? []) as unknown as Group[];
     },
     staleTime: 30_000,
   });
@@ -69,8 +69,8 @@ export const useGroup = (
     queryKey: ['groups', id],
     queryFn: async () => {
       if (!id) return undefined;
-      const res = await unwrap(safe.get(`/hub/team/groups/v1/groups/${id}`));
-      return (res as { group?: GroupDetail })?.group;
+      const res = await groupsClient.getGroupDetail({ id });
+      return res.group as unknown as GroupDetail | undefined;
     },
     enabled: !!id,
   });
@@ -95,8 +95,8 @@ export const useCreateGroup = (): ReturnType<
       color?: string;
       resourcePermissions: ResourcePermission[];
     }) => {
-      const res = await unwrap(safe.post('/hub/team/groups/v1/groups', payload));
-      return (res as { group: Group })?.group;
+      const res = await groupsClient.createGroup(payload);
+      return res.group as unknown as Group;
     },
     onSuccess: () => {
       toast.success(i18next.t('toasts.groupCreated', 'Group created'));
@@ -128,8 +128,9 @@ export const useUpdateGroup = (
       color?: string;
       resourcePermissions: ResourcePermission[];
     }) => {
-      const res = await unwrap(safe.put(`/hub/team/groups/v1/groups/${id}`, payload));
-      return (res as { group: Group })?.group;
+      if (!id) throw new Error('Group id is required');
+      const res = await groupsClient.updateGroup({ id, ...payload });
+      return res.group as unknown as Group;
     },
     onSuccess: () => {
       toast.success(i18next.t('toasts.groupSaved', 'Group saved'));
@@ -144,7 +145,7 @@ export const useDeleteGroup = (): ReturnType<typeof useMutation<void, Error, num
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (groupId: number) => {
-      await unwrap(safe.delete(`/hub/team/groups/v1/groups/${groupId}`));
+      await groupsClient.deleteGroup({ id: String(groupId) });
     },
     onSuccess: () => {
       toast.success(i18next.t('toasts.groupDeleted', 'Group deleted'));
@@ -160,9 +161,11 @@ export const useAddGroupMembers = (
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (userIds: number[]) => {
-      await unwrap(
-        safe.post(`/hub/team/groups/v1/groups/${groupId}/members`, { user_ids: userIds })
-      );
+      if (!groupId) throw new Error('Group id is required');
+      await groupsClient.addGroupMembers({
+        id: groupId,
+        userIds: userIds.map(String),
+      });
     },
     onSuccess: () => {
       toast.success(i18next.t('toasts.membersAdded', 'Members added'));
@@ -179,7 +182,8 @@ export const useRemoveGroupMember = (
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (userId: number) => {
-      await unwrap(safe.delete(`/hub/team/groups/v1/groups/${groupId}/members/${userId}`));
+      if (!groupId) throw new Error('Group id is required');
+      await groupsClient.removeGroupMember({ id: groupId, userId: String(userId) });
     },
     onSuccess: () => {
       toast.success(i18next.t('toasts.memberRemoved', 'Member removed'));

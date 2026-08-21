@@ -119,6 +119,11 @@ const Businesses: React.FC = () => {
     setSwitchingId(business.id);
     switchBusiness.mutate(business.id, {
       onSuccess: ({ token }) => {
+        if (!token) {
+          setSwitchingId(null);
+          toast.error(t('businesses.switchError'));
+          return;
+        }
         removeCookie('token');
         setCookie('token', token, {
           days: 30,
@@ -210,6 +215,7 @@ const Businesses: React.FC = () => {
         }
 
         const { token } = await switchBusiness.mutateAsync(replacement.id);
+        if (!token) throw new Error(t('businesses.switchError'));
         removeCookie('token');
         setCookie('token', token, {
           days: 30,

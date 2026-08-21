@@ -1,13 +1,12 @@
 import { FaInstagram } from 'react-icons/fa';
 import { Link } from '@tanstack/react-router';
-import PackageJson from '@root/package.json';
 import { APP_URLS } from '@voxire/config';
-import { useConfigStore } from '../../../stores/configStore';
 import React from 'react';
 
 const Footer: React.FC = () => {
-  const config = useConfigStore((s) => s.contactInfo);
   const landingUrl = (APP_URLS.landing || 'https://rtylr.com').replace(/\/$/, '');
+  const contactEmail = 'info@rtylr.com';
+  const appVersion = import.meta.env.VITE_APP_VERSION ?? '0.0.0';
 
   const footerSections = [
     {
@@ -83,10 +82,10 @@ const Footer: React.FC = () => {
               <div>
                 <span className="text-xs text-white/40 block">Email</span>
                 <a
-                  href={`mailto:${config?.contactEmail || 'info@rtylr.com'}`}
+                  href={`mailto:${contactEmail}`}
                   className="text-sm text-white/70 hover:text-white transition-colors"
                 >
-                  {config?.contactEmail || 'info@rtylr.com'}
+                  {contactEmail}
                 </a>
               </div>
               <div>
@@ -126,9 +125,9 @@ const Footer: React.FC = () => {
           </div>
           <button
             className="text-xs text-white/30 hover:text-white/50 transition-colors"
-            aria-label={`Current version: ${PackageJson.version}`}
+            aria-label={`Current version: ${appVersion}`}
           >
-            v{PackageJson.version}
+            v{appVersion}
           </button>
         </div>
       </div>

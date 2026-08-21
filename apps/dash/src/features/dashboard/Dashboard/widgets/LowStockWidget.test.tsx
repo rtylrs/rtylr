@@ -15,9 +15,9 @@ vi.mock('@voxire/api', () => ({
   },
 }));
 
-const mockGet = vi.fn();
-vi.mock('../../../../shared/lib/api', () => ({
-  safe: { get: (...args: unknown[]) => mockGet(...args) },
+const mockGetLowStock = vi.fn();
+vi.mock('../../../../shared/lib/clients', () => ({
+  inventoryClient: { getLowStock: (...args: unknown[]) => mockGetLowStock(...args) },
 }));
 
 import LowStockWidget from './LowStockWidget';
@@ -37,7 +37,7 @@ beforeEach(() => {
 
 describe('LowStockWidget empty state', () => {
   it('shows the illustration, title and a refresh call-to-action when stock is healthy', async () => {
-    mockGet.mockResolvedValue({ items: [] });
+    mockGetLowStock.mockResolvedValue({ items: [] });
 
     renderWithClient();
 
@@ -48,21 +48,21 @@ describe('LowStockWidget empty state', () => {
   });
 
   it('refetches when the refresh call-to-action is clicked', async () => {
-    mockGet.mockResolvedValue({ items: [] });
+    mockGetLowStock.mockResolvedValue({ items: [] });
 
     renderWithClient();
 
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'common.refresh' })).toBeInTheDocument()
     );
-    const callsBefore = mockGet.mock.calls.length;
+    const callsBefore = mockGetLowStock.mock.calls.length;
     fireEvent.click(screen.getByRole('button', { name: 'common.refresh' }));
 
-    await waitFor(() => expect(mockGet.mock.calls.length).toBeGreaterThan(callsBefore));
+    await waitFor(() => expect(mockGetLowStock.mock.calls.length).toBeGreaterThan(callsBefore));
   });
 
   it('does not show the empty state when items are low on stock', async () => {
-    mockGet.mockResolvedValue({ items: [{ productName: 'Cups', stockQuantity: 2 }] });
+    mockGetLowStock.mockResolvedValue({ items: [{ productName: 'Cups', stockQuantity: 2 }] });
 
     renderWithClient();
 

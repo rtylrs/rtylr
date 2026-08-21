@@ -1,7 +1,6 @@
-import { unwrap } from '@voxire/api';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
-import { safe } from '../../lib/api';
+import { notificationClient } from '../../lib/clients';
 import { notificationSchema } from '../../schemas/notifications';
 
 export type { Notification } from '../../schemas/notifications';
@@ -16,7 +15,12 @@ const parseNotificationPage = (res: unknown): NotificationPage => {
   const source = res && typeof res === 'object' ? (res as Record<string, unknown>) : {};
   return {
     notifications: z.array(notificationSchema).parse(source.notifications ?? []),
-    nextCursor: typeof source.next_cursor === 'string' ? source.next_cursor : '',
+    nextCursor:
+      typeof source.nextCursor === 'string'
+        ? source.nextCursor
+        : typeof source.next_cursor === 'string'
+          ? source.next_cursor
+          : '',
   };
 };
 
@@ -24,9 +28,9 @@ export const useNotifications = () => {
   return useQuery<Notification[]>({
     queryKey: ['notifications'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/hub/notification/v1/notifications'));
-      const raw = res?.notifications ?? res;
-      return z.array(notificationSchema).parse(Array.isArray(raw) ? raw : []);
+      const res = await notificationClient.listNotifications({});
+      const notifications = Array.isArray(res) ? res : (res?.notifications ?? []);
+      return z.array(notificationSchema).parse(notifications);
     },
     refetchOnWindowFocus: true,
   });
@@ -37,10 +41,11 @@ export const useNotificationPages = () => {
     queryKey: ['notifications', 'pages'],
     initialPageParam: '',
     queryFn: async ({ pageParam }) => {
-      const params = new URLSearchParams({ limit: '100' });
-      if (typeof pageParam === 'string' && pageParam) params.set('cursor', pageParam);
       return parseNotificationPage(
-        await unwrap(safe.get(`/hub/notification/v1/notifications?${params.toString()}`))
+        await notificationClient.listNotifications({
+          limit: 100,
+          cursor: typeof pageParam === 'string' && pageParam ? pageParam : undefined,
+        })
       );
     },
     getNextPageParam: (lastPage) => lastPage.nextCursor || undefined,
@@ -52,7 +57,7 @@ export const useMarkNotificationRead = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      await unwrap(safe.patch(`/hub/notification/v1/notifications/${encodeURIComponent(id)}/read`));
+      await notificationClient.markNotificationRead({ id });
       return id;
     },
     onMutate: async (id) => {
@@ -91,7 +96,7 @@ export const useMarkAllNotificationsRead = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      await unwrap(safe.patch('/hub/notification/v1/notifications/read-all'));
+      await notificationClient.markAllRead({});
     },
     onMutate: async () => {
       await qc.cancelQueries({ queryKey: ['notifications'] });

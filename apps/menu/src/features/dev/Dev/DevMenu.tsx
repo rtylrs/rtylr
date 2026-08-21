@@ -343,7 +343,7 @@ const DevMenu: React.FC = () => {
   // Full layout config state
   const [cfg, setCfg] = useState<MenuLayoutConfig>({
     ...DEFAULT_LAYOUT_CONFIG,
-    pages: { menu: true, about: true, gallery: false, reviews: false, offers: false, book: false },
+    pages: { menu: true, about: true, gallery: false, reviews: false, offers: false },
     header: {
       coverHeight: 'md',
       showLogo: true,
@@ -447,11 +447,6 @@ const DevMenu: React.FC = () => {
                     checked={!!cfg.pages.offers}
                     onChange={(v) => patchPages({ offers: v })}
                     label="Offers"
-                  />
-                  <Toggle
-                    checked={!!cfg.pages.book}
-                    onChange={(v) => patchPages({ book: v })}
-                    label="Book"
                   />
                 </div>
               </Section>

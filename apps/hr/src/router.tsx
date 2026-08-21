@@ -7,8 +7,7 @@ import {
   Navigate,
 } from '@tanstack/react-router';
 import { AppGuard } from '@voxire/auth';
-import { unwrap } from '@voxire/api';
-import { safe } from './shared/lib/api';
+import { userClient } from './shared/lib/clients';
 import { ErrorBoundary } from '@voxire/ui';
 import { paySlipSearchSchema, payrollRunParamsSchema } from './shared/schemas';
 import HRConfigRoute from './features/setup-wizard/HRConfigRoute';
@@ -138,8 +137,8 @@ const rootRoute = createRootRoute({
     <ErrorBoundary>
       <AppGuard
         appId="hr"
-        fetchUser={(): Promise<Record<string, unknown>> =>
-          unwrap(safe.get<Record<string, unknown>>('/hub/user/v1/users/me'))
+        fetchUser={async (): Promise<Record<string, unknown>> =>
+          (await userClient.getMe({})) as unknown as Record<string, unknown>
         }
       >
         <Suspense fallback={<PageLoader />}>

@@ -1,5 +1,5 @@
 import { createOneKitClient, getOneKitErrorMessage, unwrap } from '@voxire/api';
-import { safe } from '../../shared/lib/api';
+import { financeApi } from '../../shared/services/financeApi';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -63,8 +63,7 @@ export function useRunRecurringInvoiceNow() {
   const qc = useQueryClient();
   const { t } = useTranslation();
   return useMutation({
-    mutationFn: ({ id }: { id: string }) =>
-      unwrap(safe.post(`/finance/recurring-invoices/${id}/trigger`, {})),
+    mutationFn: ({ id }: { id: string }) => unwrap(financeApi.triggerRecurringInvoice(id)),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['recurring-invoices'] });
       void qc.invalidateQueries({ queryKey: ['invoices'] });

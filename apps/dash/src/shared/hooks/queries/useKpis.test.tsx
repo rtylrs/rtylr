@@ -4,15 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { useKpis, type HubKpis } from './useKpis';
 
-const mockGet = vi.fn();
+const mockDashboardClient = vi.hoisted(() => ({ getKPIs: vi.fn() }));
 
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((v) => v),
 }));
 
-vi.mock('../../lib/api', () => ({
-  safe: { get: (...args: unknown[]) => mockGet(...args) },
-}));
+vi.mock('../../lib/clients', () => ({ dashboardClient: mockDashboardClient }));
 
 function createWrapper() {
   const client = new QueryClient({
@@ -41,7 +39,7 @@ describe('useKpis', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('fetches KPI data successfully', async () => {
-    mockGet.mockResolvedValue(mockKpis);
+    mockDashboardClient.getKPIs.mockResolvedValue(mockKpis);
 
     const { result } = renderHook(() => useKpis(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -52,23 +50,21 @@ describe('useKpis', () => {
   });
 
   it('calls the correct endpoint with range parameter', async () => {
-    mockGet.mockResolvedValue(mockKpis);
+    mockDashboardClient.getKPIs.mockResolvedValue(mockKpis);
 
     renderHook(() => useKpis('7d'), { wrapper: createWrapper() });
-    await waitFor(() =>
-      expect(mockGet).toHaveBeenCalledWith('/hub/dashboard/v1/kpis', { params: { range: '7d' } })
-    );
+    await waitFor(() => expect(mockDashboardClient.getKPIs).toHaveBeenCalledWith({ range: '7d' }));
   });
 
   it('handles API error', async () => {
-    mockGet.mockRejectedValue(new Error('Server error'));
+    mockDashboardClient.getKPIs.mockRejectedValue(new Error('Server error'));
 
     const { result } = renderHook(() => useKpis(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isError).toBe(true));
   });
 
   it('returns all expected fields', async () => {
-    mockGet.mockResolvedValue(mockKpis);
+    mockDashboardClient.getKPIs.mockResolvedValue(mockKpis);
 
     const { result } = renderHook(() => useKpis(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -83,7 +79,7 @@ describe('useKpis', () => {
   });
 
   it('has a 30s stale time', async () => {
-    mockGet.mockResolvedValue(mockKpis);
+    mockDashboardClient.getKPIs.mockResolvedValue(mockKpis);
 
     const wrapper = createWrapper();
     const { result } = renderHook(() => useKpis(), { wrapper });
@@ -94,6 +90,6 @@ describe('useKpis', () => {
     await waitFor(() => expect(result2.current.isSuccess).toBe(true));
 
     // Only 1 call because of stale time
-    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockDashboardClient.getKPIs).toHaveBeenCalledTimes(1);
   });
 });

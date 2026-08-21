@@ -7,7 +7,7 @@ import type {
 } from '@voxire/voxie/hr/onboarding/v1/types';
 import type { ListEmployeeChecklistsResponse } from '@voxire/voxie/hr/onboarding/v1/types';
 import type { CompleteChecklistItemResponse } from '@voxire/voxie/hr/onboarding/v1/types';
-import { safe } from '../../lib/api';
+import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import {
@@ -37,7 +37,7 @@ export const useListChecklistTemplates = () => {
     queryKey: ['checklist-templates'],
     queryFn: async (): Promise<ListChecklistTemplatesResponse> => {
       const res = await unwrap(
-        safe.get<ListChecklistTemplatesResponse>('/hr/onboarding/templates')
+        hrTransport.get<ListChecklistTemplatesResponse>('/hr/onboarding/templates')
       );
       return res as ListChecklistTemplatesResponse;
     },
@@ -53,7 +53,7 @@ export const useCreateChecklistTemplate = () => {
       data: CreateChecklistTemplateRequest
     ): Promise<CreateChecklistTemplateResponse> => {
       const res = await unwrap(
-        safe.post<CreateChecklistTemplateResponse>('/hr/onboarding/templates', data)
+        hrTransport.post<CreateChecklistTemplateResponse>('/hr/onboarding/templates', data)
       );
       return res as CreateChecklistTemplateResponse;
     },
@@ -72,7 +72,7 @@ export const useGetEmployeeChecklist = (employeeId?: number) => {
     queryKey: ['employee-checklists', employeeId],
     queryFn: async (): Promise<ListEmployeeChecklistsResponse> => {
       const res = await unwrap(
-        safe.get<ListEmployeeChecklistsResponse>('/hr/onboarding/checklists', {
+        hrTransport.get<ListEmployeeChecklistsResponse>('/hr/onboarding/checklists', {
           params: employeeId ? { employeeId } : undefined,
         })
       );
@@ -86,7 +86,9 @@ export const useListEmployeeChecklistSummaries = (params: ListEmployeeChecklistS
   return useQuery<EmployeeChecklistSummaryList>({
     queryKey: ['employee-checklist-summaries', 'filter', params],
     queryFn: async (): Promise<EmployeeChecklistSummaryList> => {
-      const res = await unwrap(safe.get<unknown>('/hr/onboarding/checklists/summary', { params }));
+      const res = await unwrap(
+        hrTransport.get<unknown>('/hr/onboarding/checklists/summary', { params })
+      );
       return employeeChecklistSummaryListSchema.parse(res);
     },
   });
@@ -101,7 +103,7 @@ export const useCompleteChecklistItem = () => {
       data: CompleteChecklistItemInput
     ): Promise<CompleteChecklistItemResponse> => {
       const res = await unwrap(
-        safe.post<CompleteChecklistItemResponse>(
+        hrTransport.post<CompleteChecklistItemResponse>(
           `/hr/onboarding/checklists/items/${data.itemId}/complete`,
           data
         )

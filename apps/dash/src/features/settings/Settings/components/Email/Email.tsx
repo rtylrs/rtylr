@@ -3,8 +3,8 @@ import { HelmetContainer } from '@voxire/components';
 import { Mail, Server, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMutation } from '@tanstack/react-query';
-import { unwrap, getOneKitErrorMessage } from '@voxire/api';
-import { safe } from '../../../../../shared/lib/api';
+import { oneKitResult, unwrap, getOneKitErrorMessage } from '@voxire/api';
+import { emailCompatibilityClient } from '../../../../../shared/lib/clients';
 import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
 import {
   Card,
@@ -199,7 +199,7 @@ const Email: React.FC = () => {
 
   const testSmtpMutation = useMutation({
     mutationFn: (data: { host: string; port: number; username: string }) =>
-      unwrap(safe.post('/hub/settings/email/test', data)),
+      unwrap(oneKitResult(() => emailCompatibilityClient.testEmail({ body: data }))),
     onSuccess: () => {
       toast.success(`SMTP connection to ${smtp.host}:${smtp.port || 587} verified successfully`);
     },

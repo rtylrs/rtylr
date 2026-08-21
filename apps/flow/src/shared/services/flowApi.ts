@@ -1,6 +1,21 @@
 import type { Task as ContractTask } from '@voxire/voxie/flow/task/v1/types';
 
-import { safe } from '../lib/api';
+import { oneKitResult } from '@voxire/api';
+import {
+  businessClient,
+  dashboardClient,
+  workspaceClient,
+  projectClient,
+  taskClient,
+  labelClient,
+  milestoneClient,
+  cycleClient,
+  viewClient,
+  insightsClient,
+  notificationClient,
+  settingClient,
+  userClient,
+} from '../lib/clients';
 
 // -- Types ----------------------------------------------------------------
 
@@ -419,75 +434,94 @@ export interface ApiTaskDetail {
 
 // -- API ------------------------------------------------------------------
 
+function flowResult<T>(operation: () => Promise<unknown>) {
+  return oneKitResult(operation).map((response) => response as T);
+}
+
 export const flowApi = {
   getDashboard: (workspaceId?: string) =>
-    safe.get<DashboardStats>('/flow/dashboard/v1/dashboard', {
-      params: workspaceId ? { workspace_id: workspaceId } : undefined,
-    }),
+    flowResult<DashboardStats>(() =>
+      dashboardClient.getFlowDashboard({ workspaceId: workspaceId ?? '' })
+    ),
   // -- Workspaces ---------------------------------------------------------
 
-  getWorkspaces: () => safe.get<{ workspaces: ApiWorkspace[] }>('/flow/workspace/v1/workspaces'),
+  getWorkspaces: () =>
+    flowResult<{ workspaces: ApiWorkspace[] }>(() => workspaceClient.listWorkspaces({})),
 
   getMyBusinesses: () =>
-    safe.get<{ businesses: ApiBusinessSummary[] }>('/hub/business/v1/businesses/mine'),
+    flowResult<{ businesses: ApiBusinessSummary[] }>(() => businessClient.listMyBusinesses({})),
 
   createWorkspace: (data: { name: string; color: string; description?: string; icon?: string }) =>
-    safe.post<{ workspace: ApiWorkspace }>('/flow/workspace/v1/workspaces', {
-      name: data.name,
-      description: data.description ?? '-',
-      icon: data.icon ?? 'folder',
-      color: data.color,
-    }),
+    flowResult<{ workspace: ApiWorkspace }>(() =>
+      workspaceClient.createWorkspace({
+        name: data.name,
+        description: data.description ?? '-',
+        icon: data.icon ?? 'folder',
+        color: data.color,
+      })
+    ),
 
   updateWorkspace: (
     id: string,
     data: Partial<{ name: string; color: string; description: string; icon: string }>
   ) =>
-    safe.put<{ message: string }>(`/flow/workspace/v1/workspaces/${id}`, {
-      body: {
-        name: data.name ?? '-',
-        description: data.description ?? '-',
-        icon: data.icon ?? 'folder',
-        color: data.color ?? '#6366f1',
-      },
-    }),
+    flowResult<{ message: string }>(() =>
+      workspaceClient.updateWorkspace({
+        id,
+        body: {
+          name: data.name ?? '-',
+          description: data.description ?? '-',
+          icon: data.icon ?? 'folder',
+          color: data.color ?? '#6366f1',
+        },
+      })
+    ),
 
   deleteWorkspace: (id: string) =>
-    safe.delete<{ message: string }>(`/flow/workspace/v1/workspaces/${id}`),
+    flowResult<{ message: string }>(() => workspaceClient.deleteWorkspace({ id })),
 
   getWorkspaceMembers: (workspaceId: string) =>
-    safe.get<{ members: ApiWorkspaceMember[] }>('/flow/workspace/v1/workspaces/members', {
-      params: { workspace_id: workspaceId },
-    }),
+    flowResult<{ members: ApiWorkspaceMember[] }>(() =>
+      workspaceClient.listWorkspaceMembers({ workspaceId })
+    ),
 
   addWorkspaceMember: (data: { workspace_id: number; user_id: number; role?: string }) =>
-    safe.post('/flow/workspace/v1/workspaces/members', {
-      workspace_id: data.workspace_id,
-      user_id: data.user_id,
-      role: data.role ?? 'member',
-    }),
+    flowResult(() =>
+      workspaceClient.addWorkspaceMember({
+        workspaceId: String(data.workspace_id),
+        userId: String(data.user_id),
+        role: data.role ?? 'member',
+      })
+    ),
 
   removeWorkspaceMember: (data: { workspace_id: number; user_id: number }) =>
-    safe.delete('/flow/workspace/v1/workspaces/members', {
-      params: { workspace_id: data.workspace_id, user_id: data.user_id },
-    }),
+    flowResult(() =>
+      workspaceClient.removeWorkspaceMember({
+        workspaceId: String(data.workspace_id),
+        userId: String(data.user_id),
+      })
+    ),
 
   updateWorkspaceMemberRole: (data: { workspace_id: number; user_id: number; role: string }) =>
-    safe.put('/flow/workspace/v1/workspaces/members/role', data),
+    flowResult(() =>
+      workspaceClient.updateWorkspaceMemberRole({
+        workspaceId: String(data.workspace_id),
+        userId: String(data.user_id),
+        role: data.role,
+      })
+    ),
 
   // -- Projects -----------------------------------------------------------
 
   getProjects: (workspaceId: string) =>
-    safe.get<{ projects: ApiProject[] }>('/flow/project/v1/projects', {
-      params: { workspace_id: workspaceId },
-    }),
+    flowResult<{ projects: ApiProject[] }>(() => projectClient.listProjects({ workspaceId })),
 
   // -- Project Columns ----------------------------------------------------
 
   getProjectColumns: (projectId: string) =>
-    safe.get<{ columns: ApiProjectColumn[] }>('/flow/project/v1/projects/columns', {
-      params: { project_id: projectId },
-    }),
+    flowResult<{ columns: ApiProjectColumn[] }>(() =>
+      projectClient.listProjectColumns({ projectId })
+    ),
 
   createProjectColumn: (data: {
     project_id: string;
@@ -495,23 +529,32 @@ export const flowApi = {
     name: string;
     color?: string;
     sort_order?: number;
-  }) => safe.post<{ column: ApiProjectColumn }>('/flow/project/v1/projects/columns', data),
+  }) =>
+    flowResult<{ column: ApiProjectColumn }>(() =>
+      projectClient.createProjectColumn({
+        projectId: data.project_id,
+        workspaceId: data.workspace_id,
+        name: data.name,
+        color: data.color,
+        sortOrder: data.sort_order,
+      })
+    ),
 
   updateProjectColumn: (data: { id: string; name: string; color?: string; sort_order?: number }) =>
-    safe.put<{ message: string }>(`/flow/project/v1/projects/columns/${data.id}`, {
-      name: data.name,
-      color: data.color,
-      sort_order: data.sort_order,
-    }),
+    flowResult<{ message: string }>(() =>
+      projectClient.updateProjectColumn({
+        id: data.id,
+        name: data.name,
+        color: data.color,
+        sortOrder: data.sort_order,
+      })
+    ),
 
   deleteProjectColumn: (id: string) =>
-    safe.delete<{ message: string }>(`/flow/project/v1/projects/columns/${id}`),
+    flowResult<{ message: string }>(() => projectClient.deleteProjectColumn({ id })),
 
   moveTaskToColumn: (taskId: string, columnId: string) =>
-    safe.put<{ message: string }>('/flow/project/v1/projects/columns/move', {
-      task_id: taskId,
-      column_id: columnId,
-    }),
+    flowResult<{ message: string }>(() => projectClient.moveTaskToColumn({ taskId, columnId })),
 
   createProject: (data: {
     workspaceId: string;
@@ -521,69 +564,107 @@ export const flowApi = {
     startDate?: string;
     dueDate?: string;
   }) =>
-    safe.post<{ project: ApiProject }>('/flow/project/v1/projects', {
-      // int64 fields are wire-encoded as JSON strings, matching every other
-      // numeric id in this API - sending a bare number 400s with "cannot
-      // unmarshal number into Go struct field of type string".
-      //
-      // The `|| 0` fallback is NOT a "my personal workspace" sentinel, despite
-      // what this comment used to claim: CreateProjectRequest declares
-      // `workspace_id: int64 @required @gt(0)`, so "0" is rejected with
-      // "workspace_id must be greater than 0". Callers must gate on
-      // isApiWorkspaceId() before reaching this.
-      workspace_id: String(Number(data.workspaceId) || 0),
-      name: data.name,
-      description: data.description ?? '-',
-      icon: 'folder',
-      color: data.color ?? '#6366f1',
-      // An omitted date is an unset date. Never manufacture the Unix epoch,
-      // which becomes a real project date once the backend persists it.
-      start_date: data.startDate,
-      due_date: data.dueDate,
-    }),
+    flowResult<{ project: ApiProject }>(() =>
+      projectClient.createProject({
+        // int64 fields are wire-encoded as JSON strings, matching every other
+        // numeric id in this API - sending a bare number 400s with "cannot
+        // unmarshal number into Go struct field of type string".
+        //
+        // The `|| 0` fallback is NOT a "my personal workspace" sentinel, despite
+        // what this comment used to claim: CreateProjectRequest declares
+        // `workspace_id: int64 @required @gt(0)`, so "0" is rejected with
+        // "workspace_id must be greater than 0". Callers must gate on
+        // isApiWorkspaceId() before reaching this.
+        workspaceId: String(Number(data.workspaceId) || 0),
+        name: data.name,
+        description: data.description ?? '-',
+        icon: 'folder',
+        color: data.color ?? '#6366f1',
+        // An omitted date is an unset date. Never manufacture the Unix epoch,
+        // which becomes a real project date once the backend persists it.
+        startDate: data.startDate ?? '',
+        dueDate: data.dueDate ?? '',
+      })
+    ),
 
   updateProject: (id: string, data: ProjectUpdate) =>
     // Project settings sends the current project snapshot together with the
     // edited fields because the backend PUT is a replacement update. Keeping
     // omitted values omitted here prevents a partial caller from inventing
     // placeholders or sentinel dates.
-    safe.put<{ message: string }>(`/flow/project/v1/projects/${id}`, {
-      name: data.name,
-      description: data.description,
-      icon: data.icon,
-      color: data.color,
-      status: data.status,
-      start_date: data.startDate,
-      due_date: data.dueDate,
-    }),
+    flowResult<{ message: string }>(() =>
+      projectClient.updateProject({
+        id,
+        body: {
+          name: data.name ?? '-',
+          description: data.description ?? '-',
+          icon: data.icon ?? 'folder',
+          color: data.color ?? '#6366f1',
+          status: data.status ?? 'active',
+          startDate: data.startDate ?? '',
+          dueDate: data.dueDate ?? '',
+        },
+      })
+    ),
 
   deleteProject: (id: string) =>
-    safe.delete<{ message: string }>(`/flow/project/v1/projects/${id}`),
+    flowResult<{ message: string }>(() => projectClient.deleteProject({ id })),
 
   getProjectMembers: (projectId: string) =>
-    safe.get<{ members: ApiProjectMember[] }>('/flow/project/v1/projects/members', {
-      params: { project_id: projectId },
-    }),
+    flowResult<{ members: ApiProjectMember[] }>(() =>
+      projectClient.listProjectMembers({ projectId })
+    ),
 
   addProjectMember: (data: { project_id: number; user_id: number; role?: string }) =>
-    safe.post('/flow/project/v1/projects/members', data),
+    flowResult(() =>
+      projectClient.addProjectMember({
+        projectId: String(data.project_id),
+        userId: String(data.user_id),
+        role: data.role ?? 'member',
+      })
+    ),
 
   inviteProjectMember: (data: { project_id: number; email: string; role: string }) =>
-    safe.post('/flow/project/v1/projects/members/invite', data),
+    flowResult(() =>
+      projectClient.inviteProjectMember({
+        projectId: String(data.project_id),
+        email: data.email,
+        role: data.role,
+      })
+    ),
 
   removeProjectMember: (data: { project_id: number; user_id: number }) =>
-    safe.delete('/flow/project/v1/projects/members', {
-      params: { project_id: data.project_id, user_id: data.user_id },
-    }),
+    flowResult(() =>
+      projectClient.removeProjectMember({
+        projectId: String(data.project_id),
+        userId: String(data.user_id),
+      })
+    ),
 
   updateProjectMemberRole: (data: { project_id: number; user_id: number; role: string }) =>
-    safe.put('/flow/project/v1/projects/members/role', data),
+    flowResult(() =>
+      projectClient.updateProjectMemberRole({
+        projectId: String(data.project_id),
+        userId: String(data.user_id),
+        role: data.role,
+      })
+    ),
 
   transferProjectOwnership: (data: { project_id: number; new_owner_id: number }) =>
-    safe.put('/flow/project/v1/projects/transfer', data),
+    flowResult(() =>
+      projectClient.transferProjectOwnership({
+        projectId: String(data.project_id),
+        newOwnerId: String(data.new_owner_id),
+      })
+    ),
 
   moveProject: (data: { project_id: number; workspace_id: number }) =>
-    safe.put('/flow/project/v1/projects/move', data),
+    flowResult(() =>
+      projectClient.moveProject({
+        projectId: String(data.project_id),
+        workspaceId: String(data.workspace_id),
+      })
+    ),
 
   // -- Tasks --------------------------------------------------------------
 
@@ -602,22 +683,27 @@ export const flowApi = {
     if (params.assigneeId) q.assignee_id = params.assigneeId;
     if (params.activeOnly) q.active_only = 'true';
     if (params.compact) q.compact = 'true';
-    return safe.get<{ tasks: ApiTask[] }>('/flow/task/v1/tasks', { params: q });
+    return flowResult<{ tasks: ApiTask[] }>(() =>
+      taskClient.listTasks({
+        projectId: q.project_id,
+        workspaceId: q.workspace_id,
+        status: q.status,
+        assigneeId: q.assignee_id,
+      })
+    );
   },
 
-  getMyTasks: () => safe.get<{ tasks: ApiTask[] }>('/flow/task/v1/tasks/my'),
+  getMyTasks: () => flowResult<{ tasks: ApiTask[] }>(() => taskClient.getMyTasks({})),
 
   // Get-or-create the caller's personal "My Tasks" project board and return its
   // ids. Backs the My Tasks landing — we redirect to its project board.
   getMyTasksProject: () =>
-    safe.get<{ projectId: string; workspaceId: string }>('/flow/task/v1/tasks/my-project'),
+    flowResult<{ projectId: string; workspaceId: string }>(() => taskClient.getMyTasksProject({})),
 
   searchTasks: (q: string, workspaceId: string) =>
-    safe.get<{ tasks: ApiTask[] }>('/flow/task/v1/tasks/search', {
-      params: { q, workspace_id: workspaceId },
-    }),
+    flowResult<{ tasks: ApiTask[] }>(() => taskClient.searchTasks({ q, workspaceId })),
 
-  getTaskDetail: (id: string) => safe.get<ApiTaskDetail>(`/flow/task/v1/tasks/${id}`),
+  getTaskDetail: (id: string) => flowResult<ApiTaskDetail>(() => taskClient.getTaskDetail({ id })),
 
   // Backend: project_id is optional. When omitted, the handler resolves the
   // caller's auto-provisioned "Inbox" project in the target workspace
@@ -635,7 +721,22 @@ export const flowApi = {
     effortMinutes?: number;
     estimatedHours?: number;
     labels?: string[];
-  }) => safe.post<{ task: ApiTask }>('/flow/task/v1/tasks', toTaskCreatePayload(data)),
+  }) =>
+    flowResult<{ task: ApiTask }>(() => {
+      const payload = toTaskCreatePayload(data);
+      return taskClient.createTask({
+        projectId: payload.project_id,
+        workspaceId: payload.workspace_id,
+        title: payload.title,
+        description: payload.description,
+        priority: payload.priority,
+        assigneeId: payload.assignee_id,
+        dueDate: payload.due_date,
+        startDate: payload.start_date,
+        estimatedHours: payload.estimated_hours,
+        labels: payload.labels,
+      });
+    }),
 
   // Partial update: a key the caller did not supply must stay omitted. Undefined
   // keys are dropped before the request goes out, and onion leaves a column
@@ -648,47 +749,48 @@ export const flowApi = {
   // task so it must be sent as `false`, while `undefined` must stay omitted.
   // Never collapse it to a truthiness check - flowApi.test pins both directions.
   updateTask: (id: string, data: Partial<ApiTask>) =>
-    safe.put<{ message: string }>(`/flow/task/v1/tasks/${id}`, {
-      body: {
-        title: data.title,
-        description: data.description,
-        status: data.status,
-        priority: data.priority,
-        assignee_id:
-          data.assigneeId !== undefined
-            ? data.assigneeId
-              ? Number(data.assigneeId)
-              : null
-            : undefined,
-        due_date: data.dueDate,
-        start_date: data.startDate,
-        labels: data.labels?.map((l) => Number(l)),
-        archived: data.archived,
-      },
-    }),
+    flowResult<{ message: string }>(() =>
+      taskClient.updateTask({
+        id,
+        body: {
+          title: data.title ?? '-',
+          description: data.description ?? '-',
+          status: data.status ?? 'todo',
+          priority: data.priority ?? 'no_priority',
+          assigneeId:
+            data.assigneeId !== undefined
+              ? data.assigneeId
+                ? String(Number(data.assigneeId))
+                : undefined
+              : undefined,
+          dueDate: data.dueDate ?? '-',
+          startDate: data.startDate ?? '-',
+          labels: data.labels?.map((l) => String(Number(l))),
+          archived: data.archived,
+        },
+      })
+    ),
 
-  deleteTask: (id: string) => safe.delete<{ message: string }>(`/flow/task/v1/tasks/${id}`),
+  deleteTask: (id: string) => flowResult<{ message: string }>(() => taskClient.deleteTask({ id })),
 
   updateTaskStatus: (id: string, status: ApiTask['status']) =>
-    safe.patch<{ message: string }>(`/flow/task/v1/tasks/${id}/status`, {
-      body: { status },
-    }),
+    flowResult<{ message: string }>(() => taskClient.updateTaskStatus({ id, body: { status } })),
 
   addComment: (data: { taskId: string; content: string }) =>
-    safe.post<{ comment: ApiTaskComment }>(`/flow/task/v1/tasks/${data.taskId}/comments`, {
-      content: data.content,
-    }),
+    flowResult<{ comment: ApiTaskComment }>(() =>
+      taskClient.addComment({ taskId: data.taskId, content: data.content })
+    ),
 
   deleteComment: (id: string) =>
-    safe.delete<{ message: string }>(`/flow/task/v1/tasks/comments/${id}`),
+    flowResult<{ message: string }>(() => taskClient.deleteComment({ id })),
 
   // -- Task Activity ------------------------------------------------------
 
   getTaskActivity: (taskId: string) =>
-    safe.get<{ activity: ApiTaskActivity[] }>(`/flow/task/v1/tasks/${taskId}/activity`),
+    flowResult<{ activity: ApiTaskActivity[] }>(() => taskClient.getTaskActivity({ taskId })),
 
   getSubtasks: (id: string) =>
-    safe.get<{ subtasks: ApiSubtask[] }>(`/flow/task/v1/tasks/${id}/subtasks`),
+    flowResult<{ subtasks: ApiSubtask[] }>(() => taskClient.getSubtasks({ taskId: id })),
 
   // Backend returns { task_id, message } - not the created subtask itself.
   // Caller must refetch subtasks to see it appear.
@@ -696,59 +798,60 @@ export const flowApi = {
     taskId: string,
     data: { title: string; assigneeId?: string; projectId?: string; workspaceId?: string }
   ) =>
-    safe.post<{ task_id: number; message: string }>('/flow/task/v1/tasks/subtasks', {
-      parent_task_id: Number(taskId),
-      project_id: Number(data.projectId ?? 0),
-      workspace_id: Number(data.workspaceId ?? 0),
-      title: data.title,
-      description: '-',
-      priority: 'medium',
-      due_date: '-',
-      start_date: '-',
-      assignee_id: data.assigneeId ? Number(data.assigneeId) : undefined,
-    }),
+    flowResult<{ task_id: number; message: string }>(() =>
+      taskClient.createSubtask({
+        parentTaskId: String(Number(taskId)),
+        projectId: String(Number(data.projectId ?? 0)),
+        workspaceId: String(Number(data.workspaceId ?? 0)),
+        title: data.title,
+        description: '-',
+        priority: 'medium',
+        dueDate: '-',
+        startDate: '-',
+        assigneeId: data.assigneeId ? String(Number(data.assigneeId)) : undefined,
+      })
+    ),
 
   getAttachments: (id: string) =>
-    safe.get<{ attachments: ApiAttachment[] }>(`/flow/task/v1/tasks/${id}/attachments`),
+    flowResult<{ attachments: ApiAttachment[] }>(() => taskClient.getAttachments({ taskId: id })),
 
   addAttachment: (
     taskId: string,
     data: { name: string; size: number; mime?: string; url?: string }
   ) =>
-    safe.post<{ attachment_id: number; message: string }>('/flow/task/v1/tasks/attachments', {
-      task_id: Number(taskId),
-      name: data.name,
-      size: data.size,
-      url: data.url ?? `attachment://${taskId}/${encodeURIComponent(data.name)}`,
-    }),
+    flowResult<{ attachment_id: number; message: string }>(() =>
+      taskClient.createAttachment({
+        taskId,
+        name: data.name,
+        size: String(data.size),
+        url: data.url ?? `attachment://${taskId}/${encodeURIComponent(data.name)}`,
+      })
+    ),
 
   removeAttachment: (taskId: string, attachmentId: string) =>
-    safe.delete<{ message: string }>(`/flow/task/v1/tasks/attachments/${attachmentId}`),
+    flowResult<{ message: string }>(() => taskClient.deleteAttachment({ id: attachmentId })),
 
   // -- Time Logs ----------------------------------------------------------
 
   getTimeLogs: (taskId: string) =>
-    safe.get<{ timeLogs: ApiTimeLog[] }>(`/flow/task/v1/tasks/${taskId}/time-logs`),
+    flowResult<{ timeLogs: ApiTimeLog[] }>(() => taskClient.getTimeLogs({ taskId })),
 
   logTime: (data: { task_id: number; duration_minutes: number; description?: string }) =>
-    safe.post<{ time_log_id: number; message: string }>(
-      `/flow/task/v1/tasks/${data.task_id}/time-logs`,
-      {
-        task_id: data.task_id,
-        duration_minutes: data.duration_minutes,
+    flowResult<{ time_log_id: number; message: string }>(() =>
+      taskClient.createTimeLog({
+        taskId: String(data.task_id),
+        durationMinutes: String(data.duration_minutes),
         description: data.description ?? '-',
-      }
+      })
     ),
 
   deleteTimeLog: (id: number) =>
-    safe.delete<{ message: string }>(`/flow/task/v1/tasks/time-logs/${id}`),
+    flowResult<{ message: string }>(() => taskClient.deleteTimeLog({ id: String(id) })),
 
   // -- Labels -------------------------------------------------------------
 
   listLabels: (workspaceId: string) =>
-    safe.get<{ labels: ApiLabel[] }>('/flow/label/v1/labels', {
-      params: workspaceId ? { workspace_id: workspaceId } : undefined,
-    }),
+    flowResult<{ labels: ApiLabel[] }>(() => labelClient.listLabels({ workspaceId })),
 
   // workspace_id is already a string end-to-end from the workspace store (see
   // ApiWorkspace.id / activeWorkspaceId), so this passes it straight through -
@@ -756,28 +859,36 @@ export const flowApi = {
   // strings, matching every other numeric id in this API; a bare number 400s
   // with "cannot unmarshal number into Go struct field of type string".
   createLabel: (data: { workspace_id: string; name: string; color: string }) =>
-    safe.post<{ label: ApiLabel }>('/flow/label/v1/labels', data),
+    flowResult<{ label: ApiLabel }>(() =>
+      labelClient.createLabel({
+        workspaceId: data.workspace_id,
+        name: data.name,
+        color: data.color,
+      })
+    ),
 
   updateLabel: (data: { id: number; name: string; color: string }) =>
-    safe.put<{ message: string }>(`/flow/label/v1/labels/${data.id}`, {
-      name: data.name,
-      color: data.color,
-    }),
+    flowResult<{ message: string }>(() =>
+      labelClient.updateLabel({ id: String(data.id), name: data.name, color: data.color })
+    ),
 
-  deleteLabel: (id: number) => safe.delete<{ message: string }>(`/flow/label/v1/labels/${id}`),
+  deleteLabel: (id: number) =>
+    flowResult<{ message: string }>(() => labelClient.deleteLabel({ id: String(id) })),
 
   // task_id/label_ids stay numbers up through the hook and UI layer (TaskDetail
   // compares them against numeric ApiLabel.id values), so the string-on-the-wire
   // conversion happens only here, at the boundary - same int64-as-string
   // convention as createLabel above.
   setTaskLabels: (data: { task_id: number; label_ids: number[] }) =>
-    safe.put('/flow/label/v1/tasks/labels', {
-      task_id: String(data.task_id),
-      label_ids: data.label_ids.map((id) => String(id)),
-    }),
+    flowResult(() =>
+      labelClient.setTaskLabels({
+        taskId: String(data.task_id),
+        labelIds: data.label_ids.map((id) => String(id)),
+      })
+    ),
 
   /** @deprecated use listLabels(workspaceId) */
-  getLabels: () => safe.get<{ labels: ApiLabel[] }>('/flow/label/v1/labels'),
+  getLabels: () => flowResult<{ labels: ApiLabel[] }>(() => labelClient.listLabels({})),
 
   // -- Milestones ---------------------------------------------------------
 
@@ -794,107 +905,121 @@ export const flowApi = {
             }
           : undefined;
 
-    return safe.get<{ milestones: ApiMilestone[] }>('/flow/milestone/v1/milestones', {
-      params,
-    });
+    return flowResult<{ milestones: ApiMilestone[] }>(() =>
+      milestoneClient.listMilestones({
+        projectId: params?.project_id,
+        workspaceId: params?.workspace_id,
+      })
+    );
   },
 
   createMilestone: (data: Partial<ApiMilestone>) =>
-    safe.post<{ milestone: ApiMilestone }>(
-      '/flow/milestone/v1/milestones',
-      toMilestoneCreatePayload(data)
+    flowResult<{ milestone: ApiMilestone }>(() =>
+      milestoneClient.createMilestone({
+        ...toMilestoneCreatePayload(data),
+        name: data.name ?? '',
+      })
     ),
 
   updateMilestone: (id: string, data: Partial<ApiMilestone>) =>
-    safe.put<{ message: string }>(
-      `/flow/milestone/v1/milestones/${id}`,
-      toMilestoneUpdatePayload(data)
+    flowResult<{ message: string }>(() =>
+      milestoneClient.updateMilestone({ id, ...toMilestoneUpdatePayload(data) })
     ),
 
   // -- Cycles -------------------------------------------------------------
 
   getCycles: (workspaceId?: string) =>
-    safe.get<{ cycles: ApiCycle[] }>('/flow/cycle/v1/cycles', {
-      params: workspaceId ? { workspace_id: workspaceId } : undefined,
-    }),
+    flowResult<{ cycles: ApiCycle[] }>(() => cycleClient.listCycles({ workspaceId })),
 
   createCycle: (data: Partial<ApiCycle>) =>
-    safe.post<{ cycle: ApiCycle }>('/flow/cycle/v1/cycles', toCycleCreatePayload(data)),
+    flowResult<{ cycle: ApiCycle }>(() =>
+      cycleClient.createCycle(
+        toCycleCreatePayload(data) as Parameters<typeof cycleClient.createCycle>[0]
+      )
+    ),
 
   updateCycle: (id: string, data: Partial<ApiCycle>) =>
-    safe.put<{ message: string }>(`/flow/cycle/v1/cycles/${id}`, toCycleUpdatePayload(data)),
+    flowResult<{ message: string }>(() =>
+      cycleClient.updateCycle({ id, ...toCycleUpdatePayload(data) })
+    ),
 
   // -- Views --------------------------------------------------------------
 
   getViews: (workspaceId?: string) =>
-    safe
-      .get<{ views: ApiView[] }>('/flow/view/v1/views', {
-        params: workspaceId ? { workspace_id: workspaceId } : undefined,
-      })
-      .map((res) => ({
-        ...res,
-        views: (res.views ?? []).map(decodeApiView),
-      })),
+    flowResult<{ views: ApiView[] }>(async () => {
+      const res = await viewClient.listViews(workspaceId ? { workspaceId } : {});
+      return { views: ((res as { views?: ApiView[] }).views ?? []).map(decodeApiView) };
+    }),
 
   createView: (data: Partial<ApiView>) =>
-    safe
-      .post<{ view: ApiView }>('/flow/view/v1/views', toViewPayload(data))
-      .map((res) => ({ ...res, view: res.view ? decodeApiView(res.view) : res.view })),
+    flowResult<{ view: ApiView }>(async () => {
+      const res = (await viewClient.createView(
+        toViewPayload(data) as Parameters<typeof viewClient.createView>[0]
+      )) as { view?: ApiView };
+      return { view: res.view ? decodeApiView(res.view) : res.view };
+    }),
 
   updateView: (id: string, data: Partial<ApiView>) =>
-    safe.put<{ message: string }>(`/flow/view/v1/views/${id}`, toViewUpdatePayload(data)),
+    flowResult<{ message: string }>(() =>
+      viewClient.updateView({
+        id,
+        ...(toViewUpdatePayload(data) as Parameters<typeof viewClient.updateView>[0]),
+      })
+    ),
 
-  deleteView: (id: string) => safe.delete(`/flow/view/v1/views/${id}`),
+  deleteView: (id: string) => flowResult(() => viewClient.deleteView({ id })),
 
   // -- Insights -----------------------------------------------------------
 
   getInsights: (workspaceId?: string) =>
-    safe.get<ApiInsights>('/flow/insights/v1/overview', {
-      params: workspaceId ? { workspace_id: workspaceId } : undefined,
-    }),
+    flowResult<ApiInsights>(() => insightsClient.getInsights({ workspaceId })),
 
   // -- Team workload ------------------------------------------------------
 
   getTeamWorkload: (workspaceId?: string) =>
-    safe.get<{ members: ApiTeamWorkload[] }>('/flow/insights/v1/team/workload', {
-      params: workspaceId ? { workspace_id: workspaceId } : undefined,
-    }),
+    flowResult<{ members: ApiTeamWorkload[] }>(() =>
+      insightsClient.getTeamWorkload({ workspaceId })
+    ),
 
   // -- Roadmap ------------------------------------------------------------
 
   getRoadmap: (workspaceId?: string) =>
-    safe.get<{ projects: ApiRoadmap[] }>('/flow/insights/v1/roadmap', {
-      params: workspaceId ? { workspace_id: workspaceId } : undefined,
-    }),
+    flowResult<{ projects: ApiRoadmap[] }>(() => insightsClient.getRoadmap({ workspaceId })),
 
   // -- Notifications ------------------------------------------------------
 
   getNotifications: () =>
-    safe.get<{ notifications: ApiNotification[] }>('/flow/notification/v1/notifications'),
+    flowResult<{ notifications: ApiNotification[] }>(() =>
+      notificationClient.listNotifications({})
+    ),
 
   markNotificationRead: (id: string) =>
-    safe.put(`/flow/notification/v1/notifications/${id}/read`, {}),
+    flowResult(() => notificationClient.markNotificationRead({ id })),
 
-  markAllNotificationsRead: () => safe.put('/flow/notification/v1/notifications/read-all', {}),
+  markAllNotificationsRead: () => flowResult(() => notificationClient.markAllNotificationsRead({})),
 
   // -- User Settings ------------------------------------------------------
 
-  getUserSettings: () => safe.get<ApiUserSettings>('/flow/setting/v1/settings'),
+  getUserSettings: () => flowResult<ApiUserSettings>(() => settingClient.getUserSettings({})),
 
   updateUserSettings: (data: ApiUserSettings) =>
-    safe.put('/flow/setting/v1/settings', toUserSettingsPayload(data)),
+    flowResult(() => settingClient.updateUserSettings(toUserSettingsPayload(data))),
 
   // -- Account / Profile --------------------------------------------------
 
   updateProfile: (data: { name?: string; email?: string }) =>
-    safe.patch('/hub/user/v1/users/me', {
-      name: data.name ?? '',
-      ...(data.email ? { email: data.email } : {}),
-    }),
+    flowResult(() =>
+      userClient.updateProfile({
+        name: data.name ?? '',
+        email: data.email,
+      })
+    ),
 
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
-    safe.post('/hub/user/v1/users/password', {
-      current_password: data.currentPassword,
-      new_password: data.newPassword,
-    }),
+    flowResult(() =>
+      userClient.changePassword({
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      })
+    ),
 };

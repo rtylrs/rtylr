@@ -6,29 +6,29 @@
 
 Every dossier uses the same template: benefit, why this pairing, ROI with visible assumptions, the data with citations, what exists, what is missing, precedent, how to build it, coupling cost, risks, effort.
 
-| Id | What flows | Producer | Consumer | Class | Necessity | Severity | Gap | Shape |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| [HR->HUB-01](HR-HUB-01-revoke-access-on-termination.md) | employment status change (terminated, contract ended) revokes app access | hr | hub | MUST | Essential | critical | Needs a query or endpoint | 3 |
-| [CRM->FIN-01](CRM-FIN-01-signed-contract-to-invoice.md) | signed contract (plan, mrr, seats, customer) to draft an invoice | crm | finance | CAN | Essential | high | Needs a contract field | 1 |
-| [CRM->FIN-02](CRM-FIN-02-customer-identity-for-invoices.md) | customer identity for invoices, replacing four free-text client fields | crm | finance | MUST | Essential | high | Needs a contract field | 5 |
-| [ERP->FIN-01](ERP-FIN-01-supplier-identity-for-bills.md) | supplier identity and name for accounts-payable bills | erp | finance | MUST | Essential | high | Available today | 1 |
-| [ERP->POS-01](ERP-POS-01-one-stock-one-cost.md) | one stock quantity and one cost price per sellable item, instead of two independent numbers | erp | pos | MUST | Essential | high | Needs a contract field | 5 |
-| [FLOW->FIN-01](FLOW-FIN-01-unbilled-billable-hours.md) | billable logged hours per project, so hours can be invoiced and unbilled time surfaced | flow | finance | CAN | Essential | high | Needs a contract field | 1 |
-| [HR->FIN-01](HR-FIN-01-payroll-to-journal.md) | payroll run total posted to the journal as a labour expense | hr | finance | CAN | Essential | high | Available today | 3 |
-| [HR->HR-01](HR-HR-01-one-person-record.md) | collapse hr_staff and hr_employees into one person record with one pay rate | hr | hr | MUST | Essential | high | Needs a new concept | 6 |
-| [IDENTITY-01](IDENTITY-01-shared-entity-resolver.md) | one resolver so a person or company means one thing product-wide | hub | all | MUST | Essential | high | Needs a new concept | 6 |
-| [REC->HR-01](REC-HR-01-hired-candidate-to-employee.md) | hired candidate becomes an employee record without retyping the person | recruit | hr | CAN | Essential | high | Needs a query or endpoint | 1 |
-| [HR->FLOW-01](HR-FLOW-01-project-labour-cost.md) | employee pay rate, aggregated server-side into a project labour cost | hr | flow | CAN | High value | high | Needs a query or endpoint | 2 |
-| [ERP->FIN-02](ERP-FIN-02-inventory-valuation.md) | inventory valuation total for the balance sheet | erp | finance | CAN | High value | medium | Available today | 1 |
-| [ERP->FIN-03](ERP-FIN-03-received-not-billed.md) | purchase order received-but-unbilled and outstanding commitments, for the payables picture | erp | finance | CAN | High value | medium | Available today | 1 |
-| [ERP->INS-01](ERP-INS-01-margin-per-product.md) | product cost, to turn revenue-by-product into margin-by-product | erp | insights | CAN | High value | medium | Needs a query or endpoint | 2 |
-| [FIN->CRM-01](FIN-CRM-01-outstanding-balance-on-customer.md) | outstanding and overdue balance on the customer page, and before extending credit | finance | crm | CAN | High value | medium | Needs a contract field | 1 |
-| [FIN->ERP-01](FIN-ERP-01-bill-history-on-supplier.md) | bill and payment history on the supplier page | finance | erp | CAN | High value | medium | Needs a contract field | 1 |
-| [FIN->ERP-02](FIN-ERP-02-bill-paid-closes-order.md) | bill approved and paid, so a purchase order stops looking outstanding | finance | erp | CAN | High value | medium | Needs a contract field | 3 |
-| [HR->FLOW-02](HR-FLOW-02-leave-gates-assignment.md) | approved leave dates, to warn before assigning work due during them | hr | flow | CAN | High value | medium | Needs a contract field | 1 |
-| [HR->INS-01](HR-INS-01-labour-cost-for-reporting.md) | labour cost per period for the cost side of every margin metric | hr | insights | CAN | High value | medium | Needs a query or endpoint | 2 |
-| [POS->CRM-01](POS-CRM-01-order-history-on-customer.md) | order history and lifetime spend on the customer page | pos | crm | IS | High value | medium | Needs a query or endpoint | 1 |
-| [SUP->CRM-01](SUP-CRM-01-tickets-on-customer-page.md) | open ticket count and last ticket date on the customer page | support | crm | IS | High value | medium | Needs a contract field | 1 |
+| Id                                                           | What flows                                                                                  | Producer | Consumer | Class | Necessity  | Severity | Gap                       | Shape |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------- | -------- | -------- | ----- | ---------- | -------- | ------------------------- | ----- |
+| [HR->HUB-01](HR-HUB-01-revoke-access-on-termination.md)      | employment status change (terminated, contract ended) revokes app access                    | hr       | hub      | MUST  | Essential  | critical | Needs a query or endpoint | 3     |
+| [CRM->FIN-01](CRM-FIN-01-signed-contract-to-invoice.md)      | signed contract (plan, mrr, seats, customer) to draft an invoice                            | crm      | finance  | CAN   | Essential  | high     | Needs a contract field    | 1     |
+| [CRM->FIN-02](CRM-FIN-02-customer-identity-for-invoices.md)  | customer identity for invoices, replacing four free-text client fields                      | crm      | finance  | MUST  | Essential  | high     | Needs a contract field    | 5     |
+| [ERP->FIN-01](ERP-FIN-01-supplier-identity-for-bills.md)     | supplier identity and name for accounts-payable bills                                       | erp      | finance  | MUST  | Essential  | high     | Available today           | 1     |
+| [ERP->POS-01](ERP-POS-01-one-stock-one-cost.md)              | one stock quantity and one cost price per sellable item, instead of two independent numbers | erp      | pos      | MUST  | Essential  | high     | Needs a contract field    | 5     |
+| [FLOW->FIN-01](FLOW-FIN-01-unbilled-billable-hours.md)       | billable logged hours per project, so hours can be invoiced and unbilled time surfaced      | flow     | finance  | CAN   | Essential  | high     | Needs a contract field    | 1     |
+| [HR->FIN-01](HR-FIN-01-payroll-to-journal.md)                | payroll run total posted to the journal as a labour expense                                 | hr       | finance  | CAN   | Essential  | high     | Available today           | 3     |
+| [HR->HR-01](HR-HR-01-one-person-record.md)                   | collapse hr_staff and hr_employees into one person record with one pay rate                 | hr       | hr       | MUST  | Essential  | high     | Needs a new concept       | 6     |
+| [IDENTITY-01](IDENTITY-01-shared-entity-resolver.md)         | one resolver so a person or company means one thing product-wide                            | hub      | all      | MUST  | Essential  | high     | Needs a new concept       | 6     |
+| [REC->HR-01](REC-HR-01-hired-candidate-to-employee.md)       | hired candidate becomes an employee record without retyping the person                      | recruit  | hr       | CAN   | Essential  | high     | Needs a query or endpoint | 1     |
+| [HR->FLOW-01](HR-FLOW-01-project-labour-cost.md)             | employee pay rate, aggregated server-side into a project labour cost                        | hr       | flow     | CAN   | High value | high     | Needs a query or endpoint | 2     |
+| [ERP->FIN-02](ERP-FIN-02-inventory-valuation.md)             | inventory valuation total for the balance sheet                                             | erp      | finance  | CAN   | High value | medium   | Available today           | 1     |
+| [ERP->FIN-03](ERP-FIN-03-received-not-billed.md)             | purchase order received-but-unbilled and outstanding commitments, for the payables picture  | erp      | finance  | CAN   | High value | medium   | Available today           | 1     |
+| [ERP->INS-01](ERP-INS-01-margin-per-product.md)              | product cost, to turn revenue-by-product into margin-by-product                             | erp      | insights | CAN   | High value | medium   | Needs a query or endpoint | 2     |
+| [FIN->CRM-01](FIN-CRM-01-outstanding-balance-on-customer.md) | outstanding and overdue balance on the customer page, and before extending credit           | finance  | crm      | CAN   | High value | medium   | Needs a contract field    | 1     |
+| [FIN->ERP-01](FIN-ERP-01-bill-history-on-supplier.md)        | bill and payment history on the supplier page                                               | finance  | erp      | CAN   | High value | medium   | Needs a contract field    | 1     |
+| [FIN->ERP-02](FIN-ERP-02-bill-paid-closes-order.md)          | bill approved and paid, so a purchase order stops looking outstanding                       | finance  | erp      | CAN   | High value | medium   | Needs a contract field    | 3     |
+| [HR->FLOW-02](HR-FLOW-02-leave-gates-assignment.md)          | approved leave dates, to warn before assigning work due during them                         | hr       | flow     | CAN   | High value | medium   | Needs a contract field    | 1     |
+| [HR->INS-01](HR-INS-01-labour-cost-for-reporting.md)         | labour cost per period for the cost side of every margin metric                             | hr       | insights | CAN   | High value | medium   | Needs a query or endpoint | 2     |
+| [POS->CRM-01](POS-CRM-01-order-history-on-customer.md)       | order history and lifetime spend on the customer page                                       | pos      | crm      | IS    | High value | medium   | Needs a query or endpoint | 1     |
+| [SUP->CRM-01](SUP-CRM-01-tickets-on-customer-page.md)        | open ticket count and last ticket date on the customer page                                 | support  | crm      | IS    | High value | medium   | Needs a contract field    | 1     |
 
 ## By gap bucket
 
@@ -44,24 +44,24 @@ Every dossier uses the same template: benefit, why this pairing, ROI with visibl
 
 Shapes are ordered loosest first; rule 1 requires taking the first that works.
 
-| Shape | Name | Proposals |
-| --- | --- | --- |
-| 1 | Cross-domain read from one app | CRM->FIN-01, ERP->FIN-01, FLOW->FIN-01, REC->HR-01, ERP->FIN-02, ERP->FIN-03, FIN->CRM-01, FIN->ERP-01, HR->FLOW-02, POS->CRM-01, SUP->CRM-01 |
-| 2 | Backend aggregate endpoint owned by the consumer | HR->FLOW-01, ERP->INS-01, HR->INS-01 |
-| 3 | Event or webhook | HR->HUB-01, HR->FIN-01, FIN->ERP-02 |
-| 4 | Shared query hook in packages/ | none |
-| 5 | Contract-level foreign key | CRM->FIN-02, ERP->POS-01 |
-| 6 | Shared entity resolver | HR->HR-01, IDENTITY-01 |
+| Shape | Name                                             | Proposals                                                                                                                                     |
+| ----- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | Cross-domain read from one app                   | CRM->FIN-01, ERP->FIN-01, FLOW->FIN-01, REC->HR-01, ERP->FIN-02, ERP->FIN-03, FIN->CRM-01, FIN->ERP-01, HR->FLOW-02, POS->CRM-01, SUP->CRM-01 |
+| 2     | Backend aggregate endpoint owned by the consumer | HR->FLOW-01, ERP->INS-01, HR->INS-01                                                                                                          |
+| 3     | Event or webhook                                 | HR->HUB-01, HR->FIN-01, FIN->ERP-02                                                                                                           |
+| 4     | Shared query hook in packages/                   | none                                                                                                                                          |
+| 5     | Contract-level foreign key                       | CRM->FIN-02, ERP->POS-01                                                                                                                      |
+| 6     | Shared entity resolver                           | HR->HR-01, IDENTITY-01                                                                                                                        |
 
 ## By taxonomy reason
 
-| # | Reason | Proposals |
-| --- | --- | --- |
-| 1 | Derivation | ERP->POS-01, FLOW->FIN-01, HR->FLOW-01, ERP->FIN-02, ERP->FIN-03, ERP->INS-01, HR->INS-01, POS->CRM-01 |
-| 2 | Double entry elimination | CRM->FIN-01, CRM->FIN-02, ERP->FIN-01, HR->FIN-01, REC->HR-01, FIN->ERP-02 |
-| 3 | Single source of truth | CRM->FIN-02, ERP->FIN-01, ERP->POS-01, HR->HR-01, IDENTITY-01 |
-| 4 | Trigger and automation | HR->HUB-01, CRM->FIN-01, HR->FIN-01, REC->HR-01, FIN->ERP-02 |
-| 5 | Context in place | FIN->CRM-01, FIN->ERP-01, HR->FLOW-02, POS->CRM-01, SUP->CRM-01 |
-| 6 | Gating and correctness | HR->HUB-01, ERP->POS-01, FIN->CRM-01, HR->FLOW-02 |
-| 7 | Rollup and reporting | FLOW->FIN-01, HR->FIN-01, HR->FLOW-01, ERP->FIN-02, ERP->FIN-03, ERP->INS-01, HR->INS-01 |
-| 8 | Identity resolution | CRM->FIN-02, ERP->FIN-01, HR->HR-01, IDENTITY-01, REC->HR-01 |
+| #   | Reason                   | Proposals                                                                                              |
+| --- | ------------------------ | ------------------------------------------------------------------------------------------------------ |
+| 1   | Derivation               | ERP->POS-01, FLOW->FIN-01, HR->FLOW-01, ERP->FIN-02, ERP->FIN-03, ERP->INS-01, HR->INS-01, POS->CRM-01 |
+| 2   | Double entry elimination | CRM->FIN-01, CRM->FIN-02, ERP->FIN-01, HR->FIN-01, REC->HR-01, FIN->ERP-02                             |
+| 3   | Single source of truth   | CRM->FIN-02, ERP->FIN-01, ERP->POS-01, HR->HR-01, IDENTITY-01                                          |
+| 4   | Trigger and automation   | HR->HUB-01, CRM->FIN-01, HR->FIN-01, REC->HR-01, FIN->ERP-02                                           |
+| 5   | Context in place         | FIN->CRM-01, FIN->ERP-01, HR->FLOW-02, POS->CRM-01, SUP->CRM-01                                        |
+| 6   | Gating and correctness   | HR->HUB-01, ERP->POS-01, FIN->CRM-01, HR->FLOW-02                                                      |
+| 7   | Rollup and reporting     | FLOW->FIN-01, HR->FIN-01, HR->FLOW-01, ERP->FIN-02, ERP->FIN-03, ERP->INS-01, HR->INS-01               |
+| 8   | Identity resolution      | CRM->FIN-02, ERP->FIN-01, HR->HR-01, IDENTITY-01, REC->HR-01                                           |

@@ -2,27 +2,15 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PieChart } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { toFiniteNumber, unwrap } from '@voxire/api';
+import { toFiniteNumber } from '@voxire/api';
 import { EmptyState } from '@voxire/ui';
-import { safe } from '../../../../shared/lib/api';
+import { revenueClient } from '../../../../shared/lib/clients';
 import WidgetHeader from './WidgetHeader';
 
 interface AppSlice {
   app: string;
   amountMinorUnits: number;
   pct: number;
-}
-
-interface ApiResponse {
-  byApp?: RawAppSlice[];
-  by_app?: RawAppSlice[];
-}
-
-interface RawAppSlice {
-  app?: string;
-  amountMinorUnits?: number | string;
-  amount_minor_units?: number | string;
-  pct?: number | string;
 }
 
 const APP_COLOUR: Record<string, string> = {
@@ -48,11 +36,11 @@ const RevenueByAppWidget: React.FC = (): React.JSX.Element => {
     queryKey: ['insights-revenue-by-app'],
     queryFn: async (): Promise<AppSlice[]> => {
       try {
-        const res = await unwrap(safe.get<ApiResponse>('/insights/revenue/v1/by-app'));
-        return (res.byApp ?? res.by_app ?? []).map((slice) => ({
+        const res = await revenueClient.getRevenueByApp({});
+        return (res.apps ?? []).map((slice) => ({
           app: slice.app ?? 'other',
-          amountMinorUnits: toFiniteNumber(slice.amountMinorUnits ?? slice.amount_minor_units),
-          pct: toFiniteNumber(slice.pct),
+          amountMinorUnits: toFiniteNumber(slice.amount),
+          pct: toFiniteNumber(slice.percentage),
         }));
       } catch {
         return [];

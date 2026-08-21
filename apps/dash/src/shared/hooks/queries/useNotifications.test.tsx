@@ -10,19 +10,17 @@ import {
   type Notification,
 } from './useNotifications';
 
-const mockGet = vi.fn();
-const mockPatch = vi.fn();
+const mockNotificationClient = vi.hoisted(() => ({
+  listNotifications: vi.fn(),
+  markNotificationRead: vi.fn(),
+  markAllRead: vi.fn(),
+}));
 
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((v) => v),
 }));
 
-vi.mock('../../lib/api', () => ({
-  safe: {
-    get: (...args: unknown[]) => mockGet(...args),
-    patch: (...args: unknown[]) => mockPatch(...args),
-  },
-}));
+vi.mock('../../lib/clients', () => ({ notificationClient: mockNotificationClient }));
 
 const sampleNotifications: Notification[] = [
   {
@@ -75,7 +73,9 @@ describe('useNotifications', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('fetches notifications from .notifications key', async () => {
-    mockGet.mockResolvedValue({ notifications: sampleNotifications });
+    mockNotificationClient.listNotifications.mockResolvedValue({
+      notifications: sampleNotifications,
+    });
 
     const { result } = renderHook(() => useNotifications(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -85,7 +85,7 @@ describe('useNotifications', () => {
   });
 
   it('fetches notifications from flat array', async () => {
-    mockGet.mockResolvedValue(sampleNotifications);
+    mockNotificationClient.listNotifications.mockResolvedValue(sampleNotifications);
 
     const { result } = renderHook(() => useNotifications(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -94,14 +94,14 @@ describe('useNotifications', () => {
   });
 
   it('calls the correct endpoint', async () => {
-    mockGet.mockResolvedValue({ notifications: [] });
+    mockNotificationClient.listNotifications.mockResolvedValue({ notifications: [] });
 
     renderHook(() => useNotifications(), { wrapper: createWrapper() });
-    await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/hub/notification/v1/notifications'));
+    await waitFor(() => expect(mockNotificationClient.listNotifications).toHaveBeenCalledWith({}));
   });
 
   it('handles API error', async () => {
-    mockGet.mockRejectedValue(new Error('fail'));
+    mockNotificationClient.listNotifications.mockRejectedValue(new Error('fail'));
 
     const { result } = renderHook(() => useNotifications(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isError).toBe(true));
@@ -112,7 +112,7 @@ describe('useNotificationPages', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('follows the opaque next cursor when loading another page', async () => {
-    mockGet
+    mockNotificationClient.listNotifications
       .mockResolvedValueOnce({
         notifications: sampleNotifications.slice(0, 1),
         next_cursor: 'next-page',
@@ -121,7 +121,10 @@ describe('useNotificationPages', () => {
 
     const { result } = renderHook(() => useNotificationPages(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockGet).toHaveBeenCalledWith('/hub/notification/v1/notifications?limit=100');
+    expect(mockNotificationClient.listNotifications).toHaveBeenCalledWith({
+      limit: 100,
+      cursor: undefined,
+    });
 
     await waitFor(() => expect(result.current.hasNextPage).toBe(true));
 
@@ -130,9 +133,10 @@ describe('useNotificationPages', () => {
     });
 
     await waitFor(() => expect(result.current.data?.pages).toHaveLength(2));
-    expect(mockGet).toHaveBeenLastCalledWith(
-      '/hub/notification/v1/notifications?limit=100&cursor=next-page'
-    );
+    expect(mockNotificationClient.listNotifications).toHaveBeenLastCalledWith({
+      limit: 100,
+      cursor: 'next-page',
+    });
   });
 });
 
@@ -140,7 +144,7 @@ describe('useMarkNotificationRead', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('optimistically marks notification as read', async () => {
-    mockPatch.mockResolvedValue({ success: true });
+    mockNotificationClient.markNotificationRead.mockResolvedValue({ success: true });
 
     const wrapper = createWrapperWithData();
     const { result } = renderHook(() => useMarkNotificationRead(), { wrapper });
@@ -151,12 +155,12 @@ describe('useMarkNotificationRead', () => {
 
     // Should call the right endpoint
     await waitFor(() =>
-      expect(mockPatch).toHaveBeenCalledWith('/hub/notification/v1/notifications/1/read')
+      expect(mockNotificationClient.markNotificationRead).toHaveBeenCalledWith({ id: '1' })
     );
   });
 
   it('reverts on error', async () => {
-    mockPatch.mockRejectedValue(new Error('fail'));
+    mockNotificationClient.markNotificationRead.mockRejectedValue(new Error('fail'));
 
     const wrapper = createWrapperWithData();
     const { result } = renderHook(() => useMarkNotificationRead(), { wrapper });
@@ -173,7 +177,7 @@ describe('useMarkAllNotificationsRead', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('calls read-all endpoint', async () => {
-    mockPatch.mockResolvedValue({ success: true });
+    mockNotificationClient.markAllRead.mockResolvedValue({ success: true });
 
     const wrapper = createWrapperWithData();
     const { result } = renderHook(() => useMarkAllNotificationsRead(), { wrapper });
@@ -182,13 +186,11 @@ describe('useMarkAllNotificationsRead', () => {
       result.current.mutate();
     });
 
-    await waitFor(() =>
-      expect(mockPatch).toHaveBeenCalledWith('/hub/notification/v1/notifications/read-all')
-    );
+    await waitFor(() => expect(mockNotificationClient.markAllRead).toHaveBeenCalledWith({}));
   });
 
   it('handles error gracefully', async () => {
-    mockPatch.mockRejectedValue(new Error('fail'));
+    mockNotificationClient.markAllRead.mockRejectedValue(new Error('fail'));
 
     const wrapper = createWrapperWithData();
     const { result } = renderHook(() => useMarkAllNotificationsRead(), { wrapper });

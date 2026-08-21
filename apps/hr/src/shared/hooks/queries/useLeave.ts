@@ -10,7 +10,7 @@ import type {
   LeaveBalancePayload,
   CreateLeaveTypeRequest,
 } from '@voxire/voxie/hr/leave/v1/types';
-import { safe } from '../../lib/api';
+import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -118,7 +118,9 @@ export const useGetLeaveCalendar = (params: LeaveCalendarParams) => {
   return useQuery<LeaveRequestPayload[]>({
     queryKey: ['leave-calendar', params],
     queryFn: async (): Promise<LeaveRequestPayload[]> => {
-      const res = await unwrap(safe.get<LeaveCalendarResponse>('/hr/leave/calendar', { params }));
+      const res = await unwrap(
+        hrTransport.get<LeaveCalendarResponse>('/hr/leave/calendar', { params })
+      );
       return (res as LeaveCalendarResponse).requests;
     },
   });

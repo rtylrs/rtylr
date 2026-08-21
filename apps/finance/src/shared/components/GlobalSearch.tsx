@@ -13,7 +13,7 @@ import Modal from './Modal';
 import { inputStyle, ACCENT } from '../lib/tokens';
 import type { Client } from './ClientSelect';
 import { unwrap } from '@voxire/api';
-import { safe } from '../lib/api';
+import { listCrmCustomers } from '../lib/clients';
 import { parseClientsResponse } from '../schemas/clients';
 
 interface Result {
@@ -92,7 +92,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
     if (open) {
       setQuery('');
       setIndex(0);
-      void unwrap(safe.get<unknown>('/crm/customers'))
+      void unwrap(listCrmCustomers())
         .then((data) => setClients(parseClientsResponse(data)))
         .catch(() => {});
     }

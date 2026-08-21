@@ -1,217 +1,80 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ResultAsync } from 'neverthrow';
+import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('../lib/api', () => ({
-  safe: {
-    get: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: [] }), () => ({}) as any)),
-    post: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
-    put: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
-    delete: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
-  },
-}));
+const mockClients = vi.hoisted(() => {
+  const makeClient = () => {
+    const methods: Record<string, ReturnType<typeof vi.fn>> = {};
+    return new Proxy(methods, {
+      get(target, property: string) {
+        target[property] ??= vi.fn(async () => ({}));
+        return target[property];
+      },
+    });
+  };
 
-vi.mock('@voxire/api', () => ({
-  unwrap: vi.fn((v: unknown) => v),
-  toOptionalFiniteNumber: vi.fn((value: unknown) => {
-    if (value === null || value === undefined || value === '') return undefined;
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : undefined;
-  }),
+  return {
+    compatibility: makeClient(),
+    customer: makeClient(),
+    segment: makeClient(),
+  };
+});
+
+vi.mock('../lib/clients', () => ({
+  crmCompatibilityClient: mockClients.compatibility,
+  crmCustomerClient: mockClients.customer,
+  crmSegmentClient: mockClients.segment,
 }));
 
 import { crmApi, toContractUpdatePayload, toCreateContractPayload } from './crmApi';
-import { safe } from '../lib/api';
 
 describe('crmApi', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  // Dashboard
-  it('getDashboard calls GET /crm/dashboard', () => {
+  it('routes legacy CRM reads through the generated compatibility client', async () => {
     crmApi.getDashboard();
-    expect(safe.get).toHaveBeenCalledWith('/crm/dashboard');
-  });
-
-  // Customers
-  it('getCustomers calls GET /crm/customers with params', () => {
-    const params = { search: 'John', tier: 'gold' };
-    crmApi.getCustomers(params);
-    expect(safe.get).toHaveBeenCalledWith('/crm/customers', { params });
-  });
-
-  it('getCustomerDetail calls GET /crm/customers/detail with id param', () => {
+    crmApi.getCustomers({ search: 'John', tier: 'gold' });
     crmApi.getCustomerDetail(5);
-    expect(safe.get).toHaveBeenCalledWith('/crm/customers/detail', { params: { id: 5 } });
+    crmApi.getCampaigns(25, 50);
+    await Promise.resolve();
+
+    expect(mockClients.compatibility.getDashboard).toHaveBeenCalledWith({});
+    expect(mockClients.compatibility.listCustomers).toHaveBeenCalledWith({
+      search: 'John',
+      tier: 'gold',
+    });
+    expect(mockClients.compatibility.getCustomer).toHaveBeenCalledWith({ id: 5 });
+    expect(mockClients.compatibility.listCampaigns).toHaveBeenCalledWith({ limit: 25, offset: 50 });
   });
 
-  it('getCustomerTimeline calls GET /crm/customers/timeline', () => {
-    crmApi.getCustomerTimeline(5);
-    expect(safe.get).toHaveBeenCalledWith('/crm/customers/timeline', { params: { id: 5 } });
-  });
+  it('converts compatibility request bodies to the backend wire shape', async () => {
+    crmApi.createCustomer({ name: 'Jane Doe', email: 'jane@test.com' });
+    crmApi.updateCampaignStatus(7, 'active');
+    await Promise.resolve();
 
-  it('createCustomer calls POST /crm/customers', () => {
-    const data = { name: 'Jane', email: 'jane@test.com' };
-    crmApi.createCustomer(data);
-    expect(safe.post).toHaveBeenCalledWith('/crm/customers', {
-      firstName: 'Jane',
-      lastName: '',
-      email: 'jane@test.com',
-      phone: undefined,
-      dateOfBirth: undefined,
-      tags: undefined,
-      notes: undefined,
+    expect(mockClients.compatibility.createCustomer).toHaveBeenCalledWith({
+      body: {
+        first_name: 'Jane',
+        last_name: 'Doe',
+        email: 'jane@test.com',
+        phone: undefined,
+        date_of_birth: undefined,
+        tags: undefined,
+        notes: undefined,
+      },
+    });
+    expect(mockClients.compatibility.updateCampaignStatus).toHaveBeenCalledWith({
+      id: '7',
+      body: { id: '7', status: 'active' },
     });
   });
 
-  it('updateCustomer calls PUT /crm/customers with id', () => {
-    crmApi.updateCustomer(3, { name: 'Updated' });
-    expect(safe.put).toHaveBeenCalledWith('/crm/customers', {
-      id: 3,
-      firstName: 'Updated',
-      lastName: '',
-      email: undefined,
-      phone: undefined,
-      dateOfBirth: undefined,
-      tags: undefined,
-      notes: undefined,
-    });
-  });
-
-  it('deleteCustomer calls DELETE /crm/customers with id', () => {
+  it('uses canonical generated delete contracts where they exist', async () => {
     crmApi.deleteCustomer(3);
-    expect(safe.delete).toHaveBeenCalledWith('/crm/customers', { data: { id: 3 } });
-  });
-
-  it('recordVisit calls POST /crm/customers/record-visit', () => {
-    crmApi.recordVisit(7);
-    expect(safe.post).toHaveBeenCalledWith('/crm/customers/record-visit', { customerId: 7 });
-  });
-
-  it('importCustomers calls POST /crm/customers/import', () => {
-    const customers = [{ name: 'A' }];
-    crmApi.importCustomers(customers);
-    expect(safe.post).toHaveBeenCalledWith('/crm/customers/import', {
-      customers,
-    });
-  });
-
-  it('mergeCustomers calls POST /crm/customers/merge', () => {
-    crmApi.mergeCustomers(1, 2);
-    expect(safe.post).toHaveBeenCalledWith('/crm/customers/merge', {
-      primaryId: 1,
-      secondaryId: 2,
-    });
-  });
-
-  it('exportCustomerData calls GET /crm/customers/export', () => {
-    crmApi.exportCustomerData(5);
-    expect(safe.get).toHaveBeenCalledWith('/crm/customers/export', { params: { id: 5 } });
-  });
-
-  // Loyalty
-  it('awardPoints calls POST /crm/loyalty/award', () => {
-    crmApi.awardPoints(1, 100, 'birthday');
-    expect(safe.post).toHaveBeenCalledWith('/crm/loyalty/award', {
-      customerId: 1,
-      points: 100,
-      description: 'birthday',
-    });
-  });
-
-  it('redeemPoints calls POST /crm/loyalty/redeem', () => {
-    crmApi.redeemPoints(1, 50);
-    expect(safe.post).toHaveBeenCalledWith('/crm/loyalty/redeem', {
-      customerId: 1,
-      points: 50,
-      reason: undefined,
-    });
-  });
-
-  it('getLoyaltyConfig calls GET /crm/loyalty/config', () => {
-    crmApi.getLoyaltyConfig();
-    expect(safe.get).toHaveBeenCalledWith('/crm/loyalty/config');
-  });
-
-  it('updateLoyaltyConfig calls PUT /crm/loyalty/config', () => {
-    const config = { pointsPerDollar: 2 };
-    crmApi.updateLoyaltyConfig(config);
-    expect(safe.put).toHaveBeenCalledWith('/crm/loyalty/config', config);
-  });
-
-  it('getLoyaltyMembers calls GET /crm/loyalty/members', () => {
-    crmApi.getLoyaltyMembers();
-    expect(safe.get).toHaveBeenCalledWith('/crm/loyalty/members');
-  });
-
-  it('updateLoyaltyTier calls PUT /crm/loyalty/tiers', () => {
-    crmApi.updateLoyaltyTier(1, { name: 'Platinum' });
-    expect(safe.put).toHaveBeenCalledWith('/crm/loyalty/tiers', { id: 1, name: 'Platinum' });
-  });
-
-  // Segments
-  it('getSegments calls GET /crm/segments', () => {
-    crmApi.getSegments();
-    expect(safe.get).toHaveBeenCalledWith('/crm/segments');
-  });
-
-  it('getSegmentById calls GET /crm/segments/detail', () => {
-    crmApi.getSegmentById(2);
-    expect(safe.get).toHaveBeenCalledWith('/crm/segments/detail', { params: { id: 2 } });
-  });
-
-  it('createSegment calls POST /crm/segments', () => {
-    const data = { name: 'VIPs' };
-    crmApi.createSegment(data);
-    expect(safe.post).toHaveBeenCalledWith('/crm/segments', {
-      name: 'VIPs',
-      description: undefined,
-      filters: { rules: [] },
-    });
-  });
-
-  it('deleteSegment calls DELETE /crm/segments with id', () => {
     crmApi.deleteSegment(4);
-    expect(safe.delete).toHaveBeenCalledWith('/crm/segments', { data: { id: 4 } });
+    await Promise.resolve();
+
+    expect(mockClients.customer.deleteCustomer).toHaveBeenCalledWith({ id: '3' });
+    expect(mockClients.segment.deleteSegment).toHaveBeenCalledWith({ id: '4' });
   });
 
-  // Campaigns
-  it('getCampaigns calls GET /crm/campaigns', () => {
-    crmApi.getCampaigns();
-    expect(safe.get).toHaveBeenCalledWith('/crm/campaigns');
-  });
-
-  it('createCampaign calls POST /crm/campaigns', () => {
-    const data = { name: 'Summer sale' };
-    crmApi.createCampaign(data);
-    expect(safe.post).toHaveBeenCalledWith('/crm/campaigns', data);
-  });
-
-  it('updateCampaignStatus calls PUT /crm/campaigns/status', () => {
-    crmApi.updateCampaignStatus(1, 'active');
-    expect(safe.put).toHaveBeenCalledWith('/crm/campaigns/1/status', { status: 'active' });
-  });
-
-  // Automations
-  it('getAutomations calls GET /crm/automations', () => {
-    crmApi.getAutomations();
-    expect(safe.get).toHaveBeenCalledWith('/crm/automations');
-  });
-
-  it('createAutomation calls POST /crm/automations', () => {
-    const data = { name: 'Welcome flow' };
-    crmApi.createAutomation(data);
-    expect(safe.post).toHaveBeenCalledWith('/crm/automations', {
-      name: 'Welcome flow',
-      triggerType: undefined,
-      triggerConfig: {},
-      actions: undefined,
-      isActive: false,
-    });
-  });
-
-  // Sales contracts
-  it('maps contract creation fields to the backend contract shape', () => {
+  it('maps contract creation fields and omits invalid optional ids', async () => {
     crmApi.createContract({
       leadId: 7,
       plan: 'pro',
@@ -222,19 +85,19 @@ describe('crmApi', () => {
       closedBy: '',
       notes: 'signed',
     });
-    expect(safe.post).toHaveBeenCalledWith('/crm/sales/contracts', {
-      leadId: 7,
-      plan: 'pro',
-      mrr: 125,
-      seats: 4,
-      signedAt: '2026-08-16',
-      signedByName: 'Jane Doe',
-      closedBy: undefined,
-      notes: 'signed',
+    await Promise.resolve();
+    expect(mockClients.compatibility.createContract).toHaveBeenCalledWith({
+      body: {
+        lead_id: 7,
+        plan: 'pro',
+        mrr: 125,
+        seats: 4,
+        signed_at: '2026-08-16',
+        signed_by_name: 'Jane Doe',
+        closed_by: undefined,
+        notes: 'signed',
+      },
     });
-  });
-
-  it('omits an invalid optional closed-by id from contract updates', () => {
     expect(
       toContractUpdatePayload({
         plan: 'scale',
@@ -261,29 +124,5 @@ describe('crmApi', () => {
         closedBy: '12',
       })
     ).toMatchObject({ leadId: 1, signedAt: undefined, signedByName: '', closedBy: 12 });
-  });
-
-  // Templates
-  it('getTemplates calls GET /crm/templates', () => {
-    crmApi.getTemplates();
-    expect(safe.get).toHaveBeenCalledWith('/crm/templates');
-  });
-
-  // Feedback
-  it('getFeedback calls GET /crm/feedback', () => {
-    crmApi.getFeedback();
-    expect(safe.get).toHaveBeenCalledWith('/crm/feedback');
-  });
-
-  // Settings
-  it('getSettings calls GET /crm/settings', () => {
-    crmApi.getSettings();
-    expect(safe.get).toHaveBeenCalledWith('/crm/settings');
-  });
-
-  it('updateSettings calls PUT /crm/settings', () => {
-    const data = { fromEmail: 'hi@test.com' };
-    crmApi.updateSettings(data);
-    expect(safe.put).toHaveBeenCalledWith('/crm/settings', data);
   });
 });

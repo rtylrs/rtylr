@@ -102,8 +102,8 @@ const Header: React.FC = () => {
   }, [navigate]);
 
   const handleLoginClick = useCallback(() => {
-    navigate({ to: '/auth/login' });
-  }, [navigate]);
+    window.location.assign(`${APP_URLS.auth}/login`);
+  }, []);
 
   const landingUrl = (APP_URLS.landing || 'https://rtylr.com').replace(/\/$/, '');
 

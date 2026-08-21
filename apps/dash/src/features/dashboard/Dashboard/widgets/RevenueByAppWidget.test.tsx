@@ -15,9 +15,9 @@ vi.mock('@voxire/api', () => ({
   },
 }));
 
-const mockGet = vi.fn();
-vi.mock('../../../../shared/lib/api', () => ({
-  safe: { get: (...args: unknown[]) => mockGet(...args) },
+const mockGetRevenueByApp = vi.fn();
+vi.mock('../../../../shared/lib/clients', () => ({
+  revenueClient: { getRevenueByApp: (...args: unknown[]) => mockGetRevenueByApp(...args) },
 }));
 
 import RevenueByAppWidget from './RevenueByAppWidget';
@@ -37,7 +37,7 @@ beforeEach(() => {
 
 describe('RevenueByAppWidget empty state', () => {
   it('shows the illustration, title and a refresh call-to-action when there is no revenue', async () => {
-    mockGet.mockResolvedValue({ byApp: [] });
+    mockGetRevenueByApp.mockResolvedValue({ apps: [] });
 
     renderWithClient();
 
@@ -49,21 +49,23 @@ describe('RevenueByAppWidget empty state', () => {
   });
 
   it('refetches when the refresh call-to-action is clicked', async () => {
-    mockGet.mockResolvedValue({ byApp: [] });
+    mockGetRevenueByApp.mockResolvedValue({ apps: [] });
 
     renderWithClient();
 
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'common.refresh' })).toBeInTheDocument()
     );
-    const callsBefore = mockGet.mock.calls.length;
+    const callsBefore = mockGetRevenueByApp.mock.calls.length;
     fireEvent.click(screen.getByRole('button', { name: 'common.refresh' }));
 
-    await waitFor(() => expect(mockGet.mock.calls.length).toBeGreaterThan(callsBefore));
+    await waitFor(() => expect(mockGetRevenueByApp.mock.calls.length).toBeGreaterThan(callsBefore));
   });
 
   it('does not show the empty state when there is revenue', async () => {
-    mockGet.mockResolvedValue({ byApp: [{ app: 'pos', amountMinorUnits: 1000, pct: 100 }] });
+    mockGetRevenueByApp.mockResolvedValue({
+      apps: [{ app: 'pos', amount: 1000, percentage: 100 }],
+    });
 
     renderWithClient();
 

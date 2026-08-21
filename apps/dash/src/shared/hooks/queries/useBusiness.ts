@@ -1,16 +1,16 @@
-import { unwrap } from '@voxire/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { safe } from '../../lib/api';
+import { businessClient, configClient } from '../../lib/clients';
 import { toast } from 'sonner';
 import { normalizeConfigData, useConfigStore } from '../../stores/configStore';
 import i18next from 'i18next';
+import type { UpdateConfigRequest } from '@voxire/voxie/hub/config/v1/types';
 
 export const useSetBusinessSlug = () => {
   const queryClient = useQueryClient();
   const setWebsiteData = useConfigStore((s) => s.setWebsiteData);
   return useMutation({
     mutationFn: async (slug: string) => {
-      return unwrap<{ slug: string }>(safe.patch('/hub/business/v1/businesses/slug', { slug }));
+      return businessClient.setSlug({ slug });
     },
     onSuccess: ({ slug }) => {
       const currentWebsiteData = useConfigStore.getState().websiteData ?? {};
@@ -33,45 +33,46 @@ export const useUpdateBusiness = () => {
 
   return useMutation({
     mutationFn: async ({ data }: { data: Record<string, unknown> }) => {
-      const payload: Record<string, unknown> = {};
+      const payload: Partial<UpdateConfigRequest> = {};
       const has = (key: string) => Object.prototype.hasOwnProperty.call(data, key);
-      const setIfPresent = (sourceKey: string, targetKey = sourceKey) => {
-        if (has(sourceKey) && data[sourceKey] !== undefined) payload[targetKey] = data[sourceKey];
+      const setIfPresent = (
+        sourceKey: string,
+        targetKey: keyof UpdateConfigRequest = sourceKey as keyof UpdateConfigRequest
+      ) => {
+        if (has(sourceKey) && data[sourceKey] !== undefined) {
+          payload[targetKey] = data[sourceKey] as never;
+        }
       };
 
-      setIfPresent('storeName', 'site_name');
-      if (!payload.site_name) setIfPresent('companyName', 'site_name');
-      setIfPresent('contactEmail', 'contact_email');
-      setIfPresent('telephone', 'contact_number');
-      setIfPresent('aboutContent', 'about_content');
-      setIfPresent('logoUrl', 'logo_url');
+      setIfPresent('storeName', 'siteName');
+      if (!payload.siteName) setIfPresent('companyName', 'siteName');
+      setIfPresent('contactEmail');
+      setIfPresent('telephone', 'contactNumber');
+      setIfPresent('aboutContent');
+      setIfPresent('logoUrl');
       setIfPresent('instagram');
-      setIfPresent('senderName', 'sender_name');
-      setIfPresent('senderEmail', 'sender_email');
-      setIfPresent('replyTo', 'reply_to');
-      setIfPresent('smtpHost', 'smtp_host');
-      setIfPresent('smtpPort', 'smtp_port');
-      setIfPresent('smtpUser', 'smtp_user');
-      setIfPresent('smtpPassword', 'smtp_password');
-      setIfPresent('smtpFrom', 'smtp_from');
-      setIfPresent('notificationPreferences', 'notification_preferences');
-      setIfPresent('mapsUrl', 'maps_url');
+      setIfPresent('senderName');
+      setIfPresent('senderEmail');
+      setIfPresent('replyTo', 'replyToEmail');
+      setIfPresent('smtpHost');
+      setIfPresent('smtpPort');
+      setIfPresent('smtpUser', 'smtpUsername');
+      setIfPresent('smtpPassword');
+      setIfPresent('smtpFrom', 'senderEmail');
+      setIfPresent('mapsUrl');
       setIfPresent('website');
       setIfPresent('address');
       setIfPresent('city');
       setIfPresent('zipcode');
       setIfPresent('country');
-      setIfPresent('businessType', 'business_type');
-      setIfPresent('business_type');
-      if (data.maintenanceMode !== undefined) payload.maintenance_mode = data.maintenanceMode;
+      if (data.maintenanceMode !== undefined)
+        payload.maintenanceMode = Boolean(data.maintenanceMode);
 
-      return unwrap<{ config?: Record<string, unknown> }>(
-        safe.put('/hub/config/v1/config', payload)
-      );
+      return configClient.updateConfig(payload);
     },
     onSuccess: (res) => {
       if (res.config) {
-        const config = normalizeConfigData(res.config);
+        const config = normalizeConfigData(res.config as unknown as Record<string, unknown>);
         const currentWebsiteData = useConfigStore.getState().websiteData ?? {};
         setWebsiteData({ ...currentWebsiteData, ...config });
         setContactInfo({
@@ -99,9 +100,7 @@ export const useUpdateBusinessConfig = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: Record<string, unknown>) => {
-      return unwrap<{ config?: Record<string, unknown> }>(
-        safe.put('/hub/config/v1/config', payload)
-      );
+      return configClient.updateConfig(payload as UpdateConfigRequest);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['business'] });

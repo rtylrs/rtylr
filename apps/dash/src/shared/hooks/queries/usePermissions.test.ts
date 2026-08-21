@@ -9,22 +9,19 @@ import {
   useCreateCustomRole,
 } from './usePermissions';
 
-const mockGet = vi.fn();
-const mockPut = vi.fn();
-const mockPost = vi.fn();
+const mockPermissionClient = vi.hoisted(() => ({
+  getPermissions: vi.fn(),
+  listRoles: vi.fn(),
+  updatePermissionMatrix: vi.fn(),
+  createRole: vi.fn(),
+}));
 
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((value) => value),
   getOneKitErrorMessage: vi.fn((_err, fallback) => fallback),
 }));
 
-vi.mock('../../lib/api', () => ({
-  safe: {
-    get: (...args: unknown[]) => mockGet(...args),
-    put: (...args: unknown[]) => mockPut(...args),
-    post: (...args: unknown[]) => mockPost(...args),
-  },
-}));
+vi.mock('../../lib/clients', () => ({ permissionClient: mockPermissionClient }));
 
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
@@ -41,7 +38,7 @@ describe('usePermissions', () => {
   });
 
   it('fetches permissions matrix successfully', async () => {
-    mockGet.mockResolvedValue({
+    mockPermissionClient.getPermissions.mockResolvedValue({
       permissions: [{ key: 'orders.view', label: 'View Orders', group: 'Orders', description: '' }],
       roles: ['admin', 'staff'],
       values: { admin: { 'orders.view': true } },
@@ -59,7 +56,7 @@ describe('usePermissions', () => {
   });
 
   it('fetches custom roles successfully', async () => {
-    mockGet.mockResolvedValue({
+    mockPermissionClient.listRoles.mockResolvedValue({
       roles: [
         { id: 1, name: 'Shift Lead', color: '#123456', permissions: ['orders.view'], members: 1 },
       ],
@@ -77,7 +74,7 @@ describe('usePermissions', () => {
   });
 
   it('updates permissions successfully', async () => {
-    mockPut.mockResolvedValue({ success: true });
+    mockPermissionClient.updatePermissionMatrix.mockResolvedValue({ success: true });
 
     const client = new QueryClient({
       defaultOptions: { mutations: { retry: false } },
@@ -90,15 +87,15 @@ describe('usePermissions', () => {
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockPut).toHaveBeenCalledWith('/hub/permission/v1/permissions', {
+    expect(mockPermissionClient.updatePermissionMatrix).toHaveBeenCalledWith({
       role: 'staff',
-      key: 'orders.view',
+      permissionKey: 'orders.view',
       enabled: true,
     });
   });
 
   it('creates custom role successfully', async () => {
-    mockPost.mockResolvedValue({ id: 1, name: 'Manager' });
+    mockPermissionClient.createRole.mockResolvedValue({ id: 1, name: 'Manager' });
 
     const client = new QueryClient({
       defaultOptions: { mutations: { retry: false } },
@@ -111,7 +108,7 @@ describe('usePermissions', () => {
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockPost).toHaveBeenCalledWith('/hub/permission/v1/roles', {
+    expect(mockPermissionClient.createRole).toHaveBeenCalledWith({
       name: 'Manager',
       description: 'Store manager',
     });

@@ -4,7 +4,7 @@ import type { ShiftPayload } from '@voxire/voxie/hr/shift/v1/types';
 import type { CreateShiftRequest } from '@voxire/voxie/hr/shift/v1/types';
 import type { ListShiftsResponse } from '@voxire/voxie/hr/shift/v1/types';
 import type { CreateShiftAssignmentResponse } from '@voxire/voxie/hr/shift/v1/types';
-import { safe } from '../../lib/api';
+import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -51,7 +51,7 @@ export const useListShifts = () => {
   return useQuery<ShiftPayload[]>({
     queryKey: ['shifts'],
     queryFn: async (): Promise<ShiftPayload[]> => {
-      const res = await unwrap(safe.get<ListShiftsResponse>('/hr/shifts'));
+      const res = await unwrap(hrTransport.get<ListShiftsResponse>('/hr/shifts'));
       return (res as ListShiftsResponse).shifts ?? [];
     },
   });
@@ -64,7 +64,7 @@ export const useCreateShift = () => {
   return useMutation({
     mutationFn: async (data: CreateShiftRequest): Promise<void> => {
       await unwrap(
-        safe.post('/hr/shifts', {
+        hrTransport.post('/hr/shifts', {
           name: data.name,
           locationId: data.locationId,
           startTime: data.startTime,
@@ -87,7 +87,7 @@ export const useGetRoster = (params: RosterParams) => {
   return useQuery<RosterEntry[]>({
     queryKey: ['roster', params],
     queryFn: async (): Promise<RosterEntry[]> => {
-      const res = await unwrap(safe.get<RosterResponse>('/hr/shifts/roster', { params }));
+      const res = await unwrap(hrTransport.get<RosterResponse>('/hr/shifts/roster', { params }));
       return (res as RosterResponse).entries;
     },
   });
@@ -100,7 +100,7 @@ export const useCreateShiftAssignment = () => {
   return useMutation({
     mutationFn: (data: CreateShiftAssignmentPayload): Promise<CreateShiftAssignmentResponse> =>
       unwrap(
-        safe.post<CreateShiftAssignmentResponse>('/hr/shifts/roster/assignments', {
+        hrTransport.post<CreateShiftAssignmentResponse>('/hr/shifts/roster/assignments', {
           employeeId: data.staffId,
           shiftId: data.shiftId,
           date: data.date,
@@ -133,7 +133,7 @@ export const usePublishRoster = () => {
 
   return useMutation({
     mutationFn: async (weekStart: string): Promise<void> => {
-      await unwrap(safe.post('/hr/shifts/roster/publish', { weekStart }));
+      await unwrap(hrTransport.post('/hr/shifts/roster/publish', { weekStart }));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['roster'] });

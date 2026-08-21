@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
-import { safe } from '../../lib/api';
+import { subscriptionClient } from '../../lib/clients';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -412,29 +411,32 @@ interface CheckoutResponse {
 export const useMySubscription = () =>
   useQuery({
     queryKey: ['subscription'],
-    queryFn: () => unwrap(safe.get<MySubscriptionResponse>('/hub/subscription/v1/my')),
+    queryFn: () => subscriptionClient.getMySubscription({}) as Promise<MySubscriptionResponse>,
     select: (data) => normalizeSubscription(data.subscription),
   });
 
 export const useListPlans = () =>
   useQuery({
     queryKey: ['subscription', 'plans'],
-    queryFn: () => unwrap(safe.get<ListPlansResponse>('/hub/subscription/v1/plans')),
+    queryFn: () => subscriptionClient.listPlans({}) as Promise<ListPlansResponse>,
     select: (data) => (data.plans ?? []).map(normalizePlan),
   });
 
 export const useBillingDetail = () =>
   useQuery({
     queryKey: ['subscription', 'billing'],
-    queryFn: () => unwrap(safe.get<BillingDetailResponse>('/hub/subscription/v1/billing')),
+    queryFn: () => subscriptionClient.getBillingDetail({}) as Promise<BillingDetailResponse>,
     select: (data) => normalizeBilling(data.billing),
   });
 
 export const useBillingHistory = () =>
   useQuery({
     queryKey: ['subscription', 'billing', 'history'],
-    queryFn: () => unwrap(safe.get<BillingHistoryResponse>('/hub/subscription/v1/billing/history')),
-    select: (data) => (data.history ?? []).map(normalizeBillingHistory),
+    queryFn: () => subscriptionClient.getBillingHistory({}),
+    select: (data) =>
+      (data.history ?? []).map((month) =>
+        normalizeBillingHistory(month as unknown as RawBillingHistoryMonth)
+      ),
   });
 
 import i18next from 'i18next';
@@ -443,7 +445,7 @@ export const useSetSubscription = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: SetSubscriptionRequest) =>
-      unwrap(safe.post('/hub/subscription/v1/my', { plan_slug: data.planSlug })),
+      subscriptionClient.upsertSubscription({ planSlug: data.planSlug }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['subscription'] });
       toast.success(i18next.t('toasts.subscriptionUpdated', 'Subscription updated'));
@@ -457,13 +459,11 @@ export const useSetSubscription = () => {
 export const useCheckout = () =>
   useMutation<CheckoutResponse, Error, CheckoutRequest>({
     mutationFn: (data: CheckoutRequest) =>
-      unwrap(
-        safe.post<CheckoutResponse>('/hub/subscription/v1/checkout', {
-          plan_slug: data.planSlug,
-          billing_cycle: data.billingCycle ?? 'monthly',
-          seat_count: data.seatCount,
-          addons: data.addons,
-          email: data.email,
-        })
-      ),
+      subscriptionClient.createCheckout({
+        planSlug: data.planSlug,
+        email: data.email ?? '',
+        billingCycle: data.billingCycle,
+        seatCount: data.seatCount,
+        addons: data.addons ?? [],
+      }) as Promise<CheckoutResponse>,
   });

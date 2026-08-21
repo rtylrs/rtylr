@@ -9,7 +9,7 @@ import {
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-import { safe } from '../../lib/api';
+import { crmApi } from '../../services/crmApi';
 import { unwrapList } from '../../lib/unwrapList';
 import { customerSchema, timelineEntrySchema } from '../../schemas/customers';
 import type { Customer, TimelineEntry } from '../../schemas/customers';
@@ -117,12 +117,12 @@ export const useListCustomers = (params: ListCustomersParams): UseQueryResult<Cu
       const page = Math.floor(Math.max(0, params.offset) / limit) + 1;
       const requestParams = {
         page,
-        page_size: limit,
+        pageSize: limit,
         search: params.search,
         tier: params.tier,
         tag: params.tag,
       };
-      const res = await unwrap(safe.get<unknown>('/crm/customers', { params: requestParams }));
+      const res = await unwrap(crmApi.getCustomers(requestParams));
       return z.array(customerSchema).parse(unwrapList(res, 'customers'));
     },
   });
@@ -131,7 +131,7 @@ export const useGetCustomer = (id: number | undefined): UseQueryResult<Customer>
   useQuery<Customer>({
     queryKey: ['crm-customer', id],
     queryFn: async (): Promise<Customer> => {
-      const res = await unwrap(safe.get<unknown>('/crm/customers/detail', { params: { id } }));
+      const res = await unwrap(crmApi.getCustomerDetail(id ?? 0));
       return normalizeCustomerResponse(res);
     },
     enabled: !!id,
@@ -141,7 +141,7 @@ export const useGetCustomerFull = (id: number | undefined): UseQueryResult<Custo
   useQuery<CustomerFullPayload>({
     queryKey: ['crm-customer', id, 'full'],
     queryFn: async (): Promise<CustomerFullPayload> => {
-      const res = await unwrap(safe.get<unknown>('/crm/customers/detail/full', { params: { id } }));
+      const res = await unwrap(crmApi.getCustomerFull(id ?? 0));
       const envelope = (res ?? {}) as {
         customer?: unknown;
         loyaltyTransactions?: Record<string, unknown>[];
@@ -168,9 +168,7 @@ export const useCustomerTimeline = (
     queryKey: ['crm-customer', id, 'timeline', cursor],
     queryFn: async (): Promise<CustomerTimelinePage> => {
       const res = (await unwrap(
-        safe.get<unknown>('/crm/customers/timeline', {
-          params: { customer_id: id, cursor, limit: 50 },
-        })
+        crmApi.getCustomerTimeline(id ?? 0, { customerId: id, cursor, limit: 50 })
       )) as { entries?: unknown; nextCursor?: string; next_cursor?: string };
       const rawEntries = unwrapList(res, 'entries', 'timeline');
       const entries = rawEntries.map((entry) => {
@@ -204,9 +202,7 @@ export const useCreateCustomer = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<CustomerMutationResponse, unknown, CustomerInput>({
     mutationFn: async (data: CustomerInput): Promise<CustomerMutationResponse> => {
-      const res = await unwrap(
-        safe.post<CustomerMutationResponse>('/crm/customers', toCustomerWireInput(data))
-      );
+      const res = await unwrap(crmApi.createCustomer(toCustomerWireInput(data)));
       return res as CustomerMutationResponse;
     },
     onSuccess: (): void => {
@@ -240,9 +236,7 @@ export const useUpdateCustomer = (): UseMutationResult<
         .find((customer) => customer.id === payload.id);
       const cached = cachedFromDetails ?? cachedFromLists;
       const merged = toCustomerWireInput({ ...cached, ...payload.data });
-      const res = await unwrap(
-        safe.put<CustomerMutationResponse>('/crm/customers', { id: payload.id, ...merged })
-      );
+      const res = await unwrap(crmApi.updateCustomer(payload.id, merged));
       return res as CustomerMutationResponse;
     },
     onSuccess: (_data: CustomerMutationResponse, variables: UpdateCustomerPayload): void => {
@@ -260,8 +254,7 @@ export const useDeleteCustomer = (): UseMutationResult<unknown, unknown, number>
   const qc = useQueryClient();
   const { t } = useTranslation();
   return useMutation<unknown, unknown, number>({
-    mutationFn: (id: number): Promise<unknown> =>
-      unwrap(safe.delete('/crm/customers', { data: { id } })),
+    mutationFn: (id: number): Promise<unknown> => unwrap(crmApi.deleteCustomer(id)),
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
       toast.success(t('crm.customers.deleted'));
@@ -277,7 +270,7 @@ export const useMergeCustomers = (): UseMutationResult<unknown, unknown, MergeCu
   const { t } = useTranslation();
   return useMutation<unknown, unknown, MergeCustomersPayload>({
     mutationFn: (payload: MergeCustomersPayload): Promise<unknown> =>
-      unwrap(safe.post('/crm/customers/merge', payload)),
+      unwrap(crmApi.mergeCustomers(payload.primaryId, payload.secondaryId)),
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
       toast.success(t('crm.customers.merged'));
@@ -309,7 +302,9 @@ export const useImportCustomerRows = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<CustomerImportResult, unknown, ImportCustomerRowsPayload>({
     mutationFn: async (payload: ImportCustomerRowsPayload): Promise<CustomerImportResult> =>
-      unwrap(safe.post<CustomerImportResult>('/crm/customers/import', payload)),
+      (await unwrap(
+        crmApi.importCustomers(payload.customers, payload.dedupe)
+      )) as CustomerImportResult,
     onSuccess: (result: CustomerImportResult): void => {
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
       toast.success(
@@ -336,9 +331,7 @@ export const useExportCustomers = (): UseMutationResult<CustomerExportPayload, u
   const { t } = useTranslation();
   return useMutation<CustomerExportPayload, unknown, number>({
     mutationFn: (id: number): Promise<CustomerExportPayload> =>
-      unwrap(
-        safe.get<CustomerExportPayload>('/crm/customers/export', { params: { customer_id: id } })
-      ) as Promise<CustomerExportPayload>,
+      unwrap(crmApi.exportCustomerData(id, true)) as Promise<CustomerExportPayload>,
     onSuccess: (): void => {
       toast.success(t('crm.customers.exported'));
     },

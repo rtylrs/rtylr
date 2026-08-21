@@ -20,7 +20,6 @@ import {
   UsersRound,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
 import { EmptyState } from '@voxire/ui';
 import { Avatar, Button, Input, Label } from '../../shared/components/ui';
 import {
@@ -50,7 +49,7 @@ import {
 } from '../../shared/hooks/queries/usePOSAccess';
 import { toast } from 'sonner';
 import type { GroupSummary } from '../../shared/hooks/queries/useGroups';
-import { safe } from '../../shared/lib/api';
+import { groupsClient } from '../../shared/lib/clients';
 import { useUserStore } from '../../shared/stores/userStore';
 
 const ALL_APPS = [
@@ -107,7 +106,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
   const { data: memberGroups = [] } = useQuery<GroupSummary[]>({
     queryKey: ['user-groups', id],
     queryFn: async () => {
-      const res = await unwrap(safe.get(`/hub/team/groups/v1/users/${id}/groups`));
+      const res = await groupsClient.getUserGroups({ userId: String(id) });
       return (res as { groups?: GroupSummary[] })?.groups ?? [];
     },
     enabled: !!id,
@@ -116,7 +115,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
   const qc = useQueryClient();
   const removeFromGroup = useMutation({
     mutationFn: async ({ groupId, userId }: { groupId: number; userId: string }) => {
-      await unwrap(safe.delete(`/hub/team/groups/v1/groups/${groupId}/members/${userId}`));
+      await groupsClient.removeGroupMember({ id: String(groupId), userId: String(userId) });
     },
     onSuccess: () => {
       toast.success('Removed from group');

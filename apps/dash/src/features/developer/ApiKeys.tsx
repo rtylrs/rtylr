@@ -72,7 +72,11 @@ const ApiKeys: React.FC = () => {
     }
     try {
       const result = await create.mutateAsync({ name, scopes });
-      setShowKey(result.key);
+      if (result.key) {
+        setShowKey(result.key);
+      } else {
+        toast.success('API key created');
+      }
       setName('');
       setScopes(['upload']);
       setCreateOpen(false);

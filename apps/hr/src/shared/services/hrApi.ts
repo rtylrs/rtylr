@@ -1,4 +1,4 @@
-import { safe } from '../lib/api';
+import { hrTransport } from '../lib/clients';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -129,36 +129,38 @@ const toShiftUpdatePayload = (data: UpdateShiftInput) => ({
 export const hrApi = {
   // Staff
   createStaff: (data: CreateStaffInput) =>
-    safe.post<StaffMember>('/hr/staff', toStaffPayload(data)),
+    hrTransport.post<StaffMember>('/hr/staff', toStaffPayload(data)),
   updateStaff: (data: UpdateStaffInput) =>
-    safe.put<StaffMember>('/hr/staff', toStaffUpdatePayload(data)),
-  deleteStaff: (id: number) => safe.delete<{ success: boolean }>('/hr/staff', { data: { id } }),
+    hrTransport.put<StaffMember>('/hr/staff', toStaffUpdatePayload(data)),
+  deleteStaff: (id: number) =>
+    hrTransport.delete<{ success: boolean }>('/hr/staff', { data: { id } }),
   clockIn: (staffId: number) =>
-    safe.post<{ success: boolean; time: string }>('/hr/staff/clock-in', { staffId }),
+    hrTransport.post<{ success: boolean; time: string }>('/hr/staff/clock-in', { staffId }),
   clockOut: (staffId: number) =>
-    safe.post<{ success: boolean; time: string }>('/hr/staff/clock-out', { staffId }),
+    hrTransport.post<{ success: boolean; time: string }>('/hr/staff/clock-out', { staffId }),
 
   // Shifts
   listShifts: (params?: { day?: string; staffId?: number }) =>
-    safe.get<Shift[]>('/hr/shifts', {
+    hrTransport.get<Shift[]>('/hr/shifts', {
       params: {
         ...(params?.day ? { date: params.day } : {}),
         ...(params?.staffId ? { staff_id: params.staffId } : {}),
       },
     }),
   createShift: (data: CreateShiftInput) =>
-    safe.post<Shift>('/hr/shifts', toShiftCreatePayload(data)),
+    hrTransport.post<Shift>('/hr/shifts', toShiftCreatePayload(data)),
   updateShift: (data: UpdateShiftInput) =>
-    safe.put<Shift>('/hr/shifts', toShiftUpdatePayload(data)),
+    hrTransport.put<Shift>('/hr/shifts', toShiftUpdatePayload(data)),
 
   // Payroll
 
   // Dashboard
-  getDashboard: () => safe.get<HRDashboardStats>('/hr/dashboard/v1/dashboard'),
-  getDashboardWidgets: () => safe.get<unknown>('/hr/dashboard/v1/dashboard/widgets'),
+  getDashboard: () => hrTransport.get<HRDashboardStats>('/hr/dashboard/v1/dashboard'),
+  getDashboardWidgets: () => hrTransport.get<unknown>('/hr/dashboard/v1/dashboard/widgets'),
   updateWidgetLayout: (widgets: unknown[]) =>
-    safe.put<{ success: boolean }>('/hr/dashboard/v1/dashboard/widgets', { widgets }),
+    hrTransport.put<{ success: boolean }>('/hr/dashboard/v1/dashboard/widgets', { widgets }),
 
   // Reports
-  generateReport: (request: unknown) => safe.post<unknown>('/hr/reports/generate', { request }),
+  generateReport: (request: unknown) =>
+    hrTransport.post<unknown>('/hr/reports/generate', { request }),
 };

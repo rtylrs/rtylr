@@ -7,8 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { EmptyState } from '@voxire/ui';
 import { Badge, Button } from '../../shared/components/ui';
-import { unwrap } from '@voxire/api';
-import { safe } from '../../shared/lib/api';
+import { tableClient } from '../../shared/lib/clients';
 
 interface QrTable {
   id: number;
@@ -22,10 +21,15 @@ const useQrTables = () =>
   useQuery<QrTable[]>({
     queryKey: ['qr-tables'],
     queryFn: async () => {
-      const res = await unwrap(
-        safe.get<{ tables?: QrTable[] } | QrTable[]>('/pos/table/v1/tables')
-      );
-      return Array.isArray(res) ? res : (res.tables ?? []);
+      const res = await tableClient.listTables({});
+      return (res.tables ?? []).map((table) => ({
+        id: Number(table.id ?? 0),
+        name: table.label ?? '',
+        capacity: table.seats ?? 0,
+        status: table.status ?? '',
+        // The canonical Table contract does not expose a QR URL yet.
+        qrCodeUrl: '',
+      }));
     },
   });
 

@@ -139,11 +139,11 @@ Counterpart surfaces:
 CLAUDE.md documents one API idiom. Flow uses three, and counting only the
 documented one undercounts by more than half.
 
-| Idiom | Call sites in Flow | Where |
-| --- | --- | --- |
-| `safe.get/post/put/patch/delete` via `safeFetch` | 120 | 70 in `shared/services/flowApi.ts`, the rest in `useMyEmployeeId.ts`, `router.tsx`, `useProfile.ts`, `usePresence.ts` |
-| Generated OneKit clients from `@voxire/voxie/**/client` | 9 imports | 6 files: `useDirectory.ts`, `useWorkDay.ts`, `useProfile.ts`, `useLeave.ts`, `useFlowTeam.ts`, `useFlowSubscription.ts` |
-| Raw `axios` | 0 | one mention in `apps/flow/src/layouts/FlowLayout.test.tsx:73`, a comment, not a call |
+| Idiom                                                   | Call sites in Flow | Where                                                                                                                   |
+| ------------------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `safe.get/post/put/patch/delete` via `safeFetch`        | 120                | 70 in `shared/services/flowApi.ts`, the rest in `useMyEmployeeId.ts`, `router.tsx`, `useProfile.ts`, `usePresence.ts`   |
+| Generated OneKit clients from `@voxire/voxie/**/client` | 9 imports          | 6 files: `useDirectory.ts`, `useWorkDay.ts`, `useProfile.ts`, `useLeave.ts`, `useFlowTeam.ts`, `useFlowSubscription.ts` |
+| Raw `axios`                                             | 0                  | one mention in `apps/flow/src/layouts/FlowLayout.test.tsx:73`, a comment, not a call                                    |
 
 A related correction to `CLAUDE.md`: it describes query hooks as living in
 `shared/hooks/queries/`. In Flow that directory holds 3 files. The live pattern is
@@ -186,7 +186,7 @@ because the next person measuring anything in this repo will hit one.
    The tenancy audit query in section 7.4 generates one `SELECT` per table; at the
    default it emitted 0 of 145 branches and returned an empty result set, which
    reads exactly like a clean bill of health. **Always `SET SESSION
-   group_concat_max_len` before generating SQL with it**, and check the branch
+group_concat_max_len` before generating SQL with it**, and check the branch
    count against the table count before trusting the output.
 2. **`information_schema.COLUMNS` does not distinguish a table from a view.** The
    same query counted `product_stock_total`, which is a view
@@ -221,35 +221,35 @@ Labelled inline throughout with **(inference)**. The main ones:
 Direction is "Flow reads" for every row in this catalogue. Gap classes are defined
 in section 5.
 
-| # | Data | Counterpart | Contract path, message and field | Frontend site | Trigger | Class | Consequence today |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| I1 | Caller's own `hr_employees.id` | HR | none, uncontracted `GET /hr/employees/me`; handler `~/Development/onion/internal/modules/hr_core/internal/routes/handlers/employee_handlers.go:148` | `apps/flow/src/shared/hooks/useMyEmployeeId.ts:16` | Automatic on Leave screen mount | A | Works. Precedent for id-space resolution |
-| I2 | Business staff roster | HR | `hr/staff/v1/models.onk` `Staff`, via `listStaff` | `apps/flow/src/features/directory/useDirectory.ts:25` | Directory route load | A | Works, but unpaginated |
-| I3 | Department names | HR | `hr/department/v1` `listDepartments` | `apps/flow/src/features/directory/useDirectory.ts:26`, `apps/flow/src/features/profile/useProfile.ts:31` | Directory and Profile load | A | Works |
-| I4 | Own staff record | HR | `hr/staff/v1/models.onk` `Staff`; no self-lookup or `user_id` filter exists | `apps/flow/src/features/profile/useProfile.ts:30-33` | Profile route load | C | Flow lists the whole roster and filters client-side. Unbounded read |
-| I5 | Own staff detail (extended) | HR | **none**; `GET /hr/staff/detail` is absent from contracts and absent from onion | `apps/flow/src/features/profile/useProfile.ts:48` | Profile route load | D | The query cannot succeed. See issue in section 10 |
-| I6 | Leave types | HR | `hr/leave/v1` `listLeaveTypes` | `apps/flow/src/features/leave/useLeave.ts:23` | Leave screen load | A | Works |
-| I7 | Own leave requests | HR | `hr/leave/v1` `listLeaveRequests` | `apps/flow/src/features/leave/useLeave.ts:34` | Leave screen load | A | Works |
-| I8 | Own leave balances | HR | `hr/leave/v1` `listLeaveBalances` | `apps/flow/src/features/leave/useLeave.ts:45` | Leave screen load | A | Works |
-| I9 | Team membership and roles | Hub | `hub/team/members/v1/types` `StaffUserPayload` | `apps/flow/src/shared/hooks/queries/useFlowTeam.ts:41-53` | Layout mount | A | Works |
-| I10 | Flow app grant | Hub | `hub/team/permissions/v1` | `apps/flow/src/shared/hooks/queries/useFlowTeam.ts:15` | Team screen action | A | Works |
-| I11 | Subscription and feature gate | Hub | `hub/subscription/v1` | `apps/flow/src/shared/hooks/queries/useFlowSubscription.ts:3` | Layout mount | A | Works |
-| I12 | Own user identity | Hub | `hub/user/v1` | `apps/flow/src/shared/services/flowApi.ts:890`, `router.tsx` | AppGuard | A | Works |
-| I13 | Business list and id | Hub | `packages/voxie/api/hub/business/v1/models.onk:25-34` `BusinessEntry` | `apps/flow/src/shared/services/flowApi.ts:432` | Workspace manager load | A | Works |
-| I14 | **Business currency** | Hub | `packages/voxie/api/hub/business/v1/models.onk:16` `Business.currency`, via `getBusiness` | absent; would go in `shared/services/flowApi.ts` beside `getBusinesses:432` | Would load with business config | B | Flow has no currency at all. Any money it renders would be unlabelled |
-| I15 | **Employee hourly rate** | HR | `packages/voxie/api/hr/employee/v1/models.onk:28` `hourly_rate`, `:32` `currency`; `packages/voxie/api/hr/staff/v1/models.onk:18` `hourly_rate` | `apps/flow/src/features/settings/sections/TimeSection.tsx:422` reads `localStorage` instead | Settings, Time, Billable rates | C | An admin retypes every person's rate into Flow, per browser, and nothing reads it |
-| I16 | **Overtime rate** | HR | `packages/voxie/api/hr/staff/v1/models.onk:19` `overtime_rate`; `packages/voxie/api/hr/employee/v1/models.onk:69` | absent | would gate the OT threshold in `apps/flow/src/features/settings/sections/TimeSection.tsx:215` | C | Flow's OT threshold is a local number with no pay consequence |
-| I17 | **Contracted hours per week** | HR | `packages/voxie/api/hr/work_schedule/v1/models.onk:20` `contracted_hours_per_week`; **no list or get RPC exists**, and `:32` says so in its own doc comment | `apps/flow/src/layouts/FlowLayout.tsx:380` hardcodes `capacity: 40`; `apps/flow/src/features/workspace-dashboard/WorkspaceDashboard.tsx:128` falls back to `40` | Layout mount | C | Every workload bar in Flow measures against a fictional 40 hours |
-| I18 | **Working days and OT thresholds** | HR | `packages/voxie/api/hr/work_schedule/v1/models.onk:12,22,24` `working_days`, `daily_ot_threshold_minutes`, `weekly_ot_threshold_minutes` | `apps/flow/src/shared/stores/timeSettingsStore.ts:37,38` holds browser-local equivalents | Settings, Time | C | The whole `timeSettingsStore` seam has a real HR owner it cannot reach |
-| I19 | **Approved leave for capacity** | HR | `hr/leave/v1` `listLeaveRequests` with status filter; already reachable | absent from planning screens; `features/roadmap/useRoadmap.ts`, `features/team/useTeamWorkload.ts` | Roadmap and Workload load | B | A sprint is planned against people who are on holiday |
-| I20 | Attendance clock records | HR | `hr/attendance/v1` `listAttendance` | absent; `apps/flow/src/features/time/TimeReports.tsx:142` gates a Clocked column on a local `trackAttendance` flag | Time Reports | B | Clocked-versus-logged reconciliation is offered as a toggle with no data behind it |
-| I21 | Shift roster | HR | `hr/shift/v1` `getRoster` | absent | would inform Calendar, `features/calendar/` | B | Flow's calendar cannot see that someone is on shift elsewhere |
-| I22 | Staff availability | HR | `hr/shift/v1` `listAvailability` | absent | would inform assignment in `features/tasks/` | B | Work is assigned to people who declared themselves unavailable |
-| I23 | **Customer for a project** | CRM | `packages/voxie/api/crm/customer/v1/models.onk:4-27` `Customer`; **no link field exists on Flow's side** | absent; would go on `features/projects/ProjectSettings.tsx` | Project settings save | D | A client project records its client in its name string, or not at all |
-| I24 | Project budget | Finance | **none**. No budget concept exists in `finance/` or `flow/` | absent | Project settings | D | Budget lives in a spreadsheet |
-| I25 | Expenses against a project | Finance | `finance/expenses/v1`; **no `project_id` anywhere in `finance/`** | absent | Project cost view | D | Non-labour cost cannot reach a project |
-| I26 | Purchase orders and materials | ERP | `erp/purchase_order/v1`; **no `project_id` anywhere in `erp/`** | absent | Project cost view | D | Materials cost cannot reach a project |
-| I27 | Invoice status for a project | Finance | `finance/invoices/v1` `listInvoices`; no project or customer FK on the invoice | absent | Project header | D | Nobody in Flow can see whether the client paid |
+| #   | Data                               | Counterpart | Contract path, message and field                                                                                                                            | Frontend site                                                                                                                                                   | Trigger                                                                                       | Class | Consequence today                                                                  |
+| --- | ---------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ----- | ---------------------------------------------------------------------------------- |
+| I1  | Caller's own `hr_employees.id`     | HR          | none, uncontracted `GET /hr/employees/me`; handler `~/Development/onion/internal/modules/hr_core/internal/routes/handlers/employee_handlers.go:148`         | `apps/flow/src/shared/hooks/useMyEmployeeId.ts:16`                                                                                                              | Automatic on Leave screen mount                                                               | A     | Works. Precedent for id-space resolution                                           |
+| I2  | Business staff roster              | HR          | `hr/staff/v1/models.onk` `Staff`, via `listStaff`                                                                                                           | `apps/flow/src/features/directory/useDirectory.ts:25`                                                                                                           | Directory route load                                                                          | A     | Works, but unpaginated                                                             |
+| I3  | Department names                   | HR          | `hr/department/v1` `listDepartments`                                                                                                                        | `apps/flow/src/features/directory/useDirectory.ts:26`, `apps/flow/src/features/profile/useProfile.ts:31`                                                        | Directory and Profile load                                                                    | A     | Works                                                                              |
+| I4  | Own staff record                   | HR          | `hr/staff/v1/models.onk` `Staff`; no self-lookup or `user_id` filter exists                                                                                 | `apps/flow/src/features/profile/useProfile.ts:30-33`                                                                                                            | Profile route load                                                                            | C     | Flow lists the whole roster and filters client-side. Unbounded read                |
+| I5  | Own staff detail (extended)        | HR          | **none**; `GET /hr/staff/detail` is absent from contracts and absent from onion                                                                             | `apps/flow/src/features/profile/useProfile.ts:48`                                                                                                               | Profile route load                                                                            | D     | The query cannot succeed. See issue in section 10                                  |
+| I6  | Leave types                        | HR          | `hr/leave/v1` `listLeaveTypes`                                                                                                                              | `apps/flow/src/features/leave/useLeave.ts:23`                                                                                                                   | Leave screen load                                                                             | A     | Works                                                                              |
+| I7  | Own leave requests                 | HR          | `hr/leave/v1` `listLeaveRequests`                                                                                                                           | `apps/flow/src/features/leave/useLeave.ts:34`                                                                                                                   | Leave screen load                                                                             | A     | Works                                                                              |
+| I8  | Own leave balances                 | HR          | `hr/leave/v1` `listLeaveBalances`                                                                                                                           | `apps/flow/src/features/leave/useLeave.ts:45`                                                                                                                   | Leave screen load                                                                             | A     | Works                                                                              |
+| I9  | Team membership and roles          | Hub         | `hub/team/members/v1/types` `StaffUserPayload`                                                                                                              | `apps/flow/src/shared/hooks/queries/useFlowTeam.ts:41-53`                                                                                                       | Layout mount                                                                                  | A     | Works                                                                              |
+| I10 | Flow app grant                     | Hub         | `hub/team/permissions/v1`                                                                                                                                   | `apps/flow/src/shared/hooks/queries/useFlowTeam.ts:15`                                                                                                          | Team screen action                                                                            | A     | Works                                                                              |
+| I11 | Subscription and feature gate      | Hub         | `hub/subscription/v1`                                                                                                                                       | `apps/flow/src/shared/hooks/queries/useFlowSubscription.ts:3`                                                                                                   | Layout mount                                                                                  | A     | Works                                                                              |
+| I12 | Own user identity                  | Hub         | `hub/user/v1`                                                                                                                                               | `apps/flow/src/shared/services/flowApi.ts:890`, `router.tsx`                                                                                                    | AppGuard                                                                                      | A     | Works                                                                              |
+| I13 | Business list and id               | Hub         | `packages/voxie/api/hub/business/v1/models.onk:25-34` `BusinessEntry`                                                                                       | `apps/flow/src/shared/services/flowApi.ts:432`                                                                                                                  | Workspace manager load                                                                        | A     | Works                                                                              |
+| I14 | **Business currency**              | Hub         | `packages/voxie/api/hub/business/v1/models.onk:16` `Business.currency`, via `getBusiness`                                                                   | absent; would go in `shared/services/flowApi.ts` beside `getBusinesses:432`                                                                                     | Would load with business config                                                               | B     | Flow has no currency at all. Any money it renders would be unlabelled              |
+| I15 | **Employee hourly rate**           | HR          | `packages/voxie/api/hr/employee/v1/models.onk:28` `hourly_rate`, `:32` `currency`; `packages/voxie/api/hr/staff/v1/models.onk:18` `hourly_rate`             | `apps/flow/src/features/settings/sections/TimeSection.tsx:422` reads `localStorage` instead                                                                     | Settings, Time, Billable rates                                                                | C     | An admin retypes every person's rate into Flow, per browser, and nothing reads it  |
+| I16 | **Overtime rate**                  | HR          | `packages/voxie/api/hr/staff/v1/models.onk:19` `overtime_rate`; `packages/voxie/api/hr/employee/v1/models.onk:69`                                           | absent                                                                                                                                                          | would gate the OT threshold in `apps/flow/src/features/settings/sections/TimeSection.tsx:215` | C     | Flow's OT threshold is a local number with no pay consequence                      |
+| I17 | **Contracted hours per week**      | HR          | `packages/voxie/api/hr/work_schedule/v1/models.onk:20` `contracted_hours_per_week`; **no list or get RPC exists**, and `:32` says so in its own doc comment | `apps/flow/src/layouts/FlowLayout.tsx:380` hardcodes `capacity: 40`; `apps/flow/src/features/workspace-dashboard/WorkspaceDashboard.tsx:128` falls back to `40` | Layout mount                                                                                  | C     | Every workload bar in Flow measures against a fictional 40 hours                   |
+| I18 | **Working days and OT thresholds** | HR          | `packages/voxie/api/hr/work_schedule/v1/models.onk:12,22,24` `working_days`, `daily_ot_threshold_minutes`, `weekly_ot_threshold_minutes`                    | `apps/flow/src/shared/stores/timeSettingsStore.ts:37,38` holds browser-local equivalents                                                                        | Settings, Time                                                                                | C     | The whole `timeSettingsStore` seam has a real HR owner it cannot reach             |
+| I19 | **Approved leave for capacity**    | HR          | `hr/leave/v1` `listLeaveRequests` with status filter; already reachable                                                                                     | absent from planning screens; `features/roadmap/useRoadmap.ts`, `features/team/useTeamWorkload.ts`                                                              | Roadmap and Workload load                                                                     | B     | A sprint is planned against people who are on holiday                              |
+| I20 | Attendance clock records           | HR          | `hr/attendance/v1` `listAttendance`                                                                                                                         | absent; `apps/flow/src/features/time/TimeReports.tsx:142` gates a Clocked column on a local `trackAttendance` flag                                              | Time Reports                                                                                  | B     | Clocked-versus-logged reconciliation is offered as a toggle with no data behind it |
+| I21 | Shift roster                       | HR          | `hr/shift/v1` `getRoster`                                                                                                                                   | absent                                                                                                                                                          | would inform Calendar, `features/calendar/`                                                   | B     | Flow's calendar cannot see that someone is on shift elsewhere                      |
+| I22 | Staff availability                 | HR          | `hr/shift/v1` `listAvailability`                                                                                                                            | absent                                                                                                                                                          | would inform assignment in `features/tasks/`                                                  | B     | Work is assigned to people who declared themselves unavailable                     |
+| I23 | **Customer for a project**         | CRM         | `packages/voxie/api/crm/customer/v1/models.onk:4-27` `Customer`; **no link field exists on Flow's side**                                                    | absent; would go on `features/projects/ProjectSettings.tsx`                                                                                                     | Project settings save                                                                         | D     | A client project records its client in its name string, or not at all              |
+| I24 | Project budget                     | Finance     | **none**. No budget concept exists in `finance/` or `flow/`                                                                                                 | absent                                                                                                                                                          | Project settings                                                                              | D     | Budget lives in a spreadsheet                                                      |
+| I25 | Expenses against a project         | Finance     | `finance/expenses/v1`; **no `project_id` anywhere in `finance/`**                                                                                           | absent                                                                                                                                                          | Project cost view                                                                             | D     | Non-labour cost cannot reach a project                                             |
+| I26 | Purchase orders and materials      | ERP         | `erp/purchase_order/v1`; **no `project_id` anywhere in `erp/`**                                                                                             | absent                                                                                                                                                          | Project cost view                                                                             | D     | Materials cost cannot reach a project                                              |
+| I27 | Invoice status for a project       | Finance     | `finance/invoices/v1` `listInvoices`; no project or customer FK on the invoice                                                                              | absent                                                                                                                                                          | Project header                                                                                | D     | Nobody in Flow can see whether the client paid                                     |
 
 Inbound totals: 12 class A, 6 class B, 4 class C, 5 class D.
 
@@ -259,23 +259,23 @@ Direction is "Flow writes" or "counterpart reads Flow" for every row. Note that
 **every single outbound link is unbuilt on the consumer side**: no app outside
 Flow contains a Flow endpoint literal or a `voxie/flow/` import.
 
-| # | Data | Counterpart | Contract path, message and field | Frontend site | Trigger | Class | Consequence today |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| O1 | Logged hours, with project, task, work type and billable flag | HR | `packages/voxie/api/flow/time/v1/models.onk:88-116` `WorkDayLine`, persisted directly as `hr_time_entries` (`~/Development/onion/internal/platform/database/schemas/flow/v8_time_tracking.sql:4-8`) | `features/time/useWorkDay.ts`, `features/time/AddHours.tsx` | Log Hours submit | A | Works, and is the strongest precedent in the platform |
-| O2 | Work type to payroll category mapping | HR | `packages/voxie/api/flow/time/v1/models.onk:21` `WorkType.hr_category_id` | `features/settings/sections/TimeSection.tsx` category list | Settings, Time | A | Contract and column exist. The Flow UI carries a `GateNotice` saying nothing reads the category |
-| O3 | Completed tasks as draft time entries | HR | **none**; live `POST /hr/time-entries/import-flow` | `apps/hr/src/shared/hooks/queries/useTimeEntries.ts:86` exists with **zero call sites** | none | B | An unreachable chain: five working backend links, one broken frontend link, two absent. #869 decides its fate |
-| O4 | Approved billable entries for invoicing | Finance | **none**; live `POST /hr/time-entries/export-billable`, returns `BillableExportItem` with `project_id` and `task_id` (`~/Development/onion/internal/modules/hr_time/internal/domain/types.go:90-99`) | none in any app | none | B | Billable hours are marked, batched, and exported to nowhere |
-| O5 | Task counts, velocity, cycle time | Insights | `packages/voxie/api/insights/dashboard/v1/models.onk:53-68` `GetInsightsResponse`; handler stubbed at `~/Development/onion/internal/modules/insights/internal/api/setting_service.go:102` | `apps/insights/src/shared/hooks/queries/useInsightsDashboard.ts` calls only `getDashboardSummary` | none | C | Company-wide delivery metrics do not exist outside Flow |
-| O6 | Project roadmap | Insights | `packages/voxie/api/insights/dashboard/v1/models.onk:18-35` `RoadmapProject`; handler stubbed at `~/Development/onion/internal/modules/insights/internal/api/setting_service.go:110` | none | none | C | Duplicate of `flow/insights/v1` `RoadmapProject`, with a different shape and `int64` ids where Flow uses strings |
-| O7 | Per-person workload | Insights | `packages/voxie/api/insights/dashboard/v1/models.onk:3-16` `WorkloadEntry`; handler stubbed at `~/Development/onion/internal/modules/insights/internal/api/setting_service.go:114` | none | none | C | An owner cannot see delivery load beside headcount and payroll cost |
-| O8 | Business-wide KPI tile counts | Insights | `packages/voxie/api/insights/dashboard/v1/models.onk:72-85` `GetKPIsResponse`; handler stubbed at `~/Development/onion/internal/modules/insights/internal/api/setting_service.go:106` | none | none | C | `GetKPIsResponse` has no delivery field to carry Flow's contribution |
-| O9 | **Project labour cost** | Finance, CRM, Insights | **none.** No cost field anywhere in `flow/` | absent | Project header, P&L, account view | D | The motivating example. See section 6 |
-| O10 | **Billable hours as invoice lines** | Finance | `finance/invoices/v1` `InvoiceItem` (`:4-20`) can hold them today with `unit: "hour"`; nothing records the source | `apps/finance/src/features/invoices/NewInvoice.tsx:122` hardcodes `unit: 'item'` | New Invoice | B for creating, D for linking back | Every billable line is retyped by hand from a Flow report |
-| O11 | Estimate versus actual | Insights, Finance | `packages/voxie/api/flow/task/v1/models.onk:33` `estimated_hours` and summed `WorkDayLine.duration_minutes` both exist; **no aggregation endpoint** | absent | Project header | C | Overrun is invisible until the invoice is disputed |
-| O12 | Delivery dates and blocked state | CRM | `flow/project/v1/models.onk` `due_date`, `status`; no CRM-side field to receive it | absent | Account view in CRM | D | An account manager phones the project manager |
-| O13 | Milestones | CRM, Finance | `packages/voxie/api/flow/milestone/v1/models.onk:8-20` `Milestone` with `target_date`, `computed_progress` | absent | Milestone billing trigger | D | Milestone-based invoicing is manual |
-| O14 | Presence and work mode | HR | **none**; live `GET /flow/presence/today` (`~/Development/onion/internal/modules/workspaces/presence.go:98`), a server-side join of Flow work days, HR employees and HR leave | `apps/flow/src/features/presence/usePresence.ts:15` | Presence screen load | A | Works. The best existing model for a reduced cross-app projection |
-| O15 | Cycles and sprints | Insights | `flow/cycle/v1` | absent | none | D | No consumer has asked |
+| #   | Data                                                          | Counterpart            | Contract path, message and field                                                                                                                                                                     | Frontend site                                                                                     | Trigger                           | Class                              | Consequence today                                                                                                |
+| --- | ------------------------------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| O1  | Logged hours, with project, task, work type and billable flag | HR                     | `packages/voxie/api/flow/time/v1/models.onk:88-116` `WorkDayLine`, persisted directly as `hr_time_entries` (`~/Development/onion/internal/platform/database/schemas/flow/v8_time_tracking.sql:4-8`)  | `features/time/useWorkDay.ts`, `features/time/AddHours.tsx`                                       | Log Hours submit                  | A                                  | Works, and is the strongest precedent in the platform                                                            |
+| O2  | Work type to payroll category mapping                         | HR                     | `packages/voxie/api/flow/time/v1/models.onk:21` `WorkType.hr_category_id`                                                                                                                            | `features/settings/sections/TimeSection.tsx` category list                                        | Settings, Time                    | A                                  | Contract and column exist. The Flow UI carries a `GateNotice` saying nothing reads the category                  |
+| O3  | Completed tasks as draft time entries                         | HR                     | **none**; live `POST /hr/time-entries/import-flow`                                                                                                                                                   | `apps/hr/src/shared/hooks/queries/useTimeEntries.ts:86` exists with **zero call sites**           | none                              | B                                  | An unreachable chain: five working backend links, one broken frontend link, two absent. #869 decides its fate    |
+| O4  | Approved billable entries for invoicing                       | Finance                | **none**; live `POST /hr/time-entries/export-billable`, returns `BillableExportItem` with `project_id` and `task_id` (`~/Development/onion/internal/modules/hr_time/internal/domain/types.go:90-99`) | none in any app                                                                                   | none                              | B                                  | Billable hours are marked, batched, and exported to nowhere                                                      |
+| O5  | Task counts, velocity, cycle time                             | Insights               | `packages/voxie/api/insights/dashboard/v1/models.onk:53-68` `GetInsightsResponse`; handler stubbed at `~/Development/onion/internal/modules/insights/internal/api/setting_service.go:102`            | `apps/insights/src/shared/hooks/queries/useInsightsDashboard.ts` calls only `getDashboardSummary` | none                              | C                                  | Company-wide delivery metrics do not exist outside Flow                                                          |
+| O6  | Project roadmap                                               | Insights               | `packages/voxie/api/insights/dashboard/v1/models.onk:18-35` `RoadmapProject`; handler stubbed at `~/Development/onion/internal/modules/insights/internal/api/setting_service.go:110`                 | none                                                                                              | none                              | C                                  | Duplicate of `flow/insights/v1` `RoadmapProject`, with a different shape and `int64` ids where Flow uses strings |
+| O7  | Per-person workload                                           | Insights               | `packages/voxie/api/insights/dashboard/v1/models.onk:3-16` `WorkloadEntry`; handler stubbed at `~/Development/onion/internal/modules/insights/internal/api/setting_service.go:114`                   | none                                                                                              | none                              | C                                  | An owner cannot see delivery load beside headcount and payroll cost                                              |
+| O8  | Business-wide KPI tile counts                                 | Insights               | `packages/voxie/api/insights/dashboard/v1/models.onk:72-85` `GetKPIsResponse`; handler stubbed at `~/Development/onion/internal/modules/insights/internal/api/setting_service.go:106`                | none                                                                                              | none                              | C                                  | `GetKPIsResponse` has no delivery field to carry Flow's contribution                                             |
+| O9  | **Project labour cost**                                       | Finance, CRM, Insights | **none.** No cost field anywhere in `flow/`                                                                                                                                                          | absent                                                                                            | Project header, P&L, account view | D                                  | The motivating example. See section 6                                                                            |
+| O10 | **Billable hours as invoice lines**                           | Finance                | `finance/invoices/v1` `InvoiceItem` (`:4-20`) can hold them today with `unit: "hour"`; nothing records the source                                                                                    | `apps/finance/src/features/invoices/NewInvoice.tsx:122` hardcodes `unit: 'item'`                  | New Invoice                       | B for creating, D for linking back | Every billable line is retyped by hand from a Flow report                                                        |
+| O11 | Estimate versus actual                                        | Insights, Finance      | `packages/voxie/api/flow/task/v1/models.onk:33` `estimated_hours` and summed `WorkDayLine.duration_minutes` both exist; **no aggregation endpoint**                                                  | absent                                                                                            | Project header                    | C                                  | Overrun is invisible until the invoice is disputed                                                               |
+| O12 | Delivery dates and blocked state                              | CRM                    | `flow/project/v1/models.onk` `due_date`, `status`; no CRM-side field to receive it                                                                                                                   | absent                                                                                            | Account view in CRM               | D                                  | An account manager phones the project manager                                                                    |
+| O13 | Milestones                                                    | CRM, Finance           | `packages/voxie/api/flow/milestone/v1/models.onk:8-20` `Milestone` with `target_date`, `computed_progress`                                                                                           | absent                                                                                            | Milestone billing trigger         | D                                  | Milestone-based invoicing is manual                                                                              |
+| O14 | Presence and work mode                                        | HR                     | **none**; live `GET /flow/presence/today` (`~/Development/onion/internal/modules/workspaces/presence.go:98`), a server-side join of Flow work days, HR employees and HR leave                        | `apps/flow/src/features/presence/usePresence.ts:15`                                               | Presence screen load              | A                                  | Works. The best existing model for a reduced cross-app projection                                                |
+| O15 | Cycles and sprints                                            | Insights               | `flow/cycle/v1`                                                                                                                                                                                      | absent                                                                                            | none                              | D                                  | No consumer has asked                                                                                            |
 
 Outbound totals: 3 class A, 3 class B, 4 class C, 5 class D.
 
@@ -332,16 +332,16 @@ owning app's record, rather than inventing a new one.
 Shippable without touching onion. Each row below names the contract file, message
 and field, per the rule that an uncitable claim is not class B.
 
-| Row | Contract citation | Work |
-| --- | --- | --- |
-| I14 currency | `packages/voxie/api/hub/business/v1/models.onk:16` `Business.currency`, returned by `getBusiness` (`packages/voxie/api/hub/business/v1/service.onk:18`) | Two calls: `/businesses/mine` for the id Flow already fetches, then `getBusiness`. `ApiBusinessSummary` (`apps/flow/src/shared/services/flowApi.ts:46-50`) drops it today |
-| I19 approved leave | `hr/leave/v1` `listLeaveRequests`, already called at `apps/flow/src/features/leave/useLeave.ts:34` | Reuse the existing hook on Roadmap and Workload |
-| I20 attendance | `hr/attendance/v1` `listAttendance` | New hook; gates the existing Clocked column at `apps/flow/src/features/time/TimeReports.tsx:142` |
-| I21 roster | `hr/shift/v1` `getRoster` | New hook for Calendar |
-| I22 availability | `hr/shift/v1` `listAvailability` | New hook for assignment |
-| O3 flow import | Uncontracted but live: `~/Development/onion/internal/modules/hr_time/internal/routes/handlers/import_flow_handler.go:16` | A button. The hook already exists at `apps/hr/src/shared/hooks/queries/useTimeEntries.ts:86` with zero callers |
-| O4 billable export | Uncontracted but live: `~/Development/onion/internal/modules/hr_time/internal/routes/handlers/export_billable_handler.go:15` | A screen in Finance or HR |
-| O10 invoice lines | `packages/voxie/api/finance/invoices/v1/models.onk:4-20` `InvoiceItem` accepts `description`, `quantity`, `unit`, `unit_price` | Prefill from Flow hours. `apps/finance/src/features/invoices/NewInvoice.tsx:122` hardcodes `unit: 'item'` |
+| Row                | Contract citation                                                                                                                                       | Work                                                                                                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| I14 currency       | `packages/voxie/api/hub/business/v1/models.onk:16` `Business.currency`, returned by `getBusiness` (`packages/voxie/api/hub/business/v1/service.onk:18`) | Two calls: `/businesses/mine` for the id Flow already fetches, then `getBusiness`. `ApiBusinessSummary` (`apps/flow/src/shared/services/flowApi.ts:46-50`) drops it today |
+| I19 approved leave | `hr/leave/v1` `listLeaveRequests`, already called at `apps/flow/src/features/leave/useLeave.ts:34`                                                      | Reuse the existing hook on Roadmap and Workload                                                                                                                           |
+| I20 attendance     | `hr/attendance/v1` `listAttendance`                                                                                                                     | New hook; gates the existing Clocked column at `apps/flow/src/features/time/TimeReports.tsx:142`                                                                          |
+| I21 roster         | `hr/shift/v1` `getRoster`                                                                                                                               | New hook for Calendar                                                                                                                                                     |
+| I22 availability   | `hr/shift/v1` `listAvailability`                                                                                                                        | New hook for assignment                                                                                                                                                   |
+| O3 flow import     | Uncontracted but live: `~/Development/onion/internal/modules/hr_time/internal/routes/handlers/import_flow_handler.go:16`                                | A button. The hook already exists at `apps/hr/src/shared/hooks/queries/useTimeEntries.ts:86` with zero callers                                                            |
+| O4 billable export | Uncontracted but live: `~/Development/onion/internal/modules/hr_time/internal/routes/handlers/export_billable_handler.go:15`                            | A screen in Finance or HR                                                                                                                                                 |
+| O10 invoice lines  | `packages/voxie/api/finance/invoices/v1/models.onk:4-20` `InvoiceItem` accepts `description`, `quantity`, `unit`, `unit_price`                          | Prefill from Flow hours. `apps/finance/src/features/invoices/NewInvoice.tsx:122` hardcodes `unit: 'item'`                                                                 |
 
 **A caution on O3 and O4.** Both endpoints are live and neither is in the
 contracts. Calling an uncontracted endpoint is what `useMyEmployeeId.ts` and
@@ -433,8 +433,8 @@ field. Reachable in one extra call to `getBusiness`.
 Not in the browser. `packages/voxie/api/hr/staff/v1/models.onk:134-135` already states the platform's
 position:
 
-> It never carries salary, hourly_rate, overtime_rate, address, or
-> emergency_contact_* - those stay HR-admin-only
+> It never carries salary, hourly*rate, overtime_rate, address, or
+> emergency_contact*\* - those stay HR-admin-only
 
 If Flow computed cost client-side it would need the rate in a Flow API response,
 and the network tab would become a permission bypass for every project manager.
@@ -494,13 +494,13 @@ app's record, resolved server-side, never a copied value.
 
 ### 7.1 Read live or read a projection
 
-| Data | Pattern | Why |
-| --- | --- | --- |
-| Staff, departments, leave, availability, roster | Live read of the owner's endpoint | Already the established pattern. Staleness is the user's own recent action |
-| Contracted hours | Live read, cached by React Query | Changes rarely; a stale capacity bar is a small error |
-| Project cost | Server-computed projection | The operands must not cross the wire. Not a caching decision, an exposure decision |
-| Customer name on a project | Live read via `customer_id` | Never snapshot the name. See 7.3 |
-| Billable hours to an invoice | Snapshot at invoice creation, with a link back | An invoice is a legal record. It must not change when a time entry is edited later |
+| Data                                            | Pattern                                        | Why                                                                                |
+| ----------------------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Staff, departments, leave, availability, roster | Live read of the owner's endpoint              | Already the established pattern. Staleness is the user's own recent action         |
+| Contracted hours                                | Live read, cached by React Query               | Changes rarely; a stale capacity bar is a small error                              |
+| Project cost                                    | Server-computed projection                     | The operands must not cross the wire. Not a caching decision, an exposure decision |
+| Customer name on a project                      | Live read via `customer_id`                    | Never snapshot the name. See 7.3                                                   |
+| Billable hours to an invoice                    | Snapshot at invoice creation, with a link back | An invoice is a legal record. It must not change when a time entry is edited later |
 
 ### 7.2 Cost projection
 
@@ -608,12 +608,12 @@ tables hold rows at `business_id = 0`, and five hold such rows across more than
 one `owner_id`, which `packages/voxie/api/flow/project/v1/models.onk:8` defines as
 the tenant. Tracing all five to their INSERT explained all five:
 
-| Table | Why | Leak |
-| --- | --- | --- |
-| `flow_workspaces` | Deliberate. `CreatePersonalWorkspace` omits the column (`~/Development/onion/internal/modules/workspaces/sql/queries/members.sql:27-29`) and `GetWorkspacesByOwner` re-scopes those rows on `owner_id` (`~/Development/onion/internal/modules/workspaces/sql/queries/workspaces.sql:16-21`) | No |
-| `stock_locations` | Explicit literal `0` in `InsertDefaultWarehouseLocation` (`~/Development/onion/internal/platform/stock_core/sql/queries/stock_core.sql:6-9`) | No |
-| `hr_configs` | Column never written, never read; both queries scope `owner_id` (`~/Development/onion/internal/modules/hr_setup/sql/queries/hr_setup.sql:13-23`) | No |
-| `stock_levels`, `stock_ledger` | Inserts omit it; no read in that file filters it | No |
+| Table                          | Why                                                                                                                                                                                                                                                                                         | Leak |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| `flow_workspaces`              | Deliberate. `CreatePersonalWorkspace` omits the column (`~/Development/onion/internal/modules/workspaces/sql/queries/members.sql:27-29`) and `GetWorkspacesByOwner` re-scopes those rows on `owner_id` (`~/Development/onion/internal/modules/workspaces/sql/queries/workspaces.sql:16-21`) | No   |
+| `stock_locations`              | Explicit literal `0` in `InsertDefaultWarehouseLocation` (`~/Development/onion/internal/platform/stock_core/sql/queries/stock_core.sql:6-9`)                                                                                                                                                | No   |
+| `hr_configs`                   | Column never written, never read; both queries scope `owner_id` (`~/Development/onion/internal/modules/hr_setup/sql/queries/hr_setup.sql:13-23`)                                                                                                                                            | No   |
+| `stock_levels`, `stock_ledger` | Inserts omit it; no read in that file filters it                                                                                                                                                                                                                                            | No   |
 
 `flow_workspaces` is documented in the code at `~/Development/onion/internal/modules/workspaces/sql/queries/workspaces.sql:8-11`: a personal
 workspace "has no business_id (it isn't tied to one tenant)", and zero is the
@@ -688,14 +688,14 @@ Ranked by value per unit of effort, respecting dependencies. Effort is judgement
 
 No onion work, no `.onk` change. These prove the seam.
 
-| Item | Class | Effort | Depends on |
-| --- | --- | --- | --- |
-| I19, approved leave on Roadmap and Workload | B | S | nothing; hook exists |
-| I14, business currency | B | S | nothing |
-| I22, availability in task assignment | B | M | nothing |
-| I21, shift roster in Calendar | B | M | nothing |
-| I20, attendance behind the existing Clocked toggle | B | M | nothing |
-| O3, a button for the Flow import that already works | B | S | fix the response type first |
+| Item                                                | Class | Effort | Depends on                  |
+| --------------------------------------------------- | ----- | ------ | --------------------------- |
+| I19, approved leave on Roadmap and Workload         | B     | S      | nothing; hook exists        |
+| I14, business currency                              | B     | S      | nothing                     |
+| I22, availability in task assignment                | B     | M      | nothing                     |
+| I21, shift roster in Calendar                       | B     | M      | nothing                     |
+| I20, attendance behind the existing Clocked toggle  | B     | M      | nothing                     |
+| O3, a button for the Flow import that already works | B     | S      | fix the response type first |
 
 **What a user can newly do:** plan a sprint that accounts for who is on holiday
 and who is unavailable; see a currency label on every hour; and import their
@@ -707,12 +707,12 @@ Clocked column on a local flag with no data behind it.
 
 ### Wave 2: unblock capacity, one small RPC
 
-| Item | Class | Effort | Depends on |
-| --- | --- | --- | --- |
-| I17 and I18, `listWorkSchedules` RPC plus Flow read | C | M | onion |
-| Retire the capacity fiction at `apps/flow/src/layouts/FlowLayout.tsx:380` and `apps/flow/src/features/workspace-dashboard/WorkspaceDashboard.tsx:128` | C | S | above |
-| Migrate `timeSettingsStore`'s target and OT fields to the server values | C | M | above |
-| I4, `user_id` filter on `hr.staff.v1` `listStaff` | C | S | onion |
+| Item                                                                                                                                                  | Class | Effort | Depends on |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ------ | ---------- |
+| I17 and I18, `listWorkSchedules` RPC plus Flow read                                                                                                   | C     | M      | onion      |
+| Retire the capacity fiction at `apps/flow/src/layouts/FlowLayout.tsx:380` and `apps/flow/src/features/workspace-dashboard/WorkspaceDashboard.tsx:128` | C     | S      | above      |
+| Migrate `timeSettingsStore`'s target and OT fields to the server values                                                                               | C     | M      | above      |
+| I4, `user_id` filter on `hr.staff.v1` `listStaff`                                                                                                     | C     | S      | onion      |
 
 **What a user can newly do:** see workload measured against their real contracted
 hours instead of a hardcoded 40, and stop maintaining Flow's browser-local copy of
@@ -724,11 +724,11 @@ deletes code rather than adding it.
 
 ### Wave 3: cost, the motivating example
 
-| Item | Class | Effort | Depends on |
-| --- | --- | --- | --- |
-| O9, the `ProjectCost` projection of 7.2 | D | L | I14 currency, wave 1 |
-| Delete `ratesByUserId` and the rate settings UI | C | S | above |
-| The `DEFAULT 0` tenancy audit | platform | L | nothing, but blocks nothing either |
+| Item                                            | Class    | Effort | Depends on                         |
+| ----------------------------------------------- | -------- | ------ | ---------------------------------- |
+| O9, the `ProjectCost` projection of 7.2         | D        | L      | I14 currency, wave 1               |
+| Delete `ratesByUserId` and the rate settings UI | C        | S      | above                              |
+| The `DEFAULT 0` tenancy audit                   | platform | L      | nothing, but blocks nothing either |
 
 **What a user can newly do:** open a Flow project and see what it has cost, with
 an honest partial label when someone has no rate on file. A PM stops exporting
@@ -742,12 +742,12 @@ should not be forgotten.
 
 ### Wave 4: the customer link and its consequences
 
-| Item | Class | Effort | Depends on |
-| --- | --- | --- | --- |
-| I23, `customer_id` on `Project` plus the workspace gate | D | L | 7.3 |
-| O12, delivery status on the CRM account view | D | M | above |
-| O10, prefill invoice lines from billable hours | B, then D | M | wave 3 |
-| `customer_id` and `project_id` on `finance.invoices.v1` | C | M | above |
+| Item                                                    | Class     | Effort | Depends on |
+| ------------------------------------------------------- | --------- | ------ | ---------- |
+| I23, `customer_id` on `Project` plus the workspace gate | D         | L      | 7.3        |
+| O12, delivery status on the CRM account view            | D         | M      | above      |
+| O10, prefill invoice lines from billable hours          | B, then D | M      | wave 3     |
+| `customer_id` and `project_id` on `finance.invoices.v1` | C         | M      | above      |
 
 **What a user can newly do:** raise an invoice for a client's project without
 retyping a single hour, and answer "is this account profitable" by joining cost
@@ -756,11 +756,11 @@ client problem rather than copying it.
 
 ### Wave 5: the platform view
 
-| Item | Class | Effort | Depends on |
-| --- | --- | --- | --- |
-| O5 to O8, implement the four stubbed Insights handlers | C | L | pick one `RoadmapProject`, see 7.6 |
-| O11, aggregation endpoint for estimate versus actual | C | M | nothing |
-| O4, a screen for the billable export that already runs | B | M | wave 4 |
+| Item                                                   | Class | Effort | Depends on                         |
+| ------------------------------------------------------ | ----- | ------ | ---------------------------------- |
+| O5 to O8, implement the four stubbed Insights handlers | C     | L      | pick one `RoadmapProject`, see 7.6 |
+| O11, aggregation endpoint for estimate versus actual   | C     | M      | nothing                            |
+| O4, a screen for the billable export that already runs | B     | M      | wave 4                             |
 
 **What a user can newly do:** see delivery metrics beside revenue and headcount on
 one Insights dashboard, which today is four contract messages and no
@@ -842,11 +842,11 @@ rows below are reconciled before either is merged rather than after.
 
 **Three of its issues are Flow links and this document does not re-propose them.**
 
-| Their issue | This document's row | Note |
-| --- | --- | --- |
-| #837 `HR->FLOW-01: project labour cost` | O9, section 6 | Same conclusion by the same reasoning: HR owns the aggregate, returns totals only, carries a `rate_coverage` figure, and suppresses the total on a one-contributor project. Their `cost_minor_units: int64` is better than the `float64` in 7.2; take theirs |
-| #838 `HR->FLOW-02: approved leave gates assignment` | I19 | Same link |
-| #836 `FLOW->FIN-01: unbilled billable hours` | O4, O10 | Same link |
+| Their issue                                         | This document's row | Note                                                                                                                                                                                                                                                         |
+| --------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| #837 `HR->FLOW-01: project labour cost`             | O9, section 6       | Same conclusion by the same reasoning: HR owns the aggregate, returns totals only, carries a `rate_coverage` figure, and suppresses the total on a one-contributor project. Their `cost_minor_units: int64` is better than the `float64` in 7.2; take theirs |
+| #838 `HR->FLOW-02: approved leave gates assignment` | I19                 | Same link                                                                                                                                                                                                                                                    |
+| #836 `FLOW->FIN-01: unbilled billable hours`        | O4, O10             | Same link                                                                                                                                                                                                                                                    |
 
 Their `docs/cross-app/11-rejected.md` also rejects `FLOW->HR-01` (workload on the
 employee page), `FLOW->HR-02` (cycle commitments versus shifts), `FIN->FLOW-01`
@@ -859,14 +859,14 @@ disputing its conclusion.
 platform-wide sweep did not. Verified by searching the first round's documents
 in this directory at `d62ad614`, the commit this round was branched from:
 
-| Finding | Their coverage | Filed |
-| --- | --- | --- |
-| Flow's `ratesByUserId` localStorage rate table with no reader | zero hits for `ratesByUserId` | #867 |
-| `capacity: 40` hardcoded, `contracted_hours_per_week` has no read RPC | zero hits for `capacity: 40`; `contracted_hours_per_week` appears only as a CSV inventory row | #868 |
-| `useImportFromFlow` has zero call sites and a response-type mismatch | the endpoint is in `inventory/endpoints.csv:584`; the dead hook and the mismatch are not | #869 |
-| All four `insights.dashboard.v1` handlers return `notImplemented` | zero hits for `notImplemented`; `docs/cross-app/11-rejected.md:64-69` assumes the aggregate is built | #870 |
-| `business_id` unreliable across 145 tables, so a join trusting it silently returns the wrong set | zero hits for `DEFAULT 0` | #871 |
-| Flow's currency is unreachable through the endpoint it already calls | `BusinessEntry` is mentioned; the gap is not | #872 |
+| Finding                                                                                          | Their coverage                                                                                       | Filed |
+| ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- | ----- |
+| Flow's `ratesByUserId` localStorage rate table with no reader                                    | zero hits for `ratesByUserId`                                                                        | #867  |
+| `capacity: 40` hardcoded, `contracted_hours_per_week` has no read RPC                            | zero hits for `capacity: 40`; `contracted_hours_per_week` appears only as a CSV inventory row        | #868  |
+| `useImportFromFlow` has zero call sites and a response-type mismatch                             | the endpoint is in `inventory/endpoints.csv:584`; the dead hook and the mismatch are not             | #869  |
+| All four `insights.dashboard.v1` handlers return `notImplemented`                                | zero hits for `notImplemented`; `docs/cross-app/11-rejected.md:64-69` assumes the aggregate is built | #870  |
+| `business_id` unreliable across 145 tables, so a join trusting it silently returns the wrong set | zero hits for `DEFAULT 0`                                                                            | #871  |
+| Flow's currency is unreachable through the endpoint it already calls                             | `BusinessEntry` is mentioned; the gap is not                                                         | #872  |
 
 The seventh, that `flow_work_day_lines` is not a table and Flow's hours are rows
 in `hr_time_entries`, is recorded in section 1 rather than filed, because it is a
@@ -882,17 +882,17 @@ correctly labels the production 404 as inferred rather than verified.
 
 All labelled `audit:flow-cross-app-2026-08-21` on `tryrtylr/rtylr`.
 
-| Issue | Link | Class | Blocked on onion |
-| --- | --- | --- | --- |
-| #867 | Flow re-asks for the HR hourly rate, stores it per-browser, reads it back nowhere | I15, class C | Partly: sequenced behind #837 |
-| #868 | Flow hardcodes a 40-hour capacity because HR's `contracted_hours_per_week` has no read RPC | I17, I18, class C | Yes |
-| #869 | HR's Flow time import is live but unreachable, and its response type does not match the handler | O3, class B plus a bug | Frontend fix no; two correctness problems yes |
-| #870 | `insights.dashboard.v1` declares four Flow-shaped endpoints and every handler returns `notImplemented` | O5 to O8, class C | Yes |
-| #871 | `business_id` is unreliable across 145 tables, so a join that trusts it silently returns the wrong set | platform prerequisite | Yes, entirely |
-| #873 | Contract drift: 109 of onion's 227 hand-registered routes have no `.onk` definition | platform, and the reason O3's mismatch went unseen | Partly |
-| #874 | `onion/.env` points a development-labelled config at a production RDS host | platform | Yes, entirely |
-| #875 | Flow and HR both call `/hr/staff/detail`, which does not exist, and both swallow the failure | I5, a live bug | Option A yes, Option B no |
-| #872 | Flow has no currency: the `/businesses/mine` row it already reads has no currency field | I14, class B | No |
+| Issue | Link                                                                                                   | Class                                              | Blocked on onion                              |
+| ----- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------- | --------------------------------------------- |
+| #867  | Flow re-asks for the HR hourly rate, stores it per-browser, reads it back nowhere                      | I15, class C                                       | Partly: sequenced behind #837                 |
+| #868  | Flow hardcodes a 40-hour capacity because HR's `contracted_hours_per_week` has no read RPC             | I17, I18, class C                                  | Yes                                           |
+| #869  | HR's Flow time import is live but unreachable, and its response type does not match the handler        | O3, class B plus a bug                             | Frontend fix no; two correctness problems yes |
+| #870  | `insights.dashboard.v1` declares four Flow-shaped endpoints and every handler returns `notImplemented` | O5 to O8, class C                                  | Yes                                           |
+| #871  | `business_id` is unreliable across 145 tables, so a join that trusts it silently returns the wrong set | platform prerequisite                              | Yes, entirely                                 |
+| #873  | Contract drift: 109 of onion's 227 hand-registered routes have no `.onk` definition                    | platform, and the reason O3's mismatch went unseen | Partly                                        |
+| #874  | `onion/.env` points a development-labelled config at a production RDS host                             | platform                                           | Yes, entirely                                 |
+| #875  | Flow and HR both call `/hr/staff/detail`, which does not exist, and both swallow the failure           | I5, a live bug                                     | Option A yes, Option B no                     |
+| #872  | Flow has no currency: the `/businesses/mine` row it already reads has no currency field                | I14, class B                                       | No                                            |
 
 Not filed, and why:
 
@@ -904,5 +904,5 @@ Not filed, and why:
   or already covered by #836.
 - **Row I5, `/hr/staff/detail`.** Already in their `docs/cross-app/10-doc-drift.md:50`.
 - **Row O11, estimate versus actual.** Overlaps #855 (`Contract: add range,
-  project and billability filters to hr time entries`), which is the aggregation
+project and billability filters to hr time entries`), which is the aggregation
   this needs. Better as scope there than as a new issue.

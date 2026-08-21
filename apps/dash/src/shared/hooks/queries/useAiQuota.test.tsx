@@ -4,19 +4,16 @@ import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAiQuotaMode, useUpdateAiQuotaMode } from './useAiQuota';
 
-const mockGet = vi.fn();
-const mockPut = vi.fn();
+const mockAiClient = vi.hoisted(() => ({
+  getAiQuotaSettings: vi.fn(),
+  updateAiQuotaSettings: vi.fn(),
+}));
 
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((value) => value),
 }));
 
-vi.mock('../../lib/api', () => ({
-  safe: {
-    get: (...args: unknown[]) => mockGet(...args),
-    put: (...args: unknown[]) => mockPut(...args),
-  },
-}));
+vi.mock('../../lib/clients', () => ({ aiClient: mockAiClient }));
 
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
@@ -33,8 +30,8 @@ describe('AI quota queries', () => {
   });
 
   it('updates the cached mode from PUT without refetching quota settings', async () => {
-    mockGet.mockResolvedValue({ settings: { mode: 'pool' } });
-    mockPut.mockResolvedValue({ settings: { mode: 'per_person' } });
+    mockAiClient.getAiQuotaSettings.mockResolvedValue({ settings: { mode: 'pool' } });
+    mockAiClient.updateAiQuotaSettings.mockResolvedValue({ settings: { mode: 'per_person' } });
 
     const client = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -53,8 +50,8 @@ describe('AI quota queries', () => {
 
     await waitFor(() => expect(result.current.update.isSuccess).toBe(true));
 
-    expect(mockPut).toHaveBeenCalledWith('/hub/ai/v1/quota-settings', { mode: 'per_person' });
-    expect(mockGet).toHaveBeenCalledTimes(1);
+    expect(mockAiClient.updateAiQuotaSettings).toHaveBeenCalledWith({ mode: 'per_person' });
+    expect(mockAiClient.getAiQuotaSettings).toHaveBeenCalledTimes(1);
     expect(client.getQueryData(['ai-quota-settings'])).toBe('per_person');
   });
 });

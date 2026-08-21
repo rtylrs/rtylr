@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
 import { useUserStore } from '@voxire/auth';
-import { unwrap } from '@voxire/api';
 import { LicenseBanner } from '@voxire/components';
 import { buildCaretRouteContext, CaretButton, CaretPanel, useCaretStore } from '@voxire/caret';
 import {
@@ -51,7 +50,7 @@ import {
 } from 'lucide-react';
 import type { HRCompanyConfigPayload } from '@voxire/voxie/hr/setup/v1/types';
 import { useForesightLinks } from '@voxire/utils';
-import { safe } from '../shared/lib/api';
+import { licenseClient, userClient } from '../shared/lib/clients';
 import { useHRConfigStore } from '../shared/stores/hrConfigStore';
 import { signOutFromHR } from '../shared/lib/hrSignOut';
 import CommandPalette from '../shared/components/CommandPalette';
@@ -553,10 +552,11 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
   const setAuthUser = useUserStore((s) => s.setUser);
   useEffect(() => {
     if (hrUser?.name || hrUser?.email) return;
-    unwrap(safe.get<{ user: { id: number; name: string; email: string } | null }>('/account'))
+    userClient
+      .getMe({})
       .then((res) => {
-        if (res?.user) {
-          setAuthUser({ id: String(res.user.id), name: res.user.name, email: res.user.email });
+        if (res?.id) {
+          setAuthUser({ id: String(res.id), name: res.fullName ?? '', email: res.email ?? '' });
         }
       })
       .catch(() => undefined);
@@ -966,7 +966,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         </header>
 
         {/* Page content */}
-        <LicenseBanner safe={safe} />
+        <LicenseBanner client={licenseClient} />
         <AnimatePresence mode="wait">
           <motion.main
             key={pathname}

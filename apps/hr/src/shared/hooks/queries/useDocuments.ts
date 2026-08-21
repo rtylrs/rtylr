@@ -1,7 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { EmployeeDocumentPayload } from '@voxire/voxie/hr/document/v1/types';
-import { safe } from '../../lib/api';
+import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -30,7 +30,7 @@ export const useListEmployeeDocuments = (employeeId?: number) => {
     queryKey: ['employee-documents', employeeId],
     queryFn: async (): Promise<ListEmployeeDocumentsResponse> => {
       const res = await unwrap(
-        safe.get<ListEmployeeDocumentsResponse>('/hr/documents', {
+        hrTransport.get<ListEmployeeDocumentsResponse>('/hr/documents', {
           params: employeeId ? { employeeId } : undefined,
         })
       );
@@ -46,7 +46,7 @@ export const useUploadDocument = () => {
 
   return useMutation({
     mutationFn: async (data: UploadDocumentPayload): Promise<UploadDocumentResponse> => {
-      const res = await unwrap(safe.post<UploadDocumentResponse>('/hr/documents', data));
+      const res = await unwrap(hrTransport.post<UploadDocumentResponse>('/hr/documents', data));
       return res as UploadDocumentResponse;
     },
     onSuccess: (_data: UploadDocumentResponse, variables: UploadDocumentPayload) => {

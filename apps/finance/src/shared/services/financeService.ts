@@ -1,5 +1,5 @@
-import { safe } from '../lib/api';
-import { plReportQueryParams } from './financeApi';
+import type { CreateInvoiceRequest } from '@voxire/voxie/finance/invoices/v1/types';
+import { financeApi, plReportQueryParams } from './financeApi';
 
 export interface InvoicePayload {
   customerId?: number;
@@ -57,28 +57,28 @@ export interface PLFilterParams {
 }
 
 export const financeService = {
-  getDashboard: () => safe.get('/finance/dashboard'),
+  getDashboard: () => financeApi.getDashboard(),
 
-  getInvoices: (params?: InvoiceFilterParams) => safe.get('/finance/invoices', { params }),
-  createInvoice: (data: InvoicePayload) => safe.post('/finance/invoices', data),
-  getInvoice: (id: number) => safe.get('/finance/invoices/detail', { params: { id } }),
+  getInvoices: (params?: InvoiceFilterParams) => financeApi.getInvoices(params),
+  createInvoice: (data: InvoicePayload) =>
+    financeApi.createInvoice(data as unknown as CreateInvoiceRequest),
+  getInvoice: (id: number) => financeApi.getInvoiceDetail(String(id)),
   updateInvoice: (id: number, data: Partial<InvoicePayload>) =>
-    safe.put('/finance/invoices', { id, ...data }),
-  deleteInvoice: (id: number) => safe.delete('/finance/invoices', { data: { id } }),
+    financeApi.updateInvoice(String(id), data),
+  deleteInvoice: (id: number) => financeApi.deleteInvoice(String(id)),
   updateInvoiceStatus: (id: number, status: string) =>
-    safe.put('/finance/invoices/status', { id, status }),
+    financeApi.updateInvoiceStatus(String(id), status as never),
   recordPayment: (id: number, data: PaymentPayload) =>
-    safe.post('/finance/invoices/payment', { invoiceId: id, ...data }),
+    financeApi.recordPayment(String(id), data.amount, data),
 
-  getExpenses: (params?: ExpenseFilterParams) => safe.get('/finance/expenses', { params }),
-  createExpense: (data: ExpensePayload) => safe.post('/finance/expenses', data),
+  getExpenses: (params?: ExpenseFilterParams) => financeApi.getExpenses(params),
+  createExpense: (data: ExpensePayload) => financeApi.createExpense(data),
   updateExpense: (id: number, data: Partial<ExpensePayload>) =>
-    safe.put(`/finance/expenses/${id}`, data),
-  deleteExpense: (id: number) => safe.delete(`/finance/expenses/${id}`),
-  getExpenseCategories: () => safe.get('/finance/expenses/categories'),
+    financeApi.updateExpense(String(id), data),
+  deleteExpense: (id: number) => financeApi.deleteExpense(String(id)),
+  getExpenseCategories: () => financeApi.getExpenseCategories(),
 
-  getTaxConfig: () => safe.get('/finance/tax'),
-  updateTaxConfig: (data: TaxConfigPayload) => safe.put('/finance/tax', data),
-  getPLReport: (params?: PLFilterParams) =>
-    safe.get('/finance/report/v1/pl', { params: plReportQueryParams(params) }),
+  getTaxConfig: () => financeApi.getTaxConfig(),
+  updateTaxConfig: (data: TaxConfigPayload) => financeApi.updateTaxConfig(data),
+  getPLReport: (params?: PLFilterParams) => financeApi.getPL(plReportQueryParams(params).period),
 };

@@ -5,7 +5,7 @@ import React from 'react';
 import { useUpdateBusiness } from './useBusiness';
 import { useConfigStore } from '../../stores/configStore';
 
-const mockPut = vi.fn();
+const mockConfigClient = vi.hoisted(() => ({ updateConfig: vi.fn() }));
 const mockToastSuccess = vi.fn();
 const mockToastError = vi.fn();
 
@@ -13,9 +13,7 @@ vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((v) => v),
 }));
 
-vi.mock('../../lib/api', () => ({
-  safe: { put: (...args: unknown[]) => mockPut(...args) },
-}));
+vi.mock('../../lib/clients', () => ({ configClient: mockConfigClient }));
 
 vi.mock('sonner', () => ({
   toast: {
@@ -47,7 +45,7 @@ describe('useUpdateBusiness', () => {
   });
 
   it('posts config updates using the backend snake_case contract', async () => {
-    mockPut.mockResolvedValue({
+    mockConfigClient.updateConfig.mockResolvedValue({
       config: {
         site_name: 'Suplab Store',
         contact_email: 'suplabstore@gmail.com',
@@ -75,12 +73,12 @@ describe('useUpdateBusiness', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(mockPut).toHaveBeenCalledWith('/hub/config/v1/config', {
-      site_name: 'Suplab Store',
-      contact_email: 'suplabstore@gmail.com',
-      contact_number: '+961000000',
-      sender_email: 'orders@suplabstore.com',
-      maps_url: 'https://maps.example.com',
+    expect(mockConfigClient.updateConfig).toHaveBeenCalledWith({
+      siteName: 'Suplab Store',
+      contactEmail: 'suplabstore@gmail.com',
+      contactNumber: '+961000000',
+      senderEmail: 'orders@suplabstore.com',
+      mapsUrl: 'https://maps.example.com',
       website: 'https://suplabstore.com/',
     });
     expect(useConfigStore.getState().websiteData).toMatchObject({

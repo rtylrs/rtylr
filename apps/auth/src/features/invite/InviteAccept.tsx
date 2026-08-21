@@ -48,8 +48,8 @@ const InviteAccept: React.FC = () => {
   }, [token]);
 
   const handleSubmit = async () => {
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
       return;
     }
     if (password !== confirmPassword) {
@@ -169,7 +169,7 @@ const InviteAccept: React.FC = () => {
               <input
                 id="invite-password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="At least 6 characters"
+                placeholder="At least 8 characters"
                 autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

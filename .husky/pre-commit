@@ -2,3 +2,6 @@
 
 echo "Running prettier check..."
 pnpm format:check
+
+echo "Checking OneKit boundary..."
+pnpm contracts:enforce

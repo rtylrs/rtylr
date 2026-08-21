@@ -2,9 +2,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ShoppingBag } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { toFiniteNumber, unwrap } from '@voxire/api';
+import { toFiniteNumber } from '@voxire/api';
 import { EmptyState } from '@voxire/ui';
-import { safe } from '../../../../shared/lib/api';
+import { insightsProductClient } from '../../../../shared/lib/clients';
 import WidgetHeader from './WidgetHeader';
 
 interface WidgetProduct {
@@ -45,11 +45,7 @@ const TopProductsWidget: React.FC = () => {
     queryKey: ['top-products-widget'],
     queryFn: async (): Promise<WidgetProduct[]> => {
       try {
-        const res = await unwrap(
-          safe.get<BestSellersResponse | RawWidgetProduct[]>('/insights/product/v1/best-sellers', {
-            params: { limit: 5 },
-          })
-        );
+        const res = await insightsProductClient.getBestSellers({ limit: 5 });
         return ((Array.isArray(res) ? res : res.products) ?? []).map((product) => ({
           productId: toFiniteNumber(product.productId ?? product.product_id),
           name: product.name ?? '',

@@ -1,6 +1,6 @@
 import { unwrap } from '@voxire/api';
 import { useMutation } from '@tanstack/react-query';
-import { safe } from '../../lib/api';
+import { hrTransport } from '../../lib/clients';
 
 export interface CreateLocationInput {
   name: string;
@@ -28,7 +28,7 @@ export function useCreateLocation() {
   return useMutation({
     mutationFn: (data: CreateLocationInput) =>
       unwrap(
-        safe.post<CreateLocationResponse>('/hr/locations', {
+        hrTransport.post<CreateLocationResponse>('/hr/locations', {
           name: data.name,
           address: data.address,
         })

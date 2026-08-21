@@ -22,8 +22,7 @@ import {
   Legend,
 } from 'chart.js';
 import DefaultLayout from './layouts/DefaultLayout';
-import { unwrap } from '@voxire/api';
-import { safe } from './shared/lib/api';
+import { userClient } from './shared/lib/clients';
 
 ChartJS.register(
   CategoryScale,
@@ -50,8 +49,8 @@ const rootRoute = createRootRoute({
     <ErrorBoundary>
       <AppGuard
         appId="insights"
-        fetchUser={(): Promise<Record<string, unknown>> =>
-          unwrap(safe.get<Record<string, unknown>>('/hub/user/v1/users/me'))
+        fetchUser={async (): Promise<Record<string, unknown>> =>
+          (await userClient.getMe({})) as unknown as Record<string, unknown>
         }
       >
         <AppFlagGuard flag={FLAG_KEYS.APP_INSIGHTS}>

@@ -15,9 +15,11 @@ vi.mock('@voxire/api', () => ({
   },
 }));
 
-const mockGet = vi.fn();
-vi.mock('../../../../shared/lib/api', () => ({
-  safe: { get: (...args: unknown[]) => mockGet(...args) },
+const mockGetInvoiceAging = vi.fn();
+vi.mock('../../../../shared/lib/clients', () => ({
+  insightsFinancialClient: {
+    getInvoiceAging: (...args: unknown[]) => mockGetInvoiceAging(...args),
+  },
 }));
 
 import InvoiceAgingWidget from './InvoiceAgingWidget';
@@ -37,11 +39,13 @@ beforeEach(() => {
 
 describe('InvoiceAgingWidget empty state', () => {
   it('shows the illustration, title and a refresh call-to-action when every bucket is empty', async () => {
-    mockGet.mockResolvedValue({
-      buckets: [
-        { label: '0-30', amountMinorUnits: 0, count: 0 },
-        { label: '31-60', amountMinorUnits: 0, count: 0 },
-      ],
+    mockGetInvoiceAging.mockResolvedValue({
+      aging: {
+        buckets: [
+          { bucket: '0-30', amount: 0, count: 0 },
+          { bucket: '31-60', amount: 0, count: 0 },
+        ],
+      },
     });
 
     renderWithClient();
@@ -53,21 +57,23 @@ describe('InvoiceAgingWidget empty state', () => {
   });
 
   it('refetches when the refresh call-to-action is clicked', async () => {
-    mockGet.mockResolvedValue({ buckets: [] });
+    mockGetInvoiceAging.mockResolvedValue({ aging: { buckets: [] } });
 
     renderWithClient();
 
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'common.refresh' })).toBeInTheDocument()
     );
-    const callsBefore = mockGet.mock.calls.length;
+    const callsBefore = mockGetInvoiceAging.mock.calls.length;
     fireEvent.click(screen.getByRole('button', { name: 'common.refresh' }));
 
-    await waitFor(() => expect(mockGet.mock.calls.length).toBeGreaterThan(callsBefore));
+    await waitFor(() => expect(mockGetInvoiceAging.mock.calls.length).toBeGreaterThan(callsBefore));
   });
 
   it('does not show the empty state when a bucket has outstanding invoices', async () => {
-    mockGet.mockResolvedValue({ buckets: [{ label: '0-30', amountMinorUnits: 5000, count: 2 }] });
+    mockGetInvoiceAging.mockResolvedValue({
+      aging: { buckets: [{ bucket: '0-30', amount: 5000, count: 2 }] },
+    });
 
     renderWithClient();
 

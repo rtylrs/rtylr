@@ -11,9 +11,9 @@ vi.mock('@voxire/api', () => ({
   unwrap: (v: unknown) => v,
 }));
 
-const mockGet = vi.fn();
-vi.mock('../../../../shared/lib/api', () => ({
-  safe: { get: (...args: unknown[]) => mockGet(...args) },
+const mockListTimeOff = vi.fn();
+vi.mock('../../../../shared/lib/clients', () => ({
+  timeOffClient: { listTimeOff: (...args: unknown[]) => mockListTimeOff(...args) },
 }));
 
 import PendingWidget from './PendingWidget';
@@ -33,7 +33,7 @@ beforeEach(() => {
 
 describe('PendingWidget empty state', () => {
   it('shows the illustration, title and a refresh call-to-action when nothing is pending', async () => {
-    mockGet.mockResolvedValue({ requests: [] });
+    mockListTimeOff.mockResolvedValue({ requests: [] });
 
     renderWithClient();
 
@@ -44,21 +44,21 @@ describe('PendingWidget empty state', () => {
   });
 
   it('refetches when the refresh call-to-action is clicked', async () => {
-    mockGet.mockResolvedValue({ requests: [] });
+    mockListTimeOff.mockResolvedValue({ requests: [] });
 
     renderWithClient();
 
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'common.refresh' })).toBeInTheDocument()
     );
-    const callsBefore = mockGet.mock.calls.length;
+    const callsBefore = mockListTimeOff.mock.calls.length;
     fireEvent.click(screen.getByRole('button', { name: 'common.refresh' }));
 
-    await waitFor(() => expect(mockGet.mock.calls.length).toBeGreaterThan(callsBefore));
+    await waitFor(() => expect(mockListTimeOff.mock.calls.length).toBeGreaterThan(callsBefore));
   });
 
   it('does not show the empty state when there are pending requests', async () => {
-    mockGet.mockResolvedValue({
+    mockListTimeOff.mockResolvedValue({
       requests: [{ staffName: 'Jane', type: 'Time off', status: 'pending' }],
     });
 

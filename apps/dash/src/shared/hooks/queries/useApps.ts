@@ -1,5 +1,4 @@
 import React from 'react';
-import { unwrap } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import {
@@ -19,7 +18,7 @@ import {
 } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 import type { AppId } from '@voxire/auth';
-import { safe } from '../../lib/api';
+import { appClient } from '../../lib/clients';
 
 function appLaunchUrl(appId: string): string {
   if (appId in APP_URLS) {
@@ -135,8 +134,8 @@ export const useApps = () => {
   return useQuery<RtylrApp[]>({
     queryKey: ['apps'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/hub/app/v1/apps'));
-      const remote = res?.apps ?? res;
+      const res = await appClient.listApps({});
+      const remote = Array.isArray(res) ? res : (res?.apps ?? []);
       if (!Array.isArray(remote)) return [];
       const validated = z.array(appContractSchema).parse(remote);
       return validated.map((a) => {

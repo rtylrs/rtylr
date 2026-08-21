@@ -1,4 +1,4 @@
-import { safe } from '../lib/api';
+import { fromOneKitJson, oneKitResult, toOneKitJson } from '@voxire/api';
 import type { InvoiceItem as InvoiceLine } from '@voxire/voxie/finance/invoices/v1/types';
 import type { CreateInvoiceRequest } from '@voxire/voxie/finance/invoices/v1/types';
 import type { CreateRecurringInvoiceRequest } from '@voxire/voxie/finance/recurring_invoice/v1/types';
@@ -6,6 +6,7 @@ import type { CreateBillRequest } from '@voxire/voxie/finance/bill/v1/types';
 import type { CreateBankAccountRequest } from '@voxire/voxie/finance/bank_account/v1/types';
 import type { CreateAccountRequest } from '@voxire/voxie/finance/account/v1/types';
 import type { CreateJournalEntryRequest } from '@voxire/voxie/finance/journal/v1/types';
+import { expensesClient, financeCompatibilityClient, invoicesClient } from '../lib/clients';
 
 export const plReportQueryParams = (params?: {
   period?: string;
@@ -114,6 +115,7 @@ export interface ExpenseCategory {
   id: number;
   name: string;
   color: string;
+  icon?: string;
   spent?: number;
   budget?: number;
   count?: number;
@@ -226,125 +228,213 @@ const toNumericId = (id: string): number => {
 
 // ── Service ──────────────────────────────────────────────────────
 
+function compatResult<T>(operation: () => Promise<unknown>) {
+  return oneKitResult(operation).map((value) => fromOneKitJson<T>(value));
+}
+
+function generatedResult<T>(operation: () => Promise<unknown>) {
+  return oneKitResult(operation).map((value) => value as T);
+}
+
+function body(value: unknown) {
+  return { body: toOneKitJson(value) };
+}
+
 export const financeApi = {
   // Dashboard
-  getDashboard: () => safe.get<DashboardStats>('/finance/dashboard'),
+  getDashboard: () =>
+    compatResult<DashboardStats>(() => financeCompatibilityClient.getDashboard({})),
 
   // Invoices
-  getInvoices: () => safe.get<Invoice[]>('/finance/invoices'),
+  getInvoices: (params?: {
+    page?: number;
+    pageSize?: number;
+    limit?: number;
+    offset?: number;
+    status?: string;
+    start?: string;
+    end?: string;
+  }) => compatResult<Invoice[]>(() => financeCompatibilityClient.listInvoices(params ?? {})),
 
   getInvoiceDetail: (id: string) =>
-    safe.get<Invoice>('/finance/invoices/detail', { params: { id } }),
+    compatResult<Invoice>(() => financeCompatibilityClient.getInvoice({ id })),
 
-  createInvoice: (data: CreateInvoiceRequest) => safe.post<Invoice>('/finance/invoices', data),
+  createInvoice: (data: CreateInvoiceRequest) =>
+    compatResult<Invoice>(() => financeCompatibilityClient.createInvoice(body(data))),
 
   updateInvoice: (id: string, data: Partial<Invoice>) =>
-    safe.put<Invoice>('/finance/invoices', { id, ...data }),
+    compatResult<Invoice>(() => financeCompatibilityClient.updateInvoice(body({ id, ...data }))),
 
-  deleteInvoice: (id: string) => safe.delete('/finance/invoices', { data: { id } }),
+  deleteInvoice: (id: string) =>
+    generatedResult<unknown>(() => invoicesClient.deleteInvoice({ id })),
 
   updateInvoiceStatus: (id: string, status: Invoice['status']) =>
-    safe.put('/finance/invoices/status', { id, status }),
+    compatResult<unknown>(() =>
+      financeCompatibilityClient.updateInvoiceStatus(body({ id, status }))
+    ),
 
-  recordPayment: (id: string, amount: number) =>
-    safe.post('/finance/invoices/payment', { invoiceId: toNumericId(id), amount }),
+  recordPayment: (id: string, amount: number, details?: Record<string, unknown>) =>
+    compatResult<unknown>(() =>
+      financeCompatibilityClient.recordPayment(
+        body({ invoiceId: toNumericId(id), amount, ...details })
+      )
+    ),
 
   // Expenses
-  getExpenses: () => safe.get<Expense[]>('/finance/expenses'),
+  getExpenses: (params?: {
+    page?: number;
+    pageSize?: number;
+    limit?: number;
+    offset?: number;
+    category?: string;
+    start?: string;
+    end?: string;
+  }) => compatResult<Expense[]>(() => financeCompatibilityClient.listExpenses(params ?? {})),
 
   createExpense: (data: Partial<Expense>) =>
-    safe.post<Expense>('/finance/expenses', toExpenseMutationPayload(data)),
+    compatResult<Expense>(() =>
+      financeCompatibilityClient.createExpense(body(toExpenseMutationPayload(data)))
+    ),
 
   updateExpense: (id: string, data: Partial<Expense>) =>
-    safe.put<Expense>('/finance/expenses', { id, ...data }),
+    compatResult<Expense>(() => financeCompatibilityClient.updateExpense(body({ id, ...data }))),
 
-  deleteExpense: (id: string) => safe.delete('/finance/expenses', { data: { id } }),
+  deleteExpense: (id: string) =>
+    generatedResult<unknown>(() => expensesClient.deleteExpense({ id })),
 
   // Expense Categories
-  getExpenseCategories: () => safe.get<ExpenseCategory[]>('/finance/expense-categories'),
+  getExpenseCategories: () =>
+    compatResult<ExpenseCategory[]>(() => financeCompatibilityClient.listExpenseCategories({})),
 
   createExpenseCategory: (data: Partial<ExpenseCategory>) =>
-    safe.post<ExpenseCategory>(
-      '/finance/expense-categories',
-      toExpenseCategoryMutationPayload(data)
+    compatResult<ExpenseCategory>(() =>
+      financeCompatibilityClient.createExpenseCategory(body(toExpenseCategoryMutationPayload(data)))
+    ),
+
+  updateExpenseCategory: (id: number, data: Partial<ExpenseCategory>) =>
+    compatResult<unknown>(() =>
+      financeCompatibilityClient.updateExpenseCategory({ id: String(id), ...body(data) })
+    ),
+
+  deleteExpenseCategory: (id: number) =>
+    compatResult<unknown>(() =>
+      financeCompatibilityClient.deleteExpenseCategory({ id: String(id) })
     ),
 
   // P&L
   getPL: (period: string) =>
-    safe.get<PLReport>('/finance/report/v1/pl', {
-      params: plReportQueryParams({ period, date: new Date().toISOString().slice(0, 10) }),
-    }),
+    compatResult<PLReport>(() =>
+      financeCompatibilityClient.getPL(
+        plReportQueryParams({ period, date: new Date().toISOString().slice(0, 10) })
+      )
+    ),
 
   // Tax
-  getTaxConfig: () => safe.get<TaxConfig[]>('/finance/tax/config'),
+  getTaxConfig: () => compatResult<TaxConfig[]>(() => financeCompatibilityClient.listTaxConfig({})),
 
   createTaxConfig: (data: TaxConfig) =>
-    safe.post<TaxConfig>('/finance/tax/config', toTaxConfigPayload(data)),
+    compatResult<TaxConfig>(() =>
+      financeCompatibilityClient.createTaxConfig(body(toTaxConfigPayload(data)))
+    ),
 
-  getTaxReport: () => safe.get<TaxReport>('/finance/tax/report'),
+  getTaxReport: () => compatResult<TaxReport>(() => financeCompatibilityClient.getTaxReport({})),
+
+  updateTaxConfig: (data: Record<string, unknown>) =>
+    compatResult<unknown>(() => financeCompatibilityClient.updateTaxConfig(body(data))),
 
   // Recurring Invoices
-  getRecurringInvoices: () => safe.get('/finance/recurring-invoices'),
+  getRecurringInvoices: () =>
+    compatResult<unknown>(() => financeCompatibilityClient.listRecurringInvoices({})),
 
   createRecurringInvoice: (data: CreateRecurringInvoiceRequest) =>
-    safe.post('/finance/recurring-invoices', toRecurringInvoicePayload(data)),
+    compatResult<unknown>(() =>
+      financeCompatibilityClient.createRecurringInvoice(body(toRecurringInvoicePayload(data)))
+    ),
 
   updateRecurringInvoice: (id: string, data: Partial<CreateRecurringInvoiceRequest>) =>
-    safe.put('/finance/recurring-invoices', { id, ...data }),
+    compatResult<unknown>(() =>
+      financeCompatibilityClient.updateRecurringInvoice(body({ id, ...data }))
+    ),
+
+  triggerRecurringInvoice: (id: string) =>
+    compatResult<unknown>(() =>
+      financeCompatibilityClient.triggerRecurringInvoice({ id, body: {} })
+    ),
 
   // Quotes
-  getQuotes: () => safe.get('/finance/quotes'),
+  getQuotes: () => compatResult<unknown>(() => financeCompatibilityClient.listQuotes({})),
 
-  createQuote: (data: QuotePayload) => safe.post('/finance/quotes', data),
+  createQuote: (data: QuotePayload) =>
+    compatResult<unknown>(() => financeCompatibilityClient.createQuote(body(data))),
 
   updateQuote: (id: string, data: Partial<QuotePayload>) =>
-    safe.put('/finance/quotes', { id, ...data }),
+    compatResult<unknown>(() => financeCompatibilityClient.updateQuote(body({ id, ...data }))),
 
-  deleteQuote: (id: string) => safe.delete('/finance/quotes', { data: { id } }),
+  deleteQuote: (id: string) =>
+    compatResult<unknown>(() => financeCompatibilityClient.deleteQuote({ id })),
 
   // Bills
-  getBills: () => safe.get('/finance/bills'),
+  getBills: () => compatResult<unknown>(() => financeCompatibilityClient.listBills({})),
 
-  createBill: (data: CreateBillRequest) => safe.post('/finance/bills', data),
+  createBill: (data: CreateBillRequest) =>
+    compatResult<unknown>(() => financeCompatibilityClient.createBill(body(data))),
 
   updateBill: (id: string, data: Partial<CreateBillRequest>) =>
-    safe.put('/finance/bills', { id, ...data }),
+    compatResult<unknown>(() => financeCompatibilityClient.updateBill(body({ id, ...data }))),
 
   // Bank Accounts
-  getBankAccounts: () => safe.get('/finance/bank-accounts'),
+  getBankAccounts: () =>
+    compatResult<unknown>(() => financeCompatibilityClient.listBankAccounts({})),
 
   createBankAccount: (data: CreateBankAccountRequest) =>
-    safe.post('/finance/bank-accounts', toBankAccountPayload(data)),
+    compatResult<unknown>(() =>
+      financeCompatibilityClient.createBankAccount(body(toBankAccountPayload(data)))
+    ),
 
   // Reconciliation
-  getReconciliation: () => safe.get('/finance/reconciliation'),
+  getReconciliation: () =>
+    compatResult<unknown>(() => financeCompatibilityClient.getReconciliation({})),
   matchTransaction: (
     bankFeedId: string | number,
     targetType: 'invoice' | 'expense',
     targetId: string | number
   ) =>
-    safe.post('/finance/reconciliation/match', {
-      bankFeedId: Number(bankFeedId),
-      targetType,
-      targetId: Number(targetId),
-    }),
+    compatResult<unknown>(() =>
+      financeCompatibilityClient.matchTransaction(
+        body({ bankFeedId: Number(bankFeedId), targetType, targetId: Number(targetId) })
+      )
+    ),
+
+  matchReconcile: (transactionId: string, targetId: string) =>
+    compatResult<unknown>(() =>
+      financeCompatibilityClient.matchReconcile(
+        body({ transactionId, targetType: 'invoice', targetId })
+      )
+    ),
+
+  getBankFeeds: (accountId?: string) =>
+    compatResult<unknown>(() => financeCompatibilityClient.listBankFeeds({ accountId })),
 
   // Balance Sheet
-  getBalanceSheet: () => safe.get('/finance/balance-sheet'),
+  getBalanceSheet: () =>
+    compatResult<unknown>(() => financeCompatibilityClient.getBalanceSheet({})),
 
   // Cash Flow
-  getCashFlow: () => safe.get('/finance/cash-flow'),
+  getCashFlow: () => compatResult<unknown>(() => financeCompatibilityClient.getCashFlow({})),
 
   // Chart of Accounts
-  getAccounts: () => safe.get('/finance/accounts'),
+  getAccounts: () => compatResult<unknown>(() => financeCompatibilityClient.listAccounts({})),
 
-  createAccount: (data: CreateAccountRequest) => safe.post('/finance/accounts', data),
+  createAccount: (data: CreateAccountRequest) =>
+    compatResult<unknown>(() => financeCompatibilityClient.createAccount(body(data))),
 
   // Journal
-  getJournal: () => safe.get('/finance/journal'),
+  getJournal: () => compatResult<unknown>(() => financeCompatibilityClient.getJournal({})),
 
-  createJournalEntry: (data: CreateJournalEntryRequest) => safe.post('/finance/journal', data),
+  createJournalEntry: (data: CreateJournalEntryRequest) =>
+    compatResult<unknown>(() => financeCompatibilityClient.createJournalEntry(body(data))),
 
   // Expense detail
-  getExpenseDetail: (id: string) => safe.get('/finance/expenses', { params: { id } }),
+  getExpenseDetail: (id: string) =>
+    compatResult<Expense>(() => financeCompatibilityClient.listExpenses({ id })),
 };

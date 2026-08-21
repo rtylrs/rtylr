@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
 import { DollarSign, ShoppingBag, TrendingUp, Star, BarChart2, Loader2 } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import {
@@ -22,7 +21,7 @@ import {
 } from '../../shared/components/ui';
 import { cn } from '../../shared/lib/utils';
 import { useKpis } from '../../shared/hooks/queries/useKpis';
-import { safe } from '../../shared/lib/api';
+import { insightsProductClient } from '../../shared/lib/clients';
 
 interface BestSeller {
   productId: number;
@@ -32,11 +31,15 @@ interface BestSeller {
   revenue?: number;
 }
 
-type RawBestSeller = Partial<BestSeller> & {
+type RawBestSeller = {
+  productId?: string | number;
+  name?: string;
+  unitsSold?: string | number;
+  revenueMinorUnits?: string | number;
+  revenue?: string | number;
   product_id?: string | number;
   units_sold?: string | number;
   revenue_minor_units?: string | number;
-  revenue?: string | number;
 };
 
 function finiteNumber(value: unknown): number {
@@ -66,15 +69,15 @@ const useBestSellers = (range: string = '7d') =>
   useQuery({
     queryKey: ['dash-best-sellers', range],
     queryFn: async (): Promise<BestSeller[]> => {
-      const res = await unwrap(
-        safe.get<{ products?: RawBestSeller[] } | RawBestSeller[]>(
-          '/insights/product/v1/best-sellers',
-          {
-            params: { limit: 5, range },
-          }
-        )
+      const res = await insightsProductClient.getBestSellers({ limit: 5 });
+      return (res.products ?? []).map((item) =>
+        normalizeBestSeller({
+          productId: item.productId,
+          name: item.name,
+          unitsSold: item.unitsSold,
+          revenueMinorUnits: item.revenueMinorUnits,
+        })
       );
-      return ((Array.isArray(res) ? res : res.products) ?? []).map(normalizeBestSeller);
     },
     staleTime: 60_000,
   });

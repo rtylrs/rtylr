@@ -14,13 +14,13 @@ The bar, from section 7 of the brief. A candidate becomes a proposal only if it 
 
 ## Rejections by rule
 
-| Rule | Count |
-| --- | --- |
-| `bar-2` Bar 2: the loosest sufficient shape, or a stated reason why not | 6 |
-| `bar-1` Bar 1: must be Essential or High value | 4 |
-| `bar-3` Bar 3: must survive the producing app being switched off | 4 |
-| `bar-5` Bar 5: a customer would notice within a week | 3 |
-| `bar-4` Bar 4: must have a positive modelled ROI | 1 |
+| Rule                                                                    | Count |
+| ----------------------------------------------------------------------- | ----- |
+| `bar-2` Bar 2: the loosest sufficient shape, or a stated reason why not | 6     |
+| `bar-1` Bar 1: must be Essential or High value                          | 4     |
+| `bar-3` Bar 3: must survive the producing app being switched off        | 4     |
+| `bar-5` Bar 5: a customer would notice within a week                    | 3     |
+| `bar-4` Bar 4: must have a positive modelled ROI                        | 1     |
 
 ## Bar 1: must be Essential or High value
 
@@ -162,13 +162,12 @@ Technically trivial and nobody would notice. Campaign copy is written as free te
 
 These are the rejections that matter most, because each is cheap to build, looks like an improvement, and would leave a permanent dependency behind for very little return. If a future proposal re-raises one of these, the burden is to say what changed.
 
-| Id | The tempting idea | Why not |
-| --- | --- | --- |
-| FLOW->HR-01 | current assigned workload on the employee page, before assigning more | Nice to have, not Essential or High value. A manager who wants this can open Flow, which is one click away and shows more than a summary widget would. |
-| FLOW->INS-01 | project hours and delivery metrics in the analytics app | Already partly built: insights declares RoadmapProject.project_id and WorkloadEntry.user_id and Flow has its own flow_insights module. Adding a second path to the same numbers would duplicate an existing aggregate rather than connect anything new. |
-| POS->INS-01 | sales by item and by hour for the analytics app | Already built: dash reads 9 pos endpoints and insights declares BestSeller/SlowMover over erp products. A third path to the same numbers adds an edge without adding an answer. |
-| HUB->HR-01 | team member invited in dash becomes an employee record | Negative ROI: inviting a login and hiring a person are genuinely different acts, and auto-creating an employee for every invited contractor or agency user would create records an HR admin then has to clean up. The reverse edge (REC->HR-01) is the one worth building. |
-| FIN->HUB-01 | unpaid subscription suspends app access | Confuses two different money flows. hub.billing already handles what the tenant owes RTYLR (packages/voxie/api/hub/billing/v1); finance.invoices is what the tenant's own customers owe the tenant. Connecting them would suspend a customer's account because their client paid late. |
-| CRM->INS-01 | customer counts, churn and segment size | insights already ships a customers area and crm ships its own dashboard capability (packages/voxie/api/crm/dashboard/v1). Duplicating the rollup would give two numbers for one question, which is worse than one. |
-| ERP->CRM-01 | product catalogue inside campaign composition | Technically trivial and nobody would notice. Campaign copy is written as free text today and a product picker saves one paste. The most tempting kind of low-value edge: cheap, obvious, and permanently owned by someone. |
-
+| Id           | The tempting idea                                                     | Why not                                                                                                                                                                                                                                                                                |
+| ------------ | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FLOW->HR-01  | current assigned workload on the employee page, before assigning more | Nice to have, not Essential or High value. A manager who wants this can open Flow, which is one click away and shows more than a summary widget would.                                                                                                                                 |
+| FLOW->INS-01 | project hours and delivery metrics in the analytics app               | Already partly built: insights declares RoadmapProject.project_id and WorkloadEntry.user_id and Flow has its own flow_insights module. Adding a second path to the same numbers would duplicate an existing aggregate rather than connect anything new.                                |
+| POS->INS-01  | sales by item and by hour for the analytics app                       | Already built: dash reads 9 pos endpoints and insights declares BestSeller/SlowMover over erp products. A third path to the same numbers adds an edge without adding an answer.                                                                                                        |
+| HUB->HR-01   | team member invited in dash becomes an employee record                | Negative ROI: inviting a login and hiring a person are genuinely different acts, and auto-creating an employee for every invited contractor or agency user would create records an HR admin then has to clean up. The reverse edge (REC->HR-01) is the one worth building.             |
+| FIN->HUB-01  | unpaid subscription suspends app access                               | Confuses two different money flows. hub.billing already handles what the tenant owes RTYLR (packages/voxie/api/hub/billing/v1); finance.invoices is what the tenant's own customers owe the tenant. Connecting them would suspend a customer's account because their client paid late. |
+| CRM->INS-01  | customer counts, churn and segment size                               | insights already ships a customers area and crm ships its own dashboard capability (packages/voxie/api/crm/dashboard/v1). Duplicating the rollup would give two numbers for one question, which is worse than one.                                                                     |
+| ERP->CRM-01  | product catalogue inside campaign composition                         | Technically trivial and nobody would notice. Campaign copy is written as free text today and a product picker saves one paste. The most tempting kind of low-value edge: cheap, obvious, and permanently owned by someone.                                                             |

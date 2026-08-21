@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import Shepherd, { type StepOptions, type Tour } from 'shepherd.js';
 import 'shepherd.js/dist/css/shepherd.css';
 import { useUserStore } from '../stores/userStore';
-import { safe } from '../lib/api';
+import { onboardingClient } from '../lib/clients';
 
 const TOUR_STEPS: StepOptions[] = [
   {
@@ -153,7 +153,7 @@ export function useOnboardingTour() {
 
       const persistCompletion = () => {
         localStorage.setItem(storageKey, '1');
-        void safe.patch('/hub/team/onboarding/v1/onboarded');
+        void onboardingClient.markOnboarded({});
         tourRef.current = null;
       };
 

@@ -6,9 +6,8 @@ import { Link, useNavigate, useRouterState, Outlet } from '@tanstack/react-route
 import { motion, AnimatePresence } from 'motion/react';
 import { getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
-import { unwrap } from '@voxire/api';
 import { LicenseBanner } from '@voxire/components';
-import { safe } from '../shared/lib/api';
+import { licenseClient, userClient } from '../shared/lib/clients';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import {
   LayoutDashboard,
@@ -212,10 +211,11 @@ const DefaultLayout: React.FC = () => {
   const setAuthUser = useUserStore((s) => s.setUser);
   useEffect(() => {
     if (erpUser?.name || erpUser?.email) return;
-    unwrap(safe.get<{ user: { id: number; name: string; email: string } | null }>('/account'))
+    userClient
+      .getMe({})
       .then((res) => {
-        if (res?.user) {
-          setAuthUser({ id: String(res.user.id), name: res.user.name, email: res.user.email });
+        if (res?.id) {
+          setAuthUser({ id: String(res.id), name: res.fullName ?? '', email: res.email ?? '' });
         }
       })
       .catch(() => undefined);
@@ -618,7 +618,7 @@ const DefaultLayout: React.FC = () => {
               </div>
             </header>
 
-            <LicenseBanner safe={safe} />
+            <LicenseBanner client={licenseClient} />
             <TrialBanner />
             <AnimatePresence mode="wait">
               <motion.main

@@ -5,7 +5,7 @@ import type {
   ListTimesheetsResponse,
 } from '@voxire/voxie/hr/time_entry/v1/types';
 import type { TimesheetPayload } from '@voxire/voxie/hr/time_entry/v1/types';
-import { safe } from '../../lib/api';
+import { hrTransport } from '../../lib/clients';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
@@ -35,7 +35,9 @@ export const useGetCurrentTimesheet = () => {
   return useQuery<TimesheetPayload>({
     queryKey: ['timesheets', 'current'],
     queryFn: async (): Promise<TimesheetPayload> => {
-      const res = await unwrap(safe.get<{ timesheet: TimesheetPayload }>('/hr/timesheets/current'));
+      const res = await unwrap(
+        hrTransport.get<{ timesheet: TimesheetPayload }>('/hr/timesheets/current')
+      );
       return (res as { timesheet: TimesheetPayload }).timesheet;
     },
   });
@@ -45,7 +47,9 @@ export const useListTimesheets = (params: ListTimesheetsRequest) => {
   return useQuery<ListTimesheetsResponse>({
     queryKey: ['timesheets', 'filter', params],
     queryFn: async (): Promise<ListTimesheetsResponse> => {
-      const res = await unwrap(safe.get<ListTimesheetsResponse>('/hr/timesheets', { params }));
+      const res = await unwrap(
+        hrTransport.get<ListTimesheetsResponse>('/hr/timesheets', { params })
+      );
       return res as ListTimesheetsResponse;
     },
   });
@@ -55,7 +59,9 @@ export const useGetTimesheet = (id: number | undefined) => {
   return useQuery<TimesheetPayload>({
     queryKey: ['timesheet', id],
     queryFn: async (): Promise<TimesheetPayload> => {
-      const res = await unwrap(safe.get<{ timesheet: TimesheetPayload }>(`/hr/timesheets/${id}`));
+      const res = await unwrap(
+        hrTransport.get<{ timesheet: TimesheetPayload }>(`/hr/timesheets/${id}`)
+      );
       return (res as { timesheet: TimesheetPayload }).timesheet;
     },
     enabled: !!id,
@@ -69,7 +75,7 @@ export const useSubmitTimesheet = () => {
   return useMutation({
     mutationFn: async (data: SubmitTimesheetRequest): Promise<SubmitTimesheetResponse> => {
       const res = await unwrap(
-        safe.post<SubmitTimesheetResponse>(`/hr/timesheets/${data.timesheetId}/submit`, {})
+        hrTransport.post<SubmitTimesheetResponse>(`/hr/timesheets/${data.timesheetId}/submit`, {})
       );
       return res as SubmitTimesheetResponse;
     },
@@ -90,7 +96,7 @@ export const useApproveTimesheet = () => {
   return useMutation({
     mutationFn: async (data: ApproveTimesheetRequest): Promise<ApproveTimesheetResponse> => {
       const res = await unwrap(
-        safe.post<ApproveTimesheetResponse>(`/hr/timesheets/${data.timesheetId}/approve`, {})
+        hrTransport.post<ApproveTimesheetResponse>(`/hr/timesheets/${data.timesheetId}/approve`, {})
       );
       return res as ApproveTimesheetResponse;
     },
@@ -112,7 +118,7 @@ export const useRejectTimesheet = () => {
   return useMutation({
     mutationFn: async (data: RejectTimesheetRequest): Promise<ApproveTimesheetResponse> => {
       const res = await unwrap(
-        safe.post<ApproveTimesheetResponse>(`/hr/timesheets/${data.timesheetId}/reject`, {
+        hrTransport.post<ApproveTimesheetResponse>(`/hr/timesheets/${data.timesheetId}/reject`, {
           rejectionReason: data.rejectionReason,
         })
       );

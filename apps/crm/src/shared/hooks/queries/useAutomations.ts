@@ -9,7 +9,7 @@ import {
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
-import { safe } from '../../lib/api';
+import { crmApi } from '../../services/crmApi';
 import { unwrapList } from '../../lib/unwrapList';
 import { automationSchema } from '../../schemas/automations';
 import type { Automation } from '../../schemas/automations';
@@ -93,7 +93,7 @@ export const useListAutomations = (): UseQueryResult<Automation[]> =>
   useQuery<Automation[]>({
     queryKey: ['crm-automations'],
     queryFn: async (): Promise<Automation[]> => {
-      const res = await unwrap(safe.get<unknown>('/crm/automations'));
+      const res = await unwrap(crmApi.getAutomations());
       return z.array(automationSchema).parse(unwrapList(res, 'automations'));
     },
   });
@@ -102,7 +102,7 @@ export const useGetAutomation = (id: number | undefined): UseQueryResult<Automat
   useQuery<Automation>({
     queryKey: ['crm-automation', id],
     queryFn: async (): Promise<Automation> => {
-      const res = await unwrap(safe.get<unknown>(`/crm/automations/${id}`));
+      const res = await unwrap(crmApi.getAutomation(id ?? 0));
       const envelope = (res ?? {}) as { automation?: unknown };
       return automationSchema.parse(envelope.automation ?? res);
     },
@@ -118,7 +118,7 @@ export const useCreateAutomation = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<Automation, unknown, Partial<Automation>>({
     mutationFn: async (data: Partial<Automation>): Promise<Automation> => {
-      const res = await unwrap(safe.post<Automation>('/crm/automations', toBackendRequest(data)));
+      const res = await unwrap(crmApi.createAutomation(toBackendRequest(data)));
       return res as Automation;
     },
     onSuccess: (): void => {
@@ -144,10 +144,7 @@ export const useUpdateAutomation = (): UseMutationResult<
         .getQueryData<Automation[]>(['crm-automations'])
         ?.find((item) => item.id === payload.id);
       const res = await unwrap(
-        safe.put<Automation>(
-          `/crm/automations/${payload.id}`,
-          toBackendRequest({ ...cached, ...payload.data })
-        )
+        crmApi.updateAutomation(payload.id, toBackendRequest({ ...cached, ...payload.data }))
       );
       return res as Automation;
     },
@@ -165,7 +162,7 @@ export const useDeleteAutomation = (): UseMutationResult<unknown, unknown, numbe
   const qc = useQueryClient();
   const { t } = useTranslation();
   return useMutation<unknown, unknown, number>({
-    mutationFn: (id: number): Promise<unknown> => unwrap(safe.delete(`/crm/automations/${id}`)),
+    mutationFn: (id: number): Promise<unknown> => unwrap(crmApi.deleteAutomation(id)),
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-automations'] });
       toast.success(t('crm.automations.deleted'));

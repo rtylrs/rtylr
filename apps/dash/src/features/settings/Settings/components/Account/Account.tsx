@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
+import { HelmetContainer } from '@voxire/components';
 import { signOut } from '@voxire/auth';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
 import type {
   LoginEntry as ApiLoginEntry,
   LoginHistoryResponse,
@@ -21,7 +20,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
-import { safe } from '../../../../../shared/lib/api';
+import { securityClient, userClient } from '../../../../../shared/lib/clients';
 import { useUserStore } from '../../../../../shared/stores/userStore';
 import { ConfirmDialog } from '../../../../../shared/components/dash';
 import {
@@ -178,13 +177,10 @@ const Account: React.FC = () => {
     queryKey: ['security', 'login-history', { page: loginHistoryPage }],
     placeholderData: keepPreviousData,
     queryFn: async () => {
-      const params = new URLSearchParams({
-        page: String(loginHistoryPage),
-        page_size: String(LOGIN_HISTORY_PAGE_SIZE),
+      const response = await securityClient.loginHistory({
+        page: loginHistoryPage,
+        pageSize: LOGIN_HISTORY_PAGE_SIZE,
       });
-      const response = await unwrap(
-        safe.get<LoginHistoryResponse>(`/hub/security/v1/login-history?${params.toString()}`)
-      );
       const entries = (response.history ?? []).map((entry: ApiLoginEntry, index) => {
         const createdAt = entry.createdAt ?? '';
         const userAgent = entry.userAgent ?? '';
@@ -238,12 +234,7 @@ const Account: React.FC = () => {
   };
 
   const updateProfile = useMutation({
-    mutationFn: () =>
-      unwrap(
-        safe.patch('/hub/user/v1/users/me', {
-          name: formData.name,
-        })
-      ),
+    mutationFn: () => userClient.updateProfile({ name: formData.name }),
     onSuccess: () => {
       toast.success('Profile saved');
       setIsEditing(false);
@@ -252,7 +243,7 @@ const Account: React.FC = () => {
   });
 
   const invalidateSessions = useMutation({
-    mutationFn: () => unwrap(safe.post('/hub/security/v1/invalidate-sessions')),
+    mutationFn: () => securityClient.invalidateSessions({}),
     onSuccess: () => signOut('dash'),
     onError: () => toast.error('Failed to invalidate sessions'),
   });
@@ -373,14 +364,7 @@ const Account: React.FC = () => {
               <TableBody>
                 {loginHistoryData.entries.length === 0 ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className={
-                        isLoginHistoryLoading || isLoginHistoryError
-                          ? 'py-10 text-center text-gray-500'
-                          : undefined
-                      }
-                    >
+                    <TableCell colSpan={6} className="py-10 text-center text-gray-500">
                       {isLoginHistoryLoading ? (
                         'Loading login history…'
                       ) : isLoginHistoryError ? (

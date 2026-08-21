@@ -1,7 +1,6 @@
-import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { safe } from '../../lib/api';
+import { aiClient } from '../../lib/clients';
 
 export type AiQuotaMode = 'pool' | 'per_person';
 
@@ -17,7 +16,16 @@ export interface AiUsage {
   periodEnd: string;
 }
 
-type RawAiUsage = Partial<AiUsage> & {
+type RawAiUsage = {
+  planSlug?: string;
+  mode?: string;
+  allowanceTokens?: string | number;
+  usedTokens?: string | number;
+  remainingTokens?: string | number;
+  overageTokens?: string | number;
+  allowOverage?: boolean;
+  blocked?: boolean;
+  periodEnd?: string;
   plan_slug?: string;
   allowance_tokens?: string | number;
   used_tokens?: string | number;
@@ -54,7 +62,7 @@ export const useAiUsage = () =>
   useQuery({
     queryKey: ['ai-usage'],
     queryFn: async (): Promise<AiUsage> => {
-      const res = await unwrap(safe.get<{ usage?: RawAiUsage }>('/hub/ai/v1/usage'));
+      const res = await aiClient.getAiUsage({});
       return normalizeAiUsage(res?.usage);
     },
     staleTime: 30_000,
@@ -64,10 +72,8 @@ export const useAiQuotaMode = () =>
   useQuery({
     queryKey: ['ai-quota-settings'],
     queryFn: async (): Promise<AiQuotaMode> => {
-      const res = await unwrap(
-        safe.get<{ settings: { mode: AiQuotaMode } }>('/hub/ai/v1/quota-settings')
-      );
-      return res?.settings?.mode ?? 'pool';
+      const res = await aiClient.getAiQuotaSettings({});
+      return (res.settings?.mode as AiQuotaMode | undefined) ?? 'pool';
     },
     staleTime: 30_000,
   });
@@ -77,8 +83,7 @@ import i18next from 'i18next';
 export const useUpdateAiQuotaMode = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (mode: AiQuotaMode) =>
-      unwrap<AiQuotaSettingsResponse>(safe.put('/hub/ai/v1/quota-settings', { mode })),
+    mutationFn: (mode: AiQuotaMode) => aiClient.updateAiQuotaSettings({ mode }),
     onSuccess: (res, requestedMode) => {
       const returnedMode = res?.settings?.mode;
       const nextMode =

@@ -1,7 +1,7 @@
 /**
  * Extended HR service layer backed by real API endpoints.
  */
-import { safe } from '../lib/api';
+import { hrTransport } from '../lib/clients';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -106,6 +106,15 @@ export interface DocumentItem {
   expiresAt?: string;
   sizeKb: number;
   url?: string;
+}
+
+export interface BenefitPlan {
+  id: number;
+  name: string;
+  category: 'Health' | 'Dental' | 'Vision' | '401k' | 'Life';
+  carrier: string;
+  monthlyCost: number;
+  enrolledCount: number;
 }
 
 export interface BenefitEnrollment {
@@ -264,14 +273,14 @@ export const hrExtras = {
   // hr.employee.v1 has no self-lookup RPC, and hr_employees.id is a different
   // id-space from the hub auth user id - this is the only correct way for the
   // frontend to resolve "my own employee_id" for leave/overtime/equipment forms.
-  getMyEmployee: () => safe.get<{ employee: { id: number | string } }>('/hr/employees/me'),
+  getMyEmployee: () => hrTransport.get<{ employee: { id: number | string } }>('/hr/employees/me'),
 
   // Time Off
-  listTimeOff: () => safe.get<TimeOffEntry[]>('/hr/time-off'),
+  listTimeOff: () => hrTransport.get<TimeOffEntry[]>('/hr/time-off'),
   submitTimeOff: (data: Omit<TimeOffEntry, 'id' | 'status' | 'createdAt'>) =>
-    safe.post<TimeOffEntry>('/hr/time-off', toTimeOffPayload(data)),
+    hrTransport.post<TimeOffEntry>('/hr/time-off', toTimeOffPayload(data)),
   approveTimeOff: (id: number, approved: boolean, note?: string) =>
-    safe.post<{ success: boolean }>('/hr/time-off/approve', {
+    hrTransport.post<{ success: boolean }>('/hr/time-off/approve', {
       id,
       status: approved ? 'approved' : 'rejected',
       notes: note,
@@ -279,91 +288,93 @@ export const hrExtras = {
 
   // Schedule
   listSchedule: (weekStart?: string) =>
-    safe.get<ScheduleShift[]>('/hr/shifts', { params: weekStart ? { date: weekStart } : {} }),
+    hrTransport.get<ScheduleShift[]>('/hr/shifts', {
+      params: weekStart ? { date: weekStart } : {},
+    }),
   upsertScheduleShift: (shift: Omit<ScheduleShift, 'id'> & { id?: number }) =>
     shift.id
-      ? safe.put<{ success: boolean }>('/hr/shifts', toScheduleShiftUpdatePayload(shift))
-      : safe.post<{ success: boolean }>('/hr/shifts', toScheduleShiftCreatePayload(shift)),
+      ? hrTransport.put<{ success: boolean }>('/hr/shifts', toScheduleShiftUpdatePayload(shift))
+      : hrTransport.post<{ success: boolean }>('/hr/shifts', toScheduleShiftCreatePayload(shift)),
   deleteScheduleShift: (id: number) =>
-    safe.delete<{ success: boolean }>('/hr/shifts', { data: { id } }),
+    hrTransport.delete<{ success: boolean }>('/hr/shifts', { data: { id } }),
   // Publishing a roster is a POST to its own endpoint. This used to GET
   // /hr/shifts with view=publish, which no handler ever read, so it returned a
   // shift list and published nothing.
   publishWeek: (weekStart: string) =>
-    safe.post<{ success: boolean }>('/hr/shifts/roster/publish', { week_start: weekStart }),
+    hrTransport.post<{ success: boolean }>('/hr/shifts/roster/publish', { week_start: weekStart }),
 
   // Timesheets
-  listTimesheets: () => safe.get<TimesheetRow[]>('/hr/timesheets'),
+  listTimesheets: () => hrTransport.get<TimesheetRow[]>('/hr/timesheets'),
   approveTimesheet: (id: number) =>
-    safe.post<{ success: boolean }>(`/hr/timesheets/${id}/approve`, {}),
+    hrTransport.post<{ success: boolean }>(`/hr/timesheets/${id}/approve`, {}),
   upsertTimesheet: (row: TimesheetRow) =>
-    safe.post<TimesheetRow>(`/hr/timesheets/${row.id}/submit`, {}),
+    hrTransport.post<TimesheetRow>(`/hr/timesheets/${row.id}/submit`, {}),
 
   // Reviews
-  listReviews: () => safe.get<Review[]>('/hr/reviews'),
+  listReviews: () => hrTransport.get<Review[]>('/hr/reviews'),
   createReview: (data: Omit<Review, 'id'>) =>
-    safe.post<Review>('/hr/reviews', toReviewPayload(data)),
+    hrTransport.post<Review>('/hr/reviews', toReviewPayload(data)),
 
   // 1-on-1s
-  listOneOnOnes: () => safe.get<OneOnOne[]>('/hr/one-on-ones'),
+  listOneOnOnes: () => hrTransport.get<OneOnOne[]>('/hr/one-on-ones'),
   createOneOnOne: (data: Omit<OneOnOne, 'id'>) =>
-    safe.post<OneOnOne>('/hr/one-on-ones', toOneOnOnePayload(data)),
+    hrTransport.post<OneOnOne>('/hr/one-on-ones', toOneOnOnePayload(data)),
   updateOneOnOne: (id: number, patch: Partial<OneOnOne>) =>
-    safe.post<{ success: boolean }>('/hr/one-on-ones', { id, ...patch }),
+    hrTransport.post<{ success: boolean }>('/hr/one-on-ones', { id, ...patch }),
 
   // Onboarding
-  listOnboarding: () => safe.get<OnboardingTask[]>('/hr/training'),
+  listOnboarding: () => hrTransport.get<OnboardingTask[]>('/hr/training'),
   toggleOnboardingTask: (id: number) =>
-    safe.get<{ success: boolean }>('/hr/training', { params: { id, action: 'toggle' } }),
+    hrTransport.get<{ success: boolean }>('/hr/training', { params: { id, action: 'toggle' } }),
   addOnboardingTask: (task: Omit<OnboardingTask, 'id' | 'completed'>) =>
-    safe.post<OnboardingTask>('/hr/training', toTrainingPayload(task)),
+    hrTransport.post<OnboardingTask>('/hr/training', toTrainingPayload(task)),
 
   // Offboarding
   listOffboarding: () =>
-    safe.get<OffboardingTask[]>('/hr/training', { params: { type: 'offboarding' } }),
+    hrTransport.get<OffboardingTask[]>('/hr/training', { params: { type: 'offboarding' } }),
   toggleOffboardingTask: (id: number) =>
-    safe.get<{ success: boolean }>('/hr/training', {
+    hrTransport.get<{ success: boolean }>('/hr/training', {
       params: { id, action: 'toggle-offboarding' },
     }),
 
   // Documents
-  listDocuments: () => safe.get<DocumentItem[]>('/hr/documents'),
+  listDocuments: () => hrTransport.get<DocumentItem[]>('/hr/documents'),
   addDocument: (doc: Omit<DocumentItem, 'id' | 'uploadedAt'>) =>
-    safe.post<DocumentItem>('/hr/documents', {
+    hrTransport.post<DocumentItem>('/hr/documents', {
       employeeId: doc.staffId,
       documentType: doc.type,
       title: doc.name,
       storageMode: doc.url ? 'linked' : 'stored',
       fileUrl: doc.url ?? doc.name,
     }),
-  deleteDocument: (id: number) => safe.delete<{ success: boolean }>(`/hr/documents/${id}`),
+  deleteDocument: (id: number) => hrTransport.delete<{ success: boolean }>(`/hr/documents/${id}`),
   expiringDocuments: (daysAhead = 30) =>
-    safe.get<DocumentItem[]>('/hr/documents/expiring', { params: { days: daysAhead } }),
+    hrTransport.get<DocumentItem[]>('/hr/documents/expiring', { params: { days: daysAhead } }),
 
   // Benefits
-  // listBenefitPlans is gone: self-service plan listing now goes through
-  // hr.benefit.v1's listBenefits RPC (see useBenefits in useHrExtras.ts).
+  listBenefitPlans: () => hrTransport.get<BenefitPlan[]>('/hr/benefits'),
   // Legacy, per-employee admin view used by EmployeeProfile.tsx. Self-service
   // enrollment now goes through hr.benefit.v1 (see useMyBenefitEnrollments /
   // useEnrollInBenefit in useHrExtras.ts) - there is no onekit RPC yet for an
   // admin to list a specific employee's enrollments, so this stays on the
   // legacy REST path until one exists.
   listBenefitEnrollments: () =>
-    safe.get<BenefitEnrollment[]>('/hr/benefits', { params: { type: 'enrollments' } }),
+    hrTransport.get<BenefitEnrollment[]>('/hr/benefits', { params: { type: 'enrollments' } }),
 
   // Training
-  listCourses: () => safe.get<TrainingCourse[]>('/hr/training', { params: { type: 'courses' } }),
+  listCourses: () =>
+    hrTransport.get<TrainingCourse[]>('/hr/training', { params: { type: 'courses' } }),
   listTrainingProgress: () =>
-    safe.get<TrainingProgress[]>('/hr/training', { params: { type: 'progress' } }),
+    hrTransport.get<TrainingProgress[]>('/hr/training', { params: { type: 'progress' } }),
   updateTrainingProgress: (id: number, progress: number) =>
-    safe.get<{ success: boolean }>('/hr/training', {
+    hrTransport.get<{ success: boolean }>('/hr/training', {
       params: { id, progress, action: 'update-progress' },
     }),
 
   // Birthdays & anniversaries
-  listBirthdays: () => safe.get<Birthday[]>('/hr/staff', { params: { view: 'birthdays' } }),
+  listBirthdays: () => hrTransport.get<Birthday[]>('/hr/staff', { params: { view: 'birthdays' } }),
   listAnniversaries: () =>
-    safe.get<Anniversary[]>('/hr/staff', { params: { view: 'anniversaries' } }),
+    hrTransport.get<Anniversary[]>('/hr/staff', { params: { view: 'anniversaries' } }),
 
   // Availability lives in shared/hooks/queries/useAvailability.ts, which calls
   // the hr.shift.v1 availability endpoints through the generated client. The
@@ -371,33 +382,34 @@ export const hrExtras = {
   // view=availability parameter no handler has ever read.
 
   // Swaps
-  listSwaps: () => safe.get<SwapRequest[]>('/hr/shifts', { params: { view: 'swaps' } }),
+  listSwaps: () => hrTransport.get<SwapRequest[]>('/hr/shifts', { params: { view: 'swaps' } }),
   createSwap: (data: Omit<SwapRequest, 'id' | 'status'>) =>
-    safe.post<SwapRequest>('/hr/shifts', {
+    hrTransport.post<SwapRequest>('/hr/shifts', {
       staffId: data.requesterId,
       date: data.shiftDay,
       notes: data.reason,
     }),
   resolveSwap: (id: number, accepted: boolean) =>
-    safe.put<{ success: boolean }>('/hr/shifts', {
+    hrTransport.put<{ success: boolean }>('/hr/shifts', {
       id,
       status: accepted ? 'accepted' : 'rejected',
     }),
 
   // Breaks
-  listBreaks: () => safe.get<BreakLog[]>('/hr/shifts', { params: { view: 'breaks' } }),
+  listBreaks: () => hrTransport.get<BreakLog[]>('/hr/shifts', { params: { view: 'breaks' } }),
   startBreak: (staffId: number, staffName: string, type: BreakLog['type']) =>
-    safe.post<BreakLog>('/hr/staff/clock-in', {
+    hrTransport.post<BreakLog>('/hr/staff/clock-in', {
       staffId,
     }),
-  endBreak: (id: number) => safe.post<{ success: boolean }>('/hr/staff/clock-out', { staffId: id }),
+  endBreak: (id: number) =>
+    hrTransport.post<{ success: boolean }>('/hr/staff/clock-out', { staffId: id }),
 
   // Overtime
   listOvertimeAlerts: () =>
-    safe.get<OvertimeAlert[]>('/hr/shifts', { params: { view: 'overtime' } }),
+    hrTransport.get<OvertimeAlert[]>('/hr/shifts', { params: { view: 'overtime' } }),
 
   // Settings
-  getSettings: () => safe.get<{ config: HrSettings }>('/hr/config'),
+  getSettings: () => hrTransport.get<{ config: HrSettings }>('/hr/config'),
   updateSettings: (patch: Partial<HrSettings>) =>
-    safe.put<HrSettings>('/hr/config', toSettingsPayload(patch)),
+    hrTransport.put<HrSettings>('/hr/config', toSettingsPayload(patch)),
 };

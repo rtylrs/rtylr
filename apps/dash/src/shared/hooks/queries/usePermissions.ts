@@ -1,8 +1,8 @@
-import { getOneKitErrorMessage, unwrap } from '@voxire/api';
+import { getOneKitErrorMessage } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { safe } from '../../lib/api';
+import { permissionClient } from '../../lib/clients';
 import { permissionMatrixSchema, customRoleSchema } from '../../schemas/permissions';
 import i18next from 'i18next';
 
@@ -15,8 +15,8 @@ export const usePermissions = () => {
   return useQuery<PermissionMatrix>({
     queryKey: ['permissions'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/hub/permission/v1/permissions'));
-      return permissionMatrixSchema.parse(res);
+      const res = await permissionClient.getPermissions({});
+      return permissionMatrixSchema.parse(res.matrix ?? res);
     },
   });
 };
@@ -25,9 +25,8 @@ export const useCustomRoles = () => {
   return useQuery({
     queryKey: ['custom-roles'],
     queryFn: async () => {
-      const res = await unwrap(safe.get('/hub/permission/v1/roles'));
-      const raw = res?.roles ?? res;
-      return z.array(customRoleSchema).parse(Array.isArray(raw) ? raw : []);
+      const res = await permissionClient.listRoles({});
+      return z.array(customRoleSchema).parse(res.roles ?? []);
     },
   });
 };
@@ -36,7 +35,11 @@ export const useUpdatePermissions = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { role: string; key: string; enabled: boolean }) => {
-      return unwrap(safe.put('/hub/permission/v1/permissions', payload));
+      return permissionClient.updatePermissionMatrix({
+        role: payload.role,
+        permissionKey: payload.key,
+        enabled: payload.enabled,
+      });
     },
     onSuccess: () => {
       toast.success(i18next.t('toasts.permissionUpdated', 'Permission updated'));
@@ -56,7 +59,7 @@ export const useCreateCustomRole = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { name: string; description?: string }) => {
-      return unwrap(safe.post('/hub/permission/v1/roles', payload));
+      return permissionClient.createRole(payload);
     },
     onSuccess: () => {
       toast.success(i18next.t('toasts.roleCreated', 'Role created'));

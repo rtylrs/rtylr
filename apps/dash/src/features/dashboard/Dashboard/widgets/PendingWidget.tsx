@@ -2,9 +2,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { unwrap } from '@voxire/api';
+
 import { EmptyState } from '@voxire/ui';
-import { safe } from '../../../../shared/lib/api';
+import { timeOffClient } from '../../../../shared/lib/clients';
 import WidgetHeader from './WidgetHeader';
 
 interface PendingRequest {
@@ -23,9 +23,7 @@ const PendingWidget: React.FC = () => {
   } = useQuery({
     queryKey: ['pending-widget'],
     queryFn: async (): Promise<PendingRequest[]> => {
-      const res = await unwrap(
-        safe.get<{ requests?: PendingRequest[] } | PendingRequest[]>('/hr/time-off/v1/requests')
-      );
+      const res = await timeOffClient.listTimeOff({});
       return ((Array.isArray(res) ? res : res.requests) ?? []).filter(
         (request) => request.status?.toLowerCase() === 'pending'
       );

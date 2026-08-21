@@ -1,10 +1,10 @@
-import { createOneKitClient, getOneKitErrorMessage, toFiniteNumber } from '@voxire/api';
+import { createOneKitClient, getOneKitErrorMessage, toFiniteNumber, unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { ExpensesServiceClient } from '@voxire/voxie/finance/expenses/v1/client';
 import { ReportServiceClient } from '@voxire/voxie/finance/report/v1/client';
-import { safe } from '../lib/api';
+import { financeApi } from '../services/financeApi';
 import type { ExpenseCategory } from '../services/financeApi';
 
 const expensesClient = createOneKitClient(ExpensesServiceClient, 'finance');
@@ -58,16 +58,14 @@ export function useUpdateExpenseCategory() {
       id: number;
       data: { name: string; color: string; budget?: number; icon?: string };
     }) => {
-      const response = await safe.put<{ message?: string; category?: any }>(
-        `/finance/expense-categories/${id}`,
-        {
+      return unwrap(
+        financeApi.updateExpenseCategory(id, {
           name: data.name,
           color: data.color,
           budget: data.budget,
           icon: data.icon ?? 'tag',
-        }
+        })
       );
-      return response;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['expense-categories'] });
@@ -85,8 +83,7 @@ export function useDeleteExpenseCategory() {
 
   return useMutation({
     mutationFn: async (id: number) => {
-      const response = await safe.delete<{ message?: string }>(`/finance/expense-categories/${id}`);
-      return response;
+      return unwrap(financeApi.deleteExpenseCategory(id));
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['expense-categories'] });

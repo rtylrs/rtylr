@@ -12,10 +12,11 @@ vi.mock('@voxire/components', () => ({
 
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => vi.fn(),
+  useRouterState: () => '',
 }));
 
-vi.mock('../../shared/lib/api', () => ({
-  default: { post: vi.fn(), get: vi.fn() },
+vi.mock('../../shared/lib/clients', () => ({
+  orderClient: { createPublicOrder: vi.fn() },
 }));
 
 import { useCartStore } from '../../shared/stores/cartStore';

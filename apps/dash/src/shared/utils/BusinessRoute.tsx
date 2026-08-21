@@ -13,19 +13,25 @@ import {
   Lock,
   BarChart3,
 } from 'lucide-react';
-import { unwrap } from '@voxire/api';
 import { Avatar } from '@voxire/ui';
 import { useUserStore, type StoredUser } from '../stores/userStore';
 import { normalizeConfigData, useConfigStore } from '../stores/configStore';
-import { safe } from '../lib/api';
+import { accessClient, configClient, userClient } from '../lib/clients';
 import { useBusinessFavicon } from '../hooks/useBusinessFavicon';
 
-const getCookieToken = (): string | null =>
-  document.cookie
+const getCookieToken = (): string | null => {
+  const raw = document.cookie
     .split(';')
     .map((c) => c.trim())
     .find((c) => c.startsWith('token='))
-    ?.split('=')[1] ?? null;
+    ?.slice('token='.length);
+  if (!raw) return null;
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+};
 
 const ALL_APPS = [
   {
@@ -114,7 +120,7 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
   const handleRequestAccess = async (appId: string): Promise<void> => {
     setRequestLoading(appId);
     try {
-      await safe.post('/hub/team/access/v1/requests', { app: appId });
+      await accessClient.requestAccess({ app: appId });
       setRequested((prev) => new Set(prev).add(appId));
     } catch {
       // silently fail, server returns success anyway if already requested
@@ -397,19 +403,17 @@ function BusinessRoute(): React.JSX.Element | null {
 
     setToken(token);
 
-    unwrap(safe.get<Record<string, unknown>>('/hub/user/v1/users/me'))
+    userClient
+      .getMe({})
       .then((res) => {
         setUser(res as StoredUser);
-        unwrap(
-          safe.get<{ business?: Record<string, unknown>; maintenance?: boolean }>(
-            '/hub/config/v1/config'
-          )
-        )
+        configClient
+          .getConfig({})
           .then((configRes) => {
-            const business = (configRes?.business ?? {}) as Record<string, unknown>;
+            const business = configRes.business ?? {};
             const config = normalizeConfigData({
               site_name: business.name,
-              logo_url: business.logo_url ?? business.logoUrl,
+              logo_url: business.logoUrl,
               contact_email: business.email,
               contact_number: business.phone,
               address: business.address,
@@ -422,7 +426,7 @@ function BusinessRoute(): React.JSX.Element | null {
               contactEmail: (config.contactEmail as string | null) ?? null,
               contactNumber: (config.contactNumber as string | null) ?? null,
             });
-            setMaintanance((configRes?.maintenance as boolean) ?? false);
+            setMaintanance(configRes.maintenance ?? false);
             setAboutContent({ aboutContent: config.aboutContent ?? null });
           })
           .catch(() => {

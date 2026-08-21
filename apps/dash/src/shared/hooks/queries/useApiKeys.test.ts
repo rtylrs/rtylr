@@ -4,19 +4,17 @@ import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useApiKeys, useCreateApiKey, useRevokeApiKey } from './useApiKeys';
 
-const mockGet = vi.fn();
-const mockPost = vi.fn();
+const mockDeveloperClient = vi.hoisted(() => ({
+  listApiKeys: vi.fn(),
+  createApiKey: vi.fn(),
+  revokeApiKey: vi.fn(),
+}));
 
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((value) => value),
 }));
 
-vi.mock('../../lib/api', () => ({
-  safe: {
-    get: (...args: unknown[]) => mockGet(...args),
-    post: (...args: unknown[]) => mockPost(...args),
-  },
-}));
+vi.mock('../../lib/clients', () => ({ developerClient: mockDeveloperClient }));
 
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
@@ -33,7 +31,9 @@ describe('useApiKeys', () => {
   });
 
   it('fetches api keys successfully', async () => {
-    mockGet.mockResolvedValue({ keys: [{ id: 1, name: 'Test Key', token: 'key_123' }] });
+    mockDeveloperClient.listApiKeys.mockResolvedValue({
+      keys: [{ id: 1, name: 'Test Key', token: 'key_123' }],
+    });
 
     const client = new QueryClient({
       defaultOptions: { queries: { retry: false } },
@@ -47,7 +47,11 @@ describe('useApiKeys', () => {
   });
 
   it('creates an api key successfully', async () => {
-    mockPost.mockResolvedValue({ id: 1, key: 'key_abc', message: 'Created' });
+    mockDeveloperClient.createApiKey.mockResolvedValue({
+      id: 1,
+      key: 'key_abc',
+      message: 'Created',
+    });
 
     const client = new QueryClient({
       defaultOptions: { mutations: { retry: false } },
@@ -60,14 +64,14 @@ describe('useApiKeys', () => {
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockPost).toHaveBeenCalledWith('/hub/developer/v1/api-keys', {
+    expect(mockDeveloperClient.createApiKey).toHaveBeenCalledWith({
       name: 'New Key',
       scopes: ['read'],
     });
   });
 
   it('revokes an api key successfully', async () => {
-    mockPost.mockResolvedValue({ message: 'Revoked' });
+    mockDeveloperClient.revokeApiKey.mockResolvedValue({ message: 'Revoked' });
 
     const client = new QueryClient({
       defaultOptions: { mutations: { retry: false } },
@@ -80,6 +84,6 @@ describe('useApiKeys', () => {
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockPost).toHaveBeenCalledWith('/hub/developer/v1/api-keys/revoke', { id: 12 });
+    expect(mockDeveloperClient.revokeApiKey).toHaveBeenCalledWith({ id: '12' });
   });
 });
