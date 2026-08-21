@@ -39,5 +39,6 @@ export const cases = [
   ["apps/erp/src/shared/components/QuickAddProductModal.tsx", "audit-batch-037-suite-10"],
   ["apps/finance/src/features/invoices/Invoices.tsx", "audit-batch-038-suite-10"],
   ["apps/finance/src/shared/components/InvoicePreview.tsx", "audit-batch-039-suite-10"],
+  ["apps/flow/src/features/directory/DirectoryScreen.tsx", "audit-batch-040-suite-10"],
 ];
 
