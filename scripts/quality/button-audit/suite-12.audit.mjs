@@ -4,5 +4,6 @@ export const cases = [
   ["apps/crm/src/features/dashboard/Dashboard.test.tsx", "audit-batch-002-suite-12"],
   ["apps/crm/src/features/templates/Templates.tsx", "audit-batch-003-suite-12"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/ActivityWidget.test.tsx", "audit-batch-004-suite-12"],
+  ["apps/dash/src/features/developer/Webhooks.tsx", "audit-batch-005-suite-12"],
 ];
 
