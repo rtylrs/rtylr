@@ -193,5 +193,6 @@ export const cases = [
   ["apps/erp/src/shared/components/BulkActionBar.tsx", "audit-batch-191-suite-01"],
   ["apps/erp/src/shared/components/UnitSelector.tsx", "audit-batch-192-suite-01"],
   ["apps/finance/src/features/recurring-invoices/RecurringInvoices.tsx", "audit-batch-193-suite-01"],
+  ["apps/finance/src/shared/components/PageHeader.tsx", "audit-batch-194-suite-01"],
 ];
 

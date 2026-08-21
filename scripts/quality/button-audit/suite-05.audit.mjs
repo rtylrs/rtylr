@@ -193,5 +193,6 @@ export const cases = [
   ["apps/erp/src/shared/components/DateRangePicker.tsx", "audit-batch-191-suite-05"],
   ["apps/finance/src/features/bank-feeds/BankFeeds.tsx", "audit-batch-192-suite-05"],
   ["apps/finance/src/layouts/DefaultLayout.test.tsx", "audit-batch-193-suite-05"],
+  ["apps/finance/src/shared/components/ReceiptUpload.tsx", "audit-batch-194-suite-05"],
 ];
 

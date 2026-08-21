@@ -193,5 +193,6 @@ export const cases = [
   ["apps/erp/src/shared/components/ConfirmModal.tsx", "audit-batch-191-suite-04"],
   ["apps/finance/src/features/balance-sheet/BalanceSheet.tsx", "audit-batch-192-suite-04"],
   ["apps/finance/src/features/tax/TaxReport.tsx", "audit-batch-193-suite-04"],
+  ["apps/finance/src/shared/components/PeriodSelector.tsx", "audit-batch-194-suite-04"],
 ];
 

@@ -193,5 +193,6 @@ export const cases = [
   ["apps/erp/src/shared/components/FilterDrawer.tsx", "audit-batch-191-suite-08"],
   ["apps/finance/src/features/categories/Categories.tsx", "audit-batch-192-suite-08"],
   ["apps/finance/src/router.tsx", "audit-batch-193-suite-08"],
+  ["apps/finance/src/shared/components/Skeleton.tsx", "audit-batch-194-suite-08"],
 ];
 

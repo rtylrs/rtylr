@@ -193,5 +193,6 @@ export const cases = [
   ["apps/erp/src/shared/components/ProductTagInput.tsx", "audit-batch-191-suite-17"],
   ["apps/finance/src/features/invoices/Invoices.test.tsx", "audit-batch-192-suite-17"],
   ["apps/finance/src/shared/components/GlobalSearch.tsx", "audit-batch-193-suite-17"],
+  ["apps/flow/src/features/directory/DirectoryScreen.test.tsx", "audit-batch-194-suite-17"],
 ];
 

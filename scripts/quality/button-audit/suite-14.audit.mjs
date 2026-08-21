@@ -193,5 +193,6 @@ export const cases = [
   ["apps/erp/src/shared/components/PaginationControls.tsx", "audit-batch-191-suite-14"],
   ["apps/finance/src/features/expenses/NewExpense.tsx", "audit-batch-192-suite-14"],
   ["apps/finance/src/shared/components/CurrencyInput.tsx", "audit-batch-193-suite-14"],
+  ["apps/flow/src/features/calendar/Calendar.tsx", "audit-batch-194-suite-14"],
 ];
 
