@@ -152,5 +152,6 @@ export const cases = [
   ["apps/hr/src/features/setup-wizard/HRConfigRoute.test.tsx", "audit-batch-150-suite-01"],
   ["apps/hr/src/features/time-logging/TimeEntryForm.tsx", "audit-batch-151-suite-01"],
   ["apps/hr/src/shared/components/HRPermissionGuard.tsx", "audit-batch-152-suite-01"],
+  ["apps/insights/src/features/revenue/Revenue.tsx", "audit-batch-153-suite-01"],
 ];
 

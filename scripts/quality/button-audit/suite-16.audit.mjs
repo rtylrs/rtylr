@@ -152,5 +152,6 @@ export const cases = [
   ["apps/hr/src/features/setup-wizard/steps/RolesPermissionsStep.test.tsx", "audit-batch-150-suite-16"],
   ["apps/hr/src/shared/components/ApprovalButtons.tsx", "audit-batch-151-suite-16"],
   ["apps/insights/src/features/dashboard/Dashboard.tsx", "audit-batch-152-suite-16"],
+  ["apps/menu/src/layouts/Public/PublicFooter/PublicFooter.tsx", "audit-batch-153-suite-16"],
 ];
 
