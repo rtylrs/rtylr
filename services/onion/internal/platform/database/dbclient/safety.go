@@ -29,6 +29,11 @@ const knownProductionHost = "voxire-db.rds.amazonaws.com"
 // Fail-closed: unset, or any value other than "true", leaves the guard armed.
 const envAllowProductionDB = "ALLOW_PRODUCTION_DB"
 
+// envAllowRemoteDB opts a development-labelled run into an off-box database.
+// Sharing a development database between a team is legitimate; doing it by
+// accident is what this guards. Fail-closed, parsed like envAllowProductionDB.
+const envAllowRemoteDB = "ALLOW_REMOTE_DB"
+
 // isProductionHost reports whether host (with or without a ":port" suffix) is
 // the production database endpoint.
 func isProductionHost(host string) bool {
@@ -84,4 +89,104 @@ func currentAppEnv() string {
 	}
 
 	return os.Getenv("APP_ENV")
+}
+
+// isLocalDBHost reports whether host (with or without a ":port" suffix) is on
+// this machine or on the same container network.
+//
+// Local means one of: the name "localhost"; a loopback or unspecified IP; or a
+// single-label hostname. That last case is load-bearing rather than lenient.
+// self-host/docker-compose.yml sets DB_HOST: db for api, upload and worker, so
+// a Docker service name has to count as local or every containerised deployment
+// would be refused. A single label cannot be a public DNS name.
+//
+// Remote therefore means a dotted name or a routable IP, which is exactly the
+// shape of the managed endpoint this guard exists to catch.
+func isLocalDBHost(host string) bool {
+	if h, _, err := net.SplitHostPort(host); err == nil {
+		host = h
+	}
+
+	host = strings.ToLower(strings.TrimSpace(strings.Trim(host, "[]")))
+	if host == "" {
+		// Nothing to judge. checkProductionSafety treats an unparsed host the
+		// same way, and refusing on a DSN we could not read would block far more
+		// than it protects.
+		return true
+	}
+
+	if host == "localhost" {
+		return true
+	}
+
+	if ip := net.ParseIP(host); ip != nil {
+		return ip.IsLoopback() || ip.IsUnspecified()
+	}
+
+	return !strings.Contains(host, ".")
+}
+
+// isDevelopmentEnv reports whether APP_ENV explicitly says this is development.
+//
+// Only an explicit label counts. An unset APP_ENV is deliberately not treated as
+// development: it is the state in CI and in ad-hoc tooling, and firing there
+// would refuse connections this guard has no opinion about. The mistake being
+// caught is a file that says "development" while pointing somewhere else, so the
+// declaration is the trigger.
+func isDevelopmentEnv() bool {
+	env := strings.ToLower(strings.TrimSpace(currentAppEnv()))
+
+	return env == "development" || env == "dev"
+}
+
+// remoteDBAllowed reports whether this run has declared that a
+// development-labelled process means to reach an off-box database.
+func remoteDBAllowed() bool {
+	return strings.EqualFold(strings.TrimSpace(os.Getenv(envAllowRemoteDB)), "true")
+}
+
+// checkDevelopmentSafety refuses to proceed when APP_ENV says development but
+// dsn resolves to a host that is not on this machine.
+//
+// checkProductionSafety only fires on one exact known endpoint, so that a
+// staging or self-host tier on its own RDS instance is not blocked by a guard
+// claiming to protect *this* production database. The consequence is that a
+// development-labelled config pointing at any other managed database connects
+// without comment. This closes that gap from the other direction: rather than
+// asking which host it is, it asks whether a run that calls itself development
+// should be leaving the machine at all.
+func checkDevelopmentSafety(role, dsn string) error {
+	if !isDevelopmentEnv() {
+		return nil
+	}
+
+	host := hostFromDSN(dsn)
+	if isLocalDBHost(host) {
+		return nil
+	}
+
+	if remoteDBAllowed() {
+		return nil
+	}
+
+	return fmt.Errorf(
+		"refusing to connect: APP_ENV=%q declares development, but %s host %q is not "+
+			"on this machine.\n"+
+			"If you meant to run against the local container, run `make local-env-up` and "+
+			"copy .env.example (DB_HOST=localhost, DB_NAME=onion_dev).\n"+
+			"If this tier is not development, set APP_ENV to the tier it is.\n"+
+			"If a development run is genuinely meant to reach this database, set %s=true",
+		currentAppEnv(), role, host, envAllowRemoteDB,
+	)
+}
+
+// checkDSNSafety runs every guard that applies to a resolved DSN. Connect calls
+// this rather than the individual checks so a new guard cannot be added to one
+// of the three connections and forgotten on the other two.
+func checkDSNSafety(role, dsn string) error {
+	if err := checkProductionSafety(role, dsn); err != nil {
+		return err
+	}
+
+	return checkDevelopmentSafety(role, dsn)
 }

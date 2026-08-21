@@ -79,7 +79,7 @@ func Connect(ctx context.Context) error {
 	}
 
 	mainDSN := resolveMainDSN()
-	if err := checkProductionSafety("database", mainDSN); err != nil {
+	if err := checkDSNSafety("database", mainDSN); err != nil {
 		return err
 	}
 
@@ -95,7 +95,7 @@ func Connect(ctx context.Context) error {
 	// DSN, and hard-blocking like it too, since a logging connection failure is
 	// already fatal here.
 	if loggingDSN := resolveLoggingDSN(); loggingDSN != "" {
-		if err := checkProductionSafety("logging database", loggingDSN); err != nil {
+		if err := checkDSNSafety("logging database", loggingDSN); err != nil {
 			return err
 		}
 
@@ -120,7 +120,7 @@ func Connect(ctx context.Context) error {
 		// which is a bigger behavior change than the guard should make.
 		// Logged at Error rather than Warn because a production-shaped replica
 		// host is a misconfiguration, not a transiently unreachable replica.
-		if safetyErr := checkProductionSafety("read replica", replicaDSN); safetyErr != nil {
+		if safetyErr := checkDSNSafety("read replica", replicaDSN); safetyErr != nil {
 			logger.Ctx(ctx).Error("skipping read replica; AI reads will use the primary",
 				logger.Error(safetyErr))
 		} else if replicaDB, repErr := openDB(ctx, replicaDSN); repErr != nil {

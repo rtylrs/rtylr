@@ -243,3 +243,198 @@ func TestReplicaDSNIsChecked(t *testing.T) {
 		}
 	})
 }
+
+// isLocalDBHost decides whether checkDevelopmentSafety fires at all, so the
+// single-label case matters as much as the loopback ones: self-host's compose
+// files set DB_HOST: db for api, upload and worker, and a guard that called a
+// Docker service name "remote" would refuse every containerised deployment.
+func TestIsLocalDBHost(t *testing.T) {
+	local := []string{
+		"localhost",
+		"localhost:3306",
+		"LocalHost",
+		"127.0.0.1",
+		"127.0.0.1:3306",
+		"127.5.5.5",
+		"::1",
+		"[::1]:3306",
+		"0.0.0.0",
+		"db",          // self-host compose service name
+		"db:3306",     //
+		"mysql",       // the same shape under another name
+		"onion_mysql", // the local-env volume/container naming
+		"",            // unparseable DSN: nothing to judge
+	}
+	for _, h := range local {
+		if !isLocalDBHost(h) {
+			t.Errorf("isLocalDBHost(%q) = false, want true", h)
+		}
+	}
+
+	remote := []string{
+		"voxire-db.rds.amazonaws.com",
+		"voxire-db.rds.amazonaws.com:3306",
+		"staging-db.rds.amazonaws.com",
+		"db.internal",
+		"10.0.0.4",
+		"192.168.1.50",
+		"192.168.1.50:3306",
+	}
+	for _, h := range remote {
+		if isLocalDBHost(h) {
+			t.Errorf("isLocalDBHost(%q) = true, want false", h)
+		}
+	}
+}
+
+// The combination this exists for: a file that says development while pointing
+// at a managed database. checkProductionSafety cannot catch it unless the host
+// happens to be the one known production endpoint.
+func TestCheckDevelopmentSafety(t *testing.T) {
+	const remoteDSN = "user:pw@tcp(some-other-db.rds.amazonaws.com:3306)/voxire"
+
+	t.Run("blocks a remote host when APP_ENV=development", func(t *testing.T) {
+		t.Setenv("APP_ENV", "development")
+		t.Setenv(envAllowRemoteDB, "")
+		if err := checkDevelopmentSafety("database", remoteDSN); err == nil {
+			t.Fatal("expected error, got nil")
+		}
+	})
+
+	t.Run("blocks a remote host when APP_ENV=dev", func(t *testing.T) {
+		t.Setenv("APP_ENV", "dev")
+		t.Setenv(envAllowRemoteDB, "")
+		if err := checkDevelopmentSafety("database", remoteDSN); err == nil {
+			t.Fatal("expected error, got nil")
+		}
+	})
+
+	t.Run("allows the local container in development", func(t *testing.T) {
+		t.Setenv("APP_ENV", "development")
+		t.Setenv(envAllowRemoteDB, "")
+		dsn := "onion_user:onion_password@tcp(localhost:3306)/onion_dev"
+		if err := checkDevelopmentSafety("database", dsn); err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+	})
+
+	// Regression guard: a containerised development run reaches its database by
+	// service name. Refusing that would break self-host and any compose setup.
+	t.Run("allows a docker service name in development", func(t *testing.T) {
+		t.Setenv("APP_ENV", "development")
+		t.Setenv(envAllowRemoteDB, "")
+		dsn := "user:pw@tcp(db:3306)/onion_dev"
+		if err := checkDevelopmentSafety("database", dsn); err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("says nothing about a remote host outside development", func(t *testing.T) {
+		for _, env := range []string{"production", "staging", "release-candidate"} {
+			t.Setenv("APP_ENV", env)
+			t.Setenv(envAllowRemoteDB, "")
+			if err := checkDevelopmentSafety("database", remoteDSN); err != nil {
+				t.Errorf("APP_ENV=%q: expected no error, got %v", env, err)
+			}
+		}
+	})
+
+	// Deliberate: unset is the state in CI and ad-hoc tooling. The trigger is a
+	// declaration of development, not the absence of one.
+	t.Run("does not fire when APP_ENV is unset", func(t *testing.T) {
+		t.Setenv("APP_ENV", "")
+		t.Setenv(envAllowRemoteDB, "")
+		if err := checkDevelopmentSafety("database", remoteDSN); err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("names the connection being refused", func(t *testing.T) {
+		t.Setenv("APP_ENV", "development")
+		t.Setenv(envAllowRemoteDB, "")
+		err := checkDevelopmentSafety("read replica", remoteDSN)
+		if err == nil {
+			t.Fatal("expected error, got nil")
+		}
+		if !strings.Contains(err.Error(), "read replica") {
+			t.Errorf("refusal should name the connection; got: %v", err)
+		}
+		if !strings.Contains(err.Error(), envAllowRemoteDB) {
+			t.Errorf("refusal should name the way out; got: %v", err)
+		}
+	})
+}
+
+func TestCheckDevelopmentSafetyOverride(t *testing.T) {
+	const remoteDSN = "user:pw@tcp(shared-dev-db.example.com:3306)/onion_dev"
+
+	t.Run("allows a remote host once declared", func(t *testing.T) {
+		t.Setenv("APP_ENV", "development")
+		t.Setenv(envAllowRemoteDB, "true")
+		if err := checkDevelopmentSafety("database", remoteDSN); err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("accepts any casing of true", func(t *testing.T) {
+		for _, v := range []string{"TRUE", "True", " true "} {
+			t.Setenv("APP_ENV", "development")
+			t.Setenv(envAllowRemoteDB, v)
+			if err := checkDevelopmentSafety("database", remoteDSN); err != nil {
+				t.Errorf("%s=%q: expected no error, got %v", envAllowRemoteDB, v, err)
+			}
+		}
+	})
+
+	// Fail-closed, matching envAllowProductionDB: only an explicit "true" opts in.
+	t.Run("stays armed for anything that is not true", func(t *testing.T) {
+		for _, v := range []string{"1", "yes", "on", "false", "maybe"} {
+			t.Setenv("APP_ENV", "development")
+			t.Setenv(envAllowRemoteDB, v)
+			if err := checkDevelopmentSafety("database", remoteDSN); err == nil {
+				t.Errorf("%s=%q: expected error, got nil", envAllowRemoteDB, v)
+			}
+		}
+	})
+}
+
+// Connect calls checkDSNSafety, not the individual guards. These assert the
+// wrapper actually runs both, since a guard wired into one of the three
+// connections and not the others is the failure this wrapper prevents.
+func TestCheckDSNSafetyRunsBothGuards(t *testing.T) {
+	t.Run("catches the known production host", func(t *testing.T) {
+		t.Setenv("APP_ENV", "development")
+		t.Setenv(envAllowProductionDB, "")
+		t.Setenv(envAllowRemoteDB, "")
+		dsn := "user:pw@tcp(voxire-db.rds.amazonaws.com:3306)/voxire"
+		if err := checkDSNSafety("database", dsn); err == nil {
+			t.Fatal("expected error, got nil")
+		}
+	})
+
+	// The gap this issue is about: checkProductionSafety alone passes this,
+	// because the host is not the one endpoint it knows.
+	t.Run("catches a remote host the production guard allows", func(t *testing.T) {
+		t.Setenv("APP_ENV", "development")
+		t.Setenv(envAllowProductionDB, "")
+		t.Setenv(envAllowRemoteDB, "")
+		dsn := "user:pw@tcp(some-other-db.rds.amazonaws.com:3306)/voxire"
+
+		if err := checkProductionSafety("database", dsn); err != nil {
+			t.Fatalf("precondition: the production guard should allow this, got %v", err)
+		}
+		if err := checkDSNSafety("database", dsn); err == nil {
+			t.Fatal("expected checkDSNSafety to refuse, got nil")
+		}
+	})
+
+	t.Run("allows the documented local setup", func(t *testing.T) {
+		t.Setenv("APP_ENV", "development")
+		t.Setenv(envAllowProductionDB, "")
+		t.Setenv(envAllowRemoteDB, "")
+		dsn := "onion_user:onion_password@tcp(localhost:3306)/onion_dev"
+		if err := checkDSNSafety("database", dsn); err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+	})
+}
