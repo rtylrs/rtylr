@@ -298,5 +298,6 @@ export const cases = [
   ["apps/finance/src/shared/components/Modal.tsx", "audit-batch-296-suite-19"],
   ["apps/flow/src/features/inbox/Inbox.tsx", "audit-batch-297-suite-19"],
   ["apps/flow/src/features/projects/ProjectViewTabs.tsx", "audit-batch-298-suite-19"],
+  ["apps/flow/src/features/time/TeamView.tsx", "audit-batch-299-suite-19"],
 ];
 

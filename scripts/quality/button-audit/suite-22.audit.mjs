@@ -298,5 +298,6 @@ export const cases = [
   ["apps/finance/src/shared/components/PLByCategoryChart.tsx", "audit-batch-296-suite-22"],
   ["apps/flow/src/features/leave/LeaveScreen.tsx", "audit-batch-297-suite-22"],
   ["apps/flow/src/features/projects/components/BoardSettingsPanel.test.tsx", "audit-batch-298-suite-22"],
+  ["apps/flow/src/features/timeline/Timeline.tsx", "audit-batch-299-suite-22"],
 ];
 
