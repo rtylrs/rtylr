@@ -290,5 +290,6 @@ export const cases = [
   ["apps/dash/src/features/menu/Menus.tsx", "audit-batch-288-suite-20"],
   ["apps/dash/src/features/team/GroupDetail.tsx", "audit-batch-289-suite-20"],
   ["apps/dash/src/shared/components/dash/PermissionCheckbox.tsx", "audit-batch-290-suite-20"],
+  ["apps/dash/src/shared/hooks/queries/useKpis.test.tsx", "audit-batch-291-suite-20"],
 ];
 

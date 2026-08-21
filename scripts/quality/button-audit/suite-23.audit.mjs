@@ -290,5 +290,6 @@ export const cases = [
   ["apps/dash/src/features/onboarding/CreateBusinessOnboarding.tsx", "audit-batch-288-suite-23"],
   ["apps/dash/src/features/team/InviteUser.tsx", "audit-batch-289-suite-23"],
   ["apps/dash/src/shared/components/dash/SettingSection.tsx", "audit-batch-290-suite-23"],
+  ["apps/dash/src/shared/hooks/queries/useTeam.test.tsx", "audit-batch-291-suite-23"],
 ];
 
