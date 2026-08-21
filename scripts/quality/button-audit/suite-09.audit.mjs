@@ -177,5 +177,6 @@ export const cases = [
   ["apps/hr/src/features/reports/Reports.tsx", "audit-batch-175-suite-09"],
   ["apps/hr/src/features/setup-wizard/steps/RolesPermissionsStep.test.tsx", "audit-batch-176-suite-09"],
   ["apps/hr/src/shared/components/ApprovalButtons.tsx", "audit-batch-177-suite-09"],
+  ["apps/insights/src/features/dashboard/Dashboard.tsx", "audit-batch-178-suite-09"],
 ];
 
