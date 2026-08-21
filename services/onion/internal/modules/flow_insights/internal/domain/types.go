@@ -38,13 +38,21 @@ type RoadmapMilestone struct {
 }
 
 // RoadmapProject represents a project with milestone progress.
+//
+// TotalTasks and CompletedTasks are the counts Progress is derived from. They
+// were computed by the query and discarded before; insights.dashboard.v1's
+// RoadmapProject reports them separately, so they are carried through rather
+// than recomputed.
 type RoadmapProject struct {
-	ID         int64              `json:"id"`
-	Name       string             `json:"name"`
-	StartDate  string             `json:"startDate"`
-	DueDate    string             `json:"dueDate"`
-	Progress   float64            `json:"progress"`
-	Milestones []RoadmapMilestone `json:"milestones"`
+	ID             int64              `json:"id"`
+	Name           string             `json:"name"`
+	Status         string             `json:"status"`
+	StartDate      string             `json:"startDate"`
+	DueDate        string             `json:"dueDate"`
+	Progress       float64            `json:"progress"`
+	TotalTasks     int64              `json:"totalTasks"`
+	CompletedTasks int64              `json:"completedTasks"`
+	Milestones     []RoadmapMilestone `json:"milestones"`
 }
 
 // RoadmapResult is the full roadmap response.

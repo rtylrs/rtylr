@@ -50,6 +50,7 @@ GROUP BY ft.assignee_id, u.full_name;
 SELECT
     fp.id,
     fp.name,
+    fp.status,
     COALESCE(DATE_FORMAT(fp.start_date, '%Y-%m-%d'), '') AS start_date,
     COALESCE(DATE_FORMAT(fp.due_date, '%Y-%m-%d'), '') AS due_date,
     COUNT(ft.id) AS total_tasks,
@@ -57,7 +58,7 @@ SELECT
 FROM flow_projects fp
 LEFT JOIN flow_tasks ft ON ft.project_id = fp.id AND ft.parent_task_id IS NULL
 WHERE fp.business_id = ? AND fp.status != 'archived'
-GROUP BY fp.id, fp.name, fp.start_date, fp.due_date
+GROUP BY fp.id, fp.name, fp.status, fp.start_date, fp.due_date
 ORDER BY fp.created_at ASC;
 
 -- name: GetMilestonesByProject :many
@@ -85,6 +86,6 @@ SELECT
 FROM flow_milestones fm
 LEFT JOIN flow_milestone_tasks fmt ON fmt.milestone_id = fm.id
 LEFT JOIN flow_tasks ft ON ft.id = fmt.task_id AND ft.parent_task_id IS NULL
-WHERE fm.project_id IN (sqlc.slice('project_ids'))
+WHERE fm.business_id = ? AND fm.project_id IN (sqlc.slice('project_ids'))
 GROUP BY fm.project_id, fm.id, fm.name, fm.target_date
 ORDER BY fm.target_date ASC;

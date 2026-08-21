@@ -118,10 +118,13 @@ func (r *Repository) GetRoadmap(ctx context.Context, businessID int64) (domain.R
 	var result domain.RoadmapResult
 	for _, row := range projRows {
 		p := domain.RoadmapProject{
-			ID:        row.ID,
-			Name:      row.Name,
-			StartDate: interfaceToString(row.StartDate),
-			DueDate:   interfaceToString(row.DueDate),
+			ID:             row.ID,
+			Name:           row.Name,
+			Status:         nullProjectStatus(row.Status),
+			StartDate:      interfaceToString(row.StartDate),
+			DueDate:        interfaceToString(row.DueDate),
+			TotalTasks:     row.TotalTasks,
+			CompletedTasks: row.DoneTasks,
 		}
 		if row.TotalTasks > 0 {
 			p.Progress = float64(row.DoneTasks) / float64(row.TotalTasks) * 100
@@ -135,7 +138,7 @@ func (r *Repository) GetRoadmap(ctx context.Context, businessID int64) (domain.R
 		for i := range result.Projects {
 			projectIDs[i] = result.Projects[i].ID
 		}
-		byProject, err := r.getMilestonesByProjectIDs(ctx, projectIDs)
+		byProject, err := r.getMilestonesByProjectIDs(ctx, businessID, projectIDs)
 		if err != nil {
 			logger.Ctx(ctx).Error("GetRoadmap: milestones query failed", logger.Error(err))
 		} else {
@@ -153,12 +156,15 @@ func (r *Repository) GetRoadmap(ctx context.Context, businessID int64) (domain.R
 	return result, nil
 }
 
-func (r *Repository) getMilestonesByProjectIDs(ctx context.Context, projectIDs []int64) (map[int64][]domain.RoadmapMilestone, error) {
+func (r *Repository) getMilestonesByProjectIDs(ctx context.Context, businessID int64, projectIDs []int64) (map[int64][]domain.RoadmapMilestone, error) {
 	if len(projectIDs) == 0 {
 		return map[int64][]domain.RoadmapMilestone{}, nil
 	}
 
-	rows, err := r.queries.GetMilestonesByProjectIDs(ctx, projectIDs)
+	rows, err := r.queries.GetMilestonesByProjectIDs(ctx, sqlc.GetMilestonesByProjectIDsParams{
+		BusinessID: businessID,
+		ProjectIds: projectIDs,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -212,4 +218,16 @@ func interfaceToFloat64(v interface{}) float64 {
 	default:
 		return 0
 	}
+}
+
+// nullProjectStatus renders a nullable flow_projects.status ENUM as a string,
+// empty when NULL. It deliberately does not substitute 'active': the schema
+// defaults the column, so a NULL here means the row genuinely has no status and
+// inventing one would report a lifecycle state the database does not hold.
+func nullProjectStatus(v sqlc.NullFlowProjectsStatus) string {
+	if !v.Valid {
+		return ""
+	}
+
+	return string(v.FlowProjectsStatus)
 }

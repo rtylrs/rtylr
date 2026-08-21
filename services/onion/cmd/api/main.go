@@ -458,7 +458,10 @@ func initializeModules(ctx context.Context) *apiModules {
 	loyaltyModule := loyalty.NewModule(ctx, dbclient.Pool())
 	reviewsModule := reviews.NewModule(ctx, dbclient.Pool())
 	segmentsModule := segments.NewModule(ctx, dbclient.Pool())
-	insightsModule := insights.NewModule(ctx, dbclient.Pool())
+	// flowInsights is constructed first: insights.dashboard.v1's Flow-shaped
+	// projections delegate to it rather than querying flow_* directly.
+	flowInsightsModule := flowinsights.NewModule(ctx, dbclient.Pool())
+	insightsModule := insights.NewModule(ctx, dbclient.Pool(), flowInsightsModule)
 	workspacesModule := workspaces.NewModule(ctx, dbclient.Pool(), hrCoreModule, hrLeaveModule)
 	expensesModule := expenses.NewModule(ctx, dbclient.Pool())
 	posOrdersModule := posorders.NewModule(ctx, dbclient.Pool())
@@ -489,7 +492,6 @@ func initializeModules(ctx context.Context) *apiModules {
 	financeBankFeedsModule := financebankfeeds.NewModule(ctx, dbclient.Pool())
 	financeReconciliationModule := financereconciliation.NewModule(ctx, dbclient.Pool())
 	financeReportsModule := financereports.NewModule(ctx, dbclient.Pool())
-	flowInsightsModule := flowinsights.NewModule(ctx, dbclient.Pool())
 	journalModule := journal.NewModule(ctx, dbclient.Pool())
 	hrPayrollModule.SetFinancePoster(journalModule.PayrollPoster())
 	kpisModule := kpis.NewModule(ctx, dbclient.Pool())
