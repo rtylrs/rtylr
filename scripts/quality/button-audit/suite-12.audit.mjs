@@ -306,5 +306,6 @@ export const cases = [
   ["apps/hr/src/features/setup-wizard/SetupWizard.tsx", "audit-batch-304-suite-12"],
   ["apps/hr/src/features/time-off/TimeOff.tsx", "audit-batch-305-suite-12"],
   ["apps/hr/src/shared/components/PayrollConfigGuard.tsx", "audit-batch-306-suite-12"],
+  ["apps/insights/src/layouts/DefaultLayout.tsx", "audit-batch-307-suite-12"],
 ];
 

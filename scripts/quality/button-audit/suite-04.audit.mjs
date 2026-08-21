@@ -306,5 +306,6 @@ export const cases = [
   ["apps/hr/src/features/settings/Settings.test.tsx", "audit-batch-304-suite-04"],
   ["apps/hr/src/features/shifts/Shifts.tsx", "audit-batch-305-suite-04"],
   ["apps/hr/src/shared/components/DateRangeFilter.tsx", "audit-batch-306-suite-04"],
+  ["apps/insights/src/features/products/Products.test.tsx", "audit-batch-307-suite-04"],
 ];
 
