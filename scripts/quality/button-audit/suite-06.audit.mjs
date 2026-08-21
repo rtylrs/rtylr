@@ -70,5 +70,6 @@ export const cases = [
   ["apps/flow/src/features/time/TeamView.test.tsx", "audit-batch-068-suite-06"],
   ["apps/flow/src/shared/components/CommentInput.tsx", "audit-batch-069-suite-06"],
   ["apps/flow/src/shared/components/WorkloadBar.tsx", "audit-batch-070-suite-06"],
+  ["apps/hr/src/features/employees/EmployeeDetail.test.tsx", "audit-batch-071-suite-06"],
 ];
 

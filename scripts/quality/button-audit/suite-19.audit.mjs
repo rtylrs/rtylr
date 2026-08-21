@@ -70,5 +70,6 @@ export const cases = [
   ["apps/flow/src/layouts/FlowLayout.test.tsx", "audit-batch-068-suite-19"],
   ["apps/flow/src/shared/components/QuickCreate.test.tsx", "audit-batch-069-suite-19"],
   ["apps/hr/src/features/dashboard/widgets/PendingApprovalsWidget.tsx", "audit-batch-070-suite-19"],
+  ["apps/hr/src/features/onboarding/Onboarding.tsx", "audit-batch-071-suite-19"],
 ];
 
