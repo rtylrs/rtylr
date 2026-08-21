@@ -9,5 +9,6 @@ export const cases = [
   ["apps/dash/src/shared/components/dash/PermissionCheckbox.tsx", "audit-batch-007-suite-22"],
   ["apps/dash/src/shared/hooks/queries/useKpis.test.tsx", "audit-batch-008-suite-22"],
   ["apps/erp/src/features/products/Products.tsx", "audit-batch-009-suite-22"],
+  ["apps/erp/src/shared/components/BarcodeInput.tsx", "audit-batch-010-suite-22"],
 ];
 
