@@ -304,5 +304,6 @@ export const cases = [
   ["apps/hr/src/features/dashboard/widgets/HoursThisWeekWidget.tsx", "audit-batch-302-suite-02"],
   ["apps/hr/src/features/leave/LeaveCalendar.tsx", "audit-batch-303-suite-02"],
   ["apps/hr/src/features/reviews/Reviews.tsx", "audit-batch-304-suite-02"],
+  ["apps/hr/src/features/shifts/RosterBuilder.tsx", "audit-batch-305-suite-02"],
 ];
 

@@ -304,5 +304,6 @@ export const cases = [
   ["apps/hr/src/features/employees/NewEmployee.tsx", "audit-batch-302-suite-21"],
   ["apps/hr/src/features/performance/ReviewCycleDetail.tsx", "audit-batch-303-suite-21"],
   ["apps/hr/src/features/setup-wizard/steps/OrgStructureStep.test.tsx", "audit-batch-304-suite-21"],
+  ["apps/hr/src/router.tsx", "audit-batch-305-suite-21"],
 ];
 
