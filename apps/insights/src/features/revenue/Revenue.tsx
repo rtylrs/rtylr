@@ -30,8 +30,13 @@ const itemVariants: Variants = {
 const Revenue: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: series, isLoading, isError, refetch } = useRevenueSeries();
-  const { data: byApp, isLoading: byAppLoading, refetch: refetchByApp } = useRevenueByApp();
-  const { data: comparison, isLoading: compLoading } = useRevenueComparison();
+  const {
+    data: byApp,
+    isLoading: byAppLoading,
+    isError: byAppError,
+    refetch: refetchByApp,
+  } = useRevenueByApp();
+  const { data: comparison, isLoading: compLoading, isError: compError } = useRevenueComparison();
   const { data: settings } = useInsightsSettings();
   const currency = (settings?.defaultCurrency as Currency) || 'USD';
 
@@ -191,10 +196,14 @@ const Revenue: React.FC = (): React.JSX.Element => {
               {t('insights.revenue.currentPeriod')}
             </p>
             <p className="text-2xl font-bold mt-1" style={{ color: 'var(--hub-text)' }}>
-              {formatMoney(comparison?.thisPeriod ?? 0, currency)}
+              {compError ? '—' : formatMoney(comparison?.thisPeriod ?? 0, currency)}
             </p>
             <div className="flex items-center gap-1 mt-1">
-              {deltaPct === 0 ? (
+              {compError ? (
+                <span className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
+                  —
+                </span>
+              ) : deltaPct === 0 ? (
                 <span className="text-xs" style={{ color: 'var(--hub-text-dim)' }}>
                   {formatPercent(0)} {t('insights.revenue.vsPrevious', 'vs previous')}
                 </span>
@@ -224,7 +233,7 @@ const Revenue: React.FC = (): React.JSX.Element => {
               {t('insights.revenue.previousPeriod')}
             </p>
             <p className="text-2xl font-bold mt-1" style={{ color: 'var(--hub-text)' }}>
-              {formatMoney(comparison?.lastPeriod ?? 0, currency)}
+              {compError ? '—' : formatMoney(comparison?.lastPeriod ?? 0, currency)}
             </p>
           </motion.div>
           <motion.div
@@ -236,7 +245,7 @@ const Revenue: React.FC = (): React.JSX.Element => {
               {t('insights.revenue.difference')}
             </p>
             <p className="text-2xl font-bold mt-1" style={{ color: 'var(--hub-text)' }}>
-              {formatMoney(difference, currency)}
+              {compError ? '—' : formatMoney(difference, currency)}
             </p>
           </motion.div>
         </motion.div>
@@ -279,6 +288,8 @@ const Revenue: React.FC = (): React.JSX.Element => {
         </h2>
         {byAppLoading ? (
           <SkeletonBlock className="h-44 w-full" />
+        ) : byAppError ? (
+          <ErrorState message={t('insights.errors.generic')} onRetry={refetchByApp} />
         ) : appRows.length === 0 ? (
           <EmptyState
             icon={PieChart}

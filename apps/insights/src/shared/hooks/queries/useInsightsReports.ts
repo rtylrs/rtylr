@@ -63,8 +63,11 @@ export const useGenerateRevenueReport = (): UseMutationResult<
         status: res.status ?? '',
       };
     },
-    onSuccess: (): void => {
+    onSuccess: (result: GenerateReportResult): void => {
       toast.success(t('insights.reports.generateQueued'));
+      if (result.url) {
+        window.open(result.url, '_blank', 'noopener,noreferrer');
+      }
     },
     onError: (): void => {
       toast.error(t('insights.errors.generic'));

@@ -33,13 +33,6 @@ const itemVariants: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.22, ease: 'easeOut' } },
 };
 
-const today = new Date().toLocaleDateString('en-US', {
-  weekday: 'long',
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
-
 const sparklineOptions: ChartOptions<'bar'> = {
   responsive: true,
   maintainAspectRatio: false,
@@ -87,6 +80,12 @@ const Dashboard: React.FC = (): React.JSX.Element => {
   const { data: seriesData } = useRevenueSeries();
   const { data: settings } = useInsightsSettings();
   const currency = (settings?.defaultCurrency as Currency) || 'USD';
+  const today = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
   if (isError) {
     return <ErrorState message={t('insights.errors.generic')} onRetry={refetch} />;
