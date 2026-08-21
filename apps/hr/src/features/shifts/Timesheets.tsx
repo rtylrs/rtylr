@@ -1,13 +1,16 @@
 import React from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { Clock, Check } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useTimesheets, useApproveTimesheet } from '../../shared/hooks/useHrExtras';
-import { Card, SectionHeader, Button, EmptyState, Skeleton } from '../../shared/components/ui';
+import { Card, SectionHeader, Button, Skeleton } from '../../shared/components/ui';
 
 const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
 const Timesheets: React.FC = () => {
-  const { data, isLoading } = useTimesheets();
+  const { t } = useTranslation();
+  const { data, isLoading, refetch } = useTimesheets();
   const approve = useApproveTimesheet();
 
   return (
@@ -17,9 +20,10 @@ const Timesheets: React.FC = () => {
         <Skeleton height={200} />
       ) : !data || data.length === 0 ? (
         <EmptyState
-          icon={<Clock size={20} />}
-          title="No timesheets yet"
-          description="Employees' clocked hours will show up here."
+          icon={Clock}
+          title={t('timesheets.emptyTitle')}
+          description={t('timesheets.managerViewEmptyDescription')}
+          action={{ label: t('common.refresh'), onClick: () => refetch() }}
         />
       ) : (
         <Card style={{ padding: 0, overflow: 'hidden' }}>

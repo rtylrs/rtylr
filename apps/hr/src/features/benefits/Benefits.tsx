@@ -1,19 +1,24 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
-import { Shield } from 'lucide-react';
+import { Shield, ClipboardList } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import {
   useBenefits,
   useMyBenefitEnrollments,
   useEnrollInBenefit,
 } from '../../shared/hooks/useHrExtras';
-import { Card, SectionHeader, EmptyState, Skeleton } from '../../shared/components/ui';
+import { Card, SectionHeader, Skeleton } from '../../shared/components/ui';
 import BenefitPlanCard from '../../shared/components/BenefitPlanCard';
 
 const Benefits = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { data: plans, isLoading: plansLoading } = useBenefits();
-  const { data: enrollments = [], isLoading: enrollmentsLoading } = useMyBenefitEnrollments();
+  const { data: plans, isLoading: plansLoading, refetch: refetchPlans } = useBenefits();
+  const {
+    data: enrollments = [],
+    isLoading: enrollmentsLoading,
+    refetch: refetchEnrollments,
+  } = useMyBenefitEnrollments();
   const enroll = useEnrollInBenefit();
 
   const loading = plansLoading || enrollmentsLoading;
@@ -28,9 +33,10 @@ const Benefits = (): React.JSX.Element => {
           <Skeleton height={200} />
         ) : !plans || plans.length === 0 ? (
           <EmptyState
-            icon={<Shield size={20} />}
+            icon={Shield}
             title={t('benefits.emptyTitle')}
             description={t('benefits.emptyDescription')}
+            action={{ label: t('common.refresh'), onClick: () => refetchPlans() }}
           />
         ) : (
           <div
@@ -62,7 +68,12 @@ const Benefits = (): React.JSX.Element => {
           <SectionHeader title={t('benefits.activeEnrollments')} />
           <div style={{ marginTop: 10, fontSize: 12 }}>
             {enrollments.length === 0 && (
-              <p style={{ color: 'var(--hr-text-muted)' }}>{t('benefits.noEnrollments')}</p>
+              <EmptyState
+                icon={ClipboardList}
+                title={t('benefits.noEnrollments')}
+                action={{ label: t('common.refresh'), onClick: () => refetchEnrollments() }}
+                size="compact"
+              />
             )}
             {enrollments.map((e) => {
               const plan = plans?.find((p) => String(p.id) === e.planId);

@@ -3,19 +3,12 @@ import { useUserStore } from '@voxire/auth';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { Plus, Clock } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import {
   useListOvertimeRequests,
   useApproveOvertime,
 } from '../../shared/hooks/queries/useOvertime';
-import {
-  Card,
-  SectionHeader,
-  Button,
-  EmptyState,
-  Skeleton,
-  Tabs,
-  Pill,
-} from '../../shared/components/ui';
+import { Card, SectionHeader, Button, Skeleton, Tabs, Pill } from '../../shared/components/ui';
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
 import { canHrPermission } from '../../shared/lib/hrPermissions';
 import { isHrRequestStatus, normalizeHrRequestStatus } from '../../shared/lib/requestStatus';
@@ -83,23 +76,10 @@ const Overtime = (): React.JSX.Element => {
           </div>
         ) : filteredRequests.length === 0 ? (
           <EmptyState
-            icon={<Clock size={20} />}
+            icon={Clock}
             title={t('overtime.emptyTitle')}
             description={t('overtime.emptyDescription')}
-            action={
-              <button
-                onClick={() => setFormOpen(true)}
-                style={{
-                  color: 'var(--hr-accent)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: 12,
-                }}
-              >
-                {t('overtime.newRequest')}
-              </button>
-            }
+            action={{ label: t('overtime.newRequest'), onClick: () => setFormOpen(true) }}
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

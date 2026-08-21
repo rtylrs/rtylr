@@ -1,21 +1,14 @@
 import React, { useRef, useCallback } from 'react';
 import { useUserStore } from '@voxire/auth';
-import { getRouteApi, Link } from '@tanstack/react-router';
+import { getRouteApi, Link, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { CheckCircle, Download, ArrowLeft, AlertTriangle, DollarSign } from 'lucide-react';
 import { useGetPayrollRun, useApprovePayrollRun } from '../../shared/hooks/queries/usePayroll';
 import type { PayrollEntryPayload } from '../../shared/hooks/queries/usePayroll';
-import { ErrorBoundary } from '@voxire/ui';
+import { ErrorBoundary, EmptyState } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
-import {
-  SectionHeader,
-  Button,
-  Skeleton,
-  Pill,
-  Breadcrumbs,
-  EmptyState,
-} from '../../shared/components/ui';
+import { SectionHeader, Button, Skeleton, Pill, Breadcrumbs } from '../../shared/components/ui';
 import { canHrPermission } from '../../shared/lib/hrPermissions';
 import { useHrSettings } from '../../shared/hooks/useHrExtras';
 import { formatCurrency } from '../../shared/lib/hrNumberUtils';
@@ -43,6 +36,7 @@ const routeApi = getRouteApi('/hr-config/payroll/$id');
 const PayrollRunDetailContent = (): React.JSX.Element => {
   const { id: runId } = routeApi.useParams();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data: settings } = useHrSettings();
   const payrollConfigured = usePayrollConfigured();
   const role = useUserStore((state) => state.user?.role ?? state.role);
@@ -111,17 +105,10 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
   if (!run) {
     return (
       <EmptyState
-        icon={<DollarSign size={20} />}
+        icon={DollarSign}
         title={t('payroll.runDetail.notFound')}
         description={t('payroll.runDetail.notFoundDescription')}
-        action={
-          <Link
-            to="/payroll"
-            style={{ color: 'var(--hr-accent)', textDecoration: 'none', fontSize: 12 }}
-          >
-            {t('payroll.backToRuns')}
-          </Link>
-        }
+        action={{ label: t('payroll.backToRuns'), onClick: () => navigate({ to: '/payroll' }) }}
       />
     );
   }

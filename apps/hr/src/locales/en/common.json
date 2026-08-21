@@ -29,5 +29,7 @@
   "reject": "Reject",
   "optionalNote": "Optional note",
   "dateRangeFrom": "From date",
-  "dateRangeTo": "to"
+  "dateRangeTo": "to",
+  "refresh": "Refresh",
+  "clearFilters": "Clear filters"
 }

@@ -2,14 +2,14 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
-import { CalendarCheck, Clock } from 'lucide-react';
+import { CalendarCheck } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useGetMyAttendance } from '../../shared/hooks/queries/useAttendance';
 import type { AttendanceRecordPayload } from '@voxire/voxie/hr/attendance/v1/types';
 import {
   SectionHeader,
   Card,
   Pill,
-  EmptyState,
   QueryError,
   Skeleton,
   ACCENT,
@@ -77,9 +77,10 @@ const Attendance = (): React.JSX.Element => {
           </div>
         ) : records.length === 0 ? (
           <EmptyState
-            icon={<CalendarCheck size={20} />}
+            icon={CalendarCheck}
             title={t('attendance.emptyTitle')}
             description={t('attendance.emptyDescription')}
+            action={{ label: t('common.refresh'), onClick: () => refetch() }}
           />
         ) : (
           <Card style={{ padding: 0, overflowX: 'auto' }}>

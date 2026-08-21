@@ -1,18 +1,12 @@
 import React from 'react';
-import { getRouteApi, Link } from '@tanstack/react-router';
+import { getRouteApi, Link, useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, FileText } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useGetMyPayrollRun } from '../../shared/hooks/queries/usePayroll';
 import type { PayrollEntryPayload } from '../../shared/hooks/queries/usePayroll';
-import {
-  Card,
-  SectionHeader,
-  Skeleton,
-  EmptyState,
-  Breadcrumbs,
-  Pill,
-} from '../../shared/components/ui';
+import { Card, SectionHeader, Skeleton, Breadcrumbs, Pill } from '../../shared/components/ui';
 import { useHrSettings } from '../../shared/hooks/useHrExtras';
 import { formatCurrency } from '../../shared/lib/hrNumberUtils';
 import {
@@ -65,6 +59,7 @@ const routeApi = getRouteApi('/hr-config/payroll/my-payslips/view');
 
 const PaySlip = (): React.JSX.Element => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data: settings } = useHrSettings();
   const { runId } = routeApi.useSearch();
   const payrollConfigured = usePayrollConfigured();
@@ -89,17 +84,13 @@ const PaySlip = (): React.JSX.Element => {
   if (!run || !entry) {
     return (
       <EmptyState
-        icon={<FileText size={20} />}
+        icon={FileText}
         title={t('payroll.paySlip.notFound')}
         description={t('payroll.paySlip.notFoundDescription')}
-        action={
-          <Link
-            to="/payroll/my-payslips"
-            style={{ color: 'var(--hr-accent)', textDecoration: 'none', fontSize: 12 }}
-          >
-            {t('payroll.paySlip.backToSlips')}
-          </Link>
-        }
+        action={{
+          label: t('payroll.paySlip.backToSlips'),
+          onClick: () => navigate({ to: '/payroll/my-payslips' }),
+        }}
       />
     );
   }

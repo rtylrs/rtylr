@@ -1,6 +1,12 @@
 {
   "addNew": "Ajouter un département",
   "created": "Département créé avec succès",
+  "orgChart": {
+    "title": "Organigramme",
+    "subtitle": "Hiérarchie des rapports visualisée",
+    "emptyTitle": "Aucun employé",
+    "emptyDescription": "Ajoutez des employés pour voir l'organigramme."
+  },
   "form": {
     "title": "Nouveau département",
     "name": "Nom",

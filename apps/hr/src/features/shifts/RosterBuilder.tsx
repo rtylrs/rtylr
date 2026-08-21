@@ -15,13 +15,12 @@ import {
   SectionHeader,
   Button,
   Skeleton,
-  EmptyState,
   Card,
   Modal,
   Select,
   Label,
 } from '../../shared/components/ui';
-import { ErrorBoundary } from '@voxire/ui';
+import { ErrorBoundary, EmptyState } from '@voxire/ui';
 
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
@@ -62,7 +61,7 @@ const RosterBuilderInner = (): React.JSX.Element => {
   const { t } = useTranslation();
   const [weekOffset, setWeekOffset] = useState(0);
   const weekStart = useMemo(() => getWeekStart(weekOffset), [weekOffset]);
-  const { data: roster, isLoading } = useGetRoster({ weekStart });
+  const { data: roster, isLoading, refetch } = useGetRoster({ weekStart });
   const { data: shifts } = useListShifts();
   const assignMutation = useCreateShiftAssignment();
   const publishMutation = usePublishRoster();
@@ -187,9 +186,10 @@ const RosterBuilderInner = (): React.JSX.Element => {
 
       {entries.length === 0 ? (
         <EmptyState
-          icon={<AlertTriangle size={20} />}
+          icon={AlertTriangle}
           title={t('shifts.roster.emptyTitle')}
           description={t('shifts.roster.emptyDescription')}
+          action={{ label: t('common.refresh'), onClick: () => refetch() }}
         />
       ) : (
         <Card style={{ padding: 0, overflow: 'hidden' }}>

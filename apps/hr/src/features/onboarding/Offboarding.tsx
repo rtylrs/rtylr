@@ -3,15 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { LogOut } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useOffboardingChecklist, useToggleOffboardingTask } from '../../shared/hooks/useHrExtras';
-import {
-  Card,
-  SectionHeader,
-  EmptyState,
-  Skeleton,
-  Pill,
-  Checkbox,
-} from '../../shared/components/ui';
+import { Card, SectionHeader, Skeleton, Pill, Checkbox } from '../../shared/components/ui';
 
 const CATEGORIES: Record<string, string> = {
   'Knowledge transfer': 'var(--hr-shift-blue)',
@@ -28,7 +22,7 @@ const pillStyle = (cssVar: string): React.CSSProperties => ({
 
 const Offboarding: React.FC = () => {
   const { t } = useTranslation();
-  const { data, isLoading } = useOffboardingChecklist();
+  const { data, isLoading, refetch } = useOffboardingChecklist();
   const toggle = useToggleOffboardingTask();
 
   const grouped = (data ?? []).reduce<Record<string, typeof data>>((acc, task) => {
@@ -46,9 +40,10 @@ const Offboarding: React.FC = () => {
           <Skeleton height={200} />
         ) : !data || data.length === 0 ? (
           <EmptyState
-            icon={<LogOut size={20} />}
+            icon={LogOut}
             title={t('offboarding.emptyTitle')}
             description={t('offboarding.emptyDescription')}
+            action={{ label: t('common.refresh'), onClick: () => refetch() }}
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

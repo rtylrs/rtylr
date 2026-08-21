@@ -3,9 +3,10 @@ import { Link } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { FileText, DollarSign } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useListMyPayrollRuns } from '../../shared/hooks/queries/usePayroll';
 import type { PayrollRunPayload } from '../../shared/hooks/queries/usePayroll';
-import { SectionHeader, Card, Pill, Skeleton, EmptyState } from '../../shared/components/ui';
+import { SectionHeader, Card, Pill, Skeleton } from '../../shared/components/ui';
 import { useHrSettings } from '../../shared/hooks/useHrExtras';
 import { formatCurrency } from '../../shared/lib/hrNumberUtils';
 import {
@@ -17,7 +18,7 @@ const MyPaySlips = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: settings } = useHrSettings();
   const payrollConfigured = usePayrollConfigured();
-  const { data, isLoading } = useListMyPayrollRuns(
+  const { data, isLoading, refetch } = useListMyPayrollRuns(
     { limit: 50, offset: 0 },
     { enabled: payrollConfigured }
   );
@@ -42,9 +43,10 @@ const MyPaySlips = (): React.JSX.Element => {
           </div>
         ) : runs.length === 0 ? (
           <EmptyState
-            icon={<FileText size={20} />}
+            icon={FileText}
             title={t('payroll.paySlip.emptyTitle')}
             description={t('payroll.paySlip.emptyDescription')}
+            action={{ label: t('common.refresh'), onClick: () => refetch() }}
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { CheckCircle, XCircle, Clock, Users } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import {
   useListTimesheets,
   useApproveTimesheet,
@@ -16,7 +17,6 @@ import {
   Card,
   Button,
   Pill,
-  EmptyState,
   Skeleton,
   Modal,
   Textarea,
@@ -34,7 +34,7 @@ function formatDuration(minutes: number): string {
 
 const TimesheetApprovals = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { data, isLoading } = useListTimesheets({ status: 'submitted' });
+  const { data, isLoading, refetch } = useListTimesheets({ status: 'submitted' });
   const approveMutation = useApproveTimesheet();
   const rejectMutation = useRejectTimesheet();
   const role = useUserStore((state) => state.user?.role ?? state.role);
@@ -87,9 +87,10 @@ const TimesheetApprovals = (): React.JSX.Element => {
           </div>
         ) : timesheets.length === 0 ? (
           <EmptyState
-            icon={<CheckCircle size={20} />}
+            icon={CheckCircle}
             title={t('timesheets.approvals.emptyTitle')}
             description={t('timesheets.approvals.emptyDescription')}
+            action={{ label: t('common.refresh'), onClick: () => refetch() }}
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

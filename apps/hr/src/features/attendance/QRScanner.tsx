@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QrCode, Camera } from 'lucide-react';
-import { Card, Button, EmptyState } from '../../shared/components/ui';
+import { EmptyState } from '@voxire/ui';
+import { Card, Button } from '../../shared/components/ui';
 
 const QRScanner = (): React.JSX.Element => {
   const { t } = useTranslation();
@@ -42,18 +43,13 @@ const QRScanner = (): React.JSX.Element => {
         </div>
       ) : (
         <EmptyState
-          icon={<QrCode size={20} />}
+          icon={QrCode}
           title={t('attendance.qrScanner.title')}
           description={t('attendance.qrScanner.description')}
-          action={
-            <Button
-              variant="primary"
-              onClick={() => setShowPrompt(true)}
-              icon={<Camera size={14} />}
-            >
-              {t('attendance.qrScanner.scanButton')}
-            </Button>
-          }
+          action={{
+            label: t('attendance.qrScanner.scanButton'),
+            onClick: () => setShowPrompt(true),
+          }}
         />
       )}
     </Card>

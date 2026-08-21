@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { Package, Plus, CheckCircle, XCircle } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import {
   useListEquipmentRequests,
   useApproveEquipment,
@@ -9,7 +10,6 @@ import {
 import {
   SectionHeader,
   Card,
-  EmptyState,
   Skeleton,
   Pill,
   Button,
@@ -42,7 +42,7 @@ const Equipment = (): React.JSX.Element => {
   const { t } = useTranslation();
   const [tab, setTab] = useState<string>(t('equipment.tabs.myRequests'));
   const [showForm, setShowForm] = useState(false);
-  const { data, isLoading } = useListEquipmentRequests();
+  const { data, isLoading, refetch } = useListEquipmentRequests();
   const approve = useApproveEquipment();
 
   const tabs = [t('equipment.tabs.myRequests'), t('equipment.tabs.pendingApprovals')];
@@ -79,19 +79,13 @@ const Equipment = (): React.JSX.Element => {
           </div>
         ) : displayRequests.length === 0 ? (
           <EmptyState
-            icon={<Package size={20} />}
+            icon={Package}
             title={t('equipment.emptyTitle')}
             description={t('equipment.emptyDescription')}
             action={
-              tab === tabs[0] ? (
-                <Button
-                  variant="primary"
-                  icon={<Plus size={14} />}
-                  onClick={() => setShowForm(true)}
-                >
-                  {t('equipment.newRequest')}
-                </Button>
-              ) : undefined
+              tab === tabs[0]
+                ? { label: t('equipment.newRequest'), onClick: () => setShowForm(true) }
+                : { label: t('common.refresh'), onClick: () => refetch() }
             }
           />
         ) : (

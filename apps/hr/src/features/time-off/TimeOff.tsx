@@ -1,18 +1,13 @@
 import React, { useState } from 'react';
 import { useUserStore } from '@voxire/auth';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { Plus, Calendar } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useTimeOff, useApproveTimeOff } from '../../shared/hooks/useHrExtras';
-import {
-  Card,
-  SectionHeader,
-  Button,
-  EmptyState,
-  Skeleton,
-  Tabs,
-} from '../../shared/components/ui';
+import { Card, SectionHeader, Button, Skeleton, Tabs } from '../../shared/components/ui';
 import TimeOffBadge from '../../shared/components/TimeOffBadge';
 import ApprovalButtons from '../../shared/components/ApprovalButtons';
 import { canHrPermission } from '../../shared/lib/hrPermissions';
@@ -21,14 +16,16 @@ import { isHrRequestStatus } from '../../shared/lib/requestStatus';
 const STATUSES = ['All', 'Pending', 'Approved', 'Rejected'] as const;
 
 const TimeOff: React.FC = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data, isLoading } = useTimeOff();
   const approve = useApproveTimeOff();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canApprove = canHrPermission(role, 'hr:time_off:approve');
   const [tab, setTab] = useState<(typeof STATUSES)[number]>('All');
 
-  const filtered = (data ?? []).filter((t) =>
-    tab === 'All' ? true : isHrRequestStatus(t.status, tab)
+  const filtered = (data ?? []).filter((req) =>
+    tab === 'All' ? true : isHrRequestStatus(req.status, tab)
   );
 
   return (
@@ -57,17 +54,13 @@ const TimeOff: React.FC = () => {
           </div>
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<Calendar size={20} />}
-            title="No time off requests"
-            description="Requests will appear here once they're submitted."
-            action={
-              <Link
-                to="/time-off/new"
-                style={{ color: '#8b5cf6', textDecoration: 'none', fontSize: 12 }}
-              >
-                Submit the first one
-              </Link>
-            }
+            icon={Calendar}
+            title={t('timeOff.emptyTitle')}
+            description={t('timeOff.emptyDescription')}
+            action={{
+              label: t('timeOff.submitFirstOne'),
+              onClick: () => navigate({ to: '/time-off/new' }),
+            }}
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

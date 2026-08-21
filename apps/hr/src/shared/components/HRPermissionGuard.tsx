@@ -1,8 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from '@tanstack/react-router';
 import { ShieldX } from 'lucide-react';
 import { useUserStore } from '@voxire/auth';
-import { EmptyState } from './ui';
+import { EmptyState } from '@voxire/ui';
 import { canHrPermission, type HRPermission } from '../lib/hrPermissions';
 
 interface HRPermissionGuardProps {
@@ -17,12 +18,19 @@ const HRPermissionGuard = ({
   fallback,
 }: HRPermissionGuardProps): React.JSX.Element => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const role = useUserStore((state) => state.user?.role ?? state.role);
 
   if (canHrPermission(role, permission)) return <>{children}</>;
   if (fallback) return <>{fallback}</>;
 
-  return <EmptyState icon={<ShieldX size={20} />} title={t('errors.unauthorized')} />;
+  return (
+    <EmptyState
+      icon={ShieldX}
+      title={t('errors.unauthorized')}
+      action={{ label: t('common.back'), onClick: () => navigate({ to: '/' }) }}
+    />
+  );
 };
 
 export default HRPermissionGuard;

@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { Plus, FileText } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import {
   useListChecklistTemplates,
   useCreateChecklistTemplate,
@@ -10,7 +11,6 @@ import {
 import {
   SectionHeader,
   Card,
-  EmptyState,
   Skeleton,
   Pill,
   Button,
@@ -69,14 +69,13 @@ const ChecklistTemplates = (): React.JSX.Element => {
           </div>
         ) : templates.length === 0 ? (
           <EmptyState
-            icon={<FileText size={20} />}
+            icon={FileText}
             title={t('onboardingMgmt.templates.emptyTitle')}
             description={t('onboardingMgmt.templates.emptyDescription')}
-            action={
-              <Button variant="primary" icon={<Plus size={14} />} onClick={() => setShowForm(true)}>
-                {t('onboardingMgmt.templates.create')}
-              </Button>
-            }
+            action={{
+              label: t('onboardingMgmt.templates.create'),
+              onClick: () => setShowForm(true),
+            }}
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

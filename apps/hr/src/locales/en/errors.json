@@ -2,5 +2,6 @@
   "generic": "Something went wrong. Please try again.",
   "notFound": "Not found",
   "unauthorized": "You don't have access to this resource.",
-  "calendarFailed": "Calendar failed to load. Please refresh."
+  "calendarFailed": "Calendar failed to load. Please refresh.",
+  "hrSettingsLoadFailed": "Unable to load HR settings"
 }

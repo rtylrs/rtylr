@@ -13,6 +13,7 @@
   "noEntries": "No time entries in this period.",
   "emptyTitle": "No timesheets yet",
   "emptyDescription": "Your timesheet periods will appear here.",
+  "managerViewEmptyDescription": "Employees' clocked hours will show up here.",
   "filters": {
     "all": "All",
     "draft": "Draft",

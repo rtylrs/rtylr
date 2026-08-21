@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { useUserStore } from '@voxire/auth';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
-import { Plus, Calendar, Clock } from 'lucide-react';
+import { Plus, Clock } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useListLeaveRequests, useApproveLeave } from '../../shared/hooks/queries/useLeave';
 import {
   Card,
   SectionHeader,
   Button,
-  EmptyState,
   Skeleton,
   QueryError,
   Tabs,
@@ -35,6 +35,7 @@ const LeaveCalendarLazy = React.lazy(() => import('./LeaveCalendar'));
 
 const Leave = (): React.JSX.Element => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>('myLeave');
   const [statusFilter, setStatusFilter] = useState<(typeof FILTER_STATUSES)[number]>('All');
   const { data: requests, isLoading, isError, isFetching, refetch } = useListLeaveRequests();
@@ -98,16 +99,16 @@ const Leave = (): React.JSX.Element => {
               </div>
             ) : filteredRequests.length === 0 ? (
               <EmptyState
-                icon={<Clock size={20} />}
+                icon={Clock}
                 title={t('leave.emptyTitle')}
                 description={t('leave.emptyDescription')}
                 action={
-                  <Link
-                    to="/leave/new"
-                    style={{ color: 'var(--hr-accent)', textDecoration: 'none', fontSize: 12 }}
-                  >
-                    {t('leave.newRequest')}
-                  </Link>
+                  statusFilter !== 'All'
+                    ? { label: t('common.clearFilters'), onClick: () => setStatusFilter('All') }
+                    : {
+                        label: t('leave.newRequest'),
+                        onClick: () => navigate({ to: '/leave/new' }),
+                      }
                 }
               />
             ) : (

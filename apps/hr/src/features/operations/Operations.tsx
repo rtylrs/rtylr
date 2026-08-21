@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useUserStore } from '@voxire/auth';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { Calculator, RefreshCw, Clock, Coffee, AlertTriangle, MapPin } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useTranslation } from 'react-i18next';
 import {
   useSwaps,
@@ -27,7 +28,6 @@ import {
   Select,
   Input,
   Pill,
-  EmptyState,
   ACCENT,
   useIsMobile,
 } from '../../shared/components/ui';
@@ -63,13 +63,13 @@ const Operations: React.FC = () => {
   );
   const { data: staff = [] } = useStaff();
   const { data: payroll = [] } = usePayroll({ enabled: showCompensation });
-  const { data: swaps = [] } = useSwaps();
+  const { data: swaps = [], refetch: refetchSwaps } = useSwaps();
   const createSwap = useCreateSwap();
   const resolveSwap = useResolveSwap();
   const canManageShifts = canHrPermission(role, 'hr:shifts:manage');
   const visibleTabs = showCompensation ? TABS : TABS.filter((name) => name !== 'Labor Cost');
   const activeTab = !showCompensation && tab === 'Labor Cost' ? 'Swap Shifts' : tab;
-  const { data: availability = [] } = useAvailability();
+  const { data: availability = [], refetch: refetchAvailability } = useAvailability();
 
   /**
    * A row is either a recurring weekly pattern or a single-date override. The
@@ -86,7 +86,13 @@ const Operations: React.FC = () => {
   const { data: breaks = [] } = useBreaks();
   const startBreak = useStartBreak();
   const endBreak = useEndBreak();
-  const { data: overtimeAlerts = [] } = useOvertimeAlerts();
+  const { data: overtimeAlerts = [], refetch: refetchOvertimeAlerts } = useOvertimeAlerts();
+  const handleStartLunchBreak = useCallback((): void => {
+    startBreak.mutate(
+      { staffId: staff[0]?.id ?? 1, staffName: staff[0]?.name ?? 'Alex Chen', type: 'Lunch' },
+      { onSuccess: () => toast.success('Break started') }
+    );
+  }, [startBreak, staff]);
   const { data: settings } = useHrSettings();
 
   /* Labor cost */
@@ -370,9 +376,10 @@ const Operations: React.FC = () => {
             </Card>
             {swaps.length === 0 ? (
               <EmptyState
-                icon={<RefreshCw size={20} />}
-                title="No swap requests"
-                description="Shift swap requests will show up here."
+                icon={RefreshCw}
+                title={t('operations.emptySwapsTitle')}
+                description={t('operations.emptySwapsDescription')}
+                action={{ label: t('common.refresh'), onClick: () => refetchSwaps() }}
               />
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -429,9 +436,10 @@ const Operations: React.FC = () => {
           <Card style={{ padding: 0, overflow: 'hidden' }}>
             {availability.length === 0 ? (
               <EmptyState
-                icon={<Clock size={20} />}
+                icon={Clock}
                 title={t('operations.availability.emptyTitle')}
                 description={t('operations.availability.emptyDescription')}
+                action={{ label: t('common.refresh'), onClick: () => refetchAvailability() }}
               />
             ) : (
               <div style={{ overflowX: 'auto' }}>
@@ -540,29 +548,21 @@ const Operations: React.FC = () => {
                 <div style={{ flex: 1, fontSize: 12, color: 'var(--hr-text-muted)' }}>
                   Track breaks for compliance and overtime calculations
                 </div>
-                <Button
-                  variant="primary"
-                  onClick={() =>
-                    startBreak.mutate(
-                      {
-                        staffId: staff[0]?.id ?? 1,
-                        staffName: staff[0]?.name ?? 'Alex Chen',
-                        type: 'Lunch',
-                      },
-                      { onSuccess: () => toast.success('Break started') }
-                    )
-                  }
-                >
-                  Start lunch break
+                <Button variant="primary" onClick={handleStartLunchBreak}>
+                  {t('operations.startLunchBreak')}
                 </Button>
               </div>
             </Card>
             <Card style={{ padding: 0 }}>
               {breaks.length === 0 ? (
                 <EmptyState
-                  icon={<Coffee size={20} />}
-                  title="No breaks logged"
-                  description="Start a break to track time."
+                  icon={Coffee}
+                  title={t('operations.emptyBreaksTitle')}
+                  description={t('operations.emptyBreaksDescription')}
+                  action={{
+                    label: t('operations.startLunchBreak'),
+                    onClick: handleStartLunchBreak,
+                  }}
                 />
               ) : (
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
@@ -660,9 +660,10 @@ const Operations: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {overtimeAlerts.length === 0 ? (
               <EmptyState
-                icon={<AlertTriangle size={20} />}
-                title="No overtime alerts"
-                description="Everyone is within policy limits."
+                icon={AlertTriangle}
+                title={t('operations.emptyOvertimeTitle')}
+                description={t('operations.emptyOvertimeDescription')}
+                action={{ label: t('common.refresh'), onClick: () => refetchOvertimeAlerts() }}
               />
             ) : (
               overtimeAlerts.map((a) => (

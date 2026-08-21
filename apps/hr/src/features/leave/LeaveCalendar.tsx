@@ -2,8 +2,8 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { useGetLeaveCalendar } from '../../shared/hooks/queries/useLeave';
-import { Card, Button, Skeleton, EmptyState, Select, Label } from '../../shared/components/ui';
-import { ErrorBoundary } from '@voxire/ui';
+import { Card, Button, Skeleton, Select, Label } from '../../shared/components/ui';
+import { ErrorBoundary, EmptyState } from '@voxire/ui';
 
 const DAYS_OF_WEEK_KEYS = [
   'timesheets.days.mon',
@@ -23,7 +23,11 @@ const LeaveCalendarInner = (): React.JSX.Element => {
   const [departmentId, setDepartmentId] = useState<number | undefined>(undefined);
   const [locationId, setLocationId] = useState<number | undefined>(undefined);
 
-  const { data: entries, isLoading } = useGetLeaveCalendar({
+  const {
+    data: entries,
+    isLoading,
+    refetch,
+  } = useGetLeaveCalendar({
     month,
     year,
     departmentId,
@@ -224,9 +228,20 @@ const LeaveCalendarInner = (): React.JSX.Element => {
 
       {!isLoading && (!entries || entries.length === 0) && (
         <EmptyState
-          icon={<Calendar size={20} />}
+          icon={Calendar}
           title={t('leave.calendar.emptyTitle')}
           description={t('leave.calendar.emptyDescription')}
+          action={
+            departmentId !== undefined || locationId !== undefined
+              ? {
+                  label: t('common.clearFilters'),
+                  onClick: () => {
+                    setDepartmentId(undefined);
+                    setLocationId(undefined);
+                  },
+                }
+              : { label: t('common.refresh'), onClick: () => refetch() }
+          }
         />
       )}
     </div>

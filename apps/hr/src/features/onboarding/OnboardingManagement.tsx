@@ -3,16 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { Rocket, AlertTriangle } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useListEmployeeChecklistSummaries } from '../../shared/hooks/queries/useOnboarding';
-import {
-  SectionHeader,
-  Card,
-  EmptyState,
-  Skeleton,
-  Pill,
-  Button,
-  ACCENT,
-} from '../../shared/components/ui';
+import { SectionHeader, Card, Skeleton, Pill, Button, ACCENT } from '../../shared/components/ui';
 
 const PAGE_SIZE = 20;
 
@@ -48,9 +41,13 @@ const OnboardingManagement = (): React.JSX.Element => {
           </div>
         ) : summaries.length === 0 ? (
           <EmptyState
-            icon={<Rocket size={20} />}
+            icon={Rocket}
             title={t('onboardingMgmt.management.emptyTitle')}
             description={t('onboardingMgmt.management.emptyDescription')}
+            action={{
+              label: t('onboardingMgmt.management.manageTemplates'),
+              onClick: () => navigate({ to: '/onboarding/templates' }),
+            }}
           />
         ) : (
           <>

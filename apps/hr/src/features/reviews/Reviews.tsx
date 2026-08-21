@@ -1,16 +1,11 @@
 import React from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { Plus, ClipboardList } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useReviews } from '../../shared/hooks/useHrExtras';
-import {
-  Card,
-  SectionHeader,
-  Button,
-  EmptyState,
-  Skeleton,
-  Pill,
-} from '../../shared/components/ui';
+import { Card, SectionHeader, Button, Skeleton, Pill } from '../../shared/components/ui';
 import RatingStars from '../../shared/components/RatingStars';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -21,6 +16,8 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const Reviews: React.FC = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data, isLoading } = useReviews();
   return (
     <>
@@ -41,9 +38,13 @@ const Reviews: React.FC = () => {
           <Skeleton height={200} />
         ) : !data || data.length === 0 ? (
           <EmptyState
-            icon={<ClipboardList size={20} />}
-            title="No reviews yet"
-            description="Start a review cycle to see results here."
+            icon={ClipboardList}
+            title={t('reviews.emptyTitle')}
+            description={t('reviews.emptyDescription')}
+            action={{
+              label: t('reviews.newReview'),
+              onClick: () => navigate({ to: '/reviews/new' }),
+            }}
           />
         ) : (
           <div
