@@ -64,6 +64,17 @@ describe('RequestLeaveDialog', () => {
     ]);
   });
 
+  // Without a DialogDescription, Radix warns "Missing Description or
+  // aria-describedby" and a screen reader announces the dialog with a title and
+  // no statement of what it does. Asserting the key, not English, also catches a
+  // description that was added as a hardcoded string.
+  it('gives the dialog an accessible description', () => {
+    render(<RequestLeaveDialog {...defaultProps} />);
+    expect(screen.getByRole('dialog')).toHaveAccessibleDescription(
+      'flow.leave.newRequestDescription'
+    );
+  });
+
   it('keeps submit disabled until type and both dates are set', () => {
     render(<RequestLeaveDialog {...defaultProps} />);
     expect(screen.getByRole('button', { name: 'flow.leave.submit' })).toBeDisabled();

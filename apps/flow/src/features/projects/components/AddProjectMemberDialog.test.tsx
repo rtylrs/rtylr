@@ -37,6 +37,17 @@ describe('AddProjectMemberDialog', () => {
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
+  // Without a DialogDescription, Radix warns "Missing Description or
+  // aria-describedby" and a screen reader announces the dialog with a title and
+  // no statement of what it does. Asserting the key, not English, also catches a
+  // description that was added as a hardcoded string.
+  it('gives the dialog an accessible description', () => {
+    renderDialog();
+    expect(screen.getByRole('dialog')).toHaveAccessibleDescription(
+      'flow.projectSettings.addMemberDescription'
+    );
+  });
+
   it('does not render when closed', () => {
     renderDialog({ open: false });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
