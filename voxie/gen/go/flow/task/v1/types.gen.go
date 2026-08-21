@@ -38,6 +38,11 @@ type Task struct {
 	CycleId          *int64   `json:"cycle_id,omitempty"`
 	MilestoneId      *int64   `json:"milestone_id,omitempty"`
 	Archived         bool     `json:"archived,omitempty"`
+	EffortMinutes    *int32   `json:"effort_minutes,omitempty"`
+	WaitingOn        string   `json:"waiting_on,omitempty"`
+	DecisionNote     string   `json:"decision_note,omitempty"`
+	FocusPin         bool     `json:"focus_pin,omitempty"`
+	Dependencies     []int64  `json:"dependencies,omitempty"`
 }
 
 func (m *Task) MarshalJSON() ([]byte, error) {
@@ -56,6 +61,7 @@ func (m *Task) MarshalJSON() ([]byte, error) {
 		CycleId      *string  `json:"cycle_id,omitempty"`
 		MilestoneId  *string  `json:"milestone_id,omitempty"`
 		Labels       []string `json:"labels,omitempty"`
+		Dependencies []string `json:"dependencies,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
@@ -87,6 +93,10 @@ func (m *Task) MarshalJSON() ([]byte, error) {
 	for i, v := range m.Labels {
 		aux.Labels[i] = strconv.FormatInt(v, 10)
 	}
+	aux.Dependencies = make([]string, len(m.Dependencies))
+	for i, v := range m.Dependencies {
+		aux.Dependencies[i] = strconv.FormatInt(v, 10)
+	}
 	return json.Marshal(aux)
 }
 
@@ -106,6 +116,7 @@ func (m *Task) UnmarshalJSON(data []byte) error {
 		CycleId      *string  `json:"cycle_id,omitempty"`
 		MilestoneId  *string  `json:"milestone_id,omitempty"`
 		Labels       []string `json:"labels,omitempty"`
+		Dependencies []string `json:"dependencies,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -195,6 +206,16 @@ func (m *Task) UnmarshalJSON(data []byte) error {
 				return err
 			}
 			m.Labels[i] = v
+		}
+	}
+	if aux.Dependencies != nil {
+		m.Dependencies = make([]int64, len(aux.Dependencies))
+		for i, s := range aux.Dependencies {
+			v, err := strconv.ParseInt(s, 10, 64)
+			if err != nil {
+				return err
+			}
+			m.Dependencies[i] = v
 		}
 	}
 	return nil
@@ -478,6 +499,50 @@ func (x *Task) GetArchived() bool {
 		return zero
 	}
 	return x.Archived
+}
+
+func (x *Task) GetEffortMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.EffortMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.EffortMinutes
+}
+
+func (x *Task) GetWaitingOn() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.WaitingOn
+}
+
+func (x *Task) GetDecisionNote() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.DecisionNote
+}
+
+func (x *Task) GetFocusPin() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.FocusPin
+}
+
+func (x *Task) GetDependencies() []int64 {
+	if x == nil {
+		var zero []int64
+		return zero
+	}
+	return x.Dependencies
 }
 
 type TaskComment struct {
@@ -1697,15 +1762,20 @@ func (x *GetTaskDetailResponse) GetActivity() []*TaskActivity {
 }
 
 type UpdateTaskBody struct {
-	Title       string  `json:"title,omitempty"`
-	Description string  `json:"description,omitempty"`
-	Status      string  `json:"status,omitempty"`
-	Priority    string  `json:"priority,omitempty"`
-	AssigneeId  *int64  `json:"assignee_id,omitempty"`
-	DueDate     string  `json:"due_date,omitempty"`
-	StartDate   string  `json:"start_date,omitempty"`
-	Labels      []int64 `json:"labels,omitempty"`
-	Archived    *bool   `json:"archived,omitempty"`
+	Title          string   `json:"title,omitempty"`
+	Description    string   `json:"description,omitempty"`
+	Status         string   `json:"status,omitempty"`
+	Priority       string   `json:"priority,omitempty"`
+	AssigneeId     *int64   `json:"assignee_id,omitempty"`
+	DueDate        string   `json:"due_date,omitempty"`
+	StartDate      string   `json:"start_date,omitempty"`
+	Labels         []int64  `json:"labels,omitempty"`
+	Archived       *bool    `json:"archived,omitempty"`
+	EffortMinutes  *int32   `json:"effort_minutes,omitempty"`
+	EstimatedHours *float64 `json:"estimated_hours,omitempty"`
+	WaitingOn      *string  `json:"waiting_on,omitempty"`
+	DecisionNote   *string  `json:"decision_note,omitempty"`
+	FocusPin       *bool    `json:"focus_pin,omitempty"`
 }
 
 func (m *UpdateTaskBody) MarshalJSON() ([]byte, error) {
@@ -1834,6 +1904,66 @@ func (x *UpdateTaskBody) GetArchived() bool {
 		return zero
 	}
 	return *x.Archived
+}
+
+func (x *UpdateTaskBody) GetEffortMinutes() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.EffortMinutes == nil {
+		var zero int32
+		return zero
+	}
+	return *x.EffortMinutes
+}
+
+func (x *UpdateTaskBody) GetEstimatedHours() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.EstimatedHours == nil {
+		var zero float64
+		return zero
+	}
+	return *x.EstimatedHours
+}
+
+func (x *UpdateTaskBody) GetWaitingOn() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.WaitingOn == nil {
+		var zero string
+		return zero
+	}
+	return *x.WaitingOn
+}
+
+func (x *UpdateTaskBody) GetDecisionNote() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.DecisionNote == nil {
+		var zero string
+		return zero
+	}
+	return *x.DecisionNote
+}
+
+func (x *UpdateTaskBody) GetFocusPin() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.FocusPin == nil {
+		var zero bool
+		return zero
+	}
+	return *x.FocusPin
 }
 
 type UpdateTaskRequest struct {
@@ -2956,6 +3086,181 @@ type DeleteTimeLogResponse struct {
 }
 
 func (x *DeleteTimeLogResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
+type AddTaskDependencyBody struct {
+	DependsOnTaskId int64 `json:"depends_on_task_id,omitempty"`
+}
+
+func (m *AddTaskDependencyBody) MarshalJSON() ([]byte, error) {
+	type alias AddTaskDependencyBody
+	aux := struct {
+		*alias
+		DependsOnTaskId string `json:"depends_on_task_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.DependsOnTaskId = strconv.FormatInt(m.DependsOnTaskId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *AddTaskDependencyBody) UnmarshalJSON(data []byte) error {
+	type alias AddTaskDependencyBody
+	aux := struct {
+		*alias
+		DependsOnTaskId string `json:"depends_on_task_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.DependsOnTaskId != "" {
+		v, err := strconv.ParseInt(aux.DependsOnTaskId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.DependsOnTaskId = v
+	}
+	return nil
+}
+
+func (x *AddTaskDependencyBody) GetDependsOnTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.DependsOnTaskId
+}
+
+type AddTaskDependencyRequest struct {
+	TaskId int64                  `json:"task_id,omitempty"`
+	Body   *AddTaskDependencyBody `json:"body,omitempty"`
+}
+
+func (m *AddTaskDependencyRequest) MarshalJSON() ([]byte, error) {
+	type alias AddTaskDependencyRequest
+	aux := struct {
+		*alias
+		TaskId string `json:"task_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.TaskId = strconv.FormatInt(m.TaskId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *AddTaskDependencyRequest) UnmarshalJSON(data []byte) error {
+	type alias AddTaskDependencyRequest
+	aux := struct {
+		*alias
+		TaskId string `json:"task_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.TaskId != "" {
+		v, err := strconv.ParseInt(aux.TaskId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.TaskId = v
+	}
+	return nil
+}
+
+func (x *AddTaskDependencyRequest) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
+func (x *AddTaskDependencyRequest) GetBody() *AddTaskDependencyBody {
+	if x == nil {
+		var zero *AddTaskDependencyBody
+		return zero
+	}
+	return x.Body
+}
+
+type AddTaskDependencyResponse struct {
+	Message string `json:"message,omitempty"`
+}
+
+func (x *AddTaskDependencyResponse) GetMessage() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Message
+}
+
+type RemoveTaskDependencyRequest struct {
+	TaskId          int64 `json:"task_id,omitempty"`
+	DependsOnTaskId int64 `json:"depends_on_task_id,omitempty"`
+}
+
+func (m *RemoveTaskDependencyRequest) MarshalJSON() ([]byte, error) {
+	type alias RemoveTaskDependencyRequest
+	aux := struct {
+		*alias
+		TaskId          string `json:"task_id,omitempty"`
+		DependsOnTaskId string `json:"depends_on_task_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.TaskId = strconv.FormatInt(m.TaskId, 10)
+	aux.DependsOnTaskId = strconv.FormatInt(m.DependsOnTaskId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *RemoveTaskDependencyRequest) UnmarshalJSON(data []byte) error {
+	type alias RemoveTaskDependencyRequest
+	aux := struct {
+		*alias
+		TaskId          string `json:"task_id,omitempty"`
+		DependsOnTaskId string `json:"depends_on_task_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.TaskId != "" {
+		v, err := strconv.ParseInt(aux.TaskId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.TaskId = v
+	}
+	if aux.DependsOnTaskId != "" {
+		v, err := strconv.ParseInt(aux.DependsOnTaskId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.DependsOnTaskId = v
+	}
+	return nil
+}
+
+func (x *RemoveTaskDependencyRequest) GetTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.TaskId
+}
+
+func (x *RemoveTaskDependencyRequest) GetDependsOnTaskId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.DependsOnTaskId
+}
+
+type RemoveTaskDependencyResponse struct {
+	Message string `json:"message,omitempty"`
+}
+
+func (x *RemoveTaskDependencyResponse) GetMessage() string {
 	if x == nil {
 		var zero string
 		return zero

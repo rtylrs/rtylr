@@ -40,4 +40,8 @@ service TaskService {
   getTimeLogs(GetTimeLogsRequest) -> GetTimeLogsResponse @get("/tasks/{task_id}/time-logs")
 
   deleteTimeLog(DeleteTimeLogRequest) -> DeleteTimeLogResponse @delete("/tasks/time-logs/{id}")
+
+  addTaskDependency(AddTaskDependencyRequest) -> AddTaskDependencyResponse @post("/tasks/{task_id}/dependencies") @body("body")
+
+  removeTaskDependency(RemoveTaskDependencyRequest) -> RemoveTaskDependencyResponse @delete("/tasks/{task_id}/dependencies/{depends_on_task_id}")
 }

@@ -65,6 +65,19 @@ message Task {
   /// list and board views but stay readable by id. Absent means false, as
   /// with every other non-nullable scalar in this message.
   archived: bool
+  /// Quick effort estimate in minutes. Null when no estimate is set. The
+  /// write path treats 0 as a clear, so a stored 0 does not occur.
+  effort_minutes: int32? @nullable
+  /// Free-text blocker label. Empty if nothing is blocking.
+  waiting_on: string
+  /// One-line decision log. Empty if none recorded.
+  decision_note: string
+  /// Whether the *calling* user has pinned this task to their Today view.
+  /// Resolved per request from flow_task_focus_pins; never a shared task flag.
+  focus_pin: bool
+  /// Task ids this task depends on. Read-only projection; write through the
+  /// addTaskDependency / removeTaskDependency RPCs.
+  dependencies: int64[]
 }
 
 message TaskComment {
@@ -272,25 +285,50 @@ message GetTaskDetailResponse {
 }
 
 message UpdateTaskBody {
+  /// Every field here is optional on purpose. This is a partial update: the
+  /// client sends only what changed, and the repository preserves omitted
+  /// columns with COALESCE(?, col). Marking a field @required here rejects a
+  /// single-field patch with a 400 before the handler ever runs, which is
+  /// exactly the defect this contract previously had.
+  ///
   /// title is the title value for this contract.
-  title: string @required
+  title: string
   /// description is the description value for this contract.
-  description: string @required
+  description: string
   /// status is the current lifecycle state.
-  status: string @required
+  status: string
   /// priority is the priority value for this contract.
-  priority: string @required
+  priority: string
   /// assignee_id is the assignee id value for this contract.
   assignee_id: int64? @nullable
   /// due_date is the due date value for this contract.
-  due_date: string @required
+  due_date: string
   /// start_date is the start date value for this contract.
-  start_date: string @required
-  /// labels is the labels value for this contract.
-  labels: int64[] @min_items(1)
+  start_date: string
+  /// labels is the labels value for this contract. Absent leaves labels
+  /// untouched; @min_items is deliberately absent because requiring one label
+  /// made every task without labels permanently unupdatable.
+  labels: int64[]
   /// Updated archived status; absent to keep current value. True archives the
   /// task, false restores it.
   archived: bool? @nullable
+  /// Quick effort estimate in minutes for the effort chips. Absent leaves the
+  /// value untouched; 0 clears it. Zero minutes is meaningless as a stored
+  /// value, so it is safe as the clear sentinel, and it keeps this field out
+  /// of the COALESCE ambiguity that makes description impossible to clear.
+  effort_minutes: int32? @nullable
+  /// Estimated hours. Absent leaves untouched; 0 clears. Same sentinel rule as
+  /// effort_minutes.
+  estimated_hours: float64? @nullable
+  /// Free-text blocker label: person, team or approval. Absent leaves
+  /// untouched; empty string clears.
+  waiting_on: string? @nullable
+  /// One-line decision log. Absent leaves untouched; empty string clears.
+  decision_note: string? @nullable
+  /// Pin this task into the caller's own Today view. Absent leaves untouched;
+  /// true pins, false unpins. Per-caller, not per-task: Today is a personal
+  /// view, so this writes flow_task_focus_pins rather than a task column.
+  focus_pin: bool? @nullable
 }
 
 message UpdateTaskRequest {
@@ -483,6 +521,35 @@ message DeleteTimeLogRequest {
 }
 
 message DeleteTimeLogResponse {
+  /// message is a human-readable result message.
+  message: string
+}
+
+message AddTaskDependencyBody {
+  /// depends_on_task_id is the task this task is blocked by.
+  depends_on_task_id: int64 @required @gt(0)
+}
+
+message AddTaskDependencyRequest {
+  /// task_id is the task gaining the dependency.
+  task_id: int64 @required @gt(0)
+  /// body carries the dependency target bound from the HTTP payload.
+  body: AddTaskDependencyBody
+}
+
+message AddTaskDependencyResponse {
+  /// message is a human-readable result message.
+  message: string
+}
+
+message RemoveTaskDependencyRequest {
+  /// task_id is the task losing the dependency.
+  task_id: int64 @required @gt(0)
+  /// depends_on_task_id is the dependency being removed.
+  depends_on_task_id: int64 @required @gt(0)
+}
+
+message RemoveTaskDependencyResponse {
   /// message is a human-readable result message.
   message: string
 }

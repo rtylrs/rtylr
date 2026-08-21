@@ -308,27 +308,6 @@ func (m *UpdateTaskBody) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.Title == "" {
-		violations = append(violations, "title is required")
-	}
-	if m.Description == "" {
-		violations = append(violations, "description is required")
-	}
-	if m.Status == "" {
-		violations = append(violations, "status is required")
-	}
-	if m.Priority == "" {
-		violations = append(violations, "priority is required")
-	}
-	if m.DueDate == "" {
-		violations = append(violations, "due_date is required")
-	}
-	if m.StartDate == "" {
-		violations = append(violations, "start_date is required")
-	}
-	if len(m.Labels) < 1 {
-		violations = append(violations, "labels must have at least 1 items")
-	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -768,6 +747,78 @@ func (m *DeleteTimeLogRequest) Validate() error {
 }
 
 func (m *DeleteTimeLogResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *AddTaskDependencyBody) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.DependsOnTaskId <= 0 {
+		violations = append(violations, "depends_on_task_id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *AddTaskDependencyRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.TaskId <= 0 {
+		violations = append(violations, "task_id must be greater than 0")
+	}
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *AddTaskDependencyResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RemoveTaskDependencyRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.TaskId <= 0 {
+		violations = append(violations, "task_id must be greater than 0")
+	}
+	if m.DependsOnTaskId <= 0 {
+		violations = append(violations, "depends_on_task_id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *RemoveTaskDependencyResponse) Validate() error {
 	if m == nil {
 		return nil
 	}

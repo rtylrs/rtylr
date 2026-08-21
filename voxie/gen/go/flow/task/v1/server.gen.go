@@ -236,6 +236,8 @@ type TaskServiceServer interface {
 	CreateTimeLog(ctx context.Context, req *CreateTimeLogRequest) (*CreateTimeLogResponse, error)
 	GetTimeLogs(ctx context.Context, req *GetTimeLogsRequest) (*GetTimeLogsResponse, error)
 	DeleteTimeLog(ctx context.Context, req *DeleteTimeLogRequest) (*DeleteTimeLogResponse, error)
+	AddTaskDependency(ctx context.Context, req *AddTaskDependencyRequest) (*AddTaskDependencyResponse, error)
+	RemoveTaskDependency(ctx context.Context, req *RemoveTaskDependencyRequest) (*RemoveTaskDependencyResponse, error)
 }
 
 func RegisterTaskServiceServer(first any, rest ...any) error {
@@ -853,5 +855,61 @@ func RegisterTaskServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "TaskService", Method: "deleteTimeLog", HTTPMethod: "DELETE", Route: "/flow/task/v1/tasks/time-logs/{id}", AuthSchemes: nil}))
+	mux.Handle("POST /flow/task/v1/tasks/{task_id}/dependencies", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(AddTaskDependencyRequest)
+		if r.Body != nil {
+			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && err.Error() != "EOF" {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+				return
+			}
+		}
+		parsedTaskId, err := parseInt64(r.PathValue("task_id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter task_id: "+err.Error())
+			return
+		}
+		req.TaskId = parsedTaskId
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.AddTaskDependency(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "TaskService", Method: "addTaskDependency", HTTPMethod: "POST", Route: "/flow/task/v1/tasks/{task_id}/dependencies", AuthSchemes: nil}))
+	mux.Handle("DELETE /flow/task/v1/tasks/{task_id}/dependencies/{depends_on_task_id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(RemoveTaskDependencyRequest)
+		parsedTaskId, err := parseInt64(r.PathValue("task_id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter task_id: "+err.Error())
+			return
+		}
+		req.TaskId = parsedTaskId
+		parsedDependsOnTaskId, err := parseInt64(r.PathValue("depends_on_task_id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter depends_on_task_id: "+err.Error())
+			return
+		}
+		req.DependsOnTaskId = parsedDependsOnTaskId
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.RemoveTaskDependency(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "TaskService", Method: "removeTaskDependency", HTTPMethod: "DELETE", Route: "/flow/task/v1/tasks/{task_id}/dependencies/{depends_on_task_id}", AuthSchemes: nil}))
 	return nil
 }

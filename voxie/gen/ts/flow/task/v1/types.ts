@@ -32,6 +32,11 @@ sectionId?: string;
 cycleId?: string;
 milestoneId?: string;
 archived?: boolean;
+effortMinutes?: number;
+waitingOn?: string;
+decisionNote?: string;
+focusPin?: boolean;
+dependencies?: (string)[];
 }
 
 export function decodeTask(v: any): Task {
@@ -67,6 +72,11 @@ sectionId: v.section_id,
 cycleId: v.cycle_id,
 milestoneId: v.milestone_id,
 archived: v.archived,
+effortMinutes: v.effort_minutes,
+waitingOn: v.waiting_on,
+decisionNote: v.decision_note,
+focusPin: v.focus_pin,
+dependencies: v.dependencies,
 };
 }
 
@@ -102,6 +112,11 @@ if (v.sectionId !== undefined) { out.section_id = v.sectionId; }
 if (v.cycleId !== undefined) { out.cycle_id = v.cycleId; }
 if (v.milestoneId !== undefined) { out.milestone_id = v.milestoneId; }
 if (v.archived !== undefined) { out.archived = v.archived; }
+if (v.effortMinutes !== undefined) { out.effort_minutes = v.effortMinutes; }
+if (v.waitingOn !== undefined) { out.waiting_on = v.waitingOn; }
+if (v.decisionNote !== undefined) { out.decision_note = v.decisionNote; }
+if (v.focusPin !== undefined) { out.focus_pin = v.focusPin; }
+if (v.dependencies !== undefined) { out.dependencies = v.dependencies; }
 return out;
 }
 
@@ -692,15 +707,20 @@ return violations;
 }
 
 export interface UpdateTaskBody {
-title: string;
-description: string;
-status: string;
-priority: string;
+title?: string;
+description?: string;
+status?: string;
+priority?: string;
 assigneeId?: string;
-dueDate: string;
-startDate: string;
+dueDate?: string;
+startDate?: string;
 labels?: (string)[];
 archived?: boolean;
+effortMinutes?: number;
+estimatedHours?: number;
+waitingOn?: string;
+decisionNote?: string;
+focusPin?: boolean;
 }
 
 export function decodeUpdateTaskBody(v: any): UpdateTaskBody {
@@ -715,6 +735,11 @@ dueDate: v.due_date,
 startDate: v.start_date,
 labels: v.labels,
 archived: v.archived,
+effortMinutes: v.effort_minutes,
+estimatedHours: v.estimated_hours,
+waitingOn: v.waiting_on,
+decisionNote: v.decision_note,
+focusPin: v.focus_pin,
 };
 }
 
@@ -729,18 +754,16 @@ if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
 if (v.startDate !== undefined) { out.start_date = v.startDate; }
 if (v.labels !== undefined) { out.labels = v.labels; }
 if (v.archived !== undefined) { out.archived = v.archived; }
+if (v.effortMinutes !== undefined) { out.effort_minutes = v.effortMinutes; }
+if (v.estimatedHours !== undefined) { out.estimated_hours = v.estimatedHours; }
+if (v.waitingOn !== undefined) { out.waiting_on = v.waitingOn; }
+if (v.decisionNote !== undefined) { out.decision_note = v.decisionNote; }
+if (v.focusPin !== undefined) { out.focus_pin = v.focusPin; }
 return out;
 }
 
 export function validateUpdateTaskBody(v: UpdateTaskBody): string[] {
 const violations: string[] = [];
-if (!(v.title !== undefined && v.title !== null) || v.title === "") violations.push("title is required");
-if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
-if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
-if (!(v.priority !== undefined && v.priority !== null) || v.priority === "") violations.push("priority is required");
-if (!(v.dueDate !== undefined && v.dueDate !== null) || v.dueDate === "") violations.push("due_date is required");
-if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
-if (v.labels !== undefined && v.labels !== null && v.labels.length < 1) violations.push("labels must contain at least 1 items");
 return violations;
 }
 
@@ -1507,6 +1530,131 @@ return out;
 }
 
 export function validateDeleteTimeLogResponse(v: DeleteTimeLogResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
+export interface AddTaskDependencyBody {
+dependsOnTaskId: string;
+}
+
+export function decodeAddTaskDependencyBody(v: any): AddTaskDependencyBody {
+if (v === null || v === undefined) return v;
+return {
+dependsOnTaskId: v.depends_on_task_id,
+};
+}
+
+export function encodeAddTaskDependencyBody(v: AddTaskDependencyBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.dependsOnTaskId !== undefined) { out.depends_on_task_id = v.dependsOnTaskId; }
+return out;
+}
+
+export function validateAddTaskDependencyBody(v: AddTaskDependencyBody): string[] {
+const violations: string[] = [];
+if (!(v.dependsOnTaskId !== undefined && v.dependsOnTaskId !== null)) violations.push("depends_on_task_id is required");
+if (v.dependsOnTaskId !== undefined && v.dependsOnTaskId !== null && !(Number(v.dependsOnTaskId) > 0)) violations.push("depends_on_task_id violates @gt");
+return violations;
+}
+
+export interface AddTaskDependencyRequest {
+taskId: string;
+body?: AddTaskDependencyBody;
+}
+
+export function decodeAddTaskDependencyRequest(v: any): AddTaskDependencyRequest {
+if (v === null || v === undefined) return v;
+return {
+taskId: v.task_id,
+body: (v.body !== undefined ? decodeAddTaskDependencyBody(v.body) : v.body),
+};
+}
+
+export function encodeAddTaskDependencyRequest(v: AddTaskDependencyRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+if (v.body !== undefined) { out.body = encodeAddTaskDependencyBody(v.body); }
+return out;
+}
+
+export function validateAddTaskDependencyRequest(v: AddTaskDependencyRequest): string[] {
+const violations: string[] = [];
+if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
+if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateAddTaskDependencyBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
+export interface AddTaskDependencyResponse {
+message?: string;
+}
+
+export function decodeAddTaskDependencyResponse(v: any): AddTaskDependencyResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeAddTaskDependencyResponse(v: AddTaskDependencyResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
+export function validateAddTaskDependencyResponse(v: AddTaskDependencyResponse): string[] {
+const violations: string[] = [];
+return violations;
+}
+
+export interface RemoveTaskDependencyRequest {
+taskId: string;
+dependsOnTaskId: string;
+}
+
+export function decodeRemoveTaskDependencyRequest(v: any): RemoveTaskDependencyRequest {
+if (v === null || v === undefined) return v;
+return {
+taskId: v.task_id,
+dependsOnTaskId: v.depends_on_task_id,
+};
+}
+
+export function encodeRemoveTaskDependencyRequest(v: RemoveTaskDependencyRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.taskId !== undefined) { out.task_id = v.taskId; }
+if (v.dependsOnTaskId !== undefined) { out.depends_on_task_id = v.dependsOnTaskId; }
+return out;
+}
+
+export function validateRemoveTaskDependencyRequest(v: RemoveTaskDependencyRequest): string[] {
+const violations: string[] = [];
+if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
+if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+if (!(v.dependsOnTaskId !== undefined && v.dependsOnTaskId !== null)) violations.push("depends_on_task_id is required");
+if (v.dependsOnTaskId !== undefined && v.dependsOnTaskId !== null && !(Number(v.dependsOnTaskId) > 0)) violations.push("depends_on_task_id violates @gt");
+return violations;
+}
+
+export interface RemoveTaskDependencyResponse {
+message?: string;
+}
+
+export function decodeRemoveTaskDependencyResponse(v: any): RemoveTaskDependencyResponse {
+if (v === null || v === undefined) return v;
+return {
+message: v.message,
+};
+}
+
+export function encodeRemoveTaskDependencyResponse(v: RemoveTaskDependencyResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.message !== undefined) { out.message = v.message; }
+return out;
+}
+
+export function validateRemoveTaskDependencyResponse(v: RemoveTaskDependencyResponse): string[] {
 const violations: string[] = [];
 return violations;
 }
