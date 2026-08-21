@@ -55,6 +55,9 @@ record_applied() {
 
 APPLIED=0
 SKIPPED=0
+FAILED=0
+OUTPUT_FILE="$(mktemp)"
+trap 'rm -f "$OUTPUT_FILE"' EXIT
 
 for dir in shared rtylr voxire erp hr hr_core hr_attendance hr_documents hr_equipment hr_leave hr_onboarding hr_overtime hr_payroll hr_performance hr_setup hr_shifts hr_time crm finance flow pos hub store support book hr_dashboard recruit insights oauth ai migrations; do
     schema_dir="$SCHEMAS_DIR/$dir"
@@ -73,11 +76,27 @@ for dir in shared rtylr voxire erp hr hr_core hr_attendance hr_documents hr_equi
         fi
 
         echo "  → $filename"
-        mysql_cmd < "$f" 2>&1 | grep -v "Warning:" || true
-        record_applied "$filename"
+        if mysql_cmd < "$f" >"$OUTPUT_FILE" 2>&1; then
+            grep -v "Warning:" "$OUTPUT_FILE" || true
+        else
+            status=$?
+            grep -v "Warning:" "$OUTPUT_FILE" || true
+            echo "    ✗ $filename failed; it was not recorded as applied" >&2
+            FAILED=$((FAILED + 1))
+            echo ""
+            echo "❌ Migrations stopped. Applied: $APPLIED, Skipped: $SKIPPED, Failed: $FAILED."
+            exit "$status"
+        fi
+        if ! record_applied "$filename"; then
+            echo "    ✗ could not record $filename as applied" >&2
+            FAILED=$((FAILED + 1))
+            echo ""
+            echo "❌ Migrations stopped. Applied: $APPLIED, Skipped: $SKIPPED, Failed: $FAILED."
+            exit 1
+        fi
         APPLIED=$((APPLIED + 1))
     done
 done
 
 echo ""
-echo "✅ Migrations complete. Applied: $APPLIED, Skipped: $SKIPPED."
+echo "✅ Migrations complete. Applied: $APPLIED, Skipped: $SKIPPED, Failed: $FAILED."
