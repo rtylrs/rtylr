@@ -40,5 +40,6 @@ export const cases = [
   ["apps/finance/src/router.tsx", "audit-batch-038-suite-25"],
   ["apps/finance/src/shared/components/Skeleton.tsx", "audit-batch-039-suite-25"],
   ["apps/flow/src/features/profile/ProfileScreen.tsx", "audit-batch-040-suite-25"],
+  ["apps/flow/src/features/settings/sections/WorkTypesSection.tsx", "audit-batch-041-suite-25"],
 ];
 
