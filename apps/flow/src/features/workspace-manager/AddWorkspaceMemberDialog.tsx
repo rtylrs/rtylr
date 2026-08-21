@@ -2,7 +2,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Search, UserSearch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, EmptyState } from '@voxire/ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  EmptyState,
+} from '@voxire/ui';
 import { useAddWorkspaceMember } from './useWorkspaceManager';
 import type { FlowTeamMember } from '../../shared/hooks/queries/useFlowTeam';
 import { roleLabel } from '../../shared/lib/roleUtils';
@@ -84,6 +91,9 @@ const AddWorkspaceMemberDialog: React.FC<AddWorkspaceMemberDialogProps> = ({
           <DialogTitle style={{ color: 'var(--flow-text)' }}>
             {t('workspaceManager.addMemberHeading')}
           </DialogTitle>
+          <DialogDescription style={{ color: 'var(--flow-text-muted)' }}>
+            {t('workspaceManager.addMemberDescription')}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
