@@ -417,7 +417,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
               )}
             </div>
             {isPinEnabled && (
-              <button
+              <button type="button"
                 onClick={handleOpenSetPin}
                 style={{
                   display: 'inline-flex',

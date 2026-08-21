@@ -29,7 +29,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     width={400}
     footer={
       <>
-        <button style={ghostBtn} onClick={onClose}>
+        <button type="button" style={ghostBtn} onClick={onClose}>
           Cancel
         </button>
         <button type="button"

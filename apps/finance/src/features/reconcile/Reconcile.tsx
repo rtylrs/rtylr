@@ -80,7 +80,7 @@ const Reconcile: React.FC = () => {
         title="Reconciliation"
         subtitle={`${unmatched.length} transactions awaiting match`}
         actions={
-          <button style={primaryBtn} onClick={handleAutoMatch} disabled={autoMatching}>
+          <button type="button" style={primaryBtn} onClick={handleAutoMatch} disabled={autoMatching}>
             <CheckCheck size={13} /> {autoMatching ? 'Matching…' : 'Auto-match all'}
           </button>
         }

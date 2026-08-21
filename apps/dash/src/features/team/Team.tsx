@@ -589,7 +589,7 @@ const Team: React.FC = (): React.JSX.Element => {
               {selected.size} selected
             </span>
             <div className="w-px h-4" style={{ background: 'var(--dash-border)' }} />
-            <button
+            <button type="button"
               onClick={() => setShowAddToGroupModal(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
               style={{

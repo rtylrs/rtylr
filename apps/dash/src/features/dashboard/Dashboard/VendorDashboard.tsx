@@ -280,7 +280,7 @@ const AdminDashboard: React.FC = () => {
                       Add, remove, or rearrange widgets
                     </p>
                   </div>
-                  <button
+                  <button type="button"
                     onClick={() => setShowCatalog(false)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)]"
                     style={{ color: 'var(--dash-text-muted)' }}

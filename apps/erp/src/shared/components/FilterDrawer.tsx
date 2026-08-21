@@ -84,7 +84,7 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
                   Reset
                 </button>
               )}
-              <button
+              <button type="button"
                 onClick={() => {
                   onApply?.();
                   onClose();

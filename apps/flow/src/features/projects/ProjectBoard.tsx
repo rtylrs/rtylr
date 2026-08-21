@@ -376,7 +376,7 @@ const ProjectBoard: React.FC = () => {
                   style={{ color: 'var(--flow-text)' }}
                 />
                 <div className="flex items-center gap-1.5">
-                  <button
+                  <button type="button"
                     onClick={handleAddColumn}
                     disabled={!newColumnName.trim() || createColumn.isPending}
                     className="h-6 px-2.5 rounded text-[11px] font-semibold disabled:opacity-40"

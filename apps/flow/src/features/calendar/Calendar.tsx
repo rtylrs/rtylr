@@ -218,7 +218,7 @@ const Calendar: React.FC = () => {
                 </div>
                 <div className="space-y-0.5">
                   {dayTasks.slice(0, 3).map((t) => (
-                    <button
+                    <button type="button"
                       key={t.id}
                       onClick={(e) => {
                         e.stopPropagation();

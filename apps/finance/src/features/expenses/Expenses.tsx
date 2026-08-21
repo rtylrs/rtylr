@@ -335,7 +335,7 @@ const Expenses: React.FC = () => {
             >
               Prev
             </button>
-            <button
+            <button type="button"
               onClick={() => setPage((p) => p + 1)}
               disabled={!hasMore}
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"

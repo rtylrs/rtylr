@@ -37,7 +37,7 @@ const Checkout = (): React.JSX.Element => {
         <p className="mt-2 text-sm text-gray-600">
           Online ordering is currently disabled for this menu.
         </p>
-        <button
+        <button type="button"
           onClick={() => navigate({ to: '/' })}
           className="mt-6 rounded-lg bg-black px-4 py-2 text-sm text-white"
         >

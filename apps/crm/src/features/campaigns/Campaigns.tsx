@@ -314,7 +314,7 @@ function CampaignCard({
         </span>
         <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
           {campaign.status === 'Draft' && canSend && (
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onLaunch();

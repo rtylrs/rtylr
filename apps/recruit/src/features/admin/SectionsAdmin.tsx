@@ -251,7 +251,7 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
                     >
                       {s.enabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                     </button>
-                    <button
+                    <button type="button"
                       onClick={() => setExpandedId(expandedId === s.id ? null : s.id)}
                       className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-white"
                     >

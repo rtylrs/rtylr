@@ -363,7 +363,7 @@ const NewInvoice: React.FC = () => {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button
+        <button type="button"
           style={ghostBtn}
           onClick={() => (step === 0 ? navigate({ to: '/invoices' }) : setStep(step - 1))}
         >

@@ -153,7 +153,7 @@ const Receiving: React.FC = () => {
                     >
                       {line.received}
                     </span>
-                    <button
+                    <button type="button"
                       onClick={() => adjust(line.sku, 1)}
                       aria-label={`Increase received quantity for ${line.name}`}
                       className="h-11 w-11 rounded flex items-center justify-center"

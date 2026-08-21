@@ -515,7 +515,7 @@ export const SegmentRuleRow: React.FC<{
       placeholder="value"
       style={{ width: '140px' }}
     />
-    <button
+    <button type="button"
       onClick={onRemove}
       style={{
         background: 'transparent',

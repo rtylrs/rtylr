@@ -474,7 +474,7 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
                 { value: 'dark' as Theme, icon: Moon, i18nKey: 'layout.theme.dark' },
                 { value: 'system' as Theme, icon: Monitor, i18nKey: 'layout.theme.system' },
               ].map(({ value, icon: Icon, i18nKey }) => (
-                <button
+                <button type="button"
                   key={value}
                   onClick={() => setTheme(value)}
                   style={{

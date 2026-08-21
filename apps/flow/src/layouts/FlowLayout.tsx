@@ -1214,7 +1214,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                             { value: 'system', icon: Monitor, label: t('flow.shell.system') },
                           ] as const
                         ).map(({ value, icon: Icon, label }) => (
-                          <button
+                          <button type="button"
                             key={value}
                             onClick={() => setTheme(value)}
                             className="flex-1 flex flex-col items-center gap-1 py-2 rounded-md text-[10px] font-medium transition-colors"

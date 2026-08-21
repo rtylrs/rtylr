@@ -227,7 +227,7 @@ const Products: React.FC = () => {
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: AMBER }} />
           )}
         </button>
-        <button
+        <button type="button"
           onClick={() =>
             updateFilters({
               ...filters,

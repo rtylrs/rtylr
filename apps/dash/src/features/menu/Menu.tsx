@@ -95,7 +95,7 @@ const Menu: React.FC<{}> = () => {
             >
               Edit
             </button>
-            <button
+            <button type="button"
               className="text-xs text-red-500 hover:underline px-2 py-1"
               onClick={() => deleteMenuItem(item._id as string)}
             >

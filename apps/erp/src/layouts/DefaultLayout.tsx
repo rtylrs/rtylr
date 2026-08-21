@@ -586,7 +586,7 @@ const DefaultLayout: React.FC = () => {
                 >
                   {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
                 </button>
-                <button
+                <button type="button"
                   onClick={() => setShortcutsOpen(true)}
                   aria-label="Open keyboard shortcuts"
                   className="h-11 w-11 rounded-lg flex items-center justify-center"
