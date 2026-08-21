@@ -75,6 +75,7 @@ Start with whichever question you have:
 | What dependencies would this create, and is the graph acyclic      | [12-coupling.md](12-coupling.md)                     |
 | Which forks were taken during the audit                            | [DECISIONS.md](DECISIONS.md)                         |
 | What could not be finished                                         | [BLOCKED.md](BLOCKED.md)                             |
+| Flow specifically, in more depth than the matrix allows            | [flow-deep-dive.md](flow-deep-dive.md)               |
 
 ## Reproducing it
 
