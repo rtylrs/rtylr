@@ -54,12 +54,23 @@ const APP_ICONS: Record<
 };
 
 const ITEMS_PER_PAGE = 10;
+/**
+ * The list is fetched in one window and searched/filtered/paginated
+ * client-side, so the window has to be larger than a single display page -
+ * filtering only the currently shown 10 rows made search miss members on
+ * any other page. `hasMore` from the server is surfaced as a truncation
+ * notice when a team outgrows this window.
+ */
+const FETCH_WINDOW_SIZE = 200;
 
 const Team: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
-  const { data: teamData, isLoading } = useTeam({ page: page + 1, pageSize: ITEMS_PER_PAGE });
+  const { data: teamData, isLoading } = useTeam({
+    page: 1,
+    pageSize: FETCH_WINDOW_SIZE,
+  });
   const members = teamData?.members ?? [];
   const deactivate = useDeactivateMember();
   const [query, setQuery] = useState('');
@@ -529,10 +540,17 @@ const Team: React.FC = (): React.JSX.Element => {
               </div>
 
               {/* Pagination */}
-              {(page > 0 || (teamData?.hasMore ?? false) || totalPages > 1) && (
+              {(page > 0 || totalPages > 1) && (
                 <div className="flex items-center justify-between px-5 py-3">
                   <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-                    Showing page {page + 1}
+                    {teamData?.hasMore
+                      ? t('team.list.showingTruncated', { count: filtered.length })
+                      : t(
+                          filtered.length === 1
+                            ? 'team.list.membersCountSingular'
+                            : 'team.list.membersCountPlural',
+                          { count: filtered.length }
+                        )}
                   </p>
                   <div className="flex items-center gap-1">
                     <button
@@ -545,7 +563,7 @@ const Team: React.FC = (): React.JSX.Element => {
                     </button>
                     <button
                       onClick={() => setPage(page + 1)}
-                      disabled={!teamData?.hasMore && page >= totalPages - 1}
+                      disabled={page >= totalPages - 1}
                       className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
                       style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
                     >

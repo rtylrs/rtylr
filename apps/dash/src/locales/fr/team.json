@@ -54,7 +54,10 @@
     "noMembersTitle": "Aucun membre pour l'instant",
     "noMembersDescription": "Invitez votre premier membre d'équipe pour commencer.",
     "noMembersMatchTitle": "Aucun membre ne correspond à votre recherche",
-    "noMembersMatchDescription": "Essayez un autre terme de recherche."
+    "noMembersMatchDescription": "Essayez un autre terme de recherche.",
+    "membersCountSingular": "{{count}} membre",
+    "membersCountPlural": "{{count}} membres",
+    "showingTruncated": "Affichage de {{count}} sur plus de 200 membres"
   },
   "memberDetail": {
     "notFoundTitle": "Membre introuvable",
