@@ -260,5 +260,6 @@ export const cases = [
   ["apps/auth/src/layouts/Public/Header.tsx", "audit-batch-258-suite-18"],
   ["apps/crm/src/features/dashboard/Dashboard.tsx", "audit-batch-259-suite-18"],
   ["apps/crm/src/layouts/DefaultLayout.tsx", "audit-batch-260-suite-18"],
+  ["apps/dash/src/features/dashboard/Dashboard/widgets/ActivityWidget.tsx", "audit-batch-261-suite-18"],
 ];
 
