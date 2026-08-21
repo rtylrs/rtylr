@@ -187,7 +187,7 @@ export const TagChip: React.FC<{
   >
     {label}
     {onRemove && (
-      <button
+      <button type="button"
         onClick={onRemove}
         style={{
           background: 'transparent',

@@ -596,7 +596,7 @@ const DevMenu: React.FC = () => {
               <Section label="Accent">
                 <div className="flex gap-2 flex-wrap">
                   {ACCENT_OPTIONS.map((a) => (
-                    <button
+                    <button type="button"
                       key={a.value}
                       className={cn(
                         'w-7 h-7 rounded-full transition-all',

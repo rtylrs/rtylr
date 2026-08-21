@@ -40,7 +40,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name = 'Product' })
             {images.map((img, i) => {
               const imageUrl = cdnImageUrl(img);
               return (
-                <button
+                <button type="button"
                   key={i}
                   onClick={() => setSelected(i)}
                   className="w-16 h-16 rounded-lg overflow-hidden shrink-0"

@@ -81,7 +81,7 @@ const LineItemRow: React.FC<LineItemRowProps> = ({ item, onChange, onRemove, dis
         <MoneyDisplay amount={total} />
       </td>
       <td style={{ padding: 8, width: 32 }}>
-        <button
+        <button type="button"
           onClick={onRemove}
           disabled={disabled}
           style={{

@@ -488,7 +488,7 @@ const TaskDetail: React.FC = () => {
               style={{ borderBottom: '1px solid var(--flow-border)' }}
             >
               {(['comments', 'activity'] as const).map((tabName) => (
-                <button
+                <button type="button"
                   key={tabName}
                   onClick={() => setTab(tabName)}
                   className="px-3 py-2 text-[12px] font-medium capitalize"

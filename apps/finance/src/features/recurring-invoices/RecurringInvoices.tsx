@@ -86,7 +86,7 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
           <button style={ghostBtn} onClick={onClose} disabled={create.isPending}>
             Cancel
           </button>
-          <button
+          <button type="button"
             style={{ ...primaryBtn, opacity: create.isPending ? 0.6 : 1 }}
             onClick={handleSubmit}
             disabled={create.isPending}

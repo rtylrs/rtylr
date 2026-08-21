@@ -390,7 +390,7 @@ const Journal: React.FC = () => {
         >
           <span style={{ fontSize: 12, color: 'var(--hub-text-dim)' }}>Page {page}</span>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button
+            <button type="button"
               style={{ ...ghostBtn, padding: '4px 12px', opacity: page <= 1 ? 0.3 : 1 }}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}

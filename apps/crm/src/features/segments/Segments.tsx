@@ -323,7 +323,7 @@ function RuleBuilder({
           >
             Cancel
           </button>
-          <button
+          <button type="button"
             onClick={() => onSave(segmentName, rules)}
             style={{
               padding: '8px 16px',

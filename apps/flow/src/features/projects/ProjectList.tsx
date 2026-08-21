@@ -319,7 +319,7 @@ const ProjectList: React.FC = () => {
             <LayoutGrid size={13} />
             Board
           </Link>
-          <button
+          <button type="button"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors"
             style={{
               background: 'var(--accent-muted)',

@@ -802,7 +802,7 @@ const Design: React.FC = () => {
                   outline: 'none',
                 }}
               />
-              <button
+              <button type="button"
                 onClick={handleAddPreset}
                 disabled={!newPresetName.trim()}
                 style={{

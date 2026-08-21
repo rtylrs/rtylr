@@ -193,7 +193,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                 >
                   <span>Page {page + 1}</span>
                   <div className="flex gap-2">
-                    <button
+                    <button type="button"
                       disabled={page === 0}
                       onClick={() => setPage((p) => Math.max(0, p - 1))}
                       className="rounded border px-3 py-1 text-xs text-white hover:bg-white/10 disabled:opacity-40"

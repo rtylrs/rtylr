@@ -128,7 +128,7 @@ const Cycles: React.FC = () => {
             >
               {createCycle.isPending ? t('flow.cycles.creating') : t('flow.cycles.create')}
             </button>
-            <button
+            <button type="button"
               onClick={() => {
                 setShowCreate(false);
                 setNewName('');

@@ -96,7 +96,7 @@ const BankFeeds: React.FC = () => {
         }
         actions={
           canManageAccounts ? (
-            <button style={primaryBtn} onClick={() => setShowConnect(true)}>
+            <button type="button" style={primaryBtn} onClick={() => setShowConnect(true)}>
               <LinkIcon size={13} /> Connect Account
             </button>
           ) : undefined

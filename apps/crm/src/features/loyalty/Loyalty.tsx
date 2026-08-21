@@ -238,7 +238,7 @@ const Loyalty: React.FC = () => {
           </div>
           {canConfigureLoyalty && (
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
-              <button
+              <button type="button"
                 onClick={() => updateConfig.mutate({ pointsPerDollar, pointsExpiry })}
                 disabled={updateConfig.isPending}
                 style={{

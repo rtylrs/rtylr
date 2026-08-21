@@ -504,7 +504,7 @@ const Team: React.FC = (): React.JSX.Element => {
                               >
                                 <Mail size={12} /> Send email
                               </a>
-                              <button
+                              <button type="button"
                                 className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
                                 style={{ color: 'var(--dash-text-muted)' }}
                                 onClick={() => {

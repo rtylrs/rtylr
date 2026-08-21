@@ -56,7 +56,7 @@ const ApprovalButtons: React.FC<Props> = ({
           >
             <Check size={12} /> {t('common.approve', { defaultValue: 'Approve' })}
           </button>
-          <button
+          <button type="button"
             onClick={() => {
               onReject(note);
               setNote('');

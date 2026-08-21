@@ -370,7 +370,7 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
                 placeholder={t('erp.products.variants.optionName')}
                 style={inputStyle}
               />
-              <button
+              <button type="button"
                 onClick={() => removeGroup(idx)}
                 aria-label={t('common.remove')}
                 className="h-8 w-8 shrink-0 rounded-lg flex items-center justify-center"

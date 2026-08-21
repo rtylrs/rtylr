@@ -137,7 +137,7 @@ const NewExpense: React.FC = () => {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button
+        <button type="button"
           style={ghostBtn}
           onClick={() => navigate({ to: '/expenses' })}
           disabled={createExpense.isPending}
