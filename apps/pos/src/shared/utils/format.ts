@@ -1,11 +1,26 @@
 // Shared formatters for prices, currency, dates, and percentages.
 
-export function formatCurrency(amount: number, currency = 'USD'): string {
-  try {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
-  } catch {
-    return `$${amount.toFixed(2)}`;
+// Intl.NumberFormat construction is expensive; cache one instance per
+// currency instead of rebuilding it on every formatted price.
+const currencyFormatters = new Map<string, Intl.NumberFormat>();
+
+function getCurrencyFormatter(currency: string): Intl.NumberFormat | null {
+  let formatter = currencyFormatters.get(currency);
+  if (formatter === undefined) {
+    try {
+      formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency });
+      currencyFormatters.set(currency, formatter);
+    } catch {
+      return null;
+    }
   }
+  return formatter;
+}
+
+export function formatCurrency(amount: number, currency = 'USD'): string {
+  const formatter = getCurrencyFormatter(currency);
+  if (formatter) return formatter.format(amount);
+  return `$${amount.toFixed(2)}`;
 }
 
 export function formatPercent(pct: number, digits = 0): string {
