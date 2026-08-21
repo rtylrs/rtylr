@@ -1,6 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DatePicker, Dialog, DialogContent, DialogHeader, DialogTitle } from '@voxire/ui';
+import {
+  DatePicker,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@voxire/ui';
 import GateNotice from '../../shared/components/GateNotice';
 import type { LeaveTypePayload } from './useLeave';
 import { useCreateLeaveRequest } from './useLeave';
@@ -104,6 +111,9 @@ const RequestLeaveDialog: React.FC<RequestLeaveDialogProps> = ({
           <DialogTitle style={{ color: 'var(--flow-text)' }}>
             {t('flow.leave.newRequest')}
           </DialogTitle>
+          <DialogDescription style={{ color: 'var(--flow-text-muted)' }}>
+            {t('flow.leave.newRequestDescription')}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">

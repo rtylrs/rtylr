@@ -5,6 +5,7 @@
   "memberCount_one": "{{count}} membre dans cet espace de travail",
   "memberCount_other": "{{count}} membres dans cet espace de travail",
   "addMemberHeading": "Ajouter un membre de l'équipe à cet espace de travail",
+  "addMemberDescription": "Recherchez dans votre organisation la personne à ajouter, puis choisissez le rôle qu'elle aura dans cet espace de travail.",
   "roleLabel": "Rôle",
   "searchPlaceholder": "Rechercher par nom ou e-mail...",
   "noOrgMembersFound": "Aucun membre de l'organisation trouvé. Seuls les membres d'équipe existants peuvent être ajoutés aux espaces de travail.",

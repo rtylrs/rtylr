@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@voxire/ui';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@voxire/ui';
 import { useInviteProjectMember } from '../useProjectMembers';
 import { roleLabel } from '../../../shared/lib/roleUtils';
 
@@ -62,6 +62,9 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
           <DialogTitle style={{ color: 'var(--flow-text)' }}>
             {t('flow.projectSettings.addMemberHeading')}
           </DialogTitle>
+          <DialogDescription style={{ color: 'var(--flow-text-muted)' }}>
+            {t('flow.projectSettings.addMemberDescription')}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex gap-2">
