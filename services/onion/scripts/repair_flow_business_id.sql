@@ -36,3 +36,33 @@ WHERE w.is_personal = 1 AND u.business_id IS NOT NULL AND w.business_id != u.bus
 -- JOIN users u ON u.id = w.owner_id
 -- SET w.business_id = u.business_id
 -- WHERE w.is_personal = 1 AND u.business_id IS NOT NULL AND w.business_id != u.business_id;
+
+-- ── Dry run: remaining untenanted projects ────────────────────────────────
+-- The two repairs above cover personal-workspace projects only. Before the
+-- workspace-removal phases rely on business_id, confirm nothing else wrote
+-- zeros. Split by whether the owning workspace is personal, since a non-zero
+-- count on the non-personal side has no scripted repair yet.
+SELECT
+    CASE WHEN w.is_personal = 1 THEN 'personal' ELSE 'non_personal' END AS kind,
+    COUNT(*) AS projects
+FROM flow_projects p
+LEFT JOIN flow_workspaces w ON p.workspace_id = w.id
+WHERE p.business_id = 0
+GROUP BY kind;
+
+-- ── Dry run: tasks with business_id = 0 ───────────────────────────────────
+-- Every task write path stamps business_id today; zeros mean rows written by
+-- older code. Business-scoped task lists are only correct once this is 0.
+SELECT COUNT(*) AS tasks_business_zero
+FROM flow_tasks
+WHERE business_id = 0;
+
+-- ── Dry run: legacy orphan tasks with no project ──────────────────────────
+-- flow_tasks.project_id is NOT NULL in the current schema, but RequireTaskRole
+-- and IsTaskMember still carry ProjectID = 0 fallback branches, which only make
+-- sense if rows predate it. The workspace removal re-homes these to their
+-- owner's My Tasks bucket before dropping workspace columns; this count sizes
+-- that step.
+SELECT COUNT(*) AS orphan_tasks_no_project
+FROM flow_tasks
+WHERE project_id = 0;

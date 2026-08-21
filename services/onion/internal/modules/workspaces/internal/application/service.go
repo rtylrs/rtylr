@@ -1257,7 +1257,7 @@ func (s *Service) EnsureMyTasksProject(
 			if renameErr := s.repo.RenameProject(ctx, existingID, userID, workspaceID, "My Tasks"); renameErr != nil {
 				logger.Ctx(ctx).Warn("migrate Inbox->My Tasks failed", logger.Error(renameErr))
 			} else {
-				invalidateWorkspacesScope(ctx, userID)
+				invalidateWorkspacesScope(ctx, businessID)
 			}
 		}
 		return existingID, workspaceID, nil
@@ -1281,7 +1281,7 @@ func (s *Service) EnsureMyTasksProject(
 		// Non-fatal — user can still create columns manually.
 		_ = seedErr
 	}
-	invalidateWorkspacesScope(ctx, userID)
+	invalidateWorkspacesScope(ctx, businessID)
 	return id, workspaceID, nil
 }
 
