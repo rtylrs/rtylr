@@ -40,6 +40,7 @@ import { useFeatureFlag, FLAG_KEYS, getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useClickOutside, useForesightLinks } from '@voxire/utils';
+import { useMemberCapacityHours } from '../shared/hooks/queries/useMemberCapacity';
 import { signOut, useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useUserStore } from '../shared/stores/userStore';
 import { useTranslation } from 'react-i18next';
@@ -365,6 +366,9 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // any other member-driven UI) has people to choose from. Nothing else calls
   // setMembers, so without this the store stays empty and assignment is impossible.
   const { data: teamMembers } = useFlowTeam();
+  // Real contracted hours per member, replacing the hardcoded 40 (#868). Absent
+  // for a member with no work schedule, which downstream renders as unknown.
+  const { data: capacityHours = {} } = useMemberCapacityHours();
   useEffect(() => {
     if (!teamMembers || teamMembers.length === 0) return;
     const mapped: Member[] = teamMembers
@@ -377,11 +381,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           email: m.email,
           initials: initialsFromName(m.name),
           role,
-          capacity: 40,
+          capacity: capacityHours[String(m.id)],
         };
       });
     setMembers(mapped);
-  }, [teamMembers, setMembers]);
+  }, [teamMembers, capacityHours, setMembers]);
 
   // ── Realtime wiring ─────────────────────────────────────────────────
   // Topics, invalidation fanout and the self-event skip all live in
@@ -748,7 +752,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   }}
                 >
                   {liveWorkspaces.map((ws) => (
-                    <button type="button"
+                    <button
+                      type="button"
                       key={ws.id}
                       onClick={() => {
                         setActiveWorkspace(ws.id);
@@ -1151,7 +1156,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             <CaretButton className="w-full justify-start" />
 
             <div className="relative" ref={userMenuRef}>
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setUserMenuOpen((o) => !o)}
                 className="flex items-center gap-2.5 w-full px-3 py-2 rounded-md transition-colors hover:bg-[var(--flow-hover)]"
               >
@@ -1214,7 +1220,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                             { value: 'system', icon: Monitor, label: t('flow.shell.system') },
                           ] as const
                         ).map(({ value, icon: Icon, label }) => (
-                          <button type="button"
+                          <button
+                            type="button"
                             key={value}
                             onClick={() => setTheme(value)}
                             className="flex-1 flex flex-col items-center gap-1 py-2 rounded-md text-[10px] font-medium transition-colors"
@@ -1266,7 +1273,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         margin: '4px 0',
                       }}
                     />
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={handleLogout}
                       className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-start transition-colors hover:bg-[var(--flow-hover)]"
                       style={{ color: '#ef4444' }}
