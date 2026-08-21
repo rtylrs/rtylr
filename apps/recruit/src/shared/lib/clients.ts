@@ -1,14 +1,10 @@
-import { createOneKitClient, fromOneKitJson, oneKitResult, toOneKitJson } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
-import { CompatibilityServiceClient } from '@voxire/voxie/recruit/compat/v1/client';
 
 export const userClient = createOneKitClient(UserServiceClient, 'recruit');
-export const recruitCompatibilityClient = createOneKitClient(CompatibilityServiceClient, 'recruit');
 
-export function recruitResult<T>(operation: () => Promise<unknown>) {
-  return oneKitResult(operation).map((value) => fromOneKitJson<T>(value));
-}
-
-export function recruitBody(value: unknown) {
-  return { body: toOneKitJson(value ?? {}) };
-}
+// recruit/compat/v1 is deliberately absent. That contract does not exist in
+// voxie and never has, so no client could be generated for it and importing it
+// broke `vite build` for this app. The admin and public hooks use the REST
+// transport in ./api, which is what they used before the oneKit migration
+// introduced this shim. See #894.
