@@ -19,6 +19,8 @@ export const staffMemberSchema = z.object({
  * screen had already fetched. See #875.
  */
 export const staffDetailSchema = staffMemberSchema.extend({
+  photoUrl: z.string().optional(),
+  bio: z.string().optional(),
   phone: z.string().optional(),
   address: z.string().optional(),
   startDate: z.string().optional(),

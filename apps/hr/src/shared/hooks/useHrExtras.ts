@@ -77,6 +77,8 @@ export function useStaffById(id: number | undefined) {
         email: staff.email ?? '',
         employmentType: staff.employmentType,
         status: staff.status,
+        photoUrl: staff.photoUrl || undefined,
+        bio: staff.bio || undefined,
         phone: staff.phone || undefined,
         address: staff.address || undefined,
         startDate: staff.startDate || undefined,
