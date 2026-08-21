@@ -117,6 +117,9 @@ message UpsertSubscriptionResponse {
 message CreateCheckoutRequest {
   plan_slug: string
   email: string
+  billing_cycle: string?
+  seat_count: int32?
+  addons: string[]
 }
 
 message CreateCheckoutResponse {
