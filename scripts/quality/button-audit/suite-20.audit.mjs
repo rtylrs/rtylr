@@ -293,5 +293,6 @@ export const cases = [
   ["apps/dash/src/shared/hooks/queries/useKpis.test.tsx", "audit-batch-291-suite-20"],
   ["apps/erp/src/features/products/Products.tsx", "audit-batch-292-suite-20"],
   ["apps/erp/src/shared/components/BarcodeInput.tsx", "audit-batch-293-suite-20"],
+  ["apps/erp/src/shared/components/SupplierSelect.tsx", "audit-batch-294-suite-20"],
 ];
 
