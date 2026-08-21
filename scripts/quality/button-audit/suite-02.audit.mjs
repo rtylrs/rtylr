@@ -126,5 +126,6 @@ export const cases = [
   ["apps/hr/src/features/settings/LeavePolicySettings.tsx", "audit-batch-124-suite-02"],
   ["apps/hr/src/features/shifts/Schedule.tsx", "audit-batch-125-suite-02"],
   ["apps/hr/src/shared/components/CommandPalette.tsx", "audit-batch-126-suite-02"],
+  ["apps/insights/src/features/operations/Operations.tsx", "audit-batch-127-suite-02"],
 ];
 

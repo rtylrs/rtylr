@@ -126,5 +126,6 @@ export const cases = [
   ["apps/hr/src/features/reviews/Reviews.tsx", "audit-batch-124-suite-01"],
   ["apps/hr/src/features/shifts/RosterBuilder.tsx", "audit-batch-125-suite-01"],
   ["apps/hr/src/shared/components/ClockInOutButton.tsx", "audit-batch-126-suite-01"],
+  ["apps/insights/src/features/operations/Operations.test.tsx", "audit-batch-127-suite-01"],
 ];
 
