@@ -329,5 +329,6 @@ export const cases = [
   ["apps/hr/src/features/dashboard/widgets/LeaveBalanceWidget.tsx", "audit-batch-327-suite-22"],
   ["apps/hr/src/features/onboarding/ChecklistTemplates.tsx", "audit-batch-328-suite-22"],
   ["apps/hr/src/features/settings/Settings.test.tsx", "audit-batch-329-suite-22"],
+  ["apps/hr/src/features/shifts/Shifts.tsx", "audit-batch-330-suite-22"],
 ];
 

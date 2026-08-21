@@ -329,5 +329,6 @@ export const cases = [
   ["apps/hr/src/features/dashboard/widgets/PendingApprovalsWidget.tsx", "audit-batch-327-suite-24"],
   ["apps/hr/src/features/onboarding/Onboarding.tsx", "audit-batch-328-suite-24"],
   ["apps/hr/src/features/settings/payroll-config/PayrollConfigSettings.tsx", "audit-batch-329-suite-24"],
+  ["apps/hr/src/features/staff/EmployeeProfile.tsx", "audit-batch-330-suite-24"],
 ];
 
