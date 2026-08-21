@@ -24,6 +24,9 @@ export function restoreUserSessionFromCookie({
     setToken(cookieToken);
   }
 
-  void getUserInfo().catch(() => {});
+  // A rejected restore means the cookie token is expired/revoked: send the
+  // terminal back to auth instead of leaving it in limbo until some other
+  // API call happens to 401.
+  void getUserInfo().catch(() => redirectToAuth());
   return 'restoring';
 }

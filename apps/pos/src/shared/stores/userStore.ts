@@ -144,7 +144,6 @@ export const useUserStore = create<UserState & UserActions>()(
       ...initialState,
 
       logout: () => {
-        localStorage.removeItem('token');
         set({
           user: null,
           isAuthenticated: false,
@@ -233,7 +232,9 @@ export const useUserStore = create<UserState & UserActions>()(
       partialize: (state) => ({
         user: state.user,
         businessProfile: state.businessProfile,
-        token: state.token,
+        // The JWT is deliberately NOT persisted here - the httpOnly-style
+        // token cookie is the single persistent credential, and duplicating
+        // it into localStorage exposes it to any XSS.
         isAuthenticated: state.isAuthenticated,
         role: state.role,
         userId: state.userId,
