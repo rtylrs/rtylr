@@ -208,5 +208,6 @@ export const cases = [
   ["apps/auth/src/features/callback/Callback.tsx", "audit-batch-206-suite-20"],
   ["apps/crm/src/features/campaigns/Campaigns.test.tsx", "audit-batch-207-suite-20"],
   ["apps/crm/src/features/sales/Leads.test.tsx", "audit-batch-208-suite-20"],
+  ["apps/dash/src/features/analytics/Analytics.tsx", "audit-batch-209-suite-20"],
 ];
 
