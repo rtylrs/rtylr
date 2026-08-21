@@ -262,5 +262,6 @@ export const cases = [
   ["apps/crm/src/shared/components/CommandPalette.tsx", "audit-batch-260-suite-21"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/InvoiceAgingWidget.tsx", "audit-batch-261-suite-21"],
   ["apps/dash/src/features/integrations/Integrations.test.tsx", "audit-batch-262-suite-21"],
+  ["apps/dash/src/features/settings/Settings/components/Businesses/Businesses.tsx", "audit-batch-263-suite-21"],
 ];
 
