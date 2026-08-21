@@ -153,5 +153,6 @@ export const cases = [
   ["apps/hr/src/shared/components/AnniversaryWidget.tsx", "audit-batch-151-suite-15"],
   ["apps/insights/src/features/dashboard/Dashboard.test.tsx", "audit-batch-152-suite-15"],
   ["apps/menu/src/features/dev/Dev/DevMenu.tsx", "audit-batch-153-suite-15"],
+  ["apps/recruit/src/features/public/ApplyPage.test.tsx", "audit-batch-154-suite-15"],
 ];
 
