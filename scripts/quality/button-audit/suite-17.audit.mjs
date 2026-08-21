@@ -128,5 +128,6 @@ export const cases = [
   ["apps/hr/src/shared/hooks/queries/useRoles.test.tsx", "audit-batch-126-suite-17"],
   ["apps/insights/src/shared/components/Skeleton.tsx", "audit-batch-127-suite-17"],
   ["apps/recruit/src/features/admin/FormFieldsEditor.tsx", "audit-batch-128-suite-17"],
+  ["apps/auth/src/features/email-verification/EmailVerification.tsx", "audit-batch-129-suite-17"],
 ];
 
