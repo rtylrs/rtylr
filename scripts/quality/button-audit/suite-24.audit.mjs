@@ -236,5 +236,6 @@ export const cases = [
   ["apps/crm/src/features/templates/Templates.tsx", "audit-batch-234-suite-24"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/ActivityWidget.test.tsx", "audit-batch-235-suite-24"],
   ["apps/dash/src/features/developer/Webhooks.tsx", "audit-batch-236-suite-24"],
+  ["apps/dash/src/features/settings/Settings/components/AiUsage.tsx", "audit-batch-237-suite-24"],
 ];
 
