@@ -302,5 +302,6 @@ export const cases = [
   ["apps/flow/src/features/workspace-manager/AddWorkspaceMemberDialog.tsx", "audit-batch-300-suite-03"],
   ["apps/flow/src/shared/components/PreviewRouteUnavailable.tsx", "audit-batch-301-suite-03"],
   ["apps/hr/src/features/dashboard/widgets/LeaveBalanceWidget.test.tsx", "audit-batch-302-suite-03"],
+  ["apps/hr/src/features/leave/LeaveRequestForm.tsx", "audit-batch-303-suite-03"],
 ];
 
