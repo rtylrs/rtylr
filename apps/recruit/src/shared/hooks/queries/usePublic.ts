@@ -1,7 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { recruitBody, recruitCompatibilityClient, recruitResult } from '../../lib/clients';
+import { safe } from '../../lib/api';
 import type { Customization, FormField, RecruitCareer, Section } from '../../lib/types';
 
 // Public (anonymous) hooks - used by the candidate-facing pages.
@@ -19,9 +19,9 @@ export function useBusinessCareers(slug: string | undefined) {
     enabled: !!slug,
     queryFn: () =>
       unwrap(
-        recruitResult<ListPublicCareersResponse>(() =>
-          recruitCompatibilityClient.listPublicCareers({ slug })
-        )
+        safe.get<ListPublicCareersResponse>('/recruit/public/careers', {
+          params: { slug },
+        })
       ),
   });
 }
@@ -38,9 +38,9 @@ export function usePublicCareer(slug: string | undefined, careerSlug: string | u
     enabled: !!slug && !!careerSlug,
     queryFn: () =>
       unwrap(
-        recruitResult<GetPublicCareerResponse>(() =>
-          recruitCompatibilityClient.getPublicCareer({ slug, careerSlug })
-        )
+        safe.get<GetPublicCareerResponse>('/recruit/public/career', {
+          params: { slug, career_slug: careerSlug },
+        })
       ),
   });
 }
@@ -68,11 +68,7 @@ interface SubmitApplicationResponse {
 export function useSubmitApplication() {
   return useMutation({
     mutationFn: (body: SubmitApplicationBody) =>
-      unwrap(
-        recruitResult<SubmitApplicationResponse>(() =>
-          recruitCompatibilityClient.submitApplication(recruitBody(body))
-        )
-      ),
+      unwrap(safe.post<SubmitApplicationResponse>('/recruit/public/apply', body)),
     onError: () => toast.error('Failed to apply'),
   });
 }
@@ -98,11 +94,7 @@ export interface ResumeUploadURLResponse {
 }
 
 async function requestUploadURL(body: ResumeUploadURLBody): Promise<ResumeUploadURLResponse> {
-  return unwrap(
-    recruitResult<ResumeUploadURLResponse>(() =>
-      recruitCompatibilityClient.requestResumeUploadURL(recruitBody(body))
-    )
-  );
+  return unwrap(safe.post<ResumeUploadURLResponse>('/recruit/public/resume-upload-url', body));
 }
 
 /**

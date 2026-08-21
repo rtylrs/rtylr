@@ -74,7 +74,7 @@ import { isDueToday, isQuietNow } from '../shared/lib/lifeRhythm';
 import { useNotifications } from '../features/inbox/useNotifications';
 import { apiProjectToProject, apiWorkspaceToWorkspace } from '../shared/lib/projectMapper';
 import { LicenseBanner } from '@voxire/components';
-import { licenseClient } from '../shared/lib/clients';
+import { licenseClient } from '../shared/lib/api';
 import { useFlowBusinessName } from '../shared/hooks/useFlowBusinessName';
 import { useLayoutRealtime } from '../shared/lib/useLayoutRealtime';
 import { useRealtimeReconnectRefetch, useRealtimeStatus } from '../shared/lib/realtime';
