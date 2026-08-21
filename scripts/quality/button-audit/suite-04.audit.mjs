@@ -34,5 +34,6 @@ export const cases = [
   ["apps/dash/src/features/settings/Settings/components/Account/Account.tsx", "audit-batch-032-suite-04"],
   ["apps/dash/src/shared/components/Dropzone.tsx", "audit-batch-033-suite-04"],
   ["apps/dash/src/shared/components/ui/select.tsx", "audit-batch-034-suite-04"],
+  ["apps/erp/src/features/expiry/Expiry.test.tsx", "audit-batch-035-suite-04"],
 ];
 

@@ -34,5 +34,6 @@ export const cases = [
   ["apps/dash/src/features/settings/Settings/components/Businesses/Businesses.tsx", "audit-batch-032-suite-09"],
   ["apps/dash/src/shared/components/dash/AppBadge.tsx", "audit-batch-033-suite-09"],
   ["apps/dash/src/shared/components/ui/tabs.tsx", "audit-batch-034-suite-09"],
+  ["apps/erp/src/features/low-stock-alerts/LowStockAlerts.tsx", "audit-batch-035-suite-09"],
 ];
 
