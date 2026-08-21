@@ -215,5 +215,6 @@ export const cases = [
   ["apps/dash/src/shared/components/ui/avatar.tsx", "audit-batch-213-suite-22"],
   ["apps/erp/src/features/barcodes/Barcodes.test.tsx", "audit-batch-214-suite-22"],
   ["apps/erp/src/features/purchasing/Receiving.tsx", "audit-batch-215-suite-22"],
+  ["apps/erp/src/shared/components/ConfirmModal.tsx", "audit-batch-216-suite-22"],
 ];
 

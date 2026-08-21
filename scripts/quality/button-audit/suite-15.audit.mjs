@@ -215,5 +215,6 @@ export const cases = [
   ["apps/dash/src/shared/components/dash/NotificationItem.tsx", "audit-batch-213-suite-15"],
   ["apps/dash/src/shared/hooks/queries/useBusinesses.test.tsx", "audit-batch-214-suite-15"],
   ["apps/erp/src/features/products/Products.test.tsx", "audit-batch-215-suite-15"],
+  ["apps/erp/src/router.tsx", "audit-batch-216-suite-15"],
 ];
 
