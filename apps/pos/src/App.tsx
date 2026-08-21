@@ -27,6 +27,7 @@ import { useOfflineQueueAutoSync } from './features/offline-queue/useOfflineQueu
 import { reportReactError } from './shared/services/observability/appErrors';
 import { useTerminalHeartbeat } from './shared/services/terminal/useTerminalHeartbeat';
 import { buildCartContext } from './shared/services/terminal/cartContext';
+import { getCookie } from './shared/services/api/cookies';
 import { runDesktopAutoUpdater } from './shared/services/desktop/autoUpdater';
 import {
   businessAddress,
@@ -35,12 +36,9 @@ import {
 } from './shared/stores/userStore';
 import type { POSBusinessProfile } from './shared/stores/settingsStore';
 
-const getTokenFromCookie = (): string | null =>
-  document.cookie
-    .split(';')
-    .map((c) => c.trim())
-    .find((c) => c.startsWith('token='))
-    ?.split('=')[1] ?? null;
+// Single shared cookie parser (the App.tsx copy broke on '='-padded JWTs
+// and skipped decoding).
+const getTokenFromCookie = (): string | null => getCookie('token');
 
 const settingsClient = createOneKitClient(SettingsServiceClient, 'pos');
 

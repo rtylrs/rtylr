@@ -1,9 +1,12 @@
 import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { MenuItemServiceClient } from '@voxire/voxie/pos/menu_item/v1/client';
 import type { MenuItem } from '@voxire/voxie/pos/menu_item/v1/types';
 
 const menuItemClient = createOneKitClient(MenuItemServiceClient, 'pos');
+
+const EMPTY_ITEMS: MenuItem[] = [];
 
 interface UseMenuItemsResult {
   items: MenuItem[];
@@ -23,8 +26,13 @@ export function useMenuItems(): UseMenuItemsResult {
     staleTime: 2 * 60 * 1000,
   });
 
-  const items = query.data ?? [];
-  const categories = Array.from(new Set(items.map((i) => i.category ?? ''))).sort();
+  const items = query.data ?? EMPTY_ITEMS;
+  // Stable identity while loading (EMPTY_ITEMS) and a memoized category
+  // derivation instead of rebuilding the Set+sort on every render.
+  const categories = useMemo(
+    () => Array.from(new Set(items.map((i) => i.category ?? ''))).sort(),
+    [items]
+  );
 
   return {
     items,

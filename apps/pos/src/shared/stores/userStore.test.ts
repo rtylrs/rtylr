@@ -172,7 +172,7 @@ describe('userStore', () => {
   });
 
   it('updates theme through generated POS settings', async () => {
-    setState({ user: { name: 'Alice', theme: 'light' } });
+    setState({ user: { name: 'Alice', theme: { mode: 'light' } } });
     settingsClient.getPOSSettings.mockResolvedValueOnce({
       settings: { businessProfile: '', features: undefined, receiptFooter: '' },
     });

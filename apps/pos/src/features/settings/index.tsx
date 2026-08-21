@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { createOneKitClient } from '@voxire/api';
 import { SettingsServiceClient } from '@voxire/voxie/pos/settings/v1/client';
@@ -48,7 +48,32 @@ const FEATURE_OPTIONS: { key: POSFeatureKey; label: string }[] = [
 
 const SettingsScreen: React.FC = () => {
   const { t } = useTranslation('server');
-  const s = useSettingsStore();
+  const autoLogoutMinutes = useSettingsStore((st) => st.autoLogoutMinutes);
+  const barMode = useSettingsStore((st) => st.barMode);
+  const business = useSettingsStore((st) => st.business);
+  const businessProfile = useSettingsStore((st) => st.businessProfile);
+  const features = useSettingsStore((st) => st.features);
+  const kdsHardware = useSettingsStore((st) => st.kdsHardware);
+  const printer = useSettingsStore((st) => st.printer);
+  const quickAccessSidebar = useSettingsStore((st) => st.quickAccessSidebar);
+  const receiptFooter = useSettingsStore((st) => st.receiptFooter);
+  const speedMode = useSettingsStore((st) => st.speedMode);
+  const taxRate = useSettingsStore((st) => st.taxRate);
+  const tipPresets = useSettingsStore((st) => st.tipPresets);
+  const reset = useSettingsStore((st) => st.reset);
+  const setAutoLogoutMinutes = useSettingsStore((st) => st.setAutoLogoutMinutes);
+  const setBarMode = useSettingsStore((st) => st.setBarMode);
+  const setBusiness = useSettingsStore((st) => st.setBusiness);
+  const setBusinessProfile = useSettingsStore((st) => st.setBusinessProfile);
+  const setFeature = useSettingsStore((st) => st.setFeature);
+  const setFeatures = useSettingsStore((st) => st.setFeatures);
+  const setKdsHardware = useSettingsStore((st) => st.setKdsHardware);
+  const setPrinter = useSettingsStore((st) => st.setPrinter);
+  const setQuickAccessSidebar = useSettingsStore((st) => st.setQuickAccessSidebar);
+  const setReceiptFooter = useSettingsStore((st) => st.setReceiptFooter);
+  const setSpeedMode = useSettingsStore((st) => st.setSpeedMode);
+  const setTaxRate = useSettingsStore((st) => st.setTaxRate);
+  const setTipPresets = useSettingsStore((st) => st.setTipPresets);
   const theme = useThemeStore((state) => state.theme);
   const setTheme = useThemeStore((state) => state.setTheme);
   const { locationId, terminalId, clearTerminalContext } = useTerminalContextStore();
@@ -58,9 +83,12 @@ const SettingsScreen: React.FC = () => {
   const [serialPorts, setSerialPorts] = useState<SerialPortInfo[]>([]);
   const [discovering, setDiscovering] = useState(false);
   const [savingPOSSettings, setSavingPOSSettings] = useState(false);
+  // Draft string for the tax input so intermediate typing ("8.", "8.0")
+  // isn't clobbered by the store's normalized value on every keystroke.
+  const [taxDraft, setTaxDraft] = useState<string>(() => (taxRate * 100).toFixed(2));
   const nativeHardwareAvailable = isTauri();
 
-  const discover = async () => {
+  const discover = useCallback(async () => {
     if (!nativeHardwareAvailable) return;
     setDiscovering(true);
     try {
@@ -77,19 +105,18 @@ const SettingsScreen: React.FC = () => {
     } finally {
       setDiscovering(false);
     }
-  };
+  }, [nativeHardwareAvailable]);
 
   useEffect(() => {
     if (nativeHardwareAvailable) {
-      discover();
+      void discover();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nativeHardwareAvailable]);
+  }, [discover]);
 
   const updateTip = (index: number, value: number) => {
-    const next = [...s.tipPresets];
+    const next = [...tipPresets];
     next[index] = value / 100;
-    s.setTipPresets(next);
+    setTipPresets(next);
   };
 
   const savePOSSettings = async () => {
@@ -97,18 +124,18 @@ const SettingsScreen: React.FC = () => {
     try {
       const selectedTheme: POSTheme = normalizePOSTheme(theme);
       const response = await settingsClient.updatePOSSettings({
-        businessProfile: s.businessProfile,
+        businessProfile: businessProfile,
         theme: selectedTheme,
-        features: s.features,
-        receiptFooter: s.receiptFooter,
+        features: features,
+        receiptFooter: receiptFooter,
       });
       const settings = response.settings;
       if (settings) {
-        s.setBusinessProfile(settings.businessProfile as POSBusinessProfile);
+        setBusinessProfile(settings.businessProfile as POSBusinessProfile);
         if (settings.features) {
-          s.setFeatures(settings.features);
+          setFeatures(settings.features);
         }
-        s.setReceiptFooter(settings.receiptFooter ?? '');
+        setReceiptFooter(settings.receiptFooter ?? '');
         setTheme(settings.theme ?? '');
       }
       toast.success('POS settings saved');
@@ -131,24 +158,24 @@ const SettingsScreen: React.FC = () => {
             <div>
               <label className="text-xs text-pos-muted">Business name (appears on receipt)</label>
               <input
-                value={s.business.name}
-                onChange={(e) => s.setBusiness({ name: e.target.value })}
+                value={business.name}
+                onChange={(e) => setBusiness({ name: e.target.value })}
                 className={INPUT_CLS}
               />
             </div>
             <div>
               <label className="text-xs text-pos-muted">Address</label>
               <input
-                value={s.business.address}
-                onChange={(e) => s.setBusiness({ address: e.target.value })}
+                value={business.address}
+                onChange={(e) => setBusiness({ address: e.target.value })}
                 className={INPUT_CLS}
               />
             </div>
             <div>
               <label className="text-xs text-pos-muted">Phone</label>
               <input
-                value={s.business.phone}
-                onChange={(e) => s.setBusiness({ phone: e.target.value })}
+                value={business.phone}
+                onChange={(e) => setBusiness({ phone: e.target.value })}
                 className={INPUT_CLS}
               />
             </div>
@@ -160,8 +187,8 @@ const SettingsScreen: React.FC = () => {
             <div>
               <label className="text-xs text-pos-muted">Workflow</label>
               <select
-                value={s.businessProfile}
-                onChange={(e) => s.setBusinessProfile(e.target.value as POSBusinessProfile)}
+                value={businessProfile}
+                onChange={(e) => setBusinessProfile(e.target.value as POSBusinessProfile)}
                 className={SELECT_CLS}
               >
                 {PROFILE_OPTIONS.map((profile) => (
@@ -193,8 +220,8 @@ const SettingsScreen: React.FC = () => {
                 >
                   <input
                     type="checkbox"
-                    checked={s.features[feature.key]}
-                    onChange={(e) => s.setFeature(feature.key, e.target.checked)}
+                    checked={features[feature.key]}
+                    onChange={(e) => setFeature(feature.key, e.target.checked)}
                     className="w-5 h-5"
                   />
                   {feature.label}
@@ -217,16 +244,24 @@ const SettingsScreen: React.FC = () => {
           <input
             type="number"
             step="0.01"
-            value={(s.taxRate * 100).toFixed(2)}
-            onChange={(e) => s.setTaxRate(Number(e.target.value) / 100)}
+            value={taxDraft}
+            onChange={(e) => {
+              const next = e.target.value;
+              setTaxDraft(next);
+              const parsed = Number(next);
+              if (next.trim() !== '' && Number.isFinite(parsed)) {
+                setTaxRate(parsed / 100);
+              }
+            }}
+            onBlur={() => setTaxDraft((taxRate * 100).toFixed(2))}
             className={INPUT_CLS}
           />
         </Section>
 
-        {s.features.tips && (
+        {features.tips && (
           <Section title="Tip Presets">
             <div className="grid grid-cols-4 gap-2">
-              {s.tipPresets.map((pct, i) => (
+              {tipPresets.map((pct, i) => (
                 <input
                   key={i}
                   type="number"
@@ -243,8 +278,8 @@ const SettingsScreen: React.FC = () => {
         <Section title="Receipt">
           <label className="text-xs text-pos-muted">Footer message</label>
           <textarea
-            value={s.receiptFooter}
-            onChange={(e) => s.setReceiptFooter(e.target.value)}
+            value={receiptFooter}
+            onChange={(e) => setReceiptFooter(e.target.value)}
             rows={3}
             className="w-full px-3 py-2 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25 resize-none"
           />
@@ -277,9 +312,9 @@ const SettingsScreen: React.FC = () => {
           <div>
             <label className="text-xs text-pos-muted">Transport</label>
             <select
-              value={s.printer.transport}
+              value={printer.transport}
               onChange={(e) =>
-                s.setPrinter({ transport: e.target.value as 'windows' | 'serial' | 'network' })
+                setPrinter({ transport: e.target.value as 'windows' | 'serial' | 'network' })
               }
               className={SELECT_CLS}
             >
@@ -290,13 +325,13 @@ const SettingsScreen: React.FC = () => {
           </div>
 
           {/* Transport-specific fields */}
-          {s.printer.transport === 'windows' && (
+          {printer.transport === 'windows' && (
             <div>
               <label className="text-xs text-pos-muted">Windows printer name</label>
               {printers.length > 0 ? (
                 <select
-                  value={s.printer.name}
-                  onChange={(e) => s.setPrinter({ name: e.target.value })}
+                  value={printer.name}
+                  onChange={(e) => setPrinter({ name: e.target.value })}
                   className={SELECT_CLS}
                 >
                   {printers.map((p) => (
@@ -308,23 +343,23 @@ const SettingsScreen: React.FC = () => {
                 </select>
               ) : (
                 <input
-                  value={s.printer.name}
+                  value={printer.name}
                   placeholder="e.g. EPSON TM-T88VI"
-                  onChange={(e) => s.setPrinter({ name: e.target.value })}
+                  onChange={(e) => setPrinter({ name: e.target.value })}
                   className={INPUT_CLS}
                 />
               )}
             </div>
           )}
 
-          {s.printer.transport === 'serial' && (
+          {printer.transport === 'serial' && (
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
                 <label className="text-xs text-pos-muted">Serial port</label>
                 {serialPorts.length > 0 ? (
                   <select
-                    value={s.printer.serialPort}
-                    onChange={(e) => s.setPrinter({ serialPort: e.target.value })}
+                    value={printer.serialPort}
+                    onChange={(e) => setPrinter({ serialPort: e.target.value })}
                     className={SELECT_CLS}
                   >
                     <option value="">- select port -</option>
@@ -337,9 +372,9 @@ const SettingsScreen: React.FC = () => {
                   </select>
                 ) : (
                   <input
-                    value={s.printer.serialPort}
+                    value={printer.serialPort}
                     placeholder="e.g. /dev/tty.usbserial-1420 or COM3"
-                    onChange={(e) => s.setPrinter({ serialPort: e.target.value })}
+                    onChange={(e) => setPrinter({ serialPort: e.target.value })}
                     className={INPUT_CLS}
                   />
                 )}
@@ -347,8 +382,8 @@ const SettingsScreen: React.FC = () => {
               <div>
                 <label className="text-xs text-pos-muted">Baud rate</label>
                 <select
-                  value={s.printer.serialBaudRate}
-                  onChange={(e) => s.setPrinter({ serialBaudRate: Number(e.target.value) })}
+                  value={printer.serialBaudRate}
+                  onChange={(e) => setPrinter({ serialBaudRate: Number(e.target.value) })}
                   className={SELECT_CLS}
                 >
                   {[9600, 19200, 38400, 57600, 115200].map((b) => (
@@ -361,14 +396,14 @@ const SettingsScreen: React.FC = () => {
             </div>
           )}
 
-          {s.printer.transport === 'network' && (
+          {printer.transport === 'network' && (
             <div className="grid grid-cols-3 gap-3">
               <div className="col-span-2">
                 <label className="text-xs text-pos-muted">Printer host / IP</label>
                 <input
-                  value={s.printer.networkHost}
+                  value={printer.networkHost}
                   placeholder="e.g. 192.168.1.100"
-                  onChange={(e) => s.setPrinter({ networkHost: e.target.value })}
+                  onChange={(e) => setPrinter({ networkHost: e.target.value })}
                   className={INPUT_CLS}
                 />
               </div>
@@ -376,8 +411,8 @@ const SettingsScreen: React.FC = () => {
                 <label className="text-xs text-pos-muted">TCP port</label>
                 <input
                   type="number"
-                  value={s.printer.networkPort}
-                  onChange={(e) => s.setPrinter({ networkPort: Number(e.target.value) })}
+                  value={printer.networkPort}
+                  onChange={(e) => setPrinter({ networkPort: Number(e.target.value) })}
                   className={INPUT_CLS}
                 />
               </div>
@@ -391,30 +426,30 @@ const SettingsScreen: React.FC = () => {
               type="number"
               min={1}
               max={5}
-              value={s.printer.copies}
-              onChange={(e) => s.setPrinter({ copies: Number(e.target.value) })}
+              value={printer.copies}
+              onChange={(e) => setPrinter({ copies: Number(e.target.value) })}
               className={INPUT_CLS}
             />
           </div>
 
-          {s.features.cashDrawer && (
+          {features.cashDrawer && (
             <div className="space-y-2 pt-1">
               <label className="flex items-center gap-2 text-sm text-pos-text">
                 <input
                   type="checkbox"
-                  checked={s.printer.cashDrawerKick}
-                  onChange={(e) => s.setPrinter({ cashDrawerKick: e.target.checked })}
+                  checked={printer.cashDrawerKick}
+                  onChange={(e) => setPrinter({ cashDrawerKick: e.target.checked })}
                   className="w-5 h-5"
                 />
                 Kick cash drawer on print
               </label>
-              {s.printer.cashDrawerKick && (
+              {printer.cashDrawerKick && (
                 <div>
                   <label className="text-xs text-pos-muted">Drawer pin</label>
                   <select
-                    value={s.printer.drawerPin}
+                    value={printer.drawerPin}
                     onChange={(e) =>
-                      s.setPrinter({ drawerPin: Number(e.target.value) as 2 | 5 })
+                      setPrinter({ drawerPin: Number(e.target.value) as 2 | 5 })
                     }
                     className={SELECT_CLS}
                   >
@@ -427,7 +462,7 @@ const SettingsScreen: React.FC = () => {
           )}
         </Section>
 
-        {nativeHardwareAvailable && s.features.kitchenDisplay && (
+        {nativeHardwareAvailable && features.kitchenDisplay && (
           <Section title="KDS Hardware Display">
             <p className="text-xs text-pos-muted">
               Connect a dedicated hardware KDS display (VFD, kitchen screen) via serial or network.
@@ -436,9 +471,9 @@ const SettingsScreen: React.FC = () => {
             <div>
               <label className="text-xs text-pos-muted">Transport</label>
               <select
-                value={s.kdsHardware.transport}
+                value={kdsHardware.transport}
                 onChange={(e) =>
-                  s.setKdsHardware({
+                  setKdsHardware({
                     transport: e.target.value as 'none' | 'serial' | 'network',
                   })
                 }
@@ -449,14 +484,14 @@ const SettingsScreen: React.FC = () => {
                 <option value="network">Network (TCP/IP)</option>
               </select>
             </div>
-            {s.kdsHardware.transport === 'serial' && (
+            {kdsHardware.transport === 'serial' && (
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2">
                   <label className="text-xs text-pos-muted">Serial port</label>
                   {serialPorts.length > 0 ? (
                     <select
-                      value={s.kdsHardware.serialPort}
-                      onChange={(e) => s.setKdsHardware({ serialPort: e.target.value })}
+                      value={kdsHardware.serialPort}
+                      onChange={(e) => setKdsHardware({ serialPort: e.target.value })}
                       className={SELECT_CLS}
                     >
                       <option value="">- select port -</option>
@@ -469,9 +504,9 @@ const SettingsScreen: React.FC = () => {
                     </select>
                   ) : (
                     <input
-                      value={s.kdsHardware.serialPort}
+                      value={kdsHardware.serialPort}
                       placeholder="e.g. /dev/tty.usbserial-1420"
-                      onChange={(e) => s.setKdsHardware({ serialPort: e.target.value })}
+                      onChange={(e) => setKdsHardware({ serialPort: e.target.value })}
                       className={INPUT_CLS}
                     />
                   )}
@@ -479,8 +514,8 @@ const SettingsScreen: React.FC = () => {
                 <div>
                   <label className="text-xs text-pos-muted">Baud rate</label>
                   <select
-                    value={s.kdsHardware.serialBaudRate}
-                    onChange={(e) => s.setKdsHardware({ serialBaudRate: Number(e.target.value) })}
+                    value={kdsHardware.serialBaudRate}
+                    onChange={(e) => setKdsHardware({ serialBaudRate: Number(e.target.value) })}
                     className={SELECT_CLS}
                   >
                     {[9600, 19200, 38400, 115200].map((b) => (
@@ -492,14 +527,14 @@ const SettingsScreen: React.FC = () => {
                 </div>
               </div>
             )}
-            {s.kdsHardware.transport === 'network' && (
+            {kdsHardware.transport === 'network' && (
               <div className="grid grid-cols-3 gap-3">
                 <div className="col-span-2">
                   <label className="text-xs text-pos-muted">Host / IP</label>
                   <input
-                    value={s.kdsHardware.networkHost}
+                    value={kdsHardware.networkHost}
                     placeholder="e.g. 192.168.1.200"
-                    onChange={(e) => s.setKdsHardware({ networkHost: e.target.value })}
+                    onChange={(e) => setKdsHardware({ networkHost: e.target.value })}
                     className={INPUT_CLS}
                   />
                 </div>
@@ -507,8 +542,8 @@ const SettingsScreen: React.FC = () => {
                   <label className="text-xs text-pos-muted">Port</label>
                   <input
                     type="number"
-                    value={s.kdsHardware.networkPort}
-                    onChange={(e) => s.setKdsHardware({ networkPort: Number(e.target.value) })}
+                    value={kdsHardware.networkPort}
+                    onChange={(e) => setKdsHardware({ networkPort: Number(e.target.value) })}
                     className={INPUT_CLS}
                   />
                 </div>
@@ -520,10 +555,10 @@ const SettingsScreen: React.FC = () => {
         {nativeHardwareAvailable && (
           <Section title="Hardware Status">
             <HardwareHealthCheck
-              printer={s.printer}
-              kds={s.kdsHardware}
-              showCashDrawer={s.features.cashDrawer}
-              showKds={s.features.kitchenDisplay}
+              printer={printer}
+              kds={kdsHardware}
+              showCashDrawer={features.cashDrawer}
+              showKds={features.kitchenDisplay}
             />
           </Section>
         )}
@@ -559,16 +594,16 @@ const SettingsScreen: React.FC = () => {
               <input
                 type="number"
                 min={0}
-                value={s.autoLogoutMinutes}
-                onChange={(e) => s.setAutoLogoutMinutes(Number(e.target.value))}
+                value={autoLogoutMinutes}
+                onChange={(e) => setAutoLogoutMinutes(Number(e.target.value))}
                 className={INPUT_CLS}
               />
             </div>
             <label className="flex items-center gap-2 text-sm text-pos-text">
               <input
                 type="checkbox"
-                checked={s.speedMode}
-                onChange={(e) => s.setSpeedMode(e.target.checked)}
+                checked={speedMode}
+                onChange={(e) => setSpeedMode(e.target.checked)}
                 className="w-5 h-5"
               />
               Speed mode (one tap to add)
@@ -576,8 +611,8 @@ const SettingsScreen: React.FC = () => {
             <label className="flex items-center gap-2 text-sm text-pos-text">
               <input
                 type="checkbox"
-                checked={s.barMode}
-                onChange={(e) => s.setBarMode(e.target.checked)}
+                checked={barMode}
+                onChange={(e) => setBarMode(e.target.checked)}
                 className="w-5 h-5"
               />
               Bar mode UI
@@ -585,8 +620,8 @@ const SettingsScreen: React.FC = () => {
             <label className="flex items-center gap-2 text-sm text-pos-text">
               <input
                 type="checkbox"
-                checked={s.quickAccessSidebar}
-                onChange={(e) => s.setQuickAccessSidebar(e.target.checked)}
+                checked={quickAccessSidebar}
+                onChange={(e) => setQuickAccessSidebar(e.target.checked)}
                 className="w-5 h-5"
               />
               Quick access sidebar
@@ -596,7 +631,7 @@ const SettingsScreen: React.FC = () => {
 
         <button
           onClick={() => {
-            s.reset();
+            reset();
             toast.success('Settings reset to defaults');
           }}
           className="h-12 px-5 rounded-lg bg-destructive text-white font-semibold"

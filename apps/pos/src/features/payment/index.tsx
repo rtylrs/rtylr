@@ -36,17 +36,17 @@ const fmt = (n: number): string =>
 
 const Payment: React.FC = () => {
   const navigate = useNavigate();
-  const {
-    items,
-    total,
-    clearCart,
-    newOrder,
-    customerId,
-    customerName,
-    orderType,
-    tableId,
-    notes,
-  } = useCartStore();
+  // Slice selectors keep the checkout screen from re-rendering on unrelated
+  // cart writes (branchId, kitchen notes, persisted-hydration).
+  const items = useCartStore((s) => s.items);
+  const total = useCartStore((s) => s.total);
+  const clearCart = useCartStore((s) => s.clearCart);
+  const newOrder = useCartStore((s) => s.newOrder);
+  const customerId = useCartStore((s) => s.customerId);
+  const customerName = useCartStore((s) => s.customerName);
+  const orderType = useCartStore((s) => s.orderType);
+  const tableId = useCartStore((s) => s.tableId);
+  const notes = useCartStore((s) => s.notes);
   const locationId = useTerminalContextStore((s) => s.locationId);
   // Stable local reference for the QR panel - regenerating it per render
   // would change the QR code under the customer's camera.
@@ -58,6 +58,7 @@ const Payment: React.FC = () => {
   const tablesEnabled = useSettingsStore((s) => s.features.tables);
   const cashDrawerEnabled = useSettingsStore((s) => s.features.cashDrawer);
   const enqueueOffline = useOfflineQueueStore((s) => s.enqueue);
+  const setServerOrderId = useCartStore((s) => s.setServerOrderId);
   const addReceipt = useReceiptsStore((s) => s.add);
   const recordCashSale = useCashDrawerStore((s) => s.recordCashSale);
   const [method, setMethod] = useState<CheckoutPaymentMethod>('card');
@@ -109,6 +110,7 @@ const Payment: React.FC = () => {
         },
         enqueueOffline,
         recordCashSale,
+        onOrderCreated: setServerOrderId,
       });
 
       const isCash = method === 'cash';
@@ -131,11 +133,16 @@ const Payment: React.FC = () => {
           customerId,
           orderId: result.orderId,
           totalAmount: grandTotal,
-        }).then((earn) => {
-          if (earn && earn.earned > 0) {
-            toast.success(`+${earn.earned} loyalty points earned`);
-          }
-        });
+        })
+          .then((earn) => {
+            if (earn && earn.earned > 0) {
+              toast.success(`+${earn.earned} loyalty points earned`);
+            }
+          })
+          .catch(() => {
+            // Points are non-critical; never surface an unhandled rejection
+            // after a successful checkout.
+          });
       }
 
       // Print receipt + open drawer via configured hardware

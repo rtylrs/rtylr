@@ -15,7 +15,5 @@
   "saveFailed": "تعذّر حفظ إعدادات الخادم",
   "sectionTitle": "الخادم",
   "currentHosted": "متصل بـ rtylr المستضاف.",
-  "currentSelfHost": "متصل بخادم مخصص: {{url}}",
-  "switchToHosted": "التبديل إلى rtylr المستضاف",
-  "mode": "الخلفية"
+  "currentSelfHost": "متصل بخادم مخصص: {{url}}"
 }

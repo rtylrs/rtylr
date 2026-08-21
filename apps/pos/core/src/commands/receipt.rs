@@ -19,7 +19,7 @@ pub struct PrinterConfig {
     pub port: Option<u32>,
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn print_receipt(config: PrinterConfig, receipt: ReceiptData) -> Result<String, String> {
     validate_receipt(&receipt)?;
     let data = build_receipt(&receipt);
@@ -34,7 +34,10 @@ pub fn print_receipt(config: PrinterConfig, receipt: ReceiptData) -> Result<Stri
         "network" => {
             let host = validate_host(&config.target)?;
             let raw_port = config.port.unwrap_or(9100);
-            let port = validate_port(raw_port as u16)?;
+            // u32 -> u16 truncation silently corrupted ports like 74636 into 9100.
+            let port = validate_port(u16::try_from(raw_port).map_err(|_| {
+                format!("Network port {} is out of range", raw_port)
+            })?)?;
             network::write_all(&host, port, 8, &data)?;
             Ok(format!("Receipt sent to network {}:{}", host, port))
         }

@@ -39,6 +39,8 @@ export async function printReceiptAndOpenDrawer(
 
   // Print (and embedded drawer kick for serial/network)
   const result = await printReceipt(transport, receiptData);
+  // 'skipped' (browser POS) is not a successful print, but it must not
+  // block checkout either - only failures do.
   if (result.status === 'failed') {
     return { kind: 'print_failed', error: result.error };
   }

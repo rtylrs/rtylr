@@ -6,6 +6,7 @@ interface BuildDiscountRequestParams {
   orderId: string | undefined;
   mode: DiscountMode;
   valueInput: string;
+  reason?: string;
 }
 
 interface DiscountRequest {
@@ -23,13 +24,19 @@ function discountValue(mode: DiscountMode, valueInput: string): number {
   if (!Number.isFinite(value) || value <= 0) {
     throw new Error('Enter a discount greater than zero.');
   }
-  return mode === 'percent' ? Math.min(100, value) : value;
+  // A typo like "150" must be rejected outright, never silently turned into
+  // a free order.
+  if (mode === 'percent' && value > 100) {
+    throw new Error('Percent discounts cannot exceed 100%.');
+  }
+  return value;
 }
 
 export function buildDiscountRequest({
   orderId,
   mode,
   valueInput,
+  reason = '',
 }: BuildDiscountRequestParams): DiscountRequest {
   const normalizedOrderId = positiveInteger(orderId);
   if (!normalizedOrderId) {
@@ -41,7 +48,7 @@ export function buildDiscountRequest({
       orderId: String(normalizedOrderId),
       discountType: mode,
       discountValue: discountValue(mode, valueInput),
-      reason: '',
+      reason: reason.trim(),
     },
   };
 }

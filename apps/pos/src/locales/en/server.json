@@ -15,7 +15,5 @@
   "saveFailed": "Could not save server settings",
   "sectionTitle": "Server",
   "currentHosted": "Connected to hosted rtylr.",
-  "currentSelfHost": "Connected to custom server: {{url}}",
-  "switchToHosted": "Switch to hosted rtylr",
-  "mode": "Backend"
+  "currentSelfHost": "Connected to custom server: {{url}}"
 }

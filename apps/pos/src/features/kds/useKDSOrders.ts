@@ -1,5 +1,5 @@
 import { createOneKitClient } from '@voxire/api';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { KDSServiceClient } from '@voxire/voxie/pos/kds/v1/client';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useKdsStream } from './useKdsStream';
@@ -30,12 +30,19 @@ export function useKDSOrders(station?: string) {
   const [orders, setOrders] = useState<KDSOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const ordersRef = useRef<KDSOrder[]>([]);
+
+  useEffect(() => {
+    ordersRef.current = orders;
+  }, [orders]);
 
   const rawUserId = useUserStore((s) => s.userId);
   const ownerID = rawUserId != null ? parsePositiveInteger(rawUserId) : undefined;
 
-  const load = useCallback(async (): Promise<void> => {
-    setLoading(true);
+  const load = useCallback(async (options?: { silent?: boolean }): Promise<void> => {
+    // Silent reloads (realtime pings) keep the current tickets on screen
+    // instead of flashing the skeleton grid on a busy kitchen line.
+    if (!options?.silent) setLoading(true);
     setError(null);
     try {
       const res = await kdsClient.listKDSOrders({});
@@ -61,7 +68,7 @@ export function useKDSOrders(station?: string) {
       setError(err?.response?.data?.message ?? err?.message ?? 'Failed to load KDS orders');
       setOrders([]);
     } finally {
-      setLoading(false);
+      if (!options?.silent) setLoading(false);
     }
   }, [station]);
 
@@ -69,29 +76,37 @@ export function useKDSOrders(station?: string) {
     void load();
   }, [load]);
 
-  useKdsStream(ownerID, load);
+  useKdsStream(ownerID, () => void load({ silent: true }));
 
-  const setStatus = async (id: string, status: KDSOrder['status']): Promise<void> => {
-    const order = orders.find((item) => item.id === id);
-    const itemUpdates = order?.items.filter((item) => parsePositiveInteger(item.id));
-    if (!order || !itemUpdates || itemUpdates.length === 0) {
-      return;
-    }
-    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
-    try {
-      await Promise.all(
-        itemUpdates.map((item) =>
-          kdsClient.updateKDSItemStatus({
-            orderId: item.orderId || order.id,
-            itemId: item.id,
-            body: { status },
-          }),
-        ),
-      );
-    } catch {
-      // leave local state updated; real sync handled by reload
-    }
-  };
+  const setStatus = useCallback(
+    async (id: string, status: KDSOrder['status']): Promise<void> => {
+      // Read the latest committed orders from the ref, not a render closure,
+      // so the callback identity stays stable across 1s tick re-renders.
+      const order = ordersRef.current.find((item) => item.id === id);
+      const itemUpdates = order?.items.filter((item) => parsePositiveInteger(item.id));
+      if (!order || !itemUpdates || itemUpdates.length === 0) {
+        return;
+      }
+      setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
+      try {
+        await Promise.all(
+          itemUpdates.map((item) =>
+            kdsClient.updateKDSItemStatus({
+              orderId: item.orderId || order.id,
+              itemId: item.id,
+              body: { status },
+            }),
+          ),
+        );
+      } catch {
+        // Optimistic update failed: revert and surface the failure so staff
+        // are not left looking at a ticket state the server never accepted.
+        setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status: order.status } : o)));
+        setError('Could not update ticket status. Please try again.');
+      }
+    },
+    [],
+  );
 
   return { orders, loading, error, reload: load, setStatus };
 }

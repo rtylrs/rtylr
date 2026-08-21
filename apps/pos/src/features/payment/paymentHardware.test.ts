@@ -72,8 +72,8 @@ beforeEach(() => {
 
 describe('printReceiptAndOpenDrawer - Windows transport', () => {
   it('prints then kicks drawer via Windows spooler and returns ok', async () => {
-    vi.mocked(printReceipt).mockResolvedValue({ status: 'ok' });
-    vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'ok' });
+    vi.mocked(printReceipt).mockResolvedValue({ status: 'printed', message: 'receipt printed' });
+    vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'opened' });
 
     const result = await printReceiptAndOpenDrawer({
       ...baseParams,
@@ -98,7 +98,7 @@ describe('printReceiptAndOpenDrawer - Windows transport', () => {
   });
 
   it('returns drawer_failed when drawer kick fails after successful print', async () => {
-    vi.mocked(printReceipt).mockResolvedValue({ status: 'ok' });
+    vi.mocked(printReceipt).mockResolvedValue({ status: 'printed', message: 'receipt printed' });
     vi.mocked(openConfiguredCashDrawer).mockResolvedValue({
       status: 'failed',
       error: 'access denied',
@@ -113,7 +113,7 @@ describe('printReceiptAndOpenDrawer - Windows transport', () => {
   });
 
   it('skips drawer kick when kickDrawer=false', async () => {
-    vi.mocked(printReceipt).mockResolvedValue({ status: 'ok' });
+    vi.mocked(printReceipt).mockResolvedValue({ status: 'printed', message: 'receipt printed' });
 
     const result = await printReceiptAndOpenDrawer({
       ...baseParams,
@@ -128,7 +128,7 @@ describe('printReceiptAndOpenDrawer - Windows transport', () => {
 
 describe('printReceiptAndOpenDrawer - Serial transport', () => {
   it('embeds drawer kick in ESC/POS stream (no separate drawer call)', async () => {
-    vi.mocked(printReceipt).mockResolvedValue({ status: 'ok' });
+    vi.mocked(printReceipt).mockResolvedValue({ status: 'printed', message: 'receipt printed' });
 
     const result = await printReceiptAndOpenDrawer({
       ...baseParams,
@@ -146,7 +146,7 @@ describe('printReceiptAndOpenDrawer - Serial transport', () => {
 
 describe('printReceiptAndOpenDrawer - Network transport', () => {
   it('embeds drawer kick in ESC/POS stream over TCP', async () => {
-    vi.mocked(printReceipt).mockResolvedValue({ status: 'ok' });
+    vi.mocked(printReceipt).mockResolvedValue({ status: 'printed', message: 'receipt printed' });
 
     const result = await printReceiptAndOpenDrawer({
       ...baseParams,
@@ -172,21 +172,21 @@ describe('openDrawer', () => {
   });
 
   it('uses Windows spooler for windows transport', async () => {
-    vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'ok' });
+    vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'opened' });
     const result = await openDrawer(makePrinter({ transport: 'windows' }));
     expect(result).toEqual({ kind: 'ok' });
     expect(openConfiguredCashDrawer).toHaveBeenCalledOnce();
   });
 
   it('uses serial for serial transport', async () => {
-    vi.mocked(openDrawerSerial).mockResolvedValue({ status: 'ok' });
+    vi.mocked(openDrawerSerial).mockResolvedValue({ status: 'opened', via: 'serial' });
     const result = await openDrawer(makePrinter({ transport: 'serial', serialPort: 'COM3' }));
     expect(result).toEqual({ kind: 'ok' });
     expect(openDrawerSerial).toHaveBeenCalledWith('COM3', 9600, 2);
   });
 
   it('uses network for network transport', async () => {
-    vi.mocked(openDrawerNetwork).mockResolvedValue({ status: 'ok' });
+    vi.mocked(openDrawerNetwork).mockResolvedValue({ status: 'opened', via: 'network' });
     const result = await openDrawer(
       makePrinter({ transport: 'network', networkHost: '10.0.0.1', networkPort: 9100 }),
     );

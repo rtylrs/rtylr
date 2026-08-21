@@ -45,15 +45,11 @@ pub fn probe_zpl_protocol(stream: &mut std::net::TcpStream) -> bool {
     buf[0] == 0x02 || buf[0] == b'N'
 }
 
-/// Probe an Epson ePOS-Print HTTP endpoint (port 8008/8043).
-/// Returns `true` when the device answers with HTTP 200 or 400 - either
-/// confirms an ePOS HTTP server is present.
-pub fn probe_epos_http(host: &str, port: u16) -> bool {
-    let addr_str = format!("{}:{}", host, port);
-    let Ok(addr) = addr_str.parse::<std::net::SocketAddr>() else { return false; };
-    let Ok(mut stream) = std::net::TcpStream::connect_timeout(&addr, Duration::from_secs(2)) else {
-        return false;
-    };
+/// Probe an Epson ePOS-Print HTTP endpoint (port 8008/8043) over an
+/// already-connected stream, so health checks can reuse the connection
+/// opened by `probe_connect`. Returns `true` when the device answers with
+/// HTTP 2xx or 4xx - either confirms an ePOS HTTP server is present.
+pub fn probe_epos_http_on(stream: &mut std::net::TcpStream, host: &str, port: u16) -> bool {
     stream.set_write_timeout(Some(Duration::from_millis(500))).ok();
     stream.set_read_timeout(Some(Duration::from_millis(800))).ok();
 
@@ -67,11 +63,24 @@ pub fn probe_epos_http(host: &str, port: u16) -> bool {
 
     let mut buf = [0u8; 128];
     let n = stream.read(&mut buf).unwrap_or(0);
-    if n < 7 {
-        return false;
+    let Some(status) = parse_http_status(&buf[..n]) else { return false; };
+    // Only the status CODE decides - substring matching matched digits in
+    // headers/dates and reported HTTP 500s as confirmed printers.
+    status == 2 || status == 4
+}
+
+/// Parse the three-digit status code out of an HTTP/1.x response's first
+/// line. Returns its leading digit (2 for 2xx, 4 for 4xx, ...).
+fn parse_http_status(resp: &[u8]) -> Option<u8> {
+    if !resp.starts_with(b"HTTP/1") {
+        return None;
     }
-    let resp = &buf[..n];
-    resp.starts_with(b"HTTP/1") && (resp.contains(&b'2') || resp.contains(&b'4'))
+    // "HTTP/1.x NNN ..." - the status code starts at byte offset 9.
+    let code = resp.get(9..12)?;
+    if !code.iter().all(|b| b.is_ascii_digit()) {
+        return None;
+    }
+    Some(code[0] - b'0')
 }
 
 /// Map a well-known TCP port to its expected device type label.
@@ -171,7 +180,9 @@ mod tests {
         });
 
         std::thread::sleep(Duration::from_millis(10));
-        assert!(probe_epos_http("127.0.0.1", port));
+        let addr: std::net::SocketAddr = format!("127.0.0.1:{}", port).parse().unwrap();
+        let mut stream = std::net::TcpStream::connect_timeout(&addr, Duration::from_secs(2)).expect("connect");
+        assert!(probe_epos_http_on(&mut stream, "127.0.0.1", port));
     }
 
     #[test]
@@ -182,7 +193,9 @@ mod tests {
         thread::spawn(move || { let _ = listener.accept(); });
 
         std::thread::sleep(Duration::from_millis(10));
-        assert!(!probe_epos_http("127.0.0.1", port));
+        let addr: std::net::SocketAddr = format!("127.0.0.1:{}", port).parse().unwrap();
+        let mut stream = std::net::TcpStream::connect_timeout(&addr, Duration::from_secs(2)).expect("connect");
+        assert!(!probe_epos_http_on(&mut stream, "127.0.0.1", port));
     }
 
     #[test] fn port_9100_infers_thermal_escpos() { assert_eq!(infer_tcp_device_type(9100), "thermal_escpos"); }

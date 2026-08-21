@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { AlertTriangle, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
@@ -22,21 +22,29 @@ const MenuItemsScreen: React.FC = () => {
   const catalogLabel = businessProfile === 'retail' ? 'Products' : 'Menu Items';
   const catalogSearchLabel = businessProfile === 'retail' ? 'products' : 'menu';
 
-  const filtered = items.filter((it) => {
-    const matchesCat = category === 'All' || it.category === category;
-    const matchesSearch = !search || (it.name ?? '').toLowerCase().includes(search.toLowerCase());
-    return matchesCat && matchesSearch;
-  });
+  const searchTerm = search.trim().toLowerCase();
+  const filtered = useMemo(
+    () =>
+      items.filter((it) => {
+        const matchesCat = category === 'All' || it.category === category;
+        const matchesSearch = !searchTerm || (it.name ?? '').toLowerCase().includes(searchTerm);
+        return matchesCat && matchesSearch;
+      }),
+    [items, category, searchTerm]
+  );
 
-  const quickAdd = (item: MenuItem) => {
-    try {
-      addItem(buildMenuItemCartProduct(item));
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : `Failed to add ${catalogSearchLabel}`);
-      return;
-    }
-    toast.success(`Added ${item.name}`);
-  };
+  const quickAdd = useCallback(
+    (item: MenuItem) => {
+      try {
+        addItem(buildMenuItemCartProduct(item));
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : `Failed to add ${catalogSearchLabel}`);
+        return;
+      }
+      toast.success(`Added ${item.name}`);
+    },
+    [addItem, catalogSearchLabel]
+  );
 
   return (
     <ScreenLayout

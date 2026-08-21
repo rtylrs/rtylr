@@ -18,8 +18,18 @@ function giftCardFromServer(card: ServerGiftCard): GiftCard {
   };
 }
 
+export interface RedeemResult {
+  ok: boolean;
+  remaining?: number;
+  error?: string;
+}
+
 export function useGiftCards() {
-  const store = useGiftCardStore();
+  // Slice selectors: the hook must not re-render on unrelated store writes.
+  const cards = useGiftCardStore((s) => s.cards);
+  const issue = useGiftCardStore((s) => s.issue);
+  const addBalance = useGiftCardStore((s) => s.addBalance);
+  const deactivate = useGiftCardStore((s) => s.deactivate);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,15 +62,49 @@ export function useGiftCards() {
     }
   }, []);
 
+  // Server-authoritative redemption: stored value must never be mutated
+  // locally only, or balances resurrect on refresh and other terminals never
+  // see the redemption. Fails closed - no local mutation on any error.
+  const redeemCard = useCallback(async (code: string, amountInput: string): Promise<RedeemResult> => {
+    const normalizedCode = code.trim();
+    const amount = Number(amountInput);
+    if (!normalizedCode) return { ok: false, error: 'Enter a gift card code' };
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return { ok: false, error: 'Redeem amount must be greater than zero' };
+    }
+
+    try {
+      const res = await giftCardClient.redeemGiftCard({ code: normalizedCode, amount });
+      if (res.giftCard) {
+        const redeemed = giftCardFromServer(res.giftCard);
+        useGiftCardStore.getState().setCards(
+          useGiftCardStore
+            .getState()
+            .cards.map((c) => (c.code === redeemed.code ? { ...redeemed, id: c.id } : c))
+        );
+        return { ok: true, remaining: redeemed.balance };
+      }
+      return { ok: false, error: res.message ?? 'Redemption failed' };
+    } catch (error) {
+      return {
+        ok: false,
+        error:
+          error instanceof Error && error.message.includes('status')
+            ? `Server refused redemption (${error.message.split(':').pop()?.trim() || 'error'})`
+            : 'Redemption failed. Check your connection and try again.',
+      };
+    }
+  }, []);
+
   return {
-    cards: store.cards,
+    cards,
     loading,
     error,
     refresh,
-    issue: store.issue,
-    redeem: store.redeem,
+    issue,
+    redeem: redeemCard,
     checkBalance,
-    addBalance: store.addBalance,
-    deactivate: store.deactivate,
+    addBalance,
+    deactivate,
   };
 }

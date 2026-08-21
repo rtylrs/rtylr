@@ -9,7 +9,20 @@ describe('useAutoLogout', () => {
     vi.useFakeTimers();
     useSettingsStore.setState({ autoLogoutMinutes: 1 });
     useEmployeeSessionStore.setState({
-      employee: { id: '1', name: 'Alice', role: 'cashier' },
+      employee: {
+        id: '1',
+        posUserId: '1',
+        locationId: 1,
+        name: 'Alice',
+        role: 'cashier',
+        capabilities: {
+          canVoid: false,
+          canRefund: false,
+          canOpenDrawer: true,
+          canApplyDiscount: true,
+          maxDiscountPct: 10,
+        },
+      },
       isActive: true,
       loading: false,
       error: null,

@@ -21,7 +21,8 @@ const STATUS_COLORS: Record<TableStatus, string> = {
   dirty: 'bg-red-500/15 border-red-500/30 text-red-300',
 };
 
-const TableCard: React.FC<TableCardProps> = ({
+// Memoized grid tile so floor-plan re-renders skip unchanged tables.
+const TableCard = React.memo<TableCardProps>(function TableCard({
   number,
   seats,
   status,
@@ -29,7 +30,7 @@ const TableCard: React.FC<TableCardProps> = ({
   total,
   server,
   onClick,
-}) => {
+}) {
   return (
     <button
       onClick={onClick}
@@ -50,6 +51,6 @@ const TableCard: React.FC<TableCardProps> = ({
       </div>
     </button>
   );
-};
+});
 
 export default TableCard;

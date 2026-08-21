@@ -33,10 +33,20 @@ const QrPayPanel: React.FC<QrPayPanelProps> = ({ orderId, amount, onConfirmed })
     }
   }, [paymentUrl]);
 
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (copyTimer.current !== null) clearTimeout(copyTimer.current);
+    },
+    []
+  );
+
   const copyLink = async () => {
     await navigator.clipboard.writeText(url).catch(() => undefined);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (copyTimer.current !== null) clearTimeout(copyTimer.current);
+    copyTimer.current = setTimeout(() => setCopied(false), 2000);
   };
 
   return (

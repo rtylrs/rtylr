@@ -33,6 +33,11 @@ function positiveInteger(value: number): number {
   return Math.floor(value);
 }
 
+// Full receipt payloads persisted to one localStorage value: without a cap a
+// long-lived terminal accumulates thousands of receipts and every write
+// re-serializes the whole history.
+const MAX_PERSISTED_RECEIPTS = 200;
+
 function normalizeReceipt(receipt: Receipt): Receipt | null {
   const id = requiredText(receipt.id);
   const orderId = requiredText(receipt.orderId);
@@ -65,7 +70,9 @@ export const useReceiptsStore = create<ReceiptsState & ReceiptsActions>()(
       add: (receipt) => {
         const normalized = normalizeReceipt(receipt);
         if (!normalized) return;
-        set((s) => ({ receipts: [normalized, ...s.receipts] }));
+        set((s) => ({
+          receipts: [normalized, ...s.receipts].slice(0, MAX_PERSISTED_RECEIPTS),
+        }));
       },
       markEmailed: (id) =>
         set((s) => ({

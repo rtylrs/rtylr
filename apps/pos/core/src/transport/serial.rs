@@ -12,6 +12,11 @@ pub fn write_all(port_name: &str, baud: u32, timeout_ms: u64, data: &[u8]) -> Re
     port.write_all(data)
         .map_err(|e| format!("Serial write to '{}' failed: {}", port_name, e))?;
 
+    // Some USB-serial adapters buffer internally; without an explicit flush
+    // the fd can close before the bytes reach the device.
+    port.flush()
+        .map_err(|e| format!("Serial flush on '{}' failed: {}", port_name, e))?;
+
     Ok(())
 }
 

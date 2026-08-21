@@ -56,11 +56,11 @@ describe('local held order → cart restore', () => {
 describe('server held orders → generated row → resume', () => {
   it('buildServerHeldOrderResume creates cart products from synced items', () => {
     const serverOrder = {
-      id: 22,
+      id: '22',
       orderNumber: '1001',
       total: 20,
       createdAt: '2026-05-13T12:00:00.000Z',
-      items: [{ menuItemId: 5, name: 'Burger', quantity: 2, unitPrice: 10 }],
+      items: [{ menuItemId: '5', name: 'Burger', quantity: 2, unitPrice: 10 }],
     };
 
     const { orderId, products } = buildServerHeldOrderResume(serverOrder);
@@ -73,7 +73,7 @@ describe('server held orders → generated row → resume', () => {
 
   it('rejects server held orders with missing menu item ids', () => {
     const serverOrder = {
-      id: 22,
+      id: '22',
       orderNumber: '1001',
       total: 20,
       createdAt: '2026-05-13T12:00:00.000Z',

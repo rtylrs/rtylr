@@ -57,7 +57,7 @@ describe('discount → checkout chain', () => {
       order,
       payload,
       method: 'cash',
-      createOrder: vi.fn(() => Promise.resolve({ orderId: 200 })),
+      createOrder: vi.fn(() => Promise.resolve({ orderId: '200' })),
       chargeOrder,
       enqueueOffline: vi.fn(),
       recordCashSale: vi.fn(),
@@ -69,9 +69,10 @@ describe('discount → checkout chain', () => {
     );
   });
 
-  it('percent discount is capped at 100% maximum', () => {
-    const discount = buildDiscountRequest({ orderId: '99', mode: 'percent', valueInput: '150' });
-    expect(discount.payload.discountValue).toBe(100);
+  it('percent discounts above 100% are rejected, not clamped', () => {
+    expect(() =>
+      buildDiscountRequest({ orderId: '99', mode: 'percent', valueInput: '150' }),
+    ).toThrow('Percent discounts cannot exceed 100%.');
   });
 
   it('zero discount value is rejected before checkout', () => {
@@ -108,7 +109,7 @@ describe('discount → checkout chain', () => {
       order,
       payload,
       method: 'card',
-      createOrder: vi.fn(() => Promise.resolve({ orderId: 201 })),
+      createOrder: vi.fn(() => Promise.resolve({ orderId: '201' })),
       chargeOrder,
       enqueueOffline: vi.fn(),
       recordCashSale: vi.fn(),

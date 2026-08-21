@@ -13,15 +13,15 @@ beforeEach(() => {
 describe('syncPendingSessionCloses', () => {
   it('syncs only pending queued session closes from the store', async () => {
     const first = useSessionCloseQueueStore.getState().enqueue({
-      sessionId: 'current',
+      sessionId: 42,
+      closingFloat: 95,
       expected: 100,
-      actual: 95,
       variance: -5,
     });
     const failed = useSessionCloseQueueStore.getState().enqueue({
-      sessionId: 'current',
+      sessionId: 87,
+      closingFloat: 200,
       expected: 200,
-      actual: 200,
       variance: 0,
     });
     useSessionCloseQueueStore.getState().markFailed(failed.id, 'previous failure');
@@ -41,15 +41,15 @@ describe('syncPendingSessionCloses', () => {
 describe('syncAllSessionCloses', () => {
   it('syncs failed and pending queued session closes from the store', async () => {
     const pending = useSessionCloseQueueStore.getState().enqueue({
-      sessionId: 'current',
+      sessionId: 42,
+      closingFloat: 95,
       expected: 100,
-      actual: 95,
       variance: -5,
     });
     const failed = useSessionCloseQueueStore.getState().enqueue({
-      sessionId: 'current',
+      sessionId: 87,
+      closingFloat: 200,
       expected: 200,
-      actual: 200,
       variance: 0,
     });
     useSessionCloseQueueStore.getState().markFailed(failed.id, 'previous failure');
@@ -68,16 +68,16 @@ describe('syncAllSessionCloses', () => {
 describe('retrySessionClose', () => {
   it('retries a single queued session close by id', async () => {
     const failed = useSessionCloseQueueStore.getState().enqueue({
-      sessionId: 'current',
+      sessionId: 42,
+      closingFloat: 95,
       expected: 100,
-      actual: 95,
       variance: -5,
     });
     useSessionCloseQueueStore.getState().markFailed(failed.id, 'previous failure');
     const other = useSessionCloseQueueStore.getState().enqueue({
-      sessionId: 'current',
+      sessionId: 87,
+      closingFloat: 200,
       expected: 200,
-      actual: 200,
       variance: 0,
     });
 

@@ -3,27 +3,28 @@ import { isPosEvent, KDS_EVENT_TYPES } from './realtimeEvents';
 
 describe('isPosEvent', () => {
   it('returns true when the event type matches', () => {
-    const event = { type: 'pos:order:paid', payload: {} };
+    const event = { topic: 'owner:1', type: 'pos:order:paid' };
     expect(isPosEvent(event, 'pos:order:paid')).toBe(true);
   });
 
   it('returns false when the event type does not match', () => {
-    const event = { type: 'pos:order:created', payload: {} };
+    const event = { topic: 'owner:1', type: 'pos:order:created' };
     expect(isPosEvent(event, 'pos:order:paid')).toBe(false);
   });
 
   it('returns false for an unrelated event type', () => {
-    const event = { type: 'some:other:event' };
+    const event = { topic: 'owner:1', type: 'some:other:event' };
     expect(isPosEvent(event, 'pos:order:created')).toBe(false);
   });
 
-  it('acts as a type guard (narrows the type)', () => {
-    const events: { type: string; payload?: unknown }[] = [
-      { type: 'pos:order:created', payload: { orderId: 1, orderNumber: 'ORD-1', locationId: 2, tableId: null, status: 'open', total: 20, createdAt: '2024-01-01T00:00:00Z' } },
-      { type: 'pos:order:paid', payload: {} },
+  it('filters a mixed event list to the requested type', () => {
+    const events = [
+      { topic: 'owner:1', type: 'pos:order:created', entity_id: 1 },
+      { topic: 'owner:1', type: 'pos:order:paid', entity_id: 2 },
     ];
     const created = events.filter((e) => isPosEvent(e, 'pos:order:created'));
     expect(created).toHaveLength(1);
+    expect(created[0]?.entity_id).toBe(1);
   });
 });
 

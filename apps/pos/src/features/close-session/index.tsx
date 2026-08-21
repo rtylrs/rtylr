@@ -1,6 +1,6 @@
 import { createOneKitClient } from '@voxire/api';
 import { SessionServiceClient } from '@voxire/voxie/pos/session/v1/client';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
@@ -15,7 +15,10 @@ const sessionClient = createOneKitClient(SessionServiceClient, 'pos');
 const CloseSessionScreen: React.FC = () => {
   const navigate = useNavigate();
   const { summary } = useDaySummary();
-  const expected = useCashDrawerStore((s) => s.expectedCash());
+  const movements = useCashDrawerStore((s) => s.movements);
+  const openingFloat = useCashDrawerStore((s) => s.openingFloat);
+  const expectedCashFn = useCashDrawerStore((s) => s.expectedCash);
+  const expectedCash = useMemo(() => expectedCashFn(), [expectedCashFn, movements, openingFloat]);
   const closeDrawer = useCashDrawerStore((s) => s.closeDrawer);
   const enqueueSessionClose = useSessionCloseQueueStore((s) => s.enqueue);
   const [actualCash, setActualCash] = useState('');
@@ -24,11 +27,11 @@ const CloseSessionScreen: React.FC = () => {
   let variance = 0;
   try {
     variance = buildCloseSessionPayload({
-      expected,
+      expected: expectedCash,
       actualInput: actualCash || '0',
     }).variance;
   } catch {
-    variance = -expected;
+    variance = -expectedCash;
   }
 
   const close = async () => {
@@ -36,7 +39,7 @@ const CloseSessionScreen: React.FC = () => {
     try {
       const result = await closeSessionWithFallback({
         payload: buildCloseSessionPayload({
-          expected,
+          expected: expectedCash,
           actualInput: actualCash,
         }),
         closeSession: async (payload) => {
@@ -64,7 +67,7 @@ const CloseSessionScreen: React.FC = () => {
         <div className="rounded-xl bg-pos-card border border-pos-border p-4 space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-pos-muted">Expected cash in drawer</span>
-            <span className="text-pos-text font-semibold">{formatCurrency(expected)}</span>
+            <span className="text-pos-text font-semibold">{formatCurrency(expectedCash)}</span>
           </div>
           {summary && (
             <>

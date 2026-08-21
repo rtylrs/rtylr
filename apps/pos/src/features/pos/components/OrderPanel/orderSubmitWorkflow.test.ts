@@ -65,7 +65,7 @@ describe('orderSubmitWorkflow', () => {
   });
 
   it('extracts positive integer order IDs from create responses', () => {
-    expect(extractCreatedOrderId({ orderId: 10 })).toBe(10);
+    expect(extractCreatedOrderId({ orderId: '10' })).toBe(10);
     expect(extractCreatedOrderId({ orderId: '11' })).toBe(11);
   });
 

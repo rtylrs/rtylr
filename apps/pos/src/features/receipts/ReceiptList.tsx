@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Calculator, Pointer } from 'lucide-react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
@@ -17,11 +17,16 @@ const ReceiptsScreen: React.FC = () => {
   const [selected, setSelected] = useState<Receipt | null>(null);
   const [emailInput, setEmailInput] = useState('');
 
-  const filtered = receipts.filter(
-    (r) =>
-      !search ||
-      r.orderId.toLowerCase().includes(search.toLowerCase()) ||
-      (r.customerName ?? '').toLowerCase().includes(search.toLowerCase())
+  const searchTerm = search.trim().toLowerCase();
+  const filtered = useMemo(
+    () =>
+      receipts.filter(
+        (r) =>
+          !searchTerm ||
+          r.orderId.toLowerCase().includes(searchTerm) ||
+          (r.customerName ?? '').toLowerCase().includes(searchTerm)
+      ),
+    [receipts, searchTerm]
   );
 
   const send = async (id: string) => {

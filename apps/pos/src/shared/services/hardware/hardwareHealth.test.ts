@@ -14,13 +14,15 @@ vi.mock('../../utils/platform', () => ({
 
 describe('hardwareHealth', () => {
   const mockPrinterSettings: PrinterSettings = {
+    name: 'Thermal Printer',
+    copies: 1,
+    cashDrawerKick: true,
+    drawerPin: 2,
     transport: 'serial',
     serialPort: 'COM3',
     serialBaudRate: 9600,
     networkHost: '',
     networkPort: 9100,
-    name: 'Thermal Printer',
-    paperWidth: '80mm',
   };
 
   const mockKdsSettings: KdsHardwareSettings = {

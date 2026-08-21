@@ -1,5 +1,5 @@
 import { createOneKitClient } from '@voxire/api';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Package, Store } from 'lucide-react';
 import { toast } from 'sonner';
 import { AccessServiceClient } from '@voxire/voxie/pos/access/v1/client';
@@ -144,7 +144,7 @@ function ActionModal({
 }
 
 const InventoryScreen: React.FC = () => {
-  const { locationId } = useTerminalContextStore();
+  const locationId = useTerminalContextStore((s) => s.locationId);
   const employee = useEmployeeSessionStore((s) => s.employee);
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [lowStock, setLowStock] = useState<InventoryItem[]>([]);
@@ -224,22 +224,26 @@ const InventoryScreen: React.FC = () => {
       toast.success(`${ACTION_LABELS[action]} recorded`);
       void load();
     } catch (err) {
+      // The toast informs the user; rethrowing turned every failed submit
+      // into an unhandled promise rejection from the modal's onClick.
       toast.error(err instanceof Error ? err.message : 'Action failed');
-      throw err;
     }
   };
 
-  const filtered = items.filter((it) => {
-    const term = search.trim().toLowerCase();
-    return (
-      !term ||
-      it.name.toLowerCase().includes(term) ||
-      (it.sku ? it.sku.toLowerCase().includes(term) : false)
-    );
-  });
+  const term = search.trim().toLowerCase();
+  const filtered = useMemo(
+    () =>
+      items.filter(
+        (it) =>
+          !term ||
+          it.name.toLowerCase().includes(term) ||
+          (it.sku ? it.sku.toLowerCase().includes(term) : false)
+      ),
+    [items, term]
+  );
 
-  const lowStockIds = new Set(lowStock.map((l) => l.itemId));
-  const lowStockSummary = summarizeLowStockItems(lowStock);
+  const lowStockIds = useMemo(() => new Set(lowStock.map((l) => l.itemId)), [lowStock]);
+  const lowStockSummary = useMemo(() => summarizeLowStockItems(lowStock), [lowStock]);
   const hasTransferDestinations = locations.some((location) => location.id !== branchId);
 
   return (

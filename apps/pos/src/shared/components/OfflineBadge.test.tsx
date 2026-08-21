@@ -19,15 +19,9 @@ describe('OfflineBadge', () => {
         {
           id: 'oq_1',
           order: {
-            id: 'order-1',
-            status: 'paid',
+            type: 'dine_in',
+            paymentMethod: 'cash',
             items: [],
-            subtotal: 10,
-            tax: 0,
-            tip: 0,
-            discount: 0,
-            total: 10,
-            createdAt: '2026-05-06T00:00:00.000Z',
           },
           queuedAt: '2026-05-06T00:00:00.000Z',
           retries: 0,
@@ -36,14 +30,14 @@ describe('OfflineBadge', () => {
       ],
     });
     useSessionCloseQueueStore.getState().enqueue({
-      sessionId: 'current',
+      sessionId: 42,
+      closingFloat: 95,
       expected: 100,
-      actual: 95,
       variance: -5,
     });
     useCashMovementQueueStore.getState().enqueue({
       action: 'drop',
-      payload: { amount: 25, reason: 'Safe deposit' },
+      payload: { branch_id: 1, session_id: 0, employee_id: 1, amount: 25, reason: 'Safe deposit' },
     });
 
     render(<OfflineBadge />);

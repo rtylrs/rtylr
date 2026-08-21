@@ -37,7 +37,7 @@ pub fn format_ticket_text(ticket: &KdsTicket) -> String {
     if let Some(ref ot) = ticket.order_type {
         let table = ticket.table_number.as_deref().unwrap_or("");
         let line = if table.is_empty() {
-            ot.clone()
+            ot.to_string()
         } else {
             format!("{} | TABLE {}", ot, table)
         };
@@ -46,7 +46,12 @@ pub fn format_ticket_text(ticket: &KdsTicket) -> String {
     }
 
     if let Some(ref ts) = ticket.created_at {
-        let time_part = ts.find('T').map(|i| &ts[i + 1..i + 6]).unwrap_or("");
+        // Slice defensively: a short or non-ASCII timestamp from the frontend
+        // must not panic the command (slicing could land mid-UTF-8 char).
+        let time_part = ts
+            .find('T')
+            .and_then(|i| ts.get(i + 1..(i + 6).min(ts.len())))
+            .unwrap_or("");
         if !time_part.is_empty() {
             out.push_str(&format!("Time: {}\r\n", time_part));
         }

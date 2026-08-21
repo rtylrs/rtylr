@@ -3,8 +3,9 @@ import { CirclePause } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { createOneKitClient } from '@voxire/api';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { OrderHoldServiceClient } from '@voxire/voxie/pos/orders/holds/v1/client';
+import { OrderServiceClient } from '@voxire/voxie/pos/orders/v1/client';
 import type { Order as ServerHeldOrder } from '@voxire/voxie/pos/orders/v1/types';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
@@ -17,6 +18,7 @@ import {
 } from './heldOrdersWorkflow';
 
 const orderHoldClient = createOneKitClient(OrderHoldServiceClient, 'pos');
+const orderClient = createOneKitClient(OrderServiceClient, 'pos');
 
 const HeldOrdersScreen: React.FC = () => {
   const orders = useHeldOrdersStore((s) => s.orders);
@@ -27,6 +29,7 @@ const HeldOrdersScreen: React.FC = () => {
   const setTable = useCartStore((s) => s.setTableNumber);
   const setServerOrderId = useCartStore((s) => s.setServerOrderId);
 
+  const queryClient = useQueryClient();
   const { data: serverOrders = [] } = useQuery<ServerHeldOrder[]>({
     queryKey: ['pos', 'held-orders'],
     queryFn: async () => {
@@ -34,6 +37,7 @@ const HeldOrdersScreen: React.FC = () => {
       return response.orders ?? [];
     },
     refetchInterval: 15_000,
+    refetchIntervalInBackground: false,
   });
 
   const restore = (id: string) => {
@@ -48,9 +52,16 @@ const HeldOrdersScreen: React.FC = () => {
       return;
     }
 
+    // Add items BEFORE releasing the hold: if an add fails mid-loop the hold
+    // survives and can be retried, instead of vanishing with a partial cart.
+    try {
+      products.forEach(addItem);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to restore held items');
+      return;
+    }
     const order = release(id);
     if (!order) return;
-    products.forEach(addItem);
     setTable(order.tableNumber ?? null);
     toast.success(`Released ${order.label}`);
     navigate('/');
@@ -67,6 +78,16 @@ const HeldOrdersScreen: React.FC = () => {
 
     setServerOrderId(resume.orderId);
     resume.products.forEach(addItem);
+    // Transition the order out of 'held' so it leaves the held list and
+    // cannot be resumed again on this or another terminal.
+    void orderClient
+      .updateOrderStatus({ orderId: String(resume.orderId), body: { status: 'pending' } })
+      .then(() => {
+        void queryClient.invalidateQueries({ queryKey: ['pos', 'held-orders'] });
+      })
+      .catch(() => {
+        toast.warning('Resumed locally - the server hold could not be released');
+      });
     toast.success(`Resumed order #${o.orderNumber}`);
     navigate('/');
   };

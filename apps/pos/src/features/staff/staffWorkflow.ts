@@ -63,11 +63,17 @@ export interface StaffEdits {
  * Builds the generated updatePOSUser payload from edited staff fields. A blank
  * newPin is omitted so an edit that doesn't touch the PIN leaves it unchanged.
  */
+export const STAFF_PIN_LENGTH = 4;
+
 export function buildStaffUpdate(
   user: StaffUser,
   edits: StaffEdits
 ): UpdatePOSUserRequest {
   const pin = (edits.newPin ?? '').trim();
+  // A manager-typed 1-3 digit PIN would lock the employee out on next login.
+  if (pin && pin.length !== STAFF_PIN_LENGTH) {
+    throw new Error(`PIN must be exactly ${STAFF_PIN_LENGTH} digits.`);
+  }
   return {
     id: String(user.id),
     name: user.name,

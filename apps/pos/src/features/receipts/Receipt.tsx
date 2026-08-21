@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Check, Printer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
@@ -65,8 +65,13 @@ const Receipt: React.FC = () => {
     }
   };
 
+  // Redirect in an effect: navigating during render can update a component
+  // while React is rendering another one.
+  useEffect(() => {
+    if (!receipt) navigate('/');
+  }, [receipt, navigate]);
+
   if (!receipt) {
-    navigate('/');
     return null;
   }
 

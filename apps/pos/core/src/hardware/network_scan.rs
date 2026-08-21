@@ -55,21 +55,40 @@ pub fn scan_host(host: &str, timeout_ms: u64) -> Vec<DiscoveredDevice> {
     found
 }
 
-/// Scan a /24 subnet in parallel. Wall time ≈ `n_ports × timeout_ms`
-/// regardless of subnet size.
+/// Scan a /24 subnet in parallel with a bounded worker pool. Spawning 254
+/// raw threads per scan starved low-spec registers; a pool sized to the CPU
+/// keeps wall time reasonable without the thread explosion. Results are
+/// sorted by pre-parsed IP then port (no re-parsing inside the comparator).
 pub fn discover(subnet_prefix: &str, timeout_ms: u64) -> Result<Vec<DiscoveredDevice>, String> {
     let prefix = validate_subnet_prefix(subnet_prefix)?;
 
     let results: Arc<Mutex<Vec<DiscoveredDevice>>> = Arc::new(Mutex::new(Vec::new()));
+    let hosts: Arc<Vec<String>> = Arc::new((1u8..=254).map(|octet| format!("{}.{}", prefix, octet)).collect());
+    let next = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let workers = thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(4)
+        .min(hosts.len());
 
-    let handles: Vec<_> = (1u8..=254)
-        .map(|octet| {
-            let host = format!("{}.{}", prefix, octet);
+    let handles: Vec<_> = (0..workers)
+        .map(|_| {
             let results = Arc::clone(&results);
-            thread::spawn(move || {
-                let found = scan_host(&host, timeout_ms);
-                if !found.is_empty() {
-                    results.lock().expect("mutex").extend(found);
+            let hosts = Arc::clone(&hosts);
+            let next = Arc::clone(&next);
+            thread::spawn(move || loop {
+                let index = next.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                if index >= hosts.len() {
+                    break;
+                }
+                let found = scan_host(&hosts[index], timeout_ms);
+                if found.is_empty() {
+                    continue;
+                }
+                // A poisoned mutex (a panicking worker) must not panic the
+                // whole command; recover the guarded data and continue.
+                match results.lock() {
+                    Ok(mut guard) => guard.extend(found),
+                    Err(poisoned) => poisoned.into_inner().extend(found),
                 }
             })
         })
@@ -82,7 +101,7 @@ pub fn discover(subnet_prefix: &str, timeout_ms: u64) -> Result<Vec<DiscoveredDe
     let mut final_results = Arc::try_unwrap(results)
         .map_err(|_| "Internal scan error: arc still held".to_string())?
         .into_inner()
-        .map_err(|_| "Mutex poisoned".to_string())?;
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
 
     final_results.sort_by(|a, b| {
         a.host

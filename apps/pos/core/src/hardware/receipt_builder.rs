@@ -9,10 +9,10 @@ use crate::hardware::escpos::{
     ALIGN_CENTER, ALIGN_LEFT, BOLD_OFF, BOLD_ON, CUT, DRAWER_PIN2, DRAWER_PIN5, FEED_4, INIT, LF,
     SIZE_DOUBLE, SIZE_NORMAL,
 };
-use crate::util::fmt::{write_row, RECEIPT_WIDTH};
+use crate::util::fmt::{write_padded_pair, write_row, RECEIPT_WIDTH};
 use crate::util::time::format_timestamp;
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize)]
 pub struct ReceiptItem {
     pub name: String,
     pub quantity: f64,
@@ -22,7 +22,7 @@ pub struct ReceiptItem {
     pub notes: Option<String>,
 }
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize)]
 pub struct ReceiptData {
     pub business_name: String,
     pub business_address: Option<String>,
@@ -77,12 +77,10 @@ pub fn build_receipt(data: &ReceiptData) -> Vec<u8> {
     // Order meta
     push(&mut buf, ALIGN_LEFT);
 
-    let order_label = format!("Order #{}", data.order_number);
     if let Some(ref ot) = data.order_type {
-        let right_pad = RECEIPT_WIDTH.saturating_sub(order_label.len() + ot.len());
-        text(&mut buf, &format!("{}{}{}", order_label, " ".repeat(right_pad), ot));
+        write_padded_pair(&mut buf, &format!("Order #{}", data.order_number), ot, RECEIPT_WIDTH);
     } else {
-        text(&mut buf, &order_label);
+        text(&mut buf, &format!("Order #{}", data.order_number));
     }
     push(&mut buf, LF);
 
@@ -107,11 +105,15 @@ pub fn build_receipt(data: &ReceiptData) -> Vec<u8> {
 
     // Items
     for item in &data.items {
-        let qty_name = format!("{:.0}x {}", item.quantity, item.name);
-        let total_str = format!("{:.2}", item.total);
-        let gap = RECEIPT_WIDTH.saturating_sub(qty_name.len() + total_str.len());
         push(&mut buf, BOLD_ON);
-        text(&mut buf, &format!("{}{}{}", qty_name, " ".repeat(gap), total_str));
+        // Two small format! calls instead of four intermediate Strings
+        // (qty_name + " ".repeat + concat) per item row.
+        write_padded_pair(
+            &mut buf,
+            &format!("{:.0}x {}", item.quantity, item.name),
+            &format!("{:.2}", item.total),
+            RECEIPT_WIDTH,
+        );
         push(&mut buf, BOLD_OFF);
         push(&mut buf, LF);
 

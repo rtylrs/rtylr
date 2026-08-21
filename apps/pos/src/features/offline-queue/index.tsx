@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { WifiOff } from 'lucide-react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
 import EmptyState from '../../shared/components/EmptyState';
+import ConfirmModal from '../../shared/components/ConfirmModal';
 import { useOfflineQueue } from './useOfflineQueue';
 import { formatCurrency, formatDate } from '../../shared/utils/format';
 
@@ -20,9 +21,23 @@ const OfflineQueueScreen: React.FC = () => {
     clear,
   } = useOfflineQueue();
 
+  const [confirmingClear, setConfirmingClear] = useState(false);
+  const [flushing, setFlushing] = useState(false);
+
   const doFlush = async () => {
-    await flush();
-    toast.success('Sync attempted');
+    if (flushing) return;
+    setFlushing(true);
+    try {
+      const result = await flush();
+      const failed = result.failed;
+      if (failed > 0) {
+        toast.warning(`Sync attempted: ${result.synced} sent, ${failed} failed. Check the entries below.`);
+      } else {
+        toast.success('Queue synced');
+      }
+    } finally {
+      setFlushing(false);
+    }
   };
 
   return (
@@ -39,7 +54,7 @@ const OfflineQueueScreen: React.FC = () => {
             Sync All
           </button>
           <button
-            onClick={clear}
+            onClick={() => setConfirmingClear(true)}
             disabled={totalQueued === 0}
             className="h-10 px-4 rounded-lg bg-destructive text-white font-semibold text-sm disabled:opacity-50"
           >
@@ -157,6 +172,19 @@ const OfflineQueueScreen: React.FC = () => {
           </ul>
         )}
       </div>
+
+      <ConfirmModal
+        open={confirmingClear}
+        title="Clear the offline queue?"
+        message="Unsynced orders, session closes, and cash movements will be permanently discarded."
+        danger
+        confirmText="Discard"
+        onConfirm={() => {
+          clear();
+          setConfirmingClear(false);
+        }}
+        onCancel={() => setConfirmingClear(false)}
+      />
     </ScreenLayout>
   );
 };

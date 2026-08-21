@@ -47,10 +47,14 @@ describe('syncQueuedOrders', () => {
   it('marks an order failed with a useful message after replay failure', async () => {
     const entry = makeEntry('q1');
     const markFailed = vi.fn();
+    // oneKit ApiError shape: the backend message lives in a JSON body string.
+    const rejection = Object.assign(new Error('Request failed with status 422'), {
+      body: JSON.stringify({ message: 'Out of stock' }),
+    });
 
     const result = await syncQueuedOrders({
       entries: [entry],
-      syncOrder: vi.fn(() => Promise.reject({ response: { data: { message: 'Out of stock' } } })),
+      syncOrder: vi.fn(() => Promise.reject(rejection)),
       retry: vi.fn(),
       markSynced: vi.fn(),
       markFailed,

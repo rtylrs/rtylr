@@ -151,8 +151,11 @@ const CommandPalette: React.FC = () => {
   }, [open]);
 
   useEffect(() => {
+    // Attach the Escape listener only while the palette is open instead of
+    // keeping a global keydown handler alive for the app's lifetime.
+    if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && open) {
+      if (e.key === 'Escape') {
         setOpen(false);
       }
     };

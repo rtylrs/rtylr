@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { CheckCircle2, ReceiptText, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
@@ -21,28 +21,94 @@ interface OrderPanelProps {
   tableNumber?: string;
 }
 
+interface OrderLineItemProps {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+  notes: string;
+  onUpdateQuantity: (id: string, quantity: number) => void;
+  onRemove: (id: string) => void;
+  onAddNote: (id: string) => void;
+}
+
+// Memoized so editing one line (quantity/notes) doesn't re-render every row.
+const OrderLineItem = React.memo<OrderLineItemProps>(function OrderLineItem({
+  id,
+  name,
+  quantity,
+  price,
+  notes,
+  onUpdateQuantity,
+  onRemove,
+  onAddNote,
+}) {
+  return (
+    <motion.div
+      className="flex flex-col gap-1 p-2.5 rounded-lg bg-white/5"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      layout
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-pos-text truncate">{name}</p>
+          <p className="text-xs text-pos-muted">{formatCurrency(price * quantity)}</p>
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            className="w-7 h-7 flex items-center justify-center rounded bg-white/10 text-pos-text text-sm"
+            onClick={() => onUpdateQuantity(id, quantity - 1)}
+          >
+            −
+          </button>
+          <span className="w-6 text-center text-xs font-semibold text-pos-text">{quantity}</span>
+          <button
+            className="w-7 h-7 flex items-center justify-center rounded bg-white/10 text-pos-text text-sm"
+            onClick={() => onUpdateQuantity(id, quantity + 1)}
+          >
+            +
+          </button>
+          <button
+            className="w-6 h-6 flex items-center justify-center rounded text-pos-muted hover:text-destructive transition-colors text-xs ml-1"
+            onClick={() => onRemove(id)}
+          >
+            <X className="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+      <div className="flex items-center justify-between">
+        <button onClick={() => onAddNote(id)} className="text-[10px] text-pos-muted hover:text-pos-text">
+          {notes ? `Note: ${notes}` : '+ Add note'}
+        </button>
+      </div>
+    </motion.div>
+  );
+});
+
 const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
   const navigate = useNavigate();
-  const {
-    items,
-    updateQuantity,
-    removeItem,
-    clearCart,
-    updateItemNotes,
-    total,
-    serverOrderId,
-    tableId,
-    orderType,
-    notes,
-  } = useCartStore();
+  // Slice selectors: the panel must not re-render on unrelated cart writes
+  // (branchId/kitchenNotes/persist hydration).
+  const items = useCartStore((s) => s.items);
+  const updateQuantity = useCartStore((s) => s.updateQuantity);
+  const removeItem = useCartStore((s) => s.removeItem);
+  const clearCart = useCartStore((s) => s.clearCart);
+  const updateItemNotes = useCartStore((s) => s.updateItemNotes);
+  const total = useCartStore((s) => s.total);
+  const serverOrderId = useCartStore((s) => s.serverOrderId);
+  const tableId = useCartStore((s) => s.tableId);
+  const orderType = useCartStore((s) => s.orderType);
+  const notes = useCartStore((s) => s.notes);
+  const customerId = useCartStore((s) => s.customerId);
+  const customerName = useCartStore((s) => s.customerName);
   const hold = useHeldOrdersStore((s) => s.hold);
   const taxRate = useSettingsStore((s) => s.taxRate);
   const tablesEnabled = useSettingsStore((s) => s.features.tables);
   const locationId = useTerminalContextStore((s) => s.locationId);
-  const customerId = useCartStore((s) => s.customerId);
-  const customerName = useCartStore((s) => s.customerName);
 
-  const subtotal = total();
+  const subtotal = useMemo(() => total(), [total, items]);
   const tax = subtotal * taxRate;
   const grandTotal = subtotal + tax;
   const activeTableId = tablesEnabled ? tableId : undefined;
@@ -51,6 +117,13 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
   const [confirmClear, setConfirmClear] = useState(false);
   const [notingItemId, setNotingItemId] = useState<string | null>(null);
   const [submittingOrder, setSubmittingOrder] = useState(false);
+
+  const handleUpdateQuantity = useCallback(
+    (id: string, quantity: number) => updateQuantity(id, quantity),
+    [updateQuantity]
+  );
+  const handleRemove = useCallback((id: string) => removeItem(id), [removeItem]);
+  const handleAddNote = useCallback((id: string) => setNotingItemId(id), []);
 
   const onHold = () => {
     if (items.length === 0) return;
@@ -137,54 +210,17 @@ const OrderPanel: React.FC<OrderPanelProps> = ({ tableNumber }) => {
             </motion.div>
           ) : (
             items.map((item) => (
-              <motion.div
+              <OrderLineItem
                 key={item.id}
-                className="flex flex-col gap-1 p-2.5 rounded-lg bg-white/5"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                layout
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-pos-text truncate">{item.name}</p>
-                    <p className="text-xs text-pos-muted">
-                      {formatCurrency(item.price * item.quantity)}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      className="w-7 h-7 flex items-center justify-center rounded bg-white/10 text-pos-text text-sm"
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                    >
-                      −
-                    </button>
-                    <span className="w-6 text-center text-xs font-semibold text-pos-text">
-                      {item.quantity}
-                    </span>
-                    <button
-                      className="w-7 h-7 flex items-center justify-center rounded bg-white/10 text-pos-text text-sm"
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    >
-                      +
-                    </button>
-                    <button
-                      className="w-6 h-6 flex items-center justify-center rounded text-pos-muted hover:text-destructive transition-colors text-xs ml-1"
-                      onClick={() => removeItem(item.id)}
-                    >
-                      <X className="h-3.5 w-3.5" aria-hidden="true" />
-                    </button>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <button
-                    onClick={() => setNotingItemId(item.id)}
-                    className="text-[10px] text-pos-muted hover:text-pos-text"
-                  >
-                    {item.notes ? `Note: ${item.notes}` : '+ Add note'}
-                  </button>
-                </div>
-              </motion.div>
+                id={item.id}
+                name={item.name}
+                quantity={item.quantity}
+                price={item.price}
+                notes={item.notes ?? ''}
+                onUpdateQuantity={handleUpdateQuantity}
+                onRemove={handleRemove}
+                onAddNote={handleAddNote}
+              />
             ))
           )}
         </AnimatePresence>

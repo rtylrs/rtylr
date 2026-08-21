@@ -47,11 +47,11 @@ describe('offlineQueueStore', () => {
   });
 
   it('prepends new items (newest first)', () => {
-    getState().enqueue(makeOrder({ id: 'first' }));
-    getState().enqueue(makeOrder({ id: 'second' }));
+    getState().enqueue(makeOrder({ customerId: 'first' }));
+    getState().enqueue(makeOrder({ customerId: 'second' }));
 
-    expect(getState().queue[0].order.id).toBe('second');
-    expect(getState().queue[1].order.id).toBe('first');
+    expect(getState().queue[0].order.customerId).toBe('second');
+    expect(getState().queue[1].order.customerId).toBe('first');
   });
 
   // ── setOnline ──────────────────────────────────────────────────

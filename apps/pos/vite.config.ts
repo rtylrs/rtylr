@@ -79,9 +79,7 @@ export default defineConfig(() => ({
       'zustand',
       'motion',
       '@tanstack/react-query',
-      '@voxire/components',
       '@voxire/config',
-      '@voxire/menu',
     ],
   },
   test: {

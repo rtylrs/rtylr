@@ -110,9 +110,18 @@ const POSLayout: React.FC<POSLayoutProps> = ({ children }) => {
   const userId = Number(userIdValue ?? 0);
   const caretUserId = Number.isFinite(userId) && userId > 0 ? userId : 0;
   const orderId = selectedOrderId(location.pathname);
-  const pendingOfflineOrders = offlineQueue.filter((item) => item.status === 'pending').length;
-  const failedOfflineOrders = offlineQueue.filter((item) => item.status === 'failed').length;
-  const pendingCashMovements = cashMovementQueue.filter((item) => item.status === 'pending').length;
+  // Single pass over each queue instead of three filters per render.
+  const { pendingOfflineOrders, failedOfflineOrders } = React.useMemo(
+    () => ({
+      pendingOfflineOrders: offlineQueue.filter((item) => item.status === 'pending').length,
+      failedOfflineOrders: offlineQueue.filter((item) => item.status === 'failed').length,
+    }),
+    [offlineQueue]
+  );
+  const pendingCashMovements = React.useMemo(
+    () => cashMovementQueue.filter((item) => item.status === 'pending').length,
+    [cashMovementQueue]
+  );
   const caretApiBaseUrl = resolveApiBaseUrl() ?? '';
   const caretPageContext = React.useMemo(
     () =>

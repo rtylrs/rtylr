@@ -8,7 +8,7 @@ use crate::validation::{
     net::{validate_baud, validate_host, validate_port, validate_serial_port_name},
 };
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn send_kds_ticket_serial(
     port_name: String,
     baud_rate: u32,
@@ -23,7 +23,7 @@ pub fn send_kds_ticket_serial(
     Ok(format!("KDS ticket sent to serial {}", port_name))
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn send_kds_ticket_network(
     host: String,
     port: u16,

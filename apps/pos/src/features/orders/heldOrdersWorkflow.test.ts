@@ -37,11 +37,11 @@ describe('heldOrdersWorkflow', () => {
   it('builds a server held-order resume request from synced item data', () => {
     expect(
       buildServerHeldOrderResume({
-        id: 22,
+        id: '22',
         orderNumber: '1001',
         total: 20,
         createdAt: '2026-01-01T10:00:00.000Z',
-        items: [{ menuItemId: 5, name: 'Fries', quantity: 2, unitPrice: 4 }],
+        items: [{ menuItemId: '5', name: 'Fries', quantity: 2, unitPrice: 4 }],
       }),
     ).toEqual({
       orderId: 22,
@@ -55,7 +55,7 @@ describe('heldOrdersWorkflow', () => {
   it('rejects server held orders without synced item identifiers', () => {
     expect(() =>
       buildServerHeldOrderResume({
-        id: 22,
+        id: '22',
         orderNumber: '1001',
         total: 20,
         createdAt: '2026-01-01T10:00:00.000Z',

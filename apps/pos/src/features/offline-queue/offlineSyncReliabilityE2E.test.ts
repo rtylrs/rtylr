@@ -9,6 +9,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { syncPendingOfflineOrders } from './offlineQueueSync';
 import { useOfflineQueueStore } from '../../shared/stores/offlineQueueStore';
 import type { CreateOrderRequest } from '@voxire/voxie/pos/orders/v1/types';
+import type { CartItem } from '../../shared/stores/cartStore';
 
 function makePayload(notes: string): CreateOrderRequest {
   return {
@@ -92,7 +93,7 @@ describe('offline queue sync under network failures', () => {
   it('checkout falls back to offline queue when server is unreachable', async () => {
     const { buildCheckoutOrder, buildCreateOrderPayload, processCheckout } = await import('../payment/checkoutWorkflow');
 
-    const items = [];
+    const items: CartItem[] = [];
     const payload = buildCreateOrderPayload({ items, method: 'cash' });
     const order = buildCheckoutOrder({
       id: 'local-offline-1',
@@ -132,7 +133,7 @@ describe('offline queue sync under network failures', () => {
   it('queued order syncs successfully when connectivity is restored', async () => {
     const { buildCheckoutOrder, buildCreateOrderPayload, processCheckout } = await import('../payment/checkoutWorkflow');
 
-    const items = [];
+    const items: CartItem[] = [];
     const payload = buildCreateOrderPayload({ items, method: 'cash', notes: 'local-offline-2' });
     const order = buildCheckoutOrder({
       id: 'local-offline-2',

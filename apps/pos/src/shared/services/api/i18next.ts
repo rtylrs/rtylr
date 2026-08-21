@@ -3,28 +3,22 @@ import { initI18n } from '@voxire/i18n';
 // Each file under locales/{lang}/*.json is auto-discovered.
 // The filename (without .json) becomes the i18next namespace key, so
 // `useTranslation('server')` + `t('title')` maps to locales/{lang}/server.json.
+// Non-eager glob: locale files load on demand instead of bundling every
+// language into the entry chunk.
 const modules = import.meta.glob<{ default: Record<string, unknown> }>(
-  '../../../locales/**/*.json',
-  {
-    eager: true,
-  }
+  '../../../locales/**/*.json'
 );
 
-function loadNamespace(lang: string, ns: string): Record<string, unknown> {
-  for (const [path, mod] of Object.entries(modules)) {
-    const parts = path.split('/');
-    const langDir = parts[parts.length - 2];
-    const fileNs = parts[parts.length - 1].replace('.json', '');
-    if (langDir === lang && fileNs === ns) {
-      return mod.default;
-    }
-  }
-  return {};
+function loadNamespace(lang: string, ns: string): Promise<Record<string, unknown>> {
+  const loader = modules[`../../../locales/${lang}/${ns}.json`];
+  if (!loader) return Promise.resolve({});
+  return loader().then((mod) => mod.default);
 }
 
 const i18n = initI18n({
+  defaultNS: 'server',
   ns: ['server'],
-  loadResource: (lang, ns) => Promise.resolve(loadNamespace(lang, ns)),
+  loadResource: loadNamespace,
 });
 
 export { selectLanguage } from '@voxire/i18n';

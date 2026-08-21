@@ -73,7 +73,7 @@ async function runFullSale() {
     order,
     payload,
     method: 'cash',
-    createOrder: vi.fn(() => Promise.resolve({ orderId: 500 })),
+    createOrder: vi.fn(() => Promise.resolve({ orderId: '500' })),
     chargeOrder: vi.fn(() => Promise.resolve()),
     enqueueOffline: vi.fn(),
     recordCashSale: vi.fn(),
@@ -100,8 +100,8 @@ async function runFullSale() {
 
 describe('full sale flow: order → receipt → drawer', () => {
   it('completes end-to-end with all stages succeeding', async () => {
-    vi.mocked(printReceipt).mockResolvedValue({ status: 'ok' });
-    vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'ok' });
+    vi.mocked(printReceipt).mockResolvedValue({ status: 'printed', message: 'receipt printed' });
+    vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'opened' });
 
     const { checkoutResult, hardwareResult } = await runFullSale();
 
@@ -112,8 +112,8 @@ describe('full sale flow: order → receipt → drawer', () => {
   });
 
   it('receipt includes the server order id in the order number', async () => {
-    vi.mocked(printReceipt).mockResolvedValue({ status: 'ok' });
-    vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'ok' });
+    vi.mocked(printReceipt).mockResolvedValue({ status: 'printed', message: 'receipt printed' });
+    vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'opened' });
 
     await runFullSale();
 
@@ -133,8 +133,8 @@ describe('full sale flow: order → receipt → drawer', () => {
   });
 
   it('checkout falls back to offline queue when server is unreachable, hardware still fires', async () => {
-    vi.mocked(printReceipt).mockResolvedValue({ status: 'ok' });
-    vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'ok' });
+    vi.mocked(printReceipt).mockResolvedValue({ status: 'printed', message: 'receipt printed' });
+    vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'opened' });
 
     const order = buildCheckoutOrder({
       id: 'local-99',

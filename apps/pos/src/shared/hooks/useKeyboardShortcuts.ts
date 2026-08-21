@@ -14,9 +14,6 @@ export function useKeyboardShortcuts() {
   const navigate = useNavigate();
   const toggleCommand = useShortcutStore((s) => s.toggleCommand);
   const setHelp = useShortcutStore((s) => s.setHelp);
-  const items = useCartStore((s) => s.items);
-  const orderId = useCartStore((s) => s.orderId);
-  const serverOrderId = useCartStore((s) => s.serverOrderId);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -40,16 +37,20 @@ export function useKeyboardShortcuts() {
       }
       if (e.key === 'F2') {
         e.preventDefault();
+        // Read cart state live so the listener doesn't need to be
+        // re-attached on every cart mutation.
+        const { orderId, serverOrderId } = useCartStore.getState();
         navigate(`/discount/${serverOrderId ?? orderId ?? 'current'}`);
         return;
       }
       if (e.key === 'F3') {
         e.preventDefault();
+        const { orderId, serverOrderId } = useCartStore.getState();
         navigate(`/refund/${serverOrderId ?? orderId ?? 'current'}`);
         return;
       }
 
-      if (!isInput && e.key === 'Enter' && items.length > 0) {
+      if (!isInput && e.key === 'Enter' && useCartStore.getState().items.length > 0) {
         navigate('/payment');
         return;
       }
@@ -61,5 +62,5 @@ export function useKeyboardShortcuts() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [navigate, toggleCommand, setHelp, items.length, orderId, serverOrderId]);
+  }, [navigate, toggleCommand, setHelp]);
 }

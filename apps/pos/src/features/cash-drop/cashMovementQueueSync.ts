@@ -8,6 +8,7 @@ import {
 } from '../../shared/stores/cashMovementQueueStore';
 import { resolveOpenSessionId } from '../close-session/closeSessionWorkflow';
 import { syncQueuedCashMovements } from './syncCashMovementQueue';
+import { runExclusiveDrain } from '../offline-queue/drainGuard';
 
 type SyncMovement = (
   action: QueuedCashMovementAction,
@@ -54,34 +55,58 @@ export const syncCashMovementWithApi: SyncMovement = async (action, payload) => 
 export async function syncPendingCashMovements(
   syncMovement: SyncMovement = syncCashMovementWithApi
 ): Promise<{ attempted: number; synced: number; failed: number }> {
-  const { queue, retry, markSynced, markFailed } = useCashMovementQueueStore.getState();
-  const pending = queue.filter((entry) => entry.status === 'pending');
+  return runExclusiveDrain('cash-movements', () => {
+    const store = useCashMovementQueueStore.getState();
+    // Recover entries stranded in 'syncing' by a crash before filtering.
+    store.requeueStalled();
+    const pending = useCashMovementQueueStore
+      .getState()
+      .queue.filter((entry) => entry.status === 'pending');
 
-  return syncQueuedCashMovements({ entries: pending, syncMovement, retry, markSynced, markFailed });
+    return syncQueuedCashMovements({
+      entries: pending,
+      syncMovement,
+      retry: store.retry,
+      markSynced: store.markSynced,
+      markFailed: store.markFailed,
+      readEntry: (id) => useCashMovementQueueStore.getState().queue.find((q) => q.id === id),
+    });
+  });
 }
 
 export async function syncAllCashMovements(
   syncMovement: SyncMovement = syncCashMovementWithApi
 ): Promise<{ attempted: number; synced: number; failed: number }> {
-  const { queue, retry, markSynced, markFailed } = useCashMovementQueueStore.getState();
+  return runExclusiveDrain('cash-movements', () => {
+    const store = useCashMovementQueueStore.getState();
+    store.requeueStalled();
 
-  return syncQueuedCashMovements({ entries: queue, syncMovement, retry, markSynced, markFailed });
+    return syncQueuedCashMovements({
+      entries: useCashMovementQueueStore.getState().queue,
+      syncMovement,
+      retry: store.retry,
+      markSynced: store.markSynced,
+      markFailed: store.markFailed,
+      readEntry: (id) => useCashMovementQueueStore.getState().queue.find((q) => q.id === id),
+    });
+  });
 }
 
 export async function retryCashMovement(
   id: string,
   syncMovement: SyncMovement = syncCashMovementWithApi
 ): Promise<boolean> {
-  const entry = useCashMovementQueueStore.getState().queue.find((item) => item.id === id);
+  const store = useCashMovementQueueStore.getState();
+  const entry = store.queue.find((item) => item.id === id);
   if (!entry) return false;
 
-  const { retry, markSynced, markFailed } = useCashMovementQueueStore.getState();
   const result = await syncQueuedCashMovements({
     entries: [entry],
     syncMovement,
-    retry,
-    markSynced,
-    markFailed,
+    retry: store.retry,
+    markSynced: store.markSynced,
+    markFailed: store.markFailed,
+    readEntry: (entryId) => useCashMovementQueueStore.getState().queue.find((q) => q.id === entryId),
   });
 
   return result.synced === 1;
