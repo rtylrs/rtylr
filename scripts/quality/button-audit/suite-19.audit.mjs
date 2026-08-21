@@ -52,5 +52,6 @@ export const cases = [
   ["apps/menu/src/layouts/Public/PublicFooter/PublicFooter.tsx", "audit-batch-050-suite-19"],
   ["apps/recruit/src/features/public/ApplyPage.tsx", "audit-batch-051-suite-19"],
   ["apps/auth/src/features/oauth/OAuthConsent.tsx", "audit-batch-052-suite-19"],
+  ["apps/crm/src/features/customers/Customers.test.tsx", "audit-batch-053-suite-19"],
 ];
 

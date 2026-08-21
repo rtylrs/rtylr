@@ -52,5 +52,6 @@ export const cases = [
   ["apps/insights/src/features/settings/Settings.tsx", "audit-batch-050-suite-06"],
   ["apps/menu/src/screens/Public/SlugLanding/SlugLanding.tsx", "audit-batch-051-suite-06"],
   ["apps/recruit/src/templates/minimal/Index.tsx", "audit-batch-052-suite-06"],
+  ["apps/auth/src/shared/components/PasswordStrengthMeter.tsx", "audit-batch-053-suite-06"],
 ];
 
