@@ -70,7 +70,7 @@ const InvoiceDetail: React.FC = () => {
         breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: invoice.id }]}
         actions={
           <>
-            <button style={ghostBtn} onClick={() => window.print()}>
+            <button type="button" style={ghostBtn} onClick={() => window.print()}>
               <Printer size={13} /> Print
             </button>
             <DownloadPdfButton invoiceId={invoice.id} />

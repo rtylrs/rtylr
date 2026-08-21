@@ -198,7 +198,7 @@ const Header: React.FC = () => {
       </div>
 
       <div className="header-right">
-        <button
+        <button type="button"
           className="mobile-menu-toggle"
           onClick={toggleMobileMenu}
           style={{

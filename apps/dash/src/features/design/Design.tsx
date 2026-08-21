@@ -63,7 +63,7 @@ function SegmentGroup<T extends string>({
       }}
     >
       {options.map((o) => (
-        <button
+        <button type="button"
           key={o.value}
           onClick={() => onChange(o.value)}
           style={{

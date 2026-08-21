@@ -92,7 +92,7 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
       width={440}
       footer={
         <>
-          <button style={ghostBtn} onClick={onClose} disabled={createBill.isPending}>
+          <button type="button" style={ghostBtn} onClick={onClose} disabled={createBill.isPending}>
             {t('common.cancel')}
           </button>
           <button type="button"

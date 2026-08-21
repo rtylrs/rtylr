@@ -47,7 +47,7 @@ const BarcodeInput: React.FC<BarcodeInputProps> = ({
         className="flex-1 bg-transparent outline-none text-sm"
         style={{ color: 'var(--hub-text)' }}
       />
-      <button
+      <button type="button"
         onClick={submit}
         className="text-xs font-semibold px-2 py-1 rounded-md"
         style={{

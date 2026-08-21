@@ -240,7 +240,7 @@ const Team: React.FC = (): React.JSX.Element => {
                     </span>
                   </div>
                 </div>
-                <button
+                <button type="button"
                   disabled={approveAccessRequest.isPending}
                   onClick={() =>
                     approveAccessRequest.mutate({ id: req.id, userId: req.userId, app: req.app })

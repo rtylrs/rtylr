@@ -152,7 +152,7 @@ const GroupDetail = (): React.JSX.Element => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button
+            <button type="button"
               onClick={() => navigate({ to: '/team/groups' })}
               aria-label={t('team.groupDetail.backAriaLabel')}
               className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"

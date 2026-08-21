@@ -69,7 +69,7 @@ const Employees = (): React.JSX.Element => {
           <h1 className="text-lg font-semibold" style={{ color: 'var(--hr-text)' }}>
             {t('employees.directory')}
           </h1>
-          <button
+          <button type="button"
             onClick={() => navigate({ to: '/employees/new' })}
             className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium"
             style={{ background: 'var(--accent)', color: '#fff' }}

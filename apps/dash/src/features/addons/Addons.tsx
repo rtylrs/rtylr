@@ -358,7 +358,7 @@ const Addons: React.FC = () => {
                     </span>
 
                     {!addon.isFree ? (
-                      <button
+                      <button type="button"
                         onClick={handlePaidAddonClick}
                         disabled={
                           isTrialMode ||

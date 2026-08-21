@@ -63,7 +63,7 @@ const ImportCSV: React.FC<ImportCSVProps> = ({ onImport, expectedColumns }) => {
           if (file) handleFile(file);
         }}
       />
-      <button
+      <button type="button"
         onClick={() => fileRef.current?.click()}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
         style={{

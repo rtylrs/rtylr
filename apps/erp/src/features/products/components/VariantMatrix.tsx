@@ -159,7 +159,7 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
       />
       <div className="flex items-center gap-1.5 justify-end">
         {dirty && (
-          <button
+          <button type="button"
             onClick={handleSave}
             disabled={updateMut.isPending}
             aria-label={t('erp.products.variants.save')}

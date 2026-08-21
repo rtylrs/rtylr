@@ -330,7 +330,7 @@ const TaskDetail: React.FC = () => {
           style={{ borderBottom: '1px solid var(--flow-border)' }}
         >
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <button
+            <button type="button"
               onClick={() => window.history.back()}
               aria-label={t('common.back')}
               className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"

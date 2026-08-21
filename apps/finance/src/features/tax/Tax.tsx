@@ -95,7 +95,7 @@ const Tax: React.FC = () => {
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {canManageTax && (
-            <button
+            <button type="button"
               onClick={() => setShowConfig(!showConfig)}
               style={{
                 display: 'flex',

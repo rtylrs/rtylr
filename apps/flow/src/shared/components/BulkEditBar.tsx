@@ -70,7 +70,7 @@ export const BulkEditBar: React.FC = () => {
           {selectedTaskIds.length} selected
         </span>
         <div className="h-4 w-px mx-1" style={{ background: 'var(--flow-border)' }} />
-        <button
+        <button type="button"
           disabled={isPending || !canEdit}
           title={!canEdit ? t('common.readOnlyAccess') : undefined}
           onClick={() =>

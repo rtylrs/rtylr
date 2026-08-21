@@ -159,7 +159,7 @@ function RuleBuilder({
               Segment Builder
             </span>
           </div>
-          <button
+          <button type="button"
             onClick={onClose}
             style={{
               background: 'none',

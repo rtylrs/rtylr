@@ -140,7 +140,7 @@ const ProjectSettings: React.FC = () => {
         </h1>
         <div className="flex gap-4 mt-3">
           {tabs.map((t) => (
-            <button
+            <button type="button"
               key={t.id}
               onClick={() => setTab(t.id)}
               className="text-[12px] pb-1 border-b-2 transition-colors"
