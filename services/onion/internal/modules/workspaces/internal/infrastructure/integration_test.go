@@ -39,6 +39,51 @@ func TestWorkspaces_CreateWorkspace_ReturnsPositiveID(t *testing.T) {
 	t.Cleanup(func() { _ = repo.DeleteWorkspace(context.Background(), id, testutil.BusinessID) })
 }
 
+func TestWorkspaces_ListWorkDayLines_ScopesByBusiness(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	const workDayID int64 = 980001
+
+	for _, row := range []struct {
+		ownerID    int64
+		businessID int64
+		clientKey  string
+		duration   int
+	}{
+		{ownerID: testutil.BusinessID, businessID: testutil.BusinessID, clientKey: "owner-identity-own", duration: 45},
+		{ownerID: testutil.OwnerID, businessID: testutil.OtherBusinessID, clientKey: "owner-identity-other", duration: 90},
+	} {
+		if _, err := db.ExecContext(ctx, `
+			INSERT INTO hr_time_entries (
+				owner_id, business_id, employee_id, work_day_id, date,
+				duration_minutes, description, client_key, source
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'flow')`,
+			row.ownerID, row.businessID, 4101, workDayID, "2026-08-20",
+			row.duration, "owner identity scope", row.clientKey,
+		); err != nil {
+			t.Fatalf("insert %s: %v", row.clientKey, err)
+		}
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx,
+			"DELETE FROM hr_time_entries WHERE client_key IN (?, ?)",
+			"owner-identity-own", "owner-identity-other",
+		)
+	})
+
+	lines, total, err := repo.ListWorkDayLines(ctx, testutil.BusinessID, workDayID)
+	if err != nil {
+		t.Fatalf("ListWorkDayLines: %v", err)
+	}
+	if len(lines) != 1 || lines[0].ClientKey != "owner-identity-own" {
+		t.Fatalf("lines = %+v, want only the requested business's line", lines)
+	}
+	if total != 45 {
+		t.Fatalf("total = %d, want 45", total)
+	}
+}
+
 func TestWorkspaces_GetWorkspacesByOwner_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
