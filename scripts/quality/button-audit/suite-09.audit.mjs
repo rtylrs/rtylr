@@ -170,5 +170,6 @@ export const cases = [
   ["apps/finance/src/shared/components/PaymentBadge.tsx", "audit-batch-168-suite-09"],
   ["apps/flow/src/features/leave/RequestLeaveDialog.tsx", "audit-batch-169-suite-09"],
   ["apps/flow/src/features/roadmap/Roadmap.tsx", "audit-batch-170-suite-09"],
+  ["apps/flow/src/features/views/Views.test.tsx", "audit-batch-171-suite-09"],
 ];
 

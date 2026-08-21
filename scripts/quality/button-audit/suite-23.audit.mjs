@@ -170,5 +170,6 @@ export const cases = [
   ["apps/flow/src/features/cycles/Cycles.tsx", "audit-batch-168-suite-23"],
   ["apps/flow/src/features/projects/ProjectOverview.tsx", "audit-batch-169-suite-23"],
   ["apps/flow/src/features/team/Team.tsx", "audit-batch-170-suite-23"],
+  ["apps/flow/src/shared/components/AttachmentUpload.tsx", "audit-batch-171-suite-23"],
 ];
 

@@ -170,5 +170,6 @@ export const cases = [
   ["apps/finance/src/shared/components/OverdueInvoicesWidget.tsx", "audit-batch-168-suite-06"],
   ["apps/flow/src/features/leave/LeaveScreen.test.tsx", "audit-batch-169-suite-06"],
   ["apps/flow/src/features/projects/components/AddProjectMemberDialog.tsx", "audit-batch-170-suite-06"],
+  ["apps/flow/src/features/time/TimeReports.tsx", "audit-batch-171-suite-06"],
 ];
 
