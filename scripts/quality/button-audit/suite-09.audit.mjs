@@ -243,5 +243,6 @@ export const cases = [
   ["apps/erp/src/features/products/Products.tsx", "audit-batch-241-suite-09"],
   ["apps/erp/src/shared/components/BarcodeInput.tsx", "audit-batch-242-suite-09"],
   ["apps/erp/src/shared/components/SupplierSelect.tsx", "audit-batch-243-suite-09"],
+  ["apps/finance/src/features/quotes/Quotes.test.tsx", "audit-batch-244-suite-09"],
 ];
 

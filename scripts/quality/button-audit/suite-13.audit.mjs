@@ -243,5 +243,6 @@ export const cases = [
   ["apps/erp/src/features/purchasing/Purchasing.tsx", "audit-batch-241-suite-13"],
   ["apps/erp/src/shared/components/CategoryTree.tsx", "audit-batch-242-suite-13"],
   ["apps/erp/src/shared/components/dialogAccessibility.test.tsx", "audit-batch-243-suite-13"],
+  ["apps/finance/src/features/settings/Settings.tsx", "audit-batch-244-suite-13"],
 ];
 
