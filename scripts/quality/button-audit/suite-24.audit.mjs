@@ -176,5 +176,6 @@ export const cases = [
   ["apps/hr/src/features/payroll/PaySlip.tsx", "audit-batch-174-suite-24"],
   ["apps/hr/src/features/setup-wizard/components/WizardProgress.tsx", "audit-batch-175-suite-24"],
   ["apps/hr/src/features/timesheets/TimesheetDetail.tsx", "audit-batch-176-suite-24"],
+  ["apps/hr/src/shared/components/ShiftCell.tsx", "audit-batch-177-suite-24"],
 ];
 
