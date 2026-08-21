@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -14,7 +15,24 @@ var (
 	ErrAdminExists         = errors.New("voxhire admin already exists")
 	ErrApplicationNotFound = errors.New("voxhire application not found")
 	ErrCareerNotFound      = errors.New("voxhire career not found")
+	ErrOwnerScopeMissing   = errors.New("voxhire owner scope missing")
 )
+
+type ownerScopeContextKey struct{}
+
+// WithOwnerID attaches the authenticated VoxHire owner scope to a request.
+func WithOwnerID(ctx context.Context, ownerID int64) context.Context {
+	return context.WithValue(ctx, ownerScopeContextKey{}, ownerID)
+}
+
+// OwnerIDFromContext returns the authenticated owner scope, if present.
+func OwnerIDFromContext(ctx context.Context) (int64, bool) {
+	ownerID, ok := ctx.Value(ownerScopeContextKey{}).(int64)
+	if !ok || ownerID <= 0 {
+		return 0, false
+	}
+	return ownerID, true
+}
 
 // Admin is a recruiter/HR account that can sign in to the
 // hire.voxire.com admin panel. Self-contained: not tied to the rtylr

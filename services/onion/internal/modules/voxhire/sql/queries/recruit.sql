@@ -140,19 +140,26 @@ FROM voxhire_company_leads
 ORDER BY created_at DESC;
 
 -- name: UpdateApplicationStatus :exec
-UPDATE voxire_career_applications SET status = ? WHERE id = ?;
+UPDATE voxire_career_applications a
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+   SET a.status = ?
+ WHERE a.id = ?;
 
 -- name: UpdateApplicationReview :exec
 UPDATE voxire_career_applications
+JOIN careers c ON c.id = voxire_career_applications.job_id AND c.owner_id = ?
    SET status = CASE WHEN ? <> '' THEN ? ELSE status END,
        review_rating = ?,
        review_notes = ?,
        next_step = ?,
        reviewed_at = CURRENT_TIMESTAMP
- WHERE id = ?;
+ WHERE voxire_career_applications.id = ?;
 
 -- name: GetApplicationCVKey :one
-SELECT COALESCE(cv_key, '') AS cv_key FROM voxire_career_applications WHERE id = ?;
+SELECT COALESCE(a.cv_key, '') AS cv_key
+FROM voxire_career_applications a
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+WHERE a.id = ?;
 
 -- name: CreateCareerApplication :execresult
 INSERT INTO voxire_career_applications (
@@ -164,7 +171,10 @@ INSERT INTO voxire_career_applications (
 SELECT COUNT(*) FROM voxire_career_applications WHERE id = ?;
 
 -- name: ApplicationExists :one
-SELECT COUNT(*) AS count FROM voxire_career_applications WHERE id = ?;
+SELECT COUNT(*) AS count
+FROM voxire_career_applications a
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+WHERE a.id = ?;
 
 -- name: InsertApplicationEvent :exec
 INSERT INTO voxhire_application_events (application_id, kind, title, detail)
@@ -173,6 +183,8 @@ VALUES (?, ?, ?, ?);
 -- name: ListApplicationEvents :many
 SELECT kind, title, COALESCE(detail,'') AS detail, created_at
 FROM voxhire_application_events
+JOIN voxire_career_applications a ON a.id = voxhire_application_events.application_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
 WHERE application_id = ?
 ORDER BY created_at DESC;
 
@@ -183,17 +195,22 @@ SELECT created_at,
        cv_processed_at,
        reviewed_at
 FROM voxire_career_applications
-WHERE id = ?;
+JOIN careers c ON c.id = voxire_career_applications.job_id AND c.owner_id = ?
+WHERE voxire_career_applications.id = ?;
 
 -- name: ListTaskTimelineEvents :many
 SELECT title, status, created_at, completed_at
 FROM voxhire_follow_up_tasks
-WHERE application_id = ?;
+JOIN voxire_career_applications a ON a.id = voxhire_follow_up_tasks.application_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+WHERE voxhire_follow_up_tasks.application_id = ?;
 
 -- name: ListShortlistTimelineEvents :many
 SELECT s.name, i.sort_order, i.created_at
 FROM voxhire_shortlist_items i
 JOIN voxhire_shortlists s ON s.id = i.shortlist_id
+JOIN voxire_career_applications a ON a.id = i.application_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
 WHERE i.application_id = ?;
 
 -- name: ListTasks :many
@@ -202,7 +219,7 @@ SELECT t.id, t.application_id, a.job_id, COALESCE(c.title, '') AS opening_title,
        t.title, t.status, t.due_at, t.completed_at, t.created_at
 FROM voxhire_follow_up_tasks t
 JOIN voxire_career_applications a ON a.id = t.application_id
-LEFT JOIN careers c ON c.id = a.job_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
 WHERE (sqlc.narg('filter_status') IS NULL OR t.status = sqlc.narg('filter_status'))
 ORDER BY
   CASE t.status WHEN 'open' THEN 0 WHEN 'done' THEN 2 ELSE 1 END,
@@ -216,7 +233,7 @@ SELECT t.id, t.application_id, a.job_id, COALESCE(c.title, '') AS opening_title,
        t.title, t.status, t.due_at, t.completed_at, t.created_at
 FROM voxhire_follow_up_tasks t
 JOIN voxire_career_applications a ON a.id = t.application_id
-LEFT JOIN careers c ON c.id = a.job_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
 WHERE t.id = ?;
 
 -- name: UpsertFollowUpTask :execresult
@@ -233,6 +250,8 @@ ON DUPLICATE KEY UPDATE
 
 -- name: UpdateFollowUpTask :exec
 UPDATE voxhire_follow_up_tasks
+JOIN voxire_career_applications a ON a.id = voxhire_follow_up_tasks.application_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
    SET title = CASE WHEN ? <> '' THEN ? ELSE title END,
        status = CASE WHEN ? <> '' THEN ? ELSE status END,
        due_at = ?,
@@ -241,7 +260,7 @@ UPDATE voxhire_follow_up_tasks
          WHEN ? = 'open' THEN NULL
          ELSE completed_at
        END
- WHERE id = ?;
+ WHERE voxhire_follow_up_tasks.id = ?;
 
 -- name: CountFollowUpTasks :one
 SELECT COUNT(*) FROM voxhire_follow_up_tasks WHERE id = ?;
@@ -250,7 +269,7 @@ SELECT COUNT(*) FROM voxhire_follow_up_tasks WHERE id = ?;
 SELECT s.id, s.job_id, COALESCE(c.title, '') AS job_title, s.name, s.status,
        COALESCE(s.notes, '') AS notes, s.created_at, s.updated_at
 FROM voxhire_shortlists s
-LEFT JOIN careers c ON c.id = s.job_id
+JOIN careers c ON c.id = s.job_id AND c.owner_id = ?
 WHERE (sqlc.narg('job_id') IS NULL OR s.job_id = sqlc.narg('job_id'))
 ORDER BY s.updated_at DESC;
 
@@ -258,7 +277,10 @@ ORDER BY s.updated_at DESC;
 INSERT INTO voxhire_shortlists (job_id, name, status, notes) VALUES (?, ?, ?, ?);
 
 -- name: ShortlistExists :one
-SELECT COUNT(*) AS count FROM voxhire_shortlists WHERE id = ?;
+SELECT COUNT(*) AS count
+FROM voxhire_shortlists s
+JOIN careers c ON c.id = s.job_id AND c.owner_id = ?
+WHERE s.id = ?;
 
 -- name: UpsertShortlistItem :execresult
 INSERT INTO voxhire_shortlist_items (shortlist_id, application_id, sort_order, notes)
@@ -273,6 +295,8 @@ SELECT i.id, i.shortlist_id, i.application_id, a.name AS candidate_name, a.email
        COALESCE(a.status, 'new') AS status, i.sort_order, COALESCE(i.notes, '') AS notes,
        COALESCE(a.cv_profile_json, '') AS cv_profile_json, i.created_at
 FROM voxhire_shortlist_items i
+JOIN voxhire_shortlists s ON s.id = i.shortlist_id
+JOIN careers c ON c.id = s.job_id AND c.owner_id = ?
 JOIN voxire_career_applications a ON a.id = i.application_id
 WHERE i.shortlist_id = ?
 ORDER BY i.sort_order ASC, i.created_at ASC;
@@ -282,6 +306,8 @@ SELECT i.id, i.shortlist_id, i.application_id, a.name AS candidate_name, a.email
        COALESCE(a.status, 'new') AS status, i.sort_order, COALESCE(i.notes, '') AS notes,
        COALESCE(a.cv_profile_json, '') AS cv_profile_json, i.created_at
 FROM voxhire_shortlist_items i
+JOIN voxhire_shortlists s ON s.id = i.shortlist_id
+JOIN careers c ON c.id = s.job_id AND c.owner_id = ?
 JOIN voxire_career_applications a ON a.id = i.application_id
 WHERE i.id = ?;
 
@@ -332,11 +358,16 @@ FROM voxhire_company_leads;
 SELECT COUNT(*) AS open_tasks,
        COALESCE(SUM(CASE WHEN status = 'open' AND due_at IS NOT NULL AND due_at < UTC_TIMESTAMP() THEN 1 ELSE 0 END), 0) AS overdue_tasks
 FROM voxhire_follow_up_tasks
+JOIN voxire_career_applications a ON a.id = voxhire_follow_up_tasks.application_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
 WHERE status <> 'done';
 
 -- name: AnalyticsShortlistTotals :one
-SELECT (SELECT COUNT(*) FROM voxhire_shortlists) AS shortlists_total,
-       (SELECT COUNT(*) FROM voxhire_shortlist_items) AS shortlisted_candidates;
+SELECT COUNT(DISTINCT s.id) AS shortlists_total,
+       COUNT(i.id) AS shortlisted_candidates
+FROM voxhire_shortlists s
+JOIN careers c ON c.id = s.job_id AND c.owner_id = ?
+LEFT JOIN voxhire_shortlist_items i ON i.shortlist_id = s.id;
 
 -- name: AnalyticsApplicationsByStatus :many
 SELECT LOWER(COALESCE(NULLIF(a.status, ''), 'new')) AS bucket, COUNT(*) AS count
@@ -363,6 +394,8 @@ ORDER BY count DESC, status ASC;
 -- name: AnalyticsTaskStatusMix :many
 SELECT LOWER(COALESCE(NULLIF(status, ''), 'open')) AS bucket, COUNT(*) AS count
 FROM voxhire_follow_up_tasks
+JOIN voxire_career_applications a ON a.id = voxhire_follow_up_tasks.application_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
 GROUP BY bucket
 ORDER BY count DESC, bucket ASC;
 
