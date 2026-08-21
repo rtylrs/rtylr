@@ -14,6 +14,8 @@
     "hiredOn": "تاريخ التعيين {{date}}",
     "emergencyHeading": "جهة اتصال للطوارئ",
     "emergencyNotProvided": "غير متوفر",
+    "aboutHeading": "نبذة",
+    "noBio": "لا توجد نبذة بعد.",
     "noDocuments": "لا توجد مستندات مسجلة.",
     "goToDocuments": "الانتقال إلى المستندات",
     "noCourses": "لا توجد دورات بعد.",
