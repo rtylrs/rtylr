@@ -282,5 +282,6 @@ export const cases = [
   ["apps/hr/src/layouts/WizardLayout.tsx", "audit-batch-280-suite-01"],
   ["apps/hr/src/shared/hooks/useHrExtras.test.tsx", "audit-batch-281-suite-01"],
   ["apps/menu/src/features/cart/Checkout.test.tsx", "audit-batch-282-suite-01"],
+  ["apps/recruit/src/features/admin/SectionsAdmin.test.tsx", "audit-batch-283-suite-01"],
 ];
 

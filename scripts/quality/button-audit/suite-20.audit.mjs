@@ -282,5 +282,6 @@ export const cases = [
   ["apps/hr/src/shared/components/RatingStars.tsx", "audit-batch-280-suite-20"],
   ["apps/insights/src/main.tsx", "audit-batch-281-suite-20"],
   ["apps/recruit/src/features/admin/CareerEditor.tsx", "audit-batch-282-suite-20"],
+  ["apps/recruit/src/templates/publicIndexEmptyState.test.tsx", "audit-batch-283-suite-20"],
 ];
 

@@ -282,5 +282,6 @@ export const cases = [
   ["apps/hr/src/shared/components/HRPermissionGuard.tsx", "audit-batch-280-suite-16"],
   ["apps/insights/src/features/revenue/Revenue.tsx", "audit-batch-281-suite-16"],
   ["apps/menu/src/screens/Public/SlugLanding/LocationMenu.tsx", "audit-batch-282-suite-16"],
+  ["apps/recruit/src/templates/editorial/Index.tsx", "audit-batch-283-suite-16"],
 ];
 

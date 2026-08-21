@@ -282,5 +282,6 @@ export const cases = [
   ["apps/hr/src/shared/components/ClockInOutButton.tsx", "audit-batch-280-suite-09"],
   ["apps/insights/src/features/operations/Operations.test.tsx", "audit-batch-281-suite-09"],
   ["apps/menu/src/main.tsx", "audit-batch-282-suite-09"],
+  ["apps/recruit/src/features/public/NotFound.tsx", "audit-batch-283-suite-09"],
 ];
 
