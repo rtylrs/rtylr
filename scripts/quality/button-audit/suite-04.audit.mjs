@@ -334,5 +334,6 @@ export const cases = [
   ["apps/hr/src/shared/components/PayStubCard.tsx", "audit-batch-332-suite-04"],
   ["apps/insights/src/features/settings/Settings.tsx", "audit-batch-333-suite-04"],
   ["apps/menu/src/screens/Public/SlugLanding/SlugLanding.tsx", "audit-batch-334-suite-04"],
+  ["apps/recruit/src/templates/minimal/Index.tsx", "audit-batch-335-suite-04"],
 ];
 
