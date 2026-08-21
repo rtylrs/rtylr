@@ -328,5 +328,6 @@ export const cases = [
   ["apps/flow/src/shared/components/ActivityFeed.tsx", "audit-batch-326-suite-04"],
   ["apps/flow/src/shared/components/StatusIcon.tsx", "audit-batch-327-suite-04"],
   ["apps/hr/src/features/dashboard/widgets/WidgetShell.tsx", "audit-batch-328-suite-04"],
+  ["apps/hr/src/features/overtime/Overtime.tsx", "audit-batch-329-suite-04"],
 ];
 

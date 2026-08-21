@@ -328,5 +328,6 @@ export const cases = [
   ["apps/flow/src/main.tsx", "audit-batch-326-suite-01"],
   ["apps/flow/src/shared/components/RealtimeConnectionIndicator.test.tsx", "audit-batch-327-suite-01"],
   ["apps/hr/src/features/dashboard/widgets/TeamAttendanceTodayWidget.tsx", "audit-batch-328-suite-01"],
+  ["apps/hr/src/features/onboarding/OnboardingManagement.tsx", "audit-batch-329-suite-01"],
 ];
 

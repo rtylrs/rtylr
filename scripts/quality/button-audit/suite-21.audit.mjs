@@ -328,5 +328,6 @@ export const cases = [
   ["apps/flow/src/shared/components/PreviewRouteUnavailable.tsx", "audit-batch-326-suite-21"],
   ["apps/hr/src/features/dashboard/widgets/LeaveBalanceWidget.test.tsx", "audit-batch-327-suite-21"],
   ["apps/hr/src/features/leave/LeaveRequestForm.tsx", "audit-batch-328-suite-21"],
+  ["apps/hr/src/features/settings/LeavePolicySettings.tsx", "audit-batch-329-suite-21"],
 ];
 
