@@ -124,5 +124,6 @@ export const cases = [
   ["apps/hr/src/features/leave/Leave.tsx", "audit-batch-122-suite-24"],
   ["apps/hr/src/features/reviews/OneOnOnes.tsx", "audit-batch-123-suite-24"],
   ["apps/hr/src/features/setup-wizard/steps/RolesPermissionsStep.tsx", "audit-batch-124-suite-24"],
+  ["apps/hr/src/shared/components/BenefitPlanCard.tsx", "audit-batch-125-suite-24"],
 ];
 

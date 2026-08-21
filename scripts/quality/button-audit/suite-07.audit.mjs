@@ -124,5 +124,6 @@ export const cases = [
   ["apps/hr/src/features/dashboard/widgets/TeamAttendanceTodayWidget.tsx", "audit-batch-122-suite-07"],
   ["apps/hr/src/features/onboarding/OnboardingManagement.tsx", "audit-batch-123-suite-07"],
   ["apps/hr/src/features/settings/roles-permissions/RolesPermissions.tsx", "audit-batch-124-suite-07"],
+  ["apps/hr/src/features/time-logging/ActiveTimer.tsx", "audit-batch-125-suite-07"],
 ];
 
