@@ -269,5 +269,6 @@ export const cases = [
   ["apps/erp/src/main.tsx", "audit-batch-267-suite-25"],
   ["apps/erp/src/shared/components/StockBadge.tsx", "audit-batch-268-suite-25"],
   ["apps/finance/src/features/profit-loss/ProfitLoss.test.tsx", "audit-batch-269-suite-25"],
+  ["apps/finance/src/shared/components/LineItemRow.tsx", "audit-batch-270-suite-25"],
 ];
 

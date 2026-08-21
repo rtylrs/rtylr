@@ -269,5 +269,6 @@ export const cases = [
   ["apps/erp/src/features/reorder/Reorder.test.tsx", "audit-batch-267-suite-09"],
   ["apps/erp/src/shared/components/DateRangePicker.tsx", "audit-batch-268-suite-09"],
   ["apps/finance/src/features/bank-feeds/BankFeeds.tsx", "audit-batch-269-suite-09"],
+  ["apps/finance/src/layouts/DefaultLayout.test.tsx", "audit-batch-270-suite-09"],
 ];
 
