@@ -25,5 +25,6 @@ export const cases = [
   ["apps/insights/src/features/dashboard/Dashboard.test.tsx", "audit-batch-023-suite-25"],
   ["apps/menu/src/features/dev/Dev/DevMenu.tsx", "audit-batch-024-suite-25"],
   ["apps/recruit/src/features/public/ApplyPage.test.tsx", "audit-batch-025-suite-25"],
+  ["apps/auth/src/features/not-found/NotFound.tsx", "audit-batch-026-suite-25"],
 ];
 

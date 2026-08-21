@@ -25,5 +25,6 @@ export const cases = [
   ["apps/hr/src/shared/hooks/queries/useRoles.test.tsx", "audit-batch-023-suite-20"],
   ["apps/insights/src/shared/components/Skeleton.tsx", "audit-batch-024-suite-20"],
   ["apps/recruit/src/features/admin/FormFieldsEditor.tsx", "audit-batch-025-suite-20"],
+  ["apps/auth/src/features/email-verification/EmailVerification.tsx", "audit-batch-026-suite-20"],
 ];
 
