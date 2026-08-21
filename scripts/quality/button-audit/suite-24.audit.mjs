@@ -76,5 +76,6 @@ export const cases = [
   ["apps/hr/src/shared/components/PayStubCard.tsx", "audit-batch-074-suite-24"],
   ["apps/insights/src/features/settings/Settings.tsx", "audit-batch-075-suite-24"],
   ["apps/menu/src/screens/Public/SlugLanding/SlugLanding.tsx", "audit-batch-076-suite-24"],
+  ["apps/recruit/src/templates/minimal/Index.tsx", "audit-batch-077-suite-24"],
 ];
 

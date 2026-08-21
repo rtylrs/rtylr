@@ -76,5 +76,6 @@ export const cases = [
   ["apps/hr/src/shared/components/DocumentUpload.tsx", "audit-batch-074-suite-19"],
   ["apps/insights/src/features/reports/Reports.test.tsx", "audit-batch-075-suite-19"],
   ["apps/menu/src/screens/Public/Extras/NoMatch.tsx", "audit-batch-076-suite-19"],
+  ["apps/recruit/src/shared/components/SemanticContent.tsx", "audit-batch-077-suite-19"],
 ];
 

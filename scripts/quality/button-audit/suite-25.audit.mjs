@@ -76,5 +76,6 @@ export const cases = [
   ["apps/hr/src/shared/components/PayrollConfigGuard.tsx", "audit-batch-074-suite-25"],
   ["apps/insights/src/layouts/DefaultLayout.tsx", "audit-batch-075-suite-25"],
   ["apps/recruit/src/features/admin/AdminLayout.tsx", "audit-batch-076-suite-25"],
+  ["apps/recruit/src/templates/minimal/Job.tsx", "audit-batch-077-suite-25"],
 ];
 

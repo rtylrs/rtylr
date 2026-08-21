@@ -76,5 +76,6 @@ export const cases = [
   ["apps/hr/src/shared/components/HRPermissionGuard.tsx", "audit-batch-074-suite-22"],
   ["apps/insights/src/features/revenue/Revenue.tsx", "audit-batch-075-suite-22"],
   ["apps/menu/src/screens/Public/SlugLanding/LocationMenu.tsx", "audit-batch-076-suite-22"],
+  ["apps/recruit/src/templates/editorial/Index.tsx", "audit-batch-077-suite-22"],
 ];
 

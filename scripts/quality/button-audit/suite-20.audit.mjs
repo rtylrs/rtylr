@@ -76,5 +76,6 @@ export const cases = [
   ["apps/hr/src/shared/components/EmployeeCard.tsx", "audit-batch-074-suite-20"],
   ["apps/insights/src/features/reports/Reports.tsx", "audit-batch-075-suite-20"],
   ["apps/menu/src/screens/Public/PosMenu/PosMenu.tsx", "audit-batch-076-suite-20"],
+  ["apps/recruit/src/templates/bold/Index.tsx", "audit-batch-077-suite-20"],
 ];
 
