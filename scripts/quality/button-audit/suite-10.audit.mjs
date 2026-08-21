@@ -315,5 +315,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/LowStockWidget.tsx", "audit-batch-313-suite-10"],
   ["apps/dash/src/features/menu/Components/CreateItem.tsx", "audit-batch-314-suite-10"],
   ["apps/dash/src/features/settings/Settings/components/General/General.tsx", "audit-batch-315-suite-10"],
+  ["apps/dash/src/shared/components/dash/ConfirmDialog.tsx", "audit-batch-316-suite-10"],
 ];
 
