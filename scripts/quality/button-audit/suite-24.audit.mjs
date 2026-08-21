@@ -135,5 +135,6 @@ export const cases = [
   ["apps/dash/src/features/developer/ApiKeys.test.tsx", "audit-batch-133-suite-24"],
   ["apps/dash/src/features/security/Security.tsx", "audit-batch-134-suite-24"],
   ["apps/dash/src/main.tsx", "audit-batch-135-suite-24"],
+  ["apps/dash/src/shared/components/ui/input.tsx", "audit-batch-136-suite-24"],
 ];
 

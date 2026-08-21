@@ -135,5 +135,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/TeamWidget.test.tsx", "audit-batch-133-suite-15"],
   ["apps/dash/src/features/onboarding/CreateBusinessOnboarding.tsx", "audit-batch-134-suite-15"],
   ["apps/dash/src/features/team/InviteUser.tsx", "audit-batch-135-suite-15"],
+  ["apps/dash/src/shared/components/dash/SettingSection.tsx", "audit-batch-136-suite-15"],
 ];
 

@@ -135,5 +135,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/ActivityWidget.test.tsx", "audit-batch-133-suite-02"],
   ["apps/dash/src/features/developer/Webhooks.tsx", "audit-batch-134-suite-02"],
   ["apps/dash/src/features/settings/Settings/components/AiUsage.tsx", "audit-batch-135-suite-02"],
+  ["apps/dash/src/shared/components/FullScreenLoader/FullScreenLoader.tsx", "audit-batch-136-suite-02"],
 ];
 
