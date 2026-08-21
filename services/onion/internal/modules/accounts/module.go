@@ -8,11 +8,16 @@ import (
 
 	"github.com/voxire/onion/internal/modules/accounts/internal/api"
 	"github.com/voxire/onion/internal/modules/accounts/internal/application"
+	"github.com/voxire/onion/internal/platform/financeaccounts"
 	financeaccountv1 "github.com/voxire/voxie/gen/go/finance/account/v1"
 )
 
 type Module struct {
 	service *application.Service
+}
+
+func (m *Module) PayrollAccountProvider() financeaccounts.PayrollAccountProvider {
+	return m.service
 }
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {

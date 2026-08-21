@@ -11,20 +11,29 @@ import (
 
 	"github.com/voxire/onion/internal/modules/journal/internal/domain"
 	"github.com/voxire/onion/internal/modules/journal/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/financeaccounts"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
-	queries *sqlc.Queries
-	pool    *sql.DB
+	queries         *sqlc.Queries
+	pool            *sql.DB
+	accountProvider financeaccounts.PayrollAccountProvider
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	pool := db
 
 	return &Repository{
-		queries: sqlc.New(pool),
-		pool:    pool,
+		queries:         sqlc.New(pool),
+		pool:            pool,
+		accountProvider: unavailablePayrollAccountProvider{},
+	}
+}
+
+func (r *Repository) SetPayrollAccountProvider(provider financeaccounts.PayrollAccountProvider) {
+	if provider != nil {
+		r.accountProvider = provider
 	}
 }
 
@@ -197,12 +206,20 @@ func (r *Repository) PostPayrollJournal(ctx context.Context, input domain.Payrol
 		return err
 	}
 
-	expenseAccountID, err := r.ensurePayrollAccount(ctx, tx, input, "Payroll Expense", "expense")
+	mapping, err := r.accountProvider.GetPayrollAccountMapping(ctx, input.BusinessID)
+	if err != nil || mapping.BusinessID != input.BusinessID {
+		_ = tx.Rollback()
+		if err != nil {
+			return err
+		}
+		return financeaccounts.ErrPayrollAccountsNotConfigured
+	}
+	expenseAccountID, err := r.lockConfiguredPayrollAccount(ctx, tx, input.BusinessID, mapping.ExpenseAccountID, "expense")
 	if err != nil {
 		_ = tx.Rollback()
 		return err
 	}
-	payableAccountID, err := r.ensurePayrollAccount(ctx, tx, input, "Payroll Payable", "liability")
+	payableAccountID, err := r.lockConfiguredPayrollAccount(ctx, tx, input.BusinessID, mapping.PayableAccountID, "liability")
 	if err != nil {
 		_ = tx.Rollback()
 		return err
@@ -233,7 +250,7 @@ func (r *Repository) PostPayrollJournal(ctx context.Context, input domain.Payrol
 		{accountID: payableAccountID, credit: roundMoney(input.TotalNet)},
 	}
 	if deductions > 0 {
-		deductionsAccountID, accountErr := r.ensurePayrollAccount(ctx, tx, input, "Payroll Deductions Payable", "liability")
+		deductionsAccountID, accountErr := r.lockConfiguredPayrollAccount(ctx, tx, input.BusinessID, mapping.DeductionsPayableAccountID, "liability")
 		if accountErr != nil {
 			_ = tx.Rollback()
 			return accountErr
@@ -259,31 +276,32 @@ func (r *Repository) PostPayrollJournal(ctx context.Context, input domain.Payrol
 	return nil
 }
 
-const payrollSourceType = "payroll_run"
-
-func (r *Repository) ensurePayrollAccount(ctx context.Context, tx *sql.Tx, input domain.PayrollJournalInput, name, accountType string) (int64, error) {
-	var accountID int64
+func (r *Repository) lockConfiguredPayrollAccount(ctx context.Context, tx *sql.Tx, businessID, accountID int64, accountType string) (int64, error) {
+	if accountID <= 0 {
+		return 0, financeaccounts.ErrPayrollAccountsNotConfigured
+	}
+	var id int64
 	err := tx.QueryRowContext(ctx, `
 		SELECT id
 		FROM finance_accounts
-		WHERE business_id = ? AND name = ? AND type = ? AND is_active = TRUE
-		ORDER BY id
-		LIMIT 1
-		FOR UPDATE`, input.BusinessID, name, accountType).Scan(&accountID)
-	if err == nil {
-		return accountID, nil
+		WHERE id = ? AND business_id = ? AND type = ? AND is_active = TRUE
+		FOR UPDATE`, accountID, businessID, accountType).Scan(&id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, financeaccounts.ErrPayrollAccountsNotConfigured
 	}
-	if !errors.Is(err, sql.ErrNoRows) {
-		return 0, err
-	}
-	result, err := tx.ExecContext(ctx, `
-		INSERT INTO finance_accounts (owner_id, business_id, name, code, type, currency, balance, is_active)
-		VALUES (?, ?, ?, NULL, ?, 'USD', 0, TRUE)`, input.OwnerID, input.BusinessID, name, accountType)
 	if err != nil {
 		return 0, err
 	}
-	return result.LastInsertId()
+	return id, nil
 }
+
+type unavailablePayrollAccountProvider struct{}
+
+func (unavailablePayrollAccountProvider) GetPayrollAccountMapping(context.Context, int64) (financeaccounts.PayrollAccountMapping, error) {
+	return financeaccounts.PayrollAccountMapping{}, financeaccounts.ErrPayrollAccountsNotConfigured
+}
+
+const payrollSourceType = "payroll_run"
 
 func roundMoney(value float64) float64 {
 	return math.Round(value*100) / 100

@@ -3,17 +3,39 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/accounts/internal/domain"
 	"github.com/voxire/onion/internal/modules/accounts/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/financeaccounts"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
 type Repository struct {
 	pool    *sql.DB
 	queries *sqlc.Queries
+}
+
+func (r *Repository) GetPayrollAccountMapping(ctx context.Context, businessID int64) (financeaccounts.PayrollAccountMapping, error) {
+	row, err := r.queries.GetPayrollAccountMapping(ctx, businessID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return financeaccounts.PayrollAccountMapping{}, financeaccounts.ErrPayrollAccountsNotConfigured
+		}
+		return financeaccounts.PayrollAccountMapping{}, err
+	}
+
+	mapping := financeaccounts.PayrollAccountMapping{
+		BusinessID:       row.BusinessID,
+		ExpenseAccountID: row.ExpenseAccountID,
+		PayableAccountID: row.PayableAccountID,
+	}
+	if row.DeductionsPayableAccountID.Valid {
+		mapping.DeductionsPayableAccountID = row.DeductionsPayableAccountID.Int64
+	}
+	return mapping, nil
 }
 
 func NewRepository(db *sql.DB) *Repository {

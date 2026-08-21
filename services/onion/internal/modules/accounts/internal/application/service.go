@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/accounts/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/financeaccounts"
 )
 
 const (
@@ -22,6 +23,11 @@ type repository interface {
 	Update(ctx context.Context, businessID, id int64, input domain.AccountInput) error
 	Delete(ctx context.Context, businessID, id int64) error
 	ListForTree(ctx context.Context, businessID int64) ([]domain.Account, error)
+	GetPayrollAccountMapping(ctx context.Context, businessID int64) (financeaccounts.PayrollAccountMapping, error)
+}
+
+func (s *Service) GetPayrollAccountMapping(ctx context.Context, businessID int64) (financeaccounts.PayrollAccountMapping, error) {
+	return s.repo.GetPayrollAccountMapping(ctx, businessID)
 }
 
 type Service struct {

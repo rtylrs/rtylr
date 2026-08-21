@@ -493,7 +493,9 @@ func initializeModules(ctx context.Context) *apiModules {
 	financeBankFeedsModule := financebankfeeds.NewModule(ctx, dbclient.Pool())
 	financeReconciliationModule := financereconciliation.NewModule(ctx, dbclient.Pool())
 	financeReportsModule := financereports.NewModule(ctx, dbclient.Pool())
+	accountsModule := accounts.NewModule(ctx, dbclient.Pool())
 	journalModule := journal.NewModule(ctx, dbclient.Pool())
+	journalModule.SetPayrollAccountProvider(accountsModule.PayrollAccountProvider())
 	hrPayrollModule.SetFinancePoster(journalModule.PayrollPoster())
 	kpisModule := kpis.NewModule(ctx, dbclient.Pool())
 	posDaySummaryModule := posdaysummary.NewModule(ctx, dbclient.Pool())
@@ -509,7 +511,7 @@ func initializeModules(ctx context.Context) *apiModules {
 	taxModule := tax.NewModule(ctx, dbclient.Pool())
 
 	return &apiModules{
-		Accounts:              accounts.NewModule(ctx, dbclient.Pool()),
+		Accounts:              accountsModule,
 		Activity:              activity.NewModule(ctx, dbclient.Pool()),
 		Addons:                addons.NewModule(ctx, dbclient.Pool()),
 		APIKeys:               apikeys.NewModule(ctx, dbclient.Pool()),

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/journal/internal/domain"
+	"github.com/voxire/onion/internal/platform/financeaccounts"
 )
 
 type mockRepo struct {
@@ -39,6 +40,8 @@ func (m *mockRepo) Post(_ context.Context, _, _ int64) error {
 func (m *mockRepo) PostPayrollJournal(_ context.Context, _ domain.PayrollJournalInput) error {
 	return m.payrollErr
 }
+
+func (m *mockRepo) SetPayrollAccountProvider(financeaccounts.PayrollAccountProvider) {}
 
 func TestList_Delegates(t *testing.T) {
 	s := &Service{repo: &mockRepo{list: []domain.JournalEntry{{ID: 1}}}}

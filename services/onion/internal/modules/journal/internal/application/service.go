@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/journal/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/financeaccounts"
 )
 
 const (
@@ -23,6 +24,11 @@ type repository interface {
 	Create(ctx context.Context, ownerID, businessID int64, input domain.JournalEntryInput) (int64, error)
 	Post(ctx context.Context, businessID, id int64) error
 	PostPayrollJournal(ctx context.Context, input domain.PayrollJournalInput) error
+	SetPayrollAccountProvider(financeaccounts.PayrollAccountProvider)
+}
+
+func (s *Service) SetPayrollAccountProvider(provider financeaccounts.PayrollAccountProvider) {
+	s.repo.SetPayrollAccountProvider(provider)
 }
 
 type Service struct {

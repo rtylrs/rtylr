@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/accounts/internal/domain"
+	"github.com/voxire/onion/internal/platform/financeaccounts"
 )
 
 type mockRepo struct {
@@ -16,6 +17,8 @@ type mockRepo struct {
 	updErr     error
 	delErr     error
 	treeErr    error
+	mapping    financeaccounts.PayrollAccountMapping
+	mappingErr error
 }
 
 func (m *mockRepo) List(_ context.Context, _ int64, _, _ int) ([]domain.Account, error) {
@@ -36,6 +39,31 @@ func (m *mockRepo) Delete(_ context.Context, _, _ int64) error {
 
 func (m *mockRepo) ListForTree(_ context.Context, _ int64) ([]domain.Account, error) {
 	return m.tree, m.treeErr
+}
+
+func (m *mockRepo) GetPayrollAccountMapping(context.Context, int64) (financeaccounts.PayrollAccountMapping, error) {
+	return m.mapping, m.mappingErr
+}
+
+func TestGetPayrollAccountMapping_Delegates(t *testing.T) {
+	want := financeaccounts.PayrollAccountMapping{BusinessID: 7, ExpenseAccountID: 11, PayableAccountID: 12}
+	s := &Service{repo: &mockRepo{mapping: want}}
+
+	got, err := s.GetPayrollAccountMapping(context.Background(), want.BusinessID)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got != want {
+		t.Fatalf("mapping = %+v, want %+v", got, want)
+	}
+}
+
+func TestGetPayrollAccountMapping_PropagatesError(t *testing.T) {
+	want := errors.New("mapping unavailable")
+	s := &Service{repo: &mockRepo{mappingErr: want}}
+	if _, err := s.GetPayrollAccountMapping(context.Background(), 7); !errors.Is(err, want) {
+		t.Fatalf("expected %v, got %v", want, err)
+	}
 }
 
 func TestList_Delegates(t *testing.T) {

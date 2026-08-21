@@ -27,3 +27,8 @@ WHERE id = ? AND business_id = ?;
 -- name: DeleteAccount :execresult
 DELETE FROM finance_accounts
 WHERE id = ? AND business_id = ?;
+
+-- name: GetPayrollAccountMapping :one
+SELECT business_id, expense_account_id, payable_account_id, deductions_payable_account_id
+FROM finance_payroll_account_mappings
+WHERE business_id = ?;

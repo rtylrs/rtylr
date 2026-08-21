@@ -9,12 +9,17 @@ import (
 	"github.com/voxire/onion/internal/modules/journal/internal/api"
 	"github.com/voxire/onion/internal/modules/journal/internal/application"
 	journalDomain "github.com/voxire/onion/internal/modules/journal/internal/domain"
+	"github.com/voxire/onion/internal/platform/financeaccounts"
 	"github.com/voxire/onion/internal/platform/financejournal"
 	financejournalv1 "github.com/voxire/voxie/gen/go/finance/journal/v1"
 )
 
 type Module struct {
 	service *application.Service
+}
+
+func (m *Module) SetPayrollAccountProvider(provider financeaccounts.PayrollAccountProvider) {
+	m.service.SetPayrollAccountProvider(provider)
 }
 
 func NewModule(ctx context.Context, db *sql.DB) *Module {

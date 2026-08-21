@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/voxire/onion/internal/modules/accounts"
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
 	hrleave "github.com/voxire/onion/internal/modules/hr_leave"
 	hrovertime "github.com/voxire/onion/internal/modules/hr_overtime"
@@ -113,6 +114,7 @@ func main() {
 }
 
 type jobModules struct {
+	Accounts          *accounts.Module
 	HRCore            *hrcore.Module
 	HRLeave           *hrleave.Module
 	HROvertime        *hrovertime.Module
@@ -125,14 +127,17 @@ type jobModules struct {
 
 func initializeJobModules(ctx context.Context) *jobModules {
 	db := dbclient.Pool()
+	accountsModule := accounts.NewModule(ctx, db)
 	hrCoreModule := hrcore.NewModule(ctx, db)
 	hrLeaveModule := hrleave.NewModule(ctx, db, hrCoreModule)
 	journalModule := journal.NewModule(ctx, db)
+	journalModule.SetPayrollAccountProvider(accountsModule.PayrollAccountProvider())
 	hrPayrollModule := hrpayroll.NewModule(ctx, db, hrCoreModule)
 	hrPayrollModule.SetFinancePoster(journalModule.PayrollPoster())
 	workspacesModule := workspaces.NewModule(ctx, db, hrCoreModule, hrLeaveModule)
 	workspacesModule.Service().SetLabourCostProvider(hrPayrollModule.LabourCostProvider())
 	return &jobModules{
+		Accounts:          accountsModule,
 		HRCore:            hrCoreModule,
 		HRLeave:           hrLeaveModule,
 		HROvertime:        hrovertime.NewModule(ctx, db, hrCoreModule),

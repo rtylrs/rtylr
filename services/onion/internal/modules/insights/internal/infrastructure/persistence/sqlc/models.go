@@ -2209,6 +2209,15 @@ type FinancePayment struct {
 	CreatedAt   sql.NullTime          `db:"created_at" json:"created_at"`
 }
 
+type FinancePayrollAccountMapping struct {
+	BusinessID                 int64         `db:"business_id" json:"business_id"`
+	ExpenseAccountID           int64         `db:"expense_account_id" json:"expense_account_id"`
+	PayableAccountID           int64         `db:"payable_account_id" json:"payable_account_id"`
+	DeductionsPayableAccountID sql.NullInt64 `db:"deductions_payable_account_id" json:"deductions_payable_account_id"`
+	CreatedAt                  sql.NullTime  `db:"created_at" json:"created_at"`
+	UpdatedAt                  sql.NullTime  `db:"updated_at" json:"updated_at"`
+}
+
 type FinanceQuote struct {
 	ID            int64                   `db:"id" json:"id"`
 	OwnerID       int64                   `db:"owner_id" json:"owner_id"`
