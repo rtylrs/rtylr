@@ -78,12 +78,12 @@ func TestWorkspaces_GetProjectsByWorkspace_PaginationAndTotal(t *testing.T) {
 	ctx := context.Background()
 
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "ProjListPageWS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "ProjListPageWS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	for i := 0; i < 5; i++ {
 		_, err := repo.CreateProject(ctx, domain.ProjectInput{
@@ -208,12 +208,12 @@ func TestWorkspaces_GetColumnsByProject_PaginationAndTotal(t *testing.T) {
 	ctx := context.Background()
 
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "ColumnPageWS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "ColumnPageWS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	projID, err := repo.CreateProject(ctx, domain.ProjectInput{
 		WorkspaceID: wsID, OwnerID: testutil.OwnerID, Name: "ColumnPage Project", CreatedBy: testutil.OwnerID,
@@ -279,12 +279,12 @@ func TestWorkspaces_ListWorkspaceMembers_PaginationAndTotal(t *testing.T) {
 	ctx := context.Background()
 
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "WSMemberPageWS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "WSMemberPageWS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	for i := 0; i < 5; i++ {
 		userID := int64(700000000 + i)
@@ -342,12 +342,12 @@ func TestWorkspaces_ListProjectMembers_PaginationAndTotal(t *testing.T) {
 	ctx := context.Background()
 
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "ProjMemberPageWS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "ProjMemberPageWS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	projID, err := repo.CreateProject(ctx, domain.ProjectInput{
 		WorkspaceID: wsID, OwnerID: testutil.OwnerID, Name: "ProjMemberPage Project", CreatedBy: testutil.OwnerID,
@@ -412,12 +412,12 @@ func TestWorkspaces_GetLabelsByWorkspace_PaginationAndTotal(t *testing.T) {
 	ctx := context.Background()
 
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "LabelPageWS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "LabelPageWS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	for i := 0; i < 5; i++ {
 		labelID, err := repo.CreateLabel(ctx, domain.LabelInput{

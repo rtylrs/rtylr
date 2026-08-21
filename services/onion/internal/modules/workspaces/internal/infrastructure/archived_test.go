@@ -17,12 +17,12 @@ func seedArchivedTestTask(t *testing.T, repo *infrastructure.Repository, name st
 	ctx := context.Background()
 
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: name + " WS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: name + " WS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	projID, err := repo.CreateProject(ctx, domain.ProjectInput{
 		WorkspaceID: wsID, OwnerID: testutil.OwnerID, Name: name + " Project", CreatedBy: testutil.OwnerID,
@@ -33,14 +33,14 @@ func seedArchivedTestTask(t *testing.T, repo *infrastructure.Repository, name st
 
 	taskID, err = repo.CreateTask(ctx, domain.TaskInput{
 		ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID,
-		BusinessID: testutil.OwnerID, Title: name + " Task", ReporterID: testutil.OwnerID,
+		BusinessID: testutil.BusinessID, Title: name + " Task", ReporterID: testutil.OwnerID,
 	})
 	if err != nil {
 		t.Fatalf("CreateTask: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteTask(ctx, taskID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteTask(ctx, taskID, testutil.BusinessID) })
 
-	return taskID, testutil.OwnerID
+	return taskID, testutil.BusinessID
 }
 
 func TestWorkspaces_UpdateTask_ArchivedTrueIsPersistedAndRead(t *testing.T) {

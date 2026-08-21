@@ -16,12 +16,12 @@ func TestWorkspaces_GetTasksByProject_PaginationAndTotal(t *testing.T) {
 	ctx := context.Background()
 
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "ProjectPageWS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "ProjectPageWS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	projID, err := repo.CreateProject(ctx, domain.ProjectInput{
 		WorkspaceID: wsID, OwnerID: testutil.OwnerID, Name: "ProjectPage Project", CreatedBy: testutil.OwnerID,
@@ -32,13 +32,13 @@ func TestWorkspaces_GetTasksByProject_PaginationAndTotal(t *testing.T) {
 
 	for i := 0; i < 5; i++ {
 		taskID, err := repo.CreateTask(ctx, domain.TaskInput{
-			ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID,
+			ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
 			Title: fmt.Sprintf("ProjectPage Task %d", i), ReporterID: testutil.OwnerID,
 		})
 		if err != nil {
 			t.Fatalf("CreateTask %d: %v", i, err)
 		}
-		t.Cleanup(func(id int64) func() { return func() { _ = repo.DeleteTask(ctx, id, testutil.OwnerID) } }(taskID))
+		t.Cleanup(func(id int64) func() { return func() { _ = repo.DeleteTask(ctx, id, testutil.BusinessID) } }(taskID))
 	}
 
 	page1, total1, err := repo.GetTasksByProject(ctx, domain.ListTasksFilter{ProjectID: projID, WorkspaceID: wsID, Limit: 2, Offset: 0})
@@ -88,12 +88,12 @@ func TestWorkspaces_GetMyTasks_PaginationAndTotal(t *testing.T) {
 	ctx := context.Background()
 
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "MyTasksPageWS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "MyTasksPageWS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	projID, err := repo.CreateProject(ctx, domain.ProjectInput{
 		WorkspaceID: wsID, OwnerID: testutil.OwnerID, Name: "MyTasksPage Project", CreatedBy: testutil.OwnerID,
@@ -106,14 +106,14 @@ func TestWorkspaces_GetMyTasks_PaginationAndTotal(t *testing.T) {
 	const assignee = int64(919191919)
 	for i := 0; i < 5; i++ {
 		taskID, err := repo.CreateTask(ctx, domain.TaskInput{
-			ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID,
+			ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
 			Title: fmt.Sprintf("MyTasksPage Task %d", i), ReporterID: testutil.OwnerID,
 			AssigneeID: int64Ptr(assignee),
 		})
 		if err != nil {
 			t.Fatalf("CreateTask %d: %v", i, err)
 		}
-		t.Cleanup(func(id int64) func() { return func() { _ = repo.DeleteTask(ctx, id, testutil.OwnerID) } }(taskID))
+		t.Cleanup(func(id int64) func() { return func() { _ = repo.DeleteTask(ctx, id, testutil.BusinessID) } }(taskID))
 	}
 
 	page1, total1, err := repo.GetMyTasks(ctx, assignee, 0, 2, 0)
@@ -172,20 +172,20 @@ func TestWorkspaces_GetMyTasks_ScopedByWorkspace(t *testing.T) {
 	const assignee = int64(929292929)
 
 	wsA, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "ScopedMyTasksWS-A", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "ScopedMyTasksWS-A", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace A: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsA, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsA, testutil.BusinessID) })
 
 	wsB, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "ScopedMyTasksWS-B", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "ScopedMyTasksWS-B", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace B: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsB, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsB, testutil.BusinessID) })
 
 	projA, err := repo.CreateProject(ctx, domain.ProjectInput{
 		WorkspaceID: wsA, OwnerID: testutil.OwnerID, Name: "ScopedMyTasks Project A", CreatedBy: testutil.OwnerID,
@@ -202,24 +202,24 @@ func TestWorkspaces_GetMyTasks_ScopedByWorkspace(t *testing.T) {
 	}
 
 	taskA, err := repo.CreateTask(ctx, domain.TaskInput{
-		ProjectID: projA, WorkspaceID: wsA, OwnerID: testutil.OwnerID,
+		ProjectID: projA, WorkspaceID: wsA, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
 		Title: "ScopedMyTasks Task A", ReporterID: testutil.OwnerID,
 		AssigneeID: int64Ptr(assignee),
 	})
 	if err != nil {
 		t.Fatalf("CreateTask A: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteTask(ctx, taskA, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteTask(ctx, taskA, testutil.BusinessID) })
 
 	taskB, err := repo.CreateTask(ctx, domain.TaskInput{
-		ProjectID: projB, WorkspaceID: wsB, OwnerID: testutil.OwnerID,
+		ProjectID: projB, WorkspaceID: wsB, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
 		Title: "ScopedMyTasks Task B", ReporterID: testutil.OwnerID,
 		AssigneeID: int64Ptr(assignee),
 	})
 	if err != nil {
 		t.Fatalf("CreateTask B: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteTask(ctx, taskB, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteTask(ctx, taskB, testutil.BusinessID) })
 
 	scopedToA, totalA, err := repo.GetMyTasks(ctx, assignee, wsA, 10, 0)
 	if err != nil {
@@ -261,12 +261,12 @@ func TestWorkspaces_SearchTasks_PaginationAndTotal(t *testing.T) {
 	ctx := context.Background()
 
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "SearchPageWS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "SearchPageWS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	projID, err := repo.CreateProject(ctx, domain.ProjectInput{
 		WorkspaceID: wsID, OwnerID: testutil.OwnerID, Name: "SearchPage Project", CreatedBy: testutil.OwnerID,
@@ -278,14 +278,14 @@ func TestWorkspaces_SearchTasks_PaginationAndTotal(t *testing.T) {
 	const searchToken = "zzqsearchpaginationtoken"
 	for i := 0; i < 5; i++ {
 		taskID, err := repo.CreateTask(ctx, domain.TaskInput{
-			ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID,
+			ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
 			Title:      fmt.Sprintf("%s task %d", searchToken, i),
 			ReporterID: testutil.OwnerID,
 		})
 		if err != nil {
 			t.Fatalf("CreateTask %d: %v", i, err)
 		}
-		t.Cleanup(func(id int64) func() { return func() { _ = repo.DeleteTask(ctx, id, testutil.OwnerID) } }(taskID))
+		t.Cleanup(func(id int64) func() { return func() { _ = repo.DeleteTask(ctx, id, testutil.BusinessID) } }(taskID))
 	}
 
 	page1, total1, err := repo.SearchTasks(ctx, wsID, searchToken, 2, 0)
@@ -335,12 +335,12 @@ func TestWorkspaces_GetSubtasks_PaginationAndTotal(t *testing.T) {
 	ctx := context.Background()
 
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "SubtaskPageWS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "SubtaskPageWS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	projID, err := repo.CreateProject(ctx, domain.ProjectInput{
 		WorkspaceID: wsID, OwnerID: testutil.OwnerID, Name: "SubtaskPage Project", CreatedBy: testutil.OwnerID,
@@ -350,24 +350,24 @@ func TestWorkspaces_GetSubtasks_PaginationAndTotal(t *testing.T) {
 	}
 
 	parentID, err := repo.CreateTask(ctx, domain.TaskInput{
-		ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID,
+		ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
 		Title: "Subtask Page Parent", ReporterID: testutil.OwnerID,
 	})
 	if err != nil {
 		t.Fatalf("CreateTask parent: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteTask(ctx, parentID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteTask(ctx, parentID, testutil.BusinessID) })
 
 	for i := 0; i < 5; i++ {
 		subtaskID, err := repo.CreateTask(ctx, domain.TaskInput{
-			ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID,
+			ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
 			Title: fmt.Sprintf("Subtask Page Child %d", i), ReporterID: testutil.OwnerID,
 			ParentTaskID: int64Ptr(parentID),
 		})
 		if err != nil {
 			t.Fatalf("CreateTask child %d: %v", i, err)
 		}
-		t.Cleanup(func(id int64) func() { return func() { _ = repo.DeleteTask(ctx, id, testutil.OwnerID) } }(subtaskID))
+		t.Cleanup(func(id int64) func() { return func() { _ = repo.DeleteTask(ctx, id, testutil.BusinessID) } }(subtaskID))
 	}
 
 	page1, total1, err := repo.GetSubtasks(ctx, parentID, 2, 0)

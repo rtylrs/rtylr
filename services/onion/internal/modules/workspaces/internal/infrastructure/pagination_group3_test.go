@@ -17,12 +17,12 @@ func TestWorkspaces_ListCycles_PaginationAndTotal(t *testing.T) {
 	ctx := context.Background()
 
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "CyclePageWS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "CyclePageWS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	start := time.Now()
 	for i := 0; i < 5; i++ {
@@ -85,12 +85,12 @@ func TestWorkspaces_ListMilestones_PaginationAndTotal(t *testing.T) {
 	ctx := context.Background()
 
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "MilestonePageWS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "MilestonePageWS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	projID, err := repo.CreateProject(ctx, domain.ProjectInput{
 		WorkspaceID: wsID, OwnerID: testutil.OwnerID, Name: "MilestonePage Project", CreatedBy: testutil.OwnerID,
@@ -169,12 +169,12 @@ func TestWorkspaces_ListViews_PaginationAndTotal(t *testing.T) {
 	ctx := context.Background()
 
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "ViewPageWS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "ViewPageWS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	for i := 0; i < 5; i++ {
 		_, err := repo.CreateView(ctx, domain.ViewInput{

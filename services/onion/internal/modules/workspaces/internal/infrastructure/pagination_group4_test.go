@@ -16,12 +16,12 @@ func TestWorkspaces_GetTeamWorkload_PaginationAndTotal(t *testing.T) {
 	ctx := context.Background()
 
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "WorkloadPageWS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "WorkloadPageWS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	// GetTeamWorkload inner-joins flow_workspace_members to users, so members
 	// need a real users row to show up at all.
@@ -96,12 +96,12 @@ func TestWorkspaces_GetRoadmap_PaginationAndTotal(t *testing.T) {
 	ctx := context.Background()
 
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, Name: "RoadmapPageWS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "RoadmapPageWS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.OwnerID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	for i := 0; i < 5; i++ {
 		_, err := repo.CreateProject(ctx, domain.ProjectInput{
