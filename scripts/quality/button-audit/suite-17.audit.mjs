@@ -241,5 +241,6 @@ export const cases = [
   ["apps/dash/src/shared/components/ui/button.tsx", "audit-batch-239-suite-17"],
   ["apps/erp/src/features/brands/Brands.test.tsx", "audit-batch-240-suite-17"],
   ["apps/erp/src/features/reorder/Reorder.tsx", "audit-batch-241-suite-17"],
+  ["apps/erp/src/shared/components/ExportButton.test.tsx", "audit-batch-242-suite-17"],
 ];
 
