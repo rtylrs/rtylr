@@ -11,6 +11,9 @@ sql:
       # ALTERs in v8 have a table to alter.
       - "../../../../internal/platform/database/schemas/hr_time/schema.sql"
       - "../../../../internal/platform/database/schemas/flow/v8_time_tracking.sql"
+      # v9 adds the workspace-removal columns (visibility, is_personal, archive
+      # timestamps) that the projects_v2 queries select and write.
+      - "../../../../internal/platform/database/schemas/flow/v9_workspace_removal_prep.sql"
       # hr_employees.user_id is the only link between a workspace member (a
       # user id) and a work day (keyed on employee id). The team view resolves
       # through it; nothing here writes to hr_employees.

@@ -178,10 +178,16 @@ func (r *Repository) CreateProject(ctx context.Context, input domain.ProjectInpu
 		color = "#4583C4"
 	}
 
+	visibility := input.Visibility
+	if visibility == "" {
+		visibility = domain.VisibilityPrivate
+	}
 	res, err := r.queries.CreateProject(ctx, sqlc.CreateProjectParams{
 		WorkspaceID: input.WorkspaceID,
 		OwnerID:     input.OwnerID,
 		BusinessID:  input.BusinessID,
+		Visibility:  sqlc.FlowProjectsVisibility(visibility),
+		IsPersonal:  input.IsPersonal,
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Icon:        sql.NullString{String: icon, Valid: true},
@@ -266,18 +272,6 @@ func (r *Repository) UpdateProject(ctx context.Context, input domain.UpdateProje
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateProject failed", logger.Error(err))
-		return err
-	}
-	return nil
-}
-
-func (r *Repository) ArchiveProject(ctx context.Context, id, businessID int64) error {
-	err := r.queries.ArchiveProject(ctx, sqlc.ArchiveProjectParams{
-		ID:         id,
-		BusinessID: businessID,
-	})
-	if err != nil {
-		logger.Ctx(ctx).Error("ArchiveProject failed", logger.Error(err))
 		return err
 	}
 	return nil

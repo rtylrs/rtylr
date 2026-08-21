@@ -27,8 +27,8 @@ ON DUPLICATE KEY UPDATE role = VALUES(role);
 DELETE FROM flow_workspace_members WHERE workspace_id = ? AND user_id = ?;
 
 -- name: CreateProject :execresult
-INSERT INTO flow_projects (workspace_id, owner_id, business_id, name, description, icon, color, start_date, due_date, created_by)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO flow_projects (workspace_id, owner_id, business_id, name, description, icon, color, visibility, is_personal, start_date, due_date, created_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: CountProjectsByWorkspace :one
 SELECT COUNT(*) FROM flow_projects WHERE workspace_id = ? AND business_id = ?;
@@ -77,7 +77,10 @@ UPDATE flow_projects SET name = ?, description = ?, icon = ?, color = ?, status 
 WHERE id = ? AND business_id = ?;
 
 -- name: ArchiveProject :exec
-UPDATE flow_projects SET status = 'archived' WHERE id = ? AND business_id = ?;
+-- Stamps the recycle-bin timestamps: purge_at arrives from the service, computed
+-- from the business's retention setting at archive time.
+UPDATE flow_projects SET status = 'archived', archived_at = NOW(), purge_at = ?
+WHERE id = ? AND business_id = ?;
 
 -- name: CreateTask :execresult
 INSERT INTO flow_tasks

@@ -659,13 +659,15 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	//
 	//   user:<id>        → caller must be that user
 	//   owner:<id>       → caller must own or belong to that owner account
-	//   workspace:<id>   → caller must belong to the workspace
+	//   business:<id>    → caller must belong to that business
+//   workspace:<id>   → caller must belong to the workspace
 	//   project:<id>     → caller must be a project or workspace member
 	//   task:<id>        → caller must be able to access the task's project
 	//
 	// Unknown topic schemes are denied by default.
 	workspacesSvc := modules.Workspaces.Service()
 	teamSvc := modules.Team.Service()
+	hubResolver := team.NewHubProfileResolver(modules.Team.Service())
 	wsbus.SetDefault(ctx, wsbus.New(func(ctx context.Context, userID int64, topic string) bool {
 		scope, id, ok := wsbus.ParseTopic(topic)
 		if !ok {
@@ -676,6 +678,13 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 			return id == userID
 		case "owner":
 			return teamSvc.CanAccessOwner(ctx, userID, id)
+		case "business":
+			// Workspace-removal topic: project lifecycle events fan out here.
+			// The authorizer only gets a user id, so membership resolves via
+			// the hub profile: a resolvable profile means the caller belongs
+			// to that business.
+			_, profileErr := hubResolver.GetProfile(ctx, userID, id)
+			return profileErr == nil
 		case "workspace":
 			return workspacesSvc.IsWorkspaceMember(ctx, userID, id)
 		case "project":

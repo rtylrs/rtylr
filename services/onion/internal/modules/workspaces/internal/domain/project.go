@@ -2,6 +2,18 @@ package domain
 
 import "time"
 
+// Project visibility values. Private (the default) limits the project to its
+// creator and members; public additionally exposes this struct's metadata on
+// the owner's profile, never task access.
+const (
+	VisibilityPrivate = "private"
+	VisibilityPublic  = "public"
+)
+
+func ValidVisibility(v string) bool {
+	return v == VisibilityPrivate || v == VisibilityPublic
+}
+
 type Project struct {
 	ID          int64
 	WorkspaceID int64
@@ -12,11 +24,19 @@ type Project struct {
 	Icon        string
 	Color       string
 	Status      string
+	Visibility  string
+	IsPersonal  bool
 	StartDate   *time.Time
 	DueDate     *time.Time
 	CreatedBy   int64
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+
+	// Recycle-bin timestamps. ArchivedAt set means the project sits in the bin;
+	// PurgeAt is the permanent-deletion deadline stamped from the business's
+	// retention setting at archive time.
+	ArchivedAt *time.Time
+	PurgeAt    *time.Time
 
 	// Display projections populated by list/detail reads.
 	TaskCount      int32
@@ -44,6 +64,8 @@ type ProjectInput struct {
 	Description string
 	Icon        string
 	Color       string
+	Visibility  string // empty means VisibilityPrivate; validated by the service
+	IsPersonal  bool   // true only for the auto-provisioned My Tasks bucket
 	StartDate   *time.Time
 	DueDate     *time.Time
 	CreatedBy   int64

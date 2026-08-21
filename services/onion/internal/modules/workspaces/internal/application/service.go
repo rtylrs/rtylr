@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 	"database/sql"
 	"fmt"
 	"strconv"
@@ -435,6 +436,17 @@ func (s *Service) ListProjects(ctx context.Context, workspaceID, businessID, lim
 
 func (s *Service) CreateProject(ctx context.Context, input domain.ProjectInput) (domain.Project, error) {
 	defer invalidateWorkspacesScope(ctx, input.BusinessID)
+	// Ownerless projects break RequireProjectRole's ownership fallback, so the
+	// service owns this invariant instead of trusting every caller.
+	if input.OwnerID == 0 {
+		input.OwnerID = input.CreatedBy
+	}
+	if input.Visibility == "" {
+		input.Visibility = domain.VisibilityPrivate
+	}
+	if !domain.ValidVisibility(input.Visibility) {
+		return domain.Project{}, errors.New("invalid project visibility")
+	}
 	id, err := s.repo.CreateProject(ctx, input)
 	if err != nil {
 		return domain.Project{}, err
@@ -453,6 +465,8 @@ func (s *Service) CreateProject(ctx context.Context, input domain.ProjectInput) 
 		Icon:        input.Icon,
 		Color:       input.Color,
 		Status:      "active",
+		Visibility:  input.Visibility,
+		IsPersonal:  input.IsPersonal,
 		StartDate:   input.StartDate,
 		DueDate:     input.DueDate,
 		CreatedBy:   input.CreatedBy,
@@ -466,7 +480,10 @@ func (s *Service) UpdateProject(ctx context.Context, input domain.UpdateProjectI
 
 func (s *Service) DeleteProject(ctx context.Context, id, businessID int64) error {
 	defer invalidateWorkspacesScope(ctx, businessID)
-	return s.repo.ArchiveProject(ctx, id, businessID)
+	// Archive now carries recycle-bin semantics: stamp the permanent-deletion
+	// deadline from the retention setting so every client sees the same clock.
+	deadline := binPurgeDeadline(time.Now())
+	return s.repo.ArchiveProject(ctx, id, businessID, &deadline)
 }
 
 func (s *Service) ListProjectMembers(ctx context.Context, projectID, limit, offset int64) ([]domain.ProjectMember, int64, error) {
@@ -1271,6 +1288,8 @@ func (s *Service) EnsureMyTasksProject(
 		Description: "Your personal task board. Quick-created tasks land here.",
 		Icon:        "✅",
 		Color:       "#64C5B9",
+		Visibility:  domain.VisibilityPrivate,
+		IsPersonal:  true,
 		CreatedBy:   userID,
 	})
 	if err != nil {
