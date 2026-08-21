@@ -10,27 +10,24 @@ export const staffMemberSchema = z.object({
   status: z.enum(['Active', 'Inactive']).catch('Active'),
 });
 
-export const myEmployeeSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(Number),
-});
-
-export const employeeProfileSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(Number),
-  photoUrl: z.string().optional(),
+/**
+ * The single-record projection. `getStaff` already returns phone, address,
+ * start_date and both emergency_contact_* fields; `staffMemberSchema` is the
+ * list shape and deliberately drops them. Before this existed, the detail screen
+ * read those five values from `/hr/staff/detail`, which no onion module serves,
+ * so they rendered empty while the data sat unused in the response the same
+ * screen had already fetched. See #875.
+ */
+export const staffDetailSchema = staffMemberSchema.extend({
   phone: z.string().optional(),
   address: z.string().optional(),
-  birthday: z.string().optional(),
-  hiredAt: z.string().optional(),
-  emergency: z
-    .object({
-      name: z.string(),
-      relation: z.string(),
-      phone: z.string(),
-    })
-    .optional(),
-  bio: z.string().optional(),
-  managerId: z.number().optional(),
-  skills: z.array(z.string()).optional(),
+  startDate: z.string().optional(),
+  emergencyContactName: z.string().optional(),
+  emergencyContactPhone: z.string().optional(),
+});
+
+export const myEmployeeSchema = z.object({
+  id: z.union([z.string(), z.number()]).transform(Number),
 });
 
 export const birthdaySchema = z.object({
@@ -50,6 +47,6 @@ export const anniversarySchema = z.object({
 });
 
 export type StaffMember = z.infer<typeof staffMemberSchema>;
-export type EmployeeProfile = z.infer<typeof employeeProfileSchema>;
+export type StaffDetail = z.infer<typeof staffDetailSchema>;
 export type Birthday = z.infer<typeof birthdaySchema>;
 export type Anniversary = z.infer<typeof anniversarySchema>;
