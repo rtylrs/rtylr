@@ -314,5 +314,6 @@ export const cases = [
   ["apps/dash/src/features/analytics/Analytics.test.tsx", "audit-batch-312-suite-16"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/TeamWidget.test.tsx", "audit-batch-313-suite-16"],
   ["apps/dash/src/features/onboarding/CreateBusinessOnboarding.tsx", "audit-batch-314-suite-16"],
+  ["apps/dash/src/features/team/InviteUser.tsx", "audit-batch-315-suite-16"],
 ];
 

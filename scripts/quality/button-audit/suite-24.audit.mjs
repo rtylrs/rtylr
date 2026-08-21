@@ -314,5 +314,6 @@ export const cases = [
   ["apps/dash/src/features/chat/Chat.test.tsx", "audit-batch-312-suite-24"],
   ["apps/dash/src/features/design/Design.tsx", "audit-batch-313-suite-24"],
   ["apps/dash/src/features/qr-codes/templates.tsx", "audit-batch-314-suite-24"],
+  ["apps/dash/src/layouts/NoSidebarLayout.tsx", "audit-batch-315-suite-24"],
 ];
 
