@@ -94,5 +94,6 @@ export const cases = [
   ["apps/flow/src/features/presence/PresenceScreen.tsx", "audit-batch-092-suite-09"],
   ["apps/flow/src/features/settings/sections/TimeSection.tsx", "audit-batch-093-suite-09"],
   ["apps/flow/src/features/workspace-manager/AddWorkspaceMemberDialog.tsx", "audit-batch-094-suite-09"],
+  ["apps/flow/src/shared/components/PreviewRouteUnavailable.tsx", "audit-batch-095-suite-09"],
 ];
 

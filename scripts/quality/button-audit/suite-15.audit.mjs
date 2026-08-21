@@ -94,5 +94,6 @@ export const cases = [
   ["apps/flow/src/features/projects/ProjectDashboard.tsx", "audit-batch-092-suite-15"],
   ["apps/flow/src/features/tasks/TaskDetail.tsx", "audit-batch-093-suite-15"],
   ["apps/flow/src/router.tsx", "audit-batch-094-suite-15"],
+  ["apps/flow/src/shared/components/RealtimeConnectionIndicator.tsx", "audit-batch-095-suite-15"],
 ];
 
