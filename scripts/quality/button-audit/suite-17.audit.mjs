@@ -308,5 +308,6 @@ export const cases = [
   ["apps/hr/src/shared/components/ui.tsx", "audit-batch-306-suite-17"],
   ["apps/insights/src/shared/components/ErrorState.tsx", "audit-batch-307-suite-17"],
   ["apps/recruit/src/features/admin/FormFieldsEditor.test.tsx", "audit-batch-308-suite-17"],
+  ["apps/auth/src/features/callback/Callback.tsx", "audit-batch-309-suite-17"],
 ];
 

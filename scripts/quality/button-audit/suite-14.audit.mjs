@@ -308,5 +308,6 @@ export const cases = [
   ["apps/hr/src/shared/components/ShiftCell.tsx", "audit-batch-306-suite-14"],
   ["apps/insights/src/router.tsx", "audit-batch-307-suite-14"],
   ["apps/recruit/src/features/admin/CareersAdmin.test.tsx", "audit-batch-308-suite-14"],
+  ["apps/recruit/src/templates/resolver.tsx", "audit-batch-309-suite-14"],
 ];
 
