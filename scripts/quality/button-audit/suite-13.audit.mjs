@@ -32,5 +32,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/PendingWidget.test.tsx", "audit-batch-030-suite-13"],
   ["apps/dash/src/features/menu/Menu.tsx", "audit-batch-031-suite-13"],
   ["apps/dash/src/features/settings/Settings/components/SettingsLayout/SettingsLayout.tsx", "audit-batch-032-suite-13"],
+  ["apps/dash/src/shared/components/dash/DangerZone.tsx", "audit-batch-033-suite-13"],
 ];
 

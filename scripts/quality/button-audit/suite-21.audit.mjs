@@ -32,5 +32,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/TopCustomersWidget.tsx", "audit-batch-030-suite-21"],
   ["apps/dash/src/features/permissions/Permissions.tsx", "audit-batch-031-suite-21"],
   ["apps/dash/src/features/team/Team.test.tsx", "audit-batch-032-suite-21"],
+  ["apps/dash/src/shared/components/ui/avatar.tsx", "audit-batch-033-suite-21"],
 ];
 
