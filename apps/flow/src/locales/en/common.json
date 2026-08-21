@@ -109,6 +109,7 @@
       "title": "Week load (your tasks due this week)",
       "scheduled": "h scheduled",
       "capacity": "of ~{{hours}}h capacity",
+      "capacityUnknown": "Capacity not set",
       "description": "Uses effort chips or estimate hours on tasks. Planned backlog stays visible in projects; this is only what you already scheduled for the week."
     },
     "reviewStreak": {
