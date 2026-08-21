@@ -9,8 +9,8 @@ import (
 	"github.com/voxire/onion/internal/modules/booking_services/internal/application"
 	"github.com/voxire/onion/internal/modules/booking_services/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/money"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	bookingservicev1 "github.com/voxire/voxie/gen/go/booking/service/v1"
 )

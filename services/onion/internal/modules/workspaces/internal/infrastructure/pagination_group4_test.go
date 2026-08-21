@@ -104,12 +104,15 @@ func TestWorkspaces_GetRoadmap_PaginationAndTotal(t *testing.T) {
 	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	for i := 0; i < 5; i++ {
-		_, err := repo.CreateProject(ctx, domain.ProjectInput{
+		projID, err := repo.CreateProject(ctx, domain.ProjectInput{
 			WorkspaceID: wsID, OwnerID: testutil.OwnerID, Name: fmt.Sprintf("RoadmapPage Project %d", i), CreatedBy: testutil.OwnerID,
 		})
 		if err != nil {
 			t.Fatalf("CreateProject %d: %v", i, err)
 		}
+		t.Cleanup(func(id int64) func() {
+			return func() { _, _ = db.ExecContext(context.Background(), "DELETE FROM flow_projects WHERE id = ?", id) }
+		}(projID))
 	}
 
 	page1, total1, err := repo.GetRoadmap(ctx, wsID, 2, 0)

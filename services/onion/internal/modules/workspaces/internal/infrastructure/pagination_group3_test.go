@@ -26,7 +26,7 @@ func TestWorkspaces_ListCycles_PaginationAndTotal(t *testing.T) {
 
 	start := time.Now()
 	for i := 0; i < 5; i++ {
-		_, err := repo.CreateCycle(ctx, domain.CycleInput{
+		cycleID, err := repo.CreateCycle(ctx, domain.CycleInput{
 			BusinessID: testutil.OwnerID, WorkspaceID: wsID,
 			Name:      fmt.Sprintf("CyclePage Cycle %d", i),
 			StartDate: start.AddDate(0, 0, i*14),
@@ -36,6 +36,11 @@ func TestWorkspaces_ListCycles_PaginationAndTotal(t *testing.T) {
 		if err != nil {
 			t.Fatalf("CreateCycle %d: %v", i, err)
 		}
+		// No repository DeleteCycle exists yet (production has no way to
+		// remove a cycle either), so clean up the fixture row directly.
+		t.Cleanup(func(id int64) func() {
+			return func() { _, _ = db.ExecContext(context.Background(), "DELETE FROM flow_cycles WHERE id = ?", id) }
+		}(cycleID))
 	}
 
 	page1, total1, err := repo.ListCycles(ctx, wsID, 2, 0)
@@ -98,15 +103,21 @@ func TestWorkspaces_ListMilestones_PaginationAndTotal(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	for i := 0; i < 5; i++ {
-		_, err := repo.CreateMilestone(ctx, domain.MilestoneInput{
+		milestoneID, err := repo.CreateMilestone(ctx, domain.MilestoneInput{
 			ProjectID: projID, WorkspaceID: wsID, BusinessID: testutil.OwnerID,
 			Name: fmt.Sprintf("MilestonePage Milestone %d", i), DueDate: time.Now().AddDate(0, 1, i), CreatedBy: testutil.OwnerID,
 		})
 		if err != nil {
 			t.Fatalf("CreateMilestone %d: %v", i, err)
 		}
+		// No repository DeleteMilestone exists yet (production has no way to
+		// remove a milestone either), so clean up the fixture row directly.
+		t.Cleanup(func(id int64) func() {
+			return func() { _, _ = db.ExecContext(context.Background(), "DELETE FROM flow_milestones WHERE id = ?", id) }
+		}(milestoneID))
 	}
 
 	// projectID == nil path: workspace-scoped listing.
@@ -177,13 +188,14 @@ func TestWorkspaces_ListViews_PaginationAndTotal(t *testing.T) {
 	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	for i := 0; i < 5; i++ {
-		_, err := repo.CreateView(ctx, domain.ViewInput{
+		viewID, err := repo.CreateView(ctx, domain.ViewInput{
 			WorkspaceID: wsID, Name: fmt.Sprintf("ViewPage View %d", i),
 			Filters: map[string]interface{}{}, CreatedBy: testutil.OwnerID,
 		})
 		if err != nil {
 			t.Fatalf("CreateView %d: %v", i, err)
 		}
+		t.Cleanup(func(id int64) func() { return func() { _ = repo.DeleteView(ctx, id, testutil.OwnerID) } }(viewID))
 	}
 
 	page1, total1, err := repo.ListViews(ctx, wsID, 2, 0)

@@ -86,13 +86,16 @@ func TestWorkspaces_GetProjectsByWorkspace_PaginationAndTotal(t *testing.T) {
 	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, wsID, testutil.BusinessID) })
 
 	for i := 0; i < 5; i++ {
-		_, err := repo.CreateProject(ctx, domain.ProjectInput{
+		projID, err := repo.CreateProject(ctx, domain.ProjectInput{
 			WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.OwnerID,
 			Name: fmt.Sprintf("ProjListPage Project %d", i), CreatedBy: testutil.OwnerID,
 		})
 		if err != nil {
 			t.Fatalf("CreateProject %d: %v", i, err)
 		}
+		t.Cleanup(func(id int64) func() {
+			return func() { _, _ = db.ExecContext(context.Background(), "DELETE FROM flow_projects WHERE id = ?", id) }
+		}(projID))
 	}
 
 	page1, total1, err := repo.GetProjectsByWorkspace(ctx, wsID, testutil.OwnerID, 2, 0)
@@ -155,12 +158,17 @@ func TestWorkspaces_GetProjectsByWorkspace_AggregatesCountsForPageOnly(t *testin
 	if err != nil {
 		t.Fatalf("CreateProject populated: %v", err)
 	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM flow_projects WHERE id = ?", populatedID)
+	})
+
 	emptyID, err := repo.CreateProject(ctx, domain.ProjectInput{
 		WorkspaceID: workspaceID, OwnerID: paginationBusinessID, BusinessID: paginationBusinessID, Name: "Empty", CreatedBy: paginationBusinessID,
 	})
 	if err != nil {
 		t.Fatalf("CreateProject empty: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(context.Background(), "DELETE FROM flow_projects WHERE id = ?", emptyID) })
 
 	var firstTaskID int64
 	for i := 0; i < 3; i++ {
@@ -171,6 +179,7 @@ func TestWorkspaces_GetProjectsByWorkspace_AggregatesCountsForPageOnly(t *testin
 		if err != nil {
 			t.Fatalf("CreateTask %d: %v", i, err)
 		}
+		t.Cleanup(func(id int64) func() { return func() { _ = repo.DeleteTask(ctx, id, paginationBusinessID) } }(taskID))
 		if i == 0 {
 			firstTaskID = taskID
 		}
@@ -221,6 +230,7 @@ func TestWorkspaces_GetColumnsByProject_PaginationAndTotal(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	for i := 0; i < 5; i++ {
 		_, err := repo.CreateColumn(ctx, domain.ProjectColumnInput{
@@ -355,6 +365,7 @@ func TestWorkspaces_ListProjectMembers_PaginationAndTotal(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	for i := 0; i < 5; i++ {
 		userID := int64(710000000 + i)

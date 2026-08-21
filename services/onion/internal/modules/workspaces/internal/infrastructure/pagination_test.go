@@ -29,6 +29,7 @@ func TestWorkspaces_GetTasksByProject_PaginationAndTotal(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	for i := 0; i < 5; i++ {
 		taskID, err := repo.CreateTask(ctx, domain.TaskInput{
@@ -101,6 +102,7 @@ func TestWorkspaces_GetMyTasks_PaginationAndTotal(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	// Sentinel assignee ID unlikely to collide with tasks created by other tests.
 	const assignee = int64(919191919)
@@ -193,6 +195,7 @@ func TestWorkspaces_GetMyTasks_ScopedByWorkspace(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject A: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projA) })
 
 	projB, err := repo.CreateProject(ctx, domain.ProjectInput{
 		WorkspaceID: wsB, OwnerID: testutil.OwnerID, Name: "ScopedMyTasks Project B", CreatedBy: testutil.OwnerID,
@@ -200,6 +203,7 @@ func TestWorkspaces_GetMyTasks_ScopedByWorkspace(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject B: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projB) })
 
 	taskA, err := repo.CreateTask(ctx, domain.TaskInput{
 		ProjectID: projA, WorkspaceID: wsA, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
@@ -274,6 +278,7 @@ func TestWorkspaces_SearchTasks_PaginationAndTotal(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	const searchToken = "zzqsearchpaginationtoken"
 	for i := 0; i < 5; i++ {
@@ -348,6 +353,7 @@ func TestWorkspaces_GetSubtasks_PaginationAndTotal(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	parentID, err := repo.CreateTask(ctx, domain.TaskInput{
 		ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,

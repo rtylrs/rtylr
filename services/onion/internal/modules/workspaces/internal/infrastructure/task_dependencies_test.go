@@ -14,8 +14,8 @@ func TestWorkspaces_AddTaskDependency_IsIdempotent(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "DepIdempotent")
-	blockerID, _ := seedArchivedTestTask(t, repo, "DepIdempotentBlocker")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "DepIdempotent")
+	blockerID, _ := seedArchivedTestTask(t, db, repo, "DepIdempotentBlocker")
 	t.Cleanup(func() {
 		_, _ = db.ExecContext(ctx, "DELETE FROM flow_task_dependencies WHERE task_id = ?", taskID)
 	})
@@ -43,8 +43,8 @@ func TestWorkspaces_RemoveTaskDependency(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "DepRemove")
-	blockerID, _ := seedArchivedTestTask(t, repo, "DepRemoveBlocker")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "DepRemove")
+	blockerID, _ := seedArchivedTestTask(t, db, repo, "DepRemoveBlocker")
 	t.Cleanup(func() {
 		_, _ = db.ExecContext(ctx, "DELETE FROM flow_task_dependencies WHERE task_id = ?", taskID)
 	})
@@ -74,8 +74,8 @@ func TestWorkspaces_ListTaskDependencies_ScopedToBusiness(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "DepTenancy")
-	blockerID, _ := seedArchivedTestTask(t, repo, "DepTenancyBlocker")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "DepTenancy")
+	blockerID, _ := seedArchivedTestTask(t, db, repo, "DepTenancyBlocker")
 	t.Cleanup(func() {
 		_, _ = db.ExecContext(ctx, "DELETE FROM flow_task_dependencies WHERE task_id = ?", taskID)
 	})

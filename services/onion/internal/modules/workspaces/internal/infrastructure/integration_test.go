@@ -140,6 +140,7 @@ func TestWorkspaces_CreateProject_ReturnsPositiveID(t *testing.T) {
 	if projID <= 0 {
 		t.Fatalf("expected positive project ID, got %d", projID)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(context.Background(), "DELETE FROM flow_projects WHERE id = ?", projID) })
 }
 
 func TestWorkspaces_GetProjectsByWorkspace_NoError(t *testing.T) {
@@ -177,6 +178,7 @@ func TestWorkspaces_CreateTask_ReturnsPositiveID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(context.Background(), "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	taskID, err := repo.CreateTask(context.Background(), domain.TaskInput{
 		ProjectID:   projID,
@@ -327,6 +329,7 @@ func TestWorkspaces_CreateProject_AppearsInList(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	projects, _, err := repo.GetProjectsByWorkspace(ctx, wsID, testutil.OwnerID, 100, 0)
 	if err != nil {
@@ -362,6 +365,7 @@ func TestWorkspaces_CreateTask_AppearsInProject(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	taskID, err := repo.CreateTask(ctx, domain.TaskInput{
 		ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
@@ -406,6 +410,7 @@ func TestWorkspaces_DeleteTask_RemovesFromProject(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	taskID, err := repo.CreateTask(ctx, domain.TaskInput{
 		ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
@@ -446,6 +451,7 @@ func TestWorkspaces_CreateComment_ReturnsPositiveID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	taskID, err := repo.CreateTask(ctx, domain.TaskInput{
 		ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
@@ -484,6 +490,7 @@ func TestWorkspaces_GetCommentsByTask_ReturnsComment(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	taskID, err := repo.CreateTask(ctx, domain.TaskInput{
 		ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
@@ -594,6 +601,7 @@ func TestWorkspaces_UpdateTaskStatus_NoError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	taskID, err := repo.CreateTask(ctx, domain.TaskInput{
 		ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
@@ -630,6 +638,7 @@ func TestWorkspaces_CreateColumn_ReturnsPositiveID(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	colID, err := repo.CreateColumn(ctx, domain.ProjectColumnInput{
 		ProjectID: projID, WorkspaceID: wsID, Name: "To Do", Color: "#aabbcc", CreatedBy: testutil.OwnerID,
@@ -662,6 +671,7 @@ func TestWorkspaces_LogActivity_NoError(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	taskID, err := repo.CreateTask(ctx, domain.TaskInput{
 		ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,
@@ -696,6 +706,7 @@ func TestWorkspaces_GetTaskByID_ReturnsTask(t *testing.T) {
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	taskID, err := repo.CreateTask(ctx, domain.TaskInput{
 		ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID,

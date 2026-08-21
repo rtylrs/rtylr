@@ -111,7 +111,7 @@ func TestBillToolPayloadFormatsFields(t *testing.T) {
 	payload := billToolPayload(domain.Bill{
 		ID:          5,
 		SupplierID:  42,
-		Amount: money.Amount(25075),
+		Amount:      money.Amount(25075),
 		Currency:    "USD",
 		DueDate:     dueDate,
 		Status:      "pending",

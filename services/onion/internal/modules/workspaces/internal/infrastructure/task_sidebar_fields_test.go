@@ -33,7 +33,7 @@ func TestWorkspaces_UpdateTask_PersistsEffortMinutes(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "EffortPersist")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "EffortPersist")
 
 	effort := int32(30)
 	if err := repo.UpdateTask(ctx, domain.UpdateTaskInput{
@@ -53,7 +53,7 @@ func TestWorkspaces_UpdateTask_OmittedEffortMinutesLeavesValue(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "EffortPreserve")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "EffortPreserve")
 
 	effort := int32(45)
 	if err := repo.UpdateTask(ctx, domain.UpdateTaskInput{
@@ -80,7 +80,7 @@ func TestWorkspaces_UpdateTask_ZeroEffortMinutesClears(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "EffortClear")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "EffortClear")
 
 	seed := int32(60)
 	if err := repo.UpdateTask(ctx, domain.UpdateTaskInput{
@@ -124,7 +124,7 @@ func TestWorkspaces_UpdateTask_PersistsWaitingOn(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "WaitingOnPersist")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "WaitingOnPersist")
 
 	waitingOn := "Legal approval"
 	if err := repo.UpdateTask(ctx, domain.UpdateTaskInput{
@@ -144,7 +144,7 @@ func TestWorkspaces_UpdateTask_OmittedWaitingOnLeavesValue(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "WaitingOnPreserve")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "WaitingOnPreserve")
 
 	waitingOn := "Finance sign-off"
 	if err := repo.UpdateTask(ctx, domain.UpdateTaskInput{
@@ -171,7 +171,7 @@ func TestWorkspaces_UpdateTask_EmptyWaitingOnClears(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "WaitingOnClear")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "WaitingOnClear")
 
 	seed := "Ops review"
 	if err := repo.UpdateTask(ctx, domain.UpdateTaskInput{
@@ -215,7 +215,7 @@ func TestWorkspaces_UpdateTask_PersistsDecisionNote(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "DecisionNotePersist")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "DecisionNotePersist")
 
 	note := "Chose vendor B for cost reasons"
 	if err := repo.UpdateTask(ctx, domain.UpdateTaskInput{
@@ -235,7 +235,7 @@ func TestWorkspaces_UpdateTask_OmittedDecisionNoteLeavesValue(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "DecisionNotePreserve")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "DecisionNotePreserve")
 
 	note := "Deferred to next sprint"
 	if err := repo.UpdateTask(ctx, domain.UpdateTaskInput{
@@ -262,7 +262,7 @@ func TestWorkspaces_UpdateTask_EmptyDecisionNoteClears(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "DecisionNoteClear")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "DecisionNoteClear")
 
 	seed := "Picked plan A"
 	if err := repo.UpdateTask(ctx, domain.UpdateTaskInput{
@@ -307,7 +307,7 @@ func TestWorkspaces_UpdateTask_PersistsEstimatedHours(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "EstimatedHoursPersist")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "EstimatedHoursPersist")
 
 	hours := 3.5
 	if err := repo.UpdateTask(ctx, domain.UpdateTaskInput{
@@ -337,7 +337,7 @@ func TestWorkspaces_UpdateTask_OmittedEstimatedHoursLeavesValue(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "EstimatedHoursPreserve")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "EstimatedHoursPreserve")
 
 	hours := 5.25
 	if err := repo.UpdateTask(ctx, domain.UpdateTaskInput{
@@ -364,7 +364,7 @@ func TestWorkspaces_UpdateTask_ZeroEstimatedHoursClears(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "EstimatedHoursClear")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "EstimatedHoursClear")
 
 	seed := 8.0
 	if err := repo.UpdateTask(ctx, domain.UpdateTaskInput{
@@ -405,7 +405,7 @@ func TestWorkspaces_SetTaskFocusPin_IsPerUser(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "PinPerUser")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "PinPerUser")
 	const alice, bob = int64(90101), int64(90102)
 	t.Cleanup(func() {
 		_, _ = db.ExecContext(ctx, "DELETE FROM flow_task_focus_pins WHERE task_id = ?", taskID)
@@ -457,7 +457,7 @@ func TestWorkspaces_SetTaskFocusPin_IsIdempotentAndUnpins(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "PinIdempotent")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "PinIdempotent")
 	const alice = int64(90101)
 	t.Cleanup(func() {
 		_, _ = db.ExecContext(ctx, "DELETE FROM flow_task_focus_pins WHERE task_id = ?", taskID)

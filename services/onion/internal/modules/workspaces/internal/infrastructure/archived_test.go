@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -12,7 +13,7 @@ import (
 // seedArchivedTestTask creates a throwaway workspace/project/task and returns
 // the task id plus the business id the task was written under, so callers can
 // scope UpdateTask the same way the API layer does.
-func seedArchivedTestTask(t *testing.T, repo *infrastructure.Repository, name string) (taskID, businessID int64) {
+func seedArchivedTestTask(t *testing.T, db *sql.DB, repo *infrastructure.Repository, name string) (taskID, businessID int64) {
 	t.Helper()
 	ctx := context.Background()
 
@@ -30,6 +31,7 @@ func seedArchivedTestTask(t *testing.T, repo *infrastructure.Repository, name st
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
 	}
+	t.Cleanup(func() { _, _ = db.ExecContext(ctx, "DELETE FROM flow_projects WHERE id = ?", projID) })
 
 	taskID, err = repo.CreateTask(ctx, domain.TaskInput{
 		ProjectID: projID, WorkspaceID: wsID, OwnerID: testutil.OwnerID,
@@ -48,7 +50,7 @@ func TestWorkspaces_UpdateTask_ArchivedTrueIsPersistedAndRead(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "ArchiveRoundTrip")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "ArchiveRoundTrip")
 
 	created, err := repo.GetTaskByID(ctx, taskID)
 	if err != nil {
@@ -79,7 +81,7 @@ func TestWorkspaces_UpdateTask_OmittedArchivedKeepsExistingValue(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	taskID, businessID := seedArchivedTestTask(t, repo, "ArchiveCoalesce")
+	taskID, businessID := seedArchivedTestTask(t, db, repo, "ArchiveCoalesce")
 
 	archived := true
 	if err := repo.UpdateTask(ctx, domain.UpdateTaskInput{

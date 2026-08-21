@@ -9,8 +9,8 @@ import (
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/application"
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/money"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	financebankaccountv1 "github.com/voxire/voxie/gen/go/finance/bank_account/v1"
 )
