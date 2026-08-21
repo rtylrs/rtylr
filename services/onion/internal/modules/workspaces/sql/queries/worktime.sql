@@ -48,8 +48,15 @@ INSERT INTO flow_work_day_actions (
 ) VALUES (?, ?, ?, ?, ?, ?);
 
 -- ── Lines ──────────────────────────────────────────────────────────────────
--- Lines are hr_time_entries. Flow keeps no second store of hours: that table is
--- what HR payroll reads.
+-- Lines are hr_time_entries: that table is what HR payroll reads, and every row
+-- written here carries source='flow' and a task_id.
+--
+-- Flow does keep a second store of hours. flow_time_logs holds the ad-hoc
+-- per-task durations written by CreateTimeLog in workspaces.sql, which payroll
+-- never reads. Note that the per-task rollups over there (RecalcActualHours,
+-- GetInsightsTimeByMember) read that store alone, so the lines written here do
+-- not reach a task's actual_hours: tryrtylr/rtylr#903. Do not fix that by
+-- summing both stores, since the same hour can legitimately be in each.
 
 -- name: ListWorkDayLines :many
 SELECT * FROM hr_time_entries
