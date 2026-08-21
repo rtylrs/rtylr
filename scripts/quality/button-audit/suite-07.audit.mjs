@@ -331,5 +331,6 @@ export const cases = [
   ["apps/hr/src/features/payroll/PaySlip.tsx", "audit-batch-329-suite-07"],
   ["apps/hr/src/features/setup-wizard/components/WizardProgress.tsx", "audit-batch-330-suite-07"],
   ["apps/hr/src/features/timesheets/TimesheetDetail.tsx", "audit-batch-331-suite-07"],
+  ["apps/hr/src/shared/components/ShiftCell.tsx", "audit-batch-332-suite-07"],
 ];
 
