@@ -199,5 +199,6 @@ export const cases = [
   ["apps/flow/src/shared/components/CommentList.tsx", "audit-batch-197-suite-22"],
   ["apps/hr/src/features/attendance/Attendance.tsx", "audit-batch-198-suite-22"],
   ["apps/hr/src/features/employees/EmployeeDetail.tsx", "audit-batch-199-suite-22"],
+  ["apps/hr/src/features/performance/MyReview.tsx", "audit-batch-200-suite-22"],
 ];
 

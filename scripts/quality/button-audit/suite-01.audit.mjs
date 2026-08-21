@@ -199,5 +199,6 @@ export const cases = [
   ["apps/flow/src/features/triage/Triage.tsx", "audit-batch-197-suite-01"],
   ["apps/flow/src/shared/components/DueDatePicker.tsx", "audit-batch-198-suite-01"],
   ["apps/hr/src/features/calendar/Calendar.tsx", "audit-batch-199-suite-01"],
+  ["apps/hr/src/features/equipment/Equipment.tsx", "audit-batch-200-suite-01"],
 ];
 
