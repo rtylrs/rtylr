@@ -13,18 +13,6 @@
   "startTimer": "Start",
   "stopTimer": "Stop",
   "timerDescription": "What are you working on?",
-  "importFromFlow": "Import from Flow",
-  "flowImport": {
-    "importing": "Importing from Flow…",
-    "success": "Imported {{imported}} entries",
-    "successWithSkipped": "Imported {{imported}} entries ({{skipped}} skipped - already imported)",
-    "noEntries": "No new entries to import from Flow",
-    "error": "Failed to import from Flow",
-    "modalTitle": "Import from Flow",
-    "periodLabel": "Period to import",
-    "confirm": "Import",
-    "invalidRange": "End date must be on or after the start date."
-  },
   "statuses": {
     "draft": "Draft",
     "submitted": "Submitted",

@@ -11,7 +11,6 @@ import type { TimeEntryPayload } from '@voxire/voxie/hr/time_entry/v1/types';
 import { SectionHeader, Card, Pill, Skeleton, ACCENT } from '../../shared/components/ui';
 import ActiveTimer from './ActiveTimer';
 import TimeEntryForm from './TimeEntryForm';
-import FlowImportButton from './FlowImportButton';
 
 function formatDuration(minutes: number): string {
   const h = Math.floor(minutes / 60);
@@ -88,7 +87,6 @@ const TimeLogging = (): React.JSX.Element => {
             end: week.end,
             total: formatDuration(totalMinutes),
           })}
-          right={<FlowImportButton />}
         />
 
         <ActiveTimer onStop={handleTimerStop} />

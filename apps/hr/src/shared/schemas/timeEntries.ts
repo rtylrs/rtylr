@@ -15,16 +15,3 @@ export const timeEntryFormSchema = z.object({
 });
 
 export type TimeEntryFormData = z.infer<typeof timeEntryFormSchema>;
-
-export const flowImportFormSchema = z
-  .object({
-    employeeId: z.number().int().positive(),
-    periodStart: z.string().min(1),
-    periodEnd: z.string().min(1),
-  })
-  .refine((data) => data.periodStart <= data.periodEnd, {
-    message: 'periodEnd must be on or after periodStart',
-    path: ['periodEnd'],
-  });
-
-export type FlowImportFormData = z.infer<typeof flowImportFormSchema>;

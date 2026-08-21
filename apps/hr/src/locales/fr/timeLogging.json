@@ -13,18 +13,6 @@
   "startTimer": "Démarrer",
   "stopTimer": "Arrêter",
   "timerDescription": "Sur quoi travaillez-vous ?",
-  "importFromFlow": "Importer de Flow",
-  "flowImport": {
-    "importing": "Importation depuis Flow…",
-    "success": "{{imported}} entrées importées",
-    "successWithSkipped": "{{imported}} entrées importées ({{skipped}} ignorées - déjà importées)",
-    "noEntries": "Aucune nouvelle entrée à importer depuis Flow",
-    "error": "Échec de l'importation depuis Flow",
-    "modalTitle": "Importer depuis Flow",
-    "periodLabel": "Période à importer",
-    "confirm": "Importer",
-    "invalidRange": "La date de fin doit être postérieure ou égale à la date de début."
-  },
   "statuses": {
     "draft": "Brouillon",
     "submitted": "Soumis",
