@@ -89,7 +89,13 @@ vi.mock('@voxire/caret', () => ({
   useCaretStore: () => ({ isOpen: false }),
 }));
 
-vi.mock('@voxire/utils', () => ({ useForesightLinks: () => undefined }));
+// useForesightLinks is stubbed because it prefetches routes; useClickOutside is
+// deliberately the REAL hook, since the outside-click cases below are what it
+// exists to prove. Stubbing it would make those tests assert nothing.
+vi.mock('@voxire/utils', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@voxire/utils')>()),
+  useForesightLinks: () => undefined,
+}));
 
 vi.mock('@voxire/auth', () => ({
   signOut: mocks.signOut,
