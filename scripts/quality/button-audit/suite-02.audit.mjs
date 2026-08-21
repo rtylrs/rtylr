@@ -11,5 +11,6 @@ export const cases = [
   ["apps/dash/src/shared/utils/BusinessRoute.tsx", "audit-batch-009-suite-02"],
   ["apps/erp/src/features/purchasing/Receiving.test.tsx", "audit-batch-010-suite-02"],
   ["apps/erp/src/shared/components/CommandPalette.tsx", "audit-batch-011-suite-02"],
+  ["apps/erp/src/shared/hooks/useDialogFocus.test.tsx", "audit-batch-012-suite-02"],
 ];
 

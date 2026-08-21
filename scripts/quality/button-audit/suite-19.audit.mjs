@@ -11,5 +11,6 @@ export const cases = [
   ["apps/erp/src/features/products/ProductDetail.test.tsx", "audit-batch-009-suite-19"],
   ["apps/erp/src/layouts/DefaultLayout.tsx", "audit-batch-010-suite-19"],
   ["apps/erp/src/shared/components/Skeleton.tsx", "audit-batch-011-suite-19"],
+  ["apps/finance/src/features/journal/Journal.tsx", "audit-batch-012-suite-19"],
 ];
 
