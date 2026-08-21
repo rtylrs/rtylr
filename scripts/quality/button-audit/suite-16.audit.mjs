@@ -264,5 +264,6 @@ export const cases = [
   ["apps/dash/src/features/developer/Webhooks.test.tsx", "audit-batch-262-suite-16"],
   ["apps/dash/src/features/settings/Settings/components/Account/Account.tsx", "audit-batch-263-suite-16"],
   ["apps/dash/src/shared/components/Dropzone.tsx", "audit-batch-264-suite-16"],
+  ["apps/dash/src/shared/components/ui/select.tsx", "audit-batch-265-suite-16"],
 ];
 

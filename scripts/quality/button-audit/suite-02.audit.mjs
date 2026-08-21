@@ -264,5 +264,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/RevenueByAppWidget.test.tsx", "audit-batch-262-suite-02"],
   ["apps/dash/src/features/menu/Menus.tsx", "audit-batch-263-suite-02"],
   ["apps/dash/src/features/team/GroupDetail.tsx", "audit-batch-264-suite-02"],
+  ["apps/dash/src/shared/components/dash/PermissionCheckbox.tsx", "audit-batch-265-suite-02"],
 ];
 
