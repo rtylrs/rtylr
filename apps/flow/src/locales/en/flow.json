@@ -472,6 +472,7 @@
     "phone": "Phone",
     "address": "Address",
     "emergencyContact": "Emergency contact",
+    "bio": "About",
     "activity": "Flow activity",
     "hoursLoggedThisWeek": "{{hours}} logged this week",
     "viewMyDay": "View My day"
