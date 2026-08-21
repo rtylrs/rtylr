@@ -100,5 +100,6 @@ export const cases = [
   ["apps/hr/src/features/performance/ReviewCycleDetail.tsx", "audit-batch-098-suite-02"],
   ["apps/hr/src/features/setup-wizard/steps/OrgStructureStep.test.tsx", "audit-batch-099-suite-02"],
   ["apps/hr/src/router.tsx", "audit-batch-100-suite-02"],
+  ["apps/insights/src/features/customers/Customers.test.tsx", "audit-batch-101-suite-02"],
 ];
 
