@@ -187,5 +187,6 @@ export const cases = [
   ["apps/dash/src/features/menu/Components/CreateBanner.tsx", "audit-batch-185-suite-19"],
   ["apps/dash/src/features/settings/Settings/components/Email/Email.tsx", "audit-batch-186-suite-19"],
   ["apps/dash/src/shared/components/dash/Breadcrumbs.tsx", "audit-batch-187-suite-19"],
+  ["apps/dash/src/shared/hooks/queries/useAiQuota.test.tsx", "audit-batch-188-suite-19"],
 ];
 

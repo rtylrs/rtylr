@@ -187,5 +187,6 @@ export const cases = [
   ["apps/dash/src/features/extras/Theme.tsx", "audit-batch-185-suite-16"],
   ["apps/dash/src/features/settings/Settings/components/Businesses/Businesses.test.tsx", "audit-batch-186-suite-16"],
   ["apps/dash/src/shared/components/dash/ApiKeyRow.tsx", "audit-batch-187-suite-16"],
+  ["apps/dash/src/shared/components/ui/table.tsx", "audit-batch-188-suite-16"],
 ];
 

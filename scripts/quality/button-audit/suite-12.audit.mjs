@@ -187,5 +187,6 @@ export const cases = [
   ["apps/dash/src/features/developer/Webhooks.test.tsx", "audit-batch-185-suite-12"],
   ["apps/dash/src/features/settings/Settings/components/Account/Account.tsx", "audit-batch-186-suite-12"],
   ["apps/dash/src/shared/components/Dropzone.tsx", "audit-batch-187-suite-12"],
+  ["apps/dash/src/shared/components/ui/select.tsx", "audit-batch-188-suite-12"],
 ];
 
