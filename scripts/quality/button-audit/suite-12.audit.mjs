@@ -247,5 +247,6 @@ export const cases = [
   ["apps/finance/src/shared/components/PageHeader.tsx", "audit-batch-245-suite-12"],
   ["apps/flow/src/features/leave/RequestLeaveDialog.test.tsx", "audit-batch-246-suite-12"],
   ["apps/flow/src/features/projects/components/BoardSettingsPanel.tsx", "audit-batch-247-suite-12"],
+  ["apps/flow/src/features/triage/Triage.tsx", "audit-batch-248-suite-12"],
 ];
 
