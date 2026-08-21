@@ -19,7 +19,7 @@ import CareerEditor from './CareerEditor';
 
 /**
  * CareersAdmin - the HR-facing list of this business's openings. Lets
- * an admin create, edit, publish/unpublish, and archive roles. The
+ * an admin create, edit, publish/unpublish, and delete roles. The
  * editor opens as a side drawer rather than a separate route so the
  * list stays visible (and rank-ordered by created_at) while editing.
  */
@@ -141,20 +141,23 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
                               ).length ?? 0;
                             const message =
                               openCount > 0
-                                ? `Archive "${c.title}"? It has ${openCount} open application(s).`
-                                : `Archive "${c.title}"?`;
+                                ? t('careers.deleteConfirmOpen', {
+                                    title: c.title,
+                                    count: openCount,
+                                  })
+                                : t('careers.deleteConfirm', { title: c.title });
                             toast.warning(message, {
                               action: {
-                                label: 'Archive',
+                                label: t('careers.delete'),
                                 onClick: () =>
                                   del.mutate(c.id, {
-                                    onSuccess: () => toast.success('Role archived'),
-                                    onError: () => toast.error("Couldn't archive"),
+                                    onSuccess: () => toast.success(t('careers.roleDeleted')),
+                                    onError: () => toast.error(t('careers.deleteFailed')),
                                   }),
                               },
                             });
                           }}
-                          title="Archive"
+                          title={t('careers.delete')}
                         >
                           <Trash2 className="h-4 w-4" />
                         </IconButton>
@@ -170,6 +173,7 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
         {(creating || editing) && (
           <CareerEditor
             career={editing ?? undefined}
+            saving={create.isPending || update.isPending}
             onClose={() => {
               setEditing(null);
               setCreating(false);
@@ -220,7 +224,8 @@ const IconButton: React.FC<{
   onClick: () => void;
   title: string;
 }> = ({ children, onClick, title }) => (
-  <button type="button"
+  <button
+    type="button"
     onClick={onClick}
     title={title}
     className="rounded-md p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white"

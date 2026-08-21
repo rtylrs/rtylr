@@ -111,7 +111,8 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                           </span>
                         )}
                         {s.resumeUrl && (
-                          <button type="button"
+                          <button
+                            type="button"
                             onClick={async () => {
                               try {
                                 const url = await fetchResumeURL(s.id);
@@ -144,6 +145,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                     </div>
 
                     <select
+                      aria-label="Update submission status"
                       value={s.status}
                       onChange={(e) => {
                         const newStatus = e.target.value;
@@ -193,7 +195,8 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                 >
                   <span>Page {page + 1}</span>
                   <div className="flex gap-2">
-                    <button type="button"
+                    <button
+                      type="button"
                       disabled={page === 0}
                       onClick={() => setPage((p) => Math.max(0, p - 1))}
                       className="rounded border px-3 py-1 text-xs text-white hover:bg-white/10 disabled:opacity-40"
@@ -201,7 +204,8 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                     >
                       Previous
                     </button>
-                    <button type="button"
+                    <button
+                      type="button"
                       disabled={submissions.length < PAGE_SIZE}
                       onClick={() => setPage((p) => p + 1)}
                       className="rounded border px-3 py-1 text-xs text-white hover:bg-white/10 disabled:opacity-40"

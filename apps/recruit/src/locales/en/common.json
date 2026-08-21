@@ -24,5 +24,12 @@
     "addQuestion": "Add question",
     "publicRolesNone": "No open roles right now. Check back soon.",
     "checkAgain": "Check again"
+  },
+  "careers": {
+    "deleteConfirmOpen": "Delete \"{{title}}\"? It has {{count}} open application(s).",
+    "deleteConfirm": "Delete \"{{title}}\"?",
+    "delete": "Delete",
+    "roleDeleted": "Role deleted",
+    "deleteFailed": "Couldn't delete"
   }
 }

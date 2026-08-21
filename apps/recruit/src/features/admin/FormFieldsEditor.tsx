@@ -280,6 +280,7 @@ const FormFieldRow: React.FC<{
               action: { label: 'Remove', onClick: onDelete },
             });
           }}
+          aria-label="Remove question"
           className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-red-400"
         >
           <Trash2 className="h-3.5 w-3.5" />
@@ -330,6 +331,7 @@ const FormFieldRow: React.FC<{
                     position: field.position,
                   });
                 }}
+                aria-label="Remove option"
                 className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-red-400"
               >
                 <Trash2 className="h-3.5 w-3.5" />

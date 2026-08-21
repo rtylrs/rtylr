@@ -24,5 +24,12 @@
     "addQuestion": "إضافة سؤال",
     "publicRolesNone": "لا توجد وظائف شاغرة حاليًا. تفقد الصفحة مرة أخرى قريبًا.",
     "checkAgain": "تحقق مرة أخرى"
+  },
+  "careers": {
+    "deleteConfirmOpen": "حذف \"{{title}}\"؟ لديه {{count}} طلب(ات) مفتوحة.",
+    "deleteConfirm": "حذف \"{{title}}\"؟",
+    "delete": "حذف",
+    "roleDeleted": "تم حذف الوظيفة",
+    "deleteFailed": "تعذر الحذف"
   }
 }

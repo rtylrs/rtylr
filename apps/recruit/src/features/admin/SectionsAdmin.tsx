@@ -159,7 +159,8 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
               Content blocks between the hero and the jobs list. Drag to reorder.
             </p>
           </div>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setAdding(true)}
             className="inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-white/90"
           >
@@ -230,7 +231,8 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
                         {!s.enabled && ' · hidden'}
                       </div>
                     </div>
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={() =>
                         update.mutate(
                           {
@@ -251,8 +253,10 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
                     >
                       {s.enabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                     </button>
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={() => setExpandedId(expandedId === s.id ? null : s.id)}
+                      aria-label={expandedId === s.id ? 'Collapse section' : 'Expand section'}
                       className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-white"
                     >
                       {expandedId === s.id ? (
@@ -261,7 +265,8 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
                         <ChevronRight className="h-4 w-4" />
                       )}
                     </button>
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={() => {
                         toast.warning('Delete this section?', {
                           action: {
@@ -274,6 +279,7 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
                           },
                         });
                       }}
+                      aria-label="Delete section"
                       className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-red-400"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -321,7 +327,8 @@ const AddSectionPicker: React.FC<{
   >
     <div className="flex items-center justify-between">
       <div className="text-sm font-medium">Pick a section kind</div>
-      <button type="button"
+      <button
+        type="button"
         onClick={onCancel}
         className="rounded-md px-2 py-1 text-xs text-white/60 hover:bg-white/5"
       >
@@ -332,7 +339,8 @@ const AddSectionPicker: React.FC<{
       {ORDERED_KINDS.map((k) => {
         const meta = KIND_META[k];
         return (
-          <button type="button"
+          <button
+            type="button"
             key={k}
             onClick={() => onPick(k)}
             className="flex flex-col items-start rounded-md border p-3 text-left transition hover:-translate-y-0.5 hover:border-white/30"
@@ -504,7 +512,8 @@ const SectionEditor: React.FC<{
       )}
 
       <div className="flex justify-end">
-        <button type="button"
+        <button
+          type="button"
           onClick={save}
           className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-white/90"
         >
@@ -541,15 +550,18 @@ const PerksEditor: React.FC<{
             onChange={(v) => onChange(items.map((x, j) => (i === j ? { ...x, blurb: v } : x)))}
             placeholder="blurb"
           />
-          <button type="button"
+          <button
+            type="button"
             onClick={() => onChange(items.filter((_, j) => j !== i))}
+            aria-label="Remove perk"
             className="rounded-md p-2 text-white/60 hover:bg-white/10 hover:text-red-400"
           >
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
       ))}
-      <button type="button"
+      <button
+        type="button"
         onClick={() => onChange([...items, { label: '', icon: 'Sparkles' }])}
         className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-white/20 px-3 py-2 text-xs text-white/60 hover:bg-white/5"
       >
@@ -586,8 +598,10 @@ const FaqEditor: React.FC<{
             />
           </div>
           <div className="mt-2 flex justify-end">
-            <button type="button"
+            <button
+              type="button"
               onClick={() => onChange(items.filter((_, j) => j !== i))}
+              aria-label="Remove FAQ"
               className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-red-400"
             >
               <Trash2 className="h-4 w-4" />
@@ -595,7 +609,8 @@ const FaqEditor: React.FC<{
           </div>
         </div>
       ))}
-      <button type="button"
+      <button
+        type="button"
         onClick={() => onChange([...items, { question: '', answer: '' }])}
         className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-white/20 px-3 py-2 text-xs text-white/60 hover:bg-white/5"
       >
@@ -625,15 +640,18 @@ const ValuesEditor: React.FC<{
             onChange={(val) => onChange(items.map((x, j) => (i === j ? { ...x, blurb: val } : x)))}
             placeholder="short description"
           />
-          <button type="button"
+          <button
+            type="button"
             onClick={() => onChange(items.filter((_, j) => j !== i))}
+            aria-label="Remove value"
             className="rounded-md p-2 text-white/60 hover:bg-white/10 hover:text-red-400"
           >
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
       ))}
-      <button type="button"
+      <button
+        type="button"
         onClick={() => onChange([...items, { label: '' }])}
         className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-white/20 px-3 py-2 text-xs text-white/60 hover:bg-white/5"
       >

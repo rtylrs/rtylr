@@ -24,6 +24,8 @@ interface Props {
   career?: RecruitCareer;
   onClose: () => void;
   onSave: (body: CareerFormBody) => void;
+  /** True while the parent's create/update mutation is in flight. */
+  saving?: boolean;
 }
 
 /**
@@ -31,7 +33,7 @@ interface Props {
  * parent decides whether the payload is a create or an update based on
  * whether `career` was passed in.
  */
-const CareerEditor: React.FC<Props> = ({ career, onClose, onSave }) => {
+const CareerEditor: React.FC<Props> = ({ career, onClose, onSave, saving = false }) => {
   const [title, setTitle] = useState(career?.title ?? '');
   const [slug, setSlug] = useState(career?.slug ?? '');
   const [department, setDepartment] = useState(career?.department ?? '');
@@ -94,6 +96,7 @@ const CareerEditor: React.FC<Props> = ({ career, onClose, onSave }) => {
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close"
             className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-white"
           >
             <X className="h-5 w-5" />
@@ -193,7 +196,8 @@ const CareerEditor: React.FC<Props> = ({ career, onClose, onSave }) => {
           </button>
           <button
             type="submit"
-            className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-white/90"
+            disabled={saving}
+            className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-white/90 disabled:opacity-60"
           >
             {career ? 'Save changes' : 'Create role'}
           </button>

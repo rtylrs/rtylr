@@ -24,5 +24,12 @@
     "addQuestion": "Ajouter une question",
     "publicRolesNone": "Aucun poste ouvert pour le moment. Revenez bientôt.",
     "checkAgain": "Vérifier à nouveau"
+  },
+  "careers": {
+    "deleteConfirmOpen": "Supprimer « {{title}} » ? Il y a {{count}} candidature(s) en cours.",
+    "deleteConfirm": "Supprimer « {{title}} » ?",
+    "delete": "Supprimer",
+    "roleDeleted": "Poste supprimé",
+    "deleteFailed": "Échec de la suppression"
   }
 }
