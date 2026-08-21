@@ -102,5 +102,6 @@ export const cases = [
   ["apps/hr/src/shared/components/CommandPalette.tsx", "audit-batch-100-suite-09"],
   ["apps/insights/src/features/operations/Operations.tsx", "audit-batch-101-suite-09"],
   ["apps/menu/src/router.tsx", "audit-batch-102-suite-09"],
+  ["apps/recruit/src/features/public/RootLanding.tsx", "audit-batch-103-suite-09"],
 ];
 

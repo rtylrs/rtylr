@@ -102,5 +102,6 @@ export const cases = [
   ["apps/hr/src/shared/components/TimeOffBadge.tsx", "audit-batch-100-suite-21"],
   ["apps/insights/src/routes/AppRoutes.tsx", "audit-batch-101-suite-21"],
   ["apps/recruit/src/features/admin/CareersAdmin.tsx", "audit-batch-102-suite-21"],
+  ["apps/recruit/src/templates/shared/Header.tsx", "audit-batch-103-suite-21"],
 ];
 
