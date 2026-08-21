@@ -145,5 +145,6 @@ export const cases = [
   ["apps/flow/src/features/leave/RequestLeaveDialog.tsx", "audit-batch-143-suite-16"],
   ["apps/flow/src/features/roadmap/Roadmap.tsx", "audit-batch-144-suite-16"],
   ["apps/flow/src/features/views/Views.test.tsx", "audit-batch-145-suite-16"],
+  ["apps/flow/src/shared/components/GateNotice.test.tsx", "audit-batch-146-suite-16"],
 ];
 

@@ -145,5 +145,6 @@ export const cases = [
   ["apps/flow/src/features/cycles/Cycles.test.tsx", "audit-batch-143-suite-04"],
   ["apps/flow/src/features/projects/ProjectOverview.test.tsx", "audit-batch-144-suite-04"],
   ["apps/flow/src/features/tasks/components/TimePanel.tsx", "audit-batch-145-suite-04"],
+  ["apps/flow/src/shared/components/AssigneeAvatar.tsx", "audit-batch-146-suite-04"],
 ];
 
