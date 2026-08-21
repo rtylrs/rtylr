@@ -94,7 +94,7 @@ const InvoiceDetail: React.FC = () => {
               </button>
             )}
             {canSendInvoice && invoice.status !== 'Paid' && (
-              <button
+              <button type="button"
                 style={{
                   ...ghostBtn,
                   color: 'var(--finance-danger)',

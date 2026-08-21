@@ -256,7 +256,7 @@ const ProfitLoss: React.FC = () => {
         }}
       >
         {periods.map((p) => (
-          <button
+          <button type="button"
             key={p}
             onClick={() => setPeriod(p)}
             style={{

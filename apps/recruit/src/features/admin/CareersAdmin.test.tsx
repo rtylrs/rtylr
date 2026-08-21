@@ -26,7 +26,7 @@ vi.mock('./CareerEditor', () => ({
   default: ({ onClose }: { onClose: () => void }) => (
     <div>
       <div>career-editor</div>
-      <button onClick={onClose}>close-editor</button>
+      <button type="button" onClick={onClose}>close-editor</button>
     </div>
   ),
 }));

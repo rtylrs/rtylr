@@ -579,7 +579,7 @@ const Segments: React.FC = () => {
               total
             </p>
           </div>
-          <button
+          <button type="button"
             onClick={() => setBuilderOpen(true)}
             style={{
               display: 'flex',

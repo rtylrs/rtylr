@@ -659,7 +659,7 @@ const Team: React.FC = (): React.JSX.Element => {
                 </select>
               </div>
               <div className="flex items-center justify-end gap-2 pt-2">
-                <button
+                <button type="button"
                   onClick={() => {
                     setShowAddToGroupModal(false);
                     setSelectedGroupId('');

@@ -320,7 +320,7 @@ const Tax: React.FC = () => {
               </div>
             ))}
           </div>
-          <button
+          <button type="button"
             disabled={saveRates.isPending}
             style={{
               marginTop: 14,

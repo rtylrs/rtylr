@@ -100,7 +100,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
         >
           {formatLabel(date, period)}
         </span>
-        <button
+        <button type="button"
           onClick={() => onDateChange(shift(date, period, 1))}
           style={{
             padding: 4,

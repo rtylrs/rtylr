@@ -494,7 +494,7 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
               </div>
             ))}
           </div>
-          <button
+          <button type="button"
             onClick={createAll}
             disabled={createMut.isPending}
             className="px-4 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"

@@ -489,7 +489,7 @@ const GroupDetail = (): React.JSX.Element => {
                   </div>
                 )}
                 <div className="flex items-center justify-end gap-2">
-                  <button
+                  <button type="button"
                     onClick={() => {
                       setShowAddMembers(false);
                       setSelectedToAdd([]);

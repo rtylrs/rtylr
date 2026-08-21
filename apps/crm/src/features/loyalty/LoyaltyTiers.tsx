@@ -225,7 +225,7 @@ const LoyaltyTiers: React.FC = () => {
                     <Award size={22} />
                   </div>
                   {canConfigureLoyalty && (
-                    <button
+                    <button type="button"
                       aria-label={`Edit ${t.name} tier`}
                       onClick={() => setEditingId(editingId === t.id ? null : t.id)}
                       style={{

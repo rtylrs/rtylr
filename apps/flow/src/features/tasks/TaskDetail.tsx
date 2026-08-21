@@ -931,7 +931,7 @@ const TaskDetail: React.FC = () => {
                 {allLabels.map((l) => {
                   const active = taskLabelIds.includes(l.id);
                   return (
-                    <button
+                    <button type="button"
                       key={l.id}
                       onClick={() => handleToggleLabel(l.id)}
                       className="w-full flex items-center gap-2 px-2 py-1 rounded text-start hover:bg-[var(--flow-hover)]"

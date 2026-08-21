@@ -658,7 +658,7 @@ const ProjectSettings: React.FC = () => {
                   Once deleted, tasks are archived and cannot be restored.
                 </p>
               </div>
-              <button
+              <button type="button"
                 className="px-3 py-1 rounded text-[11px] font-semibold disabled:opacity-40"
                 style={{ background: '#ef4444', color: '#fff' }}
                 disabled={deleteProject.isPending || !canManageProject}

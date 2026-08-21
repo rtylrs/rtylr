@@ -221,7 +221,7 @@ const Categories: React.FC = () => {
                   >
                     <Edit3 size={12} />
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => setConfirmDelete(cat.id ?? null)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center"
                     style={{ color: 'var(--erp-danger)' }}

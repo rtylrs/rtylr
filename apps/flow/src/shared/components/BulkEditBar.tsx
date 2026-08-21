@@ -127,7 +127,7 @@ export const BulkEditBar: React.FC = () => {
           <Trash2 size={11} /> Delete
         </button>
         <div className="h-4 w-px mx-1" style={{ background: 'var(--flow-border)' }} />
-        <button
+        <button type="button"
           onClick={clearSelection}
           aria-label={t('flow.bulkEdit.clearSelectionLabel')}
           className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"

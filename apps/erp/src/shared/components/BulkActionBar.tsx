@@ -104,7 +104,7 @@ const BulkActionBar: React.FC<BulkActionBarProps> = ({
               <Trash2 size={12} /> Delete
             </button>
           )}
-          <button
+          <button type="button"
             onClick={onClear}
             className="ml-1 h-7 w-7 rounded-lg flex items-center justify-center"
             style={{ color: 'var(--hub-text-dim)' }}

@@ -312,7 +312,7 @@ const Bills: React.FC = () => {
                   </td>
                   <td style={{ padding: '12px 16px' }}>
                     {b.status === 'unpaid' || b.status === 'overdue' ? (
-                      <button
+                      <button type="button"
                         style={{
                           ...ghostBtn,
                           padding: '4px 10px',

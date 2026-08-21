@@ -169,7 +169,7 @@ const Milestones: React.FC = () => {
                 ? t('flow.milestones.creating')
                 : t('flow.milestones.create')}
             </button>
-            <button
+            <button type="button"
               onClick={() => {
                 setShowCreate(false);
                 setNewName('');

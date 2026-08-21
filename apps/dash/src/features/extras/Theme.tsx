@@ -122,7 +122,7 @@ const ThemeCustomizer: React.FC = () => {
                   {accent}
                 </code>
               </div>
-              <button
+              <button type="button"
                 className="px-4 py-2 rounded-lg text-xs font-semibold"
                 style={{ background: accent, color: 'white' }}
               >
