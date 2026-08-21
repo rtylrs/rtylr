@@ -270,5 +270,6 @@ export const cases = [
   ["apps/erp/src/shared/components/KeyboardShortcutsModal.tsx", "audit-batch-268-suite-16"],
   ["apps/finance/src/features/expenses/ExpenseDetail.tsx", "audit-batch-269-suite-16"],
   ["apps/finance/src/shared/components/ClientSelect.tsx", "audit-batch-270-suite-16"],
+  ["apps/flow/src/features/archive/Archive.tsx", "audit-batch-271-suite-16"],
 ];
 
