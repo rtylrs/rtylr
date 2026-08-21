@@ -1,8 +1,8 @@
-import { oneKitResult, unwrap } from '@voxire/api';
+import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { teamCompatibilityClient } from '../../lib/clients';
+import { safe } from '../../lib/api';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -32,9 +32,7 @@ export const useErpTeam = (): UseQueryResult<ErpTeamMember[]> =>
   useQuery<ErpTeamMember[]>({
     queryKey: ['erp-team'],
     queryFn: async (): Promise<ErpTeamMember[]> => {
-      const res = await unwrap(
-        oneKitResult(() => teamCompatibilityClient.listMembers({}) as Promise<ListMembersResponse>)
-      );
+      const res = await unwrap(safe.get<ListMembersResponse>('/team/members'));
       const raw: ErpTeamMember[] = res?.users ?? res?.members ?? [];
       return raw.map((m) => ({ ...m, name: (m.name as string) || (m.email as string) }));
     },
@@ -45,13 +43,7 @@ export const useErpInviteMember = (): UseMutationResult<unknown, unknown, Invite
   const qc = useQueryClient();
   return useMutation<unknown, unknown, InvitePayload>({
     mutationFn: (payload: InvitePayload): Promise<unknown> =>
-      unwrap(
-        oneKitResult(() =>
-          teamCompatibilityClient.inviteMember({
-            body: { ...payload, apps: ['erp'] },
-          })
-        )
-      ),
+      unwrap(safe.post('/team/invite', { ...payload, apps: ['erp'] })),
     onSuccess: (): void => {
       toast.success('Invitation sent');
       void qc.invalidateQueries({ queryKey: ['erp-team'] });
@@ -66,7 +58,7 @@ export const useErpDeactivateMember = (): UseMutationResult<unknown, unknown, st
   const qc = useQueryClient();
   return useMutation<unknown, unknown, string>({
     mutationFn: (id: string): Promise<unknown> =>
-      unwrap(oneKitResult(() => teamCompatibilityClient.deactivateMember({ id, body: {} }))),
+      unwrap(safe.patch(`/team/members/${id}/deactivate`, {})),
     onSuccess: (): void => {
       toast.success('Member removed');
       void qc.invalidateQueries({ queryKey: ['erp-team'] });
