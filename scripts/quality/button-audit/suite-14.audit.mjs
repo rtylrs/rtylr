@@ -324,5 +324,6 @@ export const cases = [
   ["apps/finance/src/shared/components/OverdueInvoicesWidget.tsx", "audit-batch-322-suite-14"],
   ["apps/flow/src/features/leave/LeaveScreen.test.tsx", "audit-batch-323-suite-14"],
   ["apps/flow/src/features/projects/components/AddProjectMemberDialog.tsx", "audit-batch-324-suite-14"],
+  ["apps/flow/src/features/time/TimeReports.tsx", "audit-batch-325-suite-14"],
 ];
 

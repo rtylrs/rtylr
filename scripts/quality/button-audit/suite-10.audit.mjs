@@ -324,5 +324,6 @@ export const cases = [
   ["apps/finance/src/shared/components/LineItemRow.test.tsx", "audit-batch-322-suite-10"],
   ["apps/flow/src/features/focus-today/FocusToday.tsx", "audit-batch-323-suite-10"],
   ["apps/flow/src/features/projects/ProjectTimeline.tsx", "audit-batch-324-suite-10"],
+  ["apps/flow/src/features/time/MyDay.tsx", "audit-batch-325-suite-10"],
 ];
 
