@@ -30,5 +30,6 @@ export const cases = [
   ["apps/crm/src/features/sales/components/CreateLeadModal.tsx", "audit-batch-028-suite-22"],
   ["apps/dash/src/features/billing/Billing.test.tsx", "audit-batch-029-suite-22"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/TopProductsWidget.test.tsx", "audit-batch-030-suite-22"],
+  ["apps/dash/src/features/permissions/Roles.tsx", "audit-batch-031-suite-22"],
 ];
 
