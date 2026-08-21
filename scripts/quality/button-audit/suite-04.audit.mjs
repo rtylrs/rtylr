@@ -300,5 +300,6 @@ export const cases = [
   ["apps/flow/src/features/profile/ProfileScreen.test.tsx", "audit-batch-298-suite-04"],
   ["apps/flow/src/features/settings/sections/WorkTypesSection.test.tsx", "audit-batch-299-suite-04"],
   ["apps/flow/src/features/workspace-manager/WorkspaceManager.test.tsx", "audit-batch-300-suite-04"],
+  ["apps/flow/src/shared/components/PriorityIcon.tsx", "audit-batch-301-suite-04"],
 ];
 

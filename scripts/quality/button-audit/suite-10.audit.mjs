@@ -300,5 +300,6 @@ export const cases = [
   ["apps/flow/src/features/projects/ProjectList.test.tsx", "audit-batch-298-suite-10"],
   ["apps/flow/src/features/tasks/components/DurationField.tsx", "audit-batch-299-suite-10"],
   ["apps/flow/src/routes/AppRoutes.tsx", "audit-batch-300-suite-10"],
+  ["apps/flow/src/shared/components/Skeleton.tsx", "audit-batch-301-suite-10"],
 ];
 

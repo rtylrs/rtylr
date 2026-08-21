@@ -300,5 +300,6 @@ export const cases = [
   ["apps/flow/src/features/presence/PresenceScreen.tsx", "audit-batch-298-suite-03"],
   ["apps/flow/src/features/settings/sections/TimeSection.tsx", "audit-batch-299-suite-03"],
   ["apps/flow/src/features/workspace-manager/AddWorkspaceMemberDialog.tsx", "audit-batch-300-suite-03"],
+  ["apps/flow/src/shared/components/PreviewRouteUnavailable.tsx", "audit-batch-301-suite-03"],
 ];
 
