@@ -191,5 +191,6 @@ export const cases = [
   ["apps/dash/src/shared/utils/BusinessRoute.test.tsx", "audit-batch-189-suite-02"],
   ["apps/erp/src/features/purchasing/Purchasing.tsx", "audit-batch-190-suite-02"],
   ["apps/erp/src/shared/components/CategoryTree.tsx", "audit-batch-191-suite-02"],
+  ["apps/erp/src/shared/components/dialogAccessibility.test.tsx", "audit-batch-192-suite-02"],
 ];
 
