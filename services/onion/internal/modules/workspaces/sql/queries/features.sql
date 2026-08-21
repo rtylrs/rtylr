@@ -122,18 +122,48 @@ SELECT COUNT(*) AS open_tasks
 FROM flow_tasks
 WHERE workspace_id = ? AND status NOT IN ('done', 'cancelled') AND parent_task_id IS NULL;
 
--- cross-schema read from users — insights time-by-member aggregation
+-- cross-schema read from users and hr_time_entries — insights time-by-member
+-- aggregation over BOTH stores of hours.
+--
+-- Flow's hours live in two tables. Work-day lines are hr_time_entries rows
+-- carrying a task_id; the task detail time panel writes flow_time_logs. This
+-- summed the second alone, so a workspace whose members use the work-day screen
+-- reported zero hours for everyone (tryrtylr/rtylr#903).
+--
+-- flow_time_logs rows with time_entry_id set are excluded: that column names the
+-- hr_time_entries row they duplicate, and counting both sides would double the
+-- same hour. Nothing writes it yet, so today this is a plain union of the two.
+--
+-- Restricted to source='flow' rows, which is a correctness requirement and not
+-- a convenience. hr_time_entries.employee_id is not one id space: Flow's
+-- CreateWorkDayLine stores the signed-in users.id there (worktime_service.go
+-- scope() returns authUser.UserID as the employee), while hr_time writes entries
+-- whose employee_id is an hr_employees.id, and hr_employees.user_id is nullable.
+-- Joining users on both would silently drop HR-authored rows at best and
+-- attribute them to the wrong person at worst.
+--
+-- The cost is that a time entry created in HR against a Flow task is not counted
+-- here. Fixing that means resolving hr_employees.user_id, which is a join this
+-- query cannot make without hr_employees, so it is left for #903.
 -- name: GetInsightsTimeByMember :many
 SELECT
     CAST(u.id AS CHAR) AS member_id,
     COALESCE(u.full_name, u.email) AS name,
-    SUM(tl.duration_minutes) / 60.0 AS hours
-FROM flow_time_logs tl
-JOIN users u ON u.id = tl.user_id
-JOIN flow_tasks t ON t.id = tl.task_id
+    SUM(e.duration_minutes) / 60.0 AS hours
+FROM (
+    SELECT te.employee_id AS user_id, te.task_id, te.duration_minutes
+    FROM hr_time_entries te
+    WHERE te.task_id IS NOT NULL AND te.source = 'flow'
+    UNION ALL
+    SELECT tl.user_id, tl.task_id, tl.duration_minutes
+    FROM flow_time_logs tl
+    WHERE tl.time_entry_id IS NULL
+) AS e
+JOIN users u ON u.id = e.user_id
+JOIN flow_tasks t ON t.id = e.task_id
 WHERE t.workspace_id = ?
 GROUP BY u.id, u.full_name, u.email
-ORDER BY SUM(tl.duration_minutes) DESC
+ORDER BY SUM(e.duration_minutes) DESC
 LIMIT 10;
 
 -- name: CountWorkspaceMembersForWorkload :one

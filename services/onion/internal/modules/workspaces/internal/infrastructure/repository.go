@@ -1072,11 +1072,16 @@ func (r *Repository) DeleteTimeLog(ctx context.Context, id, userID int64) error 
 }
 
 func (r *Repository) RecalcActualHours(ctx context.Context, taskID, actorID int64) error {
+	// TaskID and TaskID_2 are the same task, matched against the two stores of
+	// hours the query sums (tryrtylr/rtylr#903). The first is sql.NullInt64
+	// because hr_time_entries.task_id is nullable; Valid is always true here,
+	// since a null would match no row rather than every row.
 	err := r.queries.RecalcActualHours(ctx, sqlc.RecalcActualHoursParams{
-		TaskID:  taskID,
-		ID:      taskID,
-		OwnerID: actorID,
-		UserID:  actorID,
+		TaskID:   sql.NullInt64{Int64: taskID, Valid: true},
+		TaskID_2: taskID,
+		ID:       taskID,
+		OwnerID:  actorID,
+		UserID:   actorID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("RecalcActualHours failed", logger.Error(err))

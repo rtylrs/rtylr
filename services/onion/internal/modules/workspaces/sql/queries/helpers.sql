@@ -20,12 +20,34 @@ LIMIT 1;
 DELETE FROM flow_time_logs
 WHERE id = ? AND user_id = ?;
 
+-- A task's actual hours come from BOTH stores of hours, not just Flow's own.
+--
+-- hr_time_entries rows carry a task_id, so a work-day line is attributable to
+-- the task it was logged against. Summing flow_time_logs alone meant every
+-- work-day line counted as zero here, which is what tryrtylr/rtylr#903 reports.
+--
+-- flow_time_logs rows with time_entry_id set are skipped: that column names the
+-- hr_time_entries row they duplicate, so counting both sides would double the
+-- same hour. Nothing writes it yet, so today this is a plain sum of the two.
+--
+-- Restricted to source='flow'. A task's hours are Flow's own; an HR-authored
+-- entry that happens to carry a task_id belongs to HR's timesheet flow and its
+-- employee_id is an hr_employees.id rather than a users.id. See the note on
+-- GetInsightsTimeByMember in features.sql.
+--
 -- name: RecalcActualHours :exec
 UPDATE flow_tasks
 SET actual_hours = (
-    SELECT COALESCE(SUM(duration_minutes), 0) / 60.0
-    FROM flow_time_logs
-    WHERE task_id = ?
+    SELECT COALESCE(SUM(minutes), 0) / 60.0
+    FROM (
+        SELECT te.duration_minutes AS minutes
+        FROM hr_time_entries te
+        WHERE te.task_id = ? AND te.source = 'flow'
+        UNION ALL
+        SELECT tl.duration_minutes AS minutes
+        FROM flow_time_logs tl
+        WHERE tl.task_id = ? AND tl.time_entry_id IS NULL
+    ) AS both_stores
 )
 WHERE flow_tasks.id = ?
   AND (
