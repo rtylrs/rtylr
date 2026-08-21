@@ -113,5 +113,6 @@ export const cases = [
   ["apps/dash/src/shared/components/ui/separator.tsx", "audit-batch-111-suite-09"],
   ["apps/erp/src/features/expiry/Expiry.tsx", "audit-batch-112-suite-09"],
   ["apps/erp/src/features/suppliers/Suppliers.tsx", "audit-batch-113-suite-09"],
+  ["apps/erp/src/shared/components/PageHeader.tsx", "audit-batch-114-suite-09"],
 ];
 

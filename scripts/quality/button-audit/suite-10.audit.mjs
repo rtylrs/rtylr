@@ -113,5 +113,6 @@ export const cases = [
   ["apps/dash/src/shared/components/ui/sheet.tsx", "audit-batch-111-suite-10"],
   ["apps/erp/src/features/inventory/Inventory.test.tsx", "audit-batch-112-suite-10"],
   ["apps/erp/src/features/valuation/Valuation.test.tsx", "audit-batch-113-suite-10"],
+  ["apps/erp/src/shared/components/PaginationControls.tsx", "audit-batch-114-suite-10"],
 ];
 
