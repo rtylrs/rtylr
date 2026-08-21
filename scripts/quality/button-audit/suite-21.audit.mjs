@@ -251,5 +251,6 @@ export const cases = [
   ["apps/flow/src/shared/components/QuickCreate.tsx", "audit-batch-249-suite-21"],
   ["apps/hr/src/features/dashboard/widgets/SetupCompletionWidget.tsx", "audit-batch-250-suite-21"],
   ["apps/hr/src/features/onboarding/OnboardingChecklist.tsx", "audit-batch-251-suite-21"],
+  ["apps/hr/src/features/settings/roles-permissions/RolesPermissions.test.tsx", "audit-batch-252-suite-21"],
 ];
 
