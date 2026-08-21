@@ -120,5 +120,6 @@ export const cases = [
   ["apps/flow/src/features/profile/ProfileScreen.tsx", "audit-batch-118-suite-04"],
   ["apps/flow/src/features/settings/sections/WorkTypesSection.tsx", "audit-batch-119-suite-04"],
   ["apps/flow/src/features/workspace-manager/WorkspaceManager.tsx", "audit-batch-120-suite-04"],
+  ["apps/flow/src/shared/components/ProjectSelect.tsx", "audit-batch-121-suite-04"],
 ];
 
