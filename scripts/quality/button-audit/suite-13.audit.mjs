@@ -212,5 +212,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/LowStockWidget.tsx", "audit-batch-210-suite-13"],
   ["apps/dash/src/features/menu/Components/CreateItem.tsx", "audit-batch-211-suite-13"],
   ["apps/dash/src/features/settings/Settings/components/General/General.tsx", "audit-batch-212-suite-13"],
+  ["apps/dash/src/shared/components/dash/ConfirmDialog.tsx", "audit-batch-213-suite-13"],
 ];
 

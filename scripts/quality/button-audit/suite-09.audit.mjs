@@ -212,5 +212,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/InvoiceAgingWidget.test.tsx", "audit-batch-210-suite-09"],
   ["apps/dash/src/features/extras/Theme.tsx", "audit-batch-211-suite-09"],
   ["apps/dash/src/features/settings/Settings/components/Businesses/Businesses.test.tsx", "audit-batch-212-suite-09"],
+  ["apps/dash/src/shared/components/dash/ApiKeyRow.tsx", "audit-batch-213-suite-09"],
 ];
 

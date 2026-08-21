@@ -212,5 +212,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/TopProductsWidget.test.tsx", "audit-batch-210-suite-23"],
   ["apps/dash/src/features/permissions/Roles.tsx", "audit-batch-211-suite-23"],
   ["apps/dash/src/features/team/Team.tsx", "audit-batch-212-suite-23"],
+  ["apps/dash/src/shared/components/ui/badge.tsx", "audit-batch-213-suite-23"],
 ];
 
