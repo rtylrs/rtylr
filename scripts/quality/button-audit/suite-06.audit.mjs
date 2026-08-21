@@ -246,5 +246,6 @@ export const cases = [
   ["apps/finance/src/features/journal/Journal.tsx", "audit-batch-244-suite-06"],
   ["apps/finance/src/shared/components/LineItemRow.test.tsx", "audit-batch-245-suite-06"],
   ["apps/flow/src/features/focus-today/FocusToday.tsx", "audit-batch-246-suite-06"],
+  ["apps/flow/src/features/projects/ProjectTimeline.tsx", "audit-batch-247-suite-06"],
 ];
 

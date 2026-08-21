@@ -246,5 +246,6 @@ export const cases = [
   ["apps/finance/src/features/reconcile/Reconcile.tsx", "audit-batch-244-suite-11"],
   ["apps/finance/src/shared/components/PLByCategoryChart.tsx", "audit-batch-245-suite-11"],
   ["apps/flow/src/features/leave/LeaveScreen.tsx", "audit-batch-246-suite-11"],
+  ["apps/flow/src/features/projects/components/BoardSettingsPanel.test.tsx", "audit-batch-247-suite-11"],
 ];
 
