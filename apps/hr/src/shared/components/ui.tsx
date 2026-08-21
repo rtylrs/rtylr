@@ -279,46 +279,6 @@ export const Pill: React.FC<{
   </span>
 );
 
-/* ── EmptyState ── */
-export const EmptyState: React.FC<{
-  icon?: React.ReactNode;
-  title: string;
-  description?: string;
-  action?: React.ReactNode;
-}> = ({ icon, title, description, action }) => (
-  <div
-    style={{
-      padding: 'clamp(24px, 6vw, 48px)',
-      textAlign: 'center',
-      background: 'var(--hr-card)',
-      border: '1px dashed var(--hr-border)',
-      borderRadius: 12,
-    }}
-  >
-    {icon && (
-      <div
-        style={{
-          display: 'inline-flex',
-          padding: 12,
-          borderRadius: 12,
-          background: 'var(--hr-hover)',
-          color: 'var(--hr-text-muted)',
-          marginBottom: 12,
-        }}
-      >
-        {icon}
-      </div>
-    )}
-    <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--hr-text)' }}>{title}</p>
-    {description && (
-      <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--hr-text-muted)' }}>
-        {description}
-      </p>
-    )}
-    {action && <div style={{ marginTop: 16 }}>{action}</div>}
-  </div>
-);
-
 /* ── Skeleton loader ── */
 export const Skeleton: React.FC<{
   height?: number | string;
