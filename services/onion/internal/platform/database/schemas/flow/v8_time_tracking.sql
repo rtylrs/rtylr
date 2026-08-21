@@ -1,10 +1,36 @@
 -- Flow daily time logging: the work day, its approval history, and the work-type
 -- tree its lines are classified by.
 --
--- The lines themselves are hr_time_entries. Flow does not keep a second store of
--- hours: that table already carries project, task, category, date, start and end,
--- billable, status and approver, and HR payroll reads it directly. What Flow adds
--- below are the columns that table lacks.
+-- The lines themselves are hr_time_entries: that table already carries project,
+-- task, category, date, start and end, billable, status and approver, and HR
+-- payroll reads it directly. What Flow adds below are the columns it lacks.
+--
+-- Flow does keep a second store of hours, and this comment used to deny it.
+-- flow_time_logs (flow/schema.sql) holds per-task durations written by
+-- flow.task.v1 CreateTimeLog, which the task detail screen's time panel calls.
+-- The two stores mean different things and are read by different code:
+--
+--   hr_time_entries   the day's work, one row per line, source='flow' for ours.
+--                     AUTHORITATIVE FOR PAYROLL. Carries task_id, so its rows
+--                     are attributable per task.
+--   flow_time_logs    ad-hoc "N minutes on this task" entries. Read only by
+--                     Flow, for flow_tasks.actual_hours (RecalcActualHours) and
+--                     the insights time-by-member panel. Payroll never sees it.
+--
+-- Double counting is therefore not possible in payroll, which reads one store.
+-- It is not prevented at write time either: the same hour may legitimately be
+-- entered in both, and nothing reconciles them.
+--
+-- What IS wrong today is the reverse of double counting. Both per-task rollups
+-- above read flow_time_logs alone, so a work-day line carrying a task_id
+-- contributes nothing to that task's actual_hours or to insights. Teams using
+-- the work-day screen, which is what this file exists for, see undercounts.
+-- Tracked in tryrtylr/rtylr#903. Do not "fix" it by summing both stores without
+-- reading that issue: the same hour can be in both.
+--
+-- History: the denial above was cited by tryrtylr/rtylr#869 and by
+-- docs/cross-app/flow-deep-dive.md as proof that Flow's hours are a single
+-- store. See tryrtylr/rtylr#890.
 --
 -- business_id is NOT NULL with no default on every new table here, deliberately.
 -- The older tables default it to 0, which turns a forgotten value into a silently
