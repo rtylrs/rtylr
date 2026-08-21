@@ -57,12 +57,14 @@ func (m *Module) executeListTimeEntriesTool(ctx context.Context, input map[strin
 		return nil, err
 	}
 
+	// The filters are optional now (tryrtylr/rtylr#855), but this tool has always
+	// required an employee and a period, so it keeps passing all three.
 	entries, total, err := m.service.ListTimeEntries(ctx, businessID, domain.ListTimeEntriesParams{
-		EmployeeID:  employeeID,
-		PeriodStart: periodStart,
-		PeriodEnd:   periodEnd,
-		Limit:       limit,
-		Offset:      offset,
+		EmployeeID: &employeeID,
+		FromDate:   &periodStart,
+		ToDate:     &periodEnd,
+		Limit:      limit,
+		Offset:     offset,
 	})
 	if err != nil {
 		return nil, err

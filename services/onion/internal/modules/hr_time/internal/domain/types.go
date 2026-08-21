@@ -66,12 +66,23 @@ type ApprovalLevelInfo struct {
 	ApproverEmployeeID int64
 }
 
+// ListTimeEntriesParams selects logged time. Every filter is optional and they
+// combine with AND, matching hr.time_entry.v1 ListTimeEntriesRequest.
+//
+// The optional fields are pointers rather than zero values because zero is a
+// legitimate answer for none of them and an ambiguous one for all: employee 0
+// does not exist, but "" is not a date and false is a real billability. A zero
+// sentinel here is what made employee_id a mandatory filter before
+// tryrtylr/rtylr#855.
 type ListTimeEntriesParams struct {
-	EmployeeID  int64
-	PeriodStart string
-	PeriodEnd   string
-	Limit       int32
-	Offset      int32
+	EmployeeID *int64
+	FromDate   *string
+	ToDate     *string
+	ProjectID  *int64
+	IsBillable *bool
+	Status     *string
+	Limit      int32
+	Offset     int32
 }
 
 type ListTimesheetsParams struct {

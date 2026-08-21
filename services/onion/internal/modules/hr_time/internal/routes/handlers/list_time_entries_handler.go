@@ -19,13 +19,29 @@ func ListTimeEntriesRoutes() []string { return []string{"/hr/time-entries"} }
 
 type ListTimeEntriesHandler struct{ Service *application.Service }
 
+// Field names and semantics follow hr.time_entry.v1 ListTimeEntriesRequest.
+// This route is hand-registered rather than served by the generated service, so
+// the contract and this struct agree only because they are kept in step by hand
+// (tryrtylr/rtylr#873 is the general form of that).
+//
+// Optional filters are pointers so "absent" is distinguishable from a zero the
+// caller meant. is_billable is the clearest case: false is a real billability,
+// not a missing filter.
 type ListTimeEntriesRequest struct {
-	EmployeeID  int64  `json:"employee_id"`
-	Date        string `json:"date"`
+	EmployeeID *int64  `json:"employee_id"`
+	Date       string  `json:"date"`
+	FromDate   *string `json:"from_date"`
+	ToDate     *string `json:"to_date"`
+	ProjectID  *int64  `json:"project_id"`
+	IsBillable *bool   `json:"is_billable"`
+	Status     *string `json:"status"`
+	Limit      int32   `json:"limit"`
+	Offset     int32   `json:"offset"`
+
+	// period_start and period_end predate the contract's from_date/to_date and
+	// are accepted as aliases so any caller still sending them keeps working.
 	PeriodStart string `json:"period_start"`
 	PeriodEnd   string `json:"period_end"`
-	Limit       int32  `json:"limit"`
-	Offset      int32  `json:"offset"`
 }
 
 type ListTimeEntriesResponse struct {
@@ -46,15 +62,29 @@ func (h *ListTimeEntriesHandler) Serve(ctx context.Context, req *ListTimeEntries
 		return ListTimeEntriesResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	periodStart := req.PeriodStart
-	periodEnd := req.PeriodEnd
-	if req.Date != "" && periodStart == "" {
-		d, err := time.Parse(times.FormatWithDate, req.Date)
-		if err != nil {
-			return ListTimeEntriesResponse{}, onekiterrors.New(http.StatusBadRequest, "invalid date format")
+	// Range precedence, as the contract's doc comment states it: from_date and
+	// to_date win, then the period_* aliases, then date. date expands to the week
+	// beginning on it, which is what this endpoint has always done and what
+	// apps/hr's timesheet view relies on.
+	fromDate, toDate := req.FromDate, req.ToDate
+	if fromDate == nil && toDate == nil {
+		switch {
+		case req.PeriodStart != "" || req.PeriodEnd != "":
+			if req.PeriodStart != "" {
+				fromDate = &req.PeriodStart
+			}
+			if req.PeriodEnd != "" {
+				toDate = &req.PeriodEnd
+			}
+		case req.Date != "":
+			d, err := time.Parse(times.FormatWithDate, req.Date)
+			if err != nil {
+				return ListTimeEntriesResponse{}, onekiterrors.New(http.StatusBadRequest, "invalid date format")
+			}
+			start := d.Format(times.FormatWithDate)
+			end := d.AddDate(0, 0, times.DaysPerWeek-1).Format(times.FormatWithDate)
+			fromDate, toDate = &start, &end
 		}
-		periodStart = d.Format(times.FormatWithDate)
-		periodEnd = d.AddDate(0, 0, times.DaysPerWeek-1).Format(times.FormatWithDate)
 	}
 
 	if req.Limit <= 0 {
@@ -65,11 +95,14 @@ func (h *ListTimeEntriesHandler) Serve(ctx context.Context, req *ListTimeEntries
 	}
 
 	entries, total, err := h.Service.ListTimeEntries(ctx, businessID, domain.ListTimeEntriesParams{
-		EmployeeID:  req.EmployeeID,
-		PeriodStart: periodStart,
-		PeriodEnd:   periodEnd,
-		Limit:       req.Limit,
-		Offset:      req.Offset,
+		EmployeeID: req.EmployeeID,
+		FromDate:   fromDate,
+		ToDate:     toDate,
+		ProjectID:  req.ProjectID,
+		IsBillable: req.IsBillable,
+		Status:     req.Status,
+		Limit:      req.Limit,
+		Offset:     req.Offset,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list time entries", logger.Any("owner_id", device.User.UserID), logger.Error(err))

@@ -9,16 +9,19 @@ import (
 	"github.com/voxire/onion/internal/testutil"
 )
 
+// ptr takes the address of a literal, which the optional filters need.
+func ptr[T any](v T) *T { return &v }
+
 func TestListTimeEntries_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
 	entries, total, err := repo.ListTimeEntries(ctx, testutil.OwnerID, domain.ListTimeEntriesParams{
-		PeriodStart: "2024-01-01",
-		PeriodEnd:   "2025-12-31",
-		Limit:       50,
-		Offset:      0,
+		FromDate: ptr("2024-01-01"),
+		ToDate:   ptr("2025-12-31"),
+		Limit:    50,
+		Offset:   0,
 	})
 	if err != nil {
 		t.Fatalf("ListTimeEntries: %v", err)
@@ -35,10 +38,10 @@ func TestListTimeEntries_AllBelongToOwner(t *testing.T) {
 	ctx := context.Background()
 
 	entries, _, err := repo.ListTimeEntries(ctx, testutil.OwnerID, domain.ListTimeEntriesParams{
-		PeriodStart: "2024-01-01",
-		PeriodEnd:   "2025-12-31",
-		Limit:       100,
-		Offset:      0,
+		FromDate: ptr("2024-01-01"),
+		ToDate:   ptr("2025-12-31"),
+		Limit:    100,
+		Offset:   0,
 	})
 	if err != nil {
 		t.Fatalf("ListTimeEntries: %v", err)
@@ -56,11 +59,11 @@ func TestListTimeEntries_FilterByEmployee_NoError(t *testing.T) {
 	ctx := context.Background()
 
 	_, _, err := repo.ListTimeEntries(ctx, testutil.OwnerID, domain.ListTimeEntriesParams{
-		EmployeeID:  4101,
-		PeriodStart: "2024-01-01",
-		PeriodEnd:   "2025-12-31",
-		Limit:       50,
-		Offset:      0,
+		EmployeeID: ptr[int64](4101),
+		FromDate:   ptr("2024-01-01"),
+		ToDate:     ptr("2025-12-31"),
+		Limit:      50,
+		Offset:     0,
 	})
 	if err != nil {
 		t.Fatalf("ListTimeEntries with employee filter: %v", err)
@@ -269,11 +272,11 @@ func TestListTimeEntries_DoesNotReturnAnotherTenantsEntries(t *testing.T) {
 	// and returns nothing. That is why TestListTimeEntries_AllBelongToOwner above
 	// passes without ever entering its loop.
 	entries, _, err := repo.ListTimeEntries(ctx, testutil.BusinessID, domain.ListTimeEntriesParams{
-		EmployeeID:  4101,
-		PeriodStart: "2025-07-01",
-		PeriodEnd:   "2025-07-31",
-		Limit:       100,
-		Offset:      0,
+		EmployeeID: ptr[int64](4101),
+		FromDate:   ptr("2025-07-01"),
+		ToDate:     ptr("2025-07-31"),
+		Limit:      100,
+		Offset:     0,
 	})
 	if err != nil {
 		t.Fatalf("ListTimeEntries: %v", err)

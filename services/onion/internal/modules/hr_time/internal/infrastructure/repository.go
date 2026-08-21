@@ -26,21 +26,57 @@ func NewRepository(db *sql.DB) *Repository {
 
 // --- Time Entries ---
 
+// nullDate parses an optional ISO-8601 day into the nullable form sqlc expects.
+// A malformed value is an error rather than a silently dropped filter: a caller
+// who mistypes a date should not receive the unfiltered set.
+func nullDate(value *string) (sql.NullTime, error) {
+	if value == nil || *value == "" {
+		return sql.NullTime{}, nil
+	}
+	parsed, err := time.Parse("2006-01-02", *value)
+	if err != nil {
+		return sql.NullTime{}, err
+	}
+	return sql.NullTime{Time: parsed, Valid: true}, nil
+}
+
 func (r *Repository) ListTimeEntries(ctx context.Context, businessID int64, params domain.ListTimeEntriesParams) ([]domain.TimeEntryRecord, int64, error) {
-	periodStart, err := time.Parse("2006-01-02", params.PeriodStart)
+	fromDate, err := nullDate(params.FromDate)
 	if err != nil {
 		return nil, 0, err
 	}
-	periodEnd, err := time.Parse("2006-01-02", params.PeriodEnd)
+	toDate, err := nullDate(params.ToDate)
 	if err != nil {
 		return nil, 0, err
 	}
 
+	filters := struct {
+		employeeID sql.NullInt64
+		projectID  sql.NullInt64
+		isBillable sql.NullBool
+		status     sql.NullString
+	}{}
+	if params.EmployeeID != nil {
+		filters.employeeID = sql.NullInt64{Int64: *params.EmployeeID, Valid: true}
+	}
+	if params.ProjectID != nil {
+		filters.projectID = sql.NullInt64{Int64: *params.ProjectID, Valid: true}
+	}
+	if params.IsBillable != nil {
+		filters.isBillable = sql.NullBool{Bool: *params.IsBillable, Valid: true}
+	}
+	if params.Status != nil {
+		filters.status = sql.NullString{String: *params.Status, Valid: true}
+	}
+
 	total, err := r.queries.CountTimeEntries(ctx, sqlc.CountTimeEntriesParams{
 		BusinessID: businessID,
-		EmployeeID: params.EmployeeID,
-		Date:       periodStart,
-		Date_2:     periodEnd,
+		EmployeeID: filters.employeeID,
+		FromDate:   fromDate,
+		ToDate:     toDate,
+		ProjectID:  filters.projectID,
+		IsBillable: filters.isBillable,
+		Status:     filters.status,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to count time entries", logger.Any("business_id", businessID), logger.Error(err))
@@ -49,9 +85,12 @@ func (r *Repository) ListTimeEntries(ctx context.Context, businessID int64, para
 
 	rows, err := r.queries.ListTimeEntries(ctx, sqlc.ListTimeEntriesParams{
 		BusinessID: businessID,
-		EmployeeID: params.EmployeeID,
-		Date:       periodStart,
-		Date_2:     periodEnd,
+		EmployeeID: filters.employeeID,
+		FromDate:   fromDate,
+		ToDate:     toDate,
+		ProjectID:  filters.projectID,
+		IsBillable: filters.isBillable,
+		Status:     filters.status,
 		Limit:      params.Limit,
 		Offset:     params.Offset,
 	})

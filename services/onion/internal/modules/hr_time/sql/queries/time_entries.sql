@@ -1,16 +1,36 @@
+-- Every filter besides business_id is optional and they combine with AND, which
+-- is what hr.time_entry.v1 ListTimeEntriesRequest documents. employee_id was a
+-- mandatory equality before tryrtylr/rtylr#855, so "all employees over this
+-- range" was not answerable however the caller asked.
+--
 -- name: ListTimeEntries :many
 SELECT id, owner_id, business_id, employee_id, timesheet_id, project_id, task_id, category_id,
        date, duration_minutes, start_time, end_time, description, is_billable,
        status, rejection_reason, approved_by, source, billable_invoice_id,
        created_at, updated_at
 FROM hr_time_entries
-WHERE business_id = ? AND employee_id = ? AND date >= ? AND date <= ?
+WHERE business_id = ?
+  AND (sqlc.narg('employee_id') IS NULL OR employee_id = sqlc.narg('employee_id'))
+  AND (sqlc.narg('from_date') IS NULL OR date >= sqlc.narg('from_date'))
+  AND (sqlc.narg('to_date') IS NULL OR date <= sqlc.narg('to_date'))
+  AND (sqlc.narg('project_id') IS NULL OR project_id = sqlc.narg('project_id'))
+  AND (sqlc.narg('is_billable') IS NULL OR is_billable = sqlc.narg('is_billable'))
+  AND (sqlc.narg('status') IS NULL OR status = sqlc.narg('status'))
 ORDER BY date DESC, created_at DESC
 LIMIT ? OFFSET ?;
 
+-- Filters must match ListTimeEntries exactly, or total describes a different
+-- set from the page it is reported alongside.
+--
 -- name: CountTimeEntries :one
 SELECT COUNT(*) AS total FROM hr_time_entries
-WHERE business_id = ? AND employee_id = ? AND date >= ? AND date <= ?;
+WHERE business_id = ?
+  AND (sqlc.narg('employee_id') IS NULL OR employee_id = sqlc.narg('employee_id'))
+  AND (sqlc.narg('from_date') IS NULL OR date >= sqlc.narg('from_date'))
+  AND (sqlc.narg('to_date') IS NULL OR date <= sqlc.narg('to_date'))
+  AND (sqlc.narg('project_id') IS NULL OR project_id = sqlc.narg('project_id'))
+  AND (sqlc.narg('is_billable') IS NULL OR is_billable = sqlc.narg('is_billable'))
+  AND (sqlc.narg('status') IS NULL OR status = sqlc.narg('status'));
 
 -- name: GetTimeEntry :one
 SELECT id, owner_id, business_id, employee_id, timesheet_id, project_id, task_id, category_id,
