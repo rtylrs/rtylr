@@ -281,5 +281,6 @@ export const cases = [
   ["apps/hr/src/features/time-off/TimeOff.test.tsx", "audit-batch-279-suite-18"],
   ["apps/hr/src/shared/components/PayStubCard.tsx", "audit-batch-280-suite-18"],
   ["apps/insights/src/features/settings/Settings.tsx", "audit-batch-281-suite-18"],
+  ["apps/menu/src/screens/Public/SlugLanding/SlugLanding.tsx", "audit-batch-282-suite-18"],
 ];
 

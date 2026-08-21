@@ -281,5 +281,6 @@ export const cases = [
   ["apps/hr/src/features/timesheets/TimesheetsList.tsx", "audit-batch-279-suite-22"],
   ["apps/hr/src/shared/components/TimeOffBadge.tsx", "audit-batch-280-suite-22"],
   ["apps/insights/src/routes/AppRoutes.tsx", "audit-batch-281-suite-22"],
+  ["apps/recruit/src/features/admin/CareersAdmin.tsx", "audit-batch-282-suite-22"],
 ];
 

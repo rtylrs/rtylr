@@ -281,5 +281,6 @@ export const cases = [
   ["apps/hr/src/features/setup-wizard/steps/WorkScheduleStep.tsx", "audit-batch-279-suite-08"],
   ["apps/hr/src/shared/components/BirthdayWidget.tsx", "audit-batch-280-suite-08"],
   ["apps/insights/src/features/financial/Financial.tsx", "audit-batch-281-suite-08"],
+  ["apps/menu/src/layouts/Public/public.tsx", "audit-batch-282-suite-08"],
 ];
 
