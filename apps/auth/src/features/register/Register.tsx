@@ -14,7 +14,7 @@ import AuthShell from '../../shared/components/AuthShell';
 import PasswordStrengthMeter, {
   scorePassword,
 } from '../../shared/components/PasswordStrengthMeter';
-import { getCookie } from '../../shared/lib/cookies';
+import { getCookie } from '/auth';
 import { getEmailError, getPasswordMatchError } from '../../shared/lib/validation';
 
 const DEFAULT_SIGNUP_PLAN_SLUG = 'free';

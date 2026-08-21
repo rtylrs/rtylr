@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { removeCookie, getCookie, getDefaultCookieDomain } from '../lib/cookies';
+import { removeCookie, getCookie, getDefaultCookieDomain } from '/auth';
 
 export interface UserState {
   token: string | null;
