@@ -79,5 +79,6 @@ export const cases = [
   ["apps/recruit/src/templates/minimal/Job.tsx", "audit-batch-077-suite-25"],
   ["apps/crm/src/features/automations/AutomationBuilder.tsx", "audit-batch-078-suite-25"],
   ["apps/crm/src/features/loyalty/LoyaltyTiers.tsx", "audit-batch-079-suite-25"],
+  ["apps/dash/src/features/activity/Audit.test.tsx", "audit-batch-080-suite-25"],
 ];
 
