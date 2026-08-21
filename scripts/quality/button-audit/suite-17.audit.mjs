@@ -73,5 +73,6 @@ export const cases = [
   ["apps/hr/src/features/onboarding/ChecklistTemplates.tsx", "audit-batch-071-suite-17"],
   ["apps/hr/src/features/settings/Settings.test.tsx", "audit-batch-072-suite-17"],
   ["apps/hr/src/features/shifts/Shifts.tsx", "audit-batch-073-suite-17"],
+  ["apps/hr/src/shared/components/DateRangeFilter.tsx", "audit-batch-074-suite-17"],
 ];
 

@@ -73,5 +73,6 @@ export const cases = [
   ["apps/hr/src/features/leave/LeaveCalendar.tsx", "audit-batch-071-suite-15"],
   ["apps/hr/src/features/reviews/Reviews.tsx", "audit-batch-072-suite-15"],
   ["apps/hr/src/features/shifts/RosterBuilder.tsx", "audit-batch-073-suite-15"],
+  ["apps/hr/src/shared/components/ClockInOutButton.tsx", "audit-batch-074-suite-15"],
 ];
 
