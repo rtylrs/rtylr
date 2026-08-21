@@ -40,7 +40,7 @@ describe('financeApi', () => {
     expect(mockClients.compatibility.listQuotes).toHaveBeenCalledWith({});
   });
 
-  it('converts JSON compatibility bodies to snake_case', async () => {
+  it('puts the path id beside the body, not inside it, and snake_cases the body', async () => {
     financeApi.updateInvoice('INV-001', { clientEmail: 'billing@example.com' });
     financeApi.recordPayment('INV-001', 500);
     financeApi.createRecurringInvoice({
@@ -50,20 +50,26 @@ describe('financeApi', () => {
     });
     await Promise.resolve();
 
+    // UpdateInvoiceRequest is { id, body }: id binds the /invoices/{id} path
+    // segment and cannot travel inside the payload. Burying it in `body` left
+    // the URL without an id, which is what these calls used to do.
     expect(mockClients.compatibility.updateInvoice).toHaveBeenCalledWith({
-      body: { id: 'INV-001', client_email: 'billing@example.com' },
+      id: 'INV-001',
+      body: { client_email: 'billing@example.com' },
     });
+
+    // Creates are flat. RecordPaymentRequest and CreateRecurringInvoiceRequest
+    // declare their fields directly, with no `body` member to wrap them in.
     expect(mockClients.compatibility.recordPayment).toHaveBeenCalledWith({
-      body: { invoice_id: 1, amount: 500 },
+      invoice_id: 1,
+      amount: 500,
     });
     expect(mockClients.compatibility.createRecurringInvoice).toHaveBeenCalledWith({
-      body: {
-        template_invoice_id: 4,
-        frequency: 'monthly',
-        next_invoice_date: '2026-04-01',
-        end_date: undefined,
-        is_active: true,
-      },
+      template_invoice_id: 4,
+      frequency: 'monthly',
+      next_invoice_date: '2026-04-01',
+      end_date: undefined,
+      is_active: true,
     });
   });
 

@@ -236,8 +236,23 @@ function generatedResult<T>(operation: () => Promise<unknown>) {
   return oneKitResult(operation).map((value) => value as T);
 }
 
-function body(value: unknown) {
-  return { body: toOneKitJson(value) };
+/**
+ * Wraps a mutation payload for a OneKit `@body("body")` request.
+ *
+ * The generic is an assertion, not a check. toOneKitJson only renames keys to
+ * the wire's snake_case, so the value's shape is whatever the caller passed;
+ * there is nothing here that could validate it against the request type. It was
+ * previously `{ body: unknown }`, which compiled against the invented compat
+ * client because that client's parameters were loose. Now that these calls reach
+ * the real generated requests, the assertion is what carries the shape - and the
+ * generated types are at least checking the surrounding fields.
+ */
+function flat<T>(value: unknown): T {
+  return toOneKitJson(value) as T;
+}
+
+function withId<B>(id: string, value: unknown): { id: string; body: B } {
+  return { id, body: toOneKitJson(value) as B };
 }
 
 export const financeApi = {
@@ -260,23 +275,23 @@ export const financeApi = {
     compatResult<Invoice>(() => financeCompatibilityClient.getInvoice({ id })),
 
   createInvoice: (data: CreateInvoiceRequest) =>
-    compatResult<Invoice>(() => financeCompatibilityClient.createInvoice(body(data))),
+    compatResult<Invoice>(() => financeCompatibilityClient.createInvoice(flat(data))),
 
   updateInvoice: (id: string, data: Partial<Invoice>) =>
-    compatResult<Invoice>(() => financeCompatibilityClient.updateInvoice(body({ id, ...data }))),
+    compatResult<Invoice>(() => financeCompatibilityClient.updateInvoice(withId(id, data))),
 
   deleteInvoice: (id: string) =>
     generatedResult<unknown>(() => invoicesClient.deleteInvoice({ id })),
 
   updateInvoiceStatus: (id: string, status: Invoice['status']) =>
     compatResult<unknown>(() =>
-      financeCompatibilityClient.updateInvoiceStatus(body({ id, status }))
+      financeCompatibilityClient.updateInvoiceStatus(withId(id, { status }))
     ),
 
   recordPayment: (id: string, amount: number, details?: Record<string, unknown>) =>
     compatResult<unknown>(() =>
       financeCompatibilityClient.recordPayment(
-        body({ invoiceId: toNumericId(id), amount, ...details })
+        flat({ invoiceId: toNumericId(id), amount, ...details })
       )
     ),
 
@@ -293,11 +308,11 @@ export const financeApi = {
 
   createExpense: (data: Partial<Expense>) =>
     compatResult<Expense>(() =>
-      financeCompatibilityClient.createExpense(body(toExpenseMutationPayload(data)))
+      financeCompatibilityClient.createExpense(flat(toExpenseMutationPayload(data)))
     ),
 
   updateExpense: (id: string, data: Partial<Expense>) =>
-    compatResult<Expense>(() => financeCompatibilityClient.updateExpense(body({ id, ...data }))),
+    compatResult<Expense>(() => financeCompatibilityClient.updateExpense(withId(id, data))),
 
   deleteExpense: (id: string) =>
     generatedResult<unknown>(() => expensesClient.deleteExpense({ id })),
@@ -308,12 +323,12 @@ export const financeApi = {
 
   createExpenseCategory: (data: Partial<ExpenseCategory>) =>
     compatResult<ExpenseCategory>(() =>
-      financeCompatibilityClient.createExpenseCategory(body(toExpenseCategoryMutationPayload(data)))
+      financeCompatibilityClient.createExpenseCategory(flat(toExpenseCategoryMutationPayload(data)))
     ),
 
   updateExpenseCategory: (id: number, data: Partial<ExpenseCategory>) =>
     compatResult<unknown>(() =>
-      financeCompatibilityClient.updateExpenseCategory({ id: String(id), ...body(data) })
+      financeCompatibilityClient.updateExpenseCategory({ id: String(id), body: flat(data) })
     ),
 
   deleteExpenseCategory: (id: number) =>
@@ -334,13 +349,16 @@ export const financeApi = {
 
   createTaxConfig: (data: TaxConfig) =>
     compatResult<TaxConfig>(() =>
-      financeCompatibilityClient.createTaxConfig(body(toTaxConfigPayload(data)))
+      financeCompatibilityClient.createTaxConfig(flat(toTaxConfigPayload(data)))
     ),
 
-  getTaxReport: () => compatResult<TaxReport>(() => financeCompatibilityClient.getTaxReport({})),
+  getTaxReport: () =>
+    compatResult<TaxReport>(() =>
+      financeCompatibilityClient.getTaxReport({ date: new Date().toISOString().slice(0, 10) })
+    ),
 
   updateTaxConfig: (data: Record<string, unknown>) =>
-    compatResult<unknown>(() => financeCompatibilityClient.updateTaxConfig(body(data))),
+    compatResult<unknown>(() => financeCompatibilityClient.updateTaxConfig(flat(data))),
 
   // Recurring Invoices
   getRecurringInvoices: () =>
@@ -348,27 +366,25 @@ export const financeApi = {
 
   createRecurringInvoice: (data: CreateRecurringInvoiceRequest) =>
     compatResult<unknown>(() =>
-      financeCompatibilityClient.createRecurringInvoice(body(toRecurringInvoicePayload(data)))
+      financeCompatibilityClient.createRecurringInvoice(flat(toRecurringInvoicePayload(data)))
     ),
 
   updateRecurringInvoice: (id: string, data: Partial<CreateRecurringInvoiceRequest>) =>
     compatResult<unknown>(() =>
-      financeCompatibilityClient.updateRecurringInvoice(body({ id, ...data }))
+      financeCompatibilityClient.updateRecurringInvoice(withId(id, data))
     ),
 
   triggerRecurringInvoice: (id: string) =>
-    compatResult<unknown>(() =>
-      financeCompatibilityClient.triggerRecurringInvoice({ id, body: {} })
-    ),
+    compatResult<unknown>(() => financeCompatibilityClient.triggerRecurringInvoice({ id })),
 
   // Quotes
   getQuotes: () => compatResult<unknown>(() => financeCompatibilityClient.listQuotes({})),
 
   createQuote: (data: QuotePayload) =>
-    compatResult<unknown>(() => financeCompatibilityClient.createQuote(body(data))),
+    compatResult<unknown>(() => financeCompatibilityClient.createQuote(flat(data))),
 
   updateQuote: (id: string, data: Partial<QuotePayload>) =>
-    compatResult<unknown>(() => financeCompatibilityClient.updateQuote(body({ id, ...data }))),
+    compatResult<unknown>(() => financeCompatibilityClient.updateQuote(withId(id, data))),
 
   deleteQuote: (id: string) =>
     compatResult<unknown>(() => financeCompatibilityClient.deleteQuote({ id })),
@@ -377,10 +393,10 @@ export const financeApi = {
   getBills: () => compatResult<unknown>(() => financeCompatibilityClient.listBills({})),
 
   createBill: (data: CreateBillRequest) =>
-    compatResult<unknown>(() => financeCompatibilityClient.createBill(body(data))),
+    compatResult<unknown>(() => financeCompatibilityClient.createBill(flat(data))),
 
   updateBill: (id: string, data: Partial<CreateBillRequest>) =>
-    compatResult<unknown>(() => financeCompatibilityClient.updateBill(body({ id, ...data }))),
+    compatResult<unknown>(() => financeCompatibilityClient.updateBill(withId(id, data))),
 
   // Bank Accounts
   getBankAccounts: () =>
@@ -388,7 +404,7 @@ export const financeApi = {
 
   createBankAccount: (data: CreateBankAccountRequest) =>
     compatResult<unknown>(() =>
-      financeCompatibilityClient.createBankAccount(body(toBankAccountPayload(data)))
+      financeCompatibilityClient.createBankAccount(flat(toBankAccountPayload(data)))
     ),
 
   // Reconciliation
@@ -401,14 +417,14 @@ export const financeApi = {
   ) =>
     compatResult<unknown>(() =>
       financeCompatibilityClient.matchTransaction(
-        body({ bankFeedId: Number(bankFeedId), targetType, targetId: Number(targetId) })
+        flat({ bankFeedId: Number(bankFeedId), targetType, targetId: Number(targetId) })
       )
     ),
 
   matchReconcile: (transactionId: string, targetId: string) =>
     compatResult<unknown>(() =>
       financeCompatibilityClient.matchReconcile(
-        body({ transactionId, targetType: 'invoice', targetId })
+        flat({ transactionId, targetType: 'invoice', targetId })
       )
     ),
 
@@ -426,15 +442,15 @@ export const financeApi = {
   getAccounts: () => compatResult<unknown>(() => financeCompatibilityClient.listAccounts({})),
 
   createAccount: (data: CreateAccountRequest) =>
-    compatResult<unknown>(() => financeCompatibilityClient.createAccount(body(data))),
+    compatResult<unknown>(() => financeCompatibilityClient.createAccount(flat(data))),
 
   // Journal
   getJournal: () => compatResult<unknown>(() => financeCompatibilityClient.getJournal({})),
 
   createJournalEntry: (data: CreateJournalEntryRequest) =>
-    compatResult<unknown>(() => financeCompatibilityClient.createJournalEntry(body(data))),
+    compatResult<unknown>(() => financeCompatibilityClient.createJournalEntry(flat(data))),
 
   // Expense detail
   getExpenseDetail: (id: string) =>
-    compatResult<Expense>(() => financeCompatibilityClient.listExpenses({ id })),
+    compatResult<Expense>(() => financeCompatibilityClient.getExpense({ id })),
 };
