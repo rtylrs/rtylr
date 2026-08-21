@@ -57,5 +57,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/AppsWidget.tsx", "audit-batch-055-suite-25"],
   ["apps/dash/src/features/extras/NoMatch.tsx", "audit-batch-056-suite-25"],
   ["apps/dash/src/features/settings/Settings/components/BusinessType/BusinessType.tsx", "audit-batch-057-suite-25"],
+  ["apps/dash/src/shared/components/dash/ActivityEntry.tsx", "audit-batch-058-suite-25"],
 ];
 
