@@ -386,11 +386,11 @@ func (r *Repository) ListApprovedBillableEntries(ctx context.Context, businessID
 	return entries, nil
 }
 
-func (r *Repository) MarkEntryExported(ctx context.Context, businessID, entryID, billableInvoiceID int64) error {
+func (r *Repository) MarkEntryExported(ctx context.Context, businessID, entryID, exportBatchID int64) error {
 	return r.queries.MarkEntryExported(ctx, sqlc.MarkEntryExportedParams{
-		BillableInvoiceID: nullInt64(billableInvoiceID),
-		ID:                entryID,
-		BusinessID:        businessID,
+		ExportBatchID: nullInt64(exportBatchID),
+		ID:            entryID,
+		BusinessID:    businessID,
 	})
 }
 
@@ -398,7 +398,7 @@ func (r *Repository) MarkEntryExported(ctx context.Context, businessID, entryID,
 // entries and marks every row in that snapshot with the export batch id. A
 // failed mark rolls the entire batch back so no entry can disappear from a
 // later export after a partial success.
-func (r *Repository) ExportApprovedBillableEntries(ctx context.Context, businessID, billableInvoiceID int64) (entries []domain.TimeEntryRecord, err error) {
+func (r *Repository) ExportApprovedBillableEntries(ctx context.Context, businessID, exportBatchID int64) (entries []domain.TimeEntryRecord, err error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -422,9 +422,9 @@ func (r *Repository) ExportApprovedBillableEntries(ctx context.Context, business
 	entries = make([]domain.TimeEntryRecord, 0, len(rows))
 	for _, row := range rows {
 		if err := queries.MarkEntryExported(ctx, sqlc.MarkEntryExportedParams{
-			BillableInvoiceID: nullInt64(billableInvoiceID),
-			ID:                row.ID,
-			BusinessID:        businessID,
+			ExportBatchID: nullInt64(exportBatchID),
+			ID:            row.ID,
+			BusinessID:    businessID,
 		}); err != nil {
 			logger.Ctx(ctx).Error("failed to mark billable export batch",
 				logger.Any("business_id", businessID),

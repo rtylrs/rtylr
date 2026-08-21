@@ -47,13 +47,15 @@ SELECT id, owner_id, business_id, employee_id, timesheet_id, project_id, task_id
        created_at, updated_at
 FROM hr_time_entries
 WHERE business_id = ? AND is_billable = TRUE AND status = 'approved'
+      -- Export markers do not mean an invoice exists; only the invoice FK
+      -- determines whether the entry has been invoiced.
       AND billable_invoice_id IS NULL
 ORDER BY date ASC, id ASC
 LIMIT 500;
 
 -- name: MarkEntryExported :exec
 UPDATE hr_time_entries
-SET billable_invoice_id = ?, updated_at = NOW()
+SET export_batch_id = ?, updated_at = NOW()
 WHERE id = ? AND business_id = ?;
 
 -- The reminder job has no pagination contract; keep the endpoint bounded
