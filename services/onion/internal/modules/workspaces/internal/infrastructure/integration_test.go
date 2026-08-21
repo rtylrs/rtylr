@@ -84,6 +84,31 @@ func TestWorkspaces_ListWorkDayLines_ScopesByBusiness(t *testing.T) {
 	}
 }
 
+func TestWorkspaces_ClientKeyIsScopedByBusiness(t *testing.T) {
+	db := testutil.OpenDB(t)
+	ctx := context.Background()
+	const sharedOwner int64 = 970200
+
+	for _, businessID := range []int64{testutil.BusinessID, testutil.OtherBusinessID} {
+		if _, err := db.ExecContext(ctx, `
+			INSERT INTO hr_time_entries (
+				owner_id, business_id, employee_id, work_day_id, date,
+				duration_minutes, description, client_key, source
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'flow')`,
+			sharedOwner, businessID, 4101, 980002, "2026-08-21",
+			30, "tenant client key", "shared-client-key",
+		); err != nil {
+			t.Fatalf("insert business %d: %v", businessID, err)
+		}
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx,
+			"DELETE FROM hr_time_entries WHERE owner_id = ? AND client_key = ?",
+			sharedOwner, "shared-client-key",
+		)
+	})
+}
+
 func TestWorkspaces_GetWorkspacesByOwner_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
