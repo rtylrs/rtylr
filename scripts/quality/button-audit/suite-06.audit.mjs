@@ -309,5 +309,6 @@ export const cases = [
   ["apps/insights/src/features/reports/Reports.test.tsx", "audit-batch-307-suite-06"],
   ["apps/menu/src/screens/Public/Extras/NoMatch.tsx", "audit-batch-308-suite-06"],
   ["apps/recruit/src/shared/components/SemanticContent.tsx", "audit-batch-309-suite-06"],
+  ["apps/auth/src/main.tsx", "audit-batch-310-suite-06"],
 ];
 
