@@ -38,5 +38,6 @@ export const cases = [
   ["apps/erp/src/shared/components/ExportButton.test.tsx", "audit-batch-036-suite-23"],
   ["apps/finance/src/features/bills/Bills.tsx", "audit-batch-037-suite-23"],
   ["apps/finance/src/layouts/DefaultLayout.tsx", "audit-batch-038-suite-23"],
+  ["apps/finance/src/shared/components/RecordPaymentModal.tsx", "audit-batch-039-suite-23"],
 ];
 

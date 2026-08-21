@@ -38,5 +38,6 @@ export const cases = [
   ["apps/erp/src/shared/components/CategoryTree.tsx", "audit-batch-036-suite-19"],
   ["apps/erp/src/shared/components/dialogAccessibility.test.tsx", "audit-batch-037-suite-19"],
   ["apps/finance/src/features/settings/Settings.tsx", "audit-batch-038-suite-19"],
+  ["apps/finance/src/shared/components/PaymentBadge.tsx", "audit-batch-039-suite-19"],
 ];
 
