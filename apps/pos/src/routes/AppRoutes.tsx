@@ -27,6 +27,7 @@ const HeldOrders = React.lazy(() => import('../features/orders/HeldOrders'));
 const CashDrop = React.lazy(() => import('../features/cash-drop'));
 const Inventory = React.lazy(() => import('../features/inventory'));
 const Staff = React.lazy(() => import('../features/staff'));
+const OfflineQueue = React.lazy(() => import('../features/offline-queue'));
 
 export type AppRoute = {
   path: string;
@@ -52,7 +53,7 @@ const AppRoutes: AppRoute[] = [
   { path: '/day-summary', element: <DaySummary /> },
   { path: '/override', element: <Override /> },
   { path: '/products/quick', element: <ProductQuickEdit />, feature: 'inventory' },
-  { path: '/offline', element: <Navigate to="/" replace /> },
+  { path: '/offline', element: <OfflineQueue /> },
   { path: '/orders', element: <Orders /> },
   { path: '/tables', element: <Tables />, feature: 'tables' },
   { path: '/close-session', element: <CloseSession /> },

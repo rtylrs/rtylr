@@ -25,10 +25,24 @@ export function useOfflineQueue() {
   const cashMovementStore = useCashMovementQueueStore();
 
   const flush = useCallback(async () => {
-    const { queue, retry, markSynced, markFailed } = useOfflineQueueStore.getState();
-    await syncQueuedOrders({ entries: queue, syncOrder, retry, markSynced, markFailed });
-    await syncAllSessionCloses();
-    await syncAllCashMovements();
+    const ordersResult = await (async () => {
+      const { queue, retry, markSynced, markFailed } = useOfflineQueueStore.getState();
+      return syncQueuedOrders({
+        entries: queue,
+        syncOrder,
+        retry,
+        markSynced,
+        markFailed,
+        readEntry: (id) => useOfflineQueueStore.getState().queue.find((q) => q.id === id),
+      });
+    })();
+    const sessionResult = await syncAllSessionCloses();
+    const cashResult = await syncAllCashMovements();
+    return {
+      attempted: ordersResult.attempted + sessionResult.attempted + cashResult.attempted,
+      synced: ordersResult.synced + sessionResult.synced + cashResult.synced,
+      failed: ordersResult.failed + sessionResult.failed + cashResult.failed,
+    };
   }, []);
 
   const retryOne = useCallback(async (id: string) => {
