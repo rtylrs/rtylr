@@ -182,12 +182,12 @@ const EmployeeProfile: React.FC = () => {
           </Card>
         </div>
 
-        {/* Emergency contact. The "About" card that sat beside this one is gone:
-            it rendered bio and skills, and neither has a field in any contract or
-            a column in any schema, so it only ever showed the hardcoded "No bio."
-            The bio half returns when hr.staff.v1 carries it (see #875); skills is
-            a separate feature that was never built. */}
-        <div>
+        {/* Emergency contact and About. hr.staff.v1 now carries bio (#875), so the
+            About card is back. Skills is still absent: it has no contract field
+            and no column, and it was a separate feature that was never built. */}
+        <div
+          style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 16 }}
+        >
           <Card>
             <SectionHeader title={t('staff.profile.emergencyHeading')} />
             {staff.emergencyContactName || staff.emergencyContactPhone ? (
@@ -206,6 +206,20 @@ const EmployeeProfile: React.FC = () => {
                 {t('staff.profile.emergencyNotProvided')}
               </p>
             )}
+          </Card>
+
+          <Card>
+            <SectionHeader title={t('staff.profile.aboutHeading')} />
+            <p
+              style={{
+                margin: '10px 0 0',
+                fontSize: 12,
+                color: 'var(--hr-text-muted)',
+                lineHeight: 1.6,
+              }}
+            >
+              {staff.bio || t('staff.profile.noBio')}
+            </p>
           </Card>
         </div>
 
