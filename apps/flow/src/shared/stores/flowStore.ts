@@ -15,7 +15,14 @@ export interface Member {
   email: string;
   initials: string;
   role: 'owner' | 'admin' | 'member' | 'viewer';
-  capacity: number; // hours/week
+  /**
+   * Contracted hours per week, from HR's work schedule (#868). Absent when the
+   * member has no work schedule assigned, or the schedule records no hours.
+   * Optional on purpose: this used to be hardcoded to 40 for everyone, which
+   * read a part-timer as under-loaded. Consumers must render absent as unknown
+   * rather than substituting a number.
+   */
+  capacity?: number; // hours/week
 }
 
 export interface Label {
