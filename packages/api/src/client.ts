@@ -39,9 +39,7 @@ const clearTokenCookie = (): void => {
 
 const getAuthBaseUrl = (): string => {
   // Self-host uses the runtime auth URL; hosted keeps localhost/auth.rtylr.com.
-  return isLocalDevHost(window.location.hostname)
-    ? 'http://localhost:5176'
-    : resolveAuthUrl();
+  return isLocalDevHost(window.location.hostname) ? 'http://localhost:5176' : resolveAuthUrl();
 };
 
 const getAuthUrl = (appId: string): string => `${getAuthBaseUrl()}?redirect=${appId}`;
@@ -54,9 +52,7 @@ const getAuthUrl = (appId: string): string => `${getAuthBaseUrl()}?redirect=${ap
 const isOnAuthApp = (): boolean => {
   try {
     const base = new URL(getAuthBaseUrl());
-    return (
-      window.location.protocol === base.protocol && window.location.host === base.host
-    );
+    return window.location.protocol === base.protocol && window.location.host === base.host;
   } catch {
     return false;
   }
