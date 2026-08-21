@@ -18,10 +18,16 @@ UPDATE flow_workspace_members
 SET role = ?
 WHERE workspace_id = ? AND user_id = ?;
 
+-- The tenant filter is load-bearing, not defensive. flow_workspaces is
+-- business-scoped and GetWorkspacesByOwner reads it by business_id, so a lookup
+-- on owner_id alone can hand back another business's personal workspace and
+-- CreatePersonalWorkspace will treat it as already done. #703 fixed the INSERT
+-- to write a real business_id but left this lookup unscoped, which is why
+-- TestWorkspaces_CreatePersonalWorkspace_Idempotent fails intermittently.
 -- name: GetPersonalWorkspaceByOwner :one
 SELECT id
 FROM flow_workspaces
-WHERE owner_id = ? AND (is_personal = TRUE OR is_default = TRUE)
+WHERE owner_id = ? AND business_id = ? AND (is_personal = TRUE OR is_default = TRUE)
 ORDER BY is_personal DESC, is_default DESC, id ASC
 LIMIT 1;
 

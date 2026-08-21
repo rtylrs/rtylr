@@ -1409,7 +1409,10 @@ func (r *Repository) UpdateWorkspaceMemberRole(ctx context.Context, input domain
 }
 
 func (r *Repository) CreatePersonalWorkspace(ctx context.Context, userID, businessID int64) (int64, error) {
-	existing, err := r.queries.GetPersonalWorkspaceByOwner(ctx, userID)
+	existing, err := r.queries.GetPersonalWorkspaceByOwner(ctx, sqlc.GetPersonalWorkspaceByOwnerParams{
+		OwnerID:    userID,
+		BusinessID: businessID,
+	})
 	if err == nil && existing > 0 {
 		return existing, nil
 	}

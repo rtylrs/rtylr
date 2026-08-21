@@ -281,6 +281,53 @@ func TestWorkspaces_CreatePersonalWorkspace_Idempotent(t *testing.T) {
 	}
 }
 
+// The idempotency lookup behind CreatePersonalWorkspace read owner_id only, so
+// a user who belongs to two businesses got the first business's personal
+// workspace handed back for the second, and the second business never got one.
+// That is also why the test above failed intermittently: any earlier test that
+// left a personal or default workspace for the same owner under a different
+// business won the lookup.
+//
+// Seeds the other tenant first, deliberately, so an unscoped lookup would find
+// it before the caller's own.
+func TestWorkspaces_CreatePersonalWorkspace_IsPerBusiness(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const sharedOwner int64 = 970100
+
+	theirs, err := repo.CreatePersonalWorkspace(ctx, sharedOwner, testutil.OtherBusinessID)
+	if err != nil {
+		t.Fatalf("CreatePersonalWorkspace for the other business: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM flow_workspaces WHERE id = ?", theirs)
+	})
+
+	mine, err := repo.CreatePersonalWorkspace(ctx, sharedOwner, testutil.BusinessID)
+	if err != nil {
+		t.Fatalf("CreatePersonalWorkspace for this business: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM flow_workspaces WHERE id = ?", mine)
+	})
+
+	if mine == theirs {
+		t.Fatalf("returned the other business's workspace %d instead of creating one for business %d",
+			theirs, testutil.BusinessID)
+	}
+
+	// And it must still be idempotent within a business.
+	again, err := repo.CreatePersonalWorkspace(ctx, sharedOwner, testutil.BusinessID)
+	if err != nil {
+		t.Fatalf("CreatePersonalWorkspace second call: %v", err)
+	}
+	if again != mine {
+		t.Errorf("not idempotent within a business: got %d then %d", mine, again)
+	}
+}
+
 func TestWorkspaces_UpdateWorkspace_Description(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
