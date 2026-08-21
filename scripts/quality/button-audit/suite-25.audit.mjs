@@ -141,5 +141,6 @@ export const cases = [
   ["apps/erp/src/shared/components/ImportCSV.tsx", "audit-batch-139-suite-25"],
   ["apps/finance/src/features/expenses/ExpenseDetail.test.tsx", "audit-batch-140-suite-25"],
   ["apps/finance/src/shared/components/CashFlowChart.tsx", "audit-batch-141-suite-25"],
+  ["apps/flow/src/App.tsx", "audit-batch-142-suite-25"],
 ];
 

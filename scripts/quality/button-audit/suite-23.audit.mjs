@@ -141,5 +141,6 @@ export const cases = [
   ["apps/erp/src/shared/components/ImageGallery.tsx", "audit-batch-139-suite-23"],
   ["apps/finance/src/features/chart-of-accounts/ChartOfAccounts.tsx", "audit-batch-140-suite-23"],
   ["apps/finance/src/shared/components/AccountTypeBadge.tsx", "audit-batch-141-suite-23"],
+  ["apps/finance/src/shared/components/TaxBreakdown.tsx", "audit-batch-142-suite-23"],
 ];
 
