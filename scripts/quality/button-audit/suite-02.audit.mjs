@@ -296,5 +296,6 @@ export const cases = [
   ["apps/erp/src/shared/components/DateRangePicker.tsx", "audit-batch-294-suite-02"],
   ["apps/finance/src/features/bank-feeds/BankFeeds.tsx", "audit-batch-295-suite-02"],
   ["apps/finance/src/layouts/DefaultLayout.test.tsx", "audit-batch-296-suite-02"],
+  ["apps/finance/src/shared/components/ReceiptUpload.tsx", "audit-batch-297-suite-02"],
 ];
 

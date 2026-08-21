@@ -296,5 +296,6 @@ export const cases = [
   ["apps/erp/src/shared/hooks/useDialogFocus.test.tsx", "audit-batch-294-suite-25"],
   ["apps/finance/src/features/tax/Tax.tsx", "audit-batch-295-suite-25"],
   ["apps/finance/src/shared/components/PaymentReminderPanel.tsx", "audit-batch-296-suite-25"],
+  ["apps/flow/src/features/milestones/Milestones.test.tsx", "audit-batch-297-suite-25"],
 ];
 

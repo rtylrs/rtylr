@@ -296,5 +296,6 @@ export const cases = [
   ["apps/erp/src/shared/components/UnitSelector.tsx", "audit-batch-294-suite-23"],
   ["apps/finance/src/features/recurring-invoices/RecurringInvoices.tsx", "audit-batch-295-suite-23"],
   ["apps/finance/src/shared/components/PageHeader.tsx", "audit-batch-296-suite-23"],
+  ["apps/flow/src/features/leave/RequestLeaveDialog.test.tsx", "audit-batch-297-suite-23"],
 ];
 
