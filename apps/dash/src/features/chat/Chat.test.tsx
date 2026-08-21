@@ -13,7 +13,7 @@ vi.mock('@voxire/components', () => ({
 vi.mock('motion/react', () => ({
   motion: {
     div: (props: React.ComponentProps<'div'>) => <div {...props} />,
-    button: (props: React.ComponentProps<'button'>) => <button {...props} />,
+    button: (props: React.ComponentProps<'button'>) => <button type="button" {...props} />,
   },
   AnimatePresence: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
 }));

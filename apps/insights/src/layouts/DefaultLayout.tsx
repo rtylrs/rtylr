@@ -280,7 +280,7 @@ const DefaultLayout: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-1.5">
-          <button
+          <button type="button"
             onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
             aria-label={t('nav.toggleTheme', 'Toggle theme')}
             className="min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center"

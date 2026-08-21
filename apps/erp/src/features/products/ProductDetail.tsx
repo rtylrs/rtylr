@@ -186,7 +186,7 @@ const ProductDetail: React.FC = () => {
             {t('erp.products.detail.edit')}
           </button>
           {canDeleteProduct && (
-            <button
+            <button type="button"
               data-testid="product-delete-button"
               onClick={() => setConfirmDelete(true)}
               disabled={deleteProduct.isPending}

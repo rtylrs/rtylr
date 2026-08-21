@@ -523,7 +523,7 @@ const Campaigns: React.FC = () => {
           </div>
           {canManageCampaigns && (
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button
+              <button type="button"
                 onClick={() => navigate({ to: '/campaigns/sms' })}
                 style={{
                   display: 'flex',

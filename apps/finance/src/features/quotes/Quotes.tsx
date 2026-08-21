@@ -191,7 +191,7 @@ const Quotes: React.FC = () => {
           </>
         }
         actions={
-          <button style={primaryBtn} aria-label="New Quote" onClick={() => setShowCreate(true)}>
+          <button type="button" style={primaryBtn} aria-label="New Quote" onClick={() => setShowCreate(true)}>
             <Plus size={13} /> New Quote
           </button>
         }

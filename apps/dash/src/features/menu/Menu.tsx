@@ -178,7 +178,7 @@ const Menu: React.FC<{}> = () => {
             >
               Add a product
             </button>
-            <button
+            <button type="button"
               className="px-3 py-1 text-xs text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
               onClick={() => deleteCategory((category.itemId || category._id) as string)}
             >

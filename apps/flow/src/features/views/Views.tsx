@@ -102,7 +102,7 @@ const Views: React.FC = () => {
           >
             {t('flow.views.heading')}
           </h2>
-          <button
+          <button type="button"
             onClick={handleCreateView}
             disabled={createView.isPending}
             className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"

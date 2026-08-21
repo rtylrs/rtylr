@@ -102,7 +102,7 @@ const Invoices: React.FC = () => {
         actions={
           <>
             {selected.size > 0 && (
-              <button style={ghostBtn} onClick={() => setShowBulkSend(true)}>
+              <button type="button" style={ghostBtn} onClick={() => setShowBulkSend(true)}>
                 <Send size={13} /> Send {selected.size}
               </button>
             )}

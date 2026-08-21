@@ -248,7 +248,7 @@ const Purchasing: React.FC = () => {
             const Icon = sc.icon;
             const active = filter === status;
             return (
-              <button
+              <button type="button"
                 key={status}
                 onClick={() => {
                   setFilter(active ? 'All' : status);

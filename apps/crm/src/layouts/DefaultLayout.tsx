@@ -257,7 +257,7 @@ const DefaultLayout: React.FC = () => {
             borderBottom: '1px solid var(--hub-border)',
           }}
         >
-          <button
+          <button type="button"
             onClick={() => setSidebarOpen(true)}
             className="h-8 w-8 rounded-lg flex items-center justify-center"
             style={{ color: 'var(--hub-text-muted)' }}

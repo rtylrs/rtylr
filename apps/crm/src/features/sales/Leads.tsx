@@ -373,7 +373,7 @@ const Leads: React.FC = () => {
                           >
                             <Eye size={13} />
                           </button>
-                          <button
+                          <button type="button"
                             aria-label="Delete lead"
                             onClick={() => setDeleteId(lead.id)}
                             style={{

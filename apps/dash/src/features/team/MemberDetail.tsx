@@ -509,7 +509,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                     }}
                   >
                     <span>{g.name}</span>
-                    <button
+                    <button type="button"
                       aria-label={`Remove from ${g.name}`}
                       onClick={() => removeFromGroup.mutate({ groupId: g.id, userId: member.id })}
                       className="hover:opacity-70 transition-opacity"

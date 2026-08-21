@@ -47,7 +47,7 @@ export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
           <code className="text-xs font-mono" style={{ color: 'var(--dash-text-muted)' }}>
             {preview}
           </code>
-          <button
+          <button type="button"
             className="flex items-center gap-1 text-[11px] transition-opacity hover:opacity-70"
             style={{ color: 'var(--dash-text-dim)' }}
             onClick={copy}

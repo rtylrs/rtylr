@@ -102,7 +102,7 @@ const ChartOfAccounts: React.FC = () => {
           }}
         >
           {TYPES.map((t) => (
-            <button
+            <button type="button"
               key={t}
               onClick={() => setFilter(t)}
               style={{

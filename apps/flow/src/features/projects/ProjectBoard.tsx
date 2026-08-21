@@ -540,7 +540,7 @@ const KanbanColumn: React.FC<{
 
         {/* Actions (visible on header hover) */}
         <div className="flex items-center gap-0.5 opacity-0 group-hover/header:opacity-100 transition-opacity shrink-0">
-          <button
+          <button type="button"
             onClick={onAddTask}
             className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-dim)' }}

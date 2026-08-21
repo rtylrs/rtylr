@@ -354,7 +354,7 @@ const Calendar: React.FC = () => {
                 >
                   {t('flow.calendar.cancel')}
                 </button>
-                <button
+                <button type="button"
                   onClick={submitCreate}
                   disabled={!newTitle.trim() || createTask.isPending}
                   className="px-3 py-1.5 rounded text-[12px] font-semibold disabled:opacity-40"

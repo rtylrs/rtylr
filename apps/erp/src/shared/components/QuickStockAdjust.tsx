@@ -42,7 +42,7 @@ const QuickStockAdjust: React.FC<QuickStockAdjustProps> = ({
       className="inline-flex items-center gap-1 rounded-lg p-0.5"
       style={{ background: 'var(--hub-hover)' }}
     >
-      <button
+      <button type="button"
         onClick={() => bump(-1)}
         aria-label="Decrease stock"
         className="h-11 w-11 rounded flex items-center justify-center"

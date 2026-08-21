@@ -365,7 +365,7 @@ const ProjectSettings: React.FC = () => {
                           <option value="viewer">Viewer</option>
                         </select>
                       </div>
-                      <button
+                      <button type="button"
                         onClick={() => {
                           if (!canManageProject) return;
                           removeMember.mutate(

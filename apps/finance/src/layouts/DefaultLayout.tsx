@@ -402,7 +402,7 @@ const DefaultLayout: React.FC = () => {
           </div>
 
           <div style={{ padding: '6px 8px' }}>
-            <button
+            <button type="button"
               onClick={() => setSearchOpen(true)}
               style={{
                 display: 'flex',

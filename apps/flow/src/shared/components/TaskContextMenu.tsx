@@ -90,7 +90,7 @@ export const TaskContextMenu: React.FC<{
         Copy link
       </button>
       <div style={{ height: 1, background: 'var(--flow-border)', margin: '4px 0' }} />
-      <button
+      <button type="button"
         style={{
           ...itemStyle,
           color: canRemove ? '#ef4444' : 'var(--flow-text-dim)',

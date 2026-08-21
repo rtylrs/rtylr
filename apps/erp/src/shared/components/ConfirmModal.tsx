@@ -85,7 +85,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
           </div>
         </div>
         <div className="flex gap-2 justify-end mt-4">
-          <button
+          <button type="button"
             onClick={onCancel}
             className="px-3 py-1.5 rounded-lg text-xs font-medium"
             style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}

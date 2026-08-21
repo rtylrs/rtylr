@@ -896,7 +896,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             </h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <button
+            <button type="button"
               onClick={() => {
                 window.dispatchEvent(new CustomEvent('hr:open-palette'));
               }}
