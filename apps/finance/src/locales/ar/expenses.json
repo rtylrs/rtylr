@@ -3,5 +3,8 @@
   "updated": "تم تحديث المصروف",
   "deleted": "تم حذف المصروف",
   "approved": "تمت الموافقة على المصروف",
-  "rejected": "تم رفض المصروف"
+  "rejected": "تم رفض المصروف",
+  "receiptUpdated": "تم تحديث الإيصال",
+  "rejectConfirmTitle": "رفض المصروف",
+  "rejectConfirmMessage": "هل أنت متأكد أنك تريد رفض هذا المصروف؟"
 }

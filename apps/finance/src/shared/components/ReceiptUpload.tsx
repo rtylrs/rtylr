@@ -6,9 +6,11 @@ import { Upload, FileImage, X } from 'lucide-react';
 interface ReceiptUploadProps {
   value?: string | null;
   onChange: (dataUrl: string | null) => void;
+  /** Set false when a cleared receipt cannot be persisted (e.g. saved records). */
+  allowRemove?: boolean;
 }
 
-const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
+const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange, allowRemove = true }) => {
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,29 +81,32 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
             alt="Receipt"
             style={{ maxHeight: 180, maxWidth: '100%', borderRadius: 8 }}
           />
-          <button type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onChange(null);
-            }}
-            style={{
-              position: 'absolute',
-              top: -8,
-              insetInlineEnd: -8,
-              background: 'var(--finance-danger)',
-              color: 'var(--finance-white)',
-              border: 'none',
-              borderRadius: '50%',
-              width: 22,
-              height: 22,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <X size={12} />
-          </button>
+          {allowRemove && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onChange(null);
+              }}
+              style={{
+                position: 'absolute',
+                top: -8,
+                insetInlineEnd: -8,
+                background: 'var(--finance-danger)',
+                color: 'var(--finance-white)',
+                border: 'none',
+                borderRadius: '50%',
+                width: 22,
+                height: 22,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <X size={12} />
+            </button>
+          )}
         </div>
       ) : (
         <>

@@ -95,7 +95,8 @@ const Tax: React.FC = () => {
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           {canManageTax && (
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setShowConfig(!showConfig)}
               style={{
                 display: 'flex',
@@ -114,7 +115,8 @@ const Tax: React.FC = () => {
               Tax Rates
             </button>
           )}
-          <button type="button"
+          <button
+            type="button"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -320,7 +322,8 @@ const Tax: React.FC = () => {
               </div>
             ))}
           </div>
-          <button type="button"
+          <button
+            type="button"
             disabled={saveRates.isPending}
             style={{
               marginTop: 14,

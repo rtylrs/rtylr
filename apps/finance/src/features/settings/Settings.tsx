@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { EmptyState } from '@voxire/ui';
 import PageHeader from '../../shared/components/PageHeader';
+import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { useSettings } from '../../shared/lib/settings';
 import { CURRENCY_OPTIONS, type Currency } from '../../shared/lib/money';
 import {
@@ -56,8 +57,10 @@ const TABS: Tab[] = [
 // ── General Tab ───────────────────────────────────────────────────────────────
 
 const GeneralTab: React.FC = () => {
+  const { t } = useTranslation();
   const settings = useSettings();
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogoUpload = async (file?: File | null): Promise<void> => {
@@ -92,13 +95,23 @@ const GeneralTab: React.FC = () => {
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 20 }}>
-        <button type="button" style={ghostBtn} onClick={handleReset}>
+        <button type="button" style={ghostBtn} onClick={() => setShowResetConfirm(true)}>
           <RotateCcw size={13} /> Reset
         </button>
         <button type="button" style={primaryBtn} onClick={handleSave}>
           <Save size={13} /> Save
         </button>
       </div>
+
+      <ConfirmDialog
+        open={showResetConfirm}
+        onClose={() => setShowResetConfirm(false)}
+        onConfirm={handleReset}
+        title={t('settings.resetConfirmTitle')}
+        message={t('settings.resetConfirmMessage')}
+        confirmLabel={t('common.confirm')}
+        destructive
+      />
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
         <Card title="Company">

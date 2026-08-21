@@ -1,5 +1,7 @@
 {
   "teamEmptyTitle": "No team members yet",
   "teamEmptyDescription": "Invite people to give them access to Finance.",
-  "teamEmptyCta": "Invite member"
+  "teamEmptyCta": "Invite member",
+  "resetConfirmTitle": "Reset settings",
+  "resetConfirmMessage": "This will restore default settings and discard your changes."
 }

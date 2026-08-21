@@ -4,12 +4,14 @@ import { useParams } from '@tanstack/react-router';
 import { useUserStore } from '@voxire/auth';
 import { motion } from 'motion/react';
 import { CheckCircle, XCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
+import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import ReceiptUpload from '../../shared/components/ReceiptUpload';
 import { useExpenseById } from './useExpenseById';
-import { useExpenseCategories } from './useExpenses';
+import { useExpenseCategories, useUpdateExpenseReceipt } from './useExpenses';
 import { useApproveExpense, useRejectExpense } from '../../shared/hooks/queries/useExpenses';
 import { cardStyle, ghostBtn, primaryBtn } from '../../shared/lib/tokens';
 import { canFinancePermission } from '../../shared/lib/financePermissions';
@@ -31,13 +33,24 @@ const statusStyle: Record<string, React.CSSProperties> = {
 
 const ExpenseDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
+  const { t } = useTranslation();
   const { data: expense, isLoading } = useExpenseById(id);
   const { data: categories = [] } = useExpenseCategories();
   const approveMut = useApproveExpense();
   const rejectMut = useRejectExpense();
+  const receiptMut = useUpdateExpenseReceipt();
   const [receipt, setReceipt] = React.useState<string | null>(null);
+  const [showRejectConfirm, setShowRejectConfirm] = React.useState(false);
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canApproveExpense = canFinancePermission(role, 'finance:expenses:approve');
+
+  // Persist receipt replacements to the expense record (the update RPC requires
+  // a non-empty receipt_url, so clearing an existing receipt is not supported).
+  const handleReceiptChange = (url: string | null): void => {
+    setReceipt(url);
+    if (!url || !expense) return;
+    receiptMut.mutate({ id: expense.id, receiptUrl: url, expense });
+  };
 
   const categoryName = React.useMemo(() => {
     if (expense?.categoryId == null) return 'Uncategorized';
@@ -92,18 +105,20 @@ const ExpenseDetail: React.FC = () => {
         actions={
           canApproveExpense ? (
             <>
-              <button type="button"
+              <button
+                type="button"
                 style={{
                   ...ghostBtn,
                   color: 'var(--finance-error)',
                   borderColor: 'color-mix(in srgb, var(--finance-error) 30%, transparent)',
                 }}
                 disabled={rejectMut.isPending}
-                onClick={() => rejectMut.mutate(expense.id)}
+                onClick={() => setShowRejectConfirm(true)}
               >
                 <XCircle size={13} /> Reject
               </button>
-              <button type="button"
+              <button
+                type="button"
                 style={primaryBtn}
                 disabled={approveMut.isPending}
                 onClick={() => approveMut.mutate(expense.id)}
@@ -151,9 +166,19 @@ const ExpenseDetail: React.FC = () => {
           >
             Receipt
           </div>
-          <ReceiptUpload value={receipt} onChange={setReceipt} />
+          <ReceiptUpload value={receipt} onChange={handleReceiptChange} allowRemove={false} />
         </div>
       </div>
+
+      <ConfirmDialog
+        open={showRejectConfirm}
+        onClose={() => setShowRejectConfirm(false)}
+        onConfirm={() => rejectMut.mutate(expense.id)}
+        title={t('expenses.rejectConfirmTitle')}
+        message={t('expenses.rejectConfirmMessage')}
+        confirmLabel={t('common.confirm')}
+        destructive
+      />
     </motion.div>
   );
 };

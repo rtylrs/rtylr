@@ -1,5 +1,7 @@
 {
   "teamEmptyTitle": "لا يوجد أعضاء فريق حتى الآن",
   "teamEmptyDescription": "قم بدعوة أشخاص لمنحهم الوصول إلى Finance.",
-  "teamEmptyCta": "دعوة عضو"
+  "teamEmptyCta": "دعوة عضو",
+  "resetConfirmTitle": "إعادة تعيين الإعدادات",
+  "resetConfirmMessage": "سيؤدي هذا إلى استعادة الإعدادات الافتراضية وتجاهل تغييراتك."
 }

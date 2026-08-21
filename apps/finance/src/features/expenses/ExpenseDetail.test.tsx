@@ -1,3 +1,4 @@
+// @vitest-environment happy-dom
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -40,6 +41,7 @@ vi.mock('./useExpenseById', () => ({
 
 vi.mock('./useExpenses', () => ({
   useExpenseCategories: () => ({ data: [] }),
+  useUpdateExpenseReceipt: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock('../../shared/hooks/queries/useExpenses', () => ({

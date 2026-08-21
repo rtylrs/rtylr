@@ -95,7 +95,8 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
           <button type="button" style={ghostBtn} onClick={onClose} disabled={createBill.isPending}>
             {t('common.cancel')}
           </button>
-          <button type="button"
+          <button
+            type="button"
             style={{ ...primaryBtn, opacity: createBill.isPending ? 0.6 : 1 }}
             onClick={handleSubmit}
             disabled={createBill.isPending}
@@ -209,7 +210,12 @@ const Bills: React.FC = () => {
                 <CheckCircle size={13} /> Pay selected ({selected.size})
               </button>
             )}
-            <button type="button" style={ghostBtn} aria-label="New Bill" onClick={() => setShowCreate(true)}>
+            <button
+              type="button"
+              style={ghostBtn}
+              aria-label="New Bill"
+              onClick={() => setShowCreate(true)}
+            >
               <Plus size={13} /> {t('bills.new')}
             </button>
           </>
@@ -312,7 +318,8 @@ const Bills: React.FC = () => {
                   </td>
                   <td style={{ padding: '12px 16px' }}>
                     {b.status === 'unpaid' || b.status === 'overdue' ? (
-                      <button type="button"
+                      <button
+                        type="button"
                         style={{
                           ...ghostBtn,
                           padding: '4px 10px',

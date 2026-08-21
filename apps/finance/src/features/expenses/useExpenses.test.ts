@@ -27,6 +27,7 @@ import {
   useExpenseCategories,
   useCreateExpense,
   useUpdateExpense,
+  useUpdateExpenseReceipt,
   useDeleteExpense,
 } from './useExpenses';
 
@@ -107,8 +108,10 @@ describe('useCreateExpense', () => {
   it('creates an expense', async () => {
     mockClient.createExpense.mockResolvedValue({ expenseId: 'exp-new', message: 'ok' });
     const { result } = renderHook(() => useCreateExpense(), { wrapper: createWrapper() });
-    await act(() => result.current.mutateAsync({ amount: 75 }));
-    expect(mockClient.createExpense).toHaveBeenCalledWith(expect.objectContaining({ amount: 75 }));
+    await act(() => result.current.mutateAsync({ amount: 75, notes: 'Client dinner' }));
+    expect(mockClient.createExpense).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 75, notes: 'Client dinner' })
+    );
   });
 });
 
@@ -123,6 +126,43 @@ describe('useUpdateExpense', () => {
     await act(() => result.current.mutateAsync({ id: 'exp-1', data: { amount: 150 } }));
     expect(mockClient.updateExpense).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'exp-1', body: expect.objectContaining({ amount: 150 }) })
+    );
+  });
+});
+
+describe('useUpdateExpenseReceipt', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('persists the receipt url alongside the existing expense fields', async () => {
+    mockClient.updateExpense.mockResolvedValue({ message: 'ok' });
+    const { result } = renderHook(() => useUpdateExpenseReceipt(), { wrapper: createWrapper() });
+    await act(() =>
+      result.current.mutateAsync({
+        id: 'exp-1',
+        receiptUrl: 'https://cdn.example.com/receipt.png',
+        expense: {
+          id: 'exp-1',
+          description: 'Office supplies',
+          amount: 42,
+          currency: 'USD',
+          vendor: 'Acme',
+          expenseDate: '2026-08-01',
+          status: 'pending',
+        },
+      })
+    );
+    expect(mockClient.updateExpense).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'exp-1',
+        body: expect.objectContaining({
+          receiptUrl: 'https://cdn.example.com/receipt.png',
+          description: 'Office supplies',
+          vendor: 'Acme',
+          expenseDate: '2026-08-01',
+        }),
+      })
     );
   });
 });

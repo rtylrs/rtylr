@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { useNavigate } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Plus, Paperclip, Check } from 'lucide-react';
 import { safeRatio, toFiniteNumber } from '@voxire/api';
@@ -149,7 +149,8 @@ const Expenses: React.FC = () => {
             Monthly total: <strong style={{ color: 'var(--hub-text)' }}>{fmt(grandTotal)}</strong>
           </p>
         </div>
-        <button type="button"
+        <button
+          type="button"
           onClick={() => navigate({ to: '/expenses/new' })}
           style={{
             display: 'flex',
@@ -223,8 +224,20 @@ const Expenses: React.FC = () => {
                   {exp.expenseDate}
                 </td>
                 <td style={{ padding: '11px 16px', fontSize: 13, color: 'var(--hub-text)' }}>
-                  <div>{exp.description}</div>
-                  <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>{exp.id}</div>
+                  <Link
+                    to="/expenses/$id"
+                    params={{ id: String(exp.id) }}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 2,
+                      color: 'var(--hub-text)',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <span>{exp.description}</span>
+                    <span style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>{exp.id}</span>
+                  </Link>
                 </td>
                 <td style={{ padding: '11px 16px' }}>
                   {(() => {
@@ -327,7 +340,8 @@ const Expenses: React.FC = () => {
             Page {page}
           </p>
           <div className="flex items-center gap-2">
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
@@ -335,7 +349,8 @@ const Expenses: React.FC = () => {
             >
               Prev
             </button>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setPage((p) => p + 1)}
               disabled={!hasMore}
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"

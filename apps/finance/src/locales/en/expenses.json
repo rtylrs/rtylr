@@ -3,5 +3,8 @@
   "updated": "Expense updated",
   "deleted": "Expense deleted",
   "approved": "Expense approved",
-  "rejected": "Expense rejected"
+  "rejected": "Expense rejected",
+  "receiptUpdated": "Receipt updated",
+  "rejectConfirmTitle": "Reject expense",
+  "rejectConfirmMessage": "Are you sure you want to reject this expense?"
 }

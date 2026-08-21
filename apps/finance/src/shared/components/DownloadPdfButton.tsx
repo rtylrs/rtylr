@@ -11,8 +11,9 @@ const DownloadPdfButton: React.FC<DownloadPdfButtonProps> = ({
   invoiceId: _invoiceId,
   label = 'Download PDF',
 }) => (
-  <button type="button"
-    style={ghostBtn}
+  <button
+    type="button"
+    style={{ ...ghostBtn, opacity: 0.45, cursor: 'not-allowed' }}
     aria-label="Download PDF"
     disabled
     title="PDF download coming in a future update"

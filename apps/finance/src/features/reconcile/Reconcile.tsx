@@ -80,7 +80,12 @@ const Reconcile: React.FC = () => {
         title="Reconciliation"
         subtitle={`${unmatched.length} transactions awaiting match`}
         actions={
-          <button type="button" style={primaryBtn} onClick={handleAutoMatch} disabled={autoMatching}>
+          <button
+            type="button"
+            style={primaryBtn}
+            onClick={handleAutoMatch}
+            disabled={autoMatching}
+          >
             <CheckCheck size={13} /> {autoMatching ? 'Matching…' : 'Auto-match all'}
           </button>
         }
@@ -123,7 +128,8 @@ const Reconcile: React.FC = () => {
                     Math.abs(Math.abs(c.amount) - Math.abs(t.amount ?? 0)) < 500
                 )
                 .map((c) => (
-                  <button type="button"
+                  <button
+                    type="button"
                     key={c.id}
                     style={{ ...ghostBtn, padding: '6px 12px' }}
                     onClick={() => match(t.id ?? '', c.id)}

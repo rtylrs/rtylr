@@ -85,6 +85,7 @@ export function useCreateExpense() {
         vendor: data.vendor ?? '',
         receiptUrl: data.receiptUrl ?? '',
         expenseDate: data.expenseDate ?? '',
+        notes: data.notes ?? undefined,
       });
       return { expenseId: res.expenseId ?? '', message: res.message ?? '' };
     },
@@ -119,6 +120,42 @@ export function useUpdateExpense() {
       return { message: res.message ?? '' };
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['expenses'] }),
+    onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
+  });
+}
+
+export function useUpdateExpenseReceipt() {
+  const qc = useQueryClient();
+  const { t } = useTranslation();
+  return useMutation({
+    mutationFn: async ({
+      id,
+      receiptUrl,
+      expense,
+    }: {
+      id: string;
+      receiptUrl: string;
+      expense: Expense;
+    }): Promise<{ message: string }> => {
+      const res = await expensesClient.updateExpense({
+        id,
+        body: {
+          categoryId: expense.categoryId != null ? String(expense.categoryId) : undefined,
+          amount: expense.amount,
+          currency: expense.currency ?? 'USD',
+          description: expense.description,
+          vendor: expense.vendor ?? '',
+          receiptUrl,
+          expenseDate: expense.expenseDate,
+        },
+      });
+      return { message: res.message ?? '' };
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ['expenses'] });
+      qc.invalidateQueries({ queryKey: ['expense', vars.id] });
+      toast.success(t('expenses.receiptUpdated'));
+    },
     onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }

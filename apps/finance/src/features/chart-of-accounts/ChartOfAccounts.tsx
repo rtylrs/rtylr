@@ -102,7 +102,8 @@ const ChartOfAccounts: React.FC = () => {
           }}
         >
           {TYPES.map((t) => (
-            <button type="button"
+            <button
+              type="button"
               key={t}
               onClick={() => setFilter(t)}
               style={{
@@ -263,7 +264,12 @@ const ChartOfAccounts: React.FC = () => {
               <button type="button" style={ghostBtn} onClick={() => setShowCreate(false)}>
                 {t('common.cancel')}
               </button>
-              <button type="button" style={primaryBtn} onClick={handleCreate} disabled={createMut.isPending}>
+              <button
+                type="button"
+                style={primaryBtn}
+                onClick={handleCreate}
+                disabled={createMut.isPending}
+              >
                 {createMut.isPending ? t('common.creating') : t('common.create')}
               </button>
             </div>
