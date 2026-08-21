@@ -155,5 +155,6 @@ export const cases = [
   ["apps/menu/src/screens/Public/Extras/NoMatch.tsx", "audit-batch-153-suite-23"],
   ["apps/recruit/src/shared/components/SemanticContent.tsx", "audit-batch-154-suite-23"],
   ["apps/auth/src/main.tsx", "audit-batch-155-suite-23"],
+  ["apps/crm/src/features/feedback/Feedback.tsx", "audit-batch-156-suite-23"],
 ];
 

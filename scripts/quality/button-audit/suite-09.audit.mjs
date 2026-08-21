@@ -155,5 +155,6 @@ export const cases = [
   ["apps/insights/src/shared/components/ErrorState.tsx", "audit-batch-153-suite-09"],
   ["apps/recruit/src/features/admin/FormFieldsEditor.test.tsx", "audit-batch-154-suite-09"],
   ["apps/auth/src/features/callback/Callback.tsx", "audit-batch-155-suite-09"],
+  ["apps/crm/src/features/campaigns/Campaigns.test.tsx", "audit-batch-156-suite-09"],
 ];
 
