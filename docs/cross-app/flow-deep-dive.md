@@ -42,7 +42,7 @@ shape, that hook renders the toast `Imported [object Object],[object Object]
 entries`. The billable export has no caller at all. The platform built the pipes
 and never connected them.
 
-Neither is an isolated omission: **93 of onion's 195 hand-registered route
+Neither is an isolated omission: **109 of onion's 227 hand-registered route
 literals have no matching path in any `.onk` file**, so nearly half the
 hand-written API is outside the contracts and `pnpm contracts:audit-requests`
 cannot see it. That is how the response-shape disagreement above survived. Filed
@@ -174,6 +174,35 @@ monolith.
 - **One thing was verified at runtime**, unlike the first round: the toast in row
   O3, driven under vitest with the API stubbed and i18next initialised the way
   `apps/hr/src/shared/services/i18next.ts:5-21` initialises it. No server involved.
+
+### A method note on absence proofs
+
+Three measurements in this round returned a confidently wrong number rather than
+an error. All three are the same failure: **a check whose failure mode is a quiet
+under-report, which is indistinguishable from a pass.** They are recorded here
+because the next person measuring anything in this repo will hit one.
+
+1. **`GROUP_CONCAT` truncates silently.** `group_concat_max_len` defaults to 1024.
+   The tenancy audit query in section 7.4 generates one `SELECT` per table; at the
+   default it emitted 0 of 145 branches and returned an empty result set, which
+   reads exactly like a clean bill of health. **Always `SET SESSION
+   group_concat_max_len` before generating SQL with it**, and check the branch
+   count against the table count before trusting the output.
+2. **`information_schema.COLUMNS` does not distinguish a table from a view.** The
+   same query counted `product_stock_total`, which is a view
+   (`~/Development/onion/internal/platform/database/schemas/erp/migrations/002_unified_stock.sql:73`),
+   double-counting rows it had already counted in `stock_levels`. Join
+   `information_schema.TABLES` and filter `TABLE_TYPE = 'BASE TABLE'`.
+3. **A word-boundary regex does not cross an underscore.** `\b` treats `_` as a
+   word character, so `\bbillable` never matches `is_billable` and `\bsalary`
+   never matches `monthly_salary`. An absence proof built on `\b` reports absence
+   for every snake_case field whose name is a suffix. This is how the brief this
+   round started from acquired two wrong "verified facts", corrected in section 1.
+
+The general rule: **an absence proof needs its negative result falsified before it
+is believed.** Run it against a case you know is present. Every absence claim in
+section 3 and section 4 was checked that way, and section 5's class B rows name a
+file, message and field precisely so a reader can falsify them cheaply.
 
 ### What is inference rather than verification
 
@@ -573,19 +602,32 @@ and `~/Development/onion/internal/platform/database/schemas/voxire/expenses.sql:
 So every join this document proposes runs over at least one table where a dropped
 `business_id` yields tenant 0 rather than an error.
 
-**And the collision is already real, not merely possible.** Running the audit
-query read-only against the local `onion_dev` container, 35 of those 145 tables
-hold rows at `business_id = 0`, 2,986 rows in total, and six of them hold such
-rows belonging to **more than one distinct `owner_id`**, which
-`packages/voxie/api/flow/project/v1/models.onk:8` defines as the tenant. The
-worst is `flow_workspaces`: 531 rows across 7 tenants. A correctly written
-`WHERE business_id = 0` on that table returns seven tenants' workspaces.
+**The rows exist, and tracing them showed they are not a leak.** Running the
+audit read-only against the local `onion_dev` container, 34 of those 145 base
+tables hold rows at `business_id = 0`, and five hold such rows across more than
+one `owner_id`, which `packages/voxie/api/flow/project/v1/models.onk:8` defines as
+the tenant. Tracing all five to their INSERT explained all five:
 
-Those counts are **local dev data and say nothing about production volume**. What
-they do establish is that the write paths which omit `business_id` are reachable
-and that the multi-tenant outcome is what they actually produce. The production
-figure needs the same query against a read replica, which is why #871 makes the
-data audit step one. Two consequences for the roadmap:
+| Table | Why | Leak |
+| --- | --- | --- |
+| `flow_workspaces` | Deliberate. `CreatePersonalWorkspace` omits the column (`~/Development/onion/internal/modules/workspaces/sql/queries/members.sql:27-29`) and `GetWorkspacesByOwner` re-scopes those rows on `owner_id` (`~/Development/onion/internal/modules/workspaces/sql/queries/workspaces.sql:16-21`) | No |
+| `stock_locations` | Explicit literal `0` in `InsertDefaultWarehouseLocation` (`~/Development/onion/internal/platform/stock_core/sql/queries/stock_core.sql:6-9`) | No |
+| `hr_configs` | Column never written, never read; both queries scope `owner_id` (`~/Development/onion/internal/modules/hr_setup/sql/queries/hr_setup.sql:13-23`) | No |
+| `stock_levels`, `stock_ledger` | Inserts omit it; no read in that file filters it | No |
+
+`flow_workspaces` is documented in the code at `~/Development/onion/internal/modules/workspaces/sql/queries/workspaces.sql:8-11`: a personal
+workspace "has no business_id (it isn't tied to one tenant)", and zero is the
+intended encoding. Its rows are production data, written on every registration
+and login (`~/Development/onion/cmd/api/main.go:723-727`), and correct.
+
+**So the real finding is not exposure.** `owner_id` is this codebase's actual
+tenant key; `business_id` is a newer column, inconsistently populated and on many
+tables never read. The hazard is that **the first query to trust it on one of
+these tables is wrong in the quiet direction**, returning an empty set rather than
+an error. That is the `ownerID` trap of
+`~/Development/onion/internal/modules/workspaces/presence.go:40-46` generalised,
+and it matters here because every cross-app join either audit round proposes plans
+to filter `business_id`. Two consequences for the roadmap:
 
 - **Any new cross-app query needs a test that asserts isolation**, not only that
   it returns rows. A query missing its filter passes a happy-path test.
@@ -823,7 +865,7 @@ in this directory at `d62ad614`, the commit this round was branched from:
 | `capacity: 40` hardcoded, `contracted_hours_per_week` has no read RPC | zero hits for `capacity: 40`; `contracted_hours_per_week` appears only as a CSV inventory row | #868 |
 | `useImportFromFlow` has zero call sites and a response-type mismatch | the endpoint is in `inventory/endpoints.csv:584`; the dead hook and the mismatch are not | #869 |
 | All four `insights.dashboard.v1` handlers return `notImplemented` | zero hits for `notImplemented`; `docs/cross-app/11-rejected.md:64-69` assumes the aggregate is built | #870 |
-| `business_id BIGINT NOT NULL DEFAULT 0` on 145 tables, with 6 already holding multi-tenant rows locally | zero hits for `DEFAULT 0` | #871 |
+| `business_id` unreliable across 145 tables, so a join trusting it silently returns the wrong set | zero hits for `DEFAULT 0` | #871 |
 | Flow's currency is unreachable through the endpoint it already calls | `BusinessEntry` is mentioned; the gap is not | #872 |
 
 The seventh, that `flow_work_day_lines` is not a table and Flow's hours are rows
@@ -846,8 +888,10 @@ All labelled `audit:flow-cross-app-2026-08-21` on `tryrtylr/rtylr`.
 | #868 | Flow hardcodes a 40-hour capacity because HR's `contracted_hours_per_week` has no read RPC | I17, I18, class C | Yes |
 | #869 | HR's Flow time import is live but unreachable, and its response type does not match the handler | O3, class B plus a bug | Frontend fix no; two correctness problems yes |
 | #870 | `insights.dashboard.v1` declares four Flow-shaped endpoints and every handler returns `notImplemented` | O5 to O8, class C | Yes |
-| #871 | `business_id` defaults to 0 on 145 tables, so a missing tenant filter leaks instead of failing | platform prerequisite | Yes, entirely |
-| #873 | Contract drift: 93 of onion's 195 hand-registered routes have no `.onk` definition | platform, and the reason O3's mismatch went unseen | Partly |
+| #871 | `business_id` is unreliable across 145 tables, so a join that trusts it silently returns the wrong set | platform prerequisite | Yes, entirely |
+| #873 | Contract drift: 109 of onion's 227 hand-registered routes have no `.onk` definition | platform, and the reason O3's mismatch went unseen | Partly |
+| #874 | `onion/.env` points a development-labelled config at a production RDS host | platform | Yes, entirely |
+| #875 | Flow and HR both call `/hr/staff/detail`, which does not exist, and both swallow the failure | I5, a live bug | Option A yes, Option B no |
 | #872 | Flow has no currency: the `/businesses/mine` row it already reads has no currency field | I14, class B | No |
 
 Not filed, and why:
