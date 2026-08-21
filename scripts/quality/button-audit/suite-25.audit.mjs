@@ -172,5 +172,6 @@ export const cases = [
   ["apps/flow/src/features/time/AddHours.tsx", "audit-batch-170-suite-25"],
   ["apps/flow/src/shared/components/BulkEditBar.tsx", "audit-batch-171-suite-25"],
   ["apps/flow/src/shared/components/TaskContextMenu.tsx", "audit-batch-172-suite-25"],
+  ["apps/hr/src/features/documents/DocumentVault.tsx", "audit-batch-173-suite-25"],
 ];
 
