@@ -183,5 +183,6 @@ export const cases = [
   ["apps/auth/src/features/oauth/OAuthConsent.tsx", "audit-batch-181-suite-09"],
   ["apps/crm/src/features/customers/Customers.test.tsx", "audit-batch-182-suite-09"],
   ["apps/crm/src/features/segments/Segments.tsx", "audit-batch-183-suite-09"],
+  ["apps/dash/src/features/chat/Chat.test.tsx", "audit-batch-184-suite-09"],
 ];
 

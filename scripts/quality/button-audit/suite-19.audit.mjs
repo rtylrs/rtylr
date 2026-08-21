@@ -183,5 +183,6 @@ export const cases = [
   ["apps/auth/src/shared/components/AuthShowcase.tsx", "audit-batch-181-suite-19"],
   ["apps/crm/src/features/loyalty/LoyaltyMembers.tsx", "audit-batch-182-suite-19"],
   ["apps/crm/src/shared/components/TrialBanner.tsx", "audit-batch-183-suite-19"],
+  ["apps/dash/src/features/dashboard/Dashboard/widgets/LowStockWidget.test.tsx", "audit-batch-184-suite-19"],
 ];
 

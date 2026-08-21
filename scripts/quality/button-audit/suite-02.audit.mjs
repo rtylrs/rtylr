@@ -183,5 +183,6 @@ export const cases = [
   ["apps/auth/src/features/callback/Callback.tsx", "audit-batch-181-suite-02"],
   ["apps/crm/src/features/campaigns/Campaigns.test.tsx", "audit-batch-182-suite-02"],
   ["apps/crm/src/features/sales/Leads.test.tsx", "audit-batch-183-suite-02"],
+  ["apps/dash/src/features/analytics/Analytics.tsx", "audit-batch-184-suite-02"],
 ];
 
