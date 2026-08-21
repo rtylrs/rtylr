@@ -276,5 +276,6 @@ export const cases = [
   ["apps/flow/src/features/views/Views.test.tsx", "audit-batch-274-suite-06"],
   ["apps/flow/src/shared/components/GateNotice.test.tsx", "audit-batch-275-suite-06"],
   ["apps/hr/src/features/dashboard/Dashboard.test.tsx", "audit-batch-276-suite-06"],
+  ["apps/hr/src/features/equipment/EquipmentRequestForm.tsx", "audit-batch-277-suite-06"],
 ];
 
