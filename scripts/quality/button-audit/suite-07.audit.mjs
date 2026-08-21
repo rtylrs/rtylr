@@ -232,5 +232,6 @@ export const cases = [
   ["apps/insights/src/features/settings/Settings.tsx", "audit-batch-230-suite-07"],
   ["apps/menu/src/screens/Public/SlugLanding/SlugLanding.tsx", "audit-batch-231-suite-07"],
   ["apps/recruit/src/templates/minimal/Index.tsx", "audit-batch-232-suite-07"],
+  ["apps/auth/src/shared/components/PasswordStrengthMeter.tsx", "audit-batch-233-suite-07"],
 ];
 
