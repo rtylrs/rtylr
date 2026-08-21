@@ -128,6 +128,13 @@ vi.mock('../features/inbox/useNotifications', () => ({
 vi.mock('../shared/hooks/useFlowBusinessName', () => ({
   useFlowBusinessName: () => ({ data: null }),
 }));
+// FlowLayout reads real contracted hours per member (#868). Stubbed like every
+// other react-query hook here: unmocked it needs a QueryClientProvider, and an
+// empty map is the "no capacity known" case these tests do not exercise.
+vi.mock('../shared/hooks/queries/useMemberCapacity', () => ({
+  useMemberCapacityHours: () => ({ data: {} }),
+}));
+
 vi.mock('../shared/hooks/queries/useFlowTeam', () => ({
   useFlowTeam: () => ({ data: [] }),
 }));
