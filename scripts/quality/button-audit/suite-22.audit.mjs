@@ -117,5 +117,6 @@ export const cases = [
   ["apps/finance/src/features/recurring-invoices/RecurringInvoices.tsx", "audit-batch-115-suite-22"],
   ["apps/finance/src/shared/components/PageHeader.tsx", "audit-batch-116-suite-22"],
   ["apps/flow/src/features/leave/RequestLeaveDialog.test.tsx", "audit-batch-117-suite-22"],
+  ["apps/flow/src/features/projects/components/BoardSettingsPanel.tsx", "audit-batch-118-suite-22"],
 ];
 
