@@ -147,5 +147,6 @@ export const cases = [
   ["apps/flow/src/features/tasks/components/TimePanel.tsx", "audit-batch-145-suite-04"],
   ["apps/flow/src/shared/components/AssigneeAvatar.tsx", "audit-batch-146-suite-04"],
   ["apps/flow/src/shared/components/SubtaskList.tsx", "audit-batch-147-suite-04"],
+  ["apps/hr/src/features/departments/CreateDepartmentForm.tsx", "audit-batch-148-suite-04"],
 ];
 
