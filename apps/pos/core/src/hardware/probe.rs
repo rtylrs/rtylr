@@ -54,6 +54,12 @@ pub fn probe_epos_http(host: &str, port: u16) -> bool {
     let Ok(mut stream) = std::net::TcpStream::connect_timeout(&addr, Duration::from_secs(2)) else {
         return false;
     };
+    probe_epos_http_on(&mut stream, host, port)
+}
+
+/// Same probe over an already-connected stream, so health checks can reuse
+/// the connection opened by `probe_connect` instead of dialing a second time.
+pub fn probe_epos_http_on(stream: &mut std::net::TcpStream, host: &str, port: u16) -> bool {
     stream.set_write_timeout(Some(Duration::from_millis(500))).ok();
     stream.set_read_timeout(Some(Duration::from_millis(800))).ok();
 
@@ -67,11 +73,24 @@ pub fn probe_epos_http(host: &str, port: u16) -> bool {
 
     let mut buf = [0u8; 128];
     let n = stream.read(&mut buf).unwrap_or(0);
-    if n < 7 {
-        return false;
+    let Some(status) = parse_http_status(&buf[..n]) else { return false; };
+    // Only the status CODE decides - substring matching matched digits in
+    // headers/dates and reported HTTP 500s as confirmed printers.
+    status == 2 || status == 4
+}
+
+/// Parse the three-digit status code out of an HTTP/1.x response's first
+/// line. Returns its leading digit (2 for 2xx, 4 for 4xx, ...).
+fn parse_http_status(resp: &[u8]) -> Option<u8> {
+    if !resp.starts_with(b"HTTP/1") {
+        return None;
     }
-    let resp = &buf[..n];
-    resp.starts_with(b"HTTP/1") && (resp.contains(&b'2') || resp.contains(&b'4'))
+    // "HTTP/1.x NNN ..." - the status code starts at byte offset 9.
+    let code = resp.get(9..12)?;
+    if !code.iter().all(|b| b.is_ascii_digit()) {
+        return None;
+    }
+    Some(code[0] - b'0')
 }
 
 /// Map a well-known TCP port to its expected device type label.

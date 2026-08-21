@@ -3,10 +3,29 @@
 pub const RECEIPT_WIDTH: usize = 42;
 
 /// Render `label ... value` padded to `width`, followed by a newline byte.
+///
+/// Writes directly into the output buffer - no intermediate `String`s
+/// (`format!` + `" ".repeat` allocated twice per row on every receipt).
 pub fn write_row(buf: &mut Vec<u8>, label: &str, value: &str, width: usize) {
-    let gap = width.saturating_sub(label.len() + value.len());
-    buf.extend_from_slice(format!("{}{}{}", label, " ".repeat(gap), value).as_bytes());
+    buf.extend_from_slice(label.as_bytes());
+    let used = label.len() + value.len();
+    if used < width {
+        buf.resize(buf.len() + (width - used), b' ');
+    }
+    buf.extend_from_slice(value.as_bytes());
     buf.push(0x0A);
+}
+
+/// Left/right justified pair (no trailing newline) written straight into
+/// `buf` - same allocation-free pattern as [`write_row`] for callers that
+/// wrap the row in printer control bytes.
+pub fn write_padded_pair(buf: &mut Vec<u8>, left: &str, right: &str, width: usize) {
+    buf.extend_from_slice(left.as_bytes());
+    let used = left.len() + right.len();
+    if used < width {
+        buf.resize(buf.len() + (width - used), b' ');
+    }
+    buf.extend_from_slice(right.as_bytes());
 }
 
 #[cfg(test)]

@@ -7,7 +7,7 @@
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
-use crate::hardware::probe::{infer_tcp_device_type, probe_epos_http, probe_escpos_protocol, probe_zpl_protocol};
+use crate::hardware::probe::{infer_tcp_device_type, probe_epos_http_on, probe_escpos_protocol, probe_zpl_protocol};
 use crate::transport::{network as net_tx, serial as serial_tx, windows_spooler};
 
 #[derive(Debug, Serialize)]
@@ -120,8 +120,9 @@ fn probe_tcp(host: &str, port: u16) -> DeviceStatus {
                     }
                 }
                 8008 | 8043 => {
-                    drop(stream);
-                    if probe_epos_http(host, port) {
+                    // Reuse the already-open stream instead of dialing a
+                    // second connection to the same host:port.
+                    if probe_epos_http_on(&mut stream, host, port) {
                         ("epson_epos_confirmed", "Epson ePOS-Print HTTP response confirmed")
                     } else {
                         ("epson_epos", "Connected on ePOS port - Epson ePOS assumed (no HTTP response)")
@@ -170,12 +171,8 @@ fn probe_windows_printer(printer_name: &str) -> DeviceStatus {
     }
 }
 
-#[tauri::command(async)]
-pub fn check_hardware(config: HealthCheckConfig) -> HardwareHealthReport {
-    // Frontend-supplied: clamp so a bogus value cannot hang the terminal.
-    let retries = config.retry_count.unwrap_or(1).clamp(0, 5);
-
-    let printer = match config.printer_transport.as_str() {
+fn probe_printer(config: &HealthCheckConfig, retries: u32) -> DeviceStatus {
+    match config.printer_transport.as_str() {
         "serial" => {
             let port = config.printer_serial_port.as_deref().unwrap_or_default().to_string();
             let baud = config.printer_baud_rate.unwrap_or(9600);
@@ -193,9 +190,11 @@ pub fn check_hardware(config: HealthCheckConfig) -> HardwareHealthReport {
             message: "No printer transport configured".to_string(),
             device_type: "none".to_string(),
         },
-    };
+    }
+}
 
-    let drawer = match config.drawer_transport.as_deref().unwrap_or("printer") {
+fn probe_drawer(config: &HealthCheckConfig, retries: u32) -> DeviceStatus {
+    match config.drawer_transport.as_deref().unwrap_or("printer") {
         "serial" => {
             let port = config.drawer_serial_port.as_deref().unwrap_or_default().to_string();
             let baud = config.drawer_baud_rate.unwrap_or(9600);
@@ -206,15 +205,18 @@ pub fn check_hardware(config: HealthCheckConfig) -> HardwareHealthReport {
             let port = config.drawer_port.unwrap_or(9100);
             probe_with_retry(|| probe_tcp(&host, port), retries)
         }
+        // Handled by the caller, which inherits the printer result.
         _ => DeviceStatus {
             name: "drawer".to_string(),
-            status: printer.status.clone(),
+            status: "not_configured".to_string(),
             message: "Drawer shares printer connection".to_string(),
-            device_type: printer.device_type.clone(),
+            device_type: "none".to_string(),
         },
-    };
+    }
+}
 
-    let kds = match config.kds_transport.as_str() {
+fn probe_kds(config: &HealthCheckConfig, retries: u32) -> DeviceStatus {
+    match config.kds_transport.as_str() {
         "serial" => {
             let port = config.kds_serial_port.as_deref().unwrap_or_default().to_string();
             let baud = config.kds_baud_rate.unwrap_or(9600);
@@ -231,9 +233,39 @@ pub fn check_hardware(config: HealthCheckConfig) -> HardwareHealthReport {
             message: "No KDS hardware configured".to_string(),
             device_type: "none".to_string(),
         },
-    };
+    }
+}
 
-    HardwareHealthReport { printer, drawer, kds }
+#[tauri::command(async)]
+pub fn check_hardware(config: HealthCheckConfig) -> HardwareHealthReport {
+    // Frontend-supplied: clamp so a bogus value cannot hang the terminal.
+    let retries = config.retry_count.unwrap_or(1).clamp(0, 5);
+    // Without an explicit drawer transport the drawer rides on the printer
+    // connection and needs no probe of its own.
+    let drawer_has_own_transport =
+        matches!(config.drawer_transport.as_deref(), Some("serial") | Some("network"));
+
+    // Probe independent devices concurrently - serial execution stacked
+    // three multi-second probes (plus retries) into one long stall.
+    std::thread::scope(|scope| {
+        let printer_handle = scope.spawn(|| probe_printer(&config, retries));
+        let drawer_handle = drawer_has_own_transport.then(|| scope.spawn(|| probe_drawer(&config, retries)));
+        let kds_handle = scope.spawn(|| probe_kds(&config, retries));
+
+        let printer = printer_handle.join().expect("printer probe thread panicked");
+        let drawer = match drawer_handle {
+            Some(handle) => handle.join().expect("drawer probe thread panicked"),
+            None => DeviceStatus {
+                name: "drawer".to_string(),
+                status: printer.status.clone(),
+                message: "Drawer shares printer connection".to_string(),
+                device_type: printer.device_type.clone(),
+            },
+        };
+        let kds = kds_handle.join().expect("kds probe thread panicked");
+
+        HardwareHealthReport { printer, drawer, kds }
+    })
 }
 
 #[cfg(test)]
