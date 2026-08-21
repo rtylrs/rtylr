@@ -58,7 +58,9 @@ const DatePicker = ({
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: MouseEvent | TouchEvent): void => {
-      if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target;
+      const insidePicker = target instanceof Node && containerRef.current?.contains(target);
+      if (!insidePicker) setOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent): void => {
       if (event.key === 'Escape') setOpen(false);

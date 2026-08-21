@@ -7,7 +7,14 @@ export function useClickOutside<T extends HTMLElement = HTMLElement>(
   useEffect(() => {
     const listener = (event: MouseEvent | TouchEvent) => {
       const el = ref?.current;
-      if (!el || el.contains((event?.target as Node) || null)) {
+      if (!el) return;
+
+      // event.target is typed EventTarget, which is not necessarily a Node -
+      // window and XMLHttpRequest are both EventTargets. Narrowing with
+      // instanceof rather than asserting keeps contains() honest, and a target
+      // that is not a Node cannot be inside the element, so it counts as outside.
+      const target = event.target;
+      if (target instanceof Node && el.contains(target)) {
         return;
       }
 

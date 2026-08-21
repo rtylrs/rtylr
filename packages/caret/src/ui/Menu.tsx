@@ -36,7 +36,11 @@ export const Menu: React.FC<MenuProps> = ({
   useEffect(() => {
     if (!open) return;
     const onClick = (e: MouseEvent): void => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+      const root = rootRef.current;
+      if (!root) return;
+      const target = e.target;
+      if (target instanceof Node && root.contains(target)) return;
+      setOpen(false);
     };
     const onKey = (e: KeyboardEvent): void => {
       if (e.key !== 'Escape') return;

@@ -112,6 +112,30 @@ describe('useClickOutside', () => {
     document.body.removeChild(div);
   });
 
+  // The assertion this hook used to carry, `event.target as Node`, was a lie:
+  // EventTarget is not necessarily a Node. Dispatching on a non-Node target
+  // reached `contains()` with something it cannot accept. A target that is not
+  // a Node is not inside the element, so it counts as an outside interaction.
+  it('treats a non-Node event target as outside rather than passing it to contains', () => {
+    const div = document.createElement('div');
+    document.body.appendChild(div);
+    const ref = { current: div } as React.RefObject<HTMLDivElement>;
+    const containsSpy = vi.spyOn(div, 'contains');
+
+    renderHook(() => useClickOutside(ref, handler));
+
+    // window is an EventTarget and not a Node.
+    const event = new MouseEvent('mousedown', { bubbles: true });
+    Object.defineProperty(event, 'target', { value: window, configurable: true });
+    document.dispatchEvent(event);
+
+    expect(containsSpy).not.toHaveBeenCalled();
+    expect(handler).toHaveBeenCalledTimes(1);
+
+    containsSpy.mockRestore();
+    document.body.removeChild(div);
+  });
+
   it('updates handler reference without re-registering listeners', () => {
     const div = document.createElement('div');
     document.body.appendChild(div);
