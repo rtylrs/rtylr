@@ -173,5 +173,6 @@ export const cases = [
   ["apps/flow/src/layouts/FlowLayout.test.tsx", "audit-batch-171-suite-16"],
   ["apps/flow/src/shared/components/QuickCreate.test.tsx", "audit-batch-172-suite-16"],
   ["apps/hr/src/features/dashboard/widgets/PendingApprovalsWidget.tsx", "audit-batch-173-suite-16"],
+  ["apps/hr/src/features/onboarding/Onboarding.tsx", "audit-batch-174-suite-16"],
 ];
 

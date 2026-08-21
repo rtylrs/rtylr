@@ -173,5 +173,6 @@ export const cases = [
   ["apps/flow/src/features/workspace-dashboard/WorkspaceDashboard.tsx", "audit-batch-171-suite-11"],
   ["apps/flow/src/shared/components/LabelChip.tsx", "audit-batch-172-suite-11"],
   ["apps/hr/src/features/dashboard/widgets/HeadcountWidget.tsx", "audit-batch-173-suite-11"],
+  ["apps/hr/src/features/leave/LeaveBalances.tsx", "audit-batch-174-suite-11"],
 ];
 
