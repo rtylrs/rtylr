@@ -223,5 +223,6 @@ export const cases = [
   ["apps/flow/src/features/projects/ProjectViewTabs.tsx", "audit-batch-221-suite-15"],
   ["apps/flow/src/features/time/TeamView.tsx", "audit-batch-222-suite-15"],
   ["apps/flow/src/shared/components/CommentList.tsx", "audit-batch-223-suite-15"],
+  ["apps/hr/src/features/attendance/Attendance.tsx", "audit-batch-224-suite-15"],
 ];
 

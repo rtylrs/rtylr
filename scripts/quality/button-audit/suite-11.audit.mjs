@@ -223,5 +223,6 @@ export const cases = [
   ["apps/flow/src/features/projects/ProjectSettings.tsx", "audit-batch-221-suite-11"],
   ["apps/flow/src/features/time/AddHours.tsx", "audit-batch-222-suite-11"],
   ["apps/flow/src/shared/components/BulkEditBar.tsx", "audit-batch-223-suite-11"],
+  ["apps/flow/src/shared/components/TaskContextMenu.tsx", "audit-batch-224-suite-11"],
 ];
 

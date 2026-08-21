@@ -223,5 +223,6 @@ export const cases = [
   ["apps/flow/src/features/projects/components/BoardSettingsPanel.tsx", "audit-batch-221-suite-19"],
   ["apps/flow/src/features/triage/Triage.tsx", "audit-batch-222-suite-19"],
   ["apps/flow/src/shared/components/DueDatePicker.tsx", "audit-batch-223-suite-19"],
+  ["apps/hr/src/features/calendar/Calendar.tsx", "audit-batch-224-suite-19"],
 ];
 
