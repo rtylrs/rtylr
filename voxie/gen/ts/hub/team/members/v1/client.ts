@@ -38,6 +38,12 @@ const violations = validateListTeamRequest(req);
 if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
 let path = "/hub/team/members/v1/members";
 const query = new URLSearchParams();
+if (req.page !== undefined) {
+query.set("page", String(req.page));
+}
+if (req.pageSize !== undefined) {
+query.set("page_size", String(req.pageSize));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {

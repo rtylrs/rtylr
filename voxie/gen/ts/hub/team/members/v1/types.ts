@@ -86,16 +86,22 @@ return violations;
 }
 
 export interface ListTeamRequest {
+page?: number;
+pageSize?: number;
 }
 
 export function decodeListTeamRequest(v: any): ListTeamRequest {
 if (v === null || v === undefined) return v;
 return {
+page: v.page,
+pageSize: v.page_size,
 };
 }
 
 export function encodeListTeamRequest(v: ListTeamRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
+if (v.page !== undefined) { out.page = v.page; }
+if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
 }
 
@@ -106,18 +112,21 @@ return violations;
 
 export interface ListTeamResponse {
 users?: (StaffUserPayload)[];
+total?: number;
 }
 
 export function decodeListTeamResponse(v: any): ListTeamResponse {
 if (v === null || v === undefined) return v;
 return {
 users: (v.users !== undefined ? (v.users as any[]).map(decodeStaffUserPayload) : v.users),
+total: v.total,
 };
 }
 
 export function encodeListTeamResponse(v: ListTeamResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.users !== undefined) { out.users = (v.users as any[]).map(encodeStaffUserPayload); }
+if (v.total !== undefined) { out.total = v.total; }
 return out;
 }
 

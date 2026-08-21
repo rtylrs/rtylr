@@ -17,8 +17,12 @@ message ActivityEntry {
 message ListActivityRequest {
   /// The maximum number of records to return.
   limit: int32 @query("limit")
+  /// offset is the number of records to skip, for paging through the feed.
+  offset: int32? @query("offset")
 }
 
 message ListActivityResponse {
   activities: ActivityEntry[]
+  /// total is the total number of matching activity entries, for pagination math.
+  total: int32
 }

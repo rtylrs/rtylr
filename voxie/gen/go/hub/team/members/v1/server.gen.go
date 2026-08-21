@@ -255,6 +255,24 @@ func RegisterMembersServiceServer(first any, rest ...any) error {
 	mux := o.mux
 	mux.Handle("GET /hub/team/members/v1/members", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListTeamRequest)
+		if values := r.URL.Query()["page"]; len(values) > 0 {
+			value := values[0]
+			parsedPage, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page: "+err.Error())
+				return
+			}
+			req.Page = parsedPage
+		}
+		if values := r.URL.Query()["page_size"]; len(values) > 0 {
+			value := values[0]
+			parsedPageSize, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter page_size: "+err.Error())
+				return
+			}
+			req.PageSize = parsedPageSize
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())

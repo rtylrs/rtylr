@@ -26,10 +26,17 @@ message StaffUserWithGroups {
   groups: GroupSummary[]
 }
 
-message ListTeamRequest {}
+message ListTeamRequest {
+  /// page is the 1-based result page to return; defaults to 1.
+  page: int32 @query("page")
+  /// page_size is the maximum number of members per page; server caps at 500.
+  page_size: int32 @query("page_size")
+}
 
 message ListTeamResponse {
   users: StaffUserPayload[]
+  /// total is the total number of members across all pages, for pagination math.
+  total: int32
 }
 
 message GetMemberRequest {
