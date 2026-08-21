@@ -7,5 +7,6 @@ export const cases = [
   ["apps/dash/src/features/menu/Menus.test.tsx", "audit-batch-005-suite-21"],
   ["apps/dash/src/features/team/GroupDetail.test.tsx", "audit-batch-006-suite-21"],
   ["apps/dash/src/shared/components/dash/NotificationItem.tsx", "audit-batch-007-suite-21"],
+  ["apps/dash/src/shared/hooks/queries/useBusinesses.test.tsx", "audit-batch-008-suite-21"],
 ];
 

@@ -7,5 +7,6 @@ export const cases = [
   ["apps/dash/src/features/notifications/Notifications.test.tsx", "audit-batch-005-suite-23"],
   ["apps/dash/src/features/team/Groups.test.tsx", "audit-batch-006-suite-23"],
   ["apps/dash/src/shared/components/dash/RoleBadge.tsx", "audit-batch-007-suite-23"],
+  ["apps/dash/src/shared/hooks/queries/useNotifications.test.tsx", "audit-batch-008-suite-23"],
 ];
 

@@ -7,5 +7,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/TopCustomersWidget.test.tsx", "audit-batch-005-suite-02"],
   ["apps/dash/src/features/orders/Orders.tsx", "audit-batch-006-suite-02"],
   ["apps/dash/src/features/team/MemberDetail.tsx", "audit-batch-007-suite-02"],
+  ["apps/dash/src/shared/components/dash/WebhookRow.tsx", "audit-batch-008-suite-02"],
 ];
 
