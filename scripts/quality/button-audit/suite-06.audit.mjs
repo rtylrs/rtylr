@@ -299,5 +299,6 @@ export const cases = [
   ["apps/finance/src/shared/components/TaxBreakdown.tsx", "audit-batch-297-suite-06"],
   ["apps/flow/src/features/projects/ProjectBoard.tsx", "audit-batch-298-suite-06"],
   ["apps/flow/src/features/tasks/MyIssues.test.tsx", "audit-batch-299-suite-06"],
+  ["apps/flow/src/layouts/FlowLayout.test.tsx", "audit-batch-300-suite-06"],
 ];
 
