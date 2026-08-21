@@ -6,5 +6,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/VendorDashboard.tsx", "audit-batch-004-suite-11"],
   ["apps/dash/src/features/developer/Webhooks.test.tsx", "audit-batch-005-suite-11"],
   ["apps/dash/src/features/settings/Settings/components/Account/Account.tsx", "audit-batch-006-suite-11"],
+  ["apps/dash/src/shared/components/Dropzone.tsx", "audit-batch-007-suite-11"],
 ];
 

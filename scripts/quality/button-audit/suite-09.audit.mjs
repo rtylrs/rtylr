@@ -6,5 +6,6 @@ export const cases = [
   ["apps/dash/src/features/chat/Chat.tsx", "audit-batch-004-suite-09"],
   ["apps/dash/src/features/developer/ApiKeys.test.tsx", "audit-batch-005-suite-09"],
   ["apps/dash/src/features/security/Security.tsx", "audit-batch-006-suite-09"],
+  ["apps/dash/src/main.tsx", "audit-batch-007-suite-09"],
 ];
 
