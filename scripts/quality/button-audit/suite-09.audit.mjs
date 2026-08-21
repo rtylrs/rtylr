@@ -99,5 +99,6 @@ export const cases = [
   ["apps/hr/src/features/leave/LeaveRequestForm.tsx", "audit-batch-097-suite-09"],
   ["apps/hr/src/features/settings/LeavePolicySettings.tsx", "audit-batch-098-suite-09"],
   ["apps/hr/src/features/shifts/Schedule.tsx", "audit-batch-099-suite-09"],
+  ["apps/hr/src/shared/components/CommandPalette.tsx", "audit-batch-100-suite-09"],
 ];
 

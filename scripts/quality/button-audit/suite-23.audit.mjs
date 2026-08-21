@@ -99,5 +99,6 @@ export const cases = [
   ["apps/hr/src/features/performance/CreateCycleForm.tsx", "audit-batch-097-suite-23"],
   ["apps/hr/src/features/setup-wizard/steps/EmployeesStep.tsx", "audit-batch-098-suite-23"],
   ["apps/hr/src/features/training/Training.tsx", "audit-batch-099-suite-23"],
+  ["apps/hr/src/shared/components/ui.tsx", "audit-batch-100-suite-23"],
 ];
 
