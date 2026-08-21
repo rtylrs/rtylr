@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  staffMemberSchema,
-  employeeProfileSchema,
-  birthdaySchema,
-  anniversarySchema,
-} from './staff';
+import { staffMemberSchema, staffDetailSchema, birthdaySchema, anniversarySchema } from './staff';
 
 // ─── staff Zod schemas - pure parse/validation tests ─────────────────────────
 
@@ -69,40 +64,47 @@ describe('staffMemberSchema', () => {
   });
 });
 
-describe('employeeProfileSchema', () => {
-  it('parses a full profile', () => {
-    const result = employeeProfileSchema.parse({
-      id: '10',
-      photoUrl: 'https://cdn.example.com/avatar.jpg',
+// staffDetailSchema replaced employeeProfileSchema, which described the response
+// of /hr/staff/detail. No onion module serves that path, so the schema described
+// a shape that never arrived. These five fields do arrive, from getStaff.
+describe('staffDetailSchema', () => {
+  const BASE = {
+    id: 10,
+    name: 'Alex Chen',
+    role: 'Server',
+    department: 'FOH',
+    email: 'alex@rtylr.com',
+    employmentType: 'Full-time',
+    status: 'Active',
+  };
+
+  it('carries the contact fields getStaff returns', () => {
+    const result = staffDetailSchema.parse({
+      ...BASE,
       phone: '+1 555 0001',
       address: '123 Main St',
-      birthday: '1990-03-15',
-      hiredAt: '2021-06-01',
-      emergency: { name: 'Fran Smith', relation: 'Spouse', phone: '+1 555 0002' },
-      bio: 'Experienced team lead.',
-      managerId: 7,
-      skills: ['Leadership', 'TypeScript'],
+      startDate: '2021-06-01',
+      emergencyContactName: 'Fran Smith',
+      emergencyContactPhone: '+1 555 0002',
     });
-    expect(result.id).toBe(10);
-    expect(result.emergency?.relation).toBe('Spouse');
-    expect(result.skills).toHaveLength(2);
+    expect(result.phone).toBe('+1 555 0001');
+    expect(result.address).toBe('123 Main St');
+    expect(result.startDate).toBe('2021-06-01');
+    expect(result.emergencyContactName).toBe('Fran Smith');
+    expect(result.emergencyContactPhone).toBe('+1 555 0002');
   });
 
-  it('allows all optional fields to be absent', () => {
-    const result = employeeProfileSchema.parse({ id: 11 });
-    expect(result.id).toBe(11);
-    expect(result.photoUrl).toBeUndefined();
-    expect(result.emergency).toBeUndefined();
-    expect(result.skills).toBeUndefined();
+  it('leaves every contact field optional', () => {
+    const result = staffDetailSchema.parse(BASE);
+    expect(result.phone).toBeUndefined();
+    expect(result.address).toBeUndefined();
+    expect(result.startDate).toBeUndefined();
+    expect(result.emergencyContactName).toBeUndefined();
+    expect(result.emergencyContactPhone).toBeUndefined();
   });
 
-  it('coerces string id to number', () => {
-    const result = employeeProfileSchema.parse({ id: '55' });
-    expect(result.id).toBe(55);
-  });
-
-  it('rejects missing id', () => {
-    expect(() => employeeProfileSchema.parse({ phone: '+1 555 0000' })).toThrow();
+  it('still enforces everything the list shape requires', () => {
+    expect(() => staffDetailSchema.parse({ phone: '+1 555 0000' })).toThrow();
   });
 });
 

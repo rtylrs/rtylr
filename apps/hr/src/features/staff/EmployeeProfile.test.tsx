@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
   useStaffById: vi.fn(),
-  useEmployeeProfile: vi.fn(),
   useDocuments: vi.fn(),
   useTrainingProgress: vi.fn(),
   useBenefitEnrollments: vi.fn(),
@@ -29,7 +28,6 @@ vi.mock('@tanstack/react-router', () => ({
 
 vi.mock('../../shared/hooks/useHrExtras', () => ({
   useStaffById: mocks.useStaffById,
-  useEmployeeProfile: mocks.useEmployeeProfile,
   useDocuments: mocks.useDocuments,
   useTrainingProgress: mocks.useTrainingProgress,
   useBenefitEnrollments: mocks.useBenefitEnrollments,
@@ -45,18 +43,21 @@ const STAFF = {
   employmentType: 'Full-time',
   status: 'Active',
   email: 'alex@rtylr.com',
+  phone: '+961 3 000 000',
+  address: '12 Test Street, Beirut',
+  startDate: '2024-03-01',
+  emergencyContactName: 'Dana Chen',
+  emergencyContactPhone: '+961 3 111 111',
 };
 
 describe('EmployeeProfile empty states', () => {
   beforeEach(() => {
     mocks.navigate.mockReset();
     mocks.useStaffById.mockReset();
-    mocks.useEmployeeProfile.mockReset();
     mocks.useDocuments.mockReset();
     mocks.useTrainingProgress.mockReset();
     mocks.useBenefitEnrollments.mockReset();
 
-    mocks.useEmployeeProfile.mockReturnValue({ data: undefined });
     mocks.useDocuments.mockReturnValue({ data: [] });
     mocks.useTrainingProgress.mockReturnValue({ data: [] });
     mocks.useBenefitEnrollments.mockReturnValue({ data: [] });
@@ -113,5 +114,49 @@ describe('EmployeeProfile empty states', () => {
 
     expect(screen.queryByText('staff.profile.noDocuments')).not.toBeInTheDocument();
     expect(screen.getByText('Contract.pdf')).toBeInTheDocument();
+  });
+});
+
+// These five values are returned by getStaff and were previously read from
+// /hr/staff/detail, which no onion module serves, so they rendered empty for
+// every employee. The suite could not see it: it set the profile hook to
+// `{ data: undefined }`, which was also the permanent production value.
+describe('EmployeeProfile contact details', () => {
+  beforeEach(() => {
+    mocks.navigate.mockReset();
+    mocks.useStaffById.mockReset();
+    mocks.useDocuments.mockReset();
+    mocks.useTrainingProgress.mockReset();
+    mocks.useBenefitEnrollments.mockReset();
+
+    mocks.useDocuments.mockReturnValue({ data: [] });
+    mocks.useTrainingProgress.mockReturnValue({ data: [] });
+    mocks.useBenefitEnrollments.mockReturnValue({ data: [] });
+    mocks.useStaffById.mockReturnValue({ data: STAFF, isLoading: false });
+  });
+
+  it('renders phone and address from the staff record', () => {
+    render(<EmployeeProfile />);
+
+    expect(screen.getByText('+961 3 000 000')).toBeInTheDocument();
+    expect(screen.getByText('12 Test Street, Beirut')).toBeInTheDocument();
+  });
+
+  it('renders the emergency contact from the staff record', () => {
+    render(<EmployeeProfile />);
+
+    expect(screen.getByText('Dana Chen')).toBeInTheDocument();
+    expect(screen.getByText('+961 3 111 111')).toBeInTheDocument();
+  });
+
+  it('falls back to a not-provided message when no emergency contact is stored', () => {
+    mocks.useStaffById.mockReturnValue({
+      data: { ...STAFF, emergencyContactName: undefined, emergencyContactPhone: undefined },
+      isLoading: false,
+    });
+
+    render(<EmployeeProfile />);
+
+    expect(screen.getByText('staff.profile.emergencyNotProvided')).toBeInTheDocument();
   });
 });
