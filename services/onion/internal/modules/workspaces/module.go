@@ -15,6 +15,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/realtime"
 	"github.com/voxire/onion/internal/platform/logger"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
+	"github.com/voxire/onion/internal/platform/tenant"
 	flowcyclev1 "github.com/voxire/voxie/gen/go/flow/cycle/v1"
 	flowdashboardv1 "github.com/voxire/voxie/gen/go/flow/dashboard/v1"
 	flowinsightsv1 "github.com/voxire/voxie/gen/go/flow/insights/v1"
@@ -148,9 +149,19 @@ func (m *Module) GetAnonymousRoutes() []string {
 }
 
 // CreatePersonalWorkspace creates a personal workspace for a newly registered user.
-// Safe to call multiple times — idempotent.
+// Safe to call multiple times — idempotent. The hook this is wired to
+// (user.OnUserCreated/OnUserLogin) only carries a userID, so businessID is
+// resolved here from the user's own default business record.
 func (m *Module) CreatePersonalWorkspace(ctx context.Context, userID int64) {
-	if _, err := m.service.CreatePersonalWorkspace(ctx, userID); err != nil {
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, 0, userID)
+	if bizErr != nil {
+		logger.Ctx(ctx).Warn("failed to resolve business for personal workspace",
+			logger.Any("user_id", userID),
+			logger.Error(bizErr),
+		)
+		return
+	}
+	if _, err := m.service.CreatePersonalWorkspace(ctx, userID, businessID); err != nil {
 		logger.Ctx(ctx).Warn("failed to create personal workspace",
 			logger.Any("user_id", userID),
 			logger.Error(err),

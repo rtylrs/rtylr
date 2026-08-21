@@ -239,12 +239,12 @@ func (a *WorkspaceAPI) RemoveWorkspaceMember(ctx context.Context, req *flowworks
 	return &flowworkspacev1.RemoveWorkspaceMemberResponse{Message: "Member removed successfully"}, nil
 }
 
-func (a *WorkspaceAPI) resolveWorkspaceID(ctx context.Context, userID, workspaceID int64) (int64, error) {
+func (a *WorkspaceAPI) resolveWorkspaceID(ctx context.Context, userID, businessID, workspaceID int64) (int64, error) {
 	raw := strconv.FormatInt(workspaceID, 10)
 	if workspaceID == 0 {
 		raw = "personal"
 	}
-	resolved, err := a.Service.ResolveWorkspaceID(ctx, userID, raw)
+	resolved, err := a.Service.ResolveWorkspaceID(ctx, userID, businessID, raw)
 	if err != nil || resolved == 0 {
 		return 0, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
 	}
@@ -277,7 +277,7 @@ func (a *WorkspaceAPI) ListWorkspaceMembers(ctx context.Context, req *flowworksp
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	workspaceID, err := a.resolveWorkspaceID(ctx, authUser.UserID, req.GetWorkspaceId())
+	workspaceID, err := a.resolveWorkspaceID(ctx, authUser.UserID, authUser.BusinessID, req.GetWorkspaceId())
 	if err != nil {
 		return nil, err
 	}

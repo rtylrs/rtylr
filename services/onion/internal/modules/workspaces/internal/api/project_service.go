@@ -86,12 +86,12 @@ func (a *ProjectAPI) resolveBusinessID(ctx context.Context) (int64, *authPkg.Aut
 	return businessID, authUser, nil
 }
 
-func (a *ProjectAPI) resolveWorkspaceID(ctx context.Context, userID, workspaceID int64) (int64, error) {
+func (a *ProjectAPI) resolveWorkspaceID(ctx context.Context, userID, businessID, workspaceID int64) (int64, error) {
 	raw := strconv.FormatInt(workspaceID, 10)
 	if workspaceID == 0 {
 		raw = "personal"
 	}
-	resolved, err := a.Service.ResolveWorkspaceID(ctx, userID, raw)
+	resolved, err := a.Service.ResolveWorkspaceID(ctx, userID, businessID, raw)
 	if err != nil || resolved == 0 {
 		return 0, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
 	}
@@ -104,7 +104,7 @@ func (a *ProjectAPI) ListProjects(ctx context.Context, req *flowprojectv1.ListPr
 		return nil, err
 	}
 
-	workspaceID, err := a.resolveWorkspaceID(ctx, authUser.UserID, req.GetWorkspaceId())
+	workspaceID, err := a.resolveWorkspaceID(ctx, authUser.UserID, businessID, req.GetWorkspaceId())
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +131,7 @@ func (a *ProjectAPI) CreateProject(ctx context.Context, req *flowprojectv1.Creat
 		return nil, err
 	}
 
-	workspaceID, err := a.resolveWorkspaceID(ctx, authUser.UserID, req.GetWorkspaceId())
+	workspaceID, err := a.resolveWorkspaceID(ctx, authUser.UserID, businessID, req.GetWorkspaceId())
 	if err != nil {
 		return nil, err
 	}

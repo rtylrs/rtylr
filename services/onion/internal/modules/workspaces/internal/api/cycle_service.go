@@ -48,7 +48,7 @@ func (a *CycleAPI) ListCycles(ctx context.Context, req *flowcyclev1.ListCyclesRe
 
 	wsID := businessID
 	if req.GetWorkspaceId() != "" {
-		resolved, err := a.Service.ResolveWorkspaceID(ctx, authUser.UserID, req.GetWorkspaceId())
+		resolved, err := a.Service.ResolveWorkspaceID(ctx, authUser.UserID, businessID, req.GetWorkspaceId())
 		if err != nil {
 			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
 		}
@@ -86,7 +86,7 @@ func (a *CycleAPI) CreateCycle(ctx context.Context, req *flowcyclev1.CreateCycle
 
 	wsID := businessID
 	if req.GetWorkspaceId() != "" {
-		resolved, err := a.Service.ResolveWorkspaceID(ctx, authUser.UserID, req.GetWorkspaceId())
+		resolved, err := a.Service.ResolveWorkspaceID(ctx, authUser.UserID, businessID, req.GetWorkspaceId())
 		if err != nil {
 			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
 		}

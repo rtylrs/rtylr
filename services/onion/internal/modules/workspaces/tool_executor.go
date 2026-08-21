@@ -58,6 +58,10 @@ func (m *Module) executeListTasksTool(ctx context.Context, input map[string]any)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return nil, errors.New("authentication is required")
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, errors.New("business scope could not be resolved")
+	}
 
 	parsed, err := parseListTasksToolInput(input, authUser.UserID)
 	if err != nil {
@@ -66,7 +70,7 @@ func (m *Module) executeListTasksTool(ctx context.Context, input map[string]any)
 
 	workspaceID := int64(0)
 	if parsed.WorkspaceRaw != "" {
-		resolved, resolveErr := m.service.ResolveWorkspaceID(ctx, authUser.UserID, parsed.WorkspaceRaw)
+		resolved, resolveErr := m.service.ResolveWorkspaceID(ctx, authUser.UserID, businessID, parsed.WorkspaceRaw)
 		if resolveErr != nil || resolved <= 0 {
 			return nil, errors.New("invalid workspace_id")
 		}
@@ -166,7 +170,7 @@ func (m *Module) executeCreateTaskTool(ctx context.Context, input map[string]any
 	if workspaceRaw == "" {
 		workspaceRaw = "personal"
 	}
-	workspaceID, err := m.service.ResolveWorkspaceID(ctx, authUser.UserID, workspaceRaw)
+	workspaceID, err := m.service.ResolveWorkspaceID(ctx, authUser.UserID, businessID, workspaceRaw)
 	if err != nil || workspaceID <= 0 {
 		return nil, errors.New("invalid workspace_id")
 	}
@@ -179,7 +183,7 @@ func (m *Module) executeCreateTaskTool(ctx context.Context, input map[string]any
 		return nil, errors.New("project_id must be non-negative")
 	}
 	if projectID == 0 {
-		resolvedProjectID, _, ensureErr := m.service.EnsureMyTasksProject(ctx, authUser.UserID, workspaceID)
+		resolvedProjectID, _, ensureErr := m.service.EnsureMyTasksProject(ctx, authUser.UserID, businessID, workspaceID)
 		if ensureErr != nil || resolvedProjectID <= 0 {
 			return nil, errors.New("failed to resolve My Tasks project")
 		}

@@ -53,7 +53,7 @@ func buildPagination(page, limit int32, total int64, returned int) *commonpagina
 	}
 }
 
-func resolveWorkspaceQuery(ctx context.Context, svc *application.Service, authUser *authPkg.AuthUser, workspaceID string) (int64, error) {
+func resolveWorkspaceQuery(ctx context.Context, svc *application.Service, authUser *authPkg.AuthUser, businessID int64, workspaceID string) (int64, error) {
 	wsID := authUser.BusinessID
 	if workspaceID == "" {
 		return wsID, nil
@@ -61,7 +61,7 @@ func resolveWorkspaceQuery(ctx context.Context, svc *application.Service, authUs
 	if id, err := strconv.ParseInt(workspaceID, 10, 64); err == nil {
 		return id, nil
 	}
-	resolved, err := svc.ResolveWorkspaceID(ctx, authUser.UserID, workspaceID)
+	resolved, err := svc.ResolveWorkspaceID(ctx, authUser.UserID, businessID, workspaceID)
 	if err != nil || resolved == 0 {
 		return 0, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
 	}

@@ -33,14 +33,14 @@ func (a *TaskAPI) resolveAuth(ctx context.Context) (*authPkg.AuthUser, int64, er
 }
 
 func (a *TaskAPI) ListTasks(ctx context.Context, req *flowtaskv1.ListTasksRequest) (*flowtaskv1.ListTasksResponse, error) {
-	authUser, _, err := a.resolveAuth(ctx)
+	authUser, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	var workspaceID int64
 	if req.GetWorkspaceId() != "" {
-		resolved, resolveErr := a.Service.ResolveWorkspaceID(ctx, authUser.UserID, req.GetWorkspaceId())
+		resolved, resolveErr := a.Service.ResolveWorkspaceID(ctx, authUser.UserID, businessID, req.GetWorkspaceId())
 		if resolveErr != nil {
 			return nil, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
 		}
@@ -97,14 +97,14 @@ func (a *TaskAPI) CreateTask(ctx context.Context, req *flowtaskv1.CreateTaskRequ
 		return nil, err
 	}
 
-	workspaceID, err := a.Service.ResolveWorkspaceID(ctx, authUser.UserID, formatWorkspaceID(req.GetWorkspaceId()))
+	workspaceID, err := a.Service.ResolveWorkspaceID(ctx, authUser.UserID, businessID, formatWorkspaceID(req.GetWorkspaceId()))
 	if err != nil || workspaceID == 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
 	}
 
 	projectID := req.GetProjectId()
 	if projectID == 0 {
-		myTasksID, _, ensureErr := a.Service.EnsureMyTasksProject(ctx, authUser.UserID, workspaceID)
+		myTasksID, _, ensureErr := a.Service.EnsureMyTasksProject(ctx, authUser.UserID, businessID, workspaceID)
 		if ensureErr != nil || myTasksID == 0 {
 			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to resolve My Tasks project")
 		}
@@ -566,12 +566,12 @@ func (a *TaskAPI) DeleteTimeLog(ctx context.Context, req *flowtaskv1.DeleteTimeL
 }
 
 func (a *TaskAPI) SearchTasks(ctx context.Context, req *flowtaskv1.SearchTasksRequest) (*flowtaskv1.SearchTasksResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return nil, onekiterrors.PermissionDenied()
+	authUser, businessID, err := a.resolveAuth(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	workspaceID, err := a.Service.ResolveWorkspaceID(ctx, authUser.UserID, req.GetWorkspaceId())
+	workspaceID, err := a.Service.ResolveWorkspaceID(ctx, authUser.UserID, businessID, req.GetWorkspaceId())
 	if err != nil || workspaceID == 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
 	}
@@ -589,12 +589,12 @@ func (a *TaskAPI) SearchTasks(ctx context.Context, req *flowtaskv1.SearchTasksRe
 }
 
 func (a *TaskAPI) GetMyTasksProject(ctx context.Context, _ *flowtaskv1.GetMyTasksProjectRequest) (*flowtaskv1.GetMyTasksProjectResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return nil, onekiterrors.PermissionDenied()
+	authUser, businessID, err := a.resolveAuth(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	projectID, workspaceID, err := a.Service.EnsureMyTasksProject(ctx, authUser.UserID, 0)
+	projectID, workspaceID, err := a.Service.EnsureMyTasksProject(ctx, authUser.UserID, businessID, 0)
 	if err != nil || projectID == 0 {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to resolve My Tasks project")
 	}

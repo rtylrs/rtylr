@@ -189,20 +189,21 @@ func (s *Service) UpdateWorkspaceMemberRole(ctx context.Context, input domain.Up
 	return s.repo.UpdateWorkspaceMemberRole(ctx, input)
 }
 
-func (s *Service) CreatePersonalWorkspace(ctx context.Context, userID int64) (int64, error) {
-	return s.repo.CreatePersonalWorkspace(ctx, userID)
+func (s *Service) CreatePersonalWorkspace(ctx context.Context, userID, businessID int64) (int64, error) {
+	return s.repo.CreatePersonalWorkspace(ctx, userID, businessID)
 }
 
 // ResolveWorkspaceID converts a workspace_id coming from the frontend into
 // a numeric DB ID. The frontend uses the sentinel string "personal" to mean
 // "the user's Personal workspace", which is created on demand. Any numeric
-// string (or empty) is parsed as-is; numbers round-trip unchanged.
-func (s *Service) ResolveWorkspaceID(ctx context.Context, userID int64, raw string) (int64, error) {
+// string (or empty) is parsed as-is; numbers round-trip unchanged. businessID
+// must be the caller's resolved tenant id, used only on the "personal" path.
+func (s *Service) ResolveWorkspaceID(ctx context.Context, userID, businessID int64, raw string) (int64, error) {
 	if raw == "" {
 		return 0, nil
 	}
 	if raw == "personal" {
-		return s.repo.CreatePersonalWorkspace(ctx, userID)
+		return s.repo.CreatePersonalWorkspace(ctx, userID, businessID)
 	}
 	return strconv.ParseInt(raw, 10, 64)
 }
@@ -1209,13 +1210,15 @@ func (s *Service) GetProjectWorkspace(ctx context.Context, projectID int64) int6
 // kanban columns — on first call. This is the board the user lands on in Flow
 // and where quick-created tasks go. Idempotent: it reuses the existing project,
 // migrating the legacy "Inbox" name to "My Tasks" on access. Pass workspaceID 0
-// to use (and lazily create) the caller's personal workspace.
+// to use (and lazily create) the caller's personal workspace. businessID must
+// be the caller's resolved tenant id (tenant.ResolveBusinessID), not their
+// user id — this is what the created project's business_id column stores.
 func (s *Service) EnsureMyTasksProject(
 	ctx context.Context,
-	userID, workspaceID int64,
+	userID, businessID, workspaceID int64,
 ) (projectID, resolvedWorkspaceID int64, err error) {
 	if workspaceID == 0 {
-		wsID, wsErr := s.repo.CreatePersonalWorkspace(ctx, userID)
+		wsID, wsErr := s.repo.CreatePersonalWorkspace(ctx, userID, businessID)
 		if wsErr != nil {
 			return 0, 0, wsErr
 		}
@@ -1236,7 +1239,7 @@ func (s *Service) EnsureMyTasksProject(
 	id, err := s.repo.CreateProject(ctx, domain.ProjectInput{
 		WorkspaceID: workspaceID,
 		OwnerID:     userID,
-		BusinessID:  userID,
+		BusinessID:  businessID,
 		Name:        "My Tasks",
 		Description: "Your personal task board. Quick-created tasks land here.",
 		Icon:        "✅",

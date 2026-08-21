@@ -26,8 +26,8 @@ ORDER BY is_personal DESC, is_default DESC, id ASC
 LIMIT 1;
 
 -- name: CreatePersonalWorkspace :execresult
-INSERT INTO flow_workspaces (owner_id, name, icon, color, is_default, is_personal, created_by)
-VALUES (?, 'Personal', '🏠', '#64C5B9', TRUE, TRUE, ?);
+INSERT INTO flow_workspaces (owner_id, business_id, name, icon, color, is_default, is_personal, created_by)
+VALUES (?, ?, 'Personal', '🏠', '#64C5B9', TRUE, TRUE, ?);
 
 -- name: CountProjectMembers :one
 SELECT COUNT(*) FROM flow_project_members WHERE project_id = ?;

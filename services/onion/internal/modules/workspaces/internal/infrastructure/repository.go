@@ -1408,7 +1408,7 @@ func (r *Repository) UpdateWorkspaceMemberRole(ctx context.Context, input domain
 	return err
 }
 
-func (r *Repository) CreatePersonalWorkspace(ctx context.Context, userID int64) (int64, error) {
+func (r *Repository) CreatePersonalWorkspace(ctx context.Context, userID, businessID int64) (int64, error) {
 	existing, err := r.queries.GetPersonalWorkspaceByOwner(ctx, userID)
 	if err == nil && existing > 0 {
 		return existing, nil
@@ -1418,8 +1418,9 @@ func (r *Repository) CreatePersonalWorkspace(ctx context.Context, userID int64) 
 	}
 
 	res, err := r.queries.CreatePersonalWorkspace(ctx, sqlc.CreatePersonalWorkspaceParams{
-		OwnerID:   userID,
-		CreatedBy: userID,
+		OwnerID:    userID,
+		BusinessID: businessID,
+		CreatedBy:  userID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CreatePersonalWorkspace failed", logger.Error(err))

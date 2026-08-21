@@ -61,7 +61,7 @@ func (a *ViewAPI) ListViews(ctx context.Context, req *flowviewv1.ListViewsReques
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, req.GetWorkspaceId())
+	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, authUser.BusinessID, req.GetWorkspaceId())
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (a *ViewAPI) CreateView(ctx context.Context, req *flowviewv1.CreateViewRequ
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, req.GetWorkspaceId())
+	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, authUser.BusinessID, req.GetWorkspaceId())
 	if err != nil {
 		return nil, err
 	}

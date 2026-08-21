@@ -37,7 +37,7 @@ func (a *DashboardAPI) GetFlowDashboard(ctx context.Context, req *flowdashboardv
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	workspaceID, err := a.Service.ResolveWorkspaceID(ctx, authUser.UserID, formatWorkspaceID(req.GetWorkspaceId()))
+	workspaceID, err := a.Service.ResolveWorkspaceID(ctx, authUser.UserID, businessID, formatWorkspaceID(req.GetWorkspaceId()))
 	if err != nil || workspaceID == 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
 	}

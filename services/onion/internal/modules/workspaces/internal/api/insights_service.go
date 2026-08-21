@@ -25,7 +25,7 @@ func (a *InsightsAPI) GetInsights(ctx context.Context, req *flowinsightsv1.GetIn
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, req.GetWorkspaceId())
+	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, authUser.BusinessID, req.GetWorkspaceId())
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (a *InsightsAPI) GetTeamWorkload(ctx context.Context, req *flowinsightsv1.G
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, req.GetWorkspaceId())
+	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, authUser.BusinessID, req.GetWorkspaceId())
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +140,7 @@ func (a *InsightsAPI) GetRoadmap(ctx context.Context, req *flowinsightsv1.GetRoa
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, req.GetWorkspaceId())
+	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, authUser.BusinessID, req.GetWorkspaceId())
 	if err != nil {
 		return nil, err
 	}

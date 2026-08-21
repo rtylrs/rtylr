@@ -250,16 +250,34 @@ func TestWorkspaces_GetDashboardStats_NoError(t *testing.T) {
 func TestWorkspaces_CreatePersonalWorkspace_Idempotent(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	id1, err := repo.CreatePersonalWorkspace(context.Background(), testutil.OwnerID)
+	id1, err := repo.CreatePersonalWorkspace(context.Background(), testutil.OwnerID, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("CreatePersonalWorkspace first call: %v", err)
 	}
-	id2, err := repo.CreatePersonalWorkspace(context.Background(), testutil.OwnerID)
+	id2, err := repo.CreatePersonalWorkspace(context.Background(), testutil.OwnerID, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("CreatePersonalWorkspace second call: %v", err)
 	}
 	if id1 != id2 {
 		t.Errorf("expected idempotent ID, got %d then %d", id1, id2)
+	}
+
+	// business_id used to be omitted from the INSERT entirely, leaving every
+	// personal workspace stuck at the schema's DEFAULT 0. Confirm it's
+	// findable by its real business, not just present with some value.
+	workspaces, _, err := repo.GetWorkspacesByOwner(context.Background(), testutil.BusinessID, 50, 0)
+	if err != nil {
+		t.Fatalf("GetWorkspacesByOwner: %v", err)
+	}
+	found := false
+	for _, w := range workspaces {
+		if w.ID == id1 {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("personal workspace %d not found when listed by its real business id %d - business_id was likely left at 0",
+			id1, testutil.BusinessID)
 	}
 }
 
