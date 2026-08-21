@@ -253,7 +253,7 @@ const rootRoute = createRootRoute({
 });
 ```
 
-`AppGuard` (from `@voxire/auth`) replaces the old per-app `ProtectedRoute` wiring: it checks the cookie, loads the user, and enforces `allowedRoles` from `APP_CONFIG`. Feature-flagged apps additionally wrap with `AppFlagGuard` from `@voxire/config`. Unknown paths render a `CatchAllRedirect` that sends the user back to `/`.
+`AppGuard` (from `@voxire/auth`) replaces the old per-app `ProtectedRoute` wiring: it checks the cookie, loads the user, and allows entry when the user is `owner`/`admin` or the app id appears in their own `apps` array. It does **not** consult `APP_CONFIG`, which no longer carries roles at all (#795, tryrtylr/packages#60). Feature-flagged apps additionally wrap with `AppFlagGuard` from `@voxire/config`. Unknown paths render a `CatchAllRedirect` that sends the user back to `/`.
 
 ### Route Search Params - `validateSearch`
 
@@ -445,7 +445,7 @@ Never ship a new UI element without a translation key, even in early development
 
 ### Authentication Pattern
 
-- `AppGuard` from `@voxire/auth` wraps each app's root route (see Routing Pattern above): checks the cookie, fetches `/user/me`, and enforces the app's `allowedRoles` from `APP_CONFIG`.
+- `AppGuard` from `@voxire/auth` wraps each app's root route (see Routing Pattern above): checks the cookie, fetches `/user/me`, and allows entry when the user is `owner`/`admin` or the app id is in their per-user `apps` array. That array is authoritative; there is no per-app role table (#795).
 - `ProtectedRoute` and `RoleGuard` from `@voxire/auth` remain available for finer-grained gating of routes and UI elements.
 - `useUserStore` from `@voxire/auth` is the single source of truth for user identity; `signOut` from the same package handles logout.
 - **Never read the token from a store or prop.** Always read it via the cookie mechanism in `@voxire/api` or `@voxire/auth`.
