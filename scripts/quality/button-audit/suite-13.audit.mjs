@@ -220,5 +220,6 @@ export const cases = [
   ["apps/finance/src/features/journal/Journal.tsx", "audit-batch-218-suite-13"],
   ["apps/finance/src/shared/components/LineItemRow.test.tsx", "audit-batch-219-suite-13"],
   ["apps/flow/src/features/focus-today/FocusToday.tsx", "audit-batch-220-suite-13"],
+  ["apps/flow/src/features/projects/ProjectTimeline.tsx", "audit-batch-221-suite-13"],
 ];
 

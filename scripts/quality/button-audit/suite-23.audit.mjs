@@ -220,5 +220,6 @@ export const cases = [
   ["apps/finance/src/layouts/DefaultLayout.test.tsx", "audit-batch-218-suite-23"],
   ["apps/finance/src/shared/components/ReceiptUpload.tsx", "audit-batch-219-suite-23"],
   ["apps/flow/src/features/presence/PresenceScreen.test.tsx", "audit-batch-220-suite-23"],
+  ["apps/flow/src/features/settings/sections/TimeSection.test.tsx", "audit-batch-221-suite-23"],
 ];
 
