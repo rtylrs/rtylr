@@ -82,5 +82,6 @@ export const cases = [
   ["apps/crm/src/shared/components/crm.tsx", "audit-batch-080-suite-23"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/LowStockWidget.tsx", "audit-batch-081-suite-23"],
   ["apps/dash/src/features/menu/Components/CreateItem.tsx", "audit-batch-082-suite-23"],
+  ["apps/dash/src/features/settings/Settings/components/General/General.tsx", "audit-batch-083-suite-23"],
 ];
 
