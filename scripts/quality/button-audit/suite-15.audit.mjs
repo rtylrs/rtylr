@@ -14,5 +14,6 @@ export const cases = [
   ["apps/finance/src/features/invoices/InvoiceDetail.tsx", "audit-batch-012-suite-15"],
   ["apps/finance/src/shared/components/FinanceKpiWidgets.tsx", "audit-batch-013-suite-15"],
   ["apps/flow/src/features/cycles/Cycles.tsx", "audit-batch-014-suite-15"],
+  ["apps/flow/src/features/projects/ProjectOverview.tsx", "audit-batch-015-suite-15"],
 ];
 

@@ -14,5 +14,6 @@ export const cases = [
   ["apps/finance/src/features/recurring-invoices/RecurringInvoices.tsx", "audit-batch-012-suite-25"],
   ["apps/finance/src/shared/components/PageHeader.tsx", "audit-batch-013-suite-25"],
   ["apps/flow/src/features/leave/RequestLeaveDialog.test.tsx", "audit-batch-014-suite-25"],
+  ["apps/flow/src/features/projects/components/BoardSettingsPanel.tsx", "audit-batch-015-suite-25"],
 ];
 
