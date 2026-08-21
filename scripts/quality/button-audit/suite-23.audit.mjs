@@ -45,5 +45,6 @@ export const cases = [
   ["apps/flow/src/shared/components/PreviewRouteUnavailable.tsx", "audit-batch-043-suite-23"],
   ["apps/hr/src/features/dashboard/widgets/LeaveBalanceWidget.test.tsx", "audit-batch-044-suite-23"],
   ["apps/hr/src/features/leave/LeaveRequestForm.tsx", "audit-batch-045-suite-23"],
+  ["apps/hr/src/features/settings/LeavePolicySettings.tsx", "audit-batch-046-suite-23"],
 ];
 

@@ -45,5 +45,6 @@ export const cases = [
   ["apps/flow/src/shared/components/AssigneeAvatar.tsx", "audit-batch-043-suite-07"],
   ["apps/flow/src/shared/components/SubtaskList.tsx", "audit-batch-044-suite-07"],
   ["apps/hr/src/features/departments/CreateDepartmentForm.tsx", "audit-batch-045-suite-07"],
+  ["apps/hr/src/features/overtime/OvertimeRequestForm.tsx", "audit-batch-046-suite-07"],
 ];
 
