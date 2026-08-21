@@ -171,6 +171,8 @@ export const useAddGroupMembers = (
       toast.success(i18next.t('toasts.membersAdded', 'Members added'));
       qc.invalidateQueries({ queryKey: ['groups'] });
       qc.invalidateQueries({ queryKey: ['groups', groupId] });
+      // Team rows embed each member's group memberships; refresh them too.
+      qc.invalidateQueries({ queryKey: ['team'] });
     },
     onError: () => toast.error(i18next.t('toasts.failedAddMembers', 'Failed to add members')),
   });
