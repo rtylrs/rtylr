@@ -283,5 +283,6 @@ export const cases = [
   ["apps/insights/src/shared/components/Skeleton.tsx", "audit-batch-281-suite-25"],
   ["apps/recruit/src/features/admin/FormFieldsEditor.tsx", "audit-batch-282-suite-25"],
   ["apps/auth/src/features/email-verification/EmailVerification.tsx", "audit-batch-283-suite-25"],
+  ["apps/crm/src/features/campaigns/Campaigns.tsx", "audit-batch-284-suite-25"],
 ];
 

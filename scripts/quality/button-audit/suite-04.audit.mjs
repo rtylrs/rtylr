@@ -283,5 +283,6 @@ export const cases = [
   ["apps/insights/src/features/customers/Customers.tsx", "audit-batch-281-suite-04"],
   ["apps/menu/src/features/cart/OrderStatus.tsx", "audit-batch-282-suite-04"],
   ["apps/recruit/src/features/admin/SubmissionsAdmin.tsx", "audit-batch-283-suite-04"],
+  ["apps/auth/src/features/login/Login.tsx", "audit-batch-284-suite-04"],
 ];
 

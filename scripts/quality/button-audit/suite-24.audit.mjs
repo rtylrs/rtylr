@@ -283,5 +283,6 @@ export const cases = [
   ["apps/insights/src/shared/components/ErrorState.tsx", "audit-batch-281-suite-24"],
   ["apps/recruit/src/features/admin/FormFieldsEditor.test.tsx", "audit-batch-282-suite-24"],
   ["apps/auth/src/features/callback/Callback.tsx", "audit-batch-283-suite-24"],
+  ["apps/crm/src/features/campaigns/Campaigns.test.tsx", "audit-batch-284-suite-24"],
 ];
 
