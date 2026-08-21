@@ -581,8 +581,21 @@ function compatResult<T>(operation: () => Promise<unknown>) {
   return oneKitResult(operation).map((value) => fromOneKitJson<T>(value));
 }
 
-function body(value: unknown) {
-  return { body: toOneKitJson(value) };
+/**
+ * Payload for a request whose fields are declared directly, with no body member.
+ *
+ * Both of these assert rather than check: toOneKitJson only renames keys to the
+ * wire's snake_case, so nothing here could validate a shape against the request
+ * type. The single loose `body()` they replace compiled against the invented
+ * compat client because its parameters accepted anything.
+ */
+function flat<T>(value: unknown): T {
+  return toOneKitJson(value) as T;
+}
+
+/** Payload for a request shaped { id, body }, where id binds a path segment. */
+function withId<B>(id: string | number, value: unknown): { id: string; body: B } {
+  return { id: String(id), body: toOneKitJson(value) as B };
 }
 
 /**
@@ -605,11 +618,23 @@ export const crmApi = {
   getDashboard: () => compatResult<DashboardStats>(() => crmCompatibilityClient.getDashboard({})),
 
   // Customers
+  // ListCustomersRequest takes search, tier, tag, page and page_size, and the
+  // int64 fields travel as strings. It has no limit/offset, so those two
+  // CustomersParams fields were never reaching the server and are dropped here
+  // rather than silently passed: see #913.
   getCustomers: (params?: CustomersParams) =>
-    compatResult<Customer[]>(() => crmCompatibilityClient.listCustomers(params ?? {})),
+    compatResult<Customer[]>(() =>
+      crmCompatibilityClient.listCustomers({
+        search: params?.search,
+        tier: params?.tier,
+        tag: params?.tag,
+        page: params?.page === undefined ? undefined : String(params.page),
+        pageSize: params?.pageSize === undefined ? undefined : String(params.pageSize),
+      })
+    ),
 
   getCustomerDetail: (id: number) =>
-    compatResult<Customer>(() => crmCompatibilityClient.getCustomer({ id })),
+    compatResult<Customer>(() => crmCompatibilityClient.getCustomer({ id: String(id) })),
 
   getCustomerFull: (id: number) =>
     compatResult<Customer>(() => crmCompatibilityClient.getCustomerFull({ id })),
@@ -629,28 +654,28 @@ export const crmApi = {
 
   createCustomer: (data: Partial<Customer>) =>
     compatResult<Customer>(() =>
-      crmCompatibilityClient.createCustomer(body(toCustomerMutationPayload(data)))
+      crmCompatibilityClient.createCustomer(flat(toCustomerMutationPayload(data)))
     ),
 
   updateCustomer: (id: number, data: Partial<Customer>) =>
     compatResult<Customer>(() =>
-      crmCompatibilityClient.updateCustomer(body({ id, ...toCustomerMutationPayload(data) }))
+      crmCompatibilityClient.updateCustomer(withId(id, toCustomerMutationPayload(data)))
     ),
 
   deleteCustomer: (id: number) =>
     oneKitResult(() => crmCustomerClient.deleteCustomer({ id: String(id) })),
 
   recordVisit: (customerId: number) =>
-    compatResult<unknown>(() => crmCompatibilityClient.recordVisit(body({ customerId }))),
+    compatResult<unknown>(() => crmCompatibilityClient.recordVisit(flat({ customerId }))),
 
   importCustomers: (customers: Record<string, unknown>[], _dedupe?: boolean) =>
     compatResult<unknown>(() =>
-      crmCompatibilityClient.importCustomers(body({ customers } satisfies ImportCustomersPayload))
+      crmCompatibilityClient.importCustomers(flat({ customers } satisfies ImportCustomersPayload))
     ),
 
   mergeCustomers: (primaryId: number, secondaryId: number) =>
     compatResult<unknown>(() =>
-      crmCompatibilityClient.mergeCustomers(body({ primaryId, secondaryId }))
+      crmCompatibilityClient.mergeCustomers(flat({ primaryId, secondaryId }))
     ),
 
   exportCustomerData: (id: number, useCustomerId = false) =>
@@ -662,14 +687,14 @@ export const crmApi = {
   awardPoints: (customerId: number, points: number, reason?: string) =>
     compatResult<unknown>(() =>
       crmCompatibilityClient.awardPoints(
-        body({ customerId, points, description: reason, referenceType: 'manual' })
+        flat({ customerId, points, description: reason, referenceType: 'manual' })
       )
     ),
 
   redeemPoints: (customerId: number, points: number, reason?: string) =>
     compatResult<unknown>(() =>
       crmCompatibilityClient.redeemPoints(
-        body({ customerId, points, description: reason, referenceType: 'manual' })
+        flat({ customerId, points, description: reason, referenceType: 'manual' })
       )
     ),
 
@@ -678,12 +703,22 @@ export const crmApi = {
 
   updateLoyaltyConfig: (config: Partial<LoyaltyConfig>) =>
     compatResult<LoyaltyConfig>(() =>
-      crmCompatibilityClient.updateLoyaltyConfig(body(toLoyaltyConfigPayload(config)))
+      crmCompatibilityClient.updateLoyaltyConfig(flat(toLoyaltyConfigPayload(config)))
     ),
 
   getLoyaltyTransactions: (customerId?: number, limit?: number, offset?: number) =>
     compatResult<LoyaltyTransaction[]>(() =>
-      crmCompatibilityClient.getLoyaltyTransactions({ customerId, limit, offset })
+      // The contract pages by page/page_size. Translating rather than dropping
+      // the caller's limit/offset, which is a faithful mapping while both are
+      // multiples: page is 1-based, so offset 0 is page 1.
+      crmCompatibilityClient.getLoyaltyTransactions({
+        customerId: customerId === undefined ? undefined : String(customerId),
+        pageSize: limit === undefined ? undefined : String(limit),
+        page:
+          offset === undefined || limit === undefined || limit === 0
+            ? undefined
+            : String(Math.floor(offset / limit) + 1),
+      })
     ),
 
   getLoyaltyMembers: (limit?: number, offset?: number) =>
@@ -698,65 +733,63 @@ export const crmApi = {
     compatResult<LoyaltyTier[]>(() => crmCompatibilityClient.getLoyaltyTiers({})),
 
   updateLoyaltyTier: (id: number, data: Partial<LoyaltyTier>) =>
-    compatResult<unknown>(() => crmCompatibilityClient.updateLoyaltyTier(body({ id, ...data }))),
+    compatResult<unknown>(() => crmCompatibilityClient.updateLoyaltyTier(withId(id, data))),
 
   createLoyaltyTier: (data: Partial<LoyaltyTier>) =>
-    compatResult<unknown>(() => crmCompatibilityClient.createLoyaltyTier(body(data))),
+    compatResult<unknown>(() => crmCompatibilityClient.createLoyaltyTier(flat(data))),
 
   upsertLoyaltyReward: (id: number | undefined, data: Partial<LoyaltyReward>) =>
     compatResult<unknown>(() =>
-      crmCompatibilityClient.upsertLoyaltyReward(body(id ? { id, ...data } : data))
+      crmCompatibilityClient.upsertLoyaltyReward(flat(id ? { id, ...data } : data))
     ),
 
   // Segments
   getSegments: () => compatResult<Segment[]>(() => crmCompatibilityClient.listSegments({})),
 
   getSegmentById: (id: number) =>
-    compatResult<Segment>(() => crmCompatibilityClient.getSegment({ id })),
-
-  getSegmentCustomers: (id: number) =>
-    compatResult<Customer[]>(() => crmCompatibilityClient.getSegmentCustomers({ segmentId: id })),
+    compatResult<Segment>(() => crmCompatibilityClient.getSegment({ id: String(id) })),
 
   createSegment: (data: Partial<Segment>) =>
     compatResult<Segment>(() =>
-      crmCompatibilityClient.createSegment(body(toSegmentMutationPayload(data)))
+      crmCompatibilityClient.createSegment(flat(toSegmentMutationPayload(data)))
     ),
 
   updateSegment: (id: number, data: Partial<Segment>) =>
-    compatResult<Segment>(() => crmCompatibilityClient.updateSegment(body({ id, ...data }))),
+    compatResult<Segment>(() => crmCompatibilityClient.updateSegment(withId(id, data))),
 
   deleteSegment: (id: number) =>
     oneKitResult(() => crmSegmentClient.deleteSegment({ id: String(id) })),
 
   // Campaigns
   getCampaigns: (limit?: number, offset?: number) =>
-    compatResult<Campaign[]>(() => crmCompatibilityClient.listCampaigns({ limit, offset })),
+    compatResult<Campaign[]>(() =>
+      crmCompatibilityClient.listCampaigns({
+        limit: limit === undefined ? undefined : String(limit),
+        offset: offset === undefined ? undefined : String(offset),
+      })
+    ),
 
   getCampaignById: (id: number) =>
-    compatResult<Campaign>(() => crmCompatibilityClient.getCampaign({ id })),
+    compatResult<Campaign>(() => crmCompatibilityClient.getCampaign({ id: String(id) })),
 
   getCampaignStats: (id: number) =>
-    compatResult<CampaignStats>(() => crmCompatibilityClient.getCampaignStats({ campaignId: id })),
+    compatResult<CampaignStats>(() =>
+      crmCompatibilityClient.getCampaignStats({ campaignId: String(id) })
+    ),
 
   createCampaign: (data: Partial<Campaign>) =>
     compatResult<Campaign>(() =>
-      crmCompatibilityClient.createCampaign(body(toCampaignMutationPayload(data)))
+      crmCompatibilityClient.createCampaign(flat(toCampaignMutationPayload(data)))
     ),
 
   updateCampaign: (id: number, data: Partial<Campaign>) =>
     compatResult<Campaign>(() =>
-      crmCompatibilityClient.updateCampaign({
-        id: String(id),
-        ...body(toCampaignMutationPayload(data)),
-      })
+      crmCompatibilityClient.updateCampaign(withId(id, toCampaignMutationPayload(data)))
     ),
 
   updateCampaignStatus: (id: number, status: string) =>
     compatResult<unknown>(() =>
-      crmCompatibilityClient.updateCampaignStatus({
-        id: String(id),
-        ...body({ id: String(id), status }),
-      })
+      crmCompatibilityClient.updateCampaignStatus(withId(id, { status }))
     ),
 
   deleteCampaign: (id: number) =>
@@ -771,15 +804,12 @@ export const crmApi = {
 
   createAutomation: (data: Partial<Automation>) =>
     compatResult<Automation>(() =>
-      crmCompatibilityClient.createAutomation(body(toAutomationMutationPayload(data)))
+      crmCompatibilityClient.createAutomation(flat(toAutomationMutationPayload(data)))
     ),
 
   updateAutomation: (id: number, data: Partial<Automation>) =>
     compatResult<Automation>(() =>
-      crmCompatibilityClient.updateAutomation({
-        id: String(id),
-        ...body(toAutomationMutationPayload(data)),
-      })
+      crmCompatibilityClient.updateAutomation(withId(id, toAutomationMutationPayload(data)))
     ),
 
   deleteAutomation: (id: number) =>
@@ -790,7 +820,7 @@ export const crmApi = {
 
   createTemplate: (data: Omit<Template, 'id' | 'updatedAt'>) =>
     compatResult<Template>(() =>
-      crmCompatibilityClient.createTemplate(body({ ...data, type: data.channel }))
+      crmCompatibilityClient.createTemplate(flat({ ...data, type: data.channel }))
     ),
 
   // Feedback
@@ -801,7 +831,7 @@ export const crmApi = {
 
   updateSettings: (data: Partial<Settings>) =>
     compatResult<Settings>(() =>
-      crmCompatibilityClient.updateSettings(body(toSettingsMutationPayload(data)))
+      crmCompatibilityClient.updateSettings(flat(toSettingsMutationPayload(data)))
     ),
 
   // Sales Pipeline
@@ -812,13 +842,10 @@ export const crmApi = {
   getLead: (id: number) =>
     compatResult<Lead>(() => crmCompatibilityClient.getLead({ id: String(id) })),
   createLead: (data: CreateLeadRequest) =>
-    compatResult<Lead>(() => crmCompatibilityClient.createLead(body(toLeadMutationPayload(data)))),
+    compatResult<Lead>(() => crmCompatibilityClient.createLead(flat(toLeadMutationPayload(data)))),
   updateLead: (id: number, data: UpdateLeadRequest) =>
     compatResult<Lead>(() =>
-      crmCompatibilityClient.updateLead({
-        id: String(id),
-        ...body(toLeadMutationPayload(data)),
-      })
+      crmCompatibilityClient.updateLead(withId(id, toLeadMutationPayload(data)))
     ),
   deleteLead: (id: number) =>
     compatResult<unknown>(() => crmCompatibilityClient.deleteLead({ id: String(id) })),
@@ -828,7 +855,7 @@ export const crmApi = {
     ),
   createTouchpoint: (data: CreateTouchpointRequest) =>
     compatResult<Touchpoint>(() =>
-      crmCompatibilityClient.createTouchpoint(body(toTouchpointMutationPayload(data)))
+      crmCompatibilityClient.createTouchpoint(flat(toTouchpointMutationPayload(data)))
     ),
   deleteTouchpoint: (id: number) =>
     compatResult<unknown>(() => crmCompatibilityClient.deleteTouchpoint({ id: String(id) })),
@@ -837,11 +864,9 @@ export const crmApi = {
       crmCompatibilityClient.listContacts({ leadId, limit, offset })
     ),
   createContact: (data: CreateContactRequest) =>
-    compatResult<SalesContact>(() => crmCompatibilityClient.createContact(body(data))),
+    compatResult<SalesContact>(() => crmCompatibilityClient.createContact(flat(data))),
   updateContact: (id: number, data: UpdateContactRequest) =>
-    compatResult<SalesContact>(() =>
-      crmCompatibilityClient.updateContact({ id: String(id), ...body(data) })
-    ),
+    compatResult<SalesContact>(() => crmCompatibilityClient.updateContact(withId(id, data))),
   deleteContact: (id: number) =>
     compatResult<unknown>(() => crmCompatibilityClient.deleteContact({ id: String(id) })),
   getContracts: (limit?: number, offset?: number) =>
@@ -850,13 +875,10 @@ export const crmApi = {
     compatResult<Contract>(() => crmCompatibilityClient.getContract({ id: String(id) })),
   createContract: (data: CreateContractRequest) =>
     compatResult<Contract>(() =>
-      crmCompatibilityClient.createContract(body(toCreateContractPayload(data)))
+      crmCompatibilityClient.createContract(flat(toCreateContractPayload(data)))
     ),
   updateContract: (id: number, data: UpdateContractRequest) =>
     compatResult<Contract>(() =>
-      crmCompatibilityClient.updateContract({
-        id: String(id),
-        ...body(toContractUpdatePayload(data)),
-      })
+      crmCompatibilityClient.updateContract(withId(id, toContractUpdatePayload(data)))
     ),
 };
