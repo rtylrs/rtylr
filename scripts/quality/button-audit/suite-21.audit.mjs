@@ -74,5 +74,6 @@ export const cases = [
   ["apps/hr/src/features/settings/roles-permissions/RolesPermissions.tsx", "audit-batch-072-suite-21"],
   ["apps/hr/src/features/time-logging/ActiveTimer.tsx", "audit-batch-073-suite-21"],
   ["apps/hr/src/shared/components/GlobalShortcuts.tsx", "audit-batch-074-suite-21"],
+  ["apps/insights/src/features/revenue/Revenue.test.tsx", "audit-batch-075-suite-21"],
 ];
 
