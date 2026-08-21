@@ -186,7 +186,7 @@ const AddWorkspaceMemberDialog: React.FC<AddWorkspaceMemberDialogProps> = ({
               onClick={handleAddMember}
               disabled={!selectedUserId || addMember.isPending}
               className="flex-1 min-h-[44px] px-4 rounded text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-2"
-              style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+              style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
             >
               {addMember.isPending
                 ? t('workspaceManager.adding')
