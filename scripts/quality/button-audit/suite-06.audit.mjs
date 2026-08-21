@@ -109,5 +109,6 @@ export const cases = [
   ["apps/dash/src/features/chat/Chat.tsx", "audit-batch-107-suite-06"],
   ["apps/dash/src/features/developer/ApiKeys.test.tsx", "audit-batch-108-suite-06"],
   ["apps/dash/src/features/security/Security.tsx", "audit-batch-109-suite-06"],
+  ["apps/dash/src/main.tsx", "audit-batch-110-suite-06"],
 ];
 

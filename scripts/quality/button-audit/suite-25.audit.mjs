@@ -109,5 +109,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/TopCustomersWidget.tsx", "audit-batch-107-suite-25"],
   ["apps/dash/src/features/permissions/Permissions.tsx", "audit-batch-108-suite-25"],
   ["apps/dash/src/features/team/Team.test.tsx", "audit-batch-109-suite-25"],
+  ["apps/dash/src/shared/components/ui/avatar.tsx", "audit-batch-110-suite-25"],
 ];
 

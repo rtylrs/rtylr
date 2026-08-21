@@ -109,5 +109,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/ActivityWidget.test.tsx", "audit-batch-107-suite-09"],
   ["apps/dash/src/features/developer/Webhooks.tsx", "audit-batch-108-suite-09"],
   ["apps/dash/src/features/settings/Settings/components/AiUsage.tsx", "audit-batch-109-suite-09"],
+  ["apps/dash/src/shared/components/FullScreenLoader/FullScreenLoader.tsx", "audit-batch-110-suite-09"],
 ];
 
