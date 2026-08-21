@@ -75,6 +75,9 @@ CREATE TABLE IF NOT EXISTS flow_tasks (
     completed_at TIMESTAMP NULL,
     estimated_hours DECIMAL(6,2),
     actual_hours DECIMAL(6,2),
+    effort_minutes INT DEFAULT NULL,
+    waiting_on VARCHAR(255) DEFAULT NULL,
+    decision_note TEXT DEFAULT NULL,
     section_id BIGINT DEFAULT NULL,
     sort_order INT DEFAULT 0,
     archived BOOLEAN DEFAULT FALSE,
@@ -252,4 +255,27 @@ CREATE TABLE IF NOT EXISTS flow_user_settings (
     weekly_digest BOOLEAN DEFAULT TRUE,
     email_notifications BOOLEAN DEFAULT FALSE,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Pinning a task to Today is per-user, not per-task: Today is a personal view,
+-- so a task-level column would leak one member's planning into another's list.
+CREATE TABLE IF NOT EXISTS flow_task_focus_pins (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    task_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_flow_task_focus_pins (task_id, user_id),
+    INDEX idx_flow_task_focus_pins_user (user_id, business_id)
+);
+
+CREATE TABLE IF NOT EXISTS flow_task_dependencies (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    task_id BIGINT NOT NULL,
+    depends_on_task_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_flow_task_dependencies (task_id, depends_on_task_id),
+    INDEX idx_flow_task_dependencies_task (task_id, business_id),
+    INDEX idx_flow_task_dependencies_depends_on (depends_on_task_id, business_id)
 );
