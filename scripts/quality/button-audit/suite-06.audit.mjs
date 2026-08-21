@@ -75,5 +75,6 @@ export const cases = [
   ["apps/hr/src/features/setup-wizard/steps/LocationsStep.test.tsx", "audit-batch-073-suite-06"],
   ["apps/hr/src/layouts/DefaultLayout.tsx", "audit-batch-074-suite-06"],
   ["apps/hr/src/shared/hooks/queries/useRoles.test.tsx", "audit-batch-075-suite-06"],
+  ["apps/insights/src/shared/components/Skeleton.tsx", "audit-batch-076-suite-06"],
 ];
 

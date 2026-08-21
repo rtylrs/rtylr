@@ -75,5 +75,6 @@ export const cases = [
   ["apps/hr/src/features/setup-wizard/steps/CompanyProfileStep.tsx", "audit-batch-073-suite-03"],
   ["apps/hr/src/features/timesheets/TimesheetsList.tsx", "audit-batch-074-suite-03"],
   ["apps/hr/src/shared/components/TimeOffBadge.tsx", "audit-batch-075-suite-03"],
+  ["apps/insights/src/routes/AppRoutes.tsx", "audit-batch-076-suite-03"],
 ];
 
