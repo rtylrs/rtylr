@@ -150,5 +150,6 @@ export const cases = [
   ["apps/hr/src/features/onboarding/OnboardingChecklist.tsx", "audit-batch-148-suite-24"],
   ["apps/hr/src/features/settings/roles-permissions/RolesPermissions.test.tsx", "audit-batch-149-suite-24"],
   ["apps/hr/src/features/staff/Staff.tsx", "audit-batch-150-suite-24"],
+  ["apps/hr/src/shared/components/EmployeeCard.tsx", "audit-batch-151-suite-24"],
 ];
 

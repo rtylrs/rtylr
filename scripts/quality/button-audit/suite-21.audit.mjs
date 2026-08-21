@@ -150,5 +150,6 @@ export const cases = [
   ["apps/hr/src/features/onboarding/ChecklistTemplates.tsx", "audit-batch-148-suite-21"],
   ["apps/hr/src/features/settings/Settings.test.tsx", "audit-batch-149-suite-21"],
   ["apps/hr/src/features/shifts/Shifts.tsx", "audit-batch-150-suite-21"],
+  ["apps/hr/src/shared/components/DateRangeFilter.tsx", "audit-batch-151-suite-21"],
 ];
 
