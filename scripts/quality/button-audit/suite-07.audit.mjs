@@ -129,5 +129,6 @@ export const cases = [
   ["apps/insights/src/features/revenue/Revenue.test.tsx", "audit-batch-127-suite-07"],
   ["apps/menu/src/screens/Public/SlugLanding/LocationMenu.test.tsx", "audit-batch-128-suite-07"],
   ["apps/recruit/src/templates/bold/Job.tsx", "audit-batch-129-suite-07"],
+  ["apps/auth/src/shared/components/AuthShell.tsx", "audit-batch-130-suite-07"],
 ];
 
