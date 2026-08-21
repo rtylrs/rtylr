@@ -15,7 +15,5 @@
   "saveFailed": "Impossible d'enregistrer les paramètres du serveur",
   "sectionTitle": "Serveur",
   "currentHosted": "Connecté à rtylr hébergé.",
-  "currentSelfHost": "Connecté au serveur personnalisé : {{url}}",
-  "switchToHosted": "Basculer vers rtylr hébergé",
-  "mode": "Backend"
+  "currentSelfHost": "Connecté au serveur personnalisé : {{url}}"
 }
