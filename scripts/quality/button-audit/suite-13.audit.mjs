@@ -138,5 +138,6 @@ export const cases = [
   ["apps/dash/src/shared/components/dash/RoleBadge.tsx", "audit-batch-136-suite-13"],
   ["apps/dash/src/shared/hooks/queries/useNotifications.test.tsx", "audit-batch-137-suite-13"],
   ["apps/erp/src/features/products/components/VariantMatrix.test.tsx", "audit-batch-138-suite-13"],
+  ["apps/erp/src/shared/components/BarcodeSvg.tsx", "audit-batch-139-suite-13"],
 ];
 

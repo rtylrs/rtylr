@@ -138,5 +138,6 @@ export const cases = [
   ["apps/dash/src/shared/components/dash/ConfirmDialog.tsx", "audit-batch-136-suite-09"],
   ["apps/dash/src/shared/hooks/queries/useApps.test.tsx", "audit-batch-137-suite-09"],
   ["apps/erp/src/features/products/ProductDetail.test.tsx", "audit-batch-138-suite-09"],
+  ["apps/erp/src/layouts/DefaultLayout.tsx", "audit-batch-139-suite-09"],
 ];
 

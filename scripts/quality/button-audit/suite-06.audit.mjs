@@ -138,5 +138,6 @@ export const cases = [
   ["apps/dash/src/shared/components/dash/AppBadge.tsx", "audit-batch-136-suite-06"],
   ["apps/dash/src/shared/components/ui/tabs.tsx", "audit-batch-137-suite-06"],
   ["apps/erp/src/features/low-stock-alerts/LowStockAlerts.tsx", "audit-batch-138-suite-06"],
+  ["apps/erp/src/features/variants/Variants.tsx", "audit-batch-139-suite-06"],
 ];
 
