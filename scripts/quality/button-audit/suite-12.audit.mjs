@@ -149,5 +149,6 @@ export const cases = [
   ["apps/hr/src/features/attendance/ClockInWidget.tsx", "audit-batch-147-suite-12"],
   ["apps/hr/src/features/employees/Employees.tsx", "audit-batch-148-suite-12"],
   ["apps/hr/src/features/performance/Performance.tsx", "audit-batch-149-suite-12"],
+  ["apps/hr/src/features/setup-wizard/steps/NotificationsStep.tsx", "audit-batch-150-suite-12"],
 ];
 

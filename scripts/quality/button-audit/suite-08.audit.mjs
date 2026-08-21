@@ -149,5 +149,6 @@ export const cases = [
   ["apps/flow/src/shared/components/TaskRow.tsx", "audit-batch-147-suite-08"],
   ["apps/hr/src/features/documents/Documents.tsx", "audit-batch-148-suite-08"],
   ["apps/hr/src/features/payroll/PayrollRunDetail.tsx", "audit-batch-149-suite-08"],
+  ["apps/hr/src/features/setup-wizard/steps/EmployeesStep.test.tsx", "audit-batch-150-suite-08"],
 ];
 

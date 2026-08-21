@@ -149,5 +149,6 @@ export const cases = [
   ["apps/flow/src/shared/components/WorkloadBar.tsx", "audit-batch-147-suite-10"],
   ["apps/hr/src/features/employees/EmployeeDetail.test.tsx", "audit-batch-148-suite-10"],
   ["apps/hr/src/features/performance/GoalsList.tsx", "audit-batch-149-suite-10"],
+  ["apps/hr/src/features/setup-wizard/steps/LocationsStep.test.tsx", "audit-batch-150-suite-10"],
 ];
 
