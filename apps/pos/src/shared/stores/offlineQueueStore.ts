@@ -14,6 +14,8 @@ interface OfflineQueueActions {
   retry: (id: string) => void;
   markSynced: (id: string) => void;
   markFailed: (id: string, err: string) => void;
+  /** Reset entries stranded in 'syncing' by a crash back to 'pending'. */
+  requeueStalled: () => void;
   clear: () => void;
 }
 
@@ -46,6 +48,10 @@ export const useOfflineQueueStore = create<OfflineQueueState & OfflineQueueActio
           queue: s.queue.map((q) =>
             q.id === id ? { ...q, status: 'failed' as const, lastError: err } : q
           ),
+        })),
+      requeueStalled: () =>
+        set((s) => ({
+          queue: s.queue.map((q) => (q.status === 'syncing' ? { ...q, status: 'pending' as const } : q)),
         })),
       clear: () => set({ queue: [] }),
     }),

@@ -1,5 +1,6 @@
 import type { SessionClosePayload } from './closeSessionWorkflow';
 import type { QueuedSessionClose } from '../../shared/stores/sessionCloseQueueStore';
+import { getOneKitErrorMessage } from '@voxire/api';
 
 interface SyncQueuedSessionClosesParams {
   entries: QueuedSessionClose[];
@@ -7,6 +8,9 @@ interface SyncQueuedSessionClosesParams {
   retry: (id: string) => void;
   markSynced: (id: string) => void;
   markFailed: (id: string, error: string) => void;
+  /** Fresh store read so claims are checked against live state, not a
+   *  snapshot that may already have been claimed by another runner. */
+  readEntry?: (id: string) => QueuedSessionClose | undefined;
 }
 
 interface SyncQueuedSessionClosesResult {
@@ -15,32 +19,29 @@ interface SyncQueuedSessionClosesResult {
   failed: number;
 }
 
-function errorMessage(error: unknown): string {
-  const err = error as { response?: { data?: { message?: string } }; message?: string };
-  return err?.response?.data?.message ?? err?.message ?? 'Sync failed';
-}
-
 export async function syncQueuedSessionCloses({
   entries,
   syncClose,
   retry,
   markSynced,
   markFailed,
+  readEntry,
 }: SyncQueuedSessionClosesParams): Promise<SyncQueuedSessionClosesResult> {
   const result: SyncQueuedSessionClosesResult = { attempted: 0, synced: 0, failed: 0 };
 
   for (const entry of entries) {
-    if (entry.status === 'syncing') continue;
+    const current = readEntry ? readEntry(entry.id) : entry;
+    if (!current || current.status === 'syncing') continue;
 
     result.attempted += 1;
-    retry(entry.id);
+    retry(current.id);
 
     try {
-      await syncClose(entry.payload);
-      markSynced(entry.id);
+      await syncClose(current.payload);
+      markSynced(current.id);
       result.synced += 1;
     } catch (error) {
-      markFailed(entry.id, errorMessage(error));
+      markFailed(current.id, getOneKitErrorMessage(error, 'Sync failed'));
       result.failed += 1;
     }
   }

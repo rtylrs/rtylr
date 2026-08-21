@@ -20,6 +20,8 @@ interface SessionCloseQueueActions {
   retry: (id: string) => void;
   markSynced: (id: string) => void;
   markFailed: (id: string, error: string) => void;
+  /** Reset entries stranded in 'syncing' by a crash back to 'pending'. */
+  requeueStalled: () => void;
   clear: () => void;
 }
 
@@ -54,6 +56,12 @@ export const useSessionCloseQueueStore = create<
         set((state) => ({
           queue: state.queue.map((item) =>
             item.id === id ? { ...item, status: 'failed' as const, lastError: error } : item
+          ),
+        })),
+      requeueStalled: () =>
+        set((state) => ({
+          queue: state.queue.map((item) =>
+            item.status === 'syncing' ? { ...item, status: 'pending' as const } : item
           ),
         })),
       clear: () => set({ queue: [] }),

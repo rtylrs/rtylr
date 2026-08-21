@@ -3,6 +3,7 @@ import type {
   QueuedCashMovement,
   QueuedCashMovementAction,
 } from '../../shared/stores/cashMovementQueueStore';
+import { getOneKitErrorMessage } from '@voxire/api';
 
 interface SyncQueuedCashMovementsParams {
   entries: QueuedCashMovement[];
@@ -10,6 +11,9 @@ interface SyncQueuedCashMovementsParams {
   retry: (id: string) => void;
   markSynced: (id: string) => void;
   markFailed: (id: string, error: string) => void;
+  /** Fresh store read so claims are checked against live state, not a
+   *  snapshot that may already have been claimed by another runner. */
+  readEntry?: (id: string) => QueuedCashMovement | undefined;
 }
 
 interface SyncQueuedCashMovementsResult {
@@ -18,32 +22,29 @@ interface SyncQueuedCashMovementsResult {
   failed: number;
 }
 
-function errorMessage(error: unknown): string {
-  const err = error as { response?: { data?: { message?: string } }; message?: string };
-  return err?.response?.data?.message ?? err?.message ?? 'Sync failed';
-}
-
 export async function syncQueuedCashMovements({
   entries,
   syncMovement,
   retry,
   markSynced,
   markFailed,
+  readEntry,
 }: SyncQueuedCashMovementsParams): Promise<SyncQueuedCashMovementsResult> {
   const result: SyncQueuedCashMovementsResult = { attempted: 0, synced: 0, failed: 0 };
 
   for (const entry of entries) {
-    if (entry.status === 'syncing') continue;
+    const current = readEntry ? readEntry(entry.id) : entry;
+    if (!current || current.status === 'syncing') continue;
 
     result.attempted += 1;
-    retry(entry.id);
+    retry(current.id);
 
     try {
-      await syncMovement(entry.action, entry.payload);
-      markSynced(entry.id);
+      await syncMovement(current.action, current.payload);
+      markSynced(current.id);
       result.synced += 1;
     } catch (error) {
-      markFailed(entry.id, errorMessage(error));
+      markFailed(current.id, getOneKitErrorMessage(error, 'Sync failed'));
       result.failed += 1;
     }
   }
