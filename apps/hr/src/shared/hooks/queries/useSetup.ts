@@ -58,11 +58,7 @@ export const useUpsertHRConfig = () => {
 
   return useMutation({
     mutationFn: async (data: Partial<HRCompanyConfigPayload>): Promise<HRCompanyConfigPayload> => {
-      const res = await unwrap(
-        safe.put<{ config: HRCompanyConfigPayload }>('/hr/config', {
-          setupCompletedAt: data.setupCompletedAt,
-        })
-      );
+      const res = await unwrap(safe.put<{ config: HRCompanyConfigPayload }>('/hr/config', data));
       return (res as { config: HRCompanyConfigPayload }).config;
     },
     onSuccess: (config: HRCompanyConfigPayload) => {
