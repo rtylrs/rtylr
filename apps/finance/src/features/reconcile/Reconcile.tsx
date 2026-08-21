@@ -123,7 +123,7 @@ const Reconcile: React.FC = () => {
                     Math.abs(Math.abs(c.amount) - Math.abs(t.amount ?? 0)) < 500
                 )
                 .map((c) => (
-                  <button
+                  <button type="button"
                     key={c.id}
                     style={{ ...ghostBtn, padding: '6px 12px' }}
                     onClick={() => match(t.id ?? '', c.id)}

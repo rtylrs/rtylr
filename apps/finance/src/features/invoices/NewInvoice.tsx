@@ -371,7 +371,7 @@ const NewInvoice: React.FC = () => {
         </button>
         <div style={{ display: 'flex', gap: 8 }}>
           {step < STEPS.length - 1 ? (
-            <button style={primaryBtn} disabled={!canProceed()} onClick={() => setStep(step + 1)}>
+            <button type="button" style={primaryBtn} disabled={!canProceed()} onClick={() => setStep(step + 1)}>
               Next <ChevronRight size={13} />
             </button>
           ) : (

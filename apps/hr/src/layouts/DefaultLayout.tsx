@@ -501,7 +501,7 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
             <hr
               style={{ border: 'none', borderTop: '1px solid var(--hr-border)', margin: '4px 0' }}
             />
-            <button
+            <button type="button"
               onClick={() => {
                 signOutFromHR();
               }}

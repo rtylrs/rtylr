@@ -336,7 +336,7 @@ function CampaignCard({
             </button>
           )}
           {campaign.status === 'Active' && canManage && (
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onPause();

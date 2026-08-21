@@ -235,7 +235,7 @@ const Calendar: React.FC = () => {
                     </button>
                   ))}
                   {dayTasks.length > 3 && (
-                    <button
+                    <button type="button"
                       onClick={(e) => e.stopPropagation()}
                       className="text-[9px] px-1 hover:underline"
                       style={{ color: ACCENT_VAR }}

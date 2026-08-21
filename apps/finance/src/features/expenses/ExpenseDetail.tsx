@@ -92,7 +92,7 @@ const ExpenseDetail: React.FC = () => {
         actions={
           canApproveExpense ? (
             <>
-              <button
+              <button type="button"
                 style={{
                   ...ghostBtn,
                   color: 'var(--finance-error)',

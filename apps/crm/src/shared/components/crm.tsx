@@ -577,7 +577,7 @@ export const AutomationNode: React.FC<{
           {type}
         </span>
         {onRemove && (
-          <button
+          <button type="button"
             onClick={onRemove}
             style={{
               marginLeft: 'auto',

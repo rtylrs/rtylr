@@ -178,7 +178,7 @@ const Receiving: React.FC = () => {
               );
             })}
           </div>
-          <button
+          <button type="button"
             onClick={completeReceipt}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}

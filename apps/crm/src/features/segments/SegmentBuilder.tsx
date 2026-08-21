@@ -160,7 +160,7 @@ const SegmentBuilder: React.FC = () => {
                   { key: true, label: 'Match all' },
                   { key: false, label: 'Match any' },
                 ].map((o) => (
-                  <button
+                  <button type="button"
                     key={String(o.key)}
                     onClick={() => setMatchAll(o.key)}
                     style={{

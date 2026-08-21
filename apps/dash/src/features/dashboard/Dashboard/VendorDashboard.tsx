@@ -314,7 +314,7 @@ const AdminDashboard: React.FC = () => {
                           </p>
                         </div>
                         {isActive ? (
-                          <button
+                          <button type="button"
                             onClick={() => removeWidget(w.id)}
                             className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-md"
                             style={{

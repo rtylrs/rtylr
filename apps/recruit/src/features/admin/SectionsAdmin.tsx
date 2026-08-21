@@ -261,7 +261,7 @@ const SectionsAdmin: React.FC = (): React.JSX.Element => {
                         <ChevronRight className="h-4 w-4" />
                       )}
                     </button>
-                    <button
+                    <button type="button"
                       onClick={() => {
                         toast.warning('Delete this section?', {
                           action: {

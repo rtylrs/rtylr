@@ -249,7 +249,7 @@ const Products: React.FC = () => {
           className="flex rounded-lg p-0.5"
           style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
         >
-          <button
+          <button type="button"
             onClick={() => setViewMode('list')}
             className="h-7 w-7 rounded-md flex items-center justify-center"
             style={{

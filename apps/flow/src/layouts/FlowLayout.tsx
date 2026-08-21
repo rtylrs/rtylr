@@ -1266,7 +1266,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         margin: '4px 0',
                       }}
                     />
-                    <button
+                    <button type="button"
                       onClick={handleLogout}
                       className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-start transition-colors hover:bg-[var(--flow-hover)]"
                       style={{ color: '#ef4444' }}

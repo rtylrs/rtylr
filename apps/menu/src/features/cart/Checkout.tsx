@@ -149,7 +149,7 @@ const Checkout = (): React.JSX.Element => {
         }}
       >
         {/* Back */}
-        <button
+        <button type="button"
           onClick={() => window.history.back()}
           aria-label="Go back"
           style={{

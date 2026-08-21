@@ -16,7 +16,7 @@ const Harness = ({ open, onClose }: HarnessProps) => {
   return (
     <div ref={dialogRef} tabIndex={-1} data-testid="dialog">
       <button>First action</button>
-      <button>Last action</button>
+      <button type="button">Last action</button>
     </div>
   );
 };

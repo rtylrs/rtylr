@@ -384,7 +384,7 @@ const ProjectBoard: React.FC = () => {
                   >
                     Add
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => setAddingColumn(false)}
                     className="h-6 px-2 rounded text-[11px] hover:bg-[var(--flow-hover)]"
                     style={{ color: 'var(--flow-text-muted)' }}

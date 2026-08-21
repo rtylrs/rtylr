@@ -130,7 +130,7 @@ const Menu: React.FC<{}> = () => {
         >
           {item.details?.isActive === false ? 'Inactive' : 'Active'}
         </span>
-        <button
+        <button type="button"
           className="text-xs text-blue-500 hover:underline px-2 py-1"
           onClick={() => {
             navigate({
