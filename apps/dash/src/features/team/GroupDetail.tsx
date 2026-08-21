@@ -327,7 +327,7 @@ const GroupDetail = (): React.JSX.Element => {
                       </div>
                       {LEVELS.map((l) => (
                         <div key={l.value} className="col-span-2 flex justify-center">
-                          <button
+                          <button type="button"
                             aria-label={t('team.groupDetail.radioAriaLabel', {
                               section: section.label,
                               level: t(l.tKey),

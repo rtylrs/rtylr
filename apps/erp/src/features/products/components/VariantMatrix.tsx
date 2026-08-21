@@ -417,7 +417,7 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
         ))}
 
         <div className="flex items-center gap-2 flex-wrap">
-          <button
+          <button type="button"
             onClick={addGroup}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium"
             style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}

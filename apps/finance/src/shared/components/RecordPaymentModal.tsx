@@ -79,7 +79,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
       width={420}
       footer={
         <>
-          <button style={ghostBtn} onClick={onClose} disabled={recordPayment.isPending}>
+          <button type="button" style={ghostBtn} onClick={onClose} disabled={recordPayment.isPending}>
             Cancel
           </button>
           <button type="button"

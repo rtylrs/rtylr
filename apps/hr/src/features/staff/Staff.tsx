@@ -133,7 +133,7 @@ const Staff: React.FC = () => {
             }}
           >
             {filterTabs.map((tab) => (
-              <button
+              <button type="button"
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 style={{

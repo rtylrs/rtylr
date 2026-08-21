@@ -158,7 +158,7 @@ const Categories: React.FC = () => {
               </div>
               {editingId === cat.id ? (
                 <>
-                  <button
+                  <button type="button"
                     aria-label="Save category"
                     onClick={() =>
                       updateMut.mutate(

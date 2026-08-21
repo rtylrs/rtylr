@@ -203,7 +203,7 @@ const Automations: React.FC = () => {
                         </button>
                       )}
                       {canManageAutomations && (
-                        <button
+                        <button type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setConfirmDeleteId(a.id);

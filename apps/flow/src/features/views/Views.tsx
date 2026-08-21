@@ -176,7 +176,7 @@ const Views: React.FC = () => {
                       >
                         <Pencil size={9} />
                       </button>
-                      <button
+                      <button type="button"
                         onClick={(e) => handleDelete(v, e)}
                         className="h-5 w-5 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"
                         style={{ color: 'var(--flow-text-dim)' }}

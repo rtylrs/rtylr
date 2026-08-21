@@ -798,7 +798,7 @@ const LeadDetail: React.FC = () => {
                   Contract
                 </p>
                 {!contract && (
-                  <button
+                  <button type="button"
                     aria-label="Add contract"
                     onClick={() => setContractOpen((v) => !v)}
                     style={{

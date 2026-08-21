@@ -176,7 +176,7 @@ const Integrations: React.FC = () => {
                         Coming Soon
                       </button>
                     ) : isConnected ? (
-                      <button
+                      <button type="button"
                         onClick={() => disconnect.mutate(i.id)}
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                         style={{

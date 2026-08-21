@@ -540,7 +540,7 @@ const Addons: React.FC = () => {
                 </p>
 
                 <div className="flex gap-2 justify-end">
-                  <button
+                  <button type="button"
                     onClick={() => setPurchaseTarget(null)}
                     disabled={purchaseMutation.isPending}
                     className="px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-60"

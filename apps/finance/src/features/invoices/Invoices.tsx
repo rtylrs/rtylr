@@ -260,7 +260,7 @@ const Invoices: React.FC = () => {
                         </button>
                       )}
                       {(inv.status === 'Sent' || inv.status === 'Overdue') && (
-                        <button
+                        <button type="button"
                           style={{
                             ...ghostBtn,
                             padding: '4px 10px',

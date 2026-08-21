@@ -556,7 +556,7 @@ const ProjectSettings: React.FC = () => {
                       >
                         {transferOwnership.isPending ? 'Transferring…' : 'Confirm'}
                       </button>
-                      <button
+                      <button type="button"
                         onClick={() => setConfirmTransfer(false)}
                         className="px-3 py-1.5 rounded text-[11px]"
                         style={{ color: 'var(--flow-text-muted)' }}

@@ -185,7 +185,7 @@ const Suppliers: React.FC = () => {
             filename="suppliers.csv"
           />
           {canManageSuppliers && (
-            <button
+            <button type="button"
               data-testid="suppliers-add-button"
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-opacity"

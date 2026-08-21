@@ -574,7 +574,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               }}
             >
               <div className="flex items-center gap-2">
-                <button
+                <button type="button"
                   onClick={() => setMobileSidebarOpen((v) => !v)}
                   className="md:hidden h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--dash-hover)]"
                   style={{ color: 'var(--dash-text-muted)' }}

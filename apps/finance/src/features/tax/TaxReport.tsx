@@ -40,7 +40,7 @@ const TaxReport: React.FC = () => {
         title="Tax Summary"
         breadcrumbs={[{ label: 'Reports' }, { label: 'Tax' }]}
         actions={
-          <button style={ghostBtn} disabled title="Export coming in a future update">
+          <button type="button" style={ghostBtn} disabled title="Export coming in a future update">
             <Download size={13} /> Export
           </button>
         }

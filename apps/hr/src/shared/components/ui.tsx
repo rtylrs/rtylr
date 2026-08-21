@@ -492,7 +492,7 @@ export const Tabs: React.FC<{ tabs: string[]; active: string; onChange: (t: stri
     }}
   >
     {tabs.map((tab) => (
-      <button
+      <button type="button"
         key={tab}
         onClick={() => onChange(tab)}
         style={{

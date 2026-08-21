@@ -588,7 +588,7 @@ const DefaultLayout: React.FC = () => {
                 {pageTitle}
               </h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <button
+                <button type="button"
                   onClick={openPalette}
                   style={{
                     height: '28px',
