@@ -132,5 +132,6 @@ export const cases = [
   ["apps/crm/src/features/automations/Automations.test.tsx", "audit-batch-130-suite-12"],
   ["apps/crm/src/features/sales/Contracts.test.tsx", "audit-batch-131-suite-12"],
   ["apps/dash/src/features/activity/Audit.tsx", "audit-batch-132-suite-12"],
+  ["apps/dash/src/features/dashboard/Dashboard/widgets/RevenueByAppWidget.test.tsx", "audit-batch-133-suite-12"],
 ];
 
