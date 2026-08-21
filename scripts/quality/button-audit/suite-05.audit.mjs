@@ -200,5 +200,6 @@ export const cases = [
   ["apps/flow/src/shared/components/PreviewRouteUnavailable.test.tsx", "audit-batch-198-suite-05"],
   ["apps/hr/src/features/dashboard/widgets/HoursThisWeekWidget.tsx", "audit-batch-199-suite-05"],
   ["apps/hr/src/features/leave/LeaveCalendar.tsx", "audit-batch-200-suite-05"],
+  ["apps/hr/src/features/reviews/Reviews.tsx", "audit-batch-201-suite-05"],
 ];
 
