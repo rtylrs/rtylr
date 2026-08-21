@@ -18,7 +18,10 @@ DB_NAME="${DB_NAME:?DB_NAME is required}"
 
 SCHEMAS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-ERRORS=0
+APPLIED=0
+FAILED=0
+OUTPUT_FILE="$(mktemp)"
+trap 'rm -f "$OUTPUT_FILE"' EXIT
 
 mysql_cmd() {
     mysql \
@@ -26,7 +29,6 @@ mysql_cmd() {
         --port="$DB_PORT" \
         --user="$DB_USER" \
         --password="$DB_PASSWORD" \
-        --force \
         "$DB_NAME"
 }
 
@@ -41,17 +43,20 @@ for dir in shared cdn rtylr voxire erp hr hr_core hr_attendance hr_documents hr_
     for f in "$schema_dir"/*.sql; do
         [ -f "$f" ] || continue
         echo "  → $dir/$(basename "$f")"
-        if ! mysql_cmd < "$f" 2>&1 | grep -v "Warning:"; then
-            echo "    ⚠ warnings in $f (continuing)"
-            ERRORS=$((ERRORS + 1))
+        if mysql_cmd < "$f" >"$OUTPUT_FILE" 2>&1; then
+            grep -v "Warning:" "$OUTPUT_FILE" || true
+            APPLIED=$((APPLIED + 1))
+        else
+            status=$?
+            grep -v "Warning:" "$OUTPUT_FILE" || true
+            echo "    ✗ $f failed; migration run stopped" >&2
+            FAILED=$((FAILED + 1))
+            echo ""
+            echo "❌ Migrations stopped. Applied: $APPLIED, Skipped: 0, Failed: $FAILED."
+            exit "$status"
         fi
     done
 done
 
-if [ "$ERRORS" -gt 0 ]; then
-    echo ""
-    echo "✅ Migrations complete with $ERRORS warning(s) (tables/indexes already existed)."
-else
-    echo ""
-    echo "✅ All migrations applied cleanly."
-fi
+echo ""
+echo "✅ Migrations complete. Applied: $APPLIED, Skipped: 0, Failed: $FAILED."
