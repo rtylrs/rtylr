@@ -125,5 +125,6 @@ export const cases = [
   ["apps/hr/src/features/overtime/OvertimeRequestForm.tsx", "audit-batch-123-suite-11"],
   ["apps/hr/src/features/setup-wizard/SetupWizard.tsx", "audit-batch-124-suite-11"],
   ["apps/hr/src/features/time-off/TimeOff.tsx", "audit-batch-125-suite-11"],
+  ["apps/hr/src/shared/components/PayrollConfigGuard.tsx", "audit-batch-126-suite-11"],
 ];
 
