@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import TrialBanner from '../shared/components/TrialBanner';
 import { Link, useLocation, useNavigate, useParams, useRouterState } from '@tanstack/react-router';
@@ -39,7 +39,7 @@ import {
 import { useFeatureFlag, FLAG_KEYS, getAvatarUrl } from '@voxire/config';
 import { Avatar } from '@voxire/ui';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
-import { useForesightLinks } from '@voxire/utils';
+import { useClickOutside, useForesightLinks } from '@voxire/utils';
 import { signOut, useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useUserStore } from '../shared/stores/userStore';
 import { useTranslation } from 'react-i18next';
@@ -428,55 +428,30 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // outside click and on Escape, scoped to this menu only - it must not
   // interfere with the unrelated "New Project" modal's own Escape handling
   // further down in this file.
-  //
-  // packages/utils's useClickOutside takes RefObject<T> (non-nullable
-  // `current`), which React 19's useRef<T | null>(null) can't satisfy
-  // without an unsafe cast, so the listener is hand-rolled here instead.
   const userMenuRef = useRef<HTMLDivElement | null>(null);
+  const closeUserMenu = useCallback((): void => setUserMenuOpen(false), []);
+  useClickOutside(userMenuRef, closeUserMenu);
   useEffect(() => {
     if (!userMenuOpen) return;
-    const handlePointerDown = (e: MouseEvent | TouchEvent): void => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
-        setUserMenuOpen(false);
-      }
-    };
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') setUserMenuOpen(false);
     };
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('touchstart', handlePointerDown);
     document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('touchstart', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [userMenuOpen]);
 
-  // Workspace switcher (sidebar top): same gap as the account menu above,
-  // fixed the same way and kept independent - each menu closes only itself.
+  // Workspace switcher (sidebar top): same behaviour as the account menu above
+  // and kept independent - each menu closes only itself.
   const workspaceSwitcherRef = useRef<HTMLDivElement | null>(null);
+  const closeWorkspaceSwitcher = useCallback((): void => setWorkspaceSwitcherOpen(false), []);
+  useClickOutside(workspaceSwitcherRef, closeWorkspaceSwitcher);
   useEffect(() => {
     if (!workspaceSwitcherOpen) return;
-    const handlePointerDown = (e: MouseEvent | TouchEvent): void => {
-      if (
-        workspaceSwitcherRef.current &&
-        !workspaceSwitcherRef.current.contains(e.target as Node)
-      ) {
-        setWorkspaceSwitcherOpen(false);
-      }
-    };
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') setWorkspaceSwitcherOpen(false);
     };
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('touchstart', handlePointerDown);
     document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('touchstart', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, [workspaceSwitcherOpen]);
 
   useEffect(() => {
