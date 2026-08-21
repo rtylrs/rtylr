@@ -1,6 +1,6 @@
 import { createOneKitClient } from '@voxire/api';
 import { TableServiceClient } from '@voxire/voxie/pos/table/v1/client';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, Armchair } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ScreenLayout from '../../layouts/ScreenLayout';
@@ -32,6 +32,11 @@ const TablesScreen: React.FC = () => {
     })();
   }, []);
 
+  const openTable = useCallback(
+    (tableNumber: string) => navigate(`/?table=${tableNumber}`),
+    [navigate]
+  );
+
   return (
     <ScreenLayout title="Tables">
       <div className="p-5">
@@ -44,7 +49,7 @@ const TablesScreen: React.FC = () => {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {tables.map((t) => (
-              <TableCard key={t.id} {...t} onClick={() => navigate(`/?table=${t.number}`)} />
+              <TableCard key={t.id} {...t} onClick={() => openTable(t.number)} />
             ))}
           </div>
         )}

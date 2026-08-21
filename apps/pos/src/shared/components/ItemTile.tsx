@@ -10,12 +10,14 @@ interface ItemTileProps {
   disabled?: boolean;
 }
 
-const ItemTile: React.FC<ItemTileProps> = ({
+// Memoized grid tile: catalog screens re-render on search/category changes
+// and every tile carries an <img>, so identity-stable props matter here.
+const ItemTile = React.memo<ItemTileProps>(function ItemTile({
   item,
   onClick,
   size = "md",
   disabled,
-}) => {
+}) {
   const unavailable = disabled || item.isActive === false;
   const stock = item.stock;
   const showStock = typeof stock === "number" && Number.isFinite(stock);
@@ -76,6 +78,6 @@ const ItemTile: React.FC<ItemTileProps> = ({
       )}
     </button>
   );
-};
+});
 
 export default ItemTile;
