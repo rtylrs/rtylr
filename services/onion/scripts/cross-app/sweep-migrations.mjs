@@ -5,10 +5,9 @@
 import { readFileSync } from 'node:fs';
 import { readdirSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { walk, paths, writeCsv } from './lib.mjs';
+import { walk, paths, writeCsv, voxieApiDir } from './lib.mjs';
 
-const VOXIE = join(paths.schemas, '..', '..', '..', '..', '..', 'voxie');
-const apiDir = join(VOXIE, 'api');
+const apiDir = voxieApiDir();
 
 // Contract domains on disk.
 const contractDomains = new Set();

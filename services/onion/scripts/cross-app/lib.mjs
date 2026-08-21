@@ -3,12 +3,18 @@
 // directory holds round one's five CSVs plus these seven.
 import { readdirSync, statSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
+import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
+// ONION resolves wherever this checkout lives; this repo may be checked out
+// in a worktree rather than at ~/Development/onion.
 export const ONION = resolve(here, '..', '..');
-export const RTYLR = resolve(here, '..', '..', '..', 'rtylr');
+// The audit data always lands in the canonical rtylr clone so one directory
+// holds round one's CSVs plus these seven.
+export const RTYLR =
+  process.env.CROSS_APP_RTYLR || join(homedir(), 'Development', 'rtylr');
 export const OUT =
   process.env.CROSS_APP_OUT || join(RTYLR, 'docs', 'cross-app', 'inventory');
 
@@ -53,6 +59,15 @@ export const paths = {
   platform: PLATFORM_PATHS,
   schemas: SCHEMA_PATHS,
 };
+
+// Voxie lives as this repo's submodule when initialised, otherwise as the
+// sibling checkout. Contracts are read from whichever exists.
+import { existsSync } from 'node:fs';
+export function voxieApiDir() {
+  const sub = join(ONION, 'voxie', 'api');
+  if (existsSync(sub)) return sub;
+  return join(homedir(), 'Development', 'voxie', 'api');
+}
 
 export function csvCell(v) {
   const s = v == null ? '' : String(v);

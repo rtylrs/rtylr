@@ -3,7 +3,7 @@
 // Output: backend_handlers.csv
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { walk, moduleDirs, paths, writeCsv, relRepo, lineOf } from './lib.mjs';
+import { walk, moduleDirs, paths, writeCsv, relRepo, lineOf, voxieApiDir } from './lib.mjs';
 
 const rows = [];
 
@@ -195,7 +195,7 @@ for (const m of moduleDirs()) {
 
 // ---------- oneKit RPC handlers ----------
 // .onk services -> generated RegisterXServiceServer calls in module.go.
-const onkRoot = join(paths.schemas, '..', '..', '..', '..', '..', 'voxie', 'api');
+const onkRoot = voxieApiDir();
 import { readdirSync, statSync as st } from 'node:fs';
 function listOnk(dir) {
   const out = [];

@@ -33,7 +33,8 @@ for (const f of walk(paths.schemas, ['.sql'])) {
 
 // 2. sqlc query access (module attribution from the queries sweep output).
 import { readFileSync as rf } from 'node:fs';
-const qcsv = rf(join(paths.schemas, '..', '..', '..', '..', '..', 'rtylr', 'docs', 'cross-app', 'inventory', 'backend_queries.csv'), 'utf8');
+import { OUT } from './lib.mjs';
+const qcsv = rf(join(OUT, 'backend_queries.csv'), 'utf8');
 for (const line of qcsv.split('\n').slice(1)) {
   if (!line.trim()) continue;
   // Parse conservatively: module is field 1, reads field 4, writes field 5.

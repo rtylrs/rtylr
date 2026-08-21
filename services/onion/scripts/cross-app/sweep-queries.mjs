@@ -11,7 +11,9 @@ const rows = [];
 
 function tablesIn(sql) {
   // Strip comments so commented examples do not count.
-  const t = sql.replace(/--[^\n]*/g, ' ').replace(/\/\*[\s\S]*?\*\//g, ' ');
+  let t = sql.replace(/--[^\n]*/g, ' ').replace(/\/\*[\s\S]*?\*\//g, ' ');
+  // ON DUPLICATE KEY UPDATE names columns, not tables.
+  t = t.replace(/on\s+duplicate\s+key\s+update/gi, ' ');
   const reads = new Set();
   const writes = new Set();
   const push = (set, name) => {
