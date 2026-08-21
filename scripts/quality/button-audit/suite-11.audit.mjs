@@ -20,5 +20,6 @@ export const cases = [
   ["apps/flow/src/shared/components/RealtimeConnectionIndicator.tsx", "audit-batch-018-suite-11"],
   ["apps/hr/src/features/dashboard/widgets/UpcomingShiftsWidget.test.tsx", "audit-batch-019-suite-11"],
   ["apps/hr/src/features/operations/Operations.test.tsx", "audit-batch-020-suite-11"],
+  ["apps/hr/src/features/setup-wizard/HRConfigRoute.test.tsx", "audit-batch-021-suite-11"],
 ];
 

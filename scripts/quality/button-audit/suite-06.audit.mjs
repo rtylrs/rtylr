@@ -20,5 +20,6 @@ export const cases = [
   ["apps/flow/src/shared/components/PriorityIcon.tsx", "audit-batch-018-suite-06"],
   ["apps/hr/src/features/dashboard/widgets/LeaveBalanceWidget.tsx", "audit-batch-019-suite-06"],
   ["apps/hr/src/features/onboarding/ChecklistTemplates.tsx", "audit-batch-020-suite-06"],
+  ["apps/hr/src/features/settings/Settings.test.tsx", "audit-batch-021-suite-06"],
 ];
 
