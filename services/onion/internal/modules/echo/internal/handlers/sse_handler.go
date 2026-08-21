@@ -327,7 +327,7 @@ func (h *GenerateTextStreamHandler) streamDirectResponse(ctx context.Context, w 
 		return
 	}
 
-	go h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String())
+	go h.storeAIResponseDetached(context.WithoutCancel(ctx), req.SessionID, int(req.UserID), fullResponse.String())
 }
 
 // writeQuotaExceeded reports that the tenant has spent its monthly AI allowance.
@@ -480,7 +480,7 @@ func (h *GenerateTextStreamHandler) streamCachedResponse(ctx context.Context, w 
 	}
 
 	if cached.Response != "" {
-		go h.storeAIResponse(ctx, req.SessionID, int(req.UserID), cached.Response)
+		go h.storeAIResponseDetached(context.WithoutCancel(ctx), req.SessionID, int(req.UserID), cached.Response)
 	}
 
 	aicache.Record(aicache.Event{
@@ -701,7 +701,7 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 				return
 			}
 			if fullResponse.Len() > 0 {
-				go h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String())
+				go h.storeAIResponseDetached(context.WithoutCancel(ctx), req.SessionID, int(req.UserID), fullResponse.String())
 			}
 			h.recordUsage(ctx, businessID, userID, totalTokens)
 			h.writeExactCacheEntry(ctx, finalToken, fullResponse.String(), totalTokens, cachePlan, businessID, userID)
@@ -717,7 +717,7 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 				return
 			}
 			if fullResponse.Len() > 0 {
-				go h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String())
+				go h.storeAIResponseDetached(context.WithoutCancel(ctx), req.SessionID, int(req.UserID), fullResponse.String())
 			}
 			h.recordUsage(ctx, businessID, userID, totalTokens)
 			return
@@ -988,7 +988,9 @@ func flushResponse(w http.ResponseWriter) func() {
 	}
 }
 
-func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, sessionID string, userID int, response string) {
+// storeAIResponseDetached persists work after the request has ended. Callers
+// must pass a context already detached from request cancellation.
+func (h *GenerateTextStreamHandler) storeAIResponseDetached(ctx context.Context, sessionID string, userID int, response string) {
 	// Runs in its own goroutine — a panic here must not crash the API process.
 	defer func() {
 		if r := recover(); r != nil {
@@ -996,11 +998,9 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, session
 		}
 	}()
 
-	// Decouple from the request context: the SSE handler has already returned by
-	// the time this runs, so the request ctx is canceled and the DB write +
-	// cache invalidation would fail with "context canceled". Keep the logger
-	// scope (trace ids) but a fresh, time-bounded cancellation.
-	storeCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
+	// Keep the logger scope (trace ids) but apply a fresh, time-bounded
+	// cancellation to the detached context.
+	storeCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	_, err := h.MemoryService.StoreMessage(storeCtx, sessionID, userID, "assistant", response, len(response)/4)
@@ -1015,11 +1015,8 @@ func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, session
 	}
 	defer h.releaseSessionSummary(sessionID)
 
-	// Decouple from the request context — when the SSE handler returns,
-	// the request context is canceled and the summarize call would
-	// abort before it ever starts. We still keep the parent's logger
-	// scope so trace ids survive.
-	bg, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
+	// Keep the detached context and trace ids while bounding summarization.
+	bg, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 	if summarizeErr := h.MemoryService.SummarizeSession(bg, sessionID, userID); summarizeErr != nil {
 		logger.Ctx(bg).Warn("Failed to summarize session",
