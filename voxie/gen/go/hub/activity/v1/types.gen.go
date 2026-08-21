@@ -159,7 +159,8 @@ func (x *ActivityEntry) GetCreatedAt() string {
 }
 
 type ListActivityRequest struct {
-	Limit int32 `json:"limit,omitempty"`
+	Limit  int32  `json:"limit,omitempty"`
+	Offset *int32 `json:"offset,omitempty"`
 }
 
 func (x *ListActivityRequest) GetLimit() int32 {
@@ -170,8 +171,21 @@ func (x *ListActivityRequest) GetLimit() int32 {
 	return x.Limit
 }
 
+func (x *ListActivityRequest) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.Offset == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Offset
+}
+
 type ListActivityResponse struct {
 	Activities []*ActivityEntry `json:"activities,omitempty"`
+	Total      int32            `json:"total,omitempty"`
 }
 
 func (x *ListActivityResponse) GetActivities() []*ActivityEntry {
@@ -180,4 +194,12 @@ func (x *ListActivityResponse) GetActivities() []*ActivityEntry {
 		return zero
 	}
 	return x.Activities
+}
+
+func (x *ListActivityResponse) GetTotal() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Total
 }

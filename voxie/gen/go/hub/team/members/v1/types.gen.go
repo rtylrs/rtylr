@@ -207,10 +207,29 @@ func (x *StaffUserWithGroups) GetGroups() []*hub_team_groups_v1.GroupSummary {
 }
 
 type ListTeamRequest struct {
+	Page     int32 `json:"page,omitempty"`
+	PageSize int32 `json:"page_size,omitempty"`
+}
+
+func (x *ListTeamRequest) GetPage() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Page
+}
+
+func (x *ListTeamRequest) GetPageSize() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.PageSize
 }
 
 type ListTeamResponse struct {
 	Users []*StaffUserPayload `json:"users,omitempty"`
+	Total int32               `json:"total,omitempty"`
 }
 
 func (x *ListTeamResponse) GetUsers() []*StaffUserPayload {
@@ -219,6 +238,14 @@ func (x *ListTeamResponse) GetUsers() []*StaffUserPayload {
 		return zero
 	}
 	return x.Users
+}
+
+func (x *ListTeamResponse) GetTotal() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Total
 }
 
 type GetMemberRequest struct {

@@ -51,18 +51,21 @@ return violations;
 
 export interface ListActivityRequest {
 limit?: number;
+offset?: number;
 }
 
 export function decodeListActivityRequest(v: any): ListActivityRequest {
 if (v === null || v === undefined) return v;
 return {
 limit: v.limit,
+offset: v.offset,
 };
 }
 
 export function encodeListActivityRequest(v: ListActivityRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
@@ -73,18 +76,21 @@ return violations;
 
 export interface ListActivityResponse {
 activities?: (ActivityEntry)[];
+total?: number;
 }
 
 export function decodeListActivityResponse(v: any): ListActivityResponse {
 if (v === null || v === undefined) return v;
 return {
 activities: (v.activities !== undefined ? (v.activities as any[]).map(decodeActivityEntry) : v.activities),
+total: v.total,
 };
 }
 
 export function encodeListActivityResponse(v: ListActivityResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.activities !== undefined) { out.activities = (v.activities as any[]).map(encodeActivityEntry); }
+if (v.total !== undefined) { out.total = v.total; }
 return out;
 }
 

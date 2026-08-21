@@ -30,6 +30,9 @@ func (c *ActivityServiceClient) ListActivity(ctx context.Context, req *ListActiv
 	path := "/hub/activity/v1/activity"
 	query := url.Values{}
 	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	if req.Offset != nil {
+		query.Set("offset", strconv.FormatInt(int64(*req.Offset), 10))
+	}
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

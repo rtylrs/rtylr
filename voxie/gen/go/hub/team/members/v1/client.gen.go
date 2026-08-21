@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -29,6 +30,8 @@ func (c *MembersServiceClient) ListTeam(ctx context.Context, req *ListTeamReques
 	}
 	path := "/hub/team/members/v1/members"
 	query := url.Values{}
+	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
+	query.Set("page_size", strconv.FormatInt(int64(req.PageSize), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
