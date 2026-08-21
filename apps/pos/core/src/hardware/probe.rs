@@ -45,20 +45,10 @@ pub fn probe_zpl_protocol(stream: &mut std::net::TcpStream) -> bool {
     buf[0] == 0x02 || buf[0] == b'N'
 }
 
-/// Probe an Epson ePOS-Print HTTP endpoint (port 8008/8043).
-/// Returns `true` when the device answers with HTTP 200 or 400 - either
-/// confirms an ePOS HTTP server is present.
-pub fn probe_epos_http(host: &str, port: u16) -> bool {
-    let addr_str = format!("{}:{}", host, port);
-    let Ok(addr) = addr_str.parse::<std::net::SocketAddr>() else { return false; };
-    let Ok(mut stream) = std::net::TcpStream::connect_timeout(&addr, Duration::from_secs(2)) else {
-        return false;
-    };
-    probe_epos_http_on(&mut stream, host, port)
-}
-
-/// Same probe over an already-connected stream, so health checks can reuse
-/// the connection opened by `probe_connect` instead of dialing a second time.
+/// Probe an Epson ePOS-Print HTTP endpoint (port 8008/8043) over an
+/// already-connected stream, so health checks can reuse the connection
+/// opened by `probe_connect`. Returns `true` when the device answers with
+/// HTTP 2xx or 4xx - either confirms an ePOS HTTP server is present.
 pub fn probe_epos_http_on(stream: &mut std::net::TcpStream, host: &str, port: u16) -> bool {
     stream.set_write_timeout(Some(Duration::from_millis(500))).ok();
     stream.set_read_timeout(Some(Duration::from_millis(800))).ok();
@@ -190,7 +180,9 @@ mod tests {
         });
 
         std::thread::sleep(Duration::from_millis(10));
-        assert!(probe_epos_http("127.0.0.1", port));
+        let addr: std::net::SocketAddr = format!("127.0.0.1:{}", port).parse().unwrap();
+        let mut stream = std::net::TcpStream::connect_timeout(&addr, Duration::from_secs(2)).expect("connect");
+        assert!(probe_epos_http_on(&mut stream, "127.0.0.1", port));
     }
 
     #[test]
@@ -201,7 +193,9 @@ mod tests {
         thread::spawn(move || { let _ = listener.accept(); });
 
         std::thread::sleep(Duration::from_millis(10));
-        assert!(!probe_epos_http("127.0.0.1", port));
+        let addr: std::net::SocketAddr = format!("127.0.0.1:{}", port).parse().unwrap();
+        let mut stream = std::net::TcpStream::connect_timeout(&addr, Duration::from_secs(2)).expect("connect");
+        assert!(!probe_epos_http_on(&mut stream, "127.0.0.1", port));
     }
 
     #[test] fn port_9100_infers_thermal_escpos() { assert_eq!(infer_tcp_device_type(9100), "thermal_escpos"); }
