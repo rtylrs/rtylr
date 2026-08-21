@@ -106,5 +106,6 @@ export const cases = [
   ["apps/auth/src/main.tsx", "audit-batch-104-suite-12"],
   ["apps/crm/src/features/feedback/Feedback.tsx", "audit-batch-105-suite-12"],
   ["apps/crm/src/router.tsx", "audit-batch-106-suite-12"],
+  ["apps/dash/src/features/dashboard/Dashboard/widgets/InvoiceAgingWidget.test.tsx", "audit-batch-107-suite-12"],
 ];
 
