@@ -10,5 +10,13 @@
   "favicon": "اختر فافيكون",
   "icon": "اختر شعارًا",
   "name": "الاسم",
-  "slogan": "الشعار"
+  "slogan": "الشعار",
+  "businessType": {
+    "noIndustriesMatchTitle": "لا توجد مجالات مطابقة لـ \"{{search}}\"",
+    "noIndustriesMatchDescription": "جرّب كلمة بحث مختلفة."
+  },
+  "account": {
+    "noLoginActivityTitle": "لا يوجد نشاط تسجيل دخول بعد",
+    "noLoginActivityDescription": "ستظهر عمليات تسجيل الدخول إلى حسابك هنا."
+  }
 }

@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PieChart } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { toFiniteNumber, unwrap } from '@voxire/api';
+import { EmptyState } from '@voxire/ui';
 import { safe } from '../../../../shared/lib/api';
 import WidgetHeader from './WidgetHeader';
 
@@ -41,7 +43,8 @@ function formatMoney(minor: number): string {
 }
 
 const RevenueByAppWidget: React.FC = (): React.JSX.Element => {
-  const { data: raw } = useQuery({
+  const { t } = useTranslation();
+  const { data: raw, refetch } = useQuery({
     queryKey: ['insights-revenue-by-app'],
     queryFn: async (): Promise<AppSlice[]> => {
       try {
@@ -65,11 +68,13 @@ const RevenueByAppWidget: React.FC = (): React.JSX.Element => {
     <div className="flex flex-col h-full">
       <WidgetHeader icon={PieChart} iconColor="var(--accent)" title="Revenue by app (MTD)" />
       {slices.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
-          <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-            Start selling to see the split across your apps.
-          </p>
-        </div>
+        <EmptyState
+          icon={PieChart}
+          title={t('dashboard.revenueByAppWidget.emptyTitle')}
+          description={t('dashboard.revenueByAppWidget.emptyDescription')}
+          action={{ label: t('common.refresh'), onClick: () => void refetch() }}
+          size="compact"
+        />
       ) : (
         <div className="flex-1 flex flex-col gap-2 p-4">
           <div className="flex items-baseline justify-between">

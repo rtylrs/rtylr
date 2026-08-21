@@ -14,6 +14,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { setCookie, removeCookie, getDefaultCookieDomain } from '@voxire/auth';
+import { EmptyState } from '@voxire/ui';
 import { cn } from '../../../../../shared/lib/utils';
 import {
   Button,
@@ -299,19 +300,14 @@ const Businesses: React.FC = () => {
                   />
                 </div>
               ) : businesses.length === 0 ? (
-                <div
-                  className="rounded-xl border border-dashed px-4 py-10 text-center"
-                  style={{ borderColor: 'var(--dash-border)' }}
-                >
-                  <Building2
-                    size={24}
-                    className="mx-auto mb-2"
-                    style={{ color: 'var(--dash-text-dim)' }}
-                  />
-                  <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
-                    {t('businesses.noBusinesses')}
-                  </p>
-                </div>
+                <EmptyState
+                  icon={Building2}
+                  title={t('businesses.noBusinesses')}
+                  action={{
+                    label: t('businesses.addBusiness'),
+                    onClick: () => setCreateOpen(true),
+                  }}
+                />
               ) : (
                 businesses.map((business) => {
                   const isCurrent = business.id === currentBusinessId;

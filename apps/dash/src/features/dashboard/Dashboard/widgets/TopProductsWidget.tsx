@@ -1,7 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ShoppingBag } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { toFiniteNumber, unwrap } from '@voxire/api';
+import { EmptyState } from '@voxire/ui';
 import { safe } from '../../../../shared/lib/api';
 import WidgetHeader from './WidgetHeader';
 
@@ -38,7 +40,8 @@ function productRevenue(product: WidgetProduct): number {
 }
 
 const TopProductsWidget: React.FC = () => {
-  const { data: raw } = useQuery({
+  const { t } = useTranslation();
+  const { data: raw, refetch } = useQuery({
     queryKey: ['top-products-widget'],
     queryFn: async (): Promise<WidgetProduct[]> => {
       try {
@@ -71,11 +74,13 @@ const TopProductsWidget: React.FC = () => {
       <WidgetHeader icon={ShoppingBag} iconColor="#8b5cf6" title="Top products" />
       <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
         {products.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
-              No products yet
-            </p>
-          </div>
+          <EmptyState
+            icon={ShoppingBag}
+            title={t('dashboard.topProductsWidget.emptyTitle')}
+            description={t('dashboard.topProductsWidget.emptyDescription')}
+            action={{ label: t('common.refresh'), onClick: () => void refetch() }}
+            size="compact"
+          />
         ) : (
           products.map((p, i) => (
             <div key={i} className="flex items-center gap-3 px-2 py-1.5">

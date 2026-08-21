@@ -10,6 +10,5 @@ export { default as SettingSection } from './SettingSection';
 export { default as DangerZone } from './DangerZone';
 export { default as ConfirmDialog } from './ConfirmDialog';
 export { default as SearchCommand } from './SearchCommand';
-export { default as EmptyState } from './EmptyState';
 export { default as Breadcrumbs } from './Breadcrumbs';
 export { SkeletonList, SkeletonGrid } from './SkeletonList';

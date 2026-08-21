@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { Search, Loader2, Check } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
+import { EmptyState } from '@voxire/ui';
 import { useBusinessStore, type BusinessType } from '../../../../../shared/stores/businessStore';
 import { useUpdateBusiness } from '../../../../../shared/hooks/queries/useBusiness';
 import { useIndustries } from '../../../../../shared/hooks/queries/useIndustries';
@@ -16,6 +18,7 @@ import {
 import { cn } from '../../../../../shared/lib/utils';
 
 const BusinessTypeSettings: React.FC = () => {
+  const { t } = useTranslation();
   const { businessType, setBusinessType } = useBusinessStore();
   const updateBusiness = useUpdateBusiness();
   const { data, isLoading } = useIndustries();
@@ -94,9 +97,12 @@ const BusinessTypeSettings: React.FC = () => {
             <Loader2 size={20} className="animate-spin" style={{ color: 'var(--dash-text-dim)' }} />
           </div>
         ) : filteredGroups.length === 0 ? (
-          <p className="text-sm text-center py-10" style={{ color: 'var(--dash-text-muted)' }}>
-            No industries match "{search}"
-          </p>
+          <EmptyState
+            icon={Search}
+            title={t('settings.businessType.noIndustriesMatchTitle', { search })}
+            description={t('settings.businessType.noIndustriesMatchDescription')}
+            action={{ label: t('common.clearSearch'), onClick: () => setSearch('') }}
+          />
         ) : (
           <div className="space-y-5">
             {filteredGroups.map((group) => (

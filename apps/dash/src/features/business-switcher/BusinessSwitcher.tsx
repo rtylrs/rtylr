@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Building2, Check, ChevronsUpDown, Loader2, Search, Settings2 } from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { setCookie, removeCookie, getDefaultCookieDomain } from '@voxire/auth';
+import { EmptyState } from '@voxire/ui';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -166,9 +167,12 @@ const BusinessSwitcher: React.FC = (): React.JSX.Element | null => {
               </DropdownMenuItem>
             ))}
             {filteredBusinesses.length === 0 && (
-              <div className="px-3 py-2 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-                {t('businesses.noResults')}
-              </div>
+              <EmptyState
+                icon={Search}
+                title={t('businesses.noResults')}
+                action={{ label: t('common.clearSearch'), onClick: () => setSearch('') }}
+                size="compact"
+              />
             )}
           </div>
           <DropdownMenuSeparator />

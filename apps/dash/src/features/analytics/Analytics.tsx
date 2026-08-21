@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { DollarSign, ShoppingBag, TrendingUp, Star, BarChart2, Loader2 } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import {
   Card,
   CardContent,
@@ -78,9 +80,14 @@ const useBestSellers = (range: string = '7d') =>
   });
 
 const Analytics: React.FC = () => {
+  const { t } = useTranslation();
   const [range, setRange] = useState('7d');
   const { data: kpis, isLoading } = useKpis(range);
-  const { data: bestSellers = [], isLoading: sellersLoading } = useBestSellers(range);
+  const {
+    data: bestSellers = [],
+    isLoading: sellersLoading,
+    refetch: refetchBestSellers,
+  } = useBestSellers(range);
 
   const avgOrderValue = kpis && kpis.ordersToday > 0 ? kpis.revenueToday / kpis.ordersToday : 0;
 
@@ -235,13 +242,16 @@ const Analytics: React.FC = () => {
                 ) : bestSellers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={3}>
-                      <div className="flex flex-col items-center justify-center py-8 text-center">
-                        <BarChart2 size={28} className="text-gray-200 mb-3" />
-                        <p className="text-sm font-medium text-gray-400">No data yet</p>
-                        <p className="text-xs text-gray-300 mt-1">
-                          Top performing items will appear here
-                        </p>
-                      </div>
+                      <EmptyState
+                        icon={BarChart2}
+                        title={t('analytics.emptyNoDataTitle')}
+                        description={t('analytics.emptyNoDataDescription')}
+                        action={{
+                          label: t('common.refresh'),
+                          onClick: () => void refetchBestSellers(),
+                        }}
+                        size="compact"
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (

@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { Bell, CheckCheck } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { Button } from '../../shared/components/ui';
-import {
-  Breadcrumbs,
-  EmptyState,
-  NotificationItem,
-  SkeletonList,
-} from '../../shared/components/dash';
+import { Breadcrumbs, NotificationItem, SkeletonList } from '../../shared/components/dash';
 import {
   useNotifications,
   useNotificationPages,
@@ -18,6 +15,7 @@ import {
 const TABS = ['all', 'unread'] as const;
 
 const Notifications: React.FC = () => {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<(typeof TABS)[number]>('all');
   const { data: firstPage = [] } = useNotifications();
   const {
@@ -26,6 +24,7 @@ const Notifications: React.FC = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch,
   } = useNotificationPages();
   const markRead = useMarkNotificationRead();
   const markAll = useMarkAllNotificationsRead();
@@ -96,9 +95,16 @@ const Notifications: React.FC = () => {
             <div className="p-4">
               <EmptyState
                 icon={Bell}
-                title="All caught up"
+                title={t('notifications.emptyAllCaughtUpTitle')}
                 description={
-                  tab === 'unread' ? 'No unread notifications.' : 'No notifications yet.'
+                  tab === 'unread'
+                    ? t('notifications.emptyNoUnreadDescription')
+                    : t('notifications.emptyNoneDescription')
+                }
+                action={
+                  tab === 'unread'
+                    ? { label: t('notifications.viewAll'), onClick: () => setTab('all') }
+                    : { label: t('common.refresh'), onClick: () => void refetch() }
                 }
               />
             </div>

@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { Copy, ExternalLink, Plus, QrCode as QrCodeIcon, Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { EmptyState } from '@voxire/ui';
 import { Badge, Button } from '../../shared/components/ui';
 import { unwrap } from '@voxire/api';
 import { safe } from '../../shared/lib/api';
@@ -36,6 +38,7 @@ function formatStatus(status: string): string {
 }
 
 const QrCodes: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const { data: tables = [], isLoading } = useQrTables();
@@ -171,31 +174,21 @@ const QrCodes: React.FC = () => {
               ))}
             </div>
           ) : filteredTables.length === 0 ? (
-            <div className="flex min-h-64 flex-col items-center justify-center px-4 py-16 text-center">
-              <div
-                className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg"
-                style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-dim)' }}
-              >
-                <QrCodeIcon size={22} />
-              </div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                No tables found
-              </p>
-              <p className="mt-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-                {searchTerm ? 'Try another search.' : 'No QR codes yet.'}
-              </p>
-              {!searchTerm && (
-                <Button
-                  className="mt-4"
-                  size="sm"
-                  variant="outline"
-                  onClick={() => navigate({ to: '/qr-codes/create' })}
-                >
-                  <Plus size={14} />
-                  QR Code
-                </Button>
-              )}
-            </div>
+            <EmptyState
+              icon={QrCodeIcon}
+              title={t('qrCodes.emptyNoTablesTitle')}
+              description={
+                searchTerm ? t('qrCodes.emptyTryAnotherSearch') : t('qrCodes.emptyNoQrCodesYet')
+              }
+              action={
+                searchTerm
+                  ? { label: t('common.clearSearch'), onClick: () => setSearchTerm('') }
+                  : {
+                      label: t('qrCodes.createQrCode'),
+                      onClick: () => navigate({ to: '/qr-codes/create' }),
+                    }
+              }
+            />
           ) : (
             <div>
               {filteredTables.map((table, index) => {

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { KeyRound, Plus, Copy } from 'lucide-react';
 import { toast } from 'sonner';
+import { EmptyState } from '@voxire/ui';
 import {
   Button,
   Dialog,
@@ -17,7 +19,6 @@ import {
   ApiKeyRow,
   Breadcrumbs,
   ConfirmDialog,
-  EmptyState,
   PermissionCheckbox,
   SkeletonList,
 } from '../../shared/components/dash';
@@ -53,6 +54,7 @@ const SCOPE_OPTIONS = [
 ];
 
 const ApiKeys: React.FC = () => {
+  const { t } = useTranslation();
   const { data = [], isLoading } = useApiKeys();
   const create = useCreateApiKey();
   const revoke = useRevokeApiKey();
@@ -118,10 +120,12 @@ const ApiKeys: React.FC = () => {
             <div className="p-4">
               <EmptyState
                 icon={KeyRound}
-                title="No API keys yet"
-                description="Create your first API key to start building."
-                actionLabel="New key"
-                onAction={() => setCreateOpen(true)}
+                title={t('developer.apiKeys.emptyTitle')}
+                description={t('developer.apiKeys.emptyDescription')}
+                action={{
+                  label: t('developer.apiKeys.newKey'),
+                  onClick: () => setCreateOpen(true),
+                }}
               />
             </div>
           ) : (

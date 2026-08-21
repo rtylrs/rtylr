@@ -1,16 +1,19 @@
 import React, { useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { ScrollText, Download, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { Button, Input } from '../../shared/components/ui';
-import { ActivityEntryRow, EmptyState, SkeletonList } from '../../shared/components/dash';
+import { ActivityEntryRow, SkeletonList } from '../../shared/components/dash';
 import { useAuditLog } from '../../shared/hooks/queries/useActivity';
 import { toast } from 'sonner';
 
 const PAGE_SIZE = 50;
 
 const Audit: React.FC = () => {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
-  const { data, isLoading, isFetching } = useAuditLog({ page, pageSize: PAGE_SIZE });
+  const { data, isLoading, isFetching, refetch } = useAuditLog({ page, pageSize: PAGE_SIZE });
   const [query, setQuery] = useState('');
   const [severity, setSeverity] = useState<'all' | 'info' | 'warning' | 'critical'>('all');
 
@@ -135,8 +138,9 @@ const Audit: React.FC = () => {
             <div className="p-4">
               <EmptyState
                 icon={ScrollText}
-                title="No audit entries"
-                description="Security-relevant events will appear here."
+                title={t('activity.audit.emptyTitle')}
+                description={t('activity.audit.emptyDescription')}
+                action={{ label: t('common.refresh'), onClick: () => void refetch() }}
               />
             </div>
           ) : (

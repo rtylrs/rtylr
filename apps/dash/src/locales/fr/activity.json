@@ -1,0 +1,6 @@
+{
+  "audit": {
+    "emptyTitle": "Aucune entrée d'audit",
+    "emptyDescription": "Les événements liés à la sécurité apparaîtront ici."
+  }
+}

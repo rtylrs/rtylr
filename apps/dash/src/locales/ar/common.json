@@ -7,6 +7,10 @@
   "confirm": "تأكيد",
   "delete": "حذف",
   "edit": "تعديل",
+  "refresh": "تحديث",
+  "clearSearch": "مسح البحث",
+  "clearFilters": "مسح الفلاتر",
+  "goBack": "رجوع",
   "roleLabels": {
     "owner": "المالك",
     "admin": "المسؤول",
