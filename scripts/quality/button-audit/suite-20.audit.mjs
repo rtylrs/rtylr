@@ -5,5 +5,6 @@ export const cases = [
   ["apps/crm/src/shared/components/ui.tsx", "audit-batch-003-suite-20"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/PendingWidget.test.tsx", "audit-batch-004-suite-20"],
   ["apps/dash/src/features/menu/Menu.tsx", "audit-batch-005-suite-20"],
+  ["apps/dash/src/features/settings/Settings/components/SettingsLayout/SettingsLayout.tsx", "audit-batch-006-suite-20"],
 ];
 
