@@ -127,5 +127,6 @@ export const cases = [
   ["apps/hr/src/features/time-off/TimeOffNew.tsx", "audit-batch-125-suite-12"],
   ["apps/hr/src/shared/components/RatingStars.tsx", "audit-batch-126-suite-12"],
   ["apps/insights/src/main.tsx", "audit-batch-127-suite-12"],
+  ["apps/recruit/src/features/admin/CareerEditor.tsx", "audit-batch-128-suite-12"],
 ];
 

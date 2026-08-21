@@ -127,5 +127,6 @@ export const cases = [
   ["apps/hr/src/features/staff/EmployeeProfile.tsx", "audit-batch-125-suite-05"],
   ["apps/hr/src/shared/components/DocumentUpload.tsx", "audit-batch-126-suite-05"],
   ["apps/insights/src/features/reports/Reports.test.tsx", "audit-batch-127-suite-05"],
+  ["apps/menu/src/screens/Public/Extras/NoMatch.tsx", "audit-batch-128-suite-05"],
 ];
 
