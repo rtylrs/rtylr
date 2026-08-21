@@ -66,5 +66,6 @@ export const cases = [
   ["apps/finance/src/features/settings/Settings.tsx", "audit-batch-064-suite-12"],
   ["apps/finance/src/shared/components/PaymentBadge.tsx", "audit-batch-065-suite-12"],
   ["apps/flow/src/features/leave/RequestLeaveDialog.tsx", "audit-batch-066-suite-12"],
+  ["apps/flow/src/features/roadmap/Roadmap.tsx", "audit-batch-067-suite-12"],
 ];
 

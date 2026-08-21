@@ -66,5 +66,6 @@ export const cases = [
   ["apps/finance/src/features/profit-loss/ProfitLoss.tsx", "audit-batch-064-suite-07"],
   ["apps/finance/src/shared/components/Modal.tsx", "audit-batch-065-suite-07"],
   ["apps/flow/src/features/inbox/Inbox.tsx", "audit-batch-066-suite-07"],
+  ["apps/flow/src/features/projects/ProjectViewTabs.tsx", "audit-batch-067-suite-07"],
 ];
 
