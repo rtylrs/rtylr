@@ -176,8 +176,34 @@ func (x *WorkSchedulePayload) GetUpdatedAt() int64 {
 	return x.UpdatedAt
 }
 
+type ListWorkSchedulesRequest struct {
+	Limit  int32  `json:"limit,omitempty"`
+	Offset *int32 `json:"offset,omitempty"`
+}
+
+func (x *ListWorkSchedulesRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListWorkSchedulesRequest) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.Offset == nil {
+		var zero int32
+		return zero
+	}
+	return *x.Offset
+}
+
 type ListWorkSchedulesResponse struct {
 	Schedules []*WorkSchedulePayload `json:"schedules,omitempty"`
+	Total     int32                  `json:"total,omitempty"`
 }
 
 func (x *ListWorkSchedulesResponse) GetSchedules() []*WorkSchedulePayload {
@@ -186,6 +212,14 @@ func (x *ListWorkSchedulesResponse) GetSchedules() []*WorkSchedulePayload {
 		return zero
 	}
 	return x.Schedules
+}
+
+func (x *ListWorkSchedulesResponse) GetTotal() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Total
 }
 
 type CreateWorkScheduleRequest struct {

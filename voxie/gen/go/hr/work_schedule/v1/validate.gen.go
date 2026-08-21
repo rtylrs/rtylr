@@ -31,6 +31,17 @@ func (m *WorkSchedulePayload) Validate() error {
 	return nil
 }
 
+func (m *ListWorkSchedulesRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *ListWorkSchedulesResponse) Validate() error {
 	if m == nil {
 		return nil

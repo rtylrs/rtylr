@@ -28,11 +28,24 @@ message WorkSchedulePayload {
   updated_at: int64
 }
 
-/// ListWorkSchedulesResponse lists all work schedules for the tenant.
-/// Not currently wired to any RPC in service.proto (no request message or list RPC exists) - kept for parity with the source proto.
+message ListWorkSchedulesRequest {
+  /// The maximum number of records to return.
+  limit: int32 @query("limit")
+  /// offset is the number of records to skip, for paging through the list.
+  offset: int32? @query("offset")
+}
+
+/// ListWorkSchedulesResponse lists work schedules for the tenant.
+///
+/// Read by Flow to size a member's workload bar against the hours they are
+/// actually contracted for, resolved through Employee.work_schedule_id. Before
+/// this had an RPC, Flow hardcoded 40 hours for everyone, which reads a
+/// part-timer as under-loaded and a four-day week as a shortfall.
 message ListWorkSchedulesResponse {
   /// All work schedules for the tenant.
   schedules: WorkSchedulePayload[]
+  /// total is the total number of schedules for the tenant, for pagination math.
+  total: int32
 }
 
 message CreateWorkScheduleRequest {

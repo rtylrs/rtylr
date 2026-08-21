@@ -216,6 +216,7 @@ func (w *statusResponseWriter) Flush() {
 }
 
 type WorkScheduleServiceServer interface {
+	ListWorkSchedules(ctx context.Context, req *ListWorkSchedulesRequest) (*ListWorkSchedulesResponse, error)
 	CreateWorkSchedule(ctx context.Context, req *CreateWorkScheduleRequest) (*CreateWorkScheduleResponse, error)
 	UpdateWorkSchedule(ctx context.Context, req *UpdateWorkScheduleRequest) (*UpdateWorkScheduleResponse, error)
 }
@@ -252,6 +253,40 @@ func RegisterWorkScheduleServiceServer(first any, rest ...any) error {
 		return fmt.Errorf("RegisterWorkScheduleServiceServer: mux is required")
 	}
 	mux := o.mux
+	mux.Handle("GET /hr/work-schedule/v1/work-schedules", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(ListWorkSchedulesRequest)
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
+		}
+		if values := r.URL.Query()["offset"]; len(values) > 0 {
+			value := values[0]
+			parsedOffset, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter offset: "+err.Error())
+				return
+			}
+			req.Offset = &parsedOffset
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.ListWorkSchedules(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "WorkScheduleService", Method: "listWorkSchedules", HTTPMethod: "GET", Route: "/hr/work-schedule/v1/work-schedules", AuthSchemes: nil}))
 	mux.Handle("POST /hr/work-schedule/v1/work-schedules", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CreateWorkScheduleRequest)
 		if r.Body != nil {

@@ -55,20 +55,48 @@ const violations: string[] = [];
 return violations;
 }
 
+export interface ListWorkSchedulesRequest {
+limit?: number;
+offset?: number;
+}
+
+export function decodeListWorkSchedulesRequest(v: any): ListWorkSchedulesRequest {
+if (v === null || v === undefined) return v;
+return {
+limit: v.limit,
+offset: v.offset,
+};
+}
+
+export function encodeListWorkSchedulesRequest(v: ListWorkSchedulesRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+return out;
+}
+
+export function validateListWorkSchedulesRequest(v: ListWorkSchedulesRequest): string[] {
+const violations: string[] = [];
+return violations;
+}
+
 export interface ListWorkSchedulesResponse {
 schedules?: (WorkSchedulePayload)[];
+total?: number;
 }
 
 export function decodeListWorkSchedulesResponse(v: any): ListWorkSchedulesResponse {
 if (v === null || v === undefined) return v;
 return {
 schedules: (v.schedules !== undefined ? (v.schedules as any[]).map(decodeWorkSchedulePayload) : v.schedules),
+total: v.total,
 };
 }
 
 export function encodeListWorkSchedulesResponse(v: ListWorkSchedulesResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.schedules !== undefined) { out.schedules = (v.schedules as any[]).map(encodeWorkSchedulePayload); }
+if (v.total !== undefined) { out.total = v.total; }
 return out;
 }
 
