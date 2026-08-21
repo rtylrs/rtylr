@@ -129,3 +129,44 @@ func TestMarkEntryExported_NoError(t *testing.T) {
 		t.Errorf("MarkEntryExported: %v", err)
 	}
 }
+
+func TestExportApprovedBillableEntries_MarksOneBatch(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	createdIDs := make([]int64, 0, 2)
+	for _, description := range []string{"atomic export one", "atomic export two"} {
+		entry, err := repo.CreateTimeEntry(ctx, testutil.OwnerID, domain.TimeEntryRecord{
+			EmployeeID:      4101,
+			Date:            "2026-04-02",
+			DurationMinutes: 60,
+			Description:     description,
+			IsBillable:      true,
+			Status:          "approved",
+		})
+		if err != nil {
+			t.Fatalf("CreateTimeEntry: %v", err)
+		}
+		createdIDs = append(createdIDs, entry.ID)
+	}
+
+	batchID := int64(91001)
+	exported, err := repo.ExportApprovedBillableEntries(ctx, testutil.OwnerID, batchID)
+	if err != nil {
+		t.Fatalf("ExportApprovedBillableEntries: %v", err)
+	}
+	if len(exported) < len(createdIDs) {
+		t.Fatalf("exported %d entries, want at least %d", len(exported), len(createdIDs))
+	}
+
+	for _, id := range createdIDs {
+		entry, err := repo.GetTimeEntry(ctx, testutil.OwnerID, id)
+		if err != nil {
+			t.Fatalf("GetTimeEntry(%d): %v", id, err)
+		}
+		if entry.BillableInvoiceID != batchID {
+			t.Errorf("entry %d batch id = %d, want %d", id, entry.BillableInvoiceID, batchID)
+		}
+	}
+}
