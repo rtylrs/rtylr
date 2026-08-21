@@ -280,5 +280,6 @@ export const cases = [
   ["apps/hr/src/features/settings/roles-permissions/RolesPermissions.test.tsx", "audit-batch-278-suite-14"],
   ["apps/hr/src/features/staff/Staff.tsx", "audit-batch-279-suite-14"],
   ["apps/hr/src/shared/components/EmployeeCard.tsx", "audit-batch-280-suite-14"],
+  ["apps/insights/src/features/reports/Reports.tsx", "audit-batch-281-suite-14"],
 ];
 
