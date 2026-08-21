@@ -205,5 +205,6 @@ export const cases = [
   ["apps/hr/src/shared/components/BirthdayWidget.tsx", "audit-batch-203-suite-04"],
   ["apps/insights/src/features/financial/Financial.tsx", "audit-batch-204-suite-04"],
   ["apps/menu/src/layouts/Public/public.tsx", "audit-batch-205-suite-04"],
+  ["apps/recruit/src/features/public/CareersIndex.tsx", "audit-batch-206-suite-04"],
 ];
 

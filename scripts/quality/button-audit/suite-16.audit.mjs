@@ -205,5 +205,6 @@ export const cases = [
   ["apps/hr/src/shared/components/RatingStars.tsx", "audit-batch-203-suite-16"],
   ["apps/insights/src/main.tsx", "audit-batch-204-suite-16"],
   ["apps/recruit/src/features/admin/CareerEditor.tsx", "audit-batch-205-suite-16"],
+  ["apps/recruit/src/templates/publicIndexEmptyState.test.tsx", "audit-batch-206-suite-16"],
 ];
 
