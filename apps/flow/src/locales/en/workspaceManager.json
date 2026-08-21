@@ -5,6 +5,7 @@
   "memberCount_one": "{{count}} member in this workspace",
   "memberCount_other": "{{count}} members in this workspace",
   "addMemberHeading": "Add a team member to this workspace",
+  "addMemberDescription": "Search your org for someone to add, then choose the role they get in this workspace.",
   "roleLabel": "Role",
   "searchPlaceholder": "Search by name or email...",
   "noOrgMembersFound": "No org members found. Only existing team members can be added to workspaces.",
