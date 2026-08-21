@@ -4,6 +4,7 @@ import {
   TIME_SETTINGS_STORAGE_KEY,
   getWeeklyTargetMinutes,
   migrateTimeSettingsV0,
+  migrateTimeSettingsV1,
   roundLoggedMinutes,
   useTimeSettingsStore,
 } from './timeSettingsStore';
@@ -154,22 +155,27 @@ describe('categories', () => {
   });
 });
 
-describe('billable rates', () => {
-  it('starts unset, so nothing bills at zero by default', () => {
-    expect(useTimeSettingsStore.getState().ratesByUserId['7']).toBeUndefined();
+describe('migrateTimeSettingsV1', () => {
+  it('drops a stored rate table, so pay rates do not linger in a browser', () => {
+    const stored = {
+      weekStart: 'monday',
+      ratesByUserId: { '7': 95, '9': 120 },
+      roundingMinutes: 15,
+    };
+
+    const migrated = migrateTimeSettingsV1(stored) as Record<string, unknown>;
+
+    expect('ratesByUserId' in migrated).toBe(false);
+    // Everything else survives: this is a targeted removal, not a reset. A
+    // workspace that customised its week start keeps it.
+    expect(migrated.weekStart).toBe('monday');
+    expect(migrated.roundingMinutes).toBe(15);
   });
 
-  it('stores a rate against a user', () => {
-    useTimeSettingsStore.getState().setRate('7', 95);
+  it('is a no-op on a blob that never had rates', () => {
+    const migrated = migrateTimeSettingsV1({ weekStart: 'sunday' }) as Record<string, unknown>;
 
-    expect(useTimeSettingsStore.getState().ratesByUserId['7']).toBe(95);
-  });
-
-  it('clears a rate back to unset rather than to zero', () => {
-    useTimeSettingsStore.getState().setRate('7', 95);
-    useTimeSettingsStore.getState().setRate('7', null);
-
-    expect(useTimeSettingsStore.getState().ratesByUserId['7']).toBeNull();
+    expect(migrated).toEqual({ weekStart: 'sunday' });
   });
 });
 

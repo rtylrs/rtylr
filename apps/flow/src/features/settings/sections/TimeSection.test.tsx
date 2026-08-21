@@ -147,35 +147,6 @@ describe('TimeSection: categories', () => {
   });
 });
 
-describe('TimeSection: rates', () => {
-  it('reads "not set" rather than zero for a person with no rate', () => {
-    render(<TimeSection />);
-
-    expect(screen.getAllByText('flow.settings.time.rateNotSet')).toHaveLength(2);
-  });
-
-  it('stores a typed rate against the person', () => {
-    render(<TimeSection />);
-
-    fireEvent.change(screen.getByLabelText('flow.settings.time.rateFor:Maya Krishnan'), {
-      target: { value: '95' },
-    });
-
-    expect(useTimeSettingsStore.getState().ratesByUserId['7']).toBe(95);
-  });
-
-  it('clears an emptied rate back to unset rather than to zero', () => {
-    useTimeSettingsStore.getState().setRate('7', 95);
-    render(<TimeSection />);
-
-    fireEvent.change(screen.getByLabelText('flow.settings.time.rateFor:Maya Krishnan'), {
-      target: { value: '' },
-    });
-
-    expect(useTimeSettingsStore.getState().ratesByUserId['7']).toBeNull();
-  });
-});
-
 describe('TimeSection: attendance tracking', () => {
   it('defaults to on, preserving current My Day/reports behavior', () => {
     render(<TimeSection />);
