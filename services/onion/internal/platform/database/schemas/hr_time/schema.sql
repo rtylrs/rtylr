@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS hr_time_entries (
     approved_by BIGINT,
     source VARCHAR(50) NOT NULL DEFAULT 'manual',
     billable_invoice_id BIGINT NULL,
+    export_batch_id BIGINT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_time_entries_owner (owner_id),
