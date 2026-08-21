@@ -60,5 +60,6 @@ export const cases = [
   ["apps/dash/src/shared/components/Dropzone.tsx", "audit-batch-058-suite-22"],
   ["apps/dash/src/shared/components/ui/select.tsx", "audit-batch-059-suite-22"],
   ["apps/erp/src/features/expiry/Expiry.test.tsx", "audit-batch-060-suite-22"],
+  ["apps/erp/src/features/stock-transfers/StockTransfers.tsx", "audit-batch-061-suite-22"],
 ];
 
