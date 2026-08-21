@@ -175,5 +175,6 @@ export const cases = [
   ["apps/hr/src/features/attendance/QRScanner.tsx", "audit-batch-173-suite-06"],
   ["apps/hr/src/features/employees/NewEmployee.tsx", "audit-batch-174-suite-06"],
   ["apps/hr/src/features/performance/ReviewCycleDetail.tsx", "audit-batch-175-suite-06"],
+  ["apps/hr/src/features/setup-wizard/steps/OrgStructureStep.test.tsx", "audit-batch-176-suite-06"],
 ];
 

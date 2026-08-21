@@ -175,5 +175,6 @@ export const cases = [
   ["apps/hr/src/features/dashboard/widgets/LeaveBalanceWidget.test.tsx", "audit-batch-173-suite-13"],
   ["apps/hr/src/features/leave/LeaveRequestForm.tsx", "audit-batch-174-suite-13"],
   ["apps/hr/src/features/settings/LeavePolicySettings.tsx", "audit-batch-175-suite-13"],
+  ["apps/hr/src/features/shifts/Schedule.tsx", "audit-batch-176-suite-13"],
 ];
 
