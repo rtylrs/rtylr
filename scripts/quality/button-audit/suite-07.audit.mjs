@@ -221,5 +221,6 @@ export const cases = [
   ["apps/finance/src/shared/components/CurrencyInput.tsx", "audit-batch-219-suite-07"],
   ["apps/flow/src/features/calendar/Calendar.tsx", "audit-batch-220-suite-07"],
   ["apps/flow/src/features/projects/ProjectList.tsx", "audit-batch-221-suite-07"],
+  ["apps/flow/src/features/tasks/components/TimePanel.test.tsx", "audit-batch-222-suite-07"],
 ];
 

@@ -221,5 +221,6 @@ export const cases = [
   ["apps/finance/src/shared/components/PageHeader.tsx", "audit-batch-219-suite-19"],
   ["apps/flow/src/features/leave/RequestLeaveDialog.test.tsx", "audit-batch-220-suite-19"],
   ["apps/flow/src/features/projects/components/BoardSettingsPanel.tsx", "audit-batch-221-suite-19"],
+  ["apps/flow/src/features/triage/Triage.tsx", "audit-batch-222-suite-19"],
 ];
 
