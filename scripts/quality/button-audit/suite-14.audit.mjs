@@ -224,5 +224,6 @@ export const cases = [
   ["apps/flow/src/features/time/TeamView.test.tsx", "audit-batch-222-suite-14"],
   ["apps/flow/src/shared/components/CommentInput.tsx", "audit-batch-223-suite-14"],
   ["apps/flow/src/shared/components/WorkloadBar.tsx", "audit-batch-224-suite-14"],
+  ["apps/hr/src/features/employees/EmployeeDetail.test.tsx", "audit-batch-225-suite-14"],
 ];
 
