@@ -23,5 +23,6 @@ export const cases = [
   ["apps/hr/src/features/setup-wizard/steps/NotificationsStep.tsx", "audit-batch-021-suite-22"],
   ["apps/hr/src/main.tsx", "audit-batch-022-suite-22"],
   ["apps/insights/src/App.tsx", "audit-batch-023-suite-22"],
+  ["apps/menu/src/features/cart/Checkout.tsx", "audit-batch-024-suite-22"],
 ];
 
