@@ -278,5 +278,6 @@ export const cases = [
   ["apps/hr/src/features/dashboard/widgets/WidgetShell.tsx", "audit-batch-276-suite-18"],
   ["apps/hr/src/features/overtime/Overtime.tsx", "audit-batch-277-suite-18"],
   ["apps/hr/src/features/setup-wizard/SetupWizard.test.tsx", "audit-batch-278-suite-18"],
+  ["apps/hr/src/features/time-off/TimeOff.test.tsx", "audit-batch-279-suite-18"],
 ];
 

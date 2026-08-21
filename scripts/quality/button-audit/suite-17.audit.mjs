@@ -278,5 +278,6 @@ export const cases = [
   ["apps/hr/src/features/dashboard/widgets/UpcomingShiftsWidget.tsx", "audit-batch-276-suite-17"],
   ["apps/hr/src/features/operations/Operations.tsx", "audit-batch-277-suite-17"],
   ["apps/hr/src/features/setup-wizard/HRConfigRoute.tsx", "audit-batch-278-suite-17"],
+  ["apps/hr/src/features/time-logging/TimeLogging.tsx", "audit-batch-279-suite-17"],
 ];
 

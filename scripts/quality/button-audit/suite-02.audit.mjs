@@ -278,5 +278,6 @@ export const cases = [
   ["apps/hr/src/features/attendance/ClockInWidget.tsx", "audit-batch-276-suite-02"],
   ["apps/hr/src/features/employees/Employees.tsx", "audit-batch-277-suite-02"],
   ["apps/hr/src/features/performance/Performance.tsx", "audit-batch-278-suite-02"],
+  ["apps/hr/src/features/setup-wizard/steps/NotificationsStep.tsx", "audit-batch-279-suite-02"],
 ];
 
