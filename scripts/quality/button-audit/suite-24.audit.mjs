@@ -112,5 +112,6 @@ export const cases = [
   ["apps/dash/src/shared/components/dash/WebhookRow.tsx", "audit-batch-110-suite-24"],
   ["apps/dash/src/shared/utils/BusinessRoute.tsx", "audit-batch-111-suite-24"],
   ["apps/erp/src/features/purchasing/Receiving.test.tsx", "audit-batch-112-suite-24"],
+  ["apps/erp/src/shared/components/CommandPalette.tsx", "audit-batch-113-suite-24"],
 ];
 

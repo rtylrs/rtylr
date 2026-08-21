@@ -112,5 +112,6 @@ export const cases = [
   ["apps/dash/src/shared/components/dash/Breadcrumbs.tsx", "audit-batch-110-suite-15"],
   ["apps/dash/src/shared/hooks/queries/useAiQuota.test.tsx", "audit-batch-111-suite-15"],
   ["apps/erp/src/features/price-lists/PriceLists.tsx", "audit-batch-112-suite-15"],
+  ["apps/erp/src/features/warehouses/Warehouses.tsx", "audit-batch-113-suite-15"],
 ];
 
