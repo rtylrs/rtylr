@@ -5,9 +5,6 @@ service DashboardService {
   /// Returns high-level insights summary.
   getInsights(GetInsightsRequest) -> GetInsightsResponse @get("/insights")
 
-  /// Returns key performance indicators.
-  getKPIs(GetKPIsRequest) -> GetKPIsResponse @get("/kpis")
-
   /// Returns the product roadmap view.
   getRoadmap(GetRoadmapRequest) -> GetRoadmapResponse @get("/roadmap")
 

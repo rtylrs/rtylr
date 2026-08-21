@@ -82,44 +82,6 @@ func (c *DashboardServiceClient) GetInsights(ctx context.Context, req *GetInsigh
 	return result, nil
 }
 
-func (c *DashboardServiceClient) GetKPIs(ctx context.Context, req *GetKPIsRequest) (*GetKPIsResponse, error) {
-	if validator, ok := any(req).(interface{ Validate() error }); ok {
-		if err := validator.Validate(); err != nil {
-			return nil, fmt.Errorf("validate request: %w", err)
-		}
-	}
-	path := "/insights/dashboard/v1/kpis"
-	query := url.Values{}
-	if len(query) > 0 {
-		path += "?" + query.Encode()
-	}
-	httpReq, err := http.NewRequestWithContext(ctx, "GET", c.BaseURL+path, nil)
-	if err != nil {
-		return nil, fmt.Errorf("build request: %w", err)
-	}
-	for k, v := range c.Headers {
-		httpReq.Header.Set(k, v)
-	}
-	resp, err := c.HTTPClient.Do(httpReq)
-	if err != nil {
-		return nil, fmt.Errorf("do request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
-		if bodyErr != nil {
-			return nil, bodyErr
-		}
-		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
-	}
-	result := new(GetKPIsResponse)
-	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
-		return nil, fmt.Errorf("decode response: %w", err)
-	}
-	return result, nil
-}
-
 func (c *DashboardServiceClient) GetRoadmap(ctx context.Context, req *GetRoadmapRequest) (*GetRoadmapResponse, error) {
 	if validator, ok := any(req).(interface{ Validate() error }); ok {
 		if err := validator.Validate(); err != nil {

@@ -67,23 +67,6 @@ message GetInsightsResponse {
   velocity_change: int64
 }
 
-message GetKPIsRequest {}
-
-message GetKPIsResponse {
-  /// revenue is the revenue value for this contract.
-  revenue: float64
-  /// order_count is the order count value for this contract.
-  order_count: int64
-  /// staff_count is the staff count value for this contract.
-  staff_count: int64
-  /// customer_count is the customer count value for this contract.
-  customer_count: int64
-  /// low_stock_count is the low stock count value for this contract.
-  low_stock_count: int64
-  /// active_apps is the active apps value for this contract.
-  active_apps: int64
-}
-
 message GetRoadmapRequest {}
 
 message GetRoadmapResponse {

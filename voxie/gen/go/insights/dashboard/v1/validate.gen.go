@@ -72,28 +72,6 @@ func (m *GetInsightsResponse) Validate() error {
 	return nil
 }
 
-func (m *GetKPIsRequest) Validate() error {
-	if m == nil {
-		return nil
-	}
-	var violations []string
-	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
-	}
-	return nil
-}
-
-func (m *GetKPIsResponse) Validate() error {
-	if m == nil {
-		return nil
-	}
-	var violations []string
-	if len(violations) > 0 {
-		return errors.New(strings.Join(violations, "; "))
-	}
-	return nil
-}
-
 func (m *GetRoadmapRequest) Validate() error {
 	if m == nil {
 		return nil

@@ -233,7 +233,6 @@ func (w *statusResponseWriter) Flush() {
 
 type DashboardServiceServer interface {
 	GetInsights(ctx context.Context, req *GetInsightsRequest) (*GetInsightsResponse, error)
-	GetKPIs(ctx context.Context, req *GetKPIsRequest) (*GetKPIsResponse, error)
 	GetRoadmap(ctx context.Context, req *GetRoadmapRequest) (*GetRoadmapResponse, error)
 	GetWorkload(ctx context.Context, req *GetWorkloadRequest) (*GetWorkloadResponse, error)
 	GetDashboardSummary(ctx context.Context, req *GetDashboardSummaryRequest) (*GetDashboardSummaryResponse, error)
@@ -287,22 +286,6 @@ func RegisterDashboardServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "DashboardService", Method: "getInsights", HTTPMethod: "GET", Route: "/insights/dashboard/v1/insights", AuthSchemes: nil}))
-	mux.Handle("GET /insights/dashboard/v1/kpis", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		req := new(GetKPIsRequest)
-		if v, ok := any(req).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				writeJSONError(w, http.StatusBadRequest, err.Error())
-				return
-			}
-		}
-		resp, err := srv.GetKPIs(r.Context(), req)
-		if err != nil {
-			writeHandlerError(w, err)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(resp)
-	}), RequestMetadata{Service: "DashboardService", Method: "getKPIs", HTTPMethod: "GET", Route: "/insights/dashboard/v1/kpis", AuthSchemes: nil}))
 	mux.Handle("GET /insights/dashboard/v1/roadmap", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetRoadmapRequest)
 		if v, ok := any(req).(interface{ Validate() error }); ok {
