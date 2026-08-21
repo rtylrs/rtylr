@@ -261,5 +261,6 @@ export const cases = [
   ["apps/crm/src/features/loyalty/LoyaltyMembers.test.tsx", "audit-batch-259-suite-22"],
   ["apps/crm/src/shared/components/ShortcutsProvider.tsx", "audit-batch-260-suite-22"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/KpisWidget.tsx", "audit-batch-261-suite-22"],
+  ["apps/dash/src/features/integrations/Integrations.tsx", "audit-batch-262-suite-22"],
 ];
 

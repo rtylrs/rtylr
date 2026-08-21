@@ -261,5 +261,6 @@ export const cases = [
   ["apps/crm/src/features/customers/Customers.tsx", "audit-batch-259-suite-14"],
   ["apps/crm/src/features/settings/Settings.test.tsx", "audit-batch-260-suite-14"],
   ["apps/dash/src/features/chat/Chat.tsx", "audit-batch-261-suite-14"],
+  ["apps/dash/src/features/developer/ApiKeys.test.tsx", "audit-batch-262-suite-14"],
 ];
 
