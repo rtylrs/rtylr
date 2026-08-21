@@ -15,6 +15,7 @@ const GiftCardsScreen: React.FC = () => {
   const [amount, setAmount] = useState('');
   const [balanceResult, setBalanceResult] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [redeeming, setRedeeming] = useState(false);
 
   useEffect(() => {
     void refresh();
@@ -37,15 +38,21 @@ const GiftCardsScreen: React.FC = () => {
     setMode('list');
   };
 
-  const handleRedeem = () => {
-    const result = redeem(code.trim(), Number(amount));
-    if (!result.ok) {
-      toast.error(result.error ?? 'Redemption failed');
-      return;
+  const handleRedeem = async () => {
+    if (redeeming) return;
+    setRedeeming(true);
+    try {
+      const result = await redeem(code, amount);
+      if (!result.ok) {
+        toast.error(result.error ?? 'Redemption failed');
+        return;
+      }
+      toast.success(`Redeemed. Remaining: ${formatCurrency(result.remaining ?? 0)}`);
+      setCode('');
+      setAmount('');
+    } finally {
+      setRedeeming(false);
     }
-    toast.success(`Redeemed. Remaining: ${formatCurrency(result.remaining ?? 0)}`);
-    setCode('');
-    setAmount('');
   };
 
   const handleCheck = async () => {
@@ -128,10 +135,11 @@ const GiftCardsScreen: React.FC = () => {
               className="w-full h-12 px-4 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25"
             />
             <button
-              onClick={mode === 'sell' ? handleSell : handleRedeem}
-              className="w-full h-12 rounded-lg bg-pos-text text-pos-bg font-bold"
+              onClick={mode === 'sell' ? () => void handleSell() : () => void handleRedeem()}
+              disabled={mode === 'redeem' && redeeming}
+              className="w-full h-12 rounded-lg bg-pos-text text-pos-bg font-bold disabled:opacity-50"
             >
-              {mode === 'sell' ? 'Issue Card' : 'Redeem'}
+              {mode === 'sell' ? 'Issue Card' : redeeming ? 'Redeeming…' : 'Redeem'}
             </button>
           </div>
         )}
