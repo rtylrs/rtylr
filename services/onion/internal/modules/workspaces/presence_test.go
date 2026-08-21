@@ -114,10 +114,15 @@ func TestListPresenceForBusiness_ResolvesStatusPerEmployee(t *testing.T) {
 		_, _ = db.ExecContext(context.Background(), "DELETE FROM hr_leave_types WHERE id = ?", leaveTypeID)
 	})
 
+	// hr_leave scopes owner_id/business_id to the raw caller id, not the
+	// tenant's resolved businessID (see the ListPresenceForBusiness doc
+	// comment) - so this row must be written under presenceCallerUserID,
+	// the same id ApprovedLeaveEmployeeIDs is queried with below, or the
+	// lookup silently finds nothing.
 	if _, err := db.ExecContext(ctx,
 		`INSERT INTO hr_leave_requests (owner_id, business_id, employee_id, leave_type_id, start_date, end_date, total_days, status)
 		 VALUES (?, ?, ?, ?, ?, ?, 1, 'approved')`,
-		presenceOwnerID, presenceBusinessID, leaveEmployeeID, leaveTypeID, presenceDate, presenceDate,
+		presenceCallerUserID, presenceCallerUserID, leaveEmployeeID, leaveTypeID, presenceDate, presenceDate,
 	); err != nil {
 		t.Fatalf("insert hr_leave_requests: %v", err)
 	}
