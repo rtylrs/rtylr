@@ -64,7 +64,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name = 'Product' })
           style={{ background: 'var(--hub-overlay-opaque)' }}
           onClick={() => setLightbox(false)}
         >
-          <button
+          <button type="button"
             className="absolute top-4 right-4 h-8 w-8 rounded-full flex items-center justify-center"
             style={{ background: 'var(--hub-highlight)', color: 'var(--hub-text)' }}
           >

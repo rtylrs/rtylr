@@ -447,7 +447,7 @@ function SegmentCard({
 
       {/* Actions */}
       <div style={{ display: 'flex', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
-        <button
+        <button type="button"
           onClick={(e) => {
             e.stopPropagation();
             onClick?.();

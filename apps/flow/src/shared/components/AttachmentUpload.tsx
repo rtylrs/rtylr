@@ -84,7 +84,7 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
           );
         })}
       </div>
-      <button
+      <button type="button"
         onClick={() => {
           if (!uploading && !disabled) ref.current?.click();
         }}

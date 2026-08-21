@@ -119,7 +119,7 @@ const BankFeeds: React.FC = () => {
             {accounts.map((a) => {
               const Icon = iconFor[a.type ?? ''] ?? Building2;
               return (
-                <button
+                <button type="button"
                   key={a.id}
                   onClick={() => setSelected(selected === a.id ? undefined : a.id)}
                   style={{

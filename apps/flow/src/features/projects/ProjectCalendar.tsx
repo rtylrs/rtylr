@@ -98,7 +98,7 @@ const ProjectCalendar: React.FC = () => {
 
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={() => setCursor((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
             className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-muted)' }}

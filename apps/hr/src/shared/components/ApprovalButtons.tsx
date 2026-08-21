@@ -87,7 +87,7 @@ const ApprovalButtons: React.FC<Props> = ({
 
   return (
     <div style={{ display: 'flex', gap: 4 }}>
-      <button
+      <button type="button"
         onClick={() => (allowNote ? setOpen(true) : onApprove())}
         style={{
           padding: pad,

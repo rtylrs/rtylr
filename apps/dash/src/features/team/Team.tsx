@@ -519,7 +519,7 @@ const Team: React.FC = (): React.JSX.Element => {
                                 style={{ borderTop: '1px solid var(--dash-border)' }}
                               />
                               {m.role?.toLowerCase() !== 'owner' && (
-                                <button
+                                <button type="button"
                                   className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
                                   style={{ color: '#ef4444' }}
                                   onClick={() => {

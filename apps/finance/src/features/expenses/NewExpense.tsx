@@ -144,7 +144,7 @@ const NewExpense: React.FC = () => {
         >
           <ArrowLeft size={13} /> Cancel
         </button>
-        <button
+        <button type="button"
           style={{ ...primaryBtn, opacity: createExpense.isPending ? 0.6 : 1 }}
           onClick={handleSave}
           disabled={createExpense.isPending}

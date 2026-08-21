@@ -390,7 +390,7 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
                   style={{ background: 'var(--hub-card)', color: 'var(--hub-text)' }}
                 >
                   {v}
-                  <button
+                  <button type="button"
                     onClick={() => removeValue(idx, v)}
                     aria-label={t('common.remove')}
                     style={{ color: 'var(--hub-text-dim)' }}

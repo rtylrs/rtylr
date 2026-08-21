@@ -242,7 +242,7 @@ export const NotesPanel: React.FC<{
           Notes
         </h4>
         {!editing && (
-          <button
+          <button type="button"
             onClick={() => setEditing(true)}
             style={{
               background: 'transparent',

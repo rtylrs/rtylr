@@ -178,7 +178,7 @@ const RecurringInvoices: React.FC = () => {
         subtitle={`${data.length} active subscriptions`}
         breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: 'Recurring' }]}
         actions={
-          <button
+          <button type="button"
             style={primaryBtn}
             aria-label="New Recurring Invoice"
             onClick={() => setShowCreate(true)}

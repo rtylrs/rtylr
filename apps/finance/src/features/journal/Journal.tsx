@@ -397,7 +397,7 @@ const Journal: React.FC = () => {
             >
               Prev
             </button>
-            <button
+            <button type="button"
               style={{ ...ghostBtn, padding: '4px 12px', opacity: !hasMore ? 0.3 : 1 }}
               onClick={() => setPage((p) => p + 1)}
               disabled={!hasMore}

@@ -624,7 +624,7 @@ const DevMenu: React.FC = () => {
           )}
         </AnimatePresence>
 
-        <button
+        <button type="button"
           className="w-12 h-12 rounded-full bg-gray-900 text-white shadow-lg hover:opacity-90 transition-opacity flex items-center justify-center text-lg relative"
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle dev toolbar"

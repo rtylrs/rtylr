@@ -125,7 +125,7 @@ const Calendar: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
             aria-label={t('flow.calendar.prevMonthLabel')}
             className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
