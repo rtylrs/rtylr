@@ -72,5 +72,6 @@ export const cases = [
   ["apps/flow/src/shared/components/TaskCard.tsx", "audit-batch-070-suite-01"],
   ["apps/hr/src/features/departments/Departments.tsx", "audit-batch-071-suite-01"],
   ["apps/hr/src/features/payroll/MyPaySlips.tsx", "audit-batch-072-suite-01"],
+  ["apps/hr/src/features/setup-wizard/components/StepContainer.tsx", "audit-batch-073-suite-01"],
 ];
 

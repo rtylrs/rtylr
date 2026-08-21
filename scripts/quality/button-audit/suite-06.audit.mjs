@@ -72,5 +72,6 @@ export const cases = [
   ["apps/flow/src/shared/components/WorkloadBar.tsx", "audit-batch-070-suite-06"],
   ["apps/hr/src/features/employees/EmployeeDetail.test.tsx", "audit-batch-071-suite-06"],
   ["apps/hr/src/features/performance/GoalsList.tsx", "audit-batch-072-suite-06"],
+  ["apps/hr/src/features/setup-wizard/steps/LocationsStep.test.tsx", "audit-batch-073-suite-06"],
 ];
 

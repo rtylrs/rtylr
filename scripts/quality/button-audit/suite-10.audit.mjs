@@ -72,5 +72,6 @@ export const cases = [
   ["apps/hr/src/features/benefits/Benefits.tsx", "audit-batch-070-suite-10"],
   ["apps/hr/src/features/equipment/AssetRegister.tsx", "audit-batch-071-suite-10"],
   ["apps/hr/src/features/reports/ReportTable.test.tsx", "audit-batch-072-suite-10"],
+  ["apps/hr/src/features/setup-wizard/steps/OrgStructureStep.tsx", "audit-batch-073-suite-10"],
 ];
 

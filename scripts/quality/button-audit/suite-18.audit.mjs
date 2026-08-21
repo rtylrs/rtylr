@@ -72,5 +72,6 @@ export const cases = [
   ["apps/hr/src/features/dashboard/widgets/PayrollCostWidget.tsx", "audit-batch-070-suite-18"],
   ["apps/hr/src/features/onboarding/Offboarding.tsx", "audit-batch-071-suite-18"],
   ["apps/hr/src/features/settings/Settings.tsx", "audit-batch-072-suite-18"],
+  ["apps/hr/src/features/staff/EmployeeProfile.test.tsx", "audit-batch-073-suite-18"],
 ];
 
