@@ -162,5 +162,6 @@ export const cases = [
   ["apps/dash/src/features/onboarding/CreateBusinessOnboarding.tsx", "audit-batch-160-suite-08"],
   ["apps/dash/src/features/team/InviteUser.tsx", "audit-batch-161-suite-08"],
   ["apps/dash/src/shared/components/dash/SettingSection.tsx", "audit-batch-162-suite-08"],
+  ["apps/dash/src/shared/hooks/queries/useTeam.test.tsx", "audit-batch-163-suite-08"],
 ];
 

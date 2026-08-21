@@ -162,5 +162,6 @@ export const cases = [
   ["apps/dash/src/features/qr-codes/templates.tsx", "audit-batch-160-suite-16"],
   ["apps/dash/src/layouts/NoSidebarLayout.tsx", "audit-batch-161-suite-16"],
   ["apps/dash/src/shared/components/ui/dropdown-menu.tsx", "audit-batch-162-suite-16"],
+  ["apps/erp/src/features/categories/Categories.tsx", "audit-batch-163-suite-16"],
 ];
 
