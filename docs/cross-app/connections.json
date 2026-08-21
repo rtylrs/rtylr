@@ -239,7 +239,7 @@
         5
       ],
       "shape": 1,
-      "gap": "available-today",
+      "gap": "needs-contract-field",
       "status": "proposed",
       "severity": "medium"
     },
@@ -546,7 +546,7 @@
         1
       ],
       "shape": 1,
-      "gap": "available-today",
+      "gap": "needs-endpoint",
       "status": "proposed",
       "severity": "medium"
     },
