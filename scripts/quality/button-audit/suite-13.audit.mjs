@@ -291,5 +291,6 @@ export const cases = [
   ["apps/dash/src/features/settings/Settings/components/Businesses/Businesses.test.tsx", "audit-batch-289-suite-13"],
   ["apps/dash/src/shared/components/dash/ApiKeyRow.tsx", "audit-batch-290-suite-13"],
   ["apps/dash/src/shared/components/ui/table.tsx", "audit-batch-291-suite-13"],
+  ["apps/erp/src/features/low-stock-alerts/LowStockAlerts.test.tsx", "audit-batch-292-suite-13"],
 ];
 
