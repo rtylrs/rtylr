@@ -253,5 +253,6 @@ export const cases = [
   ["apps/hr/src/features/employees/CreateLocationForm.tsx", "audit-batch-251-suite-06"],
   ["apps/hr/src/features/performance/CreateCycleForm.tsx", "audit-batch-252-suite-06"],
   ["apps/hr/src/features/setup-wizard/steps/EmployeesStep.tsx", "audit-batch-253-suite-06"],
+  ["apps/hr/src/features/training/Training.tsx", "audit-batch-254-suite-06"],
 ];
 
