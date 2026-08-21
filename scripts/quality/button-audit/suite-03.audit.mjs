@@ -133,5 +133,6 @@ export const cases = [
   ["apps/crm/src/features/dashboard/Dashboard.tsx", "audit-batch-131-suite-03"],
   ["apps/crm/src/layouts/DefaultLayout.tsx", "audit-batch-132-suite-03"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/ActivityWidget.tsx", "audit-batch-133-suite-03"],
+  ["apps/dash/src/features/extras/HelpCenter.tsx", "audit-batch-134-suite-03"],
 ];
 

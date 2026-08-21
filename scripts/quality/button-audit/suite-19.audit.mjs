@@ -133,5 +133,6 @@ export const cases = [
   ["apps/crm/src/features/sales/components/CreateLeadModal.tsx", "audit-batch-131-suite-19"],
   ["apps/dash/src/features/billing/Billing.test.tsx", "audit-batch-132-suite-19"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/TopProductsWidget.test.tsx", "audit-batch-133-suite-19"],
+  ["apps/dash/src/features/permissions/Roles.tsx", "audit-batch-134-suite-19"],
 ];
 
