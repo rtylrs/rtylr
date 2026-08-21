@@ -27,7 +27,8 @@ const SupplierSelect: React.FC<SupplierSelectProps> = ({
 
   return (
     <div className="relative">
-      <button type="button"
+      <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
         className="w-full px-3 py-2 rounded-lg text-sm text-left flex items-center justify-between"
         style={{
@@ -67,7 +68,8 @@ const SupplierSelect: React.FC<SupplierSelectProps> = ({
             />
           </div>
           {filtered.map((s) => (
-            <button type="button"
+            <button
+              type="button"
               key={s.id}
               onClick={() => {
                 onChange(s.id ?? '');

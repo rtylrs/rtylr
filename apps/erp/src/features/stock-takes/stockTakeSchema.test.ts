@@ -10,6 +10,16 @@ describe('stockTakeProgress', () => {
     });
   });
 
+  it('treats a null or missing count as uncounted', () => {
+    expect(
+      stockTakeProgress([{ countedQty: null }, { countedQty: undefined }, { countedQty: 4 }])
+    ).toEqual({
+      counted: 1,
+      total: 3,
+      pct: 33,
+    });
+  });
+
   it('reports an empty list as zero progress', () => {
     expect(stockTakeProgress([])).toEqual({ counted: 0, total: 0, pct: 0 });
   });

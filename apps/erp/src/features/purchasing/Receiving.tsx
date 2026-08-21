@@ -60,38 +60,40 @@ const Receiving: React.FC = () => {
     );
   };
 
-  const completeReceipt = () => {
+  const completeReceipt = async (): Promise<void> => {
     const overReceived = lines.filter((l) => l.received > l.expected);
     if (overReceived.length > 0) {
       toast.error(t('receiving.validation.overReceived'));
       return;
     }
+    if (selectedId === null) return;
     const hasReceivedItems = lines.some((line) => line.received > 0);
     const isFullyReceived = lines.every((line) => line.received === line.expected);
     const status = isFullyReceived ? 'received' : hasReceivedItems ? 'partial' : 'approved';
     const variance = lines.reduce((sum, l) => sum + (l.expected - l.received), 0);
-    toast.success(
-      variance === 0
-        ? t('receiving.toast.completed')
-        : t('receiving.toast.completedVariance', { count: variance })
-    );
-    if (selectedId !== null) {
-      updateStatus.mutate(
-        {
-          id: selectedId,
-          body: {
-            status,
-            items: lines.map((line) => ({
-              id: line.id,
-              quantityReceived: line.received,
-            })),
-          },
+    try {
+      await updateStatus.mutateAsync({
+        id: selectedId,
+        body: {
+          status,
+          items: lines.map((line) => ({
+            id: line.id,
+            quantityReceived: line.received,
+          })),
         },
-        { onError: () => toast.error(t('receiving.toast.updateFailed')) }
+      });
+      toast.success(
+        variance === 0
+          ? t('receiving.toast.completed')
+          : t('receiving.toast.completedVariance', { count: variance })
       );
+      setSelectedId(null);
+    } catch {
+      // onError in the hook already shows the failure toast
     }
-    setSelectedId(null);
   };
+
+  const noItemsReceived = lines.every((line) => line.received <= 0);
 
   return (
     <motion.div
@@ -113,7 +115,8 @@ const Receiving: React.FC = () => {
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               {t('receiving.receiveFor', { id: selectedId })}
             </h3>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setSelectedId(null)}
               aria-label={t('receiving.closeDetails')}
               className="h-11 w-11 rounded-lg flex items-center justify-center"
@@ -139,7 +142,8 @@ const Receiving: React.FC = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={() => adjust(line.sku, -1)}
                       aria-label={`Decrease received quantity for ${line.name}`}
                       className="h-11 w-11 rounded flex items-center justify-center"
@@ -153,7 +157,8 @@ const Receiving: React.FC = () => {
                     >
                       {line.received}
                     </span>
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={() => adjust(line.sku, 1)}
                       aria-label={`Increase received quantity for ${line.name}`}
                       className="h-11 w-11 rounded flex items-center justify-center"
@@ -178,9 +183,12 @@ const Receiving: React.FC = () => {
               );
             })}
           </div>
-          <button type="button"
-            onClick={completeReceipt}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold"
+          <button
+            type="button"
+            onClick={() => void completeReceipt()}
+            disabled={noItemsReceived || updateStatus.isPending}
+            title={noItemsReceived ? t('receiving.markReceivedDisabled') : undefined}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-40"
             style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
           >
             <Check size={14} /> {t('receiving.markReceived')}
@@ -199,7 +207,8 @@ const Receiving: React.FC = () => {
       ) : (
         <div className="space-y-2">
           {open.map((o) => (
-            <button type="button"
+            <button
+              type="button"
               key={o.id}
               onClick={() => handleSelectOrder(o)}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors"

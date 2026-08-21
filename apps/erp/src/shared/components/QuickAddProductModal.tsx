@@ -1,12 +1,11 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
-import { X, PackagePlus, Plus, Upload } from 'lucide-react';
+import { X, PackagePlus, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { uploadAsset } from '@voxire/api';
 import { cdnImageUrl } from '@voxire/config';
 import { useTranslation } from 'react-i18next';
 import {
   useCreateProduct,
-  useProductAttributes,
   useProductFull,
   useUpdateProduct,
   type CreateProductInput,
@@ -79,22 +78,8 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   const [hsCode, setHsCode] = useState('');
   const [leadTimeDays, setLeadTimeDays] = useState('');
   const [allowBackorder, setAllowBackorder] = useState(false);
-  const [attributes, setAttributes] = useState<{ name: string; value: string }[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
-
-  // Prefill custom attributes when editing an existing product.
-  const { data: attributesData } = useProductAttributes(editing?.id);
-  useEffect(() => {
-    if (attributesData) {
-      setAttributes(
-        attributesData.map((attribute) => ({
-          name: attribute.name ?? '',
-          value: attribute.value ?? '',
-        }))
-      );
-    }
-  }, [attributesData]);
 
   // Authoritative full-product fetch on edit: the list payload lacks the PIM
   // fields, so without this an edit-save would zero compare-at/tax/weight/etc.
@@ -200,16 +185,9 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       setHsCode('');
       setLeadTimeDays('');
       setAllowBackorder(false);
-      setAttributes([]);
     }
     onClose();
   };
-
-  const addAttribute = (): void => setAttributes((a) => [...a, { name: '', value: '' }]);
-  const updateAttribute = (i: number, key: 'name' | 'value', val: string): void =>
-    setAttributes((a) => a.map((x, idx) => (idx === i ? { ...x, [key]: val } : x)));
-  const removeAttribute = (i: number): void =>
-    setAttributes((a) => a.filter((_, idx) => idx !== i));
 
   const handleImageUpload = async (file?: File | null): Promise<void> => {
     if (!file) return;
@@ -639,56 +617,19 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
               {t('erp.products.fields.allowBackorder')}
             </label>
           </div>
-
-          <SectionLabel>{t('erp.products.sections.attributes')}</SectionLabel>
-          {attributes.map((a, i) => (
-            <div key={i} className="flex gap-2 items-center">
-              <input
-                aria-label={t('erp.products.fields.attrName')}
-                value={a.name}
-                onChange={(e) => updateAttribute(i, 'name', e.target.value)}
-                placeholder={t('erp.products.fields.attrName')}
-                className={inputClass}
-                style={inputStyle}
-              />
-              <input
-                aria-label={t('erp.products.fields.attrValue')}
-                value={a.value}
-                onChange={(e) => updateAttribute(i, 'value', e.target.value)}
-                placeholder={t('erp.products.fields.attrValue')}
-                className={inputClass}
-                style={inputStyle}
-              />
-              <button
-                type="button"
-                onClick={() => removeAttribute(i)}
-                aria-label={t('common.remove')}
-                className="shrink-0 rounded-lg p-1.5"
-                style={{ background: 'var(--hub-hover)' }}
-              >
-                <X size={13} style={{ color: 'var(--hub-text-muted)' }} />
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={addAttribute}
-            className="flex items-center gap-1.5 text-xs"
-            style={{ color: 'var(--hub-text-muted)' }}
-          >
-            <Plus size={13} /> {t('erp.products.fields.addAttribute')}
-          </button>
         </div>
 
         <div className="flex gap-2 justify-end mt-4">
-          <button type="button"
+          <button
+            type="button"
             onClick={onClose}
             className="px-3 py-1.5 rounded-lg text-xs"
             style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
           >
             {t('common.cancel')}
           </button>
-          <button type="button"
+          <button
+            type="button"
             data-testid="qap-submit"
             onClick={handleSubmit}
             disabled={pending}

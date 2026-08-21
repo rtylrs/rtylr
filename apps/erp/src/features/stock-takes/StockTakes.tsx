@@ -14,6 +14,7 @@ import { useInventoryReport } from '../inventory/useInventory';
 import { buildStockTakeItems } from './stockTakeUtils';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
+import ConfirmModal from '../../shared/components/ConfirmModal';
 import { formatDate } from '../../shared/lib/format';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { toast } from 'sonner';
@@ -52,6 +53,10 @@ const StockTakes: React.FC = () => {
   const [showCreate, setShowCreate] = useState(false);
   const [newWarehouseId, setNewWarehouseId] = useState('');
   const [newNotes, setNewNotes] = useState('');
+  const [pendingComplete, setPendingComplete] = useState<{
+    id: string;
+    items: UpdateStockTakeItemBody[];
+  } | null>(null);
   const itemsToCount = buildStockTakeItems(inventoryItems);
 
   const warehouseName = (id: string): string =>
@@ -89,26 +94,37 @@ const StockTakes: React.FC = () => {
     }
   };
 
-  const handleComplete = async (id: string, items: UpdateStockTakeItemBody[]): Promise<void> => {
-    const uncounted = items.filter(
-      (item) => (item.expectedQty ?? 0) > 0 && item.countedQty == null
-    ).length;
-    const doComplete = async (): Promise<void> => {
-      try {
-        await updateMut.mutateAsync({ id, body: { status: 'completed', notes: '', items } });
-        toast.success('Stock take completed');
-      } catch {
-        toast.error('Failed to complete stock take');
-      }
-    };
-    if (uncounted > 0) {
-      toast.warning(`${uncounted} uncounted item${uncounted === 1 ? '' : 's'}. Complete anyway?`, {
-        action: { label: 'Complete', onClick: () => void doComplete() },
-      });
+  const handleComplete = (id: string, items: UpdateStockTakeItemBody[]): void => {
+    // Data-damage guard: never finalize a stock take with uncounted lines.
+    if (items.some((item) => item.countedQty == null)) {
+      toast.error(t('stockTakes.countsRequired'));
       return;
     }
-    await doComplete();
+    setPendingComplete({ id, items });
   };
+
+  const confirmComplete = async (): Promise<void> => {
+    if (!pendingComplete) return;
+    try {
+      await updateMut.mutateAsync({
+        id: pendingComplete.id,
+        body: { status: 'completed', notes: '', items: pendingComplete.items },
+      });
+      toast.success('Stock take completed');
+      setPendingComplete(null);
+    } catch {
+      toast.error('Failed to complete stock take');
+    }
+  };
+
+  const completeSummary = ((): { count: number; expected: number; counted: number } | null => {
+    if (!pendingComplete) return null;
+    return {
+      count: pendingComplete.items.length,
+      expected: pendingComplete.items.reduce((sum, item) => sum + (item.expectedQty ?? 0), 0),
+      counted: pendingComplete.items.reduce((sum, item) => sum + (item.countedQty ?? 0), 0),
+    };
+  })();
 
   return (
     <motion.div
@@ -122,7 +138,8 @@ const StockTakes: React.FC = () => {
         description="Periodic inventory counts and variance reports"
         actions={
           canManageStockTakes && (
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
               style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
@@ -149,11 +166,13 @@ const StockTakes: React.FC = () => {
           />
         ) : (
           stockTakes.map((st) => {
+            const stItems = st.items ?? [];
+            const allCounted = stItems.every((item) => item.countedQty != null);
             const progress = stockTakeProgress(
-              (st.items ?? []).map((item) => ({ countedQty: item.countedQty ?? 0 }))
+              stItems.map((item) => ({ countedQty: item.countedQty ?? null }))
             );
             const variance = stockTakeVariance(
-              (st.items ?? []).map((item) => ({ variance: item.variance ?? 0 }))
+              stItems.map((item) => ({ variance: item.variance ?? 0 }))
             );
             const statusColor =
               st.status === 'completed'
@@ -188,19 +207,21 @@ const StockTakes: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {st.status !== 'completed' && canManageStockTakes && (
-                      <button type="button"
+                      <button
+                        type="button"
                         aria-label="Complete stock take"
+                        title={allCounted ? undefined : t('stockTakes.countsRequired')}
                         onClick={() =>
                           handleComplete(
                             st.id ?? '',
-                            (st.items ?? []).map((item) => ({
+                            stItems.map((item) => ({
                               productId: item.productId,
                               expectedQty: item.expectedQty,
                               countedQty: item.countedQty,
                             }))
                           )
                         }
-                        disabled={updateMut.isPending}
+                        disabled={!allCounted || updateMut.isPending}
                         className="flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-lg disabled:opacity-40"
                         style={{
                           background: 'color-mix(in srgb, var(--erp-success) 12%, transparent)',
@@ -263,6 +284,22 @@ const StockTakes: React.FC = () => {
         onPageChange={setPage}
       />
 
+      <ConfirmModal
+        open={pendingComplete !== null}
+        title={t('stockTakes.confirmTitle')}
+        description={
+          completeSummary
+            ? t('stockTakes.confirmDescription', {
+                count: completeSummary.count,
+                expected: completeSummary.expected,
+                counted: completeSummary.counted,
+              })
+            : undefined
+        }
+        onConfirm={() => void confirmComplete()}
+        onCancel={() => setPendingComplete(null)}
+      />
+
       {showCreate && (
         <div
           className="fixed inset-0 flex items-center justify-center"
@@ -304,14 +341,16 @@ const StockTakes: React.FC = () => {
                   : `${itemsToCount.length} inventory item${itemsToCount.length === 1 ? '' : 's'} will be included with current stock as the expected quantity.`}
             </p>
             <div className="flex gap-2 justify-end">
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setShowCreate(false)}
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
                 Cancel
               </button>
-              <button type="button"
+              <button
+                type="button"
                 onClick={handleCreate}
                 disabled={
                   createMut.isPending ||

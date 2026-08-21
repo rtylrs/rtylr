@@ -28,10 +28,15 @@
     "detail": {
       "edit": "Edit",
       "delete": "Delete",
+      "deleteConfirm": "This permanently deletes this product from your catalog. This action cannot be undone.",
       "notFound": "Product not found",
       "notFoundDescription": "The product you are looking for does not exist or has been deleted.",
       "backToInventory": "Back to Inventory",
       "noActivity": "No activity recorded yet."
+    },
+    "bulkDelete": {
+      "title": "Delete {{count}} products?",
+      "description": "This permanently deletes the selected products and cannot be undone."
     },
     "toast": {
       "created": "Product \"{{name}}\" created",
@@ -126,6 +131,14 @@
     "comingSoon": "Supplier management is coming soon.",
     "scorecards": "Scorecards"
   },
+  "purchasing": {
+    "approve": "Approve",
+    "send": "Send",
+    "sendConfirmTitle": "Send PO-{{id}}?",
+    "sendConfirmDescription": "The purchase order will be marked as sent to the supplier and can no longer be edited as a draft.",
+    "approveConfirmTitle": "Approve PO-{{id}}?",
+    "approveConfirmDescription": "Approval confirms this order for receiving and cannot be undone."
+  },
   "common": {
     "cancel": "Cancel",
     "create": "Create",
@@ -170,6 +183,7 @@
     "expected": "Expected {{count}}",
     "ok": "OK",
     "markReceived": "Mark Received",
+    "markReceivedDisabled": "Record at least one received quantity before completing",
     "empty": {
       "title": "No open orders to receive",
       "description": "All orders have been received"
@@ -225,7 +239,14 @@
       "description": "Create your first stock transfer"
     },
     "newTransfer": "New Transfer",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "send": "Send",
+    "cancelTransfer": "Cancel",
+    "markReceived": "Mark Received",
+    "sendConfirmTitle": "Send this transfer?",
+    "receiveConfirmTitle": "Mark this transfer as received?",
+    "cancelConfirmTitle": "Cancel this transfer?",
+    "transitionDescription": "Transfer #{{id}} — this change is permanent and cannot be undone."
   },
   "lowStockAlerts": {
     "empty": {
@@ -240,7 +261,10 @@
       "description": "Start a count to find discrepancies"
     },
     "newStockTake": "New Stock Take",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "countsRequired": "Count every item before completing this stock take",
+    "confirmTitle": "Complete this stock take?",
+    "confirmDescription": "{{count}} items · expected {{expected}} · counted {{counted}}. Completing records the variance permanently and cannot be undone."
   },
   "categories": {
     "empty": {
@@ -253,7 +277,10 @@
     "team": {
       "empty": { "title": "No team members yet." },
       "invite": "Invite member",
-      "refresh": "Refresh"
+      "refresh": "Refresh",
+      "remove": "Remove",
+      "removeConfirmTitle": "Remove {{name}}?",
+      "removeConfirmDescription": "{{name}} will immediately lose access to ERP. You can invite them again later."
     }
   },
   "barcodes": {

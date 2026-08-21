@@ -43,6 +43,7 @@ import { Toaster } from 'sonner';
 import CommandPalette from '../shared/components/CommandPalette';
 import KeyboardShortcutsModal from '../shared/components/KeyboardShortcutsModal';
 import QuickAddProductModal from '../shared/components/QuickAddProductModal';
+import { applyTheme, readStoredTheme, type ErpTheme } from '../shared/lib/theme';
 
 interface NavItem {
   label: string;
@@ -128,17 +129,7 @@ function getPageTitle(pathname: string): string {
   return match ? routeLabels[match] : 'ERP';
 }
 
-type Theme = 'dark' | 'light' | 'system';
-
-function applyTheme(theme: Theme) {
-  const root = document.documentElement;
-  if (theme === 'system') {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-  } else {
-    root.setAttribute('data-theme', theme);
-  }
-}
+type Theme = ErpTheme;
 
 const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -176,9 +167,7 @@ const DefaultLayout: React.FC = () => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const search = useRouterState({ select: (s) => s.location.searchStr });
   const navigate = useNavigate();
-  const [theme, setThemeState] = useState<Theme>(() => {
-    return (localStorage.getItem('rtylr-erp-theme') as Theme) || 'dark';
-  });
+  const [theme, setThemeState] = useState<Theme>(readStoredTheme);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
@@ -282,7 +271,7 @@ const DefaultLayout: React.FC = () => {
       } else if (e.key === '?' && e.shiftKey) {
         e.preventDefault();
         setShortcutsOpen(true);
-      } else if (e.key === 'n') {
+      } else if (e.key === 'n' && !e.metaKey && !e.ctrlKey && !e.altKey) {
         e.preventDefault();
         setQuickAddOpen(true);
       } else if (e.key === 'Escape') {
@@ -321,7 +310,8 @@ const DefaultLayout: React.FC = () => {
             insetInline: 0,
           }}
         >
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setSidebarOpen(true)}
             aria-label="Open navigation menu"
             aria-expanded={sidebarOpen}
@@ -375,7 +365,8 @@ const DefaultLayout: React.FC = () => {
               alt="rtylr"
               className="h-9 w-auto"
             />
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setSidebarOpen(false)}
               aria-label="Close navigation menu"
               className="h-11 w-11 rounded-lg flex md:hidden items-center justify-center"
@@ -419,7 +410,8 @@ const DefaultLayout: React.FC = () => {
             </Link>
             <CaretButton className="w-full justify-start mb-1" />
             <div className="relative">
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setShowUserMenu((v) => !v)}
                 aria-label={showUserMenu ? 'Close user menu' : 'Open user menu'}
                 aria-expanded={showUserMenu}
@@ -492,7 +484,8 @@ const DefaultLayout: React.FC = () => {
                           { value: 'system' as Theme, icon: Monitor, label: 'System' },
                         ] as const
                       ).map(({ value, icon: Icon, label }) => (
-                        <button type="button"
+                        <button
+                          type="button"
                           key={value}
                           onClick={() => handleSetTheme(value)}
                           className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"
@@ -517,7 +510,8 @@ const DefaultLayout: React.FC = () => {
                       className="my-1"
                       style={{ height: '1px', background: 'var(--hub-border)' }}
                     />
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={handleLogout}
                       className="flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm transition-colors"
                       style={{ color: 'var(--erp-danger-strong)' }}
@@ -553,7 +547,8 @@ const DefaultLayout: React.FC = () => {
                 {pageTitle}
               </h1>
               <div className="flex items-center gap-1">
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => setPaletteOpen(true)}
                   aria-label="Open search"
                   className="flex items-center gap-2 h-11 px-3 rounded-lg text-xs"
@@ -572,7 +567,8 @@ const DefaultLayout: React.FC = () => {
                     cmd+k
                   </kbd>
                 </button>
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
                   aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
                   className="h-11 w-11 rounded-lg flex items-center justify-center"
@@ -586,7 +582,8 @@ const DefaultLayout: React.FC = () => {
                 >
                   {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
                 </button>
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => setShortcutsOpen(true)}
                   aria-label="Open keyboard shortcuts"
                   className="h-11 w-11 rounded-lg flex items-center justify-center"
@@ -602,7 +599,7 @@ const DefaultLayout: React.FC = () => {
                 </button>
                 <Link
                   to="/alerts"
-                  aria-label="Open notifications"
+                  aria-label="Open low stock alerts"
                   className="h-11 w-11 rounded-lg flex items-center justify-center transition-colors duration-150"
                   style={{ color: 'var(--hub-text-muted)' }}
                   onMouseEnter={(e) => {

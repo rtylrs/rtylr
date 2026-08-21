@@ -5,17 +5,23 @@ import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import { useUserStore } from '@voxire/auth';
 import { useTranslation } from 'react-i18next';
-import { useStockTransfers, useCreateStockTransfer } from './useStockTransfers';
+import {
+  useStockTransfers,
+  useCreateStockTransfer,
+  useUpdateStockTransferStatus,
+} from './useStockTransfers';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
 import {
   stockTransferStatusLabel,
   toStockTransferItems,
   type StockTransferDraftItem,
 } from './stockTransferSchema';
+import type { StockTransferStatus } from './stockTransferSchema';
 import { useWarehouses } from '../warehouses/useWarehouses';
 import { useProducts } from '../products/useProducts';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
+import ConfirmModal from '../../shared/components/ConfirmModal';
 import { formatDate } from '../../shared/lib/format';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { toast } from 'sonner';
@@ -67,8 +73,9 @@ const StockTransfers: React.FC = () => {
   const { data: productResult, isLoading: productsLoading } = useProducts({ pageSize: 100 });
   const products = productResult?.products ?? [];
   const createMut = useCreateStockTransfer();
+  const statusMut = useUpdateStockTransferStatus();
   const role = useUserStore((state) => state.user?.role ?? state.role);
-  const canCreateTransfer = canErpPermission(role, 'erp:inventory:transfer');
+  const canManageTransfers = canErpPermission(role, 'erp:inventory:transfer');
   const [showCreate, setShowCreate] = useState(false);
   const [fromWarehouseId, setFromWarehouseId] = useState('');
   const [toWarehouseId, setToWarehouseId] = useState('');
@@ -76,6 +83,10 @@ const StockTransfers: React.FC = () => {
   const [newItems, setNewItems] = useState<StockTransferDraftItem[]>([
     { productId: '', quantity: '' },
   ]);
+  const [pendingAction, setPendingAction] = useState<{
+    id: string;
+    action: StockTransferStatus;
+  } | null>(null);
   const validItems = toStockTransferItems(newItems);
 
   const warehouseName = (id: string): string =>
@@ -112,6 +123,42 @@ const StockTransfers: React.FC = () => {
     }
   };
 
+  const confirmPendingAction = async (): Promise<void> => {
+    if (!pendingAction) return;
+    const { id, action } = pendingAction;
+    try {
+      await statusMut.mutateAsync({ id, body: { status: action } });
+      if (action === 'in_transit') toast.success(`Transfer #${id} sent`);
+      else if (action === 'received') toast.success(`Transfer #${id} received`);
+      else toast.success(`Transfer #${id} cancelled`);
+      setPendingAction(null);
+    } catch {
+      // onError in hook handles toast
+    }
+  };
+
+  const pendingActionCopy = ((): { title: string; description: string; danger: boolean } | null => {
+    if (!pendingAction) return null;
+    const id = pendingAction.id;
+    if (pendingAction.action === 'in_transit')
+      return {
+        title: t('stockTransfers.sendConfirmTitle'),
+        description: t('stockTransfers.transitionDescription', { id }),
+        danger: false,
+      };
+    if (pendingAction.action === 'received')
+      return {
+        title: t('stockTransfers.receiveConfirmTitle'),
+        description: t('stockTransfers.transitionDescription', { id }),
+        danger: false,
+      };
+    return {
+      title: t('stockTransfers.cancelConfirmTitle'),
+      description: t('stockTransfers.transitionDescription', { id }),
+      danger: true,
+    };
+  })();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -123,8 +170,9 @@ const StockTransfers: React.FC = () => {
         title="Stock Transfers"
         description="Move inventory between warehouses"
         actions={
-          canCreateTransfer && (
-            <button type="button"
+          canManageTransfers && (
+            <button
+              type="button"
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
               style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
@@ -142,7 +190,7 @@ const StockTransfers: React.FC = () => {
         <div
           className="grid px-4 py-3 text-[10px] font-semibold uppercase tracking-wider"
           style={{
-            gridTemplateColumns: '0.5fr 1.5fr 0.3fr 1.5fr 0.7fr 0.8fr 0.8fr',
+            gridTemplateColumns: '0.5fr 1.5fr 0.3fr 1.5fr 0.7fr 0.8fr 0.8fr 1fr',
             color: 'var(--hub-text-dim)',
             borderBottom: '1px solid var(--hub-border)',
           }}
@@ -154,6 +202,7 @@ const StockTransfers: React.FC = () => {
           <span>Items</span>
           <span>Created</span>
           <span>Status</span>
+          <span>Actions</span>
         </div>
         <div className="divide-y" style={{ borderColor: 'var(--hub-border)' }}>
           {isLoading ? (
@@ -164,7 +213,7 @@ const StockTransfers: React.FC = () => {
               title={t('stockTransfers.empty.title')}
               description={t('stockTransfers.empty.description')}
               action={
-                canCreateTransfer
+                canManageTransfers
                   ? { label: t('stockTransfers.newTransfer'), onClick: () => setShowCreate(true) }
                   : { label: t('stockTransfers.refresh'), onClick: () => void refetch() }
               }
@@ -176,7 +225,7 @@ const StockTransfers: React.FC = () => {
                 <div
                   key={transfer.id}
                   className="grid px-4 py-3 items-center"
-                  style={{ gridTemplateColumns: '0.5fr 1.5fr 0.3fr 1.5fr 0.7fr 0.8fr 0.8fr' }}
+                  style={{ gridTemplateColumns: '0.5fr 1.5fr 0.3fr 1.5fr 0.7fr 0.8fr 0.8fr 1fr' }}
                 >
                   <span className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)' }}>
                     #{transfer.id}
@@ -208,6 +257,62 @@ const StockTransfers: React.FC = () => {
                       {stockTransferStatusLabel(transfer.status ?? '')}
                     </span>
                   </span>
+                  <span className="flex items-center gap-1">
+                    {canManageTransfers && transfer.status === 'draft' && (
+                      <>
+                        <button
+                          type="button"
+                          aria-label={`Send transfer #${transfer.id}`}
+                          onClick={() =>
+                            setPendingAction({ id: transfer.id ?? '', action: 'in_transit' })
+                          }
+                          disabled={statusMut.isPending}
+                          title={t('stockTransfers.sendConfirmTitle')}
+                          className="text-[10px] font-semibold px-2 py-1 rounded-md disabled:opacity-40"
+                          style={{
+                            background: 'color-mix(in srgb, var(--erp-accent) 15%, transparent)',
+                            color: AMBER,
+                          }}
+                        >
+                          {t('stockTransfers.send')}
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`Cancel transfer #${transfer.id}`}
+                          onClick={() =>
+                            setPendingAction({ id: transfer.id ?? '', action: 'cancelled' })
+                          }
+                          disabled={statusMut.isPending}
+                          title={t('stockTransfers.cancelConfirmTitle')}
+                          className="text-[10px] font-semibold px-2 py-1 rounded-md disabled:opacity-40"
+                          style={{
+                            background: 'color-mix(in srgb, var(--erp-danger) 12%, transparent)',
+                            color: 'var(--erp-danger)',
+                          }}
+                        >
+                          {t('stockTransfers.cancelTransfer')}
+                        </button>
+                      </>
+                    )}
+                    {canManageTransfers && transfer.status === 'in_transit' && (
+                      <button
+                        type="button"
+                        aria-label={`Mark transfer #${transfer.id} received`}
+                        onClick={() =>
+                          setPendingAction({ id: transfer.id ?? '', action: 'received' })
+                        }
+                        disabled={statusMut.isPending}
+                        title={t('stockTransfers.receiveConfirmTitle')}
+                        className="text-[10px] font-semibold px-2 py-1 rounded-md disabled:opacity-40"
+                        style={{
+                          background: 'color-mix(in srgb, var(--erp-success) 12%, transparent)',
+                          color: 'var(--erp-success)',
+                        }}
+                      >
+                        {t('stockTransfers.markReceived')}
+                      </button>
+                    )}
+                  </span>
                 </div>
               );
             })
@@ -219,6 +324,21 @@ const StockTransfers: React.FC = () => {
         hasMore={hasMore}
         itemCount={transfers.length}
         onPageChange={setPage}
+      />
+      <ConfirmModal
+        open={pendingAction !== null}
+        title={pendingActionCopy?.title ?? ''}
+        description={pendingActionCopy?.description}
+        danger={pendingActionCopy?.danger}
+        confirmLabel={
+          pendingAction?.action === 'in_transit'
+            ? t('stockTransfers.send')
+            : pendingAction?.action === 'received'
+              ? t('stockTransfers.markReceived')
+              : t('stockTransfers.cancelTransfer')
+        }
+        onConfirm={() => void confirmPendingAction()}
+        onCancel={() => setPendingAction(null)}
       />
       {showCreate && (
         <div
@@ -333,14 +453,16 @@ const StockTransfers: React.FC = () => {
               + Add item
             </button>
             <div className="flex gap-2 justify-end">
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setShowCreate(false)}
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
                 Cancel
               </button>
-              <button type="button"
+              <button
+                type="button"
                 onClick={handleCreate}
                 disabled={
                   createMut.isPending ||

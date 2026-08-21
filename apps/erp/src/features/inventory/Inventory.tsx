@@ -4,6 +4,7 @@ import { HelmetContainer } from '@voxire/components';
 import { cdnImageUrl } from '@voxire/config';
 import { Package, Search, SearchX, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Link } from '@tanstack/react-router';
 import { EmptyState } from '@voxire/ui';
 import { useDebounce } from '@voxire/utils';
 import {
@@ -98,7 +99,8 @@ const Inventory: React.FC = () => {
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('erp.inventory.title')}
         </h2>
-        <button type="button"
+        <button
+          type="button"
           data-testid="inventory-add-product-button"
           onClick={() => setQuickAddOpen(true)}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
@@ -228,12 +230,14 @@ const Inventory: React.FC = () => {
                           )}
                         </div>
                         <div className="min-w-0">
-                          <div
-                            className="truncate text-sm font-semibold"
-                            style={{ color: 'var(--hub-text)' }}
+                          <Link
+                            to="/products/$id"
+                            params={{ id: String(product.id) }}
+                            className="truncate text-sm font-semibold hover:underline"
+                            style={{ color: 'var(--hub-text)', textDecoration: 'none' }}
                           >
                             {product.name}
-                          </div>
+                          </Link>
                           {product.unit && (
                             <div className="text-[11px]" style={{ color: 'var(--hub-text-muted)' }}>
                               Unit: {product.unit}

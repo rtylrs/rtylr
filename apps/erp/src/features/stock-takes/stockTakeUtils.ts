@@ -11,7 +11,8 @@ export function buildStockTakeItems(
       {
         productId,
         expectedQty: Math.max(0, stockQuantity ?? 0),
-        countedQty: 0,
+        // countedQty is intentionally omitted: lines start uncounted, so a
+        // stock take cannot be completed until every item has been counted.
       },
     ];
   });

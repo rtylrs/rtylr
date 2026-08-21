@@ -30,6 +30,13 @@ import {
   computeSeatProration,
 } from '../../shared/hooks/queries/useErpSubscription';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
+import ConfirmModal from '../../shared/components/ConfirmModal';
+import {
+  applyTheme,
+  readStoredTheme,
+  THEME_STORAGE_KEY,
+  type ErpTheme,
+} from '../../shared/lib/theme';
 
 type TabId = 'general' | 'team';
 
@@ -106,6 +113,7 @@ const Toggle: React.FC<{ value: boolean; onChange: (v: boolean) => void }> = ({
 
 const GeneralTab: React.FC = () => {
   const settings = useSettings();
+  const [theme, setThemeState] = useState<ErpTheme>(readStoredTheme);
   const { data: serverSettings, isError, isFetching, isLoading, refetch } = useErpSettings();
   const update = useUpdateErpSettings();
   const { data: warehouses = [] } = useWarehouses();
@@ -268,18 +276,23 @@ const GeneralTab: React.FC = () => {
       <Section title="Appearance" icon={Palette}>
         <ConfigField label="Theme" description="Light, dark, or follow system">
           <div className="flex gap-1">
-            {(['light', 'dark', 'system'] as const).map((t) => (
+            {(['light', 'dark', 'system'] as const).map((option) => (
               <button
-                key={t}
+                key={option}
                 type="button"
-                onClick={() => settings.setTheme(t)}
-                className="px-2 py-1 rounded-md text-[11px] font-medium"
+                aria-pressed={theme === option}
+                onClick={() => {
+                  setThemeState(option);
+                  localStorage.setItem(THEME_STORAGE_KEY, option);
+                  applyTheme(option);
+                }}
+                className="px-2 py-1 rounded-md text-[11px] font-medium capitalize"
                 style={{
-                  background: settings.theme === t ? 'var(--hub-active)' : 'var(--hub-hover)',
-                  color: settings.theme === t ? 'var(--erp-accent)' : 'var(--hub-text-muted)',
+                  background: theme === option ? 'var(--hub-active)' : 'var(--hub-hover)',
+                  color: theme === option ? 'var(--erp-accent)' : 'var(--hub-text-muted)',
                 }}
               >
-                {t}
+                {option}
               </button>
             ))}
           </div>
@@ -316,6 +329,7 @@ const TeamTab: React.FC = () => {
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [showInvite, setShowInvite] = useState(false);
+  const [pendingRemove, setPendingRemove] = useState<{ id: string; name: string } | null>(null);
 
   const handleInvite = (): void => {
     if (!email.trim() || !fullName.trim()) {
@@ -506,7 +520,8 @@ const TeamTab: React.FC = () => {
                   type="button"
                   aria-label={`Remove ${m.name}`}
                   onClick={() => {
-                    deactivate.mutate(m.id);
+                    if (!m.id) return;
+                    setPendingRemove({ id: m.id, name: m.name });
                   }}
                   className="h-7 w-7 flex items-center justify-center rounded hover:bg-[var(--hub-hover)] transition-colors shrink-0"
                   style={{
@@ -523,6 +538,21 @@ const TeamTab: React.FC = () => {
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        open={pendingRemove !== null}
+        title={t('settings.team.removeConfirmTitle', { name: pendingRemove?.name ?? '' })}
+        description={t('settings.team.removeConfirmDescription', {
+          name: pendingRemove?.name ?? '',
+        })}
+        danger
+        confirmLabel={t('settings.team.remove')}
+        onConfirm={() => {
+          if (pendingRemove?.id) deactivate.mutate(pendingRemove.id);
+          setPendingRemove(null);
+        }}
+        onCancel={() => setPendingRemove(null)}
+      />
     </div>
   );
 };

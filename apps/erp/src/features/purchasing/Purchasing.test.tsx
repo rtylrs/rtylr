@@ -16,6 +16,19 @@ const sentOrder = {
   expectedDelivery: '2026-01-01',
 };
 
+const draftOrder = {
+  id: 'po2',
+  supplierId: 's1',
+  status: 'draft',
+  total: 50,
+  items: [],
+  expectedDelivery: '2026-01-01',
+};
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
 }));
@@ -35,7 +48,7 @@ vi.mock('@voxire/auth', () => ({
 
 vi.mock('./usePurchaseOrders', () => ({
   usePurchaseOrders: () => ({
-    data: { purchaseOrders: [sentOrder], hasMore: false },
+    data: { purchaseOrders: [sentOrder, draftOrder], hasMore: false },
     isLoading: false,
   }),
   useAllPurchaseOrders: () => ({ data: [sentOrder], isLoading: false }),
@@ -64,27 +77,43 @@ describe('Purchasing approval gating', () => {
     mocks.role = 'operator';
     render(<Purchasing />);
 
-    expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'purchasing.approve' })).not.toBeInTheDocument();
   });
 
   it('hides the Approve action for staff', () => {
     mocks.role = 'staff';
     render(<Purchasing />);
 
-    expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'purchasing.approve' })).not.toBeInTheDocument();
   });
 
   it('shows the Approve action for admin', () => {
     mocks.role = 'admin';
     render(<Purchasing />);
 
-    expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'purchasing.approve' })).toBeInTheDocument();
   });
 
   it('shows the Approve action for owner', () => {
     mocks.role = 'owner';
     render(<Purchasing />);
 
-    expect(screen.getByRole('button', { name: 'Approve' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'purchasing.approve' })).toBeInTheDocument();
+  });
+});
+
+describe('Purchasing send gating', () => {
+  it('hides the Send action for an operator, matching the Approve permission', () => {
+    mocks.role = 'operator';
+    render(<Purchasing />);
+
+    expect(screen.queryByRole('button', { name: 'purchasing.send' })).not.toBeInTheDocument();
+  });
+
+  it('shows the Send action for admin', () => {
+    mocks.role = 'admin';
+    render(<Purchasing />);
+
+    expect(screen.getByRole('button', { name: 'purchasing.send' })).toBeInTheDocument();
   });
 });

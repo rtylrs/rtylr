@@ -32,8 +32,10 @@ import { useProducts } from '../products/useProducts';
 import PrintPOButton from '../../shared/components/PrintPOButton';
 import ExportButton from '../../shared/components/ExportButton';
 import PaginationControls from '../../shared/components/PaginationControls';
+import ConfirmModal from '../../shared/components/ConfirmModal';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const AMBER = 'var(--erp-accent)';
 
@@ -103,6 +105,7 @@ const SkeletonTableRow: React.FC = () => (
 );
 
 const Purchasing: React.FC = () => {
+  const { t } = useTranslation('erp');
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<PurchaseOrderFilter>('All');
   const status = purchaseOrderStatusFilter(filter);
@@ -120,6 +123,10 @@ const Purchasing: React.FC = () => {
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canApprovePO = canErpPermission(role, 'erp:purchase_orders:approve');
   const [showCreate, setShowCreate] = useState(false);
+  const [pendingPoAction, setPendingPoAction] = useState<{
+    id: string;
+    action: 'send' | 'approve';
+  } | null>(null);
   const [newSupplierId, setNewSupplierId] = useState('');
   const [newPoNumber, setNewPoNumber] = useState('');
   const [newExpectedDelivery, setNewExpectedDelivery] = useState(
@@ -176,6 +183,29 @@ const Purchasing: React.FC = () => {
     );
   };
 
+  const confirmPoAction = (): void => {
+    if (!pendingPoAction) return;
+    const { id, action } = pendingPoAction;
+    setPendingPoAction(null);
+    if (action === 'send') handleSend(id);
+    else handleApprove(id);
+  };
+
+  const pendingPoCopy = ((): { title: string; description: string; danger: boolean } | null => {
+    if (!pendingPoAction) return null;
+    return pendingPoAction.action === 'send'
+      ? {
+          title: t('purchasing.sendConfirmTitle', { id: pendingPoAction.id }),
+          description: t('purchasing.sendConfirmDescription'),
+          danger: false,
+        }
+      : {
+          title: t('purchasing.approveConfirmTitle', { id: pendingPoAction.id }),
+          description: t('purchasing.approveConfirmDescription'),
+          danger: false,
+        };
+  })();
+
   const handleCreatePO = async (): Promise<void> => {
     if (!newSupplierId || !newPoNumber.trim()) {
       toast.error('Supplier and PO number are required');
@@ -196,7 +226,7 @@ const Purchasing: React.FC = () => {
         items: validItems.map((it) => ({
           productId: it.productId,
           quantityOrdered: Number(it.quantityOrdered),
-          unitCost: it.unitCost ? Number(it.unitCost) : 0,
+          unitCost: Math.max(0, it.unitCost ? Number(it.unitCost) : 0),
         })),
       });
       toast.success('Purchase order draft created');
@@ -229,7 +259,8 @@ const Purchasing: React.FC = () => {
             getData={getAllExportable}
             filename="purchase-orders.csv"
           />
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
@@ -248,7 +279,8 @@ const Purchasing: React.FC = () => {
             const Icon = sc.icon;
             const active = filter === status;
             return (
-              <button type="button"
+              <button
+                type="button"
                 key={status}
                 onClick={() => {
                   setFilter(active ? 'All' : status);
@@ -354,27 +386,31 @@ const Purchasing: React.FC = () => {
                     </span>
                     <div className="flex items-center gap-1">
                       {status === 'Sent' && canApprovePO && (
-                        <button type="button"
-                          onClick={() => handleApprove(order.id ?? '')}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPendingPoAction({ id: order.id ?? '', action: 'approve' })
+                          }
                           className="text-[10px] font-semibold px-2 py-1 rounded-md"
                           style={{
                             background: 'color-mix(in srgb, var(--erp-info) 15%, transparent)',
                             color: 'var(--erp-info)',
                           }}
                         >
-                          Approve
+                          {t('purchasing.approve')}
                         </button>
                       )}
-                      {status === 'Draft' && (
-                        <button type="button"
-                          onClick={() => handleSend(order.id ?? '')}
+                      {status === 'Draft' && canApprovePO && (
+                        <button
+                          type="button"
+                          onClick={() => setPendingPoAction({ id: order.id ?? '', action: 'send' })}
                           className="text-[10px] font-semibold px-2 py-1 rounded-md"
                           style={{
                             background: 'color-mix(in srgb, var(--erp-accent) 15%, transparent)',
                             color: AMBER,
                           }}
                         >
-                          Send
+                          {t('purchasing.send')}
                         </button>
                       )}
                       <PrintPOButton
@@ -546,16 +582,23 @@ const Purchasing: React.FC = () => {
               + Add item
             </button>
             <div className="flex gap-2 justify-end">
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setShowCreate(false)}
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
                 Cancel
               </button>
-              <button type="button"
+              <button
+                type="button"
                 onClick={handleCreatePO}
-                disabled={createMut.isPending || !newSupplierId || !newPoNumber.trim()}
+                disabled={
+                  createMut.isPending ||
+                  !newSupplierId ||
+                  !newPoNumber.trim() ||
+                  !newExpectedDelivery
+                }
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"
                 style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
               >
@@ -571,6 +614,18 @@ const Purchasing: React.FC = () => {
         hasMore={hasMore}
         itemCount={orders.length}
         onPageChange={setPage}
+      />
+
+      <ConfirmModal
+        open={pendingPoAction !== null}
+        title={pendingPoCopy?.title ?? ''}
+        description={pendingPoCopy?.description}
+        danger={pendingPoCopy?.danger}
+        confirmLabel={
+          pendingPoAction?.action === 'send' ? t('purchasing.send') : t('purchasing.approve')
+        }
+        onConfirm={confirmPoAction}
+        onCancel={() => setPendingPoAction(null)}
       />
     </motion.div>
   );

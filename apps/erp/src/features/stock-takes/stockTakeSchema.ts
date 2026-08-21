@@ -66,13 +66,13 @@ export function stockTakeStatusLabel(status: string): string {
 }
 
 /** Counting progress derived from items (backend does not send totals). */
-export function stockTakeProgress(items: Array<Pick<StockTakeItem, 'countedQty'>>): {
+export function stockTakeProgress(items: Array<{ countedQty: number | null | undefined }>): {
   counted: number;
   total: number;
   pct: number;
 } {
   const total = items.length;
-  const counted = items.filter((item) => item.countedQty >= 0).length;
+  const counted = items.filter((item) => item.countedQty != null && item.countedQty >= 0).length;
   const pct = total > 0 ? Math.round((counted / total) * 100) : 0;
   return { counted, total, pct };
 }

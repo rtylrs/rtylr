@@ -28,10 +28,15 @@
     "detail": {
       "edit": "Edit",
       "delete": "Delete",
+      "deleteConfirm": "سيؤدي هذا إلى حذف هذا المنتج نهائيًا من كتالوجك. لا يمكن التراجع عن هذا الإجراء.",
       "notFound": "Product not found",
       "notFoundDescription": "The product you are looking for does not exist or has been deleted.",
       "backToInventory": "Back to Inventory",
       "noActivity": "لا يوجد نشاط مسجل حتى الآن."
+    },
+    "bulkDelete": {
+      "title": "حذف {{count}} منتجًا؟",
+      "description": "سيؤدي هذا إلى حذف المنتجات المحددة نهائيًا ولا يمكن التراجع عنه."
     },
     "toast": {
       "created": "Product \"{{name}}\" created",
@@ -126,6 +131,14 @@
     "comingSoon": "Supplier management is coming soon.",
     "scorecards": "Scorecards"
   },
+  "purchasing": {
+    "approve": "اعتماد",
+    "send": "إرسال",
+    "sendConfirmTitle": "إرسال أمر الشراء {{id}}؟",
+    "sendConfirmDescription": "سيتم تحديد أمر الشراء كمُرسل إلى المورد ولن يمكن تعديله كمسودة بعد ذلك.",
+    "approveConfirmTitle": "اعتماد أمر الشراء {{id}}؟",
+    "approveConfirmDescription": "يعتمد هذا الأمر للاستلام ولا يمكن التراجع عنه."
+  },
   "common": {
     "cancel": "Cancel",
     "create": "إنشاء",
@@ -170,6 +183,7 @@
     "expected": "المتوقع {{count}}",
     "ok": "موافق",
     "markReceived": "تحديد كمستلم",
+    "markReceivedDisabled": "سجّل كمية مستلمة واحدة على الأقل قبل الإكمال",
     "empty": { "title": "لا توجد أوامر مفتوحة للاستلام", "description": "تم استلام جميع الطلبات" },
     "goToPurchasing": "الانتقال إلى أوامر الشراء",
     "orderSummary": "{{count}} عناصر / الموعد {{date}}",
@@ -222,7 +236,14 @@
       "description": "أنشئ أول عملية نقل مخزون"
     },
     "newTransfer": "نقل جديد",
-    "refresh": "تحديث"
+    "refresh": "تحديث",
+    "send": "إرسال",
+    "cancelTransfer": "إلغاء",
+    "markReceived": "تحديد كمستلم",
+    "sendConfirmTitle": "إرسال هذا النقل؟",
+    "receiveConfirmTitle": "تحديد هذا النقل كمستلم؟",
+    "cancelConfirmTitle": "إلغاء هذا النقل؟",
+    "transitionDescription": "نقل #{{id}} — هذا التغيير دائم ولا يمكن التراجع عنه."
   },
   "lowStockAlerts": {
     "empty": {
@@ -237,7 +258,10 @@
       "description": "ابدأ عملية جرد لإيجاد الفروقات"
     },
     "newStockTake": "جرد جديد",
-    "refresh": "تحديث"
+    "refresh": "تحديث",
+    "countsRequired": "قم بعدّ كل العناصر قبل إتمام عملية الجرد هذه",
+    "confirmTitle": "إتمام عملية الجرد هذه؟",
+    "confirmDescription": "{{count}} عنصرًا · المتوقع {{expected}} · المعدود {{counted}}. سيتم تسجيل الفروقات نهائيًا ولا يمكن التراجع."
   },
   "categories": {
     "empty": {
@@ -250,7 +274,10 @@
     "team": {
       "empty": { "title": "لا يوجد أعضاء فريق بعد." },
       "invite": "دعوة عضو",
-      "refresh": "تحديث"
+      "refresh": "تحديث",
+      "remove": "إزالة",
+      "removeConfirmTitle": "إزالة {{name}}؟",
+      "removeConfirmDescription": "سيفقد {{name}} الوصول إلى ERP فورًا. يمكنك دعوته مرة أخرى لاحقًا."
     }
   },
   "barcodes": {

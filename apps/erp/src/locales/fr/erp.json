@@ -28,10 +28,15 @@
     "detail": {
       "edit": "Edit",
       "delete": "Delete",
+      "deleteConfirm": "Cette action supprime définitivement ce produit de votre catalogue. Elle est irréversible.",
       "notFound": "Product not found",
       "notFoundDescription": "The product you are looking for does not exist or has been deleted.",
       "backToInventory": "Back to Inventory",
       "noActivity": "Aucune activité enregistrée pour l'instant."
+    },
+    "bulkDelete": {
+      "title": "Supprimer {{count}} produits ?",
+      "description": "Cette action supprime définitivement les produits sélectionnés et est irréversible."
     },
     "toast": {
       "created": "Product \"{{name}}\" created",
@@ -126,6 +131,14 @@
     "comingSoon": "Supplier management is coming soon.",
     "scorecards": "Scorecards"
   },
+  "purchasing": {
+    "approve": "Approuver",
+    "send": "Envoyer",
+    "sendConfirmTitle": "Envoyer le BC-{{id}} ?",
+    "sendConfirmDescription": "Le bon de commande sera marqué comme envoyé au fournisseur et ne pourra plus être modifié en tant que brouillon.",
+    "approveConfirmTitle": "Approuver le BC-{{id}} ?",
+    "approveConfirmDescription": "L'approbation confirme cette commande pour réception et est irréversible."
+  },
   "common": {
     "cancel": "Cancel",
     "create": "Créer",
@@ -170,6 +183,7 @@
     "expected": "Attendu : {{count}}",
     "ok": "OK",
     "markReceived": "Marquer reçu",
+    "markReceivedDisabled": "Enregistrez au moins une quantité reçue avant de terminer",
     "empty": {
       "title": "Aucune commande à recevoir",
       "description": "Toutes les commandes ont été reçues"
@@ -225,7 +239,14 @@
       "description": "Créez votre premier transfert de stock"
     },
     "newTransfer": "Nouveau transfert",
-    "refresh": "Actualiser"
+    "refresh": "Actualiser",
+    "send": "Envoyer",
+    "cancelTransfer": "Annuler",
+    "markReceived": "Marquer reçu",
+    "sendConfirmTitle": "Envoyer ce transfert ?",
+    "receiveConfirmTitle": "Marquer ce transfert comme reçu ?",
+    "cancelConfirmTitle": "Annuler ce transfert ?",
+    "transitionDescription": "Transfert n°{{id}} — ce changement est définitif et irréversible."
   },
   "lowStockAlerts": {
     "empty": {
@@ -240,7 +261,10 @@
       "description": "Lancez un comptage pour détecter les écarts"
     },
     "newStockTake": "Nouvel inventaire",
-    "refresh": "Actualiser"
+    "refresh": "Actualiser",
+    "countsRequired": "Comptez chaque article avant de terminer cet inventaire",
+    "confirmTitle": "Terminer cet inventaire ?",
+    "confirmDescription": "{{count}} articles · attendus {{expected}} · comptés {{counted}}. La validation enregistre définitivement les écarts et est irréversible."
   },
   "categories": {
     "empty": {
@@ -253,7 +277,10 @@
     "team": {
       "empty": { "title": "Pas encore de membres d'équipe." },
       "invite": "Inviter un membre",
-      "refresh": "Actualiser"
+      "refresh": "Actualiser",
+      "remove": "Retirer",
+      "removeConfirmTitle": "Retirer {{name}} ?",
+      "removeConfirmDescription": "{{name}} perdra immédiatement l'accès à l'ERP. Vous pourrez le réinviter plus tard."
     }
   },
   "barcodes": {

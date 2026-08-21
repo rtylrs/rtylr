@@ -26,6 +26,7 @@ import ExportButton from '../../shared/components/ExportButton';
 import ImportCSV from '../../shared/components/ImportCSV';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { SkeletonRow } from '../../shared/components/Skeleton';
+import ConfirmModal from '../../shared/components/ConfirmModal';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
 import PageHeader from '../../shared/components/PageHeader';
 import { formatCurrency } from '../../shared/lib/format';
@@ -67,6 +68,7 @@ const Products: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showAdd, setShowAdd] = useState(false);
+  const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
   const [page, setPage] = useState(1);
   const pageSize = 50;
 
@@ -175,7 +177,8 @@ const Products: React.FC = () => {
               ]}
             />
             <ExportButton data={exportable} getData={getAllExportable} filename="products.csv" />
-            <button type="button"
+            <button
+              type="button"
               data-testid="products-new-button"
               onClick={() => setShowAdd(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
@@ -212,7 +215,8 @@ const Products: React.FC = () => {
             }}
           />
         </div>
-        <button type="button"
+        <button
+          type="button"
           onClick={() => setDrawerOpen(true)}
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium"
           style={{
@@ -227,7 +231,8 @@ const Products: React.FC = () => {
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: AMBER }} />
           )}
         </button>
-        <button type="button"
+        <button
+          type="button"
           onClick={() =>
             updateFilters({
               ...filters,
@@ -249,7 +254,8 @@ const Products: React.FC = () => {
           className="flex rounded-lg p-0.5"
           style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
         >
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setViewMode('list')}
             className="h-7 w-7 rounded-md flex items-center justify-center"
             style={{
@@ -259,7 +265,8 @@ const Products: React.FC = () => {
           >
             <List size={12} />
           </button>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setViewMode('grid')}
             className="h-7 w-7 rounded-md flex items-center justify-center"
             style={{
@@ -478,7 +485,7 @@ const Products: React.FC = () => {
       <BulkActionBar
         count={selected.size}
         onClear={() => setSelected(new Set())}
-        onDelete={canDeleteProduct ? handleBulkDelete : undefined}
+        onDelete={canDeleteProduct ? () => setConfirmBulkDelete(true) : undefined}
         onExport={() => {
           const rows = products.filter((p) => selected.has(p.id ?? ''));
           if (rows.length === 0) return;
@@ -518,6 +525,20 @@ const Products: React.FC = () => {
       />
 
       <QuickAddProductModal open={showAdd} onClose={() => setShowAdd(false)} />
+
+      <ConfirmModal
+        open={confirmBulkDelete}
+        title={t('erp.products.bulkDelete.title', { count: selected.size })}
+        description={t('erp.products.bulkDelete.description')}
+        danger
+        confirmLabel={t('common.delete')}
+        cancelLabel={t('common.cancel')}
+        onConfirm={() => {
+          setConfirmBulkDelete(false);
+          void handleBulkDelete();
+        }}
+        onCancel={() => setConfirmBulkDelete(false)}
+      />
     </motion.div>
   );
 };

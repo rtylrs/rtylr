@@ -29,6 +29,10 @@ vi.mock('motion/react', () => ({
   },
 }));
 
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children }: React.PropsWithChildren<Record<string, unknown>>) => <a>{children}</a>,
+}));
+
 vi.mock('../products/useProducts', () => ({
   getProductStockStatus: () => 'In Stock',
   useProducts: mocks.useProducts,

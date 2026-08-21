@@ -171,6 +171,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
           <Search size={14} style={{ color: 'var(--hub-text-dim)' }} />
           <input
             autoFocus
+            type="text"
             aria-label="Search products, suppliers, orders, or pages"
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -195,7 +196,8 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
               const Icon = r.icon;
               const active = i === activeIdx;
               return (
-                <button type="button"
+                <button
+                  type="button"
                   key={`${r.type}-${r.label}-${i}`}
                   onClick={() => {
                     nav({ to: r.to });
