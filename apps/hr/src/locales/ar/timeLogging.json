@@ -13,18 +13,6 @@
   "startTimer": "بدء",
   "stopTimer": "إيقاف",
   "timerDescription": "ما الذي تعمل عليه؟",
-  "importFromFlow": "استيراد من Flow",
-  "flowImport": {
-    "importing": "جاري الاستيراد من Flow…",
-    "success": "تم استيراد {{imported}} إدخالات",
-    "successWithSkipped": "تم استيراد {{imported}} إدخالات ({{skipped}} تم تخطيها - مستوردة مسبقاً)",
-    "noEntries": "لا توجد إدخالات جديدة للاستيراد من Flow",
-    "error": "فشل الاستيراد من Flow",
-    "modalTitle": "استيراد من Flow",
-    "periodLabel": "الفترة المطلوب استيرادها",
-    "confirm": "استيراد",
-    "invalidRange": "يجب أن يكون تاريخ الانتهاء بعد تاريخ البدء أو مساويًا له."
-  },
   "statuses": {
     "draft": "مسودة",
     "submitted": "مُرسَل",
