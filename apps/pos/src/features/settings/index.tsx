@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { createOneKitClient } from '@voxire/api';
 import { SettingsServiceClient } from '@voxire/voxie/pos/settings/v1/client';
@@ -88,7 +88,7 @@ const SettingsScreen: React.FC = () => {
   const [taxDraft, setTaxDraft] = useState<string>(() => (taxRate * 100).toFixed(2));
   const nativeHardwareAvailable = isTauri();
 
-  const discover = async () => {
+  const discover = useCallback(async () => {
     if (!nativeHardwareAvailable) return;
     setDiscovering(true);
     try {
@@ -105,14 +105,13 @@ const SettingsScreen: React.FC = () => {
     } finally {
       setDiscovering(false);
     }
-  };
+  }, [nativeHardwareAvailable]);
 
   useEffect(() => {
     if (nativeHardwareAvailable) {
-      discover();
+      void discover();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nativeHardwareAvailable]);
+  }, [discover]);
 
   const updateTip = (index: number, value: number) => {
     const next = [...tipPresets];
