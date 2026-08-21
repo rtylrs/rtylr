@@ -1,6 +1,10 @@
 {
   "title": "الأرشيف",
+  "count_zero": "لا مهام مؤرشفة",
   "count_one": "{{count}} مهمة مؤرشفة",
+  "count_two": "مهمتان مؤرشفتان",
+  "count_few": "{{count}} مهام مؤرشفة",
+  "count_many": "{{count}} مهمة مؤرشفة",
   "count_other": "{{count}} مهمة مؤرشفة",
   "emptyTitle": "لا توجد عناصر مؤرشفة",
   "emptyDescription": "ستظهر المهام المؤرشفة هنا.",
