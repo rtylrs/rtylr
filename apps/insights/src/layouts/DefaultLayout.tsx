@@ -207,7 +207,7 @@ const DefaultLayout: React.FC = () => {
           </Link>
 
           <div className="relative" ref={menuRef}>
-            <button
+            <button type="button"
               onClick={() => setShowPagesMenu((v) => !v)}
               aria-haspopup="menu"
               aria-expanded={showPagesMenu}

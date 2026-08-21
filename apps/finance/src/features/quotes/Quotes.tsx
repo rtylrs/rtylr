@@ -89,7 +89,7 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
           <button style={ghostBtn} onClick={onClose} disabled={createQuote.isPending}>
             Cancel
           </button>
-          <button
+          <button type="button"
             style={{ ...primaryBtn, opacity: createQuote.isPending ? 0.6 : 1 }}
             onClick={handleSubmit}
             disabled={createQuote.isPending}

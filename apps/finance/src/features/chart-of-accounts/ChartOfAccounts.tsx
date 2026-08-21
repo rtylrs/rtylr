@@ -83,7 +83,7 @@ const ChartOfAccounts: React.FC = () => {
         subtitle={t('accounts.count', { count: filtered.length })}
         actions={
           canCreateAccount ? (
-            <button style={primaryBtn} onClick={() => setShowCreate(true)}>
+            <button type="button" style={primaryBtn} onClick={() => setShowCreate(true)}>
               <Plus size={13} /> {t('accounts.new')}
             </button>
           ) : undefined

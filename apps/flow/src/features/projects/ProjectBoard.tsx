@@ -522,7 +522,7 @@ const KanbanColumn: React.FC<{
             style={{ color: 'var(--flow-text)' }}
           />
         ) : (
-          <button
+          <button type="button"
             onClick={() => setEditing(true)}
             className="flex-1 text-start text-[12px] font-semibold truncate hover:opacity-70 transition-opacity"
             style={{ color: 'var(--flow-text)' }}

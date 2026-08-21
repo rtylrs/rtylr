@@ -355,7 +355,7 @@ const Leads: React.FC = () => {
                       </td>
                       <td style={{ padding: '12px 16px' }} onClick={(e) => e.stopPropagation()}>
                         <div style={{ display: 'flex', gap: '6px' }}>
-                          <button
+                          <button type="button"
                             aria-label="View lead"
                             onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
                             style={{

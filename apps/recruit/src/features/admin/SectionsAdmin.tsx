@@ -332,7 +332,7 @@ const AddSectionPicker: React.FC<{
       {ORDERED_KINDS.map((k) => {
         const meta = KIND_META[k];
         return (
-          <button
+          <button type="button"
             key={k}
             onClick={() => onPick(k)}
             className="flex flex-col items-start rounded-md border p-3 text-left transition hover:-translate-y-0.5 hover:border-white/30"

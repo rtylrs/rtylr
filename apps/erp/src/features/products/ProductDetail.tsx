@@ -172,7 +172,7 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <button
+          <button type="button"
             data-testid="product-edit-button"
             onClick={() => setEditing(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"

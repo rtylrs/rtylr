@@ -69,7 +69,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
               >
                 {title}
               </h3>
-              <button onClick={onCancel} aria-label="Close dialog">
+              <button type="button" onClick={onCancel} aria-label="Close dialog">
                 <X size={14} style={{ color: 'var(--hub-text-muted)' }} />
               </button>
             </div>

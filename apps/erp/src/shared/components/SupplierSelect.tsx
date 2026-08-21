@@ -67,7 +67,7 @@ const SupplierSelect: React.FC<SupplierSelectProps> = ({
             />
           </div>
           {filtered.map((s) => (
-            <button
+            <button type="button"
               key={s.id}
               onClick={() => {
                 onChange(s.id ?? '');

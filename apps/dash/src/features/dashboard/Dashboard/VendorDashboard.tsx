@@ -347,7 +347,7 @@ const AdminDashboard: React.FC = () => {
                   className="px-6 py-3 flex justify-end"
                   style={{ borderTop: '1px solid var(--dash-border)' }}
                 >
-                  <button
+                  <button type="button"
                     onClick={resetLayout}
                     className="text-xs font-medium px-3 py-1.5 rounded-md transition-colors"
                     style={{ color: 'var(--dash-text-muted)', background: 'var(--dash-hover)' }}

@@ -382,7 +382,7 @@ function CampaignCard({
             </button>
           )}
           {canManage && (
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();

@@ -170,7 +170,7 @@ const Menu: React.FC<{}> = () => {
             )}
           </div>
           <div className="flex gap-2">
-            <button
+            <button type="button"
               className="px-3 py-1 text-xs bg-accent text-white rounded-lg hover:opacity-90 transition-opacity"
               onClick={() => {
                 navigate({ to: '/create-item', search: { categoryId: category.itemId } });

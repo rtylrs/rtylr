@@ -358,7 +358,7 @@ export const SearchCommand: React.FC = () => {
                 const isActive = flatIndex === activeIndex;
                 const Icon = item.icon;
                 return (
-                  <button
+                  <button type="button"
                     key={item.id}
                     className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors text-left"
                     style={{

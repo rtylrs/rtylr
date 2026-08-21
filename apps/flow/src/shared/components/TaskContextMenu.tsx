@@ -76,7 +76,7 @@ export const TaskContextMenu: React.FC<{
         <ExternalLink size={12} style={{ color: 'var(--flow-text-muted)', flexShrink: 0 }} />
         Open task
       </button>
-      <button
+      <button type="button"
         style={itemStyle}
         onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--flow-hover)')}
         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}

@@ -861,7 +861,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
             {isMobile && (
-              <button
+              <button type="button"
                 onClick={() => setMobileNavOpen((open) => !open)}
                 style={{
                   height: 36,

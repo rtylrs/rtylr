@@ -472,7 +472,7 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
               <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
                 Groups
               </p>
-              <button
+              <button type="button"
                 onClick={() => navigate({ to: '/team/groups' })}
                 className="text-xs"
                 style={{ color: '#4583C4' }}

@@ -247,7 +247,7 @@ const ProjectSettings: React.FC = () => {
                 {members.length} member{members.length !== 1 ? 's' : ''}
               </p>
               {canManageProject && (
-                <button
+                <button type="button"
                   onClick={() => setShowAddMember(true)}
                   className="flex items-center gap-1 text-[11px] px-2 py-1 rounded"
                   style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}

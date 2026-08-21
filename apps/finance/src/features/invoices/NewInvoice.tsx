@@ -383,7 +383,7 @@ const NewInvoice: React.FC = () => {
               >
                 <Save size={13} /> {createInvoice.isPending ? 'Saving...' : 'Save as Draft'}
               </button>
-              <button
+              <button type="button"
                 style={{ ...primaryBtn, opacity: createInvoice.isPending ? 0.6 : 1 }}
                 onClick={() => handleSave('Sent')}
                 disabled={createInvoice.isPending}

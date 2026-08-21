@@ -347,7 +347,7 @@ const Calendar: React.FC = () => {
               </select>
 
               <div className="flex justify-end gap-2">
-                <button
+                <button type="button"
                   onClick={() => setCreateModal(null)}
                   className="px-3 py-1.5 rounded text-[12px]"
                   style={{ color: 'var(--flow-text-muted)' }}
