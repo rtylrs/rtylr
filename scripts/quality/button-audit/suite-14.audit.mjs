@@ -312,5 +312,6 @@ export const cases = [
   ["apps/crm/src/features/automations/Automations.tsx", "audit-batch-310-suite-14"],
   ["apps/crm/src/features/sales/Contracts.tsx", "audit-batch-311-suite-14"],
   ["apps/dash/src/features/addons/Addons.test.tsx", "audit-batch-312-suite-14"],
+  ["apps/dash/src/features/dashboard/Dashboard/widgets/RevenueByAppWidget.tsx", "audit-batch-313-suite-14"],
 ];
 
