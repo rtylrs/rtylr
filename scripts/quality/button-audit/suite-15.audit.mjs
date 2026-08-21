@@ -142,5 +142,6 @@ export const cases = [
   ["apps/erp/src/shared/components/UnitSelector.tsx", "audit-batch-140-suite-15"],
   ["apps/finance/src/features/recurring-invoices/RecurringInvoices.tsx", "audit-batch-141-suite-15"],
   ["apps/finance/src/shared/components/PageHeader.tsx", "audit-batch-142-suite-15"],
+  ["apps/flow/src/features/leave/RequestLeaveDialog.test.tsx", "audit-batch-143-suite-15"],
 ];
 
