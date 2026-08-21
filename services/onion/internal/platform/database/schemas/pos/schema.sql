@@ -214,7 +214,6 @@ CREATE TABLE IF NOT EXISTS pos_users (
     user_id BIGINT NOT NULL,
     location_id BIGINT NOT NULL,
     name VARCHAR(255) NOT NULL,
-    pin VARCHAR(10) NOT NULL DEFAULT '',
     pin_hash VARCHAR(255) DEFAULT NULL,
     role ENUM('manager','cashier','server','bartender','kitchen') DEFAULT 'cashier',
     is_active BOOLEAN DEFAULT TRUE,
