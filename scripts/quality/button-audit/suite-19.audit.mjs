@@ -202,5 +202,6 @@ export const cases = [
   ["apps/hr/src/features/payroll/PayrollRunDetail.tsx", "audit-batch-200-suite-19"],
   ["apps/hr/src/features/setup-wizard/steps/EmployeesStep.test.tsx", "audit-batch-201-suite-19"],
   ["apps/hr/src/features/timesheets/approvals/TimesheetApprovals.tsx", "audit-batch-202-suite-19"],
+  ["apps/hr/src/shared/components/TrainingProgress.tsx", "audit-batch-203-suite-19"],
 ];
 

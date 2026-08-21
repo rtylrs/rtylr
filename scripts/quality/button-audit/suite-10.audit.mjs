@@ -202,5 +202,6 @@ export const cases = [
   ["apps/hr/src/features/onboarding/OnboardingChecklist.tsx", "audit-batch-200-suite-10"],
   ["apps/hr/src/features/settings/roles-permissions/RolesPermissions.test.tsx", "audit-batch-201-suite-10"],
   ["apps/hr/src/features/staff/Staff.tsx", "audit-batch-202-suite-10"],
+  ["apps/hr/src/shared/components/EmployeeCard.tsx", "audit-batch-203-suite-10"],
 ];
 

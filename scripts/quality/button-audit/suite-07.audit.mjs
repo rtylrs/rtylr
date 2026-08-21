@@ -202,5 +202,6 @@ export const cases = [
   ["apps/hr/src/features/onboarding/ChecklistTemplates.tsx", "audit-batch-200-suite-07"],
   ["apps/hr/src/features/settings/Settings.test.tsx", "audit-batch-201-suite-07"],
   ["apps/hr/src/features/shifts/Shifts.tsx", "audit-batch-202-suite-07"],
+  ["apps/hr/src/shared/components/DateRangeFilter.tsx", "audit-batch-203-suite-07"],
 ];
 
