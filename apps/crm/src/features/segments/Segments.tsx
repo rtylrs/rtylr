@@ -267,7 +267,7 @@ function RuleBuilder({
                   ))}
                 </select>
                 {rules.length > 1 && (
-                  <button
+                  <button type="button"
                     onClick={() => removeRule(rule.id)}
                     style={{
                       background: 'none',

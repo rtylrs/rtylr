@@ -66,7 +66,7 @@ const Loyalty: React.FC = () => {
             </p>
           </div>
           {canConfigureLoyalty && (
-            <button
+            <button type="button"
               onClick={() => {
                 const next = !programEnabled;
                 updateConfig.mutate(

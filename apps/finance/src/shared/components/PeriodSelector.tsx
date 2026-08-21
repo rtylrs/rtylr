@@ -76,7 +76,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
           borderRadius: 8,
         }}
       >
-        <button
+        <button type="button"
           onClick={() => onDateChange(shift(date, period, -1))}
           style={{
             padding: 4,

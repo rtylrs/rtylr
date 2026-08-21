@@ -181,7 +181,7 @@ const Inbox: React.FC = () => {
         style={{ borderBottom: '1px solid var(--flow-border)' }}
       >
         {filterDefs.map(({ id, label }) => (
-          <button
+          <button type="button"
             key={id}
             onClick={() => setActiveFilter(id)}
             className="px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors"

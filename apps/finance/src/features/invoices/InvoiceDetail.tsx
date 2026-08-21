@@ -74,7 +74,7 @@ const InvoiceDetail: React.FC = () => {
               <Printer size={13} /> Print
             </button>
             <DownloadPdfButton invoiceId={invoice.id} />
-            <button
+            <button type="button"
               style={ghostBtn}
               onClick={() => {
                 navigate({ to: `/invoices/new?clone=${invoice.id}` });

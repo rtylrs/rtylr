@@ -98,7 +98,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
       }}
     >
       {/* Checkbox */}
-      <button
+      <button type="button"
         onClick={handleToggle}
         aria-label={t('flow.projectList.toggleDoneLabel')}
         aria-pressed={checked}

@@ -84,7 +84,7 @@ export const BulkEditBar: React.FC = () => {
         >
           <Check size={11} /> Mark done
         </button>
-        <button
+        <button type="button"
           disabled={isPending || !canEdit}
           title={!canEdit ? t('common.readOnlyAccess') : undefined}
           onClick={() =>

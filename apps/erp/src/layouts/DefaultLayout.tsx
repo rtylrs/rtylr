@@ -321,7 +321,7 @@ const DefaultLayout: React.FC = () => {
             insetInline: 0,
           }}
         >
-          <button
+          <button type="button"
             onClick={() => setSidebarOpen(true)}
             aria-label="Open navigation menu"
             aria-expanded={sidebarOpen}

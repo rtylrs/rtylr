@@ -107,7 +107,7 @@ function ToggleRow({
       }}
     >
       <span style={{ fontSize: '13px', color: 'var(--dash-text)' }}>{label}</span>
-      <button
+      <button type="button"
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}

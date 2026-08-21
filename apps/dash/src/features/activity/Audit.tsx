@@ -107,7 +107,7 @@ const Audit: React.FC = () => {
           </div>
           <div className="flex items-center gap-1">
             {(['all', 'info', 'warning', 'critical'] as const).map((s) => (
-              <button
+              <button type="button"
                 key={s}
                 onClick={() => setSeverity(s)}
                 className="px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider transition-colors"

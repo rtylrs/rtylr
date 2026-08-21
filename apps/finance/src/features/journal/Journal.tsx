@@ -112,7 +112,7 @@ const Journal: React.FC = () => {
         title={t('title')}
         subtitle={`${data.length} entries`}
         actions={
-          <button style={primaryBtn} onClick={() => setShowCreate(true)}>
+          <button type="button" style={primaryBtn} onClick={() => setShowCreate(true)}>
             <Plus size={13} /> {t('newEntry')}
           </button>
         }

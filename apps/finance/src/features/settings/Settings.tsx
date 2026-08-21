@@ -92,7 +92,7 @@ const GeneralTab: React.FC = () => {
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 20 }}>
-        <button style={ghostBtn} onClick={handleReset}>
+        <button type="button" style={ghostBtn} onClick={handleReset}>
           <RotateCcw size={13} /> Reset
         </button>
         <button type="button" style={primaryBtn} onClick={handleSave}>

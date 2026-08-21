@@ -91,7 +91,7 @@ const ImportCSV: React.FC<ImportCSVProps> = ({ onImport, expectedColumns }) => {
               >
                 <FileText size={14} /> Preview ({preview.length} rows)
               </h3>
-              <button onClick={() => setPreview(null)}>
+              <button type="button" onClick={() => setPreview(null)}>
                 <X size={14} style={{ color: 'var(--hub-text-muted)' }} />
               </button>
             </div>

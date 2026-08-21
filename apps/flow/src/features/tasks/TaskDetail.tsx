@@ -349,7 +349,7 @@ const TaskDetail: React.FC = () => {
             />
           </div>
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
-            <button
+            <button type="button"
               onClick={() => {
                 navigator.clipboard?.writeText(task.identifier ?? task.id);
                 toast.success(t('toasts.task.copied', { id: task.identifier ?? task.id }));

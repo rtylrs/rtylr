@@ -283,7 +283,7 @@ const Team: React.FC = (): React.JSX.Element => {
               { id: 'staff', label: 'Staff' },
               { id: 'viewer', label: 'Viewer' },
             ].map((r) => (
-              <button
+              <button type="button"
                 key={r.id}
                 onClick={() => {
                   setRoleFilter(r.id);

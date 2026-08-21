@@ -222,7 +222,7 @@ const Header: React.FC = () => {
         </button>
 
         {!isQuestionnaire && (
-          <button
+          <button type="button"
             className="login-button"
             style={{
               display: isMobile ? 'none' : token ? 'none' : 'flex',

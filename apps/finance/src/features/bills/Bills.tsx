@@ -95,7 +95,7 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
           <button style={ghostBtn} onClick={onClose} disabled={createBill.isPending}>
             {t('common.cancel')}
           </button>
-          <button
+          <button type="button"
             style={{ ...primaryBtn, opacity: createBill.isPending ? 0.6 : 1 }}
             onClick={handleSubmit}
             disabled={createBill.isPending}

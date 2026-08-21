@@ -171,7 +171,7 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
         )}
         {confirming ? (
           <>
-            <button
+            <button type="button"
               onClick={handleDelete}
               disabled={deleteMut.isPending}
               aria-label={t('common.delete')}
