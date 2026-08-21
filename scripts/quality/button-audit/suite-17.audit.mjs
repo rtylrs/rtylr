@@ -81,5 +81,6 @@ export const cases = [
   ["apps/crm/src/features/dashboard/Dashboard.tsx", "audit-batch-079-suite-17"],
   ["apps/crm/src/layouts/DefaultLayout.tsx", "audit-batch-080-suite-17"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/ActivityWidget.tsx", "audit-batch-081-suite-17"],
+  ["apps/dash/src/features/extras/HelpCenter.tsx", "audit-batch-082-suite-17"],
 ];
 

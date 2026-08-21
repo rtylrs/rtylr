@@ -81,5 +81,6 @@ export const cases = [
   ["apps/crm/src/features/customers/Customers.test.tsx", "audit-batch-079-suite-12"],
   ["apps/crm/src/features/segments/Segments.tsx", "audit-batch-080-suite-12"],
   ["apps/dash/src/features/chat/Chat.test.tsx", "audit-batch-081-suite-12"],
+  ["apps/dash/src/features/design/Design.tsx", "audit-batch-082-suite-12"],
 ];
 
