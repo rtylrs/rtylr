@@ -76,7 +76,29 @@ for (const doc of walk(DOCS)) {
     if (inFence) return;
 
     lastPathOnLine = null;
-    for (const m of line.matchAll(CITATION)) {
+    // Collect citations and bare-line continuations together and process them
+    // in positional order: a `:456` continuation refers to the path that
+    // precedes it on the line, not to the last path anywhere on the line.
+    const events = [];
+    for (const m of line.matchAll(CITATION))
+      events.push({ at: m.index, kind: 'cite', m });
+    for (const m of line.matchAll(BARE_LINE)) events.push({ at: m.index, kind: 'cont', m });
+    events.sort((a, b) => a.at - b.at);
+
+    for (const ev of events) {
+      if (ev.kind === 'cont') {
+        if (!lastPathOnLine) continue;
+        stats.citations++;
+        const count = lineCount(lastPathOnLine);
+        if (count !== null && (Number(ev.m[1]) < 1 || Number(ev.m[1]) > count)) {
+          failures.push(
+            `${relDoc}:${ln}  continuation line out of range: :${ev.m[1]} (file has ${count} lines)`
+          );
+        }
+        continue;
+      }
+      const m = ev.m;
+      {
       const [, p, lineNo] = m;
       const abs = resolveTarget(p);
       lastPathOnLine = abs;
@@ -104,16 +126,6 @@ for (const doc of walk(DOCS)) {
       }
     }
 
-    // `:456` continuations reuse the last path mentioned on the same line.
-    for (const m of line.matchAll(BARE_LINE)) {
-      if (!lastPathOnLine) continue;
-      stats.citations++;
-      const count = lineCount(lastPathOnLine);
-      if (count !== null && (Number(m[1]) < 1 || Number(m[1]) > count)) {
-        failures.push(
-          `${relDoc}:${ln}  continuation line out of range: :${m[1]} (file has ${count} lines)`
-        );
-      }
     }
 
     // Relative markdown links between audit documents.
