@@ -29,7 +29,7 @@ func (s *Service) GetWorkDay(ctx context.Context, ownerID, businessID, employeeI
 		return domain.WorkDay{}, nil, found, err
 	}
 
-	lines, logged, err := s.repo.ListWorkDayLines(ctx, ownerID, day.ID)
+	lines, logged, err := s.repo.ListWorkDayLines(ctx, businessID, day.ID)
 	if err != nil {
 		return day, nil, true, err
 	}
@@ -64,7 +64,7 @@ func (s *Service) UpsertWorkDay(ctx context.Context, input domain.WorkDayInput) 
 		return domain.WorkDay{}, err
 	}
 
-	lines, logged, err := s.repo.ListWorkDayLines(ctx, input.OwnerID, day.ID)
+	lines, logged, err := s.repo.ListWorkDayLines(ctx, input.BusinessID, day.ID)
 	if err != nil {
 		return day, err
 	}

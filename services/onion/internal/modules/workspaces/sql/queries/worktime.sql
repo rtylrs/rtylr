@@ -60,17 +60,17 @@ INSERT INTO flow_work_day_actions (
 
 -- name: ListWorkDayLines :many
 SELECT * FROM hr_time_entries
-WHERE owner_id = ? AND work_day_id = ?
+WHERE owner_id = ? AND business_id = ? AND work_day_id = ?
 ORDER BY id ASC;
 
 -- name: GetTimeEntryByClientKey :one
 SELECT * FROM hr_time_entries
-WHERE owner_id = ? AND client_key = ?
+WHERE owner_id = ? AND business_id = ? AND client_key = ?
 LIMIT 1;
 
 -- name: GetTimeEntry :one
 SELECT * FROM hr_time_entries
-WHERE id = ? AND owner_id = ?
+WHERE id = ? AND owner_id = ? AND business_id = ?
 LIMIT 1;
 
 -- name: CreateWorkDayLine :execresult
@@ -94,7 +94,7 @@ WHERE id = ? AND owner_id = ? AND business_id = ?;
 -- rather than in Go so a paginated read cannot report a partial total.
 -- name: SumWorkDayLineMinutes :one
 SELECT COALESCE(SUM(duration_minutes), 0) FROM hr_time_entries
-WHERE owner_id = ? AND work_day_id = ?;
+WHERE owner_id = ? AND business_id = ? AND work_day_id = ?;
 
 -- ── Work types ─────────────────────────────────────────────────────────────
 

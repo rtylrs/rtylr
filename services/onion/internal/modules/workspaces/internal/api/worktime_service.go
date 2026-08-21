@@ -286,7 +286,7 @@ func (a *WorkTimeAPI) CreateWorkDayLine(ctx context.Context, req *flowtimev1.Cre
 	}
 
 	line, err := a.Service.CreateWorkDayLine(ctx, domain.WorkDayLineInput{
-		OwnerID:         ownerID,
+		OwnerID:         businessID,
 		BusinessID:      businessID,
 		WorkDayID:       req.GetWorkDayId(),
 		ProjectID:       req.GetProjectId(),
@@ -313,7 +313,7 @@ func (a *WorkTimeAPI) UpdateWorkDayLine(ctx context.Context, req *flowtimev1.Upd
 
 	line, err := a.Service.UpdateWorkDayLine(ctx, domain.WorkDayLineInput{
 		ID:              req.GetId(),
-		OwnerID:         ownerID,
+		OwnerID:         businessID,
 		BusinessID:      businessID,
 		ProjectID:       req.GetProjectId(),
 		TaskID:          req.GetTaskId(),
@@ -335,7 +335,7 @@ func (a *WorkTimeAPI) DeleteWorkDayLine(ctx context.Context, req *flowtimev1.Del
 		return nil, err
 	}
 
-	removed, err := a.Service.DeleteWorkDayLine(ctx, req.GetId(), ownerID, businessID)
+	removed, err := a.Service.DeleteWorkDayLine(ctx, req.GetId(), businessID, businessID)
 	if err != nil {
 		return nil, mapServiceError(err)
 	}

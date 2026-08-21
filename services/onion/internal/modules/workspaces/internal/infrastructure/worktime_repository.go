@@ -187,10 +187,11 @@ func (r *Repository) UpsertWorkDay(ctx context.Context, input domain.WorkDayInpu
 
 // ListWorkDayLines returns the day's lines with its logged total. The total is
 // summed in SQL so it cannot disagree with a paginated read of the lines.
-func (r *Repository) ListWorkDayLines(ctx context.Context, ownerID, workDayID int64) ([]domain.WorkDayLine, int32, error) {
+func (r *Repository) ListWorkDayLines(ctx context.Context, businessID, workDayID int64) ([]domain.WorkDayLine, int32, error) {
 	rows, err := r.queries.ListWorkDayLines(ctx, sqlc.ListWorkDayLinesParams{
-		OwnerID:   ownerID,
-		WorkDayID: nullInt64(workDayID),
+		OwnerID:    businessID,
+		BusinessID: businessID,
+		WorkDayID:  nullInt64(workDayID),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListWorkDayLines failed", logger.Error(err))
@@ -202,8 +203,9 @@ func (r *Repository) ListWorkDayLines(ctx context.Context, ownerID, workDayID in
 	}
 
 	total, err := r.queries.SumWorkDayLineMinutes(ctx, sqlc.SumWorkDayLineMinutesParams{
-		OwnerID:   ownerID,
-		WorkDayID: nullInt64(workDayID),
+		OwnerID:    businessID,
+		BusinessID: businessID,
+		WorkDayID:  nullInt64(workDayID),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("SumWorkDayLineMinutes failed", logger.Error(err))
@@ -219,8 +221,9 @@ func (r *Repository) ListWorkDayLines(ctx context.Context, ownerID, workDayID in
 func (r *Repository) CreateWorkDayLine(ctx context.Context, input domain.WorkDayLineInput) (domain.WorkDayLine, error) {
 	if input.ClientKey != "" {
 		existing, err := r.queries.GetTimeEntryByClientKey(ctx, sqlc.GetTimeEntryByClientKeyParams{
-			OwnerID:   input.OwnerID,
-			ClientKey: nullString(input.ClientKey),
+			OwnerID:    input.OwnerID,
+			BusinessID: input.BusinessID,
+			ClientKey:  nullString(input.ClientKey),
 		})
 		if err == nil {
 			return toDomainLine(existing), nil
@@ -261,7 +264,7 @@ func (r *Repository) CreateWorkDayLine(ctx context.Context, input domain.WorkDay
 	if err != nil {
 		return domain.WorkDayLine{}, err
 	}
-	row, err := r.queries.GetTimeEntry(ctx, sqlc.GetTimeEntryParams{ID: id, OwnerID: input.OwnerID})
+	row, err := r.queries.GetTimeEntry(ctx, sqlc.GetTimeEntryParams{ID: id, OwnerID: input.OwnerID, BusinessID: input.BusinessID})
 	if err != nil {
 		return domain.WorkDayLine{}, err
 	}
@@ -285,7 +288,7 @@ func (r *Repository) UpdateWorkDayLine(ctx context.Context, input domain.WorkDay
 		logger.Ctx(ctx).Error("UpdateWorkDayLine failed", logger.Error(err))
 		return domain.WorkDayLine{}, err
 	}
-	row, err := r.queries.GetTimeEntry(ctx, sqlc.GetTimeEntryParams{ID: input.ID, OwnerID: input.OwnerID})
+	row, err := r.queries.GetTimeEntry(ctx, sqlc.GetTimeEntryParams{ID: input.ID, OwnerID: input.OwnerID, BusinessID: input.BusinessID})
 	if err != nil {
 		return domain.WorkDayLine{}, err
 	}
