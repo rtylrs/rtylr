@@ -77,5 +77,6 @@ export const cases = [
   ["apps/insights/src/features/operations/Operations.tsx", "audit-batch-075-suite-16"],
   ["apps/menu/src/router.tsx", "audit-batch-076-suite-16"],
   ["apps/recruit/src/features/public/RootLanding.tsx", "audit-batch-077-suite-16"],
+  ["apps/auth/src/features/reset-password/ResetPasswordConfirm.tsx", "audit-batch-078-suite-16"],
 ];
 
