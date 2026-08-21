@@ -100,9 +100,12 @@ What the original row got wrong:
    in the `packages` submodule. It exists in some working trees as an untracked
    local file, which is why the citation resolved for whoever wrote the row and
    for nobody else.
-4. **Its line numbers.** It cited root `CLAUDE.md:143` and `:901`. The submodule
-   text is at `:119` and `:877`; line 143 is part of an ASCII directory tree and
-   line 901 does not exist in the committed file.
+4. **Its line numbers.** It pointed at root `CLAUDE.md` lines 143 and 901. The
+   submodule text is at `CLAUDE.md:119` and `:877`; line 143 is part of an ASCII
+   directory tree, and line 901 does not exist in the committed file, which has
+   899. Those two numbers are written as prose here rather than as citations
+   deliberately: written in citation form, a line that does not exist would fail
+   the very check this entry is about.
 
 Points 3 and 4 are the same defect from two directions: a citation checked
 against a working tree rather than against what is committed.
