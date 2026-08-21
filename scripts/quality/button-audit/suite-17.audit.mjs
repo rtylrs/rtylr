@@ -248,5 +248,6 @@ export const cases = [
   ["apps/flow/src/features/presence/PresenceScreen.tsx", "audit-batch-246-suite-17"],
   ["apps/flow/src/features/settings/sections/TimeSection.tsx", "audit-batch-247-suite-17"],
   ["apps/flow/src/features/workspace-manager/AddWorkspaceMemberDialog.tsx", "audit-batch-248-suite-17"],
+  ["apps/flow/src/shared/components/PreviewRouteUnavailable.tsx", "audit-batch-249-suite-17"],
 ];
 

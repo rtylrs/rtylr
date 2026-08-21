@@ -248,5 +248,6 @@ export const cases = [
   ["apps/flow/src/features/projects/ProjectCalendar.tsx", "audit-batch-246-suite-21"],
   ["apps/flow/src/features/tasks/MyIssues.tsx", "audit-batch-247-suite-21"],
   ["apps/flow/src/layouts/FlowLayout.tsx", "audit-batch-248-suite-21"],
+  ["apps/flow/src/shared/components/QuickCreate.tsx", "audit-batch-249-suite-21"],
 ];
 
