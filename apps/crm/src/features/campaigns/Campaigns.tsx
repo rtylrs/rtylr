@@ -362,7 +362,7 @@ function CampaignCard({
             campaign.status === 'Sent' ||
             campaign.status === 'Cancelled' ||
             canManage) && (
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit();

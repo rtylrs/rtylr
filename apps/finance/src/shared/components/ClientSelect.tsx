@@ -34,7 +34,7 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
 
   return (
     <div style={{ position: 'relative', width: '100%' }}>
-      <button
+      <button type="button"
         onClick={() => setOpen((v) => !v)}
         style={{
           width: '100%',

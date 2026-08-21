@@ -321,7 +321,7 @@ const AddSectionPicker: React.FC<{
   >
     <div className="flex items-center justify-between">
       <div className="text-sm font-medium">Pick a section kind</div>
-      <button
+      <button type="button"
         onClick={onCancel}
         className="rounded-md px-2 py-1 text-xs text-white/60 hover:bg-white/5"
       >

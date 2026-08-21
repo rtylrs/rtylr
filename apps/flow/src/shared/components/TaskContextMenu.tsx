@@ -64,7 +64,7 @@ export const TaskContextMenu: React.FC<{
 
   return createPortal(
     <div ref={ref} style={menuStyle} role="menu">
-      <button
+      <button type="button"
         style={itemStyle}
         onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--flow-hover)')}
         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}

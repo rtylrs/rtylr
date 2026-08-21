@@ -146,7 +146,7 @@ const Warehouses: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  <button
+                  <button type="button"
                     aria-label={t('warehouses.delete')}
                     onClick={() => setConfirmDeleteId(w.id ?? null)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center"

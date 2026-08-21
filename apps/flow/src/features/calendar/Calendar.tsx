@@ -280,7 +280,7 @@ const Calendar: React.FC = () => {
                     })}
                   </span>
                 </h2>
-                <button
+                <button type="button"
                   onClick={() => setCreateModal(null)}
                   aria-label={t('common.close')}
                   className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"

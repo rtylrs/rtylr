@@ -394,7 +394,7 @@ const ProjectBoard: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <button
+              <button type="button"
                 onClick={() => setAddingColumn(true)}
                 className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] transition-colors hover:bg-[var(--flow-hover)]"
                 style={{

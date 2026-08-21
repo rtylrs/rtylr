@@ -950,7 +950,7 @@ export const SearchableCustomerSelect: React.FC<{
               </div>
             )}
             {filtered.map((c) => (
-              <button
+              <button type="button"
                 key={c.id}
                 onClick={() => {
                   onChange(c.id);

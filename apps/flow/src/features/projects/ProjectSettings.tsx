@@ -195,7 +195,7 @@ const ProjectSettings: React.FC = () => {
                 }}
               />
             </Field>
-            <button
+            <button type="button"
               onClick={() => {
                 if (!canManageProject) return;
                 updateProject.mutate(

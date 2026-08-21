@@ -95,7 +95,7 @@ const MemberRow: React.FC<{
           ))}
         </select>
       </div>
-      <button
+      <button type="button"
         onClick={() => {
           if (isLastAdmin) return toast.error(t('toasts.workspaceMember.cannotRemoveLastAdmin'));
           setConfirmRemove(true);

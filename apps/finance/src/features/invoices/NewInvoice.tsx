@@ -376,7 +376,7 @@ const NewInvoice: React.FC = () => {
             </button>
           ) : (
             <>
-              <button
+              <button type="button"
                 style={{ ...ghostBtn, opacity: createInvoice.isPending ? 0.6 : 1 }}
                 onClick={() => handleSave('Draft')}
                 disabled={createInvoice.isPending}

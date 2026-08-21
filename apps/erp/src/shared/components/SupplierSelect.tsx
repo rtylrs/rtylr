@@ -27,7 +27,7 @@ const SupplierSelect: React.FC<SupplierSelectProps> = ({
 
   return (
     <div className="relative">
-      <button
+      <button type="button"
         onClick={() => setOpen((v) => !v)}
         className="w-full px-3 py-2 rounded-lg text-sm text-left flex items-center justify-between"
         style={{

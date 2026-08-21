@@ -55,7 +55,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({ value, onChange }) =>
       />
       <div className="flex items-center gap-0.5 ml-2">
         {presets.map((p) => (
-          <button
+          <button type="button"
             key={p.label}
             onClick={() => applyPreset(p.days)}
             className="text-[10px] px-2 py-1 rounded"

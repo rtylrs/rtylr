@@ -611,7 +611,7 @@ const Team: React.FC = (): React.JSX.Element => {
             >
               <UserX size={12} /> Deactivate
             </button>
-            <button
+            <button type="button"
               aria-label="Clear selection"
               onClick={clearSelection}
               className="h-6 w-6 rounded-md flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"

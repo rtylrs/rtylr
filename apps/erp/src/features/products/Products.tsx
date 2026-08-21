@@ -259,7 +259,7 @@ const Products: React.FC = () => {
           >
             <List size={12} />
           </button>
-          <button
+          <button type="button"
             onClick={() => setViewMode('grid')}
             className="h-7 w-7 rounded-md flex items-center justify-center"
             style={{

@@ -738,7 +738,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 key={section.i18nKey}
                 style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 4 }}
               >
-                <button
+                <button type="button"
                   onClick={() => toggleSection(section.i18nKey)}
                   style={{
                     display: 'flex',

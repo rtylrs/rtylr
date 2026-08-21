@@ -86,7 +86,7 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
       width={440}
       footer={
         <>
-          <button style={ghostBtn} onClick={onClose} disabled={createQuote.isPending}>
+          <button type="button" style={ghostBtn} onClick={onClose} disabled={createQuote.isPending}>
             Cancel
           </button>
           <button type="button"
