@@ -43,5 +43,6 @@ export const cases = [
   ["apps/flow/src/features/projects/ProjectSettings.test.tsx", "audit-batch-041-suite-09"],
   ["apps/flow/src/features/time/AddHours.test.tsx", "audit-batch-042-suite-09"],
   ["apps/flow/src/shared/components/Breadcrumbs.tsx", "audit-batch-043-suite-09"],
+  ["apps/flow/src/shared/components/TaskContextMenu.test.tsx", "audit-batch-044-suite-09"],
 ];
 

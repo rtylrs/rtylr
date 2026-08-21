@@ -43,5 +43,6 @@ export const cases = [
   ["apps/flow/src/features/projects/components/BoardSettingsPanel.tsx", "audit-batch-041-suite-18"],
   ["apps/flow/src/features/triage/Triage.tsx", "audit-batch-042-suite-18"],
   ["apps/flow/src/shared/components/DueDatePicker.tsx", "audit-batch-043-suite-18"],
+  ["apps/hr/src/features/calendar/Calendar.tsx", "audit-batch-044-suite-18"],
 ];
 
