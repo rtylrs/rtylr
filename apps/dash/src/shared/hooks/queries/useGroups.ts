@@ -213,7 +213,7 @@ export const useBulkInvite = (): ReturnType<
         emails: payload.emails,
         role: payload.role,
         apps: payload.apps,
-        groupId: payload.groupId ? String(payload.groupId) : '',
+        ...(payload.groupId ? { groupId: String(payload.groupId) } : {}),
       });
       return {
         results: (res.results ?? []).map((r) => ({
