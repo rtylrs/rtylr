@@ -198,5 +198,6 @@ export const cases = [
   ["apps/flow/src/features/settings/sections/TimeSection.tsx", "audit-batch-196-suite-06"],
   ["apps/flow/src/features/workspace-manager/AddWorkspaceMemberDialog.tsx", "audit-batch-197-suite-06"],
   ["apps/flow/src/shared/components/PreviewRouteUnavailable.tsx", "audit-batch-198-suite-06"],
+  ["apps/hr/src/features/dashboard/widgets/LeaveBalanceWidget.test.tsx", "audit-batch-199-suite-06"],
 ];
 

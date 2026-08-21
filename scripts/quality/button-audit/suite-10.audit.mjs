@@ -198,5 +198,6 @@ export const cases = [
   ["apps/flow/src/features/tasks/MyIssues.tsx", "audit-batch-196-suite-10"],
   ["apps/flow/src/layouts/FlowLayout.tsx", "audit-batch-197-suite-10"],
   ["apps/flow/src/shared/components/QuickCreate.tsx", "audit-batch-198-suite-10"],
+  ["apps/hr/src/features/dashboard/widgets/SetupCompletionWidget.tsx", "audit-batch-199-suite-10"],
 ];
 
