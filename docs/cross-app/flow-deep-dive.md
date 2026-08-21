@@ -37,8 +37,16 @@ and `POST /hr/time-entries/export-billable`
 appears anywhere in `packages/voxie/api`. The import has exactly one frontend
 caller, `useImportFromFlow` in `apps/hr/src/shared/hooks/queries/useTimeEntries.ts:86-114`,
 which has **zero call sites** and whose declared response type does not match what
-the handler returns. The billable export has no caller at all. The platform built
-the pipes and never connected them.
+the handler returns. Driven under vitest against the handler's real response
+shape, that hook renders the toast `Imported [object Object],[object Object]
+entries`. The billable export has no caller at all. The platform built the pipes
+and never connected them.
+
+Neither is an isolated omission: **93 of onion's 195 hand-registered route
+literals have no matching path in any `.onk` file**, so nearly half the
+hand-written API is outside the contracts and `pnpm contracts:audit-requests`
+cannot see it. That is how the response-shape disagreement above survived. Filed
+as #873.
 
 **Finding 3: Flow already asks the user for the hourly rate that HR owns, stores
 it in `localStorage`, and reads it back nowhere.**
@@ -155,6 +163,17 @@ monolith.
 - **Row-level SQL verification of every proposed join.** Section 7 states the join
   keys and the tenancy column, verified against the schema files. It does not
   claim the queries were executed.
+- **Any query against a production database, and any call to a live endpoint.**
+  `onion/.env` points `DB_HOST` at an `*.rds.amazonaws.com` host with
+  `DB_NAME=voxire` while `APP_ENV=development`, and onion has no `godotenv`, so
+  `resolveMainDSN` (`~/Development/onion/internal/platform/database/dbclient/mysql.go:198-211`)
+  resolves to `localhost:3306/onion_dev` from a clean shell and to that RDS
+  instance one `source .env` away. The tenancy figures in section 7.4 come from
+  the local `onion_dev` container only, confirmed at the connection, read-only.
+  No `insights` or `hr/time-entries` endpoint was called anywhere.
+- **One thing was verified at runtime**, unlike the first round: the toast in row
+  O3, driven under vitest with the API stubbed and i18next initialised the way
+  `apps/hr/src/shared/services/i18next.ts:5-21` initialises it. No server involved.
 
 ### What is inference rather than verification
 
@@ -215,7 +234,7 @@ Flow contains a Flow endpoint literal or a `voxie/flow/` import.
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | O1 | Logged hours, with project, task, work type and billable flag | HR | `packages/voxie/api/flow/time/v1/models.onk:88-116` `WorkDayLine`, persisted directly as `hr_time_entries` (`~/Development/onion/internal/platform/database/schemas/flow/v8_time_tracking.sql:4-8`) | `features/time/useWorkDay.ts`, `features/time/AddHours.tsx` | Log Hours submit | A | Works, and is the strongest precedent in the platform |
 | O2 | Work type to payroll category mapping | HR | `packages/voxie/api/flow/time/v1/models.onk:21` `WorkType.hr_category_id` | `features/settings/sections/TimeSection.tsx` category list | Settings, Time | A | Contract and column exist. The Flow UI carries a `GateNotice` saying nothing reads the category |
-| O3 | Completed tasks as draft time entries | HR | **none**; live `POST /hr/time-entries/import-flow` | `apps/hr/src/shared/hooks/queries/useTimeEntries.ts:86` exists with **zero call sites** | none | B | An endpoint and a hook both exist and no button reaches them |
+| O3 | Completed tasks as draft time entries | HR | **none**; live `POST /hr/time-entries/import-flow` | `apps/hr/src/shared/hooks/queries/useTimeEntries.ts:86` exists with **zero call sites** | none | B | An unreachable chain: five working backend links, one broken frontend link, two absent. #869 decides its fate |
 | O4 | Approved billable entries for invoicing | Finance | **none**; live `POST /hr/time-entries/export-billable`, returns `BillableExportItem` with `project_id` and `task_id` (`~/Development/onion/internal/modules/hr_time/internal/domain/types.go:90-99`) | none in any app | none | B | Billable hours are marked, batched, and exported to nowhere |
 | O5 | Task counts, velocity, cycle time | Insights | `packages/voxie/api/insights/dashboard/v1/models.onk:53-68` `GetInsightsResponse`; handler stubbed at `~/Development/onion/internal/modules/insights/internal/api/setting_service.go:102` | `apps/insights/src/shared/hooks/queries/useInsightsDashboard.ts` calls only `getDashboardSummary` | none | C | Company-wide delivery metrics do not exist outside Flow |
 | O6 | Project roadmap | Insights | `packages/voxie/api/insights/dashboard/v1/models.onk:18-35` `RoadmapProject`; handler stubbed at `~/Development/onion/internal/modules/insights/internal/api/setting_service.go:110` | none | none | C | Duplicate of `flow/insights/v1` `RoadmapProject`, with a different shape and `int64` ids where Flow uses strings |
@@ -541,15 +560,32 @@ A cross-schema join filters on **both** sides, not one.
 > The older tables default it to 0, which turns a forgotten value into a silently
 > shared tenant rather than an error.
 
-Verified: `business_id BIGINT NOT NULL DEFAULT 0` appears in **57 schema files**,
-including every one of the nine tables in `flow/schema.sql` (`:4,29,65,116,127,139,156,172,205`),
+Verified, and larger than a file count suggests: `business_id BIGINT NOT NULL
+DEFAULT 0` is declared on **145 distinct tables** across **57 schema files**. The
+live schema agrees, so this is not a parsing artefact: of 170 columns named
+`business_id` in the local `onion_dev` database, **146** carry
+`COLUMN_DEFAULT = '0'`. Affected tables include every one of the nine in
+`~/Development/onion/internal/platform/database/schemas/flow/schema.sql` (`:4,29,65,116,127,139,156,172,205`),
 `~/Development/onion/internal/platform/database/schemas/hr_time/schema.sql:4` for `hr_time_entries`, `~/Development/onion/internal/platform/database/schemas/crm/schema.sql:4` for customers,
 and `~/Development/onion/internal/platform/database/schemas/voxire/expenses.sql:4`. Only the three v8 tables
 (`~/Development/onion/internal/platform/database/schemas/flow/v8_time_tracking.sql:17,52,68`) are safe.
 
 So every join this document proposes runs over at least one table where a dropped
-`business_id` yields tenant 0 rather than an error. Two consequences for the
-roadmap:
+`business_id` yields tenant 0 rather than an error.
+
+**And the collision is already real, not merely possible.** Running the audit
+query read-only against the local `onion_dev` container, 35 of those 145 tables
+hold rows at `business_id = 0`, 2,986 rows in total, and six of them hold such
+rows belonging to **more than one distinct `owner_id`**, which
+`packages/voxie/api/flow/project/v1/models.onk:8` defines as the tenant. The
+worst is `flow_workspaces`: 531 rows across 7 tenants. A correctly written
+`WHERE business_id = 0` on that table returns seven tenants' workspaces.
+
+Those counts are **local dev data and say nothing about production volume**. What
+they do establish is that the write paths which omit `business_id` are reachable
+and that the multi-tenant outcome is what they actually produce. The production
+figure needs the same query against a read replica, which is why #871 makes the
+data audit step one. Two consequences for the roadmap:
 
 - **Any new cross-app query needs a test that asserts isolation**, not only that
   it returns rows. A query missing its filter passes a happy-path test.
@@ -787,7 +823,7 @@ in this directory at `d62ad614`, the commit this round was branched from:
 | `capacity: 40` hardcoded, `contracted_hours_per_week` has no read RPC | zero hits for `capacity: 40`; `contracted_hours_per_week` appears only as a CSV inventory row | #868 |
 | `useImportFromFlow` has zero call sites and a response-type mismatch | the endpoint is in `inventory/endpoints.csv:584`; the dead hook and the mismatch are not | #869 |
 | All four `insights.dashboard.v1` handlers return `notImplemented` | zero hits for `notImplemented`; `docs/cross-app/11-rejected.md:64-69` assumes the aggregate is built | #870 |
-| `business_id BIGINT NOT NULL DEFAULT 0` on 57 schema files | zero hits for `DEFAULT 0` | #871 |
+| `business_id BIGINT NOT NULL DEFAULT 0` on 145 tables, with 6 already holding multi-tenant rows locally | zero hits for `DEFAULT 0` | #871 |
 | Flow's currency is unreachable through the endpoint it already calls | `BusinessEntry` is mentioned; the gap is not | #872 |
 
 The seventh, that `flow_work_day_lines` is not a table and Flow's hours are rows
@@ -810,7 +846,8 @@ All labelled `audit:flow-cross-app-2026-08-21` on `tryrtylr/rtylr`.
 | #868 | Flow hardcodes a 40-hour capacity because HR's `contracted_hours_per_week` has no read RPC | I17, I18, class C | Yes |
 | #869 | HR's Flow time import is live but unreachable, and its response type does not match the handler | O3, class B plus a bug | Frontend fix no; two correctness problems yes |
 | #870 | `insights.dashboard.v1` declares four Flow-shaped endpoints and every handler returns `notImplemented` | O5 to O8, class C | Yes |
-| #871 | `business_id` defaults to 0 on 57 schema files, so a missing tenant filter leaks instead of failing | platform prerequisite | Yes, entirely |
+| #871 | `business_id` defaults to 0 on 145 tables, so a missing tenant filter leaks instead of failing | platform prerequisite | Yes, entirely |
+| #873 | Contract drift: 93 of onion's 195 hand-registered routes have no `.onk` definition | platform, and the reason O3's mismatch went unseen | Partly |
 | #872 | Flow has no currency: the `/businesses/mine` row it already reads has no currency field | I14, class B | No |
 
 Not filed, and why:
