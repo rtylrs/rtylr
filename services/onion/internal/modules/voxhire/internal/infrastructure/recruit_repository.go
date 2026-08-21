@@ -1802,7 +1802,13 @@ func (r *Repository) listRecordedApplicationEvents(ctx context.Context, id int64
 }
 
 func (r *Repository) listTaskTimelineEvents(ctx context.Context, id int64) ([]domain.TimelineEvent, error) {
-	rows, err := r.queries.ListTaskTimelineEvents(ctx, id)
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := r.queries.ListTaskTimelineEvents(ctx, sqlc.ListTaskTimelineEventsParams{
+		OwnerID: ownerID, ApplicationID: id,
+	})
 	if err != nil {
 		return nil, err
 	}

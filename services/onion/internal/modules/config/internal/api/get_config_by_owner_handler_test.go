@@ -19,17 +19,14 @@ func oneKitStatus(err error) int {
 	return 0
 }
 
-func TestResolveConfigBusinessID_UsesTokenBusinessID(t *testing.T) {
-	got, sErr := resolveConfigBusinessID(
+func TestResolveConfigBusinessIDFailsClosedWithoutTenantMapping(t *testing.T) {
+	_, sErr := resolveConfigBusinessID(
 		context.Background(),
 		&authPkg.AuthUser{UserID: 5, BusinessID: 42, Role: "owner"},
 		&GetConfigByOwnerRequest{Owner: "not-a-number"},
 	)
-	if sErr != nil {
-		t.Fatalf("resolveConfigBusinessID returned error: %v", sErr)
-	}
-	if got != 42 {
-		t.Fatalf("business id = %d, want 42", got)
+	if oneKitStatus(sErr) != http.StatusForbidden {
+		t.Fatalf("status = %d, want %d", oneKitStatus(sErr), http.StatusForbidden)
 	}
 }
 

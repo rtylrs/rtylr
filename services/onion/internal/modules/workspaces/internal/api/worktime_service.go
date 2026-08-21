@@ -294,7 +294,7 @@ func (a *WorkTimeAPI) ListWorkDaysForWorkspace(ctx context.Context, req *flowtim
 }
 
 func (a *WorkTimeAPI) CreateWorkDayLine(ctx context.Context, req *flowtimev1.CreateWorkDayLineRequest) (*flowtimev1.CreateWorkDayLineResponse, error) {
-	ownerID, businessID, _, err := a.scope(ctx, 0)
+	_, businessID, _, err := a.scope(ctx, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -320,7 +320,7 @@ func (a *WorkTimeAPI) CreateWorkDayLine(ctx context.Context, req *flowtimev1.Cre
 }
 
 func (a *WorkTimeAPI) UpdateWorkDayLine(ctx context.Context, req *flowtimev1.UpdateWorkDayLineRequest) (*flowtimev1.UpdateWorkDayLineResponse, error) {
-	ownerID, businessID, _, err := a.scope(ctx, 0)
+	_, businessID, _, err := a.scope(ctx, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -344,7 +344,7 @@ func (a *WorkTimeAPI) UpdateWorkDayLine(ctx context.Context, req *flowtimev1.Upd
 }
 
 func (a *WorkTimeAPI) DeleteWorkDayLine(ctx context.Context, req *flowtimev1.DeleteWorkDayLineRequest) (*flowtimev1.DeleteWorkDayLineResponse, error) {
-	ownerID, businessID, _, err := a.scope(ctx, 0)
+	_, businessID, _, err := a.scope(ctx, 0)
 	if err != nil {
 		return nil, err
 	}

@@ -142,19 +142,19 @@ LIMIT 100;
 
 -- name: UpdateApplicationStatus :exec
 UPDATE voxire_career_applications a
-JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+JOIN careers c ON c.id = a.job_id
    SET a.status = ?
- WHERE a.id = ?;
+ WHERE a.id = ? AND c.owner_id = ?;
 
 -- name: UpdateApplicationReview :exec
 UPDATE voxire_career_applications
-JOIN careers c ON c.id = voxire_career_applications.job_id AND c.owner_id = ?
-   SET status = CASE WHEN ? <> '' THEN ? ELSE status END,
-       review_rating = ?,
-       review_notes = ?,
-       next_step = ?,
+JOIN careers c ON c.id = voxire_career_applications.job_id
+   SET voxire_career_applications.status = CASE WHEN ? <> '' THEN ? ELSE voxire_career_applications.status END,
+       voxire_career_applications.review_rating = ?,
+       voxire_career_applications.review_notes = ?,
+       voxire_career_applications.next_step = ?,
        reviewed_at = CURRENT_TIMESTAMP
- WHERE voxire_career_applications.id = ?;
+ WHERE voxire_career_applications.id = ? AND c.owner_id = ?;
 
 -- name: GetApplicationCVKey :one
 SELECT COALESCE(a.cv_key, '') AS cv_key
@@ -182,29 +182,29 @@ INSERT INTO voxhire_application_events (application_id, kind, title, detail)
 VALUES (?, ?, ?, ?);
 
 -- name: ListApplicationEvents :many
-SELECT kind, title, COALESCE(detail,'') AS detail, created_at
-FROM voxhire_application_events
-JOIN voxire_career_applications a ON a.id = voxhire_application_events.application_id
+SELECT e.kind, e.title, COALESCE(e.detail,'') AS detail, e.created_at
+FROM voxhire_application_events e
+JOIN voxire_career_applications a ON a.id = e.application_id
 JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
-WHERE application_id = ?
-ORDER BY created_at DESC;
+WHERE e.application_id = ?
+ORDER BY e.created_at DESC;
 
 -- name: GetApplicationTimelineMeta :one
-SELECT created_at,
-       COALESCE(cv_processing_status, 'pending') AS cv_processing_status,
-       COALESCE(cv_processing_error, '') AS cv_processing_error,
-       cv_processed_at,
-       reviewed_at
-FROM voxire_career_applications
-JOIN careers c ON c.id = voxire_career_applications.job_id AND c.owner_id = ?
-WHERE voxire_career_applications.id = ?;
+SELECT a.created_at,
+       COALESCE(a.cv_processing_status, 'pending') AS cv_processing_status,
+       COALESCE(a.cv_processing_error, '') AS cv_processing_error,
+       a.cv_processed_at,
+       a.reviewed_at
+FROM voxire_career_applications a
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+WHERE a.id = ?;
 
 -- name: ListTaskTimelineEvents :many
-SELECT title, status, created_at, completed_at
-FROM voxhire_follow_up_tasks
-JOIN voxire_career_applications a ON a.id = voxhire_follow_up_tasks.application_id
+SELECT t.title, t.status, t.created_at, t.completed_at
+FROM voxhire_follow_up_tasks t
+JOIN voxire_career_applications a ON a.id = t.application_id
 JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
-WHERE voxhire_follow_up_tasks.application_id = ?;
+WHERE t.application_id = ?;
 
 -- name: ListShortlistTimelineEvents :many
 SELECT s.name, i.sort_order, i.created_at
@@ -217,7 +217,7 @@ WHERE i.application_id = ?;
 -- name: ListTasks :many
 SELECT t.id, t.application_id, a.job_id, COALESCE(c.title, '') AS opening_title,
        a.name AS candidate_name, a.email AS candidate_email,
-       t.title, t.status, t.due_at, t.completed_at, t.created_at
+       t.title AS title, t.status AS status, t.due_at, t.completed_at, t.created_at AS created_at
 FROM voxhire_follow_up_tasks t
 JOIN voxire_career_applications a ON a.id = t.application_id
 JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
@@ -232,7 +232,7 @@ LIMIT 100;
 -- name: GetTaskByID :one
 SELECT t.id, t.application_id, a.job_id, COALESCE(c.title, '') AS opening_title,
        a.name AS candidate_name, a.email AS candidate_email,
-       t.title, t.status, t.due_at, t.completed_at, t.created_at
+       t.title AS title, t.status AS status, t.due_at, t.completed_at, t.created_at AS created_at
 FROM voxhire_follow_up_tasks t
 JOIN voxire_career_applications a ON a.id = t.application_id
 JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
@@ -251,18 +251,18 @@ ON DUPLICATE KEY UPDATE
     id = LAST_INSERT_ID(id);
 
 -- name: UpdateFollowUpTask :exec
-UPDATE voxhire_follow_up_tasks
-JOIN voxire_career_applications a ON a.id = voxhire_follow_up_tasks.application_id
-JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
-   SET title = CASE WHEN ? <> '' THEN ? ELSE title END,
-       status = CASE WHEN ? <> '' THEN ? ELSE status END,
-       due_at = ?,
-       completed_at = CASE
-         WHEN ? = 'done' THEN COALESCE(completed_at, CURRENT_TIMESTAMP)
+UPDATE voxhire_follow_up_tasks t
+JOIN voxire_career_applications a ON a.id = t.application_id
+JOIN careers c ON c.id = a.job_id
+   SET t.title = CASE WHEN ? <> '' THEN ? ELSE t.title END,
+       t.status = CASE WHEN ? <> '' THEN ? ELSE t.status END,
+       t.due_at = ?,
+       t.completed_at = CASE
+         WHEN ? = 'done' THEN COALESCE(t.completed_at, CURRENT_TIMESTAMP)
          WHEN ? = 'open' THEN NULL
-         ELSE completed_at
+         ELSE t.completed_at
        END
- WHERE voxhire_follow_up_tasks.id = ?;
+ WHERE t.id = ? AND c.owner_id = ?;
 
 -- name: CountFollowUpTasks :one
 SELECT COUNT(*) FROM voxhire_follow_up_tasks WHERE id = ?;

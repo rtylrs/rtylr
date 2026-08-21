@@ -62,7 +62,7 @@ func (r *Repository) ListTimeEntries(ctx context.Context, businessID int64, para
 
 	entries := make([]domain.TimeEntryRecord, 0, len(rows))
 	for _, row := range rows {
-		entries = append(entries, timeEntryFromRow(row))
+		entries = append(entries, timeEntryFromListRow(row))
 	}
 	return entries, total, nil
 }
@@ -76,7 +76,7 @@ func (r *Repository) GetTimeEntry(ctx context.Context, businessID, entryID int64
 		logger.Ctx(ctx).Error("failed to get time entry", logger.Any("business_id", businessID), logger.Any("entry_id", entryID), logger.Error(err))
 		return nil, err
 	}
-	entry := timeEntryFromRow(row)
+	entry := timeEntryFromGetRow(row)
 	return &entry, nil
 }
 
@@ -381,7 +381,7 @@ func (r *Repository) ListApprovedBillableEntries(ctx context.Context, businessID
 	}
 	entries := make([]domain.TimeEntryRecord, 0, len(rows))
 	for _, row := range rows {
-		entries = append(entries, timeEntryFromRow(row))
+		entries = append(entries, timeEntryFromApprovedRow(row))
 	}
 	return entries, nil
 }
@@ -433,7 +433,7 @@ func (r *Repository) ExportApprovedBillableEntries(ctx context.Context, business
 			)
 			return nil, err
 		}
-		entries = append(entries, timeEntryFromRow(row))
+		entries = append(entries, timeEntryFromApprovedRow(row))
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -474,30 +474,55 @@ func (r *Repository) ListUnsubmittedEmployees(ctx context.Context, businessID in
 
 // --- Helpers ---
 
-func timeEntryFromRow(row sqlc.HrTimeEntry) domain.TimeEntryRecord {
+func timeEntryFromFields(
+	id, ownerID, businessID, employeeID int64,
+	timesheetID, projectID, taskID, categoryID sql.NullInt64,
+	date time.Time,
+	durationMinutes int32,
+	startTime, endTime, description sql.NullString,
+	isBillable bool,
+	status string,
+	rejectionReason sql.NullString,
+	approvedBy sql.NullInt64,
+	source string,
+	billableInvoiceID sql.NullInt64,
+	createdAt, updatedAt time.Time,
+) domain.TimeEntryRecord {
 	return domain.TimeEntryRecord{
-		ID:                row.ID,
-		OwnerID:           row.OwnerID,
-		BusinessID:        row.BusinessID,
-		EmployeeID:        row.EmployeeID,
-		TimesheetID:       row.TimesheetID.Int64,
-		ProjectID:         row.ProjectID.Int64,
-		TaskID:            row.TaskID.Int64,
-		CategoryID:        row.CategoryID.Int64,
-		Date:              row.Date.Format("2006-01-02"),
-		DurationMinutes:   row.DurationMinutes,
-		StartTime:         row.StartTime.String,
-		EndTime:           row.EndTime.String,
-		Description:       row.Description.String,
-		IsBillable:        row.IsBillable,
-		Status:            row.Status,
-		RejectionReason:   row.RejectionReason.String,
-		ApprovedBy:        row.ApprovedBy.Int64,
-		Source:            row.Source,
-		BillableInvoiceID: row.BillableInvoiceID.Int64,
-		CreatedAt:         row.CreatedAt,
-		UpdatedAt:         row.UpdatedAt,
+		ID:                id,
+		OwnerID:           ownerID,
+		BusinessID:        businessID,
+		EmployeeID:        employeeID,
+		TimesheetID:       timesheetID.Int64,
+		ProjectID:         projectID.Int64,
+		TaskID:            taskID.Int64,
+		CategoryID:        categoryID.Int64,
+		Date:              date.Format("2006-01-02"),
+		DurationMinutes:   durationMinutes,
+		StartTime:         startTime.String,
+		EndTime:           endTime.String,
+		Description:       description.String,
+		IsBillable:        isBillable,
+		Status:            status,
+		RejectionReason:   rejectionReason.String,
+		ApprovedBy:        approvedBy.Int64,
+		Source:            source,
+		BillableInvoiceID: billableInvoiceID.Int64,
+		CreatedAt:         createdAt,
+		UpdatedAt:         updatedAt,
 	}
+}
+
+func timeEntryFromListRow(row sqlc.ListTimeEntriesRow) domain.TimeEntryRecord {
+	return timeEntryFromFields(row.ID, row.OwnerID, row.BusinessID, row.EmployeeID, row.TimesheetID, row.ProjectID, row.TaskID, row.CategoryID, row.Date, row.DurationMinutes, row.StartTime, row.EndTime, row.Description, row.IsBillable, row.Status, row.RejectionReason, row.ApprovedBy, row.Source, row.BillableInvoiceID, row.CreatedAt, row.UpdatedAt)
+}
+
+func timeEntryFromGetRow(row sqlc.GetTimeEntryRow) domain.TimeEntryRecord {
+	return timeEntryFromFields(row.ID, row.OwnerID, row.BusinessID, row.EmployeeID, row.TimesheetID, row.ProjectID, row.TaskID, row.CategoryID, row.Date, row.DurationMinutes, row.StartTime, row.EndTime, row.Description, row.IsBillable, row.Status, row.RejectionReason, row.ApprovedBy, row.Source, row.BillableInvoiceID, row.CreatedAt, row.UpdatedAt)
+}
+
+func timeEntryFromApprovedRow(row sqlc.ListApprovedBillableEntriesRow) domain.TimeEntryRecord {
+	return timeEntryFromFields(row.ID, row.OwnerID, row.BusinessID, row.EmployeeID, row.TimesheetID, row.ProjectID, row.TaskID, row.CategoryID, row.Date, row.DurationMinutes, row.StartTime, row.EndTime, row.Description, row.IsBillable, row.Status, row.RejectionReason, row.ApprovedBy, row.Source, row.BillableInvoiceID, row.CreatedAt, row.UpdatedAt)
 }
 
 func timesheetFromRow(row sqlc.HrTimesheet) domain.TimesheetRecord {
