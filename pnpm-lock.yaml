@@ -1441,6 +1441,9 @@ importers:
       '@voxire/config':
         specifier: workspace:*
         version: link:../config
+      '@voxire/types':
+        specifier: workspace:*
+        version: link:../types
       axios:
         specifier: ^1.19.0
         version: 1.19.0
