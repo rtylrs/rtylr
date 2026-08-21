@@ -807,8 +807,11 @@ func (x *UpsertSubscriptionResponse) GetMessage() string {
 }
 
 type CreateCheckoutRequest struct {
-	PlanSlug string `json:"plan_slug,omitempty"`
-	Email    string `json:"email,omitempty"`
+	PlanSlug     string   `json:"plan_slug,omitempty"`
+	Email        string   `json:"email,omitempty"`
+	BillingCycle *string  `json:"billing_cycle,omitempty"`
+	SeatCount    *int32   `json:"seat_count,omitempty"`
+	Addons       []string `json:"addons,omitempty"`
 }
 
 func (x *CreateCheckoutRequest) GetPlanSlug() string {
@@ -825,6 +828,38 @@ func (x *CreateCheckoutRequest) GetEmail() string {
 		return zero
 	}
 	return x.Email
+}
+
+func (x *CreateCheckoutRequest) GetBillingCycle() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.BillingCycle == nil {
+		var zero string
+		return zero
+	}
+	return *x.BillingCycle
+}
+
+func (x *CreateCheckoutRequest) GetSeatCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	if x.SeatCount == nil {
+		var zero int32
+		return zero
+	}
+	return *x.SeatCount
+}
+
+func (x *CreateCheckoutRequest) GetAddons() []string {
+	if x == nil {
+		var zero []string
+		return zero
+	}
+	return x.Addons
 }
 
 type CreateCheckoutResponse struct {

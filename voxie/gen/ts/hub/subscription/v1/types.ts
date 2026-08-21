@@ -513,6 +513,9 @@ return violations;
 export interface CreateCheckoutRequest {
 planSlug?: string;
 email?: string;
+billingCycle?: string;
+seatCount?: number;
+addons?: (string)[];
 }
 
 export function decodeCreateCheckoutRequest(v: any): CreateCheckoutRequest {
@@ -520,6 +523,9 @@ if (v === null || v === undefined) return v;
 return {
 planSlug: v.plan_slug,
 email: v.email,
+billingCycle: v.billing_cycle,
+seatCount: v.seat_count,
+addons: v.addons,
 };
 }
 
@@ -527,6 +533,9 @@ export function encodeCreateCheckoutRequest(v: CreateCheckoutRequest): Record<st
 const out: Record<string, unknown> = {};
 if (v.planSlug !== undefined) { out.plan_slug = v.planSlug; }
 if (v.email !== undefined) { out.email = v.email; }
+if (v.billingCycle !== undefined) { out.billing_cycle = v.billingCycle; }
+if (v.seatCount !== undefined) { out.seat_count = v.seatCount; }
+if (v.addons !== undefined) { out.addons = v.addons; }
 return out;
 }
 
