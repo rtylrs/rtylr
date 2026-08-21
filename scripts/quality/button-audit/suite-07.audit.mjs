@@ -33,5 +33,6 @@ export const cases = [
   ["apps/dash/src/features/extras/NoMatch.tsx", "audit-batch-031-suite-07"],
   ["apps/dash/src/features/settings/Settings/components/BusinessType/BusinessType.tsx", "audit-batch-032-suite-07"],
   ["apps/dash/src/shared/components/dash/ActivityEntry.tsx", "audit-batch-033-suite-07"],
+  ["apps/dash/src/shared/components/ui/skeleton.tsx", "audit-batch-034-suite-07"],
 ];
 
