@@ -7,10 +7,9 @@ import { CompatibilityServiceClient as FinanceCompatibilityServiceClient } from 
 import { InvoicesServiceClient } from '@voxire/voxie/finance/invoices/v1/client';
 import { ExpensesServiceClient } from '@voxire/voxie/finance/expenses/v1/client';
 import { CompatibilityServiceClient as CrmCompatibilityServiceClient } from '@voxire/voxie/crm/compat/v1/client';
+import { LicenseServiceClient } from '@voxire/voxie/license/v1/client';
 
-// licenseClient lives in ./api as a REST adapter: license/v1 has no contract
-// in voxie (#894).
-export { licenseClient } from './api';
+export const licenseClient = createOneKitClient(LicenseServiceClient, 'finance');
 export const userClient = createOneKitClient(UserServiceClient, 'finance');
 export const teamCompatibilityClient = createOneKitClient(
   TeamCompatibilityServiceClient,
