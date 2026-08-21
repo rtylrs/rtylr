@@ -299,30 +299,3 @@ export function useToggleSubtask() {
     onError: () => toast.error(t('toasts.subtask.updateFailed')),
   });
 }
-
-export function useLogTime() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      task_id,
-      duration_minutes,
-      description,
-    }: {
-      task_id: number;
-      duration_minutes: number;
-      description?: string;
-    }) => {
-      return unwrap(
-        flowApi.logTime({
-          task_id,
-          duration_minutes,
-          description,
-        })
-      ).then(() => {});
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['task'] });
-    },
-    onError: () => toast.error(t('toasts.time.logFailed')),
-  });
-}
