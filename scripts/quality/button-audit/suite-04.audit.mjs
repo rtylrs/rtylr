@@ -240,5 +240,6 @@ export const cases = [
   ["apps/dash/src/features/settings/Settings/components/Domain/Domain.tsx", "audit-batch-238-suite-04"],
   ["apps/dash/src/shared/components/dash/AppCard.tsx", "audit-batch-239-suite-04"],
   ["apps/dash/src/shared/components/ui/tooltip.tsx", "audit-batch-240-suite-04"],
+  ["apps/erp/src/features/price-lists/PriceLists.test.tsx", "audit-batch-241-suite-04"],
 ];
 

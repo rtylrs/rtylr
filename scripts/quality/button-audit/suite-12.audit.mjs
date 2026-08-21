@@ -240,5 +240,6 @@ export const cases = [
   ["apps/dash/src/features/team/InviteUser.tsx", "audit-batch-238-suite-12"],
   ["apps/dash/src/shared/components/dash/SettingSection.tsx", "audit-batch-239-suite-12"],
   ["apps/dash/src/shared/hooks/queries/useTeam.test.tsx", "audit-batch-240-suite-12"],
+  ["apps/erp/src/features/purchasing/Purchasing.test.tsx", "audit-batch-241-suite-12"],
 ];
 

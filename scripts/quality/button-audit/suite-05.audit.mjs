@@ -240,5 +240,6 @@ export const cases = [
   ["apps/dash/src/features/settings/Settings/components/Email/Email.tsx", "audit-batch-238-suite-05"],
   ["apps/dash/src/shared/components/dash/Breadcrumbs.tsx", "audit-batch-239-suite-05"],
   ["apps/dash/src/shared/hooks/queries/useAiQuota.test.tsx", "audit-batch-240-suite-05"],
+  ["apps/erp/src/features/price-lists/PriceLists.tsx", "audit-batch-241-suite-05"],
 ];
 

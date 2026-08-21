@@ -240,5 +240,6 @@ export const cases = [
   ["apps/dash/src/layouts/CustomSidebarLayout.tsx", "audit-batch-238-suite-18"],
   ["apps/dash/src/shared/components/ui/card.tsx", "audit-batch-239-suite-18"],
   ["apps/erp/src/features/brands/Brands.tsx", "audit-batch-240-suite-18"],
+  ["apps/erp/src/features/settings/Settings.test.tsx", "audit-batch-241-suite-18"],
 ];
 

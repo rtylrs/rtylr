@@ -240,5 +240,6 @@ export const cases = [
   ["apps/dash/src/features/settings/Settings/components/Businesses/Businesses.test.tsx", "audit-batch-238-suite-02"],
   ["apps/dash/src/shared/components/dash/ApiKeyRow.tsx", "audit-batch-239-suite-02"],
   ["apps/dash/src/shared/components/ui/table.tsx", "audit-batch-240-suite-02"],
+  ["apps/erp/src/features/low-stock-alerts/LowStockAlerts.test.tsx", "audit-batch-241-suite-02"],
 ];
 
