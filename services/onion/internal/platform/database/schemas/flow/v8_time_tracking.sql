@@ -17,16 +17,19 @@
 --                     Flow, for flow_tasks.actual_hours (RecalcActualHours) and
 --                     the insights time-by-member panel. Payroll never sees it.
 --
--- Double counting is therefore not possible in payroll, which reads one store.
--- It is not prevented at write time either: the same hour may legitimately be
--- entered in both, and nothing reconciles them.
+-- Double counting is not possible in payroll, which reads one store.
 --
--- What IS wrong today is the reverse of double counting. Both per-task rollups
--- above read flow_time_logs alone, so a work-day line carrying a task_id
--- contributes nothing to that task's actual_hours or to insights. Teams using
--- the work-day screen, which is what this file exists for, see undercounts.
--- Tracked in tryrtylr/rtylr#903. Do not "fix" it by summing both stores without
--- reading that issue: the same hour can be in both.
+-- The per-task rollups read BOTH, as of tryrtylr/rtylr#903. They used to read
+-- flow_time_logs alone, so a work-day line carrying a task_id contributed
+-- nothing to that task's actual_hours or to insights, and teams using the
+-- work-day screen this file exists for saw zeros.
+--
+-- Summing both needs an overlap key, because the same hour may legitimately be
+-- entered in each. flow_time_logs.time_entry_id is it: when set, that row is the
+-- same hour as the named hr_time_entries row and the rollups skip it, counting
+-- the hr_time_entries side because payroll reads it. Nothing writes the column
+-- yet, so today the rollups are a plain sum; linking the two at write time is
+-- still open on #903.
 --
 -- History: the denial above was cited by tryrtylr/rtylr#869 and by
 -- docs/cross-app/flow-deep-dive.md as proof that Flow's hours are a single

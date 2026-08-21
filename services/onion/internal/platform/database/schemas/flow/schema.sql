@@ -129,6 +129,10 @@ CREATE TABLE IF NOT EXISTS flow_time_logs (
     owner_id BIGINT NOT NULL,
     business_id BIGINT NOT NULL DEFAULT 0,
     task_id BIGINT NOT NULL,
+    -- When set, this row is the same hour as the named hr_time_entries row and
+    -- the per-task rollups skip it. See flow/zz_flow_time_logs_time_entry_id.sql
+    -- and tryrtylr/rtylr#903.
+    time_entry_id BIGINT NULL,
     user_id BIGINT NOT NULL,
     duration_minutes INT NOT NULL DEFAULT 0,
     description TEXT,
