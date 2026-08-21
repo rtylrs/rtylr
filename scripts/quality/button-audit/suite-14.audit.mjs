@@ -179,5 +179,6 @@ export const cases = [
   ["apps/hr/src/shared/components/DateRangeFilter.tsx", "audit-batch-177-suite-14"],
   ["apps/insights/src/features/products/Products.test.tsx", "audit-batch-178-suite-14"],
   ["apps/menu/src/screens/Dev/DevMenu.tsx", "audit-batch-179-suite-14"],
+  ["apps/recruit/src/main.tsx", "audit-batch-180-suite-14"],
 ];
 

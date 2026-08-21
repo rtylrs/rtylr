@@ -179,5 +179,6 @@ export const cases = [
   ["apps/hr/src/shared/components/HRPermissionGuard.tsx", "audit-batch-177-suite-19"],
   ["apps/insights/src/features/revenue/Revenue.tsx", "audit-batch-178-suite-19"],
   ["apps/menu/src/screens/Public/SlugLanding/LocationMenu.tsx", "audit-batch-179-suite-19"],
+  ["apps/recruit/src/templates/editorial/Index.tsx", "audit-batch-180-suite-19"],
 ];
 
