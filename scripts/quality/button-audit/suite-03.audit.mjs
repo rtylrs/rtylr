@@ -148,5 +148,6 @@ export const cases = [
   ["apps/flow/src/shared/components/ActivityFeed.tsx", "audit-batch-146-suite-03"],
   ["apps/flow/src/shared/components/StatusIcon.tsx", "audit-batch-147-suite-03"],
   ["apps/hr/src/features/dashboard/widgets/WidgetShell.tsx", "audit-batch-148-suite-03"],
+  ["apps/hr/src/features/overtime/Overtime.tsx", "audit-batch-149-suite-03"],
 ];
 

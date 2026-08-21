@@ -148,5 +148,6 @@ export const cases = [
   ["apps/flow/src/shared/components/CommentInput.test.tsx", "audit-batch-146-suite-09"],
   ["apps/flow/src/shared/components/TrialBanner.tsx", "audit-batch-147-suite-09"],
   ["apps/hr/src/features/employees/CreateLocationForm.tsx", "audit-batch-148-suite-09"],
+  ["apps/hr/src/features/performance/CreateCycleForm.tsx", "audit-batch-149-suite-09"],
 ];
 

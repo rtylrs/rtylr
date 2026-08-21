@@ -148,5 +148,6 @@ export const cases = [
   ["apps/flow/src/shared/components/RealtimeConnectionIndicator.test.tsx", "audit-batch-146-suite-25"],
   ["apps/hr/src/features/dashboard/widgets/TeamAttendanceTodayWidget.tsx", "audit-batch-147-suite-25"],
   ["apps/hr/src/features/onboarding/OnboardingManagement.tsx", "audit-batch-148-suite-25"],
+  ["apps/hr/src/features/settings/roles-permissions/RolesPermissions.tsx", "audit-batch-149-suite-25"],
 ];
 

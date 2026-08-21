@@ -148,5 +148,6 @@ export const cases = [
   ["apps/flow/src/shared/components/CycleBadge.tsx", "audit-batch-146-suite-13"],
   ["apps/hr/src/features/attendance/QRScanner.tsx", "audit-batch-147-suite-13"],
   ["apps/hr/src/features/employees/NewEmployee.tsx", "audit-batch-148-suite-13"],
+  ["apps/hr/src/features/performance/ReviewCycleDetail.tsx", "audit-batch-149-suite-13"],
 ];
 

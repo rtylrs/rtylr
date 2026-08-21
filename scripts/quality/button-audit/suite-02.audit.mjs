@@ -148,5 +148,6 @@ export const cases = [
   ["apps/flow/src/routes/AppRoutes.tsx", "audit-batch-146-suite-02"],
   ["apps/flow/src/shared/components/Skeleton.tsx", "audit-batch-147-suite-02"],
   ["apps/hr/src/features/dashboard/widgets/UpcomingShiftsWidget.tsx", "audit-batch-148-suite-02"],
+  ["apps/hr/src/features/operations/Operations.tsx", "audit-batch-149-suite-02"],
 ];
 
