@@ -101,5 +101,6 @@ export const cases = [
   ["apps/hr/src/features/time-off/TimeOffNew.tsx", "audit-batch-099-suite-19"],
   ["apps/hr/src/shared/components/RatingStars.tsx", "audit-batch-100-suite-19"],
   ["apps/insights/src/main.tsx", "audit-batch-101-suite-19"],
+  ["apps/recruit/src/features/admin/CareerEditor.tsx", "audit-batch-102-suite-19"],
 ];
 

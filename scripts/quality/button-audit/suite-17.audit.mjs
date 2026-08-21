@@ -101,5 +101,6 @@ export const cases = [
   ["apps/hr/src/features/time-off/TimeOff.test.tsx", "audit-batch-099-suite-17"],
   ["apps/hr/src/shared/components/PayStubCard.tsx", "audit-batch-100-suite-17"],
   ["apps/insights/src/features/settings/Settings.tsx", "audit-batch-101-suite-17"],
+  ["apps/menu/src/screens/Public/SlugLanding/SlugLanding.tsx", "audit-batch-102-suite-17"],
 ];
 

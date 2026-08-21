@@ -101,5 +101,6 @@ export const cases = [
   ["apps/hr/src/features/shifts/Shifts.tsx", "audit-batch-099-suite-10"],
   ["apps/hr/src/shared/components/DateRangeFilter.tsx", "audit-batch-100-suite-10"],
   ["apps/insights/src/features/products/Products.test.tsx", "audit-batch-101-suite-10"],
+  ["apps/menu/src/screens/Dev/DevMenu.tsx", "audit-batch-102-suite-10"],
 ];
 
