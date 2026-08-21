@@ -204,7 +204,7 @@ const Categories: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <button
+                  <button type="button"
                     aria-label="Edit category"
                     onClick={() => {
                       setEditingId(cat.id ?? null);

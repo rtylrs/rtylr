@@ -138,7 +138,7 @@ const Milestones: React.FC = () => {
             className="text-[12px]"
           />
           <div className="flex gap-2">
-            <button
+            <button type="button"
               onClick={() => {
                 if (!newName.trim() || !newDate) {
                   toast.error(t('errors.generic'));

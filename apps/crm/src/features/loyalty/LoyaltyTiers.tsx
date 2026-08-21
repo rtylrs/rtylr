@@ -133,7 +133,7 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
         >
           Cancel
         </button>
-        <button
+        <button type="button"
           onClick={handleSave}
           disabled={upsert.isPending}
           style={{

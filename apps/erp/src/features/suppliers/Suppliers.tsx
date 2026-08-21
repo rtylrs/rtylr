@@ -362,7 +362,7 @@ const Suppliers: React.FC = () => {
               >
                 Cancel
               </button>
-              <button
+              <button type="button"
                 onClick={handleCreate}
                 disabled={
                   createMut.isPending ||

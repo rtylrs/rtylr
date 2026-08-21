@@ -311,7 +311,7 @@ const Categories: React.FC = () => {
             >
               Cancel
             </button>
-            <button
+            <button type="button"
               style={{ ...primaryBtn, opacity: updateCategory.isPending ? 0.6 : 1 }}
               onClick={handleUpdate}
               disabled={updateCategory.isPending || !editName.trim()}

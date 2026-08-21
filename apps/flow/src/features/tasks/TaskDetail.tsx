@@ -910,7 +910,7 @@ const TaskDetail: React.FC = () => {
               />
             ))}
             {taskLabels.length > 0 && canEdit && (
-              <button
+              <button type="button"
                 onClick={() => setLabelPickerOpen((v) => !v)}
                 className="text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-dim)' }}

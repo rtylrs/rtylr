@@ -417,7 +417,7 @@ const GroupDetail = (): React.JSX.Element => {
                         </p>
                       </div>
                     </div>
-                    <button
+                    <button type="button"
                       aria-label={t('team.groupDetail.removeMemberAriaLabel', {
                         name: m.fullName || m.email,
                       })}

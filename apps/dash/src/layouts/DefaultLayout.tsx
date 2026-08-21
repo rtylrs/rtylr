@@ -632,7 +632,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   </kbd>
                 </button>
                 <CaretButton className="dash-caret-button" data-tour="caret" />
-                <button
+                <button type="button"
                   onClick={() => navigate({ to: '/notifications' })}
                   className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--dash-hover)]"
                   style={{ color: 'var(--dash-text-muted)' }}

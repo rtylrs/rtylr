@@ -620,7 +620,7 @@ const ProjectSettings: React.FC = () => {
                     {description}
                   </p>
                 </div>
-                <button
+                <button type="button"
                   className="text-[11px] px-2 py-1 rounded hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-muted)' }}
                   disabled

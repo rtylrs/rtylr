@@ -631,7 +631,7 @@ const Addons: React.FC = () => {
                 />
 
                 <div className="flex gap-2 justify-end">
-                  <button
+                  <button type="button"
                     onClick={() => {
                       setDisableTarget(null);
                       setConfirmText('');

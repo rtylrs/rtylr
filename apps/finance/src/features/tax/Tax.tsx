@@ -114,7 +114,7 @@ const Tax: React.FC = () => {
               Tax Rates
             </button>
           )}
-          <button
+          <button type="button"
             style={{
               display: 'flex',
               alignItems: 'center',

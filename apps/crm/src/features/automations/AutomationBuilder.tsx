@@ -221,7 +221,7 @@ const AutomationBuilder: React.FC = () => {
               {actions.map((a) => {
                 const Icon = a.icon;
                 return (
-                  <button
+                  <button type="button"
                     key={a.label}
                     onClick={() => addAction(a)}
                     style={{

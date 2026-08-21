@@ -221,7 +221,7 @@ const ProfitLoss: React.FC = () => {
             <Download size={14} />
             Export
           </button>
-          <button
+          <button type="button"
             onClick={() => setShowClose(true)}
             style={{
               display: 'flex',

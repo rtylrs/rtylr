@@ -87,7 +87,7 @@ const Templates: React.FC = () => {
 
         <div style={{ display: 'flex', gap: '6px', marginBottom: '16px' }}>
           {(['all', 'email', 'sms'] as const).map((f) => (
-            <button
+            <button type="button"
               key={f}
               onClick={() => setFilter(f)}
               style={{
