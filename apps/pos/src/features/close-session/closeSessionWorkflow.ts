@@ -1,6 +1,7 @@
 import { createOneKitClient } from '@voxire/api';
 import { SessionServiceClient } from '@voxire/voxie/pos/session/v1/client';
 import type { CloseSessionRequest } from '@voxire/voxie/pos/session/v1/types';
+import { isRetryableTransportError } from '../../shared/utils/errorClassify';
 
 const sessionClient = createOneKitClient(SessionServiceClient, 'pos');
 
@@ -8,6 +9,9 @@ export interface SessionClosePayload {
   closingFloat: number;
   expected: number;
   variance: number;
+  /** Session the close belongs to, captured at enqueue time so replays hit
+   *  the right register session instead of whatever happens to be open. */
+  sessionId?: number;
 }
 
 interface BuildCloseSessionPayloadParams {
@@ -73,12 +77,17 @@ export async function closeSessionWithFallback({
   enqueue,
   resolveSessionId = resolveOpenSessionId,
 }: CloseSessionWithFallbackParams): Promise<CloseSessionResult> {
+  // Resolve the session first: "no open session" is a permanent condition
+  // that must surface now instead of becoming an unfixable queue entry.
+  const sessionId = await resolveSessionId();
   try {
-    const sessionId = await resolveSessionId();
     await closeSession({ id: String(sessionId), closingFloat: payload.closingFloat });
     return { status: 'online' };
-  } catch {
-    enqueue(payload);
+  } catch (error) {
+    // Only transport-class failures may be replayed later; server rejections
+    // (4xx) would fail forever as poison entries.
+    if (!isRetryableTransportError(error)) throw error;
+    enqueue({ ...payload, sessionId });
     return { status: 'queued' };
   }
 }

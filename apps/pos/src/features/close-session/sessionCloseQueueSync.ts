@@ -9,7 +9,13 @@ type SyncClose = (payload: SessionClosePayload) => Promise<void>;
 const sessionClient = createOneKitClient(SessionServiceClient, 'pos');
 
 const syncCloseWithApi: SyncClose = async (payload) => {
-  const sessionId = await resolveOpenSessionId();
+  // Prefer the session captured at enqueue time; re-resolving could close a
+  // different terminal's newly-opened session. Legacy entries without an id
+  // still fall back to resolution.
+  const sessionId =
+    payload.sessionId != null && Number.isInteger(payload.sessionId) && payload.sessionId > 0
+      ? payload.sessionId
+      : await resolveOpenSessionId();
   await sessionClient.closeSession({ id: String(sessionId), closingFloat: payload.closingFloat });
 };
 

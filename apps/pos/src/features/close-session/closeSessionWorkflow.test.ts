@@ -21,7 +21,7 @@ describe('closeSessionWithFallback', () => {
     expect(enqueue).not.toHaveBeenCalled();
   });
 
-  it('durably queues the close payload when the API fails', async () => {
+  it('durably queues the close payload with its session id when the API fails', async () => {
     const payload = buildCloseSessionPayload({ expected: 100, actualInput: '95' });
     const closeSession = vi.fn(async () => {
       throw new Error('offline');
@@ -36,7 +36,43 @@ describe('closeSessionWithFallback', () => {
     });
 
     expect(result).toEqual({ status: 'queued' });
-    expect(enqueue).toHaveBeenCalledWith(payload);
+    expect(enqueue).toHaveBeenCalledWith({ ...payload, sessionId: 42 });
+  });
+
+  it('does not queue when no open session exists (permanent condition)', async () => {
+    const closeSession = vi.fn(async () => undefined);
+    const enqueue = vi.fn();
+
+    await expect(
+      closeSessionWithFallback({
+        payload: buildCloseSessionPayload({ expected: 100, actualInput: '95' }),
+        closeSession,
+        enqueue,
+        resolveSessionId: async () => {
+          throw new Error('No open register session found.');
+        },
+      })
+    ).rejects.toThrow('No open register session found.');
+
+    expect(enqueue).not.toHaveBeenCalled();
+  });
+
+  it('rethrows permanent server rejections instead of queueing them', async () => {
+    const rejection = Object.assign(new Error('unexpected status 422'), { statusCode: 422 });
+    const enqueue = vi.fn();
+
+    await expect(
+      closeSessionWithFallback({
+        payload: buildCloseSessionPayload({ expected: 100, actualInput: '95' }),
+        closeSession: vi.fn(async () => {
+          throw rejection;
+        }),
+        enqueue,
+        resolveSessionId: mockResolveSessionId,
+      })
+    ).rejects.toThrow('unexpected status 422');
+
+    expect(enqueue).not.toHaveBeenCalled();
   });
 });
 
