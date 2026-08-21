@@ -118,5 +118,6 @@ export const cases = [
   ["apps/finance/src/shared/components/GlobalSearch.tsx", "audit-batch-116-suite-13"],
   ["apps/flow/src/features/directory/DirectoryScreen.test.tsx", "audit-batch-117-suite-13"],
   ["apps/flow/src/features/projects/ProjectSettings.test.tsx", "audit-batch-118-suite-13"],
+  ["apps/flow/src/features/time/AddHours.test.tsx", "audit-batch-119-suite-13"],
 ];
 

@@ -118,5 +118,6 @@ export const cases = [
   ["apps/finance/src/shared/components/MoneyDisplay.tsx", "audit-batch-116-suite-19"],
   ["apps/flow/src/features/insights/Insights.tsx", "audit-batch-117-suite-19"],
   ["apps/flow/src/features/projects/components/AddProjectMemberDialog.test.tsx", "audit-batch-118-suite-19"],
+  ["apps/flow/src/features/time/TimeReports.test.tsx", "audit-batch-119-suite-19"],
 ];
 

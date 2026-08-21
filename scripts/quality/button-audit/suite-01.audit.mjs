@@ -118,5 +118,6 @@ export const cases = [
   ["apps/finance/src/layouts/DefaultLayout.test.tsx", "audit-batch-116-suite-01"],
   ["apps/finance/src/shared/components/ReceiptUpload.tsx", "audit-batch-117-suite-01"],
   ["apps/flow/src/features/presence/PresenceScreen.test.tsx", "audit-batch-118-suite-01"],
+  ["apps/flow/src/features/settings/sections/TimeSection.test.tsx", "audit-batch-119-suite-01"],
 ];
 
