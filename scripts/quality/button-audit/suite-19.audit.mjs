@@ -184,5 +184,6 @@ export const cases = [
   ["apps/crm/src/features/loyalty/LoyaltyMembers.tsx", "audit-batch-182-suite-19"],
   ["apps/crm/src/shared/components/TrialBanner.tsx", "audit-batch-183-suite-19"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/LowStockWidget.test.tsx", "audit-batch-184-suite-19"],
+  ["apps/dash/src/features/menu/Components/CreateBanner.tsx", "audit-batch-185-suite-19"],
 ];
 

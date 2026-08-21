@@ -184,5 +184,6 @@ export const cases = [
   ["apps/crm/src/features/loyalty/LoyaltyTiers.tsx", "audit-batch-182-suite-22"],
   ["apps/dash/src/features/activity/Audit.test.tsx", "audit-batch-183-suite-22"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/PendingWidget.tsx", "audit-batch-184-suite-22"],
+  ["apps/dash/src/features/menu/Menus.test.tsx", "audit-batch-185-suite-22"],
 ];
 
