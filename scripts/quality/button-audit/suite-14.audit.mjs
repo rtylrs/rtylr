@@ -115,5 +115,6 @@ export const cases = [
   ["apps/erp/src/features/warehouses/Warehouses.test.tsx", "audit-batch-113-suite-14"],
   ["apps/erp/src/shared/components/QuickAddProductModal.tsx", "audit-batch-114-suite-14"],
   ["apps/finance/src/features/invoices/Invoices.tsx", "audit-batch-115-suite-14"],
+  ["apps/finance/src/shared/components/InvoicePreview.tsx", "audit-batch-116-suite-14"],
 ];
 
