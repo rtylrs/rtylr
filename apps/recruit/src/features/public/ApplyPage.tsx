@@ -128,7 +128,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white p-6 text-center">
         <h2 className="text-lg font-semibold text-gray-900">Failed to load application form</h2>
         <p className="text-sm text-gray-500">Please try refreshing the page.</p>
-        <button
+        <button type="button"
           onClick={() => window.location.reload()}
           className="rounded-lg bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-800"
         >
@@ -215,7 +215,7 @@ const ApplyPage: React.FC = (): React.JSX.Element => {
             Thanks for applying to <span className="font-medium">{career.title}</span>. The{' '}
             {customization.brandName} team will review and reach out if there's a fit.
           </p>
-          <button
+          <button type="button"
             onClick={() => navigate({ to: `/${slug}` as any })}
             className="mt-8 inline-flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-medium"
             style={{ borderColor: 'var(--recruit-border)' }}

@@ -83,7 +83,7 @@ const Variants: React.FC = () => {
         title="Product Variants"
         description="Individual SKUs for sizes, colors, flavors and more"
         actions={
-          <button
+          <button type="button"
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
@@ -206,14 +206,14 @@ const Variants: React.FC = () => {
               style={inputStyle}
             />
             <div className="flex gap-2 justify-end">
-              <button
+              <button type="button"
                 onClick={() => setShowCreate(false)}
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
                 Cancel
               </button>
-              <button
+              <button type="button"
                 onClick={handleCreate}
                 disabled={createMut.isPending || !newProductId.trim() || !newName.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"

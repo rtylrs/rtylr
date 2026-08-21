@@ -4,6 +4,10 @@ import { toast } from 'sonner';
 import i18next from 'i18next';
 import { groupsClient } from '../../lib/clients';
 import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/client';
+import type {
+  Group as ApiGroup,
+  GroupDetail as ApiGroupDetail,
+} from '@voxire/voxie/hub/team/groups/v1/types';
 
 const invitationsClient = createOneKitClient(InvitationsServiceClient, 'dash');
 
@@ -51,13 +55,53 @@ export type BulkResult = {
   message: string;
 };
 
+// The wire carries int64 ids as strings; normalize once here so every
+// consumer can treat ids/userIds as numbers without re-parsing.
+function toIdNumber(value: string | undefined): number {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function toResourcePermissions(perms: ApiGroup['resourcePermissions']): ResourcePermission[] {
+  return (perms ?? []).map((p) => ({
+    resourceKey: p.resourceKey ?? '',
+    permissionLevel: p.permissionLevel === 'editor' ? 'editor' : 'viewer',
+  }));
+}
+
+function fromApiGroup(g: ApiGroup): Group {
+  return {
+    id: toIdNumber(g.id),
+    ownerId: toIdNumber(g.ownerId),
+    name: g.name ?? '',
+    description: g.description ?? '',
+    color: g.color ?? '',
+    resourcePermissions: toResourcePermissions(g.resourcePermissions),
+    memberCount: g.memberCount ?? 0,
+    createdAt: g.createdAt ?? '',
+    updatedAt: g.updatedAt ?? '',
+  };
+}
+
+function fromApiGroupDetail(g: ApiGroupDetail): GroupDetail {
+  return {
+    ...fromApiGroup(g),
+    members: (g.members ?? []).map((m) => ({
+      userId: toIdNumber(m.userId),
+      email: m.email ?? '',
+      fullName: m.fullName ?? '',
+      addedAt: m.addedAt ?? '',
+    })),
+  };
+}
+
 // Hooks
 export const useGroups = (): ReturnType<typeof useQuery<Group[]>> =>
   useQuery<Group[]>({
     queryKey: ['groups'],
     queryFn: async () => {
       const res = await groupsClient.listGroups({});
-      return (res.groups ?? []) as unknown as Group[];
+      return (res.groups ?? []).map(fromApiGroup);
     },
     staleTime: 30_000,
   });
@@ -70,7 +114,7 @@ export const useGroup = (
     queryFn: async () => {
       if (!id) return undefined;
       const res = await groupsClient.getGroupDetail({ id });
-      return res.group as unknown as GroupDetail | undefined;
+      return res.group ? fromApiGroupDetail(res.group) : undefined;
     },
     enabled: !!id,
   });
@@ -96,7 +140,8 @@ export const useCreateGroup = (): ReturnType<
       resourcePermissions: ResourcePermission[];
     }) => {
       const res = await groupsClient.createGroup(payload);
-      return res.group as unknown as Group;
+      if (!res.group) throw new Error('Group was not returned by the server');
+      return fromApiGroup(res.group);
     },
     onSuccess: () => {
       toast.success(i18next.t('toasts.groupCreated', 'Group created'));
@@ -130,7 +175,8 @@ export const useUpdateGroup = (
     }) => {
       if (!id) throw new Error('Group id is required');
       const res = await groupsClient.updateGroup({ id, ...payload });
-      return res.group as unknown as Group;
+      if (!res.group) throw new Error('Group was not returned by the server');
+      return fromApiGroup(res.group);
     },
     onSuccess: () => {
       toast.success(i18next.t('toasts.groupSaved', 'Group saved'));
@@ -157,13 +203,14 @@ export const useDeleteGroup = (): ReturnType<typeof useMutation<void, Error, num
 
 export const useAddGroupMembers = (
   groupId: string | undefined
-): ReturnType<typeof useMutation<void, Error, number[]>> => {
+): ReturnType<typeof useMutation<void, Error, (string | number)[]>> => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (userIds: number[]) => {
+    mutationFn: async (userIds: (string | number)[]) => {
       if (!groupId) throw new Error('Group id is required');
       await groupsClient.addGroupMembers({
         id: groupId,
+        // The wire carries int64 user ids as strings.
         userIds: userIds.map(String),
       });
     },
@@ -171,6 +218,8 @@ export const useAddGroupMembers = (
       toast.success(i18next.t('toasts.membersAdded', 'Members added'));
       qc.invalidateQueries({ queryKey: ['groups'] });
       qc.invalidateQueries({ queryKey: ['groups', groupId] });
+      // Team rows embed each member's group memberships; refresh them too.
+      qc.invalidateQueries({ queryKey: ['team'] });
     },
     onError: () => toast.error(i18next.t('toasts.failedAddMembers', 'Failed to add members')),
   });
@@ -213,7 +262,7 @@ export const useBulkInvite = (): ReturnType<
         emails: payload.emails,
         role: payload.role,
         apps: payload.apps,
-        groupId: payload.groupId ? String(payload.groupId) : '',
+        ...(payload.groupId ? { groupId: String(payload.groupId) } : {}),
       });
       return {
         results: (res.results ?? []).map((r) => ({

@@ -92,7 +92,7 @@ const ExpenseDetail: React.FC = () => {
         actions={
           canApproveExpense ? (
             <>
-              <button
+              <button type="button"
                 style={{
                   ...ghostBtn,
                   color: 'var(--finance-error)',
@@ -103,7 +103,7 @@ const ExpenseDetail: React.FC = () => {
               >
                 <XCircle size={13} /> Reject
               </button>
-              <button
+              <button type="button"
                 style={primaryBtn}
                 disabled={approveMut.isPending}
                 onClick={() => approveMut.mutate(expense.id)}

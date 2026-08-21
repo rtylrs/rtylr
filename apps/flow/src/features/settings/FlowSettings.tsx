@@ -486,7 +486,7 @@ const AppearanceSection: React.FC = () => {
               },
             ] as const
           ).map(({ value, label, preview }) => (
-            <button
+            <button type="button"
               key={value}
               onClick={() => setTheme(value)}
               className="p-3 rounded-xl border-2 text-[12px] font-medium transition-all text-center"

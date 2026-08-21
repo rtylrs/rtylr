@@ -8,10 +8,8 @@ export type { ActivityEntry } from '../../schemas/activity';
 
 const activityClient = createOneKitClient(ActivityServiceClient, 'dash');
 
-// hub.activity.v1.ListActivity has no server-side pagination or app filter -
-// it always returns the most recent `limit` rows in one shot. useAuditLog
-// fetches a large batch and slices/paginates client-side.
-const AUDIT_FETCH_LIMIT = 1000;
+// hub.activity.v1.ListActivity has no app filter - the contract carries
+// limit + offset for paging through the feed client- or server-side.
 
 // Strip any "<domain>." prefix and turn separators into spaces:
 // "product.created" -> "created", "stock_adjusted" -> "stock adjusted".
@@ -86,9 +84,9 @@ export const useAuditLog = (params: { page: number; pageSize: number }) => {
       const res = await activityClient.listActivity({
         offset: (page - 1) * pageSize,
         limit: pageSize,
-      } as any);
+      });
       const entries = (res.activities ?? []).map(mapEntry);
-      const total = (res as any).total ?? entries.length;
+      const total = res.total ?? entries.length;
       return {
         entries,
         total,

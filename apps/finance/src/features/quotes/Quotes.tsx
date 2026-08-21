@@ -86,10 +86,10 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
       width={440}
       footer={
         <>
-          <button style={ghostBtn} onClick={onClose} disabled={createQuote.isPending}>
+          <button type="button" style={ghostBtn} onClick={onClose} disabled={createQuote.isPending}>
             Cancel
           </button>
-          <button
+          <button type="button"
             style={{ ...primaryBtn, opacity: createQuote.isPending ? 0.6 : 1 }}
             onClick={handleSubmit}
             disabled={createQuote.isPending}
@@ -191,7 +191,7 @@ const Quotes: React.FC = () => {
           </>
         }
         actions={
-          <button style={primaryBtn} aria-label="New Quote" onClick={() => setShowCreate(true)}>
+          <button type="button" style={primaryBtn} aria-label="New Quote" onClick={() => setShowCreate(true)}>
             <Plus size={13} /> New Quote
           </button>
         }
@@ -282,7 +282,7 @@ const Quotes: React.FC = () => {
                   </td>
                   <td style={{ padding: '12px 16px' }}>
                     {q.status === 'Accepted' ? (
-                      <button
+                      <button type="button"
                         style={{
                           ...ghostBtn,
                           padding: '4px 10px',
@@ -297,7 +297,7 @@ const Quotes: React.FC = () => {
                         <ArrowRight size={12} /> Convert
                       </button>
                     ) : q.status === 'Sent' ? (
-                      <button
+                      <button type="button"
                         style={{
                           ...ghostBtn,
                           padding: '4px 10px',
@@ -310,7 +310,7 @@ const Quotes: React.FC = () => {
                         <CheckCircle size={12} /> Mark Accepted
                       </button>
                     ) : (
-                      <button
+                      <button type="button"
                         style={{ ...ghostBtn, padding: '4px 10px' }}
                         aria-label={`View quote ${q.id}`}
                       >
@@ -331,7 +331,7 @@ const Quotes: React.FC = () => {
             Page {page}
           </p>
           <div className="flex items-center gap-2">
-            <button
+            <button type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
@@ -339,7 +339,7 @@ const Quotes: React.FC = () => {
             >
               Prev
             </button>
-            <button
+            <button type="button"
               onClick={() => setPage((p) => p + 1)}
               disabled={!hasMore}
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"

@@ -122,7 +122,7 @@ const StockTakes: React.FC = () => {
         description="Periodic inventory counts and variance reports"
         actions={
           canManageStockTakes && (
-            <button
+            <button type="button"
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
               style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
@@ -188,7 +188,7 @@ const StockTakes: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {st.status !== 'completed' && canManageStockTakes && (
-                      <button
+                      <button type="button"
                         aria-label="Complete stock take"
                         onClick={() =>
                           handleComplete(
@@ -304,14 +304,14 @@ const StockTakes: React.FC = () => {
                   : `${itemsToCount.length} inventory item${itemsToCount.length === 1 ? '' : 's'} will be included with current stock as the expected quantity.`}
             </p>
             <div className="flex gap-2 justify-end">
-              <button
+              <button type="button"
                 onClick={() => setShowCreate(false)}
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
                 Cancel
               </button>
-              <button
+              <button type="button"
                 onClick={handleCreate}
                 disabled={
                   createMut.isPending ||

@@ -19,7 +19,7 @@ export const ProjectSelect: React.FC<ProjectSelectProps> = ({
 
   return (
     <div className="relative">
-      <button
+      <button type="button"
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-2 px-2.5 py-1.5 rounded text-[12px] transition-colors hover:bg-[var(--flow-hover)] w-full"
         style={{
@@ -48,7 +48,7 @@ export const ProjectSelect: React.FC<ProjectSelectProps> = ({
           }}
         >
           {projects.map((p) => (
-            <button
+            <button type="button"
               key={p.id}
               onClick={() => {
                 onChange(p.id);

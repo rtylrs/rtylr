@@ -50,7 +50,7 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
           </div>
           <div className="space-y-1">
             {subtasks.map((s) => (
-              <button
+              <button type="button"
                 key={s.id}
                 onClick={() => onToggle(s.id)}
                 disabled={disabled}

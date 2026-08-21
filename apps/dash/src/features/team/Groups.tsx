@@ -196,7 +196,7 @@ const Groups = (): React.JSX.Element => {
 
                     {/* Actions */}
                     <div className="col-span-1 flex justify-end items-center gap-1">
-                      <button
+                      <button type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           setConfirmDelete(g);

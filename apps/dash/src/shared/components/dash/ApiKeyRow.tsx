@@ -47,7 +47,7 @@ export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
           <code className="text-xs font-mono" style={{ color: 'var(--dash-text-muted)' }}>
             {preview}
           </code>
-          <button
+          <button type="button"
             className="flex items-center gap-1 text-[11px] transition-opacity hover:opacity-70"
             style={{ color: 'var(--dash-text-dim)' }}
             onClick={copy}
@@ -64,7 +64,7 @@ export const ApiKeyRow: React.FC<ApiKeyRowProps> = ({ apiKey, onRevoke }) => {
           {formatDate(apiKey.createdAt)}
         </p>
       </div>
-      <button
+      <button type="button"
         className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors hover:bg-red-500/10"
         style={{ color: 'var(--status-cancelled)' }}
         onClick={() => onRevoke?.(apiKey.id)}

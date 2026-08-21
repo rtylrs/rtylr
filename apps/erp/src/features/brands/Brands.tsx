@@ -65,7 +65,7 @@ const Brands: React.FC = () => {
         title="Brands"
         description={`${brands.length} brands across your catalog`}
         actions={
-          <button
+          <button type="button"
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
@@ -129,7 +129,7 @@ const Brands: React.FC = () => {
                   </p>
                 </div>
                 <Tag size={14} style={{ color: 'var(--hub-text-dim)' }} />
-                <button
+                <button type="button"
                   aria-label="Delete brand"
                   onClick={() => setConfirmDeleteId(b.id ?? null)}
                   className="h-7 w-7 rounded-lg flex items-center justify-center"
@@ -203,14 +203,14 @@ const Brands: React.FC = () => {
               style={inputStyle}
             />
             <div className="flex gap-2 justify-end">
-              <button
+              <button type="button"
                 onClick={() => setShowCreate(false)}
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
                 Cancel
               </button>
-              <button
+              <button type="button"
                 onClick={handleCreate}
                 disabled={createMut.isPending || !newName.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"

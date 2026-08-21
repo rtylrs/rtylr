@@ -220,7 +220,7 @@ const IconButton: React.FC<{
   onClick: () => void;
   title: string;
 }> = ({ children, onClick, title }) => (
-  <button
+  <button type="button"
     onClick={onClick}
     title={title}
     className="rounded-md p-1.5 text-white/70 transition hover:bg-white/10 hover:text-white"

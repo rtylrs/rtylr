@@ -98,7 +98,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
       }}
     >
       {/* Checkbox */}
-      <button
+      <button type="button"
         onClick={handleToggle}
         aria-label={t('flow.projectList.toggleDoneLabel')}
         aria-pressed={checked}
@@ -155,7 +155,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
       </span>
 
       {/* More */}
-      <button
+      <button type="button"
         onClick={handleMoreClick}
         aria-label="More options"
         className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
@@ -178,7 +178,7 @@ export const StatusGroup: React.FC<{
   return (
     <div className="mb-2">
       {/* Group header */}
-      <button
+      <button type="button"
         onClick={() => setCollapsed((c) => !c)}
         className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-[var(--flow-hover)] transition-colors"
       >
@@ -319,7 +319,7 @@ const ProjectList: React.FC = () => {
             <LayoutGrid size={13} />
             Board
           </Link>
-          <button
+          <button type="button"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors"
             style={{
               background: 'var(--accent-muted)',

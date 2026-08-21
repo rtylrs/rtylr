@@ -70,11 +70,11 @@ const InvoiceDetail: React.FC = () => {
         breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: invoice.id }]}
         actions={
           <>
-            <button style={ghostBtn} onClick={() => window.print()}>
+            <button type="button" style={ghostBtn} onClick={() => window.print()}>
               <Printer size={13} /> Print
             </button>
             <DownloadPdfButton invoiceId={invoice.id} />
-            <button
+            <button type="button"
               style={ghostBtn}
               onClick={() => {
                 navigate({ to: `/invoices/new?clone=${invoice.id}` });
@@ -84,17 +84,17 @@ const InvoiceDetail: React.FC = () => {
               <Copy size={13} /> Clone
             </button>
             {invoice.status !== 'Paid' && (
-              <button style={ghostBtn} onClick={() => setShowPayment(true)}>
+              <button type="button" style={ghostBtn} onClick={() => setShowPayment(true)}>
                 <CreditCard size={13} /> Record Payment
               </button>
             )}
             {canSendInvoice && (
-              <button style={primaryBtn} onClick={() => setShowSend(true)}>
+              <button type="button" style={primaryBtn} onClick={() => setShowSend(true)}>
                 <Send size={13} /> Send
               </button>
             )}
             {canSendInvoice && invoice.status !== 'Paid' && (
-              <button
+              <button type="button"
                 style={{
                   ...ghostBtn,
                   color: 'var(--finance-danger)',

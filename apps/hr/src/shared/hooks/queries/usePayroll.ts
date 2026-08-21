@@ -75,7 +75,7 @@ export const useGetPayrollConfig = () => {
     queryFn: async (): Promise<PayrollConfigData> => {
       try {
         const res = await unwrap(hrTransport.get<Record<string, unknown>>('/hr/payroll/config'));
-        const raw = ((res as any)?.config || res || {}) as Record<string, unknown>;
+        const raw = (res?.config || res || {}) as Record<string, unknown>;
         return {
           grossModel:
             ((raw.grossModel ?? raw.gross_model) as PayrollConfigData['grossModel']) ?? 'both',

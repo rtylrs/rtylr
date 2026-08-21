@@ -321,7 +321,7 @@ const DefaultLayout: React.FC = () => {
             insetInline: 0,
           }}
         >
-          <button
+          <button type="button"
             onClick={() => setSidebarOpen(true)}
             aria-label="Open navigation menu"
             aria-expanded={sidebarOpen}
@@ -375,7 +375,7 @@ const DefaultLayout: React.FC = () => {
               alt="rtylr"
               className="h-9 w-auto"
             />
-            <button
+            <button type="button"
               onClick={() => setSidebarOpen(false)}
               aria-label="Close navigation menu"
               className="h-11 w-11 rounded-lg flex md:hidden items-center justify-center"
@@ -419,7 +419,7 @@ const DefaultLayout: React.FC = () => {
             </Link>
             <CaretButton className="w-full justify-start mb-1" />
             <div className="relative">
-              <button
+              <button type="button"
                 onClick={() => setShowUserMenu((v) => !v)}
                 aria-label={showUserMenu ? 'Close user menu' : 'Open user menu'}
                 aria-expanded={showUserMenu}
@@ -492,7 +492,7 @@ const DefaultLayout: React.FC = () => {
                           { value: 'system' as Theme, icon: Monitor, label: 'System' },
                         ] as const
                       ).map(({ value, icon: Icon, label }) => (
-                        <button
+                        <button type="button"
                           key={value}
                           onClick={() => handleSetTheme(value)}
                           className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"
@@ -517,7 +517,7 @@ const DefaultLayout: React.FC = () => {
                       className="my-1"
                       style={{ height: '1px', background: 'var(--hub-border)' }}
                     />
-                    <button
+                    <button type="button"
                       onClick={handleLogout}
                       className="flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm transition-colors"
                       style={{ color: 'var(--erp-danger-strong)' }}
@@ -553,7 +553,7 @@ const DefaultLayout: React.FC = () => {
                 {pageTitle}
               </h1>
               <div className="flex items-center gap-1">
-                <button
+                <button type="button"
                   onClick={() => setPaletteOpen(true)}
                   aria-label="Open search"
                   className="flex items-center gap-2 h-11 px-3 rounded-lg text-xs"
@@ -572,7 +572,7 @@ const DefaultLayout: React.FC = () => {
                     cmd+k
                   </kbd>
                 </button>
-                <button
+                <button type="button"
                   onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
                   aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
                   className="h-11 w-11 rounded-lg flex items-center justify-center"
@@ -586,7 +586,7 @@ const DefaultLayout: React.FC = () => {
                 >
                   {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
                 </button>
-                <button
+                <button type="button"
                   onClick={() => setShortcutsOpen(true)}
                   aria-label="Open keyboard shortcuts"
                   className="h-11 w-11 rounded-lg flex items-center justify-center"

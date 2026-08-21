@@ -89,7 +89,7 @@ const Staff: React.FC = () => {
               {loading ? '…' : t('staff.memberCount', { count: staffData.length })}
             </p>
           </div>
-          <button
+          <button type="button"
             onClick={() => navigate({ to: '/employees/new' })}
             style={{
               display: 'flex',
@@ -133,7 +133,7 @@ const Staff: React.FC = () => {
             }}
           >
             {filterTabs.map((tab) => (
-              <button
+              <button type="button"
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 style={{

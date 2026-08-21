@@ -306,7 +306,7 @@ const CommandPalette: React.FC = () => {
             const Icon = a.icon;
             const isActive = i === active;
             return (
-              <button
+              <button type="button"
                 key={a.id}
                 onClick={() => onRun(a)}
                 onMouseEnter={() => setActive(i)}

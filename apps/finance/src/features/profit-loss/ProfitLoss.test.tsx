@@ -43,7 +43,7 @@ vi.mock('../../shared/components/ConfirmDialog', () => ({
     open: boolean;
     onConfirm: () => void;
     confirmLabel: string;
-  }) => (open ? <button onClick={onConfirm}>{confirmLabel}</button> : null),
+  }) => (open ? <button type="button" onClick={onConfirm}>{confirmLabel}</button> : null),
 }));
 
 vi.mock('../../shared/lib/exports', () => ({

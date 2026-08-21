@@ -69,7 +69,7 @@ const PriceLists: React.FC = () => {
         description="Currency-based pricing strategies"
         actions={
           canManagePriceLists && (
-            <button
+            <button type="button"
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
               style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
@@ -186,14 +186,14 @@ const PriceLists: React.FC = () => {
               Set as default price list
             </label>
             <div className="flex gap-2 justify-end">
-              <button
+              <button type="button"
                 onClick={() => setShowCreate(false)}
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
                 Cancel
               </button>
-              <button
+              <button type="button"
                 onClick={handleCreate}
                 disabled={createMut.isPending || !newName.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"

@@ -112,7 +112,7 @@ const Journal: React.FC = () => {
         title={t('title')}
         subtitle={`${data.length} entries`}
         actions={
-          <button style={primaryBtn} onClick={() => setShowCreate(true)}>
+          <button type="button" style={primaryBtn} onClick={() => setShowCreate(true)}>
             <Plus size={13} /> {t('newEntry')}
           </button>
         }
@@ -368,10 +368,10 @@ const Journal: React.FC = () => {
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button style={ghostBtn} onClick={() => setShowCreate(false)}>
+              <button type="button" style={ghostBtn} onClick={() => setShowCreate(false)}>
                 {t('cancel')}
               </button>
-              <button style={primaryBtn} onClick={handleCreate} disabled={createMut.isPending}>
+              <button type="button" style={primaryBtn} onClick={handleCreate} disabled={createMut.isPending}>
                 {createMut.isPending ? t('creating') : t('create')}
               </button>
             </div>
@@ -390,14 +390,14 @@ const Journal: React.FC = () => {
         >
           <span style={{ fontSize: 12, color: 'var(--hub-text-dim)' }}>Page {page}</span>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button
+            <button type="button"
               style={{ ...ghostBtn, padding: '4px 12px', opacity: page <= 1 ? 0.3 : 1 }}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
             >
               Prev
             </button>
-            <button
+            <button type="button"
               style={{ ...ghostBtn, padding: '4px 12px', opacity: !hasMore ? 0.3 : 1 }}
               onClick={() => setPage((p) => p + 1)}
               disabled={!hasMore}

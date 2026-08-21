@@ -167,7 +167,7 @@ const AdminDashboard: React.FC = () => {
             {today}
           </p>
         </div>
-        <button
+        <button type="button"
           onClick={() => setShowCatalog(true)}
           className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors"
           style={{ color: 'var(--dash-text-muted)', border: '1px solid var(--dash-border)' }}
@@ -221,7 +221,7 @@ const AdminDashboard: React.FC = () => {
                     >
                       <GripVertical size={12} />
                     </div>
-                    <button
+                    <button type="button"
                       onClick={() => removeWidget(widgetId)}
                       className="h-6 w-6 rounded-md flex items-center justify-center"
                       style={{
@@ -280,7 +280,7 @@ const AdminDashboard: React.FC = () => {
                       Add, remove, or rearrange widgets
                     </p>
                   </div>
-                  <button
+                  <button type="button"
                     onClick={() => setShowCatalog(false)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)]"
                     style={{ color: 'var(--dash-text-muted)' }}
@@ -314,7 +314,7 @@ const AdminDashboard: React.FC = () => {
                           </p>
                         </div>
                         {isActive ? (
-                          <button
+                          <button type="button"
                             onClick={() => removeWidget(w.id)}
                             className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-md"
                             style={{
@@ -325,7 +325,7 @@ const AdminDashboard: React.FC = () => {
                             Remove
                           </button>
                         ) : (
-                          <button
+                          <button type="button"
                             onClick={() => addWidget(w.id)}
                             className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-md"
                             style={{
@@ -347,7 +347,7 @@ const AdminDashboard: React.FC = () => {
                   className="px-6 py-3 flex justify-end"
                   style={{ borderTop: '1px solid var(--dash-border)' }}
                 >
-                  <button
+                  <button type="button"
                     onClick={resetLayout}
                     className="text-xs font-medium px-3 py-1.5 rounded-md transition-colors"
                     style={{ color: 'var(--dash-text-muted)', background: 'var(--dash-hover)' }}

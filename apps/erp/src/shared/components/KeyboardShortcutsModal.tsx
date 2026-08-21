@@ -49,7 +49,7 @@ const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({ open, o
             <Keyboard size={14} style={{ color: 'var(--erp-accent)' }} />
             Keyboard Shortcuts
           </h3>
-          <button onClick={onClose} aria-label="Close keyboard shortcuts">
+          <button type="button" onClick={onClose} aria-label="Close keyboard shortcuts">
             <X size={14} style={{ color: 'var(--hub-text-muted)' }} />
           </button>
         </div>

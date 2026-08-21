@@ -12,7 +12,7 @@ import type {
 } from '@voxire/voxie/common/auth/v1/types';
 import { validateContractPayload } from '@voxire/voxie/validation/metadata';
 import { useUserStore } from '../stores/userStore';
-import { setCookie, getDefaultCookieDomain } from '../lib/cookies';
+import { setCookie, getDefaultCookieDomain } from '@voxire/auth';
 
 const authClient = createOneKitClient(AuthServiceClient, 'auth');
 

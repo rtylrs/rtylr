@@ -214,7 +214,7 @@ const CustomerProfile: React.FC = () => {
       <HelmetContainer title="Customer profile · rtylr" />
       <div style={{ maxWidth: '1100px' }}>
         <Breadcrumbs items={[{ label: 'Customers', to: '/customers' }, { label: customer.name }]} />
-        <button
+        <button type="button"
           onClick={() => navigate({ to: '/customers' })}
           style={{
             background: 'transparent',

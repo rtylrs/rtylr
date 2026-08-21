@@ -187,7 +187,7 @@ export const TagChip: React.FC<{
   >
     {label}
     {onRemove && (
-      <button
+      <button type="button"
         onClick={onRemove}
         style={{
           background: 'transparent',
@@ -242,7 +242,7 @@ export const NotesPanel: React.FC<{
           Notes
         </h4>
         {!editing && (
-          <button
+          <button type="button"
             onClick={() => setEditing(true)}
             style={{
               background: 'transparent',
@@ -338,7 +338,7 @@ export const EmailEditor: React.FC<{
           Insert:
         </span>
         {['first_name', 'last_name', 'points', 'tier', 'business_name'].map((v) => (
-          <button
+          <button type="button"
             key={v}
             onClick={() => insertVar(v)}
             style={{
@@ -405,7 +405,7 @@ export const SMSComposer: React.FC<{
           Insert:
         </span>
         {['first_name', 'points', 'business_name'].map((v) => (
-          <button
+          <button type="button"
             key={v}
             onClick={() => onChange(body + ` {{${v}}}`)}
             style={{
@@ -515,7 +515,7 @@ export const SegmentRuleRow: React.FC<{
       placeholder="value"
       style={{ width: '140px' }}
     />
-    <button
+    <button type="button"
       onClick={onRemove}
       style={{
         background: 'transparent',
@@ -577,7 +577,7 @@ export const AutomationNode: React.FC<{
           {type}
         </span>
         {onRemove && (
-          <button
+          <button type="button"
             onClick={onRemove}
             style={{
               marginLeft: 'auto',
@@ -950,7 +950,7 @@ export const SearchableCustomerSelect: React.FC<{
               </div>
             )}
             {filtered.map((c) => (
-              <button
+              <button type="button"
                 key={c.id}
                 onClick={() => {
                   onChange(c.id);

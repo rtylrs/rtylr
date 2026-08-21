@@ -83,7 +83,7 @@ const ChartOfAccounts: React.FC = () => {
         subtitle={t('accounts.count', { count: filtered.length })}
         actions={
           canCreateAccount ? (
-            <button style={primaryBtn} onClick={() => setShowCreate(true)}>
+            <button type="button" style={primaryBtn} onClick={() => setShowCreate(true)}>
               <Plus size={13} /> {t('accounts.new')}
             </button>
           ) : undefined
@@ -102,7 +102,7 @@ const ChartOfAccounts: React.FC = () => {
           }}
         >
           {TYPES.map((t) => (
-            <button
+            <button type="button"
               key={t}
               onClick={() => setFilter(t)}
               style={{
@@ -260,10 +260,10 @@ const ChartOfAccounts: React.FC = () => {
               ))}
             </select>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button style={ghostBtn} onClick={() => setShowCreate(false)}>
+              <button type="button" style={ghostBtn} onClick={() => setShowCreate(false)}>
                 {t('common.cancel')}
               </button>
-              <button style={primaryBtn} onClick={handleCreate} disabled={createMut.isPending}>
+              <button type="button" style={primaryBtn} onClick={handleCreate} disabled={createMut.isPending}>
                 {createMut.isPending ? t('common.creating') : t('common.create')}
               </button>
             </div>

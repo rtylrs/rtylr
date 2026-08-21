@@ -207,7 +207,7 @@ const DefaultLayout: React.FC = () => {
           </Link>
 
           <div className="relative" ref={menuRef}>
-            <button
+            <button type="button"
               onClick={() => setShowPagesMenu((v) => !v)}
               aria-haspopup="menu"
               aria-expanded={showPagesMenu}
@@ -280,7 +280,7 @@ const DefaultLayout: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-1.5">
-          <button
+          <button type="button"
             onClick={() => handleSetTheme(theme === 'dark' ? 'light' : 'dark')}
             aria-label={t('nav.toggleTheme', 'Toggle theme')}
             className="min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center"
@@ -296,7 +296,7 @@ const DefaultLayout: React.FC = () => {
           </button>
 
           <div className="relative">
-            <button
+            <button type="button"
               onClick={() => setShowUserMenu((v) => !v)}
               aria-haspopup="menu"
               aria-expanded={showUserMenu}
@@ -403,7 +403,7 @@ const DefaultLayout: React.FC = () => {
                         { value: 'system' as Theme, icon: Monitor, label: 'System' },
                       ] as const
                     ).map(({ value, icon: Icon, label }) => (
-                      <button
+                      <button type="button"
                         key={value}
                         onClick={() => handleSetTheme(value)}
                         className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"
@@ -426,7 +426,7 @@ const DefaultLayout: React.FC = () => {
                     className="my-1"
                     style={{ height: '1px', background: 'var(--hub-border)' }}
                   />
-                  <button
+                  <button type="button"
                     onClick={handleLogout}
                     className="flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm transition-colors"
                     style={{ color: '#ef4444' }}

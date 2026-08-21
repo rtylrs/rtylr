@@ -84,7 +84,7 @@ const Departments: React.FC = () => {
                   )} total staff`}
             </p>
           </div>
-          <button
+          <button type="button"
             onClick={() => setCreateOpen(true)}
             style={{
               display: 'flex',

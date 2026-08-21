@@ -191,7 +191,7 @@ const NewInvoice: React.FC = () => {
       <div style={{ ...cardStyle, padding: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
         {STEPS.map((s, i) => (
           <React.Fragment key={s}>
-            <button
+            <button type="button"
               onClick={() => setStep(i)}
               style={{
                 display: 'flex',
@@ -308,7 +308,7 @@ const NewInvoice: React.FC = () => {
                   ))}
                 </tbody>
               </table>
-              <button style={{ ...ghostBtn, marginTop: 12 }} onClick={addItem}>
+              <button type="button" style={{ ...ghostBtn, marginTop: 12 }} onClick={addItem}>
                 <Plus size={13} /> Add line item
               </button>
             </div>
@@ -363,7 +363,7 @@ const NewInvoice: React.FC = () => {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button
+        <button type="button"
           style={ghostBtn}
           onClick={() => (step === 0 ? navigate({ to: '/invoices' }) : setStep(step - 1))}
         >
@@ -371,19 +371,19 @@ const NewInvoice: React.FC = () => {
         </button>
         <div style={{ display: 'flex', gap: 8 }}>
           {step < STEPS.length - 1 ? (
-            <button style={primaryBtn} disabled={!canProceed()} onClick={() => setStep(step + 1)}>
+            <button type="button" style={primaryBtn} disabled={!canProceed()} onClick={() => setStep(step + 1)}>
               Next <ChevronRight size={13} />
             </button>
           ) : (
             <>
-              <button
+              <button type="button"
                 style={{ ...ghostBtn, opacity: createInvoice.isPending ? 0.6 : 1 }}
                 onClick={() => handleSave('Draft')}
                 disabled={createInvoice.isPending}
               >
                 <Save size={13} /> {createInvoice.isPending ? 'Saving...' : 'Save as Draft'}
               </button>
-              <button
+              <button type="button"
                 style={{ ...primaryBtn, opacity: createInvoice.isPending ? 0.6 : 1 }}
                 onClick={() => handleSave('Sent')}
                 disabled={createInvoice.isPending}

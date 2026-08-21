@@ -54,12 +54,23 @@ const APP_ICONS: Record<
 };
 
 const ITEMS_PER_PAGE = 10;
+/**
+ * The list is fetched in one window and searched/filtered/paginated
+ * client-side, so the window has to be larger than a single display page -
+ * filtering only the currently shown 10 rows made search miss members on
+ * any other page. `hasMore` from the server is surfaced as a truncation
+ * notice when a team outgrows this window.
+ */
+const FETCH_WINDOW_SIZE = 200;
 
 const Team: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
-  const { data: teamData, isLoading } = useTeam({ page: page + 1, pageSize: ITEMS_PER_PAGE });
+  const { data: teamData, isLoading } = useTeam({
+    page: 1,
+    pageSize: FETCH_WINDOW_SIZE,
+  });
   const members = teamData?.members ?? [];
   const deactivate = useDeactivateMember();
   const [query, setQuery] = useState('');
@@ -128,9 +139,11 @@ const Team: React.FC = (): React.JSX.Element => {
 
   const handleAddToGroup = async (): Promise<void> => {
     if (!selectedGroupId) return;
-    const userIds = Array.from(selected)
-      .map(Number)
-      .filter((n) => !isNaN(n));
+    // Member ids are the wire's int64-as-string values; pass them through
+    // untouched instead of Number()-filtering, which silently dropped any
+    // id that was not purely numeric and still toasted success.
+    const userIds = Array.from(selected);
+    if (userIds.length === 0) return;
     try {
       await addGroupMembers.mutateAsync(userIds);
       clearSelection();
@@ -227,7 +240,7 @@ const Team: React.FC = (): React.JSX.Element => {
                     </span>
                   </div>
                 </div>
-                <button
+                <button type="button"
                   disabled={approveAccessRequest.isPending}
                   onClick={() =>
                     approveAccessRequest.mutate({ id: req.id, userId: req.userId, app: req.app })
@@ -270,7 +283,7 @@ const Team: React.FC = (): React.JSX.Element => {
               { id: 'staff', label: 'Staff' },
               { id: 'viewer', label: 'Viewer' },
             ].map((r) => (
-              <button
+              <button type="button"
                 key={r.id}
                 onClick={() => {
                   setRoleFilter(r.id);
@@ -452,7 +465,7 @@ const Team: React.FC = (): React.JSX.Element => {
 
                         {/* Actions */}
                         <div className="col-span-1 flex justify-end relative">
-                          <button
+                          <button type="button"
                             aria-label="Member actions"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -473,7 +486,7 @@ const Team: React.FC = (): React.JSX.Element => {
                               }}
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <button
+                              <button type="button"
                                 className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
                                 style={{ color: 'var(--dash-text-muted)' }}
                                 onClick={() => {
@@ -491,7 +504,7 @@ const Team: React.FC = (): React.JSX.Element => {
                               >
                                 <Mail size={12} /> Send email
                               </a>
-                              <button
+                              <button type="button"
                                 className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
                                 style={{ color: 'var(--dash-text-muted)' }}
                                 onClick={() => {
@@ -506,7 +519,7 @@ const Team: React.FC = (): React.JSX.Element => {
                                 style={{ borderTop: '1px solid var(--dash-border)' }}
                               />
                               {m.role?.toLowerCase() !== 'owner' && (
-                                <button
+                                <button type="button"
                                   className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
                                   style={{ color: '#ef4444' }}
                                   onClick={() => {
@@ -527,13 +540,20 @@ const Team: React.FC = (): React.JSX.Element => {
               </div>
 
               {/* Pagination */}
-              {(page > 0 || (teamData?.hasMore ?? false) || totalPages > 1) && (
+              {(page > 0 || totalPages > 1) && (
                 <div className="flex items-center justify-between px-5 py-3">
                   <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-                    Showing page {page + 1}
+                    {teamData?.hasMore
+                      ? t('team.list.showingTruncated', { count: filtered.length })
+                      : t(
+                          filtered.length === 1
+                            ? 'team.list.membersCountSingular'
+                            : 'team.list.membersCountPlural',
+                          { count: filtered.length }
+                        )}
                   </p>
                   <div className="flex items-center gap-1">
-                    <button
+                    <button type="button"
                       onClick={() => setPage(Math.max(0, page - 1))}
                       disabled={page === 0}
                       className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
@@ -541,9 +561,9 @@ const Team: React.FC = (): React.JSX.Element => {
                     >
                       Prev
                     </button>
-                    <button
+                    <button type="button"
                       onClick={() => setPage(page + 1)}
-                      disabled={!teamData?.hasMore && page >= totalPages - 1}
+                      disabled={page >= totalPages - 1}
                       className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
                       style={{ background: 'var(--dash-hover)', color: 'var(--dash-text-muted)' }}
                     >
@@ -569,7 +589,7 @@ const Team: React.FC = (): React.JSX.Element => {
               {selected.size} selected
             </span>
             <div className="w-px h-4" style={{ background: 'var(--dash-border)' }} />
-            <button
+            <button type="button"
               onClick={() => setShowAddToGroupModal(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
               style={{
@@ -580,7 +600,7 @@ const Team: React.FC = (): React.JSX.Element => {
             >
               <FolderOpen size={12} /> Add to group
             </button>
-            <button
+            <button type="button"
               onClick={() => setBulkConfirmDeactivate(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
               style={{
@@ -591,7 +611,7 @@ const Team: React.FC = (): React.JSX.Element => {
             >
               <UserX size={12} /> Deactivate
             </button>
-            <button
+            <button type="button"
               aria-label="Clear selection"
               onClick={clearSelection}
               className="h-6 w-6 rounded-md flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"
@@ -639,7 +659,7 @@ const Team: React.FC = (): React.JSX.Element => {
                 </select>
               </div>
               <div className="flex items-center justify-end gap-2 pt-2">
-                <button
+                <button type="button"
                   onClick={() => {
                     setShowAddToGroupModal(false);
                     setSelectedGroupId('');

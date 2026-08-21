@@ -46,7 +46,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
         }}
       >
         {options.map((p) => (
-          <button
+          <button type="button"
             key={p}
             onClick={() => onPeriodChange(p)}
             style={{
@@ -76,7 +76,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
           borderRadius: 8,
         }}
       >
-        <button
+        <button type="button"
           onClick={() => onDateChange(shift(date, period, -1))}
           style={{
             padding: 4,
@@ -100,7 +100,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
         >
           {formatLabel(date, period)}
         </span>
-        <button
+        <button type="button"
           onClick={() => onDateChange(shift(date, period, 1))}
           style={{
             padding: 4,

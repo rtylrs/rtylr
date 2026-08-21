@@ -71,7 +71,7 @@ const BenefitPlanCard: React.FC<Props> = ({ plan, enrolled, onEnroll }) => {
             <Check size={12} /> {t('benefits.enrolled')}
           </span>
         ) : (
-          <button
+          <button type="button"
             onClick={onEnroll}
             style={{
               padding: '6px 12px',

@@ -337,7 +337,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
                     const isCustomer = item.group === 'Customers';
                     const Icon = item.icon;
                     return (
-                      <button
+                      <button type="button"
                         key={item.id}
                         onClick={() => {
                           item.action();

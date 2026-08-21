@@ -95,7 +95,7 @@ const ThemeCustomizer: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-2 flex-wrap">
               {COLORS.map((c) => (
-                <button
+                <button type="button"
                   key={c}
                   onClick={() => setAccent(c)}
                   className="h-9 w-9 rounded-lg transition-all"
@@ -122,7 +122,7 @@ const ThemeCustomizer: React.FC = () => {
                   {accent}
                 </code>
               </div>
-              <button
+              <button type="button"
                 className="px-4 py-2 rounded-lg text-xs font-semibold"
                 style={{ background: accent, color: 'white' }}
               >

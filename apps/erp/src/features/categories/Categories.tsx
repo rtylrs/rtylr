@@ -69,7 +69,7 @@ const Categories: React.FC = () => {
             color: 'var(--hub-text)',
           }}
         />
-        <button
+        <button type="button"
           onClick={handleCreate}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
           style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
@@ -158,7 +158,7 @@ const Categories: React.FC = () => {
               </div>
               {editingId === cat.id ? (
                 <>
-                  <button
+                  <button type="button"
                     aria-label="Save category"
                     onClick={() =>
                       updateMut.mutate(
@@ -186,7 +186,7 @@ const Categories: React.FC = () => {
                   >
                     ✓
                   </button>
-                  <button
+                  <button type="button"
                     aria-label="Cancel edit"
                     onClick={() => setEditingId(null)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center text-xs font-bold"
@@ -204,7 +204,7 @@ const Categories: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <button
+                  <button type="button"
                     aria-label="Edit category"
                     onClick={() => {
                       setEditingId(cat.id ?? null);
@@ -221,7 +221,7 @@ const Categories: React.FC = () => {
                   >
                     <Edit3 size={12} />
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => setConfirmDelete(cat.id ?? null)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center"
                     style={{ color: 'var(--erp-danger)' }}

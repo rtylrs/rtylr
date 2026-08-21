@@ -176,7 +176,7 @@ const Shifts = (): React.JSX.Element => {
             const isSelected = i === selectedDay;
             const dateNum = new Date(week.start.getTime() + i * 86400000).getDate();
             return (
-              <button
+              <button type="button"
                 key={day}
                 onClick={() => setSelectedDay(i)}
                 style={{

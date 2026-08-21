@@ -95,7 +95,7 @@ const MemberRow: React.FC<{
           ))}
         </select>
       </div>
-      <button
+      <button type="button"
         onClick={() => {
           if (isLastAdmin) return toast.error(t('toasts.workspaceMember.cannotRemoveLastAdmin'));
           setConfirmRemove(true);
@@ -161,7 +161,7 @@ const WorkspaceManager: React.FC = () => {
               {t('workspaceManager.title')}
             </h1>
           </div>
-          <button
+          <button type="button"
             onClick={() => setShowInvite(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
             style={{ background: 'var(--accent)', color: '#0a0a0a' }}

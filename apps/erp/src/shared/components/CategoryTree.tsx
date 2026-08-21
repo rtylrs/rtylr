@@ -25,7 +25,7 @@ const CategoryTree: React.FC<CategoryTreeProps> = ({ selectedId, onSelect }) => 
         const isSelected = selectedId === cat.id;
         return (
           <div key={cat.id}>
-            <button
+            <button type="button"
               onClick={() => {
                 onSelect(cat);
               }}

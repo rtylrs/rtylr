@@ -90,7 +90,7 @@ const InviteAccept: React.FC = () => {
         subtitle="This invitation link is invalid or has expired."
         footer={
           <p className="text-sm text-[#666]">
-            <button
+            <button type="button"
               className="text-[#4583C4] font-medium hover:underline underline-offset-2"
               onClick={() => navigate({ to: '/' })}
             >

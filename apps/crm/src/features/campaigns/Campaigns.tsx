@@ -314,7 +314,7 @@ function CampaignCard({
         </span>
         <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
           {campaign.status === 'Draft' && canSend && (
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onLaunch();
@@ -336,7 +336,7 @@ function CampaignCard({
             </button>
           )}
           {campaign.status === 'Active' && canManage && (
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onPause();
@@ -362,7 +362,7 @@ function CampaignCard({
             campaign.status === 'Sent' ||
             campaign.status === 'Cancelled' ||
             canManage) && (
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit();
@@ -382,7 +382,7 @@ function CampaignCard({
             </button>
           )}
           {canManage && (
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();
@@ -523,7 +523,7 @@ const Campaigns: React.FC = () => {
           </div>
           {canManageCampaigns && (
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button
+              <button type="button"
                 onClick={() => navigate({ to: '/campaigns/sms' })}
                 style={{
                   display: 'flex',
@@ -541,7 +541,7 @@ const Campaigns: React.FC = () => {
               >
                 <MessageSquare size={14} /> New SMS
               </button>
-              <button
+              <button type="button"
                 onClick={() => navigate({ to: '/campaigns/email' })}
                 style={{
                   display: 'flex',
@@ -576,7 +576,7 @@ const Campaigns: React.FC = () => {
           }}
         >
           {statusFilters.map((f) => (
-            <button
+            <button type="button"
               key={f}
               onClick={() => setStatusFilter(f)}
               style={{

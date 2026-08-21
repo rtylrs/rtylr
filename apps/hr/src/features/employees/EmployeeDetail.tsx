@@ -37,7 +37,7 @@ const EmployeeDetail = (): React.JSX.Element => {
         <p className="text-sm" style={{ color: 'var(--hr-text-muted)' }}>
           {t('errors.notFound')}
         </p>
-        <button
+        <button type="button"
           onClick={() => navigate({ to: '/employees' })}
           className="rounded-lg px-4 py-2 text-sm font-medium"
           style={{ background: 'var(--accent)', color: '#fff' }}
@@ -78,7 +78,7 @@ const EmployeeDetail = (): React.JSX.Element => {
       <HelmetContainer title="Employee detail · rtylr" />
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-3">
-          <button
+          <button type="button"
             onClick={() => navigate({ to: '/employees' })}
             className="rounded-lg p-2 transition-colors"
             style={{ background: 'var(--hr-hover)', color: 'var(--hr-text-muted)' }}

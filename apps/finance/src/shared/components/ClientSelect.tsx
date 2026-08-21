@@ -34,7 +34,7 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
 
   return (
     <div style={{ position: 'relative', width: '100%' }}>
-      <button
+      <button type="button"
         onClick={() => setOpen((v) => !v)}
         style={{
           width: '100%',
@@ -99,7 +99,7 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
             />
           </div>
           {filtered.map((c) => (
-            <button
+            <button type="button"
               key={c.id}
               onClick={() => {
                 onChange(c);

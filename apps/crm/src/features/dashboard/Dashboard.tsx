@@ -478,7 +478,7 @@ const Dashboard: React.FC = () => {
                 not visited in 30+ days
               </span>
             </div>
-            <button
+            <button type="button"
               onClick={() =>
                 navigate({ to: '/campaigns/email', search: { segment: 'atrisk' } as any })
               }

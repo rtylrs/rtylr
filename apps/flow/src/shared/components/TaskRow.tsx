@@ -85,7 +85,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         {/* Checkbox, always visible when selected, appears on row hover otherwise.
             Its own click/keydown stop propagation so activating it never also
             triggers the row's activateRow (open task), and vice versa. */}
-        <button
+        <button type="button"
           onClick={handleCheckbox}
           onKeyDown={(e) => e.stopPropagation()}
           className={cn(

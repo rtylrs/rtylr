@@ -748,7 +748,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   }}
                 >
                   {liveWorkspaces.map((ws) => (
-                    <button
+                    <button type="button"
                       key={ws.id}
                       onClick={() => {
                         setActiveWorkspace(ws.id);
@@ -1151,7 +1151,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             <CaretButton className="w-full justify-start" />
 
             <div className="relative" ref={userMenuRef}>
-              <button
+              <button type="button"
                 onClick={() => setUserMenuOpen((o) => !o)}
                 className="flex items-center gap-2.5 w-full px-3 py-2 rounded-md transition-colors hover:bg-[var(--flow-hover)]"
               >
@@ -1214,7 +1214,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                             { value: 'system', icon: Monitor, label: t('flow.shell.system') },
                           ] as const
                         ).map(({ value, icon: Icon, label }) => (
-                          <button
+                          <button type="button"
                             key={value}
                             onClick={() => setTheme(value)}
                             className="flex-1 flex flex-col items-center gap-1 py-2 rounded-md text-[10px] font-medium transition-colors"
@@ -1266,7 +1266,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         margin: '4px 0',
                       }}
                     />
-                    <button
+                    <button type="button"
                       onClick={handleLogout}
                       className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-start transition-colors hover:bg-[var(--flow-hover)]"
                       style={{ color: '#ef4444' }}

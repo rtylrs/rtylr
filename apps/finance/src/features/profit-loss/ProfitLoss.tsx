@@ -193,7 +193,7 @@ const ProfitLoss: React.FC = () => {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button
+          <button type="button"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -221,7 +221,7 @@ const ProfitLoss: React.FC = () => {
             <Download size={14} />
             Export
           </button>
-          <button
+          <button type="button"
             onClick={() => setShowClose(true)}
             style={{
               display: 'flex',
@@ -256,7 +256,7 @@ const ProfitLoss: React.FC = () => {
         }}
       >
         {periods.map((p) => (
-          <button
+          <button type="button"
             key={p}
             onClick={() => setPeriod(p)}
             style={{

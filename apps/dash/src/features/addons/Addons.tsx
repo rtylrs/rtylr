@@ -358,7 +358,7 @@ const Addons: React.FC = () => {
                     </span>
 
                     {!addon.isFree ? (
-                      <button
+                      <button type="button"
                         onClick={handlePaidAddonClick}
                         disabled={
                           isTrialMode ||
@@ -408,7 +408,7 @@ const Addons: React.FC = () => {
                         )}
                       </div>
                     ) : addon.isEnabled ? (
-                      <button
+                      <button type="button"
                         onClick={() => {
                           if (!isTrialMode) setDisableTarget(addon);
                         }}
@@ -423,7 +423,7 @@ const Addons: React.FC = () => {
                         {isTrialMode ? 'Trial mode' : 'Disable'}
                       </button>
                     ) : (
-                      <button
+                      <button type="button"
                         onClick={() => {
                           if (!isTrialMode) enableMutation.mutate(addon.id);
                         }}
@@ -540,7 +540,7 @@ const Addons: React.FC = () => {
                 </p>
 
                 <div className="flex gap-2 justify-end">
-                  <button
+                  <button type="button"
                     onClick={() => setPurchaseTarget(null)}
                     disabled={purchaseMutation.isPending}
                     className="px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-60"
@@ -548,7 +548,7 @@ const Addons: React.FC = () => {
                   >
                     Cancel
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => {
                       if (!isTrialMode) purchaseMutation.mutate(purchaseTarget.id);
                     }}
@@ -631,7 +631,7 @@ const Addons: React.FC = () => {
                 />
 
                 <div className="flex gap-2 justify-end">
-                  <button
+                  <button type="button"
                     onClick={() => {
                       setDisableTarget(null);
                       setConfirmText('');
@@ -641,7 +641,7 @@ const Addons: React.FC = () => {
                   >
                     Cancel
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => {
                       if (!isTrialMode) disableMutation.mutate(disableTarget.id);
                     }}

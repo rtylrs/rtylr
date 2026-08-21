@@ -80,7 +80,7 @@ export const Button: React.FC<
     danger: { background: '#ef4444', color: '#fff' },
   };
   return (
-    <button {...props} style={{ ...base, ...variants[variant], ...style }}>
+    <button type="button" {...props} style={{ ...base, ...variants[variant], ...style }}>
       {children}
     </button>
   );
@@ -252,7 +252,7 @@ export const Modal: React.FC<{
           <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
             {title}
           </h3>
-          <button
+          <button type="button"
             onClick={onClose}
             style={{
               background: 'transparent',

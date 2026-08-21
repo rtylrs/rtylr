@@ -39,10 +39,10 @@ const SendInvoiceModal: React.FC<SendInvoiceModalProps> = ({
       width={520}
       footer={
         <>
-          <button style={ghostBtn} onClick={onClose} disabled={sending}>
+          <button type="button" style={ghostBtn} onClick={onClose} disabled={sending}>
             Cancel
           </button>
-          <button style={primaryBtn} onClick={handleSend} disabled={sending}>
+          <button type="button" style={primaryBtn} onClick={handleSend} disabled={sending}>
             <Send size={13} />
             {sending ? 'Sending...' : 'Send Invoice'}
           </button>

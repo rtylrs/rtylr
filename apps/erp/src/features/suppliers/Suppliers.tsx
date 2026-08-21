@@ -159,7 +159,7 @@ const Suppliers: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={() => setShowScorecards((v) => !v)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium"
             style={{
@@ -185,7 +185,7 @@ const Suppliers: React.FC = () => {
             filename="suppliers.csv"
           />
           {canManageSuppliers && (
-            <button
+            <button type="button"
               data-testid="suppliers-add-button"
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-opacity"
@@ -355,14 +355,14 @@ const Suppliers: React.FC = () => {
               />
             ))}
             <div className="flex gap-2 justify-end">
-              <button
+              <button type="button"
                 onClick={() => setShowCreate(false)}
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
                 Cancel
               </button>
-              <button
+              <button type="button"
                 onClick={handleCreate}
                 disabled={
                   createMut.isPending ||

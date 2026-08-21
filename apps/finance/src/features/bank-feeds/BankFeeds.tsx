@@ -96,7 +96,7 @@ const BankFeeds: React.FC = () => {
         }
         actions={
           canManageAccounts ? (
-            <button style={primaryBtn} onClick={() => setShowConnect(true)}>
+            <button type="button" style={primaryBtn} onClick={() => setShowConnect(true)}>
               <LinkIcon size={13} /> Connect Account
             </button>
           ) : undefined
@@ -119,7 +119,7 @@ const BankFeeds: React.FC = () => {
             {accounts.map((a) => {
               const Icon = iconFor[a.type ?? ''] ?? Building2;
               return (
-                <button
+                <button type="button"
                   key={a.id}
                   onClick={() => setSelected(selected === a.id ? undefined : a.id)}
                   style={{
@@ -271,14 +271,14 @@ const BankFeeds: React.FC = () => {
         title="Add Bank Account"
         footer={
           <>
-            <button
+            <button type="button"
               style={ghostBtn}
               onClick={() => setShowConnect(false)}
               disabled={createAccount.isPending}
             >
               Cancel
             </button>
-            <button
+            <button type="button"
               style={{ ...primaryBtn, opacity: createAccount.isPending ? 0.6 : 1 }}
               onClick={handleCreateAccount}
               disabled={

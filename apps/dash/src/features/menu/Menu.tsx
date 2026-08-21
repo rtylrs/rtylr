@@ -84,7 +84,7 @@ const Menu: React.FC<{}> = () => {
                 ${(toFiniteNumber(item.details.price) / 100).toFixed(2)}
               </span>
             )}
-            <button
+            <button type="button"
               className="text-xs text-blue-500 hover:underline px-2 py-1"
               onClick={() => {
                 navigate({
@@ -95,7 +95,7 @@ const Menu: React.FC<{}> = () => {
             >
               Edit
             </button>
-            <button
+            <button type="button"
               className="text-xs text-red-500 hover:underline px-2 py-1"
               onClick={() => deleteMenuItem(item._id as string)}
             >
@@ -130,7 +130,7 @@ const Menu: React.FC<{}> = () => {
         >
           {item.details?.isActive === false ? 'Inactive' : 'Active'}
         </span>
-        <button
+        <button type="button"
           className="text-xs text-blue-500 hover:underline px-2 py-1"
           onClick={() => {
             navigate({
@@ -141,7 +141,7 @@ const Menu: React.FC<{}> = () => {
         >
           Edit
         </button>
-        <button
+        <button type="button"
           className="text-xs text-red-500 hover:underline px-2 py-1"
           onClick={() => deleteMenuItem(item._id as string)}
         >
@@ -170,7 +170,7 @@ const Menu: React.FC<{}> = () => {
             )}
           </div>
           <div className="flex gap-2">
-            <button
+            <button type="button"
               className="px-3 py-1 text-xs bg-accent text-white rounded-lg hover:opacity-90 transition-opacity"
               onClick={() => {
                 navigate({ to: '/create-item', search: { categoryId: category.itemId } });
@@ -178,7 +178,7 @@ const Menu: React.FC<{}> = () => {
             >
               Add a product
             </button>
-            <button
+            <button type="button"
               className="px-3 py-1 text-xs text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
               onClick={() => deleteCategory((category.itemId || category._id) as string)}
             >
@@ -210,7 +210,7 @@ const Menu: React.FC<{}> = () => {
             )}
           </div>
           <div className="flex gap-2">
-            <button
+            <button type="button"
               className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
               onClick={() =>
                 deleteCategory((parentCategory.itemId || parentCategory._id) as string)
@@ -258,7 +258,7 @@ const Menu: React.FC<{}> = () => {
             <div className="flex items-center justify-between mb-2">
               <p className="font-semibold text-primary">{item?.details?.banner?.title}</p>
               <div>
-                <button
+                <button type="button"
                   className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
                   onClick={() => deleteBanner(item._id as string)}
                 >

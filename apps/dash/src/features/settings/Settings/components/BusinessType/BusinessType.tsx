@@ -115,7 +115,7 @@ const BusinessTypeSettings: React.FC = () => {
                     {group.types.map((type) => {
                       const isActive = selected === type.slug;
                       return (
-                        <button
+                        <button type="button"
                           key={type.slug}
                           onClick={() => setSelected(type.slug)}
                           className={cn(

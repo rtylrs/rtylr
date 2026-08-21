@@ -125,7 +125,7 @@ const Calendar: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <button type="button"
             onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
             aria-label={t('flow.calendar.prevMonthLabel')}
             className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
@@ -139,7 +139,7 @@ const Calendar: React.FC = () => {
           >
             {monthLabel}
           </span>
-          <button
+          <button type="button"
             onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
             aria-label={t('flow.calendar.nextMonthLabel')}
             className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
@@ -147,7 +147,7 @@ const Calendar: React.FC = () => {
           >
             <ChevronRight size={13} />
           </button>
-          <button
+          <button type="button"
             onClick={() => setCursor(new Date())}
             className="text-[11px] px-2 py-1 rounded hover:bg-[var(--flow-hover)] font-medium"
             style={{ color: 'var(--flow-text-muted)' }}
@@ -218,7 +218,7 @@ const Calendar: React.FC = () => {
                 </div>
                 <div className="space-y-0.5">
                   {dayTasks.slice(0, 3).map((t) => (
-                    <button
+                    <button type="button"
                       key={t.id}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -235,7 +235,7 @@ const Calendar: React.FC = () => {
                     </button>
                   ))}
                   {dayTasks.length > 3 && (
-                    <button
+                    <button type="button"
                       onClick={(e) => e.stopPropagation()}
                       className="text-[9px] px-1 hover:underline"
                       style={{ color: ACCENT_VAR }}
@@ -280,7 +280,7 @@ const Calendar: React.FC = () => {
                     })}
                   </span>
                 </h2>
-                <button
+                <button type="button"
                   onClick={() => setCreateModal(null)}
                   aria-label={t('common.close')}
                   className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
@@ -347,14 +347,14 @@ const Calendar: React.FC = () => {
               </select>
 
               <div className="flex justify-end gap-2">
-                <button
+                <button type="button"
                   onClick={() => setCreateModal(null)}
                   className="px-3 py-1.5 rounded text-[12px]"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
                   {t('flow.calendar.cancel')}
                 </button>
-                <button
+                <button type="button"
                   onClick={submitCreate}
                   disabled={!newTitle.trim() || createTask.isPending}
                   className="px-3 py-1.5 rounded text-[12px] font-semibold disabled:opacity-40"

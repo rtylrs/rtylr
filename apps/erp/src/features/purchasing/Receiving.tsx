@@ -113,7 +113,7 @@ const Receiving: React.FC = () => {
             <h3 className="text-sm font-semibold" style={{ color: 'var(--hub-text)' }}>
               {t('receiving.receiveFor', { id: selectedId })}
             </h3>
-            <button
+            <button type="button"
               onClick={() => setSelectedId(null)}
               aria-label={t('receiving.closeDetails')}
               className="h-11 w-11 rounded-lg flex items-center justify-center"
@@ -139,7 +139,7 @@ const Receiving: React.FC = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <button
+                    <button type="button"
                       onClick={() => adjust(line.sku, -1)}
                       aria-label={`Decrease received quantity for ${line.name}`}
                       className="h-11 w-11 rounded flex items-center justify-center"
@@ -153,7 +153,7 @@ const Receiving: React.FC = () => {
                     >
                       {line.received}
                     </span>
-                    <button
+                    <button type="button"
                       onClick={() => adjust(line.sku, 1)}
                       aria-label={`Increase received quantity for ${line.name}`}
                       className="h-11 w-11 rounded flex items-center justify-center"
@@ -178,7 +178,7 @@ const Receiving: React.FC = () => {
               );
             })}
           </div>
-          <button
+          <button type="button"
             onClick={completeReceipt}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
@@ -199,7 +199,7 @@ const Receiving: React.FC = () => {
       ) : (
         <div className="space-y-2">
           {open.map((o) => (
-            <button
+            <button type="button"
               key={o.id}
               onClick={() => handleSelectOrder(o)}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors"

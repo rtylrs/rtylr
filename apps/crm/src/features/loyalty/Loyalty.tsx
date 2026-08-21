@@ -66,7 +66,7 @@ const Loyalty: React.FC = () => {
             </p>
           </div>
           {canConfigureLoyalty && (
-            <button
+            <button type="button"
               onClick={() => {
                 const next = !programEnabled;
                 updateConfig.mutate(
@@ -132,7 +132,7 @@ const Loyalty: React.FC = () => {
                 Points per $1 spent
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <button
+                <button type="button"
                   onClick={() => setPointsPerDollar((v) => Math.max(1, v - 1))}
                   style={{
                     width: '32px',
@@ -161,7 +161,7 @@ const Loyalty: React.FC = () => {
                 >
                   {pointsPerDollar}
                 </span>
-                <button
+                <button type="button"
                   onClick={() => setPointsPerDollar((v) => Math.min(10, v + 1))}
                   style={{
                     width: '32px',
@@ -238,7 +238,7 @@ const Loyalty: React.FC = () => {
           </div>
           {canConfigureLoyalty && (
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
-              <button
+              <button type="button"
                 onClick={() => updateConfig.mutate({ pointsPerDollar, pointsExpiry })}
                 disabled={updateConfig.isPending}
                 style={{

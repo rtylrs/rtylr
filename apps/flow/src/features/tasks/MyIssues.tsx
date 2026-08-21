@@ -218,7 +218,7 @@ const QuickAddRow: React.FC<QuickAddRowProps> = ({ inputRef }) => {
         style={{ color: 'var(--flow-text)' }}
       />
       {title.trim().length > 0 && (
-        <button
+        <button type="button"
           onClick={submit}
           disabled={createTask.isPending || hasNoLabels}
           title={hasNoLabels ? t('flow.myIssues.quickAddNoLabelsReason') : undefined}

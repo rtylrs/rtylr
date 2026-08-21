@@ -158,7 +158,7 @@ export const Button: React.FC<
     base.color = 'var(--hr-text-muted)';
   }
   return (
-    <button style={{ ...base, ...style }} {...rest}>
+    <button type="button" style={{ ...base, ...style }} {...rest}>
       {icon}
       {children}
     </button>
@@ -492,7 +492,7 @@ export const Tabs: React.FC<{ tabs: string[]; active: string; onChange: (t: stri
     }}
   >
     {tabs.map((tab) => (
-      <button
+      <button type="button"
         key={tab}
         onClick={() => onChange(tab)}
         style={{

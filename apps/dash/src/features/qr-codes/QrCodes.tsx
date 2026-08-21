@@ -231,7 +231,7 @@ const QrCodes: React.FC = () => {
                       </Badge>
                     </div>
                     <div className="flex justify-start gap-2 md:justify-end">
-                      <button
+                      <button type="button"
                         className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-[var(--dash-hover)] disabled:pointer-events-none disabled:opacity-35"
                         style={{
                           color: 'var(--dash-text-muted)',

@@ -178,7 +178,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
           const Icon = r.icon;
           const active = i === index;
           return (
-            <button
+            <button type="button"
               key={r.id}
               onMouseEnter={() => setIndex(i)}
               onClick={() => {

@@ -312,7 +312,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
             <PackagePlus size={14} style={{ color: 'var(--erp-accent)' }} />
             {t('erp.products.new')}
           </h3>
-          <button onClick={onClose} aria-label={t('common.close')}>
+          <button type="button" onClick={onClose} aria-label={t('common.close')}>
             <X size={14} style={{ color: 'var(--hub-text-muted)' }} />
           </button>
         </div>
@@ -681,14 +681,14 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
         </div>
 
         <div className="flex gap-2 justify-end mt-4">
-          <button
+          <button type="button"
             onClick={onClose}
             className="px-3 py-1.5 rounded-lg text-xs"
             style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
           >
             {t('common.cancel')}
           </button>
-          <button
+          <button type="button"
             data-testid="qap-submit"
             onClick={handleSubmit}
             disabled={pending}

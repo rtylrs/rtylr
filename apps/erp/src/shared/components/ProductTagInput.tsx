@@ -41,7 +41,7 @@ const ProductTagInput: React.FC<ProductTagInputProps> = ({
           }}
         >
           {t}
-          <button onClick={() => remove(t)}>
+          <button type="button" onClick={() => remove(t)}>
             <X size={9} />
           </button>
         </span>

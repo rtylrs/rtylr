@@ -257,7 +257,7 @@ const DefaultLayout: React.FC = () => {
             borderBottom: '1px solid var(--hub-border)',
           }}
         >
-          <button
+          <button type="button"
             onClick={() => setSidebarOpen(true)}
             className="h-8 w-8 rounded-lg flex items-center justify-center"
             style={{ color: 'var(--hub-text-muted)' }}
@@ -313,7 +313,7 @@ const DefaultLayout: React.FC = () => {
               alt="rtylr"
               className="h-9 w-auto"
             />
-            <button
+            <button type="button"
               onClick={() => setSidebarOpen(false)}
               className="h-7 w-7 rounded-lg flex md:hidden items-center justify-center"
               style={{ color: 'var(--hub-text-muted)' }}
@@ -405,7 +405,7 @@ const DefaultLayout: React.FC = () => {
               <SettingsIcon size={12} /> Settings
             </Link>
             <CaretButton className="w-full justify-start mb-1" />
-            <button
+            <button type="button"
               onClick={() => setUserMenuOpen((v) => !v)}
               style={{
                 display: 'flex',
@@ -503,7 +503,7 @@ const DefaultLayout: React.FC = () => {
                         { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
                         { value: 'system' as Theme, icon: Monitor, label: 'System' },
                       ].map(({ value, icon: Icon, label }) => (
-                        <button
+                        <button type="button"
                           key={value}
                           onClick={() => handleTheme(value)}
                           style={{
@@ -533,7 +533,7 @@ const DefaultLayout: React.FC = () => {
                   <div
                     style={{ height: '1px', background: 'var(--hub-border)', margin: '4px 0' }}
                   />
-                  <button
+                  <button type="button"
                     onClick={handleLogout}
                     style={{
                       display: 'flex',
@@ -588,7 +588,7 @@ const DefaultLayout: React.FC = () => {
                 {pageTitle}
               </h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <button
+                <button type="button"
                   onClick={openPalette}
                   style={{
                     height: '28px',
@@ -620,7 +620,7 @@ const DefaultLayout: React.FC = () => {
                     ⌘K
                   </kbd>
                 </button>
-                <button
+                <button type="button"
                   aria-label="Notifications"
                   onClick={() => toast.info('No new notifications')}
                   style={{
