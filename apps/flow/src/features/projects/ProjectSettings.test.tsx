@@ -1,10 +1,15 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { toast } from 'sonner';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
+}));
+
+vi.mock('sonner', () => ({
+  toast: { error: vi.fn(), success: vi.fn() },
 }));
 
 const updateProjectMutate = vi.hoisted(() => vi.fn());
@@ -49,7 +54,9 @@ vi.mock('./useProjectMembers', () => ({
 }));
 
 vi.mock('../../shared/hooks/queries/useFlowTeam', () => ({
-  useFlowTeam: () => ({ data: [] }),
+  useFlowTeam: () => ({
+    data: [{ id: '20', name: 'Grace Hopper', email: 'grace@example.com' }],
+  }),
 }));
 
 // Defaults to project-admin so every pre-existing test below (which is about
@@ -136,7 +143,6 @@ describe('ProjectSettings integrations tab', () => {
       },
       expect.objectContaining({
         onSuccess: expect.any(Function),
-        onError: expect.any(Function),
       })
     );
   });
@@ -350,5 +356,127 @@ describe('ProjectSettings members empty state', () => {
     const refresh = screen.getByRole('button', { name: 'flow.projectSettings.refreshMembersCta' });
     fireEvent.click(refresh);
     expect(refetchMembersMock).toHaveBeenCalled();
+  });
+});
+
+describe('ProjectSettings mutation error toasts (no double-toast on failure)', () => {
+  beforeEach(() => {
+    useFlowStore.setState({ projects: [], workspaces: [] });
+    // A member row has to render for the remove/role/transfer controls to
+    // exist at all. Without it these assertions would pass vacuously against
+    // a screen that never drew the button they claim to exercise.
+    projectMembersData.data = [
+      {
+        id: 'm1',
+        userId: '10',
+        name: 'Ada Lovelace',
+        email: 'ada@example.com',
+        role: 'member',
+      },
+    ];
+    // The role-gating block above leaves this returning false, which would
+    // disable every control here and make the assertions pass vacuously.
+    canManageProjectMock.mockReturnValue(true);
+    updateProjectMutate.mockClear();
+    removeMemberMutate.mockClear();
+    updateRoleMutate.mockClear();
+    moveProjectMutate.mockClear();
+    transferOwnershipMutate.mockClear();
+    deleteProjectMutate.mockClear();
+    (toast.error as ReturnType<typeof vi.fn>).mockClear();
+    (toast.success as ReturnType<typeof vi.fn>).mockClear();
+  });
+
+  it('does not show a call-site toast when removing a member fails - the hook already shows one', () => {
+    renderProjectSettings();
+    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'flow.projectSettings.removeMemberLabel' })
+    );
+
+    const [, options] = removeMemberMutate.mock.calls[0];
+    act(() => options.onError?.(new Error('boom')));
+
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it('does not show a call-site toast when updating a member role fails - the hook already shows one', () => {
+    renderProjectSettings();
+    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+    fireEvent.change(
+      screen.getByRole('combobox', { name: 'flow.projectSettings.roleSelectLabel' }),
+      { target: { value: 'admin' } }
+    );
+
+    const [, options] = updateRoleMutate.mock.calls[0];
+    act(() => options.onError?.(new Error('boom')));
+
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it('does not show a call-site toast when moving a project fails, but still resets the confirm state', () => {
+    const { container } = renderProjectSettings();
+    act(() => {
+      useFlowStore.setState({
+        workspaces: [
+          { id: 'w1', name: 'Workspace', color: '#000' },
+          { id: 'w2', name: 'Other workspace', color: '#111' },
+        ],
+      });
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+
+    const workspaceSelect = container.querySelectorAll('select')[1];
+    fireEvent.change(workspaceSelect, { target: { value: 'w2' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Move' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    const [, options] = moveProjectMutate.mock.calls[0];
+    act(() => options.onError?.(new Error('boom')));
+
+    expect(toast.error).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Confirm' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Move' })).toBeInTheDocument();
+  });
+
+  it('does not show a call-site toast when transferring ownership fails, but still resets the confirm state', () => {
+    renderProjectSettings();
+    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+
+    fireEvent.change(document.getElementById('transfer-select')!, {
+      target: { value: '20' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Transfer' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    const [, options] = transferOwnershipMutate.mock.calls[0];
+    act(() => options.onError?.(new Error('boom')));
+
+    expect(toast.error).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Confirm' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Transfer' })).toBeInTheDocument();
+  });
+
+  it('does not show a call-site toast when deleting a project fails - the hook already shows one', () => {
+    renderProjectSettings();
+    fireEvent.click(screen.getByRole('button', { name: 'Danger Zone' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    fireEvent.change(screen.getByPlaceholderText('Demo project'), {
+      target: { value: 'Demo project' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete project' }));
+
+    const [, options] = deleteProjectMutate.mock.calls[0];
+    act(() => options.onError?.(new Error('boom')));
+
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it('does not show a call-site toast when saving a project update fails - the hook already shows one', () => {
+    renderProjectSettings();
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    const [, options] = updateProjectMutate.mock.calls[0];
+    expect(options.onError).toBeUndefined();
   });
 });
