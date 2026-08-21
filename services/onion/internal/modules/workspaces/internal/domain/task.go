@@ -150,6 +150,29 @@ type UpdateTaskInput struct {
 	StartDate   *time.Time
 	Labels      []int64
 	Archived    *bool
+	// The fields below use pointers rather than the zero-value-means-absent
+	// convention above, so they can express "clear this value" as well as
+	// "leave it alone". Title and friends cannot, which is why a description
+	// can never be emptied once set.
+	EffortMinutes  *int32
+	EstimatedHours *float64
+	WaitingOn      *string
+	DecisionNote   *string
+	// FocusPin is per-user, so the repository writes flow_task_focus_pins
+	// keyed on the caller rather than a column on flow_tasks.
+	FocusPin *bool
+}
+
+type AddTaskDependencyInput struct {
+	TaskID          int64
+	DependsOnTaskID int64
+	BusinessID      int64
+}
+
+type RemoveTaskDependencyInput struct {
+	TaskID          int64
+	DependsOnTaskID int64
+	BusinessID      int64
 }
 
 type UpdateTaskStatusInput struct {

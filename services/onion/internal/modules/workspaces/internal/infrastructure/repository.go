@@ -545,13 +545,50 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 		archivedParam = *input.Archived
 	}
 
+	// These five use a conditional Set rather than COALESCE so that a caller can
+	// distinguish "leave it alone" (nil) from "clear it" (zero value). The
+	// COALESCE fields above cannot express a clear, which is the reason a task
+	// description can never be emptied once set.
+	builder := sq.Update("flow_tasks")
+	if input.EffortMinutes != nil {
+		if *input.EffortMinutes == 0 {
+			builder = builder.Set("effort_minutes", nil)
+		} else {
+			builder = builder.Set("effort_minutes", *input.EffortMinutes)
+		}
+	}
+	if input.EstimatedHours != nil {
+		if *input.EstimatedHours == 0 {
+			builder = builder.Set("estimated_hours", nil)
+		} else {
+			// Format identically to CreateTask, deliberately: estimated_hours is a
+			// DECIMAL(6,2) column, and leaving this as a raw float64 would give the
+			// column two different marshalling paths that could drift from each
+			// other depending on the driver's float formatting.
+			builder = builder.Set("estimated_hours", strconv.FormatFloat(*input.EstimatedHours, 'f', 2, 64))
+		}
+	}
+	if input.WaitingOn != nil {
+		if *input.WaitingOn == "" {
+			builder = builder.Set("waiting_on", nil)
+		} else {
+			builder = builder.Set("waiting_on", *input.WaitingOn)
+		}
+	}
+	if input.DecisionNote != nil {
+		if *input.DecisionNote == "" {
+			builder = builder.Set("decision_note", nil)
+		} else {
+			builder = builder.Set("decision_note", *input.DecisionNote)
+		}
+	}
+
 	// Partial updates (the client sends only the fields it changed, e.g. just
 	// priority or assignee) must not overwrite the fields it omitted. COALESCE(?, col)
 	// preserves the existing value when the param is NULL, and every nullable param
 	// above is left NULL when the request omits that field. The completed_at CASE only
 	// fires when a non-NULL status is explicitly supplied.
-	q, args, err := sq.
-		Update("flow_tasks").
+	q, args, err := builder.
 		Set("title", sq.Expr("COALESCE(?, title)", titleParam)).
 		Set("description", sq.Expr("COALESCE(?, description)", sql.NullString{String: input.Description, Valid: input.Description != ""})).
 		Set("status", sq.Expr("COALESCE(?, status)", statusParam)).
@@ -584,6 +621,100 @@ func (r *Repository) UpdateTask(ctx context.Context, input domain.UpdateTaskInpu
 		return err
 	}
 	return nil
+}
+
+// SetTaskFocusPin pins or unpins a task in one user's Today view. The pin is
+// per-user by design: Today is a personal view, so a column on flow_tasks would
+// put one member's planning in another member's list.
+//
+// businessID is written as a plain column value here, not a WHERE guard, so
+// this method trusts the caller to have already confirmed the task belongs to
+// that business. The API handler enforces that via RequireTaskRole before
+// calling in.
+func (r *Repository) SetTaskFocusPin(ctx context.Context, taskID, userID, businessID int64, pinned bool) error {
+	if !pinned {
+		_, err := r.pool.ExecContext(ctx,
+			"DELETE FROM flow_task_focus_pins WHERE task_id = ? AND user_id = ? AND business_id = ?",
+			taskID, userID, businessID,
+		)
+		if err != nil {
+			logger.Ctx(ctx).Error("SetTaskFocusPin delete failed", logger.Error(err))
+		}
+		return err
+	}
+	// INSERT IGNORE rather than a read-then-write: the unique key on
+	// (task_id, user_id) makes a repeat pin a no-op without a round trip.
+	_, err := r.pool.ExecContext(ctx,
+		"INSERT IGNORE INTO flow_task_focus_pins (task_id, user_id, business_id) VALUES (?, ?, ?)",
+		taskID, userID, businessID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("SetTaskFocusPin insert failed", logger.Error(err))
+	}
+	return err
+}
+
+// AddTaskDependency records that taskID is blocked by dependsOnTaskID. The
+// unique key on (task_id, depends_on_task_id) makes a repeat add a no-op.
+//
+// input.BusinessID is written as a plain column value here, not a WHERE
+// guard, so this method trusts the caller to have already confirmed both
+// tasks belong to that business (the same trust CreateTask already places in
+// caller-supplied ids). The API handler enforces that via RequireTaskRole
+// before calling in.
+func (r *Repository) AddTaskDependency(ctx context.Context, input domain.AddTaskDependencyInput) error {
+	_, err := r.pool.ExecContext(ctx,
+		"INSERT IGNORE INTO flow_task_dependencies (task_id, depends_on_task_id, business_id) VALUES (?, ?, ?)",
+		input.TaskID, input.DependsOnTaskID, input.BusinessID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("AddTaskDependency failed", logger.Error(err))
+	}
+	return err
+}
+
+func (r *Repository) RemoveTaskDependency(ctx context.Context, input domain.RemoveTaskDependencyInput) error {
+	_, err := r.pool.ExecContext(ctx,
+		"DELETE FROM flow_task_dependencies WHERE task_id = ? AND depends_on_task_id = ? AND business_id = ?",
+		input.TaskID, input.DependsOnTaskID, input.BusinessID,
+	)
+	if err != nil {
+		logger.Ctx(ctx).Error("RemoveTaskDependency failed", logger.Error(err))
+	}
+	return err
+}
+
+// ListTaskDependencies returns dependency ids keyed by task id. It takes a slice
+// so list views resolve every row in one query instead of N.
+func (r *Repository) ListTaskDependencies(ctx context.Context, taskIDs []int64, businessID int64) (map[int64][]int64, error) {
+	out := make(map[int64][]int64, len(taskIDs))
+	if len(taskIDs) == 0 {
+		return out, nil
+	}
+	q, args, err := sq.
+		Select("task_id", "depends_on_task_id").
+		From("flow_task_dependencies").
+		Where(sq.Eq{"task_id": taskIDs, "business_id": businessID}).
+		OrderBy("id").
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, err
+	}
+	rows, err := r.pool.QueryContext(ctx, q, args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("ListTaskDependencies failed", logger.Error(err))
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var taskID, dependsOn int64
+		if err := rows.Scan(&taskID, &dependsOn); err != nil {
+			return nil, err
+		}
+		out[taskID] = append(out[taskID], dependsOn)
+	}
+	return out, rows.Err()
 }
 
 func (r *Repository) UpdateTaskStatus(ctx context.Context, input domain.UpdateTaskStatusInput) error {
