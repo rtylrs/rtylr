@@ -249,5 +249,6 @@ export const cases = [
   ["apps/flow/src/features/projects/ProjectOverview.test.tsx", "audit-batch-247-suite-01"],
   ["apps/flow/src/features/tasks/components/TimePanel.tsx", "audit-batch-248-suite-01"],
   ["apps/flow/src/shared/components/AssigneeAvatar.tsx", "audit-batch-249-suite-01"],
+  ["apps/flow/src/shared/components/SubtaskList.tsx", "audit-batch-250-suite-01"],
 ];
 

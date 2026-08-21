@@ -249,5 +249,6 @@ export const cases = [
   ["apps/flow/src/features/settings/sections/WorkTypesSection.test.tsx", "audit-batch-247-suite-18"],
   ["apps/flow/src/features/workspace-manager/WorkspaceManager.test.tsx", "audit-batch-248-suite-18"],
   ["apps/flow/src/shared/components/PriorityIcon.tsx", "audit-batch-249-suite-18"],
+  ["apps/hr/src/features/dashboard/widgets/LeaveBalanceWidget.tsx", "audit-batch-250-suite-18"],
 ];
 
