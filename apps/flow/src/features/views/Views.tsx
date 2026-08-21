@@ -158,7 +158,7 @@ const Views: React.FC = () => {
                   </div>
                 ) : (
                   <>
-                    <button
+                    <button type="button"
                       onClick={() => setSelected(v)}
                       className="flex items-center gap-2 px-3 py-1.5 rounded text-[12px] text-left flex-1 min-w-0"
                       style={{ color: active ? 'var(--flow-text)' : 'var(--flow-text-muted)' }}

@@ -426,7 +426,7 @@ const DefaultLayout: React.FC = () => {
                     className="my-1"
                     style={{ height: '1px', background: 'var(--hub-border)' }}
                   />
-                  <button
+                  <button type="button"
                     onClick={handleLogout}
                     className="flex items-center gap-2 w-full px-2 py-2 rounded-lg text-sm transition-colors"
                     style={{ color: '#ef4444' }}

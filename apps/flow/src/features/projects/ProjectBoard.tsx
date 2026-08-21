@@ -649,7 +649,7 @@ const GroupByPicker: React.FC<{
 
   return (
     <div ref={ref} className="relative">
-      <button
+      <button type="button"
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-1.5 h-7 px-2 rounded-md text-[11px] font-medium transition-colors hover:bg-[var(--flow-hover)]"
         style={{

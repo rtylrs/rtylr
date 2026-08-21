@@ -247,7 +247,7 @@ const TimeLogging = (): React.JSX.Element => {
         )}
 
         {/* Floating add button */}
-        <button
+        <button type="button"
           onClick={handleNewEntry}
           style={{
             position: 'fixed',

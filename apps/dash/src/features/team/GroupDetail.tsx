@@ -224,7 +224,7 @@ const GroupDetail = (): React.JSX.Element => {
             </label>
             <div className="flex items-center gap-2 flex-wrap">
               {PRESET_COLORS.map((c) => (
-                <button
+                <button type="button"
                   key={c}
                   aria-label={t('team.groupDetail.colorAriaLabel', { color: c })}
                   onClick={() => {

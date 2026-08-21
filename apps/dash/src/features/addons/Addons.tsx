@@ -408,7 +408,7 @@ const Addons: React.FC = () => {
                         )}
                       </div>
                     ) : addon.isEnabled ? (
-                      <button
+                      <button type="button"
                         onClick={() => {
                           if (!isTrialMode) setDisableTarget(addon);
                         }}

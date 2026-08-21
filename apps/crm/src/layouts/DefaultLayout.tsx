@@ -503,7 +503,7 @@ const DefaultLayout: React.FC = () => {
                         { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
                         { value: 'system' as Theme, icon: Monitor, label: 'System' },
                       ].map(({ value, icon: Icon, label }) => (
-                        <button
+                        <button type="button"
                           key={value}
                           onClick={() => handleTheme(value)}
                           style={{

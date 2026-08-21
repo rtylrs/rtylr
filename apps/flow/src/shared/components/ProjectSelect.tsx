@@ -48,7 +48,7 @@ export const ProjectSelect: React.FC<ProjectSelectProps> = ({
           }}
         >
           {projects.map((p) => (
-            <button
+            <button type="button"
               key={p.id}
               onClick={() => {
                 onChange(p.id);

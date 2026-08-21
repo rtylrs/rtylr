@@ -610,7 +610,7 @@ const DefaultLayout: React.FC = () => {
                 {pageTitle}
               </h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <button
+                <button type="button"
                   onClick={() => setSearchOpen(true)}
                   style={{
                     height: 28,

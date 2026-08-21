@@ -586,7 +586,7 @@ const FaqEditor: React.FC<{
             />
           </div>
           <div className="mt-2 flex justify-end">
-            <button
+            <button type="button"
               onClick={() => onChange(items.filter((_, j) => j !== i))}
               className="rounded-md p-1.5 text-white/60 hover:bg-white/10 hover:text-red-400"
             >

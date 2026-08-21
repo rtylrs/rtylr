@@ -468,7 +468,7 @@ const ProjectSettings: React.FC = () => {
                         </button>
                       </>
                     ) : (
-                      <button
+                      <button type="button"
                         onClick={() => {
                           if (!canManageProject) return;
                           if (!targetWorkspaceId)

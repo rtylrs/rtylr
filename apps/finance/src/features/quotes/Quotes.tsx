@@ -310,7 +310,7 @@ const Quotes: React.FC = () => {
                         <CheckCircle size={12} /> Mark Accepted
                       </button>
                     ) : (
-                      <button
+                      <button type="button"
                         style={{ ...ghostBtn, padding: '4px 10px' }}
                         aria-label={`View quote ${q.id}`}
                       >

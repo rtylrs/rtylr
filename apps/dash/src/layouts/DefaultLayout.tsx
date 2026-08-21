@@ -470,7 +470,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <button className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]">
+                <button type="button" className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]">
                   <Avatar
                     src={getAvatarUrl(userEmail || userName)}
                     alt={userName || 'User'}

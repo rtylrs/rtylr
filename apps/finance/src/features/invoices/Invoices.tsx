@@ -115,7 +115,7 @@ const Invoices: React.FC = () => {
             <Link to="/invoices/recurring" style={{ ...ghostBtn, textDecoration: 'none' }}>
               Recurring
             </Link>
-            <button style={primaryBtn} onClick={() => navigate({ to: '/invoices/new' })}>
+            <button type="button" style={primaryBtn} onClick={() => navigate({ to: '/invoices/new' })}>
               <Plus size={15} /> New Invoice
             </button>
           </>

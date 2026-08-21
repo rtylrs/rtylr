@@ -71,7 +71,7 @@ const Integrations: React.FC = () => {
         {/* Category pills */}
         <div className="flex items-center gap-1.5 flex-wrap">
           {CATEGORIES.map((c) => (
-            <button
+            <button type="button"
               key={c.key}
               onClick={() => setCat(c.key)}
               className="px-3 py-1 rounded-lg text-xs font-medium transition-colors"

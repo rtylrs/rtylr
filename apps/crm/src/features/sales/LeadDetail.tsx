@@ -603,7 +603,7 @@ const LeadDetail: React.FC = () => {
                 >
                   Contacts
                 </p>
-                <button
+                <button type="button"
                   aria-label="Add contact"
                   onClick={() => setContactOpen((v) => !v)}
                   style={{

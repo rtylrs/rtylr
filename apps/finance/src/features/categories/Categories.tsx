@@ -108,7 +108,7 @@ const Categories: React.FC = () => {
         title="Expense Categories"
         subtitle={`${data.length} categories`}
         actions={
-          <button style={primaryBtn} onClick={() => setShowCreate(true)}>
+          <button type="button" style={primaryBtn} onClick={() => setShowCreate(true)}>
             <Plus size={13} /> New Category
           </button>
         }
