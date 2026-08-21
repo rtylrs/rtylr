@@ -5,7 +5,7 @@
 use crate::hardware::escpos::DRAWER_PIN2;
 use crate::transport::windows_spooler;
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn open_cash_drawer(printer_name: String) -> Result<String, String> {
     let printer_name = printer_name.trim();
     if printer_name.is_empty() {

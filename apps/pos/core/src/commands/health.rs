@@ -10,7 +10,7 @@ use std::time::Duration;
 use crate::hardware::probe::{infer_tcp_device_type, probe_epos_http, probe_escpos_protocol, probe_zpl_protocol};
 use crate::transport::{network as net_tx, serial as serial_tx, windows_spooler};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize)]
 pub struct DeviceStatus {
     pub name: String,
     pub status: String,
@@ -18,7 +18,7 @@ pub struct DeviceStatus {
     pub device_type: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize)]
 pub struct HardwareHealthReport {
     pub printer: DeviceStatus,
     pub drawer: DeviceStatus,
@@ -170,18 +170,19 @@ fn probe_windows_printer(printer_name: &str) -> DeviceStatus {
     }
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn check_hardware(config: HealthCheckConfig) -> HardwareHealthReport {
-    let retries = config.retry_count.unwrap_or(1);
+    // Frontend-supplied: clamp so a bogus value cannot hang the terminal.
+    let retries = config.retry_count.unwrap_or(1).clamp(0, 5);
 
     let printer = match config.printer_transport.as_str() {
         "serial" => {
-            let port = config.printer_serial_port.clone().unwrap_or_default();
+            let port = config.printer_serial_port.as_deref().unwrap_or_default().to_string();
             let baud = config.printer_baud_rate.unwrap_or(9600);
             probe_with_retry(|| probe_serial(&port, baud), retries)
         }
         "network" => {
-            let host = config.printer_host.clone().unwrap_or_default();
+            let host = config.printer_host.as_deref().unwrap_or_default().to_string();
             let port = config.printer_port.unwrap_or(9100);
             probe_with_retry(|| probe_tcp(&host, port), retries)
         }
@@ -196,12 +197,12 @@ pub fn check_hardware(config: HealthCheckConfig) -> HardwareHealthReport {
 
     let drawer = match config.drawer_transport.as_deref().unwrap_or("printer") {
         "serial" => {
-            let port = config.drawer_serial_port.clone().unwrap_or_default();
+            let port = config.drawer_serial_port.as_deref().unwrap_or_default().to_string();
             let baud = config.drawer_baud_rate.unwrap_or(9600);
             probe_with_retry(|| probe_serial(&port, baud), retries)
         }
         "network" => {
-            let host = config.drawer_host.clone().unwrap_or_default();
+            let host = config.drawer_host.as_deref().unwrap_or_default().to_string();
             let port = config.drawer_port.unwrap_or(9100);
             probe_with_retry(|| probe_tcp(&host, port), retries)
         }
@@ -215,12 +216,12 @@ pub fn check_hardware(config: HealthCheckConfig) -> HardwareHealthReport {
 
     let kds = match config.kds_transport.as_str() {
         "serial" => {
-            let port = config.kds_serial_port.clone().unwrap_or_default();
+            let port = config.kds_serial_port.as_deref().unwrap_or_default().to_string();
             let baud = config.kds_baud_rate.unwrap_or(9600);
             probe_with_retry(|| probe_serial(&port, baud), retries)
         }
         "network" => {
-            let host = config.kds_host.clone().unwrap_or_default();
+            let host = config.kds_host.as_deref().unwrap_or_default().to_string();
             let port = config.kds_port.unwrap_or(9100);
             probe_with_retry(|| probe_tcp(&host, port), retries)
         }

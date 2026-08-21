@@ -8,7 +8,7 @@ use crate::validation::{
 };
 
 /// Open the cash drawer via a serial port (RJ11/RJ12 or USB-to-serial adapter).
-#[tauri::command]
+#[tauri::command(async)]
 pub fn open_cash_drawer_serial(
     port_name: String,
     baud_rate: u32,
@@ -23,7 +23,7 @@ pub fn open_cash_drawer_serial(
 }
 
 /// Open the cash drawer over the network (network-attached thermal printer).
-#[tauri::command]
+#[tauri::command(async)]
 pub fn open_cash_drawer_network(host: String, port: u16, pin: u8) -> Result<String, String> {
     let host = validate_host(&host)?;
     let port = validate_port(port)?;
