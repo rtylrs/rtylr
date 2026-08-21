@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Gift } from 'lucide-react';
 import { toast } from 'sonner';
 import ScreenLayout from '../../layouts/ScreenLayout';
@@ -21,8 +21,10 @@ const GiftCardsScreen: React.FC = () => {
     void refresh();
   }, [refresh]);
 
-  const filtered = cards.filter(
-    (c) => !search || c.code.toLowerCase().includes(search.toLowerCase())
+  const searchTerm = search.trim().toLowerCase();
+  const filtered = useMemo(
+    () => cards.filter((c) => !searchTerm || c.code.toLowerCase().includes(searchTerm)),
+    [cards, searchTerm]
   );
 
   const handleSell = async () => {

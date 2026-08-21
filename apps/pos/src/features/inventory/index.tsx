@@ -1,5 +1,5 @@
 import { createOneKitClient } from '@voxire/api';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Package, Store } from 'lucide-react';
 import { toast } from 'sonner';
 import { AccessServiceClient } from '@voxire/voxie/pos/access/v1/client';
@@ -229,17 +229,20 @@ const InventoryScreen: React.FC = () => {
     }
   };
 
-  const filtered = items.filter((it) => {
-    const term = search.trim().toLowerCase();
-    return (
-      !term ||
-      it.name.toLowerCase().includes(term) ||
-      (it.sku ? it.sku.toLowerCase().includes(term) : false)
-    );
-  });
+  const term = search.trim().toLowerCase();
+  const filtered = useMemo(
+    () =>
+      items.filter(
+        (it) =>
+          !term ||
+          it.name.toLowerCase().includes(term) ||
+          (it.sku ? it.sku.toLowerCase().includes(term) : false)
+      ),
+    [items, term]
+  );
 
-  const lowStockIds = new Set(lowStock.map((l) => l.itemId));
-  const lowStockSummary = summarizeLowStockItems(lowStock);
+  const lowStockIds = useMemo(() => new Set(lowStock.map((l) => l.itemId)), [lowStock]);
+  const lowStockSummary = useMemo(() => summarizeLowStockItems(lowStock), [lowStock]);
   const hasTransferDestinations = locations.some((location) => location.id !== branchId);
 
   return (

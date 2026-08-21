@@ -1,6 +1,6 @@
 import { createOneKitClient } from '@voxire/api';
 import { z } from 'zod';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ReceiptServiceClient } from '@voxire/voxie/pos/receipt/v1/client';
 import { useReceiptsStore } from '../../shared/stores/receiptsStore';
 import type { Receipt } from '../../shared/types/pos';
@@ -55,6 +55,11 @@ export function useReceipts() {
     [markEmailed]
   );
 
-  const all = [...local, ...remote.filter((r) => !local.some((l) => l.id === r.id))];
+  // Merge local + remote once per input change instead of an O(n×m) rebuild
+  // on every render of every consumer.
+  const all = useMemo(() => {
+    const localIds = new Set(local.map((l) => l.id));
+    return [...local, ...remote.filter((r) => !localIds.has(r.id))];
+  }, [local, remote]);
   return { receipts: all, loading, error, reload: load, email, add: addLocal };
 }

@@ -1,5 +1,5 @@
 import { createOneKitClient } from '@voxire/api';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import { MenuItemServiceClient } from '@voxire/voxie/pos/menu_item/v1/client';
@@ -37,8 +37,10 @@ const ProductQuickEditScreen: React.FC = () => {
     });
   }, [items]);
 
-  const filtered = items.filter(
-    (it) => !search || (it.name ?? '').toLowerCase().includes(search.toLowerCase())
+  const searchTerm = search.trim().toLowerCase();
+  const filtered = useMemo(
+    () => items.filter((it) => !searchTerm || (it.name ?? '').toLowerCase().includes(searchTerm)),
+    [items, searchTerm]
   );
 
   const update = (id: string, field: keyof (typeof drafts)[string], value: unknown) =>
@@ -50,15 +52,20 @@ const ProductQuickEditScreen: React.FC = () => {
       if (!draft) {
         throw new Error('Select a valid product before saving.');
       }
+      // Reject invalid input instead of silently publishing a free/untracked
+      // product (Number('') === 0).
+      if (!Number.isFinite(draft.price) || draft.price < 0) {
+        throw new Error('Enter a valid price before saving.');
+      }
+      if (!Number.isFinite(draft.stock) || draft.stock == null || draft.stock < 0) {
+        throw new Error('Enter a valid stock count before saving.');
+      }
       await menuItemClient.updateMenuItem({
         id: item.id ?? '',
         body: {
           name: item.name,
-          salePrice: Number.isFinite(draft.price) && draft.price >= 0 ? draft.price : 0,
-          stock:
-            Number.isFinite(draft.stock) && draft.stock != null && draft.stock >= 0
-              ? draft.stock
-              : 0,
+          salePrice: draft.price,
+          stock: draft.stock,
           isActive: draft.available,
         },
       });
