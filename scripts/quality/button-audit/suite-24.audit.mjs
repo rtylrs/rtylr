@@ -316,5 +316,6 @@ export const cases = [
   ["apps/dash/src/features/qr-codes/templates.tsx", "audit-batch-314-suite-24"],
   ["apps/dash/src/layouts/NoSidebarLayout.tsx", "audit-batch-315-suite-24"],
   ["apps/dash/src/shared/components/ui/dropdown-menu.tsx", "audit-batch-316-suite-24"],
+  ["apps/erp/src/features/categories/Categories.tsx", "audit-batch-317-suite-24"],
 ];
 

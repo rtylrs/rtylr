@@ -316,5 +316,6 @@ export const cases = [
   ["apps/dash/src/features/permissions/Roles.tsx", "audit-batch-314-suite-20"],
   ["apps/dash/src/features/team/Team.tsx", "audit-batch-315-suite-20"],
   ["apps/dash/src/shared/components/ui/badge.tsx", "audit-batch-316-suite-20"],
+  ["apps/erp/src/features/barcodes/Barcodes.tsx", "audit-batch-317-suite-20"],
 ];
 
