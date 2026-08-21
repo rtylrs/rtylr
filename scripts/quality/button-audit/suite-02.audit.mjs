@@ -297,5 +297,6 @@ export const cases = [
   ["apps/finance/src/features/bank-feeds/BankFeeds.tsx", "audit-batch-295-suite-02"],
   ["apps/finance/src/layouts/DefaultLayout.test.tsx", "audit-batch-296-suite-02"],
   ["apps/finance/src/shared/components/ReceiptUpload.tsx", "audit-batch-297-suite-02"],
+  ["apps/flow/src/features/presence/PresenceScreen.test.tsx", "audit-batch-298-suite-02"],
 ];
 
