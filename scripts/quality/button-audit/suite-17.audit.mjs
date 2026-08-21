@@ -18,5 +18,6 @@ export const cases = [
   ["apps/flow/src/features/time/AddHours.tsx", "audit-batch-016-suite-17"],
   ["apps/flow/src/shared/components/BulkEditBar.tsx", "audit-batch-017-suite-17"],
   ["apps/flow/src/shared/components/TaskContextMenu.tsx", "audit-batch-018-suite-17"],
+  ["apps/hr/src/features/documents/DocumentVault.tsx", "audit-batch-019-suite-17"],
 ];
 

@@ -18,5 +18,6 @@ export const cases = [
   ["apps/flow/src/features/settings/FlowSettings.tsx", "audit-batch-016-suite-03"],
   ["apps/flow/src/features/workspace-dashboard/WorkspaceDashboard.tsx", "audit-batch-017-suite-03"],
   ["apps/flow/src/shared/components/LabelChip.tsx", "audit-batch-018-suite-03"],
+  ["apps/hr/src/features/dashboard/widgets/HeadcountWidget.tsx", "audit-batch-019-suite-03"],
 ];
 
