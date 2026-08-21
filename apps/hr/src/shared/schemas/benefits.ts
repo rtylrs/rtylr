@@ -1,12 +1,16 @@
 import { z } from 'zod';
 
+// Backed by hr.benefit.v1's BenefitPlan (listBenefits). id stays a wire string
+// for the same reason as myBenefitEnrollmentSchema below - protobuf-JSON
+// int64 encoding. category is the backend's free-form `type` field
+// title-cased for display, not a fixed client enum: the RPC has no enrolled
+// employee count either, so that stat is not rendered rather than faked.
 export const benefitPlanSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(Number),
+  id: z.string(),
   name: z.string(),
-  category: z.enum(['Health', 'Dental', 'Vision', '401k', 'Life']).catch('Health'),
+  category: z.string(),
   carrier: z.string(),
   monthlyCost: z.number(),
-  enrolledCount: z.number(),
 });
 
 export const benefitEnrollmentSchema = z.object({
