@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -198,6 +199,22 @@ type Repository struct {
 	pool    *sql.DB
 }
 
+var ErrResourceNotAllowed = errors.New("console resource is not allowlisted")
+
+// Application-owned schema prefixes are intentionally narrow; system tables
+// and unprefixed tables must be added explicitly to the exact-name set below.
+var allowedResourceTablePrefixes = []string{
+	"booking_", "careers_", "crm_", "erp_", "finance_", "flow_", "hr_",
+	"oauth_", "pos_", "store_", "support_", "voxire_", "rtylr_",
+}
+
+var allowedResourceTables = map[string]struct{}{
+	"access_requests": {}, "activity_log": {}, "addons": {}, "businesses": {},
+	"chat_sessions": {}, "clients": {}, "config": {}, "conversation_messages": {},
+	"conversation_summaries": {}, "custom_domains": {}, "email_jobs": {},
+	"expenses": {}, "faq": {}, "feature_flags": {}, "users": {},
+}
+
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		queries: sqlc.New(db),
@@ -232,6 +249,25 @@ func isSensitiveResourceColumn(name string) bool {
 		}
 	}
 	return column == "session_id" || strings.HasSuffix(column, "_session_id")
+}
+
+func isAllowedResourceTable(table string) bool {
+	if _, ok := allowedResourceTables[table]; ok {
+		return true
+	}
+	for _, prefix := range allowedResourceTablePrefixes {
+		if strings.HasPrefix(table, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+func validateResourceTable(table string) error {
+	if !isAllowedResourceTable(table) {
+		return fmt.Errorf("%w: %s", ErrResourceNotAllowed, table)
+	}
+	return nil
 }
 
 func visibleResourceColumns(columns []ResourceColumnRow) []ResourceColumnRow {
@@ -270,7 +306,6 @@ var userColumns = []string{
 
 // ── Generic Resource CRUD ────────────────────────────────────────────────────
 
-// dynamic-query: squirrel
 func (r *Repository) ListResourceTables(ctx context.Context) ([]ResourceTableRow, error) {
 	rows, err := r.pool.QueryContext(ctx, `
 		SELECT table_name, table_comment
@@ -289,13 +324,18 @@ func (r *Repository) ListResourceTables(ctx context.Context) ([]ResourceTableRow
 		if err := rows.Scan(&table.Name, &table.Comment); err != nil {
 			return nil, err
 		}
+		if !isAllowedResourceTable(table.Name) {
+			continue
+		}
 		tables = append(tables, table)
 	}
 	return tables, rows.Err()
 }
 
-// dynamic-query: squirrel
 func (r *Repository) DescribeResourceTable(ctx context.Context, table string) ([]ResourceColumnRow, string, error) {
+	if err := validateResourceTable(table); err != nil {
+		return nil, "", err
+	}
 	rows, err := r.pool.QueryContext(ctx, `
 		SELECT column_name, data_type, is_nullable, column_key, column_default, extra, column_comment
 		FROM information_schema.columns
@@ -339,7 +379,6 @@ func (r *Repository) DescribeResourceTable(ctx context.Context, table string) ([
 	return columns, primaryKey, nil
 }
 
-// dynamic-query: squirrel
 func (r *Repository) ListResourceRows(ctx context.Context, table string, limit, offset int) (*ResourceRowsResult, error) {
 	columns, primaryKey, err := r.DescribeResourceTable(ctx, table)
 	if err != nil {
@@ -385,7 +424,6 @@ func (r *Repository) ListResourceRows(ctx context.Context, table string, limit, 
 	return &ResourceRowsResult{Columns: columns, PrimaryKey: primaryKey, Rows: resultRows, Total: total}, nil
 }
 
-// dynamic-query: squirrel
 func (r *Repository) GetResourceRow(ctx context.Context, table, id string) (map[string]any, []ResourceColumnRow, string, error) {
 	columns, primaryKey, err := r.DescribeResourceTable(ctx, table)
 	if err != nil {
@@ -421,7 +459,6 @@ func (r *Repository) GetResourceRow(ctx context.Context, table, id string) (map[
 	return resultRows[0], columns, primaryKey, nil
 }
 
-// dynamic-query: squirrel
 func (r *Repository) CreateResourceRow(ctx context.Context, table string, values map[string]any) (int64, error) {
 	columns, _, err := r.DescribeResourceTable(ctx, table)
 	if err != nil {
@@ -465,7 +502,6 @@ func (r *Repository) CreateResourceRow(ctx context.Context, table string, values
 	return res.LastInsertId()
 }
 
-// dynamic-query: squirrel
 func (r *Repository) UpdateResourceRow(ctx context.Context, table, id string, values map[string]any) error {
 	columns, primaryKey, err := r.DescribeResourceTable(ctx, table)
 	if err != nil {
@@ -509,7 +545,6 @@ func (r *Repository) UpdateResourceRow(ctx context.Context, table, id string, va
 	return err
 }
 
-// dynamic-query: squirrel
 func (r *Repository) DeleteResourceRow(ctx context.Context, table, id string) error {
 	_, primaryKey, err := r.DescribeResourceTable(ctx, table)
 	if err != nil {
