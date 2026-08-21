@@ -227,5 +227,6 @@ export const cases = [
   ["apps/hr/src/features/leave/LeaveBalances.tsx", "audit-batch-225-suite-22"],
   ["apps/hr/src/features/reviews/ReviewForm.tsx", "audit-batch-226-suite-22"],
   ["apps/hr/src/features/setup-wizard/steps/WorkScheduleStep.tsx", "audit-batch-227-suite-22"],
+  ["apps/hr/src/shared/components/BirthdayWidget.tsx", "audit-batch-228-suite-22"],
 ];
 

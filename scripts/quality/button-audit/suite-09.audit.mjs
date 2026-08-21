@@ -227,5 +227,6 @@ export const cases = [
   ["apps/hr/src/features/departments/Departments.tsx", "audit-batch-225-suite-09"],
   ["apps/hr/src/features/payroll/MyPaySlips.tsx", "audit-batch-226-suite-09"],
   ["apps/hr/src/features/setup-wizard/components/StepContainer.tsx", "audit-batch-227-suite-09"],
+  ["apps/hr/src/features/time-off/TimeOffNew.tsx", "audit-batch-228-suite-09"],
 ];
 
