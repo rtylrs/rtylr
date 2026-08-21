@@ -1,19 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
+
+// A single shared 1s interval drives every subscriber, so N ticket cards
+// cost one timer - not N timers - and each card can re-render independently.
+type TickListener = () => void;
+const listeners = new Set<TickListener>();
+let intervalId: ReturnType<typeof setInterval> | null = null;
+let currentTick = 0;
+
+function subscribeTick(listener: TickListener): () => void {
+  listeners.add(listener);
+  if (intervalId === null) {
+    intervalId = setInterval(() => {
+      currentTick += 1;
+      for (const listener of listeners) listener();
+    }, 1000);
+  }
+  return () => {
+    listeners.delete(listener);
+    if (listeners.size === 0 && intervalId !== null) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  };
+}
+
+function getTickSnapshot(): number {
+  return currentTick;
+}
 
 /**
  * Returns a tick counter that increments every second.
  * Components use this to trigger elapsed-time recalculations without
- * storing per-order timers - a single counter re-renders all tickets.
+ * storing per-order timers - one shared counter re-renders subscribers.
  */
 export function useKdsTick(): number {
-  const [tick, setTick] = useState(0);
-
-  useEffect(() => {
-    const id = setInterval(() => setTick((n) => n + 1), 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  return tick;
+  return useSyncExternalStore(subscribeTick, getTickSnapshot);
 }
 
 /** Format elapsed seconds as MM:SS, turning amber at 5 min and red at 10 min. */

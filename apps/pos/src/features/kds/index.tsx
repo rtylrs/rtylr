@@ -25,11 +25,76 @@ const urgencyStyles: Record<'ok' | 'warn' | 'crit', string> = {
 
 const ACTIVE_STATUSES = new Set<KDSOrder['status']>(['new', 'cooking']);
 
+interface KdsTicketCardProps {
+  order: KDSOrder;
+  shortcutNumber?: number;
+  isSelected: boolean;
+  onBump: (order: KDSOrder) => void;
+}
+
+// Memoized card that subscribes to the shared 1s tick itself, so elapsed
+// timers stay live without re-rendering the whole grid every second.
+const KdsTicketCard = React.memo<KdsTicketCardProps>(function KdsTicketCard({
+  order,
+  shortcutNumber,
+  isSelected,
+  onBump,
+}) {
+  useKdsTick();
+  const elapsed = elapsedSeconds(order.createdAt);
+  const { label: elapsedLabel, urgency } = formatElapsed(elapsed);
+  const isActive = ACTIVE_STATUSES.has(order.status);
+
+  return (
+    <div
+      className={`p-4 rounded-xl border-2 ${statusStyles[order.status]} flex flex-col gap-3 transition-all ${
+        isSelected ? 'ring-2 ring-white/40' : ''
+      }`}
+    >
+      <div className="flex items-baseline justify-between">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-lg text-pos-text">#{order.number}</span>
+          {isActive && (
+            <span className={`text-[10px] tabular-nums ${urgencyStyles[urgency]}`}>
+              {elapsedLabel}
+            </span>
+          )}
+        </div>
+        <span className="text-[10px] uppercase opacity-70">{order.station}</span>
+      </div>
+
+      {shortcutNumber != null && (
+        <span className="text-[9px] text-pos-muted opacity-40">⌨ {shortcutNumber}</span>
+      )}
+
+      <ul className="space-y-1.5 flex-1">
+        {order.items.map((it, i) => (
+          <li key={it.id || `${it.name}-${i}`} className="text-sm text-pos-text">
+            <span className="font-semibold">{it.qty}×</span> {it.name}
+            {it.notes && <div className="text-[10px] italic text-pos-muted">{it.notes}</div>}
+          </li>
+        ))}
+      </ul>
+
+      {order.status !== 'served' && (
+        <button
+          onClick={() => onBump(order)}
+          className="h-11 rounded-lg bg-white/10 text-pos-text font-semibold text-sm hover:bg-white/20 active:scale-95 transition-all"
+        >
+          {order.status === 'new' && 'Start Cooking'}
+          {order.status === 'cooking' && 'Mark Ready'}
+          {order.status === 'ready' && 'Mark Served'}
+        </button>
+      )}
+    </div>
+  );
+});
+
 const KDSScreen: React.FC = () => {
   const station = useSettingsStore((s) => s.kdsStation);
   const setStation = useSettingsStore((s) => s.setKdsStation);
   const kdsHardware = useSettingsStore((s) => s.kdsHardware);
-  const { orders, loading, setStatus } = useKDSOrders(station === 'all' ? undefined : station);
+  const { orders, loading, error, setStatus } = useKDSOrders(station === 'all' ? undefined : station);
 
   const availableStations = useMemo(() => {
     const seen = new Set<string>();
@@ -38,7 +103,7 @@ const KDSScreen: React.FC = () => {
     }
     return Array.from(seen).sort();
   }, [orders]);
-  const tick = useKdsTick();
+
   const [selectedIdx, setSelectedIdx] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const sentIds = useRef(new Set<string>());
@@ -48,6 +113,8 @@ const KDSScreen: React.FC = () => {
     return STATUS_ORDER[Math.min(STATUS_ORDER.length - 1, idx + 1)];
   };
 
+  // setStatus is a stable useCallback, so bump (and therefore the keyboard
+  // listener below) no longer churns on every render.
   const bump = useCallback(
     async (order: KDSOrder) => {
       await setStatus(order.id, next(order.status));
@@ -132,6 +199,8 @@ const KDSScreen: React.FC = () => {
       <div className="p-5" ref={containerRef}>
         {loading ? (
           <Skeleton rows={6} />
+        ) : error ? (
+          <EmptyState icon={ChefHat} title="Couldn't load tickets" message={error} />
         ) : orders.length === 0 ? (
           <EmptyState icon={ChefHat} title="No active tickets" />
         ) : (
@@ -141,57 +210,15 @@ const KDSScreen: React.FC = () => {
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
               {orders.map((o, idx) => {
-                void tick; // re-render trigger every second
-                const elapsed = elapsedSeconds(o.createdAt);
-                const { label: elapsedLabel, urgency } = formatElapsed(elapsed);
                 const isActive = ACTIVE_STATUSES.has(o.status);
-                const isSelected = isActive && idx === selectedIdx;
-
                 return (
-                  <div
+                  <KdsTicketCard
                     key={o.id}
-                    className={`p-4 rounded-xl border-2 ${statusStyles[o.status]} flex flex-col gap-3 transition-all ${
-                      isSelected ? 'ring-2 ring-white/40' : ''
-                    }`}
-                  >
-                    <div className="flex items-baseline justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-lg text-pos-text">#{o.number}</span>
-                        {isActive && (
-                          <span className={`text-[10px] tabular-nums ${urgencyStyles[urgency]}`}>
-                            {elapsedLabel}
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-[10px] uppercase opacity-70">{o.station}</span>
-                    </div>
-
-                    {idx < 9 && (
-                      <span className="text-[9px] text-pos-muted opacity-40">⌨ {idx + 1}</span>
-                    )}
-
-                    <ul className="space-y-1.5 flex-1">
-                      {o.items.map((it, i) => (
-                        <li key={i} className="text-sm text-pos-text">
-                          <span className="font-semibold">{it.qty}×</span> {it.name}
-                          {it.notes && (
-                            <div className="text-[10px] italic text-pos-muted">{it.notes}</div>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-
-                    {o.status !== 'served' && (
-                      <button
-                        onClick={() => void bump(o)}
-                        className="h-11 rounded-lg bg-white/10 text-pos-text font-semibold text-sm hover:bg-white/20 active:scale-95 transition-all"
-                      >
-                        {o.status === 'new' && 'Start Cooking'}
-                        {o.status === 'cooking' && 'Mark Ready'}
-                        {o.status === 'ready' && 'Mark Served'}
-                      </button>
-                    )}
-                  </div>
+                    order={o}
+                    shortcutNumber={idx < 9 ? idx + 1 : undefined}
+                    isSelected={isActive && idx === selectedIdx}
+                    onBump={bump}
+                  />
                 );
               })}
             </div>
