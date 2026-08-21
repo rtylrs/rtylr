@@ -126,6 +126,8 @@ func (a *StaffAPI) CreateStaff(ctx context.Context, req *hrstaffv1.CreateStaffRe
 		EmergencyContactPhone: req.GetEmergencyContactPhone(),
 		Apps:                  req.GetApps(),
 		Notes:                 req.GetNotes(),
+		PhotoURL:              req.GetPhotoUrl(),
+		Bio:                   req.GetBio(),
 	})
 	if createErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create staff member")
@@ -184,6 +186,8 @@ func (a *StaffAPI) UpdateStaff(ctx context.Context, req *hrstaffv1.UpdateStaffRe
 		EmergencyContactPhone: body.GetEmergencyContactPhone(),
 		Apps:                  body.GetApps(),
 		Notes:                 body.GetNotes(),
+		PhotoURL:              body.GetPhotoUrl(),
+		Bio:                   body.GetBio(),
 	})
 	if updateErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update staff member")
@@ -280,6 +284,8 @@ func newStaffPayload(staff domain.Staff, hasSensitiveDetailsPermission bool, cal
 		EmergencyContactPhone: staff.EmergencyContactPhone,
 		Apps:                  staff.Apps,
 		Notes:                 staff.Notes,
+		PhotoUrl:              staff.PhotoURL,
+		Bio:                   staff.Bio,
 		CreatedAt:             formatStaffTime(staff.CreatedAt),
 		UpdatedAt:             formatStaffTime(staff.UpdatedAt),
 	}

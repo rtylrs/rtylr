@@ -2,7 +2,7 @@
 SELECT id, owner_id, business_id, user_id, department_id, first_name, last_name, email, phone,
        role, employment_type, status, salary, hourly_rate, overtime_rate,
        start_date, end_date, address, emergency_contact_name, emergency_contact_phone,
-       apps, notes, created_at, updated_at
+       apps, notes, photo_url, bio, created_at, updated_at
 FROM hr_staff
 WHERE id = ? AND business_id = ?;
 
@@ -10,15 +10,16 @@ WHERE id = ? AND business_id = ?;
 INSERT INTO hr_staff
 (owner_id, business_id, user_id, department_id, first_name, last_name, email, phone, role,
  employment_type, status, salary, hourly_rate, overtime_rate, start_date, end_date,
- address, emergency_contact_name, emergency_contact_phone, apps, notes)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+ address, emergency_contact_name, emergency_contact_phone, apps, notes, photo_url, bio)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateStaff :exec
 UPDATE hr_staff
 SET department_id = ?, first_name = ?, last_name = ?, email = ?, phone = ?,
     role = ?, employment_type = ?, status = ?, salary = ?, hourly_rate = ?,
     overtime_rate = ?, end_date = ?, address = ?, emergency_contact_name = ?,
-    emergency_contact_phone = ?, apps = ?, notes = ?, updated_at = NOW()
+    emergency_contact_phone = ?, apps = ?, notes = ?, photo_url = ?, bio = ?,
+    updated_at = NOW()
 WHERE id = ? AND business_id = ?;
 
 -- name: TerminateStaff :exec

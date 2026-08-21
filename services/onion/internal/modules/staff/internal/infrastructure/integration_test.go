@@ -364,3 +364,114 @@ func TestCreateStaff_SalaryIsStored(t *testing.T) {
 		t.Errorf("expected Salary=4500, got %v", s.Salary)
 	}
 }
+
+// photo_url and bio were added for tryrtylr/rtylr#875. Flow's profile screen and
+// HR's employee profile both read them, and Flow reads them through ListStaff
+// rather than GetStaffByID, so both paths are asserted.
+//
+// This exists because the wiring compiles whether or not it works: sqlc's params
+// struct gains the fields, an unset field is the zero value, and the INSERT then
+// writes NULL without any error. A round trip is the only thing that shows the
+// value actually made it to the column and back.
+func TestCreateStaff_PersistsPhotoURLAndBio(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	const (
+		wantPhoto = "https://cdn.example.test/staff/carol.jpg"
+		wantBio   = "Runs the evening shift. Ask me about the espresso machine."
+	)
+
+	id, err := repo.CreateStaff(ctx, domain.StaffInput{
+		OwnerID:        testutil.OwnerID,
+		BusinessID:     testutil.BusinessID,
+		FirstName:      "Profile",
+		LastName:       "Fields",
+		Email:          "profile.fields@test.local",
+		Role:           "cashier",
+		EmploymentType: "full_time",
+		Status:         "active",
+		StartDate:      "2024-01-01",
+		PhotoURL:       wantPhoto,
+		Bio:            wantBio,
+	})
+	if err != nil {
+		t.Fatalf("CreateStaff: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM hr_staff WHERE id = ?", id)
+	})
+
+	got, err := repo.GetStaffByID(ctx, testutil.BusinessID, id)
+	if err != nil {
+		t.Fatalf("GetStaffByID: %v", err)
+	}
+	if got.PhotoURL != wantPhoto {
+		t.Errorf("GetStaffByID PhotoURL = %q, want %q", got.PhotoURL, wantPhoto)
+	}
+	if got.Bio != wantBio {
+		t.Errorf("GetStaffByID Bio = %q, want %q", got.Bio, wantBio)
+	}
+
+	// Flow resolves "my own record" by listing and matching on user_id, so the
+	// list projection has to carry these too. scanStaffRows is shared with
+	// ListStaffDirectory, which is why both SELECTs gained the columns together.
+	list, err := repo.ListStaff(ctx, testutil.BusinessID, "", "", "")
+	if err != nil {
+		t.Fatalf("ListStaff: %v", err)
+	}
+	var found bool
+	for _, s := range list {
+		if s.ID != id {
+			continue
+		}
+		found = true
+		if s.PhotoURL != wantPhoto {
+			t.Errorf("ListStaff PhotoURL = %q, want %q", s.PhotoURL, wantPhoto)
+		}
+		if s.Bio != wantBio {
+			t.Errorf("ListStaff Bio = %q, want %q", s.Bio, wantBio)
+		}
+	}
+	if !found {
+		t.Fatalf("staff %d not returned by ListStaff, so the assertions above never ran", id)
+	}
+}
+
+// An unset photo or bio must read back empty, not as a literal "NULL" or an
+// error. The fallback to the hub account avatar depends on it being empty.
+func TestCreateStaff_OmittedPhotoAndBioReadBackEmpty(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	id, err := repo.CreateStaff(ctx, domain.StaffInput{
+		OwnerID:        testutil.OwnerID,
+		BusinessID:     testutil.BusinessID,
+		FirstName:      "NoProfile",
+		LastName:       "Fields",
+		Email:          "noprofile.fields@test.local",
+		Role:           "cashier",
+		EmploymentType: "full_time",
+		Status:         "active",
+		StartDate:      "2024-01-01",
+	})
+	if err != nil {
+		t.Fatalf("CreateStaff: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM hr_staff WHERE id = ?", id)
+	})
+
+	got, err := repo.GetStaffByID(ctx, testutil.BusinessID, id)
+	if err != nil {
+		t.Fatalf("GetStaffByID: %v", err)
+	}
+	if got.PhotoURL != "" {
+		t.Errorf("PhotoURL = %q, want empty", got.PhotoURL)
+	}
+	if got.Bio != "" {
+		t.Errorf("Bio = %q, want empty", got.Bio)
+	}
+}

@@ -40,7 +40,7 @@ func (r *Repository) ListStaff(ctx context.Context, businessID int64, search, de
 			"s.first_name", "s.last_name", "s.email", "s.phone",
 			"s.role", "s.employment_type", "s.status", "s.salary", "s.hourly_rate", "s.overtime_rate",
 			"s.start_date", "s.end_date", "s.address", "s.emergency_contact_name", "s.emergency_contact_phone",
-			"s.apps", "s.notes", "s.created_at", "s.updated_at").
+			"s.apps", "s.notes", "s.photo_url", "s.bio", "s.created_at", "s.updated_at").
 		From("hr_staff s").
 		LeftJoin("hr_departments d ON d.id = s.department_id AND d.business_id = s.business_id").
 		Where(sq.Eq{"s.business_id": businessID})
@@ -103,6 +103,8 @@ func scanStaffRows(rows *sql.Rows) ([]domain.Staff, error) {
 			emergencyContactPhone sql.NullString
 			apps                  []byte
 			notes                 sql.NullString
+			photoURL              sql.NullString
+			bio                   sql.NullString
 			createdAt             sql.NullTime
 			updatedAt             sql.NullTime
 		)
@@ -111,7 +113,7 @@ func scanStaffRows(rows *sql.Rows) ([]domain.Staff, error) {
 			&s.FirstName, &s.LastName, &s.Email, &phone,
 			&s.Role, &employmentType, &statusVal, &salary, &hourlyRate, &overtimeRate,
 			&s.StartDate, &endDate, &address, &emergencyContactName, &emergencyContactPhone,
-			&apps, &notes, &createdAt, &updatedAt,
+			&apps, &notes, &photoURL, &bio, &createdAt, &updatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -123,6 +125,12 @@ func scanStaffRows(rows *sql.Rows) ([]domain.Staff, error) {
 		}
 		if departmentName.Valid {
 			s.DepartmentName = departmentName.String
+		}
+		if photoURL.Valid {
+			s.PhotoURL = photoURL.String
+		}
+		if bio.Valid {
+			s.Bio = bio.String
 		}
 		if phone.Valid {
 			s.Phone = phone.String
@@ -189,7 +197,7 @@ func (r *Repository) ListStaffDirectory(ctx context.Context, businessID, limit, 
 			"s.first_name", "s.last_name", "s.email", "s.phone",
 			"s.role", "s.employment_type", "s.status", "s.salary", "s.hourly_rate", "s.overtime_rate",
 			"s.start_date", "s.end_date", "s.address", "s.emergency_contact_name", "s.emergency_contact_phone",
-			"s.apps", "s.notes", "s.created_at", "s.updated_at").
+			"s.apps", "s.notes", "s.photo_url", "s.bio", "s.created_at", "s.updated_at").
 		From("hr_staff s").
 		LeftJoin("hr_departments d ON d.id = s.department_id AND d.business_id = s.business_id").
 		Where(sq.Eq{"s.business_id": businessID}).
@@ -291,6 +299,12 @@ func staffFromGetRow(row sqlc.GetStaffByIDRow) domain.Staff {
 	if row.Apps != nil {
 		s.Apps = string(row.Apps)
 	}
+	if row.PhotoUrl.Valid {
+		s.PhotoURL = row.PhotoUrl.String
+	}
+	if row.Bio.Valid {
+		s.Bio = row.Bio.String
+	}
 	if row.Notes.Valid {
 		s.Notes = row.Notes.String
 	}
@@ -356,6 +370,8 @@ func (r *Repository) CreateStaff(ctx context.Context, input domain.StaffInput) (
 		EmergencyContactPhone: sql.NullString{String: input.EmergencyContactPhone, Valid: input.EmergencyContactPhone != ""},
 		Apps:                  appsJSON,
 		Notes:                 sql.NullString{String: input.Notes, Valid: input.Notes != ""},
+		PhotoUrl:              sql.NullString{String: input.PhotoURL, Valid: input.PhotoURL != ""},
+		Bio:                   sql.NullString{String: input.Bio, Valid: input.Bio != ""},
 	})
 	if err != nil {
 		if rollbackErr := tx.Rollback(); rollbackErr != nil {
@@ -427,6 +443,8 @@ func (r *Repository) UpdateStaff(ctx context.Context, businessID int64, input do
 		EmergencyContactPhone: sql.NullString{String: input.EmergencyContactPhone, Valid: input.EmergencyContactPhone != ""},
 		Apps:                  appsJSON,
 		Notes:                 sql.NullString{String: input.Notes, Valid: input.Notes != ""},
+		PhotoUrl:              sql.NullString{String: input.PhotoURL, Valid: input.PhotoURL != ""},
+		Bio:                   sql.NullString{String: input.Bio, Valid: input.Bio != ""},
 		ID:                    input.ID,
 		BusinessID:            businessID,
 	})

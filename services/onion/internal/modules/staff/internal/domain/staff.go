@@ -32,8 +32,13 @@ type Staff struct {
 	EmergencyContactPhone string    `json:"emergency_contact_phone"`
 	Apps                  string    `json:"apps"`
 	Notes                 string    `json:"notes"`
-	CreatedAt             time.Time `json:"created_at"`
-	UpdatedAt             time.Time `json:"updated_at"`
+	// PhotoURL and Bio are profile fields, distinct from Notes. Notes is
+	// HR-admin commentary about a person; Bio is what that person says about
+	// themselves and is shown on their profile.
+	PhotoURL  string    `json:"photo_url"`
+	Bio       string    `json:"bio"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (s *Staff) FromRow(row *sql.Rows) error {
@@ -164,6 +169,8 @@ type StaffInput struct {
 	EmergencyContactPhone string  `json:"emergency_contact_phone"`
 	Apps                  string  `json:"apps"`
 	Notes                 string  `json:"notes"`
+	PhotoURL              string  `json:"photo_url"`
+	Bio                   string  `json:"bio"`
 }
 
 type StaffUpdateInput struct {
@@ -185,4 +192,6 @@ type StaffUpdateInput struct {
 	EmergencyContactPhone string  `json:"emergency_contact_phone"`
 	Apps                  string  `json:"apps"`
 	Notes                 string  `json:"notes"`
+	PhotoURL              string  `json:"photo_url"`
+	Bio                   string  `json:"bio"`
 }
