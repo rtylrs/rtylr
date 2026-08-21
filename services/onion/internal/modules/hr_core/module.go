@@ -4,13 +4,17 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	nethttp "net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/voxire/onion/internal/modules/hr_core/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/routes"
+	workschedulev1 "github.com/voxire/voxie/gen/go/hr/work_schedule/v1"
 )
 
 type ApprovalChainInfo struct {
@@ -111,6 +115,20 @@ func configFromDomain(cfg *domain.HRCompanyConfigRecord) *Config {
 		DirectoryEnabled:      cfg.DirectoryEnabled,
 		CreatedAt:             cfg.CreatedAt,
 		UpdatedAt:             cfg.UpdatedAt,
+	}
+}
+
+// RegisterAPI registers hr_core's oneKit service servers. AutoRegisterAPIs
+// finds this by name on the modules struct, so no wiring in main.go is needed.
+//
+// hr_core had no oneKit surface before hr.work_schedule.v1: everything else in
+// this module is still hand-registered chi routes.
+func (m *Module) RegisterAPI(mux *nethttp.ServeMux) {
+	if err := workschedulev1.RegisterWorkScheduleServiceServer(
+		api.NewWorkScheduleAPI(m.service),
+		workschedulev1.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register hr_core work schedule service: %w", err))
 	}
 }
 

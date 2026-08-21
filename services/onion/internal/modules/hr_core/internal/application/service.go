@@ -190,14 +190,23 @@ func (s *Service) UpdateDepartment(ctx context.Context, ownerID int64, dept doma
 
 // --- Work Schedules ---
 
-func (s *Service) ListWorkSchedules(ctx context.Context, ownerID int64) ([]domain.WorkScheduleRecord, error) {
+func (s *Service) ListWorkSchedules(ctx context.Context, ownerID int64, limit, offset int32) ([]domain.WorkScheduleRecord, error) {
 	return cacher.Of[[]domain.WorkScheduleRecord]().GetOrComputeSingle(ctx,
-		cacheKeys.Scoped(hrCoreScope, ownerID, "work_schedules"),
+		// The page is part of the key. Caching a paginated list under a
+		// page-independent key serves page one's rows for every other page.
+		cacheKeys.Scoped(hrCoreScope, ownerID, fmt.Sprintf("work_schedules:%d:%d", limit, offset)),
 		func(ctx context.Context) ([]domain.WorkScheduleRecord, error) {
-			return s.repo.ListWorkSchedules(ctx, ownerID)
+			return s.repo.ListWorkSchedules(ctx, ownerID, limit, offset)
 		},
 		cacher.WithExpiry(ctx, hrCoreTTL),
 	)
+}
+
+// CountWorkSchedules is deliberately uncached: it is one COUNT behind a
+// tenant-filtered index, and a stale total beside a fresh page is worse than
+// a cheap query.
+func (s *Service) CountWorkSchedules(ctx context.Context, ownerID int64) (int64, error) {
+	return s.repo.CountWorkSchedules(ctx, ownerID)
 }
 
 func (s *Service) GetEffectiveSchedule(ctx context.Context, ownerID, employeeID int64) (*domain.WorkScheduleRecord, error) {
@@ -230,7 +239,10 @@ func (s *Service) GetEffectiveSchedule(ctx context.Context, ownerID, employeeID 
 		return nil, nil
 	}
 	if cfg.DefaultWorkScheduleID > 0 {
-		schedules, listErr := s.repo.ListWorkSchedules(ctx, ownerID)
+		// Scanning for one id by name order. 500 was this query's previous hard
+		// LIMIT and stays the bound; a tenant with more schedules than that has
+		// a different problem than this lookup.
+		schedules, listErr := s.repo.ListWorkSchedules(ctx, ownerID, 500, 0)
 		if listErr != nil {
 			return nil, nil
 		}

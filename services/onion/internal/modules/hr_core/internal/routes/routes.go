@@ -83,15 +83,10 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	)
 
 	// Work Schedules
-	serverHttp.RegisterGET[handlers.ListWorkSchedulesRequest, handlers.ListWorkSchedulesResponse](
-		ctx, router, handlers.ListWorkSchedulesRoutes(), &handlers.ListWorkSchedulesHandler{Service: service},
-	)
-	serverHttp.RegisterPOSTWithValidation[handlers.CreateWorkScheduleRequest, handlers.CreateWorkScheduleResponse](
-		ctx, router, handlers.CreateWorkScheduleRoutes(), &handlers.CreateWorkScheduleHandler{Service: service},
-	)
-	serverHttp.RegisterPUTWithValidation[handlers.UpdateWorkScheduleRequest, handlers.UpdateWorkScheduleResponse](
-		ctx, router, handlers.UpdateWorkScheduleRoutes(), &handlers.UpdateWorkScheduleHandler{Service: service},
-	)
+	// Work schedules moved to the contracted oneKit path
+	// (hr.work_schedule.v1, registered in module.go). The three hand-registered
+	// routes that used to live here had no .onk definition and no caller in any
+	// app.
 
 	// Roles
 	serverHttp.RegisterGET[handlers.ListRolesRequest, handlers.ListRolesResponse](

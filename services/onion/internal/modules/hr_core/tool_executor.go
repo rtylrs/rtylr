@@ -202,7 +202,9 @@ func (m *Module) executeListHRWorkSchedulesTool(ctx context.Context) (map[string
 		return nil, errors.New("authentication is required")
 	}
 
-	schedules, err := m.service.ListWorkSchedules(ctx, authUser.UserID)
+	// The Caret tool summarises schedules for one business; 500 was the old
+	// hard LIMIT on this query and stays the bound here.
+	schedules, err := m.service.ListWorkSchedules(ctx, authUser.UserID, 500, 0)
 	if err != nil {
 		return nil, err
 	}

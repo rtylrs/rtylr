@@ -378,8 +378,12 @@ func (r *Repository) UpdateDepartment(ctx context.Context, businessID int64, dep
 
 // --- Work Schedules ---
 
-func (r *Repository) ListWorkSchedules(ctx context.Context, businessID int64) ([]domain.WorkScheduleRecord, error) {
-	rows, err := r.queries.ListWorkSchedules(ctx, businessID)
+func (r *Repository) ListWorkSchedules(ctx context.Context, businessID int64, limit, offset int32) ([]domain.WorkScheduleRecord, error) {
+	rows, err := r.queries.ListWorkSchedules(ctx, sqlc.ListWorkSchedulesParams{
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list work schedules", logger.Any("business_id", businessID), logger.Error(err))
 		return nil, err
@@ -389,6 +393,18 @@ func (r *Repository) ListWorkSchedules(ctx context.Context, businessID int64) ([
 		schedules = append(schedules, workScheduleFromRow(row))
 	}
 	return schedules, nil
+}
+
+// CountWorkSchedules returns the tenant's total, for the list response's
+// pagination maths.
+func (r *Repository) CountWorkSchedules(ctx context.Context, businessID int64) (int64, error) {
+	total, err := r.queries.CountWorkSchedules(ctx, businessID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to count work schedules", logger.Any("business_id", businessID), logger.Error(err))
+		return 0, err
+	}
+
+	return total, nil
 }
 
 func (r *Repository) GetWorkScheduleForEmployee(ctx context.Context, businessID, employeeID int64) (*domain.WorkScheduleRecord, error) {
@@ -404,6 +420,12 @@ func (r *Repository) GetWorkScheduleForEmployee(ctx context.Context, businessID,
 }
 
 func (r *Repository) CreateWorkSchedule(ctx context.Context, businessID int64, ws domain.WorkScheduleRecord) (*domain.WorkScheduleRecord, error) {
+	// schedule_data is a JSON column, so an empty string is not valid input:
+	// MySQL rejects it with "Invalid JSON text: The document is empty", which
+	// reaches the caller as a 500 rather than a validation error. An absent
+	// schedule is an empty object.
+	ws.ScheduleData = defaultedScheduleData(ws.ScheduleData)
+
 	result, err := r.queries.CreateWorkSchedule(ctx, sqlc.CreateWorkScheduleParams{
 		OwnerID:      businessID,
 		BusinessID:   businessID,
@@ -426,6 +448,8 @@ func (r *Repository) CreateWorkSchedule(ctx context.Context, businessID int64, w
 }
 
 func (r *Repository) UpdateWorkSchedule(ctx context.Context, businessID int64, ws domain.WorkScheduleRecord) (*domain.WorkScheduleRecord, error) {
+	ws.ScheduleData = defaultedScheduleData(ws.ScheduleData)
+
 	err := r.queries.UpdateWorkSchedule(ctx, sqlc.UpdateWorkScheduleParams{
 		Name:         ws.Name,
 		ScheduleData: json.RawMessage(ws.ScheduleData),
@@ -997,4 +1021,14 @@ func parseFloat(v string) float64 {
 		return 0
 	}
 	return f
+}
+
+// defaultedScheduleData keeps an absent schedule out of the JSON column as an
+// empty object rather than an empty string, which MySQL will not accept.
+func defaultedScheduleData(raw string) string {
+	if strings.TrimSpace(raw) == "" {
+		return "{}"
+	}
+
+	return raw
 }

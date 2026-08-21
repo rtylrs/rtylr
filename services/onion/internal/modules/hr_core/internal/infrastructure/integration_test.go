@@ -309,7 +309,7 @@ func TestListWorkSchedules_ZeroOwner_ReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	schedules, err := repo.ListWorkSchedules(ctx, 0)
+	schedules, err := repo.ListWorkSchedules(ctx, 0, 100, 0)
 	if err != nil {
 		t.Fatalf("ListWorkSchedules zero owner: %v", err)
 	}
