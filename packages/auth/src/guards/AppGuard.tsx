@@ -156,15 +156,16 @@ export function AppGuard({
     fetchUserRef
       .current()
       .then((data) => {
+        // The @voxire/api response interceptor already converts wire
+        // snake_case keys to camelCase, so only camelCase fields exist here.
         const user: User = {
-          id: String(data.id ?? data.user_id ?? data.userId ?? ''),
+          id: String(data.id ?? data.userId ?? ''),
           email: (data.email as string) ?? '',
-          name: (data.fullName as string) ?? (data.full_name as string) ?? '',
+          name: (data.fullName as string) ?? '',
           role: (data.role as User['role']) ?? undefined,
           apps: (data.apps as AppId[]) ?? [],
-          planType: (data.planSlug as string) ?? (data.plan_slug as string) ?? undefined,
-          isConsoleAdmin:
-            data.isConsoleAdmin === true || data.is_console_admin === true || undefined,
+          planType: (data.planSlug as string) ?? undefined,
+          isConsoleAdmin: data.isConsoleAdmin === true || undefined,
         };
         login(user);
 
