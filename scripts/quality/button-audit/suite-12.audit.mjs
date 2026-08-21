@@ -85,5 +85,6 @@ export const cases = [
   ["apps/dash/src/features/qr-codes/templates.tsx", "audit-batch-083-suite-12"],
   ["apps/dash/src/layouts/NoSidebarLayout.tsx", "audit-batch-084-suite-12"],
   ["apps/dash/src/shared/components/ui/dropdown-menu.tsx", "audit-batch-085-suite-12"],
+  ["apps/erp/src/features/categories/Categories.tsx", "audit-batch-086-suite-12"],
 ];
 
