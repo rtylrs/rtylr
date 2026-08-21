@@ -188,5 +188,6 @@ export const cases = [
   ["apps/dash/src/features/orders/Orders.tsx", "audit-batch-186-suite-03"],
   ["apps/dash/src/features/team/MemberDetail.tsx", "audit-batch-187-suite-03"],
   ["apps/dash/src/shared/components/dash/WebhookRow.tsx", "audit-batch-188-suite-03"],
+  ["apps/dash/src/shared/utils/BusinessRoute.tsx", "audit-batch-189-suite-03"],
 ];
 

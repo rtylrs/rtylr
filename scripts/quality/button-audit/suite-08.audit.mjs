@@ -188,5 +188,6 @@ export const cases = [
   ["apps/dash/src/features/qr-codes/QrCodes.tsx", "audit-batch-186-suite-08"],
   ["apps/dash/src/layouts/DefaultLayout.tsx", "audit-batch-187-suite-08"],
   ["apps/dash/src/shared/components/ui/dialog.tsx", "audit-batch-188-suite-08"],
+  ["apps/erp/src/features/categories/Categories.test.tsx", "audit-batch-189-suite-08"],
 ];
 
