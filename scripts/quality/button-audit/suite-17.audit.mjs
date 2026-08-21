@@ -171,5 +171,6 @@ export const cases = [
   ["apps/flow/src/features/projects/ProjectCalendar.tsx", "audit-batch-169-suite-17"],
   ["apps/flow/src/features/tasks/MyIssues.tsx", "audit-batch-170-suite-17"],
   ["apps/flow/src/layouts/FlowLayout.tsx", "audit-batch-171-suite-17"],
+  ["apps/flow/src/shared/components/QuickCreate.tsx", "audit-batch-172-suite-17"],
 ];
 

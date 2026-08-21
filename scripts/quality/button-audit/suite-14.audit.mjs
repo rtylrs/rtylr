@@ -171,5 +171,6 @@ export const cases = [
   ["apps/flow/src/features/profile/ProfileScreen.test.tsx", "audit-batch-169-suite-14"],
   ["apps/flow/src/features/settings/sections/WorkTypesSection.test.tsx", "audit-batch-170-suite-14"],
   ["apps/flow/src/features/workspace-manager/WorkspaceManager.test.tsx", "audit-batch-171-suite-14"],
+  ["apps/flow/src/shared/components/PriorityIcon.tsx", "audit-batch-172-suite-14"],
 ];
 
