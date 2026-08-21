@@ -217,6 +217,19 @@ describe('MyDay: Add Hours renders inline', () => {
   });
 });
 
+describe('MyDay: no work lines yet', () => {
+  it('shows the empty title with an Add hours CTA that scrolls to the inline form', () => {
+    render(<MyDay />);
+
+    expect(screen.getByText('flow.time.noLinesYet')).toBeInTheDocument();
+    const cta = screen.getByRole('button', { name: 'flow.time.noLinesYetCta' });
+    expect(cta).toBeEnabled();
+
+    fireEvent.click(cta);
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
+  });
+});
+
 describe('MyDay: day-level attendance and summary controls removed', () => {
   it('shows no Where-you-worked picker, clock inputs, or standalone Logged figure', () => {
     render(<MyDay />);

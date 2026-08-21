@@ -80,7 +80,8 @@
       "throughput": "الإنتاجية",
       "throughputHint": "6 أسابيع"
     },
-    "noData": "لا توجد بيانات متاحة"
+    "noData": "لا توجد بيانات متاحة",
+    "noDataCta": "الانتقال إلى الدورات"
   },
   "settings": {
     "profile": "الملف الشخصي",

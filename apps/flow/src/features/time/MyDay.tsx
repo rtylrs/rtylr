@@ -1,9 +1,9 @@
-import React, { useMemo, useState } from 'react';
-import { Trash2 } from 'lucide-react';
+import React, { useMemo, useRef, useState } from 'react';
+import { ClipboardList, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getRouteApi } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
-import { DatePicker } from '@voxire/ui';
+import { DatePicker, EmptyState } from '@voxire/ui';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { addDays, formatWeekDayShort, startOfWeek } from '../../shared/lib/dateUtils';
 import { formatWorkEntryTarget } from '../../shared/lib/timeEntryLabel';
@@ -26,6 +26,7 @@ const MyDay = (): React.JSX.Element => {
 
   const { data, isLoading } = useWorkDay(date);
   const deleteLine = useDeleteWorkDayLine();
+  const addHoursRef = useRef<HTMLDivElement | null>(null);
 
   const weekStart = useTimeSettingsStore((s) => s.weekStart);
   const weekDays = useMemo(() => {
@@ -124,9 +125,18 @@ const MyDay = (): React.JSX.Element => {
               </h2>
 
               {lines.length === 0 && (
-                <p className="mb-3 text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
-                  {t('flow.time.noLinesYet')}
-                </p>
+                <div className="mb-3">
+                  <EmptyState
+                    icon={ClipboardList}
+                    title={t('flow.time.noLinesYet')}
+                    action={{
+                      label: t('flow.time.noLinesYetCta'),
+                      onClick: () =>
+                        addHoursRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+                    }}
+                    size="compact"
+                  />
+                </div>
               )}
 
               <ul className="mb-4 space-y-1.5">
@@ -181,7 +191,9 @@ const MyDay = (): React.JSX.Element => {
                * that dialog and its own day-must-exist gate are gone. Add
                * Hours renders inline instead, and creates the work day itself
                * on first submit if one doesn't exist yet for this date. */}
-              <AddHours date={date} onDateChange={setDate} />
+              <div ref={addHoursRef}>
+                <AddHours date={date} onDateChange={setDate} />
+              </div>
             </section>
           </>
         )}

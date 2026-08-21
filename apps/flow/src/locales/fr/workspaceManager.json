@@ -8,6 +8,7 @@
   "roleLabel": "Rôle",
   "searchPlaceholder": "Rechercher par nom ou e-mail...",
   "noOrgMembersFound": "Aucun membre de l'organisation trouvé. Seuls les membres d'équipe existants peuvent être ajoutés aux espaces de travail.",
+  "clearSearchCta": "Effacer la recherche",
   "addToWorkspace": "Ajouter à l'espace de travail",
   "adding": "Ajout en cours...",
   "noMembersEmpty": "Aucun membre pour le moment. Ajoutez quelqu'un pour commencer.",

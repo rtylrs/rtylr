@@ -76,7 +76,8 @@
       "throughput": "Débit",
       "throughputHint": "6 semaines"
     },
-    "noData": "Aucune donnée disponible"
+    "noData": "Aucune donnée disponible",
+    "noDataCta": "Aller aux itérations"
   },
   "settings": {
     "profile": "Profil",

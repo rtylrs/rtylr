@@ -2,13 +2,16 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { BarChart3, TrendingUp, Clock, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useInsights } from './useInsights';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { Skeleton, CardSkeleton } from '../../shared/components/Skeleton';
 
 const Insights: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { activeWorkspaceId } = useFlowStore();
   const { data, isLoading } = useInsights(activeWorkspaceId);
 
@@ -91,7 +94,7 @@ const Insights: React.FC = () => {
         {/* Burndown */}
         <ChartCard title={t('common.insights.burndown')}>
           {data.burndown.length === 0 ? (
-            <EmptyChart />
+            <EmptyChart onGoToCycles={() => navigate({ to: '/cycles' })} />
           ) : (
             <div className="relative h-40">
               <svg width="100%" height="100%" viewBox="0 0 400 160" preserveAspectRatio="none">
@@ -269,14 +272,19 @@ const ChartCard: React.FC<{ title: string; children: React.ReactNode }> = ({ tit
   </div>
 );
 
-const EmptyChart: React.FC = () => {
+const EmptyChart: React.FC<{ onGoToCycles: () => void }> = ({ onGoToCycles }) => {
   const { t } = useTranslation();
   return (
-    <div
-      className="flex items-center justify-center h-40 text-[11px]"
-      style={{ color: 'var(--flow-text-dim)' }}
-    >
-      {t('common.insights.noData')}
+    <div className="flex h-40 items-center justify-center">
+      <EmptyState
+        icon={BarChart3}
+        title={t('common.insights.noData')}
+        action={{
+          label: t('common.insights.noDataCta'),
+          onClick: onGoToCycles,
+        }}
+        size="compact"
+      />
     </div>
   );
 };

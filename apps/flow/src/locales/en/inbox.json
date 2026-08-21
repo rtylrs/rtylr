@@ -10,6 +10,7 @@
   },
   "emptyTitle": "All caught up!",
   "emptyDescription": "No notifications to show.",
+  "refreshCta": "Refresh",
   "time": {
     "justNow": "Just now",
     "hoursAgo": "{{count}}h ago",

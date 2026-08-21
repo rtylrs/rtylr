@@ -88,6 +88,7 @@
     "addShort": "+ Add",
     "noLabels": "No labels yet",
     "noActivity": "No activity yet.",
+    "goToComments": "Go to Comments",
     "noComments": "No comments yet. Start the conversation.",
     "commentPlaceholder": "Leave a comment… @mention to notify",
     "mentionSomeone": "Mention someone",
@@ -152,11 +153,13 @@
     "teamAccessDenied": "You don't have access to see the team's time. This needs admin on the workspace.",
     "teamEmptyTitle": "No one to show yet",
     "teamEmptyDescription": "Add teammates to this workspace to see their time here.",
+    "teamEmptyCta": "Manage workspace members",
     "clocked": "Clocked",
     "logged": "Logged",
     "unaccounted": "Unaccounted",
     "whatYouWorkedOn": "What you worked on",
     "noLinesYet": "Nothing logged for this day yet.",
+    "noLinesYetCta": "Add hours",
     "addLine": "Add",
     "setTheDayFirst": "Set where you worked to start the day, then add what you worked on.",
     "loadingDay": "Loading the day…",
@@ -170,6 +173,7 @@
     "reportsScopeNote": "Totals per person for the range. Grouping by project or type of work needs an endpoint that doesn't exist yet.",
     "reportsEmptyTitle": "Nothing to report yet",
     "reportsEmptyDescription": "No one on this workspace has time to show for this range.",
+    "reportsEmptyCta": "Manage workspace members",
     "project": "Project",
     "selectProject": "Select a project",
     "workType": "Type of work",
@@ -280,6 +284,7 @@
       "explained": "The list an employee picks from in Log Hours. The description shows up there as the task description once picked.",
       "loading": "Loading work types…",
       "empty": "No work types yet. Add one below.",
+      "addFirstCta": "Add a work type",
       "name": "Name",
       "namePlaceholder": "e.g. Development",
       "description": "Description",
@@ -314,6 +319,7 @@
       "grantAccessAction": "Grant access",
       "addMember": "Add member",
       "noMembersYet": "No team members yet.",
+      "refreshCta": "Refresh",
       "removeMemberLabel": "Remove {{name}}",
       "gateReason": "Only workspace owners and admins can grant or remove Flow access."
     },
@@ -399,7 +405,9 @@
     "notStarted": "Not started",
     "noResults": "No one to show yet.",
     "loadFailedTitle": "Couldn't load who's in today",
-    "loadFailedDescription": "This can happen if your role doesn't have permission to see it, or presence couldn't be reached. Ask an admin if you think this is wrong."
+    "loadFailedDescription": "This can happen if your role doesn't have permission to see it, or presence couldn't be reached. Ask an admin if you think this is wrong.",
+    "retryCta": "Retry",
+    "refreshCta": "Refresh"
   },
   "directory": {
     "heading": "Directory",
@@ -407,7 +415,10 @@
     "noResults": "No one matches your search.",
     "noMembersYet": "No one in the directory yet.",
     "loadFailedTitle": "Couldn't load the directory",
-    "loadFailedDescription": "This can happen if your role doesn't have permission to see it, or the directory couldn't be reached. Ask an admin if you think this is wrong."
+    "loadFailedDescription": "This can happen if your role doesn't have permission to see it, or the directory couldn't be reached. Ask an admin if you think this is wrong.",
+    "retryCta": "Retry",
+    "clearSearchCta": "Clear search",
+    "refreshCta": "Refresh"
   },
   "leave": {
     "heading": "Leave",
@@ -423,6 +434,7 @@
     "noRequests": "No leave requests yet.",
     "loadRequestsFailedTitle": "Couldn't load your leave requests",
     "loadRequestsFailedDescription": "This can happen if your role doesn't have permission to see it, or the requests couldn't be reached. Ask an admin if you think this is wrong.",
+    "retryCta": "Retry",
     "newRequest": "Request time off",
     "leaveType": "Type",
     "selectLeaveType": "Select a type",
@@ -449,6 +461,7 @@
     "hrDetails": "HR details",
     "noRecordTitle": "No HR record linked yet",
     "noRecordDescription": "Your account isn't linked to a staff record in HR yet. Ask an admin to link it.",
+    "noRecordCta": "Refresh",
     "role": "Role",
     "department": "Department",
     "employmentType": "Employment type",
@@ -580,7 +593,8 @@
     "subtitle_one": "{{count}} task needs attention · Capture → set priority & date → move out of backlog",
     "subtitle_other": "{{count}} tasks need attention · Capture → set priority & date → move out of backlog",
     "emptyTitle": "Inbox zero",
-    "emptyDescription": "Nothing stuck without a priority or due date. New work lands in capture first-keep triage lean so planned work stays trustworthy."
+    "emptyDescription": "Nothing stuck without a priority or due date. New work lands in capture first-keep triage lean so planned work stays trustworthy.",
+    "emptyCta": "Go to My Tasks"
   },
   "team": {
     "loading": "Loading team...",
@@ -645,15 +659,25 @@
     "toggleDoneLabel": "Mark done"
   },
   "projectOverview": {
-    "pageTitle": "Overview · rtylr"
+    "pageTitle": "Overview · rtylr",
+    "noMilestones": "No milestones defined.",
+    "goToMilestonesCta": "Go to Milestones",
+    "noComments": "No recent comments.",
+    "goToBoardCta": "Go to Board"
   },
   "projectTimeline": {
-    "pageTitle": "Timeline · rtylr"
+    "pageTitle": "Timeline · rtylr",
+    "emptyTitle": "No tasks with due dates yet",
+    "emptyDescription": "Add due dates to see the timeline.",
+    "goToBoardCta": "Go to Board"
   },
   "projectDashboard": {
     "pageTitle": "Project dashboard · rtylr",
     "statusBreakdown": "Status breakdown",
-    "byAssignee": "By assignee"
+    "byAssignee": "By assignee",
+    "noTasksYet": "No tasks yet",
+    "noTasksYetDescription": "Add a task to populate the dashboard.",
+    "addTaskCta": "Add task"
   },
   "projectCalendar": {
     "pageTitle": "Calendar · rtylr"
@@ -669,6 +693,9 @@
     "descriptionPlaceholder": "Add a description…",
     "generalGateReason": "Only project admins can rename or describe this project.",
     "membersGateReason": "Only project admins can add, remove, or change the role of project members.",
+    "noMembersYet": "No members yet.",
+    "addMemberCta": "Add member",
+    "refreshMembersCta": "Refresh",
     "moveGateReason": "Only project admins can move this project to another workspace.",
     "transferGateReason": "Only project admins can transfer ownership of this project.",
     "deleteGateReason": "Only project admins can delete this project."

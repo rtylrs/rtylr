@@ -15,6 +15,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
@@ -588,7 +589,7 @@ const LABEL_COLORS = [
   '#64C5B9',
 ];
 
-const LabelsSection: React.FC = () => {
+export const LabelsSection: React.FC = () => {
   const { t } = useTranslation();
   const { activeWorkspaceId } = useFlowStore();
   const workspaceId = activeWorkspaceId ?? '';
@@ -599,6 +600,7 @@ const LabelsSection: React.FC = () => {
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState(LABEL_COLORS[0]);
   const customColorInputRef = useRef<HTMLInputElement | null>(null);
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
   const [pendingDeleteLabel, setPendingDeleteLabel] = useState<{
     id: number;
     name: string;
@@ -654,6 +656,7 @@ const LabelsSection: React.FC = () => {
         </h3>
         <div className="flex gap-2">
           <input
+            ref={nameInputRef}
             type="text"
             placeholder={t('flow.settings.labels.namePlaceholder')}
             value={newName}
@@ -734,9 +737,15 @@ const LabelsSection: React.FC = () => {
             {t('common.loading')}
           </p>
         ) : labels.length === 0 ? (
-          <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
-            {t('flow.settings.labels.emptyList')}
-          </p>
+          <EmptyState
+            icon={Tag}
+            title={t('flow.settings.labels.emptyList')}
+            action={{
+              label: t('flow.settings.labels.newLabel'),
+              onClick: () => nameInputRef.current?.focus(),
+            }}
+            size="compact"
+          />
         ) : (
           <div
             className="rounded-xl divide-y divide-[var(--flow-border)]"
@@ -809,7 +818,7 @@ const LabelsSection: React.FC = () => {
 // ever mounting this component at all.
 export const TeamSection: React.FC = () => {
   const { t } = useTranslation();
-  const { data: allMembers = [], isLoading } = useFlowTeam();
+  const { data: allMembers = [], isLoading, refetch: refetchMembers } = useFlowTeam();
   const grant = useFlowGrantAccess();
   const deactivate = useFlowDeactivateMember();
   const { data: sub } = useFlowSubscription();
@@ -979,10 +988,16 @@ export const TeamSection: React.FC = () => {
           ))}
         </div>
       ) : flowMembers.length === 0 ? (
-        <div className="py-8 text-center" style={{ color: 'var(--flow-text-dim)' }}>
-          <Users size={24} className="mx-auto mb-2 opacity-40" />
-          <p className="text-[13px]">{t('flow.settings.team.noMembersYet')}</p>
-        </div>
+        <EmptyState
+          icon={Users}
+          title={t('flow.settings.team.noMembersYet')}
+          action={
+            canManageTeam
+              ? { label: t('flow.settings.team.addMember'), onClick: () => setShowInvite(true) }
+              : { label: t('flow.settings.team.refreshCta'), onClick: () => void refetchMembers() }
+          }
+          size="compact"
+        />
       ) : (
         <div
           className="rounded-xl divide-y divide-[var(--flow-border)]"

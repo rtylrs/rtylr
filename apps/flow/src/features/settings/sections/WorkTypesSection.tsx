@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Plus, X } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { ListChecks, Plus, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import {
   useCreateWorkType,
   useDeleteWorkType,
@@ -36,6 +37,7 @@ const WorkTypesSection = (): React.JSX.Element => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const nameInputRef = useRef<HTMLInputElement | null>(null);
 
   const workTypes = (data?.workTypes ?? []).filter((wt) => !wt.parentId);
 
@@ -83,9 +85,15 @@ const WorkTypesSection = (): React.JSX.Element => {
           {t('flow.settings.workTypes.loading')}
         </p>
       ) : workTypes.length === 0 ? (
-        <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
-          {t('flow.settings.workTypes.empty')}
-        </p>
+        <EmptyState
+          icon={ListChecks}
+          title={t('flow.settings.workTypes.empty')}
+          action={{
+            label: t('flow.settings.workTypes.addFirstCta'),
+            onClick: () => nameInputRef.current?.focus(),
+          }}
+          size="compact"
+        />
       ) : (
         <ul className="space-y-1.5">
           {workTypes.map((wt) => {
@@ -171,6 +179,7 @@ const WorkTypesSection = (): React.JSX.Element => {
 
       <div className="mt-3 flex flex-col gap-2">
         <input
+          ref={nameInputRef}
           aria-label={t('flow.settings.workTypes.name')}
           value={newName}
           onChange={(e) => setNewName(e.target.value)}

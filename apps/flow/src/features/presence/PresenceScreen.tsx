@@ -2,8 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Users, AlertCircle } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { Avatar } from '@voxire/ui';
-import EmptyState from '../../shared/components/EmptyState';
+import { Avatar, EmptyState } from '@voxire/ui';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import type { PresenceEntry } from '../../shared/schemas/presence';
 import { usePresence } from './usePresence';
@@ -31,7 +30,7 @@ const statusTone: Record<string, string> = {
  */
 const PresenceScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { data, isLoading, isError } = usePresence();
+  const { data, isLoading, isError, refetch } = usePresence();
 
   const statusLabel = (status: string): string => {
     if (status === 'on_leave') return t('flow.presence.onLeave');
@@ -54,11 +53,22 @@ const PresenceScreen = (): React.JSX.Element => {
             icon={AlertCircle}
             title={t('flow.presence.loadFailedTitle')}
             description={t('flow.presence.loadFailedDescription')}
+            action={{
+              label: t('flow.presence.retryCta'),
+              onClick: () => void refetch(),
+            }}
           />
         )}
 
         {!isLoading && !isError && (data?.presence.length ?? 0) === 0 && (
-          <EmptyState icon={Users} title={t('flow.presence.noResults')} />
+          <EmptyState
+            icon={Users}
+            title={t('flow.presence.noResults')}
+            action={{
+              label: t('flow.presence.refreshCta'),
+              onClick: () => void refetch(),
+            }}
+          />
         )}
 
         {!isLoading && !isError && data && data.presence.length > 0 && (

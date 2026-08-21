@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from '@tanstack/react-router';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import {
   Activity,
@@ -8,9 +8,11 @@ import {
   AlertCircle,
   Users,
   Milestone as MilestoneIcon,
+  MessageSquare,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useProjectOverview } from './useProjectOverview';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { AvatarStack } from '../../shared/components/AssigneeAvatar';
@@ -28,6 +30,7 @@ const HEALTH: Record<string, { color: string; label: string }> = {
 
 const ProjectOverview: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
   useProjectRealtime(projectId);
 
@@ -150,9 +153,15 @@ const ProjectOverview: React.FC = () => {
             <MilestoneIcon size={12} style={{ color: 'var(--flow-text-dim)' }} />
           </div>
           {milestones.length === 0 ? (
-            <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
-              No milestones defined.
-            </p>
+            <EmptyState
+              icon={MilestoneIcon}
+              title={t('flow.projectOverview.noMilestones')}
+              action={{
+                label: t('flow.projectOverview.goToMilestonesCta'),
+                onClick: () => navigate({ to: '/milestones' }),
+              }}
+              size="compact"
+            />
           ) : (
             <div className="space-y-3">
               {milestones.map((m) => (
@@ -218,9 +227,19 @@ const ProjectOverview: React.FC = () => {
             Recent comments
           </h3>
           {recentComments.length === 0 ? (
-            <p className="text-[12px]" style={{ color: 'var(--flow-text-dim)' }}>
-              No recent comments.
-            </p>
+            <EmptyState
+              icon={MessageSquare}
+              title={t('flow.projectOverview.noComments')}
+              action={{
+                label: t('flow.projectOverview.goToBoardCta'),
+                onClick: () =>
+                  navigate({
+                    to: '/w/$workspaceId/p/$projectId/board',
+                    params: { workspaceId, projectId },
+                  }),
+              }}
+              size="compact"
+            />
           ) : (
             <div className="space-y-2">
               {recentComments.map((c) => (

@@ -40,6 +40,11 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// jsdom/happy-dom implement no layout, so Element.prototype.scrollIntoView is
+// absent - stub it so components that scroll a ref into view (e.g. an empty
+// state's "jump to the form" action) don't throw in tests that click through.
+Element.prototype.scrollIntoView = vi.fn();
+
 // Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};

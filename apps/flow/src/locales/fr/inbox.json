@@ -10,6 +10,7 @@
   },
   "emptyTitle": "Vous êtes à jour !",
   "emptyDescription": "Aucune notification à afficher.",
+  "refreshCta": "Actualiser",
   "time": {
     "justNow": "À l'instant",
     "hoursAgo": "Il y a {{count}} h",

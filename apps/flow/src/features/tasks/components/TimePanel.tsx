@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Timer, Trash2, RotateCcw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Avatar } from '@voxire/ui';
+import { Avatar, EmptyState } from '@voxire/ui';
 import { useTimeLogs, useLogTime, useDeleteTimeLog } from '../useTimeLogs';
 import { useFlowTeam } from '../../../shared/hooks/queries/useFlowTeam';
 import { initialsFromName } from '../../../shared/lib/memberUtils';
@@ -52,7 +52,12 @@ const TimePanel = ({
   const [formOpen, setFormOpen] = useState(false);
   const [duration, setDuration] = useState('');
   const [description, setDescription] = useState('');
-  const openButtonRef = useRef<HTMLButtonElement | null>(null);
+  // Wraps whichever trigger is currently mounted - the plain "log time"
+  // button, or the shared EmptyState's own action button when the list is
+  // empty. The shared component exposes no ref of its own, so focus is
+  // restored by querying the one button inside this wrapper instead of
+  // holding a ref to a specific trigger element.
+  const triggerContainerRef = useRef<HTMLDivElement | null>(null);
 
   const logs = data?.timeLogs ?? [];
   const totalMinutes = logs.reduce((sum, l) => sum + l.durationMinutes, 0);
@@ -70,6 +75,10 @@ const TimePanel = ({
     logTime.isPending && logTime.variables ? logTime.variables.duration_minutes : null;
   const pendingDescription =
     logTime.isPending && logTime.variables ? logTime.variables.description : undefined;
+  // Drives both the empty-state illustration below and whether the regular
+  // "log time" trigger also renders - showing both would just be the same
+  // action offered twice.
+  const isTrulyEmpty = !isLoading && !isError && logs.length === 0 && pendingMinutes === null;
 
   // Focus cannot be restored inside closeForm: the trigger is unmounted while
   // the form is open, so the ref still points at the detached node and the
@@ -79,7 +88,7 @@ const TimePanel = ({
   useEffect(() => {
     if (!formOpen && restoreFocus.current) {
       restoreFocus.current = false;
-      openButtonRef.current?.focus();
+      triggerContainerRef.current?.querySelector('button')?.focus();
     }
   }, [formOpen]);
 
@@ -210,10 +219,19 @@ const TimePanel = ({
         </div>
       )}
 
-      {!isLoading && !isError && logs.length === 0 && pendingMinutes === null && (
-        <p className="mt-2 text-[11px] leading-snug" style={{ color: 'var(--flow-text-muted)' }}>
-          {t('flow.time.empty')}
-        </p>
+      {isTrulyEmpty && (
+        <div className="mt-2" ref={triggerContainerRef}>
+          <EmptyState
+            icon={Timer}
+            title={t('flow.time.empty')}
+            action={
+              canLog
+                ? { label: t('flow.time.logFirst'), onClick: () => setFormOpen(true) }
+                : { label: t('flow.time.retry'), onClick: () => void refetch() }
+            }
+            size="compact"
+          />
+        </div>
       )}
 
       {(logs.length > 0 || pendingMinutes !== null) && (
@@ -296,16 +314,17 @@ const TimePanel = ({
         </ul>
       )}
 
-      {canLog && !formOpen && (
-        <button
-          ref={openButtonRef}
-          type="button"
-          onClick={() => setFormOpen(true)}
-          className="flow-focus mt-2 inline-flex min-h-[44px] w-full items-center justify-center rounded px-3 text-[11px] font-semibold md:min-h-0 md:w-auto md:py-1.5"
-          style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
-        >
-          {logs.length === 0 && !isError ? t('flow.time.logFirst') : t('flow.time.logTime')}
-        </button>
+      {canLog && !formOpen && !isTrulyEmpty && (
+        <div ref={triggerContainerRef}>
+          <button
+            type="button"
+            onClick={() => setFormOpen(true)}
+            className="flow-focus mt-2 inline-flex min-h-[44px] w-full items-center justify-center rounded px-3 text-[11px] font-semibold md:min-h-0 md:w-auto md:py-1.5"
+            style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
+          >
+            {t('flow.time.logTime')}
+          </button>
+        </div>
       )}
 
       {canLog && formOpen && (

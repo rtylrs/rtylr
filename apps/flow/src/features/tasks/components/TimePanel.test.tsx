@@ -105,6 +105,17 @@ describe('TimePanel: empty', () => {
 
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
+
+  it('offers a refresh instead of the log form to a viewer who cannot log', () => {
+    timeLogsState.value = { data: { timeLogs: [] }, isLoading: false, isError: false, refetch };
+
+    renderPanel({ canLog: false });
+
+    expect(screen.queryByRole('button', { name: 'flow.time.logFirst' })).not.toBeInTheDocument();
+    const retry = screen.getByRole('button', { name: 'flow.time.retry' });
+    fireEvent.click(retry);
+    expect(refetch).toHaveBeenCalled();
+  });
 });
 
 describe('TimePanel: read error', () => {
