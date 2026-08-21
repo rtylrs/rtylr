@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useClickOutside } from '@voxire/utils';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { ExternalLink, Trash2, Copy } from 'lucide-react';
@@ -25,19 +26,13 @@ export const TaskContextMenu: React.FC<{
   const canRemove = useCanDeleteResource(menu.projectId);
   const ref = useRef<HTMLDivElement>(null);
 
+  useClickOutside(ref, onClose);
   useEffect(() => {
-    const close = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
-    };
-    const closeKey = (e: KeyboardEvent) => {
+    const closeKey = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') onClose();
     };
-    document.addEventListener('mousedown', close);
     document.addEventListener('keydown', closeKey);
-    return () => {
-      document.removeEventListener('mousedown', close);
-      document.removeEventListener('keydown', closeKey);
-    };
+    return () => document.removeEventListener('keydown', closeKey);
   }, [onClose]);
 
   const menuStyle: React.CSSProperties = {

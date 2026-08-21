@@ -926,6 +926,9 @@ importers:
       '@voxire/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@voxire/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@voxire/voxie':
         specifier: workspace:*
         version: link:../../packages/voxie

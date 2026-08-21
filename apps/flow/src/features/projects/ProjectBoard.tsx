@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useClickOutside } from '@voxire/utils';
 import { toast } from 'sonner';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -641,16 +642,8 @@ const GroupByPicker: React.FC<{
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e: MouseEvent): void => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
-  }, [open]);
+  const close = useCallback((): void => setOpen(false), []);
+  useClickOutside(ref, close);
 
   const current = GROUP_OPTIONS.find((o) => o.key === groupBy)!;
 
