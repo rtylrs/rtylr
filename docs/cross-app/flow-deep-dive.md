@@ -18,16 +18,28 @@ Five findings, in the order that should change what gets built.
 
 **Finding 1: the Flow-to-HR hours seam already exists, one layer below the
 contracts, and no audit reading only `.onk` files would find it.**
-`~/Development/onion/internal/platform/database/schemas/flow/v8_time_tracking.sql:4-8` states it
-plainly: "The lines themselves are hr_time_entries. Flow does not keep a second
-store of hours." `Repository.CreateWorkDayLine`
+`~/Development/onion/internal/platform/database/schemas/flow/v8_time_tracking.sql:4-8` states the
+first half plainly: "The lines themselves are hr_time_entries." It used to go on
+to say "Flow does not keep a second store of hours", which was false and has been
+corrected (#890, tryrtylr/schemas#39). `Repository.CreateWorkDayLine`
 (`~/Development/onion/internal/modules/workspaces/internal/infrastructure/worktime_repository.go:219-255`)
 writes into HR's time-entry table via `GetTimeEntryByClientKey` and
 `CreateWorkDayLine` sqlc queries. `flow_work_day_lines` is not a table; the
 `flow` schema creates only `flow_work_days`, `flow_work_day_actions` and
-`flow_work_types` (`~/Development/onion/internal/platform/database/schemas/flow/v8_time_tracking.sql:14,49,65`). Hours are already a single
-store shared by Flow and payroll. Nothing needs building here, and anything
-proposing a Flow-side hours table is proposing a regression.
+`flow_work_types` (`~/Development/onion/internal/platform/database/schemas/flow/v8_time_tracking.sql:14,49,65`). The work-day seam
+is real and nothing needs building for it.
+
+**Correction, from #889 and #890: the "single store" half of this finding was
+wrong.** A Flow-side hours table already exists. `flow_time_logs`
+(`~/Development/onion/internal/platform/database/schemas/flow/schema.sql:127`) holds per-task durations written by
+`flow.task.v1 CreateTimeLog`, which the task detail time panel calls on a live
+route. So payroll reads one store, but Flow writes two, and this document's
+advice to treat a Flow-side hours table as a regression described a table that
+was already there. What is actually wrong is narrower and is filed as **#903**:
+`RecalcActualHours` and `GetInsightsTimeByMember` aggregate `flow_time_logs`
+alone, so a work-day line carrying a `task_id` never reaches that task's
+`actual_hours` or the insights panel. Do not resolve that by summing both stores
+without reading #903 first; the same hour can legitimately be in each.
 
 **Finding 2: two live cross-app endpoints exist, are absent from the contracts,
 and are called by nobody who benefits.** `POST /hr/time-entries/import-flow`
@@ -315,8 +327,10 @@ That is the "server-computed only" decision already applied once, to a different
 sensitive quantity, by the same reasoning.
 
 **Copy this, but know what it costs: `flow_work_day_lines` does not exist.** Flow
-writes hours straight into `hr_time_entries`. One store, no reconciliation, and
-payroll reads exactly what Flow wrote. It also means a Flow bug writes into
+writes work-day hours straight into `hr_time_entries`, and payroll reads exactly
+what Flow wrote there. That is one store for the work day, not one store for
+Flow's hours overall: `flow_time_logs` is a second, and nothing reconciles them
+(see Finding 1's correction and #903). It also means a Flow bug writes into
 payroll's table, which is why section 7 treats hours as the highest-consequence
 row in the audit.
 
@@ -868,9 +882,11 @@ in this directory at `d62ad614`, the commit this round was branched from:
 | `business_id` unreliable across 145 tables, so a join trusting it silently returns the wrong set | zero hits for `DEFAULT 0`                                                                            | #871  |
 | Flow's currency is unreachable through the endpoint it already calls                             | `BusinessEntry` is mentioned; the gap is not                                                         | #872  |
 
-The seventh, that `flow_work_day_lines` is not a table and Flow's hours are rows
-in `hr_time_entries`, is recorded in section 1 rather than filed, because it is a
-fact to know rather than work to do. Zero hits for `flow_work_day_lines` in their
+The seventh, that `flow_work_day_lines` is not a table and Flow's work-day hours
+are rows in `hr_time_entries`, is recorded in section 1 rather than filed,
+because it is a fact to know rather than work to do. It did become work to do,
+but not the work it looked like: the accompanying claim that Flow keeps no
+second store of hours was false, and tracing it produced #890 and #903. Zero hits for `flow_work_day_lines` in their
 documents.
 
 They also found something this document did not, and it is worth reading before
