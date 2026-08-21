@@ -13,7 +13,7 @@ const payments: PaymentEntry[] = [
 
 describe('collapsePayments', () => {
   it('collapses single-method payments into one payload', () => {
-    expect(collapsePayments('1', payments, 0)).toEqual({
+    expect(collapsePayments('1', payments)).toEqual({
       orderId: '1',
       paymentMethod: 'card',
       amountPaid: 20,

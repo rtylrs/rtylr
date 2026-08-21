@@ -23,7 +23,7 @@ describe('heldOrdersStore', () => {
     const order = getState().hold({
       label: 'Table 5',
       items: [{ id: '1', name: 'Burger', price: 10, quantity: 1 }],
-    });
+    })!;
 
     expect(order.id).toMatch(/^held_/);
     expect(order.label).toBe('Table 5');
@@ -78,7 +78,7 @@ describe('heldOrdersStore', () => {
       items: [],
       tableNumber: '3',
       note: 'Rush order',
-    });
+    })!;
 
     expect(order.tableNumber).toBe('3');
     expect(order.note).toBe('Rush order');
@@ -87,7 +87,7 @@ describe('heldOrdersStore', () => {
   // ── release ────────────────────────────────────────────────────
 
   it('releases a held order and returns it', () => {
-    const order = getState().hold({ label: 'Table 1', items: [] });
+    const order = getState().hold({ label: 'Table 1', items: [] })!;
     const released = getState().release(order.id);
 
     expect(released).toBeDefined();
@@ -101,7 +101,7 @@ describe('heldOrdersStore', () => {
   });
 
   it('only removes the targeted order on release', () => {
-    const a = getState().hold({ label: 'A', items: [] });
+    const a = getState().hold({ label: 'A', items: [] })!;
     getState().hold({ label: 'B', items: [] });
 
     getState().release(a.id);
@@ -112,7 +112,7 @@ describe('heldOrdersStore', () => {
   // ── remove ─────────────────────────────────────────────────────
 
   it('removes an order by id', () => {
-    const order = getState().hold({ label: 'Table 2', items: [] });
+    const order = getState().hold({ label: 'Table 2', items: [] })!;
     act(() => getState().remove(order.id));
     expect(getState().orders).toHaveLength(0);
   });
@@ -126,20 +126,20 @@ describe('heldOrdersStore', () => {
   // ── updateNote ─────────────────────────────────────────────────
 
   it('updates the note of a held order', () => {
-    const order = getState().hold({ label: 'Table 4', items: [] });
+    const order = getState().hold({ label: 'Table 4', items: [] })!;
     act(() => getState().updateNote(order.id, 'No onions'));
     expect(getState().orders[0].note).toBe('No onions');
   });
 
   it('normalizes updated notes', () => {
-    const order = getState().hold({ label: 'Table 4', items: [] });
+    const order = getState().hold({ label: 'Table 4', items: [] })!;
     act(() => getState().updateNote(order.id, '   '));
     expect(getState().orders[0].note).toBeUndefined();
   });
 
   it('updateNote does not affect other orders', () => {
-    const a = getState().hold({ label: 'A', items: [], note: 'Note A' });
-    const b = getState().hold({ label: 'B', items: [], note: 'Note B' });
+    const a = getState().hold({ label: 'A', items: [], note: 'Note A' })!;
+    const b = getState().hold({ label: 'B', items: [], note: 'Note B' })!;
 
     act(() => getState().updateNote(a.id, 'Updated A'));
 
@@ -153,7 +153,7 @@ describe('heldOrdersStore', () => {
 
   it('can hold multiple orders and release them independently', () => {
     const o1 = getState().hold({ label: '1', items: [] });
-    const o2 = getState().hold({ label: '2', items: [] });
+    const o2 = getState().hold({ label: '2', items: [] })!;
     const o3 = getState().hold({ label: '3', items: [] });
 
     getState().release(o2.id);
@@ -162,7 +162,7 @@ describe('heldOrdersStore', () => {
   });
 
   it('holds order with empty items array', () => {
-    const order = getState().hold({ label: 'Empty', items: [] });
+    const order = getState().hold({ label: 'Empty', items: [] })!;
     expect(order.items).toEqual([]);
   });
 });

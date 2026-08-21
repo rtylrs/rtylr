@@ -118,7 +118,7 @@ describe('mapInventoryItems', () => {
   it('maps decoded branch inventory fields', () => {
     const raw = [
       {
-        itemId: 1,
+        itemId: '1',
         name: 'Tomatoes',
         sku: 'TOM-001',
         currentQty: 15,
@@ -140,7 +140,7 @@ describe('mapInventoryItems', () => {
   });
 
   it('falls back to reorderPoint for the low stock threshold', () => {
-    const raw = [{ itemId: 2, name: 'Oil', currentQty: 3, unit: 'L', reorderPoint: 2 }];
+    const raw = [{ itemId: '2', name: 'Oil', currentQty: 3, unit: 'L', reorderPoint: 2 }];
     const result = mapInventoryItems(raw);
     expect(result[0].itemId).toBe(2);
     expect(result[0].currentQty).toBe(3);
@@ -150,8 +150,8 @@ describe('mapInventoryItems', () => {
   it('maps shared stock inventory fields (productId/quantity/reorderPoint)', () => {
     const raw = [
       {
-        id: 99,
-        productId: 12,
+        id: '99',
+        productId: '12',
         name: 'Platinum MultiVitamins Muscletech',
         sku: 'SUPLAB-PLATINUM-MULTIVITAMINS',
         quantity: 28,
@@ -171,15 +171,15 @@ describe('mapInventoryItems', () => {
   });
 
   it('falls back to id when itemId and productId are absent', () => {
-    const result = mapInventoryItems([{ id: 7, name: 'Iso 100 Dymatize', quantity: 8 }]);
+    const result = mapInventoryItems([{ id: '7', name: 'Iso 100 Dymatize', quantity: 8 }]);
     expect(result[0].itemId).toBe(7);
     expect(result[0].currentQty).toBe(8);
   });
 
   it('filters out entries with invalid item ids', () => {
     const raw = [
-      { itemId: 0, name: 'Bad', currentQty: 5, unit: 'kg', lowStockThreshold: 1 },
-      { itemId: 3, name: 'Good', currentQty: 10, unit: 'kg', lowStockThreshold: 2 },
+      { itemId: '0', name: 'Bad', currentQty: 5, unit: 'kg', lowStockThreshold: 1 },
+      { itemId: '3', name: 'Good', currentQty: 10, unit: 'kg', lowStockThreshold: 2 },
     ];
     const result = mapInventoryItems(raw);
     expect(result).toHaveLength(1);
@@ -195,8 +195,8 @@ describe('mapInventoryLocations', () => {
   it('maps location responses from both access and location services', () => {
     expect(
       mapInventoryLocations([
-        { id: 1, name: 'Main' },
-        { locationId: 2, name: 'Warehouse' },
+        { id: '1', name: 'Main' },
+        { locationId: '2', name: 'Warehouse' },
       ]),
     ).toEqual([
       { id: 1, name: 'Main' },
@@ -205,7 +205,7 @@ describe('mapInventoryLocations', () => {
   });
 
   it('filters invalid locations and falls back to generated names', () => {
-    expect(mapInventoryLocations([{ id: 0, name: 'Bad' }, { locationId: 3 }])).toEqual([
+    expect(mapInventoryLocations([{ id: '0', name: 'Bad' }, { locationId: '3' }])).toEqual([
       { id: 3, name: 'Location 3' },
     ]);
   });

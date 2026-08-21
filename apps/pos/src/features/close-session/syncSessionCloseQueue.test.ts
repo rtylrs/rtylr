@@ -5,9 +5,9 @@ import type { QueuedSessionClose } from '../../shared/stores/sessionCloseQueueSt
 const makeEntry = (overrides: Partial<QueuedSessionClose> = {}): QueuedSessionClose => ({
   id: 'sc_1',
   payload: {
-    sessionId: 'current',
+    sessionId: 42,
+    closingFloat: 95,
     expected: 100,
-    actual: 95,
     variance: -5,
   },
   queuedAt: '2026-05-06T00:00:00.000Z',
@@ -34,9 +34,9 @@ describe('syncQueuedSessionCloses', () => {
     expect(result).toEqual({ attempted: 1, synced: 1, failed: 0 });
     expect(retry).toHaveBeenCalledWith('sc_1');
     expect(syncClose).toHaveBeenCalledWith({
-      sessionId: 'current',
+      sessionId: 42,
+      closingFloat: 95,
       expected: 100,
-      actual: 95,
       variance: -5,
     });
     expect(markSynced).toHaveBeenCalledWith('sc_1');

@@ -10,18 +10,18 @@ beforeEach(() => {
 describe('sessionCloseQueueStore', () => {
   it('enqueues a close-session payload for later sync', () => {
     const queued = getState().enqueue({
-      sessionId: 'current',
+      closingFloat: 95,
       expected: 100,
-      actual: 95,
       variance: -5,
+      sessionId: 12,
     });
 
     expect(queued).toMatchObject({
       payload: {
-        sessionId: 'current',
+        closingFloat: 95,
         expected: 100,
-        actual: 95,
         variance: -5,
+        sessionId: 12,
       },
       retries: 0,
       status: 'pending',

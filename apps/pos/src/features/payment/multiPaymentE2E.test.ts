@@ -95,8 +95,8 @@ describe('split-tender checkout: $33 cash + $22 card', () => {
 
   it('receipt print + drawer kick succeed after multi-payment charge', async () => {
     const chargeOrder = vi.fn(async () => undefined);
-    vi.mocked(printReceipt).mockResolvedValue({ status: 'ok' });
-    vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'ok' });
+    vi.mocked(printReceipt).mockResolvedValue({ status: 'printed', message: 'ok' });
+    vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'opened' });
 
     await finalizeMultiPayment({ orderId: '99', payments, chargeOrder });
 
@@ -122,8 +122,8 @@ describe('split-tender checkout: $33 cash + $22 card', () => {
   });
 
   it('receipt reflects tip in total displayed to customer', async () => {
-    vi.mocked(printReceipt).mockResolvedValue({ status: 'ok' });
-    vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'ok' });
+    vi.mocked(printReceipt).mockResolvedValue({ status: 'printed', message: 'ok' });
+    vi.mocked(openConfiguredCashDrawer).mockResolvedValue({ status: 'opened' });
 
     await printReceiptAndOpenDrawer({
       printer,

@@ -20,9 +20,9 @@ describe('locationSelection', () => {
     expect(
       filterTerminalsForLocation(
         [
-          { id: '4', businessId: '1', branchId: '3', name: 'Register 1', deviceId: null, isActive: true, lastSeenAt: null, createdAt: '' },
-          { id: '0', businessId: '1', branchId: '3', name: 'Broken', deviceId: null, isActive: true, lastSeenAt: null, createdAt: '' },
-          { id: '5', businessId: '1', branchId: '9', name: 'Other', deviceId: null, isActive: true, lastSeenAt: null, createdAt: '' },
+          { id: '4', businessId: '1', branchId: '3', name: 'Register 1', deviceId: undefined, isActive: true, lastSeenAt: undefined, createdAt: '' },
+          { id: '0', businessId: '1', branchId: '3', name: 'Broken', deviceId: undefined, isActive: true, lastSeenAt: undefined, createdAt: '' },
+          { id: '5', businessId: '1', branchId: '9', name: 'Other', deviceId: undefined, isActive: true, lastSeenAt: undefined, createdAt: '' },
         ],
         3
       )

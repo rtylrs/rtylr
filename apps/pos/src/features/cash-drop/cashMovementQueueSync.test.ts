@@ -10,10 +10,13 @@ beforeEach(() => {
 
 describe('cashMovementQueueSync', () => {
   it('syncs only pending cash movements during auto sync', async () => {
-    const pending = getState().enqueue({ action: 'drop', payload: { amount: 10, reason: 'Safe' } });
+    const pending = getState().enqueue({
+      action: 'drop',
+      payload: { branch_id: 1, session_id: 0, employee_id: 1, amount: 10, reason: 'Safe' },
+    });
     const failed = getState().enqueue({
       action: 'paid_in',
-      payload: { amount: 5, reason: 'Correction' },
+      payload: { branch_id: 1, session_id: 0, employee_id: 1, amount: 5, reason: 'Correction' },
     });
     getState().markFailed(failed.id, 'offline');
     const syncMovement = vi.fn(async () => undefined);
@@ -28,7 +31,7 @@ describe('cashMovementQueueSync', () => {
   it('syncs failed cash movements during manual sync all', async () => {
     const failed = getState().enqueue({
       action: 'paid_out',
-      payload: { amount: 5, reason: 'Petty cash' },
+      payload: { branch_id: 1, session_id: 0, employee_id: 1, amount: 5, reason: 'Petty cash' },
     });
     getState().markFailed(failed.id, 'offline');
     const syncMovement = vi.fn(async () => undefined);
@@ -40,7 +43,10 @@ describe('cashMovementQueueSync', () => {
   });
 
   it('retries one cash movement by id', async () => {
-    const queued = getState().enqueue({ action: 'drop', payload: { amount: 10, reason: 'Safe' } });
+    const queued = getState().enqueue({
+      action: 'drop',
+      payload: { branch_id: 1, session_id: 0, employee_id: 1, amount: 10, reason: 'Safe' },
+    });
 
     const synced = await retryCashMovement(queued.id, vi.fn(async () => undefined));
 

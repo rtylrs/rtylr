@@ -4,7 +4,6 @@ import {
   isWeb,
   getPlatform,
   getPlatformCapabilities,
-  clamp as _clamp,
 } from './platform';
 
 // In the test environment window.__TAURI__ is not set, so we run as 'web'.

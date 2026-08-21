@@ -2,10 +2,18 @@ import { describe, expect, it, vi } from 'vitest';
 import type { QueuedCashMovement } from '../../shared/stores/cashMovementQueueStore';
 import { syncQueuedCashMovements } from './syncCashMovementQueue';
 
+const payload = {
+  branch_id: 1,
+  session_id: 0,
+  employee_id: 1,
+  amount: 25,
+  reason: 'Safe deposit',
+};
+
 const entry = (overrides: Partial<QueuedCashMovement> = {}): QueuedCashMovement => ({
   id: 'cm_1',
   action: 'drop',
-  payload: { amount: 25, reason: 'Safe deposit' },
+  payload,
   queuedAt: '2026-05-06T00:00:00.000Z',
   retries: 0,
   status: 'pending',
@@ -28,7 +36,7 @@ describe('syncQueuedCashMovements', () => {
     });
 
     expect(result).toEqual({ attempted: 1, synced: 1, failed: 0 });
-    expect(syncMovement).toHaveBeenCalledWith('drop', { amount: 25, reason: 'Safe deposit' });
+    expect(syncMovement).toHaveBeenCalledWith('drop', payload);
     expect(retry).toHaveBeenCalledWith('cm_1');
     expect(markSynced).toHaveBeenCalledWith('cm_1');
     expect(markFailed).not.toHaveBeenCalled();

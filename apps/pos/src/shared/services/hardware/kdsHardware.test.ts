@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { sendKdsTicket } from './kdsHardware';
-import type { KdsHardwareSettings } from '../stores/settingsStore';
+import type { KdsHardwareSettings } from '../../stores/settingsStore';
 import type { KdsTicket } from './kdsHardware';
 
 vi.mock('@tauri-apps/api/core', () => ({

@@ -14,15 +14,10 @@ import type { OfflineQueuedOrder } from '../types/pos';
 const makeEntry = (overrides: Partial<OfflineQueuedOrder> = {}): OfflineQueuedOrder => ({
   id: '1',
   order: {
-    id: 'o1',
-    status: 'open',
-    items: [{ id: 'i1', name: 'Burger', price: 10, quantity: 1 }],
-    subtotal: 10,
-    tax: 0.9,
-    tip: 0,
-    discount: 0,
-    total: 10.9,
-    createdAt: '2024-06-01T10:00:00Z',
+    sessionId: 'session-1',
+    type: 'dine_in',
+    paymentMethod: 'cash',
+    items: [{ menuItemId: 'i1', name: 'Burger', unitPrice: 10, quantity: 1 }],
   },
   queuedAt: '2024-06-01T10:00:00Z',
   retries: 0,
@@ -135,13 +130,13 @@ describe('totalQueuedItemCount', () => {
       order: {
         ...makeEntry().order,
         items: [
-          { id: 'a', name: 'Burger', price: 10, quantity: 1 },
-          { id: 'b', name: 'Fries', price: 3, quantity: 1 },
+          { menuItemId: 'a', name: 'Burger', unitPrice: 10, quantity: 1 },
+          { menuItemId: 'b', name: 'Fries', unitPrice: 3, quantity: 1 },
         ],
       },
     });
     const entry2 = makeEntry({
-      order: { ...makeEntry().order, items: [{ id: 'c', name: 'Soda', price: 2, quantity: 1 }] },
+      order: { ...makeEntry().order, items: [{ menuItemId: 'c', name: 'Soda', unitPrice: 2, quantity: 1 }] },
     });
     expect(totalQueuedItemCount([entry1, entry2])).toBe(3);
   });

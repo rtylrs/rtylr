@@ -52,7 +52,7 @@ describe('processCheckout', () => {
   // as orderId. This asserts the runtime contract (regression guard for the
   // checkout that threw because it only read id/order_id).
   it('reads the camelCased orderId the api client actually returns', async () => {
-    const createOrder = vi.fn(() => Promise.resolve({ orderId: 555, orderNumber: 'ORD-555' }));
+    const createOrder = vi.fn(() => Promise.resolve({ orderId: '555', orderNumber: 'ORD-555' }));
     const chargeOrder = vi.fn(() => Promise.resolve());
 
     const result = await processCheckout({
@@ -82,7 +82,7 @@ describe('processCheckout', () => {
   });
 
   it('creates and charges the order online', async () => {
-    const createOrder = vi.fn(() => Promise.resolve({ orderId: 123 }));
+    const createOrder = vi.fn(() => Promise.resolve({ orderId: '123' }));
     const chargeOrder = vi.fn(() => Promise.resolve());
     const enqueueOffline = vi.fn();
     const recordCashSale = vi.fn();
@@ -161,7 +161,7 @@ describe('processCheckout', () => {
         }),
         payload: basePayload,
         method: 'cash',
-        createOrder: vi.fn(() => Promise.resolve({ orderId: 77 })),
+        createOrder: vi.fn(() => Promise.resolve({ orderId: '77' })),
         chargeOrder: vi.fn(() => Promise.reject(new Error('Network Error'))),
         enqueueOffline,
         recordCashSale,
