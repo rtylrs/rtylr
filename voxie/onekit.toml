@@ -1,11 +1,12 @@
 module = "github.com/voxire/voxie/gen/go"
+schema_root = "api"
 allow_legacy_contracts = true
 
 [generate.go-server]
-out = "../gen/go"
+out = "gen/go"
 
 [generate.go-client]
-out = "../gen/go"
+out = "gen/go"
 
 [generate.ts-client]
-out = "../gen/ts"
+out = "gen/ts"

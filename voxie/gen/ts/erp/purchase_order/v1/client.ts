@@ -2,6 +2,42 @@
 import type { ListPurchaseOrdersRequest, ListPurchaseOrdersResponse, CreatePurchaseOrderRequest, CreatePurchaseOrderResponse, GetPurchaseOrderRequest, GetPurchaseOrderResponse, UpdatePurchaseOrderStatusRequest, UpdatePurchaseOrderStatusResponse, ApprovePurchaseOrderRequest, ApprovePurchaseOrderResponse } from "./types";
 import { encodeListPurchaseOrdersRequest, validateListPurchaseOrdersRequest, decodeListPurchaseOrdersResponse, encodeCreatePurchaseOrderRequest, validateCreatePurchaseOrderRequest, decodeCreatePurchaseOrderResponse, encodeGetPurchaseOrderRequest, validateGetPurchaseOrderRequest, decodeGetPurchaseOrderResponse, encodeUpdatePurchaseOrderStatusRequest, validateUpdatePurchaseOrderStatusRequest, decodeUpdatePurchaseOrderStatusResponse, encodeApprovePurchaseOrderRequest, validateApprovePurchaseOrderRequest, decodeApprovePurchaseOrderResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface PurchaseOrderServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class PurchaseOrderServiceClient {
@@ -55,11 +93,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListPurchaseOrdersResponse(await res.json());
+return decodeListPurchaseOrdersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createPurchaseOrder(req: CreatePurchaseOrderRequest): Promise<CreatePurchaseOrderResponse> {
@@ -73,11 +111,11 @@ body: JSON.stringify(encodeCreatePurchaseOrderRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreatePurchaseOrderResponse(await res.json());
+return decodeCreatePurchaseOrderResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getPurchaseOrder(req: GetPurchaseOrderRequest): Promise<GetPurchaseOrderResponse> {
@@ -94,11 +132,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetPurchaseOrderResponse(await res.json());
+return decodeGetPurchaseOrderResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updatePurchaseOrderStatus(req: UpdatePurchaseOrderStatusRequest): Promise<UpdatePurchaseOrderStatusResponse> {
@@ -113,11 +151,11 @@ body: JSON.stringify(encodeUpdatePurchaseOrderStatusRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdatePurchaseOrderStatusResponse(await res.json());
+return decodeUpdatePurchaseOrderStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async approvePurchaseOrder(req: ApprovePurchaseOrderRequest): Promise<ApprovePurchaseOrderResponse> {
@@ -132,11 +170,11 @@ body: JSON.stringify(encodeApprovePurchaseOrderRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeApprovePurchaseOrderResponse(await res.json());
+return decodeApprovePurchaseOrderResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

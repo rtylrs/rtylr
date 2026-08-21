@@ -65,6 +65,16 @@ return out;
 
 export function validateGetMeResponse(v: GetMeResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.fullName !== undefined && v.fullName !== null && !(typeof v.fullName === "string")) violations.push("full_name has invalid type");
+if (v.apps !== undefined && v.apps !== null && !(Array.isArray(v.apps) && (v.apps).every((item: any) => typeof item === "string"))) violations.push("apps has invalid type");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.businessName !== undefined && v.businessName !== null && !(typeof v.businessName === "string")) violations.push("business_name has invalid type");
+if (v.isOwner !== undefined && v.isOwner !== null && !(typeof v.isOwner === "boolean")) violations.push("is_owner has invalid type");
+if (v.isConsoleAdmin !== undefined && v.isConsoleAdmin !== null && !(typeof v.isConsoleAdmin === "boolean")) violations.push("is_console_admin has invalid type");
+if (v.onboarded !== undefined && v.onboarded !== null && !(typeof v.onboarded === "boolean")) violations.push("onboarded has invalid type");
 return violations;
 }
 
@@ -90,7 +100,9 @@ return out;
 
 export function validateUpdateProfileRequest(v: UpdateProfileRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
 return violations;
 }
@@ -114,6 +126,7 @@ return out;
 
 export function validateUpdateProfileResponse(v: UpdateProfileResponse): string[] {
 const violations: string[] = [];
+if (v.user !== undefined && v.user !== null && !(typeof v.user === "object" && v.user !== null && !Array.isArray(v.user))) violations.push("user has invalid type");
 if (v.user !== undefined && v.user !== null) violations.push(...validateGetMeResponse(v.user).map((message) => "user: " + message));
 return violations;
 }
@@ -140,7 +153,9 @@ return out;
 
 export function validateChangePasswordRequest(v: ChangePasswordRequest): string[] {
 const violations: string[] = [];
+if (v.currentPassword !== undefined && v.currentPassword !== null && !(typeof v.currentPassword === "string")) violations.push("current_password has invalid type");
 if (!(v.currentPassword !== undefined && v.currentPassword !== null) || v.currentPassword === "") violations.push("current_password is required");
+if (v.newPassword !== undefined && v.newPassword !== null && !(typeof v.newPassword === "string")) violations.push("new_password has invalid type");
 if (!(v.newPassword !== undefined && v.newPassword !== null) || v.newPassword === "") violations.push("new_password is required");
 return violations;
 }
@@ -183,6 +198,7 @@ return out;
 
 export function validateSwitchBusinessRequest(v: SwitchBusinessRequest): string[] {
 const violations: string[] = [];
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
 if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
 if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
 return violations;
@@ -207,6 +223,7 @@ return out;
 
 export function validateSwitchBusinessResponse(v: SwitchBusinessResponse): string[] {
 const violations: string[] = [];
+if (v.token !== undefined && v.token !== null && !(typeof v.token === "string")) violations.push("token has invalid type");
 return violations;
 }
 

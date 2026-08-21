@@ -31,10 +31,15 @@ return out;
 
 export function validateRegisterRequest(v: RegisterRequest): string[] {
 const violations: string[] = [];
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
 if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (v.password !== undefined && v.password !== null && !(typeof v.password === "string")) violations.push("password has invalid type");
 if (!(v.password !== undefined && v.password !== null) || v.password === "") violations.push("password is required");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.businessName !== undefined && v.businessName !== null && !(typeof v.businessName === "string")) violations.push("business_name has invalid type");
+if (v.planSlug !== undefined && v.planSlug !== null && !(typeof v.planSlug === "string")) violations.push("plan_slug has invalid type");
 return violations;
 }
 
@@ -69,6 +74,11 @@ return out;
 
 export function validateRegisterResponse(v: RegisterResponse): string[] {
 const violations: string[] = [];
+if (v.token !== undefined && v.token !== null && !(typeof v.token === "string")) violations.push("token has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 return violations;
 }
 
@@ -94,8 +104,10 @@ return out;
 
 export function validateLoginRequest(v: LoginRequest): string[] {
 const violations: string[] = [];
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
 if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (v.password !== undefined && v.password !== null && !(typeof v.password === "string")) violations.push("password has invalid type");
 if (!(v.password !== undefined && v.password !== null) || v.password === "") violations.push("password is required");
 return violations;
 }
@@ -134,6 +146,12 @@ return out;
 
 export function validateLoginResponse(v: LoginResponse): string[] {
 const violations: string[] = [];
+if (v.token !== undefined && v.token !== null && !(typeof v.token === "string")) violations.push("token has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.isConsoleAdmin !== undefined && v.isConsoleAdmin !== null && !(typeof v.isConsoleAdmin === "boolean")) violations.push("is_console_admin has invalid type");
 return violations;
 }
 
@@ -159,6 +177,8 @@ return out;
 
 export function validateGoogleAuthRequest(v: GoogleAuthRequest): string[] {
 const violations: string[] = [];
+if (v.businessName !== undefined && v.businessName !== null && !(typeof v.businessName === "string")) violations.push("business_name has invalid type");
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
 if (!(v.code !== undefined && v.code !== null) || v.code === "") violations.push("code is required");
 return violations;
 }
@@ -185,6 +205,8 @@ return out;
 
 export function validateGoogleAuthResponse(v: GoogleAuthResponse): string[] {
 const violations: string[] = [];
+if (v.token !== undefined && v.token !== null && !(typeof v.token === "string")) violations.push("token has invalid type");
+if (v.isNew !== undefined && v.isNew !== null && !(typeof v.isNew === "boolean")) violations.push("is_new has invalid type");
 return violations;
 }
 
@@ -207,6 +229,7 @@ return out;
 
 export function validateResetPasswordRequest(v: ResetPasswordRequest): string[] {
 const violations: string[] = [];
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
 if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
 return violations;
@@ -231,6 +254,7 @@ return out;
 
 export function validateResetPasswordResponse(v: ResetPasswordResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -256,7 +280,9 @@ return out;
 
 export function validateResetPasswordConfirmRequest(v: ResetPasswordConfirmRequest): string[] {
 const violations: string[] = [];
+if (v.token !== undefined && v.token !== null && !(typeof v.token === "string")) violations.push("token has invalid type");
 if (!(v.token !== undefined && v.token !== null) || v.token === "") violations.push("token is required");
+if (v.password !== undefined && v.password !== null && !(typeof v.password === "string")) violations.push("password has invalid type");
 if (!(v.password !== undefined && v.password !== null) || v.password === "") violations.push("password is required");
 return violations;
 }
@@ -280,6 +306,7 @@ return out;
 
 export function validateResetPasswordConfirmResponse(v: ResetPasswordConfirmResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -302,6 +329,7 @@ return out;
 
 export function validateVerifyEmailRequest(v: VerifyEmailRequest): string[] {
 const violations: string[] = [];
+if (v.token !== undefined && v.token !== null && !(typeof v.token === "string")) violations.push("token has invalid type");
 if (!(v.token !== undefined && v.token !== null) || v.token === "") violations.push("token is required");
 return violations;
 }
@@ -328,6 +356,8 @@ return out;
 
 export function validateVerifyEmailResponse(v: VerifyEmailResponse): string[] {
 const violations: string[] = [];
+if (v.verified !== undefined && v.verified !== null && !(typeof v.verified === "boolean")) violations.push("verified has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -350,6 +380,7 @@ return out;
 
 export function validateResendVerificationRequest(v: ResendVerificationRequest): string[] {
 const violations: string[] = [];
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
 if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
 return violations;
@@ -377,6 +408,8 @@ return out;
 
 export function validateResendVerificationResponse(v: ResendVerificationResponse): string[] {
 const violations: string[] = [];
+if (v.ok !== undefined && v.ok !== null && !(typeof v.ok === "boolean")) violations.push("ok has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -402,7 +435,9 @@ return out;
 
 export function validateInviteAcceptRequest(v: InviteAcceptRequest): string[] {
 const violations: string[] = [];
+if (v.token !== undefined && v.token !== null && !(typeof v.token === "string")) violations.push("token has invalid type");
 if (!(v.token !== undefined && v.token !== null) || v.token === "") violations.push("token is required");
+if (v.password !== undefined && v.password !== null && !(typeof v.password === "string")) violations.push("password has invalid type");
 if (!(v.password !== undefined && v.password !== null) || v.password === "") violations.push("password is required");
 return violations;
 }
@@ -426,6 +461,7 @@ return out;
 
 export function validateInviteAcceptResponse(v: InviteAcceptResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -448,6 +484,7 @@ return out;
 
 export function validateCheckEmailExistsRequest(v: CheckEmailExistsRequest): string[] {
 const violations: string[] = [];
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
 if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
 return violations;
@@ -472,6 +509,7 @@ return out;
 
 export function validateCheckEmailExistsResponse(v: CheckEmailExistsResponse): string[] {
 const violations: string[] = [];
+if (v.exists !== undefined && v.exists !== null && !(typeof v.exists === "boolean")) violations.push("exists has invalid type");
 return violations;
 }
 
@@ -494,6 +532,7 @@ return out;
 
 export function validateSocialAuthorizeRequest(v: SocialAuthorizeRequest): string[] {
 const violations: string[] = [];
+if (v.provider !== undefined && v.provider !== null && !(typeof v.provider === "string")) violations.push("provider has invalid type");
 if (v.provider !== undefined && v.provider !== null && !["google", "github", "microsoft", "apple", ""].includes(v.provider)) violations.push("provider must be one of the allowed values");
 return violations;
 }
@@ -517,6 +556,7 @@ return out;
 
 export function validateSocialAuthorizeResponse(v: SocialAuthorizeResponse): string[] {
 const violations: string[] = [];
+if (v.url !== undefined && v.url !== null && !(typeof v.url === "string")) violations.push("url has invalid type");
 return violations;
 }
 

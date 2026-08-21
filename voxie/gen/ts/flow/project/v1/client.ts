@@ -2,6 +2,42 @@
 import type { ListProjectsRequest, ListProjectsResponse, CreateProjectRequest, CreateProjectResponse, UpdateProjectRequest, UpdateProjectResponse, DeleteProjectRequest, DeleteProjectResponse, ListProjectColumnsRequest, ListProjectColumnsResponse, CreateProjectColumnRequest, CreateProjectColumnResponse, UpdateProjectColumnRequest, UpdateProjectColumnResponse, DeleteProjectColumnRequest, DeleteProjectColumnResponse, MoveTaskToColumnRequest, MoveTaskToColumnResponse, ListProjectMembersRequest, ListProjectMembersResponse, AddProjectMemberRequest, AddProjectMemberResponse, RemoveProjectMemberRequest, RemoveProjectMemberResponse, UpdateProjectMemberRoleRequest, UpdateProjectMemberRoleResponse, InviteProjectMemberRequest, InviteProjectMemberResponse, TransferProjectOwnershipRequest, TransferProjectOwnershipResponse, MoveProjectRequest, MoveProjectResponse } from "./types";
 import { encodeListProjectsRequest, validateListProjectsRequest, decodeListProjectsResponse, encodeCreateProjectRequest, validateCreateProjectRequest, decodeCreateProjectResponse, encodeUpdateProjectRequest, validateUpdateProjectRequest, decodeUpdateProjectResponse, encodeDeleteProjectRequest, validateDeleteProjectRequest, decodeDeleteProjectResponse, encodeListProjectColumnsRequest, validateListProjectColumnsRequest, decodeListProjectColumnsResponse, encodeCreateProjectColumnRequest, validateCreateProjectColumnRequest, decodeCreateProjectColumnResponse, encodeUpdateProjectColumnRequest, validateUpdateProjectColumnRequest, decodeUpdateProjectColumnResponse, encodeDeleteProjectColumnRequest, validateDeleteProjectColumnRequest, decodeDeleteProjectColumnResponse, encodeMoveTaskToColumnRequest, validateMoveTaskToColumnRequest, decodeMoveTaskToColumnResponse, encodeListProjectMembersRequest, validateListProjectMembersRequest, decodeListProjectMembersResponse, encodeAddProjectMemberRequest, validateAddProjectMemberRequest, decodeAddProjectMemberResponse, encodeRemoveProjectMemberRequest, validateRemoveProjectMemberRequest, decodeRemoveProjectMemberResponse, encodeUpdateProjectMemberRoleRequest, validateUpdateProjectMemberRoleRequest, decodeUpdateProjectMemberRoleResponse, encodeInviteProjectMemberRequest, validateInviteProjectMemberRequest, decodeInviteProjectMemberResponse, encodeTransferProjectOwnershipRequest, validateTransferProjectOwnershipRequest, decodeTransferProjectOwnershipResponse, encodeMoveProjectRequest, validateMoveProjectRequest, decodeMoveProjectResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface ProjectServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class ProjectServiceClient {
@@ -61,11 +99,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListProjectsResponse(await res.json());
+return decodeListProjectsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createProject(req: CreateProjectRequest): Promise<CreateProjectResponse> {
@@ -79,11 +117,11 @@ body: JSON.stringify(encodeCreateProjectRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateProjectResponse(await res.json());
+return decodeCreateProjectResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateProject(req: UpdateProjectRequest): Promise<UpdateProjectResponse> {
@@ -98,11 +136,11 @@ body: JSON.stringify(encodeUpdateProjectRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateProjectResponse(await res.json());
+return decodeUpdateProjectResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteProject(req: DeleteProjectRequest): Promise<DeleteProjectResponse> {
@@ -119,11 +157,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteProjectResponse(await res.json());
+return decodeDeleteProjectResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listProjectColumns(req: ListProjectColumnsRequest): Promise<ListProjectColumnsResponse> {
@@ -154,11 +192,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListProjectColumnsResponse(await res.json());
+return decodeListProjectColumnsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createProjectColumn(req: CreateProjectColumnRequest): Promise<CreateProjectColumnResponse> {
@@ -172,11 +210,11 @@ body: JSON.stringify(encodeCreateProjectColumnRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateProjectColumnResponse(await res.json());
+return decodeCreateProjectColumnResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateProjectColumn(req: UpdateProjectColumnRequest): Promise<UpdateProjectColumnResponse> {
@@ -191,11 +229,11 @@ body: JSON.stringify(encodeUpdateProjectColumnRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateProjectColumnResponse(await res.json());
+return decodeUpdateProjectColumnResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteProjectColumn(req: DeleteProjectColumnRequest): Promise<DeleteProjectColumnResponse> {
@@ -212,11 +250,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteProjectColumnResponse(await res.json());
+return decodeDeleteProjectColumnResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async moveTaskToColumn(req: MoveTaskToColumnRequest): Promise<MoveTaskToColumnResponse> {
@@ -230,11 +268,11 @@ body: JSON.stringify(encodeMoveTaskToColumnRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeMoveTaskToColumnResponse(await res.json());
+return decodeMoveTaskToColumnResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listProjectMembers(req: ListProjectMembersRequest): Promise<ListProjectMembersResponse> {
@@ -265,11 +303,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListProjectMembersResponse(await res.json());
+return decodeListProjectMembersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async addProjectMember(req: AddProjectMemberRequest): Promise<AddProjectMemberResponse> {
@@ -283,11 +321,11 @@ body: JSON.stringify(encodeAddProjectMemberRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAddProjectMemberResponse(await res.json());
+return decodeAddProjectMemberResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async removeProjectMember(req: RemoveProjectMemberRequest): Promise<RemoveProjectMemberResponse> {
@@ -309,11 +347,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRemoveProjectMemberResponse(await res.json());
+return decodeRemoveProjectMemberResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateProjectMemberRole(req: UpdateProjectMemberRoleRequest): Promise<UpdateProjectMemberRoleResponse> {
@@ -327,11 +365,11 @@ body: JSON.stringify(encodeUpdateProjectMemberRoleRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateProjectMemberRoleResponse(await res.json());
+return decodeUpdateProjectMemberRoleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async inviteProjectMember(req: InviteProjectMemberRequest): Promise<InviteProjectMemberResponse> {
@@ -345,11 +383,11 @@ body: JSON.stringify(encodeInviteProjectMemberRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeInviteProjectMemberResponse(await res.json());
+return decodeInviteProjectMemberResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async transferProjectOwnership(req: TransferProjectOwnershipRequest): Promise<TransferProjectOwnershipResponse> {
@@ -363,11 +401,11 @@ body: JSON.stringify(encodeTransferProjectOwnershipRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeTransferProjectOwnershipResponse(await res.json());
+return decodeTransferProjectOwnershipResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async moveProject(req: MoveProjectRequest): Promise<MoveProjectResponse> {
@@ -381,11 +419,11 @@ body: JSON.stringify(encodeMoveProjectRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeMoveProjectResponse(await res.json());
+return decodeMoveProjectResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

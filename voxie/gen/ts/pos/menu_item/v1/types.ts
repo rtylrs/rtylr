@@ -61,6 +61,21 @@ return out;
 
 export function validateMenuItem(v: MenuItem): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.categoryId !== undefined && v.categoryId !== null && !(typeof v.categoryId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.categoryId))) violations.push("category_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.sku !== undefined && v.sku !== null && !(typeof v.sku === "string")) violations.push("sku has invalid type");
+if (v.salePrice !== undefined && v.salePrice !== null && !(typeof v.salePrice === "number" && Number.isFinite(v.salePrice))) violations.push("sale_price has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
+if (v.imageUrl !== undefined && v.imageUrl !== null && !(typeof v.imageUrl === "string")) violations.push("image_url has invalid type");
+if (v.category !== undefined && v.category !== null && !(typeof v.category === "string")) violations.push("category has invalid type");
+if (v.barcode !== undefined && v.barcode !== null && !(typeof v.barcode === "string")) violations.push("barcode has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.taxRate !== undefined && v.taxRate !== null && !(typeof v.taxRate === "number" && Number.isFinite(v.taxRate))) violations.push("tax_rate has invalid type");
+if (v.stock !== undefined && v.stock !== null && !(typeof v.stock === "number" && Number.isFinite(v.stock))) violations.push("stock has invalid type");
 return violations;
 }
 
@@ -89,8 +104,11 @@ return out;
 
 export function validateCreateMenuItemRequest(v: CreateMenuItemRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.sku !== undefined && v.sku !== null && !(typeof v.sku === "string")) violations.push("sku has invalid type");
 if (!(v.sku !== undefined && v.sku !== null) || v.sku === "") violations.push("sku is required");
+if (v.salePrice !== undefined && v.salePrice !== null && !(typeof v.salePrice === "number" && Number.isFinite(v.salePrice))) violations.push("sale_price has invalid type");
 if (v.salePrice !== undefined && v.salePrice !== null && !(Number(v.salePrice) >= 0)) violations.push("sale_price violates @gte");
 return violations;
 }
@@ -117,6 +135,8 @@ return out;
 
 export function validateCreateMenuItemResponse(v: CreateMenuItemResponse): string[] {
 const violations: string[] = [];
+if (v.itemId !== undefined && v.itemId !== null && !(typeof v.itemId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.itemId))) violations.push("item_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -158,6 +178,7 @@ return out;
 
 export function validateListMenuItemsResponse(v: ListMenuItemsResponse): string[] {
 const violations: string[] = [];
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateMenuItem(item).map((message) => "items: " + message));
 return violations;
 }
@@ -184,7 +205,9 @@ return out;
 
 export function validateListPublicMenuItemsRequest(v: ListPublicMenuItemsRequest): string[] {
 const violations: string[] = [];
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
 if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
 return violations;
 }
 
@@ -207,6 +230,7 @@ return out;
 
 export function validateListPublicMenuItemsResponse(v: ListPublicMenuItemsResponse): string[] {
 const violations: string[] = [];
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateMenuItem(item).map((message) => "items: " + message));
 return violations;
 }
@@ -239,7 +263,11 @@ return out;
 
 export function validateUpdateMenuItemBody(v: UpdateMenuItemBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.salePrice !== undefined && v.salePrice !== null && !(typeof v.salePrice === "number" && Number.isFinite(v.salePrice))) violations.push("sale_price has invalid type");
 if (v.salePrice !== undefined && v.salePrice !== null && !(Number(v.salePrice) >= 0)) violations.push("sale_price violates @gte");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.stock !== undefined && v.stock !== null && !(typeof v.stock === "number" && Number.isFinite(v.stock))) violations.push("stock has invalid type");
 if (v.stock !== undefined && v.stock !== null && !(Number(v.stock) >= 0)) violations.push("stock violates @gte");
 return violations;
 }
@@ -266,8 +294,10 @@ return out;
 
 export function validateUpdateMenuItemRequest(v: UpdateMenuItemRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateMenuItemBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -291,6 +321,7 @@ return out;
 
 export function validateUpdateMenuItemResponse(v: UpdateMenuItemResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

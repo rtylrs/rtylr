@@ -43,6 +43,15 @@ return out;
 
 export function validateSettings(v: Settings): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.defaultConsent !== undefined && v.defaultConsent !== null && !(typeof v.defaultConsent === "boolean")) violations.push("default_consent has invalid type");
+if (v.fromEmail !== undefined && v.fromEmail !== null && !(typeof v.fromEmail === "string")) violations.push("from_email has invalid type");
+if (v.fromName !== undefined && v.fromName !== null && !(typeof v.fromName === "string")) violations.push("from_name has invalid type");
+if (v.smsSenderId !== undefined && v.smsSenderId !== null && !(typeof v.smsSenderId === "string")) violations.push("sms_sender_id has invalid type");
+if (v.timezone !== undefined && v.timezone !== null && !(typeof v.timezone === "string")) violations.push("timezone has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -84,6 +93,7 @@ return out;
 
 export function validateGetSettingsResponse(v: GetSettingsResponse): string[] {
 const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null && !(typeof v.settings === "object" && v.settings !== null && !Array.isArray(v.settings))) violations.push("settings has invalid type");
 if (v.settings !== undefined && v.settings !== null) violations.push(...validateSettings(v.settings).map((message) => "settings: " + message));
 return violations;
 }
@@ -119,6 +129,11 @@ return out;
 
 export function validateUpdateSettingsRequest(v: UpdateSettingsRequest): string[] {
 const violations: string[] = [];
+if (v.defaultConsent !== undefined && v.defaultConsent !== null && !(typeof v.defaultConsent === "boolean")) violations.push("default_consent has invalid type");
+if (v.fromEmail !== undefined && v.fromEmail !== null && !(typeof v.fromEmail === "string")) violations.push("from_email has invalid type");
+if (v.fromName !== undefined && v.fromName !== null && !(typeof v.fromName === "string")) violations.push("from_name has invalid type");
+if (v.smsSenderId !== undefined && v.smsSenderId !== null && !(typeof v.smsSenderId === "string")) violations.push("sms_sender_id has invalid type");
+if (v.timezone !== undefined && v.timezone !== null && !(typeof v.timezone === "string")) violations.push("timezone has invalid type");
 return violations;
 }
 
@@ -141,6 +156,7 @@ return out;
 
 export function validateUpdateSettingsResponse(v: UpdateSettingsResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

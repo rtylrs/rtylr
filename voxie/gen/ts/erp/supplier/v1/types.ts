@@ -58,6 +58,20 @@ return out;
 
 export function validateSupplier(v: Supplier): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.phone !== undefined && v.phone !== null && !(typeof v.phone === "string")) violations.push("phone has invalid type");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.city !== undefined && v.city !== null && !(typeof v.city === "string")) violations.push("city has invalid type");
+if (v.country !== undefined && v.country !== null && !(typeof v.country === "string")) violations.push("country has invalid type");
+if (v.taxId !== undefined && v.taxId !== null && !(typeof v.taxId === "string")) violations.push("tax_id has invalid type");
+if (v.paymentTerms !== undefined && v.paymentTerms !== null && !(typeof v.paymentTerms === "string")) violations.push("payment_terms has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -107,11 +121,21 @@ return out;
 
 export function validateCreateSupplierRequest(v: CreateSupplierRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
 if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (v.phone !== undefined && v.phone !== null && !(typeof v.phone === "string")) violations.push("phone has invalid type");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.city !== undefined && v.city !== null && !(typeof v.city === "string")) violations.push("city has invalid type");
 if (!(v.city !== undefined && v.city !== null) || v.city === "") violations.push("city is required");
+if (v.country !== undefined && v.country !== null && !(typeof v.country === "string")) violations.push("country has invalid type");
 if (!(v.country !== undefined && v.country !== null) || v.country === "") violations.push("country is required");
+if (v.taxId !== undefined && v.taxId !== null && !(typeof v.taxId === "string")) violations.push("tax_id has invalid type");
+if (v.paymentTerms !== undefined && v.paymentTerms !== null && !(typeof v.paymentTerms === "string")) violations.push("payment_terms has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -137,6 +161,8 @@ return out;
 
 export function validateCreateSupplierResponse(v: CreateSupplierResponse): string[] {
 const violations: string[] = [];
+if (v.supplierId !== undefined && v.supplierId !== null && !(typeof v.supplierId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.supplierId))) violations.push("supplier_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -159,6 +185,7 @@ return out;
 
 export function validateDeleteSupplierRequest(v: DeleteSupplierRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -183,6 +210,7 @@ return out;
 
 export function validateDeleteSupplierResponse(v: DeleteSupplierResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -208,6 +236,8 @@ return out;
 
 export function validateListSuppliersRequest(v: ListSuppliersRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -239,7 +269,11 @@ return out;
 
 export function validateListSuppliersResponse(v: ListSuppliersResponse): string[] {
 const violations: string[] = [];
+if (v.suppliers !== undefined && v.suppliers !== null && !(Array.isArray(v.suppliers) && (v.suppliers).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("suppliers has invalid type");
 if (v.suppliers !== undefined && v.suppliers !== null) for (const item of v.suppliers) violations.push(...validateSupplier(item).map((message) => "suppliers: " + message));
+if (v.hasMore !== undefined && v.hasMore !== null && !(typeof v.hasMore === "boolean")) violations.push("has_more has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -289,11 +323,21 @@ return out;
 
 export function validateUpdateSupplierBody(v: UpdateSupplierBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
 if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (v.phone !== undefined && v.phone !== null && !(typeof v.phone === "string")) violations.push("phone has invalid type");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.city !== undefined && v.city !== null && !(typeof v.city === "string")) violations.push("city has invalid type");
 if (!(v.city !== undefined && v.city !== null) || v.city === "") violations.push("city is required");
+if (v.country !== undefined && v.country !== null && !(typeof v.country === "string")) violations.push("country has invalid type");
 if (!(v.country !== undefined && v.country !== null) || v.country === "") violations.push("country is required");
+if (v.taxId !== undefined && v.taxId !== null && !(typeof v.taxId === "string")) violations.push("tax_id has invalid type");
+if (v.paymentTerms !== undefined && v.paymentTerms !== null && !(typeof v.paymentTerms === "string")) violations.push("payment_terms has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -319,8 +363,10 @@ return out;
 
 export function validateUpdateSupplierRequest(v: UpdateSupplierRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateSupplierBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -344,6 +390,7 @@ return out;
 
 export function validateUpdateSupplierResponse(v: UpdateSupplierResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

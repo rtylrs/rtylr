@@ -43,6 +43,15 @@ return out;
 
 export function validateFeedback(v: Feedback): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.score !== undefined && v.score !== null && !(typeof v.score === "number" && Number.isInteger(v.score) && v.score >= -2147483648 && v.score <= 2147483647)) violations.push("score has invalid type");
+if (v.comment !== undefined && v.comment !== null && !(typeof v.comment === "string")) violations.push("comment has invalid type");
+if (v.source !== undefined && v.source !== null && !(typeof v.source === "string")) violations.push("source has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
 return violations;
 }
 
@@ -77,7 +86,12 @@ return out;
 
 export function validateCreateFeedbackRequest(v: CreateFeedbackRequest): string[] {
 const violations: string[] = [];
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
 if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (v.score !== undefined && v.score !== null && !(typeof v.score === "number" && Number.isInteger(v.score) && v.score >= -2147483648 && v.score <= 2147483647)) violations.push("score has invalid type");
+if (v.comment !== undefined && v.comment !== null && !(typeof v.comment === "string")) violations.push("comment has invalid type");
+if (v.source !== undefined && v.source !== null && !(typeof v.source === "string")) violations.push("source has invalid type");
 return violations;
 }
 
@@ -103,6 +117,8 @@ return out;
 
 export function validateCreateFeedbackResponse(v: CreateFeedbackResponse): string[] {
 const violations: string[] = [];
+if (v.feedbackId !== undefined && v.feedbackId !== null && !(typeof v.feedbackId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.feedbackId))) violations.push("feedback_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -140,6 +156,12 @@ return out;
 
 export function validateListFeedbackRequest(v: ListFeedbackRequest): string[] {
 const violations: string[] = [];
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.source !== undefined && v.source !== null && !(typeof v.source === "string")) violations.push("source has invalid type");
+if (v.minScore !== undefined && v.minScore !== null && !(typeof v.minScore === "number" && Number.isInteger(v.minScore) && v.minScore >= -2147483648 && v.minScore <= 2147483647)) violations.push("min_score has invalid type");
+if (v.maxScore !== undefined && v.maxScore !== null && !(typeof v.maxScore === "number" && Number.isInteger(v.maxScore) && v.maxScore >= -2147483648 && v.maxScore <= 2147483647)) violations.push("max_score has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -171,7 +193,11 @@ return out;
 
 export function validateListFeedbackResponse(v: ListFeedbackResponse): string[] {
 const violations: string[] = [];
+if (v.feedback !== undefined && v.feedback !== null && !(Array.isArray(v.feedback) && (v.feedback).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("feedback has invalid type");
 if (v.feedback !== undefined && v.feedback !== null) for (const item of v.feedback) violations.push(...validateFeedback(item).map((message) => "feedback: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isInteger(v.total) && v.total >= -2147483648 && v.total <= 2147483647)) violations.push("total has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
 return violations;
 }
 

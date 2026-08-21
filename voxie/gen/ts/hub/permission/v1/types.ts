@@ -22,7 +22,9 @@ return out;
 
 export function validatePermissionMatrix(v: PermissionMatrix): string[] {
 const violations: string[] = [];
+if (v.rows !== undefined && v.rows !== null && !(Array.isArray(v.rows) && (v.rows).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("rows has invalid type");
 if (v.rows !== undefined && v.rows !== null) for (const item of v.rows) violations.push(...validatePermissionRow(item).map((message) => "rows: " + message));
+if (v.roles !== undefined && v.roles !== null && !(Array.isArray(v.roles) && (v.roles).every((item: any) => typeof item === "string"))) violations.push("roles has invalid type");
 return violations;
 }
 
@@ -54,6 +56,10 @@ return out;
 
 export function validatePermissionRow(v: PermissionRow): string[] {
 const violations: string[] = [];
+if (v.key !== undefined && v.key !== null && !(typeof v.key === "string")) violations.push("key has invalid type");
+if (v.category !== undefined && v.category !== null && !(typeof v.category === "string")) violations.push("category has invalid type");
+if (v.label !== undefined && v.label !== null && !(typeof v.label === "string")) violations.push("label has invalid type");
+if (v.roleValues !== undefined && v.roleValues !== null && !(typeof v.roleValues === "object" && v.roleValues !== null && !Array.isArray(v.roleValues) && Object.values(v.roleValues).every((item: any) => typeof item === "boolean"))) violations.push("role_values has invalid type");
 return violations;
 }
 
@@ -91,6 +97,12 @@ return out;
 
 export function validateCustomRole(v: CustomRole): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.permissions !== undefined && v.permissions !== null && !(Array.isArray(v.permissions) && (v.permissions).every((item: any) => typeof item === "string"))) violations.push("permissions has invalid type");
+if (v.memberCount !== undefined && v.memberCount !== null && !(typeof v.memberCount === "number" && Number.isInteger(v.memberCount) && v.memberCount >= -2147483648 && v.memberCount <= 2147483647)) violations.push("member_count has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -132,6 +144,7 @@ return out;
 
 export function validateGetPermissionsResponse(v: GetPermissionsResponse): string[] {
 const violations: string[] = [];
+if (v.matrix !== undefined && v.matrix !== null && !(typeof v.matrix === "object" && v.matrix !== null && !Array.isArray(v.matrix))) violations.push("matrix has invalid type");
 if (v.matrix !== undefined && v.matrix !== null) violations.push(...validatePermissionMatrix(v.matrix).map((message) => "matrix: " + message));
 return violations;
 }
@@ -174,6 +187,7 @@ return out;
 
 export function validateListRolesResponse(v: ListRolesResponse): string[] {
 const violations: string[] = [];
+if (v.roles !== undefined && v.roles !== null && !(Array.isArray(v.roles) && (v.roles).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("roles has invalid type");
 if (v.roles !== undefined && v.roles !== null) for (const item of v.roles) violations.push(...validateCustomRole(item).map((message) => "roles: " + message));
 return violations;
 }
@@ -203,7 +217,10 @@ return out;
 
 export function validateCreateRoleRequest(v: CreateRoleRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.permissions !== undefined && v.permissions !== null && !(Array.isArray(v.permissions) && (v.permissions).every((item: any) => typeof item === "string"))) violations.push("permissions has invalid type");
 return violations;
 }
 
@@ -226,6 +243,7 @@ return out;
 
 export function validateCreateRoleResponse(v: CreateRoleResponse): string[] {
 const violations: string[] = [];
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "object" && v.role !== null && !Array.isArray(v.role))) violations.push("role has invalid type");
 if (v.role !== undefined && v.role !== null) violations.push(...validateCustomRole(v.role).map((message) => "role: " + message));
 return violations;
 }
@@ -249,6 +267,7 @@ return out;
 
 export function validateDeleteRoleRequest(v: DeleteRoleRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -273,6 +292,7 @@ return out;
 
 export function validateDeleteRoleResponse(v: DeleteRoleResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -298,7 +318,9 @@ return out;
 
 export function validateUpdateRoleBody(v: UpdateRoleBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.permissions !== undefined && v.permissions !== null && !(Array.isArray(v.permissions) && (v.permissions).every((item: any) => typeof item === "string"))) violations.push("permissions has invalid type");
 return violations;
 }
 
@@ -324,8 +346,10 @@ return out;
 
 export function validateUpdateRoleRequest(v: UpdateRoleRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateRoleBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -349,6 +373,7 @@ return out;
 
 export function validateUpdateRoleResponse(v: UpdateRoleResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -377,8 +402,11 @@ return out;
 
 export function validateUpdatePermissionMatrixRequest(v: UpdatePermissionMatrixRequest): string[] {
 const violations: string[] = [];
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
 if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
+if (v.permissionKey !== undefined && v.permissionKey !== null && !(typeof v.permissionKey === "string")) violations.push("permission_key has invalid type");
 if (!(v.permissionKey !== undefined && v.permissionKey !== null) || v.permissionKey === "") violations.push("permission_key is required");
+if (v.enabled !== undefined && v.enabled !== null && !(typeof v.enabled === "boolean")) violations.push("enabled has invalid type");
 return violations;
 }
 
@@ -401,6 +429,7 @@ return out;
 
 export function validateUpdatePermissionMatrixResponse(v: UpdatePermissionMatrixResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 

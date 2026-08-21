@@ -55,6 +55,19 @@ return out;
 
 export function validateReview(v: Review): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.reviewerId !== undefined && v.reviewerId !== null && !(typeof v.reviewerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.reviewerId))) violations.push("reviewer_id has invalid type");
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
+if (v.rating !== undefined && v.rating !== null && !(typeof v.rating === "number" && Number.isFinite(v.rating))) violations.push("rating has invalid type");
+if (v.goalsRating !== undefined && v.goalsRating !== null && !(typeof v.goalsRating === "number" && Number.isFinite(v.goalsRating))) violations.push("goals_rating has invalid type");
+if (v.valuesRating !== undefined && v.valuesRating !== null && !(typeof v.valuesRating === "number" && Number.isFinite(v.valuesRating))) violations.push("values_rating has invalid type");
+if (v.skillsRating !== undefined && v.skillsRating !== null && !(typeof v.skillsRating === "number" && Number.isFinite(v.skillsRating))) violations.push("skills_rating has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -96,6 +109,7 @@ return out;
 
 export function validateListReviewsResponse(v: ListReviewsResponse): string[] {
 const violations: string[] = [];
+if (v.reviews !== undefined && v.reviews !== null && !(Array.isArray(v.reviews) && (v.reviews).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("reviews has invalid type");
 if (v.reviews !== undefined && v.reviews !== null) for (const item of v.reviews) violations.push(...validateReview(item).map((message) => "reviews: " + message));
 return violations;
 }
@@ -143,8 +157,17 @@ return out;
 
 export function validateCreateReviewRequest(v: CreateReviewRequest): string[] {
 const violations: string[] = [];
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
 if (!(v.staffId !== undefined && v.staffId !== null)) violations.push("staff_id is required");
+if (v.reviewerId !== undefined && v.reviewerId !== null && !(typeof v.reviewerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.reviewerId))) violations.push("reviewer_id has invalid type");
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
 if (!(v.period !== undefined && v.period !== null) || v.period === "") violations.push("period is required");
+if (v.rating !== undefined && v.rating !== null && !(typeof v.rating === "number" && Number.isFinite(v.rating))) violations.push("rating has invalid type");
+if (v.goalsRating !== undefined && v.goalsRating !== null && !(typeof v.goalsRating === "number" && Number.isFinite(v.goalsRating))) violations.push("goals_rating has invalid type");
+if (v.valuesRating !== undefined && v.valuesRating !== null && !(typeof v.valuesRating === "number" && Number.isFinite(v.valuesRating))) violations.push("values_rating has invalid type");
+if (v.skillsRating !== undefined && v.skillsRating !== null && !(typeof v.skillsRating === "number" && Number.isFinite(v.skillsRating))) violations.push("skills_rating has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 return violations;
 }
 
@@ -170,6 +193,8 @@ return out;
 
 export function validateCreateReviewResponse(v: CreateReviewResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

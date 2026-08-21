@@ -23,8 +23,10 @@ return out;
 
 export function validateSplitOrderRequest(v: SplitOrderRequest): string[] {
 const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
 if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (v.splits !== undefined && v.splits !== null && !(Array.isArray(v.splits) && (v.splits).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("splits has invalid type");
 if (v.splits !== undefined && v.splits !== null && v.splits.length < 1) violations.push("splits must contain at least 1 items");
 if (v.splits !== undefined && v.splits !== null) for (const item of v.splits) violations.push(...pos_orders_v1.validateSplitGroup(item).map((message) => "splits: " + message));
 return violations;
@@ -52,6 +54,8 @@ return out;
 
 export function validateSplitOrderResponse(v: SplitOrderResponse): string[] {
 const violations: string[] = [];
+if (v.orderIds !== undefined && v.orderIds !== null && !(Array.isArray(v.orderIds) && (v.orderIds).every((item: any) => typeof item === "string" && /^-?(0|[1-9][0-9]*)$/.test(item)))) violations.push("order_ids has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

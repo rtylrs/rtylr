@@ -22,6 +22,8 @@ return out;
 
 export function validateSecurityState(v: SecurityState): string[] {
 const violations: string[] = [];
+if (v.twoFactorEnabled !== undefined && v.twoFactorEnabled !== null && !(typeof v.twoFactorEnabled === "boolean")) violations.push("two_factor_enabled has invalid type");
+if (v.activeSessions !== undefined && v.activeSessions !== null && !(Array.isArray(v.activeSessions) && (v.activeSessions).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("active_sessions has invalid type");
 if (v.activeSessions !== undefined && v.activeSessions !== null) for (const item of v.activeSessions) violations.push(...validateActiveSession(item).map((message) => "active_sessions: " + message));
 return violations;
 }
@@ -57,6 +59,11 @@ return out;
 
 export function validateActiveSession(v: ActiveSession): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string")) violations.push("id has invalid type");
+if (v.ip !== undefined && v.ip !== null && !(typeof v.ip === "string")) violations.push("ip has invalid type");
+if (v.userAgent !== undefined && v.userAgent !== null && !(typeof v.userAgent === "string")) violations.push("user_agent has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.isCurrent !== undefined && v.isCurrent !== null && !(typeof v.isCurrent === "boolean")) violations.push("is_current has invalid type");
 return violations;
 }
 
@@ -97,6 +104,13 @@ return out;
 
 export function validateLoginEntry(v: LoginEntry): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.method !== undefined && v.method !== null && !(typeof v.method === "string")) violations.push("method has invalid type");
+if (v.ip !== undefined && v.ip !== null && !(typeof v.ip === "string")) violations.push("ip has invalid type");
+if (v.userAgent !== undefined && v.userAgent !== null && !(typeof v.userAgent === "string")) violations.push("user_agent has invalid type");
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -138,6 +152,7 @@ return out;
 
 export function validateGetSecurityStateResponse(v: GetSecurityStateResponse): string[] {
 const violations: string[] = [];
+if (v.state !== undefined && v.state !== null && !(typeof v.state === "object" && v.state !== null && !Array.isArray(v.state))) violations.push("state has invalid type");
 if (v.state !== undefined && v.state !== null) violations.push(...validateSecurityState(v.state).map((message) => "state: " + message));
 return violations;
 }
@@ -164,6 +179,8 @@ return out;
 
 export function validateLoginHistoryRequest(v: LoginHistoryRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -198,7 +215,12 @@ return out;
 
 export function validateLoginHistoryResponse(v: LoginHistoryResponse): string[] {
 const violations: string[] = [];
+if (v.history !== undefined && v.history !== null && !(Array.isArray(v.history) && (v.history).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("history has invalid type");
 if (v.history !== undefined && v.history !== null) for (const item of v.history) violations.push(...validateLoginEntry(item).map((message) => "history: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isInteger(v.total) && v.total >= -2147483648 && v.total <= 2147483647)) violations.push("total has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
+if (v.hasMore !== undefined && v.hasMore !== null && !(typeof v.hasMore === "boolean")) violations.push("has_more has invalid type");
 return violations;
 }
 
@@ -240,6 +262,7 @@ return out;
 
 export function validateInvalidateSessionsResponse(v: InvalidateSessionsResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -262,6 +285,7 @@ return out;
 
 export function validateUpdate2FARequest(v: Update2FARequest): string[] {
 const violations: string[] = [];
+if (v.enabled !== undefined && v.enabled !== null && !(typeof v.enabled === "boolean")) violations.push("enabled has invalid type");
 return violations;
 }
 
@@ -284,6 +308,7 @@ return out;
 
 export function validateUpdate2FAResponse(v: Update2FAResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

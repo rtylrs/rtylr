@@ -13,14 +13,38 @@ import (
 	"strings"
 )
 
+const defaultMaxResponseBodyBytes int64 = 8 << 20
+const defaultMaxSSELineBytes = 1 << 20
+
+func responseBodyLimit(value int64) int64 {
+	if value <= 0 {
+		return defaultMaxResponseBodyBytes
+	}
+	return value
+}
+
+func readResponseBody(body io.Reader, limit int64) ([]byte, error) {
+	limit = responseBodyLimit(limit)
+	data, err := io.ReadAll(io.LimitReader(body, limit+1))
+	if err != nil {
+		return nil, err
+	}
+	if int64(len(data)) > limit {
+		return nil, fmt.Errorf("response body exceeds configured limit")
+	}
+	return data, nil
+}
+
 type MemoryServiceClient struct {
-	BaseURL    string
-	HTTPClient *http.Client
-	Headers    map[string]string
+	BaseURL              string
+	HTTPClient           *http.Client
+	Headers              map[string]string
+	MaxResponseBodyBytes int64
+	MaxSSELineBytes      int
 }
 
 func NewMemoryServiceClient(baseURL string) *MemoryServiceClient {
-	return &MemoryServiceClient{BaseURL: baseURL, HTTPClient: http.DefaultClient, Headers: map[string]string{}}
+	return &MemoryServiceClient{BaseURL: baseURL, HTTPClient: http.DefaultClient, Headers: map[string]string{}, MaxResponseBodyBytes: defaultMaxResponseBodyBytes, MaxSSELineBytes: defaultMaxSSELineBytes}
 }
 
 func (c *MemoryServiceClient) ListChats(ctx context.Context, req *ListChatsRequest) (*ListChatsResponse, error) {
@@ -50,11 +74,14 @@ func (c *MemoryServiceClient) ListChats(ctx context.Context, req *ListChatsReque
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(resp.Body)
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
 	result := new(ListChatsResponse)
-	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
@@ -86,11 +113,14 @@ func (c *MemoryServiceClient) GetChatMessages(ctx context.Context, req *GetChatM
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(resp.Body)
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
 	result := new(GetChatMessagesResponse)
-	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
@@ -122,11 +152,14 @@ func (c *MemoryServiceClient) DeleteChat(ctx context.Context, req *DeleteChatReq
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(resp.Body)
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
 	result := new(DeleteChatResponse)
-	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
@@ -159,11 +192,14 @@ func (c *MemoryServiceClient) RenameChat(ctx context.Context, req *RenameChatReq
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(resp.Body)
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
 	result := new(RenameChatResponse)
-	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
@@ -196,11 +232,14 @@ func (c *MemoryServiceClient) PinChat(ctx context.Context, req *PinChatRequest) 
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(resp.Body)
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
 	result := new(PinChatResponse)
-	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil

@@ -44,6 +44,15 @@ return out;
 
 export function validateWorkType(v: WorkType): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.parentId !== undefined && v.parentId !== null && !(typeof v.parentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.parentId))) violations.push("parent_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.hrCategoryId !== undefined && v.hrCategoryId !== null && !(typeof v.hrCategoryId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.hrCategoryId))) violations.push("hr_category_id has invalid type");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(typeof v.sortOrder === "number" && Number.isInteger(v.sortOrder) && v.sortOrder >= -2147483648 && v.sortOrder <= 2147483647)) violations.push("sort_order has invalid type");
+if (v.archived !== undefined && v.archived !== null && !(typeof v.archived === "boolean")) violations.push("archived has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -123,6 +132,26 @@ return out;
 
 export function validateWorkDay(v: WorkDay): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.timezone !== undefined && v.timezone !== null && !(typeof v.timezone === "string")) violations.push("timezone has invalid type");
+if (v.workMode !== undefined && v.workMode !== null && !(typeof v.workMode === "string")) violations.push("work_mode has invalid type");
+if (v.startTime !== undefined && v.startTime !== null && !(typeof v.startTime === "string")) violations.push("start_time has invalid type");
+if (v.endTime !== undefined && v.endTime !== null && !(typeof v.endTime === "string")) violations.push("end_time has invalid type");
+if (v.breakMinutes !== undefined && v.breakMinutes !== null && !(typeof v.breakMinutes === "number" && Number.isInteger(v.breakMinutes) && v.breakMinutes >= -2147483648 && v.breakMinutes <= 2147483647)) violations.push("break_minutes has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.clockedMinutes !== undefined && v.clockedMinutes !== null && !(typeof v.clockedMinutes === "number" && Number.isInteger(v.clockedMinutes) && v.clockedMinutes >= -2147483648 && v.clockedMinutes <= 2147483647)) violations.push("clocked_minutes has invalid type");
+if (v.loggedMinutes !== undefined && v.loggedMinutes !== null && !(typeof v.loggedMinutes === "number" && Number.isInteger(v.loggedMinutes) && v.loggedMinutes >= -2147483648 && v.loggedMinutes <= 2147483647)) violations.push("logged_minutes has invalid type");
+if (v.gapMinutes !== undefined && v.gapMinutes !== null && !(typeof v.gapMinutes === "number" && Number.isInteger(v.gapMinutes) && v.gapMinutes >= -2147483648 && v.gapMinutes <= 2147483647)) violations.push("gap_minutes has invalid type");
+if (v.loggedBy !== undefined && v.loggedBy !== null && !(typeof v.loggedBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.loggedBy))) violations.push("logged_by has invalid type");
+if (v.approvedBy !== undefined && v.approvedBy !== null && !(typeof v.approvedBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.approvedBy))) violations.push("approved_by has invalid type");
+if (v.approvedAt !== undefined && v.approvedAt !== null && !(typeof v.approvedAt === "string")) violations.push("approved_at has invalid type");
+if (v.reopenedBy !== undefined && v.reopenedBy !== null && !(typeof v.reopenedBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.reopenedBy))) violations.push("reopened_by has invalid type");
+if (v.reopenedAt !== undefined && v.reopenedAt !== null && !(typeof v.reopenedAt === "string")) violations.push("reopened_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -184,6 +213,20 @@ return out;
 
 export function validateWorkDayLine(v: WorkDayLine): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.workDayId !== undefined && v.workDayId !== null && !(typeof v.workDayId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workDayId))) violations.push("work_day_id has invalid type");
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
+if (v.workTypeId !== undefined && v.workTypeId !== null && !(typeof v.workTypeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workTypeId))) violations.push("work_type_id has invalid type");
+if (v.workMode !== undefined && v.workMode !== null && !(typeof v.workMode === "string")) violations.push("work_mode has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(typeof v.durationMinutes === "number" && Number.isInteger(v.durationMinutes) && v.durationMinutes >= -2147483648 && v.durationMinutes <= 2147483647)) violations.push("duration_minutes has invalid type");
+if (v.isBillable !== undefined && v.isBillable !== null && !(typeof v.isBillable === "boolean")) violations.push("is_billable has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.clientKey !== undefined && v.clientKey !== null && !(typeof v.clientKey === "string")) violations.push("client_key has invalid type");
+if (v.loggedBy !== undefined && v.loggedBy !== null && !(typeof v.loggedBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.loggedBy))) violations.push("logged_by has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -209,7 +252,9 @@ return out;
 
 export function validateGetWorkDayRequest(v: GetWorkDayRequest): string[] {
 const violations: string[] = [];
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
 if (!(v.date !== undefined && v.date !== null) || v.date === "") violations.push("date is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
 return violations;
 }
 
@@ -235,7 +280,9 @@ return out;
 
 export function validateGetWorkDayResponse(v: GetWorkDayResponse): string[] {
 const violations: string[] = [];
+if (v.workDay !== undefined && v.workDay !== null && !(typeof v.workDay === "object" && v.workDay !== null && !Array.isArray(v.workDay))) violations.push("work_day has invalid type");
 if (v.workDay !== undefined && v.workDay !== null) violations.push(...validateWorkDay(v.workDay).map((message) => "work_day: " + message));
+if (v.lines !== undefined && v.lines !== null && !(Array.isArray(v.lines) && (v.lines).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("lines has invalid type");
 if (v.lines !== undefined && v.lines !== null) for (const item of v.lines) violations.push(...validateWorkDayLine(item).map((message) => "lines: " + message));
 return violations;
 }
@@ -277,9 +324,16 @@ return out;
 
 export function validateUpsertWorkDayRequest(v: UpsertWorkDayRequest): string[] {
 const violations: string[] = [];
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
 if (!(v.date !== undefined && v.date !== null) || v.date === "") violations.push("date is required");
+if (v.timezone !== undefined && v.timezone !== null && !(typeof v.timezone === "string")) violations.push("timezone has invalid type");
 if (!(v.timezone !== undefined && v.timezone !== null) || v.timezone === "") violations.push("timezone is required");
+if (v.workMode !== undefined && v.workMode !== null && !(typeof v.workMode === "string")) violations.push("work_mode has invalid type");
 if (!(v.workMode !== undefined && v.workMode !== null) || v.workMode === "") violations.push("work_mode is required");
+if (v.startTime !== undefined && v.startTime !== null && !(typeof v.startTime === "string")) violations.push("start_time has invalid type");
+if (v.endTime !== undefined && v.endTime !== null && !(typeof v.endTime === "string")) violations.push("end_time has invalid type");
+if (v.breakMinutes !== undefined && v.breakMinutes !== null && !(typeof v.breakMinutes === "number" && Number.isInteger(v.breakMinutes) && v.breakMinutes >= -2147483648 && v.breakMinutes <= 2147483647)) violations.push("break_minutes has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
 return violations;
 }
 
@@ -302,6 +356,7 @@ return out;
 
 export function validateUpsertWorkDayResponse(v: UpsertWorkDayResponse): string[] {
 const violations: string[] = [];
+if (v.workDay !== undefined && v.workDay !== null && !(typeof v.workDay === "object" && v.workDay !== null && !Array.isArray(v.workDay))) violations.push("work_day has invalid type");
 if (v.workDay !== undefined && v.workDay !== null) violations.push(...validateWorkDay(v.workDay).map((message) => "work_day: " + message));
 return violations;
 }
@@ -337,8 +392,13 @@ return out;
 
 export function validateListWorkDaysRequest(v: ListWorkDaysRequest): string[] {
 const violations: string[] = [];
+if (v.from !== undefined && v.from !== null && !(typeof v.from === "string")) violations.push("from has invalid type");
 if (!(v.from !== undefined && v.from !== null) || v.from === "") violations.push("from is required");
+if (v.to !== undefined && v.to !== null && !(typeof v.to === "string")) violations.push("to has invalid type");
 if (!(v.to !== undefined && v.to !== null) || v.to === "") violations.push("to is required");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
 return violations;
 }
 
@@ -364,7 +424,9 @@ return out;
 
 export function validateListWorkDaysResponse(v: ListWorkDaysResponse): string[] {
 const violations: string[] = [];
+if (v.workDays !== undefined && v.workDays !== null && !(Array.isArray(v.workDays) && (v.workDays).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("work_days has invalid type");
 if (v.workDays !== undefined && v.workDays !== null) for (const item of v.workDays) violations.push(...validateWorkDay(item).map((message) => "work_days: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -400,10 +462,15 @@ return out;
 
 export function validateListWorkDaysForWorkspaceRequest(v: ListWorkDaysForWorkspaceRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
 if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
 if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (v.from !== undefined && v.from !== null && !(typeof v.from === "string")) violations.push("from has invalid type");
 if (!(v.from !== undefined && v.from !== null) || v.from === "") violations.push("from is required");
+if (v.to !== undefined && v.to !== null && !(typeof v.to === "string")) violations.push("to has invalid type");
 if (!(v.to !== undefined && v.to !== null) || v.to === "") violations.push("to is required");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
 return violations;
 }
 
@@ -429,7 +496,9 @@ return out;
 
 export function validateListWorkDaysForWorkspaceResponse(v: ListWorkDaysForWorkspaceResponse): string[] {
 const violations: string[] = [];
+if (v.workDays !== undefined && v.workDays !== null && !(Array.isArray(v.workDays) && (v.workDays).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("work_days has invalid type");
 if (v.workDays !== undefined && v.workDays !== null) for (const item of v.workDays) violations.push(...validateWorkDay(item).map((message) => "work_days: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -477,12 +546,21 @@ return out;
 
 export function validateCreateWorkDayLineRequest(v: CreateWorkDayLineRequest): string[] {
 const violations: string[] = [];
+if (v.workDayId !== undefined && v.workDayId !== null && !(typeof v.workDayId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workDayId))) violations.push("work_day_id has invalid type");
 if (!(v.workDayId !== undefined && v.workDayId !== null)) violations.push("work_day_id is required");
 if (v.workDayId !== undefined && v.workDayId !== null && !(Number(v.workDayId) > 0)) violations.push("work_day_id violates @gt");
+if (v.clientKey !== undefined && v.clientKey !== null && !(typeof v.clientKey === "string")) violations.push("client_key has invalid type");
 if (!(v.clientKey !== undefined && v.clientKey !== null) || v.clientKey === "") violations.push("client_key is required");
+if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(typeof v.durationMinutes === "number" && Number.isInteger(v.durationMinutes) && v.durationMinutes >= -2147483648 && v.durationMinutes <= 2147483647)) violations.push("duration_minutes has invalid type");
 if (!(v.durationMinutes !== undefined && v.durationMinutes !== null)) violations.push("duration_minutes is required");
 if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(Number(v.durationMinutes) > 0)) violations.push("duration_minutes violates @gt");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
+if (v.workTypeId !== undefined && v.workTypeId !== null && !(typeof v.workTypeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workTypeId))) violations.push("work_type_id has invalid type");
+if (v.workMode !== undefined && v.workMode !== null && !(typeof v.workMode === "string")) violations.push("work_mode has invalid type");
+if (v.isBillable !== undefined && v.isBillable !== null && !(typeof v.isBillable === "boolean")) violations.push("is_billable has invalid type");
 return violations;
 }
 
@@ -505,6 +583,7 @@ return out;
 
 export function validateCreateWorkDayLineResponse(v: CreateWorkDayLineResponse): string[] {
 const violations: string[] = [];
+if (v.line !== undefined && v.line !== null && !(typeof v.line === "object" && v.line !== null && !Array.isArray(v.line))) violations.push("line has invalid type");
 if (v.line !== undefined && v.line !== null) violations.push(...validateWorkDayLine(v.line).map((message) => "line: " + message));
 return violations;
 }
@@ -549,11 +628,19 @@ return out;
 
 export function validateUpdateWorkDayLineRequest(v: UpdateWorkDayLineRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(typeof v.durationMinutes === "number" && Number.isInteger(v.durationMinutes) && v.durationMinutes >= -2147483648 && v.durationMinutes <= 2147483647)) violations.push("duration_minutes has invalid type");
 if (!(v.durationMinutes !== undefined && v.durationMinutes !== null)) violations.push("duration_minutes is required");
 if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(Number(v.durationMinutes) > 0)) violations.push("duration_minutes violates @gt");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
+if (v.workTypeId !== undefined && v.workTypeId !== null && !(typeof v.workTypeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workTypeId))) violations.push("work_type_id has invalid type");
+if (v.workMode !== undefined && v.workMode !== null && !(typeof v.workMode === "string")) violations.push("work_mode has invalid type");
+if (v.isBillable !== undefined && v.isBillable !== null && !(typeof v.isBillable === "boolean")) violations.push("is_billable has invalid type");
 return violations;
 }
 
@@ -576,6 +663,7 @@ return out;
 
 export function validateUpdateWorkDayLineResponse(v: UpdateWorkDayLineResponse): string[] {
 const violations: string[] = [];
+if (v.line !== undefined && v.line !== null && !(typeof v.line === "object" && v.line !== null && !Array.isArray(v.line))) violations.push("line has invalid type");
 if (v.line !== undefined && v.line !== null) violations.push(...validateWorkDayLine(v.line).map((message) => "line: " + message));
 return violations;
 }
@@ -599,6 +687,7 @@ return out;
 
 export function validateDeleteWorkDayLineRequest(v: DeleteWorkDayLineRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -623,6 +712,7 @@ return out;
 
 export function validateDeleteWorkDayLineResponse(v: DeleteWorkDayLineResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -645,6 +735,7 @@ return out;
 
 export function validateListWorkTypesRequest(v: ListWorkTypesRequest): string[] {
 const violations: string[] = [];
+if (v.includeArchived !== undefined && v.includeArchived !== null && !(typeof v.includeArchived === "boolean")) violations.push("include_archived has invalid type");
 return violations;
 }
 
@@ -667,6 +758,7 @@ return out;
 
 export function validateListWorkTypesResponse(v: ListWorkTypesResponse): string[] {
 const violations: string[] = [];
+if (v.workTypes !== undefined && v.workTypes !== null && !(Array.isArray(v.workTypes) && (v.workTypes).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("work_types has invalid type");
 if (v.workTypes !== undefined && v.workTypes !== null) for (const item of v.workTypes) violations.push(...validateWorkType(item).map((message) => "work_types: " + message));
 return violations;
 }
@@ -702,7 +794,12 @@ return out;
 
 export function validateCreateWorkTypeRequest(v: CreateWorkTypeRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.parentId !== undefined && v.parentId !== null && !(typeof v.parentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.parentId))) violations.push("parent_id has invalid type");
+if (v.hrCategoryId !== undefined && v.hrCategoryId !== null && !(typeof v.hrCategoryId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.hrCategoryId))) violations.push("hr_category_id has invalid type");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(typeof v.sortOrder === "number" && Number.isInteger(v.sortOrder) && v.sortOrder >= -2147483648 && v.sortOrder <= 2147483647)) violations.push("sort_order has invalid type");
 return violations;
 }
 
@@ -725,6 +822,7 @@ return out;
 
 export function validateCreateWorkTypeResponse(v: CreateWorkTypeResponse): string[] {
 const violations: string[] = [];
+if (v.workType !== undefined && v.workType !== null && !(typeof v.workType === "object" && v.workType !== null && !Array.isArray(v.workType))) violations.push("work_type has invalid type");
 if (v.workType !== undefined && v.workType !== null) violations.push(...validateWorkType(v.workType).map((message) => "work_type: " + message));
 return violations;
 }
@@ -766,9 +864,16 @@ return out;
 
 export function validateUpdateWorkTypeRequest(v: UpdateWorkTypeRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.parentId !== undefined && v.parentId !== null && !(typeof v.parentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.parentId))) violations.push("parent_id has invalid type");
+if (v.hrCategoryId !== undefined && v.hrCategoryId !== null && !(typeof v.hrCategoryId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.hrCategoryId))) violations.push("hr_category_id has invalid type");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(typeof v.sortOrder === "number" && Number.isInteger(v.sortOrder) && v.sortOrder >= -2147483648 && v.sortOrder <= 2147483647)) violations.push("sort_order has invalid type");
+if (v.archived !== undefined && v.archived !== null && !(typeof v.archived === "boolean")) violations.push("archived has invalid type");
 return violations;
 }
 
@@ -791,6 +896,7 @@ return out;
 
 export function validateUpdateWorkTypeResponse(v: UpdateWorkTypeResponse): string[] {
 const violations: string[] = [];
+if (v.workType !== undefined && v.workType !== null && !(typeof v.workType === "object" && v.workType !== null && !Array.isArray(v.workType))) violations.push("work_type has invalid type");
 if (v.workType !== undefined && v.workType !== null) violations.push(...validateWorkType(v.workType).map((message) => "work_type: " + message));
 return violations;
 }
@@ -814,6 +920,7 @@ return out;
 
 export function validateDeleteWorkTypeRequest(v: DeleteWorkTypeRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -838,6 +945,7 @@ return out;
 
 export function validateDeleteWorkTypeResponse(v: DeleteWorkTypeResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

@@ -13,14 +13,38 @@ import (
 	"strings"
 )
 
+const defaultMaxResponseBodyBytes int64 = 8 << 20
+const defaultMaxSSELineBytes = 1 << 20
+
+func responseBodyLimit(value int64) int64 {
+	if value <= 0 {
+		return defaultMaxResponseBodyBytes
+	}
+	return value
+}
+
+func readResponseBody(body io.Reader, limit int64) ([]byte, error) {
+	limit = responseBodyLimit(limit)
+	data, err := io.ReadAll(io.LimitReader(body, limit+1))
+	if err != nil {
+		return nil, err
+	}
+	if int64(len(data)) > limit {
+		return nil, fmt.Errorf("response body exceeds configured limit")
+	}
+	return data, nil
+}
+
 type LabelServiceClient struct {
-	BaseURL    string
-	HTTPClient *http.Client
-	Headers    map[string]string
+	BaseURL              string
+	HTTPClient           *http.Client
+	Headers              map[string]string
+	MaxResponseBodyBytes int64
+	MaxSSELineBytes      int
 }
 
 func NewLabelServiceClient(baseURL string) *LabelServiceClient {
-	return &LabelServiceClient{BaseURL: baseURL, HTTPClient: http.DefaultClient, Headers: map[string]string{}}
+	return &LabelServiceClient{BaseURL: baseURL, HTTPClient: http.DefaultClient, Headers: map[string]string{}, MaxResponseBodyBytes: defaultMaxResponseBodyBytes, MaxSSELineBytes: defaultMaxSSELineBytes}
 }
 
 func (c *LabelServiceClient) ListLabels(ctx context.Context, req *ListLabelsRequest) (*ListLabelsResponse, error) {
@@ -53,11 +77,14 @@ func (c *LabelServiceClient) ListLabels(ctx context.Context, req *ListLabelsRequ
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(resp.Body)
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
 	result := new(ListLabelsResponse)
-	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
@@ -89,11 +116,14 @@ func (c *LabelServiceClient) CreateLabel(ctx context.Context, req *CreateLabelRe
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(resp.Body)
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
 	result := new(CreateLabelResponse)
-	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
@@ -126,11 +156,14 @@ func (c *LabelServiceClient) UpdateLabel(ctx context.Context, req *UpdateLabelRe
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(resp.Body)
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
 	result := new(UpdateLabelResponse)
-	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
@@ -162,11 +195,14 @@ func (c *LabelServiceClient) DeleteLabel(ctx context.Context, req *DeleteLabelRe
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(resp.Body)
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
 	result := new(DeleteLabelResponse)
-	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil
@@ -198,11 +234,14 @@ func (c *LabelServiceClient) SetTaskLabels(ctx context.Context, req *SetTaskLabe
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(resp.Body)
+		respBody, bodyErr := readResponseBody(resp.Body, c.MaxResponseBodyBytes)
+		if bodyErr != nil {
+			return nil, bodyErr
+		}
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, string(respBody))
 	}
 	result := new(SetTaskLabelsResponse)
-	if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+	if err := json.NewDecoder(io.LimitReader(resp.Body, responseBodyLimit(c.MaxResponseBodyBytes))).Decode(result); err != nil {
 		return nil, fmt.Errorf("decode response: %w", err)
 	}
 	return result, nil

@@ -2,6 +2,42 @@
 import type { GetWorkDayRequest, GetWorkDayResponse, UpsertWorkDayRequest, UpsertWorkDayResponse, ListWorkDaysRequest, ListWorkDaysResponse, ListWorkDaysForWorkspaceRequest, ListWorkDaysForWorkspaceResponse, CreateWorkDayLineRequest, CreateWorkDayLineResponse, UpdateWorkDayLineRequest, UpdateWorkDayLineResponse, DeleteWorkDayLineRequest, DeleteWorkDayLineResponse, ListWorkTypesRequest, ListWorkTypesResponse, CreateWorkTypeRequest, CreateWorkTypeResponse, UpdateWorkTypeRequest, UpdateWorkTypeResponse, DeleteWorkTypeRequest, DeleteWorkTypeResponse } from "./types";
 import { encodeGetWorkDayRequest, validateGetWorkDayRequest, decodeGetWorkDayResponse, encodeUpsertWorkDayRequest, validateUpsertWorkDayRequest, decodeUpsertWorkDayResponse, encodeListWorkDaysRequest, validateListWorkDaysRequest, decodeListWorkDaysResponse, encodeListWorkDaysForWorkspaceRequest, validateListWorkDaysForWorkspaceRequest, decodeListWorkDaysForWorkspaceResponse, encodeCreateWorkDayLineRequest, validateCreateWorkDayLineRequest, decodeCreateWorkDayLineResponse, encodeUpdateWorkDayLineRequest, validateUpdateWorkDayLineRequest, decodeUpdateWorkDayLineResponse, encodeDeleteWorkDayLineRequest, validateDeleteWorkDayLineRequest, decodeDeleteWorkDayLineResponse, encodeListWorkTypesRequest, validateListWorkTypesRequest, decodeListWorkTypesResponse, encodeCreateWorkTypeRequest, validateCreateWorkTypeRequest, decodeCreateWorkTypeResponse, encodeUpdateWorkTypeRequest, validateUpdateWorkTypeRequest, decodeUpdateWorkTypeResponse, encodeDeleteWorkTypeRequest, validateDeleteWorkTypeRequest, decodeDeleteWorkTypeResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface TimeServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class TimeServiceClient {
@@ -52,11 +90,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetWorkDayResponse(await res.json());
+return decodeGetWorkDayResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async upsertWorkDay(req: UpsertWorkDayRequest): Promise<UpsertWorkDayResponse> {
@@ -70,11 +108,11 @@ body: JSON.stringify(encodeUpsertWorkDayRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpsertWorkDayResponse(await res.json());
+return decodeUpsertWorkDayResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listWorkDays(req: ListWorkDaysRequest): Promise<ListWorkDaysResponse> {
@@ -105,11 +143,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListWorkDaysResponse(await res.json());
+return decodeListWorkDaysResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listWorkDaysForWorkspace(req: ListWorkDaysForWorkspaceRequest): Promise<ListWorkDaysForWorkspaceResponse> {
@@ -140,11 +178,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListWorkDaysForWorkspaceResponse(await res.json());
+return decodeListWorkDaysForWorkspaceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createWorkDayLine(req: CreateWorkDayLineRequest): Promise<CreateWorkDayLineResponse> {
@@ -159,11 +197,11 @@ body: JSON.stringify(encodeCreateWorkDayLineRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateWorkDayLineResponse(await res.json());
+return decodeCreateWorkDayLineResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateWorkDayLine(req: UpdateWorkDayLineRequest): Promise<UpdateWorkDayLineResponse> {
@@ -178,11 +216,11 @@ body: JSON.stringify(encodeUpdateWorkDayLineRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateWorkDayLineResponse(await res.json());
+return decodeUpdateWorkDayLineResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteWorkDayLine(req: DeleteWorkDayLineRequest): Promise<DeleteWorkDayLineResponse> {
@@ -199,11 +237,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteWorkDayLineResponse(await res.json());
+return decodeDeleteWorkDayLineResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listWorkTypes(req: ListWorkTypesRequest): Promise<ListWorkTypesResponse> {
@@ -222,11 +260,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListWorkTypesResponse(await res.json());
+return decodeListWorkTypesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createWorkType(req: CreateWorkTypeRequest): Promise<CreateWorkTypeResponse> {
@@ -240,11 +278,11 @@ body: JSON.stringify(encodeCreateWorkTypeRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateWorkTypeResponse(await res.json());
+return decodeCreateWorkTypeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateWorkType(req: UpdateWorkTypeRequest): Promise<UpdateWorkTypeResponse> {
@@ -259,11 +297,11 @@ body: JSON.stringify(encodeUpdateWorkTypeRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateWorkTypeResponse(await res.json());
+return decodeUpdateWorkTypeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteWorkType(req: DeleteWorkTypeRequest): Promise<DeleteWorkTypeResponse> {
@@ -280,11 +318,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteWorkTypeResponse(await res.json());
+return decodeDeleteWorkTypeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

@@ -28,6 +28,10 @@ return out;
 
 export function validatePaginationRequest(v: PaginationRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -65,6 +69,12 @@ return out;
 
 export function validatePaginationResponse(v: PaginationResponse): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isInteger(v.total) && v.total >= -2147483648 && v.total <= 2147483647)) violations.push("total has invalid type");
+if (v.totalPages !== undefined && v.totalPages !== null && !(typeof v.totalPages === "number" && Number.isInteger(v.totalPages) && v.totalPages >= -2147483648 && v.totalPages <= 2147483647)) violations.push("total_pages has invalid type");
+if (v.hasNext !== undefined && v.hasNext !== null && !(typeof v.hasNext === "boolean")) violations.push("has_next has invalid type");
+if (v.hasPrev !== undefined && v.hasPrev !== null && !(typeof v.hasPrev === "boolean")) violations.push("has_prev has invalid type");
 return violations;
 }
 
@@ -87,6 +97,7 @@ return out;
 
 export function validateTimestamp(v: Timestamp): string[] {
 const violations: string[] = [];
+if (v.value !== undefined && v.value !== null && !(typeof v.value === "string")) violations.push("value has invalid type");
 return violations;
 }
 

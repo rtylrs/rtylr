@@ -34,6 +34,12 @@ return out;
 
 export function validateCaretTool(v: CaretTool): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.label !== undefined && v.label !== null && !(typeof v.label === "string")) violations.push("label has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.category !== undefined && v.category !== null && !(typeof v.category === "string")) violations.push("category has invalid type");
+if (v.requiresApproval !== undefined && v.requiresApproval !== null && !(typeof v.requiresApproval === "boolean")) violations.push("requires_approval has invalid type");
+if (v.scope !== undefined && v.scope !== null && !(typeof v.scope === "string")) violations.push("scope has invalid type");
 return violations;
 }
 
@@ -56,6 +62,7 @@ return out;
 
 export function validateListCaretToolsRequest(v: ListCaretToolsRequest): string[] {
 const violations: string[] = [];
+if (v.mode !== undefined && v.mode !== null && !(typeof v.mode === "string")) violations.push("mode has invalid type");
 return violations;
 }
 
@@ -78,6 +85,7 @@ return out;
 
 export function validateListCaretToolsResponse(v: ListCaretToolsResponse): string[] {
 const violations: string[] = [];
+if (v.tools !== undefined && v.tools !== null && !(Array.isArray(v.tools) && (v.tools).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("tools has invalid type");
 if (v.tools !== undefined && v.tools !== null) for (const item of v.tools) violations.push(...validateCaretTool(item).map((message) => "tools: " + message));
 return violations;
 }

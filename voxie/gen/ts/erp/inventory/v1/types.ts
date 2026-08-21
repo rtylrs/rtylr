@@ -49,6 +49,17 @@ return out;
 
 export function validateInventoryReportItem(v: InventoryReportItem): string[] {
 const violations: string[] = [];
+if (v.productId !== undefined && v.productId !== null && !(typeof v.productId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.productId))) violations.push("product_id has invalid type");
+if (v.productName !== undefined && v.productName !== null && !(typeof v.productName === "string")) violations.push("product_name has invalid type");
+if (v.sku !== undefined && v.sku !== null && !(typeof v.sku === "string")) violations.push("sku has invalid type");
+if (v.unit !== undefined && v.unit !== null && !(typeof v.unit === "string")) violations.push("unit has invalid type");
+if (v.stockQuantity !== undefined && v.stockQuantity !== null && !(typeof v.stockQuantity === "number" && Number.isFinite(v.stockQuantity))) violations.push("stock_quantity has invalid type");
+if (v.lowStockThreshold !== undefined && v.lowStockThreshold !== null && !(typeof v.lowStockThreshold === "number" && Number.isFinite(v.lowStockThreshold))) violations.push("low_stock_threshold has invalid type");
+if (v.reorderQuantity !== undefined && v.reorderQuantity !== null && !(typeof v.reorderQuantity === "number" && Number.isFinite(v.reorderQuantity))) violations.push("reorder_quantity has invalid type");
+if (v.costPrice !== undefined && v.costPrice !== null && !(typeof v.costPrice === "number" && Number.isFinite(v.costPrice))) violations.push("cost_price has invalid type");
+if (v.salePrice !== undefined && v.salePrice !== null && !(typeof v.salePrice === "number" && Number.isFinite(v.salePrice))) violations.push("sale_price has invalid type");
+if (v.stockValue !== undefined && v.stockValue !== null && !(typeof v.stockValue === "number" && Number.isFinite(v.stockValue))) violations.push("stock_value has invalid type");
+if (v.isLowStock !== undefined && v.isLowStock !== null && !(typeof v.isLowStock === "boolean")) violations.push("is_low_stock has invalid type");
 return violations;
 }
 
@@ -83,6 +94,11 @@ return out;
 
 export function validateValuationItem(v: ValuationItem): string[] {
 const violations: string[] = [];
+if (v.categoryName !== undefined && v.categoryName !== null && !(typeof v.categoryName === "string")) violations.push("category_name has invalid type");
+if (v.warehouseName !== undefined && v.warehouseName !== null && !(typeof v.warehouseName === "string")) violations.push("warehouse_name has invalid type");
+if (v.totalItems !== undefined && v.totalItems !== null && !(typeof v.totalItems === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.totalItems))) violations.push("total_items has invalid type");
+if (v.totalValue !== undefined && v.totalValue !== null && !(typeof v.totalValue === "number" && Number.isFinite(v.totalValue))) violations.push("total_value has invalid type");
+if (v.totalCost !== undefined && v.totalCost !== null && !(typeof v.totalCost === "number" && Number.isFinite(v.totalCost))) violations.push("total_cost has invalid type");
 return violations;
 }
 
@@ -114,11 +130,15 @@ return out;
 
 export function validateAdjustInventoryRequest(v: AdjustInventoryRequest): string[] {
 const violations: string[] = [];
+if (v.productId !== undefined && v.productId !== null && !(typeof v.productId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.productId))) violations.push("product_id has invalid type");
 if (!(v.productId !== undefined && v.productId !== null)) violations.push("product_id is required");
 if (v.productId !== undefined && v.productId !== null && !(Number(v.productId) > 0)) violations.push("product_id violates @gt");
+if (v.change !== undefined && v.change !== null && !(typeof v.change === "number" && Number.isFinite(v.change))) violations.push("change has invalid type");
 if (!(v.change !== undefined && v.change !== null)) violations.push("change is required");
 if (v.change !== undefined && v.change !== null && !(Number(v.change) > 0)) violations.push("change violates @gt");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
 if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
 return violations;
 }
 
@@ -141,6 +161,7 @@ return out;
 
 export function validateAdjustInventoryResponse(v: AdjustInventoryResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -185,7 +206,9 @@ return out;
 
 export function validateGetInventoryReportResponse(v: GetInventoryReportResponse): string[] {
 const violations: string[] = [];
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateInventoryReportItem(item).map((message) => "items: " + message));
+if (v.totalValue !== undefined && v.totalValue !== null && !(typeof v.totalValue === "number" && Number.isFinite(v.totalValue))) violations.push("total_value has invalid type");
 return violations;
 }
 
@@ -230,7 +253,9 @@ return out;
 
 export function validateGetLowStockResponse(v: GetLowStockResponse): string[] {
 const violations: string[] = [];
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateInventoryReportItem(item).map((message) => "items: " + message));
+if (v.count !== undefined && v.count !== null && !(typeof v.count === "number" && Number.isSafeInteger(v.count) && v.count >= Number.MIN_SAFE_INTEGER && v.count <= Number.MAX_SAFE_INTEGER)) violations.push("count has invalid type");
 return violations;
 }
 
@@ -275,7 +300,9 @@ return out;
 
 export function validateGetValuationResponse(v: GetValuationResponse): string[] {
 const violations: string[] = [];
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateValuationItem(item).map((message) => "items: " + message));
+if (v.totalValue !== undefined && v.totalValue !== null && !(typeof v.totalValue === "number" && Number.isFinite(v.totalValue))) violations.push("total_value has invalid type");
 return violations;
 }
 

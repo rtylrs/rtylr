@@ -37,6 +37,13 @@ return out;
 
 export function validateUtilizationMetrics(v: UtilizationMetrics): string[] {
 const violations: string[] = [];
+if (v.avgUtilization !== undefined && v.avgUtilization !== null && !(typeof v.avgUtilization === "number" && Number.isFinite(v.avgUtilization))) violations.push("avg_utilization has invalid type");
+if (v.totalStaff !== undefined && v.totalStaff !== null && !(typeof v.totalStaff === "number" && Number.isInteger(v.totalStaff) && v.totalStaff >= -2147483648 && v.totalStaff <= 2147483647)) violations.push("total_staff has invalid type");
+if (v.activeToday !== undefined && v.activeToday !== null && !(typeof v.activeToday === "number" && Number.isInteger(v.activeToday) && v.activeToday >= -2147483648 && v.activeToday <= 2147483647)) violations.push("active_today has invalid type");
+if (v.totalHours !== undefined && v.totalHours !== null && !(typeof v.totalHours === "number" && Number.isFinite(v.totalHours))) violations.push("total_hours has invalid type");
+if (v.availableHours !== undefined && v.availableHours !== null && !(typeof v.availableHours === "number" && Number.isFinite(v.availableHours))) violations.push("available_hours has invalid type");
+if (v.overtimeHours !== undefined && v.overtimeHours !== null && !(typeof v.overtimeHours === "number" && Number.isFinite(v.overtimeHours))) violations.push("overtime_hours has invalid type");
+if (v.byStaff !== undefined && v.byStaff !== null && !(Array.isArray(v.byStaff) && (v.byStaff).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("by_staff has invalid type");
 if (v.byStaff !== undefined && v.byStaff !== null) for (const item of v.byStaff) violations.push(...validateStaffUtilization(item).map((message) => "by_staff: " + message));
 return violations;
 }
@@ -72,6 +79,11 @@ return out;
 
 export function validateStaffUtilization(v: StaffUtilization): string[] {
 const violations: string[] = [];
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.hoursWorked !== undefined && v.hoursWorked !== null && !(typeof v.hoursWorked === "number" && Number.isFinite(v.hoursWorked))) violations.push("hours_worked has invalid type");
+if (v.hoursScheduled !== undefined && v.hoursScheduled !== null && !(typeof v.hoursScheduled === "number" && Number.isFinite(v.hoursScheduled))) violations.push("hours_scheduled has invalid type");
+if (v.utilization !== undefined && v.utilization !== null && !(typeof v.utilization === "number" && Number.isFinite(v.utilization))) violations.push("utilization has invalid type");
 return violations;
 }
 
@@ -106,6 +118,11 @@ return out;
 
 export function validateShiftMetrics(v: ShiftMetrics): string[] {
 const violations: string[] = [];
+if (v.totalShifts !== undefined && v.totalShifts !== null && !(typeof v.totalShifts === "number" && Number.isInteger(v.totalShifts) && v.totalShifts >= -2147483648 && v.totalShifts <= 2147483647)) violations.push("total_shifts has invalid type");
+if (v.covered !== undefined && v.covered !== null && !(typeof v.covered === "number" && Number.isInteger(v.covered) && v.covered >= -2147483648 && v.covered <= 2147483647)) violations.push("covered has invalid type");
+if (v.missed !== undefined && v.missed !== null && !(typeof v.missed === "number" && Number.isInteger(v.missed) && v.missed >= -2147483648 && v.missed <= 2147483647)) violations.push("missed has invalid type");
+if (v.coverageRate !== undefined && v.coverageRate !== null && !(typeof v.coverageRate === "number" && Number.isFinite(v.coverageRate))) violations.push("coverage_rate has invalid type");
+if (v.byDay !== undefined && v.byDay !== null && !(Array.isArray(v.byDay) && (v.byDay).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("by_day has invalid type");
 if (v.byDay !== undefined && v.byDay !== null) for (const item of v.byDay) violations.push(...validateShiftsByDay(item).map((message) => "by_day: " + message));
 return violations;
 }
@@ -135,6 +152,9 @@ return out;
 
 export function validateShiftsByDay(v: ShiftsByDay): string[] {
 const violations: string[] = [];
+if (v.day !== undefined && v.day !== null && !(typeof v.day === "string")) violations.push("day has invalid type");
+if (v.scheduled !== undefined && v.scheduled !== null && !(typeof v.scheduled === "number" && Number.isInteger(v.scheduled) && v.scheduled >= -2147483648 && v.scheduled <= 2147483647)) violations.push("scheduled has invalid type");
+if (v.completed !== undefined && v.completed !== null && !(typeof v.completed === "number" && Number.isInteger(v.completed) && v.completed >= -2147483648 && v.completed <= 2147483647)) violations.push("completed has invalid type");
 return violations;
 }
 
@@ -169,6 +189,11 @@ return out;
 
 export function validateTimeOffMetrics(v: TimeOffMetrics): string[] {
 const violations: string[] = [];
+if (v.totalRequests !== undefined && v.totalRequests !== null && !(typeof v.totalRequests === "number" && Number.isInteger(v.totalRequests) && v.totalRequests >= -2147483648 && v.totalRequests <= 2147483647)) violations.push("total_requests has invalid type");
+if (v.approved !== undefined && v.approved !== null && !(typeof v.approved === "number" && Number.isInteger(v.approved) && v.approved >= -2147483648 && v.approved <= 2147483647)) violations.push("approved has invalid type");
+if (v.pending !== undefined && v.pending !== null && !(typeof v.pending === "number" && Number.isInteger(v.pending) && v.pending >= -2147483648 && v.pending <= 2147483647)) violations.push("pending has invalid type");
+if (v.rejected !== undefined && v.rejected !== null && !(typeof v.rejected === "number" && Number.isInteger(v.rejected) && v.rejected >= -2147483648 && v.rejected <= 2147483647)) violations.push("rejected has invalid type");
+if (v.byType !== undefined && v.byType !== null && !(Array.isArray(v.byType) && (v.byType).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("by_type has invalid type");
 if (v.byType !== undefined && v.byType !== null) for (const item of v.byType) violations.push(...validateTimeOffByType(item).map((message) => "by_type: " + message));
 return violations;
 }
@@ -198,6 +223,9 @@ return out;
 
 export function validateTimeOffByType(v: TimeOffByType): string[] {
 const violations: string[] = [];
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.days !== undefined && v.days !== null && !(typeof v.days === "number" && Number.isInteger(v.days) && v.days >= -2147483648 && v.days <= 2147483647)) violations.push("days has invalid type");
+if (v.requests !== undefined && v.requests !== null && !(typeof v.requests === "number" && Number.isInteger(v.requests) && v.requests >= -2147483648 && v.requests <= 2147483647)) violations.push("requests has invalid type");
 return violations;
 }
 
@@ -232,6 +260,11 @@ return out;
 
 export function validateHeadcountMetrics(v: HeadcountMetrics): string[] {
 const violations: string[] = [];
+if (v.current !== undefined && v.current !== null && !(typeof v.current === "number" && Number.isInteger(v.current) && v.current >= -2147483648 && v.current <= 2147483647)) violations.push("current has invalid type");
+if (v.hiredThisPeriod !== undefined && v.hiredThisPeriod !== null && !(typeof v.hiredThisPeriod === "number" && Number.isInteger(v.hiredThisPeriod) && v.hiredThisPeriod >= -2147483648 && v.hiredThisPeriod <= 2147483647)) violations.push("hired_this_period has invalid type");
+if (v.departedThisPeriod !== undefined && v.departedThisPeriod !== null && !(typeof v.departedThisPeriod === "number" && Number.isInteger(v.departedThisPeriod) && v.departedThisPeriod >= -2147483648 && v.departedThisPeriod <= 2147483647)) violations.push("departed_this_period has invalid type");
+if (v.turnoverRate !== undefined && v.turnoverRate !== null && !(typeof v.turnoverRate === "number" && Number.isFinite(v.turnoverRate))) violations.push("turnover_rate has invalid type");
+if (v.trend !== undefined && v.trend !== null && !(Array.isArray(v.trend) && (v.trend).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("trend has invalid type");
 if (v.trend !== undefined && v.trend !== null) for (const item of v.trend) violations.push(...validateHeadcountPoint(item).map((message) => "trend: " + message));
 return violations;
 }
@@ -258,6 +291,8 @@ return out;
 
 export function validateHeadcountPoint(v: HeadcountPoint): string[] {
 const violations: string[] = [];
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.count !== undefined && v.count !== null && !(typeof v.count === "number" && Number.isInteger(v.count) && v.count >= -2147483648 && v.count <= 2147483647)) violations.push("count has invalid type");
 return violations;
 }
 
@@ -280,6 +315,7 @@ return out;
 
 export function validateGetHeadcountMetricsRequest(v: GetHeadcountMetricsRequest): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
 return violations;
 }
 
@@ -302,6 +338,7 @@ return out;
 
 export function validateGetHeadcountMetricsResponse(v: GetHeadcountMetricsResponse): string[] {
 const violations: string[] = [];
+if (v.metrics !== undefined && v.metrics !== null && !(typeof v.metrics === "object" && v.metrics !== null && !Array.isArray(v.metrics))) violations.push("metrics has invalid type");
 if (v.metrics !== undefined && v.metrics !== null) violations.push(...validateHeadcountMetrics(v.metrics).map((message) => "metrics: " + message));
 return violations;
 }
@@ -353,6 +390,10 @@ return out;
 
 export function validateGetOperationsSummaryResponse(v: GetOperationsSummaryResponse): string[] {
 const violations: string[] = [];
+if (v.activeStaff !== undefined && v.activeStaff !== null && !(typeof v.activeStaff === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.activeStaff))) violations.push("active_staff has invalid type");
+if (v.shiftsThisWeek !== undefined && v.shiftsThisWeek !== null && !(typeof v.shiftsThisWeek === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.shiftsThisWeek))) violations.push("shifts_this_week has invalid type");
+if (v.pendingTimeOff !== undefined && v.pendingTimeOff !== null && !(typeof v.pendingTimeOff === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.pendingTimeOff))) violations.push("pending_time_off has invalid type");
+if (v.openLeaveRequests !== undefined && v.openLeaveRequests !== null && !(typeof v.openLeaveRequests === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.openLeaveRequests))) violations.push("open_leave_requests has invalid type");
 return violations;
 }
 
@@ -375,6 +416,7 @@ return out;
 
 export function validateGetShiftMetricsRequest(v: GetShiftMetricsRequest): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
 return violations;
 }
 
@@ -397,6 +439,7 @@ return out;
 
 export function validateGetShiftMetricsResponse(v: GetShiftMetricsResponse): string[] {
 const violations: string[] = [];
+if (v.metrics !== undefined && v.metrics !== null && !(typeof v.metrics === "object" && v.metrics !== null && !Array.isArray(v.metrics))) violations.push("metrics has invalid type");
 if (v.metrics !== undefined && v.metrics !== null) violations.push(...validateShiftMetrics(v.metrics).map((message) => "metrics: " + message));
 return violations;
 }
@@ -420,6 +463,7 @@ return out;
 
 export function validateGetTimeOffMetricsRequest(v: GetTimeOffMetricsRequest): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
 return violations;
 }
 
@@ -442,6 +486,7 @@ return out;
 
 export function validateGetTimeOffMetricsResponse(v: GetTimeOffMetricsResponse): string[] {
 const violations: string[] = [];
+if (v.metrics !== undefined && v.metrics !== null && !(typeof v.metrics === "object" && v.metrics !== null && !Array.isArray(v.metrics))) violations.push("metrics has invalid type");
 if (v.metrics !== undefined && v.metrics !== null) violations.push(...validateTimeOffMetrics(v.metrics).map((message) => "metrics: " + message));
 return violations;
 }
@@ -465,6 +510,7 @@ return out;
 
 export function validateGetUtilizationRequest(v: GetUtilizationRequest): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
 return violations;
 }
 
@@ -487,6 +533,7 @@ return out;
 
 export function validateGetUtilizationResponse(v: GetUtilizationResponse): string[] {
 const violations: string[] = [];
+if (v.metrics !== undefined && v.metrics !== null && !(typeof v.metrics === "object" && v.metrics !== null && !Array.isArray(v.metrics))) violations.push("metrics has invalid type");
 if (v.metrics !== undefined && v.metrics !== null) violations.push(...validateUtilizationMetrics(v.metrics).map((message) => "metrics: " + message));
 return violations;
 }

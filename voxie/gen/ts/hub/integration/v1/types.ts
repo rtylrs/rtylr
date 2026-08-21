@@ -34,6 +34,12 @@ return out;
 
 export function validateIntegration(v: Integration): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.provider !== undefined && v.provider !== null && !(typeof v.provider === "string")) violations.push("provider has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.config !== undefined && v.config !== null && !(typeof v.config === "string")) violations.push("config has invalid type");
+if (v.connectedAt !== undefined && v.connectedAt !== null && !(typeof v.connectedAt === "string")) violations.push("connected_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -59,7 +65,9 @@ return out;
 
 export function validateConnectIntegrationRequest(v: ConnectIntegrationRequest): string[] {
 const violations: string[] = [];
+if (v.provider !== undefined && v.provider !== null && !(typeof v.provider === "string")) violations.push("provider has invalid type");
 if (!(v.provider !== undefined && v.provider !== null) || v.provider === "") violations.push("provider is required");
+if (v.config !== undefined && v.config !== null && !(typeof v.config === "string")) violations.push("config has invalid type");
 return violations;
 }
 
@@ -85,6 +93,8 @@ return out;
 
 export function validateConnectIntegrationResponse(v: ConnectIntegrationResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -107,6 +117,7 @@ return out;
 
 export function validateDisconnectIntegrationRequest(v: DisconnectIntegrationRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -131,6 +142,7 @@ return out;
 
 export function validateDisconnectIntegrationResponse(v: DisconnectIntegrationResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -172,6 +184,7 @@ return out;
 
 export function validateListIntegrationsResponse(v: ListIntegrationsResponse): string[] {
 const violations: string[] = [];
+if (v.integrations !== undefined && v.integrations !== null && !(Array.isArray(v.integrations) && (v.integrations).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("integrations has invalid type");
 if (v.integrations !== undefined && v.integrations !== null) for (const item of v.integrations) violations.push(...validateIntegration(item).map((message) => "integrations: " + message));
 return violations;
 }

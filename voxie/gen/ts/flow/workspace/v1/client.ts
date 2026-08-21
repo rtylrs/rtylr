@@ -2,6 +2,42 @@
 import type { ListWorkspacesRequest, ListWorkspacesResponse, CreateWorkspaceRequest, CreateWorkspaceResponse, UpdateWorkspaceRequest, UpdateWorkspaceResponse, DeleteWorkspaceRequest, DeleteWorkspaceResponse, ListWorkspaceMembersRequest, ListWorkspaceMembersResponse, AddWorkspaceMemberRequest, AddWorkspaceMemberResponse, RemoveWorkspaceMemberRequest, RemoveWorkspaceMemberResponse, UpdateWorkspaceMemberRoleRequest, UpdateWorkspaceMemberRoleResponse } from "./types";
 import { encodeListWorkspacesRequest, validateListWorkspacesRequest, decodeListWorkspacesResponse, encodeCreateWorkspaceRequest, validateCreateWorkspaceRequest, decodeCreateWorkspaceResponse, encodeUpdateWorkspaceRequest, validateUpdateWorkspaceRequest, decodeUpdateWorkspaceResponse, encodeDeleteWorkspaceRequest, validateDeleteWorkspaceRequest, decodeDeleteWorkspaceResponse, encodeListWorkspaceMembersRequest, validateListWorkspaceMembersRequest, decodeListWorkspaceMembersResponse, encodeAddWorkspaceMemberRequest, validateAddWorkspaceMemberRequest, decodeAddWorkspaceMemberResponse, encodeRemoveWorkspaceMemberRequest, validateRemoveWorkspaceMemberRequest, decodeRemoveWorkspaceMemberResponse, encodeUpdateWorkspaceMemberRoleRequest, validateUpdateWorkspaceMemberRoleRequest, decodeUpdateWorkspaceMemberRoleResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface WorkspaceServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class WorkspaceServiceClient {
@@ -58,11 +96,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListWorkspacesResponse(await res.json());
+return decodeListWorkspacesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createWorkspace(req: CreateWorkspaceRequest): Promise<CreateWorkspaceResponse> {
@@ -76,11 +114,11 @@ body: JSON.stringify(encodeCreateWorkspaceRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateWorkspaceResponse(await res.json());
+return decodeCreateWorkspaceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateWorkspace(req: UpdateWorkspaceRequest): Promise<UpdateWorkspaceResponse> {
@@ -95,11 +133,11 @@ body: JSON.stringify(encodeUpdateWorkspaceRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateWorkspaceResponse(await res.json());
+return decodeUpdateWorkspaceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteWorkspace(req: DeleteWorkspaceRequest): Promise<DeleteWorkspaceResponse> {
@@ -116,11 +154,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteWorkspaceResponse(await res.json());
+return decodeDeleteWorkspaceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listWorkspaceMembers(req: ListWorkspaceMembersRequest): Promise<ListWorkspaceMembersResponse> {
@@ -151,11 +189,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListWorkspaceMembersResponse(await res.json());
+return decodeListWorkspaceMembersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async addWorkspaceMember(req: AddWorkspaceMemberRequest): Promise<AddWorkspaceMemberResponse> {
@@ -169,11 +207,11 @@ body: JSON.stringify(encodeAddWorkspaceMemberRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAddWorkspaceMemberResponse(await res.json());
+return decodeAddWorkspaceMemberResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async removeWorkspaceMember(req: RemoveWorkspaceMemberRequest): Promise<RemoveWorkspaceMemberResponse> {
@@ -195,11 +233,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRemoveWorkspaceMemberResponse(await res.json());
+return decodeRemoveWorkspaceMemberResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateWorkspaceMemberRole(req: UpdateWorkspaceMemberRoleRequest): Promise<UpdateWorkspaceMemberRoleResponse> {
@@ -213,11 +251,11 @@ body: JSON.stringify(encodeUpdateWorkspaceMemberRoleRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateWorkspaceMemberRoleResponse(await res.json());
+return decodeUpdateWorkspaceMemberRoleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

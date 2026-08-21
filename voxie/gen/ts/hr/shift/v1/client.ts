@@ -2,6 +2,42 @@
 import type { ListShiftsRequest, ListShiftsResponse, CreateShiftRequest, CreateShiftResponse, UpdateShiftRequest, UpdateShiftResponse, DeleteShiftRequest, DeleteShiftResponse, CreateShiftAssignmentRequest, CreateShiftAssignmentResponse, GetRosterRequest, GetRosterResponse, PublishRosterRequest, PublishRosterResponse, ListAvailabilityRequest, ListAvailabilityResponse, SetAvailabilityRequest, SetAvailabilityResponse, DeleteAvailabilityRequest, DeleteAvailabilityResponse } from "./types";
 import { encodeListShiftsRequest, validateListShiftsRequest, decodeListShiftsResponse, encodeCreateShiftRequest, validateCreateShiftRequest, decodeCreateShiftResponse, encodeUpdateShiftRequest, validateUpdateShiftRequest, decodeUpdateShiftResponse, encodeDeleteShiftRequest, validateDeleteShiftRequest, decodeDeleteShiftResponse, encodeCreateShiftAssignmentRequest, validateCreateShiftAssignmentRequest, decodeCreateShiftAssignmentResponse, encodeGetRosterRequest, validateGetRosterRequest, decodeGetRosterResponse, encodePublishRosterRequest, validatePublishRosterRequest, decodePublishRosterResponse, encodeListAvailabilityRequest, validateListAvailabilityRequest, decodeListAvailabilityResponse, encodeSetAvailabilityRequest, validateSetAvailabilityRequest, decodeSetAvailabilityResponse, encodeDeleteAvailabilityRequest, validateDeleteAvailabilityRequest, decodeDeleteAvailabilityResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface ShiftServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class ShiftServiceClient {
@@ -64,11 +102,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListShiftsResponse(await res.json());
+return decodeListShiftsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createShift(req: CreateShiftRequest): Promise<CreateShiftResponse> {
@@ -82,11 +120,11 @@ body: JSON.stringify(encodeCreateShiftRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateShiftResponse(await res.json());
+return decodeCreateShiftResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateShift(req: UpdateShiftRequest): Promise<UpdateShiftResponse> {
@@ -100,11 +138,11 @@ body: JSON.stringify(encodeUpdateShiftRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateShiftResponse(await res.json());
+return decodeUpdateShiftResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteShift(req: DeleteShiftRequest): Promise<DeleteShiftResponse> {
@@ -120,11 +158,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteShiftResponse(await res.json());
+return decodeDeleteShiftResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createShiftAssignment(req: CreateShiftAssignmentRequest): Promise<CreateShiftAssignmentResponse> {
@@ -138,11 +176,11 @@ body: JSON.stringify(encodeCreateShiftAssignmentRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateShiftAssignmentResponse(await res.json());
+return decodeCreateShiftAssignmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getRoster(req: GetRosterRequest): Promise<GetRosterResponse> {
@@ -162,11 +200,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetRosterResponse(await res.json());
+return decodeGetRosterResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async publishRoster(req: PublishRosterRequest): Promise<PublishRosterResponse> {
@@ -180,11 +218,11 @@ body: JSON.stringify(encodePublishRosterRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodePublishRosterResponse(await res.json());
+return decodePublishRosterResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listAvailability(req: ListAvailabilityRequest): Promise<ListAvailabilityResponse> {
@@ -218,11 +256,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListAvailabilityResponse(await res.json());
+return decodeListAvailabilityResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async setAvailability(req: SetAvailabilityRequest): Promise<SetAvailabilityResponse> {
@@ -236,11 +274,11 @@ body: JSON.stringify(encodeSetAvailabilityRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSetAvailabilityResponse(await res.json());
+return decodeSetAvailabilityResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteAvailability(req: DeleteAvailabilityRequest): Promise<DeleteAvailabilityResponse> {
@@ -257,11 +295,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteAvailabilityResponse(await res.json());
+return decodeDeleteAvailabilityResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

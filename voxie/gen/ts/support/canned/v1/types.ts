@@ -37,6 +37,13 @@ return out;
 
 export function validateCannedResponse(v: CannedResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "string")) violations.push("body has invalid type");
+if (v.category !== undefined && v.category !== null && !(typeof v.category === "string")) violations.push("category has invalid type");
+if (v.shortcut !== undefined && v.shortcut !== null && !(typeof v.shortcut === "string")) violations.push("shortcut has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -78,6 +85,7 @@ return out;
 
 export function validateListCannedResponsesResponse(v: ListCannedResponsesResponse): string[] {
 const violations: string[] = [];
+if (v.cannedResponses !== undefined && v.cannedResponses !== null && !(Array.isArray(v.cannedResponses) && (v.cannedResponses).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("canned_responses has invalid type");
 if (v.cannedResponses !== undefined && v.cannedResponses !== null) for (const item of v.cannedResponses) violations.push(...validateCannedResponse(item).map((message) => "canned_responses: " + message));
 return violations;
 }
@@ -110,8 +118,12 @@ return out;
 
 export function validateCreateCannedResponseRequest(v: CreateCannedResponseRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "string")) violations.push("body has invalid type");
 if (!(v.body !== undefined && v.body !== null) || v.body === "") violations.push("body is required");
+if (v.category !== undefined && v.category !== null && !(typeof v.category === "string")) violations.push("category has invalid type");
+if (v.shortcut !== undefined && v.shortcut !== null && !(typeof v.shortcut === "string")) violations.push("shortcut has invalid type");
 return violations;
 }
 
@@ -137,6 +149,8 @@ return out;
 
 export function validateCreateCannedResponseResponse(v: CreateCannedResponseResponse): string[] {
 const violations: string[] = [];
+if (v.cannedResponseId !== undefined && v.cannedResponseId !== null && !(typeof v.cannedResponseId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.cannedResponseId))) violations.push("canned_response_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -171,8 +185,13 @@ return out;
 
 export function validateUpdateCannedResponseRequest(v: UpdateCannedResponseRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "string")) violations.push("body has invalid type");
+if (v.category !== undefined && v.category !== null && !(typeof v.category === "string")) violations.push("category has invalid type");
+if (v.shortcut !== undefined && v.shortcut !== null && !(typeof v.shortcut === "string")) violations.push("shortcut has invalid type");
 return violations;
 }
 
@@ -195,6 +214,7 @@ return out;
 
 export function validateUpdateCannedResponseResponse(v: UpdateCannedResponseResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -217,6 +237,7 @@ return out;
 
 export function validateDeleteCannedResponseRequest(v: DeleteCannedResponseRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -241,6 +262,7 @@ return out;
 
 export function validateDeleteCannedResponseResponse(v: DeleteCannedResponseResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

@@ -55,6 +55,19 @@ return out;
 
 export function validatePayrollEntryPayload(v: PayrollEntryPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.payrollRunId !== undefined && v.payrollRunId !== null && !(typeof v.payrollRunId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.payrollRunId))) violations.push("payroll_run_id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.basePay !== undefined && v.basePay !== null && !(typeof v.basePay === "number" && Number.isFinite(v.basePay))) violations.push("base_pay has invalid type");
+if (v.overtimePay !== undefined && v.overtimePay !== null && !(typeof v.overtimePay === "number" && Number.isFinite(v.overtimePay))) violations.push("overtime_pay has invalid type");
+if (v.deductions !== undefined && v.deductions !== null && !(typeof v.deductions === "number" && Number.isFinite(v.deductions))) violations.push("deductions has invalid type");
+if (v.bonuses !== undefined && v.bonuses !== null && !(typeof v.bonuses === "number" && Number.isFinite(v.bonuses))) violations.push("bonuses has invalid type");
+if (v.netPay !== undefined && v.netPay !== null && !(typeof v.netPay === "number" && Number.isFinite(v.netPay))) violations.push("net_pay has invalid type");
+if (v.hoursWorked !== undefined && v.hoursWorked !== null && !(typeof v.hoursWorked === "number" && Number.isFinite(v.hoursWorked))) violations.push("hours_worked has invalid type");
+if (v.overtimeHours !== undefined && v.overtimeHours !== null && !(typeof v.overtimeHours === "number" && Number.isFinite(v.overtimeHours))) violations.push("overtime_hours has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -113,7 +126,20 @@ return out;
 
 export function validatePayrollRunPayload(v: PayrollRunPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.periodStart !== undefined && v.periodStart !== null && !(typeof v.periodStart === "string")) violations.push("period_start has invalid type");
+if (v.periodEnd !== undefined && v.periodEnd !== null && !(typeof v.periodEnd === "string")) violations.push("period_end has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.createdBy !== undefined && v.createdBy !== null && !(typeof v.createdBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdBy))) violations.push("created_by has invalid type");
+if (v.approvedBy !== undefined && v.approvedBy !== null && !(typeof v.approvedBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.approvedBy))) violations.push("approved_by has invalid type");
+if (v.exportedAt !== undefined && v.exportedAt !== null && !(typeof v.exportedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.exportedAt))) violations.push("exported_at has invalid type");
+if (v.totalGross !== undefined && v.totalGross !== null && !(typeof v.totalGross === "number" && Number.isFinite(v.totalGross))) violations.push("total_gross has invalid type");
+if (v.totalNet !== undefined && v.totalNet !== null && !(typeof v.totalNet === "number" && Number.isFinite(v.totalNet))) violations.push("total_net has invalid type");
+if (v.entries !== undefined && v.entries !== null && !(Array.isArray(v.entries) && (v.entries).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("entries has invalid type");
 if (v.entries !== undefined && v.entries !== null) for (const item of v.entries) violations.push(...validatePayrollEntryPayload(item).map((message) => "entries: " + message));
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -164,7 +190,11 @@ return out;
 
 export function validateListPayrollRunsResponse(v: ListPayrollRunsResponse): string[] {
 const violations: string[] = [];
+if (v.runs !== undefined && v.runs !== null && !(Array.isArray(v.runs) && (v.runs).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("runs has invalid type");
 if (v.runs !== undefined && v.runs !== null) for (const item of v.runs) violations.push(...validatePayrollRunPayload(item).map((message) => "runs: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -190,7 +220,9 @@ return out;
 
 export function validateTriggerPayrollRunRequest(v: TriggerPayrollRunRequest): string[] {
 const violations: string[] = [];
+if (v.periodStart !== undefined && v.periodStart !== null && !(typeof v.periodStart === "string")) violations.push("period_start has invalid type");
 if (!(v.periodStart !== undefined && v.periodStart !== null) || v.periodStart === "") violations.push("period_start is required");
+if (v.periodEnd !== undefined && v.periodEnd !== null && !(typeof v.periodEnd === "string")) violations.push("period_end has invalid type");
 if (!(v.periodEnd !== undefined && v.periodEnd !== null) || v.periodEnd === "") violations.push("period_end is required");
 return violations;
 }
@@ -214,6 +246,7 @@ return out;
 
 export function validateTriggerPayrollRunResponse(v: TriggerPayrollRunResponse): string[] {
 const violations: string[] = [];
+if (v.run !== undefined && v.run !== null && !(typeof v.run === "object" && v.run !== null && !Array.isArray(v.run))) violations.push("run has invalid type");
 if (v.run !== undefined && v.run !== null) violations.push(...validatePayrollRunPayload(v.run).map((message) => "run: " + message));
 return violations;
 }
@@ -237,6 +270,7 @@ return out;
 
 export function validateApprovePayrollRunRequest(v: ApprovePayrollRunRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -261,6 +295,7 @@ return out;
 
 export function validateApprovePayrollRunResponse(v: ApprovePayrollRunResponse): string[] {
 const violations: string[] = [];
+if (v.run !== undefined && v.run !== null && !(typeof v.run === "object" && v.run !== null && !Array.isArray(v.run))) violations.push("run has invalid type");
 if (v.run !== undefined && v.run !== null) violations.push(...validatePayrollRunPayload(v.run).map((message) => "run: " + message));
 return violations;
 }
@@ -284,6 +319,7 @@ return out;
 
 export function validateExportPayrollRequest(v: ExportPayrollRequest): string[] {
 const violations: string[] = [];
+if (v.runId !== undefined && v.runId !== null && !(typeof v.runId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.runId))) violations.push("run_id has invalid type");
 if (!(v.runId !== undefined && v.runId !== null)) violations.push("run_id is required");
 if (v.runId !== undefined && v.runId !== null && !(Number(v.runId) > 0)) violations.push("run_id violates @gt");
 return violations;
@@ -308,6 +344,7 @@ return out;
 
 export function validateExportPayrollResponse(v: ExportPayrollResponse): string[] {
 const violations: string[] = [];
+if (v.batchId !== undefined && v.batchId !== null && !(typeof v.batchId === "string")) violations.push("batch_id has invalid type");
 return violations;
 }
 

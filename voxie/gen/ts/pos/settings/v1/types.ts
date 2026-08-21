@@ -43,6 +43,15 @@ return out;
 
 export function validatePOSFeatureSettings(v: POSFeatureSettings): string[] {
 const violations: string[] = [];
+if (v.tables !== undefined && v.tables !== null && !(typeof v.tables === "boolean")) violations.push("tables has invalid type");
+if (v.kitchenDisplay !== undefined && v.kitchenDisplay !== null && !(typeof v.kitchenDisplay === "boolean")) violations.push("kitchen_display has invalid type");
+if (v.modifiers !== undefined && v.modifiers !== null && !(typeof v.modifiers === "boolean")) violations.push("modifiers has invalid type");
+if (v.combos !== undefined && v.combos !== null && !(typeof v.combos === "boolean")) violations.push("combos has invalid type");
+if (v.tips !== undefined && v.tips !== null && !(typeof v.tips === "boolean")) violations.push("tips has invalid type");
+if (v.giftCards !== undefined && v.giftCards !== null && !(typeof v.giftCards === "boolean")) violations.push("gift_cards has invalid type");
+if (v.customers !== undefined && v.customers !== null && !(typeof v.customers === "boolean")) violations.push("customers has invalid type");
+if (v.inventory !== undefined && v.inventory !== null && !(typeof v.inventory === "boolean")) violations.push("inventory has invalid type");
+if (v.cashDrawer !== undefined && v.cashDrawer !== null && !(typeof v.cashDrawer === "boolean")) violations.push("cash_drawer has invalid type");
 return violations;
 }
 
@@ -86,7 +95,15 @@ return out;
 
 export function validatePOSBusinessSettings(v: POSBusinessSettings): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.businessProfile !== undefined && v.businessProfile !== null && !(typeof v.businessProfile === "string")) violations.push("business_profile has invalid type");
+if (v.theme !== undefined && v.theme !== null && !(typeof v.theme === "string")) violations.push("theme has invalid type");
+if (v.features !== undefined && v.features !== null && !(typeof v.features === "object" && v.features !== null && !Array.isArray(v.features))) violations.push("features has invalid type");
 if (v.features !== undefined && v.features !== null) violations.push(...validatePOSFeatureSettings(v.features).map((message) => "features: " + message));
+if (v.receiptFooter !== undefined && v.receiptFooter !== null && !(typeof v.receiptFooter === "string")) violations.push("receipt_footer has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -128,6 +145,7 @@ return out;
 
 export function validateGetPOSSettingsResponse(v: GetPOSSettingsResponse): string[] {
 const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null && !(typeof v.settings === "object" && v.settings !== null && !Array.isArray(v.settings))) violations.push("settings has invalid type");
 if (v.settings !== undefined && v.settings !== null) violations.push(...validatePOSBusinessSettings(v.settings).map((message) => "settings: " + message));
 return violations;
 }
@@ -160,7 +178,11 @@ return out;
 
 export function validateUpdatePOSSettingsRequest(v: UpdatePOSSettingsRequest): string[] {
 const violations: string[] = [];
+if (v.businessProfile !== undefined && v.businessProfile !== null && !(typeof v.businessProfile === "string")) violations.push("business_profile has invalid type");
+if (v.theme !== undefined && v.theme !== null && !(typeof v.theme === "string")) violations.push("theme has invalid type");
+if (v.features !== undefined && v.features !== null && !(typeof v.features === "object" && v.features !== null && !Array.isArray(v.features))) violations.push("features has invalid type");
 if (v.features !== undefined && v.features !== null) violations.push(...validatePOSFeatureSettings(v.features).map((message) => "features: " + message));
+if (v.receiptFooter !== undefined && v.receiptFooter !== null && !(typeof v.receiptFooter === "string")) violations.push("receipt_footer has invalid type");
 return violations;
 }
 
@@ -186,7 +208,9 @@ return out;
 
 export function validateUpdatePOSSettingsResponse(v: UpdatePOSSettingsResponse): string[] {
 const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null && !(typeof v.settings === "object" && v.settings !== null && !Array.isArray(v.settings))) violations.push("settings has invalid type");
 if (v.settings !== undefined && v.settings !== null) violations.push(...validatePOSBusinessSettings(v.settings).map((message) => "settings: " + message));
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

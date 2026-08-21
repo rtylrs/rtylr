@@ -55,6 +55,19 @@ return out;
 
 export function validateEquipmentRequestPayload(v: EquipmentRequestPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.equipmentType !== undefined && v.equipmentType !== null && !(typeof v.equipmentType === "string")) violations.push("equipment_type has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.urgency !== undefined && v.urgency !== null && !(typeof v.urgency === "string")) violations.push("urgency has invalid type");
+if (v.neededByDate !== undefined && v.neededByDate !== null && !(typeof v.neededByDate === "string")) violations.push("needed_by_date has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.currentApprovalLevel !== undefined && v.currentApprovalLevel !== null && !(typeof v.currentApprovalLevel === "number" && Number.isInteger(v.currentApprovalLevel) && v.currentApprovalLevel >= -2147483648 && v.currentApprovalLevel <= 2147483647)) violations.push("current_approval_level has invalid type");
+if (v.approvedBy !== undefined && v.approvedBy !== null && !(typeof v.approvedBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.approvedBy))) violations.push("approved_by has invalid type");
+if (v.deliveredAt !== undefined && v.deliveredAt !== null && !(typeof v.deliveredAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.deliveredAt))) violations.push("delivered_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -104,6 +117,16 @@ return out;
 
 export function validateAssetPayload(v: AssetPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.serialNumber !== undefined && v.serialNumber !== null && !(typeof v.serialNumber === "string")) violations.push("serial_number has invalid type");
+if (v.assignedDate !== undefined && v.assignedDate !== null && !(typeof v.assignedDate === "string")) violations.push("assigned_date has invalid type");
+if (v.returnedDate !== undefined && v.returnedDate !== null && !(typeof v.returnedDate === "string")) violations.push("returned_date has invalid type");
+if (v.condition !== undefined && v.condition !== null && !(typeof v.condition === "string")) violations.push("condition has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -129,6 +152,8 @@ return out;
 
 export function validateListAssetsRequest(v: ListAssetsRequest): string[] {
 const violations: string[] = [];
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.condition !== undefined && v.condition !== null && !(typeof v.condition === "string")) violations.push("condition has invalid type");
 return violations;
 }
 
@@ -160,7 +185,11 @@ return out;
 
 export function validateListAssetsResponse(v: ListAssetsResponse): string[] {
 const violations: string[] = [];
+if (v.assets !== undefined && v.assets !== null && !(Array.isArray(v.assets) && (v.assets).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("assets has invalid type");
 if (v.assets !== undefined && v.assets !== null) for (const item of v.assets) violations.push(...validateAssetPayload(item).map((message) => "assets: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -186,6 +215,8 @@ return out;
 
 export function validateListEquipmentRequestsRequest(v: ListEquipmentRequestsRequest): string[] {
 const violations: string[] = [];
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 return violations;
 }
 
@@ -217,7 +248,11 @@ return out;
 
 export function validateListEquipmentRequestsResponse(v: ListEquipmentRequestsResponse): string[] {
 const violations: string[] = [];
+if (v.requests !== undefined && v.requests !== null && !(Array.isArray(v.requests) && (v.requests).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("requests has invalid type");
 if (v.requests !== undefined && v.requests !== null) for (const item of v.requests) violations.push(...validateEquipmentRequestPayload(item).map((message) => "requests: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -252,11 +287,16 @@ return out;
 
 export function validateCreateEquipmentRequestRequest(v: CreateEquipmentRequestRequest): string[] {
 const violations: string[] = [];
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
 if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
 if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (v.equipmentType !== undefined && v.equipmentType !== null && !(typeof v.equipmentType === "string")) violations.push("equipment_type has invalid type");
 if (!(v.equipmentType !== undefined && v.equipmentType !== null) || v.equipmentType === "") violations.push("equipment_type is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.urgency !== undefined && v.urgency !== null && !(typeof v.urgency === "string")) violations.push("urgency has invalid type");
 if (!(v.urgency !== undefined && v.urgency !== null) || v.urgency === "") violations.push("urgency is required");
+if (v.neededByDate !== undefined && v.neededByDate !== null && !(typeof v.neededByDate === "string")) violations.push("needed_by_date has invalid type");
 return violations;
 }
 
@@ -279,6 +319,7 @@ return out;
 
 export function validateCreateEquipmentRequestResponse(v: CreateEquipmentRequestResponse): string[] {
 const violations: string[] = [];
+if (v.request !== undefined && v.request !== null && !(typeof v.request === "object" && v.request !== null && !Array.isArray(v.request))) violations.push("request has invalid type");
 if (v.request !== undefined && v.request !== null) violations.push(...validateEquipmentRequestPayload(v.request).map((message) => "request: " + message));
 return violations;
 }
@@ -302,6 +343,7 @@ return out;
 
 export function validateApproveEquipmentBody(v: ApproveEquipmentBody): string[] {
 const violations: string[] = [];
+if (v.approved !== undefined && v.approved !== null && !(typeof v.approved === "boolean")) violations.push("approved has invalid type");
 return violations;
 }
 
@@ -327,8 +369,10 @@ return out;
 
 export function validateApproveEquipmentRequest(v: ApproveEquipmentRequest): string[] {
 const violations: string[] = [];
+if (v.equipmentRequestId !== undefined && v.equipmentRequestId !== null && !(typeof v.equipmentRequestId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.equipmentRequestId))) violations.push("equipment_request_id has invalid type");
 if (!(v.equipmentRequestId !== undefined && v.equipmentRequestId !== null)) violations.push("equipment_request_id is required");
 if (v.equipmentRequestId !== undefined && v.equipmentRequestId !== null && !(Number(v.equipmentRequestId) > 0)) violations.push("equipment_request_id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateApproveEquipmentBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -352,6 +396,7 @@ return out;
 
 export function validateApproveEquipmentResponse(v: ApproveEquipmentResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 

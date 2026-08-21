@@ -40,6 +40,14 @@ return out;
 
 export function validateDocument(v: Document): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.fileUrl !== undefined && v.fileUrl !== null && !(typeof v.fileUrl === "string")) violations.push("file_url has invalid type");
+if (v.expiryDate !== undefined && v.expiryDate !== null && !(typeof v.expiryDate === "string")) violations.push("expiry_date has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -95,6 +103,18 @@ return out;
 
 export function validateEmployeeDocumentPayload(v: EmployeeDocumentPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.documentType !== undefined && v.documentType !== null && !(typeof v.documentType === "string")) violations.push("document_type has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.storageMode !== undefined && v.storageMode !== null && !(typeof v.storageMode === "string")) violations.push("storage_mode has invalid type");
+if (v.fileUrl !== undefined && v.fileUrl !== null && !(typeof v.fileUrl === "string")) violations.push("file_url has invalid type");
+if (v.expiryDate !== undefined && v.expiryDate !== null && !(typeof v.expiryDate === "string")) violations.push("expiry_date has invalid type");
+if (v.uploadedBy !== undefined && v.uploadedBy !== null && !(typeof v.uploadedBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.uploadedBy))) violations.push("uploaded_by has invalid type");
+if (v.uploadedAt !== undefined && v.uploadedAt !== null && !(typeof v.uploadedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.uploadedAt))) violations.push("uploaded_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -129,7 +149,12 @@ return out;
 
 export function validateCreateDocumentRequest(v: CreateDocumentRequest): string[] {
 const violations: string[] = [];
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.fileUrl !== undefined && v.fileUrl !== null && !(typeof v.fileUrl === "string")) violations.push("file_url has invalid type");
+if (v.expiryDate !== undefined && v.expiryDate !== null && !(typeof v.expiryDate === "string")) violations.push("expiry_date has invalid type");
 return violations;
 }
 
@@ -155,6 +180,8 @@ return out;
 
 export function validateCreateDocumentResponse(v: CreateDocumentResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -177,6 +204,7 @@ return out;
 
 export function validateDeleteDocumentRequest(v: DeleteDocumentRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -201,6 +229,7 @@ return out;
 
 export function validateDeleteDocumentResponse(v: DeleteDocumentResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -242,6 +271,7 @@ return out;
 
 export function validateListDocumentsResponse(v: ListDocumentsResponse): string[] {
 const violations: string[] = [];
+if (v.documents !== undefined && v.documents !== null && !(Array.isArray(v.documents) && (v.documents).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("documents has invalid type");
 if (v.documents !== undefined && v.documents !== null) for (const item of v.documents) violations.push(...validateDocument(item).map((message) => "documents: " + message));
 return violations;
 }

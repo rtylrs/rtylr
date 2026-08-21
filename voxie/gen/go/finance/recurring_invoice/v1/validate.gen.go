@@ -7,20 +7,8 @@ import (
 	"strings"
 )
 
-var emailPattern = regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`)
-var uuidPattern = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
-var uriPattern = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9+.-]*://[^\s]+$`)
 var CreateRecurringInvoiceRequestNextInvoiceDatePattern = regexp.MustCompile("^\\d{4}-\\d{2}-\\d{2}$")
 var UpdateRecurringInvoiceBodyNextInvoiceDatePattern = regexp.MustCompile("^\\d{4}-\\d{2}-\\d{2}$")
-
-func inSet(v string, allowed ...string) bool {
-	for _, a := range allowed {
-		if v == a {
-			return true
-		}
-	}
-	return false
-}
 
 func (m *RecurringInvoice) Validate() error {
 	if m == nil {

@@ -34,6 +34,12 @@ return out;
 
 export function validateReceipt(v: Receipt): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.orderNumber !== undefined && v.orderNumber !== null && !(typeof v.orderNumber === "string")) violations.push("order_number has invalid type");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isFinite(v.total))) violations.push("total has invalid type");
+if (v.paymentMethod !== undefined && v.paymentMethod !== null && !(typeof v.paymentMethod === "string")) violations.push("payment_method has invalid type");
+if (v.paidAt !== undefined && v.paidAt !== null && !(typeof v.paidAt === "string")) violations.push("paid_at has invalid type");
 return violations;
 }
 
@@ -59,8 +65,10 @@ return out;
 
 export function validateEmailReceiptRequest(v: EmailReceiptRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
 return violations;
 }
@@ -84,6 +92,7 @@ return out;
 
 export function validateEmailReceiptResponse(v: EmailReceiptResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -109,6 +118,8 @@ return out;
 
 export function validateListReceiptsRequest(v: ListReceiptsRequest): string[] {
 const violations: string[] = [];
+if (v.from !== undefined && v.from !== null && !(typeof v.from === "string")) violations.push("from has invalid type");
+if (v.to !== undefined && v.to !== null && !(typeof v.to === "string")) violations.push("to has invalid type");
 return violations;
 }
 
@@ -131,6 +142,7 @@ return out;
 
 export function validateListReceiptsResponse(v: ListReceiptsResponse): string[] {
 const violations: string[] = [];
+if (v.receipts !== undefined && v.receipts !== null && !(Array.isArray(v.receipts) && (v.receipts).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("receipts has invalid type");
 if (v.receipts !== undefined && v.receipts !== null) for (const item of v.receipts) violations.push(...validateReceipt(item).map((message) => "receipts: " + message));
 return violations;
 }

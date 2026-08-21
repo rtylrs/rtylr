@@ -38,6 +38,13 @@ return out;
 
 export function validateReportTemplate(v: ReportTemplate): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.metrics !== undefined && v.metrics !== null && !(Array.isArray(v.metrics) && (v.metrics).every((item: any) => typeof item === "string"))) violations.push("metrics has invalid type");
+if (v.format !== undefined && v.format !== null && !(typeof v.format === "string")) violations.push("format has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -87,6 +94,16 @@ return out;
 
 export function validateScheduledReport(v: ScheduledReport): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.templateId !== undefined && v.templateId !== null && !(typeof v.templateId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.templateId))) violations.push("template_id has invalid type");
+if (v.templateName !== undefined && v.templateName !== null && !(typeof v.templateName === "string")) violations.push("template_name has invalid type");
+if (v.frequency !== undefined && v.frequency !== null && !(typeof v.frequency === "string")) violations.push("frequency has invalid type");
+if (v.recipientEmail !== undefined && v.recipientEmail !== null && !(typeof v.recipientEmail === "string")) violations.push("recipient_email has invalid type");
+if (v.channel !== undefined && v.channel !== null && !(typeof v.channel === "string")) violations.push("channel has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.lastSentAt !== undefined && v.lastSentAt !== null && !(typeof v.lastSentAt === "string")) violations.push("last_sent_at has invalid type");
+if (v.nextSendAt !== undefined && v.nextSendAt !== null && !(typeof v.nextSendAt === "string")) violations.push("next_send_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -121,6 +138,11 @@ return out;
 
 export function validateListReportTemplatesRequest(v: ListReportTemplatesRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
 return violations;
 }
 
@@ -146,7 +168,9 @@ return out;
 
 export function validateListReportTemplatesResponse(v: ListReportTemplatesResponse): string[] {
 const violations: string[] = [];
+if (v.templates !== undefined && v.templates !== null && !(Array.isArray(v.templates) && (v.templates).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("templates has invalid type");
 if (v.templates !== undefined && v.templates !== null) for (const item of v.templates) violations.push(...validateReportTemplate(item).map((message) => "templates: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -182,10 +206,15 @@ return out;
 
 export function validateCreateReportTemplateRequest(v: CreateReportTemplateRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
 if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (v.metrics !== undefined && v.metrics !== null && !(Array.isArray(v.metrics) && (v.metrics).every((item: any) => typeof item === "string"))) violations.push("metrics has invalid type");
 if (v.metrics !== undefined && v.metrics !== null && v.metrics.length < 1) violations.push("metrics must contain at least 1 items");
+if (v.format !== undefined && v.format !== null && !(typeof v.format === "string")) violations.push("format has invalid type");
 if (!(v.format !== undefined && v.format !== null) || v.format === "") violations.push("format is required");
 return violations;
 }
@@ -209,6 +238,7 @@ return out;
 
 export function validateCreateReportTemplateResponse(v: CreateReportTemplateResponse): string[] {
 const violations: string[] = [];
+if (v.template !== undefined && v.template !== null && !(typeof v.template === "object" && v.template !== null && !Array.isArray(v.template))) violations.push("template has invalid type");
 if (v.template !== undefined && v.template !== null) violations.push(...validateReportTemplate(v.template).map((message) => "template: " + message));
 return violations;
 }
@@ -232,6 +262,7 @@ return out;
 
 export function validateGetReportTemplateRequest(v: GetReportTemplateRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -256,6 +287,7 @@ return out;
 
 export function validateGetReportTemplateResponse(v: GetReportTemplateResponse): string[] {
 const violations: string[] = [];
+if (v.template !== undefined && v.template !== null && !(typeof v.template === "object" && v.template !== null && !Array.isArray(v.template))) violations.push("template has invalid type");
 if (v.template !== undefined && v.template !== null) violations.push(...validateReportTemplate(v.template).map((message) => "template: " + message));
 return violations;
 }
@@ -288,6 +320,10 @@ return out;
 
 export function validateListScheduledReportsRequest(v: ListScheduledReportsRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -313,7 +349,9 @@ return out;
 
 export function validateListScheduledReportsResponse(v: ListScheduledReportsResponse): string[] {
 const violations: string[] = [];
+if (v.reports !== undefined && v.reports !== null && !(Array.isArray(v.reports) && (v.reports).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("reports has invalid type");
 if (v.reports !== undefined && v.reports !== null) for (const item of v.reports) violations.push(...validateScheduledReport(item).map((message) => "reports: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -349,11 +387,16 @@ return out;
 
 export function validateCreateScheduledReportRequest(v: CreateScheduledReportRequest): string[] {
 const violations: string[] = [];
+if (v.templateSlug !== undefined && v.templateSlug !== null && !(typeof v.templateSlug === "string")) violations.push("template_slug has invalid type");
 if (!(v.templateSlug !== undefined && v.templateSlug !== null) || v.templateSlug === "") violations.push("template_slug is required");
+if (v.frequency !== undefined && v.frequency !== null && !(typeof v.frequency === "string")) violations.push("frequency has invalid type");
 if (!(v.frequency !== undefined && v.frequency !== null) || v.frequency === "") violations.push("frequency is required");
+if (v.channel !== undefined && v.channel !== null && !(typeof v.channel === "string")) violations.push("channel has invalid type");
 if (!(v.channel !== undefined && v.channel !== null) || v.channel === "") violations.push("channel is required");
+if (v.recipientEmail !== undefined && v.recipientEmail !== null && !(typeof v.recipientEmail === "string")) violations.push("recipient_email has invalid type");
 if (!(v.recipientEmail !== undefined && v.recipientEmail !== null) || v.recipientEmail === "") violations.push("recipient_email is required");
 if (v.recipientEmail !== undefined && v.recipientEmail !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.recipientEmail)) violations.push("recipient_email must be a valid email");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -376,6 +419,7 @@ return out;
 
 export function validateCreateScheduledReportResponse(v: CreateScheduledReportResponse): string[] {
 const violations: string[] = [];
+if (v.report !== undefined && v.report !== null && !(typeof v.report === "object" && v.report !== null && !Array.isArray(v.report))) violations.push("report has invalid type");
 if (v.report !== undefined && v.report !== null) violations.push(...validateScheduledReport(v.report).map((message) => "report: " + message));
 return violations;
 }
@@ -414,13 +458,19 @@ return out;
 
 export function validateUpdateScheduledReportRequest(v: UpdateScheduledReportRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.templateSlug !== undefined && v.templateSlug !== null && !(typeof v.templateSlug === "string")) violations.push("template_slug has invalid type");
 if (!(v.templateSlug !== undefined && v.templateSlug !== null) || v.templateSlug === "") violations.push("template_slug is required");
+if (v.frequency !== undefined && v.frequency !== null && !(typeof v.frequency === "string")) violations.push("frequency has invalid type");
 if (!(v.frequency !== undefined && v.frequency !== null) || v.frequency === "") violations.push("frequency is required");
+if (v.channel !== undefined && v.channel !== null && !(typeof v.channel === "string")) violations.push("channel has invalid type");
 if (!(v.channel !== undefined && v.channel !== null) || v.channel === "") violations.push("channel is required");
+if (v.recipientEmail !== undefined && v.recipientEmail !== null && !(typeof v.recipientEmail === "string")) violations.push("recipient_email has invalid type");
 if (!(v.recipientEmail !== undefined && v.recipientEmail !== null) || v.recipientEmail === "") violations.push("recipient_email is required");
 if (v.recipientEmail !== undefined && v.recipientEmail !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.recipientEmail)) violations.push("recipient_email must be a valid email");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -443,6 +493,7 @@ return out;
 
 export function validateUpdateScheduledReportResponse(v: UpdateScheduledReportResponse): string[] {
 const violations: string[] = [];
+if (v.report !== undefined && v.report !== null && !(typeof v.report === "object" && v.report !== null && !Array.isArray(v.report))) violations.push("report has invalid type");
 if (v.report !== undefined && v.report !== null) violations.push(...validateScheduledReport(v.report).map((message) => "report: " + message));
 return violations;
 }
@@ -466,6 +517,7 @@ return out;
 
 export function validateDeleteScheduledReportRequest(v: DeleteScheduledReportRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -490,6 +542,7 @@ return out;
 
 export function validateDeleteScheduledReportResponse(v: DeleteScheduledReportResponse): string[] {
 const violations: string[] = [];
+if (v.deleted !== undefined && v.deleted !== null && !(typeof v.deleted === "boolean")) violations.push("deleted has invalid type");
 return violations;
 }
 
@@ -518,6 +571,9 @@ return out;
 
 export function validateGenerateRevenueReportRequest(v: GenerateRevenueReportRequest): string[] {
 const violations: string[] = [];
+if (v.from !== undefined && v.from !== null && !(typeof v.from === "string")) violations.push("from has invalid type");
+if (v.to !== undefined && v.to !== null && !(typeof v.to === "string")) violations.push("to has invalid type");
+if (v.format !== undefined && v.format !== null && !(typeof v.format === "string")) violations.push("format has invalid type");
 return violations;
 }
 
@@ -546,6 +602,9 @@ return out;
 
 export function validateGenerateRevenueReportResponse(v: GenerateRevenueReportResponse): string[] {
 const violations: string[] = [];
+if (v.reportId !== undefined && v.reportId !== null && !(typeof v.reportId === "string")) violations.push("report_id has invalid type");
+if (v.url !== undefined && v.url !== null && !(typeof v.url === "string")) violations.push("url has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 return violations;
 }
 
@@ -571,6 +630,8 @@ return out;
 
 export function validateExportRevenueReportRequest(v: ExportRevenueReportRequest): string[] {
 const violations: string[] = [];
+if (v.from !== undefined && v.from !== null && !(typeof v.from === "string")) violations.push("from has invalid type");
+if (v.to !== undefined && v.to !== null && !(typeof v.to === "string")) violations.push("to has invalid type");
 return violations;
 }
 
@@ -596,6 +657,8 @@ return out;
 
 export function validateExportRevenueRow(v: ExportRevenueRow): string[] {
 const violations: string[] = [];
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.amountMinorUnits !== undefined && v.amountMinorUnits !== null && !(typeof v.amountMinorUnits === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.amountMinorUnits))) violations.push("amount_minor_units has invalid type");
 return violations;
 }
 
@@ -627,6 +690,10 @@ return out;
 
 export function validateExportRevenueReportResponse(v: ExportRevenueReportResponse): string[] {
 const violations: string[] = [];
+if (v.filename !== undefined && v.filename !== null && !(typeof v.filename === "string")) violations.push("filename has invalid type");
+if (v.contentType !== undefined && v.contentType !== null && !(typeof v.contentType === "string")) violations.push("content_type has invalid type");
+if (v.csv !== undefined && v.csv !== null && !(typeof v.csv === "string")) violations.push("csv has invalid type");
+if (v.rows !== undefined && v.rows !== null && !(Array.isArray(v.rows) && (v.rows).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("rows has invalid type");
 if (v.rows !== undefined && v.rows !== null) for (const item of v.rows) violations.push(...validateExportRevenueRow(item).map((message) => "rows: " + message));
 return violations;
 }

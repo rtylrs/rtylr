@@ -49,6 +49,17 @@ return out;
 
 export function validateCashMovement(v: CashMovement): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.branchId !== undefined && v.branchId !== null && !(typeof v.branchId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.branchId))) violations.push("branch_id has invalid type");
+if (v.terminalId !== undefined && v.terminalId !== null && !(typeof v.terminalId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.terminalId))) violations.push("terminal_id has invalid type");
+if (v.sessionId !== undefined && v.sessionId !== null && !(typeof v.sessionId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sessionId))) violations.push("session_id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
+if (v.reason !== undefined && v.reason !== null && !(typeof v.reason === "string")) violations.push("reason has invalid type");
+if (v.approvedBy !== undefined && v.approvedBy !== null && !(typeof v.approvedBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.approvedBy))) violations.push("approved_by has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -86,16 +97,22 @@ return out;
 
 export function validateCashAdjustRequest(v: CashAdjustRequest): string[] {
 const violations: string[] = [];
+if (v.branchId !== undefined && v.branchId !== null && !(typeof v.branchId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.branchId))) violations.push("branch_id has invalid type");
 if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
 if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (v.terminalId !== undefined && v.terminalId !== null && !(typeof v.terminalId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.terminalId))) violations.push("terminal_id has invalid type");
 if (!(v.terminalId !== undefined && v.terminalId !== null)) violations.push("terminal_id is required");
 if (v.terminalId !== undefined && v.terminalId !== null && !(Number(v.terminalId) > 0)) violations.push("terminal_id violates @gt");
+if (v.sessionId !== undefined && v.sessionId !== null && !(typeof v.sessionId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sessionId))) violations.push("session_id has invalid type");
 if (!(v.sessionId !== undefined && v.sessionId !== null)) violations.push("session_id is required");
 if (v.sessionId !== undefined && v.sessionId !== null && !(Number(v.sessionId) > 0)) violations.push("session_id violates @gt");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
 if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
 if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
 if (!(v.amount !== undefined && v.amount !== null)) violations.push("amount is required");
 if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) > 0)) violations.push("amount violates @gt");
+if (v.reason !== undefined && v.reason !== null && !(typeof v.reason === "string")) violations.push("reason has invalid type");
 if (!(v.reason !== undefined && v.reason !== null) || v.reason === "") violations.push("reason is required");
 return violations;
 }
@@ -122,6 +139,8 @@ return out;
 
 export function validateCashAdjustResponse(v: CashAdjustResponse): string[] {
 const violations: string[] = [];
+if (v.movementId !== undefined && v.movementId !== null && !(typeof v.movementId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.movementId))) violations.push("movement_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -159,16 +178,22 @@ return out;
 
 export function validateCashDropRequest(v: CashDropRequest): string[] {
 const violations: string[] = [];
+if (v.branchId !== undefined && v.branchId !== null && !(typeof v.branchId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.branchId))) violations.push("branch_id has invalid type");
 if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
 if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (v.terminalId !== undefined && v.terminalId !== null && !(typeof v.terminalId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.terminalId))) violations.push("terminal_id has invalid type");
 if (!(v.terminalId !== undefined && v.terminalId !== null)) violations.push("terminal_id is required");
 if (v.terminalId !== undefined && v.terminalId !== null && !(Number(v.terminalId) > 0)) violations.push("terminal_id violates @gt");
+if (v.sessionId !== undefined && v.sessionId !== null && !(typeof v.sessionId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sessionId))) violations.push("session_id has invalid type");
 if (!(v.sessionId !== undefined && v.sessionId !== null)) violations.push("session_id is required");
 if (v.sessionId !== undefined && v.sessionId !== null && !(Number(v.sessionId) > 0)) violations.push("session_id violates @gt");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
 if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
 if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
 if (!(v.amount !== undefined && v.amount !== null)) violations.push("amount is required");
 if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) > 0)) violations.push("amount violates @gt");
+if (v.reason !== undefined && v.reason !== null && !(typeof v.reason === "string")) violations.push("reason has invalid type");
 if (!(v.reason !== undefined && v.reason !== null) || v.reason === "") violations.push("reason is required");
 return violations;
 }
@@ -195,6 +220,8 @@ return out;
 
 export function validateCashDropResponse(v: CashDropResponse): string[] {
 const violations: string[] = [];
+if (v.movementId !== undefined && v.movementId !== null && !(typeof v.movementId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.movementId))) violations.push("movement_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -232,16 +259,22 @@ return out;
 
 export function validateCashPickupRequest(v: CashPickupRequest): string[] {
 const violations: string[] = [];
+if (v.branchId !== undefined && v.branchId !== null && !(typeof v.branchId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.branchId))) violations.push("branch_id has invalid type");
 if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
 if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (v.terminalId !== undefined && v.terminalId !== null && !(typeof v.terminalId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.terminalId))) violations.push("terminal_id has invalid type");
 if (!(v.terminalId !== undefined && v.terminalId !== null)) violations.push("terminal_id is required");
 if (v.terminalId !== undefined && v.terminalId !== null && !(Number(v.terminalId) > 0)) violations.push("terminal_id violates @gt");
+if (v.sessionId !== undefined && v.sessionId !== null && !(typeof v.sessionId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sessionId))) violations.push("session_id has invalid type");
 if (!(v.sessionId !== undefined && v.sessionId !== null)) violations.push("session_id is required");
 if (v.sessionId !== undefined && v.sessionId !== null && !(Number(v.sessionId) > 0)) violations.push("session_id violates @gt");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
 if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
 if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
 if (!(v.amount !== undefined && v.amount !== null)) violations.push("amount is required");
 if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) > 0)) violations.push("amount violates @gt");
+if (v.reason !== undefined && v.reason !== null && !(typeof v.reason === "string")) violations.push("reason has invalid type");
 if (!(v.reason !== undefined && v.reason !== null) || v.reason === "") violations.push("reason is required");
 return violations;
 }
@@ -268,6 +301,8 @@ return out;
 
 export function validateCashPickupResponse(v: CashPickupResponse): string[] {
 const violations: string[] = [];
+if (v.movementId !== undefined && v.movementId !== null && !(typeof v.movementId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.movementId))) violations.push("movement_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -290,6 +325,7 @@ return out;
 
 export function validateListCashMovementsRequest(v: ListCashMovementsRequest): string[] {
 const violations: string[] = [];
+if (v.sessionId !== undefined && v.sessionId !== null && !(typeof v.sessionId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sessionId))) violations.push("session_id has invalid type");
 if (!(v.sessionId !== undefined && v.sessionId !== null)) violations.push("session_id is required");
 if (v.sessionId !== undefined && v.sessionId !== null && !(Number(v.sessionId) > 0)) violations.push("session_id violates @gt");
 return violations;
@@ -314,6 +350,7 @@ return out;
 
 export function validateListCashMovementsResponse(v: ListCashMovementsResponse): string[] {
 const violations: string[] = [];
+if (v.movements !== undefined && v.movements !== null && !(Array.isArray(v.movements) && (v.movements).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("movements has invalid type");
 if (v.movements !== undefined && v.movements !== null) for (const item of v.movements) violations.push(...validateCashMovement(item).map((message) => "movements: " + message));
 return violations;
 }

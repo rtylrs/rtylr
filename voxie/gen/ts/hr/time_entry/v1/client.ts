@@ -2,6 +2,42 @@
 import type { ListTimeEntriesRequest, ListTimeEntriesResponse, CreateTimeEntryRequest, CreateTimeEntryResponse, ListTimesheetsRequest, ListTimesheetsResponse, SubmitTimesheetRequest, SubmitTimesheetResponse, ApproveTimesheetRequest, ApproveTimesheetResponse } from "./types";
 import { encodeListTimeEntriesRequest, validateListTimeEntriesRequest, decodeListTimeEntriesResponse, encodeCreateTimeEntryRequest, validateCreateTimeEntryRequest, decodeCreateTimeEntryResponse, encodeListTimesheetsRequest, validateListTimesheetsRequest, decodeListTimesheetsResponse, encodeSubmitTimesheetRequest, validateSubmitTimesheetRequest, decodeSubmitTimesheetResponse, encodeApproveTimesheetRequest, validateApproveTimesheetRequest, decodeApproveTimesheetResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface TimeEntryServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class TimeEntryServiceClient {
@@ -52,11 +90,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTimeEntriesResponse(await res.json());
+return decodeListTimeEntriesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createTimeEntry(req: CreateTimeEntryRequest): Promise<CreateTimeEntryResponse> {
@@ -70,11 +108,11 @@ body: JSON.stringify(encodeCreateTimeEntryRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateTimeEntryResponse(await res.json());
+return decodeCreateTimeEntryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listTimesheets(req: ListTimesheetsRequest): Promise<ListTimesheetsResponse> {
@@ -96,11 +134,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTimesheetsResponse(await res.json());
+return decodeListTimesheetsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async submitTimesheet(req: SubmitTimesheetRequest): Promise<SubmitTimesheetResponse> {
@@ -114,11 +152,11 @@ body: JSON.stringify(encodeSubmitTimesheetRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSubmitTimesheetResponse(await res.json());
+return decodeSubmitTimesheetResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async approveTimesheet(req: ApproveTimesheetRequest): Promise<ApproveTimesheetResponse> {
@@ -133,11 +171,11 @@ body: JSON.stringify(encodeApproveTimesheetRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeApproveTimesheetResponse(await res.json());
+return decodeApproveTimesheetResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

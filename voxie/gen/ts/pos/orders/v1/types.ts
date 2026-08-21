@@ -58,6 +58,20 @@ return out;
 
 export function validateOrderItem(v: OrderItem): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
+if (v.menuItemId !== undefined && v.menuItemId !== null && !(typeof v.menuItemId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.menuItemId))) violations.push("menu_item_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.sku !== undefined && v.sku !== null && !(typeof v.sku === "string")) violations.push("sku has invalid type");
+if (v.quantity !== undefined && v.quantity !== null && !(typeof v.quantity === "number" && Number.isFinite(v.quantity))) violations.push("quantity has invalid type");
+if (v.unitPrice !== undefined && v.unitPrice !== null && !(typeof v.unitPrice === "number" && Number.isFinite(v.unitPrice))) violations.push("unit_price has invalid type");
+if (v.discountPct !== undefined && v.discountPct !== null && !(typeof v.discountPct === "number" && Number.isFinite(v.discountPct))) violations.push("discount_pct has invalid type");
+if (v.discountAmount !== undefined && v.discountAmount !== null && !(typeof v.discountAmount === "number" && Number.isFinite(v.discountAmount))) violations.push("discount_amount has invalid type");
+if (v.taxRate !== undefined && v.taxRate !== null && !(typeof v.taxRate === "number" && Number.isFinite(v.taxRate))) violations.push("tax_rate has invalid type");
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isFinite(v.total))) violations.push("total has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -152,6 +166,31 @@ return out;
 
 export function validateOrder(v: Order): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.sessionId !== undefined && v.sessionId !== null && !(typeof v.sessionId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sessionId))) violations.push("session_id has invalid type");
+if (v.tableId !== undefined && v.tableId !== null && !(typeof v.tableId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.tableId))) violations.push("table_id has invalid type");
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.orderNumber !== undefined && v.orderNumber !== null && !(typeof v.orderNumber === "string")) violations.push("order_number has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.subtotal !== undefined && v.subtotal !== null && !(typeof v.subtotal === "number" && Number.isFinite(v.subtotal))) violations.push("subtotal has invalid type");
+if (v.discountAmount !== undefined && v.discountAmount !== null && !(typeof v.discountAmount === "number" && Number.isFinite(v.discountAmount))) violations.push("discount_amount has invalid type");
+if (v.taxAmount !== undefined && v.taxAmount !== null && !(typeof v.taxAmount === "number" && Number.isFinite(v.taxAmount))) violations.push("tax_amount has invalid type");
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isFinite(v.total))) violations.push("total has invalid type");
+if (v.paymentMethod !== undefined && v.paymentMethod !== null && !(typeof v.paymentMethod === "string")) violations.push("payment_method has invalid type");
+if (v.paymentStatus !== undefined && v.paymentStatus !== null && !(typeof v.paymentStatus === "string")) violations.push("payment_status has invalid type");
+if (v.amountPaid !== undefined && v.amountPaid !== null && !(typeof v.amountPaid === "number" && Number.isFinite(v.amountPaid))) violations.push("amount_paid has invalid type");
+if (v.changeDue !== undefined && v.changeDue !== null && !(typeof v.changeDue === "number" && Number.isFinite(v.changeDue))) violations.push("change_due has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.kitchenNotes !== undefined && v.kitchenNotes !== null && !(typeof v.kitchenNotes === "string")) violations.push("kitchen_notes has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
+if (v.paidAt !== undefined && v.paidAt !== null && !(typeof v.paidAt === "string")) violations.push("paid_at has invalid type");
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateOrderItem(item).map((message) => "items: " + message));
 return violations;
 }
@@ -196,6 +235,14 @@ return out;
 
 export function validateCreateOrderItemInput(v: CreateOrderItemInput): string[] {
 const violations: string[] = [];
+if (v.menuItemId !== undefined && v.menuItemId !== null && !(typeof v.menuItemId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.menuItemId))) violations.push("menu_item_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.sku !== undefined && v.sku !== null && !(typeof v.sku === "string")) violations.push("sku has invalid type");
+if (v.quantity !== undefined && v.quantity !== null && !(typeof v.quantity === "number" && Number.isFinite(v.quantity))) violations.push("quantity has invalid type");
+if (v.unitPrice !== undefined && v.unitPrice !== null && !(typeof v.unitPrice === "number" && Number.isFinite(v.unitPrice))) violations.push("unit_price has invalid type");
+if (v.discountPct !== undefined && v.discountPct !== null && !(typeof v.discountPct === "number" && Number.isFinite(v.discountPct))) violations.push("discount_pct has invalid type");
+if (v.taxRate !== undefined && v.taxRate !== null && !(typeof v.taxRate === "number" && Number.isFinite(v.taxRate))) violations.push("tax_rate has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
 return violations;
 }
 
@@ -218,6 +265,7 @@ return out;
 
 export function validateSplitGroup(v: SplitGroup): string[] {
 const violations: string[] = [];
+if (v.itemIds !== undefined && v.itemIds !== null && !(Array.isArray(v.itemIds) && (v.itemIds).every((item: any) => typeof item === "string" && /^-?(0|[1-9][0-9]*)$/.test(item)))) violations.push("item_ids has invalid type");
 return violations;
 }
 
@@ -267,6 +315,16 @@ return out;
 
 export function validateCreateOrderRequest(v: CreateOrderRequest): string[] {
 const violations: string[] = [];
+if (v.sessionId !== undefined && v.sessionId !== null && !(typeof v.sessionId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sessionId))) violations.push("session_id has invalid type");
+if (v.tableId !== undefined && v.tableId !== null && !(typeof v.tableId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.tableId))) violations.push("table_id has invalid type");
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
+if (v.paymentMethod !== undefined && v.paymentMethod !== null && !(typeof v.paymentMethod === "string")) violations.push("payment_method has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.kitchenNotes !== undefined && v.kitchenNotes !== null && !(typeof v.kitchenNotes === "string")) violations.push("kitchen_notes has invalid type");
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null && v.items.length < 1) violations.push("items must contain at least 1 items");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateCreateOrderItemInput(item).map((message) => "items: " + message));
 return violations;
@@ -297,6 +355,9 @@ return out;
 
 export function validateCreateOrderResponse(v: CreateOrderResponse): string[] {
 const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
+if (v.orderNumber !== undefined && v.orderNumber !== null && !(typeof v.orderNumber === "string")) violations.push("order_number has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -331,8 +392,13 @@ return out;
 
 export function validatePublicOrderItemInput(v: PublicOrderItemInput): string[] {
 const violations: string[] = [];
+if (v.menuItemId !== undefined && v.menuItemId !== null && !(typeof v.menuItemId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.menuItemId))) violations.push("menu_item_id has invalid type");
 if (v.menuItemId !== undefined && v.menuItemId !== null && !(Number(v.menuItemId) > 0)) violations.push("menu_item_id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.quantity !== undefined && v.quantity !== null && !(typeof v.quantity === "number" && Number.isFinite(v.quantity))) violations.push("quantity has invalid type");
 if (v.quantity !== undefined && v.quantity !== null && !(Number(v.quantity) > 0)) violations.push("quantity violates @gt");
+if (v.unitPrice !== undefined && v.unitPrice !== null && !(typeof v.unitPrice === "number" && Number.isFinite(v.unitPrice))) violations.push("unit_price has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
 return violations;
 }
 
@@ -370,7 +436,13 @@ return out;
 
 export function validateCreatePublicOrderRequest(v: CreatePublicOrderRequest): string[] {
 const violations: string[] = [];
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
 if (v.ownerId !== undefined && v.ownerId !== null && !(Number(v.ownerId) > 0)) violations.push("owner_id violates @gt");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
+if (v.customerPhone !== undefined && v.customerPhone !== null && !(typeof v.customerPhone === "string")) violations.push("customer_phone has invalid type");
+if (v.customerEmail !== undefined && v.customerEmail !== null && !(typeof v.customerEmail === "string")) violations.push("customer_email has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null && v.items.length < 1) violations.push("items must contain at least 1 items");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validatePublicOrderItemInput(item).map((message) => "items: " + message));
 return violations;
@@ -401,6 +473,9 @@ return out;
 
 export function validateCreatePublicOrderResponse(v: CreatePublicOrderResponse): string[] {
 const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
+if (v.orderNumber !== undefined && v.orderNumber !== null && !(typeof v.orderNumber === "string")) violations.push("order_number has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 return violations;
 }
 
@@ -423,6 +498,7 @@ return out;
 
 export function validateGetOrderDetailRequest(v: GetOrderDetailRequest): string[] {
 const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
 if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
 return violations;
@@ -447,6 +523,7 @@ return out;
 
 export function validateGetOrderDetailResponse(v: GetOrderDetailResponse): string[] {
 const violations: string[] = [];
+if (v.order !== undefined && v.order !== null && !(typeof v.order === "object" && v.order !== null && !Array.isArray(v.order))) violations.push("order has invalid type");
 if (v.order !== undefined && v.order !== null) violations.push(...validateOrder(v.order).map((message) => "order: " + message));
 return violations;
 }
@@ -473,8 +550,10 @@ return out;
 
 export function validateGetPublicOrderStatusRequest(v: GetPublicOrderStatusRequest): string[] {
 const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
 if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
 if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
 if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
 return violations;
@@ -505,6 +584,9 @@ return out;
 
 export function validateGetPublicOrderStatusResponse(v: GetPublicOrderStatusResponse): string[] {
 const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
+if (v.orderNumber !== undefined && v.orderNumber !== null && !(typeof v.orderNumber === "string")) violations.push("order_number has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 return violations;
 }
 
@@ -545,8 +627,15 @@ return out;
 
 export function validateListOrdersRequest(v: ListOrdersRequest): string[] {
 const violations: string[] = [];
+if (v.sessionId !== undefined && v.sessionId !== null && !(typeof v.sessionId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sessionId))) violations.push("session_id has invalid type");
 if (!(v.sessionId !== undefined && v.sessionId !== null)) violations.push("session_id is required");
 if (v.sessionId !== undefined && v.sessionId !== null && !(Number(v.sessionId) > 0)) violations.push("session_id violates @gt");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.dateFrom !== undefined && v.dateFrom !== null && !(typeof v.dateFrom === "string")) violations.push("date_from has invalid type");
+if (v.dateTo !== undefined && v.dateTo !== null && !(typeof v.dateTo === "string")) violations.push("date_to has invalid type");
+if (v.search !== undefined && v.search !== null && !(typeof v.search === "string")) violations.push("search has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isSafeInteger(v.pageSize) && v.pageSize >= Number.MIN_SAFE_INTEGER && v.pageSize <= Number.MAX_SAFE_INTEGER)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -581,7 +670,12 @@ return out;
 
 export function validateListOrdersResponse(v: ListOrdersResponse): string[] {
 const violations: string[] = [];
+if (v.orders !== undefined && v.orders !== null && !(Array.isArray(v.orders) && (v.orders).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("orders has invalid type");
 if (v.orders !== undefined && v.orders !== null) for (const item of v.orders) violations.push(...validateOrder(item).map((message) => "orders: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
+if (v.hasMore !== undefined && v.hasMore !== null && !(typeof v.hasMore === "boolean")) violations.push("has_more has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isSafeInteger(v.pageSize) && v.pageSize >= Number.MIN_SAFE_INTEGER && v.pageSize <= Number.MAX_SAFE_INTEGER)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -604,6 +698,7 @@ return out;
 
 export function validateSendToKitchenRequest(v: SendToKitchenRequest): string[] {
 const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
 if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
 return violations;
@@ -628,6 +723,7 @@ return out;
 
 export function validateSendToKitchenResponse(v: SendToKitchenResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 
@@ -653,8 +749,10 @@ return out;
 
 export function validateTransferTableRequest(v: TransferTableRequest): string[] {
 const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
 if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (v.newTableId !== undefined && v.newTableId !== null && !(typeof v.newTableId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.newTableId))) violations.push("new_table_id has invalid type");
 if (!(v.newTableId !== undefined && v.newTableId !== null)) violations.push("new_table_id is required");
 if (v.newTableId !== undefined && v.newTableId !== null && !(Number(v.newTableId) > 0)) violations.push("new_table_id violates @gt");
 return violations;
@@ -679,6 +777,7 @@ return out;
 
 export function validateTransferTableResponse(v: TransferTableResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 
@@ -701,6 +800,7 @@ return out;
 
 export function validateUpdateOrderStatusBody(v: UpdateOrderStatusBody): string[] {
 const violations: string[] = [];
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
 return violations;
 }
@@ -727,8 +827,10 @@ return out;
 
 export function validateUpdateOrderStatusRequest(v: UpdateOrderStatusRequest): string[] {
 const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
 if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateOrderStatusBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -752,6 +854,7 @@ return out;
 
 export function validateUpdateOrderStatusResponse(v: UpdateOrderStatusResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -777,8 +880,10 @@ return out;
 
 export function validateVoidOrderRequest(v: VoidOrderRequest): string[] {
 const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
 if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (v.reason !== undefined && v.reason !== null && !(typeof v.reason === "string")) violations.push("reason has invalid type");
 if (!(v.reason !== undefined && v.reason !== null) || v.reason === "") violations.push("reason is required");
 return violations;
 }
@@ -802,6 +907,7 @@ return out;
 
 export function validateVoidOrderResponse(v: VoidOrderResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

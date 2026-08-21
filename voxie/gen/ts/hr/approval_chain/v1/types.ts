@@ -55,6 +55,19 @@ return out;
 
 export function validateApprovalChainLevelPayload(v: ApprovalChainLevelPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.chainId !== undefined && v.chainId !== null && !(typeof v.chainId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.chainId))) violations.push("chain_id has invalid type");
+if (v.levelOrder !== undefined && v.levelOrder !== null && !(typeof v.levelOrder === "number" && Number.isInteger(v.levelOrder) && v.levelOrder >= -2147483648 && v.levelOrder <= 2147483647)) violations.push("level_order has invalid type");
+if (v.approverType !== undefined && v.approverType !== null && !(typeof v.approverType === "string")) violations.push("approver_type has invalid type");
+if (v.approverRoleId !== undefined && v.approverRoleId !== null && !(typeof v.approverRoleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.approverRoleId))) violations.push("approver_role_id has invalid type");
+if (v.approverEmployeeId !== undefined && v.approverEmployeeId !== null && !(typeof v.approverEmployeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.approverEmployeeId))) violations.push("approver_employee_id has invalid type");
+if (v.thresholdMinValue !== undefined && v.thresholdMinValue !== null && !(typeof v.thresholdMinValue === "number" && Number.isFinite(v.thresholdMinValue))) violations.push("threshold_min_value has invalid type");
+if (v.thresholdMaxValue !== undefined && v.thresholdMaxValue !== null && !(typeof v.thresholdMaxValue === "number" && Number.isFinite(v.thresholdMaxValue))) violations.push("threshold_max_value has invalid type");
+if (v.timeoutDays !== undefined && v.timeoutDays !== null && !(typeof v.timeoutDays === "number" && Number.isInteger(v.timeoutDays) && v.timeoutDays >= -2147483648 && v.timeoutDays <= 2147483647)) violations.push("timeout_days has invalid type");
+if (v.timeoutAction !== undefined && v.timeoutAction !== null && !(typeof v.timeoutAction === "string")) violations.push("timeout_action has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -98,7 +111,15 @@ return out;
 
 export function validateApprovalChainPayload(v: ApprovalChainPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.requestType !== undefined && v.requestType !== null && !(typeof v.requestType === "string")) violations.push("request_type has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.delegationEnabled !== undefined && v.delegationEnabled !== null && !(typeof v.delegationEnabled === "boolean")) violations.push("delegation_enabled has invalid type");
+if (v.levels !== undefined && v.levels !== null && !(Array.isArray(v.levels) && (v.levels).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("levels has invalid type");
 if (v.levels !== undefined && v.levels !== null) for (const item of v.levels) violations.push(...validateApprovalChainLevelPayload(item).map((message) => "levels: " + message));
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -133,10 +154,15 @@ return out;
 
 export function validateUpsertApprovalChainRequest(v: UpsertApprovalChainRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.requestType !== undefined && v.requestType !== null && !(typeof v.requestType === "string")) violations.push("request_type has invalid type");
 if (!(v.requestType !== undefined && v.requestType !== null) || v.requestType === "") violations.push("request_type is required");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.delegationEnabled !== undefined && v.delegationEnabled !== null && !(typeof v.delegationEnabled === "boolean")) violations.push("delegation_enabled has invalid type");
+if (v.levels !== undefined && v.levels !== null && !(Array.isArray(v.levels) && (v.levels).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("levels has invalid type");
 if (v.levels !== undefined && v.levels !== null && v.levels.length < 1) violations.push("levels must contain at least 1 items");
 if (v.levels !== undefined && v.levels !== null) for (const item of v.levels) violations.push(...validateApprovalChainLevelPayload(item).map((message) => "levels: " + message));
 return violations;
@@ -161,6 +187,7 @@ return out;
 
 export function validateUpsertApprovalChainResponse(v: UpsertApprovalChainResponse): string[] {
 const violations: string[] = [];
+if (v.chain !== undefined && v.chain !== null && !(typeof v.chain === "object" && v.chain !== null && !Array.isArray(v.chain))) violations.push("chain has invalid type");
 if (v.chain !== undefined && v.chain !== null) violations.push(...validateApprovalChainPayload(v.chain).map((message) => "chain: " + message));
 return violations;
 }

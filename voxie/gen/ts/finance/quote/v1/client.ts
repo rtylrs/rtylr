@@ -2,6 +2,42 @@
 import type { ListQuotesRequest, ListQuotesResponse, CreateQuoteRequest, CreateQuoteResponse, GetQuoteRequest, GetQuoteResponse, UpdateQuoteStatusRequest, UpdateQuoteStatusResponse, ConvertQuoteRequest, ConvertQuoteResponse } from "./types";
 import { encodeListQuotesRequest, validateListQuotesRequest, decodeListQuotesResponse, encodeCreateQuoteRequest, validateCreateQuoteRequest, decodeCreateQuoteResponse, encodeGetQuoteRequest, validateGetQuoteRequest, decodeGetQuoteResponse, encodeUpdateQuoteStatusRequest, validateUpdateQuoteStatusRequest, decodeUpdateQuoteStatusResponse, encodeConvertQuoteRequest, validateConvertQuoteRequest, decodeConvertQuoteResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface QuoteServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class QuoteServiceClient {
@@ -52,11 +90,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListQuotesResponse(await res.json());
+return decodeListQuotesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createQuote(req: CreateQuoteRequest): Promise<CreateQuoteResponse> {
@@ -70,11 +108,11 @@ body: JSON.stringify(encodeCreateQuoteRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateQuoteResponse(await res.json());
+return decodeCreateQuoteResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getQuote(req: GetQuoteRequest): Promise<GetQuoteResponse> {
@@ -91,11 +129,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetQuoteResponse(await res.json());
+return decodeGetQuoteResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateQuoteStatus(req: UpdateQuoteStatusRequest): Promise<UpdateQuoteStatusResponse> {
@@ -110,11 +148,11 @@ body: JSON.stringify(encodeUpdateQuoteStatusRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateQuoteStatusResponse(await res.json());
+return decodeUpdateQuoteStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async convertQuote(req: ConvertQuoteRequest): Promise<ConvertQuoteResponse> {
@@ -129,11 +167,11 @@ body: JSON.stringify(encodeConvertQuoteRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeConvertQuoteResponse(await res.json());
+return decodeConvertQuoteResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

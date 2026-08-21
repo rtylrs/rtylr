@@ -38,6 +38,7 @@ return out;
 
 export function validateMarkOnboardedResponse(v: MarkOnboardedResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

@@ -46,6 +46,16 @@ return out;
 
 export function validateChecklistItemPayload(v: ChecklistItemPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.templateId !== undefined && v.templateId !== null && !(typeof v.templateId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.templateId))) violations.push("template_id has invalid type");
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.assigneeRole !== undefined && v.assigneeRole !== null && !(typeof v.assigneeRole === "string")) violations.push("assignee_role has invalid type");
+if (v.dueOffsetDays !== undefined && v.dueOffsetDays !== null && !(typeof v.dueOffsetDays === "number" && Number.isInteger(v.dueOffsetDays) && v.dueOffsetDays >= -2147483648 && v.dueOffsetDays <= 2147483647)) violations.push("due_offset_days has invalid type");
+if (v.requiresAttachment !== undefined && v.requiresAttachment !== null && !(typeof v.requiresAttachment === "boolean")) violations.push("requires_attachment has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -89,7 +99,15 @@ return out;
 
 export function validateChecklistTemplatePayload(v: ChecklistTemplatePayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.triggerType !== undefined && v.triggerType !== null && !(typeof v.triggerType === "string")) violations.push("trigger_type has invalid type");
+if (v.roleId !== undefined && v.roleId !== null && !(typeof v.roleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.roleId))) violations.push("role_id has invalid type");
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateChecklistItemPayload(item).map((message) => "items: " + message));
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -142,6 +160,17 @@ return out;
 
 export function validateEmployeeChecklistItemPayload(v: EmployeeChecklistItemPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.employeeChecklistId !== undefined && v.employeeChecklistId !== null && !(typeof v.employeeChecklistId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeChecklistId))) violations.push("employee_checklist_id has invalid type");
+if (v.checklistItemId !== undefined && v.checklistItemId !== null && !(typeof v.checklistItemId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.checklistItemId))) violations.push("checklist_item_id has invalid type");
+if (v.assignedToEmployeeId !== undefined && v.assignedToEmployeeId !== null && !(typeof v.assignedToEmployeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.assignedToEmployeeId))) violations.push("assigned_to_employee_id has invalid type");
+if (v.dueDate !== undefined && v.dueDate !== null && !(typeof v.dueDate === "string")) violations.push("due_date has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.completedAt !== undefined && v.completedAt !== null && !(typeof v.completedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.completedAt))) violations.push("completed_at has invalid type");
+if (v.attachmentUrl !== undefined && v.attachmentUrl !== null && !(typeof v.attachmentUrl === "string")) violations.push("attachment_url has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -185,7 +214,15 @@ return out;
 
 export function validateEmployeeChecklistPayload(v: EmployeeChecklistPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.templateId !== undefined && v.templateId !== null && !(typeof v.templateId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.templateId))) violations.push("template_id has invalid type");
+if (v.triggeredAt !== undefined && v.triggeredAt !== null && !(typeof v.triggeredAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.triggeredAt))) violations.push("triggered_at has invalid type");
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateEmployeeChecklistItemPayload(item).map((message) => "items: " + message));
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -208,6 +245,7 @@ return out;
 
 export function validateListChecklistTemplatesRequest(v: ListChecklistTemplatesRequest): string[] {
 const violations: string[] = [];
+if (v.triggerType !== undefined && v.triggerType !== null && !(typeof v.triggerType === "string")) violations.push("trigger_type has invalid type");
 return violations;
 }
 
@@ -239,7 +277,11 @@ return out;
 
 export function validateListChecklistTemplatesResponse(v: ListChecklistTemplatesResponse): string[] {
 const violations: string[] = [];
+if (v.templates !== undefined && v.templates !== null && !(Array.isArray(v.templates) && (v.templates).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("templates has invalid type");
 if (v.templates !== undefined && v.templates !== null) for (const item of v.templates) violations.push(...validateChecklistTemplatePayload(item).map((message) => "templates: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -268,7 +310,10 @@ return out;
 
 export function validateCreateChecklistTemplateRequest(v: CreateChecklistTemplateRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.triggerType !== undefined && v.triggerType !== null && !(typeof v.triggerType === "string")) violations.push("trigger_type has invalid type");
+if (v.roleId !== undefined && v.roleId !== null && !(typeof v.roleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.roleId))) violations.push("role_id has invalid type");
 return violations;
 }
 
@@ -291,6 +336,7 @@ return out;
 
 export function validateCreateChecklistTemplateResponse(v: CreateChecklistTemplateResponse): string[] {
 const violations: string[] = [];
+if (v.template !== undefined && v.template !== null && !(typeof v.template === "object" && v.template !== null && !Array.isArray(v.template))) violations.push("template has invalid type");
 if (v.template !== undefined && v.template !== null) violations.push(...validateChecklistTemplatePayload(v.template).map((message) => "template: " + message));
 return violations;
 }
@@ -317,7 +363,9 @@ return out;
 
 export function validateUpdateChecklistTemplateBody(v: UpdateChecklistTemplateBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.triggerType !== undefined && v.triggerType !== null && !(typeof v.triggerType === "string")) violations.push("trigger_type has invalid type");
 return violations;
 }
 
@@ -343,8 +391,10 @@ return out;
 
 export function validateUpdateChecklistTemplateRequest(v: UpdateChecklistTemplateRequest): string[] {
 const violations: string[] = [];
+if (v.roleId !== undefined && v.roleId !== null && !(typeof v.roleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.roleId))) violations.push("role_id has invalid type");
 if (!(v.roleId !== undefined && v.roleId !== null)) violations.push("role_id is required");
 if (v.roleId !== undefined && v.roleId !== null && !(Number(v.roleId) > 0)) violations.push("role_id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateChecklistTemplateBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -368,6 +418,7 @@ return out;
 
 export function validateUpdateChecklistTemplateResponse(v: UpdateChecklistTemplateResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 
@@ -405,9 +456,15 @@ return out;
 
 export function validateAddItemToChecklistTemplateRequest(v: AddItemToChecklistTemplateRequest): string[] {
 const violations: string[] = [];
+if (v.roleId !== undefined && v.roleId !== null && !(typeof v.roleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.roleId))) violations.push("role_id has invalid type");
 if (!(v.roleId !== undefined && v.roleId !== null)) violations.push("role_id is required");
 if (v.roleId !== undefined && v.roleId !== null && !(Number(v.roleId) > 0)) violations.push("role_id violates @gt");
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
 if (!(v.title !== undefined && v.title !== null) || v.title === "") violations.push("title is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.assigneeRole !== undefined && v.assigneeRole !== null && !(typeof v.assigneeRole === "string")) violations.push("assignee_role has invalid type");
+if (v.dueOffsetDays !== undefined && v.dueOffsetDays !== null && !(typeof v.dueOffsetDays === "number" && Number.isInteger(v.dueOffsetDays) && v.dueOffsetDays >= -2147483648 && v.dueOffsetDays <= 2147483647)) violations.push("due_offset_days has invalid type");
+if (v.requiresAttachment !== undefined && v.requiresAttachment !== null && !(typeof v.requiresAttachment === "boolean")) violations.push("requires_attachment has invalid type");
 return violations;
 }
 
@@ -430,6 +487,7 @@ return out;
 
 export function validateAddItemToChecklistTemplateResponse(v: AddItemToChecklistTemplateResponse): string[] {
 const violations: string[] = [];
+if (v.item !== undefined && v.item !== null && !(typeof v.item === "object" && v.item !== null && !Array.isArray(v.item))) violations.push("item has invalid type");
 if (v.item !== undefined && v.item !== null) violations.push(...validateChecklistItemPayload(v.item).map((message) => "item: " + message));
 return violations;
 }
@@ -459,8 +517,11 @@ return out;
 
 export function validateListEmployeeChecklistsRequest(v: ListEmployeeChecklistsRequest): string[] {
 const violations: string[] = [];
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
 if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
 if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -492,7 +553,11 @@ return out;
 
 export function validateListEmployeeChecklistsResponse(v: ListEmployeeChecklistsResponse): string[] {
 const violations: string[] = [];
+if (v.checklists !== undefined && v.checklists !== null && !(Array.isArray(v.checklists) && (v.checklists).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("checklists has invalid type");
 if (v.checklists !== undefined && v.checklists !== null) for (const item of v.checklists) violations.push(...validateEmployeeChecklistPayload(item).map((message) => "checklists: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -515,6 +580,7 @@ return out;
 
 export function validateGetEmployeeChecklistRequest(v: GetEmployeeChecklistRequest): string[] {
 const violations: string[] = [];
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
 if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
 if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
 return violations;
@@ -539,6 +605,7 @@ return out;
 
 export function validateGetEmployeeChecklistResponse(v: GetEmployeeChecklistResponse): string[] {
 const violations: string[] = [];
+if (v.checklist !== undefined && v.checklist !== null && !(typeof v.checklist === "object" && v.checklist !== null && !Array.isArray(v.checklist))) violations.push("checklist has invalid type");
 if (v.checklist !== undefined && v.checklist !== null) violations.push(...validateEmployeeChecklistPayload(v.checklist).map((message) => "checklist: " + message));
 return violations;
 }
@@ -568,10 +635,13 @@ return out;
 
 export function validateTriggerChecklistRequest(v: TriggerChecklistRequest): string[] {
 const violations: string[] = [];
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
 if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
 if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (v.templateId !== undefined && v.templateId !== null && !(typeof v.templateId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.templateId))) violations.push("template_id has invalid type");
 if (!(v.templateId !== undefined && v.templateId !== null)) violations.push("template_id is required");
 if (v.templateId !== undefined && v.templateId !== null && !(Number(v.templateId) > 0)) violations.push("template_id violates @gt");
+if (v.triggerDate !== undefined && v.triggerDate !== null && !(typeof v.triggerDate === "string")) violations.push("trigger_date has invalid type");
 if (!(v.triggerDate !== undefined && v.triggerDate !== null) || v.triggerDate === "") violations.push("trigger_date is required");
 if (v.triggerDate !== undefined && v.triggerDate !== null && !(new RegExp("^[0-9]{4}-[0-9]{2}-[0-9]{2}$")).test(v.triggerDate)) violations.push("trigger_date has invalid format");
 return violations;
@@ -596,6 +666,7 @@ return out;
 
 export function validateTriggerChecklistResponse(v: TriggerChecklistResponse): string[] {
 const violations: string[] = [];
+if (v.checklist !== undefined && v.checklist !== null && !(typeof v.checklist === "object" && v.checklist !== null && !Array.isArray(v.checklist))) violations.push("checklist has invalid type");
 if (v.checklist !== undefined && v.checklist !== null) violations.push(...validateEmployeeChecklistPayload(v.checklist).map((message) => "checklist: " + message));
 return violations;
 }
@@ -638,6 +709,7 @@ return out;
 
 export function validateCompleteChecklistItemResponse(v: CompleteChecklistItemResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 

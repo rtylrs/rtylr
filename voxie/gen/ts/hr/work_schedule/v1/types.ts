@@ -52,6 +52,18 @@ return out;
 
 export function validateWorkSchedulePayload(v: WorkSchedulePayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.workingDays !== undefined && v.workingDays !== null && !(Array.isArray(v.workingDays) && (v.workingDays).every((item: any) => typeof item === "string"))) violations.push("working_days has invalid type");
+if (v.startTime !== undefined && v.startTime !== null && !(typeof v.startTime === "string")) violations.push("start_time has invalid type");
+if (v.endTime !== undefined && v.endTime !== null && !(typeof v.endTime === "string")) violations.push("end_time has invalid type");
+if (v.breakMinutes !== undefined && v.breakMinutes !== null && !(typeof v.breakMinutes === "number" && Number.isInteger(v.breakMinutes) && v.breakMinutes >= -2147483648 && v.breakMinutes <= 2147483647)) violations.push("break_minutes has invalid type");
+if (v.contractedHoursPerWeek !== undefined && v.contractedHoursPerWeek !== null && !(typeof v.contractedHoursPerWeek === "number" && Number.isFinite(v.contractedHoursPerWeek))) violations.push("contracted_hours_per_week has invalid type");
+if (v.dailyOtThresholdMinutes !== undefined && v.dailyOtThresholdMinutes !== null && !(typeof v.dailyOtThresholdMinutes === "number" && Number.isInteger(v.dailyOtThresholdMinutes) && v.dailyOtThresholdMinutes >= -2147483648 && v.dailyOtThresholdMinutes <= 2147483647)) violations.push("daily_ot_threshold_minutes has invalid type");
+if (v.weeklyOtThresholdMinutes !== undefined && v.weeklyOtThresholdMinutes !== null && !(typeof v.weeklyOtThresholdMinutes === "number" && Number.isInteger(v.weeklyOtThresholdMinutes) && v.weeklyOtThresholdMinutes >= -2147483648 && v.weeklyOtThresholdMinutes <= 2147483647)) violations.push("weekly_ot_threshold_minutes has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -77,6 +89,8 @@ return out;
 
 export function validateListWorkSchedulesRequest(v: ListWorkSchedulesRequest): string[] {
 const violations: string[] = [];
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -102,7 +116,9 @@ return out;
 
 export function validateListWorkSchedulesResponse(v: ListWorkSchedulesResponse): string[] {
 const violations: string[] = [];
+if (v.schedules !== undefined && v.schedules !== null && !(Array.isArray(v.schedules) && (v.schedules).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("schedules has invalid type");
 if (v.schedules !== undefined && v.schedules !== null) for (const item of v.schedules) violations.push(...validateWorkSchedulePayload(item).map((message) => "schedules: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isInteger(v.total) && v.total >= -2147483648 && v.total <= 2147483647)) violations.push("total has invalid type");
 return violations;
 }
 
@@ -146,15 +162,23 @@ return out;
 
 export function validateCreateWorkScheduleRequest(v: CreateWorkScheduleRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.workingDays !== undefined && v.workingDays !== null && !(Array.isArray(v.workingDays) && (v.workingDays).every((item: any) => typeof item === "string"))) violations.push("working_days has invalid type");
 if (v.workingDays !== undefined && v.workingDays !== null && v.workingDays.length < 1) violations.push("working_days must contain at least 1 items");
+if (v.startTime !== undefined && v.startTime !== null && !(typeof v.startTime === "string")) violations.push("start_time has invalid type");
 if (!(v.startTime !== undefined && v.startTime !== null) || v.startTime === "") violations.push("start_time is required");
+if (v.endTime !== undefined && v.endTime !== null && !(typeof v.endTime === "string")) violations.push("end_time has invalid type");
 if (!(v.endTime !== undefined && v.endTime !== null) || v.endTime === "") violations.push("end_time is required");
+if (v.breakMinutes !== undefined && v.breakMinutes !== null && !(typeof v.breakMinutes === "number" && Number.isInteger(v.breakMinutes) && v.breakMinutes >= -2147483648 && v.breakMinutes <= 2147483647)) violations.push("break_minutes has invalid type");
 if (!(v.breakMinutes !== undefined && v.breakMinutes !== null)) violations.push("break_minutes is required");
 if (v.breakMinutes !== undefined && v.breakMinutes !== null && !(Number(v.breakMinutes) >= 0)) violations.push("break_minutes violates @gte");
+if (v.contractedHoursPerWeek !== undefined && v.contractedHoursPerWeek !== null && !(typeof v.contractedHoursPerWeek === "number" && Number.isFinite(v.contractedHoursPerWeek))) violations.push("contracted_hours_per_week has invalid type");
 if (v.contractedHoursPerWeek !== undefined && v.contractedHoursPerWeek !== null && !(Number(v.contractedHoursPerWeek) >= 0)) violations.push("contracted_hours_per_week violates @gte");
+if (v.dailyOtThresholdMinutes !== undefined && v.dailyOtThresholdMinutes !== null && !(typeof v.dailyOtThresholdMinutes === "number" && Number.isInteger(v.dailyOtThresholdMinutes) && v.dailyOtThresholdMinutes >= -2147483648 && v.dailyOtThresholdMinutes <= 2147483647)) violations.push("daily_ot_threshold_minutes has invalid type");
 if (!(v.dailyOtThresholdMinutes !== undefined && v.dailyOtThresholdMinutes !== null)) violations.push("daily_ot_threshold_minutes is required");
 if (v.dailyOtThresholdMinutes !== undefined && v.dailyOtThresholdMinutes !== null && !(Number(v.dailyOtThresholdMinutes) >= 0)) violations.push("daily_ot_threshold_minutes violates @gte");
+if (v.weeklyOtThresholdMinutes !== undefined && v.weeklyOtThresholdMinutes !== null && !(typeof v.weeklyOtThresholdMinutes === "number" && Number.isInteger(v.weeklyOtThresholdMinutes) && v.weeklyOtThresholdMinutes >= -2147483648 && v.weeklyOtThresholdMinutes <= 2147483647)) violations.push("weekly_ot_threshold_minutes has invalid type");
 if (!(v.weeklyOtThresholdMinutes !== undefined && v.weeklyOtThresholdMinutes !== null)) violations.push("weekly_ot_threshold_minutes is required");
 if (v.weeklyOtThresholdMinutes !== undefined && v.weeklyOtThresholdMinutes !== null && !(Number(v.weeklyOtThresholdMinutes) >= 0)) violations.push("weekly_ot_threshold_minutes violates @gte");
 return violations;
@@ -179,6 +203,7 @@ return out;
 
 export function validateCreateWorkScheduleResponse(v: CreateWorkScheduleResponse): string[] {
 const violations: string[] = [];
+if (v.schedule !== undefined && v.schedule !== null && !(typeof v.schedule === "object" && v.schedule !== null && !Array.isArray(v.schedule))) violations.push("schedule has invalid type");
 if (v.schedule !== undefined && v.schedule !== null) violations.push(...validateWorkSchedulePayload(v.schedule).map((message) => "schedule: " + message));
 return violations;
 }
@@ -223,7 +248,15 @@ return out;
 
 export function validateUpdateWorkScheduleBody(v: UpdateWorkScheduleBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.workingDays !== undefined && v.workingDays !== null && !(Array.isArray(v.workingDays) && (v.workingDays).every((item: any) => typeof item === "string"))) violations.push("working_days has invalid type");
 if (v.workingDays !== undefined && v.workingDays !== null && v.workingDays.length < 1) violations.push("working_days must contain at least 1 items");
+if (v.startTime !== undefined && v.startTime !== null && !(typeof v.startTime === "string")) violations.push("start_time has invalid type");
+if (v.endTime !== undefined && v.endTime !== null && !(typeof v.endTime === "string")) violations.push("end_time has invalid type");
+if (v.breakMinutes !== undefined && v.breakMinutes !== null && !(typeof v.breakMinutes === "number" && Number.isInteger(v.breakMinutes) && v.breakMinutes >= -2147483648 && v.breakMinutes <= 2147483647)) violations.push("break_minutes has invalid type");
+if (v.contractedHoursPerWeek !== undefined && v.contractedHoursPerWeek !== null && !(typeof v.contractedHoursPerWeek === "number" && Number.isFinite(v.contractedHoursPerWeek))) violations.push("contracted_hours_per_week has invalid type");
+if (v.dailyOtThresholdMinutes !== undefined && v.dailyOtThresholdMinutes !== null && !(typeof v.dailyOtThresholdMinutes === "number" && Number.isInteger(v.dailyOtThresholdMinutes) && v.dailyOtThresholdMinutes >= -2147483648 && v.dailyOtThresholdMinutes <= 2147483647)) violations.push("daily_ot_threshold_minutes has invalid type");
+if (v.weeklyOtThresholdMinutes !== undefined && v.weeklyOtThresholdMinutes !== null && !(typeof v.weeklyOtThresholdMinutes === "number" && Number.isInteger(v.weeklyOtThresholdMinutes) && v.weeklyOtThresholdMinutes >= -2147483648 && v.weeklyOtThresholdMinutes <= 2147483647)) violations.push("weekly_ot_threshold_minutes has invalid type");
 return violations;
 }
 
@@ -249,8 +282,10 @@ return out;
 
 export function validateUpdateWorkScheduleRequest(v: UpdateWorkScheduleRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateWorkScheduleBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -274,6 +309,7 @@ return out;
 
 export function validateUpdateWorkScheduleResponse(v: UpdateWorkScheduleResponse): string[] {
 const violations: string[] = [];
+if (v.schedule !== undefined && v.schedule !== null && !(typeof v.schedule === "object" && v.schedule !== null && !Array.isArray(v.schedule))) violations.push("schedule has invalid type");
 if (v.schedule !== undefined && v.schedule !== null) violations.push(...validateWorkSchedulePayload(v.schedule).map((message) => "schedule: " + message));
 return violations;
 }

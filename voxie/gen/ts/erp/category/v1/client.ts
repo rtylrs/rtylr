@@ -2,6 +2,42 @@
 import type { ListCategoriesRequest, ListCategoriesResponse, CreateCategoryRequest, CreateCategoryResponse, UpdateCategoryRequest, UpdateCategoryResponse, DeleteCategoryRequest, DeleteCategoryResponse } from "./types";
 import { encodeListCategoriesRequest, validateListCategoriesRequest, decodeListCategoriesResponse, encodeCreateCategoryRequest, validateCreateCategoryRequest, decodeCreateCategoryResponse, encodeUpdateCategoryRequest, validateUpdateCategoryRequest, decodeUpdateCategoryResponse, encodeDeleteCategoryRequest, validateDeleteCategoryRequest, decodeDeleteCategoryResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface CategoryServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class CategoryServiceClient {
@@ -46,11 +84,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListCategoriesResponse(await res.json());
+return decodeListCategoriesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createCategory(req: CreateCategoryRequest): Promise<CreateCategoryResponse> {
@@ -64,11 +102,11 @@ body: JSON.stringify(encodeCreateCategoryRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateCategoryResponse(await res.json());
+return decodeCreateCategoryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateCategory(req: UpdateCategoryRequest): Promise<UpdateCategoryResponse> {
@@ -83,11 +121,11 @@ body: JSON.stringify(encodeUpdateCategoryRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateCategoryResponse(await res.json());
+return decodeUpdateCategoryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteCategory(req: DeleteCategoryRequest): Promise<DeleteCategoryResponse> {
@@ -104,11 +142,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteCategoryResponse(await res.json());
+return decodeDeleteCategoryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

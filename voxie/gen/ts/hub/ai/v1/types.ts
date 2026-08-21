@@ -43,6 +43,15 @@ return out;
 
 export function validateAiQuotaStatus(v: AiQuotaStatus): string[] {
 const violations: string[] = [];
+if (v.planSlug !== undefined && v.planSlug !== null && !(typeof v.planSlug === "string")) violations.push("plan_slug has invalid type");
+if (v.mode !== undefined && v.mode !== null && !(typeof v.mode === "string")) violations.push("mode has invalid type");
+if (v.allowanceTokens !== undefined && v.allowanceTokens !== null && !(typeof v.allowanceTokens === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.allowanceTokens))) violations.push("allowance_tokens has invalid type");
+if (v.usedTokens !== undefined && v.usedTokens !== null && !(typeof v.usedTokens === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.usedTokens))) violations.push("used_tokens has invalid type");
+if (v.remainingTokens !== undefined && v.remainingTokens !== null && !(typeof v.remainingTokens === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.remainingTokens))) violations.push("remaining_tokens has invalid type");
+if (v.overageTokens !== undefined && v.overageTokens !== null && !(typeof v.overageTokens === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.overageTokens))) violations.push("overage_tokens has invalid type");
+if (v.allowOverage !== undefined && v.allowOverage !== null && !(typeof v.allowOverage === "boolean")) violations.push("allow_overage has invalid type");
+if (v.blocked !== undefined && v.blocked !== null && !(typeof v.blocked === "boolean")) violations.push("blocked has invalid type");
+if (v.periodEnd !== undefined && v.periodEnd !== null && !(typeof v.periodEnd === "string")) violations.push("period_end has invalid type");
 return violations;
 }
 
@@ -65,6 +74,7 @@ return out;
 
 export function validateAiQuotaSettings(v: AiQuotaSettings): string[] {
 const violations: string[] = [];
+if (v.mode !== undefined && v.mode !== null && !(typeof v.mode === "string")) violations.push("mode has invalid type");
 return violations;
 }
 
@@ -106,6 +116,7 @@ return out;
 
 export function validateGetAiUsageResponse(v: GetAiUsageResponse): string[] {
 const violations: string[] = [];
+if (v.usage !== undefined && v.usage !== null && !(typeof v.usage === "object" && v.usage !== null && !Array.isArray(v.usage))) violations.push("usage has invalid type");
 if (v.usage !== undefined && v.usage !== null) violations.push(...validateAiQuotaStatus(v.usage).map((message) => "usage: " + message));
 return violations;
 }
@@ -148,6 +159,7 @@ return out;
 
 export function validateGetAiQuotaSettingsResponse(v: GetAiQuotaSettingsResponse): string[] {
 const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null && !(typeof v.settings === "object" && v.settings !== null && !Array.isArray(v.settings))) violations.push("settings has invalid type");
 if (v.settings !== undefined && v.settings !== null) violations.push(...validateAiQuotaSettings(v.settings).map((message) => "settings: " + message));
 return violations;
 }
@@ -171,6 +183,7 @@ return out;
 
 export function validateUpdateAiQuotaSettingsRequest(v: UpdateAiQuotaSettingsRequest): string[] {
 const violations: string[] = [];
+if (v.mode !== undefined && v.mode !== null && !(typeof v.mode === "string")) violations.push("mode has invalid type");
 if (!(v.mode !== undefined && v.mode !== null) || v.mode === "") violations.push("mode is required");
 return violations;
 }
@@ -194,6 +207,7 @@ return out;
 
 export function validateUpdateAiQuotaSettingsResponse(v: UpdateAiQuotaSettingsResponse): string[] {
 const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null && !(typeof v.settings === "object" && v.settings !== null && !Array.isArray(v.settings))) violations.push("settings has invalid type");
 if (v.settings !== undefined && v.settings !== null) violations.push(...validateAiQuotaSettings(v.settings).map((message) => "settings: " + message));
 return violations;
 }

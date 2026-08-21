@@ -53,6 +53,12 @@ return out;
 
 export function validateGetKPIsResponse(v: GetKPIsResponse): string[] {
 const violations: string[] = [];
+if (v.revenue !== undefined && v.revenue !== null && !(typeof v.revenue === "number" && Number.isFinite(v.revenue))) violations.push("revenue has invalid type");
+if (v.orderCount !== undefined && v.orderCount !== null && !(typeof v.orderCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderCount))) violations.push("order_count has invalid type");
+if (v.staffCount !== undefined && v.staffCount !== null && !(typeof v.staffCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffCount))) violations.push("staff_count has invalid type");
+if (v.customerCount !== undefined && v.customerCount !== null && !(typeof v.customerCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerCount))) violations.push("customer_count has invalid type");
+if (v.lowStockCount !== undefined && v.lowStockCount !== null && !(typeof v.lowStockCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.lowStockCount))) violations.push("low_stock_count has invalid type");
+if (v.activeApps !== undefined && v.activeApps !== null && !(typeof v.activeApps === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.activeApps))) violations.push("active_apps has invalid type");
 return violations;
 }
 

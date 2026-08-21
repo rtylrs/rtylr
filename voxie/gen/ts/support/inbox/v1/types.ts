@@ -46,6 +46,16 @@ return out;
 
 export function validateInboxItem(v: InboxItem): string[] {
 const violations: string[] = [];
+if (v.ticketId !== undefined && v.ticketId !== null && !(typeof v.ticketId === "number" && Number.isSafeInteger(v.ticketId) && v.ticketId >= Number.MIN_SAFE_INTEGER && v.ticketId <= Number.MAX_SAFE_INTEGER)) violations.push("ticket_id has invalid type");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
+if (v.customerEmail !== undefined && v.customerEmail !== null && !(typeof v.customerEmail === "string")) violations.push("customer_email has invalid type");
+if (v.subject !== undefined && v.subject !== null && !(typeof v.subject === "string")) violations.push("subject has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.priority !== undefined && v.priority !== null && !(typeof v.priority === "string")) violations.push("priority has invalid type");
+if (v.channel !== undefined && v.channel !== null && !(typeof v.channel === "string")) violations.push("channel has invalid type");
+if (v.lastMessage !== undefined && v.lastMessage !== null && !(typeof v.lastMessage === "string")) violations.push("last_message has invalid type");
+if (v.lastMessageAt !== undefined && v.lastMessageAt !== null && !(typeof v.lastMessageAt === "string")) violations.push("last_message_at has invalid type");
+if (v.messageCount !== undefined && v.messageCount !== null && !(typeof v.messageCount === "number" && Number.isInteger(v.messageCount) && v.messageCount >= -2147483648 && v.messageCount <= 2147483647)) violations.push("message_count has invalid type");
 return violations;
 }
 
@@ -71,6 +81,8 @@ return out;
 
 export function validateListInboxRequest(v: ListInboxRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -102,7 +114,11 @@ return out;
 
 export function validateListInboxResponse(v: ListInboxResponse): string[] {
 const violations: string[] = [];
+if (v.inbox !== undefined && v.inbox !== null && !(Array.isArray(v.inbox) && (v.inbox).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("inbox has invalid type");
 if (v.inbox !== undefined && v.inbox !== null) for (const item of v.inbox) violations.push(...validateInboxItem(item).map((message) => "inbox: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isInteger(v.total) && v.total >= -2147483648 && v.total <= 2147483647)) violations.push("total has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -144,6 +160,7 @@ return out;
 
 export function validateGetUnreadCountResponse(v: GetUnreadCountResponse): string[] {
 const violations: string[] = [];
+if (v.count !== undefined && v.count !== null && !(typeof v.count === "number" && Number.isInteger(v.count) && v.count >= -2147483648 && v.count <= 2147483647)) violations.push("count has invalid type");
 return violations;
 }
 

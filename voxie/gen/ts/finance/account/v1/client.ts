@@ -2,6 +2,42 @@
 import type { ListAccountsRequest, ListAccountsResponse, CreateAccountRequest, CreateAccountResponse, UpdateAccountRequest, UpdateAccountResponse, DeleteAccountRequest, DeleteAccountResponse, GetChartOfAccountsRequest, GetChartOfAccountsResponse } from "./types";
 import { encodeListAccountsRequest, validateListAccountsRequest, decodeListAccountsResponse, encodeCreateAccountRequest, validateCreateAccountRequest, decodeCreateAccountResponse, encodeUpdateAccountRequest, validateUpdateAccountRequest, decodeUpdateAccountResponse, encodeDeleteAccountRequest, validateDeleteAccountRequest, decodeDeleteAccountResponse, encodeGetChartOfAccountsRequest, validateGetChartOfAccountsRequest, decodeGetChartOfAccountsResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface AccountServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class AccountServiceClient {
@@ -52,11 +90,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListAccountsResponse(await res.json());
+return decodeListAccountsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createAccount(req: CreateAccountRequest): Promise<CreateAccountResponse> {
@@ -70,11 +108,11 @@ body: JSON.stringify(encodeCreateAccountRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateAccountResponse(await res.json());
+return decodeCreateAccountResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateAccount(req: UpdateAccountRequest): Promise<UpdateAccountResponse> {
@@ -89,11 +127,11 @@ body: JSON.stringify(encodeUpdateAccountRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateAccountResponse(await res.json());
+return decodeUpdateAccountResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteAccount(req: DeleteAccountRequest): Promise<DeleteAccountResponse> {
@@ -110,11 +148,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteAccountResponse(await res.json());
+return decodeDeleteAccountResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getChartOfAccounts(req: GetChartOfAccountsRequest): Promise<GetChartOfAccountsResponse> {
@@ -130,11 +168,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetChartOfAccountsResponse(await res.json());
+return decodeGetChartOfAccountsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

@@ -58,7 +58,21 @@ return out;
 
 export function validateQuote(v: Quote): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
+if (v.customerEmail !== undefined && v.customerEmail !== null && !(typeof v.customerEmail === "string")) violations.push("customer_email has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.lines !== undefined && v.lines !== null && !(Array.isArray(v.lines) && (v.lines).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("lines has invalid type");
 if (v.lines !== undefined && v.lines !== null) for (const item of v.lines) violations.push(...validateQuoteLine(item).map((message) => "lines: " + message));
+if (v.subtotal !== undefined && v.subtotal !== null && !(typeof v.subtotal === "number" && Number.isFinite(v.subtotal))) violations.push("subtotal has invalid type");
+if (v.tax !== undefined && v.tax !== null && !(typeof v.tax === "number" && Number.isFinite(v.tax))) violations.push("tax has invalid type");
+if (v.discount !== undefined && v.discount !== null && !(typeof v.discount === "number" && Number.isFinite(v.discount))) violations.push("discount has invalid type");
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isFinite(v.total))) violations.push("total has invalid type");
+if (v.validUntil !== undefined && v.validUntil !== null && !(typeof v.validUntil === "string")) violations.push("valid_until has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -93,6 +107,11 @@ return out;
 
 export function validateQuoteLine(v: QuoteLine): string[] {
 const violations: string[] = [];
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.quantity !== undefined && v.quantity !== null && !(typeof v.quantity === "number" && Number.isInteger(v.quantity) && v.quantity >= -2147483648 && v.quantity <= 2147483647)) violations.push("quantity has invalid type");
+if (v.unitPrice !== undefined && v.unitPrice !== null && !(typeof v.unitPrice === "number" && Number.isFinite(v.unitPrice))) violations.push("unit_price has invalid type");
+if (v.taxRate !== undefined && v.taxRate !== null && !(typeof v.taxRate === "number" && Number.isFinite(v.taxRate))) violations.push("tax_rate has invalid type");
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isFinite(v.total))) violations.push("total has invalid type");
 return violations;
 }
 
@@ -142,15 +161,25 @@ return out;
 
 export function validateCreateQuoteRequest(v: CreateQuoteRequest): string[] {
 const violations: string[] = [];
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
 if (!(v.customerName !== undefined && v.customerName !== null) || v.customerName === "") violations.push("customer_name is required");
+if (v.customerEmail !== undefined && v.customerEmail !== null && !(typeof v.customerEmail === "string")) violations.push("customer_email has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.lines !== undefined && v.lines !== null && !(Array.isArray(v.lines) && (v.lines).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("lines has invalid type");
 if (v.lines !== undefined && v.lines !== null && v.lines.length < 1) violations.push("lines must contain at least 1 items");
 if (v.lines !== undefined && v.lines !== null) for (const item of v.lines) violations.push(...validateQuoteLine(item).map((message) => "lines: " + message));
+if (v.subtotal !== undefined && v.subtotal !== null && !(typeof v.subtotal === "number" && Number.isFinite(v.subtotal))) violations.push("subtotal has invalid type");
 if (v.subtotal !== undefined && v.subtotal !== null && !(Number(v.subtotal) >= 0)) violations.push("subtotal violates @gte");
+if (v.tax !== undefined && v.tax !== null && !(typeof v.tax === "number" && Number.isFinite(v.tax))) violations.push("tax has invalid type");
 if (v.tax !== undefined && v.tax !== null && !(Number(v.tax) >= 0)) violations.push("tax violates @gte");
+if (v.validUntil !== undefined && v.validUntil !== null && !(typeof v.validUntil === "string")) violations.push("valid_until has invalid type");
 if (!(v.validUntil !== undefined && v.validUntil !== null) || v.validUntil === "") violations.push("valid_until is required");
+if (v.discount !== undefined && v.discount !== null && !(typeof v.discount === "number" && Number.isFinite(v.discount))) violations.push("discount has invalid type");
 if (!(v.discount !== undefined && v.discount !== null)) violations.push("discount is required");
 if (v.discount !== undefined && v.discount !== null && !(Number(v.discount) >= 0)) violations.push("discount violates @gte");
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isFinite(v.total))) violations.push("total has invalid type");
 if (v.total !== undefined && v.total !== null && !(Number(v.total) >= 0)) violations.push("total violates @gte");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
 return violations;
 }
 
@@ -173,6 +202,7 @@ return out;
 
 export function validateCreateQuoteResponse(v: CreateQuoteResponse): string[] {
 const violations: string[] = [];
+if (v.quote !== undefined && v.quote !== null && !(typeof v.quote === "object" && v.quote !== null && !Array.isArray(v.quote))) violations.push("quote has invalid type");
 if (v.quote !== undefined && v.quote !== null) violations.push(...validateQuote(v.quote).map((message) => "quote: " + message));
 return violations;
 }
@@ -196,6 +226,7 @@ return out;
 
 export function validateGetQuoteRequest(v: GetQuoteRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -220,6 +251,7 @@ return out;
 
 export function validateGetQuoteResponse(v: GetQuoteResponse): string[] {
 const violations: string[] = [];
+if (v.quote !== undefined && v.quote !== null && !(typeof v.quote === "object" && v.quote !== null && !Array.isArray(v.quote))) violations.push("quote has invalid type");
 if (v.quote !== undefined && v.quote !== null) violations.push(...validateQuote(v.quote).map((message) => "quote: " + message));
 return violations;
 }
@@ -246,6 +278,8 @@ return out;
 
 export function validateListQuotesRequest(v: ListQuotesRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isSafeInteger(v.pageSize) && v.pageSize >= Number.MIN_SAFE_INTEGER && v.pageSize <= Number.MAX_SAFE_INTEGER)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -277,7 +311,11 @@ return out;
 
 export function validateListQuotesResponse(v: ListQuotesResponse): string[] {
 const violations: string[] = [];
+if (v.quotes !== undefined && v.quotes !== null && !(Array.isArray(v.quotes) && (v.quotes).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("quotes has invalid type");
 if (v.quotes !== undefined && v.quotes !== null) for (const item of v.quotes) violations.push(...validateQuote(item).map((message) => "quotes: " + message));
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isSafeInteger(v.pageSize) && v.pageSize >= Number.MIN_SAFE_INTEGER && v.pageSize <= Number.MAX_SAFE_INTEGER)) violations.push("page_size has invalid type");
+if (v.hasMore !== undefined && v.hasMore !== null && !(typeof v.hasMore === "boolean")) violations.push("has_more has invalid type");
 return violations;
 }
 
@@ -300,6 +338,7 @@ return out;
 
 export function validateUpdateQuoteStatusBody(v: UpdateQuoteStatusBody): string[] {
 const violations: string[] = [];
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
 return violations;
 }
@@ -326,8 +365,10 @@ return out;
 
 export function validateUpdateQuoteStatusRequest(v: UpdateQuoteStatusRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateQuoteStatusBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -351,6 +392,7 @@ return out;
 
 export function validateUpdateQuoteStatusResponse(v: UpdateQuoteStatusResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -373,6 +415,7 @@ return out;
 
 export function validateConvertQuoteRequest(v: ConvertQuoteRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -400,6 +443,8 @@ return out;
 
 export function validateConvertQuoteResponse(v: ConvertQuoteResponse): string[] {
 const violations: string[] = [];
+if (v.invoiceId !== undefined && v.invoiceId !== null && !(typeof v.invoiceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.invoiceId))) violations.push("invoice_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

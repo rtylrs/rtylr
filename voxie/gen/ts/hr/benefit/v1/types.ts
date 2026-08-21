@@ -44,6 +44,15 @@ return out;
 
 export function validateBenefitPlan(v: BenefitPlan): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.provider !== undefined && v.provider !== null && !(typeof v.provider === "string")) violations.push("provider has invalid type");
+if (v.costEmployer !== undefined && v.costEmployer !== null && !(typeof v.costEmployer === "number" && Number.isFinite(v.costEmployer))) violations.push("cost_employer has invalid type");
+if (v.costEmployee !== undefined && v.costEmployee !== null && !(typeof v.costEmployee === "number" && Number.isFinite(v.costEmployee))) violations.push("cost_employee has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -81,7 +90,13 @@ return out;
 
 export function validateCreateBenefitRequest(v: CreateBenefitRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.provider !== undefined && v.provider !== null && !(typeof v.provider === "string")) violations.push("provider has invalid type");
+if (v.costEmployer !== undefined && v.costEmployer !== null && !(typeof v.costEmployer === "number" && Number.isFinite(v.costEmployer))) violations.push("cost_employer has invalid type");
+if (v.costEmployee !== undefined && v.costEmployee !== null && !(typeof v.costEmployee === "number" && Number.isFinite(v.costEmployee))) violations.push("cost_employee has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -107,6 +122,8 @@ return out;
 
 export function validateCreateBenefitResponse(v: CreateBenefitResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -148,6 +165,7 @@ return out;
 
 export function validateListBenefitsResponse(v: ListBenefitsResponse): string[] {
 const violations: string[] = [];
+if (v.plans !== undefined && v.plans !== null && !(Array.isArray(v.plans) && (v.plans).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("plans has invalid type");
 if (v.plans !== undefined && v.plans !== null) for (const item of v.plans) violations.push(...validateBenefitPlan(item).map((message) => "plans: " + message));
 return violations;
 }
@@ -189,6 +207,13 @@ return out;
 
 export function validateBenefitEnrollment(v: BenefitEnrollment): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.planId !== undefined && v.planId !== null && !(typeof v.planId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.planId))) violations.push("plan_id has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.enrolledAt !== undefined && v.enrolledAt !== null && !(typeof v.enrolledAt === "string")) violations.push("enrolled_at has invalid type");
+if (v.cancelledAt !== undefined && v.cancelledAt !== null && !(typeof v.cancelledAt === "string")) violations.push("cancelled_at has invalid type");
 return violations;
 }
 
@@ -211,6 +236,7 @@ return out;
 
 export function validateEnrollInBenefitRequest(v: EnrollInBenefitRequest): string[] {
 const violations: string[] = [];
+if (v.planId !== undefined && v.planId !== null && !(typeof v.planId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.planId))) violations.push("plan_id has invalid type");
 if (!(v.planId !== undefined && v.planId !== null)) violations.push("plan_id is required");
 return violations;
 }
@@ -234,6 +260,7 @@ return out;
 
 export function validateEnrollInBenefitResponse(v: EnrollInBenefitResponse): string[] {
 const violations: string[] = [];
+if (v.enrollment !== undefined && v.enrollment !== null && !(typeof v.enrollment === "object" && v.enrollment !== null && !Array.isArray(v.enrollment))) violations.push("enrollment has invalid type");
 if (v.enrollment !== undefined && v.enrollment !== null) violations.push(...validateBenefitEnrollment(v.enrollment).map((message) => "enrollment: " + message));
 return violations;
 }
@@ -266,6 +293,10 @@ return out;
 
 export function validateListMyBenefitEnrollmentsRequest(v: ListMyBenefitEnrollmentsRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -291,7 +322,9 @@ return out;
 
 export function validateListMyBenefitEnrollmentsResponse(v: ListMyBenefitEnrollmentsResponse): string[] {
 const violations: string[] = [];
+if (v.enrollments !== undefined && v.enrollments !== null && !(Array.isArray(v.enrollments) && (v.enrollments).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("enrollments has invalid type");
 if (v.enrollments !== undefined && v.enrollments !== null) for (const item of v.enrollments) violations.push(...validateBenefitEnrollment(item).map((message) => "enrollments: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }

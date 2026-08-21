@@ -44,6 +44,15 @@ return out;
 
 export function validateSegment(v: Segment): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.filters !== undefined && v.filters !== null && !(typeof v.filters === "string")) violations.push("filters has invalid type");
+if (v.customerCount !== undefined && v.customerCount !== null && !(typeof v.customerCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerCount))) violations.push("customer_count has invalid type");
+if (v.lastCalculatedAt !== undefined && v.lastCalculatedAt !== null && !(typeof v.lastCalculatedAt === "string")) violations.push("last_calculated_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -72,8 +81,11 @@ return out;
 
 export function validateCreateSegmentRequest(v: CreateSegmentRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.filters !== undefined && v.filters !== null && !(typeof v.filters === "string")) violations.push("filters has invalid type");
 if (!(v.filters !== undefined && v.filters !== null) || v.filters === "") violations.push("filters is required");
 return violations;
 }
@@ -100,6 +112,8 @@ return out;
 
 export function validateCreateSegmentResponse(v: CreateSegmentResponse): string[] {
 const violations: string[] = [];
+if (v.segmentId !== undefined && v.segmentId !== null && !(typeof v.segmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.segmentId))) violations.push("segment_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -122,6 +136,7 @@ return out;
 
 export function validateDeleteSegmentRequest(v: DeleteSegmentRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -146,6 +161,7 @@ return out;
 
 export function validateDeleteSegmentResponse(v: DeleteSegmentResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -174,10 +190,13 @@ return out;
 
 export function validateGetSegmentCustomersRequest(v: GetSegmentCustomersRequest): string[] {
 const violations: string[] = [];
+if (v.segmentId !== undefined && v.segmentId !== null && !(typeof v.segmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.segmentId))) violations.push("segment_id has invalid type");
 if (!(v.segmentId !== undefined && v.segmentId !== null)) violations.push("segment_id is required");
 if (v.segmentId !== undefined && v.segmentId !== null && !(Number(v.segmentId) > 0)) violations.push("segment_id violates @gt");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.page))) violations.push("page has invalid type");
 if (!(v.page !== undefined && v.page !== null)) violations.push("page is required");
 if (v.page !== undefined && v.page !== null && !(Number(v.page) > 0)) violations.push("page violates @gt");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.pageSize))) violations.push("page_size has invalid type");
 if (!(v.pageSize !== undefined && v.pageSize !== null)) violations.push("page_size is required");
 if (v.pageSize !== undefined && v.pageSize !== null && !(Number(v.pageSize) > 0)) violations.push("page_size violates @gt");
 return violations;
@@ -211,7 +230,11 @@ return out;
 
 export function validateGetSegmentCustomersResponse(v: GetSegmentCustomersResponse): string[] {
 const violations: string[] = [];
+if (v.customers !== undefined && v.customers !== null && !(Array.isArray(v.customers) && (v.customers).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("customers has invalid type");
 if (v.customers !== undefined && v.customers !== null) for (const item of v.customers) violations.push(...crm_customer_v1.validateCustomer(item).map((message) => "customers: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.total))) violations.push("total has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.page))) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.pageSize))) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -234,6 +257,7 @@ return out;
 
 export function validateGetSegmentDetailRequest(v: GetSegmentDetailRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -261,7 +285,9 @@ return out;
 
 export function validateGetSegmentDetailResponse(v: GetSegmentDetailResponse): string[] {
 const violations: string[] = [];
+if (v.segment !== undefined && v.segment !== null && !(typeof v.segment === "object" && v.segment !== null && !Array.isArray(v.segment))) violations.push("segment has invalid type");
 if (v.segment !== undefined && v.segment !== null) violations.push(...validateSegment(v.segment).map((message) => "segment: " + message));
+if (v.customers !== undefined && v.customers !== null && !(Array.isArray(v.customers) && (v.customers).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("customers has invalid type");
 if (v.customers !== undefined && v.customers !== null) for (const item of v.customers) violations.push(...crm_customer_v1.validateCustomer(item).map((message) => "customers: " + message));
 return violations;
 }
@@ -304,6 +330,7 @@ return out;
 
 export function validateListSegmentsResponse(v: ListSegmentsResponse): string[] {
 const violations: string[] = [];
+if (v.segments !== undefined && v.segments !== null && !(Array.isArray(v.segments) && (v.segments).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("segments has invalid type");
 if (v.segments !== undefined && v.segments !== null) for (const item of v.segments) violations.push(...validateSegment(item).map((message) => "segments: " + message));
 return violations;
 }
@@ -333,8 +360,11 @@ return out;
 
 export function validateUpdateSegmentBody(v: UpdateSegmentBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.filters !== undefined && v.filters !== null && !(typeof v.filters === "string")) violations.push("filters has invalid type");
 if (!(v.filters !== undefined && v.filters !== null) || v.filters === "") violations.push("filters is required");
 return violations;
 }
@@ -361,8 +391,10 @@ return out;
 
 export function validateUpdateSegmentRequest(v: UpdateSegmentRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateSegmentBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -386,6 +418,7 @@ return out;
 
 export function validateUpdateSegmentResponse(v: UpdateSegmentResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

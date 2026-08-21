@@ -2,6 +2,42 @@
 import type { ListStaffRequest, ListStaffResponse, CreateStaffRequest, CreateStaffResponse, GetStaffRequest, GetStaffResponse, UpdateStaffRequest, UpdateStaffResponse, DeleteStaffRequest, DeleteStaffResponse, ClockInRequest, ClockInResponse, ClockOutRequest, ClockOutResponse, ListStaffDirectoryRequest, ListStaffDirectoryResponse } from "./types";
 import { encodeListStaffRequest, validateListStaffRequest, decodeListStaffResponse, encodeCreateStaffRequest, validateCreateStaffRequest, decodeCreateStaffResponse, encodeGetStaffRequest, validateGetStaffRequest, decodeGetStaffResponse, encodeUpdateStaffRequest, validateUpdateStaffRequest, decodeUpdateStaffResponse, encodeDeleteStaffRequest, validateDeleteStaffRequest, decodeDeleteStaffResponse, encodeClockInRequest, validateClockInRequest, decodeClockInResponse, encodeClockOutRequest, validateClockOutRequest, decodeClockOutResponse, encodeListStaffDirectoryRequest, validateListStaffDirectoryRequest, decodeListStaffDirectoryResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface StaffServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class StaffServiceClient {
@@ -55,11 +93,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListStaffResponse(await res.json());
+return decodeListStaffResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createStaff(req: CreateStaffRequest): Promise<CreateStaffResponse> {
@@ -73,11 +111,11 @@ body: JSON.stringify(encodeCreateStaffRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateStaffResponse(await res.json());
+return decodeCreateStaffResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getStaff(req: GetStaffRequest): Promise<GetStaffResponse> {
@@ -94,11 +132,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetStaffResponse(await res.json());
+return decodeGetStaffResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateStaff(req: UpdateStaffRequest): Promise<UpdateStaffResponse> {
@@ -113,11 +151,11 @@ body: JSON.stringify(encodeUpdateStaffRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateStaffResponse(await res.json());
+return decodeUpdateStaffResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteStaff(req: DeleteStaffRequest): Promise<DeleteStaffResponse> {
@@ -134,11 +172,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteStaffResponse(await res.json());
+return decodeDeleteStaffResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async clockIn(req: ClockInRequest): Promise<ClockInResponse> {
@@ -152,11 +190,11 @@ body: JSON.stringify(encodeClockInRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeClockInResponse(await res.json());
+return decodeClockInResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async clockOut(req: ClockOutRequest): Promise<ClockOutResponse> {
@@ -170,11 +208,11 @@ body: JSON.stringify(encodeClockOutRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeClockOutResponse(await res.json());
+return decodeClockOutResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listStaffDirectory(req: ListStaffDirectoryRequest): Promise<ListStaffDirectoryResponse> {
@@ -196,11 +234,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListStaffDirectoryResponse(await res.json());
+return decodeListStaffDirectoryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

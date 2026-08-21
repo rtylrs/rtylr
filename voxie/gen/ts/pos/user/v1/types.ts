@@ -49,6 +49,17 @@ return out;
 
 export function validatePOSUser(v: POSUser): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.maxDiscountPct !== undefined && v.maxDiscountPct !== null && !(typeof v.maxDiscountPct === "number" && Number.isFinite(v.maxDiscountPct))) violations.push("max_discount_pct has invalid type");
+if (v.canVoid !== undefined && v.canVoid !== null && !(typeof v.canVoid === "boolean")) violations.push("can_void has invalid type");
+if (v.canRefund !== undefined && v.canRefund !== null && !(typeof v.canRefund === "boolean")) violations.push("can_refund has invalid type");
+if (v.canOpenDrawer !== undefined && v.canOpenDrawer !== null && !(typeof v.canOpenDrawer === "boolean")) violations.push("can_open_drawer has invalid type");
+if (v.canApplyDiscount !== undefined && v.canApplyDiscount !== null && !(typeof v.canApplyDiscount === "boolean")) violations.push("can_apply_discount has invalid type");
 return violations;
 }
 
@@ -71,6 +82,7 @@ return out;
 
 export function validateListPOSUsersRequest(v: ListPOSUsersRequest): string[] {
 const violations: string[] = [];
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
 return violations;
 }
 
@@ -93,6 +105,7 @@ return out;
 
 export function validateListPOSUsersResponse(v: ListPOSUsersResponse): string[] {
 const violations: string[] = [];
+if (v.users !== undefined && v.users !== null && !(Array.isArray(v.users) && (v.users).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("users has invalid type");
 if (v.users !== undefined && v.users !== null) for (const item of v.users) violations.push(...validatePOSUser(item).map((message) => "users: " + message));
 return violations;
 }
@@ -143,14 +156,24 @@ return out;
 
 export function validateCreatePOSUserRequest(v: CreatePOSUserRequest): string[] {
 const violations: string[] = [];
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
 if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
 if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.pin !== undefined && v.pin !== null && !(typeof v.pin === "string")) violations.push("pin has invalid type");
 if (!(v.pin !== undefined && v.pin !== null) || v.pin === "") violations.push("pin is required");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
 if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
+if (v.hourlyRate !== undefined && v.hourlyRate !== null && !(typeof v.hourlyRate === "number" && Number.isFinite(v.hourlyRate))) violations.push("hourly_rate has invalid type");
 if (v.hourlyRate !== undefined && v.hourlyRate !== null && !(Number(v.hourlyRate) >= 0)) violations.push("hourly_rate violates @gte");
+if (v.maxDiscountPct !== undefined && v.maxDiscountPct !== null && !(typeof v.maxDiscountPct === "number" && Number.isFinite(v.maxDiscountPct))) violations.push("max_discount_pct has invalid type");
 if (!(v.maxDiscountPct !== undefined && v.maxDiscountPct !== null)) violations.push("max_discount_pct is required");
 if (v.maxDiscountPct !== undefined && v.maxDiscountPct !== null && !(Number(v.maxDiscountPct) >= 0)) violations.push("max_discount_pct violates @gte");
+if (v.canVoid !== undefined && v.canVoid !== null && !(typeof v.canVoid === "boolean")) violations.push("can_void has invalid type");
+if (v.canRefund !== undefined && v.canRefund !== null && !(typeof v.canRefund === "boolean")) violations.push("can_refund has invalid type");
+if (v.canOpenDrawer !== undefined && v.canOpenDrawer !== null && !(typeof v.canOpenDrawer === "boolean")) violations.push("can_open_drawer has invalid type");
+if (v.canApplyDiscount !== undefined && v.canApplyDiscount !== null && !(typeof v.canApplyDiscount === "boolean")) violations.push("can_apply_discount has invalid type");
 return violations;
 }
 
@@ -173,6 +196,7 @@ return out;
 
 export function validateCreatePOSUserResponse(v: CreatePOSUserResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 return violations;
 }
 
@@ -225,13 +249,24 @@ return out;
 
 export function validateUpdatePOSUserRequest(v: UpdatePOSUserRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.pin !== undefined && v.pin !== null && !(typeof v.pin === "string")) violations.push("pin has invalid type");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
 if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.hourlyRate !== undefined && v.hourlyRate !== null && !(typeof v.hourlyRate === "number" && Number.isFinite(v.hourlyRate))) violations.push("hourly_rate has invalid type");
 if (v.hourlyRate !== undefined && v.hourlyRate !== null && !(Number(v.hourlyRate) >= 0)) violations.push("hourly_rate violates @gte");
+if (v.maxDiscountPct !== undefined && v.maxDiscountPct !== null && !(typeof v.maxDiscountPct === "number" && Number.isFinite(v.maxDiscountPct))) violations.push("max_discount_pct has invalid type");
 if (!(v.maxDiscountPct !== undefined && v.maxDiscountPct !== null)) violations.push("max_discount_pct is required");
 if (v.maxDiscountPct !== undefined && v.maxDiscountPct !== null && !(Number(v.maxDiscountPct) >= 0)) violations.push("max_discount_pct violates @gte");
+if (v.canVoid !== undefined && v.canVoid !== null && !(typeof v.canVoid === "boolean")) violations.push("can_void has invalid type");
+if (v.canRefund !== undefined && v.canRefund !== null && !(typeof v.canRefund === "boolean")) violations.push("can_refund has invalid type");
+if (v.canOpenDrawer !== undefined && v.canOpenDrawer !== null && !(typeof v.canOpenDrawer === "boolean")) violations.push("can_open_drawer has invalid type");
+if (v.canApplyDiscount !== undefined && v.canApplyDiscount !== null && !(typeof v.canApplyDiscount === "boolean")) violations.push("can_apply_discount has invalid type");
 return violations;
 }
 
@@ -254,6 +289,7 @@ return out;
 
 export function validateUpdatePOSUserResponse(v: UpdatePOSUserResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 
@@ -276,6 +312,7 @@ return out;
 
 export function validateDeactivatePOSUserRequest(v: DeactivatePOSUserRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -300,6 +337,7 @@ return out;
 
 export function validateDeactivatePOSUserResponse(v: DeactivatePOSUserResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 
@@ -328,10 +366,13 @@ return out;
 
 export function validateVerifyPOSUserPINRequest(v: VerifyPOSUserPINRequest): string[] {
 const violations: string[] = [];
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
 if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
 if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (v.pin !== undefined && v.pin !== null && !(typeof v.pin === "string")) violations.push("pin has invalid type");
 if (!(v.pin !== undefined && v.pin !== null) || v.pin === "") violations.push("pin is required");
 return violations;
 }
@@ -382,6 +423,16 @@ return out;
 
 export function validateVerifyPOSUserPINResponse(v: VerifyPOSUserPINResponse): string[] {
 const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.posUserId !== undefined && v.posUserId !== null && !(typeof v.posUserId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.posUserId))) violations.push("pos_user_id has invalid type");
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
+if (v.displayName !== undefined && v.displayName !== null && !(typeof v.displayName === "string")) violations.push("display_name has invalid type");
+if (v.canVoid !== undefined && v.canVoid !== null && !(typeof v.canVoid === "boolean")) violations.push("can_void has invalid type");
+if (v.canRefund !== undefined && v.canRefund !== null && !(typeof v.canRefund === "boolean")) violations.push("can_refund has invalid type");
+if (v.canOpenDrawer !== undefined && v.canOpenDrawer !== null && !(typeof v.canOpenDrawer === "boolean")) violations.push("can_open_drawer has invalid type");
+if (v.canApplyDiscount !== undefined && v.canApplyDiscount !== null && !(typeof v.canApplyDiscount === "boolean")) violations.push("can_apply_discount has invalid type");
+if (v.maxDiscountPct !== undefined && v.maxDiscountPct !== null && !(typeof v.maxDiscountPct === "number" && Number.isFinite(v.maxDiscountPct))) violations.push("max_discount_pct has invalid type");
 return violations;
 }
 
@@ -413,11 +464,15 @@ return out;
 
 export function validateSetPINRequest(v: SetPINRequest): string[] {
 const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
 if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
 if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.pin !== undefined && v.pin !== null && !(typeof v.pin === "string")) violations.push("pin has invalid type");
 if (!(v.pin !== undefined && v.pin !== null) || v.pin === "") violations.push("pin is required");
 return violations;
 }
@@ -441,6 +496,7 @@ return out;
 
 export function validateSetPINResponse(v: SetPINResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 

@@ -122,6 +122,41 @@ return out;
 
 export function validateTask(v: Task): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.parentTaskId !== undefined && v.parentTaskId !== null && !(typeof v.parentTaskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.parentTaskId))) violations.push("parent_task_id has invalid type");
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.priority !== undefined && v.priority !== null && !(typeof v.priority === "string")) violations.push("priority has invalid type");
+if (v.assigneeId !== undefined && v.assigneeId !== null && !(typeof v.assigneeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.assigneeId))) violations.push("assignee_id has invalid type");
+if (v.reporterId !== undefined && v.reporterId !== null && !(typeof v.reporterId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.reporterId))) violations.push("reporter_id has invalid type");
+if (v.dueDate !== undefined && v.dueDate !== null && !(typeof v.dueDate === "string")) violations.push("due_date has invalid type");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
+if (v.completedAt !== undefined && v.completedAt !== null && !(typeof v.completedAt === "string")) violations.push("completed_at has invalid type");
+if (v.estimatedHours !== undefined && v.estimatedHours !== null && !(typeof v.estimatedHours === "number" && Number.isFinite(v.estimatedHours))) violations.push("estimated_hours has invalid type");
+if (v.actualHours !== undefined && v.actualHours !== null && !(typeof v.actualHours === "number" && Number.isFinite(v.actualHours))) violations.push("actual_hours has invalid type");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(typeof v.sortOrder === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sortOrder))) violations.push("sort_order has invalid type");
+if (v.labels !== undefined && v.labels !== null && !(Array.isArray(v.labels) && (v.labels).every((item: any) => typeof item === "string" && /^-?(0|[1-9][0-9]*)$/.test(item)))) violations.push("labels has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
+if (v.identifier !== undefined && v.identifier !== null && !(typeof v.identifier === "string")) violations.push("identifier has invalid type");
+if (v.projectName !== undefined && v.projectName !== null && !(typeof v.projectName === "string")) violations.push("project_name has invalid type");
+if (v.projectColor !== undefined && v.projectColor !== null && !(typeof v.projectColor === "string")) violations.push("project_color has invalid type");
+if (v.assigneeName !== undefined && v.assigneeName !== null && !(typeof v.assigneeName === "string")) violations.push("assignee_name has invalid type");
+if (v.assigneeInitials !== undefined && v.assigneeInitials !== null && !(typeof v.assigneeInitials === "string")) violations.push("assignee_initials has invalid type");
+if (v.subtaskCount !== undefined && v.subtaskCount !== null && !(typeof v.subtaskCount === "number" && Number.isInteger(v.subtaskCount) && v.subtaskCount >= -2147483648 && v.subtaskCount <= 2147483647)) violations.push("subtask_count has invalid type");
+if (v.sectionId !== undefined && v.sectionId !== null && !(typeof v.sectionId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sectionId))) violations.push("section_id has invalid type");
+if (v.cycleId !== undefined && v.cycleId !== null && !(typeof v.cycleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.cycleId))) violations.push("cycle_id has invalid type");
+if (v.milestoneId !== undefined && v.milestoneId !== null && !(typeof v.milestoneId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.milestoneId))) violations.push("milestone_id has invalid type");
+if (v.archived !== undefined && v.archived !== null && !(typeof v.archived === "boolean")) violations.push("archived has invalid type");
+if (v.effortMinutes !== undefined && v.effortMinutes !== null && !(typeof v.effortMinutes === "number" && Number.isInteger(v.effortMinutes) && v.effortMinutes >= -2147483648 && v.effortMinutes <= 2147483647)) violations.push("effort_minutes has invalid type");
+if (v.waitingOn !== undefined && v.waitingOn !== null && !(typeof v.waitingOn === "string")) violations.push("waiting_on has invalid type");
+if (v.decisionNote !== undefined && v.decisionNote !== null && !(typeof v.decisionNote === "string")) violations.push("decision_note has invalid type");
+if (v.focusPin !== undefined && v.focusPin !== null && !(typeof v.focusPin === "boolean")) violations.push("focus_pin has invalid type");
+if (v.dependencies !== undefined && v.dependencies !== null && !(Array.isArray(v.dependencies) && (v.dependencies).every((item: any) => typeof item === "string" && /^-?(0|[1-9][0-9]*)$/.test(item)))) violations.push("dependencies has invalid type");
 return violations;
 }
 
@@ -162,6 +197,13 @@ return out;
 
 export function validateTaskComment(v: TaskComment): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.content !== undefined && v.content !== null && !(typeof v.content === "string")) violations.push("content has invalid type");
+if (v.isEdited !== undefined && v.isEdited !== null && !(typeof v.isEdited === "boolean")) violations.push("is_edited has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -202,6 +244,13 @@ return out;
 
 export function validateTaskActivity(v: TaskActivity): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.action !== undefined && v.action !== null && !(typeof v.action === "string")) violations.push("action has invalid type");
+if (v.oldValue !== undefined && v.oldValue !== null && !(typeof v.oldValue === "string")) violations.push("old_value has invalid type");
+if (v.newValue !== undefined && v.newValue !== null && !(typeof v.newValue === "string")) violations.push("new_value has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -239,6 +288,12 @@ return out;
 
 export function validateTaskPayloadCompact(v: TaskPayloadCompact): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.priority !== undefined && v.priority !== null && !(typeof v.priority === "string")) violations.push("priority has invalid type");
+if (v.dueDate !== undefined && v.dueDate !== null && !(typeof v.dueDate === "string")) violations.push("due_date has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -279,6 +334,13 @@ return out;
 
 export function validateAttachment(v: Attachment): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.url !== undefined && v.url !== null && !(typeof v.url === "string")) violations.push("url has invalid type");
+if (v.size !== undefined && v.size !== null && !(typeof v.size === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.size))) violations.push("size has invalid type");
+if (v.uploadedBy !== undefined && v.uploadedBy !== null && !(typeof v.uploadedBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.uploadedBy))) violations.push("uploaded_by has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -319,6 +381,13 @@ return out;
 
 export function validateTimeLog(v: TimeLog): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(typeof v.durationMinutes === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.durationMinutes))) violations.push("duration_minutes has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.loggedAt !== undefined && v.loggedAt !== null && !(typeof v.loggedAt === "string")) violations.push("logged_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -365,6 +434,15 @@ return out;
 
 export function validateListTasksRequest(v: ListTasksRequest): string[] {
 const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.assigneeId !== undefined && v.assigneeId !== null && !(typeof v.assigneeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.assigneeId))) violations.push("assignee_id has invalid type");
+if (v.priority !== undefined && v.priority !== null && !(typeof v.priority === "string")) violations.push("priority has invalid type");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string")) violations.push("workspace_id has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -390,7 +468,9 @@ return out;
 
 export function validateListTasksResponse(v: ListTasksResponse): string[] {
 const violations: string[] = [];
+if (v.tasks !== undefined && v.tasks !== null && !(Array.isArray(v.tasks) && (v.tasks).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("tasks has invalid type");
 if (v.tasks !== undefined && v.tasks !== null) for (const item of v.tasks) violations.push(...validateTask(item).map((message) => "tasks: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -423,6 +503,10 @@ return out;
 
 export function validateGetMyTasksRequest(v: GetMyTasksRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -448,7 +532,9 @@ return out;
 
 export function validateGetMyTasksResponse(v: GetMyTasksResponse): string[] {
 const violations: string[] = [];
+if (v.tasks !== undefined && v.tasks !== null && !(Array.isArray(v.tasks) && (v.tasks).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("tasks has invalid type");
 if (v.tasks !== undefined && v.tasks !== null) for (const item of v.tasks) violations.push(...validateTask(item).map((message) => "tasks: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -494,6 +580,8 @@ return out;
 
 export function validateGetMyTasksProjectResponse(v: GetMyTasksProjectResponse): string[] {
 const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
 return violations;
 }
 
@@ -531,7 +619,13 @@ return out;
 
 export function validateSearchTasksRequest(v: SearchTasksRequest): string[] {
 const violations: string[] = [];
+if (v.q !== undefined && v.q !== null && !(typeof v.q === "string")) violations.push("q has invalid type");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string")) violations.push("workspace_id has invalid type");
 if (!(v.workspaceId !== undefined && v.workspaceId !== null) || v.workspaceId === "") violations.push("workspace_id is required");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -557,7 +651,9 @@ return out;
 
 export function validateSearchTasksResponse(v: SearchTasksResponse): string[] {
 const violations: string[] = [];
+if (v.tasks !== undefined && v.tasks !== null && !(Array.isArray(v.tasks) && (v.tasks).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("tasks has invalid type");
 if (v.tasks !== undefined && v.tasks !== null) for (const item of v.tasks) violations.push(...validateTask(item).map((message) => "tasks: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -611,15 +707,26 @@ return out;
 
 export function validateCreateTaskRequest(v: CreateTaskRequest): string[] {
 const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
 if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
 if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
 if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
 if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (v.parentTaskId !== undefined && v.parentTaskId !== null && !(typeof v.parentTaskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.parentTaskId))) violations.push("parent_task_id has invalid type");
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
 if (!(v.title !== undefined && v.title !== null) || v.title === "") violations.push("title is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.priority !== undefined && v.priority !== null && !(typeof v.priority === "string")) violations.push("priority has invalid type");
 if (!(v.priority !== undefined && v.priority !== null) || v.priority === "") violations.push("priority is required");
+if (v.assigneeId !== undefined && v.assigneeId !== null && !(typeof v.assigneeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.assigneeId))) violations.push("assignee_id has invalid type");
+if (v.dueDate !== undefined && v.dueDate !== null && !(typeof v.dueDate === "string")) violations.push("due_date has invalid type");
 if (!(v.dueDate !== undefined && v.dueDate !== null) || v.dueDate === "") violations.push("due_date is required");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
 if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+if (v.estimatedHours !== undefined && v.estimatedHours !== null && !(typeof v.estimatedHours === "number" && Number.isFinite(v.estimatedHours))) violations.push("estimated_hours has invalid type");
+if (v.labels !== undefined && v.labels !== null && !(Array.isArray(v.labels) && (v.labels).every((item: any) => typeof item === "string" && /^-?(0|[1-9][0-9]*)$/.test(item)))) violations.push("labels has invalid type");
 if (v.labels !== undefined && v.labels !== null && v.labels.length < 1) violations.push("labels must contain at least 1 items");
 return violations;
 }
@@ -643,6 +750,7 @@ return out;
 
 export function validateCreateTaskResponse(v: CreateTaskResponse): string[] {
 const violations: string[] = [];
+if (v.task !== undefined && v.task !== null && !(typeof v.task === "object" && v.task !== null && !Array.isArray(v.task))) violations.push("task has invalid type");
 if (v.task !== undefined && v.task !== null) violations.push(...validateTask(v.task).map((message) => "task: " + message));
 return violations;
 }
@@ -666,6 +774,7 @@ return out;
 
 export function validateGetTaskDetailRequest(v: GetTaskDetailRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -699,9 +808,13 @@ return out;
 
 export function validateGetTaskDetailResponse(v: GetTaskDetailResponse): string[] {
 const violations: string[] = [];
+if (v.task !== undefined && v.task !== null && !(typeof v.task === "object" && v.task !== null && !Array.isArray(v.task))) violations.push("task has invalid type");
 if (v.task !== undefined && v.task !== null) violations.push(...validateTask(v.task).map((message) => "task: " + message));
+if (v.subtasks !== undefined && v.subtasks !== null && !(Array.isArray(v.subtasks) && (v.subtasks).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("subtasks has invalid type");
 if (v.subtasks !== undefined && v.subtasks !== null) for (const item of v.subtasks) violations.push(...validateTask(item).map((message) => "subtasks: " + message));
+if (v.comments !== undefined && v.comments !== null && !(Array.isArray(v.comments) && (v.comments).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("comments has invalid type");
 if (v.comments !== undefined && v.comments !== null) for (const item of v.comments) violations.push(...validateTaskComment(item).map((message) => "comments: " + message));
+if (v.activity !== undefined && v.activity !== null && !(Array.isArray(v.activity) && (v.activity).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("activity has invalid type");
 if (v.activity !== undefined && v.activity !== null) for (const item of v.activity) violations.push(...validateTaskActivity(item).map((message) => "activity: " + message));
 return violations;
 }
@@ -764,6 +877,20 @@ return out;
 
 export function validateUpdateTaskBody(v: UpdateTaskBody): string[] {
 const violations: string[] = [];
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.priority !== undefined && v.priority !== null && !(typeof v.priority === "string")) violations.push("priority has invalid type");
+if (v.assigneeId !== undefined && v.assigneeId !== null && !(typeof v.assigneeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.assigneeId))) violations.push("assignee_id has invalid type");
+if (v.dueDate !== undefined && v.dueDate !== null && !(typeof v.dueDate === "string")) violations.push("due_date has invalid type");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
+if (v.labels !== undefined && v.labels !== null && !(Array.isArray(v.labels) && (v.labels).every((item: any) => typeof item === "string" && /^-?(0|[1-9][0-9]*)$/.test(item)))) violations.push("labels has invalid type");
+if (v.archived !== undefined && v.archived !== null && !(typeof v.archived === "boolean")) violations.push("archived has invalid type");
+if (v.effortMinutes !== undefined && v.effortMinutes !== null && !(typeof v.effortMinutes === "number" && Number.isInteger(v.effortMinutes) && v.effortMinutes >= -2147483648 && v.effortMinutes <= 2147483647)) violations.push("effort_minutes has invalid type");
+if (v.estimatedHours !== undefined && v.estimatedHours !== null && !(typeof v.estimatedHours === "number" && Number.isFinite(v.estimatedHours))) violations.push("estimated_hours has invalid type");
+if (v.waitingOn !== undefined && v.waitingOn !== null && !(typeof v.waitingOn === "string")) violations.push("waiting_on has invalid type");
+if (v.decisionNote !== undefined && v.decisionNote !== null && !(typeof v.decisionNote === "string")) violations.push("decision_note has invalid type");
+if (v.focusPin !== undefined && v.focusPin !== null && !(typeof v.focusPin === "boolean")) violations.push("focus_pin has invalid type");
 return violations;
 }
 
@@ -789,8 +916,10 @@ return out;
 
 export function validateUpdateTaskRequest(v: UpdateTaskRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateTaskBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -814,6 +943,7 @@ return out;
 
 export function validateUpdateTaskResponse(v: UpdateTaskResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -836,6 +966,7 @@ return out;
 
 export function validateUpdateTaskStatusBody(v: UpdateTaskStatusBody): string[] {
 const violations: string[] = [];
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
 return violations;
 }
@@ -862,8 +993,10 @@ return out;
 
 export function validateUpdateTaskStatusRequest(v: UpdateTaskStatusRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateTaskStatusBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -887,6 +1020,7 @@ return out;
 
 export function validateUpdateTaskStatusResponse(v: UpdateTaskStatusResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -909,6 +1043,7 @@ return out;
 
 export function validateDeleteTaskRequest(v: DeleteTaskRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -933,6 +1068,7 @@ return out;
 
 export function validateDeleteTaskResponse(v: DeleteTaskResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -982,17 +1118,27 @@ return out;
 
 export function validateCreateSubtaskRequest(v: CreateSubtaskRequest): string[] {
 const violations: string[] = [];
+if (v.parentTaskId !== undefined && v.parentTaskId !== null && !(typeof v.parentTaskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.parentTaskId))) violations.push("parent_task_id has invalid type");
 if (!(v.parentTaskId !== undefined && v.parentTaskId !== null)) violations.push("parent_task_id is required");
 if (v.parentTaskId !== undefined && v.parentTaskId !== null && !(Number(v.parentTaskId) > 0)) violations.push("parent_task_id violates @gt");
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
 if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
 if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
 if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
 if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
 if (!(v.title !== undefined && v.title !== null) || v.title === "") violations.push("title is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.priority !== undefined && v.priority !== null && !(typeof v.priority === "string")) violations.push("priority has invalid type");
 if (!(v.priority !== undefined && v.priority !== null) || v.priority === "") violations.push("priority is required");
+if (v.assigneeId !== undefined && v.assigneeId !== null && !(typeof v.assigneeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.assigneeId))) violations.push("assignee_id has invalid type");
+if (v.dueDate !== undefined && v.dueDate !== null && !(typeof v.dueDate === "string")) violations.push("due_date has invalid type");
 if (!(v.dueDate !== undefined && v.dueDate !== null) || v.dueDate === "") violations.push("due_date is required");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
 if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+if (v.estimatedHours !== undefined && v.estimatedHours !== null && !(typeof v.estimatedHours === "number" && Number.isFinite(v.estimatedHours))) violations.push("estimated_hours has invalid type");
 return violations;
 }
 
@@ -1018,6 +1164,8 @@ return out;
 
 export function validateCreateSubtaskResponse(v: CreateSubtaskResponse): string[] {
 const violations: string[] = [];
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -1052,8 +1200,13 @@ return out;
 
 export function validateGetSubtasksRequest(v: GetSubtasksRequest): string[] {
 const violations: string[] = [];
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
 if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
 if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -1079,7 +1232,9 @@ return out;
 
 export function validateGetSubtasksResponse(v: GetSubtasksResponse): string[] {
 const violations: string[] = [];
+if (v.subtasks !== undefined && v.subtasks !== null && !(Array.isArray(v.subtasks) && (v.subtasks).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("subtasks has invalid type");
 if (v.subtasks !== undefined && v.subtasks !== null) for (const item of v.subtasks) violations.push(...validateTaskPayloadCompact(item).map((message) => "subtasks: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -1106,8 +1261,10 @@ return out;
 
 export function validateAddCommentRequest(v: AddCommentRequest): string[] {
 const violations: string[] = [];
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
 if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
 if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+if (v.content !== undefined && v.content !== null && !(typeof v.content === "string")) violations.push("content has invalid type");
 if (!(v.content !== undefined && v.content !== null) || v.content === "") violations.push("content is required");
 return violations;
 }
@@ -1131,6 +1288,7 @@ return out;
 
 export function validateAddCommentResponse(v: AddCommentResponse): string[] {
 const violations: string[] = [];
+if (v.comment !== undefined && v.comment !== null && !(typeof v.comment === "object" && v.comment !== null && !Array.isArray(v.comment))) violations.push("comment has invalid type");
 if (v.comment !== undefined && v.comment !== null) violations.push(...validateTaskComment(v.comment).map((message) => "comment: " + message));
 return violations;
 }
@@ -1154,6 +1312,7 @@ return out;
 
 export function validateDeleteCommentRequest(v: DeleteCommentRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -1178,6 +1337,7 @@ return out;
 
 export function validateDeleteCommentResponse(v: DeleteCommentResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -1200,6 +1360,7 @@ return out;
 
 export function validateGetTaskActivityRequest(v: GetTaskActivityRequest): string[] {
 const violations: string[] = [];
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
 if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
 if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
 return violations;
@@ -1224,6 +1385,7 @@ return out;
 
 export function validateGetTaskActivityResponse(v: GetTaskActivityResponse): string[] {
 const violations: string[] = [];
+if (v.activity !== undefined && v.activity !== null && !(Array.isArray(v.activity) && (v.activity).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("activity has invalid type");
 if (v.activity !== undefined && v.activity !== null) for (const item of v.activity) violations.push(...validateTaskActivity(item).map((message) => "activity: " + message));
 return violations;
 }
@@ -1256,10 +1418,14 @@ return out;
 
 export function validateCreateAttachmentRequest(v: CreateAttachmentRequest): string[] {
 const violations: string[] = [];
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
 if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
 if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.url !== undefined && v.url !== null && !(typeof v.url === "string")) violations.push("url has invalid type");
 if (!(v.url !== undefined && v.url !== null) || v.url === "") violations.push("url is required");
+if (v.size !== undefined && v.size !== null && !(typeof v.size === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.size))) violations.push("size has invalid type");
 if (!(v.size !== undefined && v.size !== null)) violations.push("size is required");
 if (v.size !== undefined && v.size !== null && !(Number(v.size) > 0)) violations.push("size violates @gt");
 return violations;
@@ -1287,6 +1453,8 @@ return out;
 
 export function validateCreateAttachmentResponse(v: CreateAttachmentResponse): string[] {
 const violations: string[] = [];
+if (v.attachmentId !== undefined && v.attachmentId !== null && !(typeof v.attachmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.attachmentId))) violations.push("attachment_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -1309,6 +1477,7 @@ return out;
 
 export function validateGetAttachmentsRequest(v: GetAttachmentsRequest): string[] {
 const violations: string[] = [];
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
 if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
 if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
 return violations;
@@ -1333,6 +1502,7 @@ return out;
 
 export function validateGetAttachmentsResponse(v: GetAttachmentsResponse): string[] {
 const violations: string[] = [];
+if (v.attachments !== undefined && v.attachments !== null && !(Array.isArray(v.attachments) && (v.attachments).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("attachments has invalid type");
 if (v.attachments !== undefined && v.attachments !== null) for (const item of v.attachments) violations.push(...validateAttachment(item).map((message) => "attachments: " + message));
 return violations;
 }
@@ -1356,6 +1526,7 @@ return out;
 
 export function validateDeleteAttachmentRequest(v: DeleteAttachmentRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -1380,6 +1551,7 @@ return out;
 
 export function validateDeleteAttachmentResponse(v: DeleteAttachmentResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -1408,9 +1580,12 @@ return out;
 
 export function validateCreateTimeLogRequest(v: CreateTimeLogRequest): string[] {
 const violations: string[] = [];
+if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(typeof v.durationMinutes === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.durationMinutes))) violations.push("duration_minutes has invalid type");
 if (!(v.durationMinutes !== undefined && v.durationMinutes !== null)) violations.push("duration_minutes is required");
 if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(Number(v.durationMinutes) > 0)) violations.push("duration_minutes violates @gt");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
 if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
 if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
 return violations;
@@ -1438,6 +1613,8 @@ return out;
 
 export function validateCreateTimeLogResponse(v: CreateTimeLogResponse): string[] {
 const violations: string[] = [];
+if (v.timeLogId !== undefined && v.timeLogId !== null && !(typeof v.timeLogId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.timeLogId))) violations.push("time_log_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -1460,6 +1637,7 @@ return out;
 
 export function validateGetTimeLogsRequest(v: GetTimeLogsRequest): string[] {
 const violations: string[] = [];
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
 if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
 if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
 return violations;
@@ -1484,6 +1662,7 @@ return out;
 
 export function validateGetTimeLogsResponse(v: GetTimeLogsResponse): string[] {
 const violations: string[] = [];
+if (v.timeLogs !== undefined && v.timeLogs !== null && !(Array.isArray(v.timeLogs) && (v.timeLogs).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("time_logs has invalid type");
 if (v.timeLogs !== undefined && v.timeLogs !== null) for (const item of v.timeLogs) violations.push(...validateTimeLog(item).map((message) => "time_logs: " + message));
 return violations;
 }
@@ -1507,6 +1686,7 @@ return out;
 
 export function validateDeleteTimeLogRequest(v: DeleteTimeLogRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -1531,6 +1711,7 @@ return out;
 
 export function validateDeleteTimeLogResponse(v: DeleteTimeLogResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -1553,6 +1734,7 @@ return out;
 
 export function validateAddTaskDependencyBody(v: AddTaskDependencyBody): string[] {
 const violations: string[] = [];
+if (v.dependsOnTaskId !== undefined && v.dependsOnTaskId !== null && !(typeof v.dependsOnTaskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.dependsOnTaskId))) violations.push("depends_on_task_id has invalid type");
 if (!(v.dependsOnTaskId !== undefined && v.dependsOnTaskId !== null)) violations.push("depends_on_task_id is required");
 if (v.dependsOnTaskId !== undefined && v.dependsOnTaskId !== null && !(Number(v.dependsOnTaskId) > 0)) violations.push("depends_on_task_id violates @gt");
 return violations;
@@ -1580,8 +1762,10 @@ return out;
 
 export function validateAddTaskDependencyRequest(v: AddTaskDependencyRequest): string[] {
 const violations: string[] = [];
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
 if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
 if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateAddTaskDependencyBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -1605,6 +1789,7 @@ return out;
 
 export function validateAddTaskDependencyResponse(v: AddTaskDependencyResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -1630,8 +1815,10 @@ return out;
 
 export function validateRemoveTaskDependencyRequest(v: RemoveTaskDependencyRequest): string[] {
 const violations: string[] = [];
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
 if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
 if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+if (v.dependsOnTaskId !== undefined && v.dependsOnTaskId !== null && !(typeof v.dependsOnTaskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.dependsOnTaskId))) violations.push("depends_on_task_id has invalid type");
 if (!(v.dependsOnTaskId !== undefined && v.dependsOnTaskId !== null)) violations.push("depends_on_task_id is required");
 if (v.dependsOnTaskId !== undefined && v.dependsOnTaskId !== null && !(Number(v.dependsOnTaskId) > 0)) violations.push("depends_on_task_id violates @gt");
 return violations;
@@ -1656,6 +1843,7 @@ return out;
 
 export function validateRemoveTaskDependencyResponse(v: RemoveTaskDependencyResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

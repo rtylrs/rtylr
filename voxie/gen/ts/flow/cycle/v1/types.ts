@@ -41,6 +41,14 @@ return out;
 
 export function validateCycle(v: Cycle): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
+if (v.endDate !== undefined && v.endDate !== null && !(typeof v.endDate === "string")) violations.push("end_date has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.scope !== undefined && v.scope !== null && !(typeof v.scope === "number" && Number.isInteger(v.scope) && v.scope >= -2147483648 && v.scope <= 2147483647)) violations.push("scope has invalid type");
+if (v.completed !== undefined && v.completed !== null && !(typeof v.completed === "number" && Number.isInteger(v.completed) && v.completed >= -2147483648 && v.completed <= 2147483647)) violations.push("completed has invalid type");
 return violations;
 }
 
@@ -75,6 +83,11 @@ return out;
 
 export function validateListCyclesRequest(v: ListCyclesRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string")) violations.push("workspace_id has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -100,7 +113,9 @@ return out;
 
 export function validateListCyclesResponse(v: ListCyclesResponse): string[] {
 const violations: string[] = [];
+if (v.cycles !== undefined && v.cycles !== null && !(Array.isArray(v.cycles) && (v.cycles).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("cycles has invalid type");
 if (v.cycles !== undefined && v.cycles !== null) for (const item of v.cycles) violations.push(...validateCycle(item).map((message) => "cycles: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -133,7 +148,11 @@ return out;
 
 export function validateCreateCycleRequest(v: CreateCycleRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string")) violations.push("workspace_id has invalid type");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
+if (v.endDate !== undefined && v.endDate !== null && !(typeof v.endDate === "string")) violations.push("end_date has invalid type");
 return violations;
 }
 
@@ -156,6 +175,7 @@ return out;
 
 export function validateCreateCycleResponse(v: CreateCycleResponse): string[] {
 const violations: string[] = [];
+if (v.cycle !== undefined && v.cycle !== null && !(typeof v.cycle === "object" && v.cycle !== null && !Array.isArray(v.cycle))) violations.push("cycle has invalid type");
 if (v.cycle !== undefined && v.cycle !== null) violations.push(...validateCycle(v.cycle).map((message) => "cycle: " + message));
 return violations;
 }
@@ -188,6 +208,10 @@ return out;
 
 export function validateUpdateCycleRequest(v: UpdateCycleRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.endDate !== undefined && v.endDate !== null && !(typeof v.endDate === "string")) violations.push("end_date has invalid type");
 return violations;
 }
 

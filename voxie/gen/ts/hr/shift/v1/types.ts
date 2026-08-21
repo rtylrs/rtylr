@@ -73,6 +73,25 @@ return out;
 
 export function validateShiftPayload(v: ShiftPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.startTime !== undefined && v.startTime !== null && !(typeof v.startTime === "string")) violations.push("start_time has invalid type");
+if (v.endTime !== undefined && v.endTime !== null && !(typeof v.endTime === "string")) violations.push("end_time has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.departmentId !== undefined && v.departmentId !== null && !(typeof v.departmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.departmentId))) violations.push("department_id has invalid type");
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.breakDurationMinutes !== undefined && v.breakDurationMinutes !== null && !(typeof v.breakDurationMinutes === "number" && Number.isInteger(v.breakDurationMinutes) && v.breakDurationMinutes >= -2147483648 && v.breakDurationMinutes <= 2147483647)) violations.push("break_duration_minutes has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.clockInAt !== undefined && v.clockInAt !== null && !(typeof v.clockInAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.clockInAt))) violations.push("clock_in_at has invalid type");
+if (v.clockOutAt !== undefined && v.clockOutAt !== null && !(typeof v.clockOutAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.clockOutAt))) violations.push("clock_out_at has invalid type");
+if (v.hoursWorked !== undefined && v.hoursWorked !== null && !(typeof v.hoursWorked === "number" && Number.isFinite(v.hoursWorked))) violations.push("hours_worked has invalid type");
+if (v.overtimeHours !== undefined && v.overtimeHours !== null && !(typeof v.overtimeHours === "number" && Number.isFinite(v.overtimeHours))) violations.push("overtime_hours has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -116,6 +135,14 @@ return out;
 
 export function validateShiftAssignmentPayload(v: ShiftAssignmentPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.shiftId !== undefined && v.shiftId !== null && !(typeof v.shiftId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.shiftId))) violations.push("shift_id has invalid type");
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -153,6 +180,12 @@ return out;
 
 export function validateListShiftsRequest(v: ListShiftsRequest): string[] {
 const violations: string[] = [];
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.kind !== undefined && v.kind !== null && !(typeof v.kind === "string")) violations.push("kind has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -184,7 +217,11 @@ return out;
 
 export function validateListShiftsResponse(v: ListShiftsResponse): string[] {
 const violations: string[] = [];
+if (v.shifts !== undefined && v.shifts !== null && !(Array.isArray(v.shifts) && (v.shifts).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("shifts has invalid type");
 if (v.shifts !== undefined && v.shifts !== null) for (const item of v.shifts) violations.push(...validateShiftPayload(item).map((message) => "shifts: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -237,8 +274,19 @@ return out;
 
 export function validateCreateShiftRequest(v: CreateShiftRequest): string[] {
 const violations: string[] = [];
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.startTime !== undefined && v.startTime !== null && !(typeof v.startTime === "string")) violations.push("start_time has invalid type");
 if (!(v.startTime !== undefined && v.startTime !== null) || v.startTime === "") violations.push("start_time is required");
+if (v.endTime !== undefined && v.endTime !== null && !(typeof v.endTime === "string")) violations.push("end_time has invalid type");
 if (!(v.endTime !== undefined && v.endTime !== null) || v.endTime === "") violations.push("end_time is required");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.departmentId !== undefined && v.departmentId !== null && !(typeof v.departmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.departmentId))) violations.push("department_id has invalid type");
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.breakDurationMinutes !== undefined && v.breakDurationMinutes !== null && !(typeof v.breakDurationMinutes === "number" && Number.isInteger(v.breakDurationMinutes) && v.breakDurationMinutes >= -2147483648 && v.breakDurationMinutes <= 2147483647)) violations.push("break_duration_minutes has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
 return violations;
 }
 
@@ -261,6 +309,7 @@ return out;
 
 export function validateCreateShiftResponse(v: CreateShiftResponse): string[] {
 const violations: string[] = [];
+if (v.shift !== undefined && v.shift !== null && !(typeof v.shift === "object" && v.shift !== null && !Array.isArray(v.shift))) violations.push("shift has invalid type");
 if (v.shift !== undefined && v.shift !== null) violations.push(...validateShiftPayload(v.shift).map((message) => "shift: " + message));
 return violations;
 }
@@ -314,8 +363,19 @@ return out;
 
 export function validateUpdateShiftRequest(v: UpdateShiftRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.startTime !== undefined && v.startTime !== null && !(typeof v.startTime === "string")) violations.push("start_time has invalid type");
+if (v.endTime !== undefined && v.endTime !== null && !(typeof v.endTime === "string")) violations.push("end_time has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.departmentId !== undefined && v.departmentId !== null && !(typeof v.departmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.departmentId))) violations.push("department_id has invalid type");
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.breakDurationMinutes !== undefined && v.breakDurationMinutes !== null && !(typeof v.breakDurationMinutes === "number" && Number.isInteger(v.breakDurationMinutes) && v.breakDurationMinutes >= -2147483648 && v.breakDurationMinutes <= 2147483647)) violations.push("break_duration_minutes has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
 return violations;
 }
 
@@ -338,6 +398,7 @@ return out;
 
 export function validateUpdateShiftResponse(v: UpdateShiftResponse): string[] {
 const violations: string[] = [];
+if (v.shift !== undefined && v.shift !== null && !(typeof v.shift === "object" && v.shift !== null && !Array.isArray(v.shift))) violations.push("shift has invalid type");
 if (v.shift !== undefined && v.shift !== null) violations.push(...validateShiftPayload(v.shift).map((message) => "shift: " + message));
 return violations;
 }
@@ -361,6 +422,7 @@ return out;
 
 export function validateDeleteShiftRequest(v: DeleteShiftRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -385,6 +447,7 @@ return out;
 
 export function validateDeleteShiftResponse(v: DeleteShiftResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 
@@ -413,10 +476,13 @@ return out;
 
 export function validateCreateShiftAssignmentRequest(v: CreateShiftAssignmentRequest): string[] {
 const violations: string[] = [];
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
 if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
 if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (v.shiftId !== undefined && v.shiftId !== null && !(typeof v.shiftId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.shiftId))) violations.push("shift_id has invalid type");
 if (!(v.shiftId !== undefined && v.shiftId !== null)) violations.push("shift_id is required");
 if (v.shiftId !== undefined && v.shiftId !== null && !(Number(v.shiftId) > 0)) violations.push("shift_id violates @gt");
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
 if (!(v.date !== undefined && v.date !== null) || v.date === "") violations.push("date is required");
 return violations;
 }
@@ -443,7 +509,9 @@ return out;
 
 export function validateCreateShiftAssignmentResponse(v: CreateShiftAssignmentResponse): string[] {
 const violations: string[] = [];
+if (v.assignment !== undefined && v.assignment !== null && !(typeof v.assignment === "object" && v.assignment !== null && !Array.isArray(v.assignment))) violations.push("assignment has invalid type");
 if (v.assignment !== undefined && v.assignment !== null) violations.push(...validateShiftAssignmentPayload(v.assignment).map((message) => "assignment: " + message));
+if (v.warnings !== undefined && v.warnings !== null && !(Array.isArray(v.warnings) && (v.warnings).every((item: any) => typeof item === "string"))) violations.push("warnings has invalid type");
 return violations;
 }
 
@@ -469,8 +537,10 @@ return out;
 
 export function validateGetRosterRequest(v: GetRosterRequest): string[] {
 const violations: string[] = [];
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
 if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
 if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+if (v.weekStart !== undefined && v.weekStart !== null && !(typeof v.weekStart === "string")) violations.push("week_start has invalid type");
 if (!(v.weekStart !== undefined && v.weekStart !== null) || v.weekStart === "") violations.push("week_start is required");
 return violations;
 }
@@ -497,7 +567,9 @@ return out;
 
 export function validateGetRosterResponse(v: GetRosterResponse): string[] {
 const violations: string[] = [];
+if (v.assignments !== undefined && v.assignments !== null && !(Array.isArray(v.assignments) && (v.assignments).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("assignments has invalid type");
 if (v.assignments !== undefined && v.assignments !== null) for (const item of v.assignments) violations.push(...validateShiftAssignmentPayload(item).map((message) => "assignments: " + message));
+if (v.conflicts !== undefined && v.conflicts !== null && !(Array.isArray(v.conflicts) && (v.conflicts).every((item: any) => typeof item === "string"))) violations.push("conflicts has invalid type");
 return violations;
 }
 
@@ -523,6 +595,8 @@ return out;
 
 export function validatePublishRosterRequest(v: PublishRosterRequest): string[] {
 const violations: string[] = [];
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.weekStart !== undefined && v.weekStart !== null && !(typeof v.weekStart === "string")) violations.push("week_start has invalid type");
 if (!(v.weekStart !== undefined && v.weekStart !== null) || v.weekStart === "") violations.push("week_start is required");
 return violations;
 }
@@ -546,6 +620,7 @@ return out;
 
 export function validatePublishRosterResponse(v: PublishRosterResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 
@@ -595,6 +670,16 @@ return out;
 
 export function validateAvailabilityPayload(v: AvailabilityPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.dayOfWeek !== undefined && v.dayOfWeek !== null && !(typeof v.dayOfWeek === "number" && Number.isInteger(v.dayOfWeek) && v.dayOfWeek >= -2147483648 && v.dayOfWeek <= 2147483647)) violations.push("day_of_week has invalid type");
+if (v.specificDate !== undefined && v.specificDate !== null && !(typeof v.specificDate === "string")) violations.push("specific_date has invalid type");
+if (v.startTime !== undefined && v.startTime !== null && !(typeof v.startTime === "string")) violations.push("start_time has invalid type");
+if (v.endTime !== undefined && v.endTime !== null && !(typeof v.endTime === "string")) violations.push("end_time has invalid type");
+if (v.isAvailable !== undefined && v.isAvailable !== null && !(typeof v.isAvailable === "boolean")) violations.push("is_available has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -632,6 +717,12 @@ return out;
 
 export function validateListAvailabilityRequest(v: ListAvailabilityRequest): string[] {
 const violations: string[] = [];
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.dayOfWeek !== undefined && v.dayOfWeek !== null && !(typeof v.dayOfWeek === "number" && Number.isInteger(v.dayOfWeek) && v.dayOfWeek >= -2147483648 && v.dayOfWeek <= 2147483647)) violations.push("day_of_week has invalid type");
+if (v.dateFrom !== undefined && v.dateFrom !== null && !(typeof v.dateFrom === "string")) violations.push("date_from has invalid type");
+if (v.dateTo !== undefined && v.dateTo !== null && !(typeof v.dateTo === "string")) violations.push("date_to has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -663,7 +754,11 @@ return out;
 
 export function validateListAvailabilityResponse(v: ListAvailabilityResponse): string[] {
 const violations: string[] = [];
+if (v.entries !== undefined && v.entries !== null && !(Array.isArray(v.entries) && (v.entries).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("entries has invalid type");
 if (v.entries !== undefined && v.entries !== null) for (const item of v.entries) violations.push(...validateAvailabilityPayload(item).map((message) => "entries: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -704,12 +799,19 @@ return out;
 
 export function validateSetAvailabilityRequest(v: SetAvailabilityRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
 if (!(v.staffId !== undefined && v.staffId !== null)) violations.push("staff_id is required");
 if (v.staffId !== undefined && v.staffId !== null && !(Number(v.staffId) > 0)) violations.push("staff_id violates @gt");
+if (v.dayOfWeek !== undefined && v.dayOfWeek !== null && !(typeof v.dayOfWeek === "number" && Number.isInteger(v.dayOfWeek) && v.dayOfWeek >= -2147483648 && v.dayOfWeek <= 2147483647)) violations.push("day_of_week has invalid type");
 if (v.dayOfWeek !== undefined && v.dayOfWeek !== null && !(Number(v.dayOfWeek) >= 0)) violations.push("day_of_week violates @gte");
 if (v.dayOfWeek !== undefined && v.dayOfWeek !== null && !(Number(v.dayOfWeek) <= 6)) violations.push("day_of_week violates @lte");
+if (v.specificDate !== undefined && v.specificDate !== null && !(typeof v.specificDate === "string")) violations.push("specific_date has invalid type");
+if (v.startTime !== undefined && v.startTime !== null && !(typeof v.startTime === "string")) violations.push("start_time has invalid type");
 if (!(v.startTime !== undefined && v.startTime !== null) || v.startTime === "") violations.push("start_time is required");
+if (v.endTime !== undefined && v.endTime !== null && !(typeof v.endTime === "string")) violations.push("end_time has invalid type");
 if (!(v.endTime !== undefined && v.endTime !== null) || v.endTime === "") violations.push("end_time is required");
+if (v.isAvailable !== undefined && v.isAvailable !== null && !(typeof v.isAvailable === "boolean")) violations.push("is_available has invalid type");
 return violations;
 }
 
@@ -732,6 +834,7 @@ return out;
 
 export function validateSetAvailabilityResponse(v: SetAvailabilityResponse): string[] {
 const violations: string[] = [];
+if (v.entry !== undefined && v.entry !== null && !(typeof v.entry === "object" && v.entry !== null && !Array.isArray(v.entry))) violations.push("entry has invalid type");
 if (v.entry !== undefined && v.entry !== null) violations.push(...validateAvailabilityPayload(v.entry).map((message) => "entry: " + message));
 return violations;
 }
@@ -755,6 +858,7 @@ return out;
 
 export function validateDeleteAvailabilityRequest(v: DeleteAvailabilityRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -779,6 +883,7 @@ return out;
 
 export function validateDeleteAvailabilityResponse(v: DeleteAvailabilityResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 

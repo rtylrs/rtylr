@@ -58,19 +58,33 @@ return out;
 
 export function validateTimeOffRequest(v: TimeOffRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
 if (!(v.ownerId !== undefined && v.ownerId !== null)) violations.push("owner_id is required");
 if (v.ownerId !== undefined && v.ownerId !== null && !(Number(v.ownerId) > 0)) violations.push("owner_id violates @gt");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
 if (!(v.staffId !== undefined && v.staffId !== null)) violations.push("staff_id is required");
 if (v.staffId !== undefined && v.staffId !== null && !(Number(v.staffId) > 0)) violations.push("staff_id violates @gt");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
 if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
 if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+if (v.endDate !== undefined && v.endDate !== null && !(typeof v.endDate === "string")) violations.push("end_date has invalid type");
 if (!(v.endDate !== undefined && v.endDate !== null) || v.endDate === "") violations.push("end_date is required");
+if (v.daysCount !== undefined && v.daysCount !== null && !(typeof v.daysCount === "number" && Number.isFinite(v.daysCount))) violations.push("days_count has invalid type");
 if (!(v.daysCount !== undefined && v.daysCount !== null)) violations.push("days_count is required");
 if (v.daysCount !== undefined && v.daysCount !== null && !(Number(v.daysCount) > 0)) violations.push("days_count violates @gt");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+if (v.reason !== undefined && v.reason !== null && !(typeof v.reason === "string")) violations.push("reason has invalid type");
 if (!(v.reason !== undefined && v.reason !== null) || v.reason === "") violations.push("reason is required");
+if (v.approvedBy !== undefined && v.approvedBy !== null && !(typeof v.approvedBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.approvedBy))) violations.push("approved_by has invalid type");
+if (v.approvedAt !== undefined && v.approvedAt !== null && !(typeof v.approvedAt === "string")) violations.push("approved_at has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -99,6 +113,9 @@ return out;
 
 export function validateApproveTimeOffRequestMsg(v: ApproveTimeOffRequestMsg): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
 return violations;
 }
 
@@ -121,6 +138,7 @@ return out;
 
 export function validateApproveTimeOffResponse(v: ApproveTimeOffResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 
@@ -162,6 +180,7 @@ return out;
 
 export function validateListTimeOffResponse(v: ListTimeOffResponse): string[] {
 const violations: string[] = [];
+if (v.requests !== undefined && v.requests !== null && !(Array.isArray(v.requests) && (v.requests).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("requests has invalid type");
 if (v.requests !== undefined && v.requests !== null) for (const item of v.requests) violations.push(...validateTimeOffRequest(item).map((message) => "requests: " + message));
 return violations;
 }
@@ -203,14 +222,21 @@ return out;
 
 export function validateSubmitTimeOffRequest(v: SubmitTimeOffRequest): string[] {
 const violations: string[] = [];
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
 if (!(v.staffId !== undefined && v.staffId !== null)) violations.push("staff_id is required");
 if (v.staffId !== undefined && v.staffId !== null && !(Number(v.staffId) > 0)) violations.push("staff_id violates @gt");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
 if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
 if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+if (v.endDate !== undefined && v.endDate !== null && !(typeof v.endDate === "string")) violations.push("end_date has invalid type");
 if (!(v.endDate !== undefined && v.endDate !== null) || v.endDate === "") violations.push("end_date is required");
+if (v.daysCount !== undefined && v.daysCount !== null && !(typeof v.daysCount === "number" && Number.isFinite(v.daysCount))) violations.push("days_count has invalid type");
 if (!(v.daysCount !== undefined && v.daysCount !== null)) violations.push("days_count is required");
 if (v.daysCount !== undefined && v.daysCount !== null && !(Number(v.daysCount) > 0)) violations.push("days_count violates @gt");
+if (v.reason !== undefined && v.reason !== null && !(typeof v.reason === "string")) violations.push("reason has invalid type");
 if (!(v.reason !== undefined && v.reason !== null) || v.reason === "") violations.push("reason is required");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
 return violations;
 }
 
@@ -233,6 +259,7 @@ return out;
 
 export function validateSubmitTimeOffResponse(v: SubmitTimeOffResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 return violations;
 }
 

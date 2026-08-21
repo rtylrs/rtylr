@@ -46,6 +46,16 @@ return out;
 
 export function validateActivityEntry(v: ActivityEntry): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.app !== undefined && v.app !== null && !(typeof v.app === "string")) violations.push("app has invalid type");
+if (v.entityType !== undefined && v.entityType !== null && !(typeof v.entityType === "string")) violations.push("entity_type has invalid type");
+if (v.entityId !== undefined && v.entityId !== null && !(typeof v.entityId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.entityId))) violations.push("entity_id has invalid type");
+if (v.action !== undefined && v.action !== null && !(typeof v.action === "string")) violations.push("action has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.userName !== undefined && v.userName !== null && !(typeof v.userName === "string")) violations.push("user_name has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -71,6 +81,8 @@ return out;
 
 export function validateListActivityRequest(v: ListActivityRequest): string[] {
 const violations: string[] = [];
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -96,7 +108,9 @@ return out;
 
 export function validateListActivityResponse(v: ListActivityResponse): string[] {
 const violations: string[] = [];
+if (v.activities !== undefined && v.activities !== null && !(Array.isArray(v.activities) && (v.activities).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("activities has invalid type");
 if (v.activities !== undefined && v.activities !== null) for (const item of v.activities) violations.push(...validateActivityEntry(item).map((message) => "activities: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isInteger(v.total) && v.total >= -2147483648 && v.total <= 2147483647)) violations.push("total has invalid type");
 return violations;
 }
 

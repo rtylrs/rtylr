@@ -40,6 +40,14 @@ return out;
 
 export function validateSettings(v: Settings): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.autoAssign !== undefined && v.autoAssign !== null && !(typeof v.autoAssign === "boolean")) violations.push("auto_assign has invalid type");
+if (v.slaHours !== undefined && v.slaHours !== null && !(typeof v.slaHours === "number" && Number.isInteger(v.slaHours) && v.slaHours >= -2147483648 && v.slaHours <= 2147483647)) violations.push("sla_hours has invalid type");
+if (v.businessHours !== undefined && v.businessHours !== null && !(typeof v.businessHours === "string")) violations.push("business_hours has invalid type");
+if (v.notificationEmail !== undefined && v.notificationEmail !== null && !(typeof v.notificationEmail === "string")) violations.push("notification_email has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -81,6 +89,7 @@ return out;
 
 export function validateGetSettingsResponse(v: GetSettingsResponse): string[] {
 const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null && !(typeof v.settings === "object" && v.settings !== null && !Array.isArray(v.settings))) violations.push("settings has invalid type");
 if (v.settings !== undefined && v.settings !== null) violations.push(...validateSettings(v.settings).map((message) => "settings: " + message));
 return violations;
 }
@@ -113,9 +122,13 @@ return out;
 
 export function validateUpdateSettingsRequest(v: UpdateSettingsRequest): string[] {
 const violations: string[] = [];
+if (v.autoAssign !== undefined && v.autoAssign !== null && !(typeof v.autoAssign === "boolean")) violations.push("auto_assign has invalid type");
+if (v.slaHours !== undefined && v.slaHours !== null && !(typeof v.slaHours === "number" && Number.isInteger(v.slaHours) && v.slaHours >= -2147483648 && v.slaHours <= 2147483647)) violations.push("sla_hours has invalid type");
 if (!(v.slaHours !== undefined && v.slaHours !== null)) violations.push("sla_hours is required");
 if (v.slaHours !== undefined && v.slaHours !== null && !(Number(v.slaHours) > 0)) violations.push("sla_hours violates @gt");
 if (v.slaHours !== undefined && v.slaHours !== null && !(Number(v.slaHours) <= 1000)) violations.push("sla_hours violates @lte");
+if (v.businessHours !== undefined && v.businessHours !== null && !(typeof v.businessHours === "string")) violations.push("business_hours has invalid type");
+if (v.notificationEmail !== undefined && v.notificationEmail !== null && !(typeof v.notificationEmail === "string")) violations.push("notification_email has invalid type");
 return violations;
 }
 
@@ -138,6 +151,7 @@ return out;
 
 export function validateUpdateSettingsResponse(v: UpdateSettingsResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

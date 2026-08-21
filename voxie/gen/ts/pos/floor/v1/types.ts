@@ -37,6 +37,13 @@ return out;
 
 export function validateFloor(v: Floor): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.branchId !== undefined && v.branchId !== null && !(typeof v.branchId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.branchId))) violations.push("branch_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(typeof v.sortOrder === "number" && Number.isInteger(v.sortOrder) && v.sortOrder >= -2147483648 && v.sortOrder <= 2147483647)) violations.push("sort_order has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -65,9 +72,12 @@ return out;
 
 export function validateCreateFloorRequest(v: CreateFloorRequest): string[] {
 const violations: string[] = [];
+if (v.branchId !== undefined && v.branchId !== null && !(typeof v.branchId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.branchId))) violations.push("branch_id has invalid type");
 if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
 if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(typeof v.sortOrder === "number" && Number.isInteger(v.sortOrder) && v.sortOrder >= -2147483648 && v.sortOrder <= 2147483647)) violations.push("sort_order has invalid type");
 if (!(v.sortOrder !== undefined && v.sortOrder !== null)) violations.push("sort_order is required");
 if (v.sortOrder !== undefined && v.sortOrder !== null && !(Number(v.sortOrder) > 0)) violations.push("sort_order violates @gt");
 return violations;
@@ -95,6 +105,8 @@ return out;
 
 export function validateCreateFloorResponse(v: CreateFloorResponse): string[] {
 const violations: string[] = [];
+if (v.floorId !== undefined && v.floorId !== null && !(typeof v.floorId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.floorId))) violations.push("floor_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -120,7 +132,9 @@ return out;
 
 export function validateUpdateFloorBody(v: UpdateFloorBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(typeof v.sortOrder === "number" && Number.isInteger(v.sortOrder) && v.sortOrder >= -2147483648 && v.sortOrder <= 2147483647)) violations.push("sort_order has invalid type");
 if (!(v.sortOrder !== undefined && v.sortOrder !== null)) violations.push("sort_order is required");
 if (v.sortOrder !== undefined && v.sortOrder !== null && !(Number(v.sortOrder) > 0)) violations.push("sort_order violates @gt");
 return violations;
@@ -148,8 +162,10 @@ return out;
 
 export function validateUpdateFloorRequest(v: UpdateFloorRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateFloorBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -173,6 +189,7 @@ return out;
 
 export function validateUpdateFloorResponse(v: UpdateFloorResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -195,6 +212,7 @@ return out;
 
 export function validateDeleteFloorRequest(v: DeleteFloorRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -219,6 +237,7 @@ return out;
 
 export function validateDeleteFloorResponse(v: DeleteFloorResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -241,6 +260,7 @@ return out;
 
 export function validateListFloorsRequest(v: ListFloorsRequest): string[] {
 const violations: string[] = [];
+if (v.branchId !== undefined && v.branchId !== null && !(typeof v.branchId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.branchId))) violations.push("branch_id has invalid type");
 return violations;
 }
 
@@ -263,6 +283,7 @@ return out;
 
 export function validateListFloorsResponse(v: ListFloorsResponse): string[] {
 const violations: string[] = [];
+if (v.floors !== undefined && v.floors !== null && !(Array.isArray(v.floors) && (v.floors).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("floors has invalid type");
 if (v.floors !== undefined && v.floors !== null) for (const item of v.floors) violations.push(...validateFloor(item).map((message) => "floors: " + message));
 return violations;
 }

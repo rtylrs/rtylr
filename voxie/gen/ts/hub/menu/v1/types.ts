@@ -39,6 +39,7 @@ return out;
 
 export function validateListMenuResponse(v: ListMenuResponse): string[] {
 const violations: string[] = [];
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...pos_menu_item_v1.validateMenuItem(item).map((message) => "items: " + message));
 return violations;
 }
@@ -62,6 +63,7 @@ return out;
 
 export function validateUpdateMenuRequest(v: UpdateMenuRequest): string[] {
 const violations: string[] = [];
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null && v.items.length < 1) violations.push("items must contain at least 1 items");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...pos_menu_item_v1.validateMenuItem(item).map((message) => "items: " + message));
 return violations;
@@ -86,6 +88,7 @@ return out;
 
 export function validateUpdateMenuResponse(v: UpdateMenuResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 
@@ -138,6 +141,17 @@ return out;
 
 export function validateMenuBanner(v: MenuBanner): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "string")) violations.push("body has invalid type");
+if (v.imageUrl !== undefined && v.imageUrl !== null && !(typeof v.imageUrl === "string")) violations.push("image_url has invalid type");
+if (v.linkUrl !== undefined && v.linkUrl !== null && !(typeof v.linkUrl === "string")) violations.push("link_url has invalid type");
+if (v.position !== undefined && v.position !== null && !(typeof v.position === "number" && Number.isInteger(v.position) && v.position >= -2147483648 && v.position <= 2147483647)) violations.push("position has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.startsAt !== undefined && v.startsAt !== null && !(typeof v.startsAt === "string")) violations.push("starts_at has invalid type");
+if (v.endsAt !== undefined && v.endsAt !== null && !(typeof v.endsAt === "string")) violations.push("ends_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -179,6 +193,7 @@ return out;
 
 export function validateListMenuBannersResponse(v: ListMenuBannersResponse): string[] {
 const violations: string[] = [];
+if (v.banners !== undefined && v.banners !== null && !(Array.isArray(v.banners) && (v.banners).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("banners has invalid type");
 if (v.banners !== undefined && v.banners !== null) for (const item of v.banners) violations.push(...validateMenuBanner(item).map((message) => "banners: " + message));
 return violations;
 }
@@ -223,7 +238,15 @@ return out;
 
 export function validateCreateMenuBannerRequest(v: CreateMenuBannerRequest): string[] {
 const violations: string[] = [];
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
 if (!(v.title !== undefined && v.title !== null) || v.title === "") violations.push("title is required");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "string")) violations.push("body has invalid type");
+if (v.imageUrl !== undefined && v.imageUrl !== null && !(typeof v.imageUrl === "string")) violations.push("image_url has invalid type");
+if (v.linkUrl !== undefined && v.linkUrl !== null && !(typeof v.linkUrl === "string")) violations.push("link_url has invalid type");
+if (v.position !== undefined && v.position !== null && !(typeof v.position === "number" && Number.isInteger(v.position) && v.position >= -2147483648 && v.position <= 2147483647)) violations.push("position has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.startsAt !== undefined && v.startsAt !== null && !(typeof v.startsAt === "string")) violations.push("starts_at has invalid type");
+if (v.endsAt !== undefined && v.endsAt !== null && !(typeof v.endsAt === "string")) violations.push("ends_at has invalid type");
 return violations;
 }
 
@@ -246,6 +269,7 @@ return out;
 
 export function validateCreateMenuBannerResponse(v: CreateMenuBannerResponse): string[] {
 const violations: string[] = [];
+if (v.banner !== undefined && v.banner !== null && !(typeof v.banner === "object" && v.banner !== null && !Array.isArray(v.banner))) violations.push("banner has invalid type");
 if (v.banner !== undefined && v.banner !== null) violations.push(...validateMenuBanner(v.banner).map((message) => "banner: " + message));
 return violations;
 }
@@ -293,9 +317,18 @@ return out;
 
 export function validateUpdateMenuBannerRequest(v: UpdateMenuBannerRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
 if (!(v.title !== undefined && v.title !== null) || v.title === "") violations.push("title is required");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "string")) violations.push("body has invalid type");
+if (v.imageUrl !== undefined && v.imageUrl !== null && !(typeof v.imageUrl === "string")) violations.push("image_url has invalid type");
+if (v.linkUrl !== undefined && v.linkUrl !== null && !(typeof v.linkUrl === "string")) violations.push("link_url has invalid type");
+if (v.position !== undefined && v.position !== null && !(typeof v.position === "number" && Number.isInteger(v.position) && v.position >= -2147483648 && v.position <= 2147483647)) violations.push("position has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.startsAt !== undefined && v.startsAt !== null && !(typeof v.startsAt === "string")) violations.push("starts_at has invalid type");
+if (v.endsAt !== undefined && v.endsAt !== null && !(typeof v.endsAt === "string")) violations.push("ends_at has invalid type");
 return violations;
 }
 
@@ -318,6 +351,7 @@ return out;
 
 export function validateUpdateMenuBannerResponse(v: UpdateMenuBannerResponse): string[] {
 const violations: string[] = [];
+if (v.banner !== undefined && v.banner !== null && !(typeof v.banner === "object" && v.banner !== null && !Array.isArray(v.banner))) violations.push("banner has invalid type");
 if (v.banner !== undefined && v.banner !== null) violations.push(...validateMenuBanner(v.banner).map((message) => "banner: " + message));
 return violations;
 }
@@ -341,6 +375,7 @@ return out;
 
 export function validateDeleteMenuBannerRequest(v: DeleteMenuBannerRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -365,6 +400,7 @@ return out;
 
 export function validateDeleteMenuBannerResponse(v: DeleteMenuBannerResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 

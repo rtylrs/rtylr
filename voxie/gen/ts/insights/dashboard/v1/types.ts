@@ -34,6 +34,12 @@ return out;
 
 export function validateWorkloadEntry(v: WorkloadEntry): string[] {
 const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.openTasks !== undefined && v.openTasks !== null && !(typeof v.openTasks === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.openTasks))) violations.push("open_tasks has invalid type");
+if (v.inProgressTasks !== undefined && v.inProgressTasks !== null && !(typeof v.inProgressTasks === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.inProgressTasks))) violations.push("in_progress_tasks has invalid type");
+if (v.completedTasks !== undefined && v.completedTasks !== null && !(typeof v.completedTasks === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.completedTasks))) violations.push("completed_tasks has invalid type");
+if (v.overdueTasks !== undefined && v.overdueTasks !== null && !(typeof v.overdueTasks === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.overdueTasks))) violations.push("overdue_tasks has invalid type");
+if (v.totalActive !== undefined && v.totalActive !== null && !(typeof v.totalActive === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.totalActive))) violations.push("total_active has invalid type");
 return violations;
 }
 
@@ -77,6 +83,14 @@ return out;
 
 export function validateRoadmapProject(v: RoadmapProject): string[] {
 const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
+if (v.projectName !== undefined && v.projectName !== null && !(typeof v.projectName === "string")) violations.push("project_name has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.totalTasks !== undefined && v.totalTasks !== null && !(typeof v.totalTasks === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.totalTasks))) violations.push("total_tasks has invalid type");
+if (v.completedTasks !== undefined && v.completedTasks !== null && !(typeof v.completedTasks === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.completedTasks))) violations.push("completed_tasks has invalid type");
+if (v.progressPercent !== undefined && v.progressPercent !== null && !(typeof v.progressPercent === "number" && Number.isFinite(v.progressPercent))) violations.push("progress_percent has invalid type");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
+if (v.dueDate !== undefined && v.dueDate !== null && !(typeof v.dueDate === "string")) violations.push("due_date has invalid type");
 return violations;
 }
 
@@ -102,6 +116,8 @@ return out;
 
 export function validateInsightsMetricCard(v: InsightsMetricCard): string[] {
 const violations: string[] = [];
+if (v.value !== undefined && v.value !== null && !(typeof v.value === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.value))) violations.push("value has invalid type");
+if (v.deltaPct !== undefined && v.deltaPct !== null && !(typeof v.deltaPct === "number" && Number.isFinite(v.deltaPct))) violations.push("delta_pct has invalid type");
 return violations;
 }
 
@@ -127,6 +143,8 @@ return out;
 
 export function validateInsightsPctCard(v: InsightsPctCard): string[] {
 const violations: string[] = [];
+if (v.value !== undefined && v.value !== null && !(typeof v.value === "number" && Number.isFinite(v.value))) violations.push("value has invalid type");
+if (v.deltaPct !== undefined && v.deltaPct !== null && !(typeof v.deltaPct === "number" && Number.isFinite(v.deltaPct))) violations.push("delta_pct has invalid type");
 return violations;
 }
 
@@ -186,6 +204,13 @@ return out;
 
 export function validateGetInsightsResponse(v: GetInsightsResponse): string[] {
 const violations: string[] = [];
+if (v.totalTasks !== undefined && v.totalTasks !== null && !(typeof v.totalTasks === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.totalTasks))) violations.push("total_tasks has invalid type");
+if (v.completedTasks !== undefined && v.completedTasks !== null && !(typeof v.completedTasks === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.completedTasks))) violations.push("completed_tasks has invalid type");
+if (v.inProgressTasks !== undefined && v.inProgressTasks !== null && !(typeof v.inProgressTasks === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.inProgressTasks))) violations.push("in_progress_tasks has invalid type");
+if (v.overdueTasks !== undefined && v.overdueTasks !== null && !(typeof v.overdueTasks === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.overdueTasks))) violations.push("overdue_tasks has invalid type");
+if (v.avgCycleTimeDays !== undefined && v.avgCycleTimeDays !== null && !(typeof v.avgCycleTimeDays === "number" && Number.isFinite(v.avgCycleTimeDays))) violations.push("avg_cycle_time_days has invalid type");
+if (v.velocity !== undefined && v.velocity !== null && !(typeof v.velocity === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.velocity))) violations.push("velocity has invalid type");
+if (v.velocityChange !== undefined && v.velocityChange !== null && !(typeof v.velocityChange === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.velocityChange))) violations.push("velocity_change has invalid type");
 return violations;
 }
 
@@ -242,6 +267,12 @@ return out;
 
 export function validateGetKPIsResponse(v: GetKPIsResponse): string[] {
 const violations: string[] = [];
+if (v.revenue !== undefined && v.revenue !== null && !(typeof v.revenue === "number" && Number.isFinite(v.revenue))) violations.push("revenue has invalid type");
+if (v.orderCount !== undefined && v.orderCount !== null && !(typeof v.orderCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderCount))) violations.push("order_count has invalid type");
+if (v.staffCount !== undefined && v.staffCount !== null && !(typeof v.staffCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffCount))) violations.push("staff_count has invalid type");
+if (v.customerCount !== undefined && v.customerCount !== null && !(typeof v.customerCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerCount))) violations.push("customer_count has invalid type");
+if (v.lowStockCount !== undefined && v.lowStockCount !== null && !(typeof v.lowStockCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.lowStockCount))) violations.push("low_stock_count has invalid type");
+if (v.activeApps !== undefined && v.activeApps !== null && !(typeof v.activeApps === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.activeApps))) violations.push("active_apps has invalid type");
 return violations;
 }
 
@@ -283,6 +314,7 @@ return out;
 
 export function validateGetRoadmapResponse(v: GetRoadmapResponse): string[] {
 const violations: string[] = [];
+if (v.projects !== undefined && v.projects !== null && !(Array.isArray(v.projects) && (v.projects).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("projects has invalid type");
 if (v.projects !== undefined && v.projects !== null) for (const item of v.projects) violations.push(...validateRoadmapProject(item).map((message) => "projects: " + message));
 return violations;
 }
@@ -325,6 +357,7 @@ return out;
 
 export function validateGetWorkloadResponse(v: GetWorkloadResponse): string[] {
 const violations: string[] = [];
+if (v.workload !== undefined && v.workload !== null && !(Array.isArray(v.workload) && (v.workload).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("workload has invalid type");
 if (v.workload !== undefined && v.workload !== null) for (const item of v.workload) violations.push(...validateWorkloadEntry(item).map((message) => "workload: " + message));
 return violations;
 }
@@ -376,9 +409,13 @@ return out;
 
 export function validateGetDashboardSummaryResponse(v: GetDashboardSummaryResponse): string[] {
 const violations: string[] = [];
+if (v.revenue !== undefined && v.revenue !== null && !(typeof v.revenue === "object" && v.revenue !== null && !Array.isArray(v.revenue))) violations.push("revenue has invalid type");
 if (v.revenue !== undefined && v.revenue !== null) violations.push(...validateInsightsMetricCard(v.revenue).map((message) => "revenue: " + message));
+if (v.customers !== undefined && v.customers !== null && !(typeof v.customers === "object" && v.customers !== null && !Array.isArray(v.customers))) violations.push("customers has invalid type");
 if (v.customers !== undefined && v.customers !== null) violations.push(...validateInsightsMetricCard(v.customers).map((message) => "customers: " + message));
+if (v.orders !== undefined && v.orders !== null && !(typeof v.orders === "object" && v.orders !== null && !Array.isArray(v.orders))) violations.push("orders has invalid type");
 if (v.orders !== undefined && v.orders !== null) violations.push(...validateInsightsMetricCard(v.orders).map((message) => "orders: " + message));
+if (v.margin !== undefined && v.margin !== null && !(typeof v.margin === "object" && v.margin !== null && !Array.isArray(v.margin))) violations.push("margin has invalid type");
 if (v.margin !== undefined && v.margin !== null) violations.push(...validateInsightsPctCard(v.margin).map((message) => "margin: " + message));
 return violations;
 }

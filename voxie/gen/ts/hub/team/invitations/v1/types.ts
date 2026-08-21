@@ -31,11 +31,16 @@ return out;
 
 export function validateInviteUserRequest(v: InviteUserRequest): string[] {
 const violations: string[] = [];
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
 if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (v.fullName !== undefined && v.fullName !== null && !(typeof v.fullName === "string")) violations.push("full_name has invalid type");
 if (!(v.fullName !== undefined && v.fullName !== null) || v.fullName === "") violations.push("full_name is required");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
 if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
+if (v.apps !== undefined && v.apps !== null && !(Array.isArray(v.apps) && (v.apps).every((item: any) => typeof item === "string"))) violations.push("apps has invalid type");
 if (v.apps !== undefined && v.apps !== null && v.apps.length < 1) violations.push("apps must contain at least 1 items");
+if (v.password !== undefined && v.password !== null && !(typeof v.password === "string")) violations.push("password has invalid type");
 return violations;
 }
 
@@ -61,6 +66,8 @@ return out;
 
 export function validateInviteUserResponse(v: InviteUserResponse): string[] {
 const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -92,7 +99,11 @@ return out;
 
 export function validateBulkInviteRequest(v: BulkInviteRequest): string[] {
 const violations: string[] = [];
+if (v.emails !== undefined && v.emails !== null && !(Array.isArray(v.emails) && (v.emails).every((item: any) => typeof item === "string"))) violations.push("emails has invalid type");
 if (v.emails !== undefined && v.emails !== null && v.emails.length < 1) violations.push("emails must contain at least 1 items");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
+if (v.apps !== undefined && v.apps !== null && !(Array.isArray(v.apps) && (v.apps).every((item: any) => typeof item === "string"))) violations.push("apps has invalid type");
+if (v.groupId !== undefined && v.groupId !== null && !(typeof v.groupId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.groupId))) violations.push("group_id has invalid type");
 return violations;
 }
 
@@ -124,6 +135,10 @@ return out;
 
 export function validateBulkInviteResult(v: BulkInviteResult): string[] {
 const violations: string[] = [];
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -149,7 +164,9 @@ return out;
 
 export function validateBulkInviteResponse(v: BulkInviteResponse): string[] {
 const violations: string[] = [];
+if (v.results !== undefined && v.results !== null && !(Array.isArray(v.results) && (v.results).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("results has invalid type");
 if (v.results !== undefined && v.results !== null) for (const item of v.results) violations.push(...validateBulkInviteResult(item).map((message) => "results: " + message));
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -172,6 +189,7 @@ return out;
 
 export function validateVerifyInviteRequest(v: VerifyInviteRequest): string[] {
 const violations: string[] = [];
+if (v.token !== undefined && v.token !== null && !(typeof v.token === "string")) violations.push("token has invalid type");
 if (!(v.token !== undefined && v.token !== null) || v.token === "") violations.push("token is required");
 return violations;
 }
@@ -204,6 +222,10 @@ return out;
 
 export function validateVerifyInviteResponse(v: VerifyInviteResponse): string[] {
 const violations: string[] = [];
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.fullName !== undefined && v.fullName !== null && !(typeof v.fullName === "string")) violations.push("full_name has invalid type");
+if (v.valid !== undefined && v.valid !== null && !(typeof v.valid === "boolean")) violations.push("valid has invalid type");
+if (v.apps !== undefined && v.apps !== null && !(Array.isArray(v.apps) && (v.apps).every((item: any) => typeof item === "string"))) violations.push("apps has invalid type");
 return violations;
 }
 
@@ -229,7 +251,9 @@ return out;
 
 export function validateAcceptInviteRequest(v: AcceptInviteRequest): string[] {
 const violations: string[] = [];
+if (v.token !== undefined && v.token !== null && !(typeof v.token === "string")) violations.push("token has invalid type");
 if (!(v.token !== undefined && v.token !== null) || v.token === "") violations.push("token is required");
+if (v.password !== undefined && v.password !== null && !(typeof v.password === "string")) violations.push("password has invalid type");
 if (!(v.password !== undefined && v.password !== null) || v.password === "") violations.push("password is required");
 return violations;
 }
@@ -253,6 +277,7 @@ return out;
 
 export function validateAcceptInviteResponse(v: AcceptInviteResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

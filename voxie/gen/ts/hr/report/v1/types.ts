@@ -37,6 +37,13 @@ return out;
 
 export function validateReportRequestPayload(v: ReportRequestPayload): string[] {
 const violations: string[] = [];
+if (v.reportType !== undefined && v.reportType !== null && !(typeof v.reportType === "string")) violations.push("report_type has invalid type");
+if (v.dateFrom !== undefined && v.dateFrom !== null && !(typeof v.dateFrom === "string")) violations.push("date_from has invalid type");
+if (v.dateTo !== undefined && v.dateTo !== null && !(typeof v.dateTo === "string")) violations.push("date_to has invalid type");
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.departmentId !== undefined && v.departmentId !== null && !(typeof v.departmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.departmentId))) violations.push("department_id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.format !== undefined && v.format !== null && !(typeof v.format === "string")) violations.push("format has invalid type");
 return violations;
 }
 
@@ -68,6 +75,10 @@ return out;
 
 export function validateReportPayload(v: ReportPayload): string[] {
 const violations: string[] = [];
+if (v.reportType !== undefined && v.reportType !== null && !(typeof v.reportType === "string")) violations.push("report_type has invalid type");
+if (v.generatedAt !== undefined && v.generatedAt !== null && !(typeof v.generatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.generatedAt))) violations.push("generated_at has invalid type");
+if (v.data !== undefined && v.data !== null && !(typeof v.data === "string")) violations.push("data has invalid type");
+if (v.format !== undefined && v.format !== null && !(typeof v.format === "string")) violations.push("format has invalid type");
 return violations;
 }
 
@@ -90,6 +101,7 @@ return out;
 
 export function validateGenerateReportRequest(v: GenerateReportRequest): string[] {
 const violations: string[] = [];
+if (v.request !== undefined && v.request !== null && !(typeof v.request === "object" && v.request !== null && !Array.isArray(v.request))) violations.push("request has invalid type");
 if (!(v.request !== undefined && v.request !== null)) violations.push("request is required");
 if (v.request !== undefined && v.request !== null) violations.push(...validateReportRequestPayload(v.request).map((message) => "request: " + message));
 return violations;
@@ -114,6 +126,7 @@ return out;
 
 export function validateGenerateReportResponse(v: GenerateReportResponse): string[] {
 const violations: string[] = [];
+if (v.report !== undefined && v.report !== null && !(typeof v.report === "object" && v.report !== null && !Array.isArray(v.report))) violations.push("report has invalid type");
 if (v.report !== undefined && v.report !== null) violations.push(...validateReportPayload(v.report).map((message) => "report: " + message));
 return violations;
 }

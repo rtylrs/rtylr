@@ -40,6 +40,14 @@ return out;
 
 export function validateDepartmentPayload(v: DepartmentPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.managerStaffId !== undefined && v.managerStaffId !== null && !(typeof v.managerStaffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.managerStaffId))) violations.push("manager_staff_id has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -68,7 +76,10 @@ return out;
 
 export function validateCreateDepartmentRequest(v: CreateDepartmentRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.managerStaffId !== undefined && v.managerStaffId !== null && !(typeof v.managerStaffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.managerStaffId))) violations.push("manager_staff_id has invalid type");
 return violations;
 }
 
@@ -91,6 +102,7 @@ return out;
 
 export function validateCreateDepartmentResponse(v: CreateDepartmentResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 return violations;
 }
 
@@ -113,6 +125,7 @@ return out;
 
 export function validateDeleteDepartmentRequest(v: DeleteDepartmentRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -137,6 +150,7 @@ return out;
 
 export function validateDeleteDepartmentResponse(v: DeleteDepartmentResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 
@@ -178,6 +192,7 @@ return out;
 
 export function validateListDepartmentsResponse(v: ListDepartmentsResponse): string[] {
 const violations: string[] = [];
+if (v.departments !== undefined && v.departments !== null && !(Array.isArray(v.departments) && (v.departments).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("departments has invalid type");
 if (v.departments !== undefined && v.departments !== null) for (const item of v.departments) violations.push(...validateDepartmentPayload(item).map((message) => "departments: " + message));
 return violations;
 }
@@ -207,7 +222,10 @@ return out;
 
 export function validateUpdateDepartmentBody(v: UpdateDepartmentBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.managerStaffId !== undefined && v.managerStaffId !== null && !(typeof v.managerStaffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.managerStaffId))) violations.push("manager_staff_id has invalid type");
 return violations;
 }
 
@@ -233,8 +251,10 @@ return out;
 
 export function validateUpdateDepartmentRequest(v: UpdateDepartmentRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateDepartmentBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -258,6 +278,7 @@ return out;
 
 export function validateUpdateDepartmentResponse(v: UpdateDepartmentResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 

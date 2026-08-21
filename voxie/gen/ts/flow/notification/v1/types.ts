@@ -50,6 +50,17 @@ return out;
 
 export function validateNotification(v: Notification): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string")) violations.push("task_id has invalid type");
+if (v.taskTitle !== undefined && v.taskTitle !== null && !(typeof v.taskTitle === "string")) violations.push("task_title has invalid type");
+if (v.actorInitials !== undefined && v.actorInitials !== null && !(typeof v.actorInitials === "string")) violations.push("actor_initials has invalid type");
+if (v.project !== undefined && v.project !== null && !(typeof v.project === "string")) violations.push("project has invalid type");
+if (v.projectColor !== undefined && v.projectColor !== null && !(typeof v.projectColor === "string")) violations.push("project_color has invalid type");
+if (v.read !== undefined && v.read !== null && !(typeof v.read === "boolean")) violations.push("read has invalid type");
+if (v.timestamp !== undefined && v.timestamp !== null && !(typeof v.timestamp === "string")) violations.push("timestamp has invalid type");
 return violations;
 }
 
@@ -81,6 +92,10 @@ return out;
 
 export function validateListNotificationsRequest(v: ListNotificationsRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -106,7 +121,9 @@ return out;
 
 export function validateListNotificationsResponse(v: ListNotificationsResponse): string[] {
 const violations: string[] = [];
+if (v.notifications !== undefined && v.notifications !== null && !(Array.isArray(v.notifications) && (v.notifications).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("notifications has invalid type");
 if (v.notifications !== undefined && v.notifications !== null) for (const item of v.notifications) violations.push(...validateNotification(item).map((message) => "notifications: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -130,6 +147,7 @@ return out;
 
 export function validateMarkNotificationReadRequest(v: MarkNotificationReadRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 return violations;
 }
 

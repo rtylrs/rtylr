@@ -2,6 +2,42 @@
 import type { ListTemplatesRequest, ListTemplatesResponse, CreateTemplateRequest, CreateTemplateResponse, UpdateTemplateRequest, UpdateTemplateResponse, DeleteTemplateRequest, DeleteTemplateResponse } from "./types";
 import { encodeListTemplatesRequest, validateListTemplatesRequest, decodeListTemplatesResponse, encodeCreateTemplateRequest, validateCreateTemplateRequest, decodeCreateTemplateResponse, encodeUpdateTemplateRequest, validateUpdateTemplateRequest, decodeUpdateTemplateResponse, encodeDeleteTemplateRequest, validateDeleteTemplateRequest, decodeDeleteTemplateResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface TemplateServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class TemplateServiceClient {
@@ -46,11 +84,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTemplatesResponse(await res.json());
+return decodeListTemplatesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createTemplate(req: CreateTemplateRequest): Promise<CreateTemplateResponse> {
@@ -64,11 +102,11 @@ body: JSON.stringify(encodeCreateTemplateRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateTemplateResponse(await res.json());
+return decodeCreateTemplateResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateTemplate(req: UpdateTemplateRequest): Promise<UpdateTemplateResponse> {
@@ -83,11 +121,11 @@ body: JSON.stringify(encodeUpdateTemplateRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateTemplateResponse(await res.json());
+return decodeUpdateTemplateResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteTemplate(req: DeleteTemplateRequest): Promise<DeleteTemplateResponse> {
@@ -104,11 +142,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteTemplateResponse(await res.json());
+return decodeDeleteTemplateResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

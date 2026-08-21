@@ -19,6 +19,7 @@ return out;
 
 export function validateDaySummaryRequest(v: DaySummaryRequest): string[] {
 const violations: string[] = [];
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
 if (!(v.date !== undefined && v.date !== null) || v.date === "") violations.push("date is required");
 return violations;
 }
@@ -57,6 +58,12 @@ return out;
 
 export function validateDaySummaryResponse(v: DaySummaryResponse): string[] {
 const violations: string[] = [];
+if (v.totalSales !== undefined && v.totalSales !== null && !(typeof v.totalSales === "number" && Number.isFinite(v.totalSales))) violations.push("total_sales has invalid type");
+if (v.totalTax !== undefined && v.totalTax !== null && !(typeof v.totalTax === "number" && Number.isFinite(v.totalTax))) violations.push("total_tax has invalid type");
+if (v.totalTips !== undefined && v.totalTips !== null && !(typeof v.totalTips === "number" && Number.isFinite(v.totalTips))) violations.push("total_tips has invalid type");
+if (v.totalRefunds !== undefined && v.totalRefunds !== null && !(typeof v.totalRefunds === "number" && Number.isFinite(v.totalRefunds))) violations.push("total_refunds has invalid type");
+if (v.totalOrders !== undefined && v.totalOrders !== null && !(typeof v.totalOrders === "number" && Number.isInteger(v.totalOrders) && v.totalOrders >= -2147483648 && v.totalOrders <= 2147483647)) violations.push("total_orders has invalid type");
+if (v.paymentBreakdown !== undefined && v.paymentBreakdown !== null && !(typeof v.paymentBreakdown === "object" && v.paymentBreakdown !== null && !Array.isArray(v.paymentBreakdown) && Object.values(v.paymentBreakdown).every((item: any) => typeof item === "number" && Number.isFinite(item)))) violations.push("payment_breakdown has invalid type");
 return violations;
 }
 

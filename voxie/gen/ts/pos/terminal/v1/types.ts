@@ -40,6 +40,14 @@ return out;
 
 export function validateTerminal(v: Terminal): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.branchId !== undefined && v.branchId !== null && !(typeof v.branchId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.branchId))) violations.push("branch_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.deviceId !== undefined && v.deviceId !== null && !(typeof v.deviceId === "string")) violations.push("device_id has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.lastSeenAt !== undefined && v.lastSeenAt !== null && !(typeof v.lastSeenAt === "string")) violations.push("last_seen_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -81,6 +89,7 @@ return out;
 
 export function validateListTerminalsResponse(v: ListTerminalsResponse): string[] {
 const violations: string[] = [];
+if (v.terminals !== undefined && v.terminals !== null && !(Array.isArray(v.terminals) && (v.terminals).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("terminals has invalid type");
 if (v.terminals !== undefined && v.terminals !== null) for (const item of v.terminals) violations.push(...validateTerminal(item).map((message) => "terminals: " + message));
 return violations;
 }
@@ -110,9 +119,12 @@ return out;
 
 export function validateCreateTerminalRequest(v: CreateTerminalRequest): string[] {
 const violations: string[] = [];
+if (v.branchId !== undefined && v.branchId !== null && !(typeof v.branchId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.branchId))) violations.push("branch_id has invalid type");
 if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
 if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.deviceId !== undefined && v.deviceId !== null && !(typeof v.deviceId === "string")) violations.push("device_id has invalid type");
 if (!(v.deviceId !== undefined && v.deviceId !== null) || v.deviceId === "") violations.push("device_id is required");
 return violations;
 }
@@ -139,6 +151,8 @@ return out;
 
 export function validateCreateTerminalResponse(v: CreateTerminalResponse): string[] {
 const violations: string[] = [];
+if (v.terminalId !== undefined && v.terminalId !== null && !(typeof v.terminalId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.terminalId))) violations.push("terminal_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -170,10 +184,14 @@ return out;
 
 export function validateUpdateTerminalBody(v: UpdateTerminalBody): string[] {
 const violations: string[] = [];
+if (v.branchId !== undefined && v.branchId !== null && !(typeof v.branchId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.branchId))) violations.push("branch_id has invalid type");
 if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
 if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.deviceId !== undefined && v.deviceId !== null && !(typeof v.deviceId === "string")) violations.push("device_id has invalid type");
 if (!(v.deviceId !== undefined && v.deviceId !== null) || v.deviceId === "") violations.push("device_id is required");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -199,8 +217,10 @@ return out;
 
 export function validateUpdateTerminalRequest(v: UpdateTerminalRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateTerminalBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -224,6 +244,7 @@ return out;
 
 export function validateUpdateTerminalResponse(v: UpdateTerminalResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -246,6 +267,7 @@ return out;
 
 export function validateHeartbeatTerminalRequest(v: HeartbeatTerminalRequest): string[] {
 const violations: string[] = [];
+if (v.terminalId !== undefined && v.terminalId !== null && !(typeof v.terminalId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.terminalId))) violations.push("terminal_id has invalid type");
 if (!(v.terminalId !== undefined && v.terminalId !== null)) violations.push("terminal_id is required");
 if (v.terminalId !== undefined && v.terminalId !== null && !(Number(v.terminalId) > 0)) violations.push("terminal_id violates @gt");
 return violations;
@@ -270,6 +292,7 @@ return out;
 
 export function validateHeartbeatTerminalResponse(v: HeartbeatTerminalResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

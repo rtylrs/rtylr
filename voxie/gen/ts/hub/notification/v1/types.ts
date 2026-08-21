@@ -37,6 +37,13 @@ return out;
 
 export function validateNotification(v: Notification): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "string")) violations.push("body has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.read !== undefined && v.read !== null && !(typeof v.read === "boolean")) violations.push("read has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.link !== undefined && v.link !== null && !(typeof v.link === "string")) violations.push("link has invalid type");
 return violations;
 }
 
@@ -62,6 +69,8 @@ return out;
 
 export function validateListNotificationsRequest(v: ListNotificationsRequest): string[] {
 const violations: string[] = [];
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.cursor !== undefined && v.cursor !== null && !(typeof v.cursor === "string")) violations.push("cursor has invalid type");
 return violations;
 }
 
@@ -87,7 +96,9 @@ return out;
 
 export function validateListNotificationsResponse(v: ListNotificationsResponse): string[] {
 const violations: string[] = [];
+if (v.notifications !== undefined && v.notifications !== null && !(Array.isArray(v.notifications) && (v.notifications).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("notifications has invalid type");
 if (v.notifications !== undefined && v.notifications !== null) for (const item of v.notifications) violations.push(...validateNotification(item).map((message) => "notifications: " + message));
+if (v.nextCursor !== undefined && v.nextCursor !== null && !(typeof v.nextCursor === "string")) violations.push("next_cursor has invalid type");
 return violations;
 }
 
@@ -129,6 +140,7 @@ return out;
 
 export function validateMarkAllReadResponse(v: MarkAllReadResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -151,6 +163,7 @@ return out;
 
 export function validateMarkNotificationReadRequest(v: MarkNotificationReadRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -175,6 +188,7 @@ return out;
 
 export function validateMarkNotificationReadResponse(v: MarkNotificationReadResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -197,6 +211,7 @@ return out;
 
 export function validateMarkNotificationsReadRequest(v: MarkNotificationsReadRequest): string[] {
 const violations: string[] = [];
+if (v.ids !== undefined && v.ids !== null && !(Array.isArray(v.ids) && (v.ids).every((item: any) => typeof item === "string" && /^-?(0|[1-9][0-9]*)$/.test(item)))) violations.push("ids has invalid type");
 if (v.ids !== undefined && v.ids !== null && v.ids.length < 1) violations.push("ids must contain at least 1 items");
 return violations;
 }
@@ -220,6 +235,7 @@ return out;
 
 export function validateMarkNotificationsReadResponse(v: MarkNotificationsReadResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

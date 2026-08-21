@@ -2,6 +2,42 @@
 import type { ListTasksRequest, ListTasksResponse, GetMyTasksRequest, GetMyTasksResponse, GetMyTasksProjectRequest, GetMyTasksProjectResponse, SearchTasksRequest, SearchTasksResponse, CreateTaskRequest, CreateTaskResponse, GetTaskDetailRequest, GetTaskDetailResponse, UpdateTaskRequest, UpdateTaskResponse, UpdateTaskStatusRequest, UpdateTaskStatusResponse, DeleteTaskRequest, DeleteTaskResponse, CreateSubtaskRequest, CreateSubtaskResponse, GetSubtasksRequest, GetSubtasksResponse, AddCommentRequest, AddCommentResponse, DeleteCommentRequest, DeleteCommentResponse, GetTaskActivityRequest, GetTaskActivityResponse, CreateAttachmentRequest, CreateAttachmentResponse, GetAttachmentsRequest, GetAttachmentsResponse, DeleteAttachmentRequest, DeleteAttachmentResponse, CreateTimeLogRequest, CreateTimeLogResponse, GetTimeLogsRequest, GetTimeLogsResponse, DeleteTimeLogRequest, DeleteTimeLogResponse, AddTaskDependencyRequest, AddTaskDependencyResponse, RemoveTaskDependencyRequest, RemoveTaskDependencyResponse } from "./types";
 import { encodeListTasksRequest, validateListTasksRequest, decodeListTasksResponse, encodeGetMyTasksRequest, validateGetMyTasksRequest, decodeGetMyTasksResponse, encodeGetMyTasksProjectRequest, validateGetMyTasksProjectRequest, decodeGetMyTasksProjectResponse, encodeSearchTasksRequest, validateSearchTasksRequest, decodeSearchTasksResponse, encodeCreateTaskRequest, validateCreateTaskRequest, decodeCreateTaskResponse, encodeGetTaskDetailRequest, validateGetTaskDetailRequest, decodeGetTaskDetailResponse, encodeUpdateTaskRequest, validateUpdateTaskRequest, decodeUpdateTaskResponse, encodeUpdateTaskStatusRequest, validateUpdateTaskStatusRequest, decodeUpdateTaskStatusResponse, encodeDeleteTaskRequest, validateDeleteTaskRequest, decodeDeleteTaskResponse, encodeCreateSubtaskRequest, validateCreateSubtaskRequest, decodeCreateSubtaskResponse, encodeGetSubtasksRequest, validateGetSubtasksRequest, decodeGetSubtasksResponse, encodeAddCommentRequest, validateAddCommentRequest, decodeAddCommentResponse, encodeDeleteCommentRequest, validateDeleteCommentRequest, decodeDeleteCommentResponse, encodeGetTaskActivityRequest, validateGetTaskActivityRequest, decodeGetTaskActivityResponse, encodeCreateAttachmentRequest, validateCreateAttachmentRequest, decodeCreateAttachmentResponse, encodeGetAttachmentsRequest, validateGetAttachmentsRequest, decodeGetAttachmentsResponse, encodeDeleteAttachmentRequest, validateDeleteAttachmentRequest, decodeDeleteAttachmentResponse, encodeCreateTimeLogRequest, validateCreateTimeLogRequest, decodeCreateTimeLogResponse, encodeGetTimeLogsRequest, validateGetTimeLogsRequest, decodeGetTimeLogsResponse, encodeDeleteTimeLogRequest, validateDeleteTimeLogRequest, decodeDeleteTimeLogResponse, encodeAddTaskDependencyRequest, validateAddTaskDependencyRequest, decodeAddTaskDependencyResponse, encodeRemoveTaskDependencyRequest, validateRemoveTaskDependencyRequest, decodeRemoveTaskDependencyResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface TaskServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class TaskServiceClient {
@@ -73,11 +111,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTasksResponse(await res.json());
+return decodeListTasksResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getMyTasks(req: GetMyTasksRequest): Promise<GetMyTasksResponse> {
@@ -105,11 +143,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetMyTasksResponse(await res.json());
+return decodeGetMyTasksResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getMyTasksProject(req: GetMyTasksProjectRequest): Promise<GetMyTasksProjectResponse> {
@@ -125,11 +163,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetMyTasksProjectResponse(await res.json());
+return decodeGetMyTasksProjectResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async searchTasks(req: SearchTasksRequest): Promise<SearchTasksResponse> {
@@ -163,11 +201,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSearchTasksResponse(await res.json());
+return decodeSearchTasksResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createTask(req: CreateTaskRequest): Promise<CreateTaskResponse> {
@@ -181,11 +219,11 @@ body: JSON.stringify(encodeCreateTaskRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateTaskResponse(await res.json());
+return decodeCreateTaskResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getTaskDetail(req: GetTaskDetailRequest): Promise<GetTaskDetailResponse> {
@@ -202,11 +240,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetTaskDetailResponse(await res.json());
+return decodeGetTaskDetailResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateTask(req: UpdateTaskRequest): Promise<UpdateTaskResponse> {
@@ -221,11 +259,11 @@ body: JSON.stringify(encodeUpdateTaskRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateTaskResponse(await res.json());
+return decodeUpdateTaskResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateTaskStatus(req: UpdateTaskStatusRequest): Promise<UpdateTaskStatusResponse> {
@@ -240,11 +278,11 @@ body: JSON.stringify(encodeUpdateTaskStatusRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateTaskStatusResponse(await res.json());
+return decodeUpdateTaskStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteTask(req: DeleteTaskRequest): Promise<DeleteTaskResponse> {
@@ -261,11 +299,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteTaskResponse(await res.json());
+return decodeDeleteTaskResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createSubtask(req: CreateSubtaskRequest): Promise<CreateSubtaskResponse> {
@@ -279,11 +317,11 @@ body: JSON.stringify(encodeCreateSubtaskRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateSubtaskResponse(await res.json());
+return decodeCreateSubtaskResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getSubtasks(req: GetSubtasksRequest): Promise<GetSubtasksResponse> {
@@ -312,11 +350,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetSubtasksResponse(await res.json());
+return decodeGetSubtasksResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async addComment(req: AddCommentRequest): Promise<AddCommentResponse> {
@@ -331,11 +369,11 @@ body: JSON.stringify(encodeAddCommentRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAddCommentResponse(await res.json());
+return decodeAddCommentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteComment(req: DeleteCommentRequest): Promise<DeleteCommentResponse> {
@@ -352,11 +390,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteCommentResponse(await res.json());
+return decodeDeleteCommentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getTaskActivity(req: GetTaskActivityRequest): Promise<GetTaskActivityResponse> {
@@ -373,11 +411,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetTaskActivityResponse(await res.json());
+return decodeGetTaskActivityResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createAttachment(req: CreateAttachmentRequest): Promise<CreateAttachmentResponse> {
@@ -391,11 +429,11 @@ body: JSON.stringify(encodeCreateAttachmentRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateAttachmentResponse(await res.json());
+return decodeCreateAttachmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getAttachments(req: GetAttachmentsRequest): Promise<GetAttachmentsResponse> {
@@ -412,11 +450,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetAttachmentsResponse(await res.json());
+return decodeGetAttachmentsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteAttachment(req: DeleteAttachmentRequest): Promise<DeleteAttachmentResponse> {
@@ -433,11 +471,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteAttachmentResponse(await res.json());
+return decodeDeleteAttachmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createTimeLog(req: CreateTimeLogRequest): Promise<CreateTimeLogResponse> {
@@ -452,11 +490,11 @@ body: JSON.stringify(encodeCreateTimeLogRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateTimeLogResponse(await res.json());
+return decodeCreateTimeLogResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getTimeLogs(req: GetTimeLogsRequest): Promise<GetTimeLogsResponse> {
@@ -473,11 +511,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetTimeLogsResponse(await res.json());
+return decodeGetTimeLogsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteTimeLog(req: DeleteTimeLogRequest): Promise<DeleteTimeLogResponse> {
@@ -494,11 +532,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteTimeLogResponse(await res.json());
+return decodeDeleteTimeLogResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async addTaskDependency(req: AddTaskDependencyRequest): Promise<AddTaskDependencyResponse> {
@@ -513,11 +551,11 @@ body: JSON.stringify(encodeAddTaskDependencyRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAddTaskDependencyResponse(await res.json());
+return decodeAddTaskDependencyResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async removeTaskDependency(req: RemoveTaskDependencyRequest): Promise<RemoveTaskDependencyResponse> {
@@ -535,11 +573,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRemoveTaskDependencyResponse(await res.json());
+return decodeRemoveTaskDependencyResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

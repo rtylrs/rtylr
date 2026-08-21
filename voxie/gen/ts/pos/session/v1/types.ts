@@ -49,6 +49,17 @@ return out;
 
 export function validateSession(v: Session): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.openingFloat !== undefined && v.openingFloat !== null && !(typeof v.openingFloat === "number" && Number.isFinite(v.openingFloat))) violations.push("opening_float has invalid type");
+if (v.closingFloat !== undefined && v.closingFloat !== null && !(typeof v.closingFloat === "number" && Number.isFinite(v.closingFloat))) violations.push("closing_float has invalid type");
+if (v.totalSales !== undefined && v.totalSales !== null && !(typeof v.totalSales === "number" && Number.isFinite(v.totalSales))) violations.push("total_sales has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.openedAt !== undefined && v.openedAt !== null && !(typeof v.openedAt === "string")) violations.push("opened_at has invalid type");
+if (v.closedAt !== undefined && v.closedAt !== null && !(typeof v.closedAt === "string")) violations.push("closed_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -98,6 +109,16 @@ return out;
 
 export function validateCurrentSession(v: CurrentSession): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.openingCash !== undefined && v.openingCash !== null && !(typeof v.openingCash === "number" && Number.isFinite(v.openingCash))) violations.push("opening_cash has invalid type");
+if (v.closingCash !== undefined && v.closingCash !== null && !(typeof v.closingCash === "number" && Number.isFinite(v.closingCash))) violations.push("closing_cash has invalid type");
+if (v.totalSales !== undefined && v.totalSales !== null && !(typeof v.totalSales === "number" && Number.isFinite(v.totalSales))) violations.push("total_sales has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.openedAt !== undefined && v.openedAt !== null && !(typeof v.openedAt === "string")) violations.push("opened_at has invalid type");
+if (v.closedAt !== undefined && v.closedAt !== null && !(typeof v.closedAt === "string")) violations.push("closed_at has invalid type");
 return violations;
 }
 
@@ -120,6 +141,7 @@ return out;
 
 export function validateGetSessionRequest(v: GetSessionRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -144,6 +166,7 @@ return out;
 
 export function validateGetSessionResponse(v: GetSessionResponse): string[] {
 const violations: string[] = [];
+if (v.session !== undefined && v.session !== null && !(typeof v.session === "object" && v.session !== null && !Array.isArray(v.session))) violations.push("session has invalid type");
 if (v.session !== undefined && v.session !== null) violations.push(...validateSession(v.session).map((message) => "session: " + message));
 return violations;
 }
@@ -186,6 +209,7 @@ return out;
 
 export function validateGetCurrentSessionResponse(v: GetCurrentSessionResponse): string[] {
 const violations: string[] = [];
+if (v.session !== undefined && v.session !== null && !(typeof v.session === "object" && v.session !== null && !Array.isArray(v.session))) violations.push("session has invalid type");
 if (v.session !== undefined && v.session !== null) violations.push(...validateCurrentSession(v.session).map((message) => "session: " + message));
 return violations;
 }
@@ -228,6 +252,7 @@ return out;
 
 export function validateListSessionsResponse(v: ListSessionsResponse): string[] {
 const violations: string[] = [];
+if (v.sessions !== undefined && v.sessions !== null && !(Array.isArray(v.sessions) && (v.sessions).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("sessions has invalid type");
 if (v.sessions !== undefined && v.sessions !== null) for (const item of v.sessions) violations.push(...validateSession(item).map((message) => "sessions: " + message));
 return violations;
 }
@@ -257,10 +282,13 @@ return out;
 
 export function validateOpenSessionRequest(v: OpenSessionRequest): string[] {
 const violations: string[] = [];
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
 if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
 if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
 if (!(v.staffId !== undefined && v.staffId !== null)) violations.push("staff_id is required");
 if (v.staffId !== undefined && v.staffId !== null && !(Number(v.staffId) > 0)) violations.push("staff_id violates @gt");
+if (v.openingFloat !== undefined && v.openingFloat !== null && !(typeof v.openingFloat === "number" && Number.isFinite(v.openingFloat))) violations.push("opening_float has invalid type");
 if (!(v.openingFloat !== undefined && v.openingFloat !== null)) violations.push("opening_float is required");
 if (v.openingFloat !== undefined && v.openingFloat !== null && !(Number(v.openingFloat) >= 0)) violations.push("opening_float violates @gte");
 return violations;
@@ -288,6 +316,8 @@ return out;
 
 export function validateOpenSessionResponse(v: OpenSessionResponse): string[] {
 const violations: string[] = [];
+if (v.sessionId !== undefined && v.sessionId !== null && !(typeof v.sessionId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sessionId))) violations.push("session_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -313,8 +343,10 @@ return out;
 
 export function validateCloseSessionRequest(v: CloseSessionRequest): string[] {
 const violations: string[] = [];
+if (v.closingFloat !== undefined && v.closingFloat !== null && !(typeof v.closingFloat === "number" && Number.isFinite(v.closingFloat))) violations.push("closing_float has invalid type");
 if (!(v.closingFloat !== undefined && v.closingFloat !== null)) violations.push("closing_float is required");
 if (v.closingFloat !== undefined && v.closingFloat !== null && !(Number(v.closingFloat) >= 0)) violations.push("closing_float violates @gte");
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -339,6 +371,7 @@ return out;
 
 export function validateCloseSessionResponse(v: CloseSessionResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

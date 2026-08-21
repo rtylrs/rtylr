@@ -52,8 +52,20 @@ return out;
 
 export function validateOvertimeRequestPayload(v: OvertimeRequestPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.plannedExtraMinutes !== undefined && v.plannedExtraMinutes !== null && !(typeof v.plannedExtraMinutes === "number" && Number.isInteger(v.plannedExtraMinutes) && v.plannedExtraMinutes >= -2147483648 && v.plannedExtraMinutes <= 2147483647)) violations.push("planned_extra_minutes has invalid type");
+if (v.reason !== undefined && v.reason !== null && !(typeof v.reason === "string")) violations.push("reason has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.currentApprovalLevel !== undefined && v.currentApprovalLevel !== null && !(typeof v.currentApprovalLevel === "number" && Number.isInteger(v.currentApprovalLevel) && v.currentApprovalLevel >= -2147483648 && v.currentApprovalLevel <= 2147483647)) violations.push("current_approval_level has invalid type");
+if (v.approvedBy !== undefined && v.approvedBy !== null && !(typeof v.approvedBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.approvedBy))) violations.push("approved_by has invalid type");
+if (v.multiplierApplied !== undefined && v.multiplierApplied !== null && !(typeof v.multiplierApplied === "number" && Number.isFinite(v.multiplierApplied))) violations.push("multiplier_applied has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -79,6 +91,8 @@ return out;
 
 export function validateListOvertimeRequestsRequest(v: ListOvertimeRequestsRequest): string[] {
 const violations: string[] = [];
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 return violations;
 }
 
@@ -110,7 +124,11 @@ return out;
 
 export function validateListOvertimeRequestsResponse(v: ListOvertimeRequestsResponse): string[] {
 const violations: string[] = [];
+if (v.requests !== undefined && v.requests !== null && !(Array.isArray(v.requests) && (v.requests).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("requests has invalid type");
 if (v.requests !== undefined && v.requests !== null) for (const item of v.requests) violations.push(...validateOvertimeRequestPayload(item).map((message) => "requests: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -142,11 +160,15 @@ return out;
 
 export function validateCreateOvertimeRequestRequest(v: CreateOvertimeRequestRequest): string[] {
 const violations: string[] = [];
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
 if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
 if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
 if (!(v.date !== undefined && v.date !== null) || v.date === "") violations.push("date is required");
+if (v.plannedExtraMinutes !== undefined && v.plannedExtraMinutes !== null && !(typeof v.plannedExtraMinutes === "number" && Number.isInteger(v.plannedExtraMinutes) && v.plannedExtraMinutes >= -2147483648 && v.plannedExtraMinutes <= 2147483647)) violations.push("planned_extra_minutes has invalid type");
 if (!(v.plannedExtraMinutes !== undefined && v.plannedExtraMinutes !== null)) violations.push("planned_extra_minutes is required");
 if (v.plannedExtraMinutes !== undefined && v.plannedExtraMinutes !== null && !(Number(v.plannedExtraMinutes) > 0)) violations.push("planned_extra_minutes violates @gt");
+if (v.reason !== undefined && v.reason !== null && !(typeof v.reason === "string")) violations.push("reason has invalid type");
 if (!(v.reason !== undefined && v.reason !== null) || v.reason === "") violations.push("reason is required");
 return violations;
 }
@@ -170,6 +192,7 @@ return out;
 
 export function validateCreateOvertimeRequestResponse(v: CreateOvertimeRequestResponse): string[] {
 const violations: string[] = [];
+if (v.request !== undefined && v.request !== null && !(typeof v.request === "object" && v.request !== null && !Array.isArray(v.request))) violations.push("request has invalid type");
 if (v.request !== undefined && v.request !== null) violations.push(...validateOvertimeRequestPayload(v.request).map((message) => "request: " + message));
 return violations;
 }
@@ -199,6 +222,9 @@ return out;
 
 export function validateApproveOvertimeBody(v: ApproveOvertimeBody): string[] {
 const violations: string[] = [];
+if (v.approved !== undefined && v.approved !== null && !(typeof v.approved === "boolean")) violations.push("approved has invalid type");
+if (v.multiplierApplied !== undefined && v.multiplierApplied !== null && !(typeof v.multiplierApplied === "number" && Number.isFinite(v.multiplierApplied))) violations.push("multiplier_applied has invalid type");
+if (v.rejectionReason !== undefined && v.rejectionReason !== null && !(typeof v.rejectionReason === "string")) violations.push("rejection_reason has invalid type");
 return violations;
 }
 
@@ -224,8 +250,10 @@ return out;
 
 export function validateApproveOvertimeRequest(v: ApproveOvertimeRequest): string[] {
 const violations: string[] = [];
+if (v.overtimeRequestId !== undefined && v.overtimeRequestId !== null && !(typeof v.overtimeRequestId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.overtimeRequestId))) violations.push("overtime_request_id has invalid type");
 if (!(v.overtimeRequestId !== undefined && v.overtimeRequestId !== null)) violations.push("overtime_request_id is required");
 if (v.overtimeRequestId !== undefined && v.overtimeRequestId !== null && !(Number(v.overtimeRequestId) > 0)) violations.push("overtime_request_id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateApproveOvertimeBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -249,6 +277,7 @@ return out;
 
 export function validateApproveOvertimeResponse(v: ApproveOvertimeResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 

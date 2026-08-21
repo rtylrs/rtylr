@@ -28,10 +28,14 @@ return out;
 
 export function validateUpdatePermissionsRequest(v: UpdatePermissionsRequest): string[] {
 const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (v.apps !== undefined && v.apps !== null && !(Array.isArray(v.apps) && (v.apps).every((item: any) => typeof item === "string"))) violations.push("apps has invalid type");
 if (v.apps !== undefined && v.apps !== null && v.apps.length < 1) violations.push("apps must contain at least 1 items");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
 if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
+if (v.fullName !== undefined && v.fullName !== null && !(typeof v.fullName === "string")) violations.push("full_name has invalid type");
 return violations;
 }
 

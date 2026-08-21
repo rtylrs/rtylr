@@ -43,6 +43,15 @@ return out;
 
 export function validateAccount(v: Account): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.balance !== undefined && v.balance !== null && !(typeof v.balance === "number" && Number.isFinite(v.balance))) violations.push("balance has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
 return violations;
 }
 
@@ -77,6 +86,11 @@ return out;
 
 export function validateChartOfAccountsNode(v: ChartOfAccountsNode): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.children !== undefined && v.children !== null && !(Array.isArray(v.children) && (v.children).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("children has invalid type");
 if (v.children !== undefined && v.children !== null) for (const item of v.children) violations.push(...validateChartOfAccountsNode(item).map((message) => "children: " + message));
 return violations;
 }
@@ -115,11 +129,17 @@ return out;
 
 export function validateCreateAccountRequest(v: CreateAccountRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
 if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
 if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (v.balance !== undefined && v.balance !== null && !(typeof v.balance === "number" && Number.isFinite(v.balance))) violations.push("balance has invalid type");
 if (!(v.balance !== undefined && v.balance !== null)) violations.push("balance is required");
 if (v.balance !== undefined && v.balance !== null && !(Number(v.balance) >= 0)) violations.push("balance violates @gte");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
 return violations;
 }
 
@@ -145,6 +165,8 @@ return out;
 
 export function validateCreateAccountResponse(v: CreateAccountResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -167,6 +189,7 @@ return out;
 
 export function validateDeleteAccountRequest(v: DeleteAccountRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -191,6 +214,7 @@ return out;
 
 export function validateDeleteAccountResponse(v: DeleteAccountResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -232,6 +256,7 @@ return out;
 
 export function validateGetChartOfAccountsResponse(v: GetChartOfAccountsResponse): string[] {
 const violations: string[] = [];
+if (v.tree !== undefined && v.tree !== null && !(Array.isArray(v.tree) && (v.tree).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("tree has invalid type");
 if (v.tree !== undefined && v.tree !== null) for (const item of v.tree) violations.push(...validateChartOfAccountsNode(item).map((message) => "tree: " + message));
 return violations;
 }
@@ -258,6 +283,8 @@ return out;
 
 export function validateListAccountsRequest(v: ListAccountsRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isSafeInteger(v.pageSize) && v.pageSize >= Number.MIN_SAFE_INTEGER && v.pageSize <= Number.MAX_SAFE_INTEGER)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -289,7 +316,11 @@ return out;
 
 export function validateListAccountsResponse(v: ListAccountsResponse): string[] {
 const violations: string[] = [];
+if (v.accounts !== undefined && v.accounts !== null && !(Array.isArray(v.accounts) && (v.accounts).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("accounts has invalid type");
 if (v.accounts !== undefined && v.accounts !== null) for (const item of v.accounts) violations.push(...validateAccount(item).map((message) => "accounts: " + message));
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isSafeInteger(v.pageSize) && v.pageSize >= Number.MIN_SAFE_INTEGER && v.pageSize <= Number.MAX_SAFE_INTEGER)) violations.push("page_size has invalid type");
+if (v.hasMore !== undefined && v.hasMore !== null && !(typeof v.hasMore === "boolean")) violations.push("has_more has invalid type");
 return violations;
 }
 
@@ -327,9 +358,15 @@ return out;
 
 export function validateUpdateAccountBody(v: UpdateAccountBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
 if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.balance !== undefined && v.balance !== null && !(typeof v.balance === "number" && Number.isFinite(v.balance))) violations.push("balance has invalid type");
 if (v.balance !== undefined && v.balance !== null && !(Number(v.balance) >= 0)) violations.push("balance violates @gte");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
 return violations;
 }
 
@@ -355,8 +392,10 @@ return out;
 
 export function validateUpdateAccountRequest(v: UpdateAccountRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateAccountBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -380,6 +419,7 @@ return out;
 
 export function validateUpdateAccountResponse(v: UpdateAccountResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

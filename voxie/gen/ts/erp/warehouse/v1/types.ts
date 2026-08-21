@@ -52,6 +52,18 @@ return out;
 
 export function validateWarehouse(v: Warehouse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.city !== undefined && v.city !== null && !(typeof v.city === "string")) violations.push("city has invalid type");
+if (v.country !== undefined && v.country !== null && !(typeof v.country === "string")) violations.push("country has invalid type");
+if (v.managerName !== undefined && v.managerName !== null && !(typeof v.managerName === "string")) violations.push("manager_name has invalid type");
+if (v.capacity !== undefined && v.capacity !== null && !(typeof v.capacity === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.capacity))) violations.push("capacity has invalid type");
+if (v.isDefault !== undefined && v.isDefault !== null && !(typeof v.isDefault === "boolean")) violations.push("is_default has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -95,7 +107,15 @@ return out;
 
 export function validateCreateWarehouseRequest(v: CreateWarehouseRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.city !== undefined && v.city !== null && !(typeof v.city === "string")) violations.push("city has invalid type");
+if (v.country !== undefined && v.country !== null && !(typeof v.country === "string")) violations.push("country has invalid type");
+if (v.managerName !== undefined && v.managerName !== null && !(typeof v.managerName === "string")) violations.push("manager_name has invalid type");
+if (v.capacity !== undefined && v.capacity !== null && !(typeof v.capacity === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.capacity))) violations.push("capacity has invalid type");
+if (v.isDefault !== undefined && v.isDefault !== null && !(typeof v.isDefault === "boolean")) violations.push("is_default has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -121,6 +141,8 @@ return out;
 
 export function validateCreateWarehouseResponse(v: CreateWarehouseResponse): string[] {
 const violations: string[] = [];
+if (v.warehouseId !== undefined && v.warehouseId !== null && !(typeof v.warehouseId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.warehouseId))) violations.push("warehouse_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -143,6 +165,7 @@ return out;
 
 export function validateDeleteWarehouseRequest(v: DeleteWarehouseRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -167,6 +190,7 @@ return out;
 
 export function validateDeleteWarehouseResponse(v: DeleteWarehouseResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -208,6 +232,7 @@ return out;
 
 export function validateListWarehousesResponse(v: ListWarehousesResponse): string[] {
 const violations: string[] = [];
+if (v.warehouses !== undefined && v.warehouses !== null && !(Array.isArray(v.warehouses) && (v.warehouses).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("warehouses has invalid type");
 if (v.warehouses !== undefined && v.warehouses !== null) for (const item of v.warehouses) violations.push(...validateWarehouse(item).map((message) => "warehouses: " + message));
 return violations;
 }
@@ -252,7 +277,15 @@ return out;
 
 export function validateUpdateWarehouseBody(v: UpdateWarehouseBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.city !== undefined && v.city !== null && !(typeof v.city === "string")) violations.push("city has invalid type");
+if (v.country !== undefined && v.country !== null && !(typeof v.country === "string")) violations.push("country has invalid type");
+if (v.managerName !== undefined && v.managerName !== null && !(typeof v.managerName === "string")) violations.push("manager_name has invalid type");
+if (v.capacity !== undefined && v.capacity !== null && !(typeof v.capacity === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.capacity))) violations.push("capacity has invalid type");
+if (v.isDefault !== undefined && v.isDefault !== null && !(typeof v.isDefault === "boolean")) violations.push("is_default has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -278,8 +311,10 @@ return out;
 
 export function validateUpdateWarehouseRequest(v: UpdateWarehouseRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateWarehouseBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -303,6 +338,7 @@ return out;
 
 export function validateUpdateWarehouseResponse(v: UpdateWarehouseResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

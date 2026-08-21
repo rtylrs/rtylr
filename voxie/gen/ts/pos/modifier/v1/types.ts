@@ -40,6 +40,14 @@ return out;
 
 export function validateModifier(v: Modifier): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.priceDelta !== undefined && v.priceDelta !== null && !(typeof v.priceDelta === "number" && Number.isFinite(v.priceDelta))) violations.push("price_delta has invalid type");
+if (v.groupName !== undefined && v.groupName !== null && !(typeof v.groupName === "string")) violations.push("group_name has invalid type");
+if (v.isRequired !== undefined && v.isRequired !== null && !(typeof v.isRequired === "boolean")) violations.push("is_required has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -71,9 +79,13 @@ return out;
 
 export function validateCreateModifierRequest(v: CreateModifierRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.priceDelta !== undefined && v.priceDelta !== null && !(typeof v.priceDelta === "number" && Number.isFinite(v.priceDelta))) violations.push("price_delta has invalid type");
 if (v.priceDelta !== undefined && v.priceDelta !== null && !(Number(v.priceDelta) >= 0)) violations.push("price_delta violates @gte");
+if (v.groupName !== undefined && v.groupName !== null && !(typeof v.groupName === "string")) violations.push("group_name has invalid type");
 if (!(v.groupName !== undefined && v.groupName !== null) || v.groupName === "") violations.push("group_name is required");
+if (v.isRequired !== undefined && v.isRequired !== null && !(typeof v.isRequired === "boolean")) violations.push("is_required has invalid type");
 return violations;
 }
 
@@ -99,6 +111,8 @@ return out;
 
 export function validateCreateModifierResponse(v: CreateModifierResponse): string[] {
 const violations: string[] = [];
+if (v.modifierId !== undefined && v.modifierId !== null && !(typeof v.modifierId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.modifierId))) violations.push("modifier_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -121,6 +135,7 @@ return out;
 
 export function validateDeleteModifierRequest(v: DeleteModifierRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -145,6 +160,7 @@ return out;
 
 export function validateDeleteModifierResponse(v: DeleteModifierResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -186,6 +202,7 @@ return out;
 
 export function validateListModifiersResponse(v: ListModifiersResponse): string[] {
 const violations: string[] = [];
+if (v.modifiers !== undefined && v.modifiers !== null && !(Array.isArray(v.modifiers) && (v.modifiers).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("modifiers has invalid type");
 if (v.modifiers !== undefined && v.modifiers !== null) for (const item of v.modifiers) violations.push(...validateModifier(item).map((message) => "modifiers: " + message));
 return violations;
 }
@@ -218,9 +235,13 @@ return out;
 
 export function validateUpdateModifierBody(v: UpdateModifierBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.priceDelta !== undefined && v.priceDelta !== null && !(typeof v.priceDelta === "number" && Number.isFinite(v.priceDelta))) violations.push("price_delta has invalid type");
 if (v.priceDelta !== undefined && v.priceDelta !== null && !(Number(v.priceDelta) >= 0)) violations.push("price_delta violates @gte");
+if (v.groupName !== undefined && v.groupName !== null && !(typeof v.groupName === "string")) violations.push("group_name has invalid type");
 if (!(v.groupName !== undefined && v.groupName !== null) || v.groupName === "") violations.push("group_name is required");
+if (v.isRequired !== undefined && v.isRequired !== null && !(typeof v.isRequired === "boolean")) violations.push("is_required has invalid type");
 return violations;
 }
 
@@ -246,8 +267,10 @@ return out;
 
 export function validateUpdateModifierRequest(v: UpdateModifierRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateModifierBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -271,6 +294,7 @@ return out;
 
 export function validateUpdateModifierResponse(v: UpdateModifierResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

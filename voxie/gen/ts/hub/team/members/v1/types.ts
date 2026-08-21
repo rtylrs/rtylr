@@ -38,6 +38,13 @@ return out;
 
 export function validateStaffUserPayload(v: StaffUserPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.fullName !== undefined && v.fullName !== null && !(typeof v.fullName === "string")) violations.push("full_name has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.apps !== undefined && v.apps !== null && !(Array.isArray(v.apps) && (v.apps).every((item: any) => typeof item === "string"))) violations.push("apps has invalid type");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -81,6 +88,14 @@ return out;
 
 export function validateStaffUserWithGroups(v: StaffUserWithGroups): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.fullName !== undefined && v.fullName !== null && !(typeof v.fullName === "string")) violations.push("full_name has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.apps !== undefined && v.apps !== null && !(Array.isArray(v.apps) && (v.apps).every((item: any) => typeof item === "string"))) violations.push("apps has invalid type");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.groups !== undefined && v.groups !== null && !(Array.isArray(v.groups) && (v.groups).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("groups has invalid type");
 if (v.groups !== undefined && v.groups !== null) for (const item of v.groups) violations.push(...hub_team_groups_v1.validateGroupSummary(item).map((message) => "groups: " + message));
 return violations;
 }
@@ -107,6 +122,8 @@ return out;
 
 export function validateListTeamRequest(v: ListTeamRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -132,7 +149,9 @@ return out;
 
 export function validateListTeamResponse(v: ListTeamResponse): string[] {
 const violations: string[] = [];
+if (v.users !== undefined && v.users !== null && !(Array.isArray(v.users) && (v.users).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("users has invalid type");
 if (v.users !== undefined && v.users !== null) for (const item of v.users) violations.push(...validateStaffUserPayload(item).map((message) => "users: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isInteger(v.total) && v.total >= -2147483648 && v.total <= 2147483647)) violations.push("total has invalid type");
 return violations;
 }
 
@@ -155,6 +174,7 @@ return out;
 
 export function validateGetMemberRequest(v: GetMemberRequest): string[] {
 const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
 return violations;
@@ -179,6 +199,7 @@ return out;
 
 export function validateGetMemberResponse(v: GetMemberResponse): string[] {
 const violations: string[] = [];
+if (v.user !== undefined && v.user !== null && !(typeof v.user === "object" && v.user !== null && !Array.isArray(v.user))) violations.push("user has invalid type");
 if (v.user !== undefined && v.user !== null) violations.push(...validateStaffUserWithGroups(v.user).map((message) => "user: " + message));
 return violations;
 }
@@ -202,6 +223,7 @@ return out;
 
 export function validateRemoveMemberRequest(v: RemoveMemberRequest): string[] {
 const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
 return violations;
@@ -226,6 +248,7 @@ return out;
 
 export function validateRemoveMemberResponse(v: RemoveMemberResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

@@ -19,6 +19,7 @@ return out;
 
 export function validateVerifyPINRequest(v: VerifyPINRequest): string[] {
 const violations: string[] = [];
+if (v.pin !== undefined && v.pin !== null && !(typeof v.pin === "string")) violations.push("pin has invalid type");
 if (!(v.pin !== undefined && v.pin !== null) || v.pin === "") violations.push("pin is required");
 return violations;
 }
@@ -48,6 +49,9 @@ return out;
 
 export function validateVerifyPINResponse(v: VerifyPINResponse): string[] {
 const violations: string[] = [];
+if (v.valid !== undefined && v.valid !== null && !(typeof v.valid === "boolean")) violations.push("valid has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

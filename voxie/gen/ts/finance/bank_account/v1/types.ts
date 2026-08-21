@@ -44,6 +44,15 @@ return out;
 
 export function validateBankAccount(v: BankAccount): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.bankName !== undefined && v.bankName !== null && !(typeof v.bankName === "string")) violations.push("bank_name has invalid type");
+if (v.accountType !== undefined && v.accountType !== null && !(typeof v.accountType === "string")) violations.push("account_type has invalid type");
+if (v.lastFour !== undefined && v.lastFour !== null && !(typeof v.lastFour === "string")) violations.push("last_four has invalid type");
+if (v.balance !== undefined && v.balance !== null && !(typeof v.balance === "number" && Number.isFinite(v.balance))) violations.push("balance has invalid type");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.isPrimary !== undefined && v.isPrimary !== null && !(typeof v.isPrimary === "boolean")) violations.push("is_primary has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -84,13 +93,20 @@ return out;
 
 export function validateCreateBankAccountRequest(v: CreateBankAccountRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.bankName !== undefined && v.bankName !== null && !(typeof v.bankName === "string")) violations.push("bank_name has invalid type");
 if (!(v.bankName !== undefined && v.bankName !== null) || v.bankName === "") violations.push("bank_name is required");
+if (v.accountType !== undefined && v.accountType !== null && !(typeof v.accountType === "string")) violations.push("account_type has invalid type");
 if (!(v.accountType !== undefined && v.accountType !== null) || v.accountType === "") violations.push("account_type is required");
+if (v.lastFour !== undefined && v.lastFour !== null && !(typeof v.lastFour === "string")) violations.push("last_four has invalid type");
 if (!(v.lastFour !== undefined && v.lastFour !== null) || v.lastFour === "") violations.push("last_four is required");
+if (v.balance !== undefined && v.balance !== null && !(typeof v.balance === "number" && Number.isFinite(v.balance))) violations.push("balance has invalid type");
 if (!(v.balance !== undefined && v.balance !== null)) violations.push("balance is required");
 if (v.balance !== undefined && v.balance !== null && !(Number(v.balance) >= 0)) violations.push("balance violates @gte");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
 if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (v.isPrimary !== undefined && v.isPrimary !== null && !(typeof v.isPrimary === "boolean")) violations.push("is_primary has invalid type");
 return violations;
 }
 
@@ -113,6 +129,7 @@ return out;
 
 export function validateCreateBankAccountResponse(v: CreateBankAccountResponse): string[] {
 const violations: string[] = [];
+if (v.account !== undefined && v.account !== null && !(typeof v.account === "object" && v.account !== null && !Array.isArray(v.account))) violations.push("account has invalid type");
 if (v.account !== undefined && v.account !== null) violations.push(...validateBankAccount(v.account).map((message) => "account: " + message));
 return violations;
 }
@@ -136,6 +153,7 @@ return out;
 
 export function validateGetBankAccountRequest(v: GetBankAccountRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -160,6 +178,7 @@ return out;
 
 export function validateGetBankAccountResponse(v: GetBankAccountResponse): string[] {
 const violations: string[] = [];
+if (v.account !== undefined && v.account !== null && !(typeof v.account === "object" && v.account !== null && !Array.isArray(v.account))) violations.push("account has invalid type");
 if (v.account !== undefined && v.account !== null) violations.push(...validateBankAccount(v.account).map((message) => "account: " + message));
 return violations;
 }
@@ -192,6 +211,10 @@ return out;
 
 export function validateListBankAccountsRequest(v: ListBankAccountsRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -217,7 +240,9 @@ return out;
 
 export function validateListBankAccountsResponse(v: ListBankAccountsResponse): string[] {
 const violations: string[] = [];
+if (v.accounts !== undefined && v.accounts !== null && !(Array.isArray(v.accounts) && (v.accounts).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("accounts has invalid type");
 if (v.accounts !== undefined && v.accounts !== null) for (const item of v.accounts) violations.push(...validateBankAccount(item).map((message) => "accounts: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }

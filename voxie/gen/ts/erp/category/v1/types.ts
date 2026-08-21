@@ -34,8 +34,14 @@ return out;
 
 export function validateCategory(v: Category): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -61,7 +67,9 @@ return out;
 
 export function validateCreateCategoryRequest(v: CreateCategoryRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 return violations;
 }
 
@@ -87,6 +95,8 @@ return out;
 
 export function validateCreateCategoryResponse(v: CreateCategoryResponse): string[] {
 const violations: string[] = [];
+if (v.categoryId !== undefined && v.categoryId !== null && !(typeof v.categoryId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.categoryId))) violations.push("category_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -112,7 +122,9 @@ return out;
 
 export function validateUpdateCategoryBody(v: UpdateCategoryBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 return violations;
 }
 
@@ -138,8 +150,10 @@ return out;
 
 export function validateUpdateCategoryRequest(v: UpdateCategoryRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateCategoryBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -163,6 +177,7 @@ return out;
 
 export function validateUpdateCategoryResponse(v: UpdateCategoryResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -185,6 +200,7 @@ return out;
 
 export function validateDeleteCategoryRequest(v: DeleteCategoryRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -209,6 +225,7 @@ return out;
 
 export function validateDeleteCategoryResponse(v: DeleteCategoryResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -250,6 +267,7 @@ return out;
 
 export function validateListCategoriesResponse(v: ListCategoriesResponse): string[] {
 const violations: string[] = [];
+if (v.categories !== undefined && v.categories !== null && !(Array.isArray(v.categories) && (v.categories).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("categories has invalid type");
 if (v.categories !== undefined && v.categories !== null) for (const item of v.categories) violations.push(...validateCategory(item).map((message) => "categories: " + message));
 return violations;
 }

@@ -118,8 +118,42 @@ return out;
 
 export function validateProduct(v: Product): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.categoryId !== undefined && v.categoryId !== null && !(typeof v.categoryId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.categoryId))) violations.push("category_id has invalid type");
+if (v.supplierId !== undefined && v.supplierId !== null && !(typeof v.supplierId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.supplierId))) violations.push("supplier_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.sku !== undefined && v.sku !== null && !(typeof v.sku === "string")) violations.push("sku has invalid type");
+if (v.barcode !== undefined && v.barcode !== null && !(typeof v.barcode === "string")) violations.push("barcode has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.unit !== undefined && v.unit !== null && !(typeof v.unit === "string")) violations.push("unit has invalid type");
+if (v.costPrice !== undefined && v.costPrice !== null && !(typeof v.costPrice === "number" && Number.isFinite(v.costPrice))) violations.push("cost_price has invalid type");
+if (v.salePrice !== undefined && v.salePrice !== null && !(typeof v.salePrice === "number" && Number.isFinite(v.salePrice))) violations.push("sale_price has invalid type");
+if (v.stockQuantity !== undefined && v.stockQuantity !== null && !(typeof v.stockQuantity === "number" && Number.isFinite(v.stockQuantity))) violations.push("stock_quantity has invalid type");
+if (v.lowStockThreshold !== undefined && v.lowStockThreshold !== null && !(typeof v.lowStockThreshold === "number" && Number.isFinite(v.lowStockThreshold))) violations.push("low_stock_threshold has invalid type");
+if (v.reorderQuantity !== undefined && v.reorderQuantity !== null && !(typeof v.reorderQuantity === "number" && Number.isFinite(v.reorderQuantity))) violations.push("reorder_quantity has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.trackInventory !== undefined && v.trackInventory !== null && !(typeof v.trackInventory === "boolean")) violations.push("track_inventory has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.brandId !== undefined && v.brandId !== null && !(typeof v.brandId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.brandId))) violations.push("brand_id has invalid type");
+if (v.compareAtPrice !== undefined && v.compareAtPrice !== null && !(typeof v.compareAtPrice === "number" && Number.isFinite(v.compareAtPrice))) violations.push("compare_at_price has invalid type");
+if (v.taxRate !== undefined && v.taxRate !== null && !(typeof v.taxRate === "number" && Number.isFinite(v.taxRate))) violations.push("tax_rate has invalid type");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.weight !== undefined && v.weight !== null && !(typeof v.weight === "number" && Number.isFinite(v.weight))) violations.push("weight has invalid type");
+if (v.weightUnit !== undefined && v.weightUnit !== null && !(typeof v.weightUnit === "string")) violations.push("weight_unit has invalid type");
+if (v.length !== undefined && v.length !== null && !(typeof v.length === "number" && Number.isFinite(v.length))) violations.push("length has invalid type");
+if (v.width !== undefined && v.width !== null && !(typeof v.width === "number" && Number.isFinite(v.width))) violations.push("width has invalid type");
+if (v.height !== undefined && v.height !== null && !(typeof v.height === "number" && Number.isFinite(v.height))) violations.push("height has invalid type");
+if (v.dimensionUnit !== undefined && v.dimensionUnit !== null && !(typeof v.dimensionUnit === "string")) violations.push("dimension_unit has invalid type");
+if (v.countryOfOrigin !== undefined && v.countryOfOrigin !== null && !(typeof v.countryOfOrigin === "string")) violations.push("country_of_origin has invalid type");
+if (v.hsCode !== undefined && v.hsCode !== null && !(typeof v.hsCode === "string")) violations.push("hs_code has invalid type");
+if (v.allowBackorder !== undefined && v.allowBackorder !== null && !(typeof v.allowBackorder === "boolean")) violations.push("allow_backorder has invalid type");
+if (v.leadTimeDays !== undefined && v.leadTimeDays !== null && !(typeof v.leadTimeDays === "number" && Number.isInteger(v.leadTimeDays) && v.leadTimeDays >= -2147483648 && v.leadTimeDays <= 2147483647)) violations.push("lead_time_days has invalid type");
+if (v.imageUrl !== undefined && v.imageUrl !== null && !(typeof v.imageUrl === "string")) violations.push("image_url has invalid type");
 return violations;
 }
 
@@ -241,8 +275,42 @@ return out;
 
 export function validateFullProduct(v: FullProduct): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.categoryId !== undefined && v.categoryId !== null && !(typeof v.categoryId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.categoryId))) violations.push("category_id has invalid type");
+if (v.supplierId !== undefined && v.supplierId !== null && !(typeof v.supplierId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.supplierId))) violations.push("supplier_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.sku !== undefined && v.sku !== null && !(typeof v.sku === "string")) violations.push("sku has invalid type");
+if (v.barcode !== undefined && v.barcode !== null && !(typeof v.barcode === "string")) violations.push("barcode has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.unit !== undefined && v.unit !== null && !(typeof v.unit === "string")) violations.push("unit has invalid type");
+if (v.costPrice !== undefined && v.costPrice !== null && !(typeof v.costPrice === "number" && Number.isFinite(v.costPrice))) violations.push("cost_price has invalid type");
+if (v.salePrice !== undefined && v.salePrice !== null && !(typeof v.salePrice === "number" && Number.isFinite(v.salePrice))) violations.push("sale_price has invalid type");
+if (v.stockQuantity !== undefined && v.stockQuantity !== null && !(typeof v.stockQuantity === "number" && Number.isFinite(v.stockQuantity))) violations.push("stock_quantity has invalid type");
+if (v.lowStockThreshold !== undefined && v.lowStockThreshold !== null && !(typeof v.lowStockThreshold === "number" && Number.isFinite(v.lowStockThreshold))) violations.push("low_stock_threshold has invalid type");
+if (v.reorderQuantity !== undefined && v.reorderQuantity !== null && !(typeof v.reorderQuantity === "number" && Number.isFinite(v.reorderQuantity))) violations.push("reorder_quantity has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.trackInventory !== undefined && v.trackInventory !== null && !(typeof v.trackInventory === "boolean")) violations.push("track_inventory has invalid type");
+if (v.brandId !== undefined && v.brandId !== null && !(typeof v.brandId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.brandId))) violations.push("brand_id has invalid type");
+if (v.compareAtPrice !== undefined && v.compareAtPrice !== null && !(typeof v.compareAtPrice === "number" && Number.isFinite(v.compareAtPrice))) violations.push("compare_at_price has invalid type");
+if (v.taxRate !== undefined && v.taxRate !== null && !(typeof v.taxRate === "number" && Number.isFinite(v.taxRate))) violations.push("tax_rate has invalid type");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.weight !== undefined && v.weight !== null && !(typeof v.weight === "number" && Number.isFinite(v.weight))) violations.push("weight has invalid type");
+if (v.weightUnit !== undefined && v.weightUnit !== null && !(typeof v.weightUnit === "string")) violations.push("weight_unit has invalid type");
+if (v.length !== undefined && v.length !== null && !(typeof v.length === "number" && Number.isFinite(v.length))) violations.push("length has invalid type");
+if (v.width !== undefined && v.width !== null && !(typeof v.width === "number" && Number.isFinite(v.width))) violations.push("width has invalid type");
+if (v.height !== undefined && v.height !== null && !(typeof v.height === "number" && Number.isFinite(v.height))) violations.push("height has invalid type");
+if (v.dimensionUnit !== undefined && v.dimensionUnit !== null && !(typeof v.dimensionUnit === "string")) violations.push("dimension_unit has invalid type");
+if (v.countryOfOrigin !== undefined && v.countryOfOrigin !== null && !(typeof v.countryOfOrigin === "string")) violations.push("country_of_origin has invalid type");
+if (v.hsCode !== undefined && v.hsCode !== null && !(typeof v.hsCode === "string")) violations.push("hs_code has invalid type");
+if (v.allowBackorder !== undefined && v.allowBackorder !== null && !(typeof v.allowBackorder === "boolean")) violations.push("allow_backorder has invalid type");
+if (v.leadTimeDays !== undefined && v.leadTimeDays !== null && !(typeof v.leadTimeDays === "number" && Number.isInteger(v.leadTimeDays) && v.leadTimeDays >= -2147483648 && v.leadTimeDays <= 2147483647)) violations.push("lead_time_days has invalid type");
+if (v.imageUrl !== undefined && v.imageUrl !== null && !(typeof v.imageUrl === "string")) violations.push("image_url has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -274,6 +342,10 @@ return out;
 
 export function validateProductAttribute(v: ProductAttribute): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.value !== undefined && v.value !== null && !(typeof v.value === "string")) violations.push("value has invalid type");
+if (v.position !== undefined && v.position !== null && !(typeof v.position === "number" && Number.isInteger(v.position) && v.position >= -2147483648 && v.position <= 2147483647)) violations.push("position has invalid type");
 return violations;
 }
 
@@ -311,6 +383,12 @@ return out;
 
 export function validateDashboardLowStockItem(v: DashboardLowStockItem): string[] {
 const violations: string[] = [];
+if (v.productId !== undefined && v.productId !== null && !(typeof v.productId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.productId))) violations.push("product_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.sku !== undefined && v.sku !== null && !(typeof v.sku === "string")) violations.push("sku has invalid type");
+if (v.currentStock !== undefined && v.currentStock !== null && !(typeof v.currentStock === "number" && Number.isFinite(v.currentStock))) violations.push("current_stock has invalid type");
+if (v.reorderPoint !== undefined && v.reorderPoint !== null && !(typeof v.reorderPoint === "number" && Number.isFinite(v.reorderPoint))) violations.push("reorder_point has invalid type");
+if (v.warehouseName !== undefined && v.warehouseName !== null && !(typeof v.warehouseName === "string")) violations.push("warehouse_name has invalid type");
 return violations;
 }
 
@@ -348,6 +426,12 @@ return out;
 
 export function validateDashboardRecentOrder(v: DashboardRecentOrder): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.poNumber !== undefined && v.poNumber !== null && !(typeof v.poNumber === "string")) violations.push("po_number has invalid type");
+if (v.supplierName !== undefined && v.supplierName !== null && !(typeof v.supplierName === "string")) violations.push("supplier_name has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isFinite(v.total))) violations.push("total has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -373,6 +457,8 @@ return out;
 
 export function validateDashboardTopCategory(v: DashboardTopCategory): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.productCount !== undefined && v.productCount !== null && !(typeof v.productCount === "number" && Number.isInteger(v.productCount) && v.productCount >= -2147483648 && v.productCount <= 2147483647)) violations.push("product_count has invalid type");
 return violations;
 }
 
@@ -413,6 +499,13 @@ return out;
 
 export function validateExpiringItem(v: ExpiringItem): string[] {
 const violations: string[] = [];
+if (v.productId !== undefined && v.productId !== null && !(typeof v.productId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.productId))) violations.push("product_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.sku !== undefined && v.sku !== null && !(typeof v.sku === "string")) violations.push("sku has invalid type");
+if (v.batchId !== undefined && v.batchId !== null && !(typeof v.batchId === "string")) violations.push("batch_id has invalid type");
+if (v.expiryDate !== undefined && v.expiryDate !== null && !(typeof v.expiryDate === "string")) violations.push("expiry_date has invalid type");
+if (v.quantity !== undefined && v.quantity !== null && !(typeof v.quantity === "number" && Number.isFinite(v.quantity))) violations.push("quantity has invalid type");
+if (v.warehouseName !== undefined && v.warehouseName !== null && !(typeof v.warehouseName === "string")) violations.push("warehouse_name has invalid type");
 return violations;
 }
 
@@ -459,6 +552,15 @@ return out;
 
 export function validateReorderSuggestion(v: ReorderSuggestion): string[] {
 const violations: string[] = [];
+if (v.productId !== undefined && v.productId !== null && !(typeof v.productId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.productId))) violations.push("product_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.sku !== undefined && v.sku !== null && !(typeof v.sku === "string")) violations.push("sku has invalid type");
+if (v.currentStock !== undefined && v.currentStock !== null && !(typeof v.currentStock === "number" && Number.isFinite(v.currentStock))) violations.push("current_stock has invalid type");
+if (v.reorderPoint !== undefined && v.reorderPoint !== null && !(typeof v.reorderPoint === "number" && Number.isFinite(v.reorderPoint))) violations.push("reorder_point has invalid type");
+if (v.suggestedQuantity !== undefined && v.suggestedQuantity !== null && !(typeof v.suggestedQuantity === "number" && Number.isFinite(v.suggestedQuantity))) violations.push("suggested_quantity has invalid type");
+if (v.avgDailySales !== undefined && v.avgDailySales !== null && !(typeof v.avgDailySales === "number" && Number.isFinite(v.avgDailySales))) violations.push("avg_daily_sales has invalid type");
+if (v.leadTimeDays !== undefined && v.leadTimeDays !== null && !(typeof v.leadTimeDays === "number" && Number.isInteger(v.leadTimeDays) && v.leadTimeDays >= -2147483648 && v.leadTimeDays <= 2147483647)) violations.push("lead_time_days has invalid type");
+if (v.confidence !== undefined && v.confidence !== null && !(typeof v.confidence === "string")) violations.push("confidence has invalid type");
 return violations;
 }
 
@@ -490,6 +592,10 @@ return out;
 
 export function validateListProductsRequest(v: ListProductsRequest): string[] {
 const violations: string[] = [];
+if (v.search !== undefined && v.search !== null && !(typeof v.search === "string")) violations.push("search has invalid type");
+if (v.categoryId !== undefined && v.categoryId !== null && !(typeof v.categoryId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.categoryId))) violations.push("category_id has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isSafeInteger(v.limit) && v.limit >= Number.MIN_SAFE_INTEGER && v.limit <= Number.MAX_SAFE_INTEGER)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isSafeInteger(v.offset) && v.offset >= Number.MIN_SAFE_INTEGER && v.offset <= Number.MAX_SAFE_INTEGER)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -524,7 +630,12 @@ return out;
 
 export function validateListProductsResponse(v: ListProductsResponse): string[] {
 const violations: string[] = [];
+if (v.products !== undefined && v.products !== null && !(Array.isArray(v.products) && (v.products).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("products has invalid type");
 if (v.products !== undefined && v.products !== null) for (const item of v.products) violations.push(...validateProduct(item).map((message) => "products: " + message));
+if (v.hasMore !== undefined && v.hasMore !== null && !(typeof v.hasMore === "boolean")) violations.push("has_more has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isSafeInteger(v.pageSize) && v.pageSize >= Number.MIN_SAFE_INTEGER && v.pageSize <= Number.MAX_SAFE_INTEGER)) violations.push("page_size has invalid type");
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
 return violations;
 }
 
@@ -631,27 +742,56 @@ return out;
 
 export function validateCreateProductRequest(v: CreateProductRequest): string[] {
 const violations: string[] = [];
+if (v.categoryId !== undefined && v.categoryId !== null && !(typeof v.categoryId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.categoryId))) violations.push("category_id has invalid type");
 if (!(v.categoryId !== undefined && v.categoryId !== null)) violations.push("category_id is required");
 if (v.categoryId !== undefined && v.categoryId !== null && !(Number(v.categoryId) > 0)) violations.push("category_id violates @gt");
+if (v.supplierId !== undefined && v.supplierId !== null && !(typeof v.supplierId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.supplierId))) violations.push("supplier_id has invalid type");
 if (!(v.supplierId !== undefined && v.supplierId !== null)) violations.push("supplier_id is required");
 if (v.supplierId !== undefined && v.supplierId !== null && !(Number(v.supplierId) > 0)) violations.push("supplier_id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.sku !== undefined && v.sku !== null && !(typeof v.sku === "string")) violations.push("sku has invalid type");
 if (!(v.sku !== undefined && v.sku !== null) || v.sku === "") violations.push("sku is required");
+if (v.barcode !== undefined && v.barcode !== null && !(typeof v.barcode === "string")) violations.push("barcode has invalid type");
 if (!(v.barcode !== undefined && v.barcode !== null) || v.barcode === "") violations.push("barcode is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.unit !== undefined && v.unit !== null && !(typeof v.unit === "string")) violations.push("unit has invalid type");
 if (!(v.unit !== undefined && v.unit !== null) || v.unit === "") violations.push("unit is required");
+if (v.costPrice !== undefined && v.costPrice !== null && !(typeof v.costPrice === "number" && Number.isFinite(v.costPrice))) violations.push("cost_price has invalid type");
 if (v.costPrice !== undefined && v.costPrice !== null && !(Number(v.costPrice) >= 0)) violations.push("cost_price violates @gte");
+if (v.salePrice !== undefined && v.salePrice !== null && !(typeof v.salePrice === "number" && Number.isFinite(v.salePrice))) violations.push("sale_price has invalid type");
 if (v.salePrice !== undefined && v.salePrice !== null && !(Number(v.salePrice) >= 0)) violations.push("sale_price violates @gte");
+if (v.lowStockThreshold !== undefined && v.lowStockThreshold !== null && !(typeof v.lowStockThreshold === "number" && Number.isFinite(v.lowStockThreshold))) violations.push("low_stock_threshold has invalid type");
 if (v.lowStockThreshold !== undefined && v.lowStockThreshold !== null && !(Number(v.lowStockThreshold) >= 0)) violations.push("low_stock_threshold violates @gte");
+if (v.reorderQuantity !== undefined && v.reorderQuantity !== null && !(typeof v.reorderQuantity === "number" && Number.isFinite(v.reorderQuantity))) violations.push("reorder_quantity has invalid type");
 if (v.reorderQuantity !== undefined && v.reorderQuantity !== null && !(Number(v.reorderQuantity) >= 0)) violations.push("reorder_quantity violates @gte");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.trackInventory !== undefined && v.trackInventory !== null && !(typeof v.trackInventory === "boolean")) violations.push("track_inventory has invalid type");
+if (v.stockQuantity !== undefined && v.stockQuantity !== null && !(typeof v.stockQuantity === "number" && Number.isFinite(v.stockQuantity))) violations.push("stock_quantity has invalid type");
 if (v.stockQuantity !== undefined && v.stockQuantity !== null && !(Number(v.stockQuantity) >= 0)) violations.push("stock_quantity violates @gte");
+if (v.brandId !== undefined && v.brandId !== null && !(typeof v.brandId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.brandId))) violations.push("brand_id has invalid type");
+if (v.compareAtPrice !== undefined && v.compareAtPrice !== null && !(typeof v.compareAtPrice === "number" && Number.isFinite(v.compareAtPrice))) violations.push("compare_at_price has invalid type");
 if (v.compareAtPrice !== undefined && v.compareAtPrice !== null && !(Number(v.compareAtPrice) >= 0)) violations.push("compare_at_price violates @gte");
+if (v.taxRate !== undefined && v.taxRate !== null && !(typeof v.taxRate === "number" && Number.isFinite(v.taxRate))) violations.push("tax_rate has invalid type");
 if (v.taxRate !== undefined && v.taxRate !== null && !(Number(v.taxRate) >= 0)) violations.push("tax_rate violates @gte");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.weight !== undefined && v.weight !== null && !(typeof v.weight === "number" && Number.isFinite(v.weight))) violations.push("weight has invalid type");
 if (v.weight !== undefined && v.weight !== null && !(Number(v.weight) >= 0)) violations.push("weight violates @gte");
+if (v.weightUnit !== undefined && v.weightUnit !== null && !(typeof v.weightUnit === "string")) violations.push("weight_unit has invalid type");
+if (v.length !== undefined && v.length !== null && !(typeof v.length === "number" && Number.isFinite(v.length))) violations.push("length has invalid type");
 if (v.length !== undefined && v.length !== null && !(Number(v.length) >= 0)) violations.push("length violates @gte");
+if (v.width !== undefined && v.width !== null && !(typeof v.width === "number" && Number.isFinite(v.width))) violations.push("width has invalid type");
 if (v.width !== undefined && v.width !== null && !(Number(v.width) >= 0)) violations.push("width violates @gte");
+if (v.height !== undefined && v.height !== null && !(typeof v.height === "number" && Number.isFinite(v.height))) violations.push("height has invalid type");
 if (v.height !== undefined && v.height !== null && !(Number(v.height) >= 0)) violations.push("height violates @gte");
+if (v.dimensionUnit !== undefined && v.dimensionUnit !== null && !(typeof v.dimensionUnit === "string")) violations.push("dimension_unit has invalid type");
+if (v.countryOfOrigin !== undefined && v.countryOfOrigin !== null && !(typeof v.countryOfOrigin === "string")) violations.push("country_of_origin has invalid type");
+if (v.hsCode !== undefined && v.hsCode !== null && !(typeof v.hsCode === "string")) violations.push("hs_code has invalid type");
+if (v.allowBackorder !== undefined && v.allowBackorder !== null && !(typeof v.allowBackorder === "boolean")) violations.push("allow_backorder has invalid type");
+if (v.leadTimeDays !== undefined && v.leadTimeDays !== null && !(typeof v.leadTimeDays === "number" && Number.isInteger(v.leadTimeDays) && v.leadTimeDays >= -2147483648 && v.leadTimeDays <= 2147483647)) violations.push("lead_time_days has invalid type");
 if (v.leadTimeDays !== undefined && v.leadTimeDays !== null && !(Number(v.leadTimeDays) >= 0)) violations.push("lead_time_days violates @gte");
+if (v.imageUrl !== undefined && v.imageUrl !== null && !(typeof v.imageUrl === "string")) violations.push("image_url has invalid type");
 return violations;
 }
 
@@ -677,6 +817,8 @@ return out;
 
 export function validateCreateProductResponse(v: CreateProductResponse): string[] {
 const violations: string[] = [];
+if (v.productId !== undefined && v.productId !== null && !(typeof v.productId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.productId))) violations.push("product_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -699,6 +841,7 @@ return out;
 
 export function validateGetProductByBarcodeRequest(v: GetProductByBarcodeRequest): string[] {
 const violations: string[] = [];
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
 if (!(v.code !== undefined && v.code !== null) || v.code === "") violations.push("code is required");
 return violations;
 }
@@ -722,6 +865,7 @@ return out;
 
 export function validateGetProductByBarcodeResponse(v: GetProductByBarcodeResponse): string[] {
 const violations: string[] = [];
+if (v.product !== undefined && v.product !== null && !(typeof v.product === "object" && v.product !== null && !Array.isArray(v.product))) violations.push("product has invalid type");
 if (v.product !== undefined && v.product !== null) violations.push(...validateProduct(v.product).map((message) => "product: " + message));
 return violations;
 }
@@ -745,6 +889,7 @@ return out;
 
 export function validateGetProductRequest(v: GetProductRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -769,6 +914,7 @@ return out;
 
 export function validateGetProductResponse(v: GetProductResponse): string[] {
 const violations: string[] = [];
+if (v.product !== undefined && v.product !== null && !(typeof v.product === "object" && v.product !== null && !Array.isArray(v.product))) violations.push("product has invalid type");
 if (v.product !== undefined && v.product !== null) violations.push(...validateProduct(v.product).map((message) => "product: " + message));
 return violations;
 }
@@ -792,6 +938,7 @@ return out;
 
 export function validateGetProductFullRequest(v: GetProductFullRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -816,6 +963,7 @@ return out;
 
 export function validateGetProductFullResponse(v: GetProductFullResponse): string[] {
 const violations: string[] = [];
+if (v.product !== undefined && v.product !== null && !(typeof v.product === "object" && v.product !== null && !Array.isArray(v.product))) violations.push("product has invalid type");
 if (v.product !== undefined && v.product !== null) violations.push(...validateFullProduct(v.product).map((message) => "product: " + message));
 return violations;
 }
@@ -839,6 +987,7 @@ return out;
 
 export function validateListProductAttributesRequest(v: ListProductAttributesRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -863,6 +1012,7 @@ return out;
 
 export function validateListProductAttributesResponse(v: ListProductAttributesResponse): string[] {
 const violations: string[] = [];
+if (v.attributes !== undefined && v.attributes !== null && !(Array.isArray(v.attributes) && (v.attributes).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("attributes has invalid type");
 if (v.attributes !== undefined && v.attributes !== null) for (const item of v.attributes) violations.push(...validateProductAttribute(item).map((message) => "attributes: " + message));
 return violations;
 }
@@ -970,27 +1120,56 @@ return out;
 
 export function validateUpdateProductBody(v: UpdateProductBody): string[] {
 const violations: string[] = [];
+if (v.categoryId !== undefined && v.categoryId !== null && !(typeof v.categoryId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.categoryId))) violations.push("category_id has invalid type");
 if (!(v.categoryId !== undefined && v.categoryId !== null)) violations.push("category_id is required");
 if (v.categoryId !== undefined && v.categoryId !== null && !(Number(v.categoryId) > 0)) violations.push("category_id violates @gt");
+if (v.supplierId !== undefined && v.supplierId !== null && !(typeof v.supplierId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.supplierId))) violations.push("supplier_id has invalid type");
 if (!(v.supplierId !== undefined && v.supplierId !== null)) violations.push("supplier_id is required");
 if (v.supplierId !== undefined && v.supplierId !== null && !(Number(v.supplierId) > 0)) violations.push("supplier_id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.sku !== undefined && v.sku !== null && !(typeof v.sku === "string")) violations.push("sku has invalid type");
 if (!(v.sku !== undefined && v.sku !== null) || v.sku === "") violations.push("sku is required");
+if (v.barcode !== undefined && v.barcode !== null && !(typeof v.barcode === "string")) violations.push("barcode has invalid type");
 if (!(v.barcode !== undefined && v.barcode !== null) || v.barcode === "") violations.push("barcode is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.unit !== undefined && v.unit !== null && !(typeof v.unit === "string")) violations.push("unit has invalid type");
 if (!(v.unit !== undefined && v.unit !== null) || v.unit === "") violations.push("unit is required");
+if (v.costPrice !== undefined && v.costPrice !== null && !(typeof v.costPrice === "number" && Number.isFinite(v.costPrice))) violations.push("cost_price has invalid type");
 if (v.costPrice !== undefined && v.costPrice !== null && !(Number(v.costPrice) >= 0)) violations.push("cost_price violates @gte");
+if (v.salePrice !== undefined && v.salePrice !== null && !(typeof v.salePrice === "number" && Number.isFinite(v.salePrice))) violations.push("sale_price has invalid type");
 if (v.salePrice !== undefined && v.salePrice !== null && !(Number(v.salePrice) >= 0)) violations.push("sale_price violates @gte");
+if (v.lowStockThreshold !== undefined && v.lowStockThreshold !== null && !(typeof v.lowStockThreshold === "number" && Number.isFinite(v.lowStockThreshold))) violations.push("low_stock_threshold has invalid type");
 if (v.lowStockThreshold !== undefined && v.lowStockThreshold !== null && !(Number(v.lowStockThreshold) >= 0)) violations.push("low_stock_threshold violates @gte");
+if (v.reorderQuantity !== undefined && v.reorderQuantity !== null && !(typeof v.reorderQuantity === "number" && Number.isFinite(v.reorderQuantity))) violations.push("reorder_quantity has invalid type");
 if (v.reorderQuantity !== undefined && v.reorderQuantity !== null && !(Number(v.reorderQuantity) >= 0)) violations.push("reorder_quantity violates @gte");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.trackInventory !== undefined && v.trackInventory !== null && !(typeof v.trackInventory === "boolean")) violations.push("track_inventory has invalid type");
+if (v.stockQuantity !== undefined && v.stockQuantity !== null && !(typeof v.stockQuantity === "number" && Number.isFinite(v.stockQuantity))) violations.push("stock_quantity has invalid type");
 if (v.stockQuantity !== undefined && v.stockQuantity !== null && !(Number(v.stockQuantity) >= 0)) violations.push("stock_quantity violates @gte");
+if (v.brandId !== undefined && v.brandId !== null && !(typeof v.brandId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.brandId))) violations.push("brand_id has invalid type");
+if (v.compareAtPrice !== undefined && v.compareAtPrice !== null && !(typeof v.compareAtPrice === "number" && Number.isFinite(v.compareAtPrice))) violations.push("compare_at_price has invalid type");
 if (v.compareAtPrice !== undefined && v.compareAtPrice !== null && !(Number(v.compareAtPrice) >= 0)) violations.push("compare_at_price violates @gte");
+if (v.taxRate !== undefined && v.taxRate !== null && !(typeof v.taxRate === "number" && Number.isFinite(v.taxRate))) violations.push("tax_rate has invalid type");
 if (v.taxRate !== undefined && v.taxRate !== null && !(Number(v.taxRate) >= 0)) violations.push("tax_rate violates @gte");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.weight !== undefined && v.weight !== null && !(typeof v.weight === "number" && Number.isFinite(v.weight))) violations.push("weight has invalid type");
 if (v.weight !== undefined && v.weight !== null && !(Number(v.weight) >= 0)) violations.push("weight violates @gte");
+if (v.weightUnit !== undefined && v.weightUnit !== null && !(typeof v.weightUnit === "string")) violations.push("weight_unit has invalid type");
+if (v.length !== undefined && v.length !== null && !(typeof v.length === "number" && Number.isFinite(v.length))) violations.push("length has invalid type");
 if (v.length !== undefined && v.length !== null && !(Number(v.length) >= 0)) violations.push("length violates @gte");
+if (v.width !== undefined && v.width !== null && !(typeof v.width === "number" && Number.isFinite(v.width))) violations.push("width has invalid type");
 if (v.width !== undefined && v.width !== null && !(Number(v.width) >= 0)) violations.push("width violates @gte");
+if (v.height !== undefined && v.height !== null && !(typeof v.height === "number" && Number.isFinite(v.height))) violations.push("height has invalid type");
 if (v.height !== undefined && v.height !== null && !(Number(v.height) >= 0)) violations.push("height violates @gte");
+if (v.dimensionUnit !== undefined && v.dimensionUnit !== null && !(typeof v.dimensionUnit === "string")) violations.push("dimension_unit has invalid type");
+if (v.countryOfOrigin !== undefined && v.countryOfOrigin !== null && !(typeof v.countryOfOrigin === "string")) violations.push("country_of_origin has invalid type");
+if (v.hsCode !== undefined && v.hsCode !== null && !(typeof v.hsCode === "string")) violations.push("hs_code has invalid type");
+if (v.allowBackorder !== undefined && v.allowBackorder !== null && !(typeof v.allowBackorder === "boolean")) violations.push("allow_backorder has invalid type");
+if (v.leadTimeDays !== undefined && v.leadTimeDays !== null && !(typeof v.leadTimeDays === "number" && Number.isInteger(v.leadTimeDays) && v.leadTimeDays >= -2147483648 && v.leadTimeDays <= 2147483647)) violations.push("lead_time_days has invalid type");
 if (v.leadTimeDays !== undefined && v.leadTimeDays !== null && !(Number(v.leadTimeDays) >= 0)) violations.push("lead_time_days violates @gte");
+if (v.imageUrl !== undefined && v.imageUrl !== null && !(typeof v.imageUrl === "string")) violations.push("image_url has invalid type");
 return violations;
 }
 
@@ -1016,8 +1195,10 @@ return out;
 
 export function validateUpdateProductRequest(v: UpdateProductRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateProductBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -1041,6 +1222,7 @@ return out;
 
 export function validateUpdateProductResponse(v: UpdateProductResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -1063,6 +1245,7 @@ return out;
 
 export function validateDeleteProductRequest(v: DeleteProductRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -1087,6 +1270,7 @@ return out;
 
 export function validateDeleteProductResponse(v: DeleteProductResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -1149,8 +1333,16 @@ return out;
 
 export function validateGetDashboardResponse(v: GetDashboardResponse): string[] {
 const violations: string[] = [];
+if (v.totalProducts !== undefined && v.totalProducts !== null && !(typeof v.totalProducts === "number" && Number.isInteger(v.totalProducts) && v.totalProducts >= -2147483648 && v.totalProducts <= 2147483647)) violations.push("total_products has invalid type");
+if (v.lowStockCount !== undefined && v.lowStockCount !== null && !(typeof v.lowStockCount === "number" && Number.isInteger(v.lowStockCount) && v.lowStockCount >= -2147483648 && v.lowStockCount <= 2147483647)) violations.push("low_stock_count has invalid type");
+if (v.pendingOrders !== undefined && v.pendingOrders !== null && !(typeof v.pendingOrders === "number" && Number.isInteger(v.pendingOrders) && v.pendingOrders >= -2147483648 && v.pendingOrders <= 2147483647)) violations.push("pending_orders has invalid type");
+if (v.totalSuppliers !== undefined && v.totalSuppliers !== null && !(typeof v.totalSuppliers === "number" && Number.isInteger(v.totalSuppliers) && v.totalSuppliers >= -2147483648 && v.totalSuppliers <= 2147483647)) violations.push("total_suppliers has invalid type");
+if (v.inventoryValue !== undefined && v.inventoryValue !== null && !(typeof v.inventoryValue === "number" && Number.isFinite(v.inventoryValue))) violations.push("inventory_value has invalid type");
+if (v.lowStockItems !== undefined && v.lowStockItems !== null && !(Array.isArray(v.lowStockItems) && (v.lowStockItems).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("low_stock_items has invalid type");
 if (v.lowStockItems !== undefined && v.lowStockItems !== null) for (const item of v.lowStockItems) violations.push(...validateDashboardLowStockItem(item).map((message) => "low_stock_items: " + message));
+if (v.recentOrders !== undefined && v.recentOrders !== null && !(Array.isArray(v.recentOrders) && (v.recentOrders).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("recent_orders has invalid type");
 if (v.recentOrders !== undefined && v.recentOrders !== null) for (const item of v.recentOrders) violations.push(...validateDashboardRecentOrder(item).map((message) => "recent_orders: " + message));
+if (v.topCategories !== undefined && v.topCategories !== null && !(Array.isArray(v.topCategories) && (v.topCategories).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("top_categories has invalid type");
 if (v.topCategories !== undefined && v.topCategories !== null) for (const item of v.topCategories) violations.push(...validateDashboardTopCategory(item).map((message) => "top_categories: " + message));
 return violations;
 }
@@ -1196,7 +1388,9 @@ return out;
 
 export function validateListReorderSuggestionsResponse(v: ListReorderSuggestionsResponse): string[] {
 const violations: string[] = [];
+if (v.suggestions !== undefined && v.suggestions !== null && !(Array.isArray(v.suggestions) && (v.suggestions).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("suggestions has invalid type");
 if (v.suggestions !== undefined && v.suggestions !== null) for (const item of v.suggestions) violations.push(...validateReorderSuggestion(item).map((message) => "suggestions: " + message));
+if (v.truncated !== undefined && v.truncated !== null && !(typeof v.truncated === "boolean")) violations.push("truncated has invalid type");
 return violations;
 }
 
@@ -1219,6 +1413,7 @@ return out;
 
 export function validateListExpiringItemsRequest(v: ListExpiringItemsRequest): string[] {
 const violations: string[] = [];
+if (v.daysAhead !== undefined && v.daysAhead !== null && !(typeof v.daysAhead === "number" && Number.isInteger(v.daysAhead) && v.daysAhead >= -2147483648 && v.daysAhead <= 2147483647)) violations.push("days_ahead has invalid type");
 return violations;
 }
 
@@ -1241,6 +1436,7 @@ return out;
 
 export function validateListExpiringItemsResponse(v: ListExpiringItemsResponse): string[] {
 const violations: string[] = [];
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateExpiringItem(item).map((message) => "items: " + message));
 return violations;
 }

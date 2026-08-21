@@ -2,6 +2,42 @@
 import type { ListStockMovementsRequest, ListStockMovementsResponse, ReceiveStockRequest, ReceiveStockResponse, AdjustStockRequest, AdjustStockResponse, WasteStockRequest, WasteStockResponse, TransferStockRequest, TransferStockResponse, ListInventoryRequest, ListInventoryResponse, LowStockRequest, LowStockResponse } from "./types";
 import { encodeListStockMovementsRequest, validateListStockMovementsRequest, decodeListStockMovementsResponse, encodeReceiveStockRequest, validateReceiveStockRequest, decodeReceiveStockResponse, encodeAdjustStockRequest, validateAdjustStockRequest, decodeAdjustStockResponse, encodeWasteStockRequest, validateWasteStockRequest, decodeWasteStockResponse, encodeTransferStockRequest, validateTransferStockRequest, decodeTransferStockResponse, encodeListInventoryRequest, validateListInventoryRequest, decodeListInventoryResponse, encodeLowStockRequest, validateLowStockRequest, decodeLowStockResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface StockServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class StockServiceClient {
@@ -52,11 +90,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListStockMovementsResponse(await res.json());
+return decodeListStockMovementsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async receiveStock(req: ReceiveStockRequest): Promise<ReceiveStockResponse> {
@@ -70,11 +108,11 @@ body: JSON.stringify(encodeReceiveStockRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeReceiveStockResponse(await res.json());
+return decodeReceiveStockResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async adjustStock(req: AdjustStockRequest): Promise<AdjustStockResponse> {
@@ -88,11 +126,11 @@ body: JSON.stringify(encodeAdjustStockRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAdjustStockResponse(await res.json());
+return decodeAdjustStockResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async wasteStock(req: WasteStockRequest): Promise<WasteStockResponse> {
@@ -106,11 +144,11 @@ body: JSON.stringify(encodeWasteStockRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeWasteStockResponse(await res.json());
+return decodeWasteStockResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async transferStock(req: TransferStockRequest): Promise<TransferStockResponse> {
@@ -124,11 +162,11 @@ body: JSON.stringify(encodeTransferStockRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeTransferStockResponse(await res.json());
+return decodeTransferStockResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listInventory(req: ListInventoryRequest): Promise<ListInventoryResponse> {
@@ -147,11 +185,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListInventoryResponse(await res.json());
+return decodeListInventoryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async lowStock(req: LowStockRequest): Promise<LowStockResponse> {
@@ -170,11 +208,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeLowStockResponse(await res.json());
+return decodeLowStockResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

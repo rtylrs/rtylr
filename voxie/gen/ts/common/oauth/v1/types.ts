@@ -34,12 +34,18 @@ return out;
 
 export function validateIssueRequest(v: IssueRequest): string[] {
 const violations: string[] = [];
+if (v.clientId !== undefined && v.clientId !== null && !(typeof v.clientId === "string")) violations.push("client_id has invalid type");
 if (!(v.clientId !== undefined && v.clientId !== null) || v.clientId === "") violations.push("client_id is required");
+if (v.redirectUri !== undefined && v.redirectUri !== null && !(typeof v.redirectUri === "string")) violations.push("redirect_uri has invalid type");
 if (!(v.redirectUri !== undefined && v.redirectUri !== null) || v.redirectUri === "") violations.push("redirect_uri is required");
 if (v.redirectUri !== undefined && v.redirectUri !== null) { try { new URL(v.redirectUri); } catch { violations.push("redirect_uri must be a valid URI"); } }
+if (v.scope !== undefined && v.scope !== null && !(typeof v.scope === "string")) violations.push("scope has invalid type");
 if (!(v.scope !== undefined && v.scope !== null) || v.scope === "") violations.push("scope is required");
+if (v.state !== undefined && v.state !== null && !(typeof v.state === "string")) violations.push("state has invalid type");
 if (!(v.state !== undefined && v.state !== null) || v.state === "") violations.push("state is required");
+if (v.codeChallenge !== undefined && v.codeChallenge !== null && !(typeof v.codeChallenge === "string")) violations.push("code_challenge has invalid type");
 if (!(v.codeChallenge !== undefined && v.codeChallenge !== null) || v.codeChallenge === "") violations.push("code_challenge is required");
+if (v.codeChallengeMethod !== undefined && v.codeChallengeMethod !== null && !(typeof v.codeChallengeMethod === "string")) violations.push("code_challenge_method has invalid type");
 if (!(v.codeChallengeMethod !== undefined && v.codeChallengeMethod !== null) || v.codeChallengeMethod === "") violations.push("code_challenge_method is required");
 return violations;
 }
@@ -63,6 +69,7 @@ return out;
 
 export function validateIssueResponse(v: IssueResponse): string[] {
 const violations: string[] = [];
+if (v.redirectUrl !== undefined && v.redirectUrl !== null && !(typeof v.redirectUrl === "string")) violations.push("redirect_url has invalid type");
 return violations;
 }
 
@@ -100,8 +107,14 @@ return out;
 
 export function validateTokenRequest(v: TokenRequest): string[] {
 const violations: string[] = [];
+if (v.grantType !== undefined && v.grantType !== null && !(typeof v.grantType === "string")) violations.push("grant_type has invalid type");
 if (!(v.grantType !== undefined && v.grantType !== null) || v.grantType === "") violations.push("grant_type is required");
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
+if (v.codeVerifier !== undefined && v.codeVerifier !== null && !(typeof v.codeVerifier === "string")) violations.push("code_verifier has invalid type");
+if (v.redirectUri !== undefined && v.redirectUri !== null && !(typeof v.redirectUri === "string")) violations.push("redirect_uri has invalid type");
+if (v.clientId !== undefined && v.clientId !== null && !(typeof v.clientId === "string")) violations.push("client_id has invalid type");
 if (!(v.clientId !== undefined && v.clientId !== null) || v.clientId === "") violations.push("client_id is required");
+if (v.refreshToken !== undefined && v.refreshToken !== null && !(typeof v.refreshToken === "string")) violations.push("refresh_token has invalid type");
 return violations;
 }
 
@@ -133,6 +146,10 @@ return out;
 
 export function validateTokenResponse(v: TokenResponse): string[] {
 const violations: string[] = [];
+if (v.accessToken !== undefined && v.accessToken !== null && !(typeof v.accessToken === "string")) violations.push("access_token has invalid type");
+if (v.refreshToken !== undefined && v.refreshToken !== null && !(typeof v.refreshToken === "string")) violations.push("refresh_token has invalid type");
+if (v.tokenType !== undefined && v.tokenType !== null && !(typeof v.tokenType === "string")) violations.push("token_type has invalid type");
+if (v.expiresIn !== undefined && v.expiresIn !== null && !(typeof v.expiresIn === "number" && Number.isInteger(v.expiresIn) && v.expiresIn >= -2147483648 && v.expiresIn <= 2147483647)) violations.push("expires_in has invalid type");
 return violations;
 }
 
@@ -158,7 +175,9 @@ return out;
 
 export function validateRevokeRequest(v: RevokeRequest): string[] {
 const violations: string[] = [];
+if (v.token !== undefined && v.token !== null && !(typeof v.token === "string")) violations.push("token has invalid type");
 if (!(v.token !== undefined && v.token !== null) || v.token === "") violations.push("token is required");
+if (v.clientId !== undefined && v.clientId !== null && !(typeof v.clientId === "string")) violations.push("client_id has invalid type");
 return violations;
 }
 
@@ -181,6 +200,7 @@ return out;
 
 export function validateRevokeResponse(v: RevokeResponse): string[] {
 const violations: string[] = [];
+if (v.ok !== undefined && v.ok !== null && !(typeof v.ok === "boolean")) violations.push("ok has invalid type");
 return violations;
 }
 
@@ -228,6 +248,9 @@ return out;
 
 export function validateMeResponse(v: MeResponse): string[] {
 const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
 return violations;
 }
 

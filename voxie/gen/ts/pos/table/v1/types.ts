@@ -40,6 +40,14 @@ return out;
 
 export function validateTable(v: Table): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.label !== undefined && v.label !== null && !(typeof v.label === "string")) violations.push("label has invalid type");
+if (v.seats !== undefined && v.seats !== null && !(typeof v.seats === "number" && Number.isInteger(v.seats) && v.seats >= -2147483648 && v.seats <= 2147483647)) violations.push("seats has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -81,6 +89,7 @@ return out;
 
 export function validateListTablesResponse(v: ListTablesResponse): string[] {
 const violations: string[] = [];
+if (v.tables !== undefined && v.tables !== null && !(Array.isArray(v.tables) && (v.tables).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("tables has invalid type");
 if (v.tables !== undefined && v.tables !== null) for (const item of v.tables) violations.push(...validateTable(item).map((message) => "tables: " + message));
 return violations;
 }
@@ -110,7 +119,10 @@ return out;
 
 export function validateCreateTableRequest(v: CreateTableRequest): string[] {
 const violations: string[] = [];
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.label !== undefined && v.label !== null && !(typeof v.label === "string")) violations.push("label has invalid type");
 if (!(v.label !== undefined && v.label !== null) || v.label === "") violations.push("label is required");
+if (v.seats !== undefined && v.seats !== null && !(typeof v.seats === "number" && Number.isInteger(v.seats) && v.seats >= -2147483648 && v.seats <= 2147483647)) violations.push("seats has invalid type");
 if (!(v.seats !== undefined && v.seats !== null)) violations.push("seats is required");
 if (v.seats !== undefined && v.seats !== null && !(Number(v.seats) > 0)) violations.push("seats violates @gt");
 return violations;
@@ -138,6 +150,8 @@ return out;
 
 export function validateCreateTableResponse(v: CreateTableResponse): string[] {
 const violations: string[] = [];
+if (v.tableId !== undefined && v.tableId !== null && !(typeof v.tableId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.tableId))) violations.push("table_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -169,9 +183,13 @@ return out;
 
 export function validateUpdateTableBody(v: UpdateTableBody): string[] {
 const violations: string[] = [];
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.label !== undefined && v.label !== null && !(typeof v.label === "string")) violations.push("label has invalid type");
 if (!(v.label !== undefined && v.label !== null) || v.label === "") violations.push("label is required");
+if (v.seats !== undefined && v.seats !== null && !(typeof v.seats === "number" && Number.isInteger(v.seats) && v.seats >= -2147483648 && v.seats <= 2147483647)) violations.push("seats has invalid type");
 if (!(v.seats !== undefined && v.seats !== null)) violations.push("seats is required");
 if (v.seats !== undefined && v.seats !== null && !(Number(v.seats) > 0)) violations.push("seats violates @gt");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
 return violations;
 }
@@ -198,8 +216,10 @@ return out;
 
 export function validateUpdateTableRequest(v: UpdateTableRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateTableBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -223,6 +243,7 @@ return out;
 
 export function validateUpdateTableResponse(v: UpdateTableResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -245,6 +266,7 @@ return out;
 
 export function validateUpdateTableStatusBody(v: UpdateTableStatusBody): string[] {
 const violations: string[] = [];
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
 return violations;
 }
@@ -271,8 +293,10 @@ return out;
 
 export function validateUpdateTableStatusRequest(v: UpdateTableStatusRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateTableStatusBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -296,6 +320,7 @@ return out;
 
 export function validateUpdateTableStatusResponse(v: UpdateTableStatusResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -318,6 +343,7 @@ return out;
 
 export function validateDeleteTableRequest(v: DeleteTableRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -342,6 +368,7 @@ return out;
 
 export function validateDeleteTableResponse(v: DeleteTableResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

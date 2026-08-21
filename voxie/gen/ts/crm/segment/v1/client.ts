@@ -2,6 +2,42 @@
 import type { ListSegmentsRequest, ListSegmentsResponse, CreateSegmentRequest, CreateSegmentResponse, GetSegmentDetailRequest, GetSegmentDetailResponse, GetSegmentCustomersRequest, GetSegmentCustomersResponse, UpdateSegmentRequest, UpdateSegmentResponse, DeleteSegmentRequest, DeleteSegmentResponse } from "./types";
 import { encodeListSegmentsRequest, validateListSegmentsRequest, decodeListSegmentsResponse, encodeCreateSegmentRequest, validateCreateSegmentRequest, decodeCreateSegmentResponse, encodeGetSegmentDetailRequest, validateGetSegmentDetailRequest, decodeGetSegmentDetailResponse, encodeGetSegmentCustomersRequest, validateGetSegmentCustomersRequest, decodeGetSegmentCustomersResponse, encodeUpdateSegmentRequest, validateUpdateSegmentRequest, decodeUpdateSegmentResponse, encodeDeleteSegmentRequest, validateDeleteSegmentRequest, decodeDeleteSegmentResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface SegmentServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class SegmentServiceClient {
@@ -46,11 +84,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListSegmentsResponse(await res.json());
+return decodeListSegmentsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createSegment(req: CreateSegmentRequest): Promise<CreateSegmentResponse> {
@@ -64,11 +102,11 @@ body: JSON.stringify(encodeCreateSegmentRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateSegmentResponse(await res.json());
+return decodeCreateSegmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getSegmentDetail(req: GetSegmentDetailRequest): Promise<GetSegmentDetailResponse> {
@@ -85,11 +123,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetSegmentDetailResponse(await res.json());
+return decodeGetSegmentDetailResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getSegmentCustomers(req: GetSegmentCustomersRequest): Promise<GetSegmentCustomersResponse> {
@@ -112,11 +150,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetSegmentCustomersResponse(await res.json());
+return decodeGetSegmentCustomersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateSegment(req: UpdateSegmentRequest): Promise<UpdateSegmentResponse> {
@@ -131,11 +169,11 @@ body: JSON.stringify(encodeUpdateSegmentRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateSegmentResponse(await res.json());
+return decodeUpdateSegmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteSegment(req: DeleteSegmentRequest): Promise<DeleteSegmentResponse> {
@@ -152,11 +190,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteSegmentResponse(await res.json());
+return decodeDeleteSegmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

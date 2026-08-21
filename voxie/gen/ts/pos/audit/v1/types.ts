@@ -49,6 +49,17 @@ return out;
 
 export function validateAuditLog(v: AuditLog): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.branchId !== undefined && v.branchId !== null && !(typeof v.branchId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.branchId))) violations.push("branch_id has invalid type");
+if (v.terminalId !== undefined && v.terminalId !== null && !(typeof v.terminalId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.terminalId))) violations.push("terminal_id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.action !== undefined && v.action !== null && !(typeof v.action === "string")) violations.push("action has invalid type");
+if (v.entityType !== undefined && v.entityType !== null && !(typeof v.entityType === "string")) violations.push("entity_type has invalid type");
+if (v.entityId !== undefined && v.entityId !== null && !(typeof v.entityId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.entityId))) violations.push("entity_id has invalid type");
+if (v.details !== undefined && v.details !== null && !(typeof v.details === "string")) violations.push("details has invalid type");
+if (v.ipAddress !== undefined && v.ipAddress !== null && !(typeof v.ipAddress === "string")) violations.push("ip_address has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -92,17 +103,25 @@ return out;
 
 export function validateCreateAuditRequest(v: CreateAuditRequest): string[] {
 const violations: string[] = [];
+if (v.branchId !== undefined && v.branchId !== null && !(typeof v.branchId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.branchId))) violations.push("branch_id has invalid type");
 if (!(v.branchId !== undefined && v.branchId !== null)) violations.push("branch_id is required");
 if (v.branchId !== undefined && v.branchId !== null && !(Number(v.branchId) > 0)) violations.push("branch_id violates @gt");
+if (v.terminalId !== undefined && v.terminalId !== null && !(typeof v.terminalId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.terminalId))) violations.push("terminal_id has invalid type");
 if (!(v.terminalId !== undefined && v.terminalId !== null)) violations.push("terminal_id is required");
 if (v.terminalId !== undefined && v.terminalId !== null && !(Number(v.terminalId) > 0)) violations.push("terminal_id violates @gt");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
 if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
 if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (v.action !== undefined && v.action !== null && !(typeof v.action === "string")) violations.push("action has invalid type");
 if (!(v.action !== undefined && v.action !== null) || v.action === "") violations.push("action is required");
+if (v.entityType !== undefined && v.entityType !== null && !(typeof v.entityType === "string")) violations.push("entity_type has invalid type");
 if (!(v.entityType !== undefined && v.entityType !== null) || v.entityType === "") violations.push("entity_type is required");
+if (v.entityId !== undefined && v.entityId !== null && !(typeof v.entityId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.entityId))) violations.push("entity_id has invalid type");
 if (!(v.entityId !== undefined && v.entityId !== null)) violations.push("entity_id is required");
 if (v.entityId !== undefined && v.entityId !== null && !(Number(v.entityId) > 0)) violations.push("entity_id violates @gt");
+if (v.details !== undefined && v.details !== null && !(typeof v.details === "string")) violations.push("details has invalid type");
 if (!(v.details !== undefined && v.details !== null) || v.details === "") violations.push("details is required");
+if (v.ipAddress !== undefined && v.ipAddress !== null && !(typeof v.ipAddress === "string")) violations.push("ip_address has invalid type");
 if (!(v.ipAddress !== undefined && v.ipAddress !== null) || v.ipAddress === "") violations.push("ip_address is required");
 return violations;
 }
@@ -129,6 +148,8 @@ return out;
 
 export function validateCreateAuditResponse(v: CreateAuditResponse): string[] {
 const violations: string[] = [];
+if (v.auditLogId !== undefined && v.auditLogId !== null && !(typeof v.auditLogId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.auditLogId))) violations.push("audit_log_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -169,8 +190,15 @@ return out;
 
 export function validateListAuditRequest(v: ListAuditRequest): string[] {
 const violations: string[] = [];
+if (v.action !== undefined && v.action !== null && !(typeof v.action === "string")) violations.push("action has invalid type");
+if (v.entityType !== undefined && v.entityType !== null && !(typeof v.entityType === "string")) violations.push("entity_type has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
 if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+if (v.endDate !== undefined && v.endDate !== null && !(typeof v.endDate === "string")) violations.push("end_date has invalid type");
 if (!(v.endDate !== undefined && v.endDate !== null) || v.endDate === "") violations.push("end_date is required");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.cursor !== undefined && v.cursor !== null && !(typeof v.cursor === "string")) violations.push("cursor has invalid type");
 return violations;
 }
 
@@ -196,7 +224,9 @@ return out;
 
 export function validateListAuditResponse(v: ListAuditResponse): string[] {
 const violations: string[] = [];
+if (v.logs !== undefined && v.logs !== null && !(Array.isArray(v.logs) && (v.logs).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("logs has invalid type");
 if (v.logs !== undefined && v.logs !== null) for (const item of v.logs) violations.push(...validateAuditLog(item).map((message) => "logs: " + message));
+if (v.nextCursor !== undefined && v.nextCursor !== null && !(typeof v.nextCursor === "string")) violations.push("next_cursor has invalid type");
 return violations;
 }
 

@@ -2,6 +2,42 @@
 import type { GetBestSellersRequest, GetBestSellersResponse, GetCategoryPerformanceRequest, GetCategoryPerformanceResponse, GetProductMarginsRequest, GetProductMarginsResponse, GetSlowMoversRequest, GetSlowMoversResponse, GetProductPerformanceRequest, GetProductPerformanceResponse } from "./types";
 import { encodeGetBestSellersRequest, validateGetBestSellersRequest, decodeGetBestSellersResponse, encodeGetCategoryPerformanceRequest, validateGetCategoryPerformanceRequest, decodeGetCategoryPerformanceResponse, encodeGetProductMarginsRequest, validateGetProductMarginsRequest, decodeGetProductMarginsResponse, encodeGetSlowMoversRequest, validateGetSlowMoversRequest, decodeGetSlowMoversResponse, encodeGetProductPerformanceRequest, validateGetProductPerformanceRequest, decodeGetProductPerformanceResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface ProductServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class ProductServiceClient {
@@ -49,11 +87,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetBestSellersResponse(await res.json());
+return decodeGetBestSellersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getCategoryPerformance(req: GetCategoryPerformanceRequest): Promise<GetCategoryPerformanceResponse> {
@@ -69,11 +107,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetCategoryPerformanceResponse(await res.json());
+return decodeGetCategoryPerformanceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getProductMargins(req: GetProductMarginsRequest): Promise<GetProductMarginsResponse> {
@@ -89,11 +127,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetProductMarginsResponse(await res.json());
+return decodeGetProductMarginsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getSlowMovers(req: GetSlowMoversRequest): Promise<GetSlowMoversResponse> {
@@ -112,11 +150,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetSlowMoversResponse(await res.json());
+return decodeGetSlowMoversResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getProductPerformance(req: GetProductPerformanceRequest): Promise<GetProductPerformanceResponse> {
@@ -132,11 +170,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetProductPerformanceResponse(await res.json());
+return decodeGetProductPerformanceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

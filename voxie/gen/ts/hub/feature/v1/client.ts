@@ -2,6 +2,42 @@
 import type { ResolveFeaturesRequest, ResolveFeaturesResponse, ResolveMyFeaturesRequest, ResolveMyFeaturesResponse, ListFlagsRequest, ListFlagsResponse, UpsertFlagRequest, UpsertFlagResponse, DeleteFlagRequest, DeleteFlagResponse, ListTargetsRequest, ListTargetsResponse, UpsertTargetRequest, UpsertTargetResponse, DeleteTargetRequest, DeleteTargetResponse, ListRulesRequest, ListRulesResponse, CreateRuleRequest, CreateRuleResponse, UpdateRuleRequest, UpdateRuleResponse, DeleteRuleRequest, DeleteRuleResponse } from "./types";
 import { encodeResolveFeaturesRequest, validateResolveFeaturesRequest, decodeResolveFeaturesResponse, encodeResolveMyFeaturesRequest, validateResolveMyFeaturesRequest, decodeResolveMyFeaturesResponse, encodeListFlagsRequest, validateListFlagsRequest, decodeListFlagsResponse, encodeUpsertFlagRequest, validateUpsertFlagRequest, decodeUpsertFlagResponse, encodeDeleteFlagRequest, validateDeleteFlagRequest, decodeDeleteFlagResponse, encodeListTargetsRequest, validateListTargetsRequest, decodeListTargetsResponse, encodeUpsertTargetRequest, validateUpsertTargetRequest, decodeUpsertTargetResponse, encodeDeleteTargetRequest, validateDeleteTargetRequest, decodeDeleteTargetResponse, encodeListRulesRequest, validateListRulesRequest, decodeListRulesResponse, encodeCreateRuleRequest, validateCreateRuleRequest, decodeCreateRuleResponse, encodeUpdateRuleRequest, validateUpdateRuleRequest, decodeUpdateRuleResponse, encodeDeleteRuleRequest, validateDeleteRuleRequest, decodeDeleteRuleResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface FeatureServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class FeatureServiceClient {
@@ -44,11 +82,11 @@ body: JSON.stringify(encodeResolveFeaturesRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeResolveFeaturesResponse(await res.json());
+return decodeResolveFeaturesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async resolveMyFeatures(req: ResolveMyFeaturesRequest): Promise<ResolveMyFeaturesResponse> {
@@ -62,11 +100,11 @@ body: JSON.stringify(encodeResolveMyFeaturesRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeResolveMyFeaturesResponse(await res.json());
+return decodeResolveMyFeaturesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listFlags(req: ListFlagsRequest): Promise<ListFlagsResponse> {
@@ -82,11 +120,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListFlagsResponse(await res.json());
+return decodeListFlagsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async upsertFlag(req: UpsertFlagRequest): Promise<UpsertFlagResponse> {
@@ -100,11 +138,11 @@ body: JSON.stringify(encodeUpsertFlagRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpsertFlagResponse(await res.json());
+return decodeUpsertFlagResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteFlag(req: DeleteFlagRequest): Promise<DeleteFlagResponse> {
@@ -121,11 +159,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteFlagResponse(await res.json());
+return decodeDeleteFlagResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listTargets(req: ListTargetsRequest): Promise<ListTargetsResponse> {
@@ -144,11 +182,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTargetsResponse(await res.json());
+return decodeListTargetsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async upsertTarget(req: UpsertTargetRequest): Promise<UpsertTargetResponse> {
@@ -162,11 +200,11 @@ body: JSON.stringify(encodeUpsertTargetRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpsertTargetResponse(await res.json());
+return decodeUpsertTargetResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteTarget(req: DeleteTargetRequest): Promise<DeleteTargetResponse> {
@@ -184,11 +222,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteTargetResponse(await res.json());
+return decodeDeleteTargetResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listRules(req: ListRulesRequest): Promise<ListRulesResponse> {
@@ -207,11 +245,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListRulesResponse(await res.json());
+return decodeListRulesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createRule(req: CreateRuleRequest): Promise<CreateRuleResponse> {
@@ -225,11 +263,11 @@ body: JSON.stringify(encodeCreateRuleRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateRuleResponse(await res.json());
+return decodeCreateRuleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateRule(req: UpdateRuleRequest): Promise<UpdateRuleResponse> {
@@ -243,11 +281,11 @@ body: JSON.stringify(encodeUpdateRuleRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateRuleResponse(await res.json());
+return decodeUpdateRuleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteRule(req: DeleteRuleRequest): Promise<DeleteRuleResponse> {
@@ -264,11 +302,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteRuleResponse(await res.json());
+return decodeDeleteRuleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

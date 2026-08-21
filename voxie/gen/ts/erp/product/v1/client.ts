@@ -2,6 +2,42 @@
 import type { ListProductsRequest, ListProductsResponse, CreateProductRequest, CreateProductResponse, GetProductByBarcodeRequest, GetProductByBarcodeResponse, GetProductRequest, GetProductResponse, GetProductFullRequest, GetProductFullResponse, ListProductAttributesRequest, ListProductAttributesResponse, UpdateProductRequest, UpdateProductResponse, DeleteProductRequest, DeleteProductResponse, GetDashboardRequest, GetDashboardResponse, ListReorderSuggestionsRequest, ListReorderSuggestionsResponse, ListExpiringItemsRequest, ListExpiringItemsResponse } from "./types";
 import { encodeListProductsRequest, validateListProductsRequest, decodeListProductsResponse, encodeCreateProductRequest, validateCreateProductRequest, decodeCreateProductResponse, encodeGetProductByBarcodeRequest, validateGetProductByBarcodeRequest, decodeGetProductByBarcodeResponse, encodeGetProductRequest, validateGetProductRequest, decodeGetProductResponse, encodeGetProductFullRequest, validateGetProductFullRequest, decodeGetProductFullResponse, encodeListProductAttributesRequest, validateListProductAttributesRequest, decodeListProductAttributesResponse, encodeUpdateProductRequest, validateUpdateProductRequest, decodeUpdateProductResponse, encodeDeleteProductRequest, validateDeleteProductRequest, decodeDeleteProductResponse, encodeGetDashboardRequest, validateGetDashboardRequest, decodeGetDashboardResponse, encodeListReorderSuggestionsRequest, validateListReorderSuggestionsRequest, decodeListReorderSuggestionsResponse, encodeListExpiringItemsRequest, validateListExpiringItemsRequest, decodeListExpiringItemsResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface ProductServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class ProductServiceClient {
@@ -58,11 +96,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListProductsResponse(await res.json());
+return decodeListProductsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createProduct(req: CreateProductRequest): Promise<CreateProductResponse> {
@@ -76,11 +114,11 @@ body: JSON.stringify(encodeCreateProductRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateProductResponse(await res.json());
+return decodeCreateProductResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getProductByBarcode(req: GetProductByBarcodeRequest): Promise<GetProductByBarcodeResponse> {
@@ -97,11 +135,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetProductByBarcodeResponse(await res.json());
+return decodeGetProductByBarcodeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getProduct(req: GetProductRequest): Promise<GetProductResponse> {
@@ -118,11 +156,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetProductResponse(await res.json());
+return decodeGetProductResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getProductFull(req: GetProductFullRequest): Promise<GetProductFullResponse> {
@@ -139,11 +177,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetProductFullResponse(await res.json());
+return decodeGetProductFullResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listProductAttributes(req: ListProductAttributesRequest): Promise<ListProductAttributesResponse> {
@@ -160,11 +198,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListProductAttributesResponse(await res.json());
+return decodeListProductAttributesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateProduct(req: UpdateProductRequest): Promise<UpdateProductResponse> {
@@ -179,11 +217,11 @@ body: JSON.stringify(encodeUpdateProductRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateProductResponse(await res.json());
+return decodeUpdateProductResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteProduct(req: DeleteProductRequest): Promise<DeleteProductResponse> {
@@ -200,11 +238,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteProductResponse(await res.json());
+return decodeDeleteProductResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getDashboard(req: GetDashboardRequest): Promise<GetDashboardResponse> {
@@ -220,11 +258,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetDashboardResponse(await res.json());
+return decodeGetDashboardResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listReorderSuggestions(req: ListReorderSuggestionsRequest): Promise<ListReorderSuggestionsResponse> {
@@ -240,11 +278,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListReorderSuggestionsResponse(await res.json());
+return decodeListReorderSuggestionsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listExpiringItems(req: ListExpiringItemsRequest): Promise<ListExpiringItemsResponse> {
@@ -263,11 +301,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListExpiringItemsResponse(await res.json());
+return decodeListExpiringItemsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }
