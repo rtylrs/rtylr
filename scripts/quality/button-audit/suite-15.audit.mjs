@@ -310,5 +310,6 @@ export const cases = [
   ["apps/recruit/src/features/admin/CareersAdmin.tsx", "audit-batch-308-suite-15"],
   ["apps/recruit/src/templates/shared/Header.tsx", "audit-batch-309-suite-15"],
   ["apps/crm/src/features/campaigns/CampaignDetail.test.tsx", "audit-batch-310-suite-15"],
+  ["apps/crm/src/features/sales/LeadDetail.test.tsx", "audit-batch-311-suite-15"],
 ];
 

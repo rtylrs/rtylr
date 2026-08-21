@@ -310,5 +310,6 @@ export const cases = [
   ["apps/menu/src/screens/Public/SlugLanding/SlugLanding.test.tsx", "audit-batch-308-suite-10"],
   ["apps/recruit/src/templates/editorial/Job.tsx", "audit-batch-309-suite-10"],
   ["apps/auth/src/shared/components/Logo.tsx", "audit-batch-310-suite-10"],
+  ["apps/crm/src/features/loyalty/LoyaltyRewards.test.tsx", "audit-batch-311-suite-10"],
 ];
 
