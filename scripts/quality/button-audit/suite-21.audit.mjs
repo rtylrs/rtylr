@@ -323,5 +323,6 @@ export const cases = [
   ["apps/finance/src/layouts/DefaultLayout.tsx", "audit-batch-321-suite-21"],
   ["apps/finance/src/shared/components/RecordPaymentModal.tsx", "audit-batch-322-suite-21"],
   ["apps/flow/src/features/presence/PresenceScreen.tsx", "audit-batch-323-suite-21"],
+  ["apps/flow/src/features/settings/sections/TimeSection.tsx", "audit-batch-324-suite-21"],
 ];
 

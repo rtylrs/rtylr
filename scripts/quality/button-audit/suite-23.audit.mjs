@@ -323,5 +323,6 @@ export const cases = [
   ["apps/finance/src/router.tsx", "audit-batch-321-suite-23"],
   ["apps/finance/src/shared/components/Skeleton.tsx", "audit-batch-322-suite-23"],
   ["apps/flow/src/features/profile/ProfileScreen.tsx", "audit-batch-323-suite-23"],
+  ["apps/flow/src/features/settings/sections/WorkTypesSection.tsx", "audit-batch-324-suite-23"],
 ];
 
