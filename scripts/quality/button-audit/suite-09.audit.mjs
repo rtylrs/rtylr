@@ -239,5 +239,6 @@ export const cases = [
   ["apps/dash/src/features/menu/Menus.tsx", "audit-batch-237-suite-09"],
   ["apps/dash/src/features/team/GroupDetail.tsx", "audit-batch-238-suite-09"],
   ["apps/dash/src/shared/components/dash/PermissionCheckbox.tsx", "audit-batch-239-suite-09"],
+  ["apps/dash/src/shared/hooks/queries/useKpis.test.tsx", "audit-batch-240-suite-09"],
 ];
 
