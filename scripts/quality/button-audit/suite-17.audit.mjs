@@ -292,5 +292,6 @@ export const cases = [
   ["apps/dash/src/shared/components/dash/ConfirmDialog.tsx", "audit-batch-290-suite-17"],
   ["apps/dash/src/shared/hooks/queries/useApps.test.tsx", "audit-batch-291-suite-17"],
   ["apps/erp/src/features/products/ProductDetail.test.tsx", "audit-batch-292-suite-17"],
+  ["apps/erp/src/layouts/DefaultLayout.tsx", "audit-batch-293-suite-17"],
 ];
 

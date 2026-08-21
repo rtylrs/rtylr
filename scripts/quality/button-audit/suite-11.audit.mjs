@@ -292,5 +292,6 @@ export const cases = [
   ["apps/dash/src/shared/components/HelmetContainer.tsx", "audit-batch-290-suite-11"],
   ["apps/dash/src/shared/components/ui/sheet.tsx", "audit-batch-291-suite-11"],
   ["apps/erp/src/features/inventory/Inventory.test.tsx", "audit-batch-292-suite-11"],
+  ["apps/erp/src/features/valuation/Valuation.test.tsx", "audit-batch-293-suite-11"],
 ];
 
