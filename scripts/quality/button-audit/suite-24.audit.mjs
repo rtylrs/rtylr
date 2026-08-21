@@ -122,5 +122,6 @@ export const cases = [
   ["apps/flow/src/shared/components/GateNotice.tsx", "audit-batch-120-suite-24"],
   ["apps/hr/src/features/dashboard/Dashboard.tsx", "audit-batch-121-suite-24"],
   ["apps/hr/src/features/leave/Leave.tsx", "audit-batch-122-suite-24"],
+  ["apps/hr/src/features/reviews/OneOnOnes.tsx", "audit-batch-123-suite-24"],
 ];
 

@@ -122,5 +122,6 @@ export const cases = [
   ["apps/flow/src/shared/components/CommentList.tsx", "audit-batch-120-suite-18"],
   ["apps/hr/src/features/attendance/Attendance.tsx", "audit-batch-121-suite-18"],
   ["apps/hr/src/features/employees/EmployeeDetail.tsx", "audit-batch-122-suite-18"],
+  ["apps/hr/src/features/performance/MyReview.tsx", "audit-batch-123-suite-18"],
 ];
 
