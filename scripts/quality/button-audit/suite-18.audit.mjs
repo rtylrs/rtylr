@@ -98,5 +98,6 @@ export const cases = [
   ["apps/hr/src/features/departments/CreateDepartmentForm.tsx", "audit-batch-096-suite-18"],
   ["apps/hr/src/features/overtime/OvertimeRequestForm.tsx", "audit-batch-097-suite-18"],
   ["apps/hr/src/features/setup-wizard/SetupWizard.tsx", "audit-batch-098-suite-18"],
+  ["apps/hr/src/features/time-off/TimeOff.tsx", "audit-batch-099-suite-18"],
 ];
 

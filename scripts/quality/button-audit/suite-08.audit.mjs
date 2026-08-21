@@ -98,5 +98,6 @@ export const cases = [
   ["apps/hr/src/features/dashboard/widgets/HoursThisWeekWidget.tsx", "audit-batch-096-suite-08"],
   ["apps/hr/src/features/leave/LeaveCalendar.tsx", "audit-batch-097-suite-08"],
   ["apps/hr/src/features/reviews/Reviews.tsx", "audit-batch-098-suite-08"],
+  ["apps/hr/src/features/shifts/RosterBuilder.tsx", "audit-batch-099-suite-08"],
 ];
 

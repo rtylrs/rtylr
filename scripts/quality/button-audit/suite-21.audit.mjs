@@ -98,5 +98,6 @@ export const cases = [
   ["apps/hr/src/features/documents/DocumentVault.tsx", "audit-batch-096-suite-21"],
   ["apps/hr/src/features/payroll/Payroll.tsx", "audit-batch-097-suite-21"],
   ["apps/hr/src/features/setup-wizard/steps/CompanyProfileStep.tsx", "audit-batch-098-suite-21"],
+  ["apps/hr/src/features/timesheets/TimesheetsList.tsx", "audit-batch-099-suite-21"],
 ];
 
