@@ -117,7 +117,8 @@
     "title": "Inventory",
     "addProduct": "Add Product",
     "search": "Search products…",
-    "empty": "No products found."
+    "empty": "No products found.",
+    "clearSearch": "مسح البحث"
   },
   "suppliers": {
     "title": "Suppliers",
@@ -170,6 +171,7 @@
     "ok": "موافق",
     "markReceived": "تحديد كمستلم",
     "empty": { "title": "لا توجد أوامر مفتوحة للاستلام", "description": "تم استلام جميع الطلبات" },
+    "goToPurchasing": "الانتقال إلى أوامر الشراء",
     "orderSummary": "{{count}} عناصر / الموعد {{date}}",
     "validation": { "overReceived": "لا يمكن استلام وحدات أكثر من الكمية المطلوبة" },
     "toast": {
@@ -177,5 +179,93 @@
       "completedVariance": "اكتمل الاستلام مع فرق {{count}} وحدة",
       "updateFailed": "فشل تحديث حالة الاستلام"
     }
+  },
+  "reorder": {
+    "empty": {
+      "title": "لا توجد اقتراحات",
+      "description": "جميع مستويات المخزون جيدة"
+    },
+    "refresh": "تحديث"
+  },
+  "variants": {
+    "empty": {
+      "title": "لا توجد متغيرات",
+      "description": "أضف متغيرات لتمييز منتجاتك"
+    },
+    "addVariant": "إضافة متغيّر"
+  },
+  "priceLists": {
+    "empty": {
+      "title": "لا توجد قوائم أسعار",
+      "description": "أنشئ أول قائمة أسعار لتفعيل التسعير المتدرّج"
+    },
+    "newPriceList": "قائمة أسعار جديدة",
+    "refresh": "تحديث"
+  },
+  "brands": {
+    "empty": {
+      "title": "لا توجد علامات تجارية بعد",
+      "description": "أضف علامتك التجارية الأولى لتجميع المنتجات."
+    },
+    "newBrand": "علامة تجارية جديدة"
+  },
+  "expiry": {
+    "empty": {
+      "title": "لا توجد عناصر منتهية الصلاحية قريبًا",
+      "description": "لا توجد دفعات بتواريخ انتهاء صلاحية متتبَّعة"
+    },
+    "refresh": "تحديث"
+  },
+  "stockTransfers": {
+    "empty": {
+      "title": "لا توجد عمليات نقل",
+      "description": "أنشئ أول عملية نقل مخزون"
+    },
+    "newTransfer": "نقل جديد",
+    "refresh": "تحديث"
+  },
+  "lowStockAlerts": {
+    "empty": {
+      "title": "جميع مستويات المخزون جيدة",
+      "description": "لا شيء يحتاج إلى إعادة الطلب الآن."
+    },
+    "viewInventory": "عرض المخزون"
+  },
+  "stockTakes": {
+    "empty": {
+      "title": "لا توجد عمليات جرد",
+      "description": "ابدأ عملية جرد لإيجاد الفروقات"
+    },
+    "newStockTake": "جرد جديد",
+    "refresh": "تحديث"
+  },
+  "categories": {
+    "empty": {
+      "title": "لا توجد فئات بعد",
+      "description": "أنشئ فئتك الأولى لتنظيم المنتجات"
+    },
+    "addCategory": "إضافة فئة"
+  },
+  "settings": {
+    "team": {
+      "empty": { "title": "لا يوجد أعضاء فريق بعد." },
+      "invite": "دعوة عضو",
+      "refresh": "تحديث"
+    }
+  },
+  "barcodes": {
+    "previewEmpty": {
+      "title": "اختر منتجات لمعاينة الملصقات",
+      "description": "اختر منتجًا واحدًا أو أكثر من القائمة لعرض ملصقات الرموز الشريطية هنا."
+    },
+    "selectFirst": "تحديد أول منتج",
+    "goToProducts": "الانتقال إلى المنتجات"
+  },
+  "valuation": {
+    "empty": {
+      "title": "لا توجد بيانات تقييم متاحة",
+      "description": "يظهر التقييم بعد تتبّع المخزون في أحد المستودعات."
+    },
+    "refresh": "تحديث"
   }
 }

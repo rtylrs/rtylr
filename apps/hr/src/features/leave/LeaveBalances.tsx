@@ -1,15 +1,16 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Wallet } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useListLeaveBalances } from '../../shared/hooks/queries/useLeave';
 import { useMyEmployeeId } from '../../shared/hooks/useHrExtras';
-import { Card, Skeleton, EmptyState } from '../../shared/components/ui';
+import { Card, Skeleton } from '../../shared/components/ui';
 
 const LeaveBalances = (): React.JSX.Element => {
   const { t } = useTranslation();
   const { data: myEmployeeId } = useMyEmployeeId();
   const employeeId = myEmployeeId !== undefined ? String(myEmployeeId) : undefined;
-  const { data: balances, isLoading } = useListLeaveBalances(employeeId);
+  const { data: balances, isLoading, refetch } = useListLeaveBalances(employeeId);
 
   if (isLoading) {
     return (
@@ -30,9 +31,10 @@ const LeaveBalances = (): React.JSX.Element => {
   if (!balances || balances.length === 0) {
     return (
       <EmptyState
-        icon={<Wallet size={20} />}
+        icon={Wallet}
         title={t('leave.balances.emptyTitle')}
         description={t('leave.balances.emptyDescription')}
+        action={{ label: t('common.refresh'), onClick: () => refetch() }}
       />
     );
   }

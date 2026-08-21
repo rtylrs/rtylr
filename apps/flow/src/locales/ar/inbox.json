@@ -14,6 +14,7 @@
   },
   "emptyTitle": "أنت على اطلاع بكل شيء!",
   "emptyDescription": "لا توجد إشعارات للعرض.",
+  "refreshCta": "تحديث",
   "time": {
     "justNow": "الآن",
     "hoursAgo": "منذ {{count}} ساعة",

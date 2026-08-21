@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import {
   MonitorSpeaker,
@@ -25,6 +26,7 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { EmptyState } from '@voxire/ui';
 import { Input } from '../../shared/components/ui';
 import {
   ADDONS_QUERY_KEY,
@@ -117,6 +119,7 @@ function proratedAddonCents(priceCents: number): {
 }
 
 const Addons: React.FC = () => {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const { data: addons = [], isLoading } = useAddons();
@@ -443,11 +446,11 @@ const Addons: React.FC = () => {
         )}
 
         {filtered.length === 0 && !isLoading && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-sm font-medium" style={{ color: 'var(--dash-text-muted)' }}>
-              No addons match your search
-            </p>
-          </div>
+          <EmptyState
+            icon={Search}
+            title={t('addons.emptyMatchTitle')}
+            action={{ label: t('common.clearSearch'), onClick: () => setSearchTerm('') }}
+          />
         )}
 
         {/* Paid addon purchase modal */}

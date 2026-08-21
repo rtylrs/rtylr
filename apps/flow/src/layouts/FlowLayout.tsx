@@ -453,6 +453,32 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     };
   }, [userMenuOpen]);
 
+  // Workspace switcher (sidebar top): same gap as the account menu above,
+  // fixed the same way and kept independent - each menu closes only itself.
+  const workspaceSwitcherRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!workspaceSwitcherOpen) return;
+    const handlePointerDown = (e: MouseEvent | TouchEvent): void => {
+      if (
+        workspaceSwitcherRef.current &&
+        !workspaceSwitcherRef.current.contains(e.target as Node)
+      ) {
+        setWorkspaceSwitcherOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') setWorkspaceSwitcherOpen(false);
+    };
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [workspaceSwitcherOpen]);
+
   useEffect(() => {
     setMobileNavOpen(false);
   }, [location.pathname]);
@@ -701,7 +727,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
           </div>
 
           {/* Workspace + search, shared inset, even vertical rhythm */}
-          <div className={cn('space-y-1.5 pt-1.5 pb-1.5 relative', sx)}>
+          <div ref={workspaceSwitcherRef} className={cn('space-y-1.5 pt-1.5 pb-1.5 relative', sx)}>
             <button
               type="button"
               onClick={() => setWorkspaceSwitcherOpen((o) => !o)}

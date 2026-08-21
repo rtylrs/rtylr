@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import {
   Plus,
   Trash2,
@@ -9,7 +10,9 @@ import {
   CheckSquare,
   Link as LinkIcon,
   ToggleRight,
+  HelpCircle,
 } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 
 import {
   useAdminFormFields,
@@ -73,6 +76,7 @@ interface Props {
 }
 
 const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
+  const { t } = useTranslation();
   const { data, isLoading } = useAdminFormFields(careerId);
   const create = useCreateFormField();
   const update = useUpdateFormField();
@@ -80,10 +84,24 @@ const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
 
   const fields = data?.fields ?? [];
 
+  function addDefaultQuestion(): void {
+    const kind = KIND_ORDER[0];
+    create.mutate(
+      { careerId, kind, label: defaultLabelFor(kind), required: false },
+      {
+        onSuccess: () => toast.success(`${KIND_META[kind].label} added`),
+        onError: () => toast.error("Couldn't add"),
+      }
+    );
+  }
+
   return (
     <div
       className="rounded-lg border p-5"
-      style={{ borderColor: '#2a2a2a', background: 'rgba(255,255,255,0.02)' }}
+      style={{
+        borderColor: 'var(--recruit-admin-border-strong)',
+        background: 'rgba(255,255,255,0.02)',
+      }}
     >
       <div className="mb-4 flex items-center justify-between">
         <div>
@@ -97,11 +115,13 @@ const FormFieldsEditor: React.FC<Props> = ({ careerId }) => {
       {isLoading ? (
         <div className="py-6 text-center text-sm text-white/50">Loading…</div>
       ) : fields.length === 0 ? (
-        <div
-          className="mb-4 rounded-md border border-dashed p-4 text-center text-xs text-white/50"
-          style={{ borderColor: '#2a2a2a' }}
-        >
-          No custom questions yet.
+        <div className="mb-4">
+          <EmptyState
+            icon={HelpCircle}
+            title={t('emptyStates.questionsNone')}
+            action={{ label: t('emptyStates.addQuestion'), onClick: addDefaultQuestion }}
+            size="compact"
+          />
         </div>
       ) : (
         <ul className="mb-4 space-y-2">
@@ -214,7 +234,10 @@ const FormFieldRow: React.FC<{
   }
 
   return (
-    <li className="rounded-md border p-3" style={{ borderColor: '#2a2a2a' }}>
+    <li
+      className="rounded-md border p-3"
+      style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
+    >
       <div className="flex items-center gap-2">
         <span className="inline-flex items-center gap-1 rounded-md bg-white/5 px-2 py-1 text-xs text-white/70">
           {meta?.icon}
@@ -225,7 +248,7 @@ const FormFieldRow: React.FC<{
           onChange={(e) => setLabel(e.target.value)}
           onBlur={commit}
           className="flex-1 rounded-md border bg-black/40 px-2.5 py-1.5 text-sm outline-none focus:border-white/40"
-          style={{ borderColor: '#2a2a2a' }}
+          style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
           placeholder="Question label"
         />
         <label className="inline-flex cursor-pointer items-center gap-1 text-xs text-white/70">
@@ -270,7 +293,7 @@ const FormFieldRow: React.FC<{
             onChange={(e) => setPlaceholder(e.target.value)}
             onBlur={commit}
             className="w-full rounded-md border bg-black/40 px-2.5 py-1.5 text-xs outline-none focus:border-white/40"
-            style={{ borderColor: '#2a2a2a' }}
+            style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
             placeholder="Placeholder (optional)"
           />
         </div>
@@ -288,7 +311,7 @@ const FormFieldRow: React.FC<{
                 }}
                 onBlur={commit}
                 className="flex-1 rounded-md border bg-black/40 px-2.5 py-1.5 text-xs outline-none focus:border-white/40"
-                style={{ borderColor: '#2a2a2a' }}
+                style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
                 placeholder={`Option ${i + 1}`}
               />
               <button

@@ -4,11 +4,11 @@ import { Archive as ArchiveIcon, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useTasks, useUpdateTask } from '../tasks/useTasks';
 import type { ApiTask } from '../../shared/services/flowApi';
 import { archivedTasks } from '../../shared/lib/taskArchiveUtils';
 import PriorityIcon from '../../shared/components/PriorityIcon';
-import EmptyState from '../../shared/components/EmptyState';
 
 const Archive: React.FC = () => {
   const { t } = useTranslation();
@@ -35,6 +35,10 @@ const Archive: React.FC = () => {
             icon={ArchiveIcon}
             title={t('archive.emptyTitle')}
             description={t('archive.emptyDescription')}
+            action={{
+              label: t('archive.emptyCta'),
+              onClick: () => navigate({ to: '/my-issues' }),
+            }}
           />
         ) : (
           archived.map((task) => (

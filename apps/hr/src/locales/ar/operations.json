@@ -21,5 +21,12 @@
       "saturday": "السبت",
       "sunday": "الأحد"
     }
-  }
+  },
+  "emptySwapsTitle": "لا توجد طلبات تبديل",
+  "emptySwapsDescription": "ستظهر طلبات تبديل الدوام هنا.",
+  "emptyBreaksTitle": "لم يتم تسجيل أي استراحات",
+  "emptyBreaksDescription": "ابدأ استراحة لتتبع الوقت.",
+  "startLunchBreak": "بدء استراحة الغداء",
+  "emptyOvertimeTitle": "لا توجد تنبيهات عمل إضافي",
+  "emptyOvertimeDescription": "الجميع ضمن حدود السياسة."
 }

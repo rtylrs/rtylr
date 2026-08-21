@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from '@tanstack/react-router';
-import { ArrowUpRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { ArrowUpRight, Briefcase } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 
 import Header from '../shared/Header';
 import Sections from '../shared/Sections';
@@ -11,6 +13,7 @@ import { cleanMojibake } from '../../shared/lib/sanitize';
 // For businesses that want the careers page to feel like a campaign
 // landing page. Best paired with a strong primary_color.
 const BoldIndex: React.FC<IndexProps> = ({ careers, customization, sections }) => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-white">
       <Header customization={customization} />
@@ -54,9 +57,14 @@ const BoldIndex: React.FC<IndexProps> = ({ careers, customization, sections }) =
 
           <div className="grid gap-0 border-t" style={{ borderColor: 'var(--recruit-border)' }}>
             {careers.length === 0 ? (
-              <div className="py-16 text-center text-sm" style={{ color: 'var(--recruit-muted)' }}>
-                No open roles right now. Check back soon.
-              </div>
+              <EmptyState
+                icon={Briefcase}
+                title={t('emptyStates.publicRolesNone')}
+                action={{
+                  label: t('emptyStates.checkAgain'),
+                  onClick: () => window.location.reload(),
+                }}
+              />
             ) : (
               careers.map((c) => (
                 <Link

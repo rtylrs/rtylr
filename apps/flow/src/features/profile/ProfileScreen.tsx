@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { UserCircle } from 'lucide-react';
-import { Avatar } from '@voxire/ui';
-import EmptyState from '../../shared/components/EmptyState';
+import { Avatar, EmptyState } from '@voxire/ui';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import { useUserStore } from '../../shared/stores/userStore';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
@@ -62,7 +61,11 @@ const Field = ({ label, value }: FieldProps): React.JSX.Element | null => {
 const ProfileScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const user = useUserStore((s) => s.user);
-  const { data: staff, isLoading: isStaffLoading } = useMyStaffRecord(user?.id);
+  const {
+    data: staff,
+    isLoading: isStaffLoading,
+    refetch: refetchStaff,
+  } = useMyStaffRecord(user?.id);
   const { data: detail } = useMyProfileDetail(staff?.id);
 
   const weekStart = useTimeSettingsStore((s) => s.weekStart);
@@ -142,6 +145,10 @@ const ProfileScreen = (): React.JSX.Element => {
               icon={UserCircle}
               title={t('flow.profile.noRecordTitle')}
               description={t('flow.profile.noRecordDescription')}
+              action={{
+                label: t('flow.profile.noRecordCta'),
+                onClick: () => void refetchStaff(),
+              }}
             />
           )}
         </section>

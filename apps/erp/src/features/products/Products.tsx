@@ -5,6 +5,7 @@ import { cdnImageUrl } from '@voxire/config';
 import { useUserStore } from '@voxire/auth';
 import { Search, Plus, Grid3X3, List, SlidersHorizontal, ArrowUpDown, Package } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import { useDebounce } from '@voxire/utils';
 import {
   fetchAllProducts,
@@ -23,7 +24,6 @@ import FilterDrawer from '../../shared/components/FilterDrawer';
 import BulkActionBar from '../../shared/components/BulkActionBar';
 import ExportButton from '../../shared/components/ExportButton';
 import ImportCSV from '../../shared/components/ImportCSV';
-import EmptyState from '../../shared/components/EmptyState';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import QuickAddProductModal from '../../shared/components/QuickAddProductModal';
@@ -281,18 +281,10 @@ const Products: React.FC = () => {
         </div>
       ) : products.length === 0 ? (
         <EmptyState
+          icon={Package}
           title={t('erp.products.empty.title')}
           description={t('erp.products.empty.description')}
-          action={
-            <button
-              data-testid="products-empty-create-button"
-              onClick={() => setShowAdd(true)}
-              className="px-3 py-2 rounded-lg text-xs font-semibold"
-              style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
-            >
-              {t('erp.products.create')}
-            </button>
-          }
+          action={{ label: t('erp.products.create'), onClick: () => setShowAdd(true) }}
         />
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">

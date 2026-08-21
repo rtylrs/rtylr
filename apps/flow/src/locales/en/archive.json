@@ -4,6 +4,7 @@
   "count_other": "{{count}} archived tasks",
   "emptyTitle": "Nothing archived",
   "emptyDescription": "Archived tasks will show up here.",
+  "emptyCta": "Go to My Tasks",
   "restore": "Restore",
   "restoreTitle": "Restore task"
 }

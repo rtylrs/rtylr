@@ -13,6 +13,7 @@
   "noEntries": "لا توجد إدخالات وقت في هذه الفترة.",
   "emptyTitle": "لا توجد سجلات دوام بعد",
   "emptyDescription": "ستظهر فترات سجل الدوام هنا.",
+  "managerViewEmptyDescription": "ستظهر هنا ساعات دوام الموظفين المسجلة.",
   "filters": {
     "all": "الكل",
     "draft": "مسودة",

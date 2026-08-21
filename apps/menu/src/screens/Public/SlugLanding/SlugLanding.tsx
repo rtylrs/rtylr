@@ -1,6 +1,9 @@
 import React from 'react';
-import { useParams, useNavigate, Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
+import { useParams, useNavigate, useRouter, Link } from '@tanstack/react-router';
 import { FullScreenLoader, HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
+import { SearchX } from 'lucide-react';
 import { usePublicBusinessBySlug } from '../../../shared/hooks/usePublicMenu';
 import Menu from '../Menu/Menu';
 
@@ -19,8 +22,10 @@ import Menu from '../Menu/Menu';
 const isMongoId = (s: string): boolean => /^[a-f0-9]{24}$/i.test(s);
 
 const SlugLanding: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation('sluglanding');
   const { slug: raw } = useParams({ strict: false });
   const navigate = useNavigate();
+  const router = useRouter();
   const slug = (raw ?? '').toLowerCase();
 
   const { data, isLoading, isError } = usePublicBusinessBySlug(slug);
@@ -39,15 +44,19 @@ const SlugLanding: React.FC = (): React.JSX.Element => {
     return (
       <div
         style={{
-          padding: 32,
-          textAlign: 'center',
-          color: 'var(--menu-text, #333)',
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '0 20px',
         }}
       >
-        <h1 style={{ fontSize: 18, fontWeight: 600 }}>Business not found</h1>
-        <p style={{ fontSize: 14, opacity: 0.7 }}>
-          The URL <code>/{slug}</code> doesn't match any active business.
-        </p>
+        <EmptyState
+          icon={SearchX}
+          title={t('businessNotFoundTitle')}
+          description={t('businessNotFoundDescription', { slug })}
+          action={{ label: t('goBack'), onClick: () => router.history.back() }}
+        />
       </div>
     );
   }

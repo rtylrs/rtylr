@@ -29,6 +29,7 @@ import {
   Type,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useTask } from './useTask';
 import {
   useUpdateTask,
@@ -538,7 +539,13 @@ const TaskDetail: React.FC = () => {
               </div>
             )}
 
-            {tab === 'activity' && <ActivitySection entries={taskActivityData} t={t} />}
+            {tab === 'activity' && (
+              <ActivitySection
+                entries={taskActivityData}
+                t={t}
+                onGoToComments={() => setTab('comments')}
+              />
+            )}
           </div>
         </motion.div>
       </div>
@@ -961,15 +968,22 @@ const TaskDetail: React.FC = () => {
 
 // ── Activity Section ──────────────────────────────────────────────────────────
 
-const ActivitySection: React.FC<{ entries: ApiTaskActivity[]; t: TFunction }> = ({
-  entries,
-  t,
-}) => {
+const ActivitySection: React.FC<{
+  entries: ApiTaskActivity[];
+  t: TFunction;
+  onGoToComments: () => void;
+}> = ({ entries, t, onGoToComments }) => {
   if (entries.length === 0) {
     return (
-      <div className="text-[12px] text-center py-4" style={{ color: 'var(--flow-text-dim)' }}>
-        {t('flow.taskDetail.noActivity')}
-      </div>
+      <EmptyState
+        icon={Activity}
+        title={t('flow.taskDetail.noActivity')}
+        action={{
+          label: t('flow.taskDetail.goToComments'),
+          onClick: onGoToComments,
+        }}
+        size="compact"
+      />
     );
   }
   return (

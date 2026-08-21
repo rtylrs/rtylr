@@ -4,8 +4,9 @@ import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Users, Plus, Search, Trash2, ChevronRight } from 'lucide-react';
 import { motion } from 'motion/react';
+import { EmptyState } from '@voxire/ui';
 import { Button, Input } from '../../shared/components/ui';
-import { ConfirmDialog, EmptyState, SkeletonList } from '../../shared/components/dash';
+import { ConfirmDialog, SkeletonList } from '../../shared/components/dash';
 import { useGroups, useDeleteGroup, type Group } from '../../shared/hooks/queries/useGroups';
 import { APP_RESOURCES } from '../../shared/config/appResources';
 
@@ -85,8 +86,10 @@ const Groups = (): React.JSX.Element => {
                 icon={Users}
                 title={query ? t('team.groups.noGroupsMatch') : t('team.groups.noGroupsTitle')}
                 description={t('team.groups.noGroupsDescription')}
-                actionLabel={t('team.groups.newGroup')}
-                onAction={() => navigate({ to: '/team/groups/new' })}
+                action={{
+                  label: t('team.groups.newGroup'),
+                  onClick: () => navigate({ to: '/team/groups/new' }),
+                }}
               />
             </div>
           ) : (

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Rocket, CheckCircle, Upload } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import {
   useGetEmployeeChecklist,
   useCompleteChecklistItem,
@@ -9,7 +10,6 @@ import type { EmployeeChecklistItemPayload } from '@voxire/voxie/hr/onboarding/v
 import {
   SectionHeader,
   Card,
-  EmptyState,
   Skeleton,
   Pill,
   Button,
@@ -36,7 +36,7 @@ interface Props {
 
 const OnboardingChecklist = ({ employeeId }: Props): React.JSX.Element => {
   const { t } = useTranslation();
-  const { data, isLoading } = useGetEmployeeChecklist(employeeId);
+  const { data, isLoading, refetch } = useGetEmployeeChecklist(employeeId);
   const complete = useCompleteChecklistItem();
   const [attachmentItem, setAttachmentItem] = useState<EmployeeChecklistItemPayload | null>(null);
 
@@ -84,9 +84,10 @@ const OnboardingChecklist = ({ employeeId }: Props): React.JSX.Element => {
         <Skeleton height={200} />
       ) : !checklist ? (
         <EmptyState
-          icon={<Rocket size={20} />}
+          icon={Rocket}
           title={t('onboardingMgmt.checklist.emptyTitle')}
           description={t('onboardingMgmt.checklist.emptyDescription')}
+          action={{ label: t('common.refresh'), onClick: () => refetch() }}
         />
       ) : (
         <>

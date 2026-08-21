@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import {
@@ -14,7 +15,10 @@ import {
   XCircle,
   MinusCircle,
   ArrowLeft,
+  Clock,
+  UserPlus,
 } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   useLead,
@@ -88,6 +92,7 @@ const LeadDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
   const leadId = id ? Number(id) : undefined;
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const { data: lead, isLoading: leadLoading } = useLead(leadId);
   const { data: touchpoints } = useLeadTouchpoints(leadId);
@@ -399,16 +404,21 @@ const LeadDetail: React.FC = () => {
               {sortedTouchpoints.length === 0 && (
                 <div
                   style={{
-                    padding: '32px',
-                    textAlign: 'center',
-                    color: 'var(--hub-text-muted)',
-                    fontSize: '13px',
                     background: 'var(--hub-card)',
                     border: '1px solid var(--hub-border)',
                     borderRadius: '10px',
                   }}
                 >
-                  No touchpoints yet. Log the first one.
+                  <EmptyState
+                    size="compact"
+                    icon={Clock}
+                    title={t('crm.leadDetail.noTouchpointsTitle')}
+                    description={t('crm.leadDetail.noTouchpointsDescription')}
+                    action={{
+                      label: t('crm.leadDetail.logTouchpoint'),
+                      onClick: () => setTpOpen(true),
+                    }}
+                  />
                 </div>
               )}
               {sortedTouchpoints.map((tp) => {
@@ -670,7 +680,16 @@ const LeadDetail: React.FC = () => {
               </AnimatePresence>
 
               {(contacts ?? []).length === 0 && !contactOpen && (
-                <p style={{ fontSize: '12px', color: 'var(--hub-text-dim)' }}>No contacts yet.</p>
+                <EmptyState
+                  size="compact"
+                  icon={UserPlus}
+                  title={t('crm.leadDetail.noContactsTitle')}
+                  description={t('crm.leadDetail.noContactsDescription')}
+                  action={{
+                    label: t('crm.leadDetail.addContact'),
+                    onClick: () => setContactOpen(true),
+                  }}
+                />
               )}
               {(contacts ?? []).map((c) => (
                 <div

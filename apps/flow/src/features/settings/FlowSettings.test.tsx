@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
@@ -85,6 +85,16 @@ vi.mock('../../features/workspace-dashboard/useWorkspaces', () => ({
   useCreateWorkspace: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
+const labelsData = vi.hoisted(() => ({
+  data: [] as Array<{ id: number; name: string; color: string }>,
+}));
+const createLabelMutate = vi.hoisted(() => vi.fn());
+vi.mock('../../features/tasks/useLabels', () => ({
+  useLabels: () => ({ data: labelsData.data, isLoading: false }),
+  useCreateLabel: () => ({ mutate: createLabelMutate, isPending: false }),
+  useDeleteLabel: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 // A mutable "cookie" the tests flip per role, decoded by FlowSettings' own
 // getRoleFromToken exactly as it would decode a real auth cookie.
 const tokenState = vi.hoisted(() => ({ token: null as string | null }));
@@ -100,7 +110,7 @@ vi.mock('@tanstack/react-router', () => ({
   getRouteApi: () => ({ useSearch: () => searchState }),
 }));
 
-import FlowSettings, { TeamSection } from './FlowSettings';
+import FlowSettings, { TeamSection, LabelsSection } from './FlowSettings';
 
 function makeToken(role: string): string {
   const payload = btoa(JSON.stringify({ role }));
@@ -121,6 +131,15 @@ function renderTeamSection() {
   return render(
     <QueryClientProvider client={queryClient}>
       <TeamSection />
+    </QueryClientProvider>
+  );
+}
+
+function renderLabelsSection() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <LabelsSection />
     </QueryClientProvider>
   );
 }
@@ -235,5 +254,53 @@ describe('TeamSection own canInviteMembers gate (#793)', () => {
     expect(
       screen.getByRole('button', { name: 'flow.settings.team.removeMemberLabel' })
     ).toBeEnabled();
+  });
+});
+
+// The shared EmptyState (title + CTA) now covers both the team-member list
+// and the labels list when they have nothing to show.
+describe('TeamSection empty state', () => {
+  beforeEach(() => {
+    flowTeamData.data = [];
+    grantMutate.mockClear();
+    deactivateMutate.mockClear();
+  });
+
+  it('shows the empty title with an Add member CTA for an admin', () => {
+    tokenState.token = makeToken('admin');
+    renderTeamSection();
+
+    expect(screen.getByText('flow.settings.team.noMembersYet')).toBeInTheDocument();
+    const addButtons = screen.getAllByRole('button', { name: 'flow.settings.team.addMember' });
+    expect(addButtons.length).toBeGreaterThan(0);
+    addButtons.forEach((button) => expect(button).toBeEnabled());
+  });
+
+  it('shows the empty title with a Refresh CTA for a non-admin', () => {
+    tokenState.token = makeToken('member');
+    renderTeamSection();
+
+    expect(screen.getByText('flow.settings.team.noMembersYet')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'flow.settings.team.addMember' })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'flow.settings.team.refreshCta' })).toBeEnabled();
+  });
+});
+
+describe('LabelsSection empty state', () => {
+  beforeEach(() => {
+    labelsData.data = [];
+  });
+
+  it('shows the empty title with a CTA that focuses the new-label input', () => {
+    renderLabelsSection();
+
+    expect(screen.getByText('flow.settings.labels.emptyList')).toBeInTheDocument();
+    const button = screen.getByRole('button', { name: 'flow.settings.labels.newLabel' });
+    expect(button).toBeEnabled();
+    const input = screen.getByPlaceholderText('flow.settings.labels.namePlaceholder');
+    fireEvent.click(button);
+    expect(input).toHaveFocus();
   });
 });

@@ -21,8 +21,10 @@ import {
   Bell,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import { Button, Input } from '../../shared/components/ui';
-import { EmptyState, SkeletonList, ConfirmDialog, RoleBadge } from '../../shared/components/dash';
+import { SkeletonList, ConfirmDialog, RoleBadge } from '../../shared/components/dash';
 import {
   useTeam,
   useDeactivateMember,
@@ -54,6 +56,7 @@ const APP_ICONS: Record<
 const ITEMS_PER_PAGE = 10;
 
 const Team: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const { data: teamData, isLoading } = useTeam({ page: page + 1, pageSize: ITEMS_PER_PAGE });
@@ -298,10 +301,20 @@ const Team: React.FC = (): React.JSX.Element => {
             <div className="p-4">
               <EmptyState
                 icon={Users}
-                title={query ? 'No members match your search' : 'No team members yet'}
-                description="Invite your first team member to get started."
-                actionLabel="Invite member"
-                onAction={() => navigate({ to: '/team/invite' })}
+                title={query ? t('team.list.noMembersMatchTitle') : t('team.list.noMembersTitle')}
+                description={
+                  query
+                    ? t('team.list.noMembersMatchDescription')
+                    : t('team.list.noMembersDescription')
+                }
+                action={
+                  query
+                    ? { label: t('common.clearSearch'), onClick: () => setQuery('') }
+                    : {
+                        label: t('common.nav.inviteMember'),
+                        onClick: () => navigate({ to: '/team/invite' }),
+                      }
+                }
               />
             </div>
           ) : (

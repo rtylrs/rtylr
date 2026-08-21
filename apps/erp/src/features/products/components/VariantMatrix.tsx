@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Tag, Plus, X, Trash2, Check, Wand2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import { toast } from 'sonner';
 import {
   parseVariantAttributes,
@@ -507,9 +508,12 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
       )}
 
       {variants.length === 0 && drafts.length === 0 && groups.length === 0 && (
-        <p className="text-xs py-1" style={{ color: 'var(--hub-text-dim)' }}>
-          {t('erp.products.variants.empty')}
-        </p>
+        <EmptyState
+          icon={Tag}
+          title={t('erp.products.variants.empty')}
+          action={{ label: t('erp.products.variants.addOption'), onClick: addGroup }}
+          size="compact"
+        />
       )}
     </div>
   );

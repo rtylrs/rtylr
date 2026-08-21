@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { signOut } from '@voxire/auth';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
@@ -12,12 +13,14 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  History,
   Laptop,
   Monitor,
   Smartphone,
   Tablet,
   XCircle,
 } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { safe } from '../../../../../shared/lib/api';
 import { useUserStore } from '../../../../../shared/stores/userStore';
 import { ConfirmDialog } from '../../../../../shared/components/dash';
@@ -158,6 +161,7 @@ interface LoginHistoryPage {
 const LOGIN_HISTORY_PAGE_SIZE = 20;
 
 const Account: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useUserStore();
   const [formData, setFormData] = useState({ name: '', email: '' });
   const [isEditing, setIsEditing] = useState(false);
@@ -169,6 +173,7 @@ const Account: React.FC = () => {
     isLoading: isLoginHistoryLoading,
     isError: isLoginHistoryError,
     isFetching: isLoginHistoryFetching,
+    refetch: refetchLoginHistory,
   } = useQuery<LoginHistoryPage>({
     queryKey: ['security', 'login-history', { page: loginHistoryPage }],
     placeholderData: keepPreviousData,
@@ -368,12 +373,30 @@ const Account: React.FC = () => {
               <TableBody>
                 {loginHistoryData.entries.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-10 text-center text-gray-500">
-                      {isLoginHistoryLoading
-                        ? 'Loading login history…'
-                        : isLoginHistoryError
-                          ? 'Unable to load login history.'
-                          : 'No login activity yet.'}
+                    <TableCell
+                      colSpan={6}
+                      className={
+                        isLoginHistoryLoading || isLoginHistoryError
+                          ? 'py-10 text-center text-gray-500'
+                          : undefined
+                      }
+                    >
+                      {isLoginHistoryLoading ? (
+                        'Loading login history…'
+                      ) : isLoginHistoryError ? (
+                        'Unable to load login history.'
+                      ) : (
+                        <EmptyState
+                          icon={History}
+                          title={t('settings.account.noLoginActivityTitle')}
+                          description={t('settings.account.noLoginActivityDescription')}
+                          action={{
+                            label: t('common.refresh'),
+                            onClick: () => void refetchLoginHistory(),
+                          }}
+                          size="compact"
+                        />
+                      )}
                     </TableCell>
                   </TableRow>
                 ) : (

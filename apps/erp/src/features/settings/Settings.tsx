@@ -3,6 +3,8 @@ import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { useUserStore } from '@voxire/auth';
+import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@voxire/ui';
 import {
   Settings as SettingsIcon,
   Bell,
@@ -302,7 +304,8 @@ const GeneralTab: React.FC = () => {
 // ── Team Tab ──────────────────────────────────────────────────────────────────
 
 const TeamTab: React.FC = () => {
-  const { data: members = [], isLoading } = useErpTeam();
+  const { t } = useTranslation('erp');
+  const { data: members = [], isLoading, refetch } = useErpTeam();
   const invite = useErpInviteMember();
   const deactivate = useErpDeactivateMember();
   const { data: sub } = useErpSubscription();
@@ -458,10 +461,16 @@ const TeamTab: React.FC = () => {
           ))}
         </div>
       ) : members.length === 0 ? (
-        <div className="py-8 text-center" style={{ color: 'var(--hub-text-muted)' }}>
-          <Users size={24} className="mx-auto mb-2 opacity-40" />
-          <p className="text-[13px]">No team members yet.</p>
-        </div>
+        <EmptyState
+          icon={Users}
+          title={t('settings.team.empty.title')}
+          size="compact"
+          action={
+            canInviteMember
+              ? { label: t('settings.team.invite'), onClick: () => setShowInvite(true) }
+              : { label: t('settings.team.refresh'), onClick: () => void refetch() }
+          }
+        />
       ) : (
         <div className="rounded-xl divide-y" style={{ border: '1px solid var(--hub-border)' }}>
           {members.map((m) => (

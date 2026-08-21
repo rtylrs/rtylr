@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { Play, DollarSign, TrendingUp, Users, Clock } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { motion } from 'motion/react';
 import { useListPayrollRuns, useTriggerPayrollRun } from '../../shared/hooks/queries/usePayroll';
 import type {
@@ -14,7 +15,6 @@ import {
   Card,
   SectionHeader,
   Button,
-  EmptyState,
   Skeleton,
   QueryError,
   Tabs,
@@ -176,9 +176,16 @@ const Payroll = (): React.JSX.Element => {
           </div>
         ) : filteredRuns.length === 0 ? (
           <EmptyState
-            icon={<DollarSign size={20} />}
+            icon={DollarSign}
             title={t('payroll.emptyTitle')}
             description={t('payroll.emptyDescription')}
+            action={
+              statusFilter !== 'all'
+                ? { label: t('common.clearFilters'), onClick: () => setStatusFilter('all') }
+                : canRunPayroll
+                  ? { label: t('payroll.triggerRun'), onClick: handleTriggerRun }
+                  : { label: t('common.refresh'), onClick: () => refetch() }
+            }
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

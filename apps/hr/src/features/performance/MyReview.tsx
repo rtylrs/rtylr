@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
+import { ClipboardList } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import type {
   ReviewGoalPayload,
   PerformanceReviewPayload,
@@ -20,7 +22,6 @@ import {
   Select,
   Textarea,
   Skeleton,
-  EmptyState,
 } from '../../shared/components/ui';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -85,7 +86,11 @@ const MyReview = (): React.JSX.Element => {
   const { t } = useTranslation();
   const submitMutation = useSubmitReview();
 
-  const { data: reviewsData, isLoading: reviewsLoading } = useListReviews({
+  const {
+    data: reviewsData,
+    isLoading: reviewsLoading,
+    refetch: refetchReviews,
+  } = useListReviews({
     status: undefined,
   });
   const reviews = reviewsData?.reviews ?? [];
@@ -145,8 +150,10 @@ const MyReview = (): React.JSX.Element => {
       <div>
         <SectionHeader title={t('performance.myReview.title')} />
         <EmptyState
+          icon={ClipboardList}
           title={t('performance.myReview.emptyTitle')}
           description={t('performance.myReview.emptyDescription')}
+          action={{ label: t('common.refresh'), onClick: () => refetchReviews() }}
         />
       </div>
     );

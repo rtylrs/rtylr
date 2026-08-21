@@ -3,19 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Plus, Clock, Trash2, Pencil } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useListTimeEntries, useDeleteTimeEntry } from '../../shared/hooks/queries/useTimeEntries';
 import { useMyEmployeeId } from '../../shared/hooks/useHrExtras';
 import { getWeekRange } from '../../shared/utils/dateRange';
 import type { TimeEntryPayload } from '@voxire/voxie/hr/time_entry/v1/types';
-import {
-  SectionHeader,
-  Card,
-  Button,
-  Pill,
-  EmptyState,
-  Skeleton,
-  ACCENT,
-} from '../../shared/components/ui';
+import { SectionHeader, Card, Pill, Skeleton, ACCENT } from '../../shared/components/ui';
 import ActiveTimer from './ActiveTimer';
 import TimeEntryForm from './TimeEntryForm';
 import FlowImportButton from './FlowImportButton';
@@ -48,7 +41,11 @@ const STATUS_COLORS: Record<string, string> = {
 const TimeLogging = (): React.JSX.Element => {
   const { t } = useTranslation();
   const week = useMemo(getWeekRange, []);
-  const { data: myEmployeeId, isError: employeeLookupFailed } = useMyEmployeeId();
+  const {
+    data: myEmployeeId,
+    isError: employeeLookupFailed,
+    refetch: refetchEmployeeId,
+  } = useMyEmployeeId();
   const { data, isLoading } = useListTimeEntries(
     { date: week.start, employeeId: myEmployeeId === undefined ? undefined : String(myEmployeeId) },
     { enabled: myEmployeeId !== undefined }
@@ -98,9 +95,10 @@ const TimeLogging = (): React.JSX.Element => {
 
         {employeeLookupFailed ? (
           <EmptyState
-            icon={<Clock size={20} />}
+            icon={Clock}
             title={t('timeLogging.employeeLookupFailed')}
             description={t('errors.unauthorized')}
+            action={{ label: t('common.retry'), onClick: () => refetchEmployeeId() }}
           />
         ) : isLoading || myEmployeeId === undefined ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -110,14 +108,10 @@ const TimeLogging = (): React.JSX.Element => {
           </div>
         ) : entries.length === 0 ? (
           <EmptyState
-            icon={<Clock size={20} />}
+            icon={Clock}
             title={t('timeLogging.emptyTitle')}
             description={t('timeLogging.emptyDescription')}
-            action={
-              <Button variant="primary" onClick={handleNewEntry} icon={<Plus size={14} />}>
-                {t('timeLogging.addEntry')}
-              </Button>
-            }
+            action={{ label: t('timeLogging.addEntry'), onClick: handleNewEntry }}
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

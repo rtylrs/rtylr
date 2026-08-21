@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Folder, Edit3, Trash2 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
+import { useTranslation } from 'react-i18next';
 import {
   useCategories,
   useCreateCategory,
@@ -9,7 +11,6 @@ import {
   useUpdateCategory,
 } from './useCategories';
 import PageHeader from '../../shared/components/PageHeader';
-import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 import { toast } from 'sonner';
@@ -17,6 +18,7 @@ import { toast } from 'sonner';
 const AMBER = 'var(--erp-accent)';
 
 const Categories: React.FC = () => {
+  const { t } = useTranslation('erp');
   const { data: categories = [], isLoading } = useCategories();
   const createMut = useCreateCategory();
   const deleteMut = useDeleteCategory();
@@ -25,6 +27,7 @@ const Categories: React.FC = () => {
   const [newName, setNewName] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const newNameInputRef = useRef<HTMLInputElement>(null);
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim()) {
@@ -54,6 +57,7 @@ const Categories: React.FC = () => {
         style={{ background: 'var(--hub-card)', border: '1px solid var(--hub-border)' }}
       >
         <input
+          ref={newNameInputRef}
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
@@ -86,8 +90,13 @@ const Categories: React.FC = () => {
           </div>
         ) : categories.length === 0 ? (
           <EmptyState
-            title="No categories yet"
-            description="Create your first category to organize products"
+            icon={Folder}
+            title={t('categories.empty.title')}
+            description={t('categories.empty.description')}
+            action={{
+              label: t('categories.addCategory'),
+              onClick: () => newNameInputRef.current?.focus(),
+            }}
           />
         ) : (
           categories.map((cat, i) => (

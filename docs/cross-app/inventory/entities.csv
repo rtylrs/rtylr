@@ -1,0 +1,179 @@
+entity,owning_domain,capability,version,primary_key,fk_fields,file,line
+Appointment,booking,appointment,v1,id,owner_id:int64; business_id:int64; service_id:int64; resource_id:int64; staff_id:int64,packages/voxie/api/booking/appointment/v1/models.onk,3
+BookingService,booking,service,v1,id,owner_id:int64; business_id:int64,packages/voxie/api/booking/service/v1/models.onk,3
+CalendarAppointment,booking,calendar,v1,id,business_id:int64; service_id:int64,packages/voxie/api/booking/calendar/v1/models.onk,3
+Reminder,booking,reminder,v1,id,owner_id:int64; business_id:int64; appointment_id:int64,packages/voxie/api/booking/reminder/v1/models.onk,3
+Resource,booking,resource,v1,id,owner_id:int64; business_id:int64,packages/voxie/api/booking/resource/v1/models.onk,3
+WaitlistEntry,booking,waitlist,v1,id,owner_id:int64; business_id:int64; service_id:int64,packages/voxie/api/booking/waitlist/v1/models.onk,3
+Business,console,admin,v1,id,owner_id:int64,packages/voxie/api/console/admin/v1/models.onk,15
+Plan,console,admin,v1,id,,packages/voxie/api/console/admin/v1/models.onk,48
+Subscription,console,admin,v1,id,owner_id:int64; business_id:int64; plan_id:int64; paddle_subscription_id:string; paddle_customer_id:string,packages/voxie/api/console/admin/v1/models.onk,23
+User,console,admin,v1,id,business_id:int64,packages/voxie/api/console/admin/v1/models.onk,3
+Campaign,crm,campaign,v1,id,owner_id:int64; segment_id:int64,packages/voxie/api/crm/campaign/v1/models.onk,4
+Customer,crm,customer,v1,id,owner_id:int64,packages/voxie/api/crm/customer/v1/models.onk,4
+Feedback,crm,feedback,v1,id,owner_id:int64; customer_id:int64,packages/voxie/api/crm/feedback/v1/models.onk,4
+LoyaltyConfig,crm,loyalty,v1,id,owner_id:int64,packages/voxie/api/crm/loyalty/v1/models.onk,4
+LoyaltyTier,crm,loyalty,v1,id,owner_id:int64,packages/voxie/api/crm/loyalty/v1/models.onk,38
+LoyaltyTransaction,crm,loyalty,v1,id,owner_id:int64; customer_id:int64; reference_id:int64,packages/voxie/api/crm/loyalty/v1/models.onk,23
+Segment,crm,segment,v1,id,owner_id:int64,packages/voxie/api/crm/segment/v1/models.onk,4
+Settings,crm,settings,v1,id,owner_id:int64; sms_sender_id:string,packages/voxie/api/crm/settings/v1/models.onk,4
+Template,crm,template,v1,id,owner_id:int64,packages/voxie/api/crm/template/v1/models.onk,4
+TopCustomer,crm,dashboard,v1,id,,packages/voxie/api/crm/dashboard/v1/models.onk,4
+Brand,erp,brand,v1,id,owner_id:int64,packages/voxie/api/erp/brand/v1/models.onk,3
+Category,erp,category,v1,id,owner_id:int64,packages/voxie/api/erp/category/v1/models.onk,3
+DashboardRecentOrder,erp,product,v1,id,,packages/voxie/api/erp/product/v1/models.onk,95
+ErpBusinessSettings,erp,settings,v1,id,business_id:int64; default_warehouse_id:int64,packages/voxie/api/erp/settings/v1/models.onk,4
+FullProduct,erp,product,v1,id,owner_id:int64; business_id:int64; category_id:int64; supplier_id:int64; brand_id:int64,packages/voxie/api/erp/product/v1/models.onk,42
+PriceList,erp,price_list,v1,id,owner_id:int64,packages/voxie/api/erp/price_list/v1/models.onk,3
+Product,erp,product,v1,id,owner_id:int64; category_id:int64; supplier_id:int64; business_id:int64; brand_id:int64,packages/voxie/api/erp/product/v1/models.onk,3
+ProductAttribute,erp,product,v1,id,,packages/voxie/api/erp/product/v1/models.onk,79
+PurchaseOrder,erp,purchase_order,v1,id,owner_id:int64; supplier_id:int64,packages/voxie/api/erp/purchase_order/v1/models.onk,13
+PurchaseOrderItem,erp,purchase_order,v1,id,purchase_order_id:int64; product_id:int64,packages/voxie/api/erp/purchase_order/v1/models.onk,3
+StockTake,erp,stock_take,v1,id,owner_id:int64; warehouse_id:int64,packages/voxie/api/erp/stock_take/v1/models.onk,13
+StockTakeItem,erp,stock_take,v1,id,stock_take_id:int64; product_id:int64,packages/voxie/api/erp/stock_take/v1/models.onk,3
+StockTransfer,erp,stock_transfer,v1,id,owner_id:int64; from_warehouse_id:int64; to_warehouse_id:int64,packages/voxie/api/erp/stock_transfer/v1/models.onk,11
+StockTransferItem,erp,stock_transfer,v1,id,transfer_id:int64; product_id:int64,packages/voxie/api/erp/stock_transfer/v1/models.onk,3
+Supplier,erp,supplier,v1,id,owner_id:int64; tax_id:string,packages/voxie/api/erp/supplier/v1/models.onk,4
+Variant,erp,variant,v1,id,owner_id:int64; business_id:int64; product_id:int64,packages/voxie/api/erp/variant/v1/models.onk,3
+Warehouse,erp,warehouse,v1,id,owner_id:int64,packages/voxie/api/erp/warehouse/v1/models.onk,3
+Account,finance,account,v1,id,owner_id:int64,packages/voxie/api/finance/account/v1/models.onk,4
+BankAccount,finance,bank_account,v1,id,,packages/voxie/api/finance/bank_account/v1/models.onk,4
+Bill,finance,bill,v1,id,owner_id:int64; supplier_id:int64,packages/voxie/api/finance/bill/v1/models.onk,4
+ChartOfAccountsNode,finance,account,v1,id,,packages/voxie/api/finance/account/v1/models.onk,26
+Expense,finance,expenses,v1,id,owner_id:int64; category_id:int64,packages/voxie/api/finance/expenses/v1/models.onk,4
+ExpenseCategory,finance,expenses,v1,id,owner_id:int64,packages/voxie/api/finance/expenses/v1/models.onk,40
+ExpenseCategoryDetail,finance,report,v1,id,owner_id:int64,packages/voxie/api/finance/report/v1/models.onk,20
+InvoiceDetail,finance,invoices,v1,id,owner_id:int64; client_tax_id:string,packages/voxie/api/finance/invoices/v1/models.onk,52
+InvoiceSummary,finance,invoices,v1,id,,packages/voxie/api/finance/invoices/v1/models.onk,24
+JournalEntry,finance,journal,v1,id,,packages/voxie/api/finance/journal/v1/models.onk,5
+Payment,finance,invoices,v1,id,,packages/voxie/api/finance/invoices/v1/models.onk,108
+Quote,finance,quote,v1,id,owner_id:int64,packages/voxie/api/finance/quote/v1/models.onk,5
+RecordPaymentResponsePayload,finance,invoices,v1,id,invoice_id:int64,packages/voxie/api/finance/invoices/v1/models.onk,126
+RecurringInvoice,finance,recurring_invoice,v1,id,owner_id:int64; template_invoice_id:int64,packages/voxie/api/finance/recurring_invoice/v1/models.onk,5
+TaxConfig,finance,report,v1,id,owner_id:int64; owner_id:int64,packages/voxie/api/finance/tax/v1/models.onk,6
+UnmatchedBankTransaction,finance,reconciliation,v1,id,bank_account_id:int64; external_id:string,packages/voxie/api/finance/reconciliation/v1/models.onk,3
+UnmatchedInvoice,finance,reconciliation,v1,id,,packages/voxie/api/finance/reconciliation/v1/models.onk,13
+Attachment,flow,task,v1,id,task_id:int64,packages/voxie/api/flow/task/v1/models.onk,119
+Cycle,flow,cycle,v1,id,workspace_id:int64,packages/voxie/api/flow/cycle/v1/models.onk,3
+Label,flow,label,v1,id,workspace_id:int64,packages/voxie/api/flow/label/v1/models.onk,3
+MemberTime,flow,insights,v1,id,,packages/voxie/api/flow/insights/v1/models.onk,16
+Milestone,flow,milestone,v1,id,project_id:int64,packages/voxie/api/flow/milestone/v1/models.onk,8
+Notification,flow,notification,v1,id,task_id:string,packages/voxie/api/flow/notification/v1/models.onk,3
+Project,flow,project,v1,id,workspace_id:int64; owner_id:int64,packages/voxie/api/flow/project/v1/models.onk,3
+ProjectColumn,flow,project,v1,id,project_id:int64; workspace_id:int64,packages/voxie/api/flow/project/v1/models.onk,40
+ProjectMember,flow,project,v1,id,project_id:int64; user_id:int64,packages/voxie/api/flow/project/v1/models.onk,59
+RoadmapProject,flow,insights,v1,id,workspace_id:string,packages/voxie/api/flow/insights/v1/models.onk,45
+Task,flow,task,v1,id,project_id:int64; workspace_id:int64; owner_id:int64; parent_task_id:int64; assignee_id:int64; reporter_id:int64; section_id:int64; cycle_id:int64; milestone_id:int64,packages/voxie/api/flow/task/v1/models.onk,3
+TaskActivity,flow,task,v1,id,task_id:int64; user_id:int64,packages/voxie/api/flow/task/v1/models.onk,87
+TaskComment,flow,task,v1,id,task_id:int64; user_id:int64,packages/voxie/api/flow/task/v1/models.onk,70
+TaskPayloadCompact,flow,task,v1,id,,packages/voxie/api/flow/task/v1/models.onk,104
+TeamMemberWorkload,flow,insights,v1,id,,packages/voxie/api/flow/insights/v1/models.onk,35
+TeamTaskSummary,flow,insights,v1,id,,packages/voxie/api/flow/insights/v1/models.onk,27
+TimeLog,flow,task,v1,id,task_id:int64; user_id:int64,packages/voxie/api/flow/task/v1/models.onk,136
+View,flow,view,v1,id,,packages/voxie/api/flow/view/v1/models.onk,3
+WorkDay,flow,time,v1,id,employee_id:int64; user_id:int64,packages/voxie/api/flow/time/v1/models.onk,34
+WorkDayLine,flow,time,v1,id,work_day_id:int64; project_id:int64; task_id:int64; work_type_id:int64,packages/voxie/api/flow/time/v1/models.onk,87
+Workspace,flow,workspace,v1,id,owner_id:int64,packages/voxie/api/flow/workspace/v1/models.onk,3
+WorkspaceMember,flow,workspace,v1,id,workspace_id:int64; user_id:int64,packages/voxie/api/flow/workspace/v1/models.onk,31
+WorkType,flow,time,v1,id,parent_id:int64; hr_category_id:int64,packages/voxie/api/flow/time/v1/models.onk,7
+ApprovalChainLevelPayload,hr,approval_chain,v1,id,owner_id:int64; chain_id:int64; approver_role_id:int64; approver_employee_id:int64,packages/voxie/api/hr/approval_chain/v1/models.onk,4
+ApprovalChainPayload,hr,approval_chain,v1,id,owner_id:int64,packages/voxie/api/hr/approval_chain/v1/models.onk,34
+ApproveTimeOffRequestMsg,hr,time_off,v1,id,,packages/voxie/api/hr/time_off/v1/models.onk,26
+AssetPayload,hr,equipment,v1,id,owner_id:int64; employee_id:int64,packages/voxie/api/hr/equipment/v1/models.onk,34
+AttendanceRecordPayload,hr,attendance,v1,id,owner_id:int64; employee_id:int64; location_id:int64,packages/voxie/api/hr/attendance/v1/models.onk,4
+AvailabilityPayload,hr,shift,v1,id,staff_id:int64; owner_id:int64,packages/voxie/api/hr/shift/v1/models.onk,239
+BenefitEnrollment,hr,benefit,v1,id,owner_id:int64; employee_id:int64; plan_id:int64,packages/voxie/api/hr/benefit/v1/models.onk,35
+BenefitPlan,hr,benefit,v1,id,owner_id:int64,packages/voxie/api/hr/benefit/v1/models.onk,3
+ChecklistItemPayload,hr,onboarding,v1,id,owner_id:int64; template_id:int64,packages/voxie/api/hr/onboarding/v1/models.onk,4
+ChecklistTemplatePayload,hr,onboarding,v1,id,owner_id:int64; role_id:int64,packages/voxie/api/hr/onboarding/v1/models.onk,28
+DashboardWidgetPayload,hr,dashboard,v1,id,owner_id:int64; role_id:int64,packages/voxie/api/hr/dashboard/v1/models.onk,15
+DepartmentPayload,hr,department,v1,id,owner_id:int64; business_id:int64; manager_staff_id:int64,packages/voxie/api/hr/department/v1/models.onk,4
+DirectoryStaffEntry,hr,staff,v1,id,department_id:int64,packages/voxie/api/hr/staff/v1/models.onk,138
+Document,hr,document,v1,id,owner_id:int64; staff_id:int64,packages/voxie/api/hr/document/v1/models.onk,3
+EmployeeChecklistItemPayload,hr,onboarding,v1,id,owner_id:int64; employee_checklist_id:int64; checklist_item_id:int64; assigned_to_employee_id:int64,packages/voxie/api/hr/onboarding/v1/models.onk,48
+EmployeeChecklistPayload,hr,onboarding,v1,id,owner_id:int64; employee_id:int64; template_id:int64,packages/voxie/api/hr/onboarding/v1/models.onk,74
+EmployeeDocumentPayload,hr,document,v1,id,owner_id:int64; employee_id:int64,packages/voxie/api/hr/document/v1/models.onk,15
+EmployeePayload,hr,employee,v1,id,owner_id:int64; user_id:int64; department_id:int64; location_id:int64; manager_id:int64; work_schedule_id:int64,packages/voxie/api/hr/employee/v1/models.onk,4
+EquipmentRequestPayload,hr,equipment,v1,id,owner_id:int64; employee_id:int64,packages/voxie/api/hr/equipment/v1/models.onk,4
+HRCompanyConfigPayload,hr,setup,v1,id,owner_id:int64,packages/voxie/api/hr/setup/v1/models.onk,20
+LeaveBalancePayload,hr,leave,v1,id,owner_id:int64; employee_id:int64; leave_type_id:int64,packages/voxie/api/hr/leave/v1/models.onk,62
+LeaveRequestPayload,hr,leave,v1,id,owner_id:int64; employee_id:int64; leave_type_id:int64,packages/voxie/api/hr/leave/v1/models.onk,32
+LeaveTypePayload,hr,leave,v1,id,owner_id:int64,packages/voxie/api/hr/leave/v1/models.onk,4
+LocationPayload,hr,location,v1,id,owner_id:int64,packages/voxie/api/hr/location/v1/models.onk,4
+OneOnOne,hr,one_on_one,v1,id,owner_id:int64; manager_id:int64; staff_id:int64,packages/voxie/api/hr/one_on_one/v1/models.onk,3
+OvertimeRequestPayload,hr,overtime,v1,id,owner_id:int64; employee_id:int64,packages/voxie/api/hr/overtime/v1/models.onk,4
+PayrollEntryPayload,hr,employees/payroll/runs,v1,id,owner_id:int64; payroll_run_id:int64; employee_id:int64,packages/voxie/api/hr/employees/payroll/runs/v1/models.onk,4
+PayrollRecord,hr,payroll,v1,id,owner_id:int64; staff_id:int64,packages/voxie/api/hr/payroll/v1/models.onk,3
+PayrollRunPayload,hr,employees/payroll/runs,v1,id,owner_id:int64,packages/voxie/api/hr/employees/payroll/runs/v1/models.onk,34
+PerformanceReviewPayload,hr,performance,v1,id,owner_id:int64; employee_id:int64; review_cycle_id:int64; reviewer_employee_id:int64,packages/voxie/api/hr/performance/v1/models.onk,30
+Review,hr,review,v1,id,owner_id:int64; staff_id:int64; reviewer_id:int64,packages/voxie/api/hr/review/v1/models.onk,3
+ReviewCyclePayload,hr,performance,v1,id,owner_id:int64,packages/voxie/api/hr/performance/v1/models.onk,58
+ReviewGoalPayload,hr,performance,v1,id,owner_id:int64; employee_id:int64; review_cycle_id:int64,packages/voxie/api/hr/performance/v1/models.onk,4
+RolePayload,hr,role,v1,id,owner_id:int64,packages/voxie/api/hr/role/v1/models.onk,14
+SetupWizardStepPayload,hr,setup,v1,id,owner_id:int64,packages/voxie/api/hr/setup/v1/models.onk,4
+ShiftAssignmentPayload,hr,shift,v1,id,owner_id:int64; employee_id:int64; shift_id:int64,packages/voxie/api/hr/shift/v1/models.onk,52
+ShiftPayload,hr,shift,v1,id,owner_id:int64; location_id:int64; staff_id:int64; department_id:int64,packages/voxie/api/hr/shift/v1/models.onk,8
+Staff,hr,staff,v1,id,owner_id:int64; user_id:int64; department_id:int64,packages/voxie/api/hr/staff/v1/models.onk,4
+TimeEntryPayload,hr,time_entry,v1,id,owner_id:int64; employee_id:int64; project_id:int64; task_id:int64; category_id:int64,packages/voxie/api/hr/time_entry/v1/models.onk,4
+TimesheetPayload,hr,time_entry,v1,id,owner_id:int64; employee_id:int64,packages/voxie/api/hr/time_entry/v1/models.onk,44
+TrainingCourse,hr,training,v1,id,owner_id:int64,packages/voxie/api/hr/training/v1/models.onk,4
+WorkSchedulePayload,hr,work_schedule,v1,id,owner_id:int64,packages/voxie/api/hr/work_schedule/v1/models.onk,4
+ActiveSession,hub,security,v1,id,,packages/voxie/api/hub/security/v1/models.onk,8
+ActivityEntry,hub,activity,v1,id,owner_id:int64; entity_id:int64; user_id:int64,packages/voxie/api/hub/activity/v1/models.onk,3
+Addon,hub,app,v1,id,,packages/voxie/api/hub/app/v1/models.onk,11
+ApiKey,hub,developer,v1,id,,packages/voxie/api/hub/developer/v1/models.onk,3
+App,hub,app,v1,id,,packages/voxie/api/hub/app/v1/models.onk,3
+Business,hub,business,v1,id,,packages/voxie/api/hub/business/v1/models.onk,4
+BusinessEntry,hub,business,v1,id,parent_id:int64,packages/voxie/api/hub/business/v1/models.onk,26
+ChatMessage,hub,memory,v1,id,,packages/voxie/api/hub/memory/v1/models.onk,12
+ChatSummary,hub,memory,v1,id,,packages/voxie/api/hub/memory/v1/models.onk,3
+CustomDomain,hub,config,v1,id,business_id:int64,packages/voxie/api/hub/config/v1/models.onk,127
+CustomRole,hub,permission,v1,id,,packages/voxie/api/hub/permission/v1/models.onk,16
+FeatureRule,hub,feature,v1,id,,packages/voxie/api/hub/feature/v1/models.onk,31
+Group,hub,team/groups,v1,id,owner_id:int64,packages/voxie/api/hub/team/groups/v1/models.onk,14
+GroupDetail,hub,team/groups,v1,id,owner_id:int64,packages/voxie/api/hub/team/groups/v1/models.onk,41
+GroupSummary,hub,team/groups,v1,id,,packages/voxie/api/hub/team/groups/v1/models.onk,8
+Integration,hub,integration,v1,id,,packages/voxie/api/hub/integration/v1/models.onk,4
+Invoice,hub,billing,v1,id,,packages/voxie/api/hub/billing/v1/models.onk,11
+LoginEntry,hub,security,v1,id,,packages/voxie/api/hub/security/v1/models.onk,17
+MenuBanner,hub,menu,v1,id,,packages/voxie/api/hub/menu/v1/models.onk,17
+Notification,hub,notification,v1,id,,packages/voxie/api/hub/notification/v1/models.onk,4
+Plan,hub,subscription,v1,id,,packages/voxie/api/hub/subscription/v1/models.onk,21
+PublicBusinessProfile,hub,business,v1,id,,packages/voxie/api/hub/business/v1/models.onk,59
+PublicBusinessSummary,hub,business,v1,id,,packages/voxie/api/hub/business/v1/models.onk,48
+PublicLocation,hub,business,v1,id,,packages/voxie/api/hub/business/v1/models.onk,38
+StaffUserPayload,hub,team/members,v1,id,,packages/voxie/api/hub/team/members/v1/models.onk,3
+StaffUserWithGroups,hub,team/members,v1,id,,packages/voxie/api/hub/team/members/v1/models.onk,15
+Subscription,hub,subscription,v1,id,paddle_subscription_id:string,packages/voxie/api/hub/subscription/v1/models.onk,3
+Webhook,hub,developer,v1,id,,packages/voxie/api/hub/developer/v1/models.onk,15
+ReportTemplate,insights,report,v1,id,,packages/voxie/api/insights/report/v1/models.onk,3
+ScheduledReport,insights,report,v1,id,template_id:int64,packages/voxie/api/insights/report/v1/models.onk,22
+TopCustomerEntry,insights,customer,v1,id,,packages/voxie/api/insights/customer/v1/models.onk,27
+AuditLog,pos,audit,v1,id,business_id:int64; branch_id:int64; terminal_id:int64; employee_id:int64; entity_id:int64,packages/voxie/api/pos/audit/v1/models.onk,4
+BranchInventory,pos,stock,v1,id,business_id:int64; branch_id:int64; product_id:int64; item_id:int64,packages/voxie/api/pos/stock/v1/models.onk,21
+CashMovement,pos,cash,v1,id,business_id:int64; branch_id:int64; terminal_id:int64; session_id:int64; employee_id:int64,packages/voxie/api/pos/cash/v1/models.onk,4
+Combo,pos,combo,v1,id,owner_id:int64,packages/voxie/api/pos/combo/v1/models.onk,4
+CurrentSession,pos,session,v1,id,owner_id:int64; location_id:int64; staff_id:int64,packages/voxie/api/pos/session/v1/models.onk,22
+Customer,pos,customer,v1,id,,packages/voxie/api/pos/customer/v1/models.onk,7
+Floor,pos,floor,v1,id,business_id:int64; branch_id:int64,packages/voxie/api/pos/floor/v1/models.onk,4
+GiftCard,pos,gift_card,v1,id,owner_id:int64; business_id:int64; customer_id:int64,packages/voxie/api/pos/gift_card/v1/models.onk,4
+KDSItem,pos,kds,v1,id,order_id:int64,packages/voxie/api/pos/kds/v1/models.onk,4
+KDSOrder,pos,kds,v1,id,table_id:int64,packages/voxie/api/pos/kds/v1/models.onk,15
+Location,pos,location,v1,id,owner_id:int64,packages/voxie/api/pos/location/v1/models.onk,4
+LoyaltyConfig,pos,loyalty,v1,id,business_id:int64,packages/voxie/api/pos/loyalty/v1/models.onk,4
+LoyaltyTransaction,pos,loyalty,v1,id,business_id:int64; customer_id:int64; order_id:int64,packages/voxie/api/pos/loyalty/v1/models.onk,19
+MemberLocationEntry,pos,access,v1,id,location_id:int64,packages/voxie/api/pos/access/v1/models.onk,25
+MenuItem,pos,menu_item,v1,id,owner_id:int64; category_id:int64,packages/voxie/api/pos/menu_item/v1/models.onk,4
+Modifier,pos,modifier,v1,id,owner_id:int64,packages/voxie/api/pos/modifier/v1/models.onk,4
+Order,pos,orders,v1,id,owner_id:int64; session_id:int64; table_id:int64; location_id:int64; customer_id:int64; staff_id:int64,packages/voxie/api/pos/orders/v1/models.onk,24
+OrderItem,pos,orders,v1,id,order_id:int64; menu_item_id:int64,packages/voxie/api/pos/orders/v1/models.onk,5
+POSBusinessSettings,pos,settings,v1,id,business_id:int64,packages/voxie/api/pos/settings/v1/models.onk,26
+POSUser,pos,user,v1,id,business_id:int64; location_id:int64,packages/voxie/api/pos/user/v1/models.onk,4
+Receipt,pos,receipt,v1,id,,packages/voxie/api/pos/receipt/v1/models.onk,4
+Session,pos,session,v1,id,owner_id:int64; location_id:int64; staff_id:int64,packages/voxie/api/pos/session/v1/models.onk,4
+StockMovement,pos,stock,v1,id,business_id:int64; branch_id:int64; product_id:int64; reference_id:int64; employee_id:int64,packages/voxie/api/pos/stock/v1/models.onk,4
+Table,pos,table,v1,id,owner_id:int64; location_id:int64,packages/voxie/api/pos/table/v1/models.onk,4
+Terminal,pos,terminal,v1,id,business_id:int64; branch_id:int64; device_id:string,packages/voxie/api/pos/terminal/v1/models.onk,4
+Article,support,knowledge,v1,id,business_id:int64,packages/voxie/api/support/knowledge/v1/models.onk,3
+Customer,support,customer,v1,id,business_id:int64,packages/voxie/api/support/customer/v1/models.onk,3
+Settings,support,settings,v1,id,business_id:int64,packages/voxie/api/support/settings/v1/models.onk,3

@@ -6,5 +6,16 @@
   "emptyState": {
     "title": "No staff members",
     "description": "Adjust filters or invite someone to your team."
+  },
+  "profile": {
+    "notFoundTitle": "Employee not found",
+    "notFoundDescription": "The employee you're looking for may have been removed.",
+    "backToStaff": "Back to staff",
+    "noDocuments": "No documents on file.",
+    "goToDocuments": "Go to Documents",
+    "noCourses": "No courses yet.",
+    "goToTraining": "Go to Training",
+    "noBenefits": "No active benefit enrollments.",
+    "goToBenefits": "Go to Benefits"
   }
 }

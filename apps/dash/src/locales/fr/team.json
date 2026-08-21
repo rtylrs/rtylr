@@ -49,5 +49,30 @@
     "addNButton": "Ajouter {{count}} membre",
     "addNButton_other": "Ajouter {{count}} membres",
     "removeMemberAriaLabel": "Retirer {{name}} du groupe"
+  },
+  "list": {
+    "noMembersTitle": "Aucun membre pour l'instant",
+    "noMembersDescription": "Invitez votre premier membre d'équipe pour commencer.",
+    "noMembersMatchTitle": "Aucun membre ne correspond à votre recherche",
+    "noMembersMatchDescription": "Essayez un autre terme de recherche."
+  },
+  "memberDetail": {
+    "notFoundTitle": "Membre introuvable",
+    "notFoundDescription": "Ce membre a peut-être été désactivé ou supprimé.",
+    "backToTeam": "Retour à l'équipe",
+    "noPosLocationsTitle": "Aucun emplacement POS pour l'instant",
+    "noPosLocationsDescription": "Créez d'abord des emplacements dans l'application POS, puis assignez-y ce membre.",
+    "removePosAccess": "Retirer l'accès POS",
+    "noAppsAssignedTitle": "Aucune application assignée",
+    "noAppsAssignedDescription": "Choisissez les applications accessibles à ce membre.",
+    "assignApp": "Assigner une application",
+    "notInGroupTitle": "N'appartient à aucun groupe",
+    "notInGroupDescription": "Ajoutez ce membre à un groupe pour regrouper ses accès aux applications.",
+    "addToGroup": "Ajouter au groupe"
+  },
+  "inviteUser": {
+    "noPosLocationsTitle": "Aucun emplacement POS pour l'instant",
+    "noPosLocationsDescription": "Créez d'abord des emplacements dans l'application POS, puis assignez-y ce membre.",
+    "removePosAccess": "Retirer l'accès POS"
   }
 }

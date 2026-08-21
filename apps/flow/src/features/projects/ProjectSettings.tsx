@@ -13,6 +13,7 @@ import {
   Shield,
   Eye,
   ArrowRightLeft,
+  Users,
 } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useUpdateProject, useDeleteProject, useMoveProject } from './useProjects';
@@ -23,7 +24,14 @@ import {
   useTransferProjectOwnership,
 } from './useProjectMembers';
 import { HelmetContainer } from '@voxire/components';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@voxire/ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  EmptyState,
+} from '@voxire/ui';
 import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import GateNotice from '../../shared/components/GateNotice';
@@ -61,7 +69,11 @@ const ProjectSettings: React.FC = () => {
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
   const moveProject = useMoveProject();
-  const { data: members = [], isLoading: membersLoading } = useProjectMembers(projectId);
+  const {
+    data: members = [],
+    isLoading: membersLoading,
+    refetch: refetchMembers,
+  } = useProjectMembers(projectId);
   const { data: orgMembers = [] } = useFlowTeam();
   const removeMember = useRemoveProjectMember(projectId ?? '');
   const updateRole = useUpdateProjectMemberRole(projectId ?? '');
@@ -265,9 +277,22 @@ const ProjectSettings: React.FC = () => {
                 ))}
               </div>
             ) : members.length === 0 ? (
-              <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-                No members yet.
-              </p>
+              <EmptyState
+                icon={Users}
+                title={t('flow.projectSettings.noMembersYet')}
+                action={
+                  canManageProject
+                    ? {
+                        label: t('flow.projectSettings.addMemberCta'),
+                        onClick: () => setShowAddMember(true),
+                      }
+                    : {
+                        label: t('flow.projectSettings.refreshMembersCta'),
+                        onClick: () => void refetchMembers(),
+                      }
+                }
+                size="compact"
+              />
             ) : (
               <div className="space-y-2">
                 {members.map((m) => {

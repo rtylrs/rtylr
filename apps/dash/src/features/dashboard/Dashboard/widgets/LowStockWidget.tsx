@@ -1,7 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Package, AlertTriangle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { toFiniteNumber, unwrap } from '@voxire/api';
+import { EmptyState } from '@voxire/ui';
 import { safe } from '../../../../shared/lib/api';
 import WidgetHeader from './WidgetHeader';
 
@@ -20,7 +22,8 @@ interface LowStockResponse {
 }
 
 const LowStockWidget: React.FC = () => {
-  const { data: raw } = useQuery({
+  const { t } = useTranslation();
+  const { data: raw, refetch } = useQuery({
     queryKey: ['low-stock-widget'],
     queryFn: async () => {
       const res = await unwrap(
@@ -37,11 +40,13 @@ const LowStockWidget: React.FC = () => {
       <WidgetHeader icon={Package} iconColor="var(--aging-critical)" title="Low stock" />
       <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
         {items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
-            <p className="text-xs" style={{ color: 'var(--dash-text-muted)' }}>
-              All stock levels are healthy
-            </p>
-          </div>
+          <EmptyState
+            icon={Package}
+            title={t('dashboard.lowStockWidget.emptyTitle')}
+            description={t('dashboard.lowStockWidget.emptyDescription')}
+            action={{ label: t('common.refresh'), onClick: () => void refetch() }}
+            size="compact"
+          />
         ) : (
           items.map((p, i) => (
             <div

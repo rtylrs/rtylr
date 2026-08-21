@@ -264,3 +264,25 @@ describe('TaskDetail description sentinel display', () => {
     });
   });
 });
+
+describe('TaskDetail activity empty state', () => {
+  it('shows the empty title with a CTA back to Comments, which switches the tab', () => {
+    taskDetailData.data = {
+      task: apiTask(),
+      subtasks: [],
+      comments: [],
+      activity: [],
+    };
+
+    renderTaskDetail();
+
+    fireEvent.click(screen.getByText('flow.taskDetail.activity'));
+
+    expect(screen.getByText('flow.taskDetail.noActivity')).toBeInTheDocument();
+    const goToComments = screen.getByRole('button', { name: 'flow.taskDetail.goToComments' });
+    expect(goToComments).toBeEnabled();
+
+    fireEvent.click(goToComments);
+    expect(screen.queryByText('flow.taskDetail.noActivity')).not.toBeInTheDocument();
+  });
+});

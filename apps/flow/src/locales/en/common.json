@@ -76,7 +76,8 @@
       "throughput": "Throughput",
       "throughputHint": "6 weeks"
     },
-    "noData": "No data available"
+    "noData": "No data available",
+    "noDataCta": "Go to Cycles"
   },
   "settings": {
     "profile": "Profile",

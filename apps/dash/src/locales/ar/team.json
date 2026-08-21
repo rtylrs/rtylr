@@ -49,5 +49,30 @@
     "addNButton": "إضافة {{count}} عضو",
     "addNButton_other": "إضافة {{count}} أعضاء",
     "removeMemberAriaLabel": "إزالة {{name}} من المجموعة"
+  },
+  "list": {
+    "noMembersTitle": "لا يوجد أعضاء فريق بعد",
+    "noMembersDescription": "قم بدعوة أول عضو في فريقك للبدء.",
+    "noMembersMatchTitle": "لا يوجد أعضاء مطابقون لبحثك",
+    "noMembersMatchDescription": "جرّب كلمة بحث مختلفة."
+  },
+  "memberDetail": {
+    "notFoundTitle": "العضو غير موجود",
+    "notFoundDescription": "قد يكون هذا العضو معطّلاً أو تمت إزالته.",
+    "backToTeam": "العودة إلى الفريق",
+    "noPosLocationsTitle": "لا توجد مواقع نقاط بيع بعد",
+    "noPosLocationsDescription": "أنشئ مواقع في تطبيق نقاط البيع أولاً، ثم عيّن هذا العضو إليها.",
+    "removePosAccess": "إزالة صلاحية نقاط البيع",
+    "noAppsAssignedTitle": "لا توجد تطبيقات معيّنة",
+    "noAppsAssignedDescription": "اختر التطبيقات التي يمكن لهذا العضو الوصول إليها.",
+    "assignApp": "تعيين تطبيق",
+    "notInGroupTitle": "غير موجود في أي مجموعة",
+    "notInGroupDescription": "أضف هذا العضو إلى مجموعة لتجميع صلاحيات وصوله إلى التطبيقات.",
+    "addToGroup": "إضافة إلى مجموعة"
+  },
+  "inviteUser": {
+    "noPosLocationsTitle": "لا توجد مواقع نقاط بيع بعد",
+    "noPosLocationsDescription": "أنشئ مواقع في تطبيق نقاط البيع أولاً، ثم عيّن هذا العضو إليها.",
+    "removePosAccess": "إزالة صلاحية نقاط البيع"
   }
 }

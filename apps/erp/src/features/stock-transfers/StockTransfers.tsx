@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Plus, ArrowRight, Trash2 } from 'lucide-react';
+import { Plus, ArrowLeftRight, ArrowRight, Trash2 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useUserStore } from '@voxire/auth';
+import { useTranslation } from 'react-i18next';
 import { useStockTransfers, useCreateStockTransfer } from './useStockTransfers';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
 import {
@@ -13,7 +15,6 @@ import {
 import { useWarehouses } from '../warehouses/useWarehouses';
 import { useProducts } from '../products/useProducts';
 import PageHeader from '../../shared/components/PageHeader';
-import EmptyState from '../../shared/components/EmptyState';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { formatDate } from '../../shared/lib/format';
 import PaginationControls from '../../shared/components/PaginationControls';
@@ -56,9 +57,10 @@ function statusConfig(status: string): { color: string; bg: string } {
 }
 
 const StockTransfers: React.FC = () => {
+  const { t } = useTranslation('erp');
   const [page, setPage] = useState(1);
   const pageSize = 50;
-  const { data: transferResult, isLoading } = useStockTransfers({ page, pageSize });
+  const { data: transferResult, isLoading, refetch } = useStockTransfers({ page, pageSize });
   const transfers = transferResult?.stockTransfers ?? [];
   const hasMore = transferResult?.hasMore ?? false;
   const { data: warehouses = [] } = useWarehouses();
@@ -157,44 +159,53 @@ const StockTransfers: React.FC = () => {
           {isLoading ? (
             Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={7} />)
           ) : transfers.length === 0 ? (
-            <EmptyState title="No transfers" description="Create your first stock transfer" />
+            <EmptyState
+              icon={ArrowLeftRight}
+              title={t('stockTransfers.empty.title')}
+              description={t('stockTransfers.empty.description')}
+              action={
+                canCreateTransfer
+                  ? { label: t('stockTransfers.newTransfer'), onClick: () => setShowCreate(true) }
+                  : { label: t('stockTransfers.refresh'), onClick: () => void refetch() }
+              }
+            />
           ) : (
-            transfers.map((t) => {
-              const sc = statusConfig(t.status ?? '');
+            transfers.map((transfer) => {
+              const sc = statusConfig(transfer.status ?? '');
               return (
                 <div
-                  key={t.id}
+                  key={transfer.id}
                   className="grid px-4 py-3 items-center"
                   style={{ gridTemplateColumns: '0.5fr 1.5fr 0.3fr 1.5fr 0.7fr 0.8fr 0.8fr' }}
                 >
                   <span className="text-xs font-mono" style={{ color: 'var(--hub-text-muted)' }}>
-                    #{t.id}
+                    #{transfer.id}
                   </span>
                   <span
                     className="text-xs font-medium truncate pr-2"
                     style={{ color: 'var(--hub-text)' }}
                   >
-                    {warehouseName(t.fromWarehouseId ?? '')}
+                    {warehouseName(transfer.fromWarehouseId ?? '')}
                   </span>
                   <ArrowRight size={12} style={{ color: 'var(--hub-text-dim)' }} />
                   <span
                     className="text-xs font-medium truncate pr-2"
                     style={{ color: 'var(--hub-text)' }}
                   >
-                    {warehouseName(t.toWarehouseId ?? '')}
+                    {warehouseName(transfer.toWarehouseId ?? '')}
                   </span>
                   <span className="text-xs" style={{ color: 'var(--hub-text)' }}>
-                    {(t.items ?? []).length}
+                    {(transfer.items ?? []).length}
                   </span>
                   <span className="text-xs" style={{ color: 'var(--hub-text-muted)' }}>
-                    {formatDate(t.createdAt ?? '')}
+                    {formatDate(transfer.createdAt ?? '')}
                   </span>
                   <span>
                     <span
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                       style={{ background: sc.bg, color: sc.color }}
                     >
-                      {stockTransferStatusLabel(t.status ?? '')}
+                      {stockTransferStatusLabel(transfer.status ?? '')}
                     </span>
                   </span>
                 </div>

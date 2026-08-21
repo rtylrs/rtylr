@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
+import { EmptyState } from '@voxire/ui';
+import { ShoppingCart } from 'lucide-react';
 import api from '../../shared/lib/api';
 import { useCartStore } from '../../shared/stores/cartStore';
 
@@ -135,32 +137,16 @@ const Checkout = (): React.JSX.Element => {
           style={{
             minHeight: '100vh',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 16,
             padding: '0 20px',
           }}
         >
-          <p style={{ fontSize: '18px', fontWeight: 600, color: 'rgba(0,0,0,0.7)' }}>
-            Your cart is empty
-          </p>
-          <button
-            onClick={() => window.history.back()}
-            style={{
-              background: 'var(--menu-accent, #03aed2)',
-              color: 'var(--menu-accent-text, #ffffff)',
-              border: 'none',
-              borderRadius: 12,
-              padding: '12px 24px',
-              fontSize: '16px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              minHeight: 44,
-            }}
-          >
-            Back to Menu
-          </button>
+          <EmptyState
+            icon={ShoppingCart}
+            title={t('emptyCart')}
+            action={{ label: t('backToMenu'), onClick: () => window.history.back() }}
+          />
         </div>
       </>
     );

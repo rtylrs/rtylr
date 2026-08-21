@@ -3,7 +3,9 @@ import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { Eye, Plus, Flame, Timer, CheckCircle2, Pencil, Trash2, Check, X } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useFlowStore, SavedView } from '../../shared/stores/flowStore';
 import {
   useViews,
@@ -23,6 +25,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
 
 const Views: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data: views = [] } = useViews();
   const createView = useCreateView();
   const updateView = useUpdateView();
@@ -64,6 +67,13 @@ const Views: React.FC = () => {
     setPendingDelete(v);
   };
 
+  const handleCreateView = (): void => {
+    createView.mutate(
+      { name: t('flow.views.defaultName'), icon: 'eye', filters: {} },
+      { onSuccess: () => toast.success(t('toasts.view.created')) }
+    );
+  };
+
   const performDelete = (v: SavedView) => {
     deleteView.mutate(v.id, {
       onSuccess: () => {
@@ -93,12 +103,7 @@ const Views: React.FC = () => {
             {t('flow.views.heading')}
           </h2>
           <button
-            onClick={() =>
-              createView.mutate(
-                { name: t('flow.views.defaultName'), icon: 'eye', filters: {} },
-                { onSuccess: () => toast.success(t('toasts.view.created')) }
-              )
-            }
+            onClick={handleCreateView}
             disabled={createView.isPending}
             className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-dim)' }}
@@ -190,9 +195,15 @@ const Views: React.FC = () => {
           })}
 
           {views.length === 0 && (
-            <p className="text-[11px] px-2 py-2" style={{ color: 'var(--flow-text-dim)' }}>
-              {t('flow.views.emptyList')}
-            </p>
+            <EmptyState
+              icon={Eye}
+              title={t('flow.views.emptyList')}
+              action={{
+                label: t('flow.views.addTooltip'),
+                onClick: handleCreateView,
+              }}
+              size="compact"
+            />
           )}
         </div>
       </aside>
@@ -213,11 +224,14 @@ const Views: React.FC = () => {
           transition={{ duration: 0.18 }}
         >
           {tasks.length === 0 && displayView && (
-            <div className="flex items-center justify-center py-20">
-              <p className="text-[13px]" style={{ color: 'var(--flow-text-dim)' }}>
-                {t('flow.views.emptyTasksForView')}
-              </p>
-            </div>
+            <EmptyState
+              icon={Eye}
+              title={t('flow.views.emptyTasksForView')}
+              action={{
+                label: t('flow.shell.myTasks'),
+                onClick: () => navigate({ to: '/my-issues' }),
+              }}
+            />
           )}
           {tasks.map((t) => (
             <TaskRow key={t.id} task={t} showProject />

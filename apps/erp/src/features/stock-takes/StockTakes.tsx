@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, ClipboardList, CheckCircle2 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useUserStore } from '@voxire/auth';
+import { useTranslation } from 'react-i18next';
 import { useStockTakes, useCreateStockTake, useUpdateStockTake } from './useStockTakes';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { stockTakeStatusLabel, stockTakeProgress, stockTakeVariance } from './stockTakeSchema';
@@ -12,7 +14,6 @@ import { useInventoryReport } from '../inventory/useInventory';
 import { buildStockTakeItems } from './stockTakeUtils';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
-import EmptyState from '../../shared/components/EmptyState';
 import { formatDate } from '../../shared/lib/format';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { toast } from 'sonner';
@@ -32,9 +33,10 @@ const inputStyle: React.CSSProperties = {
 };
 
 const StockTakes: React.FC = () => {
+  const { t } = useTranslation('erp');
   const [page, setPage] = useState(1);
   const pageSize = 50;
-  const { data: stockTakeResult, isLoading } = useStockTakes({ page, pageSize });
+  const { data: stockTakeResult, isLoading, refetch } = useStockTakes({ page, pageSize });
   const stockTakes = stockTakeResult?.stockTakes ?? [];
   const hasMore = stockTakeResult?.hasMore ?? false;
   const { data: warehouses = [] } = useWarehouses();
@@ -137,8 +139,13 @@ const StockTakes: React.FC = () => {
         ) : stockTakes.length === 0 ? (
           <EmptyState
             icon={ClipboardList}
-            title="No stock takes"
-            description="Start a count to find discrepancies"
+            title={t('stockTakes.empty.title')}
+            description={t('stockTakes.empty.description')}
+            action={
+              canManageStockTakes
+                ? { label: t('stockTakes.newStockTake'), onClick: () => setShowCreate(true) }
+                : { label: t('stockTakes.refresh'), onClick: () => void refetch() }
+            }
           />
         ) : (
           stockTakes.map((st) => {

@@ -78,11 +78,17 @@ const CareerEditor: React.FC<Props> = ({ career, onClose, onSave }) => {
         onSubmit={onSubmit}
         onClick={(e) => e.stopPropagation()}
         className="flex h-full w-full max-w-2xl flex-col overflow-y-auto"
-        style={{ background: '#0f0f0f', borderLeft: '1px solid #1f1f1f' }}
+        style={{
+          background: 'var(--recruit-admin-surface)',
+          borderLeft: '1px solid var(--recruit-admin-border)',
+        }}
       >
         <div
           className="sticky top-0 z-10 flex items-center justify-between border-b px-6 py-4"
-          style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
+          style={{
+            borderColor: 'var(--recruit-admin-border)',
+            background: 'var(--recruit-admin-surface)',
+          }}
         >
           <h2 className="text-lg font-semibold">{career ? 'Edit role' : 'New role'}</h2>
           <button
@@ -173,7 +179,10 @@ const CareerEditor: React.FC<Props> = ({ career, onClose, onSave }) => {
 
         <div
           className="sticky bottom-0 flex items-center justify-end gap-2 border-t px-6 py-4"
-          style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
+          style={{
+            borderColor: 'var(--recruit-admin-border)',
+            background: 'var(--recruit-admin-surface)',
+          }}
         >
           <button
             type="button"
@@ -228,7 +237,7 @@ const Input: React.FC<{
     onChange={(e) => onChange(e.target.value)}
     required={required}
     className="w-full rounded-md border bg-black/40 px-3 py-2.5 text-sm outline-none focus:border-white/40"
-    style={{ borderColor: '#2a2a2a' }}
+    style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
   />
 );
 
@@ -244,7 +253,7 @@ const Textarea: React.FC<{
     rows={rows}
     required={required}
     className="w-full rounded-md border bg-black/40 px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-white/40"
-    style={{ borderColor: '#2a2a2a' }}
+    style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
   />
 );
 
@@ -257,7 +266,7 @@ const Select: React.FC<{
     value={value}
     onChange={(e) => onChange(e.target.value)}
     className="w-full rounded-md border bg-black/40 px-3 py-2.5 text-sm outline-none focus:border-white/40"
-    style={{ borderColor: '#2a2a2a' }}
+    style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
   >
     {options.map((o) => (
       <option key={o} value={o}>

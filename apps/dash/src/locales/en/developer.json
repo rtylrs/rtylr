@@ -1,0 +1,12 @@
+{
+  "webhooks": {
+    "emptyTitle": "No webhooks configured",
+    "emptyDescription": "Create your first webhook endpoint to start receiving events.",
+    "newWebhook": "New webhook"
+  },
+  "apiKeys": {
+    "emptyTitle": "No API keys yet",
+    "emptyDescription": "Create your first API key to start building.",
+    "newKey": "New key"
+  }
+}

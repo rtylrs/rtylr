@@ -2,12 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BarChart3 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { DatePicker } from '@voxire/ui';
+import { DatePicker, EmptyState } from '@voxire/ui';
+import { useNavigate } from '@tanstack/react-router';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
 import { useWorkspaceMembers } from '../workspace-manager/useWorkspaceManager';
 import GateNotice from '../../shared/components/GateNotice';
-import EmptyState from '../../shared/components/EmptyState';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { startOfWeek, endOfWeek } from '../../shared/lib/dateUtils';
 import { todayLocalDate, useWorkDaysForWorkspace } from './useWorkDay';
@@ -28,6 +28,7 @@ interface PersonTotals {
  */
 const TimeReports = (): React.JSX.Element => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const today = todayLocalDate();
   const weekStart = useTimeSettingsStore((s) => s.weekStart);
   const trackAttendance = useTimeSettingsStore((s) => s.trackAttendance);
@@ -121,6 +122,14 @@ const TimeReports = (): React.JSX.Element => {
             icon={BarChart3}
             title={t('flow.time.reportsEmptyTitle')}
             description={t('flow.time.reportsEmptyDescription')}
+            action={{
+              label: t('flow.time.reportsEmptyCta'),
+              onClick: () =>
+                navigate({
+                  to: '/w/$workspaceId/members',
+                  params: { workspaceId: activeWorkspaceId },
+                }),
+            }}
           />
         ) : (
           <div className="overflow-x-auto">

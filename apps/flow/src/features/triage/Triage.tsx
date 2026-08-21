@@ -4,13 +4,15 @@ import { useTranslation } from 'react-i18next';
 import type { Task } from '../../shared/stores/flowStore';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
+import { useNavigate } from '@tanstack/react-router';
 import { useTasks } from '../tasks/useTasks';
 import TaskRow from '../../shared/components/TaskRow';
-import EmptyState from '../../shared/components/EmptyState';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 
 const Triage: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data: apiTasks } = useTasks({});
   const tasks: Task[] = (apiTasks ?? []).map(apiTaskToTask);
   const { selectedTaskIds } = useFlowStore();
@@ -42,6 +44,10 @@ const Triage: React.FC = () => {
             icon={Eye}
             title={t('flow.triage.emptyTitle')}
             description={t('flow.triage.emptyDescription')}
+            action={{
+              label: t('flow.triage.emptyCta'),
+              onClick: () => navigate({ to: '/my-issues' }),
+            }}
           />
         ) : (
           needsTriage.map((t) => (

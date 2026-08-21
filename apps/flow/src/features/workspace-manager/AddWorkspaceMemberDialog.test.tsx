@@ -111,4 +111,18 @@ describe('AddWorkspaceMemberDialog', () => {
     expect(addMemberMutate).not.toHaveBeenCalled();
     expect(toast.error).not.toHaveBeenCalled();
   });
+
+  it('shows the empty title with a Clear search CTA when a search matches no one', () => {
+    renderDialog();
+
+    fireEvent.change(screen.getByPlaceholderText('workspaceManager.searchPlaceholder'), {
+      target: { value: 'nobody-matches-this' },
+    });
+
+    expect(screen.getByText('workspaceManager.noOrgMembersFound')).toBeInTheDocument();
+    const clear = screen.getByRole('button', { name: 'workspaceManager.clearSearchCta' });
+
+    fireEvent.click(clear);
+    expect(screen.getByPlaceholderText('workspaceManager.searchPlaceholder')).toHaveValue('');
+  });
 });

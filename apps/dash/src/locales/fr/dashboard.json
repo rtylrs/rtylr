@@ -1,0 +1,34 @@
+{
+  "activityWidget": {
+    "emptyTitle": "Aucune activité pour l'instant",
+    "emptyDescription": "Les actions apparaîtront ici"
+  },
+  "teamWidget": {
+    "emptyTitle": "Aucun membre d'équipe pour l'instant",
+    "inviteSomeone": "Inviter quelqu'un"
+  },
+  "revenueByAppWidget": {
+    "emptyTitle": "Aucun revenu pour l'instant",
+    "emptyDescription": "Commencez à vendre pour voir la répartition entre vos applications."
+  },
+  "invoiceAgingWidget": {
+    "emptyTitle": "Tout est à jour",
+    "emptyDescription": "Toutes les factures impayées sont à jour."
+  },
+  "pendingWidget": {
+    "emptyTitle": "Rien en attente",
+    "emptyDescription": "Les demandes de congé en attente d'approbation apparaîtront ici."
+  },
+  "topProductsWidget": {
+    "emptyTitle": "Aucun produit pour l'instant",
+    "emptyDescription": "Vos meilleures ventes apparaîtront ici."
+  },
+  "lowStockWidget": {
+    "emptyTitle": "Les niveaux de stock sont sains",
+    "emptyDescription": "Les articles en rupture apparaîtront ici."
+  },
+  "topCustomersWidget": {
+    "emptyTitle": "Aucun client pour l'instant",
+    "emptyDescription": "Vos clients VIP apparaîtront ici dès que les commandes répétées commenceront."
+  }
+}

@@ -5,6 +5,7 @@
     "import": "Import",
     "exportCsv": "Export CSV",
     "empty": "No customers found",
+    "emptySearchDescription": "لا يوجد عملاء يطابقون \"{{search}}\"",
     "createFirst": "Create your first customer to get started.",
     "created": "Customer created",
     "createFailed": "Failed to create customer",
@@ -35,6 +36,39 @@
     "pointsAwarded": "Points awarded",
     "pointsRedeemed": "Points redeemed"
   },
+  "leads": {
+    "loadFailedTitle": "تعذّر تحميل العملاء المحتملين",
+    "empty": "لا يوجد عملاء محتملون",
+    "emptySearchDescription": "لا يوجد عملاء محتملون يطابقون \"{{search}}\"",
+    "createFirstDescription": "أنشئ أول عميل محتمل للبدء.",
+    "new": "عميل محتمل جديد"
+  },
+  "contracts": {
+    "loadFailedTitle": "تعذّر تحميل العقود",
+    "empty": "لا توجد عقود بعد",
+    "emptyDescription": "ستظهر العقود الموقعة هنا بعد إتمام صفقة.",
+    "new": "عقد جديد"
+  },
+  "loyaltyMembers": {
+    "loadFailedTitle": "تعذّر تحميل الأعضاء",
+    "empty": "لا يوجد أعضاء",
+    "searchEmptyDescription": "جرّب مصطلح بحث مختلف.",
+    "trueEmptyDescription": "سيظهر الأعضاء هنا بعد انضمام العملاء إلى برنامج الولاء."
+  },
+  "rewards": {
+    "empty": "لا توجد مكافآت بعد",
+    "emptyDescription": "أضف أول مكافأة إلى القائمة.",
+    "addReward": "إضافة مكافأة"
+  },
+  "feedback": {
+    "empty": "لا توجد ملاحظات بعد",
+    "emptyDescription": "ستظهر الملاحظات هنا بعد جمعها."
+  },
+  "templates": {
+    "empty": "لا توجد قوالب",
+    "emptyDescription": "أنشئ قالبًا للبدء.",
+    "new": "قالب جديد"
+  },
   "campaigns": {
     "created": "Campaign created",
     "updated": "Campaign updated",
@@ -49,7 +83,19 @@
     "sent": "Campaign sent",
     "sendFailed": "Failed to send campaign",
     "draftSaved": "Draft saved",
-    "draftFailed": "Failed to save draft"
+    "draftFailed": "Failed to save draft",
+    "loadMoreToSearch": "حمّل المزيد من الحملات لمواصلة البحث.",
+    "emptyStatus": "لا توجد حملات في هذه الحالة.",
+    "emptyAllTitle": "لا توجد حملات بعد",
+    "emptyAllDescription": "أنشئ حملة للوصول إلى عملائك.",
+    "viewAllCampaigns": "عرض جميع الحملات",
+    "loadMore": "تحميل المزيد من الحملات",
+    "newEmailCampaign": "حملة بريد إلكتروني جديدة"
+  },
+  "campaignDetail": {
+    "notFoundTitle": "الحملة غير موجودة",
+    "notFoundDescription": "تعذّر تحميل هذه الحملة.",
+    "backToCampaigns": "العودة إلى الحملات"
   },
   "segments": {
     "created": "Segment created",
@@ -58,6 +104,13 @@
     "deleted": "Segment deleted",
     "deleteFailed": "Failed to delete segment",
     "deleteConfirmTitle": "Delete segment?"
+  },
+  "segmentDetail": {
+    "notFoundTitle": "الشريحة غير موجودة",
+    "notFoundDescription": "تعذّر تحميل هذه الشريحة.",
+    "backToSegments": "العودة إلى الشرائح",
+    "noCustomersTitle": "لا يوجد عملاء",
+    "noCustomersDescription": "هذه الشريحة فارغة."
   },
   "automations": {
     "created": "Automation created",
@@ -69,7 +122,10 @@
     "saveFailed": "Failed to save automation",
     "paused": "Automation paused",
     "resumed": "Automation resumed",
-    "updateFailed": "Failed to update automation"
+    "updateFailed": "Failed to update automation",
+    "emptyTitle": "لا توجد أتمتة بعد",
+    "emptyDescription": "أنشئ حملات تلقائية وتهاني أعياد ميلاد ومسارات استعادة العملاء.",
+    "createOne": "إنشاء واحدة"
   },
   "settings": {
     "updated": "Settings updated"
@@ -78,7 +134,26 @@
     "inviteSent": "Invitation sent",
     "inviteFailed": "Failed to send invitation",
     "memberRemoved": "Member removed",
-    "removeFailed": "Failed to remove member"
+    "removeFailed": "Failed to remove member",
+    "emptyTitle": "لا يوجد أعضاء فريق بعد",
+    "inviteMember": "دعوة عضو"
+  },
+  "customerProfile": {
+    "noTagsTitle": "لا توجد وسوم بعد",
+    "addTag": "إضافة وسم"
+  },
+  "leadDetail": {
+    "noTouchpointsTitle": "لا توجد نقاط تواصل بعد",
+    "noTouchpointsDescription": "سجّل أول نقطة تواصل لبدء سجل أنشطة هذا العميل المحتمل.",
+    "logTouchpoint": "تسجيل نقطة تواصل",
+    "noContactsTitle": "لا توجد جهات اتصال بعد",
+    "noContactsDescription": "أضف جهة اتصال لتتبع من تتحدث معهم.",
+    "addContact": "إضافة جهة اتصال"
+  },
+  "dashboard": {
+    "atRiskEmptyTitle": "لا يوجد عملاء معرضون للخطر حاليًا",
+    "campaignPerformanceUnavailableTitle": "أداء الحملات غير متاح",
+    "campaignPerformanceUnavailableDescription": "تعذّر تحميل هذه البيانات من واجهة برمجة تطبيقات لوحة تحكم إدارة العلاقات مع العملاء."
   },
   "actions": {
     "launch": "Launch",
@@ -86,7 +161,11 @@
     "resume": "Resume",
     "edit": "Edit",
     "delete": "Delete",
-    "viewReport": "View Report"
+    "viewReport": "View Report",
+    "retry": "إعادة المحاولة",
+    "refresh": "تحديث",
+    "viewCustomers": "عرض العملاء",
+    "clearSearch": "مسح البحث"
   },
   "states": {
     "launching": "Launching…",

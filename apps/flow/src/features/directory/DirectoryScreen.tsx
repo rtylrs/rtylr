@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Search, Users, AlertCircle } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { Avatar } from '@voxire/ui';
-import EmptyState from '../../shared/components/EmptyState';
+import { Avatar, EmptyState } from '@voxire/ui';
 import { CardSkeleton } from '../../shared/components/Skeleton';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import { useDirectory } from './useDirectory';
@@ -33,7 +32,7 @@ const DirectoryScreen = (): React.JSX.Element => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const directoryQuery = useDirectory(search);
-  const { data: members, isLoading } = directoryQuery;
+  const { data: members, isLoading, refetch } = directoryQuery;
   const isError = hasQueryFailed(directoryQuery);
 
   return (
@@ -69,19 +68,35 @@ const DirectoryScreen = (): React.JSX.Element => {
             icon={AlertCircle}
             title={t('flow.directory.loadFailedTitle')}
             description={t('flow.directory.loadFailedDescription')}
+            action={{
+              label: t('flow.directory.retryCta'),
+              onClick: () => void refetch(),
+            }}
           />
         )}
 
-        {!isLoading && !isError && (members?.length ?? 0) === 0 && (
-          <EmptyState
-            icon={Users}
-            title={
-              search.trim().length > 0
-                ? t('flow.directory.noResults')
-                : t('flow.directory.noMembersYet')
-            }
-          />
-        )}
+        {!isLoading &&
+          !isError &&
+          (members?.length ?? 0) === 0 &&
+          (search.trim().length > 0 ? (
+            <EmptyState
+              icon={Users}
+              title={t('flow.directory.noResults')}
+              action={{
+                label: t('flow.directory.clearSearchCta'),
+                onClick: () => setSearch(''),
+              }}
+            />
+          ) : (
+            <EmptyState
+              icon={Users}
+              title={t('flow.directory.noMembersYet')}
+              action={{
+                label: t('flow.directory.refreshCta'),
+                onClick: () => void refetch(),
+              }}
+            />
+          ))}
 
         {!isLoading && !isError && members && members.length > 0 && (
           <ul className="space-y-1.5">

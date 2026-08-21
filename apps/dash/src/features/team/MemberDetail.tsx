@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import {
   Mail,
@@ -16,9 +17,11 @@ import {
   CreditCard,
   Layers,
   MapPin,
+  UsersRound,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
+import { EmptyState } from '@voxire/ui';
 import { Avatar, Button, Input, Label } from '../../shared/components/ui';
 import {
   RoleBadge,
@@ -26,7 +29,6 @@ import {
   SettingSection,
   DangerZone,
   ConfirmDialog,
-  EmptyState,
 } from '../../shared/components/dash';
 import {
   useMember,
@@ -81,9 +83,10 @@ function getInitials(name?: string | null): string {
 }
 
 const MemberDetail: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
-  const { data: member, isLoading } = useMember(id);
+  const { data: member, isLoading, refetch: refetchMember } = useMember(id);
   const deactivate = useDeactivateMember();
   const updateMember = useUpdateMember();
   const currentUser = useUserStore((state) => state.user);
@@ -150,10 +153,12 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
       <div className="max-w-3xl space-y-4">
         <EmptyState
           icon={UserX}
-          title="Member not found"
-          description="This member may have been deactivated or removed."
-          actionLabel="Back to team"
-          onAction={() => navigate({ to: '/team' })}
+          title={t('team.memberDetail.notFoundTitle')}
+          description={t('team.memberDetail.notFoundDescription')}
+          action={{
+            label: t('team.memberDetail.backToTeam'),
+            onClick: () => navigate({ to: '/team' }),
+          }}
         />
       </div>
     );
@@ -349,9 +354,16 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                     : 'Locations this member can work at'}
                 </p>
                 {allLocations.length === 0 ? (
-                  <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-                    No POS locations yet.
-                  </p>
+                  <EmptyState
+                    icon={MapPin}
+                    title={t('team.memberDetail.noPosLocationsTitle')}
+                    description={t('team.memberDetail.noPosLocationsDescription')}
+                    action={{
+                      label: t('team.memberDetail.removePosAccess'),
+                      onClick: () => toggleApp('pos'),
+                    }}
+                    size="compact"
+                  />
                 ) : (
                   <div className="grid grid-cols-2 gap-2">
                     {allLocations.map((loc) => {
@@ -435,9 +447,17 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
         <SettingSection title="App access" description="Apps this member can launch.">
           <div className="flex flex-wrap gap-2">
             {(member.apps ?? []).length === 0 ? (
-              <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-                No apps assigned.
-              </p>
+              <EmptyState
+                icon={Package}
+                title={t('team.memberDetail.noAppsAssignedTitle')}
+                description={t('team.memberDetail.noAppsAssignedDescription')}
+                action={
+                  canEditMember
+                    ? { label: t('team.memberDetail.assignApp'), onClick: () => setIsEditing(true) }
+                    : { label: t('common.refresh'), onClick: () => void refetchMember() }
+                }
+                size="compact"
+              />
             ) : (
               (member.apps ?? []).map((a: string) => <AppBadge key={a} app={a} size="sm" />)
             )}
@@ -467,9 +487,16 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
           </div>
           <div className="px-5 py-4">
             {memberGroups.length === 0 ? (
-              <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-                Not in any group.
-              </p>
+              <EmptyState
+                icon={UsersRound}
+                title={t('team.memberDetail.notInGroupTitle')}
+                description={t('team.memberDetail.notInGroupDescription')}
+                action={{
+                  label: t('team.memberDetail.addToGroup'),
+                  onClick: () => navigate({ to: '/team/groups' }),
+                }}
+                size="compact"
+              />
             ) : (
               <div className="flex flex-wrap gap-2">
                 {memberGroups.map((g) => (

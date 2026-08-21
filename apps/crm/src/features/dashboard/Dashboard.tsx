@@ -1,6 +1,7 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
@@ -17,6 +18,7 @@ import {
   Activity,
   ArrowRight,
 } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useCrmDashboard } from '../../shared/hooks/queries/useCrmDashboard';
 import { useListCustomers } from '../../shared/hooks/queries/useCustomers';
 import { useListSegments } from '../../shared/hooks/queries/useSegments';
@@ -128,7 +130,12 @@ function StatCard({ stat, index }: { stat: StatItem; index: number }): React.JSX
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { data: dashboardData, isLoading: dashLoading } = useCrmDashboard();
+  const { t } = useTranslation();
+  const {
+    data: dashboardData,
+    isLoading: dashLoading,
+    refetch: refetchDashboard,
+  } = useCrmDashboard();
   const { data: fetchedCustomers } = useListCustomers({ limit: 200, offset: 0 });
   const { data: fetchedSegments } = useListSegments();
   const customersPool = fetchedCustomers ?? [];
@@ -524,16 +531,15 @@ const Dashboard: React.FC = () => {
               </div>
             ))}
             {atRisk.length === 0 && (
-              <div
-                style={{
-                  fontSize: '12px',
-                  color: 'var(--hub-text-muted)',
-                  textAlign: 'center',
-                  padding: '10px',
+              <EmptyState
+                size="compact"
+                icon={AlertTriangle}
+                title={t('crm.dashboard.atRiskEmptyTitle')}
+                action={{
+                  label: t('crm.actions.viewCustomers'),
+                  onClick: () => navigate({ to: '/customers' }),
                 }}
-              >
-                No at-risk customers right now.
-              </div>
+              />
             )}
           </div>
         </motion.div>
@@ -692,15 +698,16 @@ const Dashboard: React.FC = () => {
                 </div>
               ))}
               {campaigns.length === 0 && (
-                <div
-                  style={{
-                    padding: '24px 20px',
-                    color: 'var(--hub-text-muted)',
-                    fontSize: '12px',
+                <EmptyState
+                  size="compact"
+                  icon={Megaphone}
+                  title={t('crm.dashboard.campaignPerformanceUnavailableTitle')}
+                  description={t('crm.dashboard.campaignPerformanceUnavailableDescription')}
+                  action={{
+                    label: t('crm.actions.refresh'),
+                    onClick: () => refetchDashboard(),
                   }}
-                >
-                  Campaign performance is unavailable from the CRM dashboard API.
-                </div>
+                />
               )}
             </div>
           </motion.div>

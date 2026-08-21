@@ -193,3 +193,68 @@ describe('FlowLayout account menu', () => {
     expect(screen.getByText('flow.shell.signOut')).toBeInTheDocument();
   });
 });
+
+describe('FlowLayout workspace switcher', () => {
+  beforeEach(() => {
+    mocks.navigate.mockClear();
+    mocks.location = { pathname: '/inbox' };
+  });
+
+  const renderLayout = () =>
+    render(
+      <FlowLayout>
+        <div>content</div>
+      </FlowLayout>
+    );
+
+  // Trigger and the (single, fallback "Personal") workspace list item share
+  // the same accessible name once the menu is open, so open/closed state is
+  // asserted by count (1 = trigger only, 2 = trigger + list item) rather than
+  // by presence/absence of unique text.
+  const getWorkspaceButtons = () =>
+    screen.getAllByRole('button', { name: /flow\.shell\.personal/i });
+
+  it('opens on trigger click and lists workspaces', () => {
+    renderLayout();
+
+    expect(getWorkspaceButtons()).toHaveLength(1);
+
+    fireEvent.click(getWorkspaceButtons()[0]);
+
+    expect(getWorkspaceButtons()).toHaveLength(2);
+  });
+
+  it('closes on Escape', () => {
+    renderLayout();
+
+    fireEvent.click(getWorkspaceButtons()[0]);
+    expect(getWorkspaceButtons()).toHaveLength(2);
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    expect(getWorkspaceButtons()).toHaveLength(1);
+  });
+
+  it('closes when clicking outside the menu', () => {
+    renderLayout();
+
+    fireEvent.click(getWorkspaceButtons()[0]);
+    expect(getWorkspaceButtons()).toHaveLength(2);
+
+    fireEvent.mouseDown(document.body);
+
+    expect(getWorkspaceButtons()).toHaveLength(1);
+  });
+
+  it('stays open when clicking inside the menu', () => {
+    renderLayout();
+
+    fireEvent.click(getWorkspaceButtons()[0]);
+    const items = getWorkspaceButtons();
+    expect(items).toHaveLength(2);
+
+    fireEvent.mouseDown(items[1]);
+
+    expect(getWorkspaceButtons()).toHaveLength(2);
+  });
+});

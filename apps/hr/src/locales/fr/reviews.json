@@ -1,0 +1,10 @@
+{
+  "emptyTitle": "Pas encore d'évaluations",
+  "emptyDescription": "Démarrez un cycle d'évaluation pour voir les résultats ici.",
+  "newReview": "Nouvelle évaluation",
+  "oneOnOnes": {
+    "emptyTitle": "Aucun entretien individuel programmé",
+    "emptyDescription": "Les managers verront ici les entretiens individuels à venir.",
+    "schedule": "Programmer un entretien individuel"
+  }
+}

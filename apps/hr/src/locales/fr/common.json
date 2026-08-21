@@ -29,5 +29,7 @@
   "reject": "Refuser",
   "optionalNote": "Note optionnelle",
   "dateRangeFrom": "Date de début",
-  "dateRangeTo": "à"
+  "dateRangeTo": "à",
+  "refresh": "Actualiser",
+  "clearFilters": "Effacer les filtres"
 }

@@ -1,0 +1,762 @@
+{
+  "$comment": "Single source of truth for the cross-app audit. 03-sharing-matrix.md, 12-coupling.md and the acyclicity assertion are all rendered from this file by scripts/cross-app/. Edit here, then re-run render-matrix.mjs and check-acyclic.mjs. Fields: id, producer domain, consumer domain, what flows, class (IS|CAN|MUST), necessity (Essential|High value|Nice to have), why (taxonomy numbers 1-8), shape (1-6 from 07-plumbing.md), status (proposed|rejected), gap bucket, and for rejected items the rule it failed.",
+  "taxonomy": {
+    "1": "Derivation",
+    "2": "Double entry elimination",
+    "3": "Single source of truth",
+    "4": "Trigger and automation",
+    "5": "Context in place",
+    "6": "Gating and correctness",
+    "7": "Rollup and reporting",
+    "8": "Identity resolution"
+  },
+  "shapes": {
+    "1": "Cross-domain read from one app",
+    "2": "Backend aggregate endpoint owned by the consumer",
+    "3": "Event or webhook",
+    "4": "Shared query hook in packages/",
+    "5": "Contract-level foreign key",
+    "6": "Shared entity resolver"
+  },
+  "domains": [
+    "booking",
+    "common",
+    "console",
+    "crm",
+    "erp",
+    "finance",
+    "flow",
+    "hr",
+    "hub",
+    "insights",
+    "pos",
+    "support"
+  ],
+  "connections": [
+    {
+      "id": "HR->HUB-01",
+      "producer": "hr",
+      "consumer": "hub",
+      "flows": "employment status change (terminated, contract ended) revokes app access",
+      "class": "MUST",
+      "necessity": "Essential",
+      "why": [
+        4,
+        6
+      ],
+      "shape": 3,
+      "gap": "needs-endpoint",
+      "status": "proposed",
+      "severity": "critical",
+      "producerFact": "employment_status",
+      "consumerFact": "app_entitlement",
+      "shortFlows": "revoke app access on employment end"
+    },
+    {
+      "id": "ERP->FIN-01",
+      "producer": "erp",
+      "consumer": "finance",
+      "flows": "supplier identity and name for accounts-payable bills",
+      "class": "MUST",
+      "necessity": "Essential",
+      "why": [
+        2,
+        3,
+        8
+      ],
+      "shape": 1,
+      "gap": "available-today",
+      "status": "proposed",
+      "severity": "high",
+      "producerFact": "supplier_identity",
+      "consumerFact": "payable_supplier",
+      "shortFlows": "supplier identity for bills"
+    },
+    {
+      "id": "FLOW->FIN-01",
+      "producer": "flow",
+      "consumer": "finance",
+      "flows": "billable logged hours per project, so hours can be invoiced and unbilled time surfaced",
+      "class": "CAN",
+      "necessity": "Essential",
+      "why": [
+        1,
+        7
+      ],
+      "shape": 1,
+      "gap": "needs-contract-field",
+      "status": "proposed",
+      "severity": "high",
+      "producerFact": "logged_billable_hours",
+      "consumerFact": "unbilled_time_view",
+      "shortFlows": "unbilled billable hours"
+    },
+    {
+      "id": "HR->FLOW-01",
+      "producer": "hr",
+      "consumer": "flow",
+      "flows": "employee pay rate, aggregated server-side into a project labour cost",
+      "class": "CAN",
+      "necessity": "High value",
+      "why": [
+        1,
+        7
+      ],
+      "shape": 2,
+      "gap": "needs-endpoint",
+      "status": "proposed",
+      "severity": "high",
+      "producerFact": "pay_rate",
+      "consumerFact": "project_labour_cost",
+      "shortFlows": "project labour cost"
+    },
+    {
+      "id": "HR->FLOW-02",
+      "producer": "hr",
+      "consumer": "flow",
+      "flows": "approved leave dates, to warn before assigning work due during them",
+      "class": "CAN",
+      "necessity": "High value",
+      "why": [
+        6,
+        5
+      ],
+      "shape": 1,
+      "gap": "needs-contract-field",
+      "status": "proposed",
+      "severity": "medium",
+      "producerFact": "approved_leave_dates",
+      "consumerFact": "assignment_warning",
+      "shortFlows": "approved leave gates assignment"
+    },
+    {
+      "id": "CRM->FIN-01",
+      "producer": "crm",
+      "consumer": "finance",
+      "flows": "signed contract (plan, mrr, seats, customer) to draft an invoice",
+      "class": "CAN",
+      "necessity": "Essential",
+      "why": [
+        2,
+        4
+      ],
+      "shape": 1,
+      "gap": "needs-contract-field",
+      "status": "proposed",
+      "severity": "high",
+      "producerFact": "signed_contract",
+      "consumerFact": "invoice_draft",
+      "shortFlows": "signed contract drafts an invoice"
+    },
+    {
+      "id": "CRM->FIN-02",
+      "producer": "crm",
+      "consumer": "finance",
+      "flows": "customer identity for invoices, replacing four free-text client fields",
+      "class": "MUST",
+      "necessity": "Essential",
+      "why": [
+        2,
+        3,
+        8
+      ],
+      "shape": 5,
+      "gap": "needs-contract-field",
+      "status": "proposed",
+      "severity": "high",
+      "producerFact": "customer_identity",
+      "consumerFact": "invoice_customer_link",
+      "shortFlows": "customer identity for invoices"
+    },
+    {
+      "id": "FIN->CRM-01",
+      "producer": "finance",
+      "consumer": "crm",
+      "flows": "outstanding and overdue balance on the customer page, and before extending credit",
+      "class": "CAN",
+      "necessity": "High value",
+      "why": [
+        5,
+        6
+      ],
+      "shape": 1,
+      "gap": "needs-contract-field",
+      "status": "proposed",
+      "severity": "medium",
+      "producerFact": "invoice_balance",
+      "consumerFact": "customer_credit_view",
+      "shortFlows": "outstanding balance on the customer page"
+    },
+    {
+      "id": "SUP->CRM-01",
+      "producer": "support",
+      "consumer": "crm",
+      "flows": "open ticket count and last ticket date on the customer page",
+      "class": "IS",
+      "necessity": "High value",
+      "why": [
+        5
+      ],
+      "shape": 1,
+      "gap": "needs-contract-field",
+      "status": "proposed",
+      "severity": "medium",
+      "producerFact": "ticket_counts",
+      "consumerFact": "customer_health_view",
+      "shortFlows": "ticket history on the customer page"
+    },
+    {
+      "id": "ERP->POS-01",
+      "producer": "erp",
+      "consumer": "pos",
+      "flows": "one stock quantity and one cost price per sellable item, instead of two independent numbers",
+      "class": "MUST",
+      "necessity": "Essential",
+      "why": [
+        3,
+        1,
+        6
+      ],
+      "shape": 5,
+      "gap": "needs-contract-field",
+      "status": "proposed",
+      "severity": "high",
+      "producerFact": "product_stock_and_cost",
+      "consumerFact": "sellable_item_margin",
+      "shortFlows": "one stock number and one cost per item"
+    },
+    {
+      "id": "FLOW->HR-01",
+      "producer": "flow",
+      "consumer": "hr",
+      "flows": "current assigned workload on the employee page, before assigning more",
+      "class": "CAN",
+      "necessity": "Nice to have",
+      "why": [
+        5
+      ],
+      "shape": 1,
+      "gap": "available-today",
+      "status": "rejected",
+      "failedRule": "bar-1",
+      "reason": "Nice to have, not Essential or High value. A manager who wants this can open Flow, which is one click away and shows more than a summary widget would.",
+      "temptingBadIdea": true
+    },
+    {
+      "id": "FIN->FLOW-01",
+      "producer": "finance",
+      "consumer": "flow",
+      "flows": "budget consumed against a project",
+      "class": "CAN",
+      "necessity": "High value",
+      "why": [
+        5,
+        1
+      ],
+      "shape": 2,
+      "gap": "needs-new-concept",
+      "status": "rejected",
+      "failedRule": "bar-2",
+      "reason": "Finance holds no project_id on any expense, invoice or bill, so there is no project budget to consume. This needs a new concept (project cost allocation) before it is a connection, and that concept belongs to Finance, not to this audit."
+    },
+    {
+      "id": "FIN->ERP-01",
+      "producer": "finance",
+      "consumer": "erp",
+      "flows": "bill and payment history on the supplier page",
+      "class": "CAN",
+      "necessity": "High value",
+      "why": [
+        5
+      ],
+      "shape": 1,
+      "gap": "needs-contract-field",
+      "status": "proposed",
+      "severity": "medium",
+      "producerFact": "bill_payment_history",
+      "consumerFact": "supplier_payment_view",
+      "shortFlows": "bill history on the supplier page"
+    },
+    {
+      "id": "ERP->FIN-02",
+      "producer": "erp",
+      "consumer": "finance",
+      "flows": "inventory valuation total for the balance sheet",
+      "class": "CAN",
+      "necessity": "High value",
+      "why": [
+        1,
+        7
+      ],
+      "shape": 1,
+      "gap": "available-today",
+      "status": "proposed",
+      "severity": "medium",
+      "producerFact": "inventory_valuation",
+      "consumerFact": "balance_sheet_inventory",
+      "shortFlows": "inventory valuation for the balance sheet"
+    },
+    {
+      "id": "REC->HR-01",
+      "producer": "recruit",
+      "consumer": "hr",
+      "flows": "hired candidate becomes an employee record without retyping the person",
+      "class": "CAN",
+      "necessity": "Essential",
+      "why": [
+        2,
+        4,
+        8
+      ],
+      "shape": 1,
+      "gap": "needs-endpoint",
+      "status": "proposed",
+      "severity": "high",
+      "producerFact": "candidate_details",
+      "consumerFact": "employee_record",
+      "shortFlows": "hired candidate becomes an employee"
+    },
+    {
+      "id": "IDENTITY-01",
+      "producer": "hub",
+      "consumer": "all",
+      "flows": "one resolver so a person or company means one thing product-wide",
+      "class": "MUST",
+      "necessity": "Essential",
+      "why": [
+        8,
+        3
+      ],
+      "shape": 6,
+      "gap": "needs-new-concept",
+      "status": "proposed",
+      "severity": "high",
+      "shortFlows": "one resolver for people and companies"
+    },
+    {
+      "id": "HR->HR-01",
+      "producer": "hr",
+      "consumer": "hr",
+      "flows": "collapse hr_staff and hr_employees into one person record with one pay rate",
+      "class": "MUST",
+      "necessity": "Essential",
+      "why": [
+        3,
+        8
+      ],
+      "shape": 6,
+      "gap": "needs-new-concept",
+      "status": "proposed",
+      "severity": "high",
+      "shortFlows": "one person record, one pay rate"
+    },
+    {
+      "id": "POS->FIN-01",
+      "producer": "pos",
+      "consumer": "finance",
+      "flows": "day-close takings posted to the journal",
+      "class": "CAN",
+      "necessity": "High value",
+      "why": [
+        2,
+        4
+      ],
+      "shape": 3,
+      "gap": "needs-endpoint",
+      "status": "rejected",
+      "failedRule": "bar-3",
+      "reason": "POS has no operator surface in this repo and serves a separate terminal application, so the consuming screen cannot be built or tested here. Real, valuable, and out of scope for a frontend monorepo audit: it belongs to the POS repo's own roadmap."
+    },
+    {
+      "id": "ERP->POS-02",
+      "producer": "erp",
+      "consumer": "pos",
+      "flows": "zero stock or passed expiry blocks a sale",
+      "class": "MUST",
+      "necessity": "Essential",
+      "why": [
+        6
+      ],
+      "shape": 2,
+      "gap": "needs-contract-field",
+      "status": "rejected",
+      "failedRule": "bar-3",
+      "reason": "Same reason as POS->FIN-01: the consumer is the POS terminal repo. Subsumed by ERP->POS-01, which fixes the underlying duplicate stock number that makes this gate impossible to enforce correctly in the first place."
+    },
+    {
+      "id": "HR->INS-01",
+      "producer": "hr",
+      "consumer": "insights",
+      "flows": "labour cost per period for the cost side of every margin metric",
+      "class": "CAN",
+      "necessity": "High value",
+      "why": [
+        1,
+        7
+      ],
+      "shape": 2,
+      "gap": "needs-endpoint",
+      "status": "proposed",
+      "severity": "medium",
+      "producerFact": "pay_rate",
+      "consumerFact": "labour_cost_metric",
+      "shortFlows": "labour cost for margin reporting"
+    },
+    {
+      "id": "BOOK->CRM-01",
+      "producer": "booking",
+      "consumer": "crm",
+      "flows": "appointment history as customer activity",
+      "class": "CAN",
+      "necessity": "Nice to have",
+      "why": [
+        5
+      ],
+      "shape": 1,
+      "gap": "needs-contract-field",
+      "status": "rejected",
+      "failedRule": "bar-5",
+      "reason": "Booking has no app in this repo and booking.Appointment carries no customer id, only a staff id. Nobody would notice this shipping because nobody can create an appointment through a RTYLR surface today."
+    },
+    {
+      "id": "FLOW->INS-01",
+      "producer": "flow",
+      "consumer": "insights",
+      "flows": "project hours and delivery metrics in the analytics app",
+      "class": "IS",
+      "necessity": "Nice to have",
+      "why": [
+        7
+      ],
+      "shape": 1,
+      "gap": "available-today",
+      "status": "rejected",
+      "failedRule": "bar-2",
+      "reason": "Already partly built: insights declares RoadmapProject.project_id and WorkloadEntry.user_id and Flow has its own flow_insights module. Adding a second path to the same numbers would duplicate an existing aggregate rather than connect anything new.",
+      "temptingBadIdea": true
+    },
+    {
+      "id": "HUB->ALL-01",
+      "producer": "hub",
+      "consumer": "all",
+      "flows": "tenant, user, team, app entitlement and config",
+      "class": "IS",
+      "necessity": "Essential",
+      "why": [
+        3,
+        8
+      ],
+      "shape": 1,
+      "gap": "available-today",
+      "status": "existing",
+      "reason": "Already the product's one working cross-domain contract. Documented as the precedent every other connection should imitate, not as new work."
+    },
+    {
+      "id": "ERP->FIN-03",
+      "producer": "erp",
+      "consumer": "finance",
+      "flows": "purchase order received-but-unbilled and outstanding commitments, for the payables picture",
+      "class": "CAN",
+      "necessity": "High value",
+      "why": [
+        1,
+        7
+      ],
+      "shape": 1,
+      "gap": "available-today",
+      "status": "proposed",
+      "severity": "medium",
+      "producerFact": "purchase_order_receipt",
+      "consumerFact": "payables_commitments",
+      "shortFlows": "received-but-unbilled purchase orders"
+    },
+    {
+      "id": "FIN->ERP-02",
+      "producer": "finance",
+      "consumer": "erp",
+      "flows": "bill approved and paid, so a purchase order stops looking outstanding",
+      "class": "CAN",
+      "necessity": "High value",
+      "why": [
+        2,
+        4
+      ],
+      "shape": 3,
+      "gap": "needs-contract-field",
+      "status": "proposed",
+      "severity": "medium",
+      "producerFact": "bill_settlement",
+      "consumerFact": "purchase_order_status",
+      "shortFlows": "bill settlement closes the purchase order"
+    },
+    {
+      "id": "ERP->ERP-01",
+      "producer": "erp",
+      "consumer": "erp",
+      "flows": "reorder suggestions already exist; surface them where purchasing happens",
+      "class": "IS",
+      "necessity": "Nice to have",
+      "why": [
+        5
+      ],
+      "shape": 1,
+      "gap": "available-today",
+      "status": "rejected",
+      "failedRule": "bar-1",
+      "reason": "Intra-domain, and already built: apps/erp/src/features/reorder/useReorderSuggestions.ts calls listReorderSuggestions today. Not a crossing."
+    },
+    {
+      "id": "HR->CRM-01",
+      "producer": "hr",
+      "consumer": "crm",
+      "flows": "cost to serve a customer, from support time logged against them",
+      "class": "CAN",
+      "necessity": "Nice to have",
+      "why": [
+        1
+      ],
+      "shape": 2,
+      "gap": "needs-new-concept",
+      "status": "rejected",
+      "failedRule": "bar-2",
+      "reason": "Requires time to be logged against a customer, which no contract supports: hr.TimeEntryPayload carries project_id and task_id only (packages/voxie/api/hr/time_entry/v1/models.onk:12). Needs a new concept (customer-attributable time) that nobody has asked for."
+    },
+    {
+      "id": "SUP->INS-01",
+      "producer": "support",
+      "consumer": "insights",
+      "flows": "ticket volume and resolution time as an operations metric",
+      "class": "CAN",
+      "necessity": "Nice to have",
+      "why": [
+        7
+      ],
+      "shape": 1,
+      "gap": "available-today",
+      "status": "rejected",
+      "failedRule": "bar-5",
+      "reason": "Support has no operator app in this repo, so no tenant is generating ticket data through a RTYLR surface. Reporting on an empty table is not a feature a customer notices."
+    },
+    {
+      "id": "HR->BOOK-01",
+      "producer": "hr",
+      "consumer": "booking",
+      "flows": "staff availability and shift coverage behind a bookable slot",
+      "class": "CAN",
+      "necessity": "High value",
+      "why": [
+        6,
+        1
+      ],
+      "shape": 2,
+      "gap": "needs-endpoint",
+      "status": "rejected",
+      "failedRule": "bar-3",
+      "reason": "No booking app exists in apps/, so the consuming surface cannot be built or degraded-tested here. Worth revisiting the day a booking app is scaffolded; the contracts and backend modules are already in place."
+    },
+    {
+      "id": "FLOW->HR-02",
+      "producer": "flow",
+      "consumer": "hr",
+      "flows": "cycle commitments vs scheduled shifts, to catch overtime committed twice",
+      "class": "CAN",
+      "necessity": "Nice to have",
+      "why": [
+        6
+      ],
+      "shape": 2,
+      "gap": "needs-new-concept",
+      "status": "rejected",
+      "failedRule": "bar-2",
+      "reason": "hr.shift keys attendance on staff_id while flow work days key on employee_id, and the bridge between those id spaces is a nullable column (02-entity-graph.md). Blocked behind HR->HR-01; re-evaluate after the person record is unified."
+    },
+    {
+      "id": "FIN->INS-01",
+      "producer": "finance",
+      "consumer": "insights",
+      "flows": "revenue actuals as the numerator for every margin metric",
+      "class": "IS",
+      "necessity": "High value",
+      "why": [
+        7
+      ],
+      "shape": 1,
+      "gap": "available-today",
+      "status": "rejected",
+      "failedRule": "bar-2",
+      "reason": "Already flowing, and in the wrong direction: apps/finance reads /insights/financial/cash-flow rather than Insights reading Finance. Logged as an inversion in 10-doc-drift.md; fixing the direction is a refactor of existing code, not a new connection."
+    },
+    {
+      "id": "POS->CRM-01",
+      "producer": "pos",
+      "consumer": "crm",
+      "flows": "order history and lifetime spend on the customer page",
+      "class": "IS",
+      "necessity": "High value",
+      "why": [
+        5,
+        1
+      ],
+      "shape": 1,
+      "gap": "needs-endpoint",
+      "status": "proposed",
+      "severity": "medium",
+      "producerFact": "order_history",
+      "consumerFact": "customer_purchase_view",
+      "shortFlows": "order history on the customer page"
+    },
+    {
+      "id": "POS->INS-01",
+      "producer": "pos",
+      "consumer": "insights",
+      "flows": "sales by item and by hour for the analytics app",
+      "class": "IS",
+      "necessity": "Nice to have",
+      "why": [
+        7
+      ],
+      "shape": 1,
+      "gap": "available-today",
+      "status": "rejected",
+      "failedRule": "bar-1",
+      "reason": "Already built: dash reads 9 pos endpoints and insights declares BestSeller/SlowMover over erp products. A third path to the same numbers adds an edge without adding an answer.",
+      "temptingBadIdea": true
+    },
+    {
+      "id": "ERP->INS-01",
+      "producer": "erp",
+      "consumer": "insights",
+      "flows": "product cost, to turn revenue-by-product into margin-by-product",
+      "class": "CAN",
+      "necessity": "High value",
+      "why": [
+        1,
+        7
+      ],
+      "shape": 2,
+      "gap": "needs-endpoint",
+      "status": "proposed",
+      "severity": "medium",
+      "producerFact": "product_cost",
+      "consumerFact": "product_margin_metric",
+      "shortFlows": "product cost for margin reporting"
+    },
+    {
+      "id": "HUB->HR-01",
+      "producer": "hub",
+      "consumer": "hr",
+      "flows": "team member invited in dash becomes an employee record",
+      "class": "CAN",
+      "necessity": "Nice to have",
+      "why": [
+        2,
+        4
+      ],
+      "shape": 3,
+      "gap": "needs-endpoint",
+      "status": "rejected",
+      "failedRule": "bar-4",
+      "reason": "Negative ROI: inviting a login and hiring a person are genuinely different acts, and auto-creating an employee for every invited contractor or agency user would create records an HR admin then has to clean up. The reverse edge (REC->HR-01) is the one worth building.",
+      "temptingBadIdea": true
+    },
+    {
+      "id": "FIN->HUB-01",
+      "producer": "finance",
+      "consumer": "hub",
+      "flows": "unpaid subscription suspends app access",
+      "class": "CAN",
+      "necessity": "Nice to have",
+      "why": [
+        6,
+        4
+      ],
+      "shape": 3,
+      "gap": "needs-endpoint",
+      "status": "rejected",
+      "failedRule": "bar-2",
+      "reason": "Confuses two different money flows. hub.billing already handles what the tenant owes RTYLR (packages/voxie/api/hub/billing/v1); finance.invoices is what the tenant's own customers owe the tenant. Connecting them would suspend a customer's account because their client paid late.",
+      "temptingBadIdea": true
+    },
+    {
+      "id": "CRM->INS-01",
+      "producer": "crm",
+      "consumer": "insights",
+      "flows": "customer counts, churn and segment size",
+      "class": "IS",
+      "necessity": "Nice to have",
+      "why": [
+        7
+      ],
+      "shape": 1,
+      "gap": "available-today",
+      "status": "rejected",
+      "failedRule": "bar-1",
+      "reason": "insights already ships a customers area and crm ships its own dashboard capability (packages/voxie/api/crm/dashboard/v1). Duplicating the rollup would give two numbers for one question, which is worse than one.",
+      "temptingBadIdea": true
+    },
+    {
+      "id": "HR->FIN-01",
+      "producer": "hr",
+      "consumer": "finance",
+      "flows": "payroll run total posted to the journal as a labour expense",
+      "class": "CAN",
+      "necessity": "Essential",
+      "why": [
+        2,
+        4,
+        7
+      ],
+      "shape": 3,
+      "gap": "available-today",
+      "status": "proposed",
+      "severity": "high",
+      "producerFact": "payroll_total",
+      "consumerFact": "journal_entry",
+      "shortFlows": "payroll total to the journal"
+    },
+    {
+      "id": "ERP->CRM-01",
+      "producer": "erp",
+      "consumer": "crm",
+      "flows": "product catalogue inside campaign composition",
+      "class": "CAN",
+      "necessity": "Nice to have",
+      "why": [
+        5
+      ],
+      "shape": 1,
+      "gap": "available-today",
+      "status": "rejected",
+      "failedRule": "bar-5",
+      "reason": "Technically trivial and nobody would notice. Campaign copy is written as free text today and a product picker saves one paste. The most tempting kind of low-value edge: cheap, obvious, and permanently owned by someone.",
+      "temptingBadIdea": true
+    },
+    {
+      "id": "HR->POS-01",
+      "producer": "hr",
+      "consumer": "pos",
+      "flows": "terminated employee loses terminal access",
+      "class": "MUST",
+      "necessity": "Essential",
+      "why": [
+        6,
+        4
+      ],
+      "shape": 3,
+      "gap": "needs-endpoint",
+      "status": "rejected",
+      "failedRule": "bar-3",
+      "reason": "Correct and important, but the consumer is the POS terminal repo. Folded into HR->HUB-01, which revokes at the entitlement layer every surface reads, rather than adding a per-surface revocation edge."
+    }
+  ],
+  "emptyCellReasons": {
+    "self": "Same domain; not a crossing.",
+    "infra": "common holds auth and pagination wrappers, not business data. Every app already depends on it as infrastructure; there is no business fact to share in either direction.",
+    "console": "console is RTYLR's own cross-tenant admin surface. A tenant domain reading it would cross a tenancy boundary, and console reading a tenant domain is already its whole job. Deliberately not connected.",
+    "no-consumer-surface": "The consuming domain has no operator surface in this repo (booking and support have contracts and backend modules but no app; pos serves the separate terminal repo). A connection whose consumer cannot be built here fails bar rule 3.",
+    "no-producer-data": "The producing domain holds no fact this consumer needs. Verified against the producer's entity list in 02-entity-graph.md.",
+    "insights-is-terminal": "insights is a read-only projection layer. It consumes; nothing should consume it, because a second domain reading insights would depend on a derived number instead of its source. Finance already violates this once (see 10-doc-drift.md).",
+    "would-invert": "The natural direction of this pair is the reverse edge, which is listed. Adding this direction too would create a cycle and breaks rule 2.",
+    "hub-already-shared": "hub is the tenant, user, team and entitlement domain that every app already reads; that crossing is built and working (HUB->ALL-01). Its outbound cells are marked here rather than re-proposed."
+  }
+}

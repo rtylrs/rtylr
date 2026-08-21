@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useNavigate } from '@tanstack/react-router';
 import {
@@ -14,6 +15,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { Input, Label } from '../../shared/components/ui';
 import { useInviteMember, type TeamMember } from '../../shared/hooks/queries/useTeam';
 import { useGroups, useBulkInvite, type BulkResult } from '../../shared/hooks/queries/useGroups';
@@ -72,6 +74,7 @@ const STATUS_COLORS: Record<BulkResult['status'], string> = {
 };
 
 const InviteUser: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const invite = useInviteMember();
   const bulkInvite = useBulkInvite();
@@ -299,7 +302,8 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const renderLocationSelector = (
     currentLocations: number[],
     toggle: (id: number) => void,
-    currentRole: string
+    currentRole: string,
+    onRemovePos: () => void
   ): React.JSX.Element => (
     <div className="space-y-2 pt-1">
       <div>
@@ -313,9 +317,13 @@ const InviteUser: React.FC = (): React.JSX.Element => {
         </p>
       </div>
       {locations.length === 0 ? (
-        <p className="text-[11px]" style={{ color: 'var(--dash-text-dim)' }}>
-          No POS locations yet. Create one in the POS app first.
-        </p>
+        <EmptyState
+          icon={MapPin}
+          title={t('team.inviteUser.noPosLocationsTitle')}
+          description={t('team.inviteUser.noPosLocationsDescription')}
+          action={{ label: t('team.inviteUser.removePosAccess'), onClick: onRemovePos }}
+          size="compact"
+        />
       ) : (
         <div className="grid grid-cols-2 gap-2">
           {locations.map((loc) => {
@@ -575,7 +583,10 @@ const InviteUser: React.FC = (): React.JSX.Element => {
               </div>
               {renderAppSelector(selectedApps, toggleApp)}
 
-              {posSelectedSingle && renderLocationSelector(selectedLocations, toggleLocation, role)}
+              {posSelectedSingle &&
+                renderLocationSelector(selectedLocations, toggleLocation, role, () =>
+                  toggleApp('pos')
+                )}
 
               {/* Seat cost preview */}
               {sub &&
@@ -706,7 +717,9 @@ const InviteUser: React.FC = (): React.JSX.Element => {
               {renderAppSelector(bulkApps, toggleBulkApp)}
 
               {posSelectedBulk &&
-                renderLocationSelector(bulkLocations, toggleBulkLocation, bulkRole)}
+                renderLocationSelector(bulkLocations, toggleBulkLocation, bulkRole, () =>
+                  toggleBulkApp('pos')
+                )}
             </div>
 
             {/* Group */}

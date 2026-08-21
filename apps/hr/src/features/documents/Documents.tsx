@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
 import { FileText, Trash2, AlertTriangle } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import {
   useDocuments,
   useAddDocument,
@@ -13,7 +14,6 @@ import { useStaff } from '../staff/useStaff';
 import {
   Card,
   SectionHeader,
-  EmptyState,
   Skeleton,
   Pill,
   Select,
@@ -28,7 +28,7 @@ const TYPES = ['I-9', 'W4', 'Contract', 'NDA', 'Offer Letter', 'Other'] as const
 const Documents: React.FC = () => {
   const { t } = useTranslation();
   const isMobile = useIsMobile(900);
-  const { data, isLoading } = useDocuments();
+  const { data, isLoading, refetch } = useDocuments();
   const { data: expiring = [] } = useExpiringDocuments(30);
   const { data: staff = [] } = useStaff();
   const add = useAddDocument();
@@ -123,9 +123,10 @@ const Documents: React.FC = () => {
           <Skeleton height={200} />
         ) : !data || data.length === 0 ? (
           <EmptyState
-            icon={<FileText size={20} />}
+            icon={FileText}
             title={t('documents.emptyTitle')}
             description={t('documents.emptyDescription')}
+            action={{ label: t('common.refresh'), onClick: () => refetch() }}
           />
         ) : (
           <Card style={{ padding: 0, overflow: 'hidden' }}>

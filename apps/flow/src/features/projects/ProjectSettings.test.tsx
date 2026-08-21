@@ -18,6 +18,7 @@ const transferOwnershipMutate = vi.hoisted(() => vi.fn());
 const projectMembersData = vi.hoisted(() => ({
   data: [] as Array<{ id: string; userId: string; name: string; email: string; role: string }>,
 }));
+const refetchMembersMock = vi.hoisted(() => vi.fn());
 
 vi.mock('@tanstack/react-router', () => ({
   useParams: () => ({ projectId: 'p1', workspaceId: 'w1' }),
@@ -36,7 +37,11 @@ vi.mock('./useProjects', () => ({
 }));
 
 vi.mock('./useProjectMembers', () => ({
-  useProjectMembers: () => ({ data: projectMembersData.data, isLoading: false }),
+  useProjectMembers: () => ({
+    data: projectMembersData.data,
+    isLoading: false,
+    refetch: refetchMembersMock,
+  }),
   useRemoveProjectMember: () => ({ mutate: removeMemberMutate, isPending: false }),
   useUpdateProjectMemberRole: () => ({ mutate: updateRoleMutate, isPending: false }),
   useTransferProjectOwnership: () => ({ mutate: transferOwnershipMutate, isPending: false }),
@@ -315,5 +320,35 @@ describe('ProjectSettings role gating (#793)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Members' }));
 
     expect(screen.getByRole('button', { name: /Transfer/ })).toBeDisabled();
+  });
+});
+
+describe('ProjectSettings members empty state', () => {
+  beforeEach(() => {
+    useFlowStore.setState({ projects: [], workspaces: [] });
+    refetchMembersMock.mockClear();
+    projectMembersData.data = [];
+  });
+
+  it('offers Add member as the CTA for a project admin', () => {
+    canManageProjectMock.mockReturnValue(true);
+    renderProjectSettings();
+    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+
+    expect(screen.getByText('flow.projectSettings.noMembersYet')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'flow.projectSettings.addMemberCta' })).toBeEnabled();
+  });
+
+  it('offers Refresh instead for a non-admin', () => {
+    canManageProjectMock.mockReturnValue(false);
+    renderProjectSettings();
+    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
+
+    expect(
+      screen.queryByRole('button', { name: 'flow.projectSettings.addMemberCta' })
+    ).not.toBeInTheDocument();
+    const refresh = screen.getByRole('button', { name: 'flow.projectSettings.refreshMembersCta' });
+    fireEvent.click(refresh);
+    expect(refetchMembersMock).toHaveBeenCalled();
   });
 });

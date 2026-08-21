@@ -1,7 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Crown } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { toFiniteNumber, unwrap } from '@voxire/api';
+import { EmptyState } from '@voxire/ui';
 import { safe } from '../../../../shared/lib/api';
 import WidgetHeader from './WidgetHeader';
 
@@ -33,7 +35,8 @@ function formatMoney(minor: number): string {
 }
 
 const TopCustomersWidget: React.FC = (): React.JSX.Element => {
-  const { data: raw } = useQuery({
+  const { t } = useTranslation();
+  const { data: raw, refetch } = useQuery({
     queryKey: ['insights-top-customers', { limit: 5 }],
     queryFn: async (): Promise<TopCustomer[]> => {
       try {
@@ -61,11 +64,13 @@ const TopCustomersWidget: React.FC = (): React.JSX.Element => {
     <div className="flex flex-col h-full">
       <WidgetHeader icon={Crown} iconColor="var(--accent)" title="Top customers" />
       {customers.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
-          <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-            Your VIPs show up here once repeat orders start rolling.
-          </p>
-        </div>
+        <EmptyState
+          icon={Crown}
+          title={t('dashboard.topCustomersWidget.emptyTitle')}
+          description={t('dashboard.topCustomersWidget.emptyDescription')}
+          action={{ label: t('common.refresh'), onClick: () => void refetch() }}
+          size="compact"
+        />
       ) : (
         <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
           {customers.map((c, i) => (

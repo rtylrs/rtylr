@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Tag, Trash2 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
+import { useTranslation } from 'react-i18next';
 import { useBrands, useCreateBrand, useDeleteBrand } from './useBrands';
 import PageHeader from '../../shared/components/PageHeader';
-import EmptyState from '../../shared/components/EmptyState';
 import { Skeleton } from '../../shared/components/Skeleton';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 import { toast } from 'sonner';
@@ -24,6 +25,7 @@ const inputStyle: React.CSSProperties = {
 };
 
 const Brands: React.FC = () => {
+  const { t } = useTranslation('erp');
   const { data: brands = [], isLoading } = useBrands();
   const createMut = useCreateBrand();
   const deleteMut = useDeleteBrand();
@@ -80,7 +82,12 @@ const Brands: React.FC = () => {
           ))}
         </div>
       ) : brands.length === 0 ? (
-        <EmptyState title="No brands yet" description="Add your first brand to group products." />
+        <EmptyState
+          icon={Tag}
+          title={t('brands.empty.title')}
+          description={t('brands.empty.description')}
+          action={{ label: t('brands.newBrand'), onClick: () => setShowCreate(true) }}
+        />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {brands.map((b) => (

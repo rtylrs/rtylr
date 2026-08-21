@@ -1,13 +1,24 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useRouter } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
+import { SearchX } from 'lucide-react';
 
-const NoMatch: React.FC = () => {
+const NoMatch = (): React.JSX.Element => {
+  const { t } = useTranslation('notfound');
+  const router = useRouter();
+
   return (
     <>
       <HelmetContainer title="Page not found · rtylr" />
-      <div className="min-h-screen flex flex-col items-center justify-center gap-3 bg-white">
-        <span className="text-7xl font-black text-black/10">404</span>
-        <p className="text-sm text-gray-500">Page not found</p>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <EmptyState
+          icon={SearchX}
+          title={t('title')}
+          description={t('description')}
+          action={{ label: t('goBack'), onClick: () => router.history.back() }}
+        />
       </div>
     </>
   );

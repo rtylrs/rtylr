@@ -1,6 +1,12 @@
 {
   "addNew": "Add Department",
   "created": "Department created successfully",
+  "orgChart": {
+    "title": "Org Chart",
+    "subtitle": "Reporting hierarchy visualized",
+    "emptyTitle": "No employees",
+    "emptyDescription": "Add employees to see the org chart."
+  },
   "form": {
     "title": "New Department",
     "name": "Name",

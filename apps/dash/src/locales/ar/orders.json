@@ -1,0 +1,5 @@
+{
+  "emptyTitleAll": "لا توجد طلبات بعد",
+  "emptyTitleFiltered": "لا توجد طلبات {{status}}",
+  "emptyDescription": "ستظهر الطلبات هنا بعد أن يقدّمها العملاء."
+}

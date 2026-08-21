@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, UserSearch } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@voxire/ui';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, EmptyState } from '@voxire/ui';
 import { useAddWorkspaceMember } from './useWorkspaceManager';
 import type { FlowTeamMember } from '../../shared/hooks/queries/useFlowTeam';
 import { roleLabel } from '../../shared/lib/roleUtils';
@@ -152,9 +152,15 @@ const AddWorkspaceMemberDialog: React.FC<AddWorkspaceMemberDialogProps> = ({
           )}
 
           {search && availableMembers.length === 0 && (
-            <p className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-              {t('workspaceManager.noOrgMembersFound')}
-            </p>
+            <EmptyState
+              icon={UserSearch}
+              title={t('workspaceManager.noOrgMembersFound')}
+              action={{
+                label: t('workspaceManager.clearSearchCta'),
+                onClick: () => setSearch(''),
+              }}
+              size="compact"
+            />
           )}
 
           <div className="flex items-center gap-2">
@@ -180,7 +186,7 @@ const AddWorkspaceMemberDialog: React.FC<AddWorkspaceMemberDialogProps> = ({
               onClick={handleAddMember}
               disabled={!selectedUserId || addMember.isPending}
               className="flex-1 min-h-[44px] px-4 rounded text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-2"
-              style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+              style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
             >
               {addMember.isPending
                 ? t('workspaceManager.adding')

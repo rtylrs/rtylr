@@ -121,15 +121,6 @@ export interface DocumentItem {
   url?: string;
 }
 
-export interface BenefitPlan {
-  id: number;
-  name: string;
-  category: 'Health' | 'Dental' | 'Vision' | '401k' | 'Life';
-  carrier: string;
-  monthlyCost: number;
-  enrolledCount: number;
-}
-
 export interface BenefitEnrollment {
   id: number;
   staffId: number;
@@ -377,7 +368,8 @@ export const hrExtras = {
     safe.get<DocumentItem[]>('/hr/documents/expiring', { params: { days: daysAhead } }),
 
   // Benefits
-  listBenefitPlans: () => safe.get<BenefitPlan[]>('/hr/benefits'),
+  // listBenefitPlans is gone: self-service plan listing now goes through
+  // hr.benefit.v1's listBenefits RPC (see useBenefits in useHrExtras.ts).
   // Legacy, per-employee admin view used by EmployeeProfile.tsx. Self-service
   // enrollment now goes through hr.benefit.v1 (see useMyBenefitEnrollments /
   // useEnrollInBenefit in useHrExtras.ts) - there is no onekit RPC yet for an

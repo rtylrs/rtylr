@@ -21,5 +21,12 @@
       "saturday": "Samedi",
       "sunday": "Dimanche"
     }
-  }
+  },
+  "emptySwapsTitle": "Aucune demande d'échange",
+  "emptySwapsDescription": "Les demandes d'échange de poste s'afficheront ici.",
+  "emptyBreaksTitle": "Aucune pause enregistrée",
+  "emptyBreaksDescription": "Démarrez une pause pour suivre le temps.",
+  "startLunchBreak": "Démarrer la pause déjeuner",
+  "emptyOvertimeTitle": "Aucune alerte d'heures supplémentaires",
+  "emptyOvertimeDescription": "Tout le monde respecte les limites de la politique."
 }

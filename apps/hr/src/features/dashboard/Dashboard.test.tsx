@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { DashboardWidget } from '../../shared/schemas/dashboard';
 
@@ -13,6 +13,9 @@ const mocks = vi.hoisted(() => ({
   useOvertimeAlerts: vi.fn(),
   useHrSettings: vi.fn(),
   useHRConfigStore: vi.fn(),
+  navigate: vi.fn(),
+  refetchDashboardWidgets: vi.fn(),
+  refetchLegacyDashboard: vi.fn(),
 }));
 
 vi.mock('@voxire/auth', () => ({
@@ -45,6 +48,18 @@ vi.mock('@voxire/components', () => ({
 
 vi.mock('@voxire/ui', () => ({
   ErrorBoundary: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  EmptyState: ({
+    title,
+    action,
+  }: {
+    title: string;
+    action: { label: string; onClick: () => void };
+  }) => (
+    <div>
+      <span>{title}</span>
+      <button onClick={action.onClick}>{action.label}</button>
+    </div>
+  ),
 }));
 
 vi.mock('react-i18next', () => ({
@@ -55,6 +70,7 @@ vi.mock('@tanstack/react-router', () => ({
   Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
     <a href={to}>{children}</a>
   ),
+  useNavigate: () => mocks.navigate,
 }));
 
 vi.mock('motion/react', () => ({
@@ -117,8 +133,15 @@ describe('Dashboard compensation gating', () => {
     mocks.useOvertimeAlerts.mockReset();
     mocks.useHrSettings.mockReset();
     mocks.useHRConfigStore.mockReset();
+    mocks.navigate.mockReset();
+    mocks.refetchDashboardWidgets.mockReset();
+    mocks.refetchLegacyDashboard.mockReset();
 
-    mocks.useGetDashboard.mockReturnValue({ data: undefined, isLoading: false });
+    mocks.useGetDashboard.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      refetch: mocks.refetchDashboardWidgets,
+    });
     mocks.useHRDashboard.mockReturnValue({
       data: {
         totalStaff: 10,
@@ -129,6 +152,7 @@ describe('Dashboard compensation gating', () => {
         todayAtGlance: { shiftsScheduled: 0, newApplications: 0, pendingApprovals: 0 },
       },
       isLoading: false,
+      refetch: mocks.refetchLegacyDashboard,
     });
     mocks.useUpdateWidgetLayout.mockReturnValue({ mutate: vi.fn() });
     mocks.useStaff.mockReturnValue({ data: [] });
@@ -211,5 +235,41 @@ describe('Dashboard compensation gating', () => {
 
     expect(screen.queryByTestId('widget-payroll_cost')).not.toBeInTheDocument();
     expect(screen.getByTestId('widget-headcount')).toBeInTheDocument();
+  });
+
+  it('shows the recent activity empty state and refetches the legacy dashboard on CTA click', () => {
+    role('owner');
+
+    render(<Dashboard />);
+
+    expect(screen.getByText('dashboard.noActivity')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'common.refresh' }));
+
+    expect(mocks.refetchLegacyDashboard).toHaveBeenCalledOnce();
+  });
+
+  it('shows the recent hires empty state and navigates to invite staff on CTA click', () => {
+    role('owner');
+    mocks.useStaff.mockReturnValue({ data: [] });
+
+    render(<Dashboard />);
+
+    expect(screen.getByText('dashboard.noRecentHires')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'staff.inviteStaff' }));
+
+    expect(mocks.navigate).toHaveBeenCalledWith({ to: '/employees/new' });
+  });
+
+  it('does not show the recent hires empty state once staff exist', () => {
+    role('owner');
+    mocks.useStaff.mockReturnValue({
+      data: [{ id: 1, name: 'Alex Chen', role: 'Server', department: 'FOH' }],
+    });
+
+    render(<Dashboard />);
+
+    expect(screen.queryByText('dashboard.noRecentHires')).not.toBeInTheDocument();
   });
 });

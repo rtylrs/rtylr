@@ -1,0 +1,10 @@
+{
+  "emptyTitle": "No reviews yet",
+  "emptyDescription": "Start a review cycle to see results here.",
+  "newReview": "New review",
+  "oneOnOnes": {
+    "emptyTitle": "No 1-on-1s scheduled",
+    "emptyDescription": "Managers will see upcoming 1-on-1s here.",
+    "schedule": "Schedule 1-on-1"
+  }
+}

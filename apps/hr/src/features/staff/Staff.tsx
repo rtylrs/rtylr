@@ -6,9 +6,10 @@ import type { Variants } from 'motion/react';
 import { Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { UserPlus, Mail, Search, Users } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { StaffMember } from '../../shared/services/hrApi';
 import { useStaff } from './useStaff';
-import { EmptyState, useIsMobile } from '../../shared/components/ui';
+import { useIsMobile } from '../../shared/components/ui';
 
 const ACCENT = '#8b5cf6';
 
@@ -332,9 +333,23 @@ const Staff: React.FC = () => {
 
         {filtered.length === 0 && !loading && (
           <EmptyState
-            icon={<Users size={20} />}
+            icon={Users}
             title={t('staff.emptyState.title')}
             description={t('staff.emptyState.description')}
+            action={
+              search || activeTab !== 'All'
+                ? {
+                    label: t('common.clearFilters'),
+                    onClick: () => {
+                      setSearch('');
+                      setActiveTab('All');
+                    },
+                  }
+                : {
+                    label: t('staff.inviteStaff'),
+                    onClick: () => navigate({ to: '/employees/new' }),
+                  }
+            }
           />
         )}
       </div>

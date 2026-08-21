@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useCallback } from 'react';
-import { cn } from '@voxire/ui';
+import { useTranslation } from 'react-i18next';
+import { cn, EmptyState } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
 import { Send, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -40,6 +41,7 @@ function blocksToText(blocks: ContentBlock[]): string {
 }
 
 const Chat: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useUserStore();
   const userId = Number(user?.id) || 0;
   const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'https://api.voxire.com/';
@@ -69,6 +71,7 @@ const Chat: React.FC = () => {
 
   const [input, setInput] = React.useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -100,23 +103,17 @@ const Chat: React.FC = () => {
                 transition={{ duration: 0.5 }}
                 className="text-center max-w-md"
               >
-                <div
-                  className="h-12 w-12 rounded-2xl flex items-center justify-center mx-auto mb-5"
-                  style={{ background: 'rgba(69,131,196,0.1)' }}
-                >
-                  <Sparkles size={24} style={{ color: '#4583C4' }} />
-                </div>
-                <h1 className="text-xl font-semibold mb-2" style={{ color: 'var(--dash-text)' }}>
-                  Chat with Caret
-                </h1>
-                <p
-                  className="text-sm leading-relaxed mb-8"
-                  style={{ color: 'var(--dash-text-muted)' }}
-                >
-                  Your AI assistant with access to all your business data.
-                </p>
+                <EmptyState
+                  icon={Sparkles}
+                  title={t('chat.welcomeTitle')}
+                  description={t('chat.welcomeDescription')}
+                  action={{
+                    label: t('chat.startChatting'),
+                    onClick: () => inputRef.current?.focus(),
+                  }}
+                />
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 mt-6">
                   {SUGGESTIONS.map((s, i) => (
                     <motion.button
                       key={i}
@@ -241,6 +238,7 @@ const Chat: React.FC = () => {
             className="max-w-2xl mx-auto relative"
           >
             <input
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Message Caret..."

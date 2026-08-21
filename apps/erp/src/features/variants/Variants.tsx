@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Layers } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
+import { useTranslation } from 'react-i18next';
 import { parseVariantAttributes, useVariants, useCreateVariant } from '../products/useVariants';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
-import EmptyState from '../../shared/components/EmptyState';
 import { formatCurrency } from '../../shared/lib/format';
 import StockBadge from '../../shared/components/StockBadge';
 import { toast } from 'sonner';
@@ -25,6 +26,7 @@ const inputStyle: React.CSSProperties = {
 };
 
 const Variants: React.FC = () => {
+  const { t } = useTranslation('erp');
   const { data: variants = [], isLoading } = useVariants();
   const createMut = useCreateVariant();
   const [showCreate, setShowCreate] = useState(false);
@@ -115,8 +117,9 @@ const Variants: React.FC = () => {
         ) : variants.length === 0 ? (
           <EmptyState
             icon={Layers}
-            title="No variants"
-            description="Add variants to differentiate your products"
+            title={t('variants.empty.title')}
+            description={t('variants.empty.description')}
+            action={{ label: t('variants.addVariant'), onClick: () => setShowCreate(true) }}
           />
         ) : (
           variants.map((v, i) => {

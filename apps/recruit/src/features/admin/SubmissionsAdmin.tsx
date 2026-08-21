@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { cn } from '@voxire/ui';
+import { cn, EmptyState } from '@voxire/ui';
 import { toast } from 'sonner';
-import { Mail, Phone, FileText } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Mail, Phone, FileText, Inbox } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 
 import {
@@ -23,9 +24,10 @@ const STATUSES = ['new', 'reviewed', 'interviewing', 'offered', 'hired', 'reject
 const PAGE_SIZE = 20;
 
 const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<string>('');
   const [page, setPage] = useState<number>(0);
-  const { data, isLoading } = useAdminSubmissions(filter, PAGE_SIZE, page * PAGE_SIZE);
+  const { data, isLoading, refetch } = useAdminSubmissions(filter, PAGE_SIZE, page * PAGE_SIZE);
   const update = useUpdateSubmissionStatus();
   const submissions = data?.submissions ?? [];
 
@@ -57,17 +59,28 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
 
         <div
           className="mt-6 overflow-hidden rounded-lg border"
-          style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
+          style={{
+            borderColor: 'var(--recruit-admin-border)',
+            background: 'var(--recruit-admin-surface)',
+          }}
         >
           {isLoading ? (
             <div className="p-10 text-center text-sm text-white/60">Loading…</div>
           ) : submissions.length === 0 ? (
-            <div className="p-10 text-center text-sm text-white/60">
-              No applications yet{filter && ` at this stage`}.
-            </div>
+            <EmptyState
+              icon={Inbox}
+              title={
+                filter ? t('emptyStates.submissionsNoneFiltered') : t('emptyStates.submissionsNone')
+              }
+              action={
+                filter
+                  ? { label: t('emptyStates.clearFilter'), onClick: () => handleFilterChange('') }
+                  : { label: t('emptyStates.refresh'), onClick: () => void refetch() }
+              }
+            />
           ) : (
             <>
-              <ul className="divide-y" style={{ borderColor: '#1f1f1f' }}>
+              <ul className="divide-y" style={{ borderColor: 'var(--recruit-admin-border)' }}>
                 {submissions.map((s) => (
                   <li
                     key={s.id}
@@ -162,7 +175,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                         );
                       }}
                       className="rounded-md border bg-black/40 px-3 py-1.5 text-sm outline-none focus:border-white/40"
-                      style={{ borderColor: '#2a2a2a' }}
+                      style={{ borderColor: 'var(--recruit-admin-border-strong)' }}
                     >
                       {STATUSES.map((opt) => (
                         <option key={opt} value={opt}>
@@ -176,7 +189,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
               {submissions.length > 0 && (
                 <div
                   className="flex items-center justify-between border-t px-6 py-3 text-xs text-white/60"
-                  style={{ borderColor: '#1f1f1f' }}
+                  style={{ borderColor: 'var(--recruit-admin-border)' }}
                 >
                   <span>Page {page + 1}</span>
                   <div className="flex gap-2">
@@ -184,7 +197,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                       disabled={page === 0}
                       onClick={() => setPage((p) => Math.max(0, p - 1))}
                       className="rounded border px-3 py-1 text-xs text-white hover:bg-white/10 disabled:opacity-40"
-                      style={{ borderColor: '#1f1f1f' }}
+                      style={{ borderColor: 'var(--recruit-admin-border)' }}
                     >
                       Previous
                     </button>
@@ -192,7 +205,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                       disabled={submissions.length < PAGE_SIZE}
                       onClick={() => setPage((p) => p + 1)}
                       className="rounded border px-3 py-1 text-xs text-white hover:bg-white/10 disabled:opacity-40"
-                      style={{ borderColor: '#1f1f1f' }}
+                      style={{ borderColor: 'var(--recruit-admin-border)' }}
                     >
                       Next
                     </button>
@@ -233,7 +246,7 @@ const CustomAnswers: React.FC<{ submission: Submission }> = ({ submission }) => 
   return (
     <div
       className="mt-3 space-y-1.5 rounded-md border p-3"
-      style={{ borderColor: '#1f1f1f', background: 'rgba(255,255,255,0.02)' }}
+      style={{ borderColor: 'var(--recruit-admin-border)', background: 'rgba(255,255,255,0.02)' }}
     >
       {ids.map((id) => {
         const field = byId.get(id);

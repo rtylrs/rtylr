@@ -1,6 +1,7 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useParams, useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   Send,
@@ -9,14 +10,17 @@ import {
   UserMinus,
   DollarSign,
   Mail,
+  FileQuestion,
 } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useGetCampaign, useCampaignStats } from '../../shared/hooks/queries/useCampaigns';
-import { Breadcrumbs, Card, SkeletonList, EmptyState } from '../../shared/components/ui';
+import { Breadcrumbs, Card, SkeletonList } from '../../shared/components/ui';
 import { CampaignStatsCard } from '../../shared/components/crm';
 
 const CampaignDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const campaignId = Number(id);
   const {
     data: fetched,
@@ -45,9 +49,13 @@ const CampaignDetail: React.FC = () => {
     return (
       <div style={{ maxWidth: '1200px' }}>
         <EmptyState
-          icon={Mail}
-          title="Campaign not found"
-          description="This campaign could not be loaded."
+          icon={FileQuestion}
+          title={t('crm.campaignDetail.notFoundTitle')}
+          description={t('crm.campaignDetail.notFoundDescription')}
+          action={{
+            label: t('crm.campaignDetail.backToCampaigns'),
+            onClick: () => navigate({ to: '/campaigns' }),
+          }}
         />
       </div>
     );

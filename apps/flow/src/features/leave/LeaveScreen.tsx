@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertCircle, Plus, X } from 'lucide-react';
+import { AlertCircle, CalendarDays, Plus, Wallet, X } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useMyEmployeeId } from '../../shared/hooks/useMyEmployeeId';
 import { CardSkeleton } from '../../shared/components/Skeleton';
-import EmptyState from '../../shared/components/EmptyState';
 import { hasQueryFailed } from '../../shared/lib/queryFailureUtils';
 import {
   useCancelLeaveRequest,
@@ -79,11 +79,20 @@ const LeaveScreen = (): React.JSX.Element => {
               icon={AlertCircle}
               title={t('flow.leave.loadBalancesFailedTitle')}
               description={t('flow.leave.loadBalancesFailedDescription')}
+              action={{
+                label: t('flow.leave.retryCta'),
+                onClick: () => void balancesQuery.refetch(),
+              }}
             />
           ) : balances.length === 0 ? (
-            <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
-              {t('flow.leave.noBalances')}
-            </p>
+            <EmptyState
+              icon={Wallet}
+              title={t('flow.leave.noBalances')}
+              action={{
+                label: t('flow.leave.newRequest'),
+                onClick: () => setDialogOpen(true),
+              }}
+            />
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
               {balances.map((balance) => (
@@ -138,11 +147,20 @@ const LeaveScreen = (): React.JSX.Element => {
               icon={AlertCircle}
               title={t('flow.leave.loadRequestsFailedTitle')}
               description={t('flow.leave.loadRequestsFailedDescription')}
+              action={{
+                label: t('flow.leave.retryCta'),
+                onClick: () => void requestsQuery.refetch(),
+              }}
             />
           ) : requests.length === 0 ? (
-            <p className="text-[13px]" style={{ color: 'var(--flow-text-muted)' }}>
-              {t('flow.leave.noRequests')}
-            </p>
+            <EmptyState
+              icon={CalendarDays}
+              title={t('flow.leave.noRequests')}
+              action={{
+                label: t('flow.leave.newRequest'),
+                onClick: () => setDialogOpen(true),
+              }}
+            />
           ) : (
             <ul className="space-y-1.5">
               {requests.map((request) => (

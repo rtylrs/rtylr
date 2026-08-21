@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
-import { Plus, Trash2, ExternalLink, Edit3 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Plus, Trash2, ExternalLink, Edit3, Briefcase } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 
 import {
   useAdminCareers,
@@ -22,6 +24,7 @@ import CareerEditor from './CareerEditor';
  * list stays visible (and rank-ordered by created_at) while editing.
  */
 const CareersAdmin: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const { data: careersData, isLoading } = useAdminCareers();
   const { data: customData } = useAdminCustomization();
   const { data: submissionsData } = useAdminSubmissions();
@@ -73,18 +76,23 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
 
         <div
           className="mt-8 overflow-hidden rounded-lg border"
-          style={{ borderColor: '#1f1f1f', background: '#0f0f0f' }}
+          style={{
+            borderColor: 'var(--recruit-admin-border)',
+            background: 'var(--recruit-admin-surface)',
+          }}
         >
           {isLoading ? (
             <div className="p-10 text-center text-sm text-white/60">Loading…</div>
           ) : careers.length === 0 ? (
-            <div className="p-10 text-center text-sm text-white/60">
-              No roles yet. Click "New role" to create your first posting.
-            </div>
+            <EmptyState
+              icon={Briefcase}
+              title={t('emptyStates.rolesNone')}
+              action={{ label: t('emptyStates.createRole'), onClick: () => setCreating(true) }}
+            />
           ) : (
             <table className="w-full">
               <thead>
-                <tr className="border-b" style={{ borderColor: '#1f1f1f' }}>
+                <tr className="border-b" style={{ borderColor: 'var(--recruit-admin-border)' }}>
                   <Th>Title</Th>
                   <Th>Department</Th>
                   <Th>Location</Th>
@@ -97,7 +105,7 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
                   <tr
                     key={c.id}
                     className="border-b transition hover:bg-white/5"
-                    style={{ borderColor: '#1f1f1f' }}
+                    style={{ borderColor: 'var(--recruit-admin-border)' }}
                   >
                     <td className="px-4 py-3 font-medium">{c.title}</td>
                     <td className="px-4 py-3 text-sm text-white/70">{c.department || '-'}</td>
@@ -107,9 +115,11 @@ const CareersAdmin: React.FC = (): React.JSX.Element => {
                         className="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium"
                         style={{
                           background: c.isPublished
-                            ? 'rgba(16,185,129,0.15)'
+                            ? 'color-mix(in srgb, var(--recruit-admin-success) 15%, transparent)'
                             : 'rgba(255,255,255,0.08)',
-                          color: c.isPublished ? '#10b981' : 'rgba(255,255,255,0.6)',
+                          color: c.isPublished
+                            ? 'var(--recruit-admin-success)'
+                            : 'rgba(255,255,255,0.6)',
                         }}
                       >
                         {c.isPublished ? 'Published' : 'Draft'}

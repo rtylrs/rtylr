@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
+import { Settings as SettingsIcon } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { INDUSTRIES } from '@voxire/config';
 import { useHrSettings, useUpdateHrSettings } from '../../shared/hooks/useHrExtras';
 import {
@@ -11,14 +14,14 @@ import {
   Input,
   Select,
   Skeleton,
-  EmptyState,
   useIsMobile,
 } from '../../shared/components/ui';
 import { HrSettings } from '../../shared/services/hrExtras';
 
 const Settings: React.FC = () => {
+  const { t } = useTranslation();
   const isMobile = useIsMobile(900);
-  const { data, isLoading, isError, isFetching, refetch } = useHrSettings();
+  const { data, isLoading, isError, refetch } = useHrSettings();
   const update = useUpdateHrSettings();
 
   const [form, setForm] = useState<HrSettings | null>(null);
@@ -31,19 +34,10 @@ const Settings: React.FC = () => {
     return (
       <div role="alert">
         <EmptyState
-          title="Unable to load HR settings"
-          description="Please try again."
-          action={
-            <Button
-              variant="primary"
-              onClick={() => {
-                void refetch();
-              }}
-              disabled={isFetching}
-            >
-              Retry
-            </Button>
-          }
+          icon={SettingsIcon}
+          title={t('errors.hrSettingsLoadFailed')}
+          description={t('errors.generic')}
+          action={{ label: t('common.retry'), onClick: () => void refetch() }}
         />
       </div>
     );

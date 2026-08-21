@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { MessageSquare, Plus, Calendar, Clock } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useOneOnOnes, useCreateOneOnOne } from '../../shared/hooks/useHrExtras';
 import { useStaff } from '../staff/useStaff';
 import {
   Card,
   SectionHeader,
   Button,
-  EmptyState,
   Skeleton,
   Pill,
   Modal,
@@ -20,6 +21,7 @@ import {
 } from '../../shared/components/ui';
 
 const OneOnOnes: React.FC = () => {
+  const { t } = useTranslation();
   const isMobile = useIsMobile(900);
   const { data, isLoading } = useOneOnOnes();
   const { data: staff = [] } = useStaff();
@@ -81,9 +83,10 @@ const OneOnOnes: React.FC = () => {
           <Skeleton height={200} />
         ) : !data || data.length === 0 ? (
           <EmptyState
-            icon={<MessageSquare size={20} />}
-            title="No 1-on-1s scheduled"
-            description="Managers will see upcoming 1-on-1s here."
+            icon={MessageSquare}
+            title={t('reviews.oneOnOnes.emptyTitle')}
+            description={t('reviews.oneOnOnes.emptyDescription')}
+            action={{ label: t('reviews.oneOnOnes.schedule'), onClick: () => setOpen(true) }}
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
