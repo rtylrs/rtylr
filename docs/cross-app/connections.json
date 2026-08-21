@@ -209,7 +209,8 @@
       "gap": "available-today",
       "status": "rejected",
       "failedRule": "bar-1",
-      "reason": "Nice to have, not Essential or High value. A manager who wants this can open Flow, which is one click away and shows more than a summary widget would."
+      "reason": "Nice to have, not Essential or High value. A manager who wants this can open Flow, which is one click away and shows more than a summary widget would.",
+      "temptingBadIdea": true
     },
     {
       "id": "FIN->FLOW-01",
@@ -387,7 +388,8 @@
       "gap": "available-today",
       "status": "rejected",
       "failedRule": "bar-2",
-      "reason": "Already partly built: insights declares RoadmapProject.project_id and WorkloadEntry.user_id and Flow has its own flow_insights module. Adding a second path to the same numbers would duplicate an existing aggregate rather than connect anything new."
+      "reason": "Already partly built: insights declares RoadmapProject.project_id and WorkloadEntry.user_id and Flow has its own flow_insights module. Adding a second path to the same numbers would duplicate an existing aggregate rather than connect anything new.",
+      "temptingBadIdea": true
     },
     {
       "id": "HUB->ALL-01",
@@ -564,7 +566,8 @@
       "gap": "available-today",
       "status": "rejected",
       "failedRule": "bar-1",
-      "reason": "Already built: dash reads 9 pos endpoints and insights declares BestSeller/SlowMover over erp products. A third path to the same numbers adds an edge without adding an answer."
+      "reason": "Already built: dash reads 9 pos endpoints and insights declares BestSeller/SlowMover over erp products. A third path to the same numbers adds an edge without adding an answer.",
+      "temptingBadIdea": true
     },
     {
       "id": "ERP->INS-01",
@@ -597,7 +600,8 @@
       "gap": "needs-endpoint",
       "status": "rejected",
       "failedRule": "bar-4",
-      "reason": "Negative ROI: inviting a login and hiring a person are genuinely different acts, and auto-creating an employee for every invited contractor or agency user would create records an HR admin then has to clean up. The reverse edge (REC->HR-01) is the one worth building."
+      "reason": "Negative ROI: inviting a login and hiring a person are genuinely different acts, and auto-creating an employee for every invited contractor or agency user would create records an HR admin then has to clean up. The reverse edge (REC->HR-01) is the one worth building.",
+      "temptingBadIdea": true
     },
     {
       "id": "FIN->HUB-01",
@@ -614,7 +618,8 @@
       "gap": "needs-endpoint",
       "status": "rejected",
       "failedRule": "bar-2",
-      "reason": "Confuses two different money flows. hub.billing already handles what the tenant owes RTYLR (packages/voxie/api/hub/billing/v1); finance.invoices is what the tenant's own customers owe the tenant. Connecting them would suspend a customer's account because their client paid late."
+      "reason": "Confuses two different money flows. hub.billing already handles what the tenant owes RTYLR (packages/voxie/api/hub/billing/v1); finance.invoices is what the tenant's own customers owe the tenant. Connecting them would suspend a customer's account because their client paid late.",
+      "temptingBadIdea": true
     },
     {
       "id": "CRM->INS-01",
@@ -630,7 +635,8 @@
       "gap": "available-today",
       "status": "rejected",
       "failedRule": "bar-1",
-      "reason": "insights already ships a customers area and crm ships its own dashboard capability (packages/voxie/api/crm/dashboard/v1). Duplicating the rollup would give two numbers for one question, which is worse than one."
+      "reason": "insights already ships a customers area and crm ships its own dashboard capability (packages/voxie/api/crm/dashboard/v1). Duplicating the rollup would give two numbers for one question, which is worse than one.",
+      "temptingBadIdea": true
     },
     {
       "id": "HR->FIN-01",
@@ -663,7 +669,8 @@
       "gap": "available-today",
       "status": "rejected",
       "failedRule": "bar-5",
-      "reason": "Technically trivial and nobody would notice. Campaign copy is written as free text today and a product picker saves one paste. The most tempting kind of low-value edge: cheap, obvious, and permanently owned by someone."
+      "reason": "Technically trivial and nobody would notice. Campaign copy is written as free text today and a product picker saves one paste. The most tempting kind of low-value edge: cheap, obvious, and permanently owned by someone.",
+      "temptingBadIdea": true
     },
     {
       "id": "HR->POS-01",
