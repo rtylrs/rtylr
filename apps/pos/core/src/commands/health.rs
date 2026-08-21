@@ -89,8 +89,7 @@ fn probe_serial(port_name: &str, baud_rate: u32) -> DeviceStatus {
 }
 
 fn probe_tcp(host: &str, port: u16) -> DeviceStatus {
-    let addr_str = format!("{}:{}", host, port);
-    let name = addr_str.clone();
+    let name = format!("{}:{}", host, port);
     let device_type_hint = infer_tcp_device_type(port);
 
     if host.trim().is_empty() {
