@@ -1,4 +1,5 @@
 import { formatCurrency } from '../../shared/utils/format';
+import { isRetryableTransportError } from '../../shared/utils/errorClassify';
 import type {
   CashMovementPayload,
   QueuedCashMovement,
@@ -31,6 +32,16 @@ interface CashMovementContext {
   terminalId?: number | null;
   employeeId: number | null;
   resolveSessionId: () => Promise<number>;
+}
+
+function requireMovementContext(context: CashMovementContext): {
+  branchId: number;
+  employeeId: number;
+} {
+  if (!context.branchId || !context.employeeId) {
+    throw new Error('Select a terminal and sign in before recording cash movements.');
+  }
+  return { branchId: context.branchId, employeeId: context.employeeId };
 }
 
 interface ProcessCashDrawerActionParams extends RecordCashDrawerActionParams {
@@ -89,33 +100,41 @@ export async function processCashDrawerAction({
   syncMovement,
   enqueueMovement,
 }: ProcessCashDrawerActionParams): Promise<ProcessCashDrawerActionResult> {
-  const result = recordCashDrawerAction({ action, amountInput, reason, drawer });
-  if (action === 'float') return { ...result, queued: false };
-
-  if (!context.branchId || !context.employeeId) {
-    throw new Error('Select a terminal and sign in before recording cash movements.');
+  if (action === 'float') {
+    const floatResult = recordCashDrawerAction({ action, amountInput, reason, drawer });
+    return { ...floatResult, queued: false };
   }
+
+  // Every other movement syncs or queues: validate the terminal/session
+  // context BEFORE mutating the local drawer, otherwise a rejected movement
+  // leaves the drawer corrupted with nothing synced or queued to repair it.
+  const { branchId, employeeId } = requireMovementContext(context);
+
+  const result = recordCashDrawerAction({ action, amountInput, reason, drawer });
 
   try {
     const sessionId = await context.resolveSessionId();
     const payload: CashMovementPayload = {
-      branch_id: context.branchId,
+      branch_id: branchId,
       terminal_id: context.terminalId ?? null,
       session_id: sessionId,
-      employee_id: context.employeeId,
+      employee_id: employeeId,
       amount: result.amount,
       reason: reason.trim() || null,
     };
     await syncMovement(action, payload);
     return { ...result, queued: false };
-  } catch {
+  } catch (error) {
+    // Only transport-class failures may go to the offline queue; server
+    // rejections (4xx) would fail forever as poison entries.
+    if (!isRetryableTransportError(error)) throw error;
     // Queue with a session_id of 0; the replay path re-resolves the open
     // session before posting.
     const payload: CashMovementPayload = {
-      branch_id: context.branchId,
+      branch_id: branchId,
       terminal_id: context.terminalId ?? null,
       session_id: 0,
-      employee_id: context.employeeId,
+      employee_id: employeeId,
       amount: result.amount,
       reason: reason.trim() || null,
     };

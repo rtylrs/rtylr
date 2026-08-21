@@ -20,8 +20,11 @@ const CashDropScreen: React.FC = () => {
   const [action, setAction] = useState<CashDrawerAction>('drop');
   const [amount, setAmount] = useState('');
   const [reason, setReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const submit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
     try {
       const result = await processCashDrawerAction({
         action,
@@ -46,6 +49,8 @@ const CashDropScreen: React.FC = () => {
       setReason('');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Unable to record cash movement.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -93,10 +98,11 @@ const CashDropScreen: React.FC = () => {
             />
           )}
           <button
-            onClick={submit}
-            className="w-full h-12 rounded-lg bg-pos-text text-pos-bg font-bold"
+            onClick={() => void submit()}
+            disabled={submitting}
+            className="w-full h-12 rounded-lg bg-pos-text text-pos-bg font-bold disabled:opacity-50"
           >
-            Record
+            {submitting ? 'Recording…' : 'Record'}
           </button>
         </div>
         <div>
