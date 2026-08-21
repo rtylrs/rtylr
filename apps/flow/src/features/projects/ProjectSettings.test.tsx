@@ -374,6 +374,9 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
         role: 'member',
       },
     ];
+    // The role-gating block above leaves this returning false, which would
+    // disable every control here and make the assertions pass vacuously.
+    canManageProjectMock.mockReturnValue(true);
     updateProjectMutate.mockClear();
     removeMemberMutate.mockClear();
     updateRoleMutate.mockClear();
@@ -387,7 +390,9 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
   it('does not show a call-site toast when removing a member fails - the hook already shows one', () => {
     renderProjectSettings();
     fireEvent.click(screen.getByRole('button', { name: 'Members' }));
-    fireEvent.click(screen.getByTitle('Remove'));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'flow.projectSettings.removeMemberLabel' })
+    );
 
     const [, options] = removeMemberMutate.mock.calls[0];
     act(() => options.onError?.(new Error('boom')));
@@ -398,7 +403,10 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
   it('does not show a call-site toast when updating a member role fails - the hook already shows one', () => {
     renderProjectSettings();
     fireEvent.click(screen.getByRole('button', { name: 'Members' }));
-    fireEvent.change(screen.getByDisplayValue('Member'), { target: { value: 'admin' } });
+    fireEvent.change(
+      screen.getByRole('combobox', { name: 'flow.projectSettings.roleSelectLabel' }),
+      { target: { value: 'admin' } }
+    );
 
     const [, options] = updateRoleMutate.mock.calls[0];
     act(() => options.onError?.(new Error('boom')));
