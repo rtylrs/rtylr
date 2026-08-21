@@ -257,5 +257,6 @@ export const cases = [
   ["apps/insights/src/features/revenue/Revenue.tsx", "audit-batch-255-suite-23"],
   ["apps/menu/src/screens/Public/SlugLanding/LocationMenu.tsx", "audit-batch-256-suite-23"],
   ["apps/recruit/src/templates/editorial/Index.tsx", "audit-batch-257-suite-23"],
+  ["apps/auth/src/shared/components/AuthShowcase.tsx", "audit-batch-258-suite-23"],
 ];
 

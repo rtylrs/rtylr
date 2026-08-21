@@ -257,5 +257,6 @@ export const cases = [
   ["apps/insights/src/features/financial/Financial.test.tsx", "audit-batch-255-suite-14"],
   ["apps/menu/src/layouts/Public/PublicHeader.tsx", "audit-batch-256-suite-14"],
   ["apps/recruit/src/features/public/CareerDetail.tsx", "audit-batch-257-suite-14"],
+  ["apps/auth/src/features/register/Register.test.tsx", "audit-batch-258-suite-14"],
 ];
 

@@ -257,5 +257,6 @@ export const cases = [
   ["apps/hr/src/shared/hooks/useHrExtras.test.tsx", "audit-batch-255-suite-08"],
   ["apps/menu/src/features/cart/Checkout.test.tsx", "audit-batch-256-suite-08"],
   ["apps/recruit/src/features/admin/SectionsAdmin.test.tsx", "audit-batch-257-suite-08"],
+  ["apps/auth/src/features/email-verification/VerifyEmail.tsx", "audit-batch-258-suite-08"],
 ];
 
