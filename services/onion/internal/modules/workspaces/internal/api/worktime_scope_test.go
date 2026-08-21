@@ -13,9 +13,17 @@ import (
 	flowtimev1 "github.com/voxire/voxie/gen/go/flow/time/v1"
 )
 
-// scope() denies before touching the Service, so a nil Service is enough to
-// prove the permission check runs first - if it did not, this would panic
-// instead of returning a permission error, which fails the test either way.
+// These are the deny cases only, and a nil Service is enough for them: scope()
+// rejects before it ever reaches the Service, so a panic here would itself be
+// the failure.
+//
+// The allow case is deliberately not here. scope() goes on to call
+// tenant.ResolveBusinessID, which fails closed on a nil pool, so a permitted
+// caller and a rejected one both come back as PermissionDenied and no assertion
+// through this API can tell them apart. A test that expected the nil Service to
+// panic on the allow path was committed alongside scope() and never once passed.
+// The decision it meant to check is callerMayActFor, covered directly in
+// worktime_scope_internal_test.go. Do not re-add it here.
 
 func withCaller(userID int64) context.Context {
 	return authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
@@ -36,27 +44,6 @@ func TestWorkTimeAPI_GetWorkDay_DeniesEmployeeIDOverride(t *testing.T) {
 	var httpErr *onekithttp.Error
 	if !errors.As(err, &httpErr) || httpErr.HTTPStatusCode() != http.StatusForbidden {
 		t.Fatalf("want a 403 permission-denied error, got %v", err)
-	}
-}
-
-func TestWorkTimeAPI_GetWorkDay_AllowsOwnEmployeeID(t *testing.T) {
-	workTimeAPI := api.NewWorkTimeAPI(nil)
-
-	// Passes scope() and reaches the (nil) Service, which is expected to panic -
-	// recovered here so the test only asserts scope() let it through rather than
-	// denying a caller who is explicit about acting on their own behalf.
-	defer func() {
-		if r := recover(); r == nil {
-			t.Fatal("want a panic from the nil Service, meaning scope() let the self id through")
-		}
-	}()
-
-	_, err := workTimeAPI.GetWorkDay(withCaller(1001), &flowtimev1.GetWorkDayRequest{
-		Date:       "2026-08-16",
-		EmployeeId: int64Ptr(1001), // self, explicit
-	})
-	if err != nil {
-		t.Fatalf("want scope() to pass and panic in Service, got a returned error instead: %v", err)
 	}
 }
 

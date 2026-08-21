@@ -44,13 +44,27 @@ func NewWorkTimeAPI(service *application.Service) *WorkTimeAPI {
 // ErrNoBusinessScope is denied rather than defaulted: treating an unresolved
 // scope as "no filter" is what turns a tenancy bug into a cross-tenant read, and
 // the platform's own tenant package says so explicitly.
+// callerMayActFor reports whether a caller may read or write the work day of the
+// given employee id. A zero id means "whoever I am", which is always allowed;
+// any other value must be the caller's own.
+//
+// Split out of scope() because the rest of scope() needs a database: it goes on
+// to call tenant.ResolveBusinessID, which fails closed when the pool is nil. That
+// made the allow case impossible to observe through scope(), since a permitted
+// caller and a rejected one both came back as the same PermissionDenied. The
+// predicate is where the decision actually lives, so it is what the test asserts
+// on. See worktime_scope_internal_test.go.
+func callerMayActFor(callerUserID, employeeID int64) bool {
+	return employeeID <= 0 || employeeID == callerUserID
+}
+
 func (a *WorkTimeAPI) scope(ctx context.Context, employeeID int64) (ownerID, businessID, employee int64, err error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return 0, 0, 0, onekiterrors.PermissionDenied()
 	}
 
-	if employeeID > 0 && employeeID != authUser.UserID {
+	if !callerMayActFor(authUser.UserID, employeeID) {
 		return 0, 0, 0, onekiterrors.PermissionDenied()
 	}
 
