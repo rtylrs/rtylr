@@ -116,5 +116,6 @@ export const cases = [
   ["apps/erp/src/shared/components/TaxRateSelector.tsx", "audit-batch-114-suite-20"],
   ["apps/finance/src/features/quotes/Quotes.tsx", "audit-batch-115-suite-20"],
   ["apps/finance/src/shared/components/OverdueInvoicesWidget.tsx", "audit-batch-116-suite-20"],
+  ["apps/flow/src/features/leave/LeaveScreen.test.tsx", "audit-batch-117-suite-20"],
 ];
 

@@ -116,5 +116,6 @@ export const cases = [
   ["apps/erp/src/shared/components/TrialBanner.tsx", "audit-batch-114-suite-21"],
   ["apps/finance/src/features/reconcile/Reconcile.tsx", "audit-batch-115-suite-21"],
   ["apps/finance/src/shared/components/PLByCategoryChart.tsx", "audit-batch-116-suite-21"],
+  ["apps/flow/src/features/leave/LeaveScreen.tsx", "audit-batch-117-suite-21"],
 ];
 

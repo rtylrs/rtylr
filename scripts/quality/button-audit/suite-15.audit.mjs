@@ -116,5 +116,6 @@ export const cases = [
   ["apps/erp/src/shared/components/QuickStockAdjust.tsx", "audit-batch-114-suite-15"],
   ["apps/finance/src/features/invoices/NewInvoice.tsx", "audit-batch-115-suite-15"],
   ["apps/finance/src/shared/components/InvoiceStatusFilter.tsx", "audit-batch-116-suite-15"],
+  ["apps/flow/src/features/focus-today/FocusToday.test.tsx", "audit-batch-117-suite-15"],
 ];
 
