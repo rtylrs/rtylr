@@ -83,5 +83,6 @@ export const cases = [
   ["apps/dash/src/features/business-switcher/BusinessSwitcher.tsx", "audit-batch-081-suite-11"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/index.tsx", "audit-batch-082-suite-11"],
   ["apps/dash/src/features/qr-codes/QrCodes.tsx", "audit-batch-083-suite-11"],
+  ["apps/dash/src/layouts/DefaultLayout.tsx", "audit-batch-084-suite-11"],
 ];
 
