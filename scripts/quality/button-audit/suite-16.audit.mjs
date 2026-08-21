@@ -231,5 +231,6 @@ export const cases = [
   ["apps/insights/src/App.tsx", "audit-batch-229-suite-16"],
   ["apps/menu/src/features/cart/Checkout.tsx", "audit-batch-230-suite-16"],
   ["apps/recruit/src/features/admin/SectionsAdmin.tsx", "audit-batch-231-suite-16"],
+  ["apps/auth/src/features/invite/InviteAccept.tsx", "audit-batch-232-suite-16"],
 ];
 
