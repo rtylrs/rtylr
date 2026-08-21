@@ -112,7 +112,7 @@ export const BulkEditBar: React.FC = () => {
         >
           <Archive size={11} /> Archive
         </button>
-        <button
+        <button type="button"
           disabled={isPending || !canRemove}
           title={!canRemove ? t('common.deleteRestricted') : undefined}
           onClick={() =>

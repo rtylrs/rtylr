@@ -188,7 +188,7 @@ const StockTakes: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {st.status !== 'completed' && canManageStockTakes && (
-                      <button
+                      <button type="button"
                         aria-label="Complete stock take"
                         onClick={() =>
                           handleComplete(

@@ -59,7 +59,7 @@ const PaymentReminderPanel: React.FC = () => {
           </button>
         </div>
       ))}
-      <button
+      <button type="button"
         style={{ ...ghostBtn, marginTop: 14 }}
         disabled
         title="Reminder schedule coming in a future update"

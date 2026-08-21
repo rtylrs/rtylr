@@ -193,7 +193,7 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
             </button>
           </>
         ) : (
-          <button
+          <button type="button"
             onClick={() => setConfirming(true)}
             aria-label={t('common.delete')}
             className="h-7 w-7 rounded-lg flex items-center justify-center"

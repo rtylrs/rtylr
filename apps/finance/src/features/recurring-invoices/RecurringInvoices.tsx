@@ -83,7 +83,7 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
       width={420}
       footer={
         <>
-          <button style={ghostBtn} onClick={onClose} disabled={create.isPending}>
+          <button type="button" style={ghostBtn} onClick={onClose} disabled={create.isPending}>
             Cancel
           </button>
           <button type="button"

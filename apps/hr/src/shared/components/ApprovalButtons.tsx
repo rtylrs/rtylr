@@ -32,7 +32,7 @@ const ApprovalButtons: React.FC<Props> = ({
           style={{ minHeight: 60 }}
         />
         <div style={{ display: 'flex', gap: 4 }}>
-          <button
+          <button type="button"
             onClick={() => {
               onApprove(note);
               setNote('');

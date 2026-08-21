@@ -26,7 +26,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name = 'Product' })
   return (
     <>
       <div className="space-y-2">
-        <button
+        <button type="button"
           onClick={() => setLightbox(true)}
           className="w-full h-64 rounded-xl overflow-hidden"
           style={{ border: '1px solid var(--hub-border)' }}

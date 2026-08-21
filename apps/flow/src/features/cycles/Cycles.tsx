@@ -99,7 +99,7 @@ const Cycles: React.FC = () => {
             />
           </div>
           <div className="flex gap-2">
-            <button
+            <button type="button"
               onClick={() => {
                 if (!newName.trim() || !newStart || !newEnd) {
                   toast.error(t('errors.generic'));

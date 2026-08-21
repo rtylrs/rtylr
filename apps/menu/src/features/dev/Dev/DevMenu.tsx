@@ -294,7 +294,7 @@ const BtnGroup = <T extends string | number>({
 }) => (
   <div className="flex rounded-lg overflow-hidden border border-black/10">
     {options.map((o) => (
-      <button
+      <button type="button"
         key={String(o.value)}
         className={cn(
           'px-2.5 py-1 text-xs font-medium transition-colors',

@@ -419,7 +419,7 @@ const DefaultLayout: React.FC = () => {
             </Link>
             <CaretButton className="w-full justify-start mb-1" />
             <div className="relative">
-              <button
+              <button type="button"
                 onClick={() => setShowUserMenu((v) => !v)}
                 aria-label={showUserMenu ? 'Close user menu' : 'Open user menu'}
                 aria-expanded={showUserMenu}

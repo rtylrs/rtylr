@@ -178,7 +178,7 @@ export const StatusGroup: React.FC<{
   return (
     <div className="mb-2">
       {/* Group header */}
-      <button
+      <button type="button"
         onClick={() => setCollapsed((c) => !c)}
         className="w-full flex items-center gap-2.5 px-4 py-2 hover:bg-[var(--flow-hover)] transition-colors"
       >

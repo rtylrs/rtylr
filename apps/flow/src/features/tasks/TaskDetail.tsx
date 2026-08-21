@@ -382,7 +382,7 @@ const TaskDetail: React.FC = () => {
             >
               <Archive size={12} />
             </button>
-            <button
+            <button type="button"
               onClick={() => {
                 // Wait for the mutation to actually succeed before
                 // toasting + navigating away - otherwise on API

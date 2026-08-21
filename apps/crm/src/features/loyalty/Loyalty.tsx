@@ -161,7 +161,7 @@ const Loyalty: React.FC = () => {
                 >
                   {pointsPerDollar}
                 </span>
-                <button
+                <button type="button"
                   onClick={() => setPointsPerDollar((v) => Math.min(10, v + 1))}
                   style={{
                     width: '32px',

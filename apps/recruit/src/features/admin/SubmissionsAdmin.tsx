@@ -111,7 +111,7 @@ const SubmissionsAdmin: React.FC = (): React.JSX.Element => {
                           </span>
                         )}
                         {s.resumeUrl && (
-                          <button
+                          <button type="button"
                             onClick={async () => {
                               try {
                                 const url = await fetchResumeURL(s.id);

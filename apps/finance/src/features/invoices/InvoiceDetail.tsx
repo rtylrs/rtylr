@@ -89,7 +89,7 @@ const InvoiceDetail: React.FC = () => {
               </button>
             )}
             {canSendInvoice && (
-              <button style={primaryBtn} onClick={() => setShowSend(true)}>
+              <button type="button" style={primaryBtn} onClick={() => setShowSend(true)}>
                 <Send size={13} /> Send
               </button>
             )}

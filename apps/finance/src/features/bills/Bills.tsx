@@ -209,7 +209,7 @@ const Bills: React.FC = () => {
                 <CheckCircle size={13} /> Pay selected ({selected.size})
               </button>
             )}
-            <button style={ghostBtn} aria-label="New Bill" onClick={() => setShowCreate(true)}>
+            <button type="button" style={ghostBtn} aria-label="New Bill" onClick={() => setShowCreate(true)}>
               <Plus size={13} /> {t('bills.new')}
             </button>
           </>

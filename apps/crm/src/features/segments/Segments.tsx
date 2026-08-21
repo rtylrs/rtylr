@@ -308,7 +308,7 @@ function RuleBuilder({
 
         {/* Actions */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '4px' }}>
-          <button
+          <button type="button"
             onClick={onClose}
             style={{
               padding: '8px 16px',

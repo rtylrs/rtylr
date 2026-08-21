@@ -371,7 +371,7 @@ const Journal: React.FC = () => {
               <button style={ghostBtn} onClick={() => setShowCreate(false)}>
                 {t('cancel')}
               </button>
-              <button style={primaryBtn} onClick={handleCreate} disabled={createMut.isPending}>
+              <button type="button" style={primaryBtn} onClick={handleCreate} disabled={createMut.isPending}>
                 {createMut.isPending ? t('creating') : t('create')}
               </button>
             </div>

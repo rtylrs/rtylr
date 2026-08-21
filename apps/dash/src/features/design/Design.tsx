@@ -752,7 +752,7 @@ const Design: React.FC = () => {
                     {preset.name}
                   </span>
                   {presets.length > 1 && (
-                    <button
+                    <button type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         deletePreset(preset.id);

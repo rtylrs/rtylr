@@ -486,7 +486,7 @@ const Team: React.FC = (): React.JSX.Element => {
                               }}
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <button
+                              <button type="button"
                                 className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
                                 style={{ color: 'var(--dash-text-muted)' }}
                                 onClick={() => {
