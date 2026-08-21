@@ -31,5 +31,6 @@ export const cases = [
   ["apps/crm/src/shared/components/CommandPalette.tsx", "audit-batch-029-suite-09"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/InvoiceAgingWidget.tsx", "audit-batch-030-suite-09"],
   ["apps/dash/src/features/integrations/Integrations.test.tsx", "audit-batch-031-suite-09"],
+  ["apps/dash/src/features/settings/Settings/components/Businesses/Businesses.tsx", "audit-batch-032-suite-09"],
 ];
 
