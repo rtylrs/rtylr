@@ -10,7 +10,28 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
+# -O3 measurably helps the pure-C++ pixel loops (blurhash/phash DCT, parsing).
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+
+# Link-time optimisation: inlines the ops/ and transform/ call chains.
+# Off by default for reproducible debuggability; enable with -DMEDIA_ENGINE_LTO=ON.
+option(MEDIA_ENGINE_LTO "Enable link-time optimisation" OFF)
+if(MEDIA_ENGINE_LTO)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT _ipo_ok OUTPUT _ipo_msg)
+    if(_ipo_ok)
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+    else()
+        message(WARNING "LTO requested but not supported: ${_ipo_msg}")
+    endif()
+endif()
+
+# Native CPU tuning for the deployment host. OFF by default so artifacts stay
+# portable; the worker Dockerfile can pass -DMEDIA_ENGINE_ARCH=native.
+set(MEDIA_ENGINE_ARCH "generic" CACHE STRING "CPU architecture tuning (generic|native)")
+if(MEDIA_ENGINE_ARCH STREQUAL "native")
+    add_compile_options(-march=native)
+endif()
 
 # ── Dependencies ─────────────────────────────────────────────────────────────
 
@@ -31,25 +52,30 @@ pkg_check_modules(FFMPEG QUIET
 
 # Glob every translation unit under src/ (top level plus ops/ and video/) so new
 # operations are picked up automatically. CONFIGURE_DEPENDS re-globs on build.
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE CORE_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+list(FILTER CORE_SOURCES EXCLUDE REGEX ".*/main\\.cpp$")
 
-add_executable(media-engine ${SOURCES})
+# Core processing library, shared by the CLI binary and the benchmark harness.
+add_library(media_engine_core STATIC ${CORE_SOURCES})
 
-target_include_directories(media-engine PRIVATE
+target_include_directories(media_engine_core PUBLIC
     include
     ${VIPS_INCLUDE_DIRS}
 )
 
-target_link_libraries(media-engine PRIVATE
+target_link_libraries(media_engine_core PUBLIC
     ${VIPS_LIBRARIES}
 )
 
-target_compile_options(media-engine PRIVATE
+target_compile_options(media_engine_core PRIVATE
     ${VIPS_CFLAGS_OTHER}
     -Wall
     -Wextra
     -Wpedantic
 )
+
+add_executable(media-engine src/main.cpp)
+target_link_libraries(media-engine PRIVATE media_engine_core)
 
 # Surface the project version to the binary (used by the `version` subcommand).
 target_compile_definitions(media-engine PRIVATE
@@ -63,6 +89,16 @@ if(FFMPEG_FOUND)
     message(STATUS "FFmpeg found — video processing support enabled")
 else()
     message(STATUS "FFmpeg not found — video processing will be scaffolded only")
+endif()
+
+# ── Benchmarks ───────────────────────────────────────────────────────────────
+
+# Timing harness for the main processing paths. Run before/after a change:
+#   ./media-engine-bench --iters 7
+option(MEDIA_ENGINE_BENCH "Build the media-engine benchmark harness" ON)
+if(MEDIA_ENGINE_BENCH)
+    add_executable(media-engine-bench bench/benchmark.cpp)
+    target_link_libraries(media-engine-bench PRIVATE media_engine_core)
 endif()
 
 # ── Tests ───────────────────────────────────────────────────────────────────

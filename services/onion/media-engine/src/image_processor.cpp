@@ -1,4 +1,5 @@
 #include "image_processor.hpp"
+#include "encode.hpp"
 #include <vips/vips8>
 #include <algorithm>
 #include <stdexcept>
@@ -94,38 +95,17 @@ vips::VImage ImageProcessor::resizeImage(vips::VImage img, int targetW, int targ
 }
 
 void ImageProcessor::saveImage(vips::VImage img, const ImageOptions& opts) {
-    const std::string& fmt = opts.format;
-
-    if (fmt == "webp") {
-        img.webpsave(opts.outputPath.c_str(),
-            vips::VImage::option()
-                ->set("Q", opts.quality)
-                ->set("lossless", false)
-                ->set("strip", true)
-        );
-    } else if (fmt == "jpeg" || fmt == "jpg") {
-        img.jpegsave(opts.outputPath.c_str(),
-            vips::VImage::option()
-                ->set("Q", opts.quality)
-                ->set("strip", true)
-        );
-    } else if (fmt == "png") {
-        img.pngsave(opts.outputPath.c_str(),
-            vips::VImage::option()
-                ->set("compression", 6)
-                ->set("strip", true)
-        );
-    } else if (fmt == "avif") {
-        img.heifsave(opts.outputPath.c_str(),
-            vips::VImage::option()
-                ->set("Q", opts.quality)
-                ->set("compression", VIPS_FOREIGN_HEIF_COMPRESSION_AV1)
-                ->set("lossless", false)
-                ->set("strip", true)
-        );
-    } else {
-        throw ProcessingError("unsupported output format: " + fmt);
-    }
+    // Delegate to the shared encoder so format-specific tuning (webp effort,
+    // avif speed, png level) lives in exactly one place.
+    EncodeOptions enc;
+    if (opts.format == "webp")        enc.format = OutputFormat::WebP;
+    else if (opts.format == "jpeg" ||
+             opts.format == "jpg")    enc.format = OutputFormat::JPEG;
+    else if (opts.format == "png")    enc.format = OutputFormat::PNG;
+    else if (opts.format == "avif")   enc.format = OutputFormat::AVIF;
+    else throw ProcessingError("unsupported output format: " + opts.format);
+    enc.quality = opts.quality;
+    encodeToFile(std::move(img), opts.outputPath, enc);
 }
 
 } // namespace voxire

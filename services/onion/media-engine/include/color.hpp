@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include <array>
 #include <string>
+#include <utility>
 #include <vector>
 #include <cstdio>
 
@@ -43,13 +44,43 @@ inline int hexPair(const std::string& s, std::size_t i) {
 }
 } // namespace detail
 
+// Named colors accepted by parseColor beyond hex. Covers the CSS basics the
+// Cloudinary b_/tc_ directives see in practice.
+inline const std::array<std::pair<const char*, Color>, 22>& namedColors() {
+    static const std::array<std::pair<const char*, Color>, 22> kNames = {{
+        {"black",    {0, 0, 0, 255}},
+        {"white",    {255, 255, 255, 255}},
+        {"transparent", {0, 0, 0, 0}},
+        {"red",      {255, 0, 0, 255}},
+        {"green",    {0, 128, 0, 255}},
+        {"lime",     {0, 255, 0, 255}},
+        {"blue",     {0, 0, 255, 255}},
+        {"yellow",   {255, 255, 0, 255}},
+        {"cyan",     {0, 255, 255, 255}},
+        {"aqua",     {0, 255, 255, 255}},
+        {"magenta",  {255, 0, 255, 255}},
+        {"fuchsia",  {255, 0, 255, 255}},
+        {"orange",   {255, 165, 0, 255}},
+        {"purple",   {128, 0, 128, 255}},
+        {"pink",     {255, 192, 203, 255}},
+        {"brown",    {165, 42, 42, 255}},
+        {"maroon",   {128, 0, 0, 255}},
+        {"navy",     {0, 0, 128, 255}},
+        {"olive",    {128, 128, 0, 255}},
+        {"teal",     {0, 128, 128, 255}},
+        {"gray",     {128, 128, 128, 255}},
+        {"grey",     {128, 128, 128, 255}},
+    }};
+    return kNames;
+}
+
 // parseColor accepts #RGB, #RGBA, #RRGGBB, #RRGGBBAA (with or without the
-// leading '#'), plus the named colors black/white/transparent. Throws
+// leading '#'), plus common named colors (see namedColors). Throws
 // ProcessingError on anything else.
 inline Color parseColor(const std::string& in) {
-    if (in == "transparent") return Color{0, 0, 0, 0};
-    if (in == "black")       return Color{0, 0, 0, 255};
-    if (in == "white")       return Color{255, 255, 255, 255};
+    for (const auto& [name, col] : namedColors()) {
+        if (in == name) return col;
+    }
 
     std::string s = in;
     if (!s.empty() && s[0] == '#') s = s.substr(1);

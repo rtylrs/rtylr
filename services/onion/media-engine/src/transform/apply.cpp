@@ -186,5 +186,75 @@ vips::VImage applyChain(vips::VImage img, const std::string& chain) {
     return img;
 }
 
+std::optional<vips::VImage> tryApplyChainFromFile(const std::string& path,
+                                                  const std::string& chain) {
+    const auto steps = splitSteps(chain);
+    if (steps.empty()) return std::nullopt;
+
+    // Only the first step can be folded into the decode. If it carries any
+    // directive beyond plain geometry we fall back to the generic pipeline.
+    const auto p = parseParams(steps[0]);
+    for (const auto& [key, val] : p) {
+        if (key != "w" && key != "h" && key != "c" && key != "g") {
+            return std::nullopt;
+        }
+    }
+
+    const auto strW = p.find("w");
+    const auto strH = p.find("h");
+    const int w = strW != p.end() && !strW->second.empty()
+        ? parseIntStrict(strW->second, "w") : 0;
+    const int h = strH != p.end() && !strH->second.empty()
+        ? parseIntStrict(strH->second, "h") : 0;
+    if (w <= 0 && h <= 0) return std::nullopt;
+
+    const std::string crop = p.count("c") ? p.at("c") : "";
+    const std::string gravity = p.count("g") ? p.at("g") : "";
+
+    // Mirror applyGeometry's strategies exactly; anything else (extract with
+    // offsets, pad, fit modes needing post-steps) falls back.
+    //
+    // vips_thumbnail crops to the target aspect whenever both dimensions are
+    // given, so aspect-preserving fits ("", "limit") are only safe when the
+    // caller supplied a single dimension.
+    VipsSize size = VIPS_SIZE_BOTH;
+    VipsInteresting strat = VIPS_INTERESTING_CENTRE;
+    bool singleDim = false;
+    if ((w > 0) != (h > 0)) {
+        // vips_thumbnail takes the target width as its primary argument, so
+        // height-only fits stay on the generic path.
+        if (w <= 0) return std::nullopt;
+        singleDim = true;
+        size = (crop == "limit") ? VIPS_SIZE_DOWN : VIPS_SIZE_BOTH;
+    } else if (crop.empty() || crop == "limit") {
+        return std::nullopt; // both dims + aspect-preserving fit
+    } else if (crop == "scale") {
+        size = VIPS_SIZE_FORCE;
+    } else if (crop == "fill" || crop == "thumb") {
+        strat = (crop == "thumb" || gravity == "auto" || gravity.empty())
+            ? VIPS_INTERESTING_ATTENTION : VIPS_INTERESTING_CENTRE;
+    } else {
+        return std::nullopt;
+    }
+
+    // File-level thumbnail lets loaders shrink on decode (JPEG decoders
+    // reduce before decompression), which is dramatically cheaper than
+    // decoding full-size pixels and resampling afterwards. It also honours
+    // EXIF orientation by default, matching the autorot() in the slow path.
+    vips::VImage img = singleDim
+        ? vips::VImage::thumbnail(path.c_str(), w > 0 ? w : h,
+              vips::VImage::option()->set("size", size))
+        : vips::VImage::thumbnail(path.c_str(), w,
+              vips::VImage::option()
+                  ->set("height", h)
+                  ->set("size", size)
+                  ->set("crop", strat));
+
+    for (size_t i = 1; i < steps.size(); ++i) {
+        img = applyStep(img, parseParams(steps[i]));
+    }
+    return img;
+}
+
 } // namespace transform
 } // namespace voxire

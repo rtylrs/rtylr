@@ -25,6 +25,10 @@ int main() {
     CHECK_EQ(parseColor("black").r, 0);
     CHECK_EQ(parseColor("white").r, 255);
     CHECK_EQ(parseColor("transparent").a, 0);
+    CHECK_EQ(parseColor("red").r, 255);
+    CHECK_EQ(parseColor("red").g, 0);
+    CHECK_EQ(parseColor("navy").b, 128);
+    CHECK_EQ(parseColor("grey").r, parseColor("gray").r);
 
     // bands() drops alpha when opaque, keeps it when translucent.
     CHECK_EQ(parseColor("white").bands().size(), static_cast<size_t>(3));

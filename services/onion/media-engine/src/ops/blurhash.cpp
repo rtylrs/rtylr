@@ -30,6 +30,16 @@ double sRGBToLinear(int v) {
     return x <= 0.04045 ? x / 12.92 : std::pow((x + 0.055) / 1.055, 2.4);
 }
 
+// The sRGB transfer function is pure: build the 256-entry table once so the
+// hot DCT loop never calls std::pow.
+struct SRGBToLinearTable {
+    std::array<double, 256> v{};
+    SRGBToLinearTable() {
+        for (int i = 0; i < 256; ++i) v[i] = sRGBToLinear(i);
+    }
+};
+const SRGBToLinearTable kSRGBToLinear;
+
 int linearTosRGB(double v) {
     const double x = v < 0 ? 0 : (v > 1 ? 1 : v);
     const double r = x <= 0.0031308 ? x * 12.92 : 1.055 * std::pow(x, 1.0 / 2.4) - 0.055;
@@ -74,26 +84,51 @@ std::string blurHash(vips::VImage img, int xComponents, int yComponents) {
     std::vector<std::array<double, 3>> factors(
         static_cast<size_t>(xComponents) * yComponents, {0, 0, 0});
 
-    for (int cy = 0; cy < yComponents; ++cy) {
-        for (int cx = 0; cx < xComponents; ++cx) {
-            const double norm = (cx == 0 && cy == 0) ? 1.0 : 2.0;
-            double r = 0, g = 0, b = 0;
-            for (int y = 0; y < h; ++y) {
-                for (int x = 0; x < w; ++x) {
-                    const double basis = norm *
-                        std::cos(M_PI * cx * x / w) *
-                        std::cos(M_PI * cy * y / h);
-                    const unsigned char* px = data + (y * w + x) * bands;
-                    r += basis * sRGBToLinear(px[0]);
-                    g += basis * sRGBToLinear(bands > 1 ? px[1] : px[0]);
-                    b += basis * sRGBToLinear(bands > 2 ? px[2] : px[0]);
+    // Precompute the separable cosine bases: cos terms depend only on
+    // (component, coordinate), never on the other axis or the pixel colour.
+    // Evaluating them inside the pixel loops costs two std::cos calls per
+    // component per pixel; hoisted here they cost (xc*w + yc*h) in total.
+    std::vector<std::vector<double>> cosX(static_cast<size_t>(xComponents),
+        std::vector<double>(w));
+    std::vector<std::vector<double>> cosY(static_cast<size_t>(yComponents),
+        std::vector<double>(h));
+    for (int cx = 0; cx < xComponents; ++cx)
+        for (int x = 0; x < w; ++x)
+            cosX[cx][x] = std::cos(M_PI * cx * x / w);
+    for (int cy = 0; cy < yComponents; ++cy)
+        for (int y = 0; y < h; ++y)
+            cosY[cy][y] = std::cos(M_PI * cy * y / h);
+
+    for (int y = 0; y < h; ++y) {
+        const unsigned char* row = data + static_cast<size_t>(y) * w * bands;
+        for (int x = 0; x < w; ++x, row += bands) {
+            // Linearise once per pixel; every factor reuses these values.
+            const double lr = kSRGBToLinear.v[row[0]];
+            const double lg = kSRGBToLinear.v[bands > 1 ? row[1] : row[0]];
+            const double lb = kSRGBToLinear.v[bands > 2 ? row[2] : row[0]];
+            for (int cy = 0; cy < yComponents; ++cy) {
+                const double by = cosY[cy][y];
+                auto* f = &factors[static_cast<size_t>(cy) * xComponents];
+                for (int cx = 0; cx < xComponents; ++cx) {
+                    const double basis =
+                        ((cx == 0 && cy == 0) ? 1.0 : 2.0) * cosX[cx][x] * by;
+                    f[cx][0] += basis * lr;
+                    f[cx][1] += basis * lg;
+                    f[cx][2] += basis * lb;
                 }
             }
-            const double scale = 1.0 / (w * h);
-            factors[cy * xComponents + cx] = {r * scale, g * scale, b * scale};
         }
     }
     g_free(data);
+
+    // Normalise the accumulated sums (the old per-component scale, applied
+    // once now that accumulation is pixel-major).
+    const double norm = 1.0 / (static_cast<double>(w) * h);
+    for (auto& f : factors) {
+        f[0] *= norm;
+        f[1] *= norm;
+        f[2] *= norm;
+    }
 
     const int acCount = xComponents * yComponents - 1;
     std::string hash;

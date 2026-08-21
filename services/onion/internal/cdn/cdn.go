@@ -42,6 +42,11 @@ type CDN struct {
 	// of cache-miss requests must not fork an unbounded number of them.
 	engineSem chan struct{}
 
+	// engine keeps up to engineSem-capacity resident `media-engine --serve`
+	// processes warm, avoiding per-request fork/exec + VIPS_INIT cost, and
+	// falls back to single-shot exec when resident mode is unavailable.
+	engine *enginePool
+
 	// transformGroup collapses concurrent cache misses for the same derivative
 	// inside one process. Only the first request runs media-engine; waiters
 	// stream the stored object once it exists.
@@ -70,6 +75,7 @@ func New(db *sql.DB, store *storage.Client, baseURL string, maxUpload int64, med
 		mediaEngine: mediaEngine,
 		apiKey:      apiKey,
 		engineSem:   make(chan struct{}, concurrency),
+		engine:      newEnginePool(mediaEngine, concurrency),
 	}
 }
 

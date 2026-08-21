@@ -55,6 +55,7 @@ void encodeToFile(vips::VImage img, const std::string& path,
             img.webpsave(path.c_str(), vips::VImage::option()
                 ->set("Q", q)
                 ->set("lossless", opts.lossless)
+                ->set("effort", opts.webpEffort)
                 ->set("strip", opts.stripMetadata));
             return;
         case OutputFormat::JPEG:
@@ -65,7 +66,7 @@ void encodeToFile(vips::VImage img, const std::string& path,
             return;
         case OutputFormat::PNG:
             img.pngsave(path.c_str(), vips::VImage::option()
-                ->set("compression", 6)
+                ->set("compression", opts.pngCompression)
                 ->set("interlace", opts.progressive)
                 ->set("strip", opts.stripMetadata));
             return;
@@ -73,6 +74,7 @@ void encodeToFile(vips::VImage img, const std::string& path,
             img.heifsave(path.c_str(), vips::VImage::option()
                 ->set("Q", q)
                 ->set("compression", VIPS_FOREIGN_HEIF_COMPRESSION_AV1)
+                ->set("speed", opts.avifSpeed)
                 ->set("lossless", opts.lossless)
                 ->set("strip", opts.stripMetadata));
             return;

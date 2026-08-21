@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -98,10 +97,8 @@ func (c *CDN) generateTransformation(ctx context.Context, fileID int64, fileUUID
 
 	execCtx, cancel := context.WithTimeout(ctx, engineTimeout)
 	defer cancel()
-	// #nosec G204 -- mediaEngine is a server-side configured binary path; CLI args are built from validated params and temp paths.
-	cmd := exec.CommandContext(execCtx, c.mediaEngine, p.CLIArgs(tmpIn, tmpOut)...)
-	if out, runErr := cmd.CombinedOutput(); runErr != nil {
-		return "", fmt.Errorf("media-engine failed: %w\noutput: %s", runErr, out)
+	if err := c.runTransformed(execCtx, p.CLIArgs(tmpIn, tmpOut)); err != nil {
+		return "", err
 	}
 
 	resultFile, err := os.Open(tmpOut)
