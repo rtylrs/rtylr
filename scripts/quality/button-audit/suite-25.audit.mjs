@@ -180,5 +180,6 @@ export const cases = [
   ["apps/insights/src/routes/AppRoutes.tsx", "audit-batch-178-suite-25"],
   ["apps/recruit/src/features/admin/CareersAdmin.tsx", "audit-batch-179-suite-25"],
   ["apps/recruit/src/templates/shared/Header.tsx", "audit-batch-180-suite-25"],
+  ["apps/crm/src/features/campaigns/CampaignDetail.test.tsx", "audit-batch-181-suite-25"],
 ];
 
