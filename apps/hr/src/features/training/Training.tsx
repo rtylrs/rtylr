@@ -1,15 +1,10 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { useTranslation } from 'react-i18next';
 import { GraduationCap, Clock, Layers, Award } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useTraining, useTrainingProgress } from '../../shared/hooks/useHrExtras';
-import {
-  Card,
-  SectionHeader,
-  EmptyState,
-  Skeleton,
-  Pill,
-  ACCENT,
-} from '../../shared/components/ui';
+import { Card, SectionHeader, Skeleton, Pill, ACCENT } from '../../shared/components/ui';
 import TrainingProgress from '../../shared/components/TrainingProgress';
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -20,7 +15,8 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 const Training: React.FC = () => {
-  const { data: courses, isLoading } = useTraining();
+  const { t } = useTranslation();
+  const { data: courses, isLoading, refetch } = useTraining();
   const { data: progress = [] } = useTrainingProgress();
 
   return (
@@ -33,9 +29,10 @@ const Training: React.FC = () => {
           <Skeleton height={240} />
         ) : !courses || courses.length === 0 ? (
           <EmptyState
-            icon={<GraduationCap size={20} />}
-            title="No training courses"
-            description="Add courses employees need to complete."
+            icon={GraduationCap}
+            title={t('training.emptyTitle')}
+            description={t('training.emptyDescription')}
+            action={{ label: t('common.refresh'), onClick: () => refetch() }}
           />
         ) : (
           <>

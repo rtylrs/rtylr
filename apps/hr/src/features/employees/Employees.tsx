@@ -3,7 +3,8 @@ import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Users } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { QueryError } from '../../shared/components/ui';
 import { useListEmployees } from '../../shared/hooks/queries/useEmployees';
 import type { EmployeePayload } from '@voxire/voxie/hr/employee/v1/types';
@@ -121,9 +122,25 @@ const Employees = (): React.JSX.Element => {
                 />
               </div>
             ) : filteredEmployees.length === 0 ? (
-              <p className="py-12 text-center text-sm" style={{ color: 'var(--hr-text-dim)' }}>
-                {t('employees.noEmployees')}
-              </p>
+              <EmptyState
+                icon={Users}
+                title={t('employees.noEmployees')}
+                action={
+                  searchTerm || departmentFilter !== undefined || statusFilter !== undefined
+                    ? {
+                        label: t('common.clearFilters'),
+                        onClick: () => {
+                          setSearchTerm('');
+                          setDepartmentFilter(undefined);
+                          setStatusFilter(undefined);
+                        },
+                      }
+                    : {
+                        label: t('employees.addNew'),
+                        onClick: () => navigate({ to: '/employees/new' }),
+                      }
+                }
+              />
             ) : (
               <>
                 <div

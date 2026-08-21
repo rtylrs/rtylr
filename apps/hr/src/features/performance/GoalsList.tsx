@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { Target } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import type { ReviewGoalPayload } from '@voxire/voxie/hr/performance/v1/types';
 import { useListGoals, useCreateGoal } from '../../shared/hooks/queries/usePerformance';
 import { goalFormSchema } from '../../shared/schemas/performance';
@@ -13,7 +14,6 @@ import {
   Input,
   Textarea,
   Label,
-  EmptyState,
   Skeleton,
 } from '../../shared/components/ui';
 
@@ -173,14 +173,10 @@ const GoalsList = (): React.JSX.Element => {
           </div>
         ) : goals.length === 0 ? (
           <EmptyState
-            icon={<Target size={24} />}
+            icon={Target}
             title={t('performance.goals.emptyTitle')}
             description={t('performance.goals.emptyDescription')}
-            action={
-              <Button variant="primary" onClick={() => setFormOpen(true)}>
-                {t('performance.goals.addGoal')}
-              </Button>
-            }
+            action={{ label: t('performance.goals.addGoal'), onClick: () => setFormOpen(true) }}
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 16 }}>

@@ -1,30 +1,28 @@
 import React from 'react';
-import { Link } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { Settings } from 'lucide-react';
-import { EmptyState, SectionHeader } from './ui';
+import { EmptyState } from '@voxire/ui';
+import { SectionHeader } from './ui';
 import { useHRConfigStore } from '../stores/hrConfigStore';
 import { isPayrollConfigured } from '../lib/payrollConfig';
 import { useGetHRConfig } from '../hooks/queries/useSetup';
 
 export function PayrollConfigRequired(): React.JSX.Element {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <SectionHeader title={t('payroll.title')} subtitle={t('payroll.subtitle')} />
       <EmptyState
-        icon={<Settings size={20} />}
+        icon={Settings}
         title={t('payroll.configRequired')}
         description={t('payroll.configRequiredDescription')}
-        action={
-          <Link
-            to="/settings/payroll-config"
-            style={{ color: 'var(--hr-accent)', textDecoration: 'none', fontSize: 12 }}
-          >
-            {t('payroll.goToConfig')}
-          </Link>
-        }
+        action={{
+          label: t('payroll.goToConfig'),
+          onClick: () => navigate({ to: '/settings/payroll-config' }),
+        }}
       />
     </div>
   );

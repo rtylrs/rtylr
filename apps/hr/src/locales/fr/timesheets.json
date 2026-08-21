@@ -13,6 +13,7 @@
   "noEntries": "Aucune entrée de temps pour cette période.",
   "emptyTitle": "Pas encore de feuilles de temps",
   "emptyDescription": "Vos périodes de feuilles de temps apparaîtront ici.",
+  "managerViewEmptyDescription": "Les heures pointées des employés apparaîtront ici.",
   "filters": {
     "all": "Toutes",
     "draft": "Brouillon",

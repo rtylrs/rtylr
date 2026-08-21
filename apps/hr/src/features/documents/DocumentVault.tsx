@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText, Upload, AlertTriangle } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import {
   useListEmployeeDocuments,
   useUploadDocument,
@@ -8,7 +9,6 @@ import {
 import type { EmployeeDocumentPayload } from '@voxire/voxie/hr/document/v1/types';
 import {
   Card,
-  EmptyState,
   Skeleton,
   Pill,
   Button,
@@ -126,18 +126,10 @@ const DocumentVault = ({ employeeId }: Props): React.JSX.Element => {
         <Skeleton height={200} />
       ) : documents.length === 0 ? (
         <EmptyState
-          icon={<FileText size={20} />}
+          icon={FileText}
           title={t('documents.vault.emptyTitle')}
           description={t('documents.vault.emptyDescription')}
-          action={
-            <Button
-              variant="primary"
-              icon={<Upload size={13} />}
-              onClick={() => setShowUpload(true)}
-            >
-              {t('documents.vault.upload')}
-            </Button>
-          }
+          action={{ label: t('documents.vault.upload'), onClick: () => setShowUpload(true) }}
         />
       ) : (
         <Card style={{ padding: 0, overflow: 'hidden' }}>

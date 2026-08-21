@@ -1,12 +1,17 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from '@tanstack/react-router';
 import { Network } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
 import { useStaff } from '../staff/useStaff';
-import { Card, SectionHeader, EmptyState, Skeleton } from '../../shared/components/ui';
+import { Card, SectionHeader, Skeleton } from '../../shared/components/ui';
 import OrgNode, { OrgTreeNode } from '../../shared/components/OrgNode';
 import { StaffMember } from '../../shared/services/hrApi';
 
 const OrgChart: React.FC = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const { data, isLoading } = useStaff();
 
   const root = useMemo<OrgTreeNode | null>(() => {
@@ -30,14 +35,21 @@ const OrgChart: React.FC = () => {
     <>
       <HelmetContainer title="Org chart · rtylr" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <SectionHeader title="Org Chart" subtitle="Reporting hierarchy visualized" />
+        <SectionHeader
+          title={t('departments.orgChart.title')}
+          subtitle={t('departments.orgChart.subtitle')}
+        />
         {isLoading ? (
           <Skeleton height={260} />
         ) : !root ? (
           <EmptyState
-            icon={<Network size={20} />}
-            title="No employees"
-            description="Add employees to see the org chart."
+            icon={Network}
+            title={t('departments.orgChart.emptyTitle')}
+            description={t('departments.orgChart.emptyDescription')}
+            action={{
+              label: t('staff.inviteStaff'),
+              onClick: () => navigate({ to: '/employees/new' }),
+            }}
           />
         ) : (
           <Card style={{ overflowX: 'auto', padding: 32 }}>

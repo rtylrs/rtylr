@@ -25,6 +25,10 @@ vi.mock('sonner', () => ({
   toast: { success: vi.fn() },
 }));
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
 import Settings from './Settings';
 
 describe('Settings', () => {
@@ -45,11 +49,11 @@ describe('Settings', () => {
 
     render(<Settings />);
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Unable to load HR settings');
-    expect(screen.getByRole('button', { name: 'Retry' })).toBeEnabled();
+    expect(screen.getByRole('alert')).toHaveTextContent('errors.hrSettingsLoadFailed');
+    expect(screen.getByRole('button', { name: 'common.retry' })).toBeEnabled();
     expect(screen.queryByText('HR Settings')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.retry' }));
 
     expect(mocks.refetch).toHaveBeenCalledOnce();
   });

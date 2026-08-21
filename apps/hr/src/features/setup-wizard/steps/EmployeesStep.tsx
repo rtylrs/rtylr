@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { UserPlus, Upload } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useListEmployees } from '../../../shared/hooks/queries/useEmployees';
 import { toast } from 'sonner';
 import StepContainer from '../components/StepContainer';
@@ -64,9 +65,11 @@ const EmployeesStep = ({
         </div>
 
         {employees.length === 0 ? (
-          <p className="py-8 text-center text-sm" style={{ color: 'var(--hr-text-dim)' }}>
-            {t('setup.employees.noEmployeesHint')}
-          </p>
+          <EmptyState
+            icon={UserPlus}
+            title={t('setup.employees.noEmployeesHint')}
+            action={{ label: t('setup.employees.addEmployee'), onClick: onAddEmployee }}
+          />
         ) : (
           <div
             className="rounded-lg overflow-hidden"

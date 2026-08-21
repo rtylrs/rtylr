@@ -4,18 +4,10 @@ import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { FileText, ChevronRight } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useListTimesheets } from '../../shared/hooks/queries/useTimesheets';
 import type { TimesheetPayload } from '@voxire/voxie/hr/time_entry/v1/types';
-import {
-  SectionHeader,
-  Card,
-  Pill,
-  EmptyState,
-  Skeleton,
-  QueryError,
-  Tabs,
-  ACCENT,
-} from '../../shared/components/ui';
+import { SectionHeader, Card, Pill, Skeleton, QueryError, Tabs } from '../../shared/components/ui';
 
 function formatDuration(minutes: number): string {
   const h = Math.floor(minutes / 60);
@@ -83,9 +75,14 @@ const TimesheetsList = (): React.JSX.Element => {
           </div>
         ) : timesheets.length === 0 ? (
           <EmptyState
-            icon={<FileText size={20} />}
+            icon={FileText}
             title={t('timesheets.emptyTitle')}
             description={t('timesheets.emptyDescription')}
+            action={
+              statusFilter !== 'all'
+                ? { label: t('common.clearFilters'), onClick: () => setStatusFilter('all') }
+                : { label: t('common.refresh'), onClick: () => refetch() }
+            }
           />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

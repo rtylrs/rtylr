@@ -2,8 +2,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { HardDrive } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useListAssets } from '../../shared/hooks/queries/useEquipment';
-import { SectionHeader, Card, EmptyState, Skeleton, Pill } from '../../shared/components/ui';
+import { SectionHeader, Card, Skeleton, Pill } from '../../shared/components/ui';
 
 const pillStyle = (cssVar: string): React.CSSProperties => ({
   background: `color-mix(in srgb, ${cssVar} 13%, transparent)`,
@@ -20,7 +21,7 @@ const CONDITION_COLORS: Record<string, string> = {
 
 const AssetRegister = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { data, isLoading } = useListAssets();
+  const { data, isLoading, refetch } = useListAssets();
   const assets = data?.assets ?? [];
 
   return (
@@ -36,9 +37,10 @@ const AssetRegister = (): React.JSX.Element => {
           <Skeleton height={300} />
         ) : assets.length === 0 ? (
           <EmptyState
-            icon={<HardDrive size={20} />}
+            icon={HardDrive}
             title={t('equipment.assets.emptyTitle')}
             description={t('equipment.assets.emptyDescription')}
+            action={{ label: t('common.refresh'), onClick: () => refetch() }}
           />
         ) : (
           <Card style={{ padding: 0, overflow: 'hidden' }}>

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, MapPin } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { TIMEZONES } from '@voxire/config';
 import StepContainer from '../components/StepContainer';
 
@@ -31,6 +32,7 @@ const LocationsStep = ({ onNext, onBack, isSubmitting }: LocationsStepProps): Re
   const [newName, setNewName] = useState('');
   const [newAddress, setNewAddress] = useState('');
   const [newTimezone, setNewTimezone] = useState('');
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const addLocation = (): void => {
     const name = newName.trim();
@@ -105,6 +107,7 @@ const LocationsStep = ({ onNext, onBack, isSubmitting }: LocationsStepProps): Re
             <div className="flex flex-col gap-2">
               <div className="flex flex-col gap-2 sm:flex-row">
                 <input
+                  ref={nameInputRef}
                   type="text"
                   placeholder={t('setup.locations.locationName')}
                   value={newName}
@@ -157,9 +160,14 @@ const LocationsStep = ({ onNext, onBack, isSubmitting }: LocationsStepProps): Re
             </div>
 
             {locations.length === 0 ? (
-              <p className="text-center text-sm" style={{ color: 'var(--hr-text-dim)' }}>
-                {t('setup.locations.noLocations')}
-              </p>
+              <EmptyState
+                icon={MapPin}
+                title={t('setup.locations.noLocations')}
+                action={{
+                  label: t('setup.locations.addLocation'),
+                  onClick: () => nameInputRef.current?.focus(),
+                }}
+              />
             ) : (
               <div className="flex flex-col gap-2">
                 {locations.map((loc, index) => (

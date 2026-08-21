@@ -3,16 +3,10 @@ import { motion } from 'motion/react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { Clock, CheckCircle2, Play, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import type { Shift } from '../../shared/schemas/shifts';
 import { useShifts } from './useShifts';
-import {
-  SectionHeader,
-  Skeleton,
-  EmptyState,
-  Button,
-  Pill,
-  useIsMobile,
-} from '../../shared/components/ui';
+import { SectionHeader, Skeleton, Button, Pill, useIsMobile } from '../../shared/components/ui';
 
 const ACCENT = 'var(--hr-accent)';
 
@@ -68,7 +62,7 @@ const Shifts = (): React.JSX.Element => {
   const [weekOffset, setWeekOffset] = useState(0);
   const [selectedDay, setSelectedDay] = useState(todayIdx);
   const week = useMemo(() => getWeekRange(weekOffset), [weekOffset]);
-  const { data: fetchedShifts, isLoading } = useShifts();
+  const { data: fetchedShifts, isLoading, refetch } = useShifts();
   const shifts: Shift[] = fetchedShifts ?? [];
   const days = DAY_KEYS.map((k) => t(`timesheets.days.${k}`));
 
@@ -253,9 +247,10 @@ const Shifts = (): React.JSX.Element => {
 
           {dayShifts.length === 0 ? (
             <EmptyState
-              icon={<Calendar size={20} />}
+              icon={Calendar}
               title={t('shifts.emptyDay')}
               description={t('shifts.emptyDayDescription')}
+              action={{ label: t('common.refresh'), onClick: () => refetch() }}
             />
           ) : (
             dayShifts.map((s, i) => {

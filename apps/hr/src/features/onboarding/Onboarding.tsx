@@ -2,16 +2,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Rocket } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useOnboardingChecklist, useToggleOnboardingTask } from '../../shared/hooks/useHrExtras';
-import {
-  Card,
-  SectionHeader,
-  EmptyState,
-  Skeleton,
-  Pill,
-  Checkbox,
-  ACCENT,
-} from '../../shared/components/ui';
+import { Card, SectionHeader, Skeleton, Pill, Checkbox, ACCENT } from '../../shared/components/ui';
 
 const CATEGORIES: Record<string, string> = {
   Paperwork: 'var(--hr-shift-blue)',
@@ -29,7 +22,7 @@ const pillStyle = (cssVar: string): React.CSSProperties => ({
 
 const Onboarding: React.FC = () => {
   const { t } = useTranslation();
-  const { data, isLoading } = useOnboardingChecklist();
+  const { data, isLoading, refetch } = useOnboardingChecklist();
   const toggle = useToggleOnboardingTask();
 
   const grouped = (data ?? []).reduce<Record<string, typeof data>>((acc, task) => {
@@ -45,9 +38,10 @@ const Onboarding: React.FC = () => {
         <Skeleton height={240} />
       ) : !data || data.length === 0 ? (
         <EmptyState
-          icon={<Rocket size={20} />}
+          icon={Rocket}
           title={t('onboarding.emptyTitle')}
           description={t('onboarding.emptyDescription')}
+          action={{ label: t('common.refresh'), onClick: () => refetch() }}
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

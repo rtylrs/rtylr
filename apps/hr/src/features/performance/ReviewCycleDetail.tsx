@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { toast } from 'sonner';
 import { HelmetContainer } from '@voxire/components';
-import { Share2 } from 'lucide-react';
+import { Share2, ClipboardList, Target } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import type {
   PerformanceReviewPayload,
   ReviewGoalPayload,
@@ -15,15 +16,7 @@ import {
   useListGoals,
   useShareReview,
 } from '../../shared/hooks/queries/usePerformance';
-import {
-  SectionHeader,
-  Tabs,
-  Pill,
-  Button,
-  Card,
-  Skeleton,
-  EmptyState,
-} from '../../shared/components/ui';
+import { SectionHeader, Tabs, Pill, Button, Card, Skeleton } from '../../shared/components/ui';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'var(--hr-status-draft)',
@@ -52,7 +45,7 @@ function ReviewsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
     () => ({ reviewCycleId: cycleId, ...(statusFilter ? { status: statusFilter } : {}) }),
     [cycleId, statusFilter]
   );
-  const { data, isLoading } = useListReviews(params);
+  const { data, isLoading, refetch } = useListReviews(params);
   const reviews = data?.reviews ?? [];
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -110,8 +103,14 @@ function ReviewsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
 
       {reviews.length === 0 ? (
         <EmptyState
+          icon={ClipboardList}
           title={t('performance.reviews.emptyTitle')}
           description={t('performance.reviews.emptyDescription')}
+          action={
+            statusFilter !== ''
+              ? { label: t('common.clearFilters'), onClick: () => setStatusFilter('') }
+              : { label: t('common.refresh'), onClick: () => refetch() }
+          }
         />
       ) : (
         <div
@@ -214,7 +213,7 @@ function ReviewsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
 
 function GoalsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
   const { t } = useTranslation();
-  const { data, isLoading } = useListGoals({ reviewCycleId: String(cycleId) });
+  const { data, isLoading, refetch } = useListGoals({ reviewCycleId: String(cycleId) });
   const goals = data?.goals ?? [];
 
   if (isLoading) {
@@ -230,8 +229,10 @@ function GoalsTab({ cycleId }: { cycleId: number }): React.JSX.Element {
   if (goals.length === 0) {
     return (
       <EmptyState
+        icon={Target}
         title={t('performance.goals.emptyTitle')}
         description={t('performance.goals.emptyDescription')}
+        action={{ label: t('common.refresh'), onClick: () => refetch() }}
       />
     );
   }

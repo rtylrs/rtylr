@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { CalendarDays } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import WidgetShell from './WidgetShell';
 
 interface ShiftEntry {
@@ -14,25 +15,33 @@ interface ShiftEntry {
 interface UpcomingShiftsWidgetProps {
   data: ShiftEntry[] | null;
   isLoading: boolean;
+  onRefresh: () => void;
 }
 
 const UpcomingShiftsWidget = ({
   data,
   isLoading,
+  onRefresh,
 }: UpcomingShiftsWidgetProps): React.JSX.Element => {
   const { t } = useTranslation();
+  const isEmpty = !data || data.length === 0;
 
   return (
     <WidgetShell
       title={t('dashboard.widgets.upcomingShifts')}
       icon={<CalendarDays size={14} />}
       isLoading={isLoading}
-      isEmpty={!data || data.length === 0}
-      emptyMessage={t('dashboard.widgets.noShifts')}
     >
-      {data && (
+      {isEmpty ? (
+        <EmptyState
+          icon={CalendarDays}
+          title={t('dashboard.widgets.noShifts')}
+          action={{ label: t('common.refresh'), onClick: onRefresh }}
+          size="compact"
+        />
+      ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {data.map((s) => (
+          {(data ?? []).map((s) => (
             <div
               key={s.id}
               style={{

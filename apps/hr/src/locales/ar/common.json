@@ -29,5 +29,7 @@
   "reject": "رفض",
   "optionalNote": "ملاحظة اختيارية",
   "dateRangeFrom": "من تاريخ",
-  "dateRangeTo": "إلى"
+  "dateRangeTo": "إلى",
+  "refresh": "تحديث",
+  "clearFilters": "مسح الفلاتر"
 }

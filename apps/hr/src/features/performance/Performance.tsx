@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { BarChart3 } from 'lucide-react';
-import { ErrorBoundary } from '@voxire/ui';
+import { ErrorBoundary, EmptyState } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
 import {
   SectionHeader,
   Button,
   Card,
   Pill,
-  EmptyState,
   Skeleton,
   ConfirmDialog,
 } from '../../shared/components/ui';
@@ -114,14 +113,10 @@ const PerformanceInner = (): React.JSX.Element => {
         </div>
       ) : cycles.length === 0 ? (
         <EmptyState
-          icon={<BarChart3 size={24} />}
+          icon={BarChart3}
           title={t('performance.emptyTitle')}
           description={t('performance.emptyDescription')}
-          action={
-            <Button variant="primary" onClick={() => setCreateOpen(true)}>
-              {t('performance.newCycle')}
-            </Button>
-          }
+          action={{ label: t('performance.newCycle'), onClick: () => setCreateOpen(true) }}
         />
       ) : (
         <div
