@@ -58,5 +58,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/KpisWidget.tsx", "audit-batch-056-suite-03"],
   ["apps/dash/src/features/integrations/Integrations.tsx", "audit-batch-057-suite-03"],
   ["apps/dash/src/features/settings/Settings/components/Domain/Domain.tsx", "audit-batch-058-suite-03"],
+  ["apps/dash/src/shared/components/dash/AppCard.tsx", "audit-batch-059-suite-03"],
 ];
 
