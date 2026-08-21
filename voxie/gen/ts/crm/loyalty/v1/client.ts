@@ -2,6 +2,42 @@
 import type { GetLoyaltyConfigRequest, GetLoyaltyConfigResponse, UpdateLoyaltyConfigRequest, UpdateLoyaltyConfigResponse, ListLoyaltyTiersRequest, ListLoyaltyTiersResponse, CreateLoyaltyTierRequest, CreateLoyaltyTierResponse, UpdateLoyaltyTierRequest, UpdateLoyaltyTierResponse, ListLoyaltyTransactionsRequest, ListLoyaltyTransactionsResponse, AwardPointsRequest, AwardPointsResponse, RedeemPointsRequest, RedeemPointsResponse } from "./types";
 import { encodeGetLoyaltyConfigRequest, validateGetLoyaltyConfigRequest, decodeGetLoyaltyConfigResponse, encodeUpdateLoyaltyConfigRequest, validateUpdateLoyaltyConfigRequest, decodeUpdateLoyaltyConfigResponse, encodeListLoyaltyTiersRequest, validateListLoyaltyTiersRequest, decodeListLoyaltyTiersResponse, encodeCreateLoyaltyTierRequest, validateCreateLoyaltyTierRequest, decodeCreateLoyaltyTierResponse, encodeUpdateLoyaltyTierRequest, validateUpdateLoyaltyTierRequest, decodeUpdateLoyaltyTierResponse, encodeListLoyaltyTransactionsRequest, validateListLoyaltyTransactionsRequest, decodeListLoyaltyTransactionsResponse, encodeAwardPointsRequest, validateAwardPointsRequest, decodeAwardPointsResponse, encodeRedeemPointsRequest, validateRedeemPointsRequest, decodeRedeemPointsResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface LoyaltyServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class LoyaltyServiceClient {
@@ -46,11 +84,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetLoyaltyConfigResponse(await res.json());
+return decodeGetLoyaltyConfigResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateLoyaltyConfig(req: UpdateLoyaltyConfigRequest): Promise<UpdateLoyaltyConfigResponse> {
@@ -64,11 +102,11 @@ body: JSON.stringify(encodeUpdateLoyaltyConfigRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateLoyaltyConfigResponse(await res.json());
+return decodeUpdateLoyaltyConfigResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listLoyaltyTiers(req: ListLoyaltyTiersRequest): Promise<ListLoyaltyTiersResponse> {
@@ -84,11 +122,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListLoyaltyTiersResponse(await res.json());
+return decodeListLoyaltyTiersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createLoyaltyTier(req: CreateLoyaltyTierRequest): Promise<CreateLoyaltyTierResponse> {
@@ -102,11 +140,11 @@ body: JSON.stringify(encodeCreateLoyaltyTierRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateLoyaltyTierResponse(await res.json());
+return decodeCreateLoyaltyTierResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateLoyaltyTier(req: UpdateLoyaltyTierRequest): Promise<UpdateLoyaltyTierResponse> {
@@ -121,11 +159,11 @@ body: JSON.stringify(encodeUpdateLoyaltyTierRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateLoyaltyTierResponse(await res.json());
+return decodeUpdateLoyaltyTierResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listLoyaltyTransactions(req: ListLoyaltyTransactionsRequest): Promise<ListLoyaltyTransactionsResponse> {
@@ -150,11 +188,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListLoyaltyTransactionsResponse(await res.json());
+return decodeListLoyaltyTransactionsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async awardPoints(req: AwardPointsRequest): Promise<AwardPointsResponse> {
@@ -168,11 +206,11 @@ body: JSON.stringify(encodeAwardPointsRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAwardPointsResponse(await res.json());
+return decodeAwardPointsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async redeemPoints(req: RedeemPointsRequest): Promise<RedeemPointsResponse> {
@@ -186,11 +224,11 @@ body: JSON.stringify(encodeRedeemPointsRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRedeemPointsResponse(await res.json());
+return decodeRedeemPointsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

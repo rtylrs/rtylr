@@ -61,6 +61,21 @@ return out;
 
 export function validateSubscription(v: Subscription): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.planName !== undefined && v.planName !== null && !(typeof v.planName === "string")) violations.push("plan_name has invalid type");
+if (v.planSlug !== undefined && v.planSlug !== null && !(typeof v.planSlug === "string")) violations.push("plan_slug has invalid type");
+if (v.apps !== undefined && v.apps !== null && !(Array.isArray(v.apps) && (v.apps).every((item: any) => typeof item === "string"))) violations.push("apps has invalid type");
+if (v.pricePerSeatCents !== undefined && v.pricePerSeatCents !== null && !(typeof v.pricePerSeatCents === "number" && Number.isInteger(v.pricePerSeatCents) && v.pricePerSeatCents >= -2147483648 && v.pricePerSeatCents <= 2147483647)) violations.push("price_per_seat_cents has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.isGranted !== undefined && v.isGranted !== null && !(typeof v.isGranted === "boolean")) violations.push("is_granted has invalid type");
+if (v.seatCount !== undefined && v.seatCount !== null && !(typeof v.seatCount === "number" && Number.isInteger(v.seatCount) && v.seatCount >= -2147483648 && v.seatCount <= 2147483647)) violations.push("seat_count has invalid type");
+if (v.includedSeatLimit !== undefined && v.includedSeatLimit !== null && !(typeof v.includedSeatLimit === "number" && Number.isInteger(v.includedSeatLimit) && v.includedSeatLimit >= -2147483648 && v.includedSeatLimit <= 2147483647)) violations.push("included_seat_limit has invalid type");
+if (v.includedSeatCount !== undefined && v.includedSeatCount !== null && !(typeof v.includedSeatCount === "number" && Number.isInteger(v.includedSeatCount) && v.includedSeatCount >= -2147483648 && v.includedSeatCount <= 2147483647)) violations.push("included_seat_count has invalid type");
+if (v.billableSeatCount !== undefined && v.billableSeatCount !== null && !(typeof v.billableSeatCount === "number" && Number.isInteger(v.billableSeatCount) && v.billableSeatCount >= -2147483648 && v.billableSeatCount <= 2147483647)) violations.push("billable_seat_count has invalid type");
+if (v.grantExpiresAt !== undefined && v.grantExpiresAt !== null && !(typeof v.grantExpiresAt === "string")) violations.push("grant_expires_at has invalid type");
+if (v.trialEndsAt !== undefined && v.trialEndsAt !== null && !(typeof v.trialEndsAt === "string")) violations.push("trial_ends_at has invalid type");
+if (v.nextBillingDate !== undefined && v.nextBillingDate !== null && !(typeof v.nextBillingDate === "string")) violations.push("next_billing_date has invalid type");
+if (v.paddleSubscriptionId !== undefined && v.paddleSubscriptionId !== null && !(typeof v.paddleSubscriptionId === "string")) violations.push("paddle_subscription_id has invalid type");
 return violations;
 }
 
@@ -128,6 +143,22 @@ return out;
 
 export function validatePlan(v: Plan): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.slug !== undefined && v.slug !== null && !(typeof v.slug === "string")) violations.push("slug has invalid type");
+if (v.apps !== undefined && v.apps !== null && !(Array.isArray(v.apps) && (v.apps).every((item: any) => typeof item === "string"))) violations.push("apps has invalid type");
+if (v.pricePerSeatCents !== undefined && v.pricePerSeatCents !== null && !(typeof v.pricePerSeatCents === "number" && Number.isInteger(v.pricePerSeatCents) && v.pricePerSeatCents >= -2147483648 && v.pricePerSeatCents <= 2147483647)) violations.push("price_per_seat_cents has invalid type");
+if (v.annualPricePerSeatCents !== undefined && v.annualPricePerSeatCents !== null && !(typeof v.annualPricePerSeatCents === "number" && Number.isInteger(v.annualPricePerSeatCents) && v.annualPricePerSeatCents >= -2147483648 && v.annualPricePerSeatCents <= 2147483647)) violations.push("annual_price_per_seat_cents has invalid type");
+if (v.trialDays !== undefined && v.trialDays !== null && !(typeof v.trialDays === "number" && Number.isInteger(v.trialDays) && v.trialDays >= -2147483648 && v.trialDays <= 2147483647)) violations.push("trial_days has invalid type");
+if (v.tagline !== undefined && v.tagline !== null && !(typeof v.tagline === "string")) violations.push("tagline has invalid type");
+if (v.maxSeats !== undefined && v.maxSeats !== null && !(typeof v.maxSeats === "number" && Number.isInteger(v.maxSeats) && v.maxSeats >= -2147483648 && v.maxSeats <= 2147483647)) violations.push("max_seats has invalid type");
+if (v.maxLocations !== undefined && v.maxLocations !== null && !(typeof v.maxLocations === "number" && Number.isInteger(v.maxLocations) && v.maxLocations >= -2147483648 && v.maxLocations <= 2147483647)) violations.push("max_locations has invalid type");
+if (v.aiCreditsPerMonth !== undefined && v.aiCreditsPerMonth !== null && !(typeof v.aiCreditsPerMonth === "number" && Number.isInteger(v.aiCreditsPerMonth) && v.aiCreditsPerMonth >= -2147483648 && v.aiCreditsPerMonth <= 2147483647)) violations.push("ai_credits_per_month has invalid type");
+if (v.features !== undefined && v.features !== null && !(Array.isArray(v.features) && (v.features).every((item: any) => typeof item === "string"))) violations.push("features has invalid type");
+if (v.tierOrder !== undefined && v.tierOrder !== null && !(typeof v.tierOrder === "number" && Number.isInteger(v.tierOrder) && v.tierOrder >= -2147483648 && v.tierOrder <= 2147483647)) violations.push("tier_order has invalid type");
+if (v.isSolo !== undefined && v.isSolo !== null && !(typeof v.isSolo === "boolean")) violations.push("is_solo has invalid type");
+if (v.isFeatured !== undefined && v.isFeatured !== null && !(typeof v.isFeatured === "boolean")) violations.push("is_featured has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -195,6 +226,22 @@ return out;
 
 export function validateBillingLineItem(v: BillingLineItem): string[] {
 const violations: string[] = [];
+if (v.periodStart !== undefined && v.periodStart !== null && !(typeof v.periodStart === "string")) violations.push("period_start has invalid type");
+if (v.periodEnd !== undefined && v.periodEnd !== null && !(typeof v.periodEnd === "string")) violations.push("period_end has invalid type");
+if (v.seatCount !== undefined && v.seatCount !== null && !(typeof v.seatCount === "number" && Number.isInteger(v.seatCount) && v.seatCount >= -2147483648 && v.seatCount <= 2147483647)) violations.push("seat_count has invalid type");
+if (v.includedSeatLimit !== undefined && v.includedSeatLimit !== null && !(typeof v.includedSeatLimit === "number" && Number.isInteger(v.includedSeatLimit) && v.includedSeatLimit >= -2147483648 && v.includedSeatLimit <= 2147483647)) violations.push("included_seat_limit has invalid type");
+if (v.includedSeatCount !== undefined && v.includedSeatCount !== null && !(typeof v.includedSeatCount === "number" && Number.isInteger(v.includedSeatCount) && v.includedSeatCount >= -2147483648 && v.includedSeatCount <= 2147483647)) violations.push("included_seat_count has invalid type");
+if (v.billableSeatCount !== undefined && v.billableSeatCount !== null && !(typeof v.billableSeatCount === "number" && Number.isInteger(v.billableSeatCount) && v.billableSeatCount >= -2147483648 && v.billableSeatCount <= 2147483647)) violations.push("billable_seat_count has invalid type");
+if (v.includedCents !== undefined && v.includedCents !== null && !(typeof v.includedCents === "number" && Number.isInteger(v.includedCents) && v.includedCents >= -2147483648 && v.includedCents <= 2147483647)) violations.push("included_cents has invalid type");
+if (v.pricePerSeatCents !== undefined && v.pricePerSeatCents !== null && !(typeof v.pricePerSeatCents === "number" && Number.isInteger(v.pricePerSeatCents) && v.pricePerSeatCents >= -2147483648 && v.pricePerSeatCents <= 2147483647)) violations.push("price_per_seat_cents has invalid type");
+if (v.amountCents !== undefined && v.amountCents !== null && !(typeof v.amountCents === "number" && Number.isInteger(v.amountCents) && v.amountCents >= -2147483648 && v.amountCents <= 2147483647)) violations.push("amount_cents has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.isGranted !== undefined && v.isGranted !== null && !(typeof v.isGranted === "boolean")) violations.push("is_granted has invalid type");
+if (v.grantExpiresAt !== undefined && v.grantExpiresAt !== null && !(typeof v.grantExpiresAt === "string")) violations.push("grant_expires_at has invalid type");
+if (v.addonId !== undefined && v.addonId !== null && !(typeof v.addonId === "string")) violations.push("addon_id has invalid type");
+if (v.quantity !== undefined && v.quantity !== null && !(typeof v.quantity === "number" && Number.isInteger(v.quantity) && v.quantity >= -2147483648 && v.quantity <= 2147483647)) violations.push("quantity has invalid type");
+if (v.unitPriceCents !== undefined && v.unitPriceCents !== null && !(typeof v.unitPriceCents === "number" && Number.isInteger(v.unitPriceCents) && v.unitPriceCents >= -2147483648 && v.unitPriceCents <= 2147483647)) violations.push("unit_price_cents has invalid type");
 return violations;
 }
 
@@ -262,7 +309,23 @@ return out;
 
 export function validateBillingDetail(v: BillingDetail): string[] {
 const violations: string[] = [];
+if (v.billingMonth !== undefined && v.billingMonth !== null && !(typeof v.billingMonth === "string")) violations.push("billing_month has invalid type");
+if (v.nextBillingDate !== undefined && v.nextBillingDate !== null && !(typeof v.nextBillingDate === "string")) violations.push("next_billing_date has invalid type");
+if (v.lineItems !== undefined && v.lineItems !== null && !(Array.isArray(v.lineItems) && (v.lineItems).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("line_items has invalid type");
 if (v.lineItems !== undefined && v.lineItems !== null) for (const item of v.lineItems) violations.push(...validateBillingLineItem(item).map((message) => "line_items: " + message));
+if (v.totalCents !== undefined && v.totalCents !== null && !(typeof v.totalCents === "number" && Number.isInteger(v.totalCents) && v.totalCents >= -2147483648 && v.totalCents <= 2147483647)) violations.push("total_cents has invalid type");
+if (v.planName !== undefined && v.planName !== null && !(typeof v.planName === "string")) violations.push("plan_name has invalid type");
+if (v.pricePerSeatCents !== undefined && v.pricePerSeatCents !== null && !(typeof v.pricePerSeatCents === "number" && Number.isInteger(v.pricePerSeatCents) && v.pricePerSeatCents >= -2147483648 && v.pricePerSeatCents <= 2147483647)) violations.push("price_per_seat_cents has invalid type");
+if (v.currentSeatCount !== undefined && v.currentSeatCount !== null && !(typeof v.currentSeatCount === "number" && Number.isInteger(v.currentSeatCount) && v.currentSeatCount >= -2147483648 && v.currentSeatCount <= 2147483647)) violations.push("current_seat_count has invalid type");
+if (v.includedSeatLimit !== undefined && v.includedSeatLimit !== null && !(typeof v.includedSeatLimit === "number" && Number.isInteger(v.includedSeatLimit) && v.includedSeatLimit >= -2147483648 && v.includedSeatLimit <= 2147483647)) violations.push("included_seat_limit has invalid type");
+if (v.includedSeatCount !== undefined && v.includedSeatCount !== null && !(typeof v.includedSeatCount === "number" && Number.isInteger(v.includedSeatCount) && v.includedSeatCount >= -2147483648 && v.includedSeatCount <= 2147483647)) violations.push("included_seat_count has invalid type");
+if (v.billableSeatCount !== undefined && v.billableSeatCount !== null && !(typeof v.billableSeatCount === "number" && Number.isInteger(v.billableSeatCount) && v.billableSeatCount >= -2147483648 && v.billableSeatCount <= 2147483647)) violations.push("billable_seat_count has invalid type");
+if (v.seatDiscountCents !== undefined && v.seatDiscountCents !== null && !(typeof v.seatDiscountCents === "number" && Number.isInteger(v.seatDiscountCents) && v.seatDiscountCents >= -2147483648 && v.seatDiscountCents <= 2147483647)) violations.push("seat_discount_cents has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.isGranted !== undefined && v.isGranted !== null && !(typeof v.isGranted === "boolean")) violations.push("is_granted has invalid type");
+if (v.grantExpiresAt !== undefined && v.grantExpiresAt !== null && !(typeof v.grantExpiresAt === "string")) violations.push("grant_expires_at has invalid type");
+if (v.trialEndsAt !== undefined && v.trialEndsAt !== null && !(typeof v.trialEndsAt === "string")) violations.push("trial_ends_at has invalid type");
+if (v.paddleSubscriptionId !== undefined && v.paddleSubscriptionId !== null && !(typeof v.paddleSubscriptionId === "string")) violations.push("paddle_subscription_id has invalid type");
 return violations;
 }
 
@@ -294,7 +357,11 @@ return out;
 
 export function validateBillingHistoryMonth(v: BillingHistoryMonth): string[] {
 const violations: string[] = [];
+if (v.month !== undefined && v.month !== null && !(typeof v.month === "string")) violations.push("month has invalid type");
+if (v.totalCents !== undefined && v.totalCents !== null && !(typeof v.totalCents === "number" && Number.isInteger(v.totalCents) && v.totalCents >= -2147483648 && v.totalCents <= 2147483647)) violations.push("total_cents has invalid type");
+if (v.lineItems !== undefined && v.lineItems !== null && !(Array.isArray(v.lineItems) && (v.lineItems).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("line_items has invalid type");
 if (v.lineItems !== undefined && v.lineItems !== null) for (const item of v.lineItems) violations.push(...validateBillingLineItem(item).map((message) => "line_items: " + message));
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 return violations;
 }
 
@@ -336,6 +403,7 @@ return out;
 
 export function validateGetMySubscriptionResponse(v: GetMySubscriptionResponse): string[] {
 const violations: string[] = [];
+if (v.subscription !== undefined && v.subscription !== null && !(typeof v.subscription === "object" && v.subscription !== null && !Array.isArray(v.subscription))) violations.push("subscription has invalid type");
 if (v.subscription !== undefined && v.subscription !== null) violations.push(...validateSubscription(v.subscription).map((message) => "subscription: " + message));
 return violations;
 }
@@ -378,6 +446,7 @@ return out;
 
 export function validateListPlansResponse(v: ListPlansResponse): string[] {
 const violations: string[] = [];
+if (v.plans !== undefined && v.plans !== null && !(Array.isArray(v.plans) && (v.plans).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("plans has invalid type");
 if (v.plans !== undefined && v.plans !== null) for (const item of v.plans) violations.push(...validatePlan(item).map((message) => "plans: " + message));
 return violations;
 }
@@ -420,6 +489,7 @@ return out;
 
 export function validateGetBillingDetailResponse(v: GetBillingDetailResponse): string[] {
 const violations: string[] = [];
+if (v.billing !== undefined && v.billing !== null && !(typeof v.billing === "object" && v.billing !== null && !Array.isArray(v.billing))) violations.push("billing has invalid type");
 if (v.billing !== undefined && v.billing !== null) violations.push(...validateBillingDetail(v.billing).map((message) => "billing: " + message));
 return violations;
 }
@@ -462,6 +532,7 @@ return out;
 
 export function validateGetBillingHistoryResponse(v: GetBillingHistoryResponse): string[] {
 const violations: string[] = [];
+if (v.history !== undefined && v.history !== null && !(Array.isArray(v.history) && (v.history).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("history has invalid type");
 if (v.history !== undefined && v.history !== null) for (const item of v.history) violations.push(...validateBillingHistoryMonth(item).map((message) => "history: " + message));
 return violations;
 }
@@ -485,6 +556,7 @@ return out;
 
 export function validateUpsertSubscriptionRequest(v: UpsertSubscriptionRequest): string[] {
 const violations: string[] = [];
+if (v.planSlug !== undefined && v.planSlug !== null && !(typeof v.planSlug === "string")) violations.push("plan_slug has invalid type");
 return violations;
 }
 
@@ -507,6 +579,7 @@ return out;
 
 export function validateUpsertSubscriptionResponse(v: UpsertSubscriptionResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -541,6 +614,11 @@ return out;
 
 export function validateCreateCheckoutRequest(v: CreateCheckoutRequest): string[] {
 const violations: string[] = [];
+if (v.planSlug !== undefined && v.planSlug !== null && !(typeof v.planSlug === "string")) violations.push("plan_slug has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.billingCycle !== undefined && v.billingCycle !== null && !(typeof v.billingCycle === "string")) violations.push("billing_cycle has invalid type");
+if (v.seatCount !== undefined && v.seatCount !== null && !(typeof v.seatCount === "number" && Number.isInteger(v.seatCount) && v.seatCount >= -2147483648 && v.seatCount <= 2147483647)) violations.push("seat_count has invalid type");
+if (v.addons !== undefined && v.addons !== null && !(Array.isArray(v.addons) && (v.addons).every((item: any) => typeof item === "string"))) violations.push("addons has invalid type");
 return violations;
 }
 
@@ -563,6 +641,7 @@ return out;
 
 export function validateCreateCheckoutResponse(v: CreateCheckoutResponse): string[] {
 const violations: string[] = [];
+if (v.checkoutUrl !== undefined && v.checkoutUrl !== null && !(typeof v.checkoutUrl === "string")) violations.push("checkout_url has invalid type");
 return violations;
 }
 

@@ -31,6 +31,11 @@ return out;
 
 export function validateApp(v: App): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string")) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
+if (v.isEnabled !== undefined && v.isEnabled !== null && !(typeof v.isEnabled === "boolean")) violations.push("is_enabled has invalid type");
 return violations;
 }
 
@@ -77,6 +82,15 @@ return out;
 
 export function validateAddon(v: Addon): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string")) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
+if (v.price !== undefined && v.price !== null && !(typeof v.price === "number" && Number.isFinite(v.price))) violations.push("price has invalid type");
+if (v.isFree !== undefined && v.isFree !== null && !(typeof v.isFree === "boolean")) violations.push("is_free has invalid type");
+if (v.isEnabled !== undefined && v.isEnabled !== null && !(typeof v.isEnabled === "boolean")) violations.push("is_enabled has invalid type");
+if (v.enabledAt !== undefined && v.enabledAt !== null && !(typeof v.enabledAt === "string")) violations.push("enabled_at has invalid type");
+if (v.disabledAt !== undefined && v.disabledAt !== null && !(typeof v.disabledAt === "string")) violations.push("disabled_at has invalid type");
 return violations;
 }
 
@@ -118,6 +132,7 @@ return out;
 
 export function validateListAppsResponse(v: ListAppsResponse): string[] {
 const violations: string[] = [];
+if (v.apps !== undefined && v.apps !== null && !(Array.isArray(v.apps) && (v.apps).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("apps has invalid type");
 if (v.apps !== undefined && v.apps !== null) for (const item of v.apps) violations.push(...validateApp(item).map((message) => "apps: " + message));
 return violations;
 }
@@ -160,6 +175,7 @@ return out;
 
 export function validateListAddonsResponse(v: ListAddonsResponse): string[] {
 const violations: string[] = [];
+if (v.addons !== undefined && v.addons !== null && !(Array.isArray(v.addons) && (v.addons).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("addons has invalid type");
 if (v.addons !== undefined && v.addons !== null) for (const item of v.addons) violations.push(...validateAddon(item).map((message) => "addons: " + message));
 return violations;
 }
@@ -183,6 +199,7 @@ return out;
 
 export function validateAddonStatusRequest(v: AddonStatusRequest): string[] {
 const violations: string[] = [];
+if (v.addonId !== undefined && v.addonId !== null && !(typeof v.addonId === "string")) violations.push("addon_id has invalid type");
 if (!(v.addonId !== undefined && v.addonId !== null) || v.addonId === "") violations.push("addon_id is required");
 return violations;
 }
@@ -206,6 +223,7 @@ return out;
 
 export function validateAddonStatusResponse(v: AddonStatusResponse): string[] {
 const violations: string[] = [];
+if (v.isEnabled !== undefined && v.isEnabled !== null && !(typeof v.isEnabled === "boolean")) violations.push("is_enabled has invalid type");
 return violations;
 }
 
@@ -228,6 +246,7 @@ return out;
 
 export function validateEnableAddonRequest(v: EnableAddonRequest): string[] {
 const violations: string[] = [];
+if (v.addonId !== undefined && v.addonId !== null && !(typeof v.addonId === "string")) violations.push("addon_id has invalid type");
 if (!(v.addonId !== undefined && v.addonId !== null) || v.addonId === "") violations.push("addon_id is required");
 return violations;
 }
@@ -251,6 +270,7 @@ return out;
 
 export function validateEnableAddonResponse(v: EnableAddonResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -273,6 +293,7 @@ return out;
 
 export function validateDisableAddonRequest(v: DisableAddonRequest): string[] {
 const violations: string[] = [];
+if (v.addonId !== undefined && v.addonId !== null && !(typeof v.addonId === "string")) violations.push("addon_id has invalid type");
 if (!(v.addonId !== undefined && v.addonId !== null) || v.addonId === "") violations.push("addon_id is required");
 return violations;
 }
@@ -296,6 +317,7 @@ return out;
 
 export function validateDisableAddonResponse(v: DisableAddonResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

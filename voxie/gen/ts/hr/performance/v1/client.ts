@@ -2,6 +2,42 @@
 import type { ListReviewCyclesRequest, ListReviewCyclesResponse, CreateReviewCycleRequest, CreateReviewCycleResponse, OpenReviewCycleRequest, OpenReviewCycleResponse, ListGoalsRequest, ListGoalsResponse, SubmitReviewRequest, SubmitReviewResponse } from "./types";
 import { encodeListReviewCyclesRequest, validateListReviewCyclesRequest, decodeListReviewCyclesResponse, encodeCreateReviewCycleRequest, validateCreateReviewCycleRequest, decodeCreateReviewCycleResponse, encodeOpenReviewCycleRequest, validateOpenReviewCycleRequest, decodeOpenReviewCycleResponse, encodeListGoalsRequest, validateListGoalsRequest, decodeListGoalsResponse, encodeSubmitReviewRequest, validateSubmitReviewRequest, decodeSubmitReviewResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface PerformanceServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class PerformanceServiceClient {
@@ -46,11 +84,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListReviewCyclesResponse(await res.json());
+return decodeListReviewCyclesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createReviewCycle(req: CreateReviewCycleRequest): Promise<CreateReviewCycleResponse> {
@@ -64,11 +102,11 @@ body: JSON.stringify(encodeCreateReviewCycleRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateReviewCycleResponse(await res.json());
+return decodeCreateReviewCycleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async openReviewCycle(req: OpenReviewCycleRequest): Promise<OpenReviewCycleResponse> {
@@ -82,11 +120,11 @@ body: JSON.stringify(encodeOpenReviewCycleRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeOpenReviewCycleResponse(await res.json());
+return decodeOpenReviewCycleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listGoals(req: ListGoalsRequest): Promise<ListGoalsResponse> {
@@ -108,11 +146,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListGoalsResponse(await res.json());
+return decodeListGoalsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async submitReview(req: SubmitReviewRequest): Promise<SubmitReviewResponse> {
@@ -126,11 +164,11 @@ body: JSON.stringify(encodeSubmitReviewRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSubmitReviewResponse(await res.json());
+return decodeSubmitReviewResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

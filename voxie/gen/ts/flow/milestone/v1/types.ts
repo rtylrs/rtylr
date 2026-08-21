@@ -23,6 +23,8 @@ return out;
 
 export function validateMilestoneProject(v: MilestoneProject): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
 return violations;
 }
 
@@ -75,6 +77,17 @@ return out;
 
 export function validateMilestone(v: Milestone): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.targetDate !== undefined && v.targetDate !== null && !(typeof v.targetDate === "string")) violations.push("target_date has invalid type");
+if (v.progress !== undefined && v.progress !== null && !(typeof v.progress === "number" && Number.isInteger(v.progress) && v.progress >= -2147483648 && v.progress <= 2147483647)) violations.push("progress has invalid type");
+if (v.computedProgress !== undefined && v.computedProgress !== null && !(typeof v.computedProgress === "number" && Number.isInteger(v.computedProgress) && v.computedProgress >= -2147483648 && v.computedProgress <= 2147483647)) violations.push("computed_progress has invalid type");
+if (v.doneCount !== undefined && v.doneCount !== null && !(typeof v.doneCount === "number" && Number.isInteger(v.doneCount) && v.doneCount >= -2147483648 && v.doneCount <= 2147483647)) violations.push("done_count has invalid type");
+if (v.taskCount !== undefined && v.taskCount !== null && !(typeof v.taskCount === "number" && Number.isInteger(v.taskCount) && v.taskCount >= -2147483648 && v.taskCount <= 2147483647)) violations.push("task_count has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.project !== undefined && v.project !== null && !(typeof v.project === "object" && v.project !== null && !Array.isArray(v.project))) violations.push("project has invalid type");
 if (v.project !== undefined && v.project !== null) violations.push(...validateMilestoneProject(v.project).map((message) => "project: " + message));
 return violations;
 }
@@ -113,6 +126,12 @@ return out;
 
 export function validateListMilestonesRequest(v: ListMilestonesRequest): string[] {
 const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string")) violations.push("project_id has invalid type");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string")) violations.push("workspace_id has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -138,7 +157,9 @@ return out;
 
 export function validateListMilestonesResponse(v: ListMilestonesResponse): string[] {
 const violations: string[] = [];
+if (v.milestones !== undefined && v.milestones !== null && !(Array.isArray(v.milestones) && (v.milestones).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("milestones has invalid type");
 if (v.milestones !== undefined && v.milestones !== null) for (const item of v.milestones) violations.push(...validateMilestone(item).map((message) => "milestones: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -174,7 +195,12 @@ return out;
 
 export function validateCreateMilestoneRequest(v: CreateMilestoneRequest): string[] {
 const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.targetDate !== undefined && v.targetDate !== null && !(typeof v.targetDate === "string")) violations.push("target_date has invalid type");
 return violations;
 }
 
@@ -197,6 +223,7 @@ return out;
 
 export function validateCreateMilestoneResponse(v: CreateMilestoneResponse): string[] {
 const violations: string[] = [];
+if (v.milestone !== undefined && v.milestone !== null && !(typeof v.milestone === "object" && v.milestone !== null && !Array.isArray(v.milestone))) violations.push("milestone has invalid type");
 if (v.milestone !== undefined && v.milestone !== null) violations.push(...validateMilestone(v.milestone).map((message) => "milestone: " + message));
 return violations;
 }
@@ -232,6 +259,11 @@ return out;
 
 export function validateUpdateMilestoneRequest(v: UpdateMilestoneRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.targetDate !== undefined && v.targetDate !== null && !(typeof v.targetDate === "string")) violations.push("target_date has invalid type");
 return violations;
 }
 

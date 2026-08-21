@@ -49,6 +49,17 @@ return out;
 
 export function validateWaitlistEntry(v: WaitlistEntry): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.serviceId !== undefined && v.serviceId !== null && !(typeof v.serviceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.serviceId))) violations.push("service_id has invalid type");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
+if (v.customerEmail !== undefined && v.customerEmail !== null && !(typeof v.customerEmail === "string")) violations.push("customer_email has invalid type");
+if (v.customerPhone !== undefined && v.customerPhone !== null && !(typeof v.customerPhone === "string")) violations.push("customer_phone has invalid type");
+if (v.preferredDate !== undefined && v.preferredDate !== null && !(typeof v.preferredDate === "string")) violations.push("preferred_date has invalid type");
+if (v.preferredTime !== undefined && v.preferredTime !== null && !(typeof v.preferredTime === "string")) violations.push("preferred_time has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -86,7 +97,13 @@ return out;
 
 export function validateCreateEntryRequest(v: CreateEntryRequest): string[] {
 const violations: string[] = [];
+if (v.serviceId !== undefined && v.serviceId !== null && !(typeof v.serviceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.serviceId))) violations.push("service_id has invalid type");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
 if (!(v.customerName !== undefined && v.customerName !== null) || v.customerName === "") violations.push("customer_name is required");
+if (v.customerEmail !== undefined && v.customerEmail !== null && !(typeof v.customerEmail === "string")) violations.push("customer_email has invalid type");
+if (v.customerPhone !== undefined && v.customerPhone !== null && !(typeof v.customerPhone === "string")) violations.push("customer_phone has invalid type");
+if (v.preferredDate !== undefined && v.preferredDate !== null && !(typeof v.preferredDate === "string")) violations.push("preferred_date has invalid type");
+if (v.preferredTime !== undefined && v.preferredTime !== null && !(typeof v.preferredTime === "string")) violations.push("preferred_time has invalid type");
 return violations;
 }
 
@@ -112,6 +129,8 @@ return out;
 
 export function validateCreateEntryResponse(v: CreateEntryResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -153,6 +172,7 @@ return out;
 
 export function validateListEntriesResponse(v: ListEntriesResponse): string[] {
 const violations: string[] = [];
+if (v.entries !== undefined && v.entries !== null && !(Array.isArray(v.entries) && (v.entries).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("entries has invalid type");
 if (v.entries !== undefined && v.entries !== null) for (const item of v.entries) violations.push(...validateWaitlistEntry(item).map((message) => "entries: " + message));
 return violations;
 }
@@ -197,8 +217,16 @@ return out;
 
 export function validateUpdateEntryRequest(v: UpdateEntryRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.serviceId !== undefined && v.serviceId !== null && !(typeof v.serviceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.serviceId))) violations.push("service_id has invalid type");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
+if (v.customerEmail !== undefined && v.customerEmail !== null && !(typeof v.customerEmail === "string")) violations.push("customer_email has invalid type");
+if (v.customerPhone !== undefined && v.customerPhone !== null && !(typeof v.customerPhone === "string")) violations.push("customer_phone has invalid type");
+if (v.preferredDate !== undefined && v.preferredDate !== null && !(typeof v.preferredDate === "string")) violations.push("preferred_date has invalid type");
+if (v.preferredTime !== undefined && v.preferredTime !== null && !(typeof v.preferredTime === "string")) violations.push("preferred_time has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 return violations;
 }
 
@@ -221,6 +249,7 @@ return out;
 
 export function validateUpdateEntryResponse(v: UpdateEntryResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

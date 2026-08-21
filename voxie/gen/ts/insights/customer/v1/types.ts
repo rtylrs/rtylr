@@ -35,6 +35,12 @@ return out;
 
 export function validateCustomerAnalytics(v: CustomerAnalytics): string[] {
 const violations: string[] = [];
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isInteger(v.total) && v.total >= -2147483648 && v.total <= 2147483647)) violations.push("total has invalid type");
+if (v.newThisPeriod !== undefined && v.newThisPeriod !== null && !(typeof v.newThisPeriod === "number" && Number.isInteger(v.newThisPeriod) && v.newThisPeriod >= -2147483648 && v.newThisPeriod <= 2147483647)) violations.push("new_this_period has invalid type");
+if (v.retentionRate !== undefined && v.retentionRate !== null && !(typeof v.retentionRate === "number" && Number.isFinite(v.retentionRate))) violations.push("retention_rate has invalid type");
+if (v.avgLifetimeValue !== undefined && v.avgLifetimeValue !== null && !(typeof v.avgLifetimeValue === "number" && Number.isFinite(v.avgLifetimeValue))) violations.push("avg_lifetime_value has invalid type");
+if (v.churnRate !== undefined && v.churnRate !== null && !(typeof v.churnRate === "number" && Number.isFinite(v.churnRate))) violations.push("churn_rate has invalid type");
+if (v.growth !== undefined && v.growth !== null && !(Array.isArray(v.growth) && (v.growth).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("growth has invalid type");
 if (v.growth !== undefined && v.growth !== null) for (const item of v.growth) violations.push(...validateCustomerGrowthPoint(item).map((message) => "growth: " + message));
 return violations;
 }
@@ -64,6 +70,9 @@ return out;
 
 export function validateCustomerGrowthPoint(v: CustomerGrowthPoint): string[] {
 const violations: string[] = [];
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.newCustomers !== undefined && v.newCustomers !== null && !(typeof v.newCustomers === "number" && Number.isInteger(v.newCustomers) && v.newCustomers >= -2147483648 && v.newCustomers <= 2147483647)) violations.push("new_customers has invalid type");
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isInteger(v.total) && v.total >= -2147483648 && v.total <= 2147483647)) violations.push("total has invalid type");
 return violations;
 }
 
@@ -98,6 +107,11 @@ return out;
 
 export function validateTopCustomerEntry(v: TopCustomerEntry): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.totalSpent !== undefined && v.totalSpent !== null && !(typeof v.totalSpent === "number" && Number.isFinite(v.totalSpent))) violations.push("total_spent has invalid type");
+if (v.orderCount !== undefined && v.orderCount !== null && !(typeof v.orderCount === "number" && Number.isInteger(v.orderCount) && v.orderCount >= -2147483648 && v.orderCount <= 2147483647)) violations.push("order_count has invalid type");
+if (v.lastOrderAt !== undefined && v.lastOrderAt !== null && !(typeof v.lastOrderAt === "string")) violations.push("last_order_at has invalid type");
 return violations;
 }
 
@@ -126,6 +140,9 @@ return out;
 
 export function validateChurnAnalysis(v: ChurnAnalysis): string[] {
 const violations: string[] = [];
+if (v.churnRate !== undefined && v.churnRate !== null && !(typeof v.churnRate === "number" && Number.isFinite(v.churnRate))) violations.push("churn_rate has invalid type");
+if (v.churnedCount !== undefined && v.churnedCount !== null && !(typeof v.churnedCount === "number" && Number.isInteger(v.churnedCount) && v.churnedCount >= -2147483648 && v.churnedCount <= 2147483647)) violations.push("churned_count has invalid type");
+if (v.reasons !== undefined && v.reasons !== null && !(Array.isArray(v.reasons) && (v.reasons).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("reasons has invalid type");
 if (v.reasons !== undefined && v.reasons !== null) for (const item of v.reasons) violations.push(...validateChurnReason(item).map((message) => "reasons: " + message));
 return violations;
 }
@@ -155,6 +172,9 @@ return out;
 
 export function validateChurnReason(v: ChurnReason): string[] {
 const violations: string[] = [];
+if (v.reason !== undefined && v.reason !== null && !(typeof v.reason === "string")) violations.push("reason has invalid type");
+if (v.count !== undefined && v.count !== null && !(typeof v.count === "number" && Number.isInteger(v.count) && v.count >= -2147483648 && v.count <= 2147483647)) violations.push("count has invalid type");
+if (v.percentage !== undefined && v.percentage !== null && !(typeof v.percentage === "number" && Number.isFinite(v.percentage))) violations.push("percentage has invalid type");
 return violations;
 }
 
@@ -183,6 +203,9 @@ return out;
 
 export function validateLTVAnalysis(v: LTVAnalysis): string[] {
 const violations: string[] = [];
+if (v.average !== undefined && v.average !== null && !(typeof v.average === "number" && Number.isFinite(v.average))) violations.push("average has invalid type");
+if (v.median !== undefined && v.median !== null && !(typeof v.median === "number" && Number.isFinite(v.median))) violations.push("median has invalid type");
+if (v.segments !== undefined && v.segments !== null && !(Array.isArray(v.segments) && (v.segments).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("segments has invalid type");
 if (v.segments !== undefined && v.segments !== null) for (const item of v.segments) violations.push(...validateLTVSegment(item).map((message) => "segments: " + message));
 return violations;
 }
@@ -212,6 +235,9 @@ return out;
 
 export function validateLTVSegment(v: LTVSegment): string[] {
 const violations: string[] = [];
+if (v.segment !== undefined && v.segment !== null && !(typeof v.segment === "string")) violations.push("segment has invalid type");
+if (v.avgLtv !== undefined && v.avgLtv !== null && !(typeof v.avgLtv === "number" && Number.isFinite(v.avgLtv))) violations.push("avg_ltv has invalid type");
+if (v.customerCount !== undefined && v.customerCount !== null && !(typeof v.customerCount === "number" && Number.isInteger(v.customerCount) && v.customerCount >= -2147483648 && v.customerCount <= 2147483647)) violations.push("customer_count has invalid type");
 return violations;
 }
 
@@ -234,6 +260,7 @@ return out;
 
 export function validateGetCustomerAnalyticsRequest(v: GetCustomerAnalyticsRequest): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
 return violations;
 }
 
@@ -256,6 +283,7 @@ return out;
 
 export function validateGetCustomerAnalyticsResponse(v: GetCustomerAnalyticsResponse): string[] {
 const violations: string[] = [];
+if (v.analytics !== undefined && v.analytics !== null && !(typeof v.analytics === "object" && v.analytics !== null && !Array.isArray(v.analytics))) violations.push("analytics has invalid type");
 if (v.analytics !== undefined && v.analytics !== null) violations.push(...validateCustomerAnalytics(v.analytics).map((message) => "analytics: " + message));
 return violations;
 }
@@ -279,6 +307,7 @@ return out;
 
 export function validateGetChurnAnalysisRequest(v: GetChurnAnalysisRequest): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
 return violations;
 }
 
@@ -301,6 +330,7 @@ return out;
 
 export function validateGetChurnAnalysisResponse(v: GetChurnAnalysisResponse): string[] {
 const violations: string[] = [];
+if (v.analysis !== undefined && v.analysis !== null && !(typeof v.analysis === "object" && v.analysis !== null && !Array.isArray(v.analysis))) violations.push("analysis has invalid type");
 if (v.analysis !== undefined && v.analysis !== null) violations.push(...validateChurnAnalysis(v.analysis).map((message) => "analysis: " + message));
 return violations;
 }
@@ -343,6 +373,7 @@ return out;
 
 export function validateGetLTVAnalysisResponse(v: GetLTVAnalysisResponse): string[] {
 const violations: string[] = [];
+if (v.analysis !== undefined && v.analysis !== null && !(typeof v.analysis === "object" && v.analysis !== null && !Array.isArray(v.analysis))) violations.push("analysis has invalid type");
 if (v.analysis !== undefined && v.analysis !== null) violations.push(...validateLTVAnalysis(v.analysis).map((message) => "analysis: " + message));
 return violations;
 }
@@ -378,6 +409,11 @@ return out;
 
 export function validateGetTopCustomersRequest(v: GetTopCustomersRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
 return violations;
 }
 
@@ -403,7 +439,9 @@ return out;
 
 export function validateGetTopCustomersResponse(v: GetTopCustomersResponse): string[] {
 const violations: string[] = [];
+if (v.customers !== undefined && v.customers !== null && !(Array.isArray(v.customers) && (v.customers).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("customers has invalid type");
 if (v.customers !== undefined && v.customers !== null) for (const item of v.customers) violations.push(...validateTopCustomerEntry(item).map((message) => "customers: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }

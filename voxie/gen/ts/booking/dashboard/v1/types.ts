@@ -47,6 +47,10 @@ return out;
 
 export function validateGetDashboardResponse(v: GetDashboardResponse): string[] {
 const violations: string[] = [];
+if (v.todayCount !== undefined && v.todayCount !== null && !(typeof v.todayCount === "number" && Number.isInteger(v.todayCount) && v.todayCount >= -2147483648 && v.todayCount <= 2147483647)) violations.push("today_count has invalid type");
+if (v.upcomingCount !== undefined && v.upcomingCount !== null && !(typeof v.upcomingCount === "number" && Number.isInteger(v.upcomingCount) && v.upcomingCount >= -2147483648 && v.upcomingCount <= 2147483647)) violations.push("upcoming_count has invalid type");
+if (v.cancellationRate !== undefined && v.cancellationRate !== null && !(typeof v.cancellationRate === "number" && Number.isFinite(v.cancellationRate))) violations.push("cancellation_rate has invalid type");
+if (v.revenue !== undefined && v.revenue !== null && !(typeof v.revenue === "number" && Number.isFinite(v.revenue))) violations.push("revenue has invalid type");
 return violations;
 }
 

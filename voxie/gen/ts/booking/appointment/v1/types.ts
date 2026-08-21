@@ -61,6 +61,21 @@ return out;
 
 export function validateAppointment(v: Appointment): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.serviceId !== undefined && v.serviceId !== null && !(typeof v.serviceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.serviceId))) violations.push("service_id has invalid type");
+if (v.resourceId !== undefined && v.resourceId !== null && !(typeof v.resourceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.resourceId))) violations.push("resource_id has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
+if (v.customerEmail !== undefined && v.customerEmail !== null && !(typeof v.customerEmail === "string")) violations.push("customer_email has invalid type");
+if (v.customerPhone !== undefined && v.customerPhone !== null && !(typeof v.customerPhone === "string")) violations.push("customer_phone has invalid type");
+if (v.startTime !== undefined && v.startTime !== null && !(typeof v.startTime === "string")) violations.push("start_time has invalid type");
+if (v.endTime !== undefined && v.endTime !== null && !(typeof v.endTime === "string")) violations.push("end_time has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -110,11 +125,21 @@ return out;
 
 export function validateCreateAppointmentRequest(v: CreateAppointmentRequest): string[] {
 const violations: string[] = [];
+if (v.serviceId !== undefined && v.serviceId !== null && !(typeof v.serviceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.serviceId))) violations.push("service_id has invalid type");
 if (!(v.serviceId !== undefined && v.serviceId !== null)) violations.push("service_id is required");
 if (v.serviceId !== undefined && v.serviceId !== null && !(Number(v.serviceId) > 0)) violations.push("service_id violates @gt");
+if (v.resourceId !== undefined && v.resourceId !== null && !(typeof v.resourceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.resourceId))) violations.push("resource_id has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
 if (!(v.customerName !== undefined && v.customerName !== null) || v.customerName === "") violations.push("customer_name is required");
+if (v.customerEmail !== undefined && v.customerEmail !== null && !(typeof v.customerEmail === "string")) violations.push("customer_email has invalid type");
+if (v.customerPhone !== undefined && v.customerPhone !== null && !(typeof v.customerPhone === "string")) violations.push("customer_phone has invalid type");
+if (v.startTime !== undefined && v.startTime !== null && !(typeof v.startTime === "string")) violations.push("start_time has invalid type");
 if (!(v.startTime !== undefined && v.startTime !== null) || v.startTime === "") violations.push("start_time is required");
+if (v.endTime !== undefined && v.endTime !== null && !(typeof v.endTime === "string")) violations.push("end_time has invalid type");
 if (!(v.endTime !== undefined && v.endTime !== null) || v.endTime === "") violations.push("end_time is required");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
 return violations;
 }
 
@@ -140,6 +165,8 @@ return out;
 
 export function validateCreateAppointmentResponse(v: CreateAppointmentResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -162,6 +189,7 @@ return out;
 
 export function validateDeleteAppointmentRequest(v: DeleteAppointmentRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -186,6 +214,7 @@ return out;
 
 export function validateDeleteAppointmentResponse(v: DeleteAppointmentResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -227,6 +256,7 @@ return out;
 
 export function validateListAppointmentsResponse(v: ListAppointmentsResponse): string[] {
 const violations: string[] = [];
+if (v.appointments !== undefined && v.appointments !== null && !(Array.isArray(v.appointments) && (v.appointments).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("appointments has invalid type");
 if (v.appointments !== undefined && v.appointments !== null) for (const item of v.appointments) violations.push(...validateAppointment(item).map((message) => "appointments: " + message));
 return violations;
 }
@@ -269,6 +299,7 @@ return out;
 
 export function validateListTodayAppointmentsResponse(v: ListTodayAppointmentsResponse): string[] {
 const violations: string[] = [];
+if (v.appointments !== undefined && v.appointments !== null && !(Array.isArray(v.appointments) && (v.appointments).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("appointments has invalid type");
 if (v.appointments !== undefined && v.appointments !== null) for (const item of v.appointments) violations.push(...validateAppointment(item).map((message) => "appointments: " + message));
 return violations;
 }
@@ -322,8 +353,19 @@ return out;
 
 export function validateUpdateAppointmentRequest(v: UpdateAppointmentRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.serviceId !== undefined && v.serviceId !== null && !(typeof v.serviceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.serviceId))) violations.push("service_id has invalid type");
+if (v.resourceId !== undefined && v.resourceId !== null && !(typeof v.resourceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.resourceId))) violations.push("resource_id has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
+if (v.customerEmail !== undefined && v.customerEmail !== null && !(typeof v.customerEmail === "string")) violations.push("customer_email has invalid type");
+if (v.customerPhone !== undefined && v.customerPhone !== null && !(typeof v.customerPhone === "string")) violations.push("customer_phone has invalid type");
+if (v.startTime !== undefined && v.startTime !== null && !(typeof v.startTime === "string")) violations.push("start_time has invalid type");
+if (v.endTime !== undefined && v.endTime !== null && !(typeof v.endTime === "string")) violations.push("end_time has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
 return violations;
 }
 
@@ -346,6 +388,7 @@ return out;
 
 export function validateUpdateAppointmentResponse(v: UpdateAppointmentResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

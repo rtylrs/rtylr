@@ -49,6 +49,17 @@ return out;
 
 export function validateBookingService(v: BookingService): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(typeof v.durationMinutes === "number" && Number.isInteger(v.durationMinutes) && v.durationMinutes >= -2147483648 && v.durationMinutes <= 2147483647)) violations.push("duration_minutes has invalid type");
+if (v.price !== undefined && v.price !== null && !(typeof v.price === "number" && Number.isFinite(v.price))) violations.push("price has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -86,10 +97,16 @@ return out;
 
 export function validateCreateServiceRequest(v: CreateServiceRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(typeof v.durationMinutes === "number" && Number.isInteger(v.durationMinutes) && v.durationMinutes >= -2147483648 && v.durationMinutes <= 2147483647)) violations.push("duration_minutes has invalid type");
 if (!(v.durationMinutes !== undefined && v.durationMinutes !== null)) violations.push("duration_minutes is required");
 if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(Number(v.durationMinutes) > 0)) violations.push("duration_minutes violates @gt");
+if (v.price !== undefined && v.price !== null && !(typeof v.price === "number" && Number.isFinite(v.price))) violations.push("price has invalid type");
 if (v.price !== undefined && v.price !== null && !(Number(v.price) >= 0)) violations.push("price violates @gte");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -115,6 +132,8 @@ return out;
 
 export function validateCreateServiceResponse(v: CreateServiceResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -137,6 +156,7 @@ return out;
 
 export function validateDeleteServiceRequest(v: DeleteServiceRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -161,6 +181,7 @@ return out;
 
 export function validateDeleteServiceResponse(v: DeleteServiceResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -202,6 +223,7 @@ return out;
 
 export function validateListServicesResponse(v: ListServicesResponse): string[] {
 const violations: string[] = [];
+if (v.services !== undefined && v.services !== null && !(Array.isArray(v.services) && (v.services).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("services has invalid type");
 if (v.services !== undefined && v.services !== null) for (const item of v.services) violations.push(...validateBookingService(item).map((message) => "services: " + message));
 return violations;
 }
@@ -243,12 +265,19 @@ return out;
 
 export function validateUpdateServiceRequest(v: UpdateServiceRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(typeof v.durationMinutes === "number" && Number.isInteger(v.durationMinutes) && v.durationMinutes >= -2147483648 && v.durationMinutes <= 2147483647)) violations.push("duration_minutes has invalid type");
 if (!(v.durationMinutes !== undefined && v.durationMinutes !== null)) violations.push("duration_minutes is required");
 if (v.durationMinutes !== undefined && v.durationMinutes !== null && !(Number(v.durationMinutes) > 0)) violations.push("duration_minutes violates @gt");
+if (v.price !== undefined && v.price !== null && !(typeof v.price === "number" && Number.isFinite(v.price))) violations.push("price has invalid type");
 if (v.price !== undefined && v.price !== null && !(Number(v.price) >= 0)) violations.push("price violates @gte");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -271,6 +300,7 @@ return out;
 
 export function validateUpdateServiceResponse(v: UpdateServiceResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

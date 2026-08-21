@@ -40,6 +40,14 @@ return out;
 
 export function validateCustomer(v: Customer): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.phone !== undefined && v.phone !== null && !(typeof v.phone === "string")) violations.push("phone has invalid type");
+if (v.totalTickets !== undefined && v.totalTickets !== null && !(typeof v.totalTickets === "number" && Number.isInteger(v.totalTickets) && v.totalTickets >= -2147483648 && v.totalTickets <= 2147483647)) violations.push("total_tickets has invalid type");
+if (v.lastTicketAt !== undefined && v.lastTicketAt !== null && !(typeof v.lastTicketAt === "string")) violations.push("last_ticket_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -65,6 +73,8 @@ return out;
 
 export function validateListCustomersRequest(v: ListCustomersRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -96,7 +106,11 @@ return out;
 
 export function validateListCustomersResponse(v: ListCustomersResponse): string[] {
 const violations: string[] = [];
+if (v.customers !== undefined && v.customers !== null && !(Array.isArray(v.customers) && (v.customers).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("customers has invalid type");
 if (v.customers !== undefined && v.customers !== null) for (const item of v.customers) violations.push(...validateCustomer(item).map((message) => "customers: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isInteger(v.total) && v.total >= -2147483648 && v.total <= 2147483647)) violations.push("total has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isInteger(v.pageSize) && v.pageSize >= -2147483648 && v.pageSize <= 2147483647)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -119,6 +133,7 @@ return out;
 
 export function validateGetCustomerRequest(v: GetCustomerRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -143,6 +158,7 @@ return out;
 
 export function validateGetCustomerResponse(v: GetCustomerResponse): string[] {
 const violations: string[] = [];
+if (v.customer !== undefined && v.customer !== null && !(typeof v.customer === "object" && v.customer !== null && !Array.isArray(v.customer))) violations.push("customer has invalid type");
 if (v.customer !== undefined && v.customer !== null) violations.push(...validateCustomer(v.customer).map((message) => "customer: " + message));
 return violations;
 }

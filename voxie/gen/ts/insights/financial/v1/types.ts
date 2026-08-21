@@ -28,7 +28,11 @@ return out;
 
 export function validateExpenseAnalytics(v: ExpenseAnalytics): string[] {
 const violations: string[] = [];
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isFinite(v.total))) violations.push("total has invalid type");
+if (v.change !== undefined && v.change !== null && !(typeof v.change === "number" && Number.isFinite(v.change))) violations.push("change has invalid type");
+if (v.byCategory !== undefined && v.byCategory !== null && !(Array.isArray(v.byCategory) && (v.byCategory).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("by_category has invalid type");
 if (v.byCategory !== undefined && v.byCategory !== null) for (const item of v.byCategory) violations.push(...validateExpenseByCategory(item).map((message) => "by_category: " + message));
+if (v.trend !== undefined && v.trend !== null && !(Array.isArray(v.trend) && (v.trend).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("trend has invalid type");
 if (v.trend !== undefined && v.trend !== null) for (const item of v.trend) violations.push(...validateExpensePoint(item).map((message) => "trend: " + message));
 return violations;
 }
@@ -64,6 +68,11 @@ return out;
 
 export function validateExpenseByCategory(v: ExpenseByCategory): string[] {
 const violations: string[] = [];
+if (v.category !== undefined && v.category !== null && !(typeof v.category === "string")) violations.push("category has invalid type");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
+if (v.percentage !== undefined && v.percentage !== null && !(typeof v.percentage === "number" && Number.isFinite(v.percentage))) violations.push("percentage has invalid type");
+if (v.budget !== undefined && v.budget !== null && !(typeof v.budget === "number" && Number.isFinite(v.budget))) violations.push("budget has invalid type");
+if (v.utilization !== undefined && v.utilization !== null && !(typeof v.utilization === "number" && Number.isFinite(v.utilization))) violations.push("utilization has invalid type");
 return violations;
 }
 
@@ -89,6 +98,8 @@ return out;
 
 export function validateExpensePoint(v: ExpensePoint): string[] {
 const violations: string[] = [];
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
 return violations;
 }
 
@@ -117,6 +128,9 @@ return out;
 
 export function validateInvoiceAgingBucket(v: InvoiceAgingBucket): string[] {
 const violations: string[] = [];
+if (v.bucket !== undefined && v.bucket !== null && !(typeof v.bucket === "string")) violations.push("bucket has invalid type");
+if (v.count !== undefined && v.count !== null && !(typeof v.count === "number" && Number.isInteger(v.count) && v.count >= -2147483648 && v.count <= 2147483647)) violations.push("count has invalid type");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
 return violations;
 }
 
@@ -142,6 +156,8 @@ return out;
 
 export function validateInvoiceAging(v: InvoiceAging): string[] {
 const violations: string[] = [];
+if (v.totalOutstanding !== undefined && v.totalOutstanding !== null && !(typeof v.totalOutstanding === "number" && Number.isFinite(v.totalOutstanding))) violations.push("total_outstanding has invalid type");
+if (v.buckets !== undefined && v.buckets !== null && !(Array.isArray(v.buckets) && (v.buckets).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("buckets has invalid type");
 if (v.buckets !== undefined && v.buckets !== null) for (const item of v.buckets) violations.push(...validateInvoiceAgingBucket(item).map((message) => "buckets: " + message));
 return violations;
 }
@@ -174,6 +190,10 @@ return out;
 
 export function validateCashFlowAnalytics(v: CashFlowAnalytics): string[] {
 const violations: string[] = [];
+if (v.inflows !== undefined && v.inflows !== null && !(typeof v.inflows === "number" && Number.isFinite(v.inflows))) violations.push("inflows has invalid type");
+if (v.outflows !== undefined && v.outflows !== null && !(typeof v.outflows === "number" && Number.isFinite(v.outflows))) violations.push("outflows has invalid type");
+if (v.net !== undefined && v.net !== null && !(typeof v.net === "number" && Number.isFinite(v.net))) violations.push("net has invalid type");
+if (v.trend !== undefined && v.trend !== null && !(Array.isArray(v.trend) && (v.trend).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("trend has invalid type");
 if (v.trend !== undefined && v.trend !== null) for (const item of v.trend) violations.push(...validateCashFlowPoint(item).map((message) => "trend: " + message));
 return violations;
 }
@@ -206,6 +226,10 @@ return out;
 
 export function validateCashFlowPoint(v: CashFlowPoint): string[] {
 const violations: string[] = [];
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.inflow !== undefined && v.inflow !== null && !(typeof v.inflow === "number" && Number.isFinite(v.inflow))) violations.push("inflow has invalid type");
+if (v.outflow !== undefined && v.outflow !== null && !(typeof v.outflow === "number" && Number.isFinite(v.outflow))) violations.push("outflow has invalid type");
+if (v.net !== undefined && v.net !== null && !(typeof v.net === "number" && Number.isFinite(v.net))) violations.push("net has invalid type");
 return violations;
 }
 
@@ -228,6 +252,7 @@ return out;
 
 export function validateGetCashFlowAnalyticsRequest(v: GetCashFlowAnalyticsRequest): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
 return violations;
 }
 
@@ -250,6 +275,7 @@ return out;
 
 export function validateGetCashFlowAnalyticsResponse(v: GetCashFlowAnalyticsResponse): string[] {
 const violations: string[] = [];
+if (v.analytics !== undefined && v.analytics !== null && !(typeof v.analytics === "object" && v.analytics !== null && !Array.isArray(v.analytics))) violations.push("analytics has invalid type");
 if (v.analytics !== undefined && v.analytics !== null) violations.push(...validateCashFlowAnalytics(v.analytics).map((message) => "analytics: " + message));
 return violations;
 }
@@ -273,6 +299,7 @@ return out;
 
 export function validateGetExpenseAnalyticsRequest(v: GetExpenseAnalyticsRequest): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
 return violations;
 }
 
@@ -295,6 +322,7 @@ return out;
 
 export function validateGetExpenseAnalyticsResponse(v: GetExpenseAnalyticsResponse): string[] {
 const violations: string[] = [];
+if (v.analytics !== undefined && v.analytics !== null && !(typeof v.analytics === "object" && v.analytics !== null && !Array.isArray(v.analytics))) violations.push("analytics has invalid type");
 if (v.analytics !== undefined && v.analytics !== null) violations.push(...validateExpenseAnalytics(v.analytics).map((message) => "analytics: " + message));
 return violations;
 }
@@ -337,6 +365,7 @@ return out;
 
 export function validateGetInvoiceAgingResponse(v: GetInvoiceAgingResponse): string[] {
 const violations: string[] = [];
+if (v.aging !== undefined && v.aging !== null && !(typeof v.aging === "object" && v.aging !== null && !Array.isArray(v.aging))) violations.push("aging has invalid type");
 if (v.aging !== undefined && v.aging !== null) violations.push(...validateInvoiceAging(v.aging).map((message) => "aging: " + message));
 return violations;
 }

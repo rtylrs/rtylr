@@ -34,6 +34,12 @@ return out;
 
 export function validateAccessRequest(v: AccessRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.app !== undefined && v.app !== null && !(typeof v.app === "string")) violations.push("app has invalid type");
+if (v.requesterName !== undefined && v.requesterName !== null && !(typeof v.requesterName === "string")) violations.push("requester_name has invalid type");
+if (v.requesterEmail !== undefined && v.requesterEmail !== null && !(typeof v.requesterEmail === "string")) violations.push("requester_email has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -56,6 +62,7 @@ return out;
 
 export function validateRequestAccessRequest(v: RequestAccessRequest): string[] {
 const violations: string[] = [];
+if (v.app !== undefined && v.app !== null && !(typeof v.app === "string")) violations.push("app has invalid type");
 if (!(v.app !== undefined && v.app !== null) || v.app === "") violations.push("app is required");
 return violations;
 }
@@ -79,6 +86,7 @@ return out;
 
 export function validateRequestAccessResponse(v: RequestAccessResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -120,6 +128,7 @@ return out;
 
 export function validateListAccessRequestsResponse(v: ListAccessRequestsResponse): string[] {
 const violations: string[] = [];
+if (v.requests !== undefined && v.requests !== null && !(Array.isArray(v.requests) && (v.requests).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("requests has invalid type");
 if (v.requests !== undefined && v.requests !== null) for (const item of v.requests) violations.push(...validateAccessRequest(item).map((message) => "requests: " + message));
 return violations;
 }
@@ -149,10 +158,13 @@ return out;
 
 export function validateApproveAccessRequestRequest(v: ApproveAccessRequestRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (v.app !== undefined && v.app !== null && !(typeof v.app === "string")) violations.push("app has invalid type");
 if (!(v.app !== undefined && v.app !== null) || v.app === "") violations.push("app is required");
 return violations;
 }
@@ -176,6 +188,7 @@ return out;
 
 export function validateApproveAccessRequestResponse(v: ApproveAccessRequestResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

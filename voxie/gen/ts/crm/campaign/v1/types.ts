@@ -70,6 +70,24 @@ return out;
 
 export function validateCampaign(v: Campaign): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.channel !== undefined && v.channel !== null && !(typeof v.channel === "string")) violations.push("channel has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.segmentId !== undefined && v.segmentId !== null && !(typeof v.segmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.segmentId))) violations.push("segment_id has invalid type");
+if (v.subject !== undefined && v.subject !== null && !(typeof v.subject === "string")) violations.push("subject has invalid type");
+if (v.content !== undefined && v.content !== null && !(typeof v.content === "string")) violations.push("content has invalid type");
+if (v.scheduledAt !== undefined && v.scheduledAt !== null && !(typeof v.scheduledAt === "string")) violations.push("scheduled_at has invalid type");
+if (v.sentAt !== undefined && v.sentAt !== null && !(typeof v.sentAt === "string")) violations.push("sent_at has invalid type");
+if (v.audienceCount !== undefined && v.audienceCount !== null && !(typeof v.audienceCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.audienceCount))) violations.push("audience_count has invalid type");
+if (v.sentCount !== undefined && v.sentCount !== null && !(typeof v.sentCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sentCount))) violations.push("sent_count has invalid type");
+if (v.deliveredCount !== undefined && v.deliveredCount !== null && !(typeof v.deliveredCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.deliveredCount))) violations.push("delivered_count has invalid type");
+if (v.openedCount !== undefined && v.openedCount !== null && !(typeof v.openedCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.openedCount))) violations.push("opened_count has invalid type");
+if (v.clickedCount !== undefined && v.clickedCount !== null && !(typeof v.clickedCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.clickedCount))) violations.push("clicked_count has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -113,6 +131,14 @@ return out;
 
 export function validateCampaignStats(v: CampaignStats): string[] {
 const violations: string[] = [];
+if (v.campaignId !== undefined && v.campaignId !== null && !(typeof v.campaignId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.campaignId))) violations.push("campaign_id has invalid type");
+if (v.audienceCount !== undefined && v.audienceCount !== null && !(typeof v.audienceCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.audienceCount))) violations.push("audience_count has invalid type");
+if (v.sentCount !== undefined && v.sentCount !== null && !(typeof v.sentCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sentCount))) violations.push("sent_count has invalid type");
+if (v.deliveredCount !== undefined && v.deliveredCount !== null && !(typeof v.deliveredCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.deliveredCount))) violations.push("delivered_count has invalid type");
+if (v.openedCount !== undefined && v.openedCount !== null && !(typeof v.openedCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.openedCount))) violations.push("opened_count has invalid type");
+if (v.clickedCount !== undefined && v.clickedCount !== null && !(typeof v.clickedCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.clickedCount))) violations.push("clicked_count has invalid type");
+if (v.bouncedCount !== undefined && v.bouncedCount !== null && !(typeof v.bouncedCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.bouncedCount))) violations.push("bounced_count has invalid type");
+if (v.failedCount !== undefined && v.failedCount !== null && !(typeof v.failedCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.failedCount))) violations.push("failed_count has invalid type");
 return violations;
 }
 
@@ -153,11 +179,18 @@ return out;
 
 export function validateCreateCampaignRequest(v: CreateCampaignRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.channel !== undefined && v.channel !== null && !(typeof v.channel === "string")) violations.push("channel has invalid type");
 if (!(v.channel !== undefined && v.channel !== null) || v.channel === "") violations.push("channel is required");
+if (v.segmentId !== undefined && v.segmentId !== null && !(typeof v.segmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.segmentId))) violations.push("segment_id has invalid type");
+if (v.subject !== undefined && v.subject !== null && !(typeof v.subject === "string")) violations.push("subject has invalid type");
 if (!(v.subject !== undefined && v.subject !== null) || v.subject === "") violations.push("subject is required");
+if (v.content !== undefined && v.content !== null && !(typeof v.content === "string")) violations.push("content has invalid type");
 if (!(v.content !== undefined && v.content !== null) || v.content === "") violations.push("content is required");
+if (v.scheduledAt !== undefined && v.scheduledAt !== null && !(typeof v.scheduledAt === "string")) violations.push("scheduled_at has invalid type");
 if (!(v.scheduledAt !== undefined && v.scheduledAt !== null) || v.scheduledAt === "") violations.push("scheduled_at is required");
 return violations;
 }
@@ -184,6 +217,8 @@ return out;
 
 export function validateCreateCampaignResponse(v: CreateCampaignResponse): string[] {
 const violations: string[] = [];
+if (v.campaignId !== undefined && v.campaignId !== null && !(typeof v.campaignId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.campaignId))) violations.push("campaign_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -206,6 +241,7 @@ return out;
 
 export function validateGetCampaignDetailRequest(v: GetCampaignDetailRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -233,7 +269,9 @@ return out;
 
 export function validateGetCampaignDetailResponse(v: GetCampaignDetailResponse): string[] {
 const violations: string[] = [];
+if (v.campaign !== undefined && v.campaign !== null && !(typeof v.campaign === "object" && v.campaign !== null && !Array.isArray(v.campaign))) violations.push("campaign has invalid type");
 if (v.campaign !== undefined && v.campaign !== null) violations.push(...validateCampaign(v.campaign).map((message) => "campaign: " + message));
+if (v.stats !== undefined && v.stats !== null && !(typeof v.stats === "object" && v.stats !== null && !Array.isArray(v.stats))) violations.push("stats has invalid type");
 if (v.stats !== undefined && v.stats !== null) violations.push(...validateCampaignStats(v.stats).map((message) => "stats: " + message));
 return violations;
 }
@@ -257,6 +295,7 @@ return out;
 
 export function validateGetCampaignStatsRequest(v: GetCampaignStatsRequest): string[] {
 const violations: string[] = [];
+if (v.campaignId !== undefined && v.campaignId !== null && !(typeof v.campaignId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.campaignId))) violations.push("campaign_id has invalid type");
 if (!(v.campaignId !== undefined && v.campaignId !== null)) violations.push("campaign_id is required");
 if (v.campaignId !== undefined && v.campaignId !== null && !(Number(v.campaignId) > 0)) violations.push("campaign_id violates @gt");
 return violations;
@@ -281,6 +320,7 @@ return out;
 
 export function validateGetCampaignStatsResponse(v: GetCampaignStatsResponse): string[] {
 const violations: string[] = [];
+if (v.stats !== undefined && v.stats !== null && !(typeof v.stats === "object" && v.stats !== null && !Array.isArray(v.stats))) violations.push("stats has invalid type");
 if (v.stats !== undefined && v.stats !== null) violations.push(...validateCampaignStats(v.stats).map((message) => "stats: " + message));
 return violations;
 }
@@ -310,6 +350,9 @@ return out;
 
 export function validateListCampaignsRequest(v: ListCampaignsRequest): string[] {
 const violations: string[] = [];
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.limit))) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.offset))) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -341,7 +384,11 @@ return out;
 
 export function validateListCampaignsResponse(v: ListCampaignsResponse): string[] {
 const violations: string[] = [];
+if (v.campaigns !== undefined && v.campaigns !== null && !(Array.isArray(v.campaigns) && (v.campaigns).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("campaigns has invalid type");
 if (v.campaigns !== undefined && v.campaigns !== null) for (const item of v.campaigns) violations.push(...validateCampaign(item).map((message) => "campaigns: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.total))) violations.push("total has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.limit))) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.offset))) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -382,11 +429,18 @@ return out;
 
 export function validateUpdateCampaignBody(v: UpdateCampaignBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.channel !== undefined && v.channel !== null && !(typeof v.channel === "string")) violations.push("channel has invalid type");
 if (!(v.channel !== undefined && v.channel !== null) || v.channel === "") violations.push("channel is required");
+if (v.segmentId !== undefined && v.segmentId !== null && !(typeof v.segmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.segmentId))) violations.push("segment_id has invalid type");
+if (v.subject !== undefined && v.subject !== null && !(typeof v.subject === "string")) violations.push("subject has invalid type");
 if (!(v.subject !== undefined && v.subject !== null) || v.subject === "") violations.push("subject is required");
+if (v.content !== undefined && v.content !== null && !(typeof v.content === "string")) violations.push("content has invalid type");
 if (!(v.content !== undefined && v.content !== null) || v.content === "") violations.push("content is required");
+if (v.scheduledAt !== undefined && v.scheduledAt !== null && !(typeof v.scheduledAt === "string")) violations.push("scheduled_at has invalid type");
 if (!(v.scheduledAt !== undefined && v.scheduledAt !== null) || v.scheduledAt === "") violations.push("scheduled_at is required");
 return violations;
 }
@@ -413,8 +467,10 @@ return out;
 
 export function validateUpdateCampaignRequest(v: UpdateCampaignRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateCampaignBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -438,6 +494,7 @@ return out;
 
 export function validateUpdateCampaignResponse(v: UpdateCampaignResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -463,8 +520,10 @@ return out;
 
 export function validateUpdateCampaignStatusRequest(v: UpdateCampaignStatusRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateCampaignStatusBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -488,6 +547,7 @@ return out;
 
 export function validateUpdateCampaignStatusBody(v: UpdateCampaignStatusBody): string[] {
 const violations: string[] = [];
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
 return violations;
 }
@@ -511,6 +571,7 @@ return out;
 
 export function validateUpdateCampaignStatusResponse(v: UpdateCampaignStatusResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

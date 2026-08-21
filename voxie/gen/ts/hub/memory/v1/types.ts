@@ -34,6 +34,12 @@ return out;
 
 export function validateChatSummary(v: ChatSummary): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string")) violations.push("id has invalid type");
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
+if (v.summary !== undefined && v.summary !== null && !(typeof v.summary === "string")) violations.push("summary has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
+if (v.pinned !== undefined && v.pinned !== null && !(typeof v.pinned === "boolean")) violations.push("pinned has invalid type");
+if (v.archived !== undefined && v.archived !== null && !(typeof v.archived === "boolean")) violations.push("archived has invalid type");
 return violations;
 }
 
@@ -68,6 +74,11 @@ return out;
 
 export function validateChatMessage(v: ChatMessage): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string")) violations.push("id has invalid type");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
+if (v.content !== undefined && v.content !== null && !(typeof v.content === "string")) violations.push("content has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.tokensUsed !== undefined && v.tokensUsed !== null && !(typeof v.tokensUsed === "number" && Number.isInteger(v.tokensUsed) && v.tokensUsed >= -2147483648 && v.tokensUsed <= 2147483647)) violations.push("tokens_used has invalid type");
 return violations;
 }
 
@@ -93,6 +104,8 @@ return out;
 
 export function validateListChatsRequest(v: ListChatsRequest): string[] {
 const violations: string[] = [];
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -115,6 +128,7 @@ return out;
 
 export function validateListChatsResponse(v: ListChatsResponse): string[] {
 const violations: string[] = [];
+if (v.chats !== undefined && v.chats !== null && !(Array.isArray(v.chats) && (v.chats).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("chats has invalid type");
 if (v.chats !== undefined && v.chats !== null) for (const item of v.chats) violations.push(...validateChatSummary(item).map((message) => "chats: " + message));
 return violations;
 }
@@ -138,6 +152,7 @@ return out;
 
 export function validateGetChatMessagesRequest(v: GetChatMessagesRequest): string[] {
 const violations: string[] = [];
+if (v.sessionId !== undefined && v.sessionId !== null && !(typeof v.sessionId === "string")) violations.push("session_id has invalid type");
 return violations;
 }
 
@@ -160,6 +175,7 @@ return out;
 
 export function validateGetChatMessagesResponse(v: GetChatMessagesResponse): string[] {
 const violations: string[] = [];
+if (v.messages !== undefined && v.messages !== null && !(Array.isArray(v.messages) && (v.messages).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("messages has invalid type");
 if (v.messages !== undefined && v.messages !== null) for (const item of v.messages) violations.push(...validateChatMessage(item).map((message) => "messages: " + message));
 return violations;
 }
@@ -183,6 +199,7 @@ return out;
 
 export function validateDeleteChatRequest(v: DeleteChatRequest): string[] {
 const violations: string[] = [];
+if (v.sessionId !== undefined && v.sessionId !== null && !(typeof v.sessionId === "string")) violations.push("session_id has invalid type");
 return violations;
 }
 
@@ -205,6 +222,7 @@ return out;
 
 export function validateDeleteChatResponse(v: DeleteChatResponse): string[] {
 const violations: string[] = [];
+if (v.deleted !== undefined && v.deleted !== null && !(typeof v.deleted === "boolean")) violations.push("deleted has invalid type");
 return violations;
 }
 
@@ -230,6 +248,8 @@ return out;
 
 export function validateRenameChatRequest(v: RenameChatRequest): string[] {
 const violations: string[] = [];
+if (v.sessionId !== undefined && v.sessionId !== null && !(typeof v.sessionId === "string")) violations.push("session_id has invalid type");
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
 return violations;
 }
 
@@ -252,6 +272,7 @@ return out;
 
 export function validateRenameChatResponse(v: RenameChatResponse): string[] {
 const violations: string[] = [];
+if (v.updated !== undefined && v.updated !== null && !(typeof v.updated === "boolean")) violations.push("updated has invalid type");
 return violations;
 }
 
@@ -277,6 +298,8 @@ return out;
 
 export function validatePinChatRequest(v: PinChatRequest): string[] {
 const violations: string[] = [];
+if (v.sessionId !== undefined && v.sessionId !== null && !(typeof v.sessionId === "string")) violations.push("session_id has invalid type");
+if (v.pinned !== undefined && v.pinned !== null && !(typeof v.pinned === "boolean")) violations.push("pinned has invalid type");
 return violations;
 }
 
@@ -299,6 +322,7 @@ return out;
 
 export function validatePinChatResponse(v: PinChatResponse): string[] {
 const violations: string[] = [];
+if (v.updated !== undefined && v.updated !== null && !(typeof v.updated === "boolean")) violations.push("updated has invalid type");
 return violations;
 }
 

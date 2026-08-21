@@ -2,6 +2,42 @@
 import type { GetMyLocationsRequest, GetMyLocationsResponse, GetMemberLocationsRequest, GetMemberLocationsResponse, GetLocationRosterRequest, GetLocationRosterResponse, AssignLocationRequest, AssignLocationResponse, RemoveLocationRequest, RemoveLocationResponse } from "./types";
 import { encodeGetMyLocationsRequest, validateGetMyLocationsRequest, decodeGetMyLocationsResponse, encodeGetMemberLocationsRequest, validateGetMemberLocationsRequest, decodeGetMemberLocationsResponse, encodeGetLocationRosterRequest, validateGetLocationRosterRequest, decodeGetLocationRosterResponse, encodeAssignLocationRequest, validateAssignLocationRequest, decodeAssignLocationResponse, encodeRemoveLocationRequest, validateRemoveLocationRequest, decodeRemoveLocationResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface AccessServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class AccessServiceClient {
@@ -46,11 +84,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetMyLocationsResponse(await res.json());
+return decodeGetMyLocationsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getMemberLocations(req: GetMemberLocationsRequest): Promise<GetMemberLocationsResponse> {
@@ -69,11 +107,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetMemberLocationsResponse(await res.json());
+return decodeGetMemberLocationsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getLocationRoster(req: GetLocationRosterRequest): Promise<GetLocationRosterResponse> {
@@ -92,11 +130,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetLocationRosterResponse(await res.json());
+return decodeGetLocationRosterResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async assignLocation(req: AssignLocationRequest): Promise<AssignLocationResponse> {
@@ -110,11 +148,11 @@ body: JSON.stringify(encodeAssignLocationRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAssignLocationResponse(await res.json());
+return decodeAssignLocationResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async removeLocation(req: RemoveLocationRequest): Promise<RemoveLocationResponse> {
@@ -128,11 +166,11 @@ body: JSON.stringify(encodeRemoveLocationRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRemoveLocationResponse(await res.json());
+return decodeRemoveLocationResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

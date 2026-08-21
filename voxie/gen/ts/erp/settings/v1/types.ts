@@ -46,14 +46,24 @@ return out;
 
 export function validateErpBusinessSettings(v: ErpBusinessSettings): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
 if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (v.taxRate !== undefined && v.taxRate !== null && !(typeof v.taxRate === "number" && Number.isFinite(v.taxRate))) violations.push("tax_rate has invalid type");
 if (!(v.taxRate !== undefined && v.taxRate !== null)) violations.push("tax_rate is required");
 if (v.taxRate !== undefined && v.taxRate !== null && !(Number(v.taxRate) >= 0)) violations.push("tax_rate violates @gte");
 if (v.taxRate !== undefined && v.taxRate !== null && !(Number(v.taxRate) <= 100)) violations.push("tax_rate violates @lte");
+if (v.lowStockThreshold !== undefined && v.lowStockThreshold !== null && !(typeof v.lowStockThreshold === "number" && Number.isFinite(v.lowStockThreshold))) violations.push("low_stock_threshold has invalid type");
 if (!(v.lowStockThreshold !== undefined && v.lowStockThreshold !== null)) violations.push("low_stock_threshold is required");
 if (v.lowStockThreshold !== undefined && v.lowStockThreshold !== null && !(Number(v.lowStockThreshold) >= 0)) violations.push("low_stock_threshold violates @gte");
+if (v.defaultWarehouseId !== undefined && v.defaultWarehouseId !== null && !(typeof v.defaultWarehouseId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.defaultWarehouseId))) violations.push("default_warehouse_id has invalid type");
 if (!(v.defaultWarehouseId !== undefined && v.defaultWarehouseId !== null)) violations.push("default_warehouse_id is required");
 if (v.defaultWarehouseId !== undefined && v.defaultWarehouseId !== null && !(Number(v.defaultWarehouseId) > 0)) violations.push("default_warehouse_id violates @gt");
+if (v.notifyOnLowStock !== undefined && v.notifyOnLowStock !== null && !(typeof v.notifyOnLowStock === "boolean")) violations.push("notify_on_low_stock has invalid type");
+if (v.notifyOnExpiry !== undefined && v.notifyOnExpiry !== null && !(typeof v.notifyOnExpiry === "boolean")) violations.push("notify_on_expiry has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -95,6 +105,7 @@ return out;
 
 export function validateGetErpSettingsResponse(v: GetErpSettingsResponse): string[] {
 const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null && !(typeof v.settings === "object" && v.settings !== null && !Array.isArray(v.settings))) violations.push("settings has invalid type");
 if (!(v.settings !== undefined && v.settings !== null)) violations.push("settings is required");
 if (v.settings !== undefined && v.settings !== null) violations.push(...validateErpBusinessSettings(v.settings).map((message) => "settings: " + message));
 return violations;
@@ -134,14 +145,20 @@ return out;
 
 export function validateUpdateErpSettingsRequest(v: UpdateErpSettingsRequest): string[] {
 const violations: string[] = [];
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
 if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (v.taxRate !== undefined && v.taxRate !== null && !(typeof v.taxRate === "number" && Number.isFinite(v.taxRate))) violations.push("tax_rate has invalid type");
 if (!(v.taxRate !== undefined && v.taxRate !== null)) violations.push("tax_rate is required");
 if (v.taxRate !== undefined && v.taxRate !== null && !(Number(v.taxRate) >= 0)) violations.push("tax_rate violates @gte");
 if (v.taxRate !== undefined && v.taxRate !== null && !(Number(v.taxRate) <= 100)) violations.push("tax_rate violates @lte");
+if (v.lowStockThreshold !== undefined && v.lowStockThreshold !== null && !(typeof v.lowStockThreshold === "number" && Number.isFinite(v.lowStockThreshold))) violations.push("low_stock_threshold has invalid type");
 if (!(v.lowStockThreshold !== undefined && v.lowStockThreshold !== null)) violations.push("low_stock_threshold is required");
 if (v.lowStockThreshold !== undefined && v.lowStockThreshold !== null && !(Number(v.lowStockThreshold) >= 0)) violations.push("low_stock_threshold violates @gte");
+if (v.defaultWarehouseId !== undefined && v.defaultWarehouseId !== null && !(typeof v.defaultWarehouseId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.defaultWarehouseId))) violations.push("default_warehouse_id has invalid type");
 if (!(v.defaultWarehouseId !== undefined && v.defaultWarehouseId !== null)) violations.push("default_warehouse_id is required");
 if (v.defaultWarehouseId !== undefined && v.defaultWarehouseId !== null && !(Number(v.defaultWarehouseId) > 0)) violations.push("default_warehouse_id violates @gt");
+if (v.notifyOnLowStock !== undefined && v.notifyOnLowStock !== null && !(typeof v.notifyOnLowStock === "boolean")) violations.push("notify_on_low_stock has invalid type");
+if (v.notifyOnExpiry !== undefined && v.notifyOnExpiry !== null && !(typeof v.notifyOnExpiry === "boolean")) violations.push("notify_on_expiry has invalid type");
 return violations;
 }
 
@@ -167,8 +184,10 @@ return out;
 
 export function validateUpdateErpSettingsResponse(v: UpdateErpSettingsResponse): string[] {
 const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null && !(typeof v.settings === "object" && v.settings !== null && !Array.isArray(v.settings))) violations.push("settings has invalid type");
 if (!(v.settings !== undefined && v.settings !== null)) violations.push("settings is required");
 if (v.settings !== undefined && v.settings !== null) violations.push(...validateErpBusinessSettings(v.settings).map((message) => "settings: " + message));
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

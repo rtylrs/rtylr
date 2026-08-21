@@ -34,6 +34,12 @@ return out;
 
 export function validateTimesheetEntry(v: TimesheetEntry): string[] {
 const violations: string[] = [];
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "number" && Number.isSafeInteger(v.staffId) && v.staffId >= Number.MIN_SAFE_INTEGER && v.staffId <= Number.MAX_SAFE_INTEGER)) violations.push("staff_id has invalid type");
+if (v.staffName !== undefined && v.staffName !== null && !(typeof v.staffName === "string")) violations.push("staff_name has invalid type");
+if (v.weekStart !== undefined && v.weekStart !== null && !(typeof v.weekStart === "string")) violations.push("week_start has invalid type");
+if (v.totalHours !== undefined && v.totalHours !== null && !(typeof v.totalHours === "number" && Number.isFinite(v.totalHours))) violations.push("total_hours has invalid type");
+if (v.regularHours !== undefined && v.regularHours !== null && !(typeof v.regularHours === "number" && Number.isFinite(v.regularHours))) violations.push("regular_hours has invalid type");
+if (v.overtimeHours !== undefined && v.overtimeHours !== null && !(typeof v.overtimeHours === "number" && Number.isFinite(v.overtimeHours))) violations.push("overtime_hours has invalid type");
 return violations;
 }
 
@@ -56,6 +62,7 @@ return out;
 
 export function validateListTimesheetsRequest(v: ListTimesheetsRequest): string[] {
 const violations: string[] = [];
+if (v.weekStart !== undefined && v.weekStart !== null && !(typeof v.weekStart === "string")) violations.push("week_start has invalid type");
 return violations;
 }
 
@@ -78,6 +85,7 @@ return out;
 
 export function validateListTimesheetsResponse(v: ListTimesheetsResponse): string[] {
 const violations: string[] = [];
+if (v.timesheets !== undefined && v.timesheets !== null && !(Array.isArray(v.timesheets) && (v.timesheets).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("timesheets has invalid type");
 if (v.timesheets !== undefined && v.timesheets !== null) for (const item of v.timesheets) violations.push(...validateTimesheetEntry(item).map((message) => "timesheets: " + message));
 return violations;
 }

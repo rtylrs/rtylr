@@ -31,6 +31,11 @@ return out;
 
 export function validateBillingSummary(v: BillingSummary): string[] {
 const violations: string[] = [];
+if (v.plan !== undefined && v.plan !== null && !(typeof v.plan === "string")) violations.push("plan has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.currentUsage !== undefined && v.currentUsage !== null && !(typeof v.currentUsage === "number" && Number.isFinite(v.currentUsage))) violations.push("current_usage has invalid type");
+if (v.usageLimit !== undefined && v.usageLimit !== null && !(typeof v.usageLimit === "number" && Number.isFinite(v.usageLimit))) violations.push("usage_limit has invalid type");
+if (v.nextBillingDate !== undefined && v.nextBillingDate !== null && !(typeof v.nextBillingDate === "string")) violations.push("next_billing_date has invalid type");
 return violations;
 }
 
@@ -68,6 +73,12 @@ return out;
 
 export function validateInvoice(v: Invoice): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.issuedAt !== undefined && v.issuedAt !== null && !(typeof v.issuedAt === "string")) violations.push("issued_at has invalid type");
+if (v.paidAt !== undefined && v.paidAt !== null && !(typeof v.paidAt === "string")) violations.push("paid_at has invalid type");
 return violations;
 }
 
@@ -109,6 +120,7 @@ return out;
 
 export function validateGetBillingSummaryResponse(v: GetBillingSummaryResponse): string[] {
 const violations: string[] = [];
+if (v.summary !== undefined && v.summary !== null && !(typeof v.summary === "object" && v.summary !== null && !Array.isArray(v.summary))) violations.push("summary has invalid type");
 if (v.summary !== undefined && v.summary !== null) violations.push(...validateBillingSummary(v.summary).map((message) => "summary: " + message));
 return violations;
 }
@@ -151,6 +163,7 @@ return out;
 
 export function validateListInvoicesResponse(v: ListInvoicesResponse): string[] {
 const violations: string[] = [];
+if (v.invoices !== undefined && v.invoices !== null && !(Array.isArray(v.invoices) && (v.invoices).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("invoices has invalid type");
 if (v.invoices !== undefined && v.invoices !== null) for (const item of v.invoices) violations.push(...validateInvoice(item).map((message) => "invoices: " + message));
 return violations;
 }

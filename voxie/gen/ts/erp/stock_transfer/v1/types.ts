@@ -31,6 +31,11 @@ return out;
 
 export function validateStockTransferItem(v: StockTransferItem): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.transferId !== undefined && v.transferId !== null && !(typeof v.transferId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.transferId))) violations.push("transfer_id has invalid type");
+if (v.productId !== undefined && v.productId !== null && !(typeof v.productId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.productId))) violations.push("product_id has invalid type");
+if (v.quantity !== undefined && v.quantity !== null && !(typeof v.quantity === "number" && Number.isFinite(v.quantity))) violations.push("quantity has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -77,7 +82,16 @@ return out;
 
 export function validateStockTransfer(v: StockTransfer): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.fromWarehouseId !== undefined && v.fromWarehouseId !== null && !(typeof v.fromWarehouseId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.fromWarehouseId))) violations.push("from_warehouse_id has invalid type");
+if (v.toWarehouseId !== undefined && v.toWarehouseId !== null && !(typeof v.toWarehouseId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.toWarehouseId))) violations.push("to_warehouse_id has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateStockTransferItem(item).map((message) => "items: " + message));
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -103,6 +117,8 @@ return out;
 
 export function validateCreateStockTransferItemRequest(v: CreateStockTransferItemRequest): string[] {
 const violations: string[] = [];
+if (v.productId !== undefined && v.productId !== null && !(typeof v.productId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.productId))) violations.push("product_id has invalid type");
+if (v.quantity !== undefined && v.quantity !== null && !(typeof v.quantity === "number" && Number.isFinite(v.quantity))) violations.push("quantity has invalid type");
 return violations;
 }
 
@@ -134,10 +150,14 @@ return out;
 
 export function validateCreateStockTransferRequest(v: CreateStockTransferRequest): string[] {
 const violations: string[] = [];
+if (v.fromWarehouseId !== undefined && v.fromWarehouseId !== null && !(typeof v.fromWarehouseId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.fromWarehouseId))) violations.push("from_warehouse_id has invalid type");
 if (!(v.fromWarehouseId !== undefined && v.fromWarehouseId !== null)) violations.push("from_warehouse_id is required");
 if (v.fromWarehouseId !== undefined && v.fromWarehouseId !== null && !(Number(v.fromWarehouseId) > 0)) violations.push("from_warehouse_id violates @gt");
+if (v.toWarehouseId !== undefined && v.toWarehouseId !== null && !(typeof v.toWarehouseId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.toWarehouseId))) violations.push("to_warehouse_id has invalid type");
 if (!(v.toWarehouseId !== undefined && v.toWarehouseId !== null)) violations.push("to_warehouse_id is required");
 if (v.toWarehouseId !== undefined && v.toWarehouseId !== null && !(Number(v.toWarehouseId) > 0)) violations.push("to_warehouse_id violates @gt");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateCreateStockTransferItemRequest(item).map((message) => "items: " + message));
 return violations;
 }
@@ -164,6 +184,8 @@ return out;
 
 export function validateCreateStockTransferResponse(v: CreateStockTransferResponse): string[] {
 const violations: string[] = [];
+if (v.transferId !== undefined && v.transferId !== null && !(typeof v.transferId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.transferId))) violations.push("transfer_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -189,6 +211,8 @@ return out;
 
 export function validateListStockTransfersRequest(v: ListStockTransfersRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isSafeInteger(v.pageSize) && v.pageSize >= Number.MIN_SAFE_INTEGER && v.pageSize <= Number.MAX_SAFE_INTEGER)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -220,7 +244,11 @@ return out;
 
 export function validateListStockTransfersResponse(v: ListStockTransfersResponse): string[] {
 const violations: string[] = [];
+if (v.stockTransfers !== undefined && v.stockTransfers !== null && !(Array.isArray(v.stockTransfers) && (v.stockTransfers).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("stock_transfers has invalid type");
 if (v.stockTransfers !== undefined && v.stockTransfers !== null) for (const item of v.stockTransfers) violations.push(...validateStockTransfer(item).map((message) => "stock_transfers: " + message));
+if (v.hasMore !== undefined && v.hasMore !== null && !(typeof v.hasMore === "boolean")) violations.push("has_more has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isSafeInteger(v.pageSize) && v.pageSize >= Number.MIN_SAFE_INTEGER && v.pageSize <= Number.MAX_SAFE_INTEGER)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -243,6 +271,7 @@ return out;
 
 export function validateUpdateStockTransferStatusBody(v: UpdateStockTransferStatusBody): string[] {
 const violations: string[] = [];
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
 return violations;
 }
@@ -269,8 +298,10 @@ return out;
 
 export function validateUpdateStockTransferStatusRequest(v: UpdateStockTransferStatusRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateStockTransferStatusBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -294,6 +325,7 @@ return out;
 
 export function validateUpdateStockTransferStatusResponse(v: UpdateStockTransferStatusResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

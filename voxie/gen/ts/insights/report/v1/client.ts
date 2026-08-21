@@ -2,6 +2,42 @@
 import type { ListReportTemplatesRequest, ListReportTemplatesResponse, CreateReportTemplateRequest, CreateReportTemplateResponse, GetReportTemplateRequest, GetReportTemplateResponse, ListScheduledReportsRequest, ListScheduledReportsResponse, CreateScheduledReportRequest, CreateScheduledReportResponse, UpdateScheduledReportRequest, UpdateScheduledReportResponse, DeleteScheduledReportRequest, DeleteScheduledReportResponse, GenerateRevenueReportRequest, GenerateRevenueReportResponse, ExportRevenueReportRequest, ExportRevenueReportResponse } from "./types";
 import { encodeListReportTemplatesRequest, validateListReportTemplatesRequest, decodeListReportTemplatesResponse, encodeCreateReportTemplateRequest, validateCreateReportTemplateRequest, decodeCreateReportTemplateResponse, encodeGetReportTemplateRequest, validateGetReportTemplateRequest, decodeGetReportTemplateResponse, encodeListScheduledReportsRequest, validateListScheduledReportsRequest, decodeListScheduledReportsResponse, encodeCreateScheduledReportRequest, validateCreateScheduledReportRequest, decodeCreateScheduledReportResponse, encodeUpdateScheduledReportRequest, validateUpdateScheduledReportRequest, decodeUpdateScheduledReportResponse, encodeDeleteScheduledReportRequest, validateDeleteScheduledReportRequest, decodeDeleteScheduledReportResponse, encodeGenerateRevenueReportRequest, validateGenerateRevenueReportRequest, decodeGenerateRevenueReportResponse, encodeExportRevenueReportRequest, validateExportRevenueReportRequest, decodeExportRevenueReportResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface ReportServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class ReportServiceClient {
@@ -61,11 +99,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListReportTemplatesResponse(await res.json());
+return decodeListReportTemplatesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createReportTemplate(req: CreateReportTemplateRequest): Promise<CreateReportTemplateResponse> {
@@ -79,11 +117,11 @@ body: JSON.stringify(encodeCreateReportTemplateRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateReportTemplateResponse(await res.json());
+return decodeCreateReportTemplateResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getReportTemplate(req: GetReportTemplateRequest): Promise<GetReportTemplateResponse> {
@@ -100,11 +138,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetReportTemplateResponse(await res.json());
+return decodeGetReportTemplateResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listScheduledReports(req: ListScheduledReportsRequest): Promise<ListScheduledReportsResponse> {
@@ -132,11 +170,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListScheduledReportsResponse(await res.json());
+return decodeListScheduledReportsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createScheduledReport(req: CreateScheduledReportRequest): Promise<CreateScheduledReportResponse> {
@@ -150,11 +188,11 @@ body: JSON.stringify(encodeCreateScheduledReportRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateScheduledReportResponse(await res.json());
+return decodeCreateScheduledReportResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateScheduledReport(req: UpdateScheduledReportRequest): Promise<UpdateScheduledReportResponse> {
@@ -169,11 +207,11 @@ body: JSON.stringify(encodeUpdateScheduledReportRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateScheduledReportResponse(await res.json());
+return decodeUpdateScheduledReportResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteScheduledReport(req: DeleteScheduledReportRequest): Promise<DeleteScheduledReportResponse> {
@@ -190,11 +228,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteScheduledReportResponse(await res.json());
+return decodeDeleteScheduledReportResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async generateRevenueReport(req: GenerateRevenueReportRequest): Promise<GenerateRevenueReportResponse> {
@@ -208,11 +246,11 @@ body: JSON.stringify(encodeGenerateRevenueReportRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGenerateRevenueReportResponse(await res.json());
+return decodeGenerateRevenueReportResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async exportRevenueReport(req: ExportRevenueReportRequest): Promise<ExportRevenueReportResponse> {
@@ -234,11 +272,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeExportRevenueReportResponse(await res.json());
+return decodeExportRevenueReportResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

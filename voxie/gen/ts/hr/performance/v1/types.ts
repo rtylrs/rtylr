@@ -49,6 +49,17 @@ return out;
 
 export function validateReviewGoalPayload(v: ReviewGoalPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.reviewCycleId !== undefined && v.reviewCycleId !== null && !(typeof v.reviewCycleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.reviewCycleId))) violations.push("review_cycle_id has invalid type");
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.weight !== undefined && v.weight !== null && !(typeof v.weight === "number" && Number.isFinite(v.weight))) violations.push("weight has invalid type");
+if (v.successCriteria !== undefined && v.successCriteria !== null && !(typeof v.successCriteria === "string")) violations.push("success_criteria has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -104,8 +115,20 @@ return out;
 
 export function validatePerformanceReviewPayload(v: PerformanceReviewPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.reviewCycleId !== undefined && v.reviewCycleId !== null && !(typeof v.reviewCycleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.reviewCycleId))) violations.push("review_cycle_id has invalid type");
+if (v.reviewerEmployeeId !== undefined && v.reviewerEmployeeId !== null && !(typeof v.reviewerEmployeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.reviewerEmployeeId))) violations.push("reviewer_employee_id has invalid type");
+if (v.reviewType !== undefined && v.reviewType !== null && !(typeof v.reviewType === "string")) violations.push("review_type has invalid type");
+if (v.overallRating !== undefined && v.overallRating !== null && !(typeof v.overallRating === "string")) violations.push("overall_rating has invalid type");
+if (v.narrative !== undefined && v.narrative !== null && !(typeof v.narrative === "string")) violations.push("narrative has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.sharedWithEmployeeAt !== undefined && v.sharedWithEmployeeAt !== null && !(typeof v.sharedWithEmployeeAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sharedWithEmployeeAt))) violations.push("shared_with_employee_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -152,8 +175,17 @@ return out;
 
 export function validateReviewCyclePayload(v: ReviewCyclePayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.periodStart !== undefined && v.periodStart !== null && !(typeof v.periodStart === "string")) violations.push("period_start has invalid type");
+if (v.periodEnd !== undefined && v.periodEnd !== null && !(typeof v.periodEnd === "string")) violations.push("period_end has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -204,7 +236,11 @@ return out;
 
 export function validateListReviewCyclesResponse(v: ListReviewCyclesResponse): string[] {
 const violations: string[] = [];
+if (v.cycles !== undefined && v.cycles !== null && !(Array.isArray(v.cycles) && (v.cycles).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("cycles has invalid type");
 if (v.cycles !== undefined && v.cycles !== null) for (const item of v.cycles) violations.push(...validateReviewCyclePayload(item).map((message) => "cycles: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -236,9 +272,13 @@ return out;
 
 export function validateCreateReviewCycleRequest(v: CreateReviewCycleRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
 if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (v.periodStart !== undefined && v.periodStart !== null && !(typeof v.periodStart === "string")) violations.push("period_start has invalid type");
 if (!(v.periodStart !== undefined && v.periodStart !== null) || v.periodStart === "") violations.push("period_start is required");
+if (v.periodEnd !== undefined && v.periodEnd !== null && !(typeof v.periodEnd === "string")) violations.push("period_end has invalid type");
 if (!(v.periodEnd !== undefined && v.periodEnd !== null) || v.periodEnd === "") violations.push("period_end is required");
 return violations;
 }
@@ -262,6 +302,7 @@ return out;
 
 export function validateCreateReviewCycleResponse(v: CreateReviewCycleResponse): string[] {
 const violations: string[] = [];
+if (v.cycle !== undefined && v.cycle !== null && !(typeof v.cycle === "object" && v.cycle !== null && !Array.isArray(v.cycle))) violations.push("cycle has invalid type");
 if (v.cycle !== undefined && v.cycle !== null) violations.push(...validateReviewCyclePayload(v.cycle).map((message) => "cycle: " + message));
 return violations;
 }
@@ -285,6 +326,7 @@ return out;
 
 export function validateOpenReviewCycleRequest(v: OpenReviewCycleRequest): string[] {
 const violations: string[] = [];
+if (v.cycleId !== undefined && v.cycleId !== null && !(typeof v.cycleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.cycleId))) violations.push("cycle_id has invalid type");
 if (!(v.cycleId !== undefined && v.cycleId !== null)) violations.push("cycle_id is required");
 if (v.cycleId !== undefined && v.cycleId !== null && !(Number(v.cycleId) > 0)) violations.push("cycle_id violates @gt");
 return violations;
@@ -309,6 +351,7 @@ return out;
 
 export function validateOpenReviewCycleResponse(v: OpenReviewCycleResponse): string[] {
 const violations: string[] = [];
+if (v.cycle !== undefined && v.cycle !== null && !(typeof v.cycle === "object" && v.cycle !== null && !Array.isArray(v.cycle))) violations.push("cycle has invalid type");
 if (v.cycle !== undefined && v.cycle !== null) violations.push(...validateReviewCyclePayload(v.cycle).map((message) => "cycle: " + message));
 return violations;
 }
@@ -335,6 +378,8 @@ return out;
 
 export function validateListGoalsRequest(v: ListGoalsRequest): string[] {
 const violations: string[] = [];
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.reviewCycleId !== undefined && v.reviewCycleId !== null && !(typeof v.reviewCycleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.reviewCycleId))) violations.push("review_cycle_id has invalid type");
 return violations;
 }
 
@@ -366,7 +411,11 @@ return out;
 
 export function validateListGoalsResponse(v: ListGoalsResponse): string[] {
 const violations: string[] = [];
+if (v.goals !== undefined && v.goals !== null && !(Array.isArray(v.goals) && (v.goals).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("goals has invalid type");
 if (v.goals !== undefined && v.goals !== null) for (const item of v.goals) violations.push(...validateReviewGoalPayload(item).map((message) => "goals: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -395,9 +444,12 @@ return out;
 
 export function validateSubmitReviewRequest(v: SubmitReviewRequest): string[] {
 const violations: string[] = [];
+if (v.reviewId !== undefined && v.reviewId !== null && !(typeof v.reviewId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.reviewId))) violations.push("review_id has invalid type");
 if (!(v.reviewId !== undefined && v.reviewId !== null)) violations.push("review_id is required");
 if (v.reviewId !== undefined && v.reviewId !== null && !(Number(v.reviewId) > 0)) violations.push("review_id violates @gt");
+if (v.overallRating !== undefined && v.overallRating !== null && !(typeof v.overallRating === "string")) violations.push("overall_rating has invalid type");
 if (!(v.overallRating !== undefined && v.overallRating !== null) || v.overallRating === "") violations.push("overall_rating is required");
+if (v.narrative !== undefined && v.narrative !== null && !(typeof v.narrative === "string")) violations.push("narrative has invalid type");
 if (!(v.narrative !== undefined && v.narrative !== null) || v.narrative === "") violations.push("narrative is required");
 return violations;
 }
@@ -421,6 +473,7 @@ return out;
 
 export function validateSubmitReviewResponse(v: SubmitReviewResponse): string[] {
 const violations: string[] = [];
+if (v.review !== undefined && v.review !== null && !(typeof v.review === "object" && v.review !== null && !Array.isArray(v.review))) violations.push("review has invalid type");
 if (v.review !== undefined && v.review !== null) violations.push(...validatePerformanceReviewPayload(v.review).map((message) => "review: " + message));
 return violations;
 }

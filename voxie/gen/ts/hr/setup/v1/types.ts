@@ -34,6 +34,12 @@ return out;
 
 export function validateSetupWizardStepPayload(v: SetupWizardStepPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.stepKey !== undefined && v.stepKey !== null && !(typeof v.stepKey === "string")) violations.push("step_key has invalid type");
+if (v.completedAt !== undefined && v.completedAt !== null && !(typeof v.completedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.completedAt))) violations.push("completed_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -89,6 +95,18 @@ return out;
 
 export function validateHRCompanyConfigPayload(v: HRCompanyConfigPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.timeTrackingModel !== undefined && v.timeTrackingModel !== null && !(typeof v.timeTrackingModel === "string")) violations.push("time_tracking_model has invalid type");
+if (v.timesheetPeriod !== undefined && v.timesheetPeriod !== null && !(typeof v.timesheetPeriod === "string")) violations.push("timesheet_period has invalid type");
+if (v.payrollPeriod !== undefined && v.payrollPeriod !== null && !(typeof v.payrollPeriod === "string")) violations.push("payroll_period has invalid type");
+if (v.payrollGrossModel !== undefined && v.payrollGrossModel !== null && !(typeof v.payrollGrossModel === "string")) violations.push("payroll_gross_model has invalid type");
+if (v.setupCompletedAt !== undefined && v.setupCompletedAt !== null && !(typeof v.setupCompletedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.setupCompletedAt))) violations.push("setup_completed_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
+if (v.clockInMethods !== undefined && v.clockInMethods !== null && !(Array.isArray(v.clockInMethods) && (v.clockInMethods).every((item: any) => typeof item === "string"))) violations.push("clock_in_methods has invalid type");
+if (v.subscribedApps !== undefined && v.subscribedApps !== null && !(Array.isArray(v.subscribedApps) && (v.subscribedApps).every((item: any) => typeof item === "string"))) violations.push("subscribed_apps has invalid type");
+if (v.directoryEnabled !== undefined && v.directoryEnabled !== null && !(typeof v.directoryEnabled === "boolean")) violations.push("directory_enabled has invalid type");
 return violations;
 }
 
@@ -117,8 +135,11 @@ return out;
 
 export function validateGetSetupStatusResponse(v: GetSetupStatusResponse): string[] {
 const violations: string[] = [];
+if (v.steps !== undefined && v.steps !== null && !(Array.isArray(v.steps) && (v.steps).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("steps has invalid type");
 if (v.steps !== undefined && v.steps !== null) for (const item of v.steps) violations.push(...validateSetupWizardStepPayload(item).map((message) => "steps: " + message));
+if (v.config !== undefined && v.config !== null && !(typeof v.config === "object" && v.config !== null && !Array.isArray(v.config))) violations.push("config has invalid type");
 if (v.config !== undefined && v.config !== null) violations.push(...validateHRCompanyConfigPayload(v.config).map((message) => "config: " + message));
+if (v.isComplete !== undefined && v.isComplete !== null && !(typeof v.isComplete === "boolean")) violations.push("is_complete has invalid type");
 return violations;
 }
 
@@ -141,6 +162,7 @@ return out;
 
 export function validateCompleteSetupStepRequest(v: CompleteSetupStepRequest): string[] {
 const violations: string[] = [];
+if (v.stepKey !== undefined && v.stepKey !== null && !(typeof v.stepKey === "string")) violations.push("step_key has invalid type");
 if (!(v.stepKey !== undefined && v.stepKey !== null) || v.stepKey === "") violations.push("step_key is required");
 return violations;
 }
@@ -164,6 +186,7 @@ return out;
 
 export function validateCompleteSetupStepResponse(v: CompleteSetupStepResponse): string[] {
 const violations: string[] = [];
+if (v.step !== undefined && v.step !== null && !(typeof v.step === "object" && v.step !== null && !Array.isArray(v.step))) violations.push("step has invalid type");
 if (v.step !== undefined && v.step !== null) violations.push(...validateSetupWizardStepPayload(v.step).map((message) => "step: " + message));
 return violations;
 }

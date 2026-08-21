@@ -2,6 +2,42 @@
 import type { ListGroupsRequest, ListGroupsResponse, CreateGroupRequest, CreateGroupResponse, GetGroupDetailRequest, GetGroupDetailResponse, UpdateGroupRequest, UpdateGroupResponse, DeleteGroupRequest, DeleteGroupResponse, AddGroupMembersRequest, AddGroupMembersResponse, RemoveGroupMemberRequest, RemoveGroupMemberResponse, GetUserGroupsRequest, GetUserGroupsResponse } from "./types";
 import { encodeListGroupsRequest, validateListGroupsRequest, decodeListGroupsResponse, encodeCreateGroupRequest, validateCreateGroupRequest, decodeCreateGroupResponse, encodeGetGroupDetailRequest, validateGetGroupDetailRequest, decodeGetGroupDetailResponse, encodeUpdateGroupRequest, validateUpdateGroupRequest, decodeUpdateGroupResponse, encodeDeleteGroupRequest, validateDeleteGroupRequest, decodeDeleteGroupResponse, encodeAddGroupMembersRequest, validateAddGroupMembersRequest, decodeAddGroupMembersResponse, encodeRemoveGroupMemberRequest, validateRemoveGroupMemberRequest, decodeRemoveGroupMemberResponse, encodeGetUserGroupsRequest, validateGetUserGroupsRequest, decodeGetUserGroupsResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface GroupsServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class GroupsServiceClient {
@@ -46,11 +84,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListGroupsResponse(await res.json());
+return decodeListGroupsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createGroup(req: CreateGroupRequest): Promise<CreateGroupResponse> {
@@ -64,11 +102,11 @@ body: JSON.stringify(encodeCreateGroupRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateGroupResponse(await res.json());
+return decodeCreateGroupResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getGroupDetail(req: GetGroupDetailRequest): Promise<GetGroupDetailResponse> {
@@ -85,11 +123,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetGroupDetailResponse(await res.json());
+return decodeGetGroupDetailResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateGroup(req: UpdateGroupRequest): Promise<UpdateGroupResponse> {
@@ -104,11 +142,11 @@ body: JSON.stringify(encodeUpdateGroupRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateGroupResponse(await res.json());
+return decodeUpdateGroupResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteGroup(req: DeleteGroupRequest): Promise<DeleteGroupResponse> {
@@ -125,11 +163,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteGroupResponse(await res.json());
+return decodeDeleteGroupResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async addGroupMembers(req: AddGroupMembersRequest): Promise<AddGroupMembersResponse> {
@@ -144,11 +182,11 @@ body: JSON.stringify(encodeAddGroupMembersRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAddGroupMembersResponse(await res.json());
+return decodeAddGroupMembersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async removeGroupMember(req: RemoveGroupMemberRequest): Promise<RemoveGroupMemberResponse> {
@@ -166,11 +204,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRemoveGroupMemberResponse(await res.json());
+return decodeRemoveGroupMemberResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getUserGroups(req: GetUserGroupsRequest): Promise<GetUserGroupsResponse> {
@@ -187,11 +225,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetUserGroupsResponse(await res.json());
+return decodeGetUserGroupsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

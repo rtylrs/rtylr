@@ -43,6 +43,15 @@ return out;
 
 export function validateLocationPayload(v: LocationPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.timezone !== undefined && v.timezone !== null && !(typeof v.timezone === "string")) violations.push("timezone has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
+if (v.slug !== undefined && v.slug !== null && !(typeof v.slug === "string")) violations.push("slug has invalid type");
 return violations;
 }
 
@@ -65,6 +74,7 @@ return out;
 
 export function validateListLocationsResponse(v: ListLocationsResponse): string[] {
 const violations: string[] = [];
+if (v.locations !== undefined && v.locations !== null && !(Array.isArray(v.locations) && (v.locations).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("locations has invalid type");
 if (v.locations !== undefined && v.locations !== null) for (const item of v.locations) violations.push(...validateLocationPayload(item).map((message) => "locations: " + message));
 return violations;
 }
@@ -97,7 +107,11 @@ return out;
 
 export function validateCreateLocationRequest(v: CreateLocationRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.timezone !== undefined && v.timezone !== null && !(typeof v.timezone === "string")) violations.push("timezone has invalid type");
+if (v.slug !== undefined && v.slug !== null && !(typeof v.slug === "string")) violations.push("slug has invalid type");
 return violations;
 }
 
@@ -120,6 +134,7 @@ return out;
 
 export function validateCreateLocationResponse(v: CreateLocationResponse): string[] {
 const violations: string[] = [];
+if (v.location !== undefined && v.location !== null && !(typeof v.location === "object" && v.location !== null && !Array.isArray(v.location))) violations.push("location has invalid type");
 if (v.location !== undefined && v.location !== null) violations.push(...validateLocationPayload(v.location).map((message) => "location: " + message));
 return violations;
 }
@@ -155,6 +170,11 @@ return out;
 
 export function validateUpdateLocationBody(v: UpdateLocationBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.timezone !== undefined && v.timezone !== null && !(typeof v.timezone === "string")) violations.push("timezone has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.slug !== undefined && v.slug !== null && !(typeof v.slug === "string")) violations.push("slug has invalid type");
 return violations;
 }
 
@@ -180,8 +200,10 @@ return out;
 
 export function validateUpdateLocationRequest(v: UpdateLocationRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateLocationBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -205,6 +227,7 @@ return out;
 
 export function validateUpdateLocationResponse(v: UpdateLocationResponse): string[] {
 const violations: string[] = [];
+if (v.location !== undefined && v.location !== null && !(typeof v.location === "object" && v.location !== null && !Array.isArray(v.location))) violations.push("location has invalid type");
 if (v.location !== undefined && v.location !== null) violations.push(...validateLocationPayload(v.location).map((message) => "location: " + message));
 return violations;
 }

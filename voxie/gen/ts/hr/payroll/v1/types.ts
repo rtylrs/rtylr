@@ -70,6 +70,24 @@ return out;
 
 export function validatePayrollRecord(v: PayrollRecord): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "number" && Number.isSafeInteger(v.ownerId) && v.ownerId >= Number.MIN_SAFE_INTEGER && v.ownerId <= Number.MAX_SAFE_INTEGER)) violations.push("owner_id has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "number" && Number.isSafeInteger(v.staffId) && v.staffId >= Number.MIN_SAFE_INTEGER && v.staffId <= Number.MAX_SAFE_INTEGER)) violations.push("staff_id has invalid type");
+if (v.periodStart !== undefined && v.periodStart !== null && !(typeof v.periodStart === "string")) violations.push("period_start has invalid type");
+if (v.periodEnd !== undefined && v.periodEnd !== null && !(typeof v.periodEnd === "string")) violations.push("period_end has invalid type");
+if (v.periodLabel !== undefined && v.periodLabel !== null && !(typeof v.periodLabel === "string")) violations.push("period_label has invalid type");
+if (v.regularHours !== undefined && v.regularHours !== null && !(typeof v.regularHours === "number" && Number.isFinite(v.regularHours))) violations.push("regular_hours has invalid type");
+if (v.overtimeHours !== undefined && v.overtimeHours !== null && !(typeof v.overtimeHours === "number" && Number.isFinite(v.overtimeHours))) violations.push("overtime_hours has invalid type");
+if (v.basePay !== undefined && v.basePay !== null && !(typeof v.basePay === "number" && Number.isFinite(v.basePay))) violations.push("base_pay has invalid type");
+if (v.overtimePay !== undefined && v.overtimePay !== null && !(typeof v.overtimePay === "number" && Number.isFinite(v.overtimePay))) violations.push("overtime_pay has invalid type");
+if (v.bonuses !== undefined && v.bonuses !== null && !(typeof v.bonuses === "number" && Number.isFinite(v.bonuses))) violations.push("bonuses has invalid type");
+if (v.deductions !== undefined && v.deductions !== null && !(typeof v.deductions === "number" && Number.isFinite(v.deductions))) violations.push("deductions has invalid type");
+if (v.taxWithheld !== undefined && v.taxWithheld !== null && !(typeof v.taxWithheld === "number" && Number.isFinite(v.taxWithheld))) violations.push("tax_withheld has invalid type");
+if (v.netPay !== undefined && v.netPay !== null && !(typeof v.netPay === "number" && Number.isFinite(v.netPay))) violations.push("net_pay has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.paidAt !== undefined && v.paidAt !== null && !(typeof v.paidAt === "string")) violations.push("paid_at has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -92,6 +110,7 @@ return out;
 
 export function validateListPayrollRequest(v: ListPayrollRequest): string[] {
 const violations: string[] = [];
+if (v.periodLabel !== undefined && v.periodLabel !== null && !(typeof v.periodLabel === "string")) violations.push("period_label has invalid type");
 return violations;
 }
 
@@ -114,6 +133,7 @@ return out;
 
 export function validateListPayrollResponse(v: ListPayrollResponse): string[] {
 const violations: string[] = [];
+if (v.records !== undefined && v.records !== null && !(Array.isArray(v.records) && (v.records).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("records has invalid type");
 if (v.records !== undefined && v.records !== null) for (const item of v.records) violations.push(...validatePayrollRecord(item).map((message) => "records: " + message));
 return violations;
 }
@@ -143,8 +163,11 @@ return out;
 
 export function validateRunPayrollRequest(v: RunPayrollRequest): string[] {
 const violations: string[] = [];
+if (v.periodStart !== undefined && v.periodStart !== null && !(typeof v.periodStart === "string")) violations.push("period_start has invalid type");
 if (!(v.periodStart !== undefined && v.periodStart !== null) || v.periodStart === "") violations.push("period_start is required");
+if (v.periodEnd !== undefined && v.periodEnd !== null && !(typeof v.periodEnd === "string")) violations.push("period_end has invalid type");
 if (!(v.periodEnd !== undefined && v.periodEnd !== null) || v.periodEnd === "") violations.push("period_end is required");
+if (v.periodLabel !== undefined && v.periodLabel !== null && !(typeof v.periodLabel === "string")) violations.push("period_label has invalid type");
 if (!(v.periodLabel !== undefined && v.periodLabel !== null) || v.periodLabel === "") violations.push("period_label is required");
 return violations;
 }
@@ -168,6 +191,7 @@ return out;
 
 export function validateRunPayrollResponse(v: RunPayrollResponse): string[] {
 const violations: string[] = [];
+if (v.recordsCreated !== undefined && v.recordsCreated !== null && !(typeof v.recordsCreated === "number" && Number.isInteger(v.recordsCreated) && v.recordsCreated >= -2147483648 && v.recordsCreated <= 2147483647)) violations.push("records_created has invalid type");
 return violations;
 }
 
@@ -190,6 +214,7 @@ return out;
 
 export function validateMarkPayrollPaidRequest(v: MarkPayrollPaidRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -214,6 +239,7 @@ return out;
 
 export function validateMarkPayrollPaidResponse(v: MarkPayrollPaidResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 

@@ -50,6 +50,11 @@ return out;
 
 export function validateGetFinanceDashboardResponse(v: GetFinanceDashboardResponse): string[] {
 const violations: string[] = [];
+if (v.totalRevenueMtd !== undefined && v.totalRevenueMtd !== null && !(typeof v.totalRevenueMtd === "number" && Number.isFinite(v.totalRevenueMtd))) violations.push("total_revenue_mtd has invalid type");
+if (v.totalReceivable !== undefined && v.totalReceivable !== null && !(typeof v.totalReceivable === "number" && Number.isFinite(v.totalReceivable))) violations.push("total_receivable has invalid type");
+if (v.overdueAmount !== undefined && v.overdueAmount !== null && !(typeof v.overdueAmount === "number" && Number.isFinite(v.overdueAmount))) violations.push("overdue_amount has invalid type");
+if (v.totalExpensesMtd !== undefined && v.totalExpensesMtd !== null && !(typeof v.totalExpensesMtd === "number" && Number.isFinite(v.totalExpensesMtd))) violations.push("total_expenses_mtd has invalid type");
+if (v.netProfitMtd !== undefined && v.netProfitMtd !== null && !(typeof v.netProfitMtd === "number" && Number.isFinite(v.netProfitMtd))) violations.push("net_profit_mtd has invalid type");
 return violations;
 }
 

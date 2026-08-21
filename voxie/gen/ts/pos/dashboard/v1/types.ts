@@ -47,6 +47,10 @@ return out;
 
 export function validateDashboardResponse(v: DashboardResponse): string[] {
 const violations: string[] = [];
+if (v.totalSales !== undefined && v.totalSales !== null && !(typeof v.totalSales === "number" && Number.isFinite(v.totalSales))) violations.push("total_sales has invalid type");
+if (v.orderCount !== undefined && v.orderCount !== null && !(typeof v.orderCount === "number" && Number.isInteger(v.orderCount) && v.orderCount >= -2147483648 && v.orderCount <= 2147483647)) violations.push("order_count has invalid type");
+if (v.avgOrder !== undefined && v.avgOrder !== null && !(typeof v.avgOrder === "number" && Number.isFinite(v.avgOrder))) violations.push("avg_order has invalid type");
+if (v.tableTurnover !== undefined && v.tableTurnover !== null && !(typeof v.tableTurnover === "number" && Number.isFinite(v.tableTurnover))) violations.push("table_turnover has invalid type");
 return violations;
 }
 

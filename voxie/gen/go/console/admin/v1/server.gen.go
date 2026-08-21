@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"math"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -28,7 +30,7 @@ func writeHandlerError(w http.ResponseWriter, err error) {
 			status = candidate
 		}
 	}
-	writeJSONError(w, status, err.Error())
+	writeJSONError(w, status, "internal server error")
 }
 
 func parseInt32(s string) (int32, error) { v, err := strconv.ParseInt(s, 10, 32); return int32(v), err }
@@ -40,9 +42,18 @@ func parseUint32(s string) (uint32, error) {
 func parseUint64(s string) (uint64, error) { return strconv.ParseUint(s, 10, 64) }
 func parseFloat32(s string) (float32, error) {
 	v, err := strconv.ParseFloat(s, 32)
-	return float32(v), err
+	if err != nil || math.IsNaN(v) || math.IsInf(v, 0) {
+		return 0, fmt.Errorf("must be a finite number")
+	}
+	return float32(v), nil
 }
-func parseFloat64(s string) (float64, error) { return strconv.ParseFloat(s, 64) }
+func parseFloat64(s string) (float64, error) {
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil || math.IsNaN(v) || math.IsInf(v, 0) {
+		return 0, fmt.Errorf("must be a finite number")
+	}
+	return v, nil
+}
 func parseBool(s string) (bool, error) {
 	if s == "true" {
 		return true, nil
@@ -56,15 +67,21 @@ func parseBool(s string) (bool, error) {
 func validHeaderFormat(value, format string) bool {
 	switch format {
 	case "uuid":
-		return regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`).MatchString(value)
+		return validHeaderUUID.MatchString(value)
 	case "email":
-		return regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`).MatchString(value)
+		return validHeaderEmail.MatchString(value)
 	case "uri":
-		return regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9+.-]*://[^\s]+$`).MatchString(value)
+		return validHeaderURI.MatchString(value)
 	default:
 		return true
 	}
 }
+
+var (
+	validHeaderUUID  = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
+	validHeaderEmail = regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`)
+	validHeaderURI   = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9+.-]*://[^\s]+$`)
+)
 
 // RequestMetadata identifies the generated route handling a request.
 type RequestMetadata struct {
@@ -169,7 +186,7 @@ func (o serverOptions) wrapHandler(handler http.Handler, metadata RequestMetadat
 				if errors.As(err, &statusErr) {
 					writeHandlerError(w, err)
 				} else {
-					writeJSONError(w, http.StatusUnauthorized, err.Error())
+					writeJSONError(w, http.StatusUnauthorized, "unauthorized")
 				}
 				return
 			}
@@ -361,8 +378,9 @@ func RegisterConsoleAdminServiceServer(first any, rest ...any) error {
 	mux.Handle("POST /console/admin/v1/console/users", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CreateUserRequest)
 		if r.Body != nil {
-			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
 				return
 			}
 		}
@@ -383,8 +401,9 @@ func RegisterConsoleAdminServiceServer(first any, rest ...any) error {
 	mux.Handle("PUT /console/admin/v1/console/users/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdateUserRequest)
 		if r.Body != nil {
-			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
 				return
 			}
 		}
@@ -433,8 +452,9 @@ func RegisterConsoleAdminServiceServer(first any, rest ...any) error {
 	mux.Handle("POST /console/admin/v1/console/users/{id}/ban", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(BanUserRequest)
 		if r.Body != nil {
-			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
 				return
 			}
 		}
@@ -461,8 +481,9 @@ func RegisterConsoleAdminServiceServer(first any, rest ...any) error {
 	mux.Handle("POST /console/admin/v1/console/users/{id}/unban", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UnbanUserRequest)
 		if r.Body != nil {
-			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
 				return
 			}
 		}
@@ -489,8 +510,9 @@ func RegisterConsoleAdminServiceServer(first any, rest ...any) error {
 	mux.Handle("POST /console/admin/v1/console/users/{id}/set-console-admin", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(SetConsoleAdminRequest)
 		if r.Body != nil {
-			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
 				return
 			}
 		}
@@ -595,8 +617,9 @@ func RegisterConsoleAdminServiceServer(first any, rest ...any) error {
 	mux.Handle("PUT /console/admin/v1/console/businesses/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdateBusinessRequest)
 		if r.Body != nil {
-			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
 				return
 			}
 		}
@@ -645,8 +668,9 @@ func RegisterConsoleAdminServiceServer(first any, rest ...any) error {
 	mux.Handle("POST /console/admin/v1/console/internal-onboarding/business-owner", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(CreateBusinessOwnerRequest)
 		if r.Body != nil {
-			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
 				return
 			}
 		}
@@ -705,8 +729,9 @@ func RegisterConsoleAdminServiceServer(first any, rest ...any) error {
 	mux.Handle("POST /console/admin/v1/console/subscriptions/upsert", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpsertSubscriptionRequest)
 		if r.Body != nil {
-			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
 				return
 			}
 		}
@@ -765,8 +790,9 @@ func RegisterConsoleAdminServiceServer(first any, rest ...any) error {
 	mux.Handle("PUT /console/admin/v1/console/plans/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdatePlanRequest)
 		if r.Body != nil {
-			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
-				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(req); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
 				return
 			}
 		}

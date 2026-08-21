@@ -53,6 +53,18 @@ return out;
 
 export function validateWorkspace(v: Workspace): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.isDefault !== undefined && v.isDefault !== null && !(typeof v.isDefault === "boolean")) violations.push("is_default has invalid type");
+if (v.createdBy !== undefined && v.createdBy !== null && !(typeof v.createdBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdBy))) violations.push("created_by has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
+if (v.memberCount !== undefined && v.memberCount !== null && !(typeof v.memberCount === "number" && Number.isInteger(v.memberCount) && v.memberCount >= -2147483648 && v.memberCount <= 2147483647)) violations.push("member_count has invalid type");
+if (v.isPersonal !== undefined && v.isPersonal !== null && !(typeof v.isPersonal === "boolean")) violations.push("is_personal has invalid type");
 return violations;
 }
 
@@ -96,6 +108,14 @@ return out;
 
 export function validateWorkspaceMember(v: WorkspaceMember): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
+if (v.invitedBy !== undefined && v.invitedBy !== null && !(typeof v.invitedBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.invitedBy))) violations.push("invited_by has invalid type");
+if (v.joinedAt !== undefined && v.joinedAt !== null && !(typeof v.joinedAt === "string")) violations.push("joined_at has invalid type");
 return violations;
 }
 
@@ -127,6 +147,10 @@ return out;
 
 export function validateListWorkspacesRequest(v: ListWorkspacesRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -152,7 +176,9 @@ return out;
 
 export function validateListWorkspacesResponse(v: ListWorkspacesResponse): string[] {
 const violations: string[] = [];
+if (v.workspaces !== undefined && v.workspaces !== null && !(Array.isArray(v.workspaces) && (v.workspaces).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("workspaces has invalid type");
 if (v.workspaces !== undefined && v.workspaces !== null) for (const item of v.workspaces) violations.push(...validateWorkspace(item).map((message) => "workspaces: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -185,9 +211,13 @@ return out;
 
 export function validateCreateWorkspaceRequest(v: CreateWorkspaceRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
 if (!(v.icon !== undefined && v.icon !== null) || v.icon === "") violations.push("icon is required");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
 if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
 return violations;
 }
@@ -211,6 +241,7 @@ return out;
 
 export function validateCreateWorkspaceResponse(v: CreateWorkspaceResponse): string[] {
 const violations: string[] = [];
+if (v.workspace !== undefined && v.workspace !== null && !(typeof v.workspace === "object" && v.workspace !== null && !Array.isArray(v.workspace))) violations.push("workspace has invalid type");
 if (v.workspace !== undefined && v.workspace !== null) violations.push(...validateWorkspace(v.workspace).map((message) => "workspace: " + message));
 return violations;
 }
@@ -243,9 +274,13 @@ return out;
 
 export function validateUpdateWorkspaceBody(v: UpdateWorkspaceBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
 if (!(v.icon !== undefined && v.icon !== null) || v.icon === "") violations.push("icon is required");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
 if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
 return violations;
 }
@@ -272,8 +307,10 @@ return out;
 
 export function validateUpdateWorkspaceRequest(v: UpdateWorkspaceRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateWorkspaceBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -297,6 +334,7 @@ return out;
 
 export function validateUpdateWorkspaceResponse(v: UpdateWorkspaceResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -319,6 +357,7 @@ return out;
 
 export function validateDeleteWorkspaceRequest(v: DeleteWorkspaceRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -343,6 +382,7 @@ return out;
 
 export function validateDeleteWorkspaceResponse(v: DeleteWorkspaceResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -377,8 +417,13 @@ return out;
 
 export function validateListWorkspaceMembersRequest(v: ListWorkspaceMembersRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
 if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
 if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -404,7 +449,9 @@ return out;
 
 export function validateListWorkspaceMembersResponse(v: ListWorkspaceMembersResponse): string[] {
 const violations: string[] = [];
+if (v.members !== undefined && v.members !== null && !(Array.isArray(v.members) && (v.members).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("members has invalid type");
 if (v.members !== undefined && v.members !== null) for (const item of v.members) violations.push(...validateWorkspaceMember(item).map((message) => "members: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -434,10 +481,13 @@ return out;
 
 export function validateAddWorkspaceMemberRequest(v: AddWorkspaceMemberRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
 if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
 if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
 if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
 return violations;
 }
@@ -461,6 +511,7 @@ return out;
 
 export function validateAddWorkspaceMemberResponse(v: AddWorkspaceMemberResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -486,8 +537,10 @@ return out;
 
 export function validateRemoveWorkspaceMemberRequest(v: RemoveWorkspaceMemberRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
 if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
 if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
 return violations;
@@ -512,6 +565,7 @@ return out;
 
 export function validateRemoveWorkspaceMemberResponse(v: RemoveWorkspaceMemberResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -540,10 +594,13 @@ return out;
 
 export function validateUpdateWorkspaceMemberRoleRequest(v: UpdateWorkspaceMemberRoleRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
 if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
 if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
 if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
 return violations;
 }
@@ -567,6 +624,7 @@ return out;
 
 export function validateUpdateWorkspaceMemberRoleResponse(v: UpdateWorkspaceMemberRoleResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

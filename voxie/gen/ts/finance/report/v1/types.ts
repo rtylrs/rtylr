@@ -40,6 +40,14 @@ return out;
 
 export function validateTaxConfig(v: TaxConfig): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.rate !== undefined && v.rate !== null && !(typeof v.rate === "number" && Number.isFinite(v.rate))) violations.push("rate has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.isDefault !== undefined && v.isDefault !== null && !(typeof v.isDefault === "boolean")) violations.push("is_default has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -77,6 +85,12 @@ return out;
 
 export function validateExpenseCategoryDetail(v: ExpenseCategoryDetail): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -102,6 +116,8 @@ return out;
 
 export function validateGetPLReportRequest(v: GetPLReportRequest): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
 if (!(v.date !== undefined && v.date !== null) || v.date === "") violations.push("date is required");
 return violations;
 }
@@ -143,6 +159,13 @@ return out;
 
 export function validateGetPLReportResponse(v: GetPLReportResponse): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
+if (v.revenue !== undefined && v.revenue !== null && !(typeof v.revenue === "number" && Number.isFinite(v.revenue))) violations.push("revenue has invalid type");
+if (v.cogs !== undefined && v.cogs !== null && !(typeof v.cogs === "number" && Number.isFinite(v.cogs))) violations.push("cogs has invalid type");
+if (v.grossProfit !== undefined && v.grossProfit !== null && !(typeof v.grossProfit === "number" && Number.isFinite(v.grossProfit))) violations.push("gross_profit has invalid type");
+if (v.operatingExpenses !== undefined && v.operatingExpenses !== null && !(typeof v.operatingExpenses === "number" && Number.isFinite(v.operatingExpenses))) violations.push("operating_expenses has invalid type");
+if (v.netProfit !== undefined && v.netProfit !== null && !(typeof v.netProfit === "number" && Number.isFinite(v.netProfit))) violations.push("net_profit has invalid type");
+if (v.marginPct !== undefined && v.marginPct !== null && !(typeof v.marginPct === "number" && Number.isFinite(v.marginPct))) violations.push("margin_pct has invalid type");
 return violations;
 }
 
@@ -168,6 +191,8 @@ return out;
 
 export function validateGetTaxReportRequest(v: GetTaxReportRequest): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
 if (!(v.date !== undefined && v.date !== null) || v.date === "") violations.push("date is required");
 return violations;
 }
@@ -197,6 +222,9 @@ return out;
 
 export function validateGetTaxReportResponse(v: GetTaxReportResponse): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
+if (v.taxCollected !== undefined && v.taxCollected !== null && !(typeof v.taxCollected === "number" && Number.isFinite(v.taxCollected))) violations.push("tax_collected has invalid type");
+if (v.taxOwed !== undefined && v.taxOwed !== null && !(typeof v.taxOwed === "number" && Number.isFinite(v.taxOwed))) violations.push("tax_owed has invalid type");
 return violations;
 }
 
@@ -238,6 +266,7 @@ return out;
 
 export function validateListExpenseCategoryDetailsResponse(v: ListExpenseCategoryDetailsResponse): string[] {
 const violations: string[] = [];
+if (v.categories !== undefined && v.categories !== null && !(Array.isArray(v.categories) && (v.categories).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("categories has invalid type");
 if (v.categories !== undefined && v.categories !== null) for (const item of v.categories) violations.push(...validateExpenseCategoryDetail(item).map((message) => "categories: " + message));
 return violations;
 }
@@ -267,8 +296,11 @@ return out;
 
 export function validateCreateExpenseCategoryDetailRequest(v: CreateExpenseCategoryDetailRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
 if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
+if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
 if (!(v.icon !== undefined && v.icon !== null) || v.icon === "") violations.push("icon is required");
 return violations;
 }
@@ -292,6 +324,7 @@ return out;
 
 export function validateCreateExpenseCategoryDetailResponse(v: CreateExpenseCategoryDetailResponse): string[] {
 const violations: string[] = [];
+if (v.category !== undefined && v.category !== null && !(typeof v.category === "object" && v.category !== null && !Array.isArray(v.category))) violations.push("category has invalid type");
 if (v.category !== undefined && v.category !== null) violations.push(...validateExpenseCategoryDetail(v.category).map((message) => "category: " + message));
 return violations;
 }
@@ -334,6 +367,7 @@ return out;
 
 export function validateListTaxConfigResponse(v: ListTaxConfigResponse): string[] {
 const violations: string[] = [];
+if (v.configs !== undefined && v.configs !== null && !(Array.isArray(v.configs) && (v.configs).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("configs has invalid type");
 if (v.configs !== undefined && v.configs !== null) for (const item of v.configs) violations.push(...validateTaxConfig(item).map((message) => "configs: " + message));
 return violations;
 }
@@ -366,9 +400,13 @@ return out;
 
 export function validateCreateTaxConfigRequest(v: CreateTaxConfigRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.rate !== undefined && v.rate !== null && !(typeof v.rate === "number" && Number.isFinite(v.rate))) violations.push("rate has invalid type");
 if (v.rate !== undefined && v.rate !== null && !(Number(v.rate) >= 0)) violations.push("rate violates @gte");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
 if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (v.isDefault !== undefined && v.isDefault !== null && !(typeof v.isDefault === "boolean")) violations.push("is_default has invalid type");
 return violations;
 }
 
@@ -391,6 +429,7 @@ return out;
 
 export function validateCreateTaxConfigResponse(v: CreateTaxConfigResponse): string[] {
 const violations: string[] = [];
+if (v.config !== undefined && v.config !== null && !(typeof v.config === "object" && v.config !== null && !Array.isArray(v.config))) violations.push("config has invalid type");
 if (v.config !== undefined && v.config !== null) violations.push(...validateTaxConfig(v.config).map((message) => "config: " + message));
 return violations;
 }

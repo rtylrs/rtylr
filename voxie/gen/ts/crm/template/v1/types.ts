@@ -46,6 +46,16 @@ return out;
 
 export function validateTemplate(v: Template): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.subject !== undefined && v.subject !== null && !(typeof v.subject === "string")) violations.push("subject has invalid type");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "string")) violations.push("body has invalid type");
+if (v.variables !== undefined && v.variables !== null && !(typeof v.variables === "string")) violations.push("variables has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -83,9 +93,15 @@ return out;
 
 export function validateCreateTemplateRequest(v: CreateTemplateRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
 if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (v.subject !== undefined && v.subject !== null && !(typeof v.subject === "string")) violations.push("subject has invalid type");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "string")) violations.push("body has invalid type");
 if (!(v.body !== undefined && v.body !== null) || v.body === "") violations.push("body is required");
+if (v.variables !== undefined && v.variables !== null && !(typeof v.variables === "string")) violations.push("variables has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -111,6 +127,8 @@ return out;
 
 export function validateCreateTemplateResponse(v: CreateTemplateResponse): string[] {
 const violations: string[] = [];
+if (v.templateId !== undefined && v.templateId !== null && !(typeof v.templateId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.templateId))) violations.push("template_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -133,6 +151,7 @@ return out;
 
 export function validateDeleteTemplateRequest(v: DeleteTemplateRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 return violations;
 }
@@ -156,6 +175,7 @@ return out;
 
 export function validateDeleteTemplateResponse(v: DeleteTemplateResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -197,6 +217,7 @@ return out;
 
 export function validateListTemplatesResponse(v: ListTemplatesResponse): string[] {
 const violations: string[] = [];
+if (v.templates !== undefined && v.templates !== null && !(Array.isArray(v.templates) && (v.templates).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("templates has invalid type");
 if (v.templates !== undefined && v.templates !== null) for (const item of v.templates) violations.push(...validateTemplate(item).map((message) => "templates: " + message));
 return violations;
 }
@@ -235,7 +256,13 @@ return out;
 
 export function validateUpdateTemplateBody(v: UpdateTemplateBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.subject !== undefined && v.subject !== null && !(typeof v.subject === "string")) violations.push("subject has invalid type");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "string")) violations.push("body has invalid type");
+if (v.variables !== undefined && v.variables !== null && !(typeof v.variables === "string")) violations.push("variables has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -261,7 +288,9 @@ return out;
 
 export function validateUpdateTemplateRequest(v: UpdateTemplateRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateTemplateBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -285,6 +314,7 @@ return out;
 
 export function validateUpdateTemplateResponse(v: UpdateTemplateResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

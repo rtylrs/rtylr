@@ -29,6 +29,10 @@ return out;
 
 export function validateVelocityPoint(v: VelocityPoint): string[] {
 const violations: string[] = [];
+if (v.cycle !== undefined && v.cycle !== null && !(typeof v.cycle === "string")) violations.push("cycle has invalid type");
+if (v.completed !== undefined && v.completed !== null && !(typeof v.completed === "number" && Number.isInteger(v.completed) && v.completed >= -2147483648 && v.completed <= 2147483647)) violations.push("completed has invalid type");
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isInteger(v.total) && v.total >= -2147483648 && v.total <= 2147483647)) violations.push("total has invalid type");
+if (v.completionRate !== undefined && v.completionRate !== null && !(typeof v.completionRate === "number" && Number.isFinite(v.completionRate))) violations.push("completion_rate has invalid type");
 return violations;
 }
 
@@ -57,6 +61,9 @@ return out;
 
 export function validateBurndownPoint(v: BurndownPoint): string[] {
 const violations: string[] = [];
+if (v.day !== undefined && v.day !== null && !(typeof v.day === "number" && Number.isInteger(v.day) && v.day >= -2147483648 && v.day <= 2147483647)) violations.push("day has invalid type");
+if (v.ideal !== undefined && v.ideal !== null && !(typeof v.ideal === "number" && Number.isFinite(v.ideal))) violations.push("ideal has invalid type");
+if (v.actual !== undefined && v.actual !== null && !(typeof v.actual === "number" && Number.isFinite(v.actual))) violations.push("actual has invalid type");
 return violations;
 }
 
@@ -85,6 +92,9 @@ return out;
 
 export function validateMemberTime(v: MemberTime): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string")) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.hours !== undefined && v.hours !== null && !(typeof v.hours === "number" && Number.isFinite(v.hours))) violations.push("hours has invalid type");
 return violations;
 }
 
@@ -110,6 +120,8 @@ return out;
 
 export function validateThroughputPoint(v: ThroughputPoint): string[] {
 const violations: string[] = [];
+if (v.week !== undefined && v.week !== null && !(typeof v.week === "string")) violations.push("week has invalid type");
+if (v.completed !== undefined && v.completed !== null && !(typeof v.completed === "number" && Number.isInteger(v.completed) && v.completed >= -2147483648 && v.completed <= 2147483647)) violations.push("completed has invalid type");
 return violations;
 }
 
@@ -144,6 +156,11 @@ return out;
 
 export function validateTeamTaskSummary(v: TeamTaskSummary): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string")) violations.push("id has invalid type");
+if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.priority !== undefined && v.priority !== null && !(typeof v.priority === "string")) violations.push("priority has invalid type");
+if (v.dueDate !== undefined && v.dueDate !== null && !(typeof v.dueDate === "string")) violations.push("due_date has invalid type");
 return violations;
 }
 
@@ -184,6 +201,13 @@ return out;
 
 export function validateTeamMemberWorkload(v: TeamMemberWorkload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string")) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.initials !== undefined && v.initials !== null && !(typeof v.initials === "string")) violations.push("initials has invalid type");
+if (v.capacity !== undefined && v.capacity !== null && !(typeof v.capacity === "number" && Number.isInteger(v.capacity) && v.capacity >= -2147483648 && v.capacity <= 2147483647)) violations.push("capacity has invalid type");
+if (v.assignedHours !== undefined && v.assignedHours !== null && !(typeof v.assignedHours === "number" && Number.isFinite(v.assignedHours))) violations.push("assigned_hours has invalid type");
+if (v.load !== undefined && v.load !== null && !(typeof v.load === "number" && Number.isFinite(v.load))) violations.push("load has invalid type");
+if (v.tasks !== undefined && v.tasks !== null && !(Array.isArray(v.tasks) && (v.tasks).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("tasks has invalid type");
 if (v.tasks !== undefined && v.tasks !== null) for (const item of v.tasks) violations.push(...validateTeamTaskSummary(item).map((message) => "tasks: " + message));
 return violations;
 }
@@ -234,6 +258,16 @@ return out;
 
 export function validateRoadmapProject(v: RoadmapProject): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string")) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
+if (v.targetDate !== undefined && v.targetDate !== null && !(typeof v.targetDate === "string")) violations.push("target_date has invalid type");
+if (v.progress !== undefined && v.progress !== null && !(typeof v.progress === "number" && Number.isInteger(v.progress) && v.progress >= -2147483648 && v.progress <= 2147483647)) violations.push("progress has invalid type");
+if (v.doneCount !== undefined && v.doneCount !== null && !(typeof v.doneCount === "number" && Number.isInteger(v.doneCount) && v.doneCount >= -2147483648 && v.doneCount <= 2147483647)) violations.push("done_count has invalid type");
+if (v.taskCount !== undefined && v.taskCount !== null && !(typeof v.taskCount === "number" && Number.isInteger(v.taskCount) && v.taskCount >= -2147483648 && v.taskCount <= 2147483647)) violations.push("task_count has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string")) violations.push("workspace_id has invalid type");
 return violations;
 }
 
@@ -256,6 +290,7 @@ return out;
 
 export function validateGetInsightsRequest(v: GetInsightsRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string")) violations.push("workspace_id has invalid type");
 return violations;
 }
 
@@ -296,10 +331,17 @@ return out;
 
 export function validateGetInsightsResponse(v: GetInsightsResponse): string[] {
 const violations: string[] = [];
+if (v.velocity !== undefined && v.velocity !== null && !(Array.isArray(v.velocity) && (v.velocity).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("velocity has invalid type");
 if (v.velocity !== undefined && v.velocity !== null) for (const item of v.velocity) violations.push(...validateVelocityPoint(item).map((message) => "velocity: " + message));
+if (v.burndown !== undefined && v.burndown !== null && !(Array.isArray(v.burndown) && (v.burndown).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("burndown has invalid type");
 if (v.burndown !== undefined && v.burndown !== null) for (const item of v.burndown) violations.push(...validateBurndownPoint(item).map((message) => "burndown: " + message));
+if (v.cycleTime !== undefined && v.cycleTime !== null && !(typeof v.cycleTime === "number" && Number.isFinite(v.cycleTime))) violations.push("cycle_time has invalid type");
+if (v.timeByMember !== undefined && v.timeByMember !== null && !(Array.isArray(v.timeByMember) && (v.timeByMember).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("time_by_member has invalid type");
 if (v.timeByMember !== undefined && v.timeByMember !== null) for (const item of v.timeByMember) violations.push(...validateMemberTime(item).map((message) => "time_by_member: " + message));
+if (v.throughput !== undefined && v.throughput !== null && !(Array.isArray(v.throughput) && (v.throughput).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("throughput has invalid type");
 if (v.throughput !== undefined && v.throughput !== null) for (const item of v.throughput) violations.push(...validateThroughputPoint(item).map((message) => "throughput: " + message));
+if (v.totalTasks !== undefined && v.totalTasks !== null && !(typeof v.totalTasks === "number" && Number.isInteger(v.totalTasks) && v.totalTasks >= -2147483648 && v.totalTasks <= 2147483647)) violations.push("total_tasks has invalid type");
+if (v.doneTasks !== undefined && v.doneTasks !== null && !(typeof v.doneTasks === "number" && Number.isInteger(v.doneTasks) && v.doneTasks >= -2147483648 && v.doneTasks <= 2147483647)) violations.push("done_tasks has invalid type");
 return violations;
 }
 
@@ -334,6 +376,11 @@ return out;
 
 export function validateGetTeamWorkloadRequest(v: GetTeamWorkloadRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string")) violations.push("workspace_id has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -359,7 +406,9 @@ return out;
 
 export function validateGetTeamWorkloadResponse(v: GetTeamWorkloadResponse): string[] {
 const violations: string[] = [];
+if (v.members !== undefined && v.members !== null && !(Array.isArray(v.members) && (v.members).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("members has invalid type");
 if (v.members !== undefined && v.members !== null) for (const item of v.members) violations.push(...validateTeamMemberWorkload(item).map((message) => "members: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -395,6 +444,11 @@ return out;
 
 export function validateGetRoadmapRequest(v: GetRoadmapRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string")) violations.push("workspace_id has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -420,7 +474,9 @@ return out;
 
 export function validateGetRoadmapResponse(v: GetRoadmapResponse): string[] {
 const violations: string[] = [];
+if (v.projects !== undefined && v.projects !== null && !(Array.isArray(v.projects) && (v.projects).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("projects has invalid type");
 if (v.projects !== undefined && v.projects !== null) for (const item of v.projects) violations.push(...validateRoadmapProject(item).map((message) => "projects: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }

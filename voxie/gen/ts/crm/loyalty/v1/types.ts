@@ -61,6 +61,21 @@ return out;
 
 export function validateLoyaltyConfig(v: LoyaltyConfig): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.isEnabled !== undefined && v.isEnabled !== null && !(typeof v.isEnabled === "boolean")) violations.push("is_enabled has invalid type");
+if (v.pointsPerCurrencyUnit !== undefined && v.pointsPerCurrencyUnit !== null && !(typeof v.pointsPerCurrencyUnit === "number" && Number.isFinite(v.pointsPerCurrencyUnit))) violations.push("points_per_currency_unit has invalid type");
+if (v.currencyPerPoint !== undefined && v.currencyPerPoint !== null && !(typeof v.currencyPerPoint === "number" && Number.isFinite(v.currencyPerPoint))) violations.push("currency_per_point has invalid type");
+if (v.bronzeMin !== undefined && v.bronzeMin !== null && !(typeof v.bronzeMin === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.bronzeMin))) violations.push("bronze_min has invalid type");
+if (v.silverMin !== undefined && v.silverMin !== null && !(typeof v.silverMin === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.silverMin))) violations.push("silver_min has invalid type");
+if (v.goldMin !== undefined && v.goldMin !== null && !(typeof v.goldMin === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.goldMin))) violations.push("gold_min has invalid type");
+if (v.platinumMin !== undefined && v.platinumMin !== null && !(typeof v.platinumMin === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.platinumMin))) violations.push("platinum_min has invalid type");
+if (v.bronzeDiscountPct !== undefined && v.bronzeDiscountPct !== null && !(typeof v.bronzeDiscountPct === "number" && Number.isFinite(v.bronzeDiscountPct))) violations.push("bronze_discount_pct has invalid type");
+if (v.silverDiscountPct !== undefined && v.silverDiscountPct !== null && !(typeof v.silverDiscountPct === "number" && Number.isFinite(v.silverDiscountPct))) violations.push("silver_discount_pct has invalid type");
+if (v.goldDiscountPct !== undefined && v.goldDiscountPct !== null && !(typeof v.goldDiscountPct === "number" && Number.isFinite(v.goldDiscountPct))) violations.push("gold_discount_pct has invalid type");
+if (v.platinumDiscountPct !== undefined && v.platinumDiscountPct !== null && !(typeof v.platinumDiscountPct === "number" && Number.isFinite(v.platinumDiscountPct))) violations.push("platinum_discount_pct has invalid type");
+if (v.pointsExpiryDays !== undefined && v.pointsExpiryDays !== null && !(typeof v.pointsExpiryDays === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.pointsExpiryDays))) violations.push("points_expiry_days has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -113,6 +128,17 @@ return out;
 
 export function validateLoyaltyTransaction(v: LoyaltyTransaction): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.points !== undefined && v.points !== null && !(typeof v.points === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.points))) violations.push("points has invalid type");
+if (v.balanceBefore !== undefined && v.balanceBefore !== null && !(typeof v.balanceBefore === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.balanceBefore))) violations.push("balance_before has invalid type");
+if (v.balanceAfter !== undefined && v.balanceAfter !== null && !(typeof v.balanceAfter === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.balanceAfter))) violations.push("balance_after has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.referenceId !== undefined && v.referenceId !== null && !(typeof v.referenceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.referenceId))) violations.push("reference_id has invalid type");
+if (v.referenceType !== undefined && v.referenceType !== null && !(typeof v.referenceType === "string")) violations.push("reference_type has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -159,6 +185,15 @@ return out;
 
 export function validateLoyaltyTier(v: LoyaltyTier): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.minPoints !== undefined && v.minPoints !== null && !(typeof v.minPoints === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.minPoints))) violations.push("min_points has invalid type");
+if (v.discountPct !== undefined && v.discountPct !== null && !(typeof v.discountPct === "number" && Number.isFinite(v.discountPct))) violations.push("discount_pct has invalid type");
+if (v.perks !== undefined && v.perks !== null && !(typeof v.perks === "string")) violations.push("perks has invalid type");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(typeof v.sortOrder === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sortOrder))) violations.push("sort_order has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -193,11 +228,16 @@ return out;
 
 export function validateAwardPointsRequest(v: AwardPointsRequest): string[] {
 const violations: string[] = [];
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
 if (!(v.customerId !== undefined && v.customerId !== null)) violations.push("customer_id is required");
 if (v.customerId !== undefined && v.customerId !== null && !(Number(v.customerId) > 0)) violations.push("customer_id violates @gt");
+if (v.points !== undefined && v.points !== null && !(typeof v.points === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.points))) violations.push("points has invalid type");
 if (!(v.points !== undefined && v.points !== null)) violations.push("points is required");
 if (v.points !== undefined && v.points !== null && !(Number(v.points) > 0)) violations.push("points violates @gt");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.referenceId !== undefined && v.referenceId !== null && !(typeof v.referenceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.referenceId))) violations.push("reference_id has invalid type");
+if (v.referenceType !== undefined && v.referenceType !== null && !(typeof v.referenceType === "string")) violations.push("reference_type has invalid type");
 if (!(v.referenceType !== undefined && v.referenceType !== null) || v.referenceType === "") violations.push("reference_type is required");
 return violations;
 }
@@ -221,6 +261,7 @@ return out;
 
 export function validateAwardPointsResponse(v: AwardPointsResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -255,12 +296,17 @@ return out;
 
 export function validateCreateLoyaltyTierRequest(v: CreateLoyaltyTierRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.minPoints !== undefined && v.minPoints !== null && !(typeof v.minPoints === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.minPoints))) violations.push("min_points has invalid type");
 if (!(v.minPoints !== undefined && v.minPoints !== null)) violations.push("min_points is required");
 if (v.minPoints !== undefined && v.minPoints !== null && !(Number(v.minPoints) > 0)) violations.push("min_points violates @gt");
+if (v.discountPct !== undefined && v.discountPct !== null && !(typeof v.discountPct === "number" && Number.isFinite(v.discountPct))) violations.push("discount_pct has invalid type");
 if (!(v.discountPct !== undefined && v.discountPct !== null)) violations.push("discount_pct is required");
 if (v.discountPct !== undefined && v.discountPct !== null && !(Number(v.discountPct) > 0)) violations.push("discount_pct violates @gt");
+if (v.perks !== undefined && v.perks !== null && !(typeof v.perks === "string")) violations.push("perks has invalid type");
 if (!(v.perks !== undefined && v.perks !== null) || v.perks === "") violations.push("perks is required");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(typeof v.sortOrder === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sortOrder))) violations.push("sort_order has invalid type");
 if (!(v.sortOrder !== undefined && v.sortOrder !== null)) violations.push("sort_order is required");
 if (v.sortOrder !== undefined && v.sortOrder !== null && !(Number(v.sortOrder) > 0)) violations.push("sort_order violates @gt");
 return violations;
@@ -288,6 +334,8 @@ return out;
 
 export function validateCreateLoyaltyTierResponse(v: CreateLoyaltyTierResponse): string[] {
 const violations: string[] = [];
+if (v.tierId !== undefined && v.tierId !== null && !(typeof v.tierId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.tierId))) violations.push("tier_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -329,6 +377,7 @@ return out;
 
 export function validateGetLoyaltyConfigResponse(v: GetLoyaltyConfigResponse): string[] {
 const violations: string[] = [];
+if (v.config !== undefined && v.config !== null && !(typeof v.config === "object" && v.config !== null && !Array.isArray(v.config))) violations.push("config has invalid type");
 if (v.config !== undefined && v.config !== null) violations.push(...validateLoyaltyConfig(v.config).map((message) => "config: " + message));
 return violations;
 }
@@ -371,6 +420,7 @@ return out;
 
 export function validateListLoyaltyTiersResponse(v: ListLoyaltyTiersResponse): string[] {
 const violations: string[] = [];
+if (v.tiers !== undefined && v.tiers !== null && !(Array.isArray(v.tiers) && (v.tiers).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("tiers has invalid type");
 if (v.tiers !== undefined && v.tiers !== null) for (const item of v.tiers) violations.push(...validateLoyaltyTier(item).map((message) => "tiers: " + message));
 return violations;
 }
@@ -400,6 +450,9 @@ return out;
 
 export function validateListLoyaltyTransactionsRequest(v: ListLoyaltyTransactionsRequest): string[] {
 const violations: string[] = [];
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.page))) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.pageSize))) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -431,7 +484,11 @@ return out;
 
 export function validateListLoyaltyTransactionsResponse(v: ListLoyaltyTransactionsResponse): string[] {
 const violations: string[] = [];
+if (v.transactions !== undefined && v.transactions !== null && !(Array.isArray(v.transactions) && (v.transactions).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("transactions has invalid type");
 if (v.transactions !== undefined && v.transactions !== null) for (const item of v.transactions) violations.push(...validateLoyaltyTransaction(item).map((message) => "transactions: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.total))) violations.push("total has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.page))) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.pageSize))) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -466,11 +523,16 @@ return out;
 
 export function validateRedeemPointsRequest(v: RedeemPointsRequest): string[] {
 const violations: string[] = [];
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
 if (!(v.customerId !== undefined && v.customerId !== null)) violations.push("customer_id is required");
 if (v.customerId !== undefined && v.customerId !== null && !(Number(v.customerId) > 0)) violations.push("customer_id violates @gt");
+if (v.points !== undefined && v.points !== null && !(typeof v.points === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.points))) violations.push("points has invalid type");
 if (!(v.points !== undefined && v.points !== null)) violations.push("points is required");
 if (v.points !== undefined && v.points !== null && !(Number(v.points) > 0)) violations.push("points violates @gt");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.referenceId !== undefined && v.referenceId !== null && !(typeof v.referenceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.referenceId))) violations.push("reference_id has invalid type");
+if (v.referenceType !== undefined && v.referenceType !== null && !(typeof v.referenceType === "string")) violations.push("reference_type has invalid type");
 if (!(v.referenceType !== undefined && v.referenceType !== null) || v.referenceType === "") violations.push("reference_type is required");
 return violations;
 }
@@ -494,6 +556,7 @@ return out;
 
 export function validateRedeemPointsResponse(v: RedeemPointsResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -549,26 +612,38 @@ return out;
 
 export function validateUpdateLoyaltyConfigRequest(v: UpdateLoyaltyConfigRequest): string[] {
 const violations: string[] = [];
+if (v.isEnabled !== undefined && v.isEnabled !== null && !(typeof v.isEnabled === "boolean")) violations.push("is_enabled has invalid type");
+if (v.pointsPerCurrencyUnit !== undefined && v.pointsPerCurrencyUnit !== null && !(typeof v.pointsPerCurrencyUnit === "number" && Number.isFinite(v.pointsPerCurrencyUnit))) violations.push("points_per_currency_unit has invalid type");
 if (!(v.pointsPerCurrencyUnit !== undefined && v.pointsPerCurrencyUnit !== null)) violations.push("points_per_currency_unit is required");
 if (v.pointsPerCurrencyUnit !== undefined && v.pointsPerCurrencyUnit !== null && !(Number(v.pointsPerCurrencyUnit) > 0)) violations.push("points_per_currency_unit violates @gt");
+if (v.currencyPerPoint !== undefined && v.currencyPerPoint !== null && !(typeof v.currencyPerPoint === "number" && Number.isFinite(v.currencyPerPoint))) violations.push("currency_per_point has invalid type");
 if (!(v.currencyPerPoint !== undefined && v.currencyPerPoint !== null)) violations.push("currency_per_point is required");
 if (v.currencyPerPoint !== undefined && v.currencyPerPoint !== null && !(Number(v.currencyPerPoint) > 0)) violations.push("currency_per_point violates @gt");
+if (v.bronzeMin !== undefined && v.bronzeMin !== null && !(typeof v.bronzeMin === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.bronzeMin))) violations.push("bronze_min has invalid type");
 if (!(v.bronzeMin !== undefined && v.bronzeMin !== null)) violations.push("bronze_min is required");
 if (v.bronzeMin !== undefined && v.bronzeMin !== null && !(Number(v.bronzeMin) > 0)) violations.push("bronze_min violates @gt");
+if (v.silverMin !== undefined && v.silverMin !== null && !(typeof v.silverMin === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.silverMin))) violations.push("silver_min has invalid type");
 if (!(v.silverMin !== undefined && v.silverMin !== null)) violations.push("silver_min is required");
 if (v.silverMin !== undefined && v.silverMin !== null && !(Number(v.silverMin) > 0)) violations.push("silver_min violates @gt");
+if (v.goldMin !== undefined && v.goldMin !== null && !(typeof v.goldMin === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.goldMin))) violations.push("gold_min has invalid type");
 if (!(v.goldMin !== undefined && v.goldMin !== null)) violations.push("gold_min is required");
 if (v.goldMin !== undefined && v.goldMin !== null && !(Number(v.goldMin) > 0)) violations.push("gold_min violates @gt");
+if (v.platinumMin !== undefined && v.platinumMin !== null && !(typeof v.platinumMin === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.platinumMin))) violations.push("platinum_min has invalid type");
 if (!(v.platinumMin !== undefined && v.platinumMin !== null)) violations.push("platinum_min is required");
 if (v.platinumMin !== undefined && v.platinumMin !== null && !(Number(v.platinumMin) > 0)) violations.push("platinum_min violates @gt");
+if (v.bronzeDiscountPct !== undefined && v.bronzeDiscountPct !== null && !(typeof v.bronzeDiscountPct === "number" && Number.isFinite(v.bronzeDiscountPct))) violations.push("bronze_discount_pct has invalid type");
 if (!(v.bronzeDiscountPct !== undefined && v.bronzeDiscountPct !== null)) violations.push("bronze_discount_pct is required");
 if (v.bronzeDiscountPct !== undefined && v.bronzeDiscountPct !== null && !(Number(v.bronzeDiscountPct) > 0)) violations.push("bronze_discount_pct violates @gt");
+if (v.silverDiscountPct !== undefined && v.silverDiscountPct !== null && !(typeof v.silverDiscountPct === "number" && Number.isFinite(v.silverDiscountPct))) violations.push("silver_discount_pct has invalid type");
 if (!(v.silverDiscountPct !== undefined && v.silverDiscountPct !== null)) violations.push("silver_discount_pct is required");
 if (v.silverDiscountPct !== undefined && v.silverDiscountPct !== null && !(Number(v.silverDiscountPct) > 0)) violations.push("silver_discount_pct violates @gt");
+if (v.goldDiscountPct !== undefined && v.goldDiscountPct !== null && !(typeof v.goldDiscountPct === "number" && Number.isFinite(v.goldDiscountPct))) violations.push("gold_discount_pct has invalid type");
 if (!(v.goldDiscountPct !== undefined && v.goldDiscountPct !== null)) violations.push("gold_discount_pct is required");
 if (v.goldDiscountPct !== undefined && v.goldDiscountPct !== null && !(Number(v.goldDiscountPct) > 0)) violations.push("gold_discount_pct violates @gt");
+if (v.platinumDiscountPct !== undefined && v.platinumDiscountPct !== null && !(typeof v.platinumDiscountPct === "number" && Number.isFinite(v.platinumDiscountPct))) violations.push("platinum_discount_pct has invalid type");
 if (!(v.platinumDiscountPct !== undefined && v.platinumDiscountPct !== null)) violations.push("platinum_discount_pct is required");
 if (v.platinumDiscountPct !== undefined && v.platinumDiscountPct !== null && !(Number(v.platinumDiscountPct) > 0)) violations.push("platinum_discount_pct violates @gt");
+if (v.pointsExpiryDays !== undefined && v.pointsExpiryDays !== null && !(typeof v.pointsExpiryDays === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.pointsExpiryDays))) violations.push("points_expiry_days has invalid type");
 if (!(v.pointsExpiryDays !== undefined && v.pointsExpiryDays !== null)) violations.push("points_expiry_days is required");
 if (v.pointsExpiryDays !== undefined && v.pointsExpiryDays !== null && !(Number(v.pointsExpiryDays) > 0)) violations.push("points_expiry_days violates @gt");
 return violations;
@@ -593,6 +668,7 @@ return out;
 
 export function validateUpdateLoyaltyConfigResponse(v: UpdateLoyaltyConfigResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -627,12 +703,17 @@ return out;
 
 export function validateUpdateLoyaltyTierBody(v: UpdateLoyaltyTierBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.minPoints !== undefined && v.minPoints !== null && !(typeof v.minPoints === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.minPoints))) violations.push("min_points has invalid type");
 if (!(v.minPoints !== undefined && v.minPoints !== null)) violations.push("min_points is required");
 if (v.minPoints !== undefined && v.minPoints !== null && !(Number(v.minPoints) > 0)) violations.push("min_points violates @gt");
+if (v.discountPct !== undefined && v.discountPct !== null && !(typeof v.discountPct === "number" && Number.isFinite(v.discountPct))) violations.push("discount_pct has invalid type");
 if (!(v.discountPct !== undefined && v.discountPct !== null)) violations.push("discount_pct is required");
 if (v.discountPct !== undefined && v.discountPct !== null && !(Number(v.discountPct) > 0)) violations.push("discount_pct violates @gt");
+if (v.perks !== undefined && v.perks !== null && !(typeof v.perks === "string")) violations.push("perks has invalid type");
 if (!(v.perks !== undefined && v.perks !== null) || v.perks === "") violations.push("perks is required");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(typeof v.sortOrder === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.sortOrder))) violations.push("sort_order has invalid type");
 if (!(v.sortOrder !== undefined && v.sortOrder !== null)) violations.push("sort_order is required");
 if (v.sortOrder !== undefined && v.sortOrder !== null && !(Number(v.sortOrder) > 0)) violations.push("sort_order violates @gt");
 return violations;
@@ -660,8 +741,10 @@ return out;
 
 export function validateUpdateLoyaltyTierRequest(v: UpdateLoyaltyTierRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateLoyaltyTierBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -685,6 +768,7 @@ return out;
 
 export function validateUpdateLoyaltyTierResponse(v: UpdateLoyaltyTierResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

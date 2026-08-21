@@ -2,6 +2,42 @@
 import type { ListExpensesRequest, ListExpensesResponse, CreateExpenseRequest, CreateExpenseResponse, UpdateExpenseRequest, UpdateExpenseResponse, DeleteExpenseRequest, DeleteExpenseResponse, GetExpenseRequest, GetExpenseResponse, UpdateExpenseStatusRequest, UpdateExpenseStatusResponse, ListExpenseCategoriesRequest, ListExpenseCategoriesResponse } from "./types";
 import { encodeListExpensesRequest, validateListExpensesRequest, decodeListExpensesResponse, encodeCreateExpenseRequest, validateCreateExpenseRequest, decodeCreateExpenseResponse, encodeUpdateExpenseRequest, validateUpdateExpenseRequest, decodeUpdateExpenseResponse, encodeDeleteExpenseRequest, validateDeleteExpenseRequest, decodeDeleteExpenseResponse, encodeGetExpenseRequest, validateGetExpenseRequest, decodeGetExpenseResponse, encodeUpdateExpenseStatusRequest, validateUpdateExpenseStatusRequest, decodeUpdateExpenseStatusResponse, encodeListExpenseCategoriesRequest, validateListExpenseCategoriesRequest, decodeListExpenseCategoriesResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface ExpensesServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class ExpensesServiceClient {
@@ -52,11 +90,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListExpensesResponse(await res.json());
+return decodeListExpensesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createExpense(req: CreateExpenseRequest): Promise<CreateExpenseResponse> {
@@ -70,11 +108,11 @@ body: JSON.stringify(encodeCreateExpenseRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateExpenseResponse(await res.json());
+return decodeCreateExpenseResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateExpense(req: UpdateExpenseRequest): Promise<UpdateExpenseResponse> {
@@ -89,11 +127,11 @@ body: JSON.stringify(encodeUpdateExpenseRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateExpenseResponse(await res.json());
+return decodeUpdateExpenseResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteExpense(req: DeleteExpenseRequest): Promise<DeleteExpenseResponse> {
@@ -110,11 +148,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteExpenseResponse(await res.json());
+return decodeDeleteExpenseResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getExpense(req: GetExpenseRequest): Promise<GetExpenseResponse> {
@@ -131,11 +169,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetExpenseResponse(await res.json());
+return decodeGetExpenseResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateExpenseStatus(req: UpdateExpenseStatusRequest): Promise<UpdateExpenseStatusResponse> {
@@ -150,11 +188,11 @@ body: JSON.stringify(encodeUpdateExpenseStatusRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateExpenseStatusResponse(await res.json());
+return decodeUpdateExpenseStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listExpenseCategories(req: ListExpenseCategoriesRequest): Promise<ListExpenseCategoriesResponse> {
@@ -170,11 +208,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListExpenseCategoriesResponse(await res.json());
+return decodeListExpenseCategoriesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

@@ -32,6 +32,11 @@ return out;
 
 export function validateLabel(v: Label): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -66,6 +71,11 @@ return out;
 
 export function validateListLabelsRequest(v: ListLabelsRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -91,7 +101,9 @@ return out;
 
 export function validateListLabelsResponse(v: ListLabelsResponse): string[] {
 const violations: string[] = [];
+if (v.labels !== undefined && v.labels !== null && !(Array.isArray(v.labels) && (v.labels).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("labels has invalid type");
 if (v.labels !== undefined && v.labels !== null) for (const item of v.labels) violations.push(...validateLabel(item).map((message) => "labels: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -121,9 +133,12 @@ return out;
 
 export function validateCreateLabelRequest(v: CreateLabelRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
 if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
 if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
 if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
 return violations;
 }
@@ -147,6 +162,7 @@ return out;
 
 export function validateCreateLabelResponse(v: CreateLabelResponse): string[] {
 const violations: string[] = [];
+if (v.label !== undefined && v.label !== null && !(typeof v.label === "object" && v.label !== null && !Array.isArray(v.label))) violations.push("label has invalid type");
 if (v.label !== undefined && v.label !== null) violations.push(...validateLabel(v.label).map((message) => "label: " + message));
 return violations;
 }
@@ -176,9 +192,12 @@ return out;
 
 export function validateUpdateLabelRequest(v: UpdateLabelRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
 if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
 return violations;
 }
@@ -202,6 +221,7 @@ return out;
 
 export function validateUpdateLabelResponse(v: UpdateLabelResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -224,6 +244,7 @@ return out;
 
 export function validateDeleteLabelRequest(v: DeleteLabelRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -248,6 +269,7 @@ return out;
 
 export function validateDeleteLabelResponse(v: DeleteLabelResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -273,8 +295,10 @@ return out;
 
 export function validateSetTaskLabelsRequest(v: SetTaskLabelsRequest): string[] {
 const violations: string[] = [];
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
 if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
 if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+if (v.labelIds !== undefined && v.labelIds !== null && !(Array.isArray(v.labelIds) && (v.labelIds).every((item: any) => typeof item === "string" && /^-?(0|[1-9][0-9]*)$/.test(item)))) violations.push("label_ids has invalid type");
 return violations;
 }
 
@@ -297,6 +321,7 @@ return out;
 
 export function validateSetTaskLabelsResponse(v: SetTaskLabelsResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

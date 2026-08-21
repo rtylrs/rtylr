@@ -2,6 +2,42 @@
 import type { GetPLReportRequest, GetPLReportResponse, GetTaxReportRequest, GetTaxReportResponse, ListExpenseCategoryDetailsRequest, ListExpenseCategoryDetailsResponse, CreateExpenseCategoryDetailRequest, CreateExpenseCategoryDetailResponse, ListTaxConfigRequest, ListTaxConfigResponse, CreateTaxConfigRequest, CreateTaxConfigResponse } from "./types";
 import { encodeGetPLReportRequest, validateGetPLReportRequest, decodeGetPLReportResponse, encodeGetTaxReportRequest, validateGetTaxReportRequest, decodeGetTaxReportResponse, encodeListExpenseCategoryDetailsRequest, validateListExpenseCategoryDetailsRequest, decodeListExpenseCategoryDetailsResponse, encodeCreateExpenseCategoryDetailRequest, validateCreateExpenseCategoryDetailRequest, decodeCreateExpenseCategoryDetailResponse, encodeListTaxConfigRequest, validateListTaxConfigRequest, decodeListTaxConfigResponse, encodeCreateTaxConfigRequest, validateCreateTaxConfigRequest, decodeCreateTaxConfigResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface ReportServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class ReportServiceClient {
@@ -52,11 +90,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetPLReportResponse(await res.json());
+return decodeGetPLReportResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getTaxReport(req: GetTaxReportRequest): Promise<GetTaxReportResponse> {
@@ -78,11 +116,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetTaxReportResponse(await res.json());
+return decodeGetTaxReportResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listExpenseCategoryDetails(req: ListExpenseCategoryDetailsRequest): Promise<ListExpenseCategoryDetailsResponse> {
@@ -98,11 +136,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListExpenseCategoryDetailsResponse(await res.json());
+return decodeListExpenseCategoryDetailsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createExpenseCategoryDetail(req: CreateExpenseCategoryDetailRequest): Promise<CreateExpenseCategoryDetailResponse> {
@@ -116,11 +154,11 @@ body: JSON.stringify(encodeCreateExpenseCategoryDetailRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateExpenseCategoryDetailResponse(await res.json());
+return decodeCreateExpenseCategoryDetailResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listTaxConfig(req: ListTaxConfigRequest): Promise<ListTaxConfigResponse> {
@@ -136,11 +174,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTaxConfigResponse(await res.json());
+return decodeListTaxConfigResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createTaxConfig(req: CreateTaxConfigRequest): Promise<CreateTaxConfigResponse> {
@@ -154,11 +192,11 @@ body: JSON.stringify(encodeCreateTaxConfigRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateTaxConfigResponse(await res.json());
+return decodeCreateTaxConfigResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

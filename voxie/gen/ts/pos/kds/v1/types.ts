@@ -34,6 +34,12 @@ return out;
 
 export function validateKDSItem(v: KDSItem): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.quantity !== undefined && v.quantity !== null && !(typeof v.quantity === "number" && Number.isFinite(v.quantity))) violations.push("quantity has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 return violations;
 }
 
@@ -80,6 +86,15 @@ return out;
 
 export function validateKDSOrder(v: KDSOrder): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.orderNumber !== undefined && v.orderNumber !== null && !(typeof v.orderNumber === "string")) violations.push("order_number has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.tableId !== undefined && v.tableId !== null && !(typeof v.tableId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.tableId))) violations.push("table_id has invalid type");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
+if (v.kitchenNotes !== undefined && v.kitchenNotes !== null && !(typeof v.kitchenNotes === "string")) violations.push("kitchen_notes has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateKDSItem(item).map((message) => "items: " + message));
 return violations;
 }
@@ -122,6 +137,7 @@ return out;
 
 export function validateListKDSOrdersResponse(v: ListKDSOrdersResponse): string[] {
 const violations: string[] = [];
+if (v.orders !== undefined && v.orders !== null && !(Array.isArray(v.orders) && (v.orders).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("orders has invalid type");
 if (v.orders !== undefined && v.orders !== null) for (const item of v.orders) violations.push(...validateKDSOrder(item).map((message) => "orders: " + message));
 return violations;
 }
@@ -145,6 +161,7 @@ return out;
 
 export function validateUpdateKDSItemByIDBody(v: UpdateKDSItemByIDBody): string[] {
 const violations: string[] = [];
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
 return violations;
 }
@@ -171,8 +188,10 @@ return out;
 
 export function validateUpdateKDSItemByIDRequest(v: UpdateKDSItemByIDRequest): string[] {
 const violations: string[] = [];
+if (v.itemId !== undefined && v.itemId !== null && !(typeof v.itemId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.itemId))) violations.push("item_id has invalid type");
 if (!(v.itemId !== undefined && v.itemId !== null)) violations.push("item_id is required");
 if (v.itemId !== undefined && v.itemId !== null && !(Number(v.itemId) > 0)) violations.push("item_id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateKDSItemByIDBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -196,6 +215,7 @@ return out;
 
 export function validateUpdateKDSItemByIDResponse(v: UpdateKDSItemByIDResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -218,6 +238,7 @@ return out;
 
 export function validateUpdateKDSItemStatusBody(v: UpdateKDSItemStatusBody): string[] {
 const violations: string[] = [];
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
 return violations;
 }
@@ -247,9 +268,12 @@ return out;
 
 export function validateUpdateKDSItemStatusRequest(v: UpdateKDSItemStatusRequest): string[] {
 const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (v.itemId !== undefined && v.itemId !== null && !(typeof v.itemId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.itemId))) violations.push("item_id has invalid type");
 if (!(v.itemId !== undefined && v.itemId !== null)) violations.push("item_id is required");
 if (v.itemId !== undefined && v.itemId !== null && !(Number(v.itemId) > 0)) violations.push("item_id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateKDSItemStatusBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -273,6 +297,7 @@ return out;
 
 export function validateUpdateKDSItemStatusResponse(v: UpdateKDSItemStatusResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

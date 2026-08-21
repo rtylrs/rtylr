@@ -38,6 +38,13 @@ return out;
 
 export function validateView(v: View): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
+if (v.filters !== undefined && v.filters !== null && !(typeof v.filters === "string")) violations.push("filters has invalid type");
+if (v.groupBy !== undefined && v.groupBy !== null && !(typeof v.groupBy === "string")) violations.push("group_by has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -72,6 +79,11 @@ return out;
 
 export function validateListViewsRequest(v: ListViewsRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string")) violations.push("workspace_id has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -97,7 +109,9 @@ return out;
 
 export function validateListViewsResponse(v: ListViewsResponse): string[] {
 const violations: string[] = [];
+if (v.views !== undefined && v.views !== null && !(Array.isArray(v.views) && (v.views).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("views has invalid type");
 if (v.views !== undefined && v.views !== null) for (const item of v.views) violations.push(...validateView(item).map((message) => "views: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -139,7 +153,14 @@ return out;
 
 export function validateCreateViewRequest(v: CreateViewRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string")) violations.push("workspace_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
+if (v.filters !== undefined && v.filters !== null && !(typeof v.filters === "string")) violations.push("filters has invalid type");
+if (v.groupBy !== undefined && v.groupBy !== null && !(typeof v.groupBy === "string")) violations.push("group_by has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -162,6 +183,7 @@ return out;
 
 export function validateCreateViewResponse(v: CreateViewResponse): string[] {
 const violations: string[] = [];
+if (v.view !== undefined && v.view !== null && !(typeof v.view === "object" && v.view !== null && !Array.isArray(v.view))) violations.push("view has invalid type");
 if (v.view !== undefined && v.view !== null) violations.push(...validateView(v.view).map((message) => "view: " + message));
 return violations;
 }
@@ -203,6 +225,13 @@ return out;
 
 export function validateUpdateViewRequest(v: UpdateViewRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
+if (v.filters !== undefined && v.filters !== null && !(typeof v.filters === "string")) violations.push("filters has invalid type");
+if (v.groupBy !== undefined && v.groupBy !== null && !(typeof v.groupBy === "string")) violations.push("group_by has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -244,6 +273,7 @@ return out;
 
 export function validateDeleteViewRequest(v: DeleteViewRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 return violations;
 }
 

@@ -40,6 +40,14 @@ return out;
 
 export function validateReminder(v: Reminder): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.appointmentId !== undefined && v.appointmentId !== null && !(typeof v.appointmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.appointmentId))) violations.push("appointment_id has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.scheduledAt !== undefined && v.scheduledAt !== null && !(typeof v.scheduledAt === "string")) violations.push("scheduled_at has invalid type");
+if (v.sentAt !== undefined && v.sentAt !== null && !(typeof v.sentAt === "string")) violations.push("sent_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -68,9 +76,12 @@ return out;
 
 export function validateCreateReminderRequest(v: CreateReminderRequest): string[] {
 const violations: string[] = [];
+if (v.appointmentId !== undefined && v.appointmentId !== null && !(typeof v.appointmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.appointmentId))) violations.push("appointment_id has invalid type");
 if (!(v.appointmentId !== undefined && v.appointmentId !== null)) violations.push("appointment_id is required");
 if (v.appointmentId !== undefined && v.appointmentId !== null && !(Number(v.appointmentId) > 0)) violations.push("appointment_id violates @gt");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
 if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (v.scheduledAt !== undefined && v.scheduledAt !== null && !(typeof v.scheduledAt === "string")) violations.push("scheduled_at has invalid type");
 if (!(v.scheduledAt !== undefined && v.scheduledAt !== null) || v.scheduledAt === "") violations.push("scheduled_at is required");
 return violations;
 }
@@ -97,6 +108,8 @@ return out;
 
 export function validateCreateReminderResponse(v: CreateReminderResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -138,6 +151,7 @@ return out;
 
 export function validateListRemindersResponse(v: ListRemindersResponse): string[] {
 const violations: string[] = [];
+if (v.reminders !== undefined && v.reminders !== null && !(Array.isArray(v.reminders) && (v.reminders).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("reminders has invalid type");
 if (v.reminders !== undefined && v.reminders !== null) for (const item of v.reminders) violations.push(...validateReminder(item).map((message) => "reminders: " + message));
 return violations;
 }

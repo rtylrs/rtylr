@@ -40,6 +40,14 @@ return out;
 
 export function validateApiKey(v: ApiKey): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.keyPrefix !== undefined && v.keyPrefix !== null && !(typeof v.keyPrefix === "string")) violations.push("key_prefix has invalid type");
+if (v.scopes !== undefined && v.scopes !== null && !(Array.isArray(v.scopes) && (v.scopes).every((item: any) => typeof item === "string"))) violations.push("scopes has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.lastUsedAt !== undefined && v.lastUsedAt !== null && !(typeof v.lastUsedAt === "string")) violations.push("last_used_at has invalid type");
+if (v.expiresAt !== undefined && v.expiresAt !== null && !(typeof v.expiresAt === "string")) violations.push("expires_at has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -77,6 +85,12 @@ return out;
 
 export function validateWebhook(v: Webhook): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.url !== undefined && v.url !== null && !(typeof v.url === "string")) violations.push("url has invalid type");
+if (v.events !== undefined && v.events !== null && !(Array.isArray(v.events) && (v.events).every((item: any) => typeof item === "string"))) violations.push("events has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.lastTriggeredAt !== undefined && v.lastTriggeredAt !== null && !(typeof v.lastTriggeredAt === "string")) violations.push("last_triggered_at has invalid type");
 return violations;
 }
 
@@ -102,7 +116,9 @@ return out;
 
 export function validateCreateApiKeyRequest(v: CreateApiKeyRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.scopes !== undefined && v.scopes !== null && !(Array.isArray(v.scopes) && (v.scopes).every((item: any) => typeof item === "string"))) violations.push("scopes has invalid type");
 if (v.scopes !== undefined && v.scopes !== null && v.scopes.length < 1) violations.push("scopes must contain at least 1 items");
 return violations;
 }
@@ -132,6 +148,9 @@ return out;
 
 export function validateCreateApiKeyResponse(v: CreateApiKeyResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.key !== undefined && v.key !== null && !(typeof v.key === "string")) violations.push("key has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -157,7 +176,9 @@ return out;
 
 export function validateCreateWebhookRequest(v: CreateWebhookRequest): string[] {
 const violations: string[] = [];
+if (v.url !== undefined && v.url !== null && !(typeof v.url === "string")) violations.push("url has invalid type");
 if (!(v.url !== undefined && v.url !== null) || v.url === "") violations.push("url is required");
+if (v.events !== undefined && v.events !== null && !(Array.isArray(v.events) && (v.events).every((item: any) => typeof item === "string"))) violations.push("events has invalid type");
 if (v.events !== undefined && v.events !== null && v.events.length < 1) violations.push("events must contain at least 1 items");
 return violations;
 }
@@ -184,6 +205,8 @@ return out;
 
 export function validateCreateWebhookResponse(v: CreateWebhookResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -206,6 +229,7 @@ return out;
 
 export function validateDeleteWebhookRequest(v: DeleteWebhookRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -230,6 +254,7 @@ return out;
 
 export function validateDeleteWebhookResponse(v: DeleteWebhookResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -271,6 +296,7 @@ return out;
 
 export function validateListApiKeysResponse(v: ListApiKeysResponse): string[] {
 const violations: string[] = [];
+if (v.keys !== undefined && v.keys !== null && !(Array.isArray(v.keys) && (v.keys).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("keys has invalid type");
 if (v.keys !== undefined && v.keys !== null) for (const item of v.keys) violations.push(...validateApiKey(item).map((message) => "keys: " + message));
 return violations;
 }
@@ -313,6 +339,7 @@ return out;
 
 export function validateListWebhooksResponse(v: ListWebhooksResponse): string[] {
 const violations: string[] = [];
+if (v.webhooks !== undefined && v.webhooks !== null && !(Array.isArray(v.webhooks) && (v.webhooks).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("webhooks has invalid type");
 if (v.webhooks !== undefined && v.webhooks !== null) for (const item of v.webhooks) violations.push(...validateWebhook(item).map((message) => "webhooks: " + message));
 return violations;
 }
@@ -336,6 +363,7 @@ return out;
 
 export function validateRevokeApiKeyRequest(v: RevokeApiKeyRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -360,6 +388,7 @@ return out;
 
 export function validateRevokeApiKeyResponse(v: RevokeApiKeyResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -391,10 +420,14 @@ return out;
 
 export function validateUpdateWebhookRequest(v: UpdateWebhookRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.url !== undefined && v.url !== null && !(typeof v.url === "string")) violations.push("url has invalid type");
 if (!(v.url !== undefined && v.url !== null) || v.url === "") violations.push("url is required");
+if (v.events !== undefined && v.events !== null && !(Array.isArray(v.events) && (v.events).every((item: any) => typeof item === "string"))) violations.push("events has invalid type");
 if (v.events !== undefined && v.events !== null && v.events.length < 1) violations.push("events must contain at least 1 items");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -417,6 +450,7 @@ return out;
 
 export function validateUpdateWebhookResponse(v: UpdateWebhookResponse): string[] {
 const violations: string[] = [];
+if (v.webhook !== undefined && v.webhook !== null && !(typeof v.webhook === "object" && v.webhook !== null && !Array.isArray(v.webhook))) violations.push("webhook has invalid type");
 if (v.webhook !== undefined && v.webhook !== null) violations.push(...validateWebhook(v.webhook).map((message) => "webhook: " + message));
 return violations;
 }

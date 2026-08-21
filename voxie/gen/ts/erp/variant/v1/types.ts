@@ -58,11 +58,25 @@ return out;
 
 export function validateVariant(v: Variant): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.productId !== undefined && v.productId !== null && !(typeof v.productId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.productId))) violations.push("product_id has invalid type");
 if (!(v.productId !== undefined && v.productId !== null)) violations.push("product_id is required");
 if (v.productId !== undefined && v.productId !== null && !(Number(v.productId) > 0)) violations.push("product_id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.sku !== undefined && v.sku !== null && !(typeof v.sku === "string")) violations.push("sku has invalid type");
+if (v.barcode !== undefined && v.barcode !== null && !(typeof v.barcode === "string")) violations.push("barcode has invalid type");
+if (v.costPrice !== undefined && v.costPrice !== null && !(typeof v.costPrice === "number" && Number.isFinite(v.costPrice))) violations.push("cost_price has invalid type");
+if (v.salePrice !== undefined && v.salePrice !== null && !(typeof v.salePrice === "number" && Number.isFinite(v.salePrice))) violations.push("sale_price has invalid type");
+if (v.stockQuantity !== undefined && v.stockQuantity !== null && !(typeof v.stockQuantity === "number" && Number.isFinite(v.stockQuantity))) violations.push("stock_quantity has invalid type");
+if (v.attributes !== undefined && v.attributes !== null && !(typeof v.attributes === "string")) violations.push("attributes has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -109,9 +123,18 @@ return out;
 
 export function validateCreateVariantRequest(v: CreateVariantRequest): string[] {
 const violations: string[] = [];
+if (v.productId !== undefined && v.productId !== null && !(typeof v.productId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.productId))) violations.push("product_id has invalid type");
 if (!(v.productId !== undefined && v.productId !== null)) violations.push("product_id is required");
 if (v.productId !== undefined && v.productId !== null && !(Number(v.productId) > 0)) violations.push("product_id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.sku !== undefined && v.sku !== null && !(typeof v.sku === "string")) violations.push("sku has invalid type");
+if (v.barcode !== undefined && v.barcode !== null && !(typeof v.barcode === "string")) violations.push("barcode has invalid type");
+if (v.costPrice !== undefined && v.costPrice !== null && !(typeof v.costPrice === "number" && Number.isFinite(v.costPrice))) violations.push("cost_price has invalid type");
+if (v.salePrice !== undefined && v.salePrice !== null && !(typeof v.salePrice === "number" && Number.isFinite(v.salePrice))) violations.push("sale_price has invalid type");
+if (v.stockQuantity !== undefined && v.stockQuantity !== null && !(typeof v.stockQuantity === "number" && Number.isFinite(v.stockQuantity))) violations.push("stock_quantity has invalid type");
+if (v.attributes !== undefined && v.attributes !== null && !(typeof v.attributes === "string")) violations.push("attributes has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -137,6 +160,8 @@ return out;
 
 export function validateCreateVariantResponse(v: CreateVariantResponse): string[] {
 const violations: string[] = [];
+if (v.variantId !== undefined && v.variantId !== null && !(typeof v.variantId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.variantId))) violations.push("variant_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -159,6 +184,7 @@ return out;
 
 export function validateDeleteVariantRequest(v: DeleteVariantRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -183,6 +209,7 @@ return out;
 
 export function validateDeleteVariantResponse(v: DeleteVariantResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -205,6 +232,7 @@ return out;
 
 export function validateListVariantsRequest(v: ListVariantsRequest): string[] {
 const violations: string[] = [];
+if (v.productId !== undefined && v.productId !== null && !(typeof v.productId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.productId))) violations.push("product_id has invalid type");
 return violations;
 }
 
@@ -227,6 +255,7 @@ return out;
 
 export function validateListVariantsResponse(v: ListVariantsResponse): string[] {
 const violations: string[] = [];
+if (v.variants !== undefined && v.variants !== null && !(Array.isArray(v.variants) && (v.variants).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("variants has invalid type");
 if (v.variants !== undefined && v.variants !== null) for (const item of v.variants) violations.push(...validateVariant(item).map((message) => "variants: " + message));
 return violations;
 }
@@ -274,7 +303,16 @@ return out;
 
 export function validateUpdateVariantBody(v: UpdateVariantBody): string[] {
 const violations: string[] = [];
+if (v.productId !== undefined && v.productId !== null && !(typeof v.productId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.productId))) violations.push("product_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.sku !== undefined && v.sku !== null && !(typeof v.sku === "string")) violations.push("sku has invalid type");
+if (v.barcode !== undefined && v.barcode !== null && !(typeof v.barcode === "string")) violations.push("barcode has invalid type");
+if (v.costPrice !== undefined && v.costPrice !== null && !(typeof v.costPrice === "number" && Number.isFinite(v.costPrice))) violations.push("cost_price has invalid type");
+if (v.salePrice !== undefined && v.salePrice !== null && !(typeof v.salePrice === "number" && Number.isFinite(v.salePrice))) violations.push("sale_price has invalid type");
+if (v.stockQuantity !== undefined && v.stockQuantity !== null && !(typeof v.stockQuantity === "number" && Number.isFinite(v.stockQuantity))) violations.push("stock_quantity has invalid type");
+if (v.attributes !== undefined && v.attributes !== null && !(typeof v.attributes === "string")) violations.push("attributes has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -300,8 +338,10 @@ return out;
 
 export function validateUpdateVariantRequest(v: UpdateVariantRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateVariantBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -325,6 +365,7 @@ return out;
 
 export function validateUpdateVariantResponse(v: UpdateVariantResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

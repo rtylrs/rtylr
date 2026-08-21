@@ -37,6 +37,13 @@ return out;
 
 export function validateTrainingCourse(v: TrainingCourse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.durationHours !== undefined && v.durationHours !== null && !(typeof v.durationHours === "number" && Number.isFinite(v.durationHours))) violations.push("duration_hours has invalid type");
+if (v.isRequired !== undefined && v.isRequired !== null && !(typeof v.isRequired === "boolean")) violations.push("is_required has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -78,6 +85,7 @@ return out;
 
 export function validateListTrainingCoursesResponse(v: ListTrainingCoursesResponse): string[] {
 const violations: string[] = [];
+if (v.courses !== undefined && v.courses !== null && !(Array.isArray(v.courses) && (v.courses).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("courses has invalid type");
 if (v.courses !== undefined && v.courses !== null) for (const item of v.courses) violations.push(...validateTrainingCourse(item).map((message) => "courses: " + message));
 return violations;
 }
@@ -110,7 +118,11 @@ return out;
 
 export function validateCreateTrainingCourseRequest(v: CreateTrainingCourseRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.durationHours !== undefined && v.durationHours !== null && !(typeof v.durationHours === "number" && Number.isFinite(v.durationHours))) violations.push("duration_hours has invalid type");
+if (v.isRequired !== undefined && v.isRequired !== null && !(typeof v.isRequired === "boolean")) violations.push("is_required has invalid type");
 return violations;
 }
 
@@ -136,6 +148,8 @@ return out;
 
 export function validateCreateTrainingCourseResponse(v: CreateTrainingCourseResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

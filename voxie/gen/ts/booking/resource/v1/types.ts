@@ -40,6 +40,14 @@ return out;
 
 export function validateResource(v: Resource): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.capacity !== undefined && v.capacity !== null && !(typeof v.capacity === "number" && Number.isInteger(v.capacity) && v.capacity >= -2147483648 && v.capacity <= 2147483647)) violations.push("capacity has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -71,7 +79,11 @@ return out;
 
 export function validateCreateResourceRequest(v: CreateResourceRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.capacity !== undefined && v.capacity !== null && !(typeof v.capacity === "number" && Number.isInteger(v.capacity) && v.capacity >= -2147483648 && v.capacity <= 2147483647)) violations.push("capacity has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -97,6 +109,8 @@ return out;
 
 export function validateCreateResourceResponse(v: CreateResourceResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -119,6 +133,7 @@ return out;
 
 export function validateDeleteResourceRequest(v: DeleteResourceRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -143,6 +158,7 @@ return out;
 
 export function validateDeleteResourceResponse(v: DeleteResourceResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -184,6 +200,7 @@ return out;
 
 export function validateListResourcesResponse(v: ListResourcesResponse): string[] {
 const violations: string[] = [];
+if (v.resources !== undefined && v.resources !== null && !(Array.isArray(v.resources) && (v.resources).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("resources has invalid type");
 if (v.resources !== undefined && v.resources !== null) for (const item of v.resources) violations.push(...validateResource(item).map((message) => "resources: " + message));
 return violations;
 }
@@ -219,8 +236,13 @@ return out;
 
 export function validateUpdateResourceRequest(v: UpdateResourceRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.capacity !== undefined && v.capacity !== null && !(typeof v.capacity === "number" && Number.isInteger(v.capacity) && v.capacity >= -2147483648 && v.capacity <= 2147483647)) violations.push("capacity has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -243,6 +265,7 @@ return out;
 
 export function validateUpdateResourceResponse(v: UpdateResourceResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

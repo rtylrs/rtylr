@@ -2,6 +2,42 @@
 import type { ListChecklistTemplatesRequest, ListChecklistTemplatesResponse, CreateChecklistTemplateRequest, CreateChecklistTemplateResponse, UpdateChecklistTemplateRequest, UpdateChecklistTemplateResponse, AddItemToChecklistTemplateRequest, AddItemToChecklistTemplateResponse, ListEmployeeChecklistsRequest, ListEmployeeChecklistsResponse, GetEmployeeChecklistRequest, GetEmployeeChecklistResponse, TriggerChecklistRequest, TriggerChecklistResponse, CompleteChecklistItemRequest, CompleteChecklistItemResponse } from "./types";
 import { encodeListChecklistTemplatesRequest, validateListChecklistTemplatesRequest, decodeListChecklistTemplatesResponse, encodeCreateChecklistTemplateRequest, validateCreateChecklistTemplateRequest, decodeCreateChecklistTemplateResponse, encodeUpdateChecklistTemplateRequest, validateUpdateChecklistTemplateRequest, decodeUpdateChecklistTemplateResponse, encodeAddItemToChecklistTemplateRequest, validateAddItemToChecklistTemplateRequest, decodeAddItemToChecklistTemplateResponse, encodeListEmployeeChecklistsRequest, validateListEmployeeChecklistsRequest, decodeListEmployeeChecklistsResponse, encodeGetEmployeeChecklistRequest, validateGetEmployeeChecklistRequest, decodeGetEmployeeChecklistResponse, encodeTriggerChecklistRequest, validateTriggerChecklistRequest, decodeTriggerChecklistResponse, encodeCompleteChecklistItemRequest, validateCompleteChecklistItemRequest, decodeCompleteChecklistItemResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface OnboardingServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class OnboardingServiceClient {
@@ -49,11 +87,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListChecklistTemplatesResponse(await res.json());
+return decodeListChecklistTemplatesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createChecklistTemplate(req: CreateChecklistTemplateRequest): Promise<CreateChecklistTemplateResponse> {
@@ -67,11 +105,11 @@ body: JSON.stringify(encodeCreateChecklistTemplateRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateChecklistTemplateResponse(await res.json());
+return decodeCreateChecklistTemplateResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateChecklistTemplate(req: UpdateChecklistTemplateRequest): Promise<UpdateChecklistTemplateResponse> {
@@ -86,11 +124,11 @@ body: JSON.stringify(encodeUpdateChecklistTemplateRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateChecklistTemplateResponse(await res.json());
+return decodeUpdateChecklistTemplateResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async addItemToChecklistTemplate(req: AddItemToChecklistTemplateRequest): Promise<AddItemToChecklistTemplateResponse> {
@@ -105,11 +143,11 @@ body: JSON.stringify(encodeAddItemToChecklistTemplateRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAddItemToChecklistTemplateResponse(await res.json());
+return decodeAddItemToChecklistTemplateResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listEmployeeChecklists(req: ListEmployeeChecklistsRequest): Promise<ListEmployeeChecklistsResponse> {
@@ -134,11 +172,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListEmployeeChecklistsResponse(await res.json());
+return decodeListEmployeeChecklistsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getEmployeeChecklist(req: GetEmployeeChecklistRequest): Promise<GetEmployeeChecklistResponse> {
@@ -155,11 +193,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetEmployeeChecklistResponse(await res.json());
+return decodeGetEmployeeChecklistResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async triggerChecklist(req: TriggerChecklistRequest): Promise<TriggerChecklistResponse> {
@@ -173,11 +211,11 @@ body: JSON.stringify(encodeTriggerChecklistRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeTriggerChecklistResponse(await res.json());
+return decodeTriggerChecklistResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async completeChecklistItem(req: CompleteChecklistItemRequest): Promise<CompleteChecklistItemResponse> {
@@ -191,11 +229,11 @@ body: JSON.stringify(encodeCompleteChecklistItemRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCompleteChecklistItemResponse(await res.json());
+return decodeCompleteChecklistItemResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

@@ -37,6 +37,13 @@ return out;
 
 export function validateCalendarAppointment(v: CalendarAppointment): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.serviceId !== undefined && v.serviceId !== null && !(typeof v.serviceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.serviceId))) violations.push("service_id has invalid type");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
+if (v.startTime !== undefined && v.startTime !== null && !(typeof v.startTime === "string")) violations.push("start_time has invalid type");
+if (v.endTime !== undefined && v.endTime !== null && !(typeof v.endTime === "string")) violations.push("end_time has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 return violations;
 }
 
@@ -62,6 +69,8 @@ return out;
 
 export function validateCalendarDay(v: CalendarDay): string[] {
 const violations: string[] = [];
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.appointments !== undefined && v.appointments !== null && !(Array.isArray(v.appointments) && (v.appointments).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("appointments has invalid type");
 if (v.appointments !== undefined && v.appointments !== null) for (const item of v.appointments) violations.push(...validateCalendarAppointment(item).map((message) => "appointments: " + message));
 return violations;
 }
@@ -88,7 +97,9 @@ return out;
 
 export function validateGetCalendarRequest(v: GetCalendarRequest): string[] {
 const violations: string[] = [];
+if (v.from !== undefined && v.from !== null && !(typeof v.from === "string")) violations.push("from has invalid type");
 if (!(v.from !== undefined && v.from !== null) || v.from === "") violations.push("from is required");
+if (v.to !== undefined && v.to !== null && !(typeof v.to === "string")) violations.push("to has invalid type");
 if (!(v.to !== undefined && v.to !== null) || v.to === "") violations.push("to is required");
 return violations;
 }
@@ -112,6 +123,7 @@ return out;
 
 export function validateGetCalendarResponse(v: GetCalendarResponse): string[] {
 const violations: string[] = [];
+if (v.days !== undefined && v.days !== null && !(Array.isArray(v.days) && (v.days).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("days has invalid type");
 if (v.days !== undefined && v.days !== null) for (const item of v.days) violations.push(...validateCalendarDay(item).map((message) => "days: " + message));
 return violations;
 }

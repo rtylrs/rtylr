@@ -52,6 +52,18 @@ return out;
 
 export function validateLeaveTypePayload(v: LeaveTypePayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.isPaid !== undefined && v.isPaid !== null && !(typeof v.isPaid === "boolean")) violations.push("is_paid has invalid type");
+if (v.requiresApproval !== undefined && v.requiresApproval !== null && !(typeof v.requiresApproval === "boolean")) violations.push("requires_approval has invalid type");
+if (v.accrualRule !== undefined && v.accrualRule !== null && !(typeof v.accrualRule === "string")) violations.push("accrual_rule has invalid type");
+if (v.maxCarryoverDays !== undefined && v.maxCarryoverDays !== null && !(typeof v.maxCarryoverDays === "number" && Number.isInteger(v.maxCarryoverDays) && v.maxCarryoverDays >= -2147483648 && v.maxCarryoverDays <= 2147483647)) violations.push("max_carryover_days has invalid type");
+if (v.minNoticeDays !== undefined && v.minNoticeDays !== null && !(typeof v.minNoticeDays === "number" && Number.isInteger(v.minNoticeDays) && v.minNoticeDays >= -2147483648 && v.minNoticeDays <= 2147483647)) violations.push("min_notice_days has invalid type");
+if (v.requiresDocumentationAfterDays !== undefined && v.requiresDocumentationAfterDays !== null && !(typeof v.requiresDocumentationAfterDays === "number" && Number.isInteger(v.requiresDocumentationAfterDays) && v.requiresDocumentationAfterDays >= -2147483648 && v.requiresDocumentationAfterDays <= 2147483647)) violations.push("requires_documentation_after_days has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -110,8 +122,21 @@ return out;
 
 export function validateLeaveRequestPayload(v: LeaveRequestPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.leaveTypeId !== undefined && v.leaveTypeId !== null && !(typeof v.leaveTypeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.leaveTypeId))) violations.push("leave_type_id has invalid type");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
+if (v.endDate !== undefined && v.endDate !== null && !(typeof v.endDate === "string")) violations.push("end_date has invalid type");
+if (v.totalDays !== undefined && v.totalDays !== null && !(typeof v.totalDays === "number" && Number.isFinite(v.totalDays))) violations.push("total_days has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.currentApprovalLevel !== undefined && v.currentApprovalLevel !== null && !(typeof v.currentApprovalLevel === "number" && Number.isInteger(v.currentApprovalLevel) && v.currentApprovalLevel >= -2147483648 && v.currentApprovalLevel <= 2147483647)) violations.push("current_approval_level has invalid type");
+if (v.rejectionReason !== undefined && v.rejectionReason !== null && !(typeof v.rejectionReason === "string")) violations.push("rejection_reason has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -164,6 +189,17 @@ return out;
 
 export function validateLeaveBalancePayload(v: LeaveBalancePayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.leaveTypeId !== undefined && v.leaveTypeId !== null && !(typeof v.leaveTypeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.leaveTypeId))) violations.push("leave_type_id has invalid type");
+if (v.year !== undefined && v.year !== null && !(typeof v.year === "number" && Number.isInteger(v.year) && v.year >= -2147483648 && v.year <= 2147483647)) violations.push("year has invalid type");
+if (v.entitledDays !== undefined && v.entitledDays !== null && !(typeof v.entitledDays === "number" && Number.isFinite(v.entitledDays))) violations.push("entitled_days has invalid type");
+if (v.usedDays !== undefined && v.usedDays !== null && !(typeof v.usedDays === "number" && Number.isFinite(v.usedDays))) violations.push("used_days has invalid type");
+if (v.pendingDays !== undefined && v.pendingDays !== null && !(typeof v.pendingDays === "number" && Number.isFinite(v.pendingDays))) violations.push("pending_days has invalid type");
+if (v.remainingDays !== undefined && v.remainingDays !== null && !(typeof v.remainingDays === "number" && Number.isFinite(v.remainingDays))) violations.push("remaining_days has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -189,6 +225,8 @@ return out;
 
 export function validateListLeaveRequestsRequest(v: ListLeaveRequestsRequest): string[] {
 const violations: string[] = [];
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 return violations;
 }
 
@@ -220,7 +258,11 @@ return out;
 
 export function validateListLeaveRequestsResponse(v: ListLeaveRequestsResponse): string[] {
 const violations: string[] = [];
+if (v.requests !== undefined && v.requests !== null && !(Array.isArray(v.requests) && (v.requests).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("requests has invalid type");
 if (v.requests !== undefined && v.requests !== null) for (const item of v.requests) violations.push(...validateLeaveRequestPayload(item).map((message) => "requests: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -258,14 +300,20 @@ return out;
 
 export function validateCreateLeaveRequestRequest(v: CreateLeaveRequestRequest): string[] {
 const violations: string[] = [];
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
 if (!(v.employeeId !== undefined && v.employeeId !== null)) violations.push("employee_id is required");
 if (v.employeeId !== undefined && v.employeeId !== null && !(Number(v.employeeId) > 0)) violations.push("employee_id violates @gt");
+if (v.leaveTypeId !== undefined && v.leaveTypeId !== null && !(typeof v.leaveTypeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.leaveTypeId))) violations.push("leave_type_id has invalid type");
 if (!(v.leaveTypeId !== undefined && v.leaveTypeId !== null)) violations.push("leave_type_id is required");
 if (v.leaveTypeId !== undefined && v.leaveTypeId !== null && !(Number(v.leaveTypeId) > 0)) violations.push("leave_type_id violates @gt");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
 if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+if (v.endDate !== undefined && v.endDate !== null && !(typeof v.endDate === "string")) violations.push("end_date has invalid type");
 if (!(v.endDate !== undefined && v.endDate !== null) || v.endDate === "") violations.push("end_date is required");
+if (v.totalDays !== undefined && v.totalDays !== null && !(typeof v.totalDays === "number" && Number.isFinite(v.totalDays))) violations.push("total_days has invalid type");
 if (!(v.totalDays !== undefined && v.totalDays !== null)) violations.push("total_days is required");
 if (v.totalDays !== undefined && v.totalDays !== null && !(Number(v.totalDays) > 0)) violations.push("total_days violates @gt");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
 return violations;
 }
 
@@ -288,6 +336,7 @@ return out;
 
 export function validateCreateLeaveRequestResponse(v: CreateLeaveRequestResponse): string[] {
 const violations: string[] = [];
+if (v.request !== undefined && v.request !== null && !(typeof v.request === "object" && v.request !== null && !Array.isArray(v.request))) violations.push("request has invalid type");
 if (v.request !== undefined && v.request !== null) violations.push(...validateLeaveRequestPayload(v.request).map((message) => "request: " + message));
 return violations;
 }
@@ -314,6 +363,8 @@ return out;
 
 export function validateApproveLeaveBody(v: ApproveLeaveBody): string[] {
 const violations: string[] = [];
+if (v.approved !== undefined && v.approved !== null && !(typeof v.approved === "boolean")) violations.push("approved has invalid type");
+if (v.rejectionReason !== undefined && v.rejectionReason !== null && !(typeof v.rejectionReason === "string")) violations.push("rejection_reason has invalid type");
 return violations;
 }
 
@@ -339,8 +390,10 @@ return out;
 
 export function validateApproveLeaveRequest(v: ApproveLeaveRequest): string[] {
 const violations: string[] = [];
+if (v.requestId !== undefined && v.requestId !== null && !(typeof v.requestId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.requestId))) violations.push("request_id has invalid type");
 if (!(v.requestId !== undefined && v.requestId !== null)) violations.push("request_id is required");
 if (v.requestId !== undefined && v.requestId !== null && !(Number(v.requestId) > 0)) violations.push("request_id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateApproveLeaveBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -364,6 +417,7 @@ return out;
 
 export function validateApproveLeaveResponse(v: ApproveLeaveResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 
@@ -386,6 +440,7 @@ return out;
 
 export function validateCancelLeaveRequestRequest(v: CancelLeaveRequestRequest): string[] {
 const violations: string[] = [];
+if (v.requestId !== undefined && v.requestId !== null && !(typeof v.requestId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.requestId))) violations.push("request_id has invalid type");
 if (!(v.requestId !== undefined && v.requestId !== null)) violations.push("request_id is required");
 if (v.requestId !== undefined && v.requestId !== null && !(Number(v.requestId) > 0)) violations.push("request_id violates @gt");
 return violations;
@@ -410,6 +465,7 @@ return out;
 
 export function validateCancelLeaveResponse(v: CancelLeaveResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 
@@ -460,7 +516,11 @@ return out;
 
 export function validateListLeaveTypesResponse(v: ListLeaveTypesResponse): string[] {
 const violations: string[] = [];
+if (v.leaveTypes !== undefined && v.leaveTypes !== null && !(Array.isArray(v.leaveTypes) && (v.leaveTypes).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("leave_types has invalid type");
 if (v.leaveTypes !== undefined && v.leaveTypes !== null) for (const item of v.leaveTypes) violations.push(...validateLeaveTypePayload(item).map((message) => "leave_types: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 
@@ -501,11 +561,18 @@ return out;
 
 export function validateCreateLeaveTypeRequest(v: CreateLeaveTypeRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.isPaid !== undefined && v.isPaid !== null && !(typeof v.isPaid === "boolean")) violations.push("is_paid has invalid type");
+if (v.requiresApproval !== undefined && v.requiresApproval !== null && !(typeof v.requiresApproval === "boolean")) violations.push("requires_approval has invalid type");
+if (v.accrualRule !== undefined && v.accrualRule !== null && !(typeof v.accrualRule === "string")) violations.push("accrual_rule has invalid type");
+if (v.maxCarryoverDays !== undefined && v.maxCarryoverDays !== null && !(typeof v.maxCarryoverDays === "number" && Number.isInteger(v.maxCarryoverDays) && v.maxCarryoverDays >= -2147483648 && v.maxCarryoverDays <= 2147483647)) violations.push("max_carryover_days has invalid type");
 if (!(v.maxCarryoverDays !== undefined && v.maxCarryoverDays !== null)) violations.push("max_carryover_days is required");
 if (v.maxCarryoverDays !== undefined && v.maxCarryoverDays !== null && !(Number(v.maxCarryoverDays) > 0)) violations.push("max_carryover_days violates @gt");
+if (v.minNoticeDays !== undefined && v.minNoticeDays !== null && !(typeof v.minNoticeDays === "number" && Number.isInteger(v.minNoticeDays) && v.minNoticeDays >= -2147483648 && v.minNoticeDays <= 2147483647)) violations.push("min_notice_days has invalid type");
 if (!(v.minNoticeDays !== undefined && v.minNoticeDays !== null)) violations.push("min_notice_days is required");
 if (v.minNoticeDays !== undefined && v.minNoticeDays !== null && !(Number(v.minNoticeDays) > 0)) violations.push("min_notice_days violates @gt");
+if (v.requiresDocumentationAfterDays !== undefined && v.requiresDocumentationAfterDays !== null && !(typeof v.requiresDocumentationAfterDays === "number" && Number.isInteger(v.requiresDocumentationAfterDays) && v.requiresDocumentationAfterDays >= -2147483648 && v.requiresDocumentationAfterDays <= 2147483647)) violations.push("requires_documentation_after_days has invalid type");
 return violations;
 }
 
@@ -528,6 +595,7 @@ return out;
 
 export function validateCreateLeaveTypeResponse(v: CreateLeaveTypeResponse): string[] {
 const violations: string[] = [];
+if (v.leaveType !== undefined && v.leaveType !== null && !(typeof v.leaveType === "object" && v.leaveType !== null && !Array.isArray(v.leaveType))) violations.push("leave_type has invalid type");
 if (v.leaveType !== undefined && v.leaveType !== null) violations.push(...validateLeaveTypePayload(v.leaveType).map((message) => "leave_type: " + message));
 return violations;
 }
@@ -572,6 +640,14 @@ return out;
 
 export function validateUpdateLeaveTypeBody(v: UpdateLeaveTypeBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.isPaid !== undefined && v.isPaid !== null && !(typeof v.isPaid === "boolean")) violations.push("is_paid has invalid type");
+if (v.requiresApproval !== undefined && v.requiresApproval !== null && !(typeof v.requiresApproval === "boolean")) violations.push("requires_approval has invalid type");
+if (v.accrualRule !== undefined && v.accrualRule !== null && !(typeof v.accrualRule === "string")) violations.push("accrual_rule has invalid type");
+if (v.maxCarryoverDays !== undefined && v.maxCarryoverDays !== null && !(typeof v.maxCarryoverDays === "number" && Number.isInteger(v.maxCarryoverDays) && v.maxCarryoverDays >= -2147483648 && v.maxCarryoverDays <= 2147483647)) violations.push("max_carryover_days has invalid type");
+if (v.minNoticeDays !== undefined && v.minNoticeDays !== null && !(typeof v.minNoticeDays === "number" && Number.isInteger(v.minNoticeDays) && v.minNoticeDays >= -2147483648 && v.minNoticeDays <= 2147483647)) violations.push("min_notice_days has invalid type");
+if (v.requiresDocumentationAfterDays !== undefined && v.requiresDocumentationAfterDays !== null && !(typeof v.requiresDocumentationAfterDays === "number" && Number.isInteger(v.requiresDocumentationAfterDays) && v.requiresDocumentationAfterDays >= -2147483648 && v.requiresDocumentationAfterDays <= 2147483647)) violations.push("requires_documentation_after_days has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -597,8 +673,10 @@ return out;
 
 export function validateUpdateLeaveTypeRequest(v: UpdateLeaveTypeRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateLeaveTypeBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -622,6 +700,7 @@ return out;
 
 export function validateUpdateLeaveTypeResponse(v: UpdateLeaveTypeResponse): string[] {
 const violations: string[] = [];
+if (v.leaveType !== undefined && v.leaveType !== null && !(typeof v.leaveType === "object" && v.leaveType !== null && !Array.isArray(v.leaveType))) violations.push("leave_type has invalid type");
 if (v.leaveType !== undefined && v.leaveType !== null) violations.push(...validateLeaveTypePayload(v.leaveType).map((message) => "leave_type: " + message));
 return violations;
 }
@@ -648,6 +727,8 @@ return out;
 
 export function validateListLeaveBalancesRequest(v: ListLeaveBalancesRequest): string[] {
 const violations: string[] = [];
+if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
+if (v.year !== undefined && v.year !== null && !(typeof v.year === "number" && Number.isInteger(v.year) && v.year >= -2147483648 && v.year <= 2147483647)) violations.push("year has invalid type");
 return violations;
 }
 
@@ -679,7 +760,11 @@ return out;
 
 export function validateListLeaveBalancesResponse(v: ListLeaveBalancesResponse): string[] {
 const violations: string[] = [];
+if (v.balances !== undefined && v.balances !== null && !(Array.isArray(v.balances) && (v.balances).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("balances has invalid type");
 if (v.balances !== undefined && v.balances !== null) for (const item of v.balances) violations.push(...validateLeaveBalancePayload(item).map((message) => "balances: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 

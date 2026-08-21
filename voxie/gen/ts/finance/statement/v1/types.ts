@@ -53,6 +53,12 @@ return out;
 
 export function validateGetBalanceSheetResponse(v: GetBalanceSheetResponse): string[] {
 const violations: string[] = [];
+if (v.totalAssets !== undefined && v.totalAssets !== null && !(typeof v.totalAssets === "number" && Number.isFinite(v.totalAssets))) violations.push("total_assets has invalid type");
+if (v.totalLiabilities !== undefined && v.totalLiabilities !== null && !(typeof v.totalLiabilities === "number" && Number.isFinite(v.totalLiabilities))) violations.push("total_liabilities has invalid type");
+if (v.totalEquity !== undefined && v.totalEquity !== null && !(typeof v.totalEquity === "number" && Number.isFinite(v.totalEquity))) violations.push("total_equity has invalid type");
+if (v.cashBalance !== undefined && v.cashBalance !== null && !(typeof v.cashBalance === "number" && Number.isFinite(v.cashBalance))) violations.push("cash_balance has invalid type");
+if (v.accountsReceivable !== undefined && v.accountsReceivable !== null && !(typeof v.accountsReceivable === "number" && Number.isFinite(v.accountsReceivable))) violations.push("accounts_receivable has invalid type");
+if (v.accountsPayable !== undefined && v.accountsPayable !== null && !(typeof v.accountsPayable === "number" && Number.isFinite(v.accountsPayable))) violations.push("accounts_payable has invalid type");
 return violations;
 }
 
@@ -75,6 +81,7 @@ return out;
 
 export function validateGetCashFlowRequest(v: GetCashFlowRequest): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
 return violations;
 }
 
@@ -109,6 +116,11 @@ return out;
 
 export function validateGetCashFlowResponse(v: GetCashFlowResponse): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
+if (v.operatingInflow !== undefined && v.operatingInflow !== null && !(typeof v.operatingInflow === "number" && Number.isFinite(v.operatingInflow))) violations.push("operating_inflow has invalid type");
+if (v.operatingOutflow !== undefined && v.operatingOutflow !== null && !(typeof v.operatingOutflow === "number" && Number.isFinite(v.operatingOutflow))) violations.push("operating_outflow has invalid type");
+if (v.netOperating !== undefined && v.netOperating !== null && !(typeof v.netOperating === "number" && Number.isFinite(v.netOperating))) violations.push("net_operating has invalid type");
+if (v.netCashFlow !== undefined && v.netCashFlow !== null && !(typeof v.netCashFlow === "number" && Number.isFinite(v.netCashFlow))) violations.push("net_cash_flow has invalid type");
 return violations;
 }
 

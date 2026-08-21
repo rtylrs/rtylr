@@ -37,6 +37,13 @@ return out;
 
 export function validateUnmatchedBankTransaction(v: UnmatchedBankTransaction): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.bankAccountId !== undefined && v.bankAccountId !== null && !(typeof v.bankAccountId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.bankAccountId))) violations.push("bank_account_id has invalid type");
+if (v.amountMinorUnits !== undefined && v.amountMinorUnits !== null && !(typeof v.amountMinorUnits === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.amountMinorUnits))) violations.push("amount_minor_units has invalid type");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.occurredAt !== undefined && v.occurredAt !== null && !(typeof v.occurredAt === "string")) violations.push("occurred_at has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.externalId !== undefined && v.externalId !== null && !(typeof v.externalId === "string")) violations.push("external_id has invalid type");
 return violations;
 }
 
@@ -77,6 +84,13 @@ return out;
 
 export function validateUnmatchedInvoice(v: UnmatchedInvoice): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.invoiceNumber !== undefined && v.invoiceNumber !== null && !(typeof v.invoiceNumber === "string")) violations.push("invoice_number has invalid type");
+if (v.clientName !== undefined && v.clientName !== null && !(typeof v.clientName === "string")) violations.push("client_name has invalid type");
+if (v.amountMinorUnits !== undefined && v.amountMinorUnits !== null && !(typeof v.amountMinorUnits === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.amountMinorUnits))) violations.push("amount_minor_units has invalid type");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.issueDate !== undefined && v.issueDate !== null && !(typeof v.issueDate === "string")) violations.push("issue_date has invalid type");
+if (v.dueDate !== undefined && v.dueDate !== null && !(typeof v.dueDate === "string")) violations.push("due_date has invalid type");
 return violations;
 }
 
@@ -114,6 +128,12 @@ return out;
 
 export function validateMatchSuggestion(v: MatchSuggestion): string[] {
 const violations: string[] = [];
+if (v.bankFeedId !== undefined && v.bankFeedId !== null && !(typeof v.bankFeedId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.bankFeedId))) violations.push("bank_feed_id has invalid type");
+if (v.targetType !== undefined && v.targetType !== null && !(typeof v.targetType === "string")) violations.push("target_type has invalid type");
+if (v.targetId !== undefined && v.targetId !== null && !(typeof v.targetId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.targetId))) violations.push("target_id has invalid type");
+if (v.amountMinorUnits !== undefined && v.amountMinorUnits !== null && !(typeof v.amountMinorUnits === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.amountMinorUnits))) violations.push("amount_minor_units has invalid type");
+if (v.daysApart !== undefined && v.daysApart !== null && !(typeof v.daysApart === "number" && Number.isInteger(v.daysApart) && v.daysApart >= -2147483648 && v.daysApart <= 2147483647)) violations.push("days_apart has invalid type");
+if (v.score !== undefined && v.score !== null && !(typeof v.score === "number" && Number.isFinite(v.score))) violations.push("score has invalid type");
 return violations;
 }
 
@@ -173,9 +193,16 @@ return out;
 
 export function validateGetOverviewResponse(v: GetOverviewResponse): string[] {
 const violations: string[] = [];
+if (v.unmatchedBankTxns !== undefined && v.unmatchedBankTxns !== null && !(Array.isArray(v.unmatchedBankTxns) && (v.unmatchedBankTxns).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("unmatched_bank_txns has invalid type");
 if (v.unmatchedBankTxns !== undefined && v.unmatchedBankTxns !== null) for (const item of v.unmatchedBankTxns) violations.push(...validateUnmatchedBankTransaction(item).map((message) => "unmatched_bank_txns: " + message));
+if (v.unmatchedInvoices !== undefined && v.unmatchedInvoices !== null && !(Array.isArray(v.unmatchedInvoices) && (v.unmatchedInvoices).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("unmatched_invoices has invalid type");
 if (v.unmatchedInvoices !== undefined && v.unmatchedInvoices !== null) for (const item of v.unmatchedInvoices) violations.push(...validateUnmatchedInvoice(item).map((message) => "unmatched_invoices: " + message));
+if (v.suggestions !== undefined && v.suggestions !== null && !(Array.isArray(v.suggestions) && (v.suggestions).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("suggestions has invalid type");
 if (v.suggestions !== undefined && v.suggestions !== null) for (const item of v.suggestions) violations.push(...validateMatchSuggestion(item).map((message) => "suggestions: " + message));
+if (v.bankTxnsTruncated !== undefined && v.bankTxnsTruncated !== null && !(typeof v.bankTxnsTruncated === "boolean")) violations.push("bank_txns_truncated has invalid type");
+if (v.invoicesTruncated !== undefined && v.invoicesTruncated !== null && !(typeof v.invoicesTruncated === "boolean")) violations.push("invoices_truncated has invalid type");
+if (v.expensesTruncated !== undefined && v.expensesTruncated !== null && !(typeof v.expensesTruncated === "boolean")) violations.push("expenses_truncated has invalid type");
+if (v.previewLimit !== undefined && v.previewLimit !== null && !(typeof v.previewLimit === "number" && Number.isInteger(v.previewLimit) && v.previewLimit >= -2147483648 && v.previewLimit <= 2147483647)) violations.push("preview_limit has invalid type");
 return violations;
 }
 
@@ -204,8 +231,11 @@ return out;
 
 export function validateMatchRequest(v: MatchRequest): string[] {
 const violations: string[] = [];
+if (v.bankFeedId !== undefined && v.bankFeedId !== null && !(typeof v.bankFeedId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.bankFeedId))) violations.push("bank_feed_id has invalid type");
 if (!(v.bankFeedId !== undefined && v.bankFeedId !== null)) violations.push("bank_feed_id is required");
+if (v.targetType !== undefined && v.targetType !== null && !(typeof v.targetType === "string")) violations.push("target_type has invalid type");
 if (!(v.targetType !== undefined && v.targetType !== null) || v.targetType === "") violations.push("target_type is required");
+if (v.targetId !== undefined && v.targetId !== null && !(typeof v.targetId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.targetId))) violations.push("target_id has invalid type");
 if (!(v.targetId !== undefined && v.targetId !== null)) violations.push("target_id is required");
 return violations;
 }
@@ -232,6 +262,8 @@ return out;
 
 export function validateMatchResponse(v: MatchResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

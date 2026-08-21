@@ -25,6 +25,9 @@ return out;
 
 export function validateFeatureResolution(v: FeatureResolution): string[] {
 const violations: string[] = [];
+if (v.key !== undefined && v.key !== null && !(typeof v.key === "string")) violations.push("key has invalid type");
+if (v.enabled !== undefined && v.enabled !== null && !(typeof v.enabled === "boolean")) violations.push("enabled has invalid type");
+if (v.variant !== undefined && v.variant !== null && !(typeof v.variant === "string")) violations.push("variant has invalid type");
 return violations;
 }
 
@@ -62,6 +65,12 @@ return out;
 
 export function validateFeatureFlag(v: FeatureFlag): string[] {
 const violations: string[] = [];
+if (v.key !== undefined && v.key !== null && !(typeof v.key === "string")) violations.push("key has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.enabled !== undefined && v.enabled !== null && !(typeof v.enabled === "boolean")) violations.push("enabled has invalid type");
+if (v.rolloutPercentage !== undefined && v.rolloutPercentage !== null && !(typeof v.rolloutPercentage === "number" && Number.isInteger(v.rolloutPercentage) && v.rolloutPercentage >= -2147483648 && v.rolloutPercentage <= 2147483647)) violations.push("rollout_percentage has invalid type");
+if (v.variantOn !== undefined && v.variantOn !== null && !(typeof v.variantOn === "string")) violations.push("variant_on has invalid type");
+if (v.variantOff !== undefined && v.variantOff !== null && !(typeof v.variantOff === "string")) violations.push("variant_off has invalid type");
 return violations;
 }
 
@@ -93,6 +102,10 @@ return out;
 
 export function validateFeatureTarget(v: FeatureTarget): string[] {
 const violations: string[] = [];
+if (v.featureKey !== undefined && v.featureKey !== null && !(typeof v.featureKey === "string")) violations.push("feature_key has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.enabled !== undefined && v.enabled !== null && !(typeof v.enabled === "boolean")) violations.push("enabled has invalid type");
+if (v.variant !== undefined && v.variant !== null && !(typeof v.variant === "string")) violations.push("variant has invalid type");
 return violations;
 }
 
@@ -121,6 +134,9 @@ return out;
 
 export function validateFeatureCondition(v: FeatureCondition): string[] {
 const violations: string[] = [];
+if (v.attribute !== undefined && v.attribute !== null && !(typeof v.attribute === "string")) violations.push("attribute has invalid type");
+if (v.operator !== undefined && v.operator !== null && !(typeof v.operator === "string")) violations.push("operator has invalid type");
+if (v.value !== undefined && v.value !== null && !(typeof v.value === "string")) violations.push("value has invalid type");
 return violations;
 }
 
@@ -164,6 +180,14 @@ return out;
 
 export function validateFeatureRule(v: FeatureRule): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.featureKey !== undefined && v.featureKey !== null && !(typeof v.featureKey === "string")) violations.push("feature_key has invalid type");
+if (v.priority !== undefined && v.priority !== null && !(typeof v.priority === "number" && Number.isInteger(v.priority) && v.priority >= -2147483648 && v.priority <= 2147483647)) violations.push("priority has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.variant !== undefined && v.variant !== null && !(typeof v.variant === "string")) violations.push("variant has invalid type");
+if (v.rolloutPercentage !== undefined && v.rolloutPercentage !== null && !(typeof v.rolloutPercentage === "number" && Number.isInteger(v.rolloutPercentage) && v.rolloutPercentage >= -2147483648 && v.rolloutPercentage <= 2147483647)) violations.push("rollout_percentage has invalid type");
+if (v.enabled !== undefined && v.enabled !== null && !(typeof v.enabled === "boolean")) violations.push("enabled has invalid type");
+if (v.conditions !== undefined && v.conditions !== null && !(Array.isArray(v.conditions) && (v.conditions).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("conditions has invalid type");
 if (v.conditions !== undefined && v.conditions !== null) for (const item of v.conditions) violations.push(...validateFeatureCondition(item).map((message) => "conditions: " + message));
 return violations;
 }
@@ -206,6 +230,7 @@ return out;
 
 export function validateListFlagsResponse(v: ListFlagsResponse): string[] {
 const violations: string[] = [];
+if (v.flags !== undefined && v.flags !== null && !(Array.isArray(v.flags) && (v.flags).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("flags has invalid type");
 if (v.flags !== undefined && v.flags !== null) for (const item of v.flags) violations.push(...validateFeatureFlag(item).map((message) => "flags: " + message));
 return violations;
 }
@@ -244,7 +269,13 @@ return out;
 
 export function validateUpsertFlagRequest(v: UpsertFlagRequest): string[] {
 const violations: string[] = [];
+if (v.key !== undefined && v.key !== null && !(typeof v.key === "string")) violations.push("key has invalid type");
 if (!(v.key !== undefined && v.key !== null) || v.key === "") violations.push("key is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.enabled !== undefined && v.enabled !== null && !(typeof v.enabled === "boolean")) violations.push("enabled has invalid type");
+if (v.rolloutPercentage !== undefined && v.rolloutPercentage !== null && !(typeof v.rolloutPercentage === "number" && Number.isInteger(v.rolloutPercentage) && v.rolloutPercentage >= -2147483648 && v.rolloutPercentage <= 2147483647)) violations.push("rollout_percentage has invalid type");
+if (v.variantOn !== undefined && v.variantOn !== null && !(typeof v.variantOn === "string")) violations.push("variant_on has invalid type");
+if (v.variantOff !== undefined && v.variantOff !== null && !(typeof v.variantOff === "string")) violations.push("variant_off has invalid type");
 return violations;
 }
 
@@ -267,6 +298,7 @@ return out;
 
 export function validateUpsertFlagResponse(v: UpsertFlagResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -289,6 +321,7 @@ return out;
 
 export function validateDeleteFlagRequest(v: DeleteFlagRequest): string[] {
 const violations: string[] = [];
+if (v.key !== undefined && v.key !== null && !(typeof v.key === "string")) violations.push("key has invalid type");
 if (!(v.key !== undefined && v.key !== null) || v.key === "") violations.push("key is required");
 return violations;
 }
@@ -312,6 +345,7 @@ return out;
 
 export function validateDeleteFlagResponse(v: DeleteFlagResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -337,6 +371,8 @@ return out;
 
 export function validateResolveFeaturesRequest(v: ResolveFeaturesRequest): string[] {
 const violations: string[] = [];
+if (v.subject !== undefined && v.subject !== null && !(typeof v.subject === "string")) violations.push("subject has invalid type");
+if (v.attributes !== undefined && v.attributes !== null && !(typeof v.attributes === "object" && v.attributes !== null && !Array.isArray(v.attributes) && Object.values(v.attributes).every((item: any) => typeof item === "string"))) violations.push("attributes has invalid type");
 return violations;
 }
 
@@ -362,7 +398,9 @@ return out;
 
 export function validateResolveFeaturesResponse(v: ResolveFeaturesResponse): string[] {
 const violations: string[] = [];
+if (v.features !== undefined && v.features !== null && !(typeof v.features === "object" && v.features !== null && !Array.isArray(v.features) && Object.values(v.features).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("features has invalid type");
 if (v.features !== undefined && v.features !== null) for (const item of Object.values(v.features)) violations.push(...validateFeatureResolution(item).map((message) => "features: " + message));
+if (v.variant !== undefined && v.variant !== null && !(typeof v.variant === "string")) violations.push("variant has invalid type");
 return violations;
 }
 
@@ -385,6 +423,7 @@ return out;
 
 export function validateResolveMyFeaturesRequest(v: ResolveMyFeaturesRequest): string[] {
 const violations: string[] = [];
+if (v.attributes !== undefined && v.attributes !== null && !(typeof v.attributes === "object" && v.attributes !== null && !Array.isArray(v.attributes) && Object.values(v.attributes).every((item: any) => typeof item === "string"))) violations.push("attributes has invalid type");
 return violations;
 }
 
@@ -410,7 +449,9 @@ return out;
 
 export function validateResolveMyFeaturesResponse(v: ResolveMyFeaturesResponse): string[] {
 const violations: string[] = [];
+if (v.features !== undefined && v.features !== null && !(typeof v.features === "object" && v.features !== null && !Array.isArray(v.features) && Object.values(v.features).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("features has invalid type");
 if (v.features !== undefined && v.features !== null) for (const item of Object.values(v.features)) violations.push(...validateFeatureResolution(item).map((message) => "features: " + message));
+if (v.variant !== undefined && v.variant !== null && !(typeof v.variant === "string")) violations.push("variant has invalid type");
 return violations;
 }
 
@@ -433,6 +474,7 @@ return out;
 
 export function validateListRulesRequest(v: ListRulesRequest): string[] {
 const violations: string[] = [];
+if (v.featureKey !== undefined && v.featureKey !== null && !(typeof v.featureKey === "string")) violations.push("feature_key has invalid type");
 if (!(v.featureKey !== undefined && v.featureKey !== null) || v.featureKey === "") violations.push("feature_key is required");
 return violations;
 }
@@ -456,6 +498,7 @@ return out;
 
 export function validateListRulesResponse(v: ListRulesResponse): string[] {
 const violations: string[] = [];
+if (v.rules !== undefined && v.rules !== null && !(Array.isArray(v.rules) && (v.rules).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("rules has invalid type");
 if (v.rules !== undefined && v.rules !== null) for (const item of v.rules) violations.push(...validateFeatureRule(item).map((message) => "rules: " + message));
 return violations;
 }
@@ -497,7 +540,14 @@ return out;
 
 export function validateCreateRuleRequest(v: CreateRuleRequest): string[] {
 const violations: string[] = [];
+if (v.featureKey !== undefined && v.featureKey !== null && !(typeof v.featureKey === "string")) violations.push("feature_key has invalid type");
 if (!(v.featureKey !== undefined && v.featureKey !== null) || v.featureKey === "") violations.push("feature_key is required");
+if (v.priority !== undefined && v.priority !== null && !(typeof v.priority === "number" && Number.isInteger(v.priority) && v.priority >= -2147483648 && v.priority <= 2147483647)) violations.push("priority has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.variant !== undefined && v.variant !== null && !(typeof v.variant === "string")) violations.push("variant has invalid type");
+if (v.rolloutPercentage !== undefined && v.rolloutPercentage !== null && !(typeof v.rolloutPercentage === "number" && Number.isInteger(v.rolloutPercentage) && v.rolloutPercentage >= -2147483648 && v.rolloutPercentage <= 2147483647)) violations.push("rollout_percentage has invalid type");
+if (v.enabled !== undefined && v.enabled !== null && !(typeof v.enabled === "boolean")) violations.push("enabled has invalid type");
+if (v.conditions !== undefined && v.conditions !== null && !(Array.isArray(v.conditions) && (v.conditions).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("conditions has invalid type");
 if (v.conditions !== undefined && v.conditions !== null) for (const item of v.conditions) violations.push(...validateFeatureCondition(item).map((message) => "conditions: " + message));
 return violations;
 }
@@ -524,6 +574,8 @@ return out;
 
 export function validateCreateRuleResponse(v: CreateRuleResponse): string[] {
 const violations: string[] = [];
+if (v.ruleId !== undefined && v.ruleId !== null && !(typeof v.ruleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ruleId))) violations.push("rule_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -564,6 +616,13 @@ return out;
 
 export function validateUpdateRuleRequest(v: UpdateRuleRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.priority !== undefined && v.priority !== null && !(typeof v.priority === "number" && Number.isInteger(v.priority) && v.priority >= -2147483648 && v.priority <= 2147483647)) violations.push("priority has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.variant !== undefined && v.variant !== null && !(typeof v.variant === "string")) violations.push("variant has invalid type");
+if (v.rolloutPercentage !== undefined && v.rolloutPercentage !== null && !(typeof v.rolloutPercentage === "number" && Number.isInteger(v.rolloutPercentage) && v.rolloutPercentage >= -2147483648 && v.rolloutPercentage <= 2147483647)) violations.push("rollout_percentage has invalid type");
+if (v.enabled !== undefined && v.enabled !== null && !(typeof v.enabled === "boolean")) violations.push("enabled has invalid type");
+if (v.conditions !== undefined && v.conditions !== null && !(Array.isArray(v.conditions) && (v.conditions).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("conditions has invalid type");
 if (v.conditions !== undefined && v.conditions !== null) for (const item of v.conditions) violations.push(...validateFeatureCondition(item).map((message) => "conditions: " + message));
 return violations;
 }
@@ -587,6 +646,7 @@ return out;
 
 export function validateUpdateRuleResponse(v: UpdateRuleResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -609,6 +669,7 @@ return out;
 
 export function validateDeleteRuleRequest(v: DeleteRuleRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 return violations;
 }
 
@@ -631,6 +692,7 @@ return out;
 
 export function validateDeleteRuleResponse(v: DeleteRuleResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -653,6 +715,7 @@ return out;
 
 export function validateListTargetsRequest(v: ListTargetsRequest): string[] {
 const violations: string[] = [];
+if (v.featureKey !== undefined && v.featureKey !== null && !(typeof v.featureKey === "string")) violations.push("feature_key has invalid type");
 if (!(v.featureKey !== undefined && v.featureKey !== null) || v.featureKey === "") violations.push("feature_key is required");
 return violations;
 }
@@ -676,6 +739,7 @@ return out;
 
 export function validateListTargetsResponse(v: ListTargetsResponse): string[] {
 const violations: string[] = [];
+if (v.targets !== undefined && v.targets !== null && !(Array.isArray(v.targets) && (v.targets).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("targets has invalid type");
 if (v.targets !== undefined && v.targets !== null) for (const item of v.targets) violations.push(...validateFeatureTarget(item).map((message) => "targets: " + message));
 return violations;
 }
@@ -708,7 +772,11 @@ return out;
 
 export function validateUpsertTargetRequest(v: UpsertTargetRequest): string[] {
 const violations: string[] = [];
+if (v.featureKey !== undefined && v.featureKey !== null && !(typeof v.featureKey === "string")) violations.push("feature_key has invalid type");
 if (!(v.featureKey !== undefined && v.featureKey !== null) || v.featureKey === "") violations.push("feature_key is required");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.enabled !== undefined && v.enabled !== null && !(typeof v.enabled === "boolean")) violations.push("enabled has invalid type");
+if (v.variant !== undefined && v.variant !== null && !(typeof v.variant === "string")) violations.push("variant has invalid type");
 return violations;
 }
 
@@ -731,6 +799,7 @@ return out;
 
 export function validateUpsertTargetResponse(v: UpsertTargetResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -756,7 +825,9 @@ return out;
 
 export function validateDeleteTargetRequest(v: DeleteTargetRequest): string[] {
 const violations: string[] = [];
+if (v.featureKey !== undefined && v.featureKey !== null && !(typeof v.featureKey === "string")) violations.push("feature_key has invalid type");
 if (!(v.featureKey !== undefined && v.featureKey !== null) || v.featureKey === "") violations.push("feature_key is required");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
 return violations;
 }
 
@@ -779,6 +850,7 @@ return out;
 
 export function validateDeleteTargetResponse(v: DeleteTargetResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

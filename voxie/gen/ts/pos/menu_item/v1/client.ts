@@ -2,6 +2,42 @@
 import type { ListMenuItemsRequest, ListMenuItemsResponse, ListPublicMenuItemsRequest, ListPublicMenuItemsResponse, CreateMenuItemRequest, CreateMenuItemResponse, UpdateMenuItemRequest, UpdateMenuItemResponse } from "./types";
 import { encodeListMenuItemsRequest, validateListMenuItemsRequest, decodeListMenuItemsResponse, encodeListPublicMenuItemsRequest, validateListPublicMenuItemsRequest, decodeListPublicMenuItemsResponse, encodeCreateMenuItemRequest, validateCreateMenuItemRequest, decodeCreateMenuItemResponse, encodeUpdateMenuItemRequest, validateUpdateMenuItemRequest, decodeUpdateMenuItemResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface MenuItemServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class MenuItemServiceClient {
@@ -46,11 +84,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListMenuItemsResponse(await res.json());
+return decodeListMenuItemsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listPublicMenuItems(req: ListPublicMenuItemsRequest): Promise<ListPublicMenuItemsResponse> {
@@ -72,11 +110,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListPublicMenuItemsResponse(await res.json());
+return decodeListPublicMenuItemsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createMenuItem(req: CreateMenuItemRequest): Promise<CreateMenuItemResponse> {
@@ -90,11 +128,11 @@ body: JSON.stringify(encodeCreateMenuItemRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateMenuItemResponse(await res.json());
+return decodeCreateMenuItemResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateMenuItem(req: UpdateMenuItemRequest): Promise<UpdateMenuItemResponse> {
@@ -109,11 +147,11 @@ body: JSON.stringify(encodeUpdateMenuItemRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateMenuItemResponse(await res.json());
+return decodeUpdateMenuItemResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

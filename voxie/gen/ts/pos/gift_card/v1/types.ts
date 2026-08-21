@@ -55,6 +55,19 @@ return out;
 
 export function validateGiftCard(v: GiftCard): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
+if (v.initialAmount !== undefined && v.initialAmount !== null && !(typeof v.initialAmount === "number" && Number.isFinite(v.initialAmount))) violations.push("initial_amount has invalid type");
+if (v.currentBalance !== undefined && v.currentBalance !== null && !(typeof v.currentBalance === "number" && Number.isFinite(v.currentBalance))) violations.push("current_balance has invalid type");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
+if (v.customerEmail !== undefined && v.customerEmail !== null && !(typeof v.customerEmail === "string")) violations.push("customer_email has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.expiresAt !== undefined && v.expiresAt !== null && !(typeof v.expiresAt === "string")) violations.push("expires_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -89,11 +102,16 @@ return out;
 
 export function validateCreateGiftCardRequest(v: CreateGiftCardRequest): string[] {
 const violations: string[] = [];
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
 if (!(v.code !== undefined && v.code !== null) || v.code === "") violations.push("code is required");
+if (v.initialAmount !== undefined && v.initialAmount !== null && !(typeof v.initialAmount === "number" && Number.isFinite(v.initialAmount))) violations.push("initial_amount has invalid type");
 if (v.initialAmount !== undefined && v.initialAmount !== null && !(Number(v.initialAmount) >= 0)) violations.push("initial_amount violates @gte");
+if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
 if (!(v.customerName !== undefined && v.customerName !== null) || v.customerName === "") violations.push("customer_name is required");
+if (v.customerEmail !== undefined && v.customerEmail !== null && !(typeof v.customerEmail === "string")) violations.push("customer_email has invalid type");
 if (!(v.customerEmail !== undefined && v.customerEmail !== null) || v.customerEmail === "") violations.push("customer_email is required");
 if (v.customerEmail !== undefined && v.customerEmail !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.customerEmail)) violations.push("customer_email must be a valid email");
+if (v.expiresAt !== undefined && v.expiresAt !== null && !(typeof v.expiresAt === "string")) violations.push("expires_at has invalid type");
 if (!(v.expiresAt !== undefined && v.expiresAt !== null) || v.expiresAt === "") violations.push("expires_at is required");
 return violations;
 }
@@ -120,6 +138,8 @@ return out;
 
 export function validateCreateGiftCardResponse(v: CreateGiftCardResponse): string[] {
 const violations: string[] = [];
+if (v.giftCardId !== undefined && v.giftCardId !== null && !(typeof v.giftCardId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.giftCardId))) violations.push("gift_card_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -142,6 +162,7 @@ return out;
 
 export function validateGetGiftCardByCodeRequest(v: GetGiftCardByCodeRequest): string[] {
 const violations: string[] = [];
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
 if (!(v.code !== undefined && v.code !== null) || v.code === "") violations.push("code is required");
 return violations;
 }
@@ -165,6 +186,7 @@ return out;
 
 export function validateGetGiftCardByCodeResponse(v: GetGiftCardByCodeResponse): string[] {
 const violations: string[] = [];
+if (v.giftCard !== undefined && v.giftCard !== null && !(typeof v.giftCard === "object" && v.giftCard !== null && !Array.isArray(v.giftCard))) violations.push("gift_card has invalid type");
 if (v.giftCard !== undefined && v.giftCard !== null) violations.push(...validateGiftCard(v.giftCard).map((message) => "gift_card: " + message));
 return violations;
 }
@@ -207,6 +229,7 @@ return out;
 
 export function validateListGiftCardsResponse(v: ListGiftCardsResponse): string[] {
 const violations: string[] = [];
+if (v.giftCards !== undefined && v.giftCards !== null && !(Array.isArray(v.giftCards) && (v.giftCards).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("gift_cards has invalid type");
 if (v.giftCards !== undefined && v.giftCards !== null) for (const item of v.giftCards) violations.push(...validateGiftCard(item).map((message) => "gift_cards: " + message));
 return violations;
 }
@@ -233,7 +256,9 @@ return out;
 
 export function validateRedeemGiftCardRequest(v: RedeemGiftCardRequest): string[] {
 const violations: string[] = [];
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
 if (!(v.code !== undefined && v.code !== null) || v.code === "") violations.push("code is required");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
 if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) >= 0)) violations.push("amount violates @gte");
 return violations;
 }
@@ -260,7 +285,9 @@ return out;
 
 export function validateRedeemGiftCardResponse(v: RedeemGiftCardResponse): string[] {
 const violations: string[] = [];
+if (v.giftCard !== undefined && v.giftCard !== null && !(typeof v.giftCard === "object" && v.giftCard !== null && !Array.isArray(v.giftCard))) violations.push("gift_card has invalid type");
 if (v.giftCard !== undefined && v.giftCard !== null) violations.push(...validateGiftCard(v.giftCard).map((message) => "gift_card: " + message));
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

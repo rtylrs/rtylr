@@ -38,13 +38,20 @@ return out;
 
 export function validateRecordPaymentRequest(v: RecordPaymentRequest): string[] {
 const violations: string[] = [];
+if (v.invoiceId !== undefined && v.invoiceId !== null && !(typeof v.invoiceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.invoiceId))) violations.push("invoice_id has invalid type");
 if (!(v.invoiceId !== undefined && v.invoiceId !== null)) violations.push("invoice_id is required");
 if (v.invoiceId !== undefined && v.invoiceId !== null && !(Number(v.invoiceId) > 0)) violations.push("invoice_id violates @gt");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
 if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) >= 0)) violations.push("amount violates @gte");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
 if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (v.paymentDate !== undefined && v.paymentDate !== null && !(typeof v.paymentDate === "string")) violations.push("payment_date has invalid type");
 if (!(v.paymentDate !== undefined && v.paymentDate !== null) || v.paymentDate === "") violations.push("payment_date is required");
+if (v.method !== undefined && v.method !== null && !(typeof v.method === "string")) violations.push("method has invalid type");
 if (!(v.method !== undefined && v.method !== null) || v.method === "") violations.push("method is required");
+if (v.reference !== undefined && v.reference !== null && !(typeof v.reference === "string")) violations.push("reference has invalid type");
 if (!(v.reference !== undefined && v.reference !== null) || v.reference === "") violations.push("reference is required");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
 return violations;
 }
 
@@ -70,7 +77,9 @@ return out;
 
 export function validateRecordPaymentResponse(v: RecordPaymentResponse): string[] {
 const violations: string[] = [];
+if (v.payment !== undefined && v.payment !== null && !(typeof v.payment === "object" && v.payment !== null && !Array.isArray(v.payment))) violations.push("payment has invalid type");
 if (v.payment !== undefined && v.payment !== null) violations.push(...finance_invoices_v1.validateRecordPaymentResponsePayload(v.payment).map((message) => "payment: " + message));
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

@@ -43,6 +43,15 @@ return out;
 
 export function validateUser(v: User): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.fullName !== undefined && v.fullName !== null && !(typeof v.fullName === "string")) violations.push("full_name has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "number" && Number.isSafeInteger(v.businessId) && v.businessId >= Number.MIN_SAFE_INTEGER && v.businessId <= Number.MAX_SAFE_INTEGER)) violations.push("business_id has invalid type");
+if (v.isConsoleAdmin !== undefined && v.isConsoleAdmin !== null && !(typeof v.isConsoleAdmin === "boolean")) violations.push("is_console_admin has invalid type");
+if (v.isBanned !== undefined && v.isBanned !== null && !(typeof v.isBanned === "boolean")) violations.push("is_banned has invalid type");
+if (v.banReason !== undefined && v.banReason !== null && !(typeof v.banReason === "string")) violations.push("ban_reason has invalid type");
+if (v.bannedAt !== undefined && v.bannedAt !== null && !(typeof v.bannedAt === "string")) violations.push("banned_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -77,6 +86,11 @@ return out;
 
 export function validateBusiness(v: Business): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "number" && Number.isSafeInteger(v.ownerId) && v.ownerId >= Number.MIN_SAFE_INTEGER && v.ownerId <= Number.MAX_SAFE_INTEGER)) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.slug !== undefined && v.slug !== null && !(typeof v.slug === "string")) violations.push("slug has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -162,6 +176,28 @@ return out;
 
 export function validateSubscription(v: Subscription): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "number" && Number.isSafeInteger(v.ownerId) && v.ownerId >= Number.MIN_SAFE_INTEGER && v.ownerId <= Number.MAX_SAFE_INTEGER)) violations.push("owner_id has invalid type");
+if (v.ownerName !== undefined && v.ownerName !== null && !(typeof v.ownerName === "string")) violations.push("owner_name has invalid type");
+if (v.ownerEmail !== undefined && v.ownerEmail !== null && !(typeof v.ownerEmail === "string")) violations.push("owner_email has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "number" && Number.isSafeInteger(v.businessId) && v.businessId >= Number.MIN_SAFE_INTEGER && v.businessId <= Number.MAX_SAFE_INTEGER)) violations.push("business_id has invalid type");
+if (v.businessName !== undefined && v.businessName !== null && !(typeof v.businessName === "string")) violations.push("business_name has invalid type");
+if (v.planId !== undefined && v.planId !== null && !(typeof v.planId === "number" && Number.isSafeInteger(v.planId) && v.planId >= Number.MIN_SAFE_INTEGER && v.planId <= Number.MAX_SAFE_INTEGER)) violations.push("plan_id has invalid type");
+if (v.planName !== undefined && v.planName !== null && !(typeof v.planName === "string")) violations.push("plan_name has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.seatCount !== undefined && v.seatCount !== null && !(typeof v.seatCount === "number" && Number.isInteger(v.seatCount) && v.seatCount >= -2147483648 && v.seatCount <= 2147483647)) violations.push("seat_count has invalid type");
+if (v.activeSeatCount !== undefined && v.activeSeatCount !== null && !(typeof v.activeSeatCount === "number" && Number.isInteger(v.activeSeatCount) && v.activeSeatCount >= -2147483648 && v.activeSeatCount <= 2147483647)) violations.push("active_seat_count has invalid type");
+if (v.includedSeatLimit !== undefined && v.includedSeatLimit !== null && !(typeof v.includedSeatLimit === "number" && Number.isInteger(v.includedSeatLimit) && v.includedSeatLimit >= -2147483648 && v.includedSeatLimit <= 2147483647)) violations.push("included_seat_limit has invalid type");
+if (v.includedSeatCount !== undefined && v.includedSeatCount !== null && !(typeof v.includedSeatCount === "number" && Number.isInteger(v.includedSeatCount) && v.includedSeatCount >= -2147483648 && v.includedSeatCount <= 2147483647)) violations.push("included_seat_count has invalid type");
+if (v.billableSeatCount !== undefined && v.billableSeatCount !== null && !(typeof v.billableSeatCount === "number" && Number.isInteger(v.billableSeatCount) && v.billableSeatCount >= -2147483648 && v.billableSeatCount <= 2147483647)) violations.push("billable_seat_count has invalid type");
+if (v.trialEndsAt !== undefined && v.trialEndsAt !== null && !(typeof v.trialEndsAt === "string")) violations.push("trial_ends_at has invalid type");
+if (v.nextBillingDate !== undefined && v.nextBillingDate !== null && !(typeof v.nextBillingDate === "string")) violations.push("next_billing_date has invalid type");
+if (v.currentPeriodEndsAt !== undefined && v.currentPeriodEndsAt !== null && !(typeof v.currentPeriodEndsAt === "string")) violations.push("current_period_ends_at has invalid type");
+if (v.paddleSubscriptionId !== undefined && v.paddleSubscriptionId !== null && !(typeof v.paddleSubscriptionId === "string")) violations.push("paddle_subscription_id has invalid type");
+if (v.paddleCustomerId !== undefined && v.paddleCustomerId !== null && !(typeof v.paddleCustomerId === "string")) violations.push("paddle_customer_id has invalid type");
+if (v.daysRemaining !== undefined && v.daysRemaining !== null && !(typeof v.daysRemaining === "number" && Number.isInteger(v.daysRemaining) && v.daysRemaining >= -2147483648 && v.daysRemaining <= 2147483647)) violations.push("days_remaining has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -199,6 +235,12 @@ return out;
 
 export function validatePlan(v: Plan): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.pricePerSeatCents !== undefined && v.pricePerSeatCents !== null && !(typeof v.pricePerSeatCents === "number" && Number.isInteger(v.pricePerSeatCents) && v.pricePerSeatCents >= -2147483648 && v.pricePerSeatCents <= 2147483647)) violations.push("price_per_seat_cents has invalid type");
+if (v.annualPricePerSeatCents !== undefined && v.annualPricePerSeatCents !== null && !(typeof v.annualPricePerSeatCents === "number" && Number.isInteger(v.annualPricePerSeatCents) && v.annualPricePerSeatCents >= -2147483648 && v.annualPricePerSeatCents <= 2147483647)) violations.push("annual_price_per_seat_cents has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -239,6 +281,13 @@ return out;
 
 export function validateStats(v: Stats): string[] {
 const violations: string[] = [];
+if (v.totalUsers !== undefined && v.totalUsers !== null && !(typeof v.totalUsers === "number" && Number.isSafeInteger(v.totalUsers) && v.totalUsers >= Number.MIN_SAFE_INTEGER && v.totalUsers <= Number.MAX_SAFE_INTEGER)) violations.push("total_users has invalid type");
+if (v.bannedUsers !== undefined && v.bannedUsers !== null && !(typeof v.bannedUsers === "number" && Number.isSafeInteger(v.bannedUsers) && v.bannedUsers >= Number.MIN_SAFE_INTEGER && v.bannedUsers <= Number.MAX_SAFE_INTEGER)) violations.push("banned_users has invalid type");
+if (v.activeSubscriptions !== undefined && v.activeSubscriptions !== null && !(typeof v.activeSubscriptions === "number" && Number.isSafeInteger(v.activeSubscriptions) && v.activeSubscriptions >= Number.MIN_SAFE_INTEGER && v.activeSubscriptions <= Number.MAX_SAFE_INTEGER)) violations.push("active_subscriptions has invalid type");
+if (v.totalBusinesses !== undefined && v.totalBusinesses !== null && !(typeof v.totalBusinesses === "number" && Number.isSafeInteger(v.totalBusinesses) && v.totalBusinesses >= Number.MIN_SAFE_INTEGER && v.totalBusinesses <= Number.MAX_SAFE_INTEGER)) violations.push("total_businesses has invalid type");
+if (v.totalGrants !== undefined && v.totalGrants !== null && !(typeof v.totalGrants === "number" && Number.isSafeInteger(v.totalGrants) && v.totalGrants >= Number.MIN_SAFE_INTEGER && v.totalGrants <= Number.MAX_SAFE_INTEGER)) violations.push("total_grants has invalid type");
+if (v.manualAddonGrants !== undefined && v.manualAddonGrants !== null && !(typeof v.manualAddonGrants === "number" && Number.isSafeInteger(v.manualAddonGrants) && v.manualAddonGrants >= Number.MIN_SAFE_INTEGER && v.manualAddonGrants <= Number.MAX_SAFE_INTEGER)) violations.push("manual_addon_grants has invalid type");
+if (v.consoleAdmins !== undefined && v.consoleAdmins !== null && !(typeof v.consoleAdmins === "number" && Number.isSafeInteger(v.consoleAdmins) && v.consoleAdmins >= Number.MIN_SAFE_INTEGER && v.consoleAdmins <= Number.MAX_SAFE_INTEGER)) violations.push("console_admins has invalid type");
 return violations;
 }
 
@@ -280,6 +329,7 @@ return out;
 
 export function validateGetStatsResponse(v: GetStatsResponse): string[] {
 const violations: string[] = [];
+if (v.stats !== undefined && v.stats !== null && !(typeof v.stats === "object" && v.stats !== null && !Array.isArray(v.stats))) violations.push("stats has invalid type");
 if (v.stats !== undefined && v.stats !== null) violations.push(...validateStats(v.stats).map((message) => "stats: " + message));
 return violations;
 }
@@ -315,6 +365,11 @@ return out;
 
 export function validateListUsersRequest(v: ListUsersRequest): string[] {
 const violations: string[] = [];
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 return violations;
 }
 
@@ -340,7 +395,9 @@ return out;
 
 export function validateListUsersResponse(v: ListUsersResponse): string[] {
 const violations: string[] = [];
+if (v.users !== undefined && v.users !== null && !(Array.isArray(v.users) && (v.users).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("users has invalid type");
 if (v.users !== undefined && v.users !== null) for (const item of v.users) violations.push(...validateUser(item).map((message) => "users: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
 return violations;
 }
 
@@ -363,6 +420,7 @@ return out;
 
 export function validateGetUserRequest(v: GetUserRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -386,6 +444,7 @@ return out;
 
 export function validateGetUserResponse(v: GetUserResponse): string[] {
 const violations: string[] = [];
+if (v.user !== undefined && v.user !== null && !(typeof v.user === "object" && v.user !== null && !Array.isArray(v.user))) violations.push("user has invalid type");
 if (v.user !== undefined && v.user !== null) violations.push(...validateUser(v.user).map((message) => "user: " + message));
 return violations;
 }
@@ -418,7 +477,11 @@ return out;
 
 export function validateCreateUserRequest(v: CreateUserRequest): string[] {
 const violations: string[] = [];
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (v.password !== undefined && v.password !== null && !(typeof v.password === "string")) violations.push("password has invalid type");
+if (v.fullName !== undefined && v.fullName !== null && !(typeof v.fullName === "string")) violations.push("full_name has invalid type");
+if (v.isConsoleAdmin !== undefined && v.isConsoleAdmin !== null && !(typeof v.isConsoleAdmin === "boolean")) violations.push("is_console_admin has invalid type");
 return violations;
 }
 
@@ -444,7 +507,9 @@ return out;
 
 export function validateCreateUserResponse(v: CreateUserResponse): string[] {
 const violations: string[] = [];
+if (v.user !== undefined && v.user !== null && !(typeof v.user === "object" && v.user !== null && !Array.isArray(v.user))) violations.push("user has invalid type");
 if (v.user !== undefined && v.user !== null) violations.push(...validateUser(v.user).map((message) => "user: " + message));
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -473,7 +538,10 @@ return out;
 
 export function validateUpdateUserRequest(v: UpdateUserRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.fullName !== undefined && v.fullName !== null && !(typeof v.fullName === "string")) violations.push("full_name has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 return violations;
 }
 
@@ -496,6 +564,7 @@ return out;
 
 export function validateUpdateUserResponse(v: UpdateUserResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -518,6 +587,7 @@ return out;
 
 export function validateDeleteUserRequest(v: DeleteUserRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -541,6 +611,7 @@ return out;
 
 export function validateDeleteUserResponse(v: DeleteUserResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -566,7 +637,9 @@ return out;
 
 export function validateBanUserRequest(v: BanUserRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.reason !== undefined && v.reason !== null && !(typeof v.reason === "string")) violations.push("reason has invalid type");
 return violations;
 }
 
@@ -589,6 +662,7 @@ return out;
 
 export function validateBanUserResponse(v: BanUserResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -611,6 +685,7 @@ return out;
 
 export function validateUnbanUserRequest(v: UnbanUserRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -634,6 +709,7 @@ return out;
 
 export function validateUnbanUserResponse(v: UnbanUserResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -659,7 +735,9 @@ return out;
 
 export function validateSetConsoleAdminRequest(v: SetConsoleAdminRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.isConsoleAdmin !== undefined && v.isConsoleAdmin !== null && !(typeof v.isConsoleAdmin === "boolean")) violations.push("is_console_admin has invalid type");
 return violations;
 }
 
@@ -682,6 +760,7 @@ return out;
 
 export function validateSetConsoleAdminResponse(v: SetConsoleAdminResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -704,6 +783,7 @@ return out;
 
 export function validateGetUserSubscriptionRequest(v: GetUserSubscriptionRequest): string[] {
 const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "number" && Number.isSafeInteger(v.userId) && v.userId >= Number.MIN_SAFE_INTEGER && v.userId <= Number.MAX_SAFE_INTEGER)) violations.push("user_id has invalid type");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
 return violations;
 }
@@ -727,6 +807,7 @@ return out;
 
 export function validateGetUserSubscriptionResponse(v: GetUserSubscriptionResponse): string[] {
 const violations: string[] = [];
+if (v.subscription !== undefined && v.subscription !== null && !(typeof v.subscription === "object" && v.subscription !== null && !Array.isArray(v.subscription))) violations.push("subscription has invalid type");
 if (v.subscription !== undefined && v.subscription !== null) violations.push(...validateSubscription(v.subscription).map((message) => "subscription: " + message));
 return violations;
 }
@@ -762,6 +843,11 @@ return out;
 
 export function validateListBusinessesRequest(v: ListBusinessesRequest): string[] {
 const violations: string[] = [];
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "number" && Number.isSafeInteger(v.ownerId) && v.ownerId >= Number.MIN_SAFE_INTEGER && v.ownerId <= Number.MAX_SAFE_INTEGER)) violations.push("owner_id has invalid type");
 return violations;
 }
 
@@ -787,7 +873,9 @@ return out;
 
 export function validateListBusinessesResponse(v: ListBusinessesResponse): string[] {
 const violations: string[] = [];
+if (v.businesses !== undefined && v.businesses !== null && !(Array.isArray(v.businesses) && (v.businesses).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("businesses has invalid type");
 if (v.businesses !== undefined && v.businesses !== null) for (const item of v.businesses) violations.push(...validateBusiness(item).map((message) => "businesses: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
 return violations;
 }
 
@@ -813,7 +901,9 @@ return out;
 
 export function validateUpdateBusinessRequest(v: UpdateBusinessRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 return violations;
 }
 
@@ -836,6 +926,7 @@ return out;
 
 export function validateUpdateBusinessResponse(v: UpdateBusinessResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -858,6 +949,7 @@ return out;
 
 export function validateDeleteBusinessRequest(v: DeleteBusinessRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -881,6 +973,7 @@ return out;
 
 export function validateDeleteBusinessResponse(v: DeleteBusinessResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -936,7 +1029,19 @@ return out;
 
 export function validateCreateBusinessOwnerRequest(v: CreateBusinessOwnerRequest): string[] {
 const violations: string[] = [];
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (v.password !== undefined && v.password !== null && !(typeof v.password === "string")) violations.push("password has invalid type");
+if (v.fullName !== undefined && v.fullName !== null && !(typeof v.fullName === "string")) violations.push("full_name has invalid type");
+if (v.businessName !== undefined && v.businessName !== null && !(typeof v.businessName === "string")) violations.push("business_name has invalid type");
+if (v.industry !== undefined && v.industry !== null && !(typeof v.industry === "string")) violations.push("industry has invalid type");
+if (v.country !== undefined && v.country !== null && !(typeof v.country === "string")) violations.push("country has invalid type");
+if (v.timezone !== undefined && v.timezone !== null && !(typeof v.timezone === "string")) violations.push("timezone has invalid type");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.grantPlan !== undefined && v.grantPlan !== null && !(typeof v.grantPlan === "boolean")) violations.push("grant_plan has invalid type");
+if (v.planId !== undefined && v.planId !== null && !(typeof v.planId === "number" && Number.isSafeInteger(v.planId) && v.planId >= Number.MIN_SAFE_INTEGER && v.planId <= Number.MAX_SAFE_INTEGER)) violations.push("plan_id has invalid type");
+if (v.subscriptionStatus !== undefined && v.subscriptionStatus !== null && !(typeof v.subscriptionStatus === "string")) violations.push("subscription_status has invalid type");
+if (v.grantDays !== undefined && v.grantDays !== null && !(typeof v.grantDays === "number" && Number.isInteger(v.grantDays) && v.grantDays >= -2147483648 && v.grantDays <= 2147483647)) violations.push("grant_days has invalid type");
 return violations;
 }
 
@@ -968,9 +1073,13 @@ return out;
 
 export function validateCreateBusinessOwnerResponse(v: CreateBusinessOwnerResponse): string[] {
 const violations: string[] = [];
+if (v.owner !== undefined && v.owner !== null && !(typeof v.owner === "object" && v.owner !== null && !Array.isArray(v.owner))) violations.push("owner has invalid type");
 if (v.owner !== undefined && v.owner !== null) violations.push(...validateUser(v.owner).map((message) => "owner: " + message));
+if (v.business !== undefined && v.business !== null && !(typeof v.business === "object" && v.business !== null && !Array.isArray(v.business))) violations.push("business has invalid type");
 if (v.business !== undefined && v.business !== null) violations.push(...validateBusiness(v.business).map((message) => "business: " + message));
+if (v.subscription !== undefined && v.subscription !== null && !(typeof v.subscription === "object" && v.subscription !== null && !Array.isArray(v.subscription))) violations.push("subscription has invalid type");
 if (v.subscription !== undefined && v.subscription !== null) violations.push(...validateSubscription(v.subscription).map((message) => "subscription: " + message));
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -999,6 +1108,9 @@ return out;
 
 export function validateListSubscriptionsRequest(v: ListSubscriptionsRequest): string[] {
 const violations: string[] = [];
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 return violations;
 }
 
@@ -1024,7 +1136,9 @@ return out;
 
 export function validateListSubscriptionsResponse(v: ListSubscriptionsResponse): string[] {
 const violations: string[] = [];
+if (v.subscriptions !== undefined && v.subscriptions !== null && !(Array.isArray(v.subscriptions) && (v.subscriptions).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("subscriptions has invalid type");
 if (v.subscriptions !== undefined && v.subscriptions !== null) for (const item of v.subscriptions) violations.push(...validateSubscription(item).map((message) => "subscriptions: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
 return violations;
 }
 
@@ -1074,8 +1188,18 @@ return out;
 
 export function validateUpsertSubscriptionRequest(v: UpsertSubscriptionRequest): string[] {
 const violations: string[] = [];
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "number" && Number.isSafeInteger(v.ownerId) && v.ownerId >= Number.MIN_SAFE_INTEGER && v.ownerId <= Number.MAX_SAFE_INTEGER)) violations.push("owner_id has invalid type");
 if (v.ownerId !== undefined && v.ownerId !== null && !(Number(v.ownerId) > 0)) violations.push("owner_id violates @gt");
+if (v.planId !== undefined && v.planId !== null && !(typeof v.planId === "number" && Number.isSafeInteger(v.planId) && v.planId >= Number.MIN_SAFE_INTEGER && v.planId <= Number.MAX_SAFE_INTEGER)) violations.push("plan_id has invalid type");
 if (v.planId !== undefined && v.planId !== null && !(Number(v.planId) > 0)) violations.push("plan_id violates @gt");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.seatCount !== undefined && v.seatCount !== null && !(typeof v.seatCount === "number" && Number.isInteger(v.seatCount) && v.seatCount >= -2147483648 && v.seatCount <= 2147483647)) violations.push("seat_count has invalid type");
+if (v.trialEndsAt !== undefined && v.trialEndsAt !== null && !(typeof v.trialEndsAt === "string")) violations.push("trial_ends_at has invalid type");
+if (v.nextBillingDate !== undefined && v.nextBillingDate !== null && !(typeof v.nextBillingDate === "string")) violations.push("next_billing_date has invalid type");
+if (v.currentPeriodEndsAt !== undefined && v.currentPeriodEndsAt !== null && !(typeof v.currentPeriodEndsAt === "string")) violations.push("current_period_ends_at has invalid type");
+if (v.totalDays !== undefined && v.totalDays !== null && !(typeof v.totalDays === "number" && Number.isInteger(v.totalDays) && v.totalDays >= -2147483648 && v.totalDays <= 2147483647)) violations.push("total_days has invalid type");
+if (v.paddleSubscriptionId !== undefined && v.paddleSubscriptionId !== null && !(typeof v.paddleSubscriptionId === "string")) violations.push("paddle_subscription_id has invalid type");
+if (v.paddleCustomerId !== undefined && v.paddleCustomerId !== null && !(typeof v.paddleCustomerId === "string")) violations.push("paddle_customer_id has invalid type");
 return violations;
 }
 
@@ -1098,6 +1222,7 @@ return out;
 
 export function validateUpsertSubscriptionResponse(v: UpsertSubscriptionResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -1120,6 +1245,7 @@ return out;
 
 export function validateDeleteSubscriptionRequest(v: DeleteSubscriptionRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
 }
@@ -1143,6 +1269,7 @@ return out;
 
 export function validateDeleteSubscriptionResponse(v: DeleteSubscriptionResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -1184,6 +1311,7 @@ return out;
 
 export function validateListPlansResponse(v: ListPlansResponse): string[] {
 const violations: string[] = [];
+if (v.plans !== undefined && v.plans !== null && !(Array.isArray(v.plans) && (v.plans).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("plans has invalid type");
 if (v.plans !== undefined && v.plans !== null) for (const item of v.plans) violations.push(...validatePlan(item).map((message) => "plans: " + message));
 return violations;
 }
@@ -1219,7 +1347,12 @@ return out;
 
 export function validateUpdatePlanRequest(v: UpdatePlanRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "number" && Number.isSafeInteger(v.id) && v.id >= Number.MIN_SAFE_INTEGER && v.id <= Number.MAX_SAFE_INTEGER)) violations.push("id has invalid type");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.pricePerSeatCents !== undefined && v.pricePerSeatCents !== null && !(typeof v.pricePerSeatCents === "number" && Number.isInteger(v.pricePerSeatCents) && v.pricePerSeatCents >= -2147483648 && v.pricePerSeatCents <= 2147483647)) violations.push("price_per_seat_cents has invalid type");
+if (v.annualPricePerSeatCents !== undefined && v.annualPricePerSeatCents !== null && !(typeof v.annualPricePerSeatCents === "number" && Number.isInteger(v.annualPricePerSeatCents) && v.annualPricePerSeatCents >= -2147483648 && v.annualPricePerSeatCents <= 2147483647)) violations.push("annual_price_per_seat_cents has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -1242,6 +1375,7 @@ return out;
 
 export function validateUpdatePlanResponse(v: UpdatePlanResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

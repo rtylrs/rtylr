@@ -25,9 +25,12 @@ return out;
 
 export function validateProcessPaymentRequest(v: ProcessPaymentRequest): string[] {
 const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
 if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (v.paymentMethod !== undefined && v.paymentMethod !== null && !(typeof v.paymentMethod === "string")) violations.push("payment_method has invalid type");
 if (!(v.paymentMethod !== undefined && v.paymentMethod !== null) || v.paymentMethod === "") violations.push("payment_method is required");
+if (v.amountPaid !== undefined && v.amountPaid !== null && !(typeof v.amountPaid === "number" && Number.isFinite(v.amountPaid))) violations.push("amount_paid has invalid type");
 if (!(v.amountPaid !== undefined && v.amountPaid !== null)) violations.push("amount_paid is required");
 if (v.amountPaid !== undefined && v.amountPaid !== null && !(Number(v.amountPaid) > 0)) violations.push("amount_paid violates @gt");
 return violations;
@@ -52,6 +55,7 @@ return out;
 
 export function validateProcessPaymentResponse(v: ProcessPaymentResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

@@ -2,6 +2,42 @@
 import type { ListMenuRequest, ListMenuResponse, UpdateMenuRequest, UpdateMenuResponse, ListMenuBannersRequest, ListMenuBannersResponse, CreateMenuBannerRequest, CreateMenuBannerResponse, UpdateMenuBannerRequest, UpdateMenuBannerResponse, DeleteMenuBannerRequest, DeleteMenuBannerResponse } from "./types";
 import { encodeListMenuRequest, validateListMenuRequest, decodeListMenuResponse, encodeUpdateMenuRequest, validateUpdateMenuRequest, decodeUpdateMenuResponse, encodeListMenuBannersRequest, validateListMenuBannersRequest, decodeListMenuBannersResponse, encodeCreateMenuBannerRequest, validateCreateMenuBannerRequest, decodeCreateMenuBannerResponse, encodeUpdateMenuBannerRequest, validateUpdateMenuBannerRequest, decodeUpdateMenuBannerResponse, encodeDeleteMenuBannerRequest, validateDeleteMenuBannerRequest, decodeDeleteMenuBannerResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface MenuServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class MenuServiceClient {
@@ -46,11 +84,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListMenuResponse(await res.json());
+return decodeListMenuResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateMenu(req: UpdateMenuRequest): Promise<UpdateMenuResponse> {
@@ -64,11 +102,11 @@ body: JSON.stringify(encodeUpdateMenuRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateMenuResponse(await res.json());
+return decodeUpdateMenuResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listMenuBanners(req: ListMenuBannersRequest): Promise<ListMenuBannersResponse> {
@@ -84,11 +122,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListMenuBannersResponse(await res.json());
+return decodeListMenuBannersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createMenuBanner(req: CreateMenuBannerRequest): Promise<CreateMenuBannerResponse> {
@@ -102,11 +140,11 @@ body: JSON.stringify(encodeCreateMenuBannerRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateMenuBannerResponse(await res.json());
+return decodeCreateMenuBannerResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateMenuBanner(req: UpdateMenuBannerRequest): Promise<UpdateMenuBannerResponse> {
@@ -121,11 +159,11 @@ body: JSON.stringify(encodeUpdateMenuBannerRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateMenuBannerResponse(await res.json());
+return decodeUpdateMenuBannerResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteMenuBanner(req: DeleteMenuBannerRequest): Promise<DeleteMenuBannerResponse> {
@@ -142,11 +180,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteMenuBannerResponse(await res.json());
+return decodeDeleteMenuBannerResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

@@ -40,6 +40,14 @@ return out;
 
 export function validateTaxConfig(v: TaxConfig): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.taxName !== undefined && v.taxName !== null && !(typeof v.taxName === "string")) violations.push("tax_name has invalid type");
+if (v.taxRate !== undefined && v.taxRate !== null && !(typeof v.taxRate === "number" && Number.isFinite(v.taxRate))) violations.push("tax_rate has invalid type");
+if (v.isInclusive !== undefined && v.isInclusive !== null && !(typeof v.isInclusive === "boolean")) violations.push("is_inclusive has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -81,6 +89,7 @@ return out;
 
 export function validateGetTaxConfigResponse(v: GetTaxConfigResponse): string[] {
 const violations: string[] = [];
+if (v.config !== undefined && v.config !== null && !(typeof v.config === "object" && v.config !== null && !Array.isArray(v.config))) violations.push("config has invalid type");
 if (v.config !== undefined && v.config !== null) violations.push(...validateTaxConfig(v.config).map((message) => "config: " + message));
 return violations;
 }
@@ -113,8 +122,12 @@ return out;
 
 export function validateUpdateTaxConfigRequest(v: UpdateTaxConfigRequest): string[] {
 const violations: string[] = [];
+if (v.taxName !== undefined && v.taxName !== null && !(typeof v.taxName === "string")) violations.push("tax_name has invalid type");
 if (!(v.taxName !== undefined && v.taxName !== null) || v.taxName === "") violations.push("tax_name is required");
+if (v.taxRate !== undefined && v.taxRate !== null && !(typeof v.taxRate === "number" && Number.isFinite(v.taxRate))) violations.push("tax_rate has invalid type");
 if (v.taxRate !== undefined && v.taxRate !== null && !(Number(v.taxRate) >= 0)) violations.push("tax_rate violates @gte");
+if (v.isInclusive !== undefined && v.isInclusive !== null && !(typeof v.isInclusive === "boolean")) violations.push("is_inclusive has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -137,6 +150,7 @@ return out;
 
 export function validateUpdateTaxConfigResponse(v: UpdateTaxConfigResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -187,6 +201,10 @@ return out;
 
 export function validateGetPLReportResponse(v: GetPLReportResponse): string[] {
 const violations: string[] = [];
+if (v.totalRevenue !== undefined && v.totalRevenue !== null && !(typeof v.totalRevenue === "number" && Number.isFinite(v.totalRevenue))) violations.push("total_revenue has invalid type");
+if (v.totalExpenses !== undefined && v.totalExpenses !== null && !(typeof v.totalExpenses === "number" && Number.isFinite(v.totalExpenses))) violations.push("total_expenses has invalid type");
+if (v.grossProfit !== undefined && v.grossProfit !== null && !(typeof v.grossProfit === "number" && Number.isFinite(v.grossProfit))) violations.push("gross_profit has invalid type");
+if (v.netProfit !== undefined && v.netProfit !== null && !(typeof v.netProfit === "number" && Number.isFinite(v.netProfit))) violations.push("net_profit has invalid type");
 return violations;
 }
 

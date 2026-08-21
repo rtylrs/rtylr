@@ -58,6 +58,20 @@ return out;
 
 export function validateBusiness(v: Business): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.logoUrl !== undefined && v.logoUrl !== null && !(typeof v.logoUrl === "string")) violations.push("logo_url has invalid type");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.phone !== undefined && v.phone !== null && !(typeof v.phone === "string")) violations.push("phone has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.website !== undefined && v.website !== null && !(typeof v.website === "string")) violations.push("website has invalid type");
+if (v.timezone !== undefined && v.timezone !== null && !(typeof v.timezone === "string")) violations.push("timezone has invalid type");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.country !== undefined && v.country !== null && !(typeof v.country === "string")) violations.push("country has invalid type");
+if (v.plan !== undefined && v.plan !== null && !(typeof v.plan === "string")) violations.push("plan has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.slug !== undefined && v.slug !== null && !(typeof v.slug === "string")) violations.push("slug has invalid type");
 return violations;
 }
 
@@ -95,6 +109,12 @@ return out;
 
 export function validateBusinessEntry(v: BusinessEntry): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.logoUrl !== undefined && v.logoUrl !== null && !(typeof v.logoUrl === "string")) violations.push("logo_url has invalid type");
+if (v.parentId !== undefined && v.parentId !== null && !(typeof v.parentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.parentId))) violations.push("parent_id has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.isOwned !== undefined && v.isOwned !== null && !(typeof v.isOwned === "boolean")) violations.push("is_owned has invalid type");
 return violations;
 }
 
@@ -132,6 +152,12 @@ return out;
 
 export function validatePublicLocation(v: PublicLocation): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.slug !== undefined && v.slug !== null && !(typeof v.slug === "string")) violations.push("slug has invalid type");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.timezone !== undefined && v.timezone !== null && !(typeof v.timezone === "string")) violations.push("timezone has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -172,6 +198,13 @@ return out;
 
 export function validatePublicBusinessSummary(v: PublicBusinessSummary): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.slug !== undefined && v.slug !== null && !(typeof v.slug === "string")) violations.push("slug has invalid type");
+if (v.logoUrl !== undefined && v.logoUrl !== null && !(typeof v.logoUrl === "string")) violations.push("logo_url has invalid type");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.timezone !== undefined && v.timezone !== null && !(typeof v.timezone === "string")) violations.push("timezone has invalid type");
 return violations;
 }
 
@@ -206,6 +239,11 @@ return out;
 
 export function validatePublicBusinessProfile(v: PublicBusinessProfile): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.logoUrl !== undefined && v.logoUrl !== null && !(typeof v.logoUrl === "string")) violations.push("logo_url has invalid type");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.timezone !== undefined && v.timezone !== null && !(typeof v.timezone === "string")) violations.push("timezone has invalid type");
 return violations;
 }
 
@@ -228,6 +266,7 @@ return out;
 
 export function validateGetBusinessRequest(v: GetBusinessRequest): string[] {
 const violations: string[] = [];
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
 if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
 if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
 return violations;
@@ -252,6 +291,7 @@ return out;
 
 export function validateGetBusinessResponse(v: GetBusinessResponse): string[] {
 const violations: string[] = [];
+if (v.business !== undefined && v.business !== null && !(typeof v.business === "object" && v.business !== null && !Array.isArray(v.business))) violations.push("business has invalid type");
 if (v.business !== undefined && v.business !== null) violations.push(...validateBusiness(v.business).map((message) => "business: " + message));
 return violations;
 }
@@ -278,7 +318,9 @@ return out;
 
 export function validateCreateSubBusinessRequest(v: CreateSubBusinessRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.parentBusinessId !== undefined && v.parentBusinessId !== null && !(typeof v.parentBusinessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.parentBusinessId))) violations.push("parent_business_id has invalid type");
 if (!(v.parentBusinessId !== undefined && v.parentBusinessId !== null)) violations.push("parent_business_id is required");
 if (v.parentBusinessId !== undefined && v.parentBusinessId !== null && !(Number(v.parentBusinessId) > 0)) violations.push("parent_business_id violates @gt");
 return violations;
@@ -303,6 +345,7 @@ return out;
 
 export function validateCreateSubBusinessResponse(v: CreateSubBusinessResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 return violations;
 }
 
@@ -325,6 +368,7 @@ return out;
 
 export function validateOnboardBusinessRequest(v: OnboardBusinessRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
 return violations;
 }
@@ -348,6 +392,7 @@ return out;
 
 export function validateOnboardBusinessResponse(v: OnboardBusinessResponse): string[] {
 const violations: string[] = [];
+if (v.token !== undefined && v.token !== null && !(typeof v.token === "string")) violations.push("token has invalid type");
 return violations;
 }
 
@@ -370,6 +415,7 @@ return out;
 
 export function validateCheckBusinessNameExistsRequest(v: CheckBusinessNameExistsRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
 return violations;
 }
@@ -393,6 +439,7 @@ return out;
 
 export function validateCheckBusinessNameExistsResponse(v: CheckBusinessNameExistsResponse): string[] {
 const violations: string[] = [];
+if (v.exists !== undefined && v.exists !== null && !(typeof v.exists === "boolean")) violations.push("exists has invalid type");
 return violations;
 }
 
@@ -415,6 +462,7 @@ return out;
 
 export function validateGetPublicBusinessRequest(v: GetPublicBusinessRequest): string[] {
 const violations: string[] = [];
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
 if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
 return violations;
 }
@@ -438,6 +486,7 @@ return out;
 
 export function validateGetPublicBusinessResponse(v: GetPublicBusinessResponse): string[] {
 const violations: string[] = [];
+if (v.business !== undefined && v.business !== null && !(typeof v.business === "object" && v.business !== null && !Array.isArray(v.business))) violations.push("business has invalid type");
 if (v.business !== undefined && v.business !== null) violations.push(...validatePublicBusinessProfile(v.business).map((message) => "business: " + message));
 return violations;
 }
@@ -480,6 +529,7 @@ return out;
 
 export function validateListMyBusinessesResponse(v: ListMyBusinessesResponse): string[] {
 const violations: string[] = [];
+if (v.businesses !== undefined && v.businesses !== null && !(Array.isArray(v.businesses) && (v.businesses).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("businesses has invalid type");
 if (v.businesses !== undefined && v.businesses !== null) for (const item of v.businesses) violations.push(...validateBusinessEntry(item).map((message) => "businesses: " + message));
 return violations;
 }
@@ -503,8 +553,9 @@ return out;
 
 export function validateLookupBusinessBySlugRequest(v: LookupBusinessBySlugRequest): string[] {
 const violations: string[] = [];
+if (v.slug !== undefined && v.slug !== null && !(typeof v.slug === "string")) violations.push("slug has invalid type");
 if (!(v.slug !== undefined && v.slug !== null) || v.slug === "") violations.push("slug is required");
-if (v.slug !== undefined && v.slug !== null && !(new RegExp("^[a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?$")).test(v.slug)) violations.push("slug has invalid format");
+if (v.slug !== undefined && v.slug !== null && !(new RegExp("^[a-z0-9]$|^[a-z0-9][a-z0-9-]{0,78}[a-z0-9]$")).test(v.slug)) violations.push("slug has invalid format");
 return violations;
 }
 
@@ -530,7 +581,9 @@ return out;
 
 export function validateLookupBusinessBySlugResponse(v: LookupBusinessBySlugResponse): string[] {
 const violations: string[] = [];
+if (v.business !== undefined && v.business !== null && !(typeof v.business === "object" && v.business !== null && !Array.isArray(v.business))) violations.push("business has invalid type");
 if (v.business !== undefined && v.business !== null) violations.push(...validatePublicBusinessSummary(v.business).map((message) => "business: " + message));
+if (v.locations !== undefined && v.locations !== null && !(Array.isArray(v.locations) && (v.locations).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("locations has invalid type");
 if (v.locations !== undefined && v.locations !== null) for (const item of v.locations) violations.push(...validatePublicLocation(item).map((message) => "locations: " + message));
 return violations;
 }
@@ -554,8 +607,9 @@ return out;
 
 export function validateSetSlugRequest(v: SetSlugRequest): string[] {
 const violations: string[] = [];
+if (v.slug !== undefined && v.slug !== null && !(typeof v.slug === "string")) violations.push("slug has invalid type");
 if (!(v.slug !== undefined && v.slug !== null) || v.slug === "") violations.push("slug is required");
-if (v.slug !== undefined && v.slug !== null && !(new RegExp("^[a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?$")).test(v.slug)) violations.push("slug has invalid format");
+if (v.slug !== undefined && v.slug !== null && !(new RegExp("^[a-z0-9]$|^[a-z0-9][a-z0-9-]{0,78}[a-z0-9]$")).test(v.slug)) violations.push("slug has invalid format");
 return violations;
 }
 
@@ -578,6 +632,7 @@ return out;
 
 export function validateSetSlugResponse(v: SetSlugResponse): string[] {
 const violations: string[] = [];
+if (v.slug !== undefined && v.slug !== null && !(typeof v.slug === "string")) violations.push("slug has invalid type");
 return violations;
 }
 
@@ -627,14 +682,24 @@ return out;
 
 export function validateUpdateBusinessRequest(v: UpdateBusinessRequest): string[] {
 const violations: string[] = [];
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
 if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
 if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
 if (!(v.type !== undefined && v.type !== null) || v.type === "") violations.push("type is required");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.phone !== undefined && v.phone !== null && !(typeof v.phone === "string")) violations.push("phone has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
 if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
+if (v.website !== undefined && v.website !== null && !(typeof v.website === "string")) violations.push("website has invalid type");
+if (v.timezone !== undefined && v.timezone !== null && !(typeof v.timezone === "string")) violations.push("timezone has invalid type");
 if (!(v.timezone !== undefined && v.timezone !== null) || v.timezone === "") violations.push("timezone is required");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
 if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (v.slug !== undefined && v.slug !== null && !(typeof v.slug === "string")) violations.push("slug has invalid type");
 return violations;
 }
 
@@ -657,6 +722,7 @@ return out;
 
 export function validateUpdateBusinessResponse(v: UpdateBusinessResponse): string[] {
 const violations: string[] = [];
+if (v.business !== undefined && v.business !== null && !(typeof v.business === "object" && v.business !== null && !Array.isArray(v.business))) violations.push("business has invalid type");
 if (v.business !== undefined && v.business !== null) violations.push(...validateBusiness(v.business).map((message) => "business: " + message));
 return violations;
 }
@@ -683,8 +749,10 @@ return out;
 
 export function validateRenameBusinessRequest(v: RenameBusinessRequest): string[] {
 const violations: string[] = [];
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
 if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
 if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
 return violations;
 }
@@ -708,6 +776,7 @@ return out;
 
 export function validateRenameBusinessResponse(v: RenameBusinessResponse): string[] {
 const violations: string[] = [];
+if (v.business !== undefined && v.business !== null && !(typeof v.business === "object" && v.business !== null && !Array.isArray(v.business))) violations.push("business has invalid type");
 if (v.business !== undefined && v.business !== null) violations.push(...validateBusiness(v.business).map((message) => "business: " + message));
 return violations;
 }
@@ -734,8 +803,10 @@ return out;
 
 export function validateSetLogoRequest(v: SetLogoRequest): string[] {
 const violations: string[] = [];
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
 if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
 if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
+if (v.logoUrl !== undefined && v.logoUrl !== null && !(typeof v.logoUrl === "string")) violations.push("logo_url has invalid type");
 if (!(v.logoUrl !== undefined && v.logoUrl !== null) || v.logoUrl === "") violations.push("logo_url is required");
 return violations;
 }
@@ -759,6 +830,7 @@ return out;
 
 export function validateSetLogoResponse(v: SetLogoResponse): string[] {
 const violations: string[] = [];
+if (v.business !== undefined && v.business !== null && !(typeof v.business === "object" && v.business !== null && !Array.isArray(v.business))) violations.push("business has invalid type");
 if (v.business !== undefined && v.business !== null) violations.push(...validateBusiness(v.business).map((message) => "business: " + message));
 return violations;
 }
@@ -782,6 +854,7 @@ return out;
 
 export function validateDeleteBusinessRequest(v: DeleteBusinessRequest): string[] {
 const violations: string[] = [];
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
 if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
 if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
 return violations;
@@ -806,6 +879,7 @@ return out;
 
 export function validateDeleteBusinessResponse(v: DeleteBusinessResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

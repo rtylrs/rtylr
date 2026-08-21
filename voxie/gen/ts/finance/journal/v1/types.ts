@@ -38,7 +38,14 @@ return out;
 
 export function validateJournalEntry(v: JournalEntry): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.number !== undefined && v.number !== null && !(typeof v.number === "string")) violations.push("number has invalid type");
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.lines !== undefined && v.lines !== null && !(Array.isArray(v.lines) && (v.lines).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("lines has invalid type");
 if (v.lines !== undefined && v.lines !== null) for (const item of v.lines) violations.push(...validateJournalLine(item).map((message) => "lines: " + message));
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -73,6 +80,11 @@ return out;
 
 export function validateJournalLine(v: JournalLine): string[] {
 const violations: string[] = [];
+if (v.accountId !== undefined && v.accountId !== null && !(typeof v.accountId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.accountId))) violations.push("account_id has invalid type");
+if (v.accountName !== undefined && v.accountName !== null && !(typeof v.accountName === "string")) violations.push("account_name has invalid type");
+if (v.debit !== undefined && v.debit !== null && !(typeof v.debit === "number" && Number.isFinite(v.debit))) violations.push("debit has invalid type");
+if (v.credit !== undefined && v.credit !== null && !(typeof v.credit === "number" && Number.isFinite(v.credit))) violations.push("credit has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 return violations;
 }
 
@@ -101,8 +113,11 @@ return out;
 
 export function validateCreateJournalEntryRequest(v: CreateJournalEntryRequest): string[] {
 const violations: string[] = [];
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
 if (!(v.date !== undefined && v.date !== null) || v.date === "") violations.push("date is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.lines !== undefined && v.lines !== null && !(Array.isArray(v.lines) && (v.lines).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("lines has invalid type");
 if (v.lines !== undefined && v.lines !== null && v.lines.length < 1) violations.push("lines must contain at least 1 items");
 if (v.lines !== undefined && v.lines !== null) for (const item of v.lines) violations.push(...validateJournalLine(item).map((message) => "lines: " + message));
 return violations;
@@ -127,6 +142,7 @@ return out;
 
 export function validateCreateJournalEntryResponse(v: CreateJournalEntryResponse): string[] {
 const violations: string[] = [];
+if (v.entry !== undefined && v.entry !== null && !(typeof v.entry === "object" && v.entry !== null && !Array.isArray(v.entry))) violations.push("entry has invalid type");
 if (v.entry !== undefined && v.entry !== null) violations.push(...validateJournalEntry(v.entry).map((message) => "entry: " + message));
 return violations;
 }
@@ -150,6 +166,7 @@ return out;
 
 export function validateGetJournalEntryRequest(v: GetJournalEntryRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -174,6 +191,7 @@ return out;
 
 export function validateGetJournalEntryResponse(v: GetJournalEntryResponse): string[] {
 const violations: string[] = [];
+if (v.entry !== undefined && v.entry !== null && !(typeof v.entry === "object" && v.entry !== null && !Array.isArray(v.entry))) violations.push("entry has invalid type");
 if (v.entry !== undefined && v.entry !== null) violations.push(...validateJournalEntry(v.entry).map((message) => "entry: " + message));
 return violations;
 }
@@ -212,6 +230,12 @@ return out;
 
 export function validateListJournalEntriesRequest(v: ListJournalEntriesRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
+if (v.fromDate !== undefined && v.fromDate !== null && !(typeof v.fromDate === "string")) violations.push("from_date has invalid type");
+if (v.toDate !== undefined && v.toDate !== null && !(typeof v.toDate === "string")) violations.push("to_date has invalid type");
 return violations;
 }
 
@@ -237,7 +261,9 @@ return out;
 
 export function validateListJournalEntriesResponse(v: ListJournalEntriesResponse): string[] {
 const violations: string[] = [];
+if (v.entries !== undefined && v.entries !== null && !(Array.isArray(v.entries) && (v.entries).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("entries has invalid type");
 if (v.entries !== undefined && v.entries !== null) for (const item of v.entries) violations.push(...validateJournalEntry(item).map((message) => "entries: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }

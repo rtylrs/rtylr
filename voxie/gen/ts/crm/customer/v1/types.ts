@@ -82,6 +82,28 @@ return out;
 
 export function validateCustomer(v: Customer): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.firstName !== undefined && v.firstName !== null && !(typeof v.firstName === "string")) violations.push("first_name has invalid type");
+if (v.lastName !== undefined && v.lastName !== null && !(typeof v.lastName === "string")) violations.push("last_name has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.phone !== undefined && v.phone !== null && !(typeof v.phone === "string")) violations.push("phone has invalid type");
+if (v.dateOfBirth !== undefined && v.dateOfBirth !== null && !(typeof v.dateOfBirth === "string")) violations.push("date_of_birth has invalid type");
+if (v.gender !== undefined && v.gender !== null && !(typeof v.gender === "string")) violations.push("gender has invalid type");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.city !== undefined && v.city !== null && !(typeof v.city === "string")) violations.push("city has invalid type");
+if (v.country !== undefined && v.country !== null && !(typeof v.country === "string")) violations.push("country has invalid type");
+if (v.loyaltyPoints !== undefined && v.loyaltyPoints !== null && !(typeof v.loyaltyPoints === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.loyaltyPoints))) violations.push("loyalty_points has invalid type");
+if (v.totalSpent !== undefined && v.totalSpent !== null && !(typeof v.totalSpent === "number" && Number.isFinite(v.totalSpent))) violations.push("total_spent has invalid type");
+if (v.visitCount !== undefined && v.visitCount !== null && !(typeof v.visitCount === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.visitCount))) violations.push("visit_count has invalid type");
+if (v.lastVisitAt !== undefined && v.lastVisitAt !== null && !(typeof v.lastVisitAt === "string")) violations.push("last_visit_at has invalid type");
+if (v.loyaltyTier !== undefined && v.loyaltyTier !== null && !(typeof v.loyaltyTier === "string")) violations.push("loyalty_tier has invalid type");
+if (v.tags !== undefined && v.tags !== null && !(Array.isArray(v.tags) && (v.tags).every((item: any) => typeof item === "string"))) violations.push("tags has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.consent !== undefined && v.consent !== null && !(typeof v.consent === "object" && v.consent !== null && !Array.isArray(v.consent) && Object.values(v.consent).every((item: any) => typeof item === "boolean"))) violations.push("consent has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -137,7 +159,19 @@ return out;
 
 export function validateCreateCustomerRequest(v: CreateCustomerRequest): string[] {
 const violations: string[] = [];
+if (v.firstName !== undefined && v.firstName !== null && !(typeof v.firstName === "string")) violations.push("first_name has invalid type");
 if (!(v.firstName !== undefined && v.firstName !== null) || v.firstName === "") violations.push("first_name is required");
+if (v.lastName !== undefined && v.lastName !== null && !(typeof v.lastName === "string")) violations.push("last_name has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.phone !== undefined && v.phone !== null && !(typeof v.phone === "string")) violations.push("phone has invalid type");
+if (v.dateOfBirth !== undefined && v.dateOfBirth !== null && !(typeof v.dateOfBirth === "string")) violations.push("date_of_birth has invalid type");
+if (v.gender !== undefined && v.gender !== null && !(typeof v.gender === "string")) violations.push("gender has invalid type");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.city !== undefined && v.city !== null && !(typeof v.city === "string")) violations.push("city has invalid type");
+if (v.country !== undefined && v.country !== null && !(typeof v.country === "string")) violations.push("country has invalid type");
+if (v.tags !== undefined && v.tags !== null && !(Array.isArray(v.tags) && (v.tags).every((item: any) => typeof item === "string"))) violations.push("tags has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.consent !== undefined && v.consent !== null && !(typeof v.consent === "object" && v.consent !== null && !Array.isArray(v.consent) && Object.values(v.consent).every((item: any) => typeof item === "boolean"))) violations.push("consent has invalid type");
 return violations;
 }
 
@@ -163,6 +197,8 @@ return out;
 
 export function validateCreateCustomerResponse(v: CreateCustomerResponse): string[] {
 const violations: string[] = [];
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -185,6 +221,7 @@ return out;
 
 export function validateDeleteCustomerRequest(v: DeleteCustomerRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -209,6 +246,7 @@ return out;
 
 export function validateDeleteCustomerResponse(v: DeleteCustomerResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -231,6 +269,7 @@ return out;
 
 export function validateGetCustomerRequest(v: GetCustomerRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -255,6 +294,7 @@ return out;
 
 export function validateGetCustomerResponse(v: GetCustomerResponse): string[] {
 const violations: string[] = [];
+if (v.customer !== undefined && v.customer !== null && !(typeof v.customer === "object" && v.customer !== null && !Array.isArray(v.customer))) violations.push("customer has invalid type");
 if (v.customer !== undefined && v.customer !== null) violations.push(...validateCustomer(v.customer).map((message) => "customer: " + message));
 return violations;
 }
@@ -290,6 +330,11 @@ return out;
 
 export function validateListCustomersRequest(v: ListCustomersRequest): string[] {
 const violations: string[] = [];
+if (v.search !== undefined && v.search !== null && !(typeof v.search === "string")) violations.push("search has invalid type");
+if (v.tier !== undefined && v.tier !== null && !(typeof v.tier === "string")) violations.push("tier has invalid type");
+if (v.tag !== undefined && v.tag !== null && !(typeof v.tag === "string")) violations.push("tag has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.page))) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.pageSize))) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -321,7 +366,11 @@ return out;
 
 export function validateListCustomersResponse(v: ListCustomersResponse): string[] {
 const violations: string[] = [];
+if (v.customers !== undefined && v.customers !== null && !(Array.isArray(v.customers) && (v.customers).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("customers has invalid type");
 if (v.customers !== undefined && v.customers !== null) for (const item of v.customers) violations.push(...validateCustomer(item).map((message) => "customers: " + message));
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.total))) violations.push("total has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.page))) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.pageSize))) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -380,7 +429,20 @@ return out;
 
 export function validateUpdateCustomerBody(v: UpdateCustomerBody): string[] {
 const violations: string[] = [];
+if (v.firstName !== undefined && v.firstName !== null && !(typeof v.firstName === "string")) violations.push("first_name has invalid type");
 if (!(v.firstName !== undefined && v.firstName !== null) || v.firstName === "") violations.push("first_name is required");
+if (v.lastName !== undefined && v.lastName !== null && !(typeof v.lastName === "string")) violations.push("last_name has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.phone !== undefined && v.phone !== null && !(typeof v.phone === "string")) violations.push("phone has invalid type");
+if (v.dateOfBirth !== undefined && v.dateOfBirth !== null && !(typeof v.dateOfBirth === "string")) violations.push("date_of_birth has invalid type");
+if (v.gender !== undefined && v.gender !== null && !(typeof v.gender === "string")) violations.push("gender has invalid type");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.city !== undefined && v.city !== null && !(typeof v.city === "string")) violations.push("city has invalid type");
+if (v.country !== undefined && v.country !== null && !(typeof v.country === "string")) violations.push("country has invalid type");
+if (v.tags !== undefined && v.tags !== null && !(Array.isArray(v.tags) && (v.tags).every((item: any) => typeof item === "string"))) violations.push("tags has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.consent !== undefined && v.consent !== null && !(typeof v.consent === "object" && v.consent !== null && !Array.isArray(v.consent) && Object.values(v.consent).every((item: any) => typeof item === "boolean"))) violations.push("consent has invalid type");
+if (v.isActive !== undefined && v.isActive !== null && !(typeof v.isActive === "boolean")) violations.push("is_active has invalid type");
 return violations;
 }
 
@@ -406,8 +468,10 @@ return out;
 
 export function validateUpdateCustomerRequest(v: UpdateCustomerRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateCustomerBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -431,6 +495,7 @@ return out;
 
 export function validateUpdateCustomerResponse(v: UpdateCustomerResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

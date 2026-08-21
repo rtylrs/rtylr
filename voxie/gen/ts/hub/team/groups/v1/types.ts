@@ -22,6 +22,8 @@ return out;
 
 export function validateResourcePermission(v: ResourcePermission): string[] {
 const violations: string[] = [];
+if (v.resourceKey !== undefined && v.resourceKey !== null && !(typeof v.resourceKey === "string")) violations.push("resource_key has invalid type");
+if (v.permissionLevel !== undefined && v.permissionLevel !== null && !(typeof v.permissionLevel === "string")) violations.push("permission_level has invalid type");
 return violations;
 }
 
@@ -50,6 +52,9 @@ return out;
 
 export function validateGroupSummary(v: GroupSummary): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
 return violations;
 }
 
@@ -96,7 +101,16 @@ return out;
 
 export function validateGroup(v: Group): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.resourcePermissions !== undefined && v.resourcePermissions !== null && !(Array.isArray(v.resourcePermissions) && (v.resourcePermissions).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("resource_permissions has invalid type");
 if (v.resourcePermissions !== undefined && v.resourcePermissions !== null) for (const item of v.resourcePermissions) violations.push(...validateResourcePermission(item).map((message) => "resource_permissions: " + message));
+if (v.memberCount !== undefined && v.memberCount !== null && !(typeof v.memberCount === "number" && Number.isInteger(v.memberCount) && v.memberCount >= -2147483648 && v.memberCount <= 2147483647)) violations.push("member_count has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -128,6 +142,10 @@ return out;
 
 export function validateGroupMember(v: GroupMember): string[] {
 const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.fullName !== undefined && v.fullName !== null && !(typeof v.fullName === "string")) violations.push("full_name has invalid type");
+if (v.addedAt !== undefined && v.addedAt !== null && !(typeof v.addedAt === "string")) violations.push("added_at has invalid type");
 return violations;
 }
 
@@ -177,7 +195,17 @@ return out;
 
 export function validateGroupDetail(v: GroupDetail): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.resourcePermissions !== undefined && v.resourcePermissions !== null && !(Array.isArray(v.resourcePermissions) && (v.resourcePermissions).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("resource_permissions has invalid type");
 if (v.resourcePermissions !== undefined && v.resourcePermissions !== null) for (const item of v.resourcePermissions) violations.push(...validateResourcePermission(item).map((message) => "resource_permissions: " + message));
+if (v.memberCount !== undefined && v.memberCount !== null && !(typeof v.memberCount === "number" && Number.isInteger(v.memberCount) && v.memberCount >= -2147483648 && v.memberCount <= 2147483647)) violations.push("member_count has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
+if (v.members !== undefined && v.members !== null && !(Array.isArray(v.members) && (v.members).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("members has invalid type");
 if (v.members !== undefined && v.members !== null) for (const item of v.members) violations.push(...validateGroupMember(item).map((message) => "members: " + message));
 return violations;
 }
@@ -220,6 +248,7 @@ return out;
 
 export function validateListGroupsResponse(v: ListGroupsResponse): string[] {
 const violations: string[] = [];
+if (v.groups !== undefined && v.groups !== null && !(Array.isArray(v.groups) && (v.groups).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("groups has invalid type");
 if (v.groups !== undefined && v.groups !== null) for (const item of v.groups) violations.push(...validateGroup(item).map((message) => "groups: " + message));
 return violations;
 }
@@ -252,7 +281,11 @@ return out;
 
 export function validateCreateGroupRequest(v: CreateGroupRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.resourcePermissions !== undefined && v.resourcePermissions !== null && !(Array.isArray(v.resourcePermissions) && (v.resourcePermissions).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("resource_permissions has invalid type");
 if (v.resourcePermissions !== undefined && v.resourcePermissions !== null) for (const item of v.resourcePermissions) violations.push(...validateResourcePermission(item).map((message) => "resource_permissions: " + message));
 return violations;
 }
@@ -276,6 +309,7 @@ return out;
 
 export function validateCreateGroupResponse(v: CreateGroupResponse): string[] {
 const violations: string[] = [];
+if (v.group !== undefined && v.group !== null && !(typeof v.group === "object" && v.group !== null && !Array.isArray(v.group))) violations.push("group has invalid type");
 if (v.group !== undefined && v.group !== null) violations.push(...validateGroup(v.group).map((message) => "group: " + message));
 return violations;
 }
@@ -299,6 +333,7 @@ return out;
 
 export function validateGetGroupDetailRequest(v: GetGroupDetailRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -323,6 +358,7 @@ return out;
 
 export function validateGetGroupDetailResponse(v: GetGroupDetailResponse): string[] {
 const violations: string[] = [];
+if (v.group !== undefined && v.group !== null && !(typeof v.group === "object" && v.group !== null && !Array.isArray(v.group))) violations.push("group has invalid type");
 if (v.group !== undefined && v.group !== null) violations.push(...validateGroupDetail(v.group).map((message) => "group: " + message));
 return violations;
 }
@@ -358,9 +394,14 @@ return out;
 
 export function validateUpdateGroupRequest(v: UpdateGroupRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.resourcePermissions !== undefined && v.resourcePermissions !== null && !(Array.isArray(v.resourcePermissions) && (v.resourcePermissions).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("resource_permissions has invalid type");
 if (v.resourcePermissions !== undefined && v.resourcePermissions !== null) for (const item of v.resourcePermissions) violations.push(...validateResourcePermission(item).map((message) => "resource_permissions: " + message));
 return violations;
 }
@@ -384,6 +425,7 @@ return out;
 
 export function validateUpdateGroupResponse(v: UpdateGroupResponse): string[] {
 const violations: string[] = [];
+if (v.group !== undefined && v.group !== null && !(typeof v.group === "object" && v.group !== null && !Array.isArray(v.group))) violations.push("group has invalid type");
 if (v.group !== undefined && v.group !== null) violations.push(...validateGroup(v.group).map((message) => "group: " + message));
 return violations;
 }
@@ -407,6 +449,7 @@ return out;
 
 export function validateDeleteGroupRequest(v: DeleteGroupRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -431,6 +474,7 @@ return out;
 
 export function validateDeleteGroupResponse(v: DeleteGroupResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -456,8 +500,10 @@ return out;
 
 export function validateAddGroupMembersRequest(v: AddGroupMembersRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.userIds !== undefined && v.userIds !== null && !(Array.isArray(v.userIds) && (v.userIds).every((item: any) => typeof item === "string" && /^-?(0|[1-9][0-9]*)$/.test(item)))) violations.push("user_ids has invalid type");
 if (v.userIds !== undefined && v.userIds !== null && v.userIds.length < 1) violations.push("user_ids must contain at least 1 items");
 return violations;
 }
@@ -484,6 +530,8 @@ return out;
 
 export function validateAddGroupMembersResponse(v: AddGroupMembersResponse): string[] {
 const violations: string[] = [];
+if (v.added !== undefined && v.added !== null && !(typeof v.added === "number" && Number.isInteger(v.added) && v.added >= -2147483648 && v.added <= 2147483647)) violations.push("added has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -509,8 +557,10 @@ return out;
 
 export function validateRemoveGroupMemberRequest(v: RemoveGroupMemberRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
 return violations;
@@ -535,6 +585,7 @@ return out;
 
 export function validateRemoveGroupMemberResponse(v: RemoveGroupMemberResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -557,6 +608,7 @@ return out;
 
 export function validateGetUserGroupsRequest(v: GetUserGroupsRequest): string[] {
 const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
 return violations;
@@ -581,6 +633,7 @@ return out;
 
 export function validateGetUserGroupsResponse(v: GetUserGroupsResponse): string[] {
 const violations: string[] = [];
+if (v.groups !== undefined && v.groups !== null && !(Array.isArray(v.groups) && (v.groups).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("groups has invalid type");
 if (v.groups !== undefined && v.groups !== null) for (const item of v.groups) violations.push(...validateGroupSummary(item).map((message) => "groups: " + message));
 return violations;
 }

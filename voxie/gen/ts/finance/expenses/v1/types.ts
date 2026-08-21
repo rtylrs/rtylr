@@ -64,6 +64,22 @@ return out;
 
 export function validateExpense(v: Expense): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.categoryId !== undefined && v.categoryId !== null && !(typeof v.categoryId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.categoryId))) violations.push("category_id has invalid type");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.vendor !== undefined && v.vendor !== null && !(typeof v.vendor === "string")) violations.push("vendor has invalid type");
+if (v.receiptUrl !== undefined && v.receiptUrl !== null && !(typeof v.receiptUrl === "string")) violations.push("receipt_url has invalid type");
+if (v.paymentMethod !== undefined && v.paymentMethod !== null && !(typeof v.paymentMethod === "string")) violations.push("payment_method has invalid type");
+if (v.isTaxDeductible !== undefined && v.isTaxDeductible !== null && !(typeof v.isTaxDeductible === "boolean")) violations.push("is_tax_deductible has invalid type");
+if (v.taxAmount !== undefined && v.taxAmount !== null && !(typeof v.taxAmount === "number" && Number.isFinite(v.taxAmount))) violations.push("tax_amount has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.expenseDate !== undefined && v.expenseDate !== null && !(typeof v.expenseDate === "string")) violations.push("expense_date has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -98,6 +114,11 @@ return out;
 
 export function validateExpenseCategory(v: ExpenseCategory): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -150,11 +171,22 @@ return out;
 
 export function validateCreateExpenseRequest(v: CreateExpenseRequest): string[] {
 const violations: string[] = [];
+if (v.categoryId !== undefined && v.categoryId !== null && !(typeof v.categoryId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.categoryId))) violations.push("category_id has invalid type");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
 if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) >= 0)) violations.push("amount violates @gte");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
 if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.vendor !== undefined && v.vendor !== null && !(typeof v.vendor === "string")) violations.push("vendor has invalid type");
 if (!(v.vendor !== undefined && v.vendor !== null) || v.vendor === "") violations.push("vendor is required");
+if (v.receiptUrl !== undefined && v.receiptUrl !== null && !(typeof v.receiptUrl === "string")) violations.push("receipt_url has invalid type");
 if (!(v.receiptUrl !== undefined && v.receiptUrl !== null) || v.receiptUrl === "") violations.push("receipt_url is required");
+if (v.paymentMethod !== undefined && v.paymentMethod !== null && !(typeof v.paymentMethod === "string")) violations.push("payment_method has invalid type");
+if (v.isTaxDeductible !== undefined && v.isTaxDeductible !== null && !(typeof v.isTaxDeductible === "boolean")) violations.push("is_tax_deductible has invalid type");
+if (v.taxAmount !== undefined && v.taxAmount !== null && !(typeof v.taxAmount === "number" && Number.isFinite(v.taxAmount))) violations.push("tax_amount has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.expenseDate !== undefined && v.expenseDate !== null && !(typeof v.expenseDate === "string")) violations.push("expense_date has invalid type");
 if (!(v.expenseDate !== undefined && v.expenseDate !== null) || v.expenseDate === "") violations.push("expense_date is required");
 return violations;
 }
@@ -181,6 +213,8 @@ return out;
 
 export function validateCreateExpenseResponse(v: CreateExpenseResponse): string[] {
 const violations: string[] = [];
+if (v.expenseId !== undefined && v.expenseId !== null && !(typeof v.expenseId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.expenseId))) violations.push("expense_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -203,6 +237,7 @@ return out;
 
 export function validateDeleteExpenseRequest(v: DeleteExpenseRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -227,6 +262,7 @@ return out;
 
 export function validateDeleteExpenseResponse(v: DeleteExpenseResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -249,6 +285,7 @@ return out;
 
 export function validateGetExpenseRequest(v: GetExpenseRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -273,6 +310,7 @@ return out;
 
 export function validateGetExpenseResponse(v: GetExpenseResponse): string[] {
 const violations: string[] = [];
+if (v.expense !== undefined && v.expense !== null && !(typeof v.expense === "object" && v.expense !== null && !Array.isArray(v.expense))) violations.push("expense has invalid type");
 if (v.expense !== undefined && v.expense !== null) violations.push(...validateExpense(v.expense).map((message) => "expense: " + message));
 return violations;
 }
@@ -315,6 +353,7 @@ return out;
 
 export function validateListExpenseCategoriesResponse(v: ListExpenseCategoriesResponse): string[] {
 const violations: string[] = [];
+if (v.categories !== undefined && v.categories !== null && !(Array.isArray(v.categories) && (v.categories).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("categories has invalid type");
 if (v.categories !== undefined && v.categories !== null) for (const item of v.categories) violations.push(...validateExpenseCategory(item).map((message) => "categories: " + message));
 return violations;
 }
@@ -341,6 +380,8 @@ return out;
 
 export function validateListExpensesRequest(v: ListExpensesRequest): string[] {
 const violations: string[] = [];
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isSafeInteger(v.pageSize) && v.pageSize >= Number.MIN_SAFE_INTEGER && v.pageSize <= Number.MAX_SAFE_INTEGER)) violations.push("page_size has invalid type");
 return violations;
 }
 
@@ -372,7 +413,11 @@ return out;
 
 export function validateListExpensesResponse(v: ListExpensesResponse): string[] {
 const violations: string[] = [];
+if (v.expenses !== undefined && v.expenses !== null && !(Array.isArray(v.expenses) && (v.expenses).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("expenses has invalid type");
 if (v.expenses !== undefined && v.expenses !== null) for (const item of v.expenses) violations.push(...validateExpense(item).map((message) => "expenses: " + message));
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");
+if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isSafeInteger(v.pageSize) && v.pageSize >= Number.MIN_SAFE_INTEGER && v.pageSize <= Number.MAX_SAFE_INTEGER)) violations.push("page_size has invalid type");
+if (v.hasMore !== undefined && v.hasMore !== null && !(typeof v.hasMore === "boolean")) violations.push("has_more has invalid type");
 return violations;
 }
 
@@ -425,11 +470,22 @@ return out;
 
 export function validateUpdateExpenseBody(v: UpdateExpenseBody): string[] {
 const violations: string[] = [];
+if (v.categoryId !== undefined && v.categoryId !== null && !(typeof v.categoryId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.categoryId))) violations.push("category_id has invalid type");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
 if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) >= 0)) violations.push("amount violates @gte");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
 if (!(v.currency !== undefined && v.currency !== null) || v.currency === "") violations.push("currency is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.vendor !== undefined && v.vendor !== null && !(typeof v.vendor === "string")) violations.push("vendor has invalid type");
 if (!(v.vendor !== undefined && v.vendor !== null) || v.vendor === "") violations.push("vendor is required");
+if (v.receiptUrl !== undefined && v.receiptUrl !== null && !(typeof v.receiptUrl === "string")) violations.push("receipt_url has invalid type");
 if (!(v.receiptUrl !== undefined && v.receiptUrl !== null) || v.receiptUrl === "") violations.push("receipt_url is required");
+if (v.paymentMethod !== undefined && v.paymentMethod !== null && !(typeof v.paymentMethod === "string")) violations.push("payment_method has invalid type");
+if (v.isTaxDeductible !== undefined && v.isTaxDeductible !== null && !(typeof v.isTaxDeductible === "boolean")) violations.push("is_tax_deductible has invalid type");
+if (v.taxAmount !== undefined && v.taxAmount !== null && !(typeof v.taxAmount === "number" && Number.isFinite(v.taxAmount))) violations.push("tax_amount has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.expenseDate !== undefined && v.expenseDate !== null && !(typeof v.expenseDate === "string")) violations.push("expense_date has invalid type");
 if (!(v.expenseDate !== undefined && v.expenseDate !== null) || v.expenseDate === "") violations.push("expense_date is required");
 return violations;
 }
@@ -456,8 +512,10 @@ return out;
 
 export function validateUpdateExpenseRequest(v: UpdateExpenseRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateExpenseBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -481,6 +539,7 @@ return out;
 
 export function validateUpdateExpenseResponse(v: UpdateExpenseResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -503,6 +562,7 @@ return out;
 
 export function validateUpdateExpenseStatusBody(v: UpdateExpenseStatusBody): string[] {
 const violations: string[] = [];
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
 return violations;
 }
@@ -529,8 +589,10 @@ return out;
 
 export function validateUpdateExpenseStatusRequest(v: UpdateExpenseStatusRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateExpenseStatusBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -554,6 +616,7 @@ return out;
 
 export function validateUpdateExpenseStatusResponse(v: UpdateExpenseStatusResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

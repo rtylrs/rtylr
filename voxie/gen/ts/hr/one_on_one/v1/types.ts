@@ -43,6 +43,15 @@ return out;
 
 export function validateOneOnOne(v: OneOnOne): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.managerId !== undefined && v.managerId !== null && !(typeof v.managerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.managerId))) violations.push("manager_id has invalid type");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
+if (v.scheduledAt !== undefined && v.scheduledAt !== null && !(typeof v.scheduledAt === "string")) violations.push("scheduled_at has invalid type");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.actionItems !== undefined && v.actionItems !== null && !(typeof v.actionItems === "string")) violations.push("action_items has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -84,6 +93,7 @@ return out;
 
 export function validateListOneOnOnesResponse(v: ListOneOnOnesResponse): string[] {
 const violations: string[] = [];
+if (v.oneOnOnes !== undefined && v.oneOnOnes !== null && !(Array.isArray(v.oneOnOnes) && (v.oneOnOnes).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("one_on_ones has invalid type");
 if (v.oneOnOnes !== undefined && v.oneOnOnes !== null) for (const item of v.oneOnOnes) violations.push(...validateOneOnOne(item).map((message) => "one_on_ones: " + message));
 return violations;
 }
@@ -122,11 +132,17 @@ return out;
 
 export function validateCreateOneOnOneRequest(v: CreateOneOnOneRequest): string[] {
 const violations: string[] = [];
+if (v.managerId !== undefined && v.managerId !== null && !(typeof v.managerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.managerId))) violations.push("manager_id has invalid type");
 if (!(v.managerId !== undefined && v.managerId !== null)) violations.push("manager_id is required");
 if (v.managerId !== undefined && v.managerId !== null && !(Number(v.managerId) > 0)) violations.push("manager_id violates @gt");
+if (v.staffId !== undefined && v.staffId !== null && !(typeof v.staffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.staffId))) violations.push("staff_id has invalid type");
 if (!(v.staffId !== undefined && v.staffId !== null)) violations.push("staff_id is required");
 if (v.staffId !== undefined && v.staffId !== null && !(Number(v.staffId) > 0)) violations.push("staff_id violates @gt");
+if (v.scheduledAt !== undefined && v.scheduledAt !== null && !(typeof v.scheduledAt === "string")) violations.push("scheduled_at has invalid type");
 if (!(v.scheduledAt !== undefined && v.scheduledAt !== null) || v.scheduledAt === "") violations.push("scheduled_at is required");
+if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
+if (v.actionItems !== undefined && v.actionItems !== null && !(typeof v.actionItems === "string")) violations.push("action_items has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 return violations;
 }
 
@@ -152,6 +168,8 @@ return out;
 
 export function validateCreateOneOnOneResponse(v: CreateOneOnOneResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

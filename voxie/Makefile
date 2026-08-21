@@ -1,14 +1,12 @@
 .PHONY: clean generate install-onek install-js typecheck
 
-# v0.6.0: fixes optional int64/uint64 fields (e.g. project_id, task_id on
-# flow.time.v1.CreateWorkDayLineRequest) never getting the wire-string
-# MarshalJSON/UnmarshalJSON treatment that required int64 fields already get -
-# onek's needsInt64StringEncoding excluded any field with f.Optional set, so
-# every consumer sending those fields as strings (the platform-wide int64
-# convention documented in this repo's own CLAUDE.md) got a 400 back from Go's
-# plain json.Unmarshal expecting a number. See internal/gengo/jsonmapping.go
-# in 1homsi/onekit@7011894.
-ONK_VERSION := 70118946d1c20146cd7f720365ef6ef11d8066f6
+# v0.7.2: introduces schema_root so api/*.onk can stay in a subdirectory while
+# outputs anchor at the repo root (v0.7.1's output-containment check rejected
+# the previous "../gen/go" out paths). Also carries v0.7.0-v0.7.1 generator
+# fixes: errors.Is/errors.As matching and usage-gated validation helpers in Go,
+# guarded JSON.parse + escaped validation messages in TS, epoch-zero timestamp
+# round-trip for non-optional @encode(unix_*). See 1homsi/onekit@5d18b2f.
+ONK_VERSION := 5d18b2f5c869c204a34a03be5b45f7cdb6c3fbb5
 
 # Clean generated code
 clean:
@@ -29,7 +27,7 @@ install-js:
 generate: install-onek install-js
 	rm -rf gen/go gen/ts
 	python3 scripts/generate_validation_metadata.py --proto-root api --out-dir gen/ts/validation
-	onek build api
+	onek build .
 
 # Typecheck the generated TypeScript output
 typecheck: install-js

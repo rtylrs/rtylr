@@ -2,6 +2,42 @@
 import type { ListMyBusinessesRequest, ListMyBusinessesResponse, CreateSubBusinessRequest, CreateSubBusinessResponse, OnboardBusinessRequest, OnboardBusinessResponse, CheckBusinessNameExistsRequest, CheckBusinessNameExistsResponse, GetBusinessRequest, GetBusinessResponse, LookupBusinessBySlugRequest, LookupBusinessBySlugResponse, GetPublicBusinessRequest, GetPublicBusinessResponse, SetSlugRequest, SetSlugResponse, UpdateBusinessRequest, UpdateBusinessResponse, RenameBusinessRequest, RenameBusinessResponse, SetLogoRequest, SetLogoResponse, DeleteBusinessRequest, DeleteBusinessResponse } from "./types";
 import { encodeListMyBusinessesRequest, validateListMyBusinessesRequest, decodeListMyBusinessesResponse, encodeCreateSubBusinessRequest, validateCreateSubBusinessRequest, decodeCreateSubBusinessResponse, encodeOnboardBusinessRequest, validateOnboardBusinessRequest, decodeOnboardBusinessResponse, encodeCheckBusinessNameExistsRequest, validateCheckBusinessNameExistsRequest, decodeCheckBusinessNameExistsResponse, encodeGetBusinessRequest, validateGetBusinessRequest, decodeGetBusinessResponse, encodeLookupBusinessBySlugRequest, validateLookupBusinessBySlugRequest, decodeLookupBusinessBySlugResponse, encodeGetPublicBusinessRequest, validateGetPublicBusinessRequest, decodeGetPublicBusinessResponse, encodeSetSlugRequest, validateSetSlugRequest, decodeSetSlugResponse, encodeUpdateBusinessRequest, validateUpdateBusinessRequest, decodeUpdateBusinessResponse, encodeRenameBusinessRequest, validateRenameBusinessRequest, decodeRenameBusinessResponse, encodeSetLogoRequest, validateSetLogoRequest, decodeSetLogoResponse, encodeDeleteBusinessRequest, validateDeleteBusinessRequest, decodeDeleteBusinessResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface BusinessServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class BusinessServiceClient {
@@ -46,11 +84,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListMyBusinessesResponse(await res.json());
+return decodeListMyBusinessesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createSubBusiness(req: CreateSubBusinessRequest): Promise<CreateSubBusinessResponse> {
@@ -64,11 +102,11 @@ body: JSON.stringify(encodeCreateSubBusinessRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateSubBusinessResponse(await res.json());
+return decodeCreateSubBusinessResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async onboardBusiness(req: OnboardBusinessRequest): Promise<OnboardBusinessResponse> {
@@ -82,11 +120,11 @@ body: JSON.stringify(encodeOnboardBusinessRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeOnboardBusinessResponse(await res.json());
+return decodeOnboardBusinessResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async checkBusinessNameExists(req: CheckBusinessNameExistsRequest): Promise<CheckBusinessNameExistsResponse> {
@@ -105,11 +143,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCheckBusinessNameExistsResponse(await res.json());
+return decodeCheckBusinessNameExistsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getBusiness(req: GetBusinessRequest): Promise<GetBusinessResponse> {
@@ -126,11 +164,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetBusinessResponse(await res.json());
+return decodeGetBusinessResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async lookupBusinessBySlug(req: LookupBusinessBySlugRequest): Promise<LookupBusinessBySlugResponse> {
@@ -149,11 +187,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeLookupBusinessBySlugResponse(await res.json());
+return decodeLookupBusinessBySlugResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getPublicBusiness(req: GetPublicBusinessRequest): Promise<GetPublicBusinessResponse> {
@@ -172,11 +210,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetPublicBusinessResponse(await res.json());
+return decodeGetPublicBusinessResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async setSlug(req: SetSlugRequest): Promise<SetSlugResponse> {
@@ -190,11 +228,11 @@ body: JSON.stringify(encodeSetSlugRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSetSlugResponse(await res.json());
+return decodeSetSlugResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateBusiness(req: UpdateBusinessRequest): Promise<UpdateBusinessResponse> {
@@ -209,11 +247,11 @@ body: JSON.stringify(encodeUpdateBusinessRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateBusinessResponse(await res.json());
+return decodeUpdateBusinessResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async renameBusiness(req: RenameBusinessRequest): Promise<RenameBusinessResponse> {
@@ -228,11 +266,11 @@ body: JSON.stringify(encodeRenameBusinessRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRenameBusinessResponse(await res.json());
+return decodeRenameBusinessResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async setLogo(req: SetLogoRequest): Promise<SetLogoResponse> {
@@ -247,11 +285,11 @@ body: JSON.stringify(encodeSetLogoRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSetLogoResponse(await res.json());
+return decodeSetLogoResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteBusiness(req: DeleteBusinessRequest): Promise<DeleteBusinessResponse> {
@@ -268,11 +306,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteBusinessResponse(await res.json());
+return decodeDeleteBusinessResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

@@ -2,6 +2,42 @@
 import type { GetPermissionsRequest, GetPermissionsResponse, ListRolesRequest, ListRolesResponse, CreateRoleRequest, CreateRoleResponse, UpdateRoleRequest, UpdateRoleResponse, DeleteRoleRequest, DeleteRoleResponse, UpdatePermissionMatrixRequest, UpdatePermissionMatrixResponse } from "./types";
 import { encodeGetPermissionsRequest, validateGetPermissionsRequest, decodeGetPermissionsResponse, encodeListRolesRequest, validateListRolesRequest, decodeListRolesResponse, encodeCreateRoleRequest, validateCreateRoleRequest, decodeCreateRoleResponse, encodeUpdateRoleRequest, validateUpdateRoleRequest, decodeUpdateRoleResponse, encodeDeleteRoleRequest, validateDeleteRoleRequest, decodeDeleteRoleResponse, encodeUpdatePermissionMatrixRequest, validateUpdatePermissionMatrixRequest, decodeUpdatePermissionMatrixResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface PermissionServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class PermissionServiceClient {
@@ -46,11 +84,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetPermissionsResponse(await res.json());
+return decodeGetPermissionsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listRoles(req: ListRolesRequest): Promise<ListRolesResponse> {
@@ -66,11 +104,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListRolesResponse(await res.json());
+return decodeListRolesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createRole(req: CreateRoleRequest): Promise<CreateRoleResponse> {
@@ -84,11 +122,11 @@ body: JSON.stringify(encodeCreateRoleRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateRoleResponse(await res.json());
+return decodeCreateRoleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateRole(req: UpdateRoleRequest): Promise<UpdateRoleResponse> {
@@ -103,11 +141,11 @@ body: JSON.stringify(encodeUpdateRoleRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateRoleResponse(await res.json());
+return decodeUpdateRoleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteRole(req: DeleteRoleRequest): Promise<DeleteRoleResponse> {
@@ -124,11 +162,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteRoleResponse(await res.json());
+return decodeDeleteRoleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updatePermissionMatrix(req: UpdatePermissionMatrixRequest): Promise<UpdatePermissionMatrixResponse> {
@@ -142,11 +180,11 @@ body: JSON.stringify(encodeUpdatePermissionMatrixRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdatePermissionMatrixResponse(await res.json());
+return decodeUpdatePermissionMatrixResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

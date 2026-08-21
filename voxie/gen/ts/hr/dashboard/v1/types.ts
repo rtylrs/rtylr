@@ -28,6 +28,10 @@ return out;
 
 export function validateDashboardStats(v: DashboardStats): string[] {
 const violations: string[] = [];
+if (v.totalStaff !== undefined && v.totalStaff !== null && !(typeof v.totalStaff === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.totalStaff))) violations.push("total_staff has invalid type");
+if (v.onShiftToday !== undefined && v.onShiftToday !== null && !(typeof v.onShiftToday === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.onShiftToday))) violations.push("on_shift_today has invalid type");
+if (v.pendingTimeOff !== undefined && v.pendingTimeOff !== null && !(typeof v.pendingTimeOff === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.pendingTimeOff))) violations.push("pending_time_off has invalid type");
+if (v.payrollDraft !== undefined && v.payrollDraft !== null && !(typeof v.payrollDraft === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.payrollDraft))) violations.push("payroll_draft has invalid type");
 return violations;
 }
 
@@ -80,6 +84,17 @@ return out;
 
 export function validateDashboardWidgetPayload(v: DashboardWidgetPayload): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.roleId !== undefined && v.roleId !== null && !(typeof v.roleId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.roleId))) violations.push("role_id has invalid type");
+if (v.widgetType !== undefined && v.widgetType !== null && !(typeof v.widgetType === "string")) violations.push("widget_type has invalid type");
+if (v.positionX !== undefined && v.positionX !== null && !(typeof v.positionX === "number" && Number.isInteger(v.positionX) && v.positionX >= -2147483648 && v.positionX <= 2147483647)) violations.push("position_x has invalid type");
+if (v.positionY !== undefined && v.positionY !== null && !(typeof v.positionY === "number" && Number.isInteger(v.positionY) && v.positionY >= -2147483648 && v.positionY <= 2147483647)) violations.push("position_y has invalid type");
+if (v.width !== undefined && v.width !== null && !(typeof v.width === "number" && Number.isInteger(v.width) && v.width >= -2147483648 && v.width <= 2147483647)) violations.push("width has invalid type");
+if (v.height !== undefined && v.height !== null && !(typeof v.height === "number" && Number.isInteger(v.height) && v.height >= -2147483648 && v.height <= 2147483647)) violations.push("height has invalid type");
+if (v.config !== undefined && v.config !== null && !(typeof v.config === "string")) violations.push("config has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdAt))) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.updatedAt))) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -105,6 +120,8 @@ return out;
 
 export function validateDashboardDataPayload(v: DashboardDataPayload): string[] {
 const violations: string[] = [];
+if (v.widgetType !== undefined && v.widgetType !== null && !(typeof v.widgetType === "string")) violations.push("widget_type has invalid type");
+if (v.data !== undefined && v.data !== null && !(typeof v.data === "string")) violations.push("data has invalid type");
 return violations;
 }
 
@@ -146,6 +163,7 @@ return out;
 
 export function validateGetHRDashboardResponse(v: GetHRDashboardResponse): string[] {
 const violations: string[] = [];
+if (v.stats !== undefined && v.stats !== null && !(typeof v.stats === "object" && v.stats !== null && !Array.isArray(v.stats))) violations.push("stats has invalid type");
 if (v.stats !== undefined && v.stats !== null) violations.push(...validateDashboardStats(v.stats).map((message) => "stats: " + message));
 return violations;
 }
@@ -191,7 +209,9 @@ return out;
 
 export function validateGetDashboardWidgetsResponse(v: GetDashboardWidgetsResponse): string[] {
 const violations: string[] = [];
+if (v.widgets !== undefined && v.widgets !== null && !(Array.isArray(v.widgets) && (v.widgets).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("widgets has invalid type");
 if (v.widgets !== undefined && v.widgets !== null) for (const item of v.widgets) violations.push(...validateDashboardWidgetPayload(item).map((message) => "widgets: " + message));
+if (v.data !== undefined && v.data !== null && !(typeof v.data === "object" && v.data !== null && !Array.isArray(v.data) && Object.values(v.data).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("data has invalid type");
 if (v.data !== undefined && v.data !== null) for (const item of Object.values(v.data)) violations.push(...validateDashboardDataPayload(item).map((message) => "data: " + message));
 return violations;
 }
@@ -215,6 +235,7 @@ return out;
 
 export function validateUpdateDashboardWidgetsRequest(v: UpdateDashboardWidgetsRequest): string[] {
 const violations: string[] = [];
+if (v.widgets !== undefined && v.widgets !== null && !(Array.isArray(v.widgets) && (v.widgets).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("widgets has invalid type");
 if (v.widgets !== undefined && v.widgets !== null && v.widgets.length < 1) violations.push("widgets must contain at least 1 items");
 if (v.widgets !== undefined && v.widgets !== null) for (const item of v.widgets) violations.push(...validateDashboardWidgetPayload(item).map((message) => "widgets: " + message));
 return violations;
@@ -239,6 +260,7 @@ return out;
 
 export function validateUpdateDashboardWidgetsResponse(v: UpdateDashboardWidgetsResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 

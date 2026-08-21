@@ -113,6 +113,38 @@ return out;
 
 export function validateConfigPayload(v: ConfigPayload): string[] {
 const violations: string[] = [];
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string")) violations.push("owner_id has invalid type");
+if (v.siteName !== undefined && v.siteName !== null && !(typeof v.siteName === "string")) violations.push("site_name has invalid type");
+if (v.logoUrl !== undefined && v.logoUrl !== null && !(typeof v.logoUrl === "string")) violations.push("logo_url has invalid type");
+if (v.faviconUrl !== undefined && v.faviconUrl !== null && !(typeof v.faviconUrl === "string")) violations.push("favicon_url has invalid type");
+if (v.metaTags !== undefined && v.metaTags !== null && !(Array.isArray(v.metaTags) && (v.metaTags).every((item: any) => typeof item === "string"))) violations.push("meta_tags has invalid type");
+if (v.contactEmail !== undefined && v.contactEmail !== null && !(typeof v.contactEmail === "string")) violations.push("contact_email has invalid type");
+if (v.contactNumber !== undefined && v.contactNumber !== null && !(typeof v.contactNumber === "string")) violations.push("contact_number has invalid type");
+if (v.senderEmail !== undefined && v.senderEmail !== null && !(typeof v.senderEmail === "string")) violations.push("sender_email has invalid type");
+if (v.emailProvider !== undefined && v.emailProvider !== null && !(typeof v.emailProvider === "string")) violations.push("email_provider has invalid type");
+if (v.senderName !== undefined && v.senderName !== null && !(typeof v.senderName === "string")) violations.push("sender_name has invalid type");
+if (v.replyToEmail !== undefined && v.replyToEmail !== null && !(typeof v.replyToEmail === "string")) violations.push("reply_to_email has invalid type");
+if (v.emailNotificationsEnabled !== undefined && v.emailNotificationsEnabled !== null && !(typeof v.emailNotificationsEnabled === "boolean")) violations.push("email_notifications_enabled has invalid type");
+if (v.smtpHost !== undefined && v.smtpHost !== null && !(typeof v.smtpHost === "string")) violations.push("smtp_host has invalid type");
+if (v.smtpPort !== undefined && v.smtpPort !== null && !(typeof v.smtpPort === "number" && Number.isInteger(v.smtpPort) && v.smtpPort >= -2147483648 && v.smtpPort <= 2147483647)) violations.push("smtp_port has invalid type");
+if (v.smtpUsername !== undefined && v.smtpUsername !== null && !(typeof v.smtpUsername === "string")) violations.push("smtp_username has invalid type");
+if (v.smtpPasswordConfigured !== undefined && v.smtpPasswordConfigured !== null && !(typeof v.smtpPasswordConfigured === "boolean")) violations.push("smtp_password_configured has invalid type");
+if (v.website !== undefined && v.website !== null && !(typeof v.website === "string")) violations.push("website has invalid type");
+if (v.mapsUrl !== undefined && v.mapsUrl !== null && !(typeof v.mapsUrl === "string")) violations.push("maps_url has invalid type");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.city !== undefined && v.city !== null && !(typeof v.city === "string")) violations.push("city has invalid type");
+if (v.zipcode !== undefined && v.zipcode !== null && !(typeof v.zipcode === "string")) violations.push("zipcode has invalid type");
+if (v.country !== undefined && v.country !== null && !(typeof v.country === "string")) violations.push("country has invalid type");
+if (v.instagram !== undefined && v.instagram !== null && !(typeof v.instagram === "string")) violations.push("instagram has invalid type");
+if (v.maintenanceMode !== undefined && v.maintenanceMode !== null && !(typeof v.maintenanceMode === "boolean")) violations.push("maintenance_mode has invalid type");
+if (v.maintenanceNotice !== undefined && v.maintenanceNotice !== null && !(typeof v.maintenanceNotice === "string")) violations.push("maintenance_notice has invalid type");
+if (v.addonsEnabled !== undefined && v.addonsEnabled !== null && !(typeof v.addonsEnabled === "boolean")) violations.push("addons_enabled has invalid type");
+if (v.enableReviews !== undefined && v.enableReviews !== null && !(typeof v.enableReviews === "boolean")) violations.push("enable_reviews has invalid type");
+if (v.enableWishlist !== undefined && v.enableWishlist !== null && !(typeof v.enableWishlist === "boolean")) violations.push("enable_wishlist has invalid type");
+if (v.enableNewsletterSignup !== undefined && v.enableNewsletterSignup !== null && !(typeof v.enableNewsletterSignup === "boolean")) violations.push("enable_newsletter_signup has invalid type");
+if (v.aboutContent !== undefined && v.aboutContent !== null && !(typeof v.aboutContent === "string")) violations.push("about_content has invalid type");
+if (v.footerSubText !== undefined && v.footerSubText !== null && !(typeof v.footerSubText === "string")) violations.push("footer_sub_text has invalid type");
+if (v.slug !== undefined && v.slug !== null && !(typeof v.slug === "string")) violations.push("slug has invalid type");
 return violations;
 }
 
@@ -144,8 +176,12 @@ return out;
 
 export function validateCreateConfigRequest(v: CreateConfigRequest): string[] {
 const violations: string[] = [];
+if (v.owner !== undefined && v.owner !== null && !(typeof v.owner === "string")) violations.push("owner has invalid type");
+if (v.key !== undefined && v.key !== null && !(typeof v.key === "string")) violations.push("key has invalid type");
 if (!(v.key !== undefined && v.key !== null) || v.key === "") violations.push("key is required");
+if (v.value !== undefined && v.value !== null && !(typeof v.value === "string")) violations.push("value has invalid type");
 if (!(v.value !== undefined && v.value !== null) || v.value === "") violations.push("value is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 return violations;
 }
 
@@ -171,6 +207,8 @@ return out;
 
 export function validateCreateConfigResponse(v: CreateConfigResponse): string[] {
 const violations: string[] = [];
+if (v.configId !== undefined && v.configId !== null && !(typeof v.configId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.configId))) violations.push("config_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -215,7 +253,9 @@ return out;
 
 export function validateGetConfigResponse(v: GetConfigResponse): string[] {
 const violations: string[] = [];
+if (v.business !== undefined && v.business !== null && !(typeof v.business === "object" && v.business !== null && !Array.isArray(v.business))) violations.push("business has invalid type");
 if (v.business !== undefined && v.business !== null) violations.push(...hub_business_v1.validateBusiness(v.business).map((message) => "business: " + message));
+if (v.maintenance !== undefined && v.maintenance !== null && !(typeof v.maintenance === "boolean")) violations.push("maintenance has invalid type");
 return violations;
 }
 
@@ -244,6 +284,9 @@ return out;
 
 export function validateIndustryType(v: IndustryType): string[] {
 const violations: string[] = [];
+if (v.slug !== undefined && v.slug !== null && !(typeof v.slug === "string")) violations.push("slug has invalid type");
+if (v.label !== undefined && v.label !== null && !(typeof v.label === "string")) violations.push("label has invalid type");
+if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
 return violations;
 }
 
@@ -269,6 +312,8 @@ return out;
 
 export function validateIndustryGroup(v: IndustryGroup): string[] {
 const violations: string[] = [];
+if (v.category !== undefined && v.category !== null && !(typeof v.category === "string")) violations.push("category has invalid type");
+if (v.types !== undefined && v.types !== null && !(Array.isArray(v.types) && (v.types).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("types has invalid type");
 if (v.types !== undefined && v.types !== null) for (const item of v.types) violations.push(...validateIndustryType(item).map((message) => "types: " + message));
 return violations;
 }
@@ -311,6 +356,7 @@ return out;
 
 export function validateGetIndustriesResponse(v: GetIndustriesResponse): string[] {
 const violations: string[] = [];
+if (v.groups !== undefined && v.groups !== null && !(Array.isArray(v.groups) && (v.groups).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("groups has invalid type");
 if (v.groups !== undefined && v.groups !== null) for (const item of v.groups) violations.push(...validateIndustryGroup(item).map((message) => "groups: " + message));
 return violations;
 }
@@ -418,6 +464,35 @@ return out;
 
 export function validateUpdateConfigRequest(v: UpdateConfigRequest): string[] {
 const violations: string[] = [];
+if (v.siteName !== undefined && v.siteName !== null && !(typeof v.siteName === "string")) violations.push("site_name has invalid type");
+if (v.logoUrl !== undefined && v.logoUrl !== null && !(typeof v.logoUrl === "string")) violations.push("logo_url has invalid type");
+if (v.faviconUrl !== undefined && v.faviconUrl !== null && !(typeof v.faviconUrl === "string")) violations.push("favicon_url has invalid type");
+if (v.contactEmail !== undefined && v.contactEmail !== null && !(typeof v.contactEmail === "string")) violations.push("contact_email has invalid type");
+if (v.contactNumber !== undefined && v.contactNumber !== null && !(typeof v.contactNumber === "string")) violations.push("contact_number has invalid type");
+if (v.senderEmail !== undefined && v.senderEmail !== null && !(typeof v.senderEmail === "string")) violations.push("sender_email has invalid type");
+if (v.emailProvider !== undefined && v.emailProvider !== null && !(typeof v.emailProvider === "string")) violations.push("email_provider has invalid type");
+if (v.senderName !== undefined && v.senderName !== null && !(typeof v.senderName === "string")) violations.push("sender_name has invalid type");
+if (v.replyToEmail !== undefined && v.replyToEmail !== null && !(typeof v.replyToEmail === "string")) violations.push("reply_to_email has invalid type");
+if (v.emailNotificationsEnabled !== undefined && v.emailNotificationsEnabled !== null && !(typeof v.emailNotificationsEnabled === "boolean")) violations.push("email_notifications_enabled has invalid type");
+if (v.smtpHost !== undefined && v.smtpHost !== null && !(typeof v.smtpHost === "string")) violations.push("smtp_host has invalid type");
+if (v.smtpPort !== undefined && v.smtpPort !== null && !(typeof v.smtpPort === "number" && Number.isInteger(v.smtpPort) && v.smtpPort >= -2147483648 && v.smtpPort <= 2147483647)) violations.push("smtp_port has invalid type");
+if (v.smtpUsername !== undefined && v.smtpUsername !== null && !(typeof v.smtpUsername === "string")) violations.push("smtp_username has invalid type");
+if (v.smtpPassword !== undefined && v.smtpPassword !== null && !(typeof v.smtpPassword === "string")) violations.push("smtp_password has invalid type");
+if (v.website !== undefined && v.website !== null && !(typeof v.website === "string")) violations.push("website has invalid type");
+if (v.mapsUrl !== undefined && v.mapsUrl !== null && !(typeof v.mapsUrl === "string")) violations.push("maps_url has invalid type");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.city !== undefined && v.city !== null && !(typeof v.city === "string")) violations.push("city has invalid type");
+if (v.zipcode !== undefined && v.zipcode !== null && !(typeof v.zipcode === "string")) violations.push("zipcode has invalid type");
+if (v.country !== undefined && v.country !== null && !(typeof v.country === "string")) violations.push("country has invalid type");
+if (v.instagram !== undefined && v.instagram !== null && !(typeof v.instagram === "string")) violations.push("instagram has invalid type");
+if (v.maintenanceMode !== undefined && v.maintenanceMode !== null && !(typeof v.maintenanceMode === "boolean")) violations.push("maintenance_mode has invalid type");
+if (v.maintenanceNotice !== undefined && v.maintenanceNotice !== null && !(typeof v.maintenanceNotice === "string")) violations.push("maintenance_notice has invalid type");
+if (v.addonsEnabled !== undefined && v.addonsEnabled !== null && !(typeof v.addonsEnabled === "boolean")) violations.push("addons_enabled has invalid type");
+if (v.enableReviews !== undefined && v.enableReviews !== null && !(typeof v.enableReviews === "boolean")) violations.push("enable_reviews has invalid type");
+if (v.enableWishlist !== undefined && v.enableWishlist !== null && !(typeof v.enableWishlist === "boolean")) violations.push("enable_wishlist has invalid type");
+if (v.enableNewsletterSignup !== undefined && v.enableNewsletterSignup !== null && !(typeof v.enableNewsletterSignup === "boolean")) violations.push("enable_newsletter_signup has invalid type");
+if (v.aboutContent !== undefined && v.aboutContent !== null && !(typeof v.aboutContent === "string")) violations.push("about_content has invalid type");
+if (v.footerSubText !== undefined && v.footerSubText !== null && !(typeof v.footerSubText === "string")) violations.push("footer_sub_text has invalid type");
 return violations;
 }
 
@@ -443,6 +518,8 @@ return out;
 
 export function validateUpdateConfigResponse(v: UpdateConfigResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
+if (v.config !== undefined && v.config !== null && !(typeof v.config === "object" && v.config !== null && !Array.isArray(v.config))) violations.push("config has invalid type");
 if (v.config !== undefined && v.config !== null) violations.push(...validateConfigPayload(v.config).map((message) => "config: " + message));
 return violations;
 }
@@ -466,6 +543,7 @@ return out;
 
 export function validateSendTestEmailRequest(v: SendTestEmailRequest): string[] {
 const violations: string[] = [];
+if (v.to !== undefined && v.to !== null && !(typeof v.to === "string")) violations.push("to has invalid type");
 if (!(v.to !== undefined && v.to !== null) || v.to === "") violations.push("to is required");
 return violations;
 }
@@ -492,6 +570,8 @@ return out;
 
 export function validateSendTestEmailResponse(v: SendTestEmailResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
+if (v.queued !== undefined && v.queued !== null && !(typeof v.queued === "boolean")) violations.push("queued has invalid type");
 return violations;
 }
 
@@ -538,6 +618,15 @@ return out;
 
 export function validateCustomDomain(v: CustomDomain): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.domain !== undefined && v.domain !== null && !(typeof v.domain === "string")) violations.push("domain has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.verificationToken !== undefined && v.verificationToken !== null && !(typeof v.verificationToken === "string")) violations.push("verification_token has invalid type");
+if (v.sslStatus !== undefined && v.sslStatus !== null && !(typeof v.sslStatus === "string")) violations.push("ssl_status has invalid type");
+if (v.verifiedAt !== undefined && v.verifiedAt !== null && !(typeof v.verifiedAt === "string")) violations.push("verified_at has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -579,6 +668,7 @@ return out;
 
 export function validateGetCustomDomainResponse(v: GetCustomDomainResponse): string[] {
 const violations: string[] = [];
+if (v.domain !== undefined && v.domain !== null && !(typeof v.domain === "object" && v.domain !== null && !Array.isArray(v.domain))) violations.push("domain has invalid type");
 if (v.domain !== undefined && v.domain !== null) violations.push(...validateCustomDomain(v.domain).map((message) => "domain: " + message));
 return violations;
 }
@@ -602,6 +692,7 @@ return out;
 
 export function validateRegisterCustomDomainRequest(v: RegisterCustomDomainRequest): string[] {
 const violations: string[] = [];
+if (v.domain !== undefined && v.domain !== null && !(typeof v.domain === "string")) violations.push("domain has invalid type");
 if (!(v.domain !== undefined && v.domain !== null) || v.domain === "") violations.push("domain is required");
 return violations;
 }
@@ -625,6 +716,7 @@ return out;
 
 export function validateRegisterCustomDomainResponse(v: RegisterCustomDomainResponse): string[] {
 const violations: string[] = [];
+if (v.domain !== undefined && v.domain !== null && !(typeof v.domain === "object" && v.domain !== null && !Array.isArray(v.domain))) violations.push("domain has invalid type");
 if (v.domain !== undefined && v.domain !== null) violations.push(...validateCustomDomain(v.domain).map((message) => "domain: " + message));
 return violations;
 }
@@ -648,6 +740,7 @@ return out;
 
 export function validateVerifyCustomDomainRequest(v: VerifyCustomDomainRequest): string[] {
 const violations: string[] = [];
+if (v.verificationToken !== undefined && v.verificationToken !== null && !(typeof v.verificationToken === "string")) violations.push("verification_token has invalid type");
 if (!(v.verificationToken !== undefined && v.verificationToken !== null) || v.verificationToken === "") violations.push("verification_token is required");
 return violations;
 }
@@ -671,6 +764,7 @@ return out;
 
 export function validateVerifyCustomDomainResponse(v: VerifyCustomDomainResponse): string[] {
 const violations: string[] = [];
+if (v.domain !== undefined && v.domain !== null && !(typeof v.domain === "object" && v.domain !== null && !Array.isArray(v.domain))) violations.push("domain has invalid type");
 if (v.domain !== undefined && v.domain !== null) violations.push(...validateCustomDomain(v.domain).map((message) => "domain: " + message));
 return violations;
 }
@@ -713,6 +807,7 @@ return out;
 
 export function validateRemoveCustomDomainResponse(v: RemoveCustomDomainResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

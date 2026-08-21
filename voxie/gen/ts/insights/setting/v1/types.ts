@@ -31,6 +31,11 @@ return out;
 
 export function validateInsightsSettings(v: InsightsSettings): string[] {
 const violations: string[] = [];
+if (v.defaultPeriod !== undefined && v.defaultPeriod !== null && !(typeof v.defaultPeriod === "string")) violations.push("default_period has invalid type");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.comparePrevious !== undefined && v.comparePrevious !== null && !(typeof v.comparePrevious === "boolean")) violations.push("compare_previous has invalid type");
+if (v.dashboardWidgets !== undefined && v.dashboardWidgets !== null && !(Array.isArray(v.dashboardWidgets) && (v.dashboardWidgets).every((item: any) => typeof item === "string"))) violations.push("dashboard_widgets has invalid type");
+if (v.favoriteReports !== undefined && v.favoriteReports !== null && !(Array.isArray(v.favoriteReports) && (v.favoriteReports).every((item: any) => typeof item === "string"))) violations.push("favorite_reports has invalid type");
 return violations;
 }
 
@@ -72,6 +77,7 @@ return out;
 
 export function validateGetInsightsSettingsResponse(v: GetInsightsSettingsResponse): string[] {
 const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null && !(typeof v.settings === "object" && v.settings !== null && !Array.isArray(v.settings))) violations.push("settings has invalid type");
 if (v.settings !== undefined && v.settings !== null) violations.push(...validateInsightsSettings(v.settings).map((message) => "settings: " + message));
 return violations;
 }
@@ -95,6 +101,7 @@ return out;
 
 export function validateUpdateInsightsSettingsRequest(v: UpdateInsightsSettingsRequest): string[] {
 const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null && !(typeof v.settings === "object" && v.settings !== null && !Array.isArray(v.settings))) violations.push("settings has invalid type");
 if (!(v.settings !== undefined && v.settings !== null)) violations.push("settings is required");
 if (v.settings !== undefined && v.settings !== null) violations.push(...validateInsightsSettings(v.settings).map((message) => "settings: " + message));
 return violations;
@@ -119,6 +126,7 @@ return out;
 
 export function validateUpdateInsightsSettingsResponse(v: UpdateInsightsSettingsResponse): string[] {
 const violations: string[] = [];
+if (v.settings !== undefined && v.settings !== null && !(typeof v.settings === "object" && v.settings !== null && !Array.isArray(v.settings))) violations.push("settings has invalid type");
 if (v.settings !== undefined && v.settings !== null) violations.push(...validateInsightsSettings(v.settings).map((message) => "settings: " + message));
 return violations;
 }

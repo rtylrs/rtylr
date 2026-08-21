@@ -8,19 +8,8 @@ import (
 )
 
 var emailPattern = regexp.MustCompile(`^[^@\s]+@[^@\s]+\.[^@\s]+$`)
-var uuidPattern = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
-var uriPattern = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9+.-]*://[^\s]+$`)
-var LookupBusinessBySlugRequestSlugPattern = regexp.MustCompile("^[a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?$")
-var SetSlugRequestSlugPattern = regexp.MustCompile("^[a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?$")
-
-func inSet(v string, allowed ...string) bool {
-	for _, a := range allowed {
-		if v == a {
-			return true
-		}
-	}
-	return false
-}
+var LookupBusinessBySlugRequestSlugPattern = regexp.MustCompile("^[a-z0-9]$|^[a-z0-9][a-z0-9-]{0,78}[a-z0-9]$")
+var SetSlugRequestSlugPattern = regexp.MustCompile("^[a-z0-9]$|^[a-z0-9][a-z0-9-]{0,78}[a-z0-9]$")
 
 func (m *Business) Validate() error {
 	if m == nil {

@@ -40,6 +40,14 @@ return out;
 
 export function validateLoyaltyConfig(v: LoyaltyConfig): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.isEnabled !== undefined && v.isEnabled !== null && !(typeof v.isEnabled === "boolean")) violations.push("is_enabled has invalid type");
+if (v.pointsPerDollar !== undefined && v.pointsPerDollar !== null && !(typeof v.pointsPerDollar === "number" && Number.isFinite(v.pointsPerDollar))) violations.push("points_per_dollar has invalid type");
+if (v.redemptionRate !== undefined && v.redemptionRate !== null && !(typeof v.redemptionRate === "number" && Number.isFinite(v.redemptionRate))) violations.push("redemption_rate has invalid type");
+if (v.minRedeemPoints !== undefined && v.minRedeemPoints !== null && !(typeof v.minRedeemPoints === "number" && Number.isInteger(v.minRedeemPoints) && v.minRedeemPoints >= -2147483648 && v.minRedeemPoints <= 2147483647)) violations.push("min_redeem_points has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -86,6 +94,15 @@ return out;
 
 export function validateLoyaltyTransaction(v: LoyaltyTransaction): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
+if (v.type !== undefined && v.type !== null && !(typeof v.type === "string")) violations.push("type has invalid type");
+if (v.points !== undefined && v.points !== null && !(typeof v.points === "number" && Number.isInteger(v.points) && v.points >= -2147483648 && v.points <= 2147483647)) violations.push("points has invalid type");
+if (v.balanceAfter !== undefined && v.balanceAfter !== null && !(typeof v.balanceAfter === "number" && Number.isInteger(v.balanceAfter) && v.balanceAfter >= -2147483648 && v.balanceAfter <= 2147483647)) violations.push("balance_after has invalid type");
+if (v.note !== undefined && v.note !== null && !(typeof v.note === "string")) violations.push("note has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
 return violations;
 }
 
@@ -114,10 +131,13 @@ return out;
 
 export function validateEarnPointsRequest(v: EarnPointsRequest): string[] {
 const violations: string[] = [];
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
 if (!(v.customerId !== undefined && v.customerId !== null)) violations.push("customer_id is required");
 if (v.customerId !== undefined && v.customerId !== null && !(Number(v.customerId) > 0)) violations.push("customer_id violates @gt");
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
 if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (v.points !== undefined && v.points !== null && !(typeof v.points === "number" && Number.isInteger(v.points) && v.points >= -2147483648 && v.points <= 2147483647)) violations.push("points has invalid type");
 if (!(v.points !== undefined && v.points !== null)) violations.push("points is required");
 if (v.points !== undefined && v.points !== null && !(Number(v.points) > 0)) violations.push("points violates @gt");
 return violations;
@@ -145,6 +165,8 @@ return out;
 
 export function validateEarnPointsResponse(v: EarnPointsResponse): string[] {
 const violations: string[] = [];
+if (v.transactionId !== undefined && v.transactionId !== null && !(typeof v.transactionId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.transactionId))) violations.push("transaction_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -167,6 +189,7 @@ return out;
 
 export function validateGetLoyaltyBalanceRequest(v: GetLoyaltyBalanceRequest): string[] {
 const violations: string[] = [];
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
 if (!(v.customerId !== undefined && v.customerId !== null)) violations.push("customer_id is required");
 if (v.customerId !== undefined && v.customerId !== null && !(Number(v.customerId) > 0)) violations.push("customer_id violates @gt");
 return violations;
@@ -194,6 +217,8 @@ return out;
 
 export function validateGetLoyaltyBalanceResponse(v: GetLoyaltyBalanceResponse): string[] {
 const violations: string[] = [];
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
+if (v.balance !== undefined && v.balance !== null && !(typeof v.balance === "number" && Number.isInteger(v.balance) && v.balance >= -2147483648 && v.balance <= 2147483647)) violations.push("balance has invalid type");
 return violations;
 }
 
@@ -235,6 +260,7 @@ return out;
 
 export function validateGetLoyaltyConfigResponse(v: GetLoyaltyConfigResponse): string[] {
 const violations: string[] = [];
+if (v.config !== undefined && v.config !== null && !(typeof v.config === "object" && v.config !== null && !Array.isArray(v.config))) violations.push("config has invalid type");
 if (v.config !== undefined && v.config !== null) violations.push(...validateLoyaltyConfig(v.config).map((message) => "config: " + message));
 return violations;
 }
@@ -258,6 +284,7 @@ return out;
 
 export function validateListLoyaltyTransactionsRequest(v: ListLoyaltyTransactionsRequest): string[] {
 const violations: string[] = [];
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
 return violations;
 }
 
@@ -280,6 +307,7 @@ return out;
 
 export function validateListLoyaltyTransactionsResponse(v: ListLoyaltyTransactionsResponse): string[] {
 const violations: string[] = [];
+if (v.transactions !== undefined && v.transactions !== null && !(Array.isArray(v.transactions) && (v.transactions).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("transactions has invalid type");
 if (v.transactions !== undefined && v.transactions !== null) for (const item of v.transactions) violations.push(...validateLoyaltyTransaction(item).map((message) => "transactions: " + message));
 return violations;
 }
@@ -306,8 +334,10 @@ return out;
 
 export function validateRedeemPointsRequest(v: RedeemPointsRequest): string[] {
 const violations: string[] = [];
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
 if (!(v.customerId !== undefined && v.customerId !== null)) violations.push("customer_id is required");
 if (v.customerId !== undefined && v.customerId !== null && !(Number(v.customerId) > 0)) violations.push("customer_id violates @gt");
+if (v.points !== undefined && v.points !== null && !(typeof v.points === "number" && Number.isInteger(v.points) && v.points >= -2147483648 && v.points <= 2147483647)) violations.push("points has invalid type");
 if (!(v.points !== undefined && v.points !== null)) violations.push("points is required");
 if (v.points !== undefined && v.points !== null && !(Number(v.points) > 0)) violations.push("points violates @gt");
 return violations;
@@ -335,6 +365,8 @@ return out;
 
 export function validateRedeemPointsResponse(v: RedeemPointsResponse): string[] {
 const violations: string[] = [];
+if (v.transactionId !== undefined && v.transactionId !== null && !(typeof v.transactionId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.transactionId))) violations.push("transaction_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -366,9 +398,13 @@ return out;
 
 export function validateUpdateLoyaltyConfigRequest(v: UpdateLoyaltyConfigRequest): string[] {
 const violations: string[] = [];
+if (v.isEnabled !== undefined && v.isEnabled !== null && !(typeof v.isEnabled === "boolean")) violations.push("is_enabled has invalid type");
+if (v.pointsPerDollar !== undefined && v.pointsPerDollar !== null && !(typeof v.pointsPerDollar === "number" && Number.isFinite(v.pointsPerDollar))) violations.push("points_per_dollar has invalid type");
 if (!(v.pointsPerDollar !== undefined && v.pointsPerDollar !== null)) violations.push("points_per_dollar is required");
 if (v.pointsPerDollar !== undefined && v.pointsPerDollar !== null && !(Number(v.pointsPerDollar) > 0)) violations.push("points_per_dollar violates @gt");
+if (v.redemptionRate !== undefined && v.redemptionRate !== null && !(typeof v.redemptionRate === "number" && Number.isFinite(v.redemptionRate))) violations.push("redemption_rate has invalid type");
 if (v.redemptionRate !== undefined && v.redemptionRate !== null && !(Number(v.redemptionRate) >= 0)) violations.push("redemption_rate violates @gte");
+if (v.minRedeemPoints !== undefined && v.minRedeemPoints !== null && !(typeof v.minRedeemPoints === "number" && Number.isInteger(v.minRedeemPoints) && v.minRedeemPoints >= -2147483648 && v.minRedeemPoints <= 2147483647)) violations.push("min_redeem_points has invalid type");
 if (!(v.minRedeemPoints !== undefined && v.minRedeemPoints !== null)) violations.push("min_redeem_points is required");
 if (v.minRedeemPoints !== undefined && v.minRedeemPoints !== null && !(Number(v.minRedeemPoints) > 0)) violations.push("min_redeem_points violates @gt");
 return violations;
@@ -393,6 +429,7 @@ return out;
 
 export function validateUpdateLoyaltyConfigResponse(v: UpdateLoyaltyConfigResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

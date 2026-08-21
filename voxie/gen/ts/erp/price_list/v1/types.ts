@@ -37,6 +37,13 @@ return out;
 
 export function validatePriceList(v: PriceList): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.isDefault !== undefined && v.isDefault !== null && !(typeof v.isDefault === "boolean")) violations.push("is_default has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -65,7 +72,10 @@ return out;
 
 export function validateCreatePriceListRequest(v: CreatePriceListRequest): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
+if (v.isDefault !== undefined && v.isDefault !== null && !(typeof v.isDefault === "boolean")) violations.push("is_default has invalid type");
 return violations;
 }
 
@@ -91,6 +101,8 @@ return out;
 
 export function validateCreatePriceListResponse(v: CreatePriceListResponse): string[] {
 const violations: string[] = [];
+if (v.priceListId !== undefined && v.priceListId !== null && !(typeof v.priceListId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.priceListId))) violations.push("price_list_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -132,6 +144,7 @@ return out;
 
 export function validateListPriceListsResponse(v: ListPriceListsResponse): string[] {
 const violations: string[] = [];
+if (v.priceLists !== undefined && v.priceLists !== null && !(Array.isArray(v.priceLists) && (v.priceLists).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("price_lists has invalid type");
 if (v.priceLists !== undefined && v.priceLists !== null) for (const item of v.priceLists) violations.push(...validatePriceList(item).map((message) => "price_lists: " + message));
 return violations;
 }

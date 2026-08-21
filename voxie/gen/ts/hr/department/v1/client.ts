@@ -2,6 +2,42 @@
 import type { ListDepartmentsRequest, ListDepartmentsResponse, CreateDepartmentRequest, CreateDepartmentResponse, UpdateDepartmentRequest, UpdateDepartmentResponse, DeleteDepartmentRequest, DeleteDepartmentResponse } from "./types";
 import { encodeListDepartmentsRequest, validateListDepartmentsRequest, decodeListDepartmentsResponse, encodeCreateDepartmentRequest, validateCreateDepartmentRequest, decodeCreateDepartmentResponse, encodeUpdateDepartmentRequest, validateUpdateDepartmentRequest, decodeUpdateDepartmentResponse, encodeDeleteDepartmentRequest, validateDeleteDepartmentRequest, decodeDeleteDepartmentResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface DepartmentServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class DepartmentServiceClient {
@@ -46,11 +84,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListDepartmentsResponse(await res.json());
+return decodeListDepartmentsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createDepartment(req: CreateDepartmentRequest): Promise<CreateDepartmentResponse> {
@@ -64,11 +102,11 @@ body: JSON.stringify(encodeCreateDepartmentRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateDepartmentResponse(await res.json());
+return decodeCreateDepartmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateDepartment(req: UpdateDepartmentRequest): Promise<UpdateDepartmentResponse> {
@@ -83,11 +121,11 @@ body: JSON.stringify(encodeUpdateDepartmentRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateDepartmentResponse(await res.json());
+return decodeUpdateDepartmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteDepartment(req: DeleteDepartmentRequest): Promise<DeleteDepartmentResponse> {
@@ -104,11 +142,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteDepartmentResponse(await res.json());
+return decodeDeleteDepartmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

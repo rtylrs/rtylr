@@ -19,6 +19,7 @@ return out;
 
 export function validateUpdateOrderItemStatusBody(v: UpdateOrderItemStatusBody): string[] {
 const violations: string[] = [];
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
 return violations;
 }
@@ -48,10 +49,13 @@ return out;
 
 export function validateUpdateOrderItemStatusRequest(v: UpdateOrderItemStatusRequest): string[] {
 const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
 if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (v.itemId !== undefined && v.itemId !== null && !(typeof v.itemId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.itemId))) violations.push("item_id has invalid type");
 if (!(v.itemId !== undefined && v.itemId !== null)) violations.push("item_id is required");
 if (v.itemId !== undefined && v.itemId !== null && !(Number(v.itemId) > 0)) violations.push("item_id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateOrderItemStatusBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -75,6 +79,7 @@ return out;
 
 export function validateUpdateOrderItemStatusResponse(v: UpdateOrderItemStatusResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -100,8 +105,10 @@ return out;
 
 export function validateVoidOrderItemRequest(v: VoidOrderItemRequest): string[] {
 const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
 if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (v.itemId !== undefined && v.itemId !== null && !(typeof v.itemId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.itemId))) violations.push("item_id has invalid type");
 if (!(v.itemId !== undefined && v.itemId !== null)) violations.push("item_id is required");
 if (v.itemId !== undefined && v.itemId !== null && !(Number(v.itemId) > 0)) violations.push("item_id violates @gt");
 return violations;
@@ -126,6 +133,7 @@ return out;
 
 export function validateVoidOrderItemResponse(v: VoidOrderItemResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 

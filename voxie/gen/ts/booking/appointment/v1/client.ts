@@ -2,6 +2,42 @@
 import type { ListAppointmentsRequest, ListAppointmentsResponse, ListTodayAppointmentsRequest, ListTodayAppointmentsResponse, CreateAppointmentRequest, CreateAppointmentResponse, UpdateAppointmentRequest, UpdateAppointmentResponse, DeleteAppointmentRequest, DeleteAppointmentResponse } from "./types";
 import { encodeListAppointmentsRequest, validateListAppointmentsRequest, decodeListAppointmentsResponse, encodeListTodayAppointmentsRequest, validateListTodayAppointmentsRequest, decodeListTodayAppointmentsResponse, encodeCreateAppointmentRequest, validateCreateAppointmentRequest, decodeCreateAppointmentResponse, encodeUpdateAppointmentRequest, validateUpdateAppointmentRequest, decodeUpdateAppointmentResponse, encodeDeleteAppointmentRequest, validateDeleteAppointmentRequest, decodeDeleteAppointmentResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface AppointmentServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class AppointmentServiceClient {
@@ -46,11 +84,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListAppointmentsResponse(await res.json());
+return decodeListAppointmentsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listTodayAppointments(req: ListTodayAppointmentsRequest): Promise<ListTodayAppointmentsResponse> {
@@ -66,11 +104,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTodayAppointmentsResponse(await res.json());
+return decodeListTodayAppointmentsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createAppointment(req: CreateAppointmentRequest): Promise<CreateAppointmentResponse> {
@@ -84,11 +122,11 @@ body: JSON.stringify(encodeCreateAppointmentRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateAppointmentResponse(await res.json());
+return decodeCreateAppointmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateAppointment(req: UpdateAppointmentRequest): Promise<UpdateAppointmentResponse> {
@@ -103,11 +141,11 @@ body: JSON.stringify(encodeUpdateAppointmentRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateAppointmentResponse(await res.json());
+return decodeUpdateAppointmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteAppointment(req: DeleteAppointmentRequest): Promise<DeleteAppointmentResponse> {
@@ -124,11 +162,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteAppointmentResponse(await res.json());
+return decodeDeleteAppointmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

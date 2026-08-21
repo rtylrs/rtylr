@@ -68,6 +68,23 @@ return out;
 
 export function validateProject(v: Project): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
+if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
+if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
+if (v.dueDate !== undefined && v.dueDate !== null && !(typeof v.dueDate === "string")) violations.push("due_date has invalid type");
+if (v.createdBy !== undefined && v.createdBy !== null && !(typeof v.createdBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.createdBy))) violations.push("created_by has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
+if (v.taskCount !== undefined && v.taskCount !== null && !(typeof v.taskCount === "number" && Number.isInteger(v.taskCount) && v.taskCount >= -2147483648 && v.taskCount <= 2147483647)) violations.push("task_count has invalid type");
+if (v.completedCount !== undefined && v.completedCount !== null && !(typeof v.completedCount === "number" && Number.isInteger(v.completedCount) && v.completedCount >= -2147483648 && v.completedCount <= 2147483647)) violations.push("completed_count has invalid type");
+if (v.memberCount !== undefined && v.memberCount !== null && !(typeof v.memberCount === "number" && Number.isInteger(v.memberCount) && v.memberCount >= -2147483648 && v.memberCount <= 2147483647)) violations.push("member_count has invalid type");
+if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
 return violations;
 }
 
@@ -111,6 +128,14 @@ return out;
 
 export function validateProjectColumn(v: ProjectColumn): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(typeof v.sortOrder === "number" && Number.isInteger(v.sortOrder) && v.sortOrder >= -2147483648 && v.sortOrder <= 2147483647)) violations.push("sort_order has invalid type");
+if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");
+if (v.updatedAt !== undefined && v.updatedAt !== null && !(typeof v.updatedAt === "string")) violations.push("updated_at has invalid type");
 return violations;
 }
 
@@ -154,6 +179,14 @@ return out;
 
 export function validateProjectMember(v: ProjectMember): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
+if (v.addedBy !== undefined && v.addedBy !== null && !(typeof v.addedBy === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.addedBy))) violations.push("added_by has invalid type");
+if (v.addedAt !== undefined && v.addedAt !== null && !(typeof v.addedAt === "string")) violations.push("added_at has invalid type");
 return violations;
 }
 
@@ -188,6 +221,11 @@ return out;
 
 export function validateListProjectsRequest(v: ListProjectsRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -213,7 +251,9 @@ return out;
 
 export function validateListProjectsResponse(v: ListProjectsResponse): string[] {
 const violations: string[] = [];
+if (v.projects !== undefined && v.projects !== null && !(Array.isArray(v.projects) && (v.projects).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("projects has invalid type");
 if (v.projects !== undefined && v.projects !== null) for (const item of v.projects) violations.push(...validateProject(item).map((message) => "projects: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -255,12 +295,19 @@ return out;
 
 export function validateCreateProjectRequest(v: CreateProjectRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
 if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
 if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
 if (!(v.icon !== undefined && v.icon !== null) || v.icon === "") violations.push("icon is required");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
 if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
+if (v.dueDate !== undefined && v.dueDate !== null && !(typeof v.dueDate === "string")) violations.push("due_date has invalid type");
 return violations;
 }
 
@@ -283,6 +330,7 @@ return out;
 
 export function validateCreateProjectResponse(v: CreateProjectResponse): string[] {
 const violations: string[] = [];
+if (v.project !== undefined && v.project !== null && !(typeof v.project === "object" && v.project !== null && !Array.isArray(v.project))) violations.push("project has invalid type");
 if (v.project !== undefined && v.project !== null) violations.push(...validateProject(v.project).map((message) => "project: " + message));
 return violations;
 }
@@ -324,12 +372,19 @@ return out;
 
 export function validateUpdateProjectBody(v: UpdateProjectBody): string[] {
 const violations: string[] = [];
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
+if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
 if (!(v.icon !== undefined && v.icon !== null) || v.icon === "") violations.push("icon is required");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
 if (!(v.color !== undefined && v.color !== null) || v.color === "") violations.push("color is required");
+if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
+if (v.startDate !== undefined && v.startDate !== null && !(typeof v.startDate === "string")) violations.push("start_date has invalid type");
 if (!(v.startDate !== undefined && v.startDate !== null) || v.startDate === "") violations.push("start_date is required");
+if (v.dueDate !== undefined && v.dueDate !== null && !(typeof v.dueDate === "string")) violations.push("due_date has invalid type");
 if (!(v.dueDate !== undefined && v.dueDate !== null) || v.dueDate === "") violations.push("due_date is required");
 return violations;
 }
@@ -356,8 +411,10 @@ return out;
 
 export function validateUpdateProjectRequest(v: UpdateProjectRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
 if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateProjectBody(v.body).map((message) => "body: " + message));
 return violations;
 }
@@ -381,6 +438,7 @@ return out;
 
 export function validateUpdateProjectResponse(v: UpdateProjectResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -403,6 +461,7 @@ return out;
 
 export function validateDeleteProjectRequest(v: DeleteProjectRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -427,6 +486,7 @@ return out;
 
 export function validateDeleteProjectResponse(v: DeleteProjectResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -461,8 +521,13 @@ return out;
 
 export function validateListProjectColumnsRequest(v: ListProjectColumnsRequest): string[] {
 const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
 if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
 if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -488,7 +553,9 @@ return out;
 
 export function validateListProjectColumnsResponse(v: ListProjectColumnsResponse): string[] {
 const violations: string[] = [];
+if (v.columns !== undefined && v.columns !== null && !(Array.isArray(v.columns) && (v.columns).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("columns has invalid type");
 if (v.columns !== undefined && v.columns !== null) for (const item of v.columns) violations.push(...validateProjectColumn(item).map((message) => "columns: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -524,9 +591,14 @@ return out;
 
 export function validateCreateProjectColumnRequest(v: CreateProjectColumnRequest): string[] {
 const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
 if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
 if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(typeof v.sortOrder === "number" && Number.isInteger(v.sortOrder) && v.sortOrder >= -2147483648 && v.sortOrder <= 2147483647)) violations.push("sort_order has invalid type");
 return violations;
 }
 
@@ -549,6 +621,7 @@ return out;
 
 export function validateCreateProjectColumnResponse(v: CreateProjectColumnResponse): string[] {
 const violations: string[] = [];
+if (v.column !== undefined && v.column !== null && !(typeof v.column === "object" && v.column !== null && !Array.isArray(v.column))) violations.push("column has invalid type");
 if (v.column !== undefined && v.column !== null) violations.push(...validateProjectColumn(v.column).map((message) => "column: " + message));
 return violations;
 }
@@ -581,9 +654,13 @@ return out;
 
 export function validateUpdateProjectColumnRequest(v: UpdateProjectColumnRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
+if (v.color !== undefined && v.color !== null && !(typeof v.color === "string")) violations.push("color has invalid type");
+if (v.sortOrder !== undefined && v.sortOrder !== null && !(typeof v.sortOrder === "number" && Number.isInteger(v.sortOrder) && v.sortOrder >= -2147483648 && v.sortOrder <= 2147483647)) violations.push("sort_order has invalid type");
 return violations;
 }
 
@@ -606,6 +683,7 @@ return out;
 
 export function validateUpdateProjectColumnResponse(v: UpdateProjectColumnResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -628,6 +706,7 @@ return out;
 
 export function validateDeleteProjectColumnRequest(v: DeleteProjectColumnRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -652,6 +731,7 @@ return out;
 
 export function validateDeleteProjectColumnResponse(v: DeleteProjectColumnResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -677,8 +757,10 @@ return out;
 
 export function validateMoveTaskToColumnRequest(v: MoveTaskToColumnRequest): string[] {
 const violations: string[] = [];
+if (v.taskId !== undefined && v.taskId !== null && !(typeof v.taskId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.taskId))) violations.push("task_id has invalid type");
 if (!(v.taskId !== undefined && v.taskId !== null)) violations.push("task_id is required");
 if (v.taskId !== undefined && v.taskId !== null && !(Number(v.taskId) > 0)) violations.push("task_id violates @gt");
+if (v.columnId !== undefined && v.columnId !== null && !(typeof v.columnId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.columnId))) violations.push("column_id has invalid type");
 return violations;
 }
 
@@ -701,6 +783,7 @@ return out;
 
 export function validateMoveTaskToColumnResponse(v: MoveTaskToColumnResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -735,8 +818,13 @@ return out;
 
 export function validateListProjectMembersRequest(v: ListProjectMembersRequest): string[] {
 const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
 if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
 if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isInteger(v.page) && v.page >= -2147483648 && v.page <= 2147483647)) violations.push("page has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
+if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
 return violations;
 }
 
@@ -762,7 +850,9 @@ return out;
 
 export function validateListProjectMembersResponse(v: ListProjectMembersResponse): string[] {
 const violations: string[] = [];
+if (v.members !== undefined && v.members !== null && !(Array.isArray(v.members) && (v.members).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("members has invalid type");
 if (v.members !== undefined && v.members !== null) for (const item of v.members) violations.push(...validateProjectMember(item).map((message) => "members: " + message));
+if (v.pagination !== undefined && v.pagination !== null && !(typeof v.pagination === "object" && v.pagination !== null && !Array.isArray(v.pagination))) violations.push("pagination has invalid type");
 if (v.pagination !== undefined && v.pagination !== null) violations.push(...common_pagination_v1.validatePaginationResponse(v.pagination).map((message) => "pagination: " + message));
 return violations;
 }
@@ -792,10 +882,13 @@ return out;
 
 export function validateAddProjectMemberRequest(v: AddProjectMemberRequest): string[] {
 const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
 if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
 if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
 return violations;
 }
 
@@ -818,6 +911,7 @@ return out;
 
 export function validateAddProjectMemberResponse(v: AddProjectMemberResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -843,8 +937,10 @@ return out;
 
 export function validateRemoveProjectMemberRequest(v: RemoveProjectMemberRequest): string[] {
 const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
 if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
 if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
 return violations;
@@ -869,6 +965,7 @@ return out;
 
 export function validateRemoveProjectMemberResponse(v: RemoveProjectMemberResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -897,10 +994,13 @@ return out;
 
 export function validateUpdateProjectMemberRoleRequest(v: UpdateProjectMemberRoleRequest): string[] {
 const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
 if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
 if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
 if (!(v.role !== undefined && v.role !== null) || v.role === "") violations.push("role is required");
 return violations;
 }
@@ -924,6 +1024,7 @@ return out;
 
 export function validateUpdateProjectMemberRoleResponse(v: UpdateProjectMemberRoleResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -952,9 +1053,12 @@ return out;
 
 export function validateInviteProjectMemberRequest(v: InviteProjectMemberRequest): string[] {
 const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
 if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
 if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
+if (v.role !== undefined && v.role !== null && !(typeof v.role === "string")) violations.push("role has invalid type");
 return violations;
 }
 
@@ -977,6 +1081,7 @@ return out;
 
 export function validateInviteProjectMemberResponse(v: InviteProjectMemberResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -1002,8 +1107,10 @@ return out;
 
 export function validateTransferProjectOwnershipRequest(v: TransferProjectOwnershipRequest): string[] {
 const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
 if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
 if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (v.newOwnerId !== undefined && v.newOwnerId !== null && !(typeof v.newOwnerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.newOwnerId))) violations.push("new_owner_id has invalid type");
 if (!(v.newOwnerId !== undefined && v.newOwnerId !== null)) violations.push("new_owner_id is required");
 if (v.newOwnerId !== undefined && v.newOwnerId !== null && !(Number(v.newOwnerId) > 0)) violations.push("new_owner_id violates @gt");
 return violations;
@@ -1028,6 +1135,7 @@ return out;
 
 export function validateTransferProjectOwnershipResponse(v: TransferProjectOwnershipResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 
@@ -1053,8 +1161,10 @@ return out;
 
 export function validateMoveProjectRequest(v: MoveProjectRequest): string[] {
 const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
 if (!(v.projectId !== undefined && v.projectId !== null)) violations.push("project_id is required");
 if (v.projectId !== undefined && v.projectId !== null && !(Number(v.projectId) > 0)) violations.push("project_id violates @gt");
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
 if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
 if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
 return violations;
@@ -1079,6 +1189,7 @@ return out;
 
 export function validateMoveProjectResponse(v: MoveProjectResponse): string[] {
 const violations: string[] = [];
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

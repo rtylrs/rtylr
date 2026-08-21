@@ -28,6 +28,10 @@ return out;
 
 export function validateMyLocation(v: MyLocation): string[] {
 const violations: string[] = [];
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.address !== undefined && v.address !== null && !(typeof v.address === "string")) violations.push("address has invalid type");
+if (v.phone !== undefined && v.phone !== null && !(typeof v.phone === "string")) violations.push("phone has invalid type");
 return violations;
 }
 
@@ -62,6 +66,11 @@ return out;
 
 export function validateRosterEntry(v: RosterEntry): string[] {
 const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.hasPin !== undefined && v.hasPin !== null && !(typeof v.hasPin === "boolean")) violations.push("has_pin has invalid type");
+if (v.isManager !== undefined && v.isManager !== null && !(typeof v.isManager === "boolean")) violations.push("is_manager has invalid type");
+if (v.posRole !== undefined && v.posRole !== null && !(typeof v.posRole === "string")) violations.push("pos_role has invalid type");
 return violations;
 }
 
@@ -96,6 +105,11 @@ return out;
 
 export function validateMemberLocationEntry(v: MemberLocationEntry): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
+if (v.canManagePosUsers !== undefined && v.canManagePosUsers !== null && !(typeof v.canManagePosUsers === "boolean")) violations.push("can_manage_pos_users has invalid type");
+if (v.canManageTerminals !== undefined && v.canManageTerminals !== null && !(typeof v.canManageTerminals === "boolean")) violations.push("can_manage_terminals has invalid type");
+if (v.canViewReports !== undefined && v.canViewReports !== null && !(typeof v.canViewReports === "boolean")) violations.push("can_view_reports has invalid type");
 return violations;
 }
 
@@ -130,10 +144,15 @@ return out;
 
 export function validateAssignLocationRequest(v: AssignLocationRequest): string[] {
 const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
 if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
 if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
+if (v.canManagePosUsers !== undefined && v.canManagePosUsers !== null && !(typeof v.canManagePosUsers === "boolean")) violations.push("can_manage_pos_users has invalid type");
+if (v.canManageTerminals !== undefined && v.canManageTerminals !== null && !(typeof v.canManageTerminals === "boolean")) violations.push("can_manage_terminals has invalid type");
+if (v.canViewReports !== undefined && v.canViewReports !== null && !(typeof v.canViewReports === "boolean")) violations.push("can_view_reports has invalid type");
 return violations;
 }
 
@@ -156,6 +175,7 @@ return out;
 
 export function validateAssignLocationResponse(v: AssignLocationResponse): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 return violations;
 }
 
@@ -178,6 +198,7 @@ return out;
 
 export function validateGetLocationRosterRequest(v: GetLocationRosterRequest): string[] {
 const violations: string[] = [];
+if (v.locationId !== undefined && v.locationId !== null && !(typeof v.locationId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.locationId))) violations.push("location_id has invalid type");
 if (!(v.locationId !== undefined && v.locationId !== null)) violations.push("location_id is required");
 if (v.locationId !== undefined && v.locationId !== null && !(Number(v.locationId) > 0)) violations.push("location_id violates @gt");
 return violations;
@@ -202,6 +223,7 @@ return out;
 
 export function validateGetLocationRosterResponse(v: GetLocationRosterResponse): string[] {
 const violations: string[] = [];
+if (v.roster !== undefined && v.roster !== null && !(Array.isArray(v.roster) && (v.roster).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("roster has invalid type");
 if (v.roster !== undefined && v.roster !== null) for (const item of v.roster) violations.push(...validateRosterEntry(item).map((message) => "roster: " + message));
 return violations;
 }
@@ -225,6 +247,7 @@ return out;
 
 export function validateGetMemberLocationsRequest(v: GetMemberLocationsRequest): string[] {
 const violations: string[] = [];
+if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (!(v.userId !== undefined && v.userId !== null)) violations.push("user_id is required");
 if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) violations.push("user_id violates @gt");
 return violations;
@@ -249,6 +272,7 @@ return out;
 
 export function validateGetMemberLocationsResponse(v: GetMemberLocationsResponse): string[] {
 const violations: string[] = [];
+if (v.locations !== undefined && v.locations !== null && !(Array.isArray(v.locations) && (v.locations).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("locations has invalid type");
 if (v.locations !== undefined && v.locations !== null) for (const item of v.locations) violations.push(...validateMemberLocationEntry(item).map((message) => "locations: " + message));
 return violations;
 }
@@ -291,6 +315,7 @@ return out;
 
 export function validateGetMyLocationsResponse(v: GetMyLocationsResponse): string[] {
 const violations: string[] = [];
+if (v.locations !== undefined && v.locations !== null && !(Array.isArray(v.locations) && (v.locations).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("locations has invalid type");
 if (v.locations !== undefined && v.locations !== null) for (const item of v.locations) violations.push(...validateMyLocation(item).map((message) => "locations: " + message));
 return violations;
 }
@@ -314,6 +339,7 @@ return out;
 
 export function validateRemoveLocationRequest(v: RemoveLocationRequest): string[] {
 const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
 return violations;
@@ -338,6 +364,7 @@ return out;
 
 export function validateRemoveLocationResponse(v: RemoveLocationResponse): string[] {
 const violations: string[] = [];
+if (v.success !== undefined && v.success !== null && !(typeof v.success === "boolean")) violations.push("success has invalid type");
 return violations;
 }
 

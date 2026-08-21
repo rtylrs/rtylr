@@ -2,6 +2,42 @@
 import type { ListLeaveRequestsRequest, ListLeaveRequestsResponse, CreateLeaveRequestRequest, CreateLeaveRequestResponse, ApproveLeaveRequest, ApproveLeaveResponse, CancelLeaveRequestRequest, CancelLeaveResponse, ListLeaveTypesRequest, ListLeaveTypesResponse, CreateLeaveTypeRequest, CreateLeaveTypeResponse, UpdateLeaveTypeRequest, UpdateLeaveTypeResponse, ListLeaveBalancesRequest, ListLeaveBalancesResponse } from "./types";
 import { encodeListLeaveRequestsRequest, validateListLeaveRequestsRequest, decodeListLeaveRequestsResponse, encodeCreateLeaveRequestRequest, validateCreateLeaveRequestRequest, decodeCreateLeaveRequestResponse, encodeApproveLeaveRequest, validateApproveLeaveRequest, decodeApproveLeaveResponse, encodeCancelLeaveRequestRequest, validateCancelLeaveRequestRequest, decodeCancelLeaveResponse, encodeListLeaveTypesRequest, validateListLeaveTypesRequest, decodeListLeaveTypesResponse, encodeCreateLeaveTypeRequest, validateCreateLeaveTypeRequest, decodeCreateLeaveTypeResponse, encodeUpdateLeaveTypeRequest, validateUpdateLeaveTypeRequest, decodeUpdateLeaveTypeResponse, encodeListLeaveBalancesRequest, validateListLeaveBalancesRequest, decodeListLeaveBalancesResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface LeaveServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class LeaveServiceClient {
@@ -52,11 +90,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListLeaveRequestsResponse(await res.json());
+return decodeListLeaveRequestsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createLeaveRequest(req: CreateLeaveRequestRequest): Promise<CreateLeaveRequestResponse> {
@@ -70,11 +108,11 @@ body: JSON.stringify(encodeCreateLeaveRequestRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateLeaveRequestResponse(await res.json());
+return decodeCreateLeaveRequestResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async approveLeave(req: ApproveLeaveRequest): Promise<ApproveLeaveResponse> {
@@ -89,11 +127,11 @@ body: JSON.stringify(encodeApproveLeaveRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeApproveLeaveResponse(await res.json());
+return decodeApproveLeaveResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async cancelLeaveRequest(req: CancelLeaveRequestRequest): Promise<CancelLeaveResponse> {
@@ -108,11 +146,11 @@ body: JSON.stringify(encodeCancelLeaveRequestRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCancelLeaveResponse(await res.json());
+return decodeCancelLeaveResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listLeaveTypes(req: ListLeaveTypesRequest): Promise<ListLeaveTypesResponse> {
@@ -128,11 +166,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListLeaveTypesResponse(await res.json());
+return decodeListLeaveTypesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createLeaveType(req: CreateLeaveTypeRequest): Promise<CreateLeaveTypeResponse> {
@@ -146,11 +184,11 @@ body: JSON.stringify(encodeCreateLeaveTypeRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateLeaveTypeResponse(await res.json());
+return decodeCreateLeaveTypeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateLeaveType(req: UpdateLeaveTypeRequest): Promise<UpdateLeaveTypeResponse> {
@@ -165,11 +203,11 @@ body: JSON.stringify(encodeUpdateLeaveTypeRequest(req)["body"]),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateLeaveTypeResponse(await res.json());
+return decodeUpdateLeaveTypeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listLeaveBalances(req: ListLeaveBalancesRequest): Promise<ListLeaveBalancesResponse> {
@@ -191,11 +229,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListLeaveBalancesResponse(await res.json());
+return decodeListLeaveBalancesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

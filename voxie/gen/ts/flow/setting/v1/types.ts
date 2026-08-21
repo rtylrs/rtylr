@@ -53,6 +53,12 @@ return out;
 
 export function validateGetUserSettingsResponse(v: GetUserSettingsResponse): string[] {
 const violations: string[] = [];
+if (v.taskAssigned !== undefined && v.taskAssigned !== null && !(typeof v.taskAssigned === "boolean")) violations.push("task_assigned has invalid type");
+if (v.taskComments !== undefined && v.taskComments !== null && !(typeof v.taskComments === "boolean")) violations.push("task_comments has invalid type");
+if (v.mentions !== undefined && v.mentions !== null && !(typeof v.mentions === "boolean")) violations.push("mentions has invalid type");
+if (v.statusChanges !== undefined && v.statusChanges !== null && !(typeof v.statusChanges === "boolean")) violations.push("status_changes has invalid type");
+if (v.weeklyDigest !== undefined && v.weeklyDigest !== null && !(typeof v.weeklyDigest === "boolean")) violations.push("weekly_digest has invalid type");
+if (v.emailNotifications !== undefined && v.emailNotifications !== null && !(typeof v.emailNotifications === "boolean")) violations.push("email_notifications has invalid type");
 return violations;
 }
 
@@ -90,6 +96,12 @@ return out;
 
 export function validateUpdateUserSettingsRequest(v: UpdateUserSettingsRequest): string[] {
 const violations: string[] = [];
+if (v.taskAssigned !== undefined && v.taskAssigned !== null && !(typeof v.taskAssigned === "boolean")) violations.push("task_assigned has invalid type");
+if (v.taskComments !== undefined && v.taskComments !== null && !(typeof v.taskComments === "boolean")) violations.push("task_comments has invalid type");
+if (v.mentions !== undefined && v.mentions !== null && !(typeof v.mentions === "boolean")) violations.push("mentions has invalid type");
+if (v.statusChanges !== undefined && v.statusChanges !== null && !(typeof v.statusChanges === "boolean")) violations.push("status_changes has invalid type");
+if (v.weeklyDigest !== undefined && v.weeklyDigest !== null && !(typeof v.weeklyDigest === "boolean")) violations.push("weekly_digest has invalid type");
+if (v.emailNotifications !== undefined && v.emailNotifications !== null && !(typeof v.emailNotifications === "boolean")) violations.push("email_notifications has invalid type");
 return violations;
 }
 

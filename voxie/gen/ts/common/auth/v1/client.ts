@@ -2,6 +2,42 @@
 import type { RegisterRequest, RegisterResponse, LoginRequest, LoginResponse, GoogleAuthRequest, GoogleAuthResponse, ResetPasswordRequest, ResetPasswordResponse, ResetPasswordConfirmRequest, ResetPasswordConfirmResponse, VerifyEmailRequest, VerifyEmailResponse, ResendVerificationRequest, ResendVerificationResponse, InviteAcceptRequest, InviteAcceptResponse, CheckEmailExistsRequest, CheckEmailExistsResponse, SocialAuthorizeRequest, SocialAuthorizeResponse } from "./types";
 import { encodeRegisterRequest, validateRegisterRequest, decodeRegisterResponse, encodeLoginRequest, validateLoginRequest, decodeLoginResponse, encodeGoogleAuthRequest, validateGoogleAuthRequest, decodeGoogleAuthResponse, encodeResetPasswordRequest, validateResetPasswordRequest, decodeResetPasswordResponse, encodeResetPasswordConfirmRequest, validateResetPasswordConfirmRequest, decodeResetPasswordConfirmResponse, encodeVerifyEmailRequest, validateVerifyEmailRequest, decodeVerifyEmailResponse, encodeResendVerificationRequest, validateResendVerificationRequest, decodeResendVerificationResponse, encodeInviteAcceptRequest, validateInviteAcceptRequest, decodeInviteAcceptResponse, encodeCheckEmailExistsRequest, validateCheckEmailExistsRequest, decodeCheckEmailExistsResponse, encodeSocialAuthorizeRequest, validateSocialAuthorizeRequest, decodeSocialAuthorizeResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface AuthServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class AuthServiceClient {
@@ -44,11 +82,11 @@ body: JSON.stringify(encodeRegisterRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRegisterResponse(await res.json());
+return decodeRegisterResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async login(req: LoginRequest): Promise<LoginResponse> {
@@ -62,11 +100,11 @@ body: JSON.stringify(encodeLoginRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeLoginResponse(await res.json());
+return decodeLoginResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async googleAuth(req: GoogleAuthRequest): Promise<GoogleAuthResponse> {
@@ -80,11 +118,11 @@ body: JSON.stringify(encodeGoogleAuthRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGoogleAuthResponse(await res.json());
+return decodeGoogleAuthResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async resetPassword(req: ResetPasswordRequest): Promise<ResetPasswordResponse> {
@@ -98,11 +136,11 @@ body: JSON.stringify(encodeResetPasswordRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeResetPasswordResponse(await res.json());
+return decodeResetPasswordResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async resetPasswordConfirm(req: ResetPasswordConfirmRequest): Promise<ResetPasswordConfirmResponse> {
@@ -116,11 +154,11 @@ body: JSON.stringify(encodeResetPasswordConfirmRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeResetPasswordConfirmResponse(await res.json());
+return decodeResetPasswordConfirmResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async verifyEmail(req: VerifyEmailRequest): Promise<VerifyEmailResponse> {
@@ -134,11 +172,11 @@ body: JSON.stringify(encodeVerifyEmailRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeVerifyEmailResponse(await res.json());
+return decodeVerifyEmailResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async resendVerification(req: ResendVerificationRequest): Promise<ResendVerificationResponse> {
@@ -152,11 +190,11 @@ body: JSON.stringify(encodeResendVerificationRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeResendVerificationResponse(await res.json());
+return decodeResendVerificationResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async inviteAccept(req: InviteAcceptRequest): Promise<InviteAcceptResponse> {
@@ -170,11 +208,11 @@ body: JSON.stringify(encodeInviteAcceptRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeInviteAcceptResponse(await res.json());
+return decodeInviteAcceptResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async checkEmailExists(req: CheckEmailExistsRequest): Promise<CheckEmailExistsResponse> {
@@ -193,11 +231,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCheckEmailExistsResponse(await res.json());
+return decodeCheckEmailExistsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async socialAuthorize(req: SocialAuthorizeRequest): Promise<SocialAuthorizeResponse> {
@@ -216,11 +254,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSocialAuthorizeResponse(await res.json());
+return decodeSocialAuthorizeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

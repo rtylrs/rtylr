@@ -25,6 +25,9 @@ return out;
 
 export function validateRevenueOverview(v: RevenueOverview): string[] {
 const violations: string[] = [];
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isFinite(v.total))) violations.push("total has invalid type");
+if (v.change !== undefined && v.change !== null && !(typeof v.change === "number" && Number.isFinite(v.change))) violations.push("change has invalid type");
+if (v.trend !== undefined && v.trend !== null && !(Array.isArray(v.trend) && (v.trend).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("trend has invalid type");
 if (v.trend !== undefined && v.trend !== null) for (const item of v.trend) violations.push(...validateRevenuePoint(item).map((message) => "trend: " + message));
 return violations;
 }
@@ -51,6 +54,8 @@ return out;
 
 export function validateRevenuePoint(v: RevenuePoint): string[] {
 const violations: string[] = [];
+if (v.date !== undefined && v.date !== null && !(typeof v.date === "string")) violations.push("date has invalid type");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
 return violations;
 }
 
@@ -79,6 +84,9 @@ return out;
 
 export function validateRevenueByApp(v: RevenueByApp): string[] {
 const violations: string[] = [];
+if (v.app !== undefined && v.app !== null && !(typeof v.app === "string")) violations.push("app has invalid type");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
+if (v.percentage !== undefined && v.percentage !== null && !(typeof v.percentage === "number" && Number.isFinite(v.percentage))) violations.push("percentage has invalid type");
 return violations;
 }
 
@@ -110,6 +118,10 @@ return out;
 
 export function validateRevenueComparison(v: RevenueComparison): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
+if (v.current !== undefined && v.current !== null && !(typeof v.current === "number" && Number.isFinite(v.current))) violations.push("current has invalid type");
+if (v.previous !== undefined && v.previous !== null && !(typeof v.previous === "number" && Number.isFinite(v.previous))) violations.push("previous has invalid type");
+if (v.change !== undefined && v.change !== null && !(typeof v.change === "number" && Number.isFinite(v.change))) violations.push("change has invalid type");
 return violations;
 }
 
@@ -132,6 +144,7 @@ return out;
 
 export function validateGetRevenueOverviewRequest(v: GetRevenueOverviewRequest): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
 return violations;
 }
 
@@ -154,6 +167,7 @@ return out;
 
 export function validateGetRevenueOverviewResponse(v: GetRevenueOverviewResponse): string[] {
 const violations: string[] = [];
+if (v.overview !== undefined && v.overview !== null && !(typeof v.overview === "object" && v.overview !== null && !Array.isArray(v.overview))) violations.push("overview has invalid type");
 if (v.overview !== undefined && v.overview !== null) violations.push(...validateRevenueOverview(v.overview).map((message) => "overview: " + message));
 return violations;
 }
@@ -177,6 +191,7 @@ return out;
 
 export function validateGetRevenueByAppRequest(v: GetRevenueByAppRequest): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
 return violations;
 }
 
@@ -199,6 +214,7 @@ return out;
 
 export function validateGetRevenueByAppResponse(v: GetRevenueByAppResponse): string[] {
 const violations: string[] = [];
+if (v.apps !== undefined && v.apps !== null && !(Array.isArray(v.apps) && (v.apps).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("apps has invalid type");
 if (v.apps !== undefined && v.apps !== null) for (const item of v.apps) violations.push(...validateRevenueByApp(item).map((message) => "apps: " + message));
 return violations;
 }
@@ -225,6 +241,8 @@ return out;
 
 export function validateGetRevenueComparisonRequest(v: GetRevenueComparisonRequest): string[] {
 const violations: string[] = [];
+if (v.period !== undefined && v.period !== null && !(typeof v.period === "string")) violations.push("period has invalid type");
+if (v.compareTo !== undefined && v.compareTo !== null && !(typeof v.compareTo === "string")) violations.push("compare_to has invalid type");
 if (!(v.compareTo !== undefined && v.compareTo !== null) || v.compareTo === "") violations.push("compare_to is required");
 return violations;
 }
@@ -248,6 +266,7 @@ return out;
 
 export function validateGetRevenueComparisonResponse(v: GetRevenueComparisonResponse): string[] {
 const violations: string[] = [];
+if (v.comparisons !== undefined && v.comparisons !== null && !(Array.isArray(v.comparisons) && (v.comparisons).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("comparisons has invalid type");
 if (v.comparisons !== undefined && v.comparisons !== null) for (const item of v.comparisons) violations.push(...validateRevenueComparison(item).map((message) => "comparisons: " + message));
 return violations;
 }

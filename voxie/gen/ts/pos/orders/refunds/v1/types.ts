@@ -25,10 +25,13 @@ return out;
 
 export function validateProcessRefundRequest(v: ProcessRefundRequest): string[] {
 const violations: string[] = [];
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
 if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
 if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
+if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
 if (!(v.amount !== undefined && v.amount !== null)) violations.push("amount is required");
 if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) > 0)) violations.push("amount violates @gt");
+if (v.reason !== undefined && v.reason !== null && !(typeof v.reason === "string")) violations.push("reason has invalid type");
 if (!(v.reason !== undefined && v.reason !== null) || v.reason === "") violations.push("reason is required");
 return violations;
 }
@@ -55,6 +58,8 @@ return out;
 
 export function validateProcessRefundResponse(v: ProcessRefundResponse): string[] {
 const violations: string[] = [];
+if (v.refundId !== undefined && v.refundId !== null && !(typeof v.refundId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.refundId))) violations.push("refund_id has invalid type");
+if (v.message !== undefined && v.message !== null && !(typeof v.message === "string")) violations.push("message has invalid type");
 return violations;
 }
 

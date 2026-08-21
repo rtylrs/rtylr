@@ -2,6 +2,42 @@
 import type { GetConfigRequest, GetConfigResponse, CreateConfigRequest, CreateConfigResponse, UpdateConfigRequest, UpdateConfigResponse, GetCustomDomainRequest, GetCustomDomainResponse, RegisterCustomDomainRequest, RegisterCustomDomainResponse, VerifyCustomDomainRequest, VerifyCustomDomainResponse, RemoveCustomDomainRequest, RemoveCustomDomainResponse, SendTestEmailRequest, SendTestEmailResponse, GetIndustriesRequest, GetIndustriesResponse } from "./types";
 import { encodeGetConfigRequest, validateGetConfigRequest, decodeGetConfigResponse, encodeCreateConfigRequest, validateCreateConfigRequest, decodeCreateConfigResponse, encodeUpdateConfigRequest, validateUpdateConfigRequest, decodeUpdateConfigResponse, encodeGetCustomDomainRequest, validateGetCustomDomainRequest, decodeGetCustomDomainResponse, encodeRegisterCustomDomainRequest, validateRegisterCustomDomainRequest, decodeRegisterCustomDomainResponse, encodeVerifyCustomDomainRequest, validateVerifyCustomDomainRequest, decodeVerifyCustomDomainResponse, encodeRemoveCustomDomainRequest, validateRemoveCustomDomainRequest, decodeRemoveCustomDomainResponse, encodeSendTestEmailRequest, validateSendTestEmailRequest, decodeSendTestEmailResponse, encodeGetIndustriesRequest, validateGetIndustriesRequest, decodeGetIndustriesResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface ConfigServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class ConfigServiceClient {
@@ -46,11 +84,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetConfigResponse(await res.json());
+return decodeGetConfigResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createConfig(req: CreateConfigRequest): Promise<CreateConfigResponse> {
@@ -64,11 +102,11 @@ body: JSON.stringify(encodeCreateConfigRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateConfigResponse(await res.json());
+return decodeCreateConfigResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateConfig(req: UpdateConfigRequest): Promise<UpdateConfigResponse> {
@@ -82,11 +120,11 @@ body: JSON.stringify(encodeUpdateConfigRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateConfigResponse(await res.json());
+return decodeUpdateConfigResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getCustomDomain(req: GetCustomDomainRequest): Promise<GetCustomDomainResponse> {
@@ -102,11 +140,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetCustomDomainResponse(await res.json());
+return decodeGetCustomDomainResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async registerCustomDomain(req: RegisterCustomDomainRequest): Promise<RegisterCustomDomainResponse> {
@@ -120,11 +158,11 @@ body: JSON.stringify(encodeRegisterCustomDomainRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRegisterCustomDomainResponse(await res.json());
+return decodeRegisterCustomDomainResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async verifyCustomDomain(req: VerifyCustomDomainRequest): Promise<VerifyCustomDomainResponse> {
@@ -138,11 +176,11 @@ body: JSON.stringify(encodeVerifyCustomDomainRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeVerifyCustomDomainResponse(await res.json());
+return decodeVerifyCustomDomainResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async removeCustomDomain(req: RemoveCustomDomainRequest): Promise<RemoveCustomDomainResponse> {
@@ -158,11 +196,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRemoveCustomDomainResponse(await res.json());
+return decodeRemoveCustomDomainResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async sendTestEmail(req: SendTestEmailRequest): Promise<SendTestEmailResponse> {
@@ -176,11 +214,11 @@ body: JSON.stringify(encodeSendTestEmailRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSendTestEmailResponse(await res.json());
+return decodeSendTestEmailResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getIndustries(req: GetIndustriesRequest): Promise<GetIndustriesResponse> {
@@ -196,11 +234,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetIndustriesResponse(await res.json());
+return decodeGetIndustriesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

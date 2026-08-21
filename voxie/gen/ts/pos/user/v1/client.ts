@@ -2,6 +2,42 @@
 import type { ListPOSUsersRequest, ListPOSUsersResponse, CreatePOSUserRequest, CreatePOSUserResponse, UpdatePOSUserRequest, UpdatePOSUserResponse, DeactivatePOSUserRequest, DeactivatePOSUserResponse, VerifyPOSUserPINRequest, VerifyPOSUserPINResponse, SetPINRequest, SetPINResponse } from "./types";
 import { encodeListPOSUsersRequest, validateListPOSUsersRequest, decodeListPOSUsersResponse, encodeCreatePOSUserRequest, validateCreatePOSUserRequest, decodeCreatePOSUserResponse, encodeUpdatePOSUserRequest, validateUpdatePOSUserRequest, decodeUpdatePOSUserResponse, encodeDeactivatePOSUserRequest, validateDeactivatePOSUserRequest, decodeDeactivatePOSUserResponse, encodeVerifyPOSUserPINRequest, validateVerifyPOSUserPINRequest, decodeVerifyPOSUserPINResponse, encodeSetPINRequest, validateSetPINRequest, decodeSetPINResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface UserServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class UserServiceClient {
@@ -49,11 +87,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListPOSUsersResponse(await res.json());
+return decodeListPOSUsersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createPOSUser(req: CreatePOSUserRequest): Promise<CreatePOSUserResponse> {
@@ -67,11 +105,11 @@ body: JSON.stringify(encodeCreatePOSUserRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreatePOSUserResponse(await res.json());
+return decodeCreatePOSUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updatePOSUser(req: UpdatePOSUserRequest): Promise<UpdatePOSUserResponse> {
@@ -85,11 +123,11 @@ body: JSON.stringify(encodeUpdatePOSUserRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdatePOSUserResponse(await res.json());
+return decodeUpdatePOSUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deactivatePOSUser(req: DeactivatePOSUserRequest): Promise<DeactivatePOSUserResponse> {
@@ -103,11 +141,11 @@ body: JSON.stringify(encodeDeactivatePOSUserRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeactivatePOSUserResponse(await res.json());
+return decodeDeactivatePOSUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async verifyPOSUserPIN(req: VerifyPOSUserPINRequest): Promise<VerifyPOSUserPINResponse> {
@@ -121,11 +159,11 @@ body: JSON.stringify(encodeVerifyPOSUserPINRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeVerifyPOSUserPINResponse(await res.json());
+return decodeVerifyPOSUserPINResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async setPIN(req: SetPINRequest): Promise<SetPINResponse> {
@@ -139,11 +177,11 @@ body: JSON.stringify(encodeSetPINRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSetPINResponse(await res.json());
+return decodeSetPINResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

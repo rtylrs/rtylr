@@ -2,6 +2,42 @@
 import type { GetStatsRequest, GetStatsResponse, ListUsersRequest, ListUsersResponse, GetUserRequest, GetUserResponse, CreateUserRequest, CreateUserResponse, UpdateUserRequest, UpdateUserResponse, DeleteUserRequest, DeleteUserResponse, BanUserRequest, BanUserResponse, UnbanUserRequest, UnbanUserResponse, SetConsoleAdminRequest, SetConsoleAdminResponse, GetUserSubscriptionRequest, GetUserSubscriptionResponse, ListBusinessesRequest, ListBusinessesResponse, UpdateBusinessRequest, UpdateBusinessResponse, DeleteBusinessRequest, DeleteBusinessResponse, CreateBusinessOwnerRequest, CreateBusinessOwnerResponse, ListSubscriptionsRequest, ListSubscriptionsResponse, UpsertSubscriptionRequest, UpsertSubscriptionResponse, DeleteSubscriptionRequest, DeleteSubscriptionResponse, ListPlansRequest, ListPlansResponse, UpdatePlanRequest, UpdatePlanResponse } from "./types";
 import { encodeGetStatsRequest, validateGetStatsRequest, decodeGetStatsResponse, encodeListUsersRequest, validateListUsersRequest, decodeListUsersResponse, encodeGetUserRequest, validateGetUserRequest, decodeGetUserResponse, encodeCreateUserRequest, validateCreateUserRequest, decodeCreateUserResponse, encodeUpdateUserRequest, validateUpdateUserRequest, decodeUpdateUserResponse, encodeDeleteUserRequest, validateDeleteUserRequest, decodeDeleteUserResponse, encodeBanUserRequest, validateBanUserRequest, decodeBanUserResponse, encodeUnbanUserRequest, validateUnbanUserRequest, decodeUnbanUserResponse, encodeSetConsoleAdminRequest, validateSetConsoleAdminRequest, decodeSetConsoleAdminResponse, encodeGetUserSubscriptionRequest, validateGetUserSubscriptionRequest, decodeGetUserSubscriptionResponse, encodeListBusinessesRequest, validateListBusinessesRequest, decodeListBusinessesResponse, encodeUpdateBusinessRequest, validateUpdateBusinessRequest, decodeUpdateBusinessResponse, encodeDeleteBusinessRequest, validateDeleteBusinessRequest, decodeDeleteBusinessResponse, encodeCreateBusinessOwnerRequest, validateCreateBusinessOwnerRequest, decodeCreateBusinessOwnerResponse, encodeListSubscriptionsRequest, validateListSubscriptionsRequest, decodeListSubscriptionsResponse, encodeUpsertSubscriptionRequest, validateUpsertSubscriptionRequest, decodeUpsertSubscriptionResponse, encodeDeleteSubscriptionRequest, validateDeleteSubscriptionRequest, decodeDeleteSubscriptionResponse, encodeListPlansRequest, validateListPlansRequest, decodeListPlansResponse, encodeUpdatePlanRequest, validateUpdatePlanRequest, decodeUpdatePlanResponse } from "./types";
 
+const DEFAULT_MAX_RESPONSE_BODY_BYTES = 8 * 1024 * 1024;
+const DEFAULT_MAX_SSE_LINE_BYTES = 1024 * 1024;
+
+function responseBodyLimit(value: number | undefined): number {
+return value && value > 0 ? value : DEFAULT_MAX_RESPONSE_BODY_BYTES;
+}
+
+async function readResponseText(res: Response, configuredLimit?: number): Promise<string> {
+const limit = responseBodyLimit(configuredLimit);
+const contentLength = Number(res.headers.get("content-length"));
+if (Number.isFinite(contentLength) && contentLength > limit) throw new Error("response body exceeds configured limit");
+if (!res.body) {
+const text = await res.text();
+if (new TextEncoder().encode(text).byteLength > limit) throw new Error("response body exceeds configured limit");
+return text;
+}
+const reader = res.body.getReader();
+const chunks: Uint8Array[] = [];
+let total = 0;
+try {
+while (true) {
+const { done, value } = await reader.read();
+if (done) break;
+total += value.byteLength;
+if (total > limit) { await reader.cancel(); throw new Error("response body exceeds configured limit"); }
+chunks.push(value);
+}
+} finally {
+reader.releaseLock();
+}
+const body = new Uint8Array(total);
+let offset = 0;
+for (const chunk of chunks) { body.set(chunk, offset); offset += chunk.byteLength; }
+return new TextDecoder().decode(body);
+}
+
 export class ApiError extends Error {
 statusCode: number;
 body: string;
@@ -17,6 +53,8 @@ this.body = body;
 export interface ConsoleAdminServiceClientOptions {
 fetch?: typeof fetch;
 defaultHeaders?: Record<string, string>;
+maxResponseBodyBytes?: number;
+maxSSELineBytes?: number;
 }
 
 export class ConsoleAdminServiceClient {
@@ -46,11 +84,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetStatsResponse(await res.json());
+return decodeGetStatsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listUsers(req: ListUsersRequest): Promise<ListUsersResponse> {
@@ -81,11 +119,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListUsersResponse(await res.json());
+return decodeListUsersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getUser(req: GetUserRequest): Promise<GetUserResponse> {
@@ -102,11 +140,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetUserResponse(await res.json());
+return decodeGetUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createUser(req: CreateUserRequest): Promise<CreateUserResponse> {
@@ -120,11 +158,11 @@ body: JSON.stringify(encodeCreateUserRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateUserResponse(await res.json());
+return decodeCreateUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateUser(req: UpdateUserRequest): Promise<UpdateUserResponse> {
@@ -139,11 +177,11 @@ body: JSON.stringify(encodeUpdateUserRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateUserResponse(await res.json());
+return decodeUpdateUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteUser(req: DeleteUserRequest): Promise<DeleteUserResponse> {
@@ -160,11 +198,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteUserResponse(await res.json());
+return decodeDeleteUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async banUser(req: BanUserRequest): Promise<BanUserResponse> {
@@ -179,11 +217,11 @@ body: JSON.stringify(encodeBanUserRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeBanUserResponse(await res.json());
+return decodeBanUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async unbanUser(req: UnbanUserRequest): Promise<UnbanUserResponse> {
@@ -198,11 +236,11 @@ body: JSON.stringify(encodeUnbanUserRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUnbanUserResponse(await res.json());
+return decodeUnbanUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async setConsoleAdmin(req: SetConsoleAdminRequest): Promise<SetConsoleAdminResponse> {
@@ -217,11 +255,11 @@ body: JSON.stringify(encodeSetConsoleAdminRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSetConsoleAdminResponse(await res.json());
+return decodeSetConsoleAdminResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async getUserSubscription(req: GetUserSubscriptionRequest): Promise<GetUserSubscriptionResponse> {
@@ -238,11 +276,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetUserSubscriptionResponse(await res.json());
+return decodeGetUserSubscriptionResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listBusinesses(req: ListBusinessesRequest): Promise<ListBusinessesResponse> {
@@ -273,11 +311,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListBusinessesResponse(await res.json());
+return decodeListBusinessesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updateBusiness(req: UpdateBusinessRequest): Promise<UpdateBusinessResponse> {
@@ -292,11 +330,11 @@ body: JSON.stringify(encodeUpdateBusinessRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateBusinessResponse(await res.json());
+return decodeUpdateBusinessResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteBusiness(req: DeleteBusinessRequest): Promise<DeleteBusinessResponse> {
@@ -313,11 +351,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteBusinessResponse(await res.json());
+return decodeDeleteBusinessResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async createBusinessOwner(req: CreateBusinessOwnerRequest): Promise<CreateBusinessOwnerResponse> {
@@ -331,11 +369,11 @@ body: JSON.stringify(encodeCreateBusinessOwnerRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateBusinessOwnerResponse(await res.json());
+return decodeCreateBusinessOwnerResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listSubscriptions(req: ListSubscriptionsRequest): Promise<ListSubscriptionsResponse> {
@@ -360,11 +398,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListSubscriptionsResponse(await res.json());
+return decodeListSubscriptionsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async upsertSubscription(req: UpsertSubscriptionRequest): Promise<UpsertSubscriptionResponse> {
@@ -378,11 +416,11 @@ body: JSON.stringify(encodeUpsertSubscriptionRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpsertSubscriptionResponse(await res.json());
+return decodeUpsertSubscriptionResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async deleteSubscription(req: DeleteSubscriptionRequest): Promise<DeleteSubscriptionResponse> {
@@ -399,11 +437,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteSubscriptionResponse(await res.json());
+return decodeDeleteSubscriptionResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async listPlans(req: ListPlansRequest): Promise<ListPlansResponse> {
@@ -419,11 +457,11 @@ headers: { ...this.options.defaultHeaders },
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListPlansResponse(await res.json());
+return decodeListPlansResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 async updatePlan(req: UpdatePlanRequest): Promise<UpdatePlanResponse> {
@@ -438,11 +476,11 @@ body: JSON.stringify(encodeUpdatePlanRequest(req)),
 });
 
 if (!res.ok) {
-const body = await res.text();
+const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdatePlanResponse(await res.json());
+return decodeUpdatePlanResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
 }
 
 }

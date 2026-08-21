@@ -20,6 +20,7 @@ return out;
 
 export function validateGetFlowDashboardRequest(v: GetFlowDashboardRequest): string[] {
 const violations: string[] = [];
+if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspaceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.workspaceId))) violations.push("workspace_id has invalid type");
 if (!(v.workspaceId !== undefined && v.workspaceId !== null)) violations.push("workspace_id is required");
 if (v.workspaceId !== undefined && v.workspaceId !== null && !(Number(v.workspaceId) > 0)) violations.push("workspace_id violates @gt");
 return violations;
@@ -56,6 +57,11 @@ return out;
 
 export function validateGetFlowDashboardResponse(v: GetFlowDashboardResponse): string[] {
 const violations: string[] = [];
+if (v.openTasks !== undefined && v.openTasks !== null && !(typeof v.openTasks === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.openTasks))) violations.push("open_tasks has invalid type");
+if (v.inProgressTasks !== undefined && v.inProgressTasks !== null && !(typeof v.inProgressTasks === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.inProgressTasks))) violations.push("in_progress_tasks has invalid type");
+if (v.completedThisWeek !== undefined && v.completedThisWeek !== null && !(typeof v.completedThisWeek === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.completedThisWeek))) violations.push("completed_this_week has invalid type");
+if (v.overdueTasks !== undefined && v.overdueTasks !== null && !(typeof v.overdueTasks === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.overdueTasks))) violations.push("overdue_tasks has invalid type");
+if (v.myTasks !== undefined && v.myTasks !== null && !(Array.isArray(v.myTasks) && (v.myTasks).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("my_tasks has invalid type");
 if (v.myTasks !== undefined && v.myTasks !== null) for (const item of v.myTasks) violations.push(...flow_task_v1.validateTask(item).map((message) => "my_tasks: " + message));
 return violations;
 }
