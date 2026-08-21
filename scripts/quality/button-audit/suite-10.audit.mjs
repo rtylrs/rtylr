@@ -244,5 +244,6 @@ export const cases = [
   ["apps/erp/src/shared/components/BarcodeSvg.tsx", "audit-batch-242-suite-10"],
   ["apps/erp/src/shared/components/TaxRateSelector.tsx", "audit-batch-243-suite-10"],
   ["apps/finance/src/features/quotes/Quotes.tsx", "audit-batch-244-suite-10"],
+  ["apps/finance/src/shared/components/OverdueInvoicesWidget.tsx", "audit-batch-245-suite-10"],
 ];
 

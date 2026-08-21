@@ -244,5 +244,6 @@ export const cases = [
   ["apps/erp/src/main.tsx", "audit-batch-242-suite-07"],
   ["apps/erp/src/shared/components/StockBadge.tsx", "audit-batch-243-suite-07"],
   ["apps/finance/src/features/profit-loss/ProfitLoss.test.tsx", "audit-batch-244-suite-07"],
+  ["apps/finance/src/shared/components/LineItemRow.tsx", "audit-batch-245-suite-07"],
 ];
 

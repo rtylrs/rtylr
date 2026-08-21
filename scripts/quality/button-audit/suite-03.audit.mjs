@@ -244,5 +244,6 @@ export const cases = [
   ["apps/erp/src/features/variants/Variants.tsx", "audit-batch-242-suite-03"],
   ["apps/erp/src/shared/components/ProductTagInput.tsx", "audit-batch-243-suite-03"],
   ["apps/finance/src/features/invoices/Invoices.test.tsx", "audit-batch-244-suite-03"],
+  ["apps/finance/src/shared/components/GlobalSearch.tsx", "audit-batch-245-suite-03"],
 ];
 
