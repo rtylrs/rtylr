@@ -210,5 +210,6 @@ export const cases = [
   ["apps/crm/src/features/segments/SegmentDetail.test.tsx", "audit-batch-208-suite-25"],
   ["apps/dash/src/features/business-switcher/BusinessSwitcher.test.tsx", "audit-batch-209-suite-25"],
   ["apps/dash/src/features/dashboard/Dashboard/widgets/WidgetHeader.tsx", "audit-batch-210-suite-25"],
+  ["apps/dash/src/features/qr-codes/QrCodes.test.tsx", "audit-batch-211-suite-25"],
 ];
 
