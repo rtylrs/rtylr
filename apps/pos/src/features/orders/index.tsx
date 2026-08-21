@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useDebounce } from '@voxire/utils';
 import ScreenLayout from '../../layouts/ScreenLayout';
+import { useCapabilities } from '../../shared/hooks/useCapabilities';
 import SearchBar from '../../shared/components/SearchBar';
 import EmptyState from '../../shared/components/EmptyState';
 import Skeleton from '../../shared/components/Skeleton';
@@ -47,7 +48,10 @@ const OrdersScreen: React.FC = () => {
   const [voiding, setVoiding] = useState<string | null>(null);
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const reopenMode = params.get('reopen') === '1';
+  // Reopening PAID orders is a manager capability, not a URL toggle: without
+  // this gate any cashier could append ?reopen=1 and un-pay an order.
+  const { canVoid } = useCapabilities();
+  const reopenMode = params.get('reopen') === '1' && canVoid;
 
   useEffect(() => {
     (async () => {

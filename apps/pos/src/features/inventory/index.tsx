@@ -224,8 +224,9 @@ const InventoryScreen: React.FC = () => {
       toast.success(`${ACTION_LABELS[action]} recorded`);
       void load();
     } catch (err) {
+      // The toast informs the user; rethrowing turned every failed submit
+      // into an unhandled promise rejection from the modal's onClick.
       toast.error(err instanceof Error ? err.message : 'Action failed');
-      throw err;
     }
   };
 

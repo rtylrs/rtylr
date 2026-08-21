@@ -39,8 +39,10 @@ export function useKDSOrders(station?: string) {
   const rawUserId = useUserStore((s) => s.userId);
   const ownerID = rawUserId != null ? parsePositiveInteger(rawUserId) : undefined;
 
-  const load = useCallback(async (): Promise<void> => {
-    setLoading(true);
+  const load = useCallback(async (options?: { silent?: boolean }): Promise<void> => {
+    // Silent reloads (realtime pings) keep the current tickets on screen
+    // instead of flashing the skeleton grid on a busy kitchen line.
+    if (!options?.silent) setLoading(true);
     setError(null);
     try {
       const res = await kdsClient.listKDSOrders({});
@@ -66,7 +68,7 @@ export function useKDSOrders(station?: string) {
       setError(err?.response?.data?.message ?? err?.message ?? 'Failed to load KDS orders');
       setOrders([]);
     } finally {
-      setLoading(false);
+      if (!options?.silent) setLoading(false);
     }
   }, [station]);
 
@@ -74,7 +76,7 @@ export function useKDSOrders(station?: string) {
     void load();
   }, [load]);
 
-  useKdsStream(ownerID, load);
+  useKdsStream(ownerID, () => void load({ silent: true }));
 
   const setStatus = useCallback(
     async (id: string, status: KDSOrder['status']): Promise<void> => {

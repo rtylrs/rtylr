@@ -133,11 +133,16 @@ const Payment: React.FC = () => {
           customerId,
           orderId: result.orderId,
           totalAmount: grandTotal,
-        }).then((earn) => {
-          if (earn && earn.earned > 0) {
-            toast.success(`+${earn.earned} loyalty points earned`);
-          }
-        });
+        })
+          .then((earn) => {
+            if (earn && earn.earned > 0) {
+              toast.success(`+${earn.earned} loyalty points earned`);
+            }
+          })
+          .catch(() => {
+            // Points are non-critical; never surface an unhandled rejection
+            // after a successful checkout.
+          });
       }
 
       // Print receipt + open drawer via configured hardware
