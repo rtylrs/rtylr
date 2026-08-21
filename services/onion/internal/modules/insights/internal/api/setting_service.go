@@ -127,21 +127,6 @@ func (a *DashboardAPI) GetInsights(ctx context.Context, _ *insightsdashboardv1.G
 	return toInsightsResponse(stats), nil
 }
 
-// GetKPIs is deliberately still unimplemented.
-//
-// insights.dashboard.v1's GetKPIsResponse declares revenue, order_count,
-// staff_count, customer_count, low_stock_count and active_apps. That is the
-// same six fields, same types, same order as hub.dashboard.v1's
-// GetKPIsResponse, which the kpis module already serves from
-// domain.KPISummary. None of it is Flow data.
-//
-// Implementing this would mean two contract paths returning identical bytes for
-// one truth, and the second one would drift. The duplicate declaration is the
-// defect, not the missing handler: see tryrtylr/rtylr#870.
-func (a *DashboardAPI) GetKPIs(context.Context, *insightsdashboardv1.GetKPIsRequest) (*insightsdashboardv1.GetKPIsResponse, error) {
-	return nil, notImplemented("GetKPIs")
-}
-
 // GetRoadmap reports Flow projects with progress, as this contract shapes them.
 //
 // flow.insights.v1's RoadmapProject carries colour, description, workspace and
