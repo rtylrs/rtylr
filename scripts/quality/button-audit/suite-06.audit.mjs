@@ -105,5 +105,6 @@ export const cases = [
   ["apps/recruit/src/features/public/CareerDetail.tsx", "audit-batch-103-suite-06"],
   ["apps/auth/src/features/register/Register.test.tsx", "audit-batch-104-suite-06"],
   ["apps/crm/src/features/customers/Customers.tsx", "audit-batch-105-suite-06"],
+  ["apps/crm/src/features/settings/Settings.test.tsx", "audit-batch-106-suite-06"],
 ];
 
