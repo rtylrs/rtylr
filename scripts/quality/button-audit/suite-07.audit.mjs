@@ -1,5 +1,6 @@
 export const cases = [
   ["apps/auth/src/features/not-found/NotFound.tsx", "initial-button-contract-07"],
   ["apps/auth/src/features/not-found/NotFound.tsx", "audit-batch-001-suite-07"],
+  ["apps/crm/src/features/customers/CustomerProfile.tsx", "audit-batch-002-suite-07"],
 ];
 
