@@ -14,6 +14,12 @@ export interface ApiError {
   message: string;
   /** Original error for logging / debugging */
   cause?: unknown;
+  /**
+   * Raw response body when the error came from a generated OneKit client
+   * (whose ApiError carries `statusCode` + `body`). Kept so helpers like
+   * getOneKitErrorMessage can still extract backend-provided detail.
+   */
+  body?: string;
 }
 
 /** Narrow union for common failure modes */
@@ -97,6 +103,34 @@ function parseAxiosError(error: AxiosError<any>): ApiError {
 function toApiError(error: unknown): ApiError {
   if (error && typeof error === 'object' && 'isAxiosError' in error) {
     return parseAxiosError(error as AxiosError<any>);
+  }
+  // Generated OneKit clients throw their own ApiError class carrying a
+  // numeric statusCode and the raw response body. Map it into our shape so
+  // consumers get a real HTTP status and a clean message instead of the
+  // generic UNKNOWN branch, which would embed the raw JSON in `message`.
+  if (
+    error &&
+    typeof error === 'object' &&
+    typeof (error as { statusCode?: unknown }).statusCode === 'number'
+  ) {
+    const genError = error as { statusCode: number; body?: string; message?: string };
+    let message = fallbackMessage(genError.statusCode);
+    if (typeof genError.body === 'string' && genError.body.trim()) {
+      try {
+        const parsed: unknown = JSON.parse(genError.body);
+        const backendMessage = messageFrom(parsed);
+        if (backendMessage) message = backendMessage;
+      } catch {
+        // body wasn't JSON - keep the status-based fallback
+      }
+    }
+    return {
+      status: genError.statusCode,
+      code: resolveCode(genError.statusCode),
+      message,
+      cause: error,
+      body: genError.body,
+    };
   }
   return {
     status: 0,
