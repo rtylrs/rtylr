@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
-  hasRoleLevel,
+  ROLE_TIERS,
+  ROLE_PARENT,
   hasPOSRoleLevel,
   hasPermission,
   hasAllPermissions,
@@ -17,29 +18,61 @@ import type { PlatformRole, POSRole, Resource, PermissionContext } from './index
 
 // ── Role hierarchy ──────────────────────────────────────────────────
 
-describe('hasRoleLevel', () => {
-  it('owner is at least owner', () => {
-    expect(hasRoleLevel('owner', 'owner')).toBe(true);
+describe('ROLE_PARENT and ROLE_TIERS agree', () => {
+  // ROLE_TIERS is otherwise only documentation. This makes it load-bearing: the
+  // chain from owner down through ROLE_PARENT must be exactly the tier ladder,
+  // so moving a lateral role into that chain fails here instead of silently
+  // granting it everything below (which is what #795 was).
+  it('the parent chain from owner is exactly ROLE_TIERS reversed', () => {
+    const chain: PlatformRole[] = [];
+    for (let r: PlatformRole | null = 'owner'; r !== null; r = ROLE_PARENT[r]) chain.push(r);
+    expect(chain).toEqual([...ROLE_TIERS].reverse());
   });
 
-  it('owner is at least viewer', () => {
-    expect(hasRoleLevel('owner', 'viewer')).toBe(true);
+  it('every lateral role names a base outside the lateral set', () => {
+    const laterals: PlatformRole[] = ['billing', 'menu_manager', 'store_manager'];
+    for (const lateral of laterals) {
+      expect(laterals).not.toContain(ROLE_PARENT[lateral]);
+    }
   });
 
-  it('viewer is NOT at least admin', () => {
-    expect(hasRoleLevel('viewer', 'admin')).toBe(false);
+  it('billing does not reach the shop floor', () => {
+    // The concrete #795 regression: billing held pos:drawer:open and hr:staff.
+    const billing = getPermissions('billing');
+    expect(billing.has('pos:drawer:open')).toBe(false);
+    expect(billing.has('pos:sessions:close')).toBe(false);
+    expect(billing.has('hr:staff')).toBe(false);
+    expect(billing.has('app:pos')).toBe(false);
+    // What it should keep.
+    expect(billing.has('hub:billing')).toBe(true);
+    expect(billing.has('finance:invoices')).toBe(true);
+    expect(billing.has('hub:dashboard')).toBe(true);
   });
 
-  it('admin is at least operator', () => {
-    expect(hasRoleLevel('admin', 'operator')).toBe(true);
+  it('staff keeps HR self-service but not the directory', () => {
+    const staff = getPermissions('staff');
+    expect(staff.has('hr:shifts')).toBe(true);
+    expect(staff.has('hr:time_off')).toBe(true);
+    expect(staff.has('hr:staff')).toBe(false);
+    expect(getPermissions('operator').has('hr:staff')).toBe(true);
   });
 
-  it('staff is NOT at least operator', () => {
-    expect(hasRoleLevel('staff', 'operator')).toBe(false);
-  });
-
-  it('operator is at least staff', () => {
-    expect(hasRoleLevel('operator', 'staff')).toBe(true);
+  it('the tiers are unchanged by the restructure', () => {
+    // Guards the regression this change could most easily have caused: operator
+    // and above previously inherited app:menu, hub:design, hub:billing,
+    // finance:invoices and finance:reports only because the lateral roles sat
+    // below them in the flat list.
+    for (const resource of [
+      'app:menu',
+      'hub:design',
+      'hub:billing',
+      'finance:invoices',
+      'finance:reports',
+    ] as const) {
+      expect(getPermissions('operator').has(resource)).toBe(true);
+      expect(getPermissions('admin').has(resource)).toBe(true);
+      expect(getPermissions('owner').has(resource)).toBe(true);
+    }
   });
 });
 

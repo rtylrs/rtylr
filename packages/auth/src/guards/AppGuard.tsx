@@ -3,6 +3,7 @@ import { resolveAppUrl, resolveAuthUrl } from '@voxire/config';
 import { getCookie } from '../cookies';
 import { signOut } from '../signOut';
 import { useUserStore } from '../store';
+import { parseUserRole } from '../types';
 import type { AppId, User } from '../types';
 
 type FetchUserFn = () => Promise<Record<string, unknown>>;
@@ -162,7 +163,7 @@ export function AppGuard({
           id: String(data.id ?? data.userId ?? ''),
           email: (data.email as string) ?? '',
           name: (data.fullName as string) ?? '',
-          role: (data.role as User['role']) ?? undefined,
+          role: parseUserRole(data.role) ?? undefined,
           apps: (data.apps as AppId[]) ?? [],
           planType: (data.planSlug as string) ?? undefined,
           isConsoleAdmin: data.isConsoleAdmin === true || undefined,
@@ -170,7 +171,22 @@ export function AppGuard({
         login(user);
 
         const apps: string[] = (data.apps as string[]) ?? [];
-        const role: string = (data.role as string) ?? '';
+        const role = parseUserRole(data.role);
+
+        // A role the frontend cannot interpret fails closed, and does so even
+        // when the apps array would otherwise admit the user. This used to be an
+        // unchecked cast, so an unrecognised backend role became a valid
+        // UserRole with nothing complaining, and access was decided by a value
+        // no code here understood (#795).
+        //
+        // "Absent" and "unrecognised" are deliberately different. A response
+        // with no role at all is the pre-existing case and still goes through
+        // the apps array; only a present-but-unknown value denies.
+        const roleWasSent = data.role !== undefined && data.role !== null && data.role !== '';
+        if (roleWasSent && role === null) {
+          setStatus('denied');
+          return;
+        }
 
         const allowed =
           role === 'owner' || role === 'admin' || (apps.length > 0 && apps.includes(appId));

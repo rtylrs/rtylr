@@ -11,28 +11,49 @@ export type PlatformRole =
   | 'viewer';
 
 /**
- * Role hierarchy - higher index = more power.
+ * Tier ladder: each entry is strictly more powerful than the one before it.
  *
- * store_manager sits just above staff in the GLOBAL hierarchy on purpose: its
- * elevated powers (managing POS users, voids/refunds) are location-scoped and
- * enforced per-location via pos_member_locations flags, not granted globally.
- * Keeping it low here prevents a global hasRoleLevel check from over-granting.
+ * Only genuine tiers belong here. The three lateral roles - billing,
+ * menu_manager and store_manager - are specialisations, not power levels, and
+ * live in ROLE_PARENT below.
+ *
+ * Before #795 all eight roles sat in one list and permissions were accumulated
+ * by array index, so every role inherited everything declared below it. That is
+ * how `billing` came to hold pos:drawer:open, pos:sessions:close and hr:staff:
+ * it sat above staff in the list, and a finance role inherited the shop floor.
  */
-export const ROLE_HIERARCHY: PlatformRole[] = [
-  'viewer',
-  'staff',
-  'store_manager',
-  'menu_manager',
-  'billing',
-  'operator',
-  'admin',
-  'owner',
-];
+export const ROLE_TIERS: PlatformRole[] = ['viewer', 'staff', 'operator', 'admin', 'owner'];
 
-/** Returns true if `role` is at least as powerful as `required` */
-export function hasRoleLevel(role: PlatformRole, required: PlatformRole): boolean {
-  return ROLE_HIERARCHY.indexOf(role) >= ROLE_HIERARCHY.indexOf(required);
-}
+/**
+ * The single role each role inherits from. null terminates the chain.
+ *
+ * A lateral role names its base explicitly and inherits from nothing else, so
+ * adding a fourth lateral cannot silently grant it a third one's permissions.
+ */
+export const ROLE_PARENT: Record<PlatformRole, PlatformRole | null> = {
+  viewer: null,
+
+  staff: 'viewer',
+  operator: 'staff',
+  admin: 'operator',
+  owner: 'admin',
+
+  // store_manager is a POS floor role, so staff is the right base. It declares
+  // no global permissions of its own on purpose: its elevated powers (staff
+  // PINs, voids, refunds, reports) are location-scoped and enforced per-location
+  // via pos_member_locations plus the capability flags returned at PIN verify.
+  store_manager: 'staff',
+
+  // menu_manager keeps staff as its base, which is what it resolved to before
+  // #795. Whether someone who manages the menu should also be able to take
+  // orders and see HR self-service is a product question, not one to settle
+  // while restructuring the model - so today's behaviour is preserved exactly.
+  menu_manager: 'staff',
+
+  // billing is a finance role and its base is viewer, NOT staff. This is the
+  // #795 fix: nothing about approving an invoice implies opening a cash drawer.
+  billing: 'viewer',
+};
 
 // ── POS roles (terminal-level) ─────────────────────────────────────
 

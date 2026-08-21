@@ -1,5 +1,5 @@
 // Roles
-export { ROLE_HIERARCHY, POS_ROLE_HIERARCHY, hasRoleLevel, hasPOSRoleLevel } from './roles';
+export { ROLE_TIERS, ROLE_PARENT, POS_ROLE_HIERARCHY, hasPOSRoleLevel } from './roles';
 export type { PlatformRole, POSRole } from './roles';
 
 // Capabilities

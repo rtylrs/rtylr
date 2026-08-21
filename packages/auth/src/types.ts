@@ -1,4 +1,12 @@
-export type UserRole = 'owner' | 'admin' | 'operator' | 'staff' | 'viewer';
+// Re-exported, not redeclared. This file carried its own five-value copy of
+// UserRole while @voxire/types carried another and the database stored eight,
+// and every app imports the role type from here rather than from @voxire/types
+// (see the *Permissions.ts bridges in erp, crm, hr, finance and insights). So
+// the copy that mattered to consumers was the one that was wrong (#795).
+import type { UserRole } from '@voxire/types';
+
+export type { UserRole };
+export { USER_ROLES, parseUserRole } from '@voxire/types';
 export type AppId =
   | 'dash'
   | 'auth'

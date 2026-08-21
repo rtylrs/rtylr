@@ -26,7 +26,9 @@ const DIRECT_PERMISSIONS: PermissionMatrix = {
     'pos:drawer:open',
     'flow:tasks',
     'flow:projects',
-    'hr:staff',
+    // Self-service only. Their own shifts and their own time-off requests are
+    // things a person needs about themselves; hr:staff is the staff directory,
+    // which is a different kind of access and now starts at operator (#795).
     'hr:shifts',
     'hr:time_off',
   ],
@@ -46,6 +48,20 @@ const DIRECT_PERMISSIONS: PermissionMatrix = {
     'app:erp',
     'app:crm',
     'app:insights',
+    // These five were never declared for operator. They arrived because
+    // menu_manager and billing sat below operator in the old flat list, so a
+    // model change would have silently revoked them. Declared explicitly to
+    // keep operator's access exactly as it was (#795).
+    //
+    // Worth reviewing separately: hub:billing on a mid-tier operator is a
+    // consequence of the old ordering, not a decision anyone recorded.
+    'app:menu',
+    'hub:design',
+    'hub:billing',
+    'finance:invoices',
+    'finance:reports',
+    // The staff directory, previously reached through staff's own grant.
+    'hr:staff',
     'hub:team',
     'hub:activity',
     'pos:orders:hold',
@@ -117,21 +133,32 @@ const DIRECT_PERMISSIONS: PermissionMatrix = {
 
 // ── Build resolved permission sets (with inheritance) ───────────────
 
-import { ROLE_HIERARCHY } from './roles';
+import { ROLE_PARENT } from './roles';
 
 const resolvedCache = new Map<PlatformRole, Set<Resource>>();
 
-/** Get all permissions for a role, including inherited from lower roles */
+/**
+ * All permissions for a role: its own, plus its base role's, following
+ * ROLE_PARENT to the end of the chain.
+ *
+ * This walks a chain rather than accumulating over an array index, so a role
+ * only ever inherits from the base it names. Before #795 the index form meant
+ * every role inherited everything declared below it in one flat list, which is
+ * how a finance role acquired the cash drawer.
+ */
 export function getPermissions(role: PlatformRole): Set<Resource> {
   if (resolvedCache.has(role)) return resolvedCache.get(role)!;
 
-  const roleIndex = ROLE_HIERARCHY.indexOf(role);
   const permissions = new Set<Resource>();
+  const seen = new Set<PlatformRole>();
 
-  // Accumulate from lowest role up to this role
-  for (let i = 0; i <= roleIndex; i++) {
-    const r = ROLE_HIERARCHY[i];
-    for (const perm of DIRECT_PERMISSIONS[r]) {
+  for (let current: PlatformRole | null = role; current !== null; current = ROLE_PARENT[current]) {
+    // ROLE_PARENT is authored by hand, so guard the cycle rather than hang.
+    if (seen.has(current)) {
+      throw new Error(`ROLE_PARENT contains a cycle reachable from "${role}" at "${current}"`);
+    }
+    seen.add(current);
+    for (const perm of DIRECT_PERMISSIONS[current]) {
       permissions.add(perm);
     }
   }
