@@ -18,12 +18,20 @@ That shape 4 is empty is a result, not an oversight; see below.
 | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
 | `AppFlagGuard` / `resolveFlag`      | whether an app is **launched** at all, resolved from PostHog, then a `VITE_APP_*_ENABLED` env var, then a hard-coded default | `packages/config/src/appGuards.tsx:44`       |
 | `hub.App.is_enabled` / `listAddons` | whether **this tenant** has the app or add-on                                                                                | `packages/voxie/api/hub/app/v1/models.onk:8` |
-| `APP_CONFIG[app].allowedRoles`      | which **roles** may use the app                                                                                              | `packages/config/src/apps.ts:34`             |
+| `APP_CONFIG[app].allowedRoles` | **nothing. It is dead code**, never consulted outside its own declaration; already filed as issue #795 | `packages/config/src/apps.ts:34` |
+| the per-user `apps` array | the **real** app-entry boundary: owner and admin bypass, everyone else needs the app id in their own `apps` array | `packages/auth/src/guards/AppGuard.tsx:173` |
 
 The brief asks for degrade behaviour to be checked against `AppFlagGuard` and
-`APP_CONFIG`. Both matter, but **neither is the per-tenant licence.** A launch
-flag is global, and `allowedRoles` is about the person, not the tenant. For
-"does this tenant have ERP", the real signal is hub.
+`APP_CONFIG`. Neither is the per-tenant licence, and one of them is not a gate
+at all: **`APP_CONFIG.allowedRoles` is never consulted.** Repo-wide, the only
+`allowedRoles` references outside its own declaration are inside an unused
+helper module (`apps/auth/src/shared/lib/permission.ts:13`). This was already
+found and filed as issue #795, and confirmed independently here.
+
+So for "does this tenant have ERP" the signal is **hub**, and for "may this
+person use it" the signal is the per-user `apps` array in `AppGuard`
+(`packages/auth/src/guards/AppGuard.tsx:173`). A dossier that said "check
+`APP_CONFIG`" would be citing dead code.
 
 Note also `allFeaturesEnabled()`: self-hosted installs short-circuit every flag
 to true (`packages/config/src/appGuards.tsx:50`). A degrade path that only ever
