@@ -125,7 +125,9 @@ const WorkspaceDashboard: React.FC = () => {
     }).length;
 
   const uid = getCurrentUserId();
-  const myCapacityHours = members.find((m) => m.id === uid)?.capacity ?? 40;
+  // Undefined when this member has no work schedule. Everything downstream
+  // treats that as unknown rather than substituting a number (#868).
+  const myCapacityHours = members.find((m) => m.id === uid)?.capacity;
 
   const weekLoad = useMemo(() => {
     const mine = workspaceTasks.filter(
@@ -143,10 +145,12 @@ const WorkspaceDashboard: React.FC = () => {
     return { minutes, count: mine.length };
   }, [workspaceTasks]);
 
-  const weekLoadPct = Math.min(
-    100,
-    myCapacityHours > 0 ? (weekLoad.minutes / (myCapacityHours * 60)) * 100 : 0
-  );
+  // Undefined when capacity is unknown. A percentage needs a denominator, and
+  // rendering 0% for "we don't know" would read as "nothing scheduled" (#868).
+  const weekLoadPct =
+    myCapacityHours && myCapacityHours > 0
+      ? Math.min(100, (weekLoad.minutes / (myCapacityHours * 60)) * 100)
+      : undefined;
 
   const [reviewStreak, setReviewStreak] = useState(() => getWeeklyReviewStreak().streak);
 
@@ -242,18 +246,22 @@ const WorkspaceDashboard: React.FC = () => {
                 {t('common.dashboard.weekLoad.scheduled')}
               </span>
               <span className="text-[12px] ml-auto" style={{ color: 'var(--flow-text-muted)' }}>
-                {t('common.dashboard.weekLoad.capacity', { hours: myCapacityHours })}
+                {myCapacityHours === undefined
+                  ? t('common.dashboard.weekLoad.capacityUnknown')
+                  : t('common.dashboard.weekLoad.capacity', { hours: myCapacityHours })}
               </span>
             </div>
-            <div className="w-full rounded-full h-2" style={{ background: 'var(--flow-hover)' }}>
-              <div
-                className="h-2 rounded-full transition-all duration-500"
-                style={{
-                  width: `${weekLoadPct}%`,
-                  background: weekLoadPct > 95 ? '#f97316' : 'var(--accent)',
-                }}
-              />
-            </div>
+            {weekLoadPct !== undefined && (
+              <div className="w-full rounded-full h-2" style={{ background: 'var(--flow-hover)' }}>
+                <div
+                  className="h-2 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${weekLoadPct}%`,
+                    background: weekLoadPct > 95 ? '#f97316' : 'var(--accent)',
+                  }}
+                />
+              </div>
+            )}
             <p className="text-[11px] leading-snug" style={{ color: 'var(--flow-text-dim)' }}>
               {t('common.dashboard.weekLoad.description')}
             </p>

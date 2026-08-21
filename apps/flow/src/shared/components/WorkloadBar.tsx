@@ -4,7 +4,8 @@ interface WorkloadBarProps {
   name: string;
   initials: string;
   load: number; // 0-1 where 1 = at capacity
-  capacity: number; // hours
+  /** Contracted hours per week. Absent when the member has no work schedule (#868). */
+  capacity?: number; // hours
   assigned: number; // hours
 }
 
@@ -31,7 +32,7 @@ export const WorkloadBar: React.FC<WorkloadBarProps> = ({
             {name}
           </span>
           <span className="text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
-            {assigned}h / {capacity}h
+            {capacity === undefined ? `${assigned}h` : `${assigned}h / ${capacity}h`}
           </span>
         </div>
         <div

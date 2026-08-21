@@ -42,8 +42,10 @@ export function sortMembersByLoad(
   members: Array<Member & { assignedHours: number }>
 ): Array<Member & { assignedHours: number }> {
   return [...members].sort((a, b) => {
-    const loadA = a.capacity > 0 ? a.assignedHours / a.capacity : 0;
-    const loadB = b.capacity > 0 ? b.assignedHours / b.capacity : 0;
+    // Unknown capacity sorts as zero load rather than infinite: a member whose
+    // schedule is unset is not evidence of being overloaded (#868).
+    const loadA = a.capacity && a.capacity > 0 ? a.assignedHours / a.capacity : 0;
+    const loadB = b.capacity && b.capacity > 0 ? b.assignedHours / b.capacity : 0;
     return loadB - loadA;
   });
 }
