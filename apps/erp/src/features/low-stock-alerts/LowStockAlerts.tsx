@@ -1,15 +1,19 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { AlertTriangle } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
+import { useTranslation } from 'react-i18next';
 import { useLowStock } from '../inventory/useInventory';
 import PageHeader from '../../shared/components/PageHeader';
 import { SkeletonRow } from '../../shared/components/Skeleton';
-import EmptyState from '../../shared/components/EmptyState';
 
 const AMBER = 'var(--erp-accent)';
 
 const LowStockAlerts: React.FC = () => {
+  const { t } = useTranslation('erp');
+  const navigate = useNavigate();
   const { data: items = [], isLoading } = useLowStock();
 
   return (
@@ -32,9 +36,13 @@ const LowStockAlerts: React.FC = () => {
         </div>
       ) : items.length === 0 ? (
         <EmptyState
-          icon={AlertTriangle}
-          title="All stock levels healthy"
-          description="Nothing needs reordering right now."
+          icon={CheckCircle2}
+          title={t('lowStockAlerts.empty.title')}
+          description={t('lowStockAlerts.empty.description')}
+          action={{
+            label: t('lowStockAlerts.viewInventory'),
+            onClick: () => navigate({ to: '/inventory' }),
+          }}
         />
       ) : (
         <div

@@ -117,7 +117,8 @@
     "title": "Inventory",
     "addProduct": "Add Product",
     "search": "Search products…",
-    "empty": "No products found."
+    "empty": "No products found.",
+    "clearSearch": "Clear Search"
   },
   "suppliers": {
     "title": "Suppliers",
@@ -173,6 +174,7 @@
       "title": "No open orders to receive",
       "description": "All orders have been received"
     },
+    "goToPurchasing": "Go to Purchase Orders",
     "orderSummary": "{{count}} items / Expected {{date}}",
     "validation": { "overReceived": "Cannot receive more units than ordered" },
     "toast": {
@@ -180,5 +182,93 @@
       "completedVariance": "Receipt completed with {{count}} unit variance",
       "updateFailed": "Failed to update receipt status"
     }
+  },
+  "reorder": {
+    "empty": {
+      "title": "No suggestions",
+      "description": "All stock levels are healthy"
+    },
+    "refresh": "Refresh"
+  },
+  "variants": {
+    "empty": {
+      "title": "No variants",
+      "description": "Add variants to differentiate your products"
+    },
+    "addVariant": "Add Variant"
+  },
+  "priceLists": {
+    "empty": {
+      "title": "No price lists",
+      "description": "Create your first price list to enable tier pricing"
+    },
+    "newPriceList": "New Price List",
+    "refresh": "Refresh"
+  },
+  "brands": {
+    "empty": {
+      "title": "No brands yet",
+      "description": "Add your first brand to group products."
+    },
+    "newBrand": "New Brand"
+  },
+  "expiry": {
+    "empty": {
+      "title": "No expiring items",
+      "description": "No batches with expiry dates tracked"
+    },
+    "refresh": "Refresh"
+  },
+  "stockTransfers": {
+    "empty": {
+      "title": "No transfers",
+      "description": "Create your first stock transfer"
+    },
+    "newTransfer": "New Transfer",
+    "refresh": "Refresh"
+  },
+  "lowStockAlerts": {
+    "empty": {
+      "title": "All stock levels healthy",
+      "description": "Nothing needs reordering right now."
+    },
+    "viewInventory": "View Inventory"
+  },
+  "stockTakes": {
+    "empty": {
+      "title": "No stock takes",
+      "description": "Start a count to find discrepancies"
+    },
+    "newStockTake": "New Stock Take",
+    "refresh": "Refresh"
+  },
+  "categories": {
+    "empty": {
+      "title": "No categories yet",
+      "description": "Create your first category to organize products"
+    },
+    "addCategory": "Add Category"
+  },
+  "settings": {
+    "team": {
+      "empty": { "title": "No team members yet." },
+      "invite": "Invite member",
+      "refresh": "Refresh"
+    }
+  },
+  "barcodes": {
+    "previewEmpty": {
+      "title": "Select products to preview labels",
+      "description": "Choose one or more products from the list to see their barcode labels here."
+    },
+    "selectFirst": "Select First Product",
+    "goToProducts": "Go to Products"
+  },
+  "valuation": {
+    "empty": {
+      "title": "No valuation data available",
+      "description": "Valuation appears once inventory is tracked in a warehouse."
+    },
+    "refresh": "Refresh"
   }
 }

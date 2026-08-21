@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Warehouse as WarehouseIcon, MapPin, User, Trash2 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useWarehouses, useCreateWarehouse, useDeleteWarehouse } from './useWarehouses';
 import PageHeader from '../../shared/components/PageHeader';
-import EmptyState from '../../shared/components/EmptyState';
 import { Skeleton } from '../../shared/components/Skeleton';
 import ConfirmModal from '../../shared/components/ConfirmModal';
 import { formatNumber } from '../../shared/lib/format';
@@ -93,8 +93,10 @@ const Warehouses: React.FC = () => {
         </div>
       ) : warehouses.length === 0 ? (
         <EmptyState
+          icon={WarehouseIcon}
           title={t('warehouses.empty.title')}
           description={t('warehouses.empty.description')}
+          action={{ label: t('warehouses.new'), onClick: () => setShowCreate(true) }}
         />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

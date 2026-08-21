@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { DollarSign, BarChart3, Boxes } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
+import { useTranslation } from 'react-i18next';
 import { useValuation } from './useValuation';
 import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
@@ -11,7 +13,8 @@ import { safeRatio, toFiniteNumber } from '@voxire/api';
 const AMBER = 'var(--erp-accent)';
 
 const Valuation: React.FC = () => {
-  const { data, isLoading } = useValuation();
+  const { t } = useTranslation('erp');
+  const { data, isLoading, refetch } = useValuation();
   const items = data?.items ?? [];
   const totalCost = useMemo(
     () => items.reduce((sum, item) => sum + (item.totalCost ?? 0), 0),
@@ -97,12 +100,13 @@ const Valuation: React.FC = () => {
           Value by Category
         </h3>
         {!isLoading && categories.length === 0 ? (
-          <div
-            className="flex items-center gap-2 text-sm"
-            style={{ color: 'var(--hub-text-muted)' }}
-          >
-            <Boxes size={14} /> No valuation data available.
-          </div>
+          <EmptyState
+            icon={Boxes}
+            title={t('valuation.empty.title')}
+            description={t('valuation.empty.description')}
+            size="compact"
+            action={{ label: t('valuation.refresh'), onClick: () => void refetch() }}
+          />
         ) : (
           <div className="space-y-2">
             {categories.map((cat) => (

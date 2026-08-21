@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Plus, Tags, Star } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
+import { EmptyState } from '@voxire/ui';
 import { useUserStore } from '@voxire/auth';
+import { useTranslation } from 'react-i18next';
 import { usePriceLists, useCreatePriceList } from './usePriceLists';
 import PageHeader from '../../shared/components/PageHeader';
 import { Skeleton } from '../../shared/components/Skeleton';
-import EmptyState from '../../shared/components/EmptyState';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
 import { toast } from 'sonner';
 
@@ -25,7 +26,8 @@ const inputStyle: React.CSSProperties = {
 };
 
 const PriceLists: React.FC = () => {
-  const { data: lists = [], isLoading } = usePriceLists();
+  const { t } = useTranslation('erp');
+  const { data: lists = [], isLoading, refetch } = usePriceLists();
   const createMut = useCreatePriceList();
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canManagePriceLists = canErpPermission(role, 'erp:purchase_orders');
@@ -87,8 +89,13 @@ const PriceLists: React.FC = () => {
       ) : lists.length === 0 ? (
         <EmptyState
           icon={Tags}
-          title="No price lists"
-          description="Create your first price list to enable tier pricing"
+          title={t('priceLists.empty.title')}
+          description={t('priceLists.empty.description')}
+          action={
+            canManagePriceLists
+              ? { label: t('priceLists.newPriceList'), onClick: () => setShowCreate(true) }
+              : { label: t('priceLists.refresh'), onClick: () => void refetch() }
+          }
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
