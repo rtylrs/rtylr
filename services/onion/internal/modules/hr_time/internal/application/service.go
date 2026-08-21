@@ -242,7 +242,8 @@ func (s *Service) RejectTimesheet(ctx context.Context, businessID, timesheetID i
 // --- Billable Export ---
 
 func (s *Service) ExportBillableEntries(ctx context.Context, businessID int64) ([]domain.BillableExportItem, int64, error) {
-	entries, err := s.repo.ListApprovedBillableEntries(ctx, businessID)
+	batchID := time.Now().UnixMilli()
+	entries, err := s.repo.ExportApprovedBillableEntries(ctx, businessID, batchID)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -251,16 +252,9 @@ func (s *Service) ExportBillableEntries(ctx context.Context, businessID int64) (
 		return nil, 0, nil
 	}
 
-	batchID := time.Now().UnixMilli()
-
 	items := make([]domain.BillableExportItem, 0, len(entries))
 	var totalMinutes int32
 	for _, e := range entries {
-		if markErr := s.repo.MarkEntryExported(ctx, businessID, e.ID, batchID); markErr != nil {
-			logger.Ctx(ctx).Error("failed to mark entry as exported",
-				logger.Any("business_id", businessID), logger.Any("entry_id", e.ID), logger.Error(markErr))
-			continue
-		}
 		items = append(items, domain.BillableExportItem{
 			EntryID:         e.ID,
 			EmployeeID:      e.EmployeeID,

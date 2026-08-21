@@ -26,6 +26,7 @@ type Repository interface {
 
 	ListApprovedBillableEntries(ctx context.Context, businessID int64) ([]TimeEntryRecord, error)
 	MarkEntryExported(ctx context.Context, businessID, entryID, billableInvoiceID int64) error
+	ExportApprovedBillableEntries(ctx context.Context, businessID, billableInvoiceID int64) ([]TimeEntryRecord, error)
 }
 
 type ApprovalChainProvider interface {
