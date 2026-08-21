@@ -217,5 +217,6 @@ export const cases = [
   ["apps/erp/src/features/inventory/Inventory.test.tsx", "audit-batch-215-suite-07"],
   ["apps/erp/src/features/valuation/Valuation.test.tsx", "audit-batch-216-suite-07"],
   ["apps/erp/src/shared/components/PaginationControls.tsx", "audit-batch-217-suite-07"],
+  ["apps/finance/src/features/expenses/NewExpense.tsx", "audit-batch-218-suite-07"],
 ];
 
