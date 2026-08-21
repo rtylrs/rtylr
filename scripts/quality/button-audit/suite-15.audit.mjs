@@ -189,5 +189,6 @@ export const cases = [
   ["apps/dash/src/shared/components/dash/ActivityEntry.tsx", "audit-batch-187-suite-15"],
   ["apps/dash/src/shared/components/ui/skeleton.tsx", "audit-batch-188-suite-15"],
   ["apps/erp/src/features/inventory/Inventory.tsx", "audit-batch-189-suite-15"],
+  ["apps/erp/src/features/valuation/Valuation.tsx", "audit-batch-190-suite-15"],
 ];
 

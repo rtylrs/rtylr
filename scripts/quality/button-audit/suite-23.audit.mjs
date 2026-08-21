@@ -189,5 +189,6 @@ export const cases = [
   ["apps/dash/src/shared/components/dash/PermissionCheckbox.tsx", "audit-batch-187-suite-23"],
   ["apps/dash/src/shared/hooks/queries/useKpis.test.tsx", "audit-batch-188-suite-23"],
   ["apps/erp/src/features/products/Products.tsx", "audit-batch-189-suite-23"],
+  ["apps/erp/src/shared/components/BarcodeInput.tsx", "audit-batch-190-suite-23"],
 ];
 
