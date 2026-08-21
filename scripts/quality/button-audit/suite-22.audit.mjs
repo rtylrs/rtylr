@@ -301,5 +301,6 @@ export const cases = [
   ["apps/flow/src/features/timeline/Timeline.tsx", "audit-batch-299-suite-22"],
   ["apps/flow/src/shared/components/DueDatePicker.test.tsx", "audit-batch-300-suite-22"],
   ["apps/hr/src/features/benefits/Benefits.tsx", "audit-batch-301-suite-22"],
+  ["apps/hr/src/features/equipment/AssetRegister.tsx", "audit-batch-302-suite-22"],
 ];
 

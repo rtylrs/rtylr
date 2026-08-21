@@ -301,5 +301,6 @@ export const cases = [
   ["apps/flow/src/features/time/MyDay.tsx", "audit-batch-299-suite-17"],
   ["apps/flow/src/shared/components/CommentInput.test.tsx", "audit-batch-300-suite-17"],
   ["apps/flow/src/shared/components/TrialBanner.tsx", "audit-batch-301-suite-17"],
+  ["apps/hr/src/features/employees/CreateLocationForm.tsx", "audit-batch-302-suite-17"],
 ];
 
