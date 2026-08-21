@@ -3,5 +3,6 @@ export const cases = [
   ["apps/auth/src/layouts/Public/Header.tsx", "audit-batch-001-suite-13"],
   ["apps/crm/src/features/dashboard/Dashboard.tsx", "audit-batch-002-suite-13"],
   ["apps/crm/src/layouts/DefaultLayout.tsx", "audit-batch-003-suite-13"],
+  ["apps/dash/src/features/dashboard/Dashboard/widgets/ActivityWidget.tsx", "audit-batch-004-suite-13"],
 ];
 

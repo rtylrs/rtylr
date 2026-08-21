@@ -3,5 +3,6 @@ export const cases = [
   ["apps/auth/src/features/login/Login.test.tsx", "audit-batch-001-suite-05"],
   ["apps/crm/src/features/customers/CreateCustomer.tsx", "audit-batch-002-suite-05"],
   ["apps/crm/src/features/segments/SegmentBuilder.tsx", "audit-batch-003-suite-05"],
+  ["apps/dash/src/features/billing/Billing.tsx", "audit-batch-004-suite-05"],
 ];
 
