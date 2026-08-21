@@ -284,11 +284,7 @@
       "removeCategoryLabel": "إزالة فئة {{name}}",
       "newCategoryName": "اسم الفئة الجديدة",
       "newCategoryPlaceholder": "أضف فئة",
-      "addCategory": "إضافة فئة",
-      "billableRates": "أسعار الفوترة",
-      "ratesOnePerPerson": "سعر واحد لكل شخص. عمود المشروع فارغ عن قصد: أسعار المشاريع تصل كقيمة في تلك الخانة، لا كإعادة بناء لهذا الجدول.",
-      "rateFor": "السعر بالساعة لـ {{name}}",
-      "rateNotSet": "غير محدّد"
+      "addCategory": "إضافة فئة"
     },
     "workTypes": {
       "section": "أنواع العمل",
