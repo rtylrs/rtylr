@@ -161,5 +161,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/TopProductsWidget.tsx", "audit-batch-159-suite-13"],
   ["apps/dash/src/features/qr-codes/QrCode.tsx", "audit-batch-160-suite-13"],
   ["apps/dash/src/layouts/AppLayout.tsx", "audit-batch-161-suite-13"],
+  ["apps/dash/src/shared/components/ui/button.tsx", "audit-batch-162-suite-13"],
 ];
 

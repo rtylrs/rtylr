@@ -161,5 +161,6 @@ export const cases = [
   ["apps/dash/src/features/extras/HelpCenter.tsx", "audit-batch-159-suite-21"],
   ["apps/dash/src/features/settings/Settings/components/BusinessType/BusinessType.test.tsx", "audit-batch-160-suite-21"],
   ["apps/dash/src/shared/components/HelmetContainer.tsx", "audit-batch-161-suite-21"],
+  ["apps/dash/src/shared/components/ui/sheet.tsx", "audit-batch-162-suite-21"],
 ];
 
