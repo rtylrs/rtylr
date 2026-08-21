@@ -1,4 +1,4 @@
-import type { AppId, UserRole } from '@voxire/types';
+import type { AppId } from '@voxire/types';
 
 export type { AppId };
 
@@ -27,27 +27,32 @@ export const APP_URLS: Record<AppId, string> & { api: string; status: string; co
   console: 'https://console.voxire.com',
 };
 
-export const APP_CONFIG: Record<
-  AppId,
-  { name: string; devPort: number; allowedRoles: UserRole[] }
-> = {
-  dash: { name: 'Dash', devPort: 5175, allowedRoles: ['owner', 'admin', 'operator'] },
-  auth: {
-    name: 'Auth',
-    devPort: 5176,
-    allowedRoles: ['owner', 'admin', 'operator', 'staff', 'viewer'],
-  },
-  menu: { name: 'Menu', devPort: 5177, allowedRoles: [] },
-  pos: { name: 'POS', devPort: 5178, allowedRoles: ['owner', 'admin', 'operator', 'staff'] },
-  erp: { name: 'ERP', devPort: 5179, allowedRoles: ['owner', 'admin', 'operator'] },
-  hr: { name: 'HR', devPort: 5180, allowedRoles: ['owner', 'admin', 'operator', 'staff'] },
-  crm: { name: 'CRM', devPort: 5181, allowedRoles: ['owner', 'admin', 'operator'] },
-  finance: { name: 'Finance', devPort: 5182, allowedRoles: ['owner', 'admin'] },
-  flow: { name: 'Flow', devPort: 5183, allowedRoles: ['owner', 'admin', 'operator', 'staff'] },
-  insights: { name: 'Insights', devPort: 5187, allowedRoles: ['owner', 'admin'] },
-  // Recruit is public on the candidate side; the admin side is gated to
-  // owner/admin only. allowedRoles reflects the admin gate - the public
-  // pages don't go through AppGuard at all.
-  recruit: { name: 'Recruit', devPort: 5184, allowedRoles: ['owner', 'admin'] },
-  landing: { name: 'Landing', devPort: 4200, allowedRoles: [] },
+/**
+ * Per-app display name and dev port.
+ *
+ * This carried an `allowedRoles: UserRole[]` per app until tryrtylr/rtylr#795.
+ * Nothing ever read it: `AppGuard` does not import APP_CONFIG, and its actual
+ * rule is `role === 'owner' || role === 'admin' || apps.includes(appId)` - the
+ * per-user `apps` array is authoritative and the role name carries no weight
+ * beyond that owner/admin special case.
+ *
+ * The table is not deleted lightly; it encoded a real intent, and it is recorded
+ * on #795 so re-introducing app-level role gating does not start from scratch.
+ * It is removed because a table that looks like authorization and enforces
+ * nothing is worse than no table: the RBAC audit that produced #795 was itself
+ * misled by it before tracing the real path.
+ */
+export const APP_CONFIG: Record<AppId, { name: string; devPort: number }> = {
+  dash: { name: 'Dash', devPort: 5175 },
+  auth: { name: 'Auth', devPort: 5176 },
+  menu: { name: 'Menu', devPort: 5177 },
+  pos: { name: 'POS', devPort: 5178 },
+  erp: { name: 'ERP', devPort: 5179 },
+  hr: { name: 'HR', devPort: 5180 },
+  crm: { name: 'CRM', devPort: 5181 },
+  finance: { name: 'Finance', devPort: 5182 },
+  flow: { name: 'Flow', devPort: 5183 },
+  insights: { name: 'Insights', devPort: 5187 },
+  recruit: { name: 'Recruit', devPort: 5184 },
+  landing: { name: 'Landing', devPort: 4200 },
 };
