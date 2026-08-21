@@ -277,5 +277,6 @@ export const cases = [
   ["apps/flow/src/shared/components/TaskCard.tsx", "audit-batch-275-suite-20"],
   ["apps/hr/src/features/departments/Departments.tsx", "audit-batch-276-suite-20"],
   ["apps/hr/src/features/payroll/MyPaySlips.tsx", "audit-batch-277-suite-20"],
+  ["apps/hr/src/features/setup-wizard/components/StepContainer.tsx", "audit-batch-278-suite-20"],
 ];
 

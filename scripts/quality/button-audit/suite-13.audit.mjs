@@ -277,5 +277,6 @@ export const cases = [
   ["apps/flow/src/shared/components/QuickCreate.test.tsx", "audit-batch-275-suite-13"],
   ["apps/hr/src/features/dashboard/widgets/PendingApprovalsWidget.tsx", "audit-batch-276-suite-13"],
   ["apps/hr/src/features/onboarding/Onboarding.tsx", "audit-batch-277-suite-13"],
+  ["apps/hr/src/features/settings/payroll-config/PayrollConfigSettings.tsx", "audit-batch-278-suite-13"],
 ];
 

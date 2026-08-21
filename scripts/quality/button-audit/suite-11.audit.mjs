@@ -277,5 +277,6 @@ export const cases = [
   ["apps/flow/src/shared/components/PriorityIcon.tsx", "audit-batch-275-suite-11"],
   ["apps/hr/src/features/dashboard/widgets/LeaveBalanceWidget.tsx", "audit-batch-276-suite-11"],
   ["apps/hr/src/features/onboarding/ChecklistTemplates.tsx", "audit-batch-277-suite-11"],
+  ["apps/hr/src/features/settings/Settings.test.tsx", "audit-batch-278-suite-11"],
 ];
 
