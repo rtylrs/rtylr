@@ -37,7 +37,7 @@ export interface UserState {
   role: UserRole | null;
   userId: string | null;
   addons: Record<string, boolean>;
-  visits: any[];
+  visits: unknown[];
 }
 
 export interface UserActions {
@@ -48,5 +48,5 @@ export interface UserActions {
   setRole: (role: UserRole) => void;
   setUserId: (userId: string) => void;
   setAddons: (addons: Record<string, boolean>) => void;
-  setVisits: (visits: any[]) => void;
+  setVisits: (visits: unknown[]) => void;
 }

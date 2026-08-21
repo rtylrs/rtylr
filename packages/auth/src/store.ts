@@ -57,7 +57,7 @@ export const useUserStore = create<UserStore>()(
 
       setAddons: (addons: Record<string, boolean>) => set({ addons }),
 
-      setVisits: (visits: any[]) => set({ visits }),
+      setVisits: (visits: unknown[]) => set({ visits }),
     }),
     {
       name: 'rtylr:voxire:user',

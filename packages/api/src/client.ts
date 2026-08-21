@@ -37,12 +37,29 @@ const clearTokenCookie = (): void => {
   document.cookie = 'token=; Max-Age=0; path=/;';
 };
 
-const getAuthUrl = (appId: string): string => {
+const getAuthBaseUrl = (): string => {
   // Self-host uses the runtime auth URL; hosted keeps localhost/auth.rtylr.com.
-  const base = isLocalDevHost(window.location.hostname)
+  return isLocalDevHost(window.location.hostname)
     ? 'http://localhost:5176'
     : resolveAuthUrl();
-  return `${base}?redirect=${appId}`;
+};
+
+const getAuthUrl = (appId: string): string => `${getAuthBaseUrl()}?redirect=${appId}`;
+
+// True when the current page IS the auth app. A 401 there (e.g. a wrong
+// password on the login screen, or an expired cookie during the login page's
+// own /user/me pre-check) must surface as an error to the calling component -
+// redirecting back to the same auth app would reload the page in a loop and
+// swallow the message.
+const isOnAuthApp = (): boolean => {
+  try {
+    const base = new URL(getAuthBaseUrl());
+    return (
+      window.location.protocol === base.protocol && window.location.host === base.host
+    );
+  } catch {
+    return false;
+  }
 };
 
 // ── snake_case → camelCase converter ──────────────────────────────
@@ -81,6 +98,16 @@ function convertKeysToSnake(obj: unknown): unknown {
     return converted;
   }
   return obj;
+}
+
+/** Convert a JSON compatibility payload to the backend's snake_case wire shape. */
+export function toOneKitJson<T>(value: T): T {
+  return convertKeysToSnake(value) as T;
+}
+
+/** Convert a JSON compatibility response from the backend's snake_case wire shape. */
+export function fromOneKitJson<T>(value: unknown): T {
+  return convertKeys(value) as T;
 }
 
 // ── Client factory ────────────────────────────────────────────────
@@ -127,7 +154,9 @@ export function createApiClient(appId: string): AxiosInstance {
       }
       if (error.response?.status === 401) {
         clearTokenCookie();
-        window.location.href = getAuthUrl(appId);
+        if (!isOnAuthApp()) {
+          window.location.href = getAuthUrl(appId);
+        }
       }
       return Promise.reject(error);
     }
@@ -163,7 +192,9 @@ export function createOneKitFetch(appId: string): typeof fetch {
 
     if (response.status === 401) {
       clearTokenCookie();
-      window.location.href = getAuthUrl(appId);
+      if (!isOnAuthApp()) {
+        window.location.href = getAuthUrl(appId);
+      }
     }
 
     return response;

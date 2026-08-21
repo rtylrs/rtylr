@@ -177,6 +177,15 @@ export function safeFetch(client: AxiosInstance): SafeApi {
   };
 }
 
+/**
+ * Adapts a generated OneKit Promise to the ResultAsync shape used by the
+ * existing React Query consumers. The transport remains the generated client;
+ * this helper only keeps error handling consistent while callers migrate.
+ */
+export function oneKitResult<T>(operation: () => Promise<T>): ResultAsync<T, ApiError> {
+  return ResultAsync.fromPromise(Promise.resolve().then(operation), toApiError);
+}
+
 // ---------------------------------------------------------------------------
 // React Query integration helper
 // ---------------------------------------------------------------------------

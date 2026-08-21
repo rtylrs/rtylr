@@ -2,15 +2,15 @@ import React from 'react';
 import { useTranslation } from '@voxire/i18n';
 import { useUserStore } from '@voxire/auth';
 import { cn } from '@voxire/ui';
-import type { SafeApi } from '@voxire/api';
 import { AlertTriangle, X } from 'lucide-react';
 import { useLicenseState } from './useLicenseState';
 import { resolveLicenseNotice, type LicenseNotice } from './notice';
 import { isLicenseAdmin } from './isAdmin';
+import type { LicenseClient } from './types';
 
 export interface LicenseBannerProps {
-  /** The app's `SafeApi` instance (from `safeFetch(api)`). */
-  safe: SafeApi;
+  /** The generated OneKit license client for the host application. */
+  client: LicenseClient;
   /** Optional extra classes for the outer bar. */
   className?: string;
 }
@@ -59,14 +59,14 @@ function noticeMessage(
  * Mount it at the top of an app shell (e.g. above page content). It is a
  * complete no-op for non-admins and for hosted/valid installations.
  */
-export function LicenseBanner({ safe, className }: LicenseBannerProps): React.JSX.Element | null {
+export function LicenseBanner({ client, className }: LicenseBannerProps): React.JSX.Element | null {
   const { t } = useTranslation();
   const user = useUserStore((s) => s.user);
   const role = useUserStore((s) => s.role);
   const admin = isLicenseAdmin(user, role);
 
   // Only admins ever trigger the network request.
-  const { data } = useLicenseState(safe, admin);
+  const { data } = useLicenseState(client, admin);
 
   const notice = React.useMemo(() => resolveLicenseNotice(data), [data]);
 

@@ -9,9 +9,9 @@ export type LicenseMode = 'hosted' | 'self_hosted';
 export type LicenseStatus = 'hosted' | 'valid' | 'missing' | 'expired' | 'invalid' | 'unreachable';
 
 export interface LicenseState {
-  mode: LicenseMode;
-  valid: boolean;
-  status: LicenseStatus;
+  mode?: LicenseMode | string;
+  valid?: boolean;
+  status?: LicenseStatus | string;
   reason?: string;
   /** RFC3339 timestamp */
   expiresAt?: string | null;
@@ -19,6 +19,9 @@ export interface LicenseState {
   graceUntil?: string | null;
   /** RFC3339 timestamp */
   checkedAt?: string;
-  /** Additional, non-secret license fields may be present. */
-  [key: string]: unknown;
+}
+
+/** Minimal structural type implemented by the generated OneKit client. */
+export interface LicenseClient {
+  getLicenseState(request: Record<string, never>): Promise<LicenseState>;
 }
