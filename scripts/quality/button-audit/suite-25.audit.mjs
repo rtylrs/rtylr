@@ -169,5 +169,6 @@ export const cases = [
   ["apps/finance/src/shared/components/InvoicePreview.tsx", "audit-batch-167-suite-25"],
   ["apps/flow/src/features/directory/DirectoryScreen.tsx", "audit-batch-168-suite-25"],
   ["apps/flow/src/features/projects/ProjectSettings.tsx", "audit-batch-169-suite-25"],
+  ["apps/flow/src/features/time/AddHours.tsx", "audit-batch-170-suite-25"],
 ];
 

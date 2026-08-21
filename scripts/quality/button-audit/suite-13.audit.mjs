@@ -169,5 +169,6 @@ export const cases = [
   ["apps/finance/src/layouts/DefaultLayout.tsx", "audit-batch-167-suite-13"],
   ["apps/finance/src/shared/components/RecordPaymentModal.tsx", "audit-batch-168-suite-13"],
   ["apps/flow/src/features/presence/PresenceScreen.tsx", "audit-batch-169-suite-13"],
+  ["apps/flow/src/features/settings/sections/TimeSection.tsx", "audit-batch-170-suite-13"],
 ];
 
