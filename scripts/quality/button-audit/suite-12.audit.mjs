@@ -22,5 +22,6 @@ export const cases = [
   ["apps/hr/src/features/operations/Operations.tsx", "audit-batch-020-suite-12"],
   ["apps/hr/src/features/setup-wizard/HRConfigRoute.tsx", "audit-batch-021-suite-12"],
   ["apps/hr/src/features/time-logging/TimeLogging.tsx", "audit-batch-022-suite-12"],
+  ["apps/hr/src/shared/components/OrgNode.tsx", "audit-batch-023-suite-12"],
 ];
 
