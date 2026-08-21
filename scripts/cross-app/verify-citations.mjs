@@ -14,13 +14,65 @@
 //
 // Citations inside fenced code blocks are skipped: those are illustrative
 // snippets, not claims. Line numbers must be within the file's line count.
+//
+// A repo-relative citation must also be TRACKED IN GIT, not merely present on
+// disk. Checking the working tree alone let this script pass on a machine where
+// an untracked local file happened to satisfy a citation, while the same
+// citation failed for everyone else: that is how the `packages/CLAUDE.md`
+// citation in 10-doc-drift.md survived (#864). Submodule contents count as
+// tracked, via `git ls-files --recurse-submodules`. Paths outside this
+// repository (`~/...`, `/...`) cannot be checked this way and are existence-only.
 
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { join, relative, resolve } from 'node:path';
 import { homedir } from 'node:os';
 
 const ROOT = new URL('../..', import.meta.url).pathname.replace(/\/$/, '');
 const DOCS = join(ROOT, 'docs/cross-app');
+
+// Every path git knows about, submodule contents included. A citation to a file
+// that exists only in someone's working tree is a fabrication for everyone else.
+const TRACKED = new Set(
+  execFileSync('git', ['ls-files', '--recurse-submodules'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  })
+    .split('\n')
+    .filter(Boolean)
+);
+
+// Locally modified files are the other half of the same problem. A line number
+// checked against uncommitted content can resolve here and nowhere else, which
+// is how `CLAUDE.md:901` was cited against a file that has 899 committed lines.
+// This does not fail the run: citing a line you just wrote is normal while the
+// change is in flight. It reports, so a green result is never mistaken for a
+// reproducible one.
+function locallyModified() {
+  const paths = new Set();
+  const add = (out, prefix) => {
+    for (const f of out.split('\n').filter(Boolean)) paths.add(prefix + f);
+  };
+  const git = (args, cwd) => execFileSync('git', args, { cwd, encoding: 'utf8' });
+  try {
+    add(git(['diff', '--name-only', 'HEAD'], ROOT), '');
+    const subs = git(['submodule', '--quiet', 'foreach', '--recursive', 'echo $displaypath'], ROOT)
+      .split('\n')
+      .filter(Boolean);
+    for (const sub of subs) {
+      add(git(['diff', '--name-only', 'HEAD'], join(ROOT, sub)), `${sub}/`);
+    }
+  } catch {
+    // Not a git checkout, or git is unavailable. The tracked-set call above
+    // would already have thrown, so reaching here means only the diff failed.
+    return paths;
+  }
+  return paths;
+}
+
+const MODIFIED = locallyModified();
+const citedButModified = new Set();
 
 function walk(dir) {
   const out = [];
@@ -80,8 +132,7 @@ for (const doc of walk(DOCS)) {
     // in positional order: a `:456` continuation refers to the path that
     // precedes it on the line, not to the last path anywhere on the line.
     const events = [];
-    for (const m of line.matchAll(CITATION))
-      events.push({ at: m.index, kind: 'cite', m });
+    for (const m of line.matchAll(CITATION)) events.push({ at: m.index, kind: 'cite', m });
     for (const m of line.matchAll(BARE_LINE)) events.push({ at: m.index, kind: 'cont', m });
     events.sort((a, b) => a.at - b.at);
 
@@ -99,33 +150,39 @@ for (const doc of walk(DOCS)) {
       }
       const m = ev.m;
       {
-      const [, p, lineNo] = m;
-      const abs = resolveTarget(p);
-      lastPathOnLine = abs;
-      if (!existsSync(abs)) {
-        // Only report paths that were meant as citations: those carrying a
-        // line number, or repo-relative paths under a known source dir.
-        if (lineNo || /^(apps|packages|scripts|docs|e2e|test)\//.test(p)) {
-          failures.push(`${relDoc}:${ln}  missing file: ${p}`);
+        const [, p, lineNo] = m;
+        const abs = resolveTarget(p);
+        lastPathOnLine = abs;
+        // Only report paths that were meant as citations: those carrying a line
+        // number, or repo-relative paths under a known source dir.
+        const isClaim = Boolean(lineNo) || /^(apps|packages|scripts|docs|e2e|test)\//.test(p);
+        if (!existsSync(abs)) {
+          if (isClaim) failures.push(`${relDoc}:${ln}  missing file: ${p}`);
+          continue;
         }
-        continue;
+        // Present on disk is not enough for a path inside this repository. An
+        // untracked file satisfies the citation here and nowhere else.
+        const isRepoRelative = !p.startsWith('~/') && !p.startsWith('/');
+        if (isClaim && isRepoRelative && !TRACKED.has(p)) {
+          failures.push(`${relDoc}:${ln}  present on disk but not tracked in git: ${p}`);
+          continue;
+        }
+        if (isRepoRelative && MODIFIED.has(p)) citedButModified.add(p);
+        if (!lineNo) continue;
+        stats.citations++;
+        if (statSync(abs).isDirectory()) {
+          failures.push(`${relDoc}:${ln}  cited a directory with a line: ${p}:${lineNo}`);
+          continue;
+        }
+        const count = lineCount(abs);
+        if (count === null) {
+          failures.push(`${relDoc}:${ln}  unreadable: ${p}`);
+        } else if (Number(lineNo) < 1 || Number(lineNo) > count) {
+          failures.push(
+            `${relDoc}:${ln}  line out of range: ${p}:${lineNo} (file has ${count} lines)`
+          );
+        }
       }
-      if (!lineNo) continue;
-      stats.citations++;
-      if (statSync(abs).isDirectory()) {
-        failures.push(`${relDoc}:${ln}  cited a directory with a line: ${p}:${lineNo}`);
-        continue;
-      }
-      const count = lineCount(abs);
-      if (count === null) {
-        failures.push(`${relDoc}:${ln}  unreadable: ${p}`);
-      } else if (Number(lineNo) < 1 || Number(lineNo) > count) {
-        failures.push(
-          `${relDoc}:${ln}  line out of range: ${p}:${lineNo} (file has ${count} lines)`
-        );
-      }
-    }
-
     }
 
     // Relative markdown links between audit documents.
@@ -142,6 +199,13 @@ for (const doc of walk(DOCS)) {
 process.stdout.write(
   `checked ${stats.files} documents, ${stats.citations} file:line citations, ${stats.links} links\n`
 );
+if (citedButModified.size) {
+  process.stdout.write(
+    `\nWARNING: ${citedButModified.size} cited file(s) are modified locally, so their line\n` +
+      `numbers were checked against uncommitted content and this result is not reproducible:\n`
+  );
+  for (const p of [...citedButModified].sort()) process.stdout.write(`  ${p}\n`);
+}
 if (failures.length) {
   process.stdout.write(`\n${failures.length} FAILURES:\n`);
   for (const f of failures) process.stdout.write(`  ${f}\n`);
