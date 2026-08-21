@@ -322,5 +322,6 @@ export const cases = [
   ["apps/finance/src/features/cash-flow/CashFlow.tsx", "audit-batch-320-suite-22"],
   ["apps/finance/src/main.tsx", "audit-batch-321-suite-22"],
   ["apps/finance/src/shared/components/SendInvoiceModal.tsx", "audit-batch-322-suite-22"],
+  ["apps/flow/src/features/profile/ProfileScreen.test.tsx", "audit-batch-323-suite-22"],
 ];
 

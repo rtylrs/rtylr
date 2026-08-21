@@ -322,5 +322,6 @@ export const cases = [
   ["apps/erp/src/shared/components/TaxRateSelector.tsx", "audit-batch-320-suite-14"],
   ["apps/finance/src/features/quotes/Quotes.tsx", "audit-batch-321-suite-14"],
   ["apps/finance/src/shared/components/OverdueInvoicesWidget.tsx", "audit-batch-322-suite-14"],
+  ["apps/flow/src/features/leave/LeaveScreen.test.tsx", "audit-batch-323-suite-14"],
 ];
 
