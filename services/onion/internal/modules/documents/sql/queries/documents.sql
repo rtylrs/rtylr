@@ -2,7 +2,7 @@
 SELECT id, owner_id, business_id, staff_id, name, type, file_url, expiry_date, created_at
 FROM hr_documents
 WHERE business_id = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC LIMIT 100;
 
 -- name: CreateDocument :execresult
 INSERT INTO hr_documents (owner_id, business_id, staff_id, name, type, file_url, expiry_date)

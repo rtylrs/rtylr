@@ -43,7 +43,8 @@ LEFT JOIN (
  AND img.product_id = p.id
 WHERE p.business_id = ?
   AND p.is_active = TRUE
-ORDER BY c.name, p.name;
+ORDER BY c.name, p.name
+LIMIT 100;
 
 -- name: GetMenuBusinessOwnerID :one
 SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE;
@@ -53,7 +54,8 @@ SELECT id, owner_id, business_id, category_id, name, sku, barcode,
        sale_price, tax_rate, is_active, created_at, updated_at
 FROM erp_products
 WHERE business_id = ? AND is_active = TRUE
-ORDER BY name;
+ORDER BY name
+LIMIT 100;
 
 -- name: QuickCreateMenuItem :execresult
 INSERT INTO erp_products (owner_id, business_id, name, sku, sale_price, is_active)

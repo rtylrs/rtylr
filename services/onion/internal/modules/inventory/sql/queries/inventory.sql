@@ -10,7 +10,8 @@ SELECT id, business_id, name, sku, unit, stock_quantity, low_stock_threshold,
        CASE WHEN low_stock_threshold IS NOT NULL AND stock_quantity <= low_stock_threshold THEN 1 ELSE 0 END AS is_low_stock
 FROM erp_products
 WHERE business_id = ? AND track_inventory = TRUE AND is_active = TRUE
-ORDER BY name ASC;
+ORDER BY name ASC
+LIMIT 100;
 
 -- name: GetLowStockProducts :many
 SELECT id, business_id, name, sku, unit, stock_quantity, low_stock_threshold,
@@ -21,7 +22,8 @@ FROM erp_products
 WHERE business_id = ? AND track_inventory = TRUE AND is_active = TRUE
   AND low_stock_threshold IS NOT NULL
   AND stock_quantity <= low_stock_threshold
-ORDER BY stock_quantity ASC;
+ORDER BY stock_quantity ASC
+LIMIT 100;
 
 -- name: GetValuation :many
 SELECT

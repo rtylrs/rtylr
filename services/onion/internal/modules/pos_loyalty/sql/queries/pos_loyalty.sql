@@ -16,7 +16,7 @@ ON DUPLICATE KEY UPDATE
 SELECT id, business_id, customer_id, order_id, type, points, balance_after, note, created_at
 FROM pos_loyalty_transactions
 WHERE business_id = ? AND customer_id = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC LIMIT 100;
 
 -- name: CreateLoyaltyTransaction :execresult
 INSERT INTO pos_loyalty_transactions (business_id, customer_id, order_id, type, points, balance_after, note)

@@ -2,4 +2,4 @@ package infrastructure
 
 import "testing"
 
-func TestAuditIssue_373_Contract(t *testing.T) {}
+func TestAuditIssue_373_Contract(_ *testing.T) {}

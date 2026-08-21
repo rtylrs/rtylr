@@ -18,7 +18,7 @@ LIMIT 1;
 SELECT id, owner_id, user_id, apps, role, is_active, created_at, updated_at
 FROM user_app_permissions
 WHERE owner_id = ?
-ORDER BY created_at DESC;
+ORDER BY created_at DESC LIMIT 100;
 
 -- name: UpsertPermission :exec
 INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role)

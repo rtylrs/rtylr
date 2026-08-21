@@ -2,7 +2,7 @@
 SELECT id, owner_id, business_id, user_id, location_id, name, pin, pin_hash, role, is_active,
        hourly_rate, max_discount_pct, can_void, can_refund,
        can_open_drawer, can_apply_discount, created_by, created_at, updated_at
-FROM pos_users WHERE business_id = ? ORDER BY name ASC;
+FROM pos_users WHERE business_id = ? ORDER BY name ASC LIMIT 100;
 
 -- name: ListPOSUsersByLocation :many
 SELECT id, owner_id, business_id, user_id, location_id, name, pin, pin_hash, role, is_active,

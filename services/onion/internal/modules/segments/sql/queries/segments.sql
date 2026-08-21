@@ -1,6 +1,6 @@
 -- name: ListSegments :many
 SELECT id, owner_id, business_id, name, description, rules, customer_count, last_calculated_at, created_at, updated_at
-FROM crm_segments WHERE business_id = ? ORDER BY created_at DESC;
+FROM crm_segments WHERE business_id = ? ORDER BY created_at DESC LIMIT 100;
 
 -- name: GetSegmentByID :one
 SELECT id, owner_id, business_id, name, description, rules, customer_count, last_calculated_at, created_at, updated_at

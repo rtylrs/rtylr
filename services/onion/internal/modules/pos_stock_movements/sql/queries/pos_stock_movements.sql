@@ -17,7 +17,8 @@ WHERE l.business_id = ?
   AND loc.source_id = ?
   AND l.product_id = ?
   AND l.channel = 'pos'
-ORDER BY l.created_at DESC, l.id DESC;
+ORDER BY l.created_at DESC, l.id DESC
+LIMIT 100;
 
 -- name: UpdateStockLedgerTransferGroup :exec
 UPDATE stock_ledger SET transfer_group = ? WHERE id = ? AND business_id = ?;

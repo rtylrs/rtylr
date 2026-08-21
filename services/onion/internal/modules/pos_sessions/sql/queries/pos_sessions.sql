@@ -2,7 +2,7 @@
 SELECT id, owner_id, business_id, location_id, staff_id, status, opening_cash, closing_cash, expected_cash,
        cash_difference, total_sales, total_orders, total_cash_sales, total_card_sales,
        total_online_sales, total_refunds, opened_at, closed_at, notes
-FROM pos_sessions WHERE business_id = ? ORDER BY opened_at DESC;
+FROM pos_sessions WHERE business_id = ? ORDER BY opened_at DESC LIMIT 100;
 
 -- name: GetSessionByID :one
 SELECT id, owner_id, business_id, location_id, staff_id, status, opening_cash, closing_cash, expected_cash,

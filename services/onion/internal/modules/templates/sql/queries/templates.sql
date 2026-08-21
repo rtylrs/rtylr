@@ -1,6 +1,6 @@
 -- name: ListTemplates :many
 SELECT id, owner_id, business_id, name, type, subject, body, variables, is_active, created_at, updated_at
-FROM crm_templates WHERE business_id = ? ORDER BY created_at DESC;
+FROM crm_templates WHERE business_id = ? ORDER BY created_at DESC LIMIT 100;
 
 -- name: CreateTemplate :execresult
 INSERT INTO crm_templates

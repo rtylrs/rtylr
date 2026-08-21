@@ -11,7 +11,7 @@ FROM voxhire_admins WHERE id = ?;
 
 -- name: ListAdmins :many
 SELECT id, email, COALESCE(name,'') AS name, created_at
-FROM voxhire_admins ORDER BY created_at DESC;
+FROM voxhire_admins ORDER BY created_at DESC LIMIT 100;
 
 -- name: CountAdmins :one
 SELECT COUNT(*) AS count FROM voxhire_admins;
@@ -137,7 +137,8 @@ SELECT id, company_name, contact_name, COALESCE(contact_title,'') AS contact_tit
        COALESCE(timeline,'') AS timeline, COALESCE(service,'') AS service,
        COALESCE(message,'') AS message, agency_opt_in, status, created_at
 FROM voxhire_company_leads
-ORDER BY created_at DESC;
+ORDER BY created_at DESC
+LIMIT 100;
 
 -- name: UpdateApplicationStatus :exec
 UPDATE voxire_career_applications SET status = ? WHERE id = ?;
@@ -208,7 +209,8 @@ ORDER BY
   CASE t.status WHEN 'open' THEN 0 WHEN 'done' THEN 2 ELSE 1 END,
   t.due_at IS NULL,
   t.due_at ASC,
-  t.created_at DESC;
+  t.created_at DESC
+LIMIT 100;
 
 -- name: GetTaskByID :one
 SELECT t.id, t.application_id, a.job_id, COALESCE(c.title, '') AS opening_title,
@@ -252,7 +254,8 @@ SELECT s.id, s.job_id, COALESCE(c.title, '') AS job_title, s.name, s.status,
 FROM voxhire_shortlists s
 LEFT JOIN careers c ON c.id = s.job_id
 WHERE (sqlc.narg('job_id') IS NULL OR s.job_id = sqlc.narg('job_id'))
-ORDER BY s.updated_at DESC;
+ORDER BY s.updated_at DESC
+LIMIT 100;
 
 -- name: CreateShortlist :execresult
 INSERT INTO voxhire_shortlists (job_id, name, status, notes) VALUES (?, ?, ?, ?);

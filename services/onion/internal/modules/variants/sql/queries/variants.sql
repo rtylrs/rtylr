@@ -4,7 +4,7 @@ SELECT id, owner_id, business_id, product_id, name, sku, barcode,
        created_at, updated_at
 FROM erp_product_variants
 WHERE business_id = ? AND product_id = ?
-ORDER BY name ASC;
+ORDER BY name ASC LIMIT 100;
 
 -- name: ListVariantsByOwner :many
 SELECT id, owner_id, business_id, product_id, name, sku, barcode,
@@ -12,7 +12,7 @@ SELECT id, owner_id, business_id, product_id, name, sku, barcode,
        created_at, updated_at
 FROM erp_product_variants
 WHERE business_id = ?
-ORDER BY name ASC;
+ORDER BY name ASC LIMIT 100;
 
 -- name: CreateVariant :execresult
 INSERT INTO erp_product_variants

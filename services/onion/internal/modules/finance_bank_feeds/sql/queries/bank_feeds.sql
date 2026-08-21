@@ -35,7 +35,8 @@ FOR UPDATE;
 SELECT amount_minor_units
 FROM finance_bank_feeds
 WHERE business_id = ? AND bank_account_id = ?
-ORDER BY occurred_at ASC, id ASC;
+ORDER BY occurred_at ASC, id ASC
+LIMIT 100;
 
 -- cross-schema read from finance_bank_feeds — apply only rows imported after
 -- the account's last sync cursor. created_at tracks import time; occurred_at
