@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/labourcost"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -45,6 +46,12 @@ func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalC
 
 func (s *Service) GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int64) (int64, error) {
 	return s.permissions.GetEmployeeIDByUserID(ctx, ownerID, userID)
+}
+
+// GetProjectLabourCost implements the platform labour-cost port. The service
+// deliberately exposes only HR's aggregate result, never hourly rates.
+func (s *Service) GetProjectLabourCost(ctx context.Context, businessID, projectID int64) (labourcost.ProjectCost, error) {
+	return s.repo.GetProjectLabourCost(ctx, businessID, projectID)
 }
 
 func (s *Service) HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error) {

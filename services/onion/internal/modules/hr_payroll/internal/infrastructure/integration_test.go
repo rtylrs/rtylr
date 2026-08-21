@@ -31,6 +31,57 @@ func TestCreatePayrollRun_RejectsDuplicateBusinessPeriod(t *testing.T) {
 	}
 }
 
+func TestGetProjectLabourCostReportsUncostedBillableMinutes(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	const businessID int64 = 9100686
+	const projectID int64 = 9900686
+
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, "DELETE FROM hr_time_entries WHERE business_id = ? AND project_id = ?", businessID, projectID)
+		_, _ = db.ExecContext(ctx, "DELETE FROM hr_employees WHERE business_id = ?", businessID)
+	})
+
+	res, err := db.ExecContext(ctx, `
+		INSERT INTO hr_employees (owner_id, business_id, first_name, last_name, email, status, hourly_rate)
+		VALUES (?, ?, ?, ?, ?, 'active', ?), (?, ?, ?, ?, ?, 'active', NULL)`,
+		businessID, businessID, "Costed", "Employee", "labour-cost-costed@example.com", "30.00",
+		businessID, businessID, "Uncosted", "Employee", "labour-cost-uncosted@example.com")
+	if err != nil {
+		t.Fatalf("insert labour cost employees: %v", err)
+	}
+	firstEmployeeID, err := res.LastInsertId()
+	if err != nil {
+		t.Fatalf("first employee id: %v", err)
+	}
+	secondEmployeeID := firstEmployeeID + 1
+
+	_, err = db.ExecContext(ctx, `
+		INSERT INTO hr_time_entries
+		(owner_id, business_id, employee_id, project_id, date, duration_minutes, is_billable, status)
+		VALUES (?, ?, ?, ?, '2026-08-01', 60, TRUE, 'approved'),
+		       (?, ?, ?, ?, '2026-08-01', 30, TRUE, 'approved'),
+		       (?, ?, ?, ?, '2026-08-01', 90, FALSE, 'approved')`,
+		businessID, businessID, firstEmployeeID, projectID,
+		businessID, businessID, secondEmployeeID, projectID,
+		businessID, businessID, firstEmployeeID, projectID)
+	if err != nil {
+		t.Fatalf("insert labour cost entries: %v", err)
+	}
+
+	cost, err := repo.GetProjectLabourCost(ctx, businessID, projectID)
+	if err != nil {
+		t.Fatalf("GetProjectLabourCost: %v", err)
+	}
+	if cost.BusinessID != businessID || cost.ProjectID != projectID {
+		t.Fatalf("scope = business %d, project %d; want %d, %d", cost.BusinessID, cost.ProjectID, businessID, projectID)
+	}
+	if cost.CostCents != 3000 || cost.CostedMinutes != 60 || cost.UncostedMinutes != 30 || cost.UncostedEmployeeCount != 1 {
+		t.Fatalf("aggregate = %+v; want 3000 cents, 60 costed minutes, 30 uncosted minutes, 1 uncosted employee", cost)
+	}
+}
+
 func TestListPayrollRuns_ReturnsMarch2026Approved(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

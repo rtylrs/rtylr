@@ -12,6 +12,7 @@ import (
 	internaljobs "github.com/voxire/onion/internal/modules/hr_payroll/internal/jobs"
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/routes"
 	platformjobs "github.com/voxire/onion/internal/platform/jobs"
+	"github.com/voxire/onion/internal/platform/labourcost"
 )
 
 type hrCoreApprovalAdapter struct {
@@ -69,6 +70,12 @@ func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Mo
 // depending on journal persistence details.
 func (m *Module) SetFinancePoster(p domain.FinanceJournalPoster) {
 	m.service.SetFinancePoster(p)
+}
+
+// LabourCostProvider exposes the HR-owned aggregate port to consumers without
+// exposing the payroll service or compensation details.
+func (m *Module) LabourCostProvider() labourcost.LabourCostProvider {
+	return m.service
 }
 
 func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {

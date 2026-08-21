@@ -13,6 +13,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/labourcost"
 	"github.com/voxire/onion/internal/platform/logger"
 )
 
@@ -443,6 +444,30 @@ func (r *Repository) ListEmployeePayInfo(ctx context.Context, ownerID int64) ([]
 	return employees, nil
 }
 
+// GetProjectLabourCost is the only HR-owned read exposed to project-cost
+// consumers. It aggregates billable minutes and rates inside HR and returns no
+// employee compensation fields.
+func (r *Repository) GetProjectLabourCost(ctx context.Context, businessID, projectID int64) (labourcost.ProjectCost, error) {
+	row, err := r.queries.GetProjectLabourCost(ctx, sqlc.GetProjectLabourCostParams{
+		BusinessID:   businessID,
+		BusinessID_2: businessID,
+		ProjectID:    sql.NullInt64{Int64: projectID, Valid: true},
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to get project labour cost",
+			logger.Any("business_id", businessID), logger.Any("project_id", projectID), logger.Error(err))
+		return labourcost.ProjectCost{}, err
+	}
+	return labourcost.ProjectCost{
+		BusinessID:            row.BusinessID,
+		ProjectID:             row.ProjectID.Int64,
+		CostCents:             interfaceToInt64(row.CostCents),
+		CostedMinutes:         interfaceToInt64(row.CostedMinutes),
+		UncostedMinutes:       interfaceToInt64(row.UncostedMinutes),
+		UncostedEmployeeCount: row.UncostedEmployeeCount,
+	}, nil
+}
+
 // cross-schema read from hr_overtime — overtime rate multiplier configuration for payroll computation.
 func (r *Repository) GetOvertimeConfig(ctx context.Context, ownerID int64) (float64, bool, error) {
 	row, err := r.queries.GetOvertimeConfigForPayroll(ctx, ownerID)
@@ -636,13 +661,21 @@ func nullDecimalStringToCents(v sql.NullString) int64 {
 }
 
 func interfaceToInt32(v interface{}) int32 {
+	return int32(interfaceToInt64(v))
+}
+
+func interfaceToInt64(v interface{}) int64 {
 	switch val := v.(type) {
 	case int64:
-		return int32(val)
+		return val
 	case float64:
-		return int32(val)
+		return int64(val)
+	case int:
+		return int64(val)
+	case uint64:
+		return int64(val)
 	case []byte:
-		n, err := strconv.ParseInt(string(val), 10, 32)
+		n, err := strconv.ParseInt(string(val), 10, 64)
 		if err != nil {
 			logger.Global().Warn("failed to parse int value from database",
 				logger.String("value", string(val)),
@@ -650,9 +683,9 @@ func interfaceToInt32(v interface{}) int32 {
 			)
 			return 0
 		}
-		return int32(n)
+		return n
 	case string:
-		n, err := strconv.ParseInt(val, 10, 32)
+		n, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			logger.Global().Warn("failed to parse int value from database",
 				logger.String("value", val),
@@ -660,7 +693,7 @@ func interfaceToInt32(v interface{}) int32 {
 			)
 			return 0
 		}
-		return int32(n)
+		return n
 	default:
 		return 0
 	}

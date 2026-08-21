@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/hubprofile"
+	"github.com/voxire/onion/internal/platform/labourcost"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/wsbus"
 )
@@ -84,6 +85,11 @@ func assigneeID(id *int64) int64 {
 type Service struct {
 	repo *infrastructure.Repository
 
+	// labourCosts is optional because workers and tests can construct the
+	// module without payroll. The no-op implementation keeps those consumers
+	// safe while the API bootstrap wires the HR-owned provider.
+	labourCosts labourcost.LabourCostProvider
+
 	// hubProfiles resolves a caller's business-wide (hub) profile - the
 	// Owner/Admin/Operator role that lives above Flow's own project/workspace
 	// roles entirely. Optional: nil until SetHubProfileResolver is called, in
@@ -97,8 +103,29 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 	repo := infrastructure.NewRepository(db)
 
 	return &Service{
-		repo: repo,
+		repo:        repo,
+		labourCosts: noopLabourCostProvider{},
 	}
+}
+
+// SetLabourCostProvider wires the HR-owned aggregate port. Consumers receive
+// cents and rate-coverage counts only; hourly rates never enter workspaces.
+func (s *Service) SetLabourCostProvider(provider labourcost.LabourCostProvider) {
+	if provider != nil {
+		s.labourCosts = provider
+	}
+}
+
+// GetProjectLabourCost returns the live tenant-scoped labour aggregate for a
+// project. The result contains no employee compensation fields.
+func (s *Service) GetProjectLabourCost(ctx context.Context, businessID, projectID int64) (labourcost.ProjectCost, error) {
+	return s.labourCosts.GetProjectLabourCost(ctx, businessID, projectID)
+}
+
+type noopLabourCostProvider struct{}
+
+func (noopLabourCostProvider) GetProjectLabourCost(_ context.Context, businessID, projectID int64) (labourcost.ProjectCost, error) {
+	return labourcost.ProjectCost{BusinessID: businessID, ProjectID: projectID}, nil
 }
 
 // SetHubProfileResolver wires the business-wide hub profile lookup consulted
