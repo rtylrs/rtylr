@@ -405,7 +405,7 @@ const DefaultLayout: React.FC = () => {
               <SettingsIcon size={12} /> Settings
             </Link>
             <CaretButton className="w-full justify-start mb-1" />
-            <button
+            <button type="button"
               onClick={() => setUserMenuOpen((v) => !v)}
               style={{
                 display: 'flex',

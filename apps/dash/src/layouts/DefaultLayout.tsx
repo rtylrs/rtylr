@@ -199,7 +199,7 @@ const SidebarSection: React.FC<{
 
   return (
     <div className="pt-1">
-      <button
+      <button type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
           'flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors duration-150',

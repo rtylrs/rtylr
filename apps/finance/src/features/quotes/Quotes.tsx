@@ -297,7 +297,7 @@ const Quotes: React.FC = () => {
                         <ArrowRight size={12} /> Convert
                       </button>
                     ) : q.status === 'Sent' ? (
-                      <button
+                      <button type="button"
                         style={{
                           ...ghostBtn,
                           padding: '4px 10px',

@@ -61,7 +61,7 @@ const Archive: React.FC = () => {
               >
                 {task.projectName}
               </span>
-              <button
+              <button type="button"
                 onClick={() =>
                   restoreTask.mutate(
                     { id: task.id, data: { archived: false } },

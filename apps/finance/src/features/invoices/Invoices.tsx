@@ -109,7 +109,7 @@ const Invoices: React.FC = () => {
             <button style={ghostBtn} onClick={() => exportQuickbooksInvoices(exportPayload)}>
               <FileSpreadsheet size={13} /> QuickBooks
             </button>
-            <button style={ghostBtn} onClick={() => exportXeroInvoices(exportPayload)}>
+            <button type="button" style={ghostBtn} onClick={() => exportXeroInvoices(exportPayload)}>
               <Download size={13} /> Xero
             </button>
             <Link to="/invoices/recurring" style={{ ...ghostBtn, textDecoration: 'none' }}>

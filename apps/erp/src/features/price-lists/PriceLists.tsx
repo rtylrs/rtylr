@@ -186,7 +186,7 @@ const PriceLists: React.FC = () => {
               Set as default price list
             </label>
             <div className="flex gap-2 justify-end">
-              <button
+              <button type="button"
                 onClick={() => setShowCreate(false)}
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}

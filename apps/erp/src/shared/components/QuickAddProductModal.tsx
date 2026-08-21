@@ -312,7 +312,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
             <PackagePlus size={14} style={{ color: 'var(--erp-accent)' }} />
             {t('erp.products.new')}
           </h3>
-          <button onClick={onClose} aria-label={t('common.close')}>
+          <button type="button" onClick={onClose} aria-label={t('common.close')}>
             <X size={14} style={{ color: 'var(--hub-text-muted)' }} />
           </button>
         </div>

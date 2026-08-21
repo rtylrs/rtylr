@@ -576,7 +576,7 @@ const Campaigns: React.FC = () => {
           }}
         >
           {statusFilters.map((f) => (
-            <button
+            <button type="button"
               key={f}
               onClick={() => setStatusFilter(f)}
               style={{

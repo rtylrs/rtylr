@@ -576,7 +576,7 @@ const KanbanColumn: React.FC<{
               />
             ))}
             {colTaskCount === 0 && (
-              <button
+              <button type="button"
                 onClick={onAddTask}
                 className="flex-1 flex items-center justify-center rounded text-[11px] min-h-[44px] hover:bg-[var(--flow-hover)] transition-colors"
                 style={{

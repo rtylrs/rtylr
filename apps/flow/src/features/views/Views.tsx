@@ -147,7 +147,7 @@ const Views: React.FC = () => {
                     >
                       <Check size={10} />
                     </button>
-                    <button
+                    <button type="button"
                       onClick={() => setEditingId(null)}
                       aria-label={t('flow.views.cancelRenameLabel')}
                       className="h-4 w-4 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"

@@ -495,7 +495,7 @@ const LeadDetail: React.FC = () => {
                           </p>
                         )}
                       </div>
-                      <button
+                      <button type="button"
                         aria-label="Delete touchpoint"
                         onClick={() => setDeleteTpId(tp.id)}
                         style={{

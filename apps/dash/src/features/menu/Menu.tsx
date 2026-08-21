@@ -258,7 +258,7 @@ const Menu: React.FC<{}> = () => {
             <div className="flex items-center justify-between mb-2">
               <p className="font-semibold text-primary">{item?.details?.banner?.title}</p>
               <div>
-                <button
+                <button type="button"
                   className="px-3 py-1.5 text-sm text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
                   onClick={() => deleteBanner(item._id as string)}
                 >
