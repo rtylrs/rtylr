@@ -245,5 +245,6 @@ export const cases = [
   ["apps/finance/src/features/chart-of-accounts/ChartOfAccounts.tsx", "audit-batch-243-suite-20"],
   ["apps/finance/src/shared/components/AccountTypeBadge.tsx", "audit-batch-244-suite-20"],
   ["apps/finance/src/shared/components/TaxBreakdown.tsx", "audit-batch-245-suite-20"],
+  ["apps/flow/src/features/projects/ProjectBoard.tsx", "audit-batch-246-suite-20"],
 ];
 
