@@ -44,5 +44,6 @@ export const cases = [
   ["apps/flow/src/features/workspace-manager/WorkspaceManager.test.tsx", "audit-batch-042-suite-24"],
   ["apps/flow/src/shared/components/PriorityIcon.tsx", "audit-batch-043-suite-24"],
   ["apps/hr/src/features/dashboard/widgets/LeaveBalanceWidget.tsx", "audit-batch-044-suite-24"],
+  ["apps/hr/src/features/onboarding/ChecklistTemplates.tsx", "audit-batch-045-suite-24"],
 ];
 
