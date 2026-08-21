@@ -28,5 +28,6 @@ export const cases = [
   ["apps/auth/src/features/invite/InviteAccept.tsx", "audit-batch-026-suite-22"],
   ["apps/crm/src/features/campaigns/SMSCampaign.tsx", "audit-batch-027-suite-22"],
   ["apps/crm/src/features/sales/components/CreateLeadModal.tsx", "audit-batch-028-suite-22"],
+  ["apps/dash/src/features/billing/Billing.test.tsx", "audit-batch-029-suite-22"],
 ];
 
