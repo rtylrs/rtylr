@@ -81,14 +81,33 @@ message ListTimeEntriesRequest {
 removing a filter would break it. The doc comment states the precedence rather
 than leaving two overlapping filters to interact silently.
 
-**Note there is already an uncontracted route that returns exactly this.**
-`GET /hr/time-entries/export-billable` returns per-entry `project_id`,
+**Note there is already an uncontracted route that returns similar data.**
+`POST /hr/time-entries/export-billable` returns per-entry `project_id`,
 `task_id`, `employee_id`, `duration_minutes` and `is_billable`
 (`~/Development/onion/internal/modules/hr_time/internal/domain/types.go:90`),
-and no frontend calls it. The recommendation is to **contract the filters
-above and delete that route**, not to contract the route: it takes no
-parameters, returns the whole business, and allocates a batch id as a side
-effect of a GET.
+and no frontend calls it.
+
+**Correction (#855).** This paragraph originally recommended deleting that
+route, on the grounds that it "takes no parameters, returns the whole
+business, and allocates a batch id as a side effect of a GET". Two of those
+three are wrong:
+
+- **It is a POST**, not a GET. `routes.go:49` registers it through
+  `RegisterPOSTWithValidation`, which calls `router.Post`. A mutation behind
+  a POST is the correct verb, not a defect.
+- **It is bounded.** `ListApprovedBillableEntries` carries `LIMIT 500` and a
+  comment explaining that the bound stands until the contract can expose a
+  page cursor. It does not return the whole business.
+
+What survives is narrower and still worth acting on: it takes no parameters,
+so it cannot be scoped to a project or a period; nothing calls it; and its
+one side effect, `export_batch_id`, is written by `MarkEntryExported` and
+**read by nothing but its own test**. So the batch marker accomplishes
+nothing today.
+
+The filters above do not replace it. They are a read; the export also marks
+entries. Deleting it would remove a workflow, so it is left in place and the
+narrower finding is recorded rather than acted on.
 
 ## 2. Add a date range to HR leave requests
 
