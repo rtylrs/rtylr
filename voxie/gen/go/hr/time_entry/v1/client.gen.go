@@ -61,6 +61,23 @@ func (c *TimeEntryServiceClient) ListTimeEntries(ctx context.Context, req *ListT
 	if req.Date != nil {
 		query.Set("date", *req.Date)
 	}
+	if req.FromDate != nil {
+		query.Set("from_date", *req.FromDate)
+	}
+	if req.ToDate != nil {
+		query.Set("to_date", *req.ToDate)
+	}
+	if req.ProjectId != nil {
+		query.Set("project_id", strconv.FormatInt(int64(*req.ProjectId), 10))
+	}
+	if req.IsBillable != nil {
+		query.Set("is_billable", strconv.FormatBool(*req.IsBillable))
+	}
+	if req.Status != nil {
+		query.Set("status", *req.Status)
+	}
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("offset", strconv.FormatInt(int64(req.Offset), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

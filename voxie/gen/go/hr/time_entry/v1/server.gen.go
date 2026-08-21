@@ -288,6 +288,57 @@ func RegisterTimeEntryServiceServer(first any, rest ...any) error {
 			dateVal := value
 			req.Date = &dateVal
 		}
+		if values := r.URL.Query()["from_date"]; len(values) > 0 {
+			value := values[0]
+			fromDateVal := value
+			req.FromDate = &fromDateVal
+		}
+		if values := r.URL.Query()["to_date"]; len(values) > 0 {
+			value := values[0]
+			toDateVal := value
+			req.ToDate = &toDateVal
+		}
+		if values := r.URL.Query()["project_id"]; len(values) > 0 {
+			value := values[0]
+			parsedProjectId, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter project_id: "+err.Error())
+				return
+			}
+			req.ProjectId = &parsedProjectId
+		}
+		if values := r.URL.Query()["is_billable"]; len(values) > 0 {
+			value := values[0]
+			parsedIsBillable, err := parseBool(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter is_billable: "+err.Error())
+				return
+			}
+			req.IsBillable = &parsedIsBillable
+		}
+		if values := r.URL.Query()["status"]; len(values) > 0 {
+			value := values[0]
+			statusVal := value
+			req.Status = &statusVal
+		}
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
+		}
+		if values := r.URL.Query()["offset"]; len(values) > 0 {
+			value := values[0]
+			parsedOffset, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter offset: "+err.Error())
+				return
+			}
+			req.Offset = parsedOffset
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())

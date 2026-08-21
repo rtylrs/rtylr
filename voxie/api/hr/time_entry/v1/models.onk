@@ -67,12 +67,34 @@ message TimesheetPayload {
   /// Unix timestamp when this record was last updated.
   updated_at: int64
 }
-
+/// ListTimeEntriesRequest selects logged time. Every filter is optional and
+/// they combine with AND. The response is always a page: callers that need
+/// everything must follow offset until total is reached.
 message ListTimeEntriesRequest {
   /// Filter by employee; absent to include all employees.
   employee_id: int64? @query("employee_id") @nullable
-  /// Filter by date; absent to include all dates.
+  /// Filter by exact date; absent to include all dates. Ignored when from_date
+  /// or to_date is supplied.
   date: string? @query("date") @nullable
+  /// Include entries dated on or after this day (ISO-8601, e.g. "2026-04-01");
+  /// absent to leave the range open at the start.
+  from_date: string? @query("from_date") @nullable
+  /// Include entries dated on or before this day; absent to leave the range
+  /// open at the end.
+  to_date: string? @query("to_date") @nullable
+  /// Filter by the Flow project the time was logged against; absent to include
+  /// all projects and entries with no project.
+  project_id: int64? @query("project_id") @nullable
+  /// Filter by billability; absent to include both billable and non-billable
+  /// time.
+  is_billable: bool? @query("is_billable") @nullable
+  /// Filter by workflow status (draft | submitted | approved | rejected);
+  /// absent to include all statuses.
+  status: string? @query("status") @nullable
+  /// Maximum number of records to return.
+  limit: int32 @query("limit")
+  /// Number of records to skip for pagination.
+  offset: int32 @query("offset")
 }
 
 message ListTimeEntriesResponse {

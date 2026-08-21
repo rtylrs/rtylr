@@ -82,6 +82,27 @@ query.set("employee_id", String(req.employeeId));
 if (req.date !== undefined) {
 query.set("date", String(req.date));
 }
+if (req.fromDate !== undefined) {
+query.set("from_date", String(req.fromDate));
+}
+if (req.toDate !== undefined) {
+query.set("to_date", String(req.toDate));
+}
+if (req.projectId !== undefined) {
+query.set("project_id", String(req.projectId));
+}
+if (req.isBillable !== undefined) {
+query.set("is_billable", String(req.isBillable));
+}
+if (req.status !== undefined) {
+query.set("status", String(req.status));
+}
+if (req.limit !== undefined) {
+query.set("limit", String(req.limit));
+}
+if (req.offset !== undefined) {
+query.set("offset", String(req.offset));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {

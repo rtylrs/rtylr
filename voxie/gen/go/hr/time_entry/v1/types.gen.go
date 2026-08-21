@@ -520,6 +520,13 @@ func (x *TimesheetPayload) GetUpdatedAt() int64 {
 type ListTimeEntriesRequest struct {
 	EmployeeId *int64  `json:"employee_id,omitempty"`
 	Date       *string `json:"date,omitempty"`
+	FromDate   *string `json:"from_date,omitempty"`
+	ToDate     *string `json:"to_date,omitempty"`
+	ProjectId  *int64  `json:"project_id,omitempty"`
+	IsBillable *bool   `json:"is_billable,omitempty"`
+	Status     *string `json:"status,omitempty"`
+	Limit      int32   `json:"limit,omitempty"`
+	Offset     int32   `json:"offset,omitempty"`
 }
 
 func (m *ListTimeEntriesRequest) MarshalJSON() ([]byte, error) {
@@ -527,10 +534,15 @@ func (m *ListTimeEntriesRequest) MarshalJSON() ([]byte, error) {
 	aux := struct {
 		*alias
 		EmployeeId *string `json:"employee_id,omitempty"`
+		ProjectId  *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if m.EmployeeId != nil {
 		encodedEmployeeId := strconv.FormatInt(*m.EmployeeId, 10)
 		aux.EmployeeId = &encodedEmployeeId
+	}
+	if m.ProjectId != nil {
+		encodedProjectId := strconv.FormatInt(*m.ProjectId, 10)
+		aux.ProjectId = &encodedProjectId
 	}
 	return json.Marshal(aux)
 }
@@ -540,6 +552,7 @@ func (m *ListTimeEntriesRequest) UnmarshalJSON(data []byte) error {
 	aux := struct {
 		*alias
 		EmployeeId *string `json:"employee_id,omitempty"`
+		ProjectId  *string `json:"project_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -550,6 +563,13 @@ func (m *ListTimeEntriesRequest) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.EmployeeId = &v
+	}
+	if aux.ProjectId != nil {
+		v, err := strconv.ParseInt(*aux.ProjectId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ProjectId = &v
 	}
 	return nil
 }
@@ -576,6 +596,82 @@ func (x *ListTimeEntriesRequest) GetDate() string {
 		return zero
 	}
 	return *x.Date
+}
+
+func (x *ListTimeEntriesRequest) GetFromDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.FromDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.FromDate
+}
+
+func (x *ListTimeEntriesRequest) GetToDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.ToDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.ToDate
+}
+
+func (x *ListTimeEntriesRequest) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ProjectId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProjectId
+}
+
+func (x *ListTimeEntriesRequest) GetIsBillable() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	if x.IsBillable == nil {
+		var zero bool
+		return zero
+	}
+	return *x.IsBillable
+}
+
+func (x *ListTimeEntriesRequest) GetStatus() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.Status == nil {
+		var zero string
+		return zero
+	}
+	return *x.Status
+}
+
+func (x *ListTimeEntriesRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListTimeEntriesRequest) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
 }
 
 type ListTimeEntriesResponse struct {
