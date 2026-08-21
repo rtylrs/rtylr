@@ -303,5 +303,6 @@ export const cases = [
   ["apps/hr/src/features/attendance/ClockInWidget.tsx", "audit-batch-301-suite-20"],
   ["apps/hr/src/features/employees/Employees.tsx", "audit-batch-302-suite-20"],
   ["apps/hr/src/features/performance/Performance.tsx", "audit-batch-303-suite-20"],
+  ["apps/hr/src/features/setup-wizard/steps/NotificationsStep.tsx", "audit-batch-304-suite-20"],
 ];
 

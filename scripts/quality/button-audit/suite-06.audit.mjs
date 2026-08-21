@@ -303,5 +303,6 @@ export const cases = [
   ["apps/flow/src/shared/components/QuickCreate.test.tsx", "audit-batch-301-suite-06"],
   ["apps/hr/src/features/dashboard/widgets/PendingApprovalsWidget.tsx", "audit-batch-302-suite-06"],
   ["apps/hr/src/features/onboarding/Onboarding.tsx", "audit-batch-303-suite-06"],
+  ["apps/hr/src/features/settings/payroll-config/PayrollConfigSettings.tsx", "audit-batch-304-suite-06"],
 ];
 
