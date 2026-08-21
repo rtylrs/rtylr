@@ -209,5 +209,6 @@ export const cases = [
   ["apps/auth/src/shared/components/Logo.tsx", "audit-batch-207-suite-13"],
   ["apps/crm/src/features/loyalty/LoyaltyRewards.test.tsx", "audit-batch-208-suite-13"],
   ["apps/crm/src/shared/components/crm.tsx", "audit-batch-209-suite-13"],
+  ["apps/dash/src/features/dashboard/Dashboard/widgets/LowStockWidget.tsx", "audit-batch-210-suite-13"],
 ];
 
