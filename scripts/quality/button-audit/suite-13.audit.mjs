@@ -136,5 +136,6 @@ export const cases = [
   ["apps/dash/src/features/notifications/Notifications.test.tsx", "audit-batch-134-suite-13"],
   ["apps/dash/src/features/team/Groups.test.tsx", "audit-batch-135-suite-13"],
   ["apps/dash/src/shared/components/dash/RoleBadge.tsx", "audit-batch-136-suite-13"],
+  ["apps/dash/src/shared/hooks/queries/useNotifications.test.tsx", "audit-batch-137-suite-13"],
 ];
 
