@@ -1,7 +1,8 @@
 import { z } from 'zod';
+import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { orderClient, ordersCompatibilityClient } from '../../lib/clients';
+import { safe } from '../../lib/api';
 import { dashOrderSchema } from '../../schemas/orders';
 
 export type { HubOrder } from '../../schemas/orders';
@@ -17,12 +18,16 @@ export const useOrders = (params: UseOrdersParams = {}) => {
   return useQuery({
     queryKey: ['dash-orders', { limit, offset, status }],
     queryFn: async () => {
-      const res = await ordersCompatibilityClient.listOrders({
-        limit,
-        offset,
-        status: status && status !== 'all' ? status : undefined,
+      const searchParams = new URLSearchParams({
+        limit: String(limit),
+        offset: String(offset),
       });
-      return z.array(dashOrderSchema).parse(res.orders ?? []);
+      if (status && status !== 'all') {
+        searchParams.set('status', status);
+      }
+      const res = await unwrap(safe.get(`/pos/orders/v1/orders?${searchParams.toString()}`));
+      const raw = res?.orders ?? res;
+      return z.array(dashOrderSchema).parse(Array.isArray(raw) ? raw : []);
     },
     refetchOnWindowFocus: true,
   });
@@ -32,7 +37,7 @@ export const useUpdateOrderStatus = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      return orderClient.updateOrderStatus({ orderId: id, body: { status } });
+      return unwrap(safe.put(`/pos/orders/v1/orders/${id}/status`, { status }));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dash-orders'] });
