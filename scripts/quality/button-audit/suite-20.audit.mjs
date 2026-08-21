@@ -207,5 +207,6 @@ export const cases = [
   ["apps/recruit/src/features/admin/FormFieldsEditor.test.tsx", "audit-batch-205-suite-20"],
   ["apps/auth/src/features/callback/Callback.tsx", "audit-batch-206-suite-20"],
   ["apps/crm/src/features/campaigns/Campaigns.test.tsx", "audit-batch-207-suite-20"],
+  ["apps/crm/src/features/sales/Leads.test.tsx", "audit-batch-208-suite-20"],
 ];
 
