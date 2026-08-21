@@ -219,5 +219,6 @@ export const cases = [
   ["apps/finance/src/features/balance-sheet/BalanceSheet.tsx", "audit-batch-217-suite-22"],
   ["apps/finance/src/features/tax/TaxReport.tsx", "audit-batch-218-suite-22"],
   ["apps/finance/src/shared/components/PeriodSelector.tsx", "audit-batch-219-suite-22"],
+  ["apps/flow/src/features/milestones/Milestones.tsx", "audit-batch-220-suite-22"],
 ];
 
