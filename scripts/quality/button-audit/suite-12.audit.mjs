@@ -64,5 +64,6 @@ export const cases = [
   ["apps/erp/src/shared/components/CategoryTree.tsx", "audit-batch-062-suite-12"],
   ["apps/erp/src/shared/components/dialogAccessibility.test.tsx", "audit-batch-063-suite-12"],
   ["apps/finance/src/features/settings/Settings.tsx", "audit-batch-064-suite-12"],
+  ["apps/finance/src/shared/components/PaymentBadge.tsx", "audit-batch-065-suite-12"],
 ];
 
