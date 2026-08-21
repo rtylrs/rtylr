@@ -90,5 +90,6 @@ export const cases = [
   ["apps/erp/src/shared/components/PageHeader.tsx", "audit-batch-088-suite-16"],
   ["apps/finance/src/features/expenses/Expenses.tsx", "audit-batch-089-suite-16"],
   ["apps/finance/src/shared/components/ConfirmDialog.tsx", "audit-batch-090-suite-16"],
+  ["apps/flow/src/features/calendar/Calendar.test.tsx", "audit-batch-091-suite-16"],
 ];
 

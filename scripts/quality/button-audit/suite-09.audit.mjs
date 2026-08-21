@@ -90,5 +90,6 @@ export const cases = [
   ["apps/erp/src/shared/components/ExportButton.test.tsx", "audit-batch-088-suite-09"],
   ["apps/finance/src/features/bills/Bills.tsx", "audit-batch-089-suite-09"],
   ["apps/finance/src/layouts/DefaultLayout.tsx", "audit-batch-090-suite-09"],
+  ["apps/finance/src/shared/components/RecordPaymentModal.tsx", "audit-batch-091-suite-09"],
 ];
 
