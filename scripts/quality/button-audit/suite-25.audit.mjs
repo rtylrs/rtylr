@@ -160,5 +160,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/KpisWidget.tsx", "audit-batch-158-suite-25"],
   ["apps/dash/src/features/integrations/Integrations.tsx", "audit-batch-159-suite-25"],
   ["apps/dash/src/features/settings/Settings/components/Domain/Domain.tsx", "audit-batch-160-suite-25"],
+  ["apps/dash/src/shared/components/dash/AppCard.tsx", "audit-batch-161-suite-25"],
 ];
 
