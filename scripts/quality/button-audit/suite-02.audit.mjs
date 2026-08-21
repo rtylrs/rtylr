@@ -87,5 +87,6 @@ export const cases = [
   ["apps/dash/src/shared/components/dash/RoleBadge.tsx", "audit-batch-085-suite-02"],
   ["apps/dash/src/shared/hooks/queries/useNotifications.test.tsx", "audit-batch-086-suite-02"],
   ["apps/erp/src/features/products/components/VariantMatrix.test.tsx", "audit-batch-087-suite-02"],
+  ["apps/erp/src/shared/components/BarcodeSvg.tsx", "audit-batch-088-suite-02"],
 ];
 
