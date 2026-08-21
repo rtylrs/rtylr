@@ -16,5 +16,6 @@ export const cases = [
   ["apps/finance/src/shared/components/ReceiptUpload.tsx", "audit-batch-014-suite-04"],
   ["apps/flow/src/features/presence/PresenceScreen.test.tsx", "audit-batch-015-suite-04"],
   ["apps/flow/src/features/settings/sections/TimeSection.test.tsx", "audit-batch-016-suite-04"],
+  ["apps/flow/src/features/workspace-manager/AddWorkspaceMemberDialog.test.tsx", "audit-batch-017-suite-04"],
 ];
 

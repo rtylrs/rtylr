@@ -16,5 +16,6 @@ export const cases = [
   ["apps/flow/src/features/calendar/Calendar.tsx", "audit-batch-014-suite-13"],
   ["apps/flow/src/features/projects/ProjectList.tsx", "audit-batch-015-suite-13"],
   ["apps/flow/src/features/tasks/components/TimePanel.test.tsx", "audit-batch-016-suite-13"],
+  ["apps/flow/src/shared/components/ActivityFeed.tsx", "audit-batch-017-suite-13"],
 ];
 

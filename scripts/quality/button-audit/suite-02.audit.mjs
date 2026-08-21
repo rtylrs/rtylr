@@ -16,5 +16,6 @@ export const cases = [
   ["apps/finance/src/shared/components/PaymentReminderPanel.tsx", "audit-batch-014-suite-02"],
   ["apps/flow/src/features/milestones/Milestones.test.tsx", "audit-batch-015-suite-02"],
   ["apps/flow/src/features/settings/FlowSettings.test.tsx", "audit-batch-016-suite-02"],
+  ["apps/flow/src/features/views/Views.tsx", "audit-batch-017-suite-02"],
 ];
 
