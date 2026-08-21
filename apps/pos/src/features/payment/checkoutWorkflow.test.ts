@@ -143,6 +143,93 @@ describe('processCheckout', () => {
     expect(recordCashSale).toHaveBeenCalledWith(21.6, 'local-1');
   });
 
+  it('does not queue a duplicate order when charging fails after creation', async () => {
+    const enqueueOffline = vi.fn();
+    const recordCashSale = vi.fn();
+    const onOrderCreated = vi.fn();
+
+    await expect(
+      processCheckout({
+        order: buildCheckoutOrder({
+          id: 'local-1',
+          items,
+          subtotal: 20,
+          tax: 1.6,
+          total: 21.6,
+          customerId: 7,
+          createdAt: '2026-05-06T00:00:00.000Z',
+        }),
+        payload: basePayload,
+        method: 'cash',
+        createOrder: vi.fn(() => Promise.resolve({ orderId: 77 })),
+        chargeOrder: vi.fn(() => Promise.reject(new Error('Network Error'))),
+        enqueueOffline,
+        recordCashSale,
+        onOrderCreated,
+      })
+    ).rejects.toThrow('Payment failed. Please try again.');
+
+    expect(onOrderCreated).toHaveBeenCalledWith(77);
+    expect(enqueueOffline).not.toHaveBeenCalled();
+    expect(recordCashSale).not.toHaveBeenCalled();
+  });
+
+  it('does not queue cash orders rejected by the server (permanent 4xx)', async () => {
+    const rejection = Object.assign(new Error('unexpected status 422: validation'), {
+      statusCode: 422,
+      name: 'ApiError',
+    });
+
+    await expect(
+      processCheckout({
+        order: buildCheckoutOrder({
+          id: 'local-1',
+          items,
+          subtotal: 20,
+          tax: 1.6,
+          total: 21.6,
+          customerId: 7,
+          createdAt: '2026-05-06T00:00:00.000Z',
+        }),
+        payload: basePayload,
+        method: 'cash',
+        createOrder: vi.fn(() => Promise.reject(rejection)),
+        chargeOrder: vi.fn(),
+        enqueueOffline: vi.fn(),
+        recordCashSale: vi.fn(),
+      })
+    ).rejects.toThrow('Payment failed. Please try again.');
+  });
+
+  it('queues cash orders on retryable server failures (5xx)', async () => {
+    const outage = Object.assign(new Error('unexpected status 503: unavailable'), {
+      statusCode: 503,
+      name: 'ApiError',
+    });
+    const enqueueOffline = vi.fn();
+
+    const result = await processCheckout({
+      order: buildCheckoutOrder({
+        id: 'local-1',
+        items,
+        subtotal: 20,
+        tax: 1.6,
+        total: 21.6,
+        customerId: 7,
+        createdAt: '2026-05-06T00:00:00.000Z',
+      }),
+      payload: basePayload,
+      method: 'cash',
+      createOrder: vi.fn(() => Promise.reject(outage)),
+      chargeOrder: vi.fn(),
+      enqueueOffline,
+      recordCashSale: vi.fn(),
+    });
+
+    expect(result).toEqual({ status: 'queued' });
+    expect(enqueueOffline).toHaveBeenCalledWith(basePayload);
+  });
+
   it('does not queue unverified card payments', async () => {
     await expect(
       processCheckout({

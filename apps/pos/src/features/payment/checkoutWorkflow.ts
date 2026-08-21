@@ -44,6 +44,7 @@ interface ProcessCheckoutParams {
   chargeOrder: (payload: ProcessPaymentRequest) => Promise<void>;
   enqueueOffline: (payload: CreateOrderRequest) => void;
   recordCashSale: (amount: number, orderId: string) => void;
+  onOrderCreated?: (orderId: number) => void;
 }
 
 type ProcessCheckoutResult = { status: 'online'; orderId: number } | { status: 'queued' };
@@ -56,6 +57,19 @@ function positiveInteger(value: unknown): number | undefined {
 
 function idString(value: unknown): string {
   return String(positiveInteger(value) ?? 0);
+}
+
+// True when a failure looks transport-related (no HTTP response at all, or a
+// 5xx/408/429 from the server). Definitive 4xx business rejections must not be
+// replayed offline - they would fail forever as poison queue entries.
+export function isRetryableCheckoutFailure(error: unknown): boolean {
+  if (error && typeof error === 'object' && 'statusCode' in error) {
+    const status = (error as { statusCode?: unknown }).statusCode;
+    if (typeof status === 'number') {
+      return status >= 500 || status === 408 || status === 429;
+    }
+  }
+  return true;
 }
 
 export function buildCashTender(amountInput: string, totalDue: number): CashTender {
@@ -148,36 +162,44 @@ export async function processCheckout({
   chargeOrder,
   enqueueOffline,
   recordCashSale,
+  onOrderCreated,
 }: ProcessCheckoutParams): Promise<ProcessCheckoutResult> {
   const persistedOrderId = positiveInteger(existingOrderId);
-  try {
-    let orderId = persistedOrderId;
-    if (!orderId) {
+  let orderId = persistedOrderId;
+
+  if (!orderId) {
+    try {
       const createRes = await createOrder(payload);
       orderId = positiveInteger(createRes.orderId);
-      if (!orderId || orderId <= 0) {
-        throw new Error('Order was not accepted by the server.');
+    } catch (error) {
+      if (method === 'cash' && isRetryableCheckoutFailure(error)) {
+        enqueueOffline(payload);
+        recordCashSale(order.total, order.id);
+        return { status: 'queued' };
       }
+      throw new Error('Payment failed. Please try again.');
     }
+    if (!orderId || orderId <= 0) {
+      throw new Error('Payment failed. Please try again.');
+    }
+    onOrderCreated?.(orderId);
+  }
 
+  // The order now exists server-side: a charge failure must never enqueue the
+  // create payload again, or the offline replay would duplicate the order.
+  try {
     await chargeOrder({
       orderId: String(orderId),
       paymentMethod: method,
       amountPaid: order.total,
     });
-
-    if (method === 'cash') {
-      recordCashSale(order.total, order.id);
-    }
-
-    return { status: 'online', orderId };
   } catch {
-    if (method === 'cash' && !persistedOrderId) {
-      enqueueOffline(payload);
-      recordCashSale(order.total, order.id);
-      return { status: 'queued' };
-    }
-
     throw new Error('Payment failed. Please try again.');
   }
+
+  if (method === 'cash') {
+    recordCashSale(order.total, order.id);
+  }
+
+  return { status: 'online', orderId };
 }

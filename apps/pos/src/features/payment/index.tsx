@@ -58,6 +58,7 @@ const Payment: React.FC = () => {
   const tablesEnabled = useSettingsStore((s) => s.features.tables);
   const cashDrawerEnabled = useSettingsStore((s) => s.features.cashDrawer);
   const enqueueOffline = useOfflineQueueStore((s) => s.enqueue);
+  const setServerOrderId = useCartStore((s) => s.setServerOrderId);
   const addReceipt = useReceiptsStore((s) => s.add);
   const recordCashSale = useCashDrawerStore((s) => s.recordCashSale);
   const [method, setMethod] = useState<CheckoutPaymentMethod>('card');
@@ -109,6 +110,7 @@ const Payment: React.FC = () => {
         },
         enqueueOffline,
         recordCashSale,
+        onOrderCreated: setServerOrderId,
       });
 
       const isCash = method === 'cash';
