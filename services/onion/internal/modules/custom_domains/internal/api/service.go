@@ -81,6 +81,7 @@ func businessID(ctx context.Context) (int64, error) {
 	_, id, err := deviceBusinessID(ctx)
 	return id, err
 }
+
 func deviceBusinessID(ctx context.Context) (authPkg.Device, int64, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
@@ -92,6 +93,7 @@ func deviceBusinessID(ctx context.Context) (authPkg.Device, int64, error) {
 	}
 	return device, id, nil
 }
+
 func payload(item domain.CustomDomain) *hubconfigv1.CustomDomain {
 	var verified string
 	if item.VerifiedAt != nil {

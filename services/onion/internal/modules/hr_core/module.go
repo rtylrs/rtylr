@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -31,9 +32,85 @@ type Module struct {
 	service *application.Service
 }
 
+// Config is the public HR-core configuration shape used by modules that need
+// to compose the shared HR configuration endpoint.
+type Config struct {
+	ID                    int64
+	OwnerID               int64
+	BusinessID            int64
+	CompanyName           string
+	FiscalYearStartMonth  int32
+	DefaultCurrency       string
+	DefaultTimezone       string
+	DefaultWorkScheduleID int64
+	OvertimeEnabled       bool
+	OvertimeMultiplier    float64
+	DirectoryEnabled      bool
+	CreatedAt             time.Time
+	UpdatedAt             time.Time
+}
+
+type ConfigInput struct {
+	CompanyName           string
+	FiscalYearStartMonth  int32
+	DefaultCurrency       string
+	DefaultTimezone       string
+	DefaultWorkScheduleID int64
+	OvertimeEnabled       bool
+	OvertimeMultiplier    float64
+	DirectoryEnabled      bool
+}
+
 func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{
 		service: application.NewService(ctx, db),
+	}
+}
+
+func (m *Module) GetConfig(ctx context.Context, ownerID int64) (*Config, error) {
+	cfg, err := m.service.GetHRConfig(ctx, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	return configFromDomain(cfg), nil
+}
+
+func (m *Module) UpsertConfig(ctx context.Context, ownerID int64, input ConfigInput) (*Config, error) {
+	cfg, err := m.service.UpsertHRConfig(ctx, ownerID, domain.HRCompanyConfigRecord{
+		CompanyName:           input.CompanyName,
+		FiscalYearStartMonth:  input.FiscalYearStartMonth,
+		DefaultCurrency:       input.DefaultCurrency,
+		DefaultTimezone:       input.DefaultTimezone,
+		DefaultWorkScheduleID: input.DefaultWorkScheduleID,
+		OvertimeEnabled:       input.OvertimeEnabled,
+		OvertimeMultiplier:    input.OvertimeMultiplier,
+		DirectoryEnabled:      input.DirectoryEnabled,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return configFromDomain(cfg), nil
+}
+
+func IsConfigNotFound(err error) bool {
+	return errors.Is(err, domain.ErrSetupNotComplete)
+}
+
+func configFromDomain(cfg *domain.HRCompanyConfigRecord) *Config {
+	return &Config{
+		ID:                    cfg.ID,
+		OwnerID:               cfg.OwnerID,
+		BusinessID:            cfg.BusinessID,
+		CompanyName:           cfg.CompanyName,
+		FiscalYearStartMonth:  cfg.FiscalYearStartMonth,
+		DefaultCurrency:       cfg.DefaultCurrency,
+		DefaultTimezone:       cfg.DefaultTimezone,
+		DefaultWorkScheduleID: cfg.DefaultWorkScheduleID,
+		OvertimeEnabled:       cfg.OvertimeEnabled,
+		OvertimeMultiplier:    cfg.OvertimeMultiplier,
+		DirectoryEnabled:      cfg.DirectoryEnabled,
+		CreatedAt:             cfg.CreatedAt,
+		UpdatedAt:             cfg.UpdatedAt,
 	}
 }
 

@@ -33,15 +33,7 @@ type payrollPoster struct {
 }
 
 func (p payrollPoster) PostPayrollJournal(ctx context.Context, entry financejournal.PayrollJournalEntry) error {
-	return p.service.PostPayrollJournal(ctx, journalDomain.PayrollJournalInput{
-		OwnerID:     entry.OwnerID,
-		BusinessID:  entry.BusinessID,
-		RunID:       entry.RunID,
-		PeriodStart: entry.PeriodStart,
-		PeriodEnd:   entry.PeriodEnd,
-		TotalGross:  entry.TotalGross,
-		TotalNet:    entry.TotalNet,
-	})
+	return p.service.PostPayrollJournal(ctx, journalDomain.PayrollJournalInput(entry))
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {

@@ -49,7 +49,7 @@ func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (Dash
 		TotalReceivable:  dashboard.TotalReceivable,
 		OverdueAmount:    dashboard.OverdueAmount,
 		TotalExpensesMTD: dashboard.TotalExpensesMTD,
-		TotalRevenueMTD: dashboard.TotalRevenueMTD,
+		TotalRevenueMTD:  dashboard.TotalRevenueMTD,
 		NetProfitMTD:     dashboard.NetProfitMTD,
 	}, nil
 }

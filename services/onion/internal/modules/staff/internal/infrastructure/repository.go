@@ -182,7 +182,7 @@ func scanStaffRows(rows *sql.Rows) ([]domain.Staff, error) {
 // ordered the same way as ListStaff. Unlike ListStaff it takes no search/
 // department/status filters - the directory is deliberately the plain
 // roster, not the admin screen's filtered view.
-func (r *Repository) ListStaffDirectory(ctx context.Context, businessID int64, limit, offset int64) ([]domain.Staff, error) {
+func (r *Repository) ListStaffDirectory(ctx context.Context, businessID, limit, offset int64) ([]domain.Staff, error) {
 	query, args, err := sq.
 		Select("s.id", "s.owner_id", "s.business_id", "s.user_id", "s.department_id",
 			"COALESCE(d.name, '') AS department_name",

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	onekithttp "github.com/corezio/onekit/http"
+
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )

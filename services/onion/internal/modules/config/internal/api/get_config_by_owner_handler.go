@@ -62,38 +62,38 @@ type ThemePayload struct {
 }
 
 type ConfigPayload struct {
-	OwnerID                string   `json:"owner_id"`
-	SiteName               string   `json:"site_name"`
-	LogoURL                string   `json:"logo_url"`
-	FaviconURL             string   `json:"favicon_url"`
-	MetaTags               []string `json:"meta_tags"`
-	ContactEmail           string   `json:"contact_email"`
-	ContactNumber          string   `json:"contact_number"`
-	SenderEmail            string   `json:"sender_email"`
-	EmailProvider          string   `json:"email_provider"`
-	SenderName             string   `json:"sender_name"`
-	ReplyToEmail           string   `json:"reply_to_email"`
-	EmailNotificationsEnabled bool `json:"email_notifications_enabled"`
-	SMTPHost               string   `json:"smtp_host"`
-	SMTPPort               int32    `json:"smtp_port"`
-	SMTPUsername           string   `json:"smtp_username"`
-	SMTPPasswordConfigured bool     `json:"smtp_password_configured"`
-	Website                string   `json:"website"`
-	MapsURL                string   `json:"maps_url"`
-	Address                string   `json:"address"`
-	City                   string   `json:"city"`
-	Zipcode                string   `json:"zipcode"`
-	Country                string   `json:"country"`
-	Instagram              string   `json:"instagram"`
-	MaintenanceMode        bool     `json:"maintenance_mode"`
-	MaintenanceNotice      string   `json:"maintenance_notice"`
-	AddonsEnabled          bool     `json:"addons_enabled"`
-	EnableReviews          bool     `json:"enable_reviews"`
-	EnableWishlist         bool     `json:"enable_wishlist"`
-	EnableNewsletterSignup bool     `json:"enable_newsletter_signup"`
-	AboutContent           string   `json:"about_content"`
-	FooterSubText          string   `json:"footer_sub_text"`
-	Slug                   string   `json:"slug"`
+	OwnerID                   string   `json:"owner_id"`
+	SiteName                  string   `json:"site_name"`
+	LogoURL                   string   `json:"logo_url"`
+	FaviconURL                string   `json:"favicon_url"`
+	MetaTags                  []string `json:"meta_tags"`
+	ContactEmail              string   `json:"contact_email"`
+	ContactNumber             string   `json:"contact_number"`
+	SenderEmail               string   `json:"sender_email"`
+	EmailProvider             string   `json:"email_provider"`
+	SenderName                string   `json:"sender_name"`
+	ReplyToEmail              string   `json:"reply_to_email"`
+	EmailNotificationsEnabled bool     `json:"email_notifications_enabled"`
+	SMTPHost                  string   `json:"smtp_host"`
+	SMTPPort                  int32    `json:"smtp_port"`
+	SMTPUsername              string   `json:"smtp_username"`
+	SMTPPasswordConfigured    bool     `json:"smtp_password_configured"`
+	Website                   string   `json:"website"`
+	MapsURL                   string   `json:"maps_url"`
+	Address                   string   `json:"address"`
+	City                      string   `json:"city"`
+	Zipcode                   string   `json:"zipcode"`
+	Country                   string   `json:"country"`
+	Instagram                 string   `json:"instagram"`
+	MaintenanceMode           bool     `json:"maintenance_mode"`
+	MaintenanceNotice         string   `json:"maintenance_notice"`
+	AddonsEnabled             bool     `json:"addons_enabled"`
+	EnableReviews             bool     `json:"enable_reviews"`
+	EnableWishlist            bool     `json:"enable_wishlist"`
+	EnableNewsletterSignup    bool     `json:"enable_newsletter_signup"`
+	AboutContent              string   `json:"about_content"`
+	FooterSubText             string   `json:"footer_sub_text"`
+	Slug                      string   `json:"slug"`
 }
 
 type GetConfigByOwnerResponse struct {
@@ -137,38 +137,38 @@ func newThemePayload(theme domain.Theme) *ThemePayload {
 
 func newConfigPayload(config domain.Config) *ConfigPayload {
 	return &ConfigPayload{
-		OwnerID:                config.OwnerId,
-		SiteName:               config.SiteName,
-		LogoURL:                config.LogoUrl,
-		FaviconURL:             config.FaviconUrl,
-		MetaTags:               config.MetaTags,
-		ContactEmail:           config.ContactEmail,
-		ContactNumber:          config.ContactNumber,
-		SenderEmail:            config.SenderEmail,
-		EmailProvider:          config.EmailProvider,
-		SenderName:             config.SenderName,
-		ReplyToEmail:           config.ReplyToEmail,
+		OwnerID:                   config.OwnerId,
+		SiteName:                  config.SiteName,
+		LogoURL:                   config.LogoUrl,
+		FaviconURL:                config.FaviconUrl,
+		MetaTags:                  config.MetaTags,
+		ContactEmail:              config.ContactEmail,
+		ContactNumber:             config.ContactNumber,
+		SenderEmail:               config.SenderEmail,
+		EmailProvider:             config.EmailProvider,
+		SenderName:                config.SenderName,
+		ReplyToEmail:              config.ReplyToEmail,
 		EmailNotificationsEnabled: config.EmailNotificationsEnabled,
-		SMTPHost:               config.SMTPHost,
-		SMTPPort:               config.SMTPPort,
-		SMTPUsername:           config.SMTPUsername,
-		SMTPPasswordConfigured: config.SMTPPasswordConfigured,
-		Website:                config.Website,
-		MapsURL:                config.MapsURL,
-		Address:                config.Address,
-		City:                   config.City,
-		Zipcode:                config.Zipcode,
-		Country:                config.Country,
-		Instagram:              config.Instagram,
-		MaintenanceMode:        config.MaintenanceMode,
-		MaintenanceNotice:      config.MaintenanceNotice,
-		AddonsEnabled:          config.AddonsEnabled,
-		EnableReviews:          config.EnableReviews,
-		EnableWishlist:         config.EnableWishlist,
-		EnableNewsletterSignup: config.EnableNewsletterSignup,
-		AboutContent:           config.AboutContent,
-		FooterSubText:          config.FooterSubText,
-		Slug:                   config.BusinessSlug,
+		SMTPHost:                  config.SMTPHost,
+		SMTPPort:                  config.SMTPPort,
+		SMTPUsername:              config.SMTPUsername,
+		SMTPPasswordConfigured:    config.SMTPPasswordConfigured,
+		Website:                   config.Website,
+		MapsURL:                   config.MapsURL,
+		Address:                   config.Address,
+		City:                      config.City,
+		Zipcode:                   config.Zipcode,
+		Country:                   config.Country,
+		Instagram:                 config.Instagram,
+		MaintenanceMode:           config.MaintenanceMode,
+		MaintenanceNotice:         config.MaintenanceNotice,
+		AddonsEnabled:             config.AddonsEnabled,
+		EnableReviews:             config.EnableReviews,
+		EnableWishlist:            config.EnableWishlist,
+		EnableNewsletterSignup:    config.EnableNewsletterSignup,
+		AboutContent:              config.AboutContent,
+		FooterSubText:             config.FooterSubText,
+		Slug:                      config.BusinessSlug,
 	}
 }
 

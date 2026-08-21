@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
+	hrcore "github.com/voxire/onion/internal/modules/hr_core"
 	"github.com/voxire/onion/internal/modules/hr_setup/internal/api"
 	"github.com/voxire/onion/internal/modules/hr_setup/internal/application"
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
@@ -15,11 +16,12 @@ import (
 )
 
 type Module struct {
-	service *application.Service
+	service    *application.Service
+	coreModule *hrcore.Module
 }
 
-func NewModule(ctx context.Context, db *sql.DB) *Module {
-	return &Module{service: application.NewService(ctx, db)}
+func NewModule(ctx context.Context, db *sql.DB, coreModule *hrcore.Module) *Module {
+	return &Module{service: application.NewService(ctx, db), coreModule: coreModule}
 }
 
 func (m *Module) RegisterAPI(mux *http.ServeMux) {
@@ -38,11 +40,13 @@ func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...inter
 	serverHttp.RegisterPOSTWithValidation[api.CompleteSetupStepRequest, api.CompleteSetupStepResponse](
 		ctx, router, api.CompleteSetupStepRoutes(), &api.CompleteSetupStepHandler{Service: m.service},
 	)
+	// /hr/config is the frontend compatibility endpoint. It composes setup
+	// state with the business-scoped HR-core configuration.
 	serverHttp.RegisterGET[api.GetHRConfigRequest, api.GetHRConfigResponse](
-		ctx, router, api.GetHRConfigRoutes(), &api.GetHRConfigHandler{Service: m.service},
+		ctx, router, api.GetHRConfigRoutes(), &api.GetHRConfigHandler{Service: m.service, CoreService: m.coreModule},
 	)
 	serverHttp.RegisterPUTWithValidation[api.UpsertHRConfigRequest, api.UpsertHRConfigResponse](
-		ctx, router, api.UpsertHRConfigRoutes(), &api.UpsertHRConfigHandler{Service: m.service},
+		ctx, router, api.UpsertHRConfigRoutes(), &api.UpsertHRConfigHandler{Service: m.service, CoreService: m.coreModule},
 	)
 }
 

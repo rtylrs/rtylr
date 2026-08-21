@@ -19,6 +19,21 @@ func oneKitStatus(err error) int {
 	return 0
 }
 
+// The onboarding/setup config owns /hr/config, so the full company config API
+// has to live on its own path or the two handlers compete for the same method
+// and path. This pins that separation so it cannot regress silently.
+func TestCoreConfigRoutesUseDedicatedNamespace(t *testing.T) {
+	const want = "/hr/company-config"
+	getRoutes := GetHRConfigRoutes()
+	if len(getRoutes) != 1 || getRoutes[0] != want {
+		t.Fatalf("core config GET routes = %v, want [%s]", getRoutes, want)
+	}
+	putRoutes := UpsertHRConfigRoutes()
+	if len(putRoutes) != 1 || putRoutes[0] != want {
+		t.Fatalf("core config PUT routes = %v, want [%s]", putRoutes, want)
+	}
+}
+
 func TestCreateEmployeeHandler_Validate_MissingFirstName(t *testing.T) {
 	h := &CreateEmployeeHandler{}
 	se := h.Validate(context.Background(), &CreateEmployeeRequest{

@@ -29,12 +29,15 @@ func NewConfigAPI(configService *application.Service, customDomains *custom_doma
 func (a *ConfigAPI) GetCustomDomain(ctx context.Context, req *hubconfigv1.GetCustomDomainRequest) (*hubconfigv1.GetCustomDomainResponse, error) {
 	return a.CustomDomains.GetCustomDomain(ctx, req)
 }
+
 func (a *ConfigAPI) RegisterCustomDomain(ctx context.Context, req *hubconfigv1.RegisterCustomDomainRequest) (*hubconfigv1.RegisterCustomDomainResponse, error) {
 	return a.CustomDomains.RegisterCustomDomain(ctx, req)
 }
+
 func (a *ConfigAPI) VerifyCustomDomain(ctx context.Context, req *hubconfigv1.VerifyCustomDomainRequest) (*hubconfigv1.VerifyCustomDomainResponse, error) {
 	return a.CustomDomains.VerifyCustomDomain(ctx, req)
 }
+
 func (a *ConfigAPI) RemoveCustomDomain(ctx context.Context, req *hubconfigv1.RemoveCustomDomainRequest) (*hubconfigv1.RemoveCustomDomainResponse, error) {
 	return a.CustomDomains.RemoveCustomDomain(ctx, req)
 }
