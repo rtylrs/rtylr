@@ -238,5 +238,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/index.tsx", "audit-batch-236-suite-19"],
   ["apps/dash/src/features/qr-codes/QrCodes.tsx", "audit-batch-237-suite-19"],
   ["apps/dash/src/layouts/DefaultLayout.tsx", "audit-batch-238-suite-19"],
+  ["apps/dash/src/shared/components/ui/dialog.tsx", "audit-batch-239-suite-19"],
 ];
 

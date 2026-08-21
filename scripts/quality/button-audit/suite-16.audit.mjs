@@ -238,5 +238,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/TopProductsWidget.test.tsx", "audit-batch-236-suite-16"],
   ["apps/dash/src/features/permissions/Roles.tsx", "audit-batch-237-suite-16"],
   ["apps/dash/src/features/team/Team.tsx", "audit-batch-238-suite-16"],
+  ["apps/dash/src/shared/components/ui/badge.tsx", "audit-batch-239-suite-16"],
 ];
 
