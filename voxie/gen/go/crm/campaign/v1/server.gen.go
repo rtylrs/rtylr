@@ -262,6 +262,24 @@ func RegisterCampaignServiceServer(first any, rest ...any) error {
 			value := values[0]
 			req.Status = value
 		}
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
+		}
+		if values := r.URL.Query()["offset"]; len(values) > 0 {
+			value := values[0]
+			parsedOffset, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter offset: "+err.Error())
+				return
+			}
+			req.Offset = parsedOffset
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -320,14 +338,17 @@ func RegisterCampaignServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "CampaignService", Method: "getCampaignDetail", HTTPMethod: "GET", Route: "/crm/campaign/v1/campaigns/{id}", AuthSchemes: nil}))
-	mux.Handle("GET /crm/campaign/v1/campaigns/{campaign_id}/stats", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("GET /crm/campaign/v1/campaigns/stats", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetCampaignStatsRequest)
-		parsedCampaignId, err := parseInt64(r.PathValue("campaign_id"))
-		if err != nil {
-			writeJSONError(w, http.StatusBadRequest, "invalid path parameter campaign_id: "+err.Error())
-			return
+		if values := r.URL.Query()["campaign_id"]; len(values) > 0 {
+			value := values[0]
+			parsedCampaignId, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter campaign_id: "+err.Error())
+				return
+			}
+			req.CampaignId = parsedCampaignId
 		}
-		req.CampaignId = parsedCampaignId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -341,7 +362,7 @@ func RegisterCampaignServiceServer(first any, rest ...any) error {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	}), RequestMetadata{Service: "CampaignService", Method: "getCampaignStats", HTTPMethod: "GET", Route: "/crm/campaign/v1/campaigns/{campaign_id}/stats", AuthSchemes: nil}))
+	}), RequestMetadata{Service: "CampaignService", Method: "getCampaignStats", HTTPMethod: "GET", Route: "/crm/campaign/v1/campaigns/stats", AuthSchemes: nil}))
 	mux.Handle("PUT /crm/campaign/v1/campaigns/{id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdateCampaignRequest)
 		if r.Body != nil {
@@ -370,14 +391,20 @@ func RegisterCampaignServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "CampaignService", Method: "updateCampaign", HTTPMethod: "PUT", Route: "/crm/campaign/v1/campaigns/{id}", AuthSchemes: nil}))
-	mux.Handle("PATCH /crm/campaign/v1/campaigns/status", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("PUT /crm/campaign/v1/campaigns/{id}/status", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(UpdateCampaignStatusRequest)
 		if r.Body != nil {
-			if err := json.NewDecoder(r.Body).Decode(req); err != nil && err.Error() != "EOF" {
+			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && err.Error() != "EOF" {
 				writeJSONError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
 				return
 			}
 		}
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -391,6 +418,6 @@ func RegisterCampaignServiceServer(first any, rest ...any) error {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	}), RequestMetadata{Service: "CampaignService", Method: "updateCampaignStatus", HTTPMethod: "PATCH", Route: "/crm/campaign/v1/campaigns/status", AuthSchemes: nil}))
+	}), RequestMetadata{Service: "CampaignService", Method: "updateCampaignStatus", HTTPMethod: "PUT", Route: "/crm/campaign/v1/campaigns/{id}/status", AuthSchemes: nil}))
 	return nil
 }

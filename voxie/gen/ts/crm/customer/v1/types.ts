@@ -87,14 +87,14 @@ return violations;
 
 export interface CreateCustomerRequest {
 firstName: string;
-lastName: string;
-email: string;
+lastName?: string;
+email?: string;
 phone?: string;
-dateOfBirth: string;
-gender: string;
+dateOfBirth?: string;
+gender?: string;
 address?: string;
-city: string;
-country: string;
+city?: string;
+country?: string;
 tags?: (string)[];
 notes?: string;
 consent?: Record<string, boolean>;
@@ -138,14 +138,6 @@ return out;
 export function validateCreateCustomerRequest(v: CreateCustomerRequest): string[] {
 const violations: string[] = [];
 if (!(v.firstName !== undefined && v.firstName !== null) || v.firstName === "") violations.push("first_name is required");
-if (!(v.lastName !== undefined && v.lastName !== null) || v.lastName === "") violations.push("last_name is required");
-if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
-if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
-if (!(v.dateOfBirth !== undefined && v.dateOfBirth !== null) || v.dateOfBirth === "") violations.push("date_of_birth is required");
-if (!(v.gender !== undefined && v.gender !== null) || v.gender === "") violations.push("gender is required");
-if (!(v.city !== undefined && v.city !== null) || v.city === "") violations.push("city is required");
-if (!(v.country !== undefined && v.country !== null) || v.country === "") violations.push("country is required");
-if (v.tags !== undefined && v.tags !== null && v.tags.length < 1) violations.push("tags must contain at least 1 items");
 return violations;
 }
 
@@ -335,14 +327,14 @@ return violations;
 
 export interface UpdateCustomerBody {
 firstName: string;
-lastName: string;
-email: string;
+lastName?: string;
+email?: string;
 phone?: string;
-dateOfBirth: string;
-gender: string;
+dateOfBirth?: string;
+gender?: string;
 address?: string;
-city: string;
-country: string;
+city?: string;
+country?: string;
 tags?: (string)[];
 notes?: string;
 consent?: Record<string, boolean>;
@@ -389,14 +381,6 @@ return out;
 export function validateUpdateCustomerBody(v: UpdateCustomerBody): string[] {
 const violations: string[] = [];
 if (!(v.firstName !== undefined && v.firstName !== null) || v.firstName === "") violations.push("first_name is required");
-if (!(v.lastName !== undefined && v.lastName !== null) || v.lastName === "") violations.push("last_name is required");
-if (!(v.email !== undefined && v.email !== null) || v.email === "") violations.push("email is required");
-if (v.email !== undefined && v.email !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) violations.push("email must be a valid email");
-if (!(v.dateOfBirth !== undefined && v.dateOfBirth !== null) || v.dateOfBirth === "") violations.push("date_of_birth is required");
-if (!(v.gender !== undefined && v.gender !== null) || v.gender === "") violations.push("gender is required");
-if (!(v.city !== undefined && v.city !== null) || v.city === "") violations.push("city is required");
-if (!(v.country !== undefined && v.country !== null) || v.country === "") violations.push("country is required");
-if (v.tags !== undefined && v.tags !== null && v.tags.length < 1) violations.push("tags must contain at least 1 items");
 return violations;
 }
 

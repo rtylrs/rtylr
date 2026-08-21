@@ -12,11 +12,12 @@ service CampaignService {
   getCampaignDetail(GetCampaignDetailRequest) -> GetCampaignDetailResponse @get("/campaigns/{id}")
 
   /// Returns stats for a single campaign.
-  getCampaignStats(GetCampaignStatsRequest) -> GetCampaignStatsResponse @get("/campaigns/{campaign_id}/stats")
+  getCampaignStats(GetCampaignStatsRequest) -> GetCampaignStatsResponse @get("/campaigns/stats")
 
   /// Updates campaign fields.
   updateCampaign(UpdateCampaignRequest) -> UpdateCampaignResponse @put("/campaigns/{id}") @body("body")
 
-  /// Changes the campaign lifecycle status.
-  updateCampaignStatus(UpdateCampaignStatusRequest) -> UpdateCampaignStatusResponse @patch("/campaigns/status")
+  /// Changes the campaign lifecycle status. The id is taken from the path;
+  /// only the status travels in the body (matches PUT /crm/campaigns/{id}/status).
+  updateCampaignStatus(UpdateCampaignStatusRequest) -> UpdateCampaignStatusResponse @put("/campaigns/{id}/status") @body("body")
 }

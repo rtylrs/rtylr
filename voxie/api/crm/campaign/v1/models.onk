@@ -61,7 +61,9 @@ message GetCampaignDetailResponse {
 }
 
 message GetCampaignStatsRequest {
-  campaign_id: int64 @required @gt(0)
+  /// The live route is GET /campaigns/stats?campaign_id=... (query param,
+  /// not a path segment).
+  campaign_id: int64 @required @gt(0) @query("campaign_id")
 }
 
 message GetCampaignStatsResponse {
@@ -71,10 +73,15 @@ message GetCampaignStatsResponse {
 message ListCampaignsRequest {
   /// Filters campaigns by lifecycle state.
   status: string @query("status")
+  limit: int64 @query("limit")
+  offset: int64 @query("offset")
 }
 
 message ListCampaignsResponse {
   campaigns: Campaign[]
+  total: int64
+  limit: int64
+  offset: int64
 }
 
 message UpdateCampaignBody {
@@ -98,6 +105,10 @@ message UpdateCampaignResponse {
 
 message UpdateCampaignStatusRequest {
   id: int64 @required @gt(0)
+  body: UpdateCampaignStatusBody
+}
+
+message UpdateCampaignStatusBody {
   status: string @required
 }
 

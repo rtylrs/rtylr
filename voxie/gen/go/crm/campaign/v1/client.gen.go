@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -31,6 +32,8 @@ func (c *CampaignServiceClient) ListCampaigns(ctx context.Context, req *ListCamp
 	path := "/crm/campaign/v1/campaigns"
 	query := url.Values{}
 	query.Set("status", req.Status)
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("offset", strconv.FormatInt(int64(req.Offset), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
@@ -136,9 +139,9 @@ func (c *CampaignServiceClient) GetCampaignStats(ctx context.Context, req *GetCa
 			return nil, fmt.Errorf("validate request: %w", err)
 		}
 	}
-	path := "/crm/campaign/v1/campaigns/{campaign_id}/stats"
-	path = strings.ReplaceAll(path, "{campaign_id}", url.PathEscape(fmt.Sprintf("%v", req.CampaignId)))
+	path := "/crm/campaign/v1/campaigns/stats"
 	query := url.Values{}
+	query.Set("campaign_id", strconv.FormatInt(int64(req.CampaignId), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
@@ -209,12 +212,13 @@ func (c *CampaignServiceClient) UpdateCampaignStatus(ctx context.Context, req *U
 			return nil, fmt.Errorf("validate request: %w", err)
 		}
 	}
-	path := "/crm/campaign/v1/campaigns/status"
-	body, err := json.Marshal(req)
+	path := "/crm/campaign/v1/campaigns/{id}/status"
+	path = strings.ReplaceAll(path, "{id}", url.PathEscape(fmt.Sprintf("%v", req.Id)))
+	body, err := json.Marshal(req.Body)
 	if err != nil {
 		return nil, fmt.Errorf("marshal request: %w", err)
 	}
-	httpReq, err := http.NewRequestWithContext(ctx, "PATCH", c.BaseURL+path, bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(ctx, "PUT", c.BaseURL+path, bytes.NewReader(body))
 	if err != nil {
 		return nil, fmt.Errorf("build request: %w", err)
 	}

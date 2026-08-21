@@ -39,30 +39,6 @@ func (m *CreateCustomerRequest) Validate() error {
 	if m.FirstName == "" {
 		violations = append(violations, "first_name is required")
 	}
-	if m.LastName == "" {
-		violations = append(violations, "last_name is required")
-	}
-	if m.Email == "" {
-		violations = append(violations, "email is required")
-	}
-	if m.Email != "" && !emailPattern.MatchString(m.Email) {
-		violations = append(violations, "email must be a valid email")
-	}
-	if m.DateOfBirth == "" {
-		violations = append(violations, "date_of_birth is required")
-	}
-	if m.Gender == "" {
-		violations = append(violations, "gender is required")
-	}
-	if m.City == "" {
-		violations = append(violations, "city is required")
-	}
-	if m.Country == "" {
-		violations = append(violations, "country is required")
-	}
-	if len(m.Tags) < 1 {
-		violations = append(violations, "tags must have at least 1 items")
-	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -169,30 +145,6 @@ func (m *UpdateCustomerBody) Validate() error {
 	var violations []string
 	if m.FirstName == "" {
 		violations = append(violations, "first_name is required")
-	}
-	if m.LastName == "" {
-		violations = append(violations, "last_name is required")
-	}
-	if m.Email == "" {
-		violations = append(violations, "email is required")
-	}
-	if m.Email != "" && !emailPattern.MatchString(m.Email) {
-		violations = append(violations, "email must be a valid email")
-	}
-	if m.DateOfBirth == "" {
-		violations = append(violations, "date_of_birth is required")
-	}
-	if m.Gender == "" {
-		violations = append(violations, "gender is required")
-	}
-	if m.City == "" {
-		violations = append(violations, "city is required")
-	}
-	if m.Country == "" {
-		violations = append(violations, "country is required")
-	}
-	if len(m.Tags) < 1 {
-		violations = append(violations, "tags must have at least 1 items")
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

@@ -41,6 +41,12 @@ const query = new URLSearchParams();
 if (req.status !== undefined) {
 query.set("status", String(req.status));
 }
+if (req.limit !== undefined) {
+query.set("limit", String(req.limit));
+}
+if (req.offset !== undefined) {
+query.set("offset", String(req.offset));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
@@ -98,9 +104,11 @@ return decodeGetCampaignDetailResponse(await res.json());
 async getCampaignStats(req: GetCampaignStatsRequest): Promise<GetCampaignStatsResponse> {
 const violations = validateGetCampaignStatsRequest(req);
 if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
-let path = "/crm/campaign/v1/campaigns/{campaign_id}/stats";
-path = path.replace("{campaign_id}", encodeURIComponent(String(req.campaignId)));
+let path = "/crm/campaign/v1/campaigns/stats";
 const query = new URLSearchParams();
+if (req.campaignId !== undefined) {
+query.set("campaign_id", String(req.campaignId));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
@@ -138,11 +146,12 @@ return decodeUpdateCampaignResponse(await res.json());
 async updateCampaignStatus(req: UpdateCampaignStatusRequest): Promise<UpdateCampaignStatusResponse> {
 const violations = validateUpdateCampaignStatusRequest(req);
 if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
-let path = "/crm/campaign/v1/campaigns/status";
+let path = "/crm/campaign/v1/campaigns/{id}/status";
+path = path.replace("{id}", encodeURIComponent(String(req.id)));
 const res = await this.request(this.baseUrl + path, {
-method: "PATCH",
+method: "PUT",
 headers: { "Content-Type": "application/json", ...this.options.defaultHeaders },
-body: JSON.stringify(encodeUpdateCampaignStatusRequest(req)),
+body: JSON.stringify(encodeUpdateCampaignStatusRequest(req)["body"]),
 });
 
 if (!res.ok) {

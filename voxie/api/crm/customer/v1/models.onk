@@ -29,15 +29,16 @@ message Customer {
 
 message CreateCustomerRequest {
   first_name: string @required
-  last_name: string @required
-  email: string @required @email
+  last_name: string
+  /// Not yet enforced server-side; clients may send "".
+  email: string
   phone: string
-  date_of_birth: string @required
-  gender: string @required
+  date_of_birth: string
+  gender: string
   address: string
-  city: string @required
-  country: string @required
-  tags: string[] @min_items(1)
+  city: string
+  country: string
+  tags: string[]
   notes: string
   consent: map[string, bool]
 }
@@ -83,15 +84,16 @@ message ListCustomersResponse {
 
 message UpdateCustomerBody {
   first_name: string @required
-  last_name: string @required
-  email: string @required @email
+  last_name: string
+  /// Not yet enforced server-side; clients may send "".
+  email: string
   phone: string
-  date_of_birth: string @required
-  gender: string @required
+  date_of_birth: string
+  gender: string
   address: string
-  city: string @required
-  country: string @required
-  tags: string[] @min_items(1)
+  city: string
+  country: string
+  tags: string[]
   notes: string
   consent: map[string, bool]
   is_active: bool? @nullable

@@ -287,18 +287,24 @@ return violations;
 
 export interface ListCampaignsRequest {
 status?: string;
+limit?: string;
+offset?: string;
 }
 
 export function decodeListCampaignsRequest(v: any): ListCampaignsRequest {
 if (v === null || v === undefined) return v;
 return {
 status: v.status,
+limit: v.limit,
+offset: v.offset,
 };
 }
 
 export function encodeListCampaignsRequest(v: ListCampaignsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.status !== undefined) { out.status = v.status; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
@@ -309,18 +315,27 @@ return violations;
 
 export interface ListCampaignsResponse {
 campaigns?: (Campaign)[];
+total?: string;
+limit?: string;
+offset?: string;
 }
 
 export function decodeListCampaignsResponse(v: any): ListCampaignsResponse {
 if (v === null || v === undefined) return v;
 return {
 campaigns: (v.campaigns !== undefined ? (v.campaigns as any[]).map(decodeCampaign) : v.campaigns),
+total: v.total,
+limit: v.limit,
+offset: v.offset,
 };
 }
 
 export function encodeListCampaignsResponse(v: ListCampaignsResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.campaigns !== undefined) { out.campaigns = (v.campaigns as any[]).map(encodeCampaign); }
+if (v.total !== undefined) { out.total = v.total; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
@@ -428,21 +443,21 @@ return violations;
 
 export interface UpdateCampaignStatusRequest {
 id: string;
-status: string;
+body?: UpdateCampaignStatusBody;
 }
 
 export function decodeUpdateCampaignStatusRequest(v: any): UpdateCampaignStatusRequest {
 if (v === null || v === undefined) return v;
 return {
 id: v.id,
-status: v.status,
+body: (v.body !== undefined ? decodeUpdateCampaignStatusBody(v.body) : v.body),
 };
 }
 
 export function encodeUpdateCampaignStatusRequest(v: UpdateCampaignStatusRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
-if (v.status !== undefined) { out.status = v.status; }
+if (v.body !== undefined) { out.body = encodeUpdateCampaignStatusBody(v.body); }
 return out;
 }
 
@@ -450,6 +465,29 @@ export function validateUpdateCampaignStatusRequest(v: UpdateCampaignStatusReque
 const violations: string[] = [];
 if (!(v.id !== undefined && v.id !== null)) violations.push("id is required");
 if (v.id !== undefined && v.id !== null && !(Number(v.id) > 0)) violations.push("id violates @gt");
+if (v.body !== undefined && v.body !== null) violations.push(...validateUpdateCampaignStatusBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
+export interface UpdateCampaignStatusBody {
+status: string;
+}
+
+export function decodeUpdateCampaignStatusBody(v: any): UpdateCampaignStatusBody {
+if (v === null || v === undefined) return v;
+return {
+status: v.status,
+};
+}
+
+export function encodeUpdateCampaignStatusBody(v: UpdateCampaignStatusBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.status !== undefined) { out.status = v.status; }
+return out;
+}
+
+export function validateUpdateCampaignStatusBody(v: UpdateCampaignStatusBody): string[] {
+const violations: string[] = [];
 if (!(v.status !== undefined && v.status !== null) || v.status === "") violations.push("status is required");
 return violations;
 }

@@ -728,6 +728,47 @@ func (x *GetCampaignStatsResponse) GetStats() *CampaignStats {
 
 type ListCampaignsRequest struct {
 	Status string `json:"status,omitempty"`
+	Limit  int64  `json:"limit,omitempty"`
+	Offset int64  `json:"offset,omitempty"`
+}
+
+func (m *ListCampaignsRequest) MarshalJSON() ([]byte, error) {
+	type alias ListCampaignsRequest
+	aux := struct {
+		*alias
+		Limit  string `json:"limit,omitempty"`
+		Offset string `json:"offset,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Limit = strconv.FormatInt(m.Limit, 10)
+	aux.Offset = strconv.FormatInt(m.Offset, 10)
+	return json.Marshal(aux)
+}
+
+func (m *ListCampaignsRequest) UnmarshalJSON(data []byte) error {
+	type alias ListCampaignsRequest
+	aux := struct {
+		*alias
+		Limit  string `json:"limit,omitempty"`
+		Offset string `json:"offset,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Limit != "" {
+		v, err := strconv.ParseInt(aux.Limit, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Limit = v
+	}
+	if aux.Offset != "" {
+		v, err := strconv.ParseInt(aux.Offset, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Offset = v
+	}
+	return nil
 }
 
 func (x *ListCampaignsRequest) GetStatus() string {
@@ -738,8 +779,76 @@ func (x *ListCampaignsRequest) GetStatus() string {
 	return x.Status
 }
 
+func (x *ListCampaignsRequest) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListCampaignsRequest) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
+}
+
 type ListCampaignsResponse struct {
 	Campaigns []*Campaign `json:"campaigns,omitempty"`
+	Total     int64       `json:"total,omitempty"`
+	Limit     int64       `json:"limit,omitempty"`
+	Offset    int64       `json:"offset,omitempty"`
+}
+
+func (m *ListCampaignsResponse) MarshalJSON() ([]byte, error) {
+	type alias ListCampaignsResponse
+	aux := struct {
+		*alias
+		Total  string `json:"total,omitempty"`
+		Limit  string `json:"limit,omitempty"`
+		Offset string `json:"offset,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Total = strconv.FormatInt(m.Total, 10)
+	aux.Limit = strconv.FormatInt(m.Limit, 10)
+	aux.Offset = strconv.FormatInt(m.Offset, 10)
+	return json.Marshal(aux)
+}
+
+func (m *ListCampaignsResponse) UnmarshalJSON(data []byte) error {
+	type alias ListCampaignsResponse
+	aux := struct {
+		*alias
+		Total  string `json:"total,omitempty"`
+		Limit  string `json:"limit,omitempty"`
+		Offset string `json:"offset,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Total != "" {
+		v, err := strconv.ParseInt(aux.Total, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Total = v
+	}
+	if aux.Limit != "" {
+		v, err := strconv.ParseInt(aux.Limit, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Limit = v
+	}
+	if aux.Offset != "" {
+		v, err := strconv.ParseInt(aux.Offset, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Offset = v
+	}
+	return nil
 }
 
 func (x *ListCampaignsResponse) GetCampaigns() []*Campaign {
@@ -748,6 +857,30 @@ func (x *ListCampaignsResponse) GetCampaigns() []*Campaign {
 		return zero
 	}
 	return x.Campaigns
+}
+
+func (x *ListCampaignsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
+func (x *ListCampaignsResponse) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListCampaignsResponse) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
 }
 
 type UpdateCampaignBody struct {
@@ -915,8 +1048,8 @@ func (x *UpdateCampaignResponse) GetMessage() string {
 }
 
 type UpdateCampaignStatusRequest struct {
-	Id     int64  `json:"id,omitempty"`
-	Status string `json:"status,omitempty"`
+	Id   int64                     `json:"id,omitempty"`
+	Body *UpdateCampaignStatusBody `json:"body,omitempty"`
 }
 
 func (m *UpdateCampaignStatusRequest) MarshalJSON() ([]byte, error) {
@@ -956,7 +1089,19 @@ func (x *UpdateCampaignStatusRequest) GetId() int64 {
 	return x.Id
 }
 
-func (x *UpdateCampaignStatusRequest) GetStatus() string {
+func (x *UpdateCampaignStatusRequest) GetBody() *UpdateCampaignStatusBody {
+	if x == nil {
+		var zero *UpdateCampaignStatusBody
+		return zero
+	}
+	return x.Body
+}
+
+type UpdateCampaignStatusBody struct {
+	Status string `json:"status,omitempty"`
+}
+
+func (x *UpdateCampaignStatusBody) GetStatus() string {
 	if x == nil {
 		var zero string
 		return zero
