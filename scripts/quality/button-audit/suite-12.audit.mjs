@@ -92,5 +92,6 @@ export const cases = [
   ["apps/finance/src/shared/components/AccountTypeBadge.tsx", "audit-batch-090-suite-12"],
   ["apps/finance/src/shared/components/TaxBreakdown.tsx", "audit-batch-091-suite-12"],
   ["apps/flow/src/features/projects/ProjectBoard.tsx", "audit-batch-092-suite-12"],
+  ["apps/flow/src/features/tasks/MyIssues.test.tsx", "audit-batch-093-suite-12"],
 ];
 

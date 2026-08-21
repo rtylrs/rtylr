@@ -92,5 +92,6 @@ export const cases = [
   ["apps/finance/src/features/reconcile/Reconcile.tsx", "audit-batch-090-suite-03"],
   ["apps/finance/src/shared/components/PLByCategoryChart.tsx", "audit-batch-091-suite-03"],
   ["apps/flow/src/features/leave/LeaveScreen.tsx", "audit-batch-092-suite-03"],
+  ["apps/flow/src/features/projects/components/BoardSettingsPanel.test.tsx", "audit-batch-093-suite-03"],
 ];
 

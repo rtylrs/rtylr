@@ -92,5 +92,6 @@ export const cases = [
   ["apps/finance/src/shared/components/LineItemRow.tsx", "audit-batch-090-suite-24"],
   ["apps/flow/src/features/inbox/Inbox.test.tsx", "audit-batch-091-suite-24"],
   ["apps/flow/src/features/projects/ProjectViewTabs.test.tsx", "audit-batch-092-suite-24"],
+  ["apps/flow/src/features/time/TeamView.test.tsx", "audit-batch-093-suite-24"],
 ];
 
