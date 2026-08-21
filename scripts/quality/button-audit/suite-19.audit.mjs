@@ -190,5 +190,6 @@ export const cases = [
   ["apps/dash/src/shared/hooks/queries/useAiQuota.test.tsx", "audit-batch-188-suite-19"],
   ["apps/erp/src/features/price-lists/PriceLists.tsx", "audit-batch-189-suite-19"],
   ["apps/erp/src/features/warehouses/Warehouses.tsx", "audit-batch-190-suite-19"],
+  ["apps/erp/src/shared/components/QuickStockAdjust.tsx", "audit-batch-191-suite-19"],
 ];
 
