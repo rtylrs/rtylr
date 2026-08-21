@@ -36,5 +36,6 @@ export const cases = [
   ["apps/dash/src/shared/hooks/queries/usePOSAccess.test.tsx", "audit-batch-034-suite-17"],
   ["apps/erp/src/features/products/components/VariantMatrix.tsx", "audit-batch-035-suite-17"],
   ["apps/erp/src/shared/components/Breadcrumbs.tsx", "audit-batch-036-suite-17"],
+  ["apps/erp/src/shared/components/TrialBanner.tsx", "audit-batch-037-suite-17"],
 ];
 
