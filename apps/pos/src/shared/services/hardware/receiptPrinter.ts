@@ -44,6 +44,7 @@ export type PrinterTransport =
 
 export type PrintResult =
   | { status: 'printed'; message: string }
+  | { status: 'skipped'; message: string }
   | { status: 'failed'; error: string };
 
 // ── Command ───────────────────────────────────────────────────────────────────
@@ -57,7 +58,9 @@ export async function printReceipt(
   receipt: ReceiptData,
 ): Promise<PrintResult> {
   if (!canUseNativeHardware()) {
-    return { status: 'printed', message: 'Receipt print skipped in browser POS.' };
+    // Report the skip honestly - callers must not treat it as a successful
+    // print (matches the drawer/KDS modules' 'skipped' convention).
+    return { status: 'skipped', message: 'Receipt print skipped in browser POS.' };
   }
   const config = buildConfig(transport);
   const receiptPayload = toSnakeCase(receipt);

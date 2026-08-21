@@ -23,6 +23,7 @@ describe('fetchRuntimeConfig', () => {
     expect(globalThis.fetch).toHaveBeenCalledWith('http://192.168.1.100:8000/runtime-config', {
       method: 'GET',
       headers: { Accept: 'application/json' },
+      signal: expect.any(AbortSignal),
     });
 
     expect(result).toEqual({
