@@ -11,7 +11,10 @@ export const timeEntryFormSchema = z.object({
   categoryId: z.number().optional(),
   description: z.string(),
   isBillable: z.boolean(),
-  source: z.enum(['manual', 'timer', 'flow_import']),
+  // 'flow_import' is gone with the Flow import button: nothing produces it now.
+  // 'flow' is deliberately absent too, since only the backend writes that value
+  // when Flow logs a work-day line; this schema validates form input.
+  source: z.enum(['manual', 'timer']),
 });
 
 export type TimeEntryFormData = z.infer<typeof timeEntryFormSchema>;
