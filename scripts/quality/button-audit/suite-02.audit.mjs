@@ -201,5 +201,6 @@ export const cases = [
   ["apps/hr/src/features/dashboard/Dashboard.test.tsx", "audit-batch-199-suite-02"],
   ["apps/hr/src/features/equipment/EquipmentRequestForm.tsx", "audit-batch-200-suite-02"],
   ["apps/hr/src/features/reports/Reports.tsx", "audit-batch-201-suite-02"],
+  ["apps/hr/src/features/setup-wizard/steps/RolesPermissionsStep.test.tsx", "audit-batch-202-suite-02"],
 ];
 

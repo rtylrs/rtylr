@@ -201,5 +201,6 @@ export const cases = [
   ["apps/hr/src/features/dashboard/widgets/HoursThisWeekWidget.tsx", "audit-batch-199-suite-05"],
   ["apps/hr/src/features/leave/LeaveCalendar.tsx", "audit-batch-200-suite-05"],
   ["apps/hr/src/features/reviews/Reviews.tsx", "audit-batch-201-suite-05"],
+  ["apps/hr/src/features/shifts/RosterBuilder.tsx", "audit-batch-202-suite-05"],
 ];
 

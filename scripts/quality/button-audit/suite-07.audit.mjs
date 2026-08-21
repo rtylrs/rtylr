@@ -201,5 +201,6 @@ export const cases = [
   ["apps/hr/src/features/dashboard/widgets/LeaveBalanceWidget.tsx", "audit-batch-199-suite-07"],
   ["apps/hr/src/features/onboarding/ChecklistTemplates.tsx", "audit-batch-200-suite-07"],
   ["apps/hr/src/features/settings/Settings.test.tsx", "audit-batch-201-suite-07"],
+  ["apps/hr/src/features/shifts/Shifts.tsx", "audit-batch-202-suite-07"],
 ];
 
