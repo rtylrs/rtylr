@@ -24,16 +24,10 @@ type Repository interface {
 	ListTimesheetBusinessIDs(ctx context.Context) ([]int64, error)
 	ListUnsubmittedEmployees(ctx context.Context, businessID int64, periodStart, periodEnd string) ([]int64, error)
 
-	GetTimeEntryBySourceAndTask(ctx context.Context, businessID, employeeID int64, source string, taskID int64) (*TimeEntryRecord, error)
-	GetExistingTaskIDsBySource(ctx context.Context, businessID, employeeID int64, source string, taskIDs []int64) (map[int64]struct{}, error)
 	ListApprovedBillableEntries(ctx context.Context, businessID int64) ([]TimeEntryRecord, error)
 	MarkEntryExported(ctx context.Context, businessID, entryID, billableInvoiceID int64) error
 }
 
 type ApprovalChainProvider interface {
 	GetApprovalChain(ctx context.Context, businessID int64, requestType string) (*ApprovalChainInfo, error)
-}
-
-type FlowTaskReader interface {
-	GetCompletedTasksForEmployee(ctx context.Context, businessID, employeeID int64, periodStart, periodEnd string) ([]FlowTaskRecord, error)
 }

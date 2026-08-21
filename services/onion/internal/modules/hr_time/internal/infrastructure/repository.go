@@ -373,58 +373,6 @@ func (r *Repository) CreateApprovalAction(ctx context.Context, businessID int64,
 	})
 }
 
-func (r *Repository) GetTimeEntryBySourceAndTask(ctx context.Context, businessID, employeeID int64, source string, taskID int64) (*domain.TimeEntryRecord, error) {
-	row, err := r.queries.GetTimeEntryBySourceAndTask(ctx, sqlc.GetTimeEntryBySourceAndTaskParams{
-		BusinessID: businessID,
-		EmployeeID: employeeID,
-		Source:     source,
-		TaskID:     nullInt64(taskID),
-	})
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	entry := timeEntryFromRow(row)
-	return &entry, nil
-}
-
-// GetExistingTaskIDsBySource returns the set of task IDs (from the given
-// candidate list) that already have a time entry for the business/employee/source
-// combination. This batches what would otherwise be a per-task existence check
-// into a single WHERE task_id IN (...) query.
-func (r *Repository) GetExistingTaskIDsBySource(ctx context.Context, businessID, employeeID int64, source string, taskIDs []int64) (map[int64]struct{}, error) {
-	existing := make(map[int64]struct{}, len(taskIDs))
-	if len(taskIDs) == 0 {
-		return existing, nil
-	}
-
-	nullableTaskIDs := make([]sql.NullInt64, len(taskIDs))
-	for i, id := range taskIDs {
-		nullableTaskIDs[i] = sql.NullInt64{Int64: id, Valid: true}
-	}
-	rows, err := r.queries.GetExistingTaskIDsBySource(ctx, sqlc.GetExistingTaskIDsBySourceParams{
-		BusinessID: businessID,
-		EmployeeID: employeeID,
-		Source:     source,
-		TaskIds:    nullableTaskIDs,
-	})
-	if err != nil {
-		logger.Ctx(ctx).Error("failed to batch-check existing task entries",
-			logger.Any("business_id", businessID), logger.Error(err))
-		return nil, err
-	}
-
-	for _, taskID := range rows {
-		if taskID.Valid {
-			existing[taskID.Int64] = struct{}{}
-		}
-	}
-
-	return existing, nil
-}
-
 func (r *Repository) ListApprovedBillableEntries(ctx context.Context, businessID int64) ([]domain.TimeEntryRecord, error) {
 	rows, err := r.queries.ListApprovedBillableEntries(ctx, businessID)
 	if err != nil {

@@ -221,19 +221,6 @@ func TestListUnsubmittedEmployees_NoError(t *testing.T) {
 	_ = ids
 }
 
-func TestGetTimeEntryBySourceAndTask_NoError(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
-	ctx := context.Background()
-
-	entry, err := repo.GetTimeEntryBySourceAndTask(ctx, testutil.OwnerID, 4101, "manual", 0)
-	if err != nil {
-		t.Fatalf("GetTimeEntryBySourceAndTask: %v", err)
-	}
-	// Returns nil when not found -- that is acceptable.
-	_ = entry
-}
-
 // hr_time_entries is the table #871 calls out as both cross-tenant-exposable and
 // an input to payroll, and it is where Flow's work-day lines are stored.
 //

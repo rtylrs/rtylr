@@ -9,7 +9,6 @@ import (
 	hrcore "github.com/voxire/onion/internal/modules/hr_core"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
-	"github.com/voxire/onion/internal/modules/hr_time/internal/infrastructure"
 	internaljobs "github.com/voxire/onion/internal/modules/hr_time/internal/jobs"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/routes"
 	platformjobs "github.com/voxire/onion/internal/platform/jobs"
@@ -48,9 +47,8 @@ type Module struct {
 
 func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Module {
 	approvalAdapter := &hrCoreApprovalAdapter{core: hrCoreModule}
-	flowAdapter := infrastructure.NewFlowAdapter(db)
 	return &Module{
-		service: application.NewService(ctx, db, approvalAdapter, flowAdapter),
+		service: application.NewService(ctx, db, approvalAdapter),
 	}
 }
 

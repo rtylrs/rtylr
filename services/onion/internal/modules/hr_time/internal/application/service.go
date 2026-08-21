@@ -27,14 +27,12 @@ func invalidateHRTimeScope(ctx context.Context, businessID int64) {
 type Service struct {
 	repo             *infrastructure.Repository
 	approvalProvider domain.ApprovalChainProvider
-	flowReader       domain.FlowTaskReader
 }
 
-func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider, flowReader domain.FlowTaskReader) *Service {
+func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider) *Service {
 	return &Service{
 		repo:             infrastructure.NewRepository(db),
 		approvalProvider: approvalProvider,
-		flowReader:       flowReader,
 	}
 }
 
@@ -240,50 +238,6 @@ func (s *Service) RejectTimesheet(ctx context.Context, businessID, timesheetID i
 }
 
 // --- Flow Import ---
-
-func (s *Service) ImportFlowTasks(ctx context.Context, businessID, employeeID int64, periodStart, periodEnd string) ([]domain.TimeEntryRecord, error) {
-	tasks, err := s.flowReader.GetCompletedTasksForEmployee(ctx, businessID, employeeID, periodStart, periodEnd)
-	if err != nil {
-		return nil, err
-	}
-
-	// Batch the per-task existence check into one query instead of issuing
-	// GetTimeEntryBySourceAndTask once per task (N+1).
-	taskIDs := make([]int64, 0, len(tasks))
-	for _, task := range tasks {
-		taskIDs = append(taskIDs, task.TaskID)
-	}
-	existingTaskIDs, err := s.repo.GetExistingTaskIDsBySource(ctx, businessID, employeeID, "flow_import", taskIDs)
-	if err != nil {
-		return nil, err
-	}
-
-	var imported []domain.TimeEntryRecord
-	for _, task := range tasks {
-		if _, ok := existingTaskIDs[task.TaskID]; ok {
-			continue
-		}
-
-		entry := domain.TimeEntryRecord{
-			EmployeeID:      employeeID,
-			TaskID:          task.TaskID,
-			Date:            task.CompletedAt,
-			DurationMinutes: task.DurationMinutes,
-			Description:     task.Title,
-			Status:          "draft",
-			Source:          "flow_import",
-		}
-		created, createErr := s.repo.CreateTimeEntry(ctx, businessID, entry)
-		if createErr != nil {
-			logger.Ctx(ctx).Error("failed to import flow task as time entry",
-				logger.Any("business_id", businessID), logger.Any("task_id", task.TaskID), logger.Error(createErr))
-			continue
-		}
-		imported = append(imported, *created)
-	}
-
-	return imported, nil
-}
 
 // --- Billable Export ---
 

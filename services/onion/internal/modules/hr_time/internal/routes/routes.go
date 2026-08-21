@@ -45,10 +45,7 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.RejectTimesheetRoutes(), &handlers.RejectTimesheetHandler{Service: service},
 	)
 
-	// Flow import & billable export
-	serverHttp.RegisterPOSTWithValidation[handlers.ImportFlowRequest, handlers.ImportFlowResponse](
-		ctx, router, handlers.ImportFlowRoutes(), &handlers.ImportFlowHandler{Service: service},
-	)
+	// Billable export
 	serverHttp.RegisterPOSTWithValidation[handlers.ExportBillableRequest, handlers.ExportBillableResponse](
 		ctx, router, handlers.ExportBillableRoutes(), &handlers.ExportBillableHandler{Service: service},
 	)

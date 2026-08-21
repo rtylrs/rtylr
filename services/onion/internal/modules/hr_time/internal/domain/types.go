@@ -80,13 +80,6 @@ type ListTimesheetsParams struct {
 	Offset     int32
 }
 
-type FlowTaskRecord struct {
-	TaskID          int64
-	Title           string
-	DurationMinutes int32
-	CompletedAt     string
-}
-
 type BillableExportItem struct {
 	EntryID         int64  `json:"entry_id"`
 	EmployeeID      int64  `json:"employee_id"`
