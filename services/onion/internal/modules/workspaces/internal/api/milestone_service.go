@@ -50,7 +50,6 @@ func (a *MilestoneAPI) ListMilestones(ctx context.Context, req *flowmilestonev1.
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
-
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
 		return nil, onekiterrors.PermissionDenied()
@@ -135,6 +134,10 @@ func (a *MilestoneAPI) UpdateMilestone(ctx context.Context, req *flowmilestonev1
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
 	var dueDate time.Time
 	if req.GetTargetDate() != "" {
@@ -148,6 +151,7 @@ func (a *MilestoneAPI) UpdateMilestone(ctx context.Context, req *flowmilestonev1
 	if err := a.Service.UpdateMilestone(ctx, domain.UpdateMilestoneInput{
 		ID:          req.GetId(),
 		ActorID:     authUser.UserID,
+		BusinessID:  businessID,
 		Name:        req.GetName(),
 		Description: req.GetDescription(),
 		Status:      req.GetStatus(),

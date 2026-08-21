@@ -62,23 +62,24 @@ INSERT INTO flow_milestones (owner_id, business_id, project_id, workspace_id, na
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: CountViewsByWorkspace :one
-SELECT COUNT(*) FROM flow_views WHERE workspace_id = ?;
+SELECT COUNT(*) FROM flow_views WHERE business_id = ? AND workspace_id = ?;
 
 -- name: ListViews :many
 SELECT id, workspace_id, name, icon, filters, group_by, sort_by, sort_dir, created_by, created_at
 FROM flow_views
-WHERE workspace_id = ?
+WHERE business_id = ? AND workspace_id = ?
 ORDER BY created_at ASC
 LIMIT ? OFFSET ?;
 
 -- name: CreateView :execresult
-INSERT INTO flow_views (workspace_id, name, icon, filters, group_by, sort_by, sort_dir, created_by)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO flow_views (owner_id, business_id, workspace_id, name, icon, filters, group_by, sort_by, sort_dir, created_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateView :execresult
 UPDATE flow_views
 SET name = ?, icon = ?, filters = ?, group_by = ?, sort_by = ?, sort_dir = ?
 WHERE flow_views.id = ?
+  AND flow_views.business_id = ?
   AND (
     EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_views.workspace_id AND w.owner_id = ?)
     OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = flow_views.workspace_id AND wm.user_id = ?)
@@ -87,6 +88,7 @@ WHERE flow_views.id = ?
 -- name: DeleteView :execresult
 DELETE FROM flow_views
 WHERE flow_views.id = ?
+  AND flow_views.business_id = ?
   AND (
     EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_views.workspace_id AND w.owner_id = ?)
     OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = flow_views.workspace_id AND wm.user_id = ?)

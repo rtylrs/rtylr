@@ -101,7 +101,7 @@ func (r *Repository) UpdateCycle(ctx context.Context, input domain.UpdateCycleIn
 		parts = append(parts, "end_date = ?")
 		args = append(args, input.EndDate.Format("2006-01-02"))
 	}
-	args = append(args, input.ID, input.ActorID, input.ActorID)
+	args = append(args, input.ID, input.BusinessID, input.ActorID, input.ActorID)
 
 	res, err := r.pool.ExecContext(ctx,
 		fmt.Sprintf("UPDATE flow_cycles SET %s WHERE id = ? AND %s", strings.Join(parts, ", "), workspaceMemberPredicate("flow_cycles")),
@@ -271,7 +271,7 @@ func (r *Repository) UpdateMilestone(ctx context.Context, input domain.UpdateMil
 		parts = append(parts, "due_date = ?")
 		args = append(args, input.DueDate.Format("2006-01-02"))
 	}
-	args = append(args, input.ID, input.ActorID, input.ActorID)
+	args = append(args, input.ID, input.BusinessID, input.ActorID, input.ActorID)
 
 	res, err := r.pool.ExecContext(ctx,
 		fmt.Sprintf("UPDATE flow_milestones SET %s WHERE id = ? AND %s", strings.Join(parts, ", "), workspaceMemberPredicate("flow_milestones")),
@@ -288,14 +288,18 @@ func (r *Repository) UpdateMilestone(ctx context.Context, input domain.UpdateMil
 // Views
 // ─────────────────────────────────────────────
 
-func (r *Repository) ListViews(ctx context.Context, workspaceID, limit, offset int64) ([]domain.View, int64, error) {
-	total, err := r.queries.CountViewsByWorkspace(ctx, workspaceID)
+func (r *Repository) ListViews(ctx context.Context, businessID, workspaceID, limit, offset int64) ([]domain.View, int64, error) {
+	total, err := r.queries.CountViewsByWorkspace(ctx, sqlc.CountViewsByWorkspaceParams{
+		BusinessID:  businessID,
+		WorkspaceID: workspaceID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CountViewsByWorkspace failed", logger.Error(err))
 		return nil, 0, err
 	}
 
 	rows, err := r.queries.ListViews(ctx, sqlc.ListViewsParams{
+		BusinessID:  businessID,
 		WorkspaceID: workspaceID,
 		Limit:       int32(limit),
 		Offset:      int32(offset),
@@ -341,6 +345,8 @@ func (r *Repository) CreateView(ctx context.Context, input domain.ViewInput) (in
 		return 0, err
 	}
 	res, err := r.queries.CreateView(ctx, sqlc.CreateViewParams{
+		OwnerID:     input.BusinessID,
+		BusinessID:  input.BusinessID,
 		WorkspaceID: input.WorkspaceID,
 		Name:        input.Name,
 		Icon:        sql.NullString{String: input.Icon, Valid: input.Icon != ""},
@@ -363,15 +369,16 @@ func (r *Repository) UpdateView(ctx context.Context, input domain.UpdateViewInpu
 		return err
 	}
 	res, err := r.queries.UpdateView(ctx, sqlc.UpdateViewParams{
-		Name:    input.Name,
-		Icon:    sql.NullString{String: input.Icon, Valid: input.Icon != ""},
-		Filters: filtersJSON,
-		GroupBy: sql.NullString{String: input.GroupBy, Valid: input.GroupBy != ""},
-		SortBy:  sql.NullString{String: input.SortBy, Valid: input.SortBy != ""},
-		SortDir: sqlc.NullFlowViewsSortDir{FlowViewsSortDir: sqlc.FlowViewsSortDir(input.SortDir), Valid: input.SortDir != ""},
-		ID:      input.ID,
-		OwnerID: input.ActorID,
-		UserID:  input.ActorID,
+		Name:       input.Name,
+		Icon:       sql.NullString{String: input.Icon, Valid: input.Icon != ""},
+		Filters:    filtersJSON,
+		GroupBy:    sql.NullString{String: input.GroupBy, Valid: input.GroupBy != ""},
+		SortBy:     sql.NullString{String: input.SortBy, Valid: input.SortBy != ""},
+		SortDir:    sqlc.NullFlowViewsSortDir{FlowViewsSortDir: sqlc.FlowViewsSortDir(input.SortDir), Valid: input.SortDir != ""},
+		ID:         input.ID,
+		BusinessID: input.BusinessID,
+		OwnerID:    input.ActorID,
+		UserID:     input.ActorID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("UpdateView failed", logger.Error(err))
@@ -380,11 +387,12 @@ func (r *Repository) UpdateView(ctx context.Context, input domain.UpdateViewInpu
 	return requireAffected(res)
 }
 
-func (r *Repository) DeleteView(ctx context.Context, id, actorID int64) error {
+func (r *Repository) DeleteView(ctx context.Context, id, actorID, businessID int64) error {
 	res, err := r.queries.DeleteView(ctx, sqlc.DeleteViewParams{
-		ID:      id,
-		OwnerID: actorID,
-		UserID:  actorID,
+		ID:         id,
+		BusinessID: businessID,
+		OwnerID:    actorID,
+		UserID:     actorID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("DeleteView failed", logger.Error(err))

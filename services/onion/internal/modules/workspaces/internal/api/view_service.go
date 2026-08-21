@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	flowviewv1 "github.com/voxire/voxie/gen/go/flow/view/v1"
 )
 
@@ -60,14 +61,18 @@ func (a *ViewAPI) ListViews(ctx context.Context, req *flowviewv1.ListViewsReques
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
-	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, authUser.BusinessID, req.GetWorkspaceId())
+	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, businessID, req.GetWorkspaceId())
 	if err != nil {
 		return nil, err
 	}
 
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
-	views, total, err := a.Service.ListViews(ctx, wsID, int64(limit), offset)
+	views, total, err := a.Service.ListViews(ctx, businessID, wsID, int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
 	}
@@ -87,8 +92,12 @@ func (a *ViewAPI) CreateView(ctx context.Context, req *flowviewv1.CreateViewRequ
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
-	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, authUser.BusinessID, req.GetWorkspaceId())
+	wsID, err := resolveWorkspaceQuery(ctx, a.Service, authUser, businessID, req.GetWorkspaceId())
 	if err != nil {
 		return nil, err
 	}
@@ -96,6 +105,7 @@ func (a *ViewAPI) CreateView(ctx context.Context, req *flowviewv1.CreateViewRequ
 	filters := filtersFromStruct(req.GetFilters())
 
 	view, err := a.Service.CreateView(ctx, domain.ViewInput{
+		BusinessID:  businessID,
 		WorkspaceID: wsID,
 		Name:        req.GetName(),
 		Icon:        req.GetIcon(),
@@ -117,16 +127,21 @@ func (a *ViewAPI) UpdateView(ctx context.Context, req *flowviewv1.UpdateViewRequ
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
 	if err := a.Service.UpdateView(ctx, domain.UpdateViewInput{
-		ID:      req.GetId(),
-		ActorID: authUser.UserID,
-		Name:    req.GetName(),
-		Icon:    req.GetIcon(),
-		Filters: filtersFromStruct(req.GetFilters()),
-		GroupBy: req.GetGroupBy(),
-		SortBy:  req.GetSortBy(),
-		SortDir: req.GetSortDir(),
+		ID:         req.GetId(),
+		ActorID:    authUser.UserID,
+		BusinessID: businessID,
+		Name:       req.GetName(),
+		Icon:       req.GetIcon(),
+		Filters:    filtersFromStruct(req.GetFilters()),
+		GroupBy:    req.GetGroupBy(),
+		SortBy:     req.GetSortBy(),
+		SortDir:    req.GetSortDir(),
 	}); err != nil {
 		if errors.Is(err, domain.ErrUnauthorized) {
 			return nil, onekiterrors.PermissionDenied()
@@ -141,8 +156,12 @@ func (a *ViewAPI) DeleteView(ctx context.Context, req *flowviewv1.DeleteViewRequ
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
-	if err := a.Service.DeleteView(ctx, req.GetId(), authUser.UserID); err != nil {
+	if err := a.Service.DeleteView(ctx, req.GetId(), authUser.UserID, businessID); err != nil {
 		if errors.Is(err, domain.ErrUnauthorized) {
 			return nil, onekiterrors.PermissionDenied()
 		}

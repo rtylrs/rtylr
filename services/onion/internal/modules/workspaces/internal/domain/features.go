@@ -33,11 +33,12 @@ type CycleInput struct {
 }
 
 type UpdateCycleInput struct {
-	ID      int64
-	ActorID int64
-	Name    string
-	Status  string
-	EndDate time.Time
+	ID         int64
+	ActorID    int64
+	BusinessID int64
+	Name       string
+	Status     string
+	EndDate    time.Time
 }
 
 // ─────────────────────────────────────────────
@@ -79,6 +80,7 @@ type MilestoneInput struct {
 type UpdateMilestoneInput struct {
 	ID          int64
 	ActorID     int64
+	BusinessID  int64
 	Name        string
 	Description string
 	Status      string
@@ -103,6 +105,7 @@ type View struct {
 }
 
 type ViewInput struct {
+	BusinessID  int64
 	WorkspaceID int64
 	Name        string
 	Icon        string
@@ -114,14 +117,15 @@ type ViewInput struct {
 }
 
 type UpdateViewInput struct {
-	ID      int64
-	ActorID int64
-	Name    string
-	Icon    string
-	Filters map[string]interface{}
-	GroupBy string
-	SortBy  string
-	SortDir string
+	ID         int64
+	ActorID    int64
+	BusinessID int64
+	Name       string
+	Icon       string
+	Filters    map[string]interface{}
+	GroupBy    string
+	SortBy     string
+	SortDir    string
 }
 
 // ─────────────────────────────────────────────

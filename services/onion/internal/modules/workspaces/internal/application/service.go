@@ -1058,8 +1058,8 @@ func (s *Service) UpdateMilestone(ctx context.Context, input domain.UpdateMilest
 // Views
 // ─────────────────────────────────────────────
 
-func (s *Service) ListViews(ctx context.Context, workspaceID, limit, offset int64) ([]domain.View, int64, error) {
-	return s.repo.ListViews(ctx, workspaceID, limit, offset)
+func (s *Service) ListViews(ctx context.Context, businessID, workspaceID, limit, offset int64) ([]domain.View, int64, error) {
+	return s.repo.ListViews(ctx, businessID, workspaceID, limit, offset)
 }
 
 func (s *Service) CreateView(ctx context.Context, input domain.ViewInput) (domain.View, error) {
@@ -1084,8 +1084,8 @@ func (s *Service) UpdateView(ctx context.Context, input domain.UpdateViewInput) 
 	return s.repo.UpdateView(ctx, input)
 }
 
-func (s *Service) DeleteView(ctx context.Context, id, actorID int64) error {
-	return s.repo.DeleteView(ctx, id, actorID)
+func (s *Service) DeleteView(ctx context.Context, id, actorID, businessID int64) error {
+	return s.repo.DeleteView(ctx, id, actorID, businessID)
 }
 
 // ─────────────────────────────────────────────

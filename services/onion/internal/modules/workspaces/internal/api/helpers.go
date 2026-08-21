@@ -54,7 +54,7 @@ func buildPagination(page, limit int32, total int64, returned int) *commonpagina
 }
 
 func resolveWorkspaceQuery(ctx context.Context, svc *application.Service, authUser *authPkg.AuthUser, businessID int64, workspaceID string) (int64, error) {
-	wsID := authUser.BusinessID
+	wsID := businessID
 	if workspaceID == "" {
 		return wsID, nil
 	}

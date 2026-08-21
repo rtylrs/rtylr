@@ -136,7 +136,7 @@ func (a *CycleAPI) UpdateCycle(ctx context.Context, req *flowcyclev1.UpdateCycle
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	_, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -151,11 +151,12 @@ func (a *CycleAPI) UpdateCycle(ctx context.Context, req *flowcyclev1.UpdateCycle
 	}
 
 	if err := a.Service.UpdateCycle(ctx, domain.UpdateCycleInput{
-		ID:      req.GetId(),
-		ActorID: authUser.UserID,
-		Name:    req.GetName(),
-		Status:  req.GetStatus(),
-		EndDate: end,
+		ID:         req.GetId(),
+		ActorID:    authUser.UserID,
+		BusinessID: businessID,
+		Name:       req.GetName(),
+		Status:     req.GetStatus(),
+		EndDate:    end,
 	}); err != nil {
 		if errors.Is(err, domain.ErrUnauthorized) {
 			return nil, onekiterrors.PermissionDenied()

@@ -189,16 +189,27 @@ func TestWorkspaces_ListViews_PaginationAndTotal(t *testing.T) {
 
 	for i := 0; i < 5; i++ {
 		viewID, err := repo.CreateView(ctx, domain.ViewInput{
-			WorkspaceID: wsID, Name: fmt.Sprintf("ViewPage View %d", i),
+			BusinessID: testutil.BusinessID, WorkspaceID: wsID, Name: fmt.Sprintf("ViewPage View %d", i),
 			Filters: map[string]interface{}{}, CreatedBy: testutil.OwnerID,
 		})
 		if err != nil {
 			t.Fatalf("CreateView %d: %v", i, err)
 		}
-		t.Cleanup(func(id int64) func() { return func() { _ = repo.DeleteView(ctx, id, testutil.OwnerID) } }(viewID))
+		if i == 0 {
+			var storedBusinessID int64
+			if err := db.QueryRowContext(ctx, "SELECT business_id FROM flow_views WHERE id = ?", viewID).Scan(&storedBusinessID); err != nil {
+				t.Fatalf("read created view business_id: %v", err)
+			}
+			if storedBusinessID != testutil.BusinessID {
+				t.Fatalf("created view business_id = %d, want %d", storedBusinessID, testutil.BusinessID)
+			}
+		}
+		t.Cleanup(func(id int64) func() {
+			return func() { _ = repo.DeleteView(ctx, id, testutil.OwnerID, testutil.BusinessID) }
+		}(viewID))
 	}
 
-	page1, total1, err := repo.ListViews(ctx, wsID, 2, 0)
+	page1, total1, err := repo.ListViews(ctx, testutil.BusinessID, wsID, 2, 0)
 	if err != nil {
 		t.Fatalf("ListViews page1: %v", err)
 	}
@@ -209,7 +220,7 @@ func TestWorkspaces_ListViews_PaginationAndTotal(t *testing.T) {
 		t.Fatalf("expected 2 views on page1, got %d", len(page1))
 	}
 
-	page2, total2, err := repo.ListViews(ctx, wsID, 2, 2)
+	page2, total2, err := repo.ListViews(ctx, testutil.BusinessID, wsID, 2, 2)
 	if err != nil {
 		t.Fatalf("ListViews page2: %v", err)
 	}
@@ -227,7 +238,7 @@ func TestWorkspaces_ListViews_PaginationAndTotal(t *testing.T) {
 		}
 	}
 
-	page3, total3, err := repo.ListViews(ctx, wsID, 2, 4)
+	page3, total3, err := repo.ListViews(ctx, testutil.BusinessID, wsID, 2, 4)
 	if err != nil {
 		t.Fatalf("ListViews page3: %v", err)
 	}
