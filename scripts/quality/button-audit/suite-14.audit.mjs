@@ -163,5 +163,6 @@ export const cases = [
   ["apps/dash/src/layouts/CustomSidebarLayout.tsx", "audit-batch-161-suite-14"],
   ["apps/dash/src/shared/components/ui/card.tsx", "audit-batch-162-suite-14"],
   ["apps/erp/src/features/brands/Brands.tsx", "audit-batch-163-suite-14"],
+  ["apps/erp/src/features/settings/Settings.test.tsx", "audit-batch-164-suite-14"],
 ];
 

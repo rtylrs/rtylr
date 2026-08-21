@@ -163,5 +163,6 @@ export const cases = [
   ["apps/dash/src/features/team/MemberDetail.tsx", "audit-batch-161-suite-10"],
   ["apps/dash/src/shared/components/dash/WebhookRow.tsx", "audit-batch-162-suite-10"],
   ["apps/dash/src/shared/utils/BusinessRoute.tsx", "audit-batch-163-suite-10"],
+  ["apps/erp/src/features/purchasing/Receiving.test.tsx", "audit-batch-164-suite-10"],
 ];
 
