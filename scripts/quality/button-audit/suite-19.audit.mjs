@@ -225,5 +225,6 @@ export const cases = [
   ["apps/flow/src/shared/components/DueDatePicker.tsx", "audit-batch-223-suite-19"],
   ["apps/hr/src/features/calendar/Calendar.tsx", "audit-batch-224-suite-19"],
   ["apps/hr/src/features/equipment/Equipment.tsx", "audit-batch-225-suite-19"],
+  ["apps/hr/src/features/reports/ReportTable.tsx", "audit-batch-226-suite-19"],
 ];
 

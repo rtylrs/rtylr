@@ -225,5 +225,6 @@ export const cases = [
   ["apps/flow/src/shared/components/LabelChip.tsx", "audit-batch-223-suite-22"],
   ["apps/hr/src/features/dashboard/widgets/HeadcountWidget.tsx", "audit-batch-224-suite-22"],
   ["apps/hr/src/features/leave/LeaveBalances.tsx", "audit-batch-225-suite-22"],
+  ["apps/hr/src/features/reviews/ReviewForm.tsx", "audit-batch-226-suite-22"],
 ];
 
