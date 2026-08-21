@@ -152,7 +152,135 @@ func ifaceToTimePtr(v interface{}) *time.Time {
 	return nil
 }
 
-const voxhireCareerOwnerID int64 = 1
+func ownerIDFromContext(ctx context.Context) (int64, error) {
+	ownerID, ok := domain.OwnerIDFromContext(ctx)
+	if !ok {
+		return 0, domain.ErrOwnerScopeMissing
+	}
+	return ownerID, nil
+}
+
+const (
+	updateApplicationStatusScopedSQL = `
+UPDATE voxire_career_applications a
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+SET a.status = ?
+WHERE a.id = ?`
+	updateApplicationReviewScopedSQL = `
+UPDATE voxire_career_applications a
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+SET a.status = CASE WHEN ? <> '' THEN ? ELSE a.status END,
+    a.review_rating = ?,
+    a.review_notes = ?,
+    a.next_step = ?,
+    a.reviewed_at = CURRENT_TIMESTAMP
+WHERE a.id = ?`
+	getApplicationCVKeyScopedSQL = `
+SELECT COALESCE(a.cv_key, '')
+FROM voxire_career_applications a
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+WHERE a.id = ?`
+	getApplicationTimelineMetaScopedSQL = `
+SELECT a.created_at,
+       COALESCE(a.cv_processing_status, 'pending'),
+       COALESCE(a.cv_processing_error, ''),
+       a.cv_processed_at,
+       a.reviewed_at
+FROM voxire_career_applications a
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+WHERE a.id = ?`
+	listApplicationEventsScopedSQL = `
+SELECT e.kind, e.title, COALESCE(e.detail, ''), e.created_at
+FROM voxhire_application_events e
+JOIN voxire_career_applications a ON a.id = e.application_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+WHERE e.application_id = ?
+ORDER BY e.created_at DESC`
+	getTaskByIDScopedSQL = `
+SELECT t.id, t.application_id, a.job_id, COALESCE(c.title, ''),
+       a.name, a.email, t.title, t.status, t.due_at, t.completed_at, t.created_at
+FROM voxhire_follow_up_tasks t
+JOIN voxire_career_applications a ON a.id = t.application_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+WHERE t.id = ?`
+	updateFollowUpTaskScopedSQL = `
+UPDATE voxhire_follow_up_tasks t
+JOIN voxire_career_applications a ON a.id = t.application_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+SET t.title = CASE WHEN ? <> '' THEN ? ELSE t.title END,
+    t.status = CASE WHEN ? <> '' THEN ? ELSE t.status END,
+    t.due_at = ?,
+    t.completed_at = CASE
+      WHEN ? = 'done' THEN COALESCE(t.completed_at, CURRENT_TIMESTAMP)
+      WHEN ? = 'open' THEN NULL
+      ELSE t.completed_at
+    END
+WHERE t.id = ?`
+	applicationExistsScopedSQL = `
+SELECT COUNT(*)
+FROM voxire_career_applications a
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+WHERE a.id = ?`
+	careerExistsScopedSQL = `
+SELECT COUNT(*) FROM careers WHERE id = ? AND owner_id = ?`
+	listShortlistsScopedSQL = `
+SELECT s.id, s.job_id, COALESCE(c.title, ''), s.name, s.status,
+       COALESCE(s.notes, ''), s.created_at, s.updated_at
+FROM voxhire_shortlists s
+JOIN careers c ON c.id = s.job_id AND c.owner_id = ?
+WHERE (? IS NULL OR s.job_id = ?)
+ORDER BY s.updated_at DESC`
+	listShortlistItemsScopedSQL = `
+SELECT i.id, i.shortlist_id, i.application_id, a.name, a.email,
+       COALESCE(a.status, 'new'), i.sort_order, COALESCE(i.notes, ''),
+       COALESCE(a.cv_profile_json, ''), i.created_at
+FROM voxhire_shortlist_items i
+JOIN voxhire_shortlists s ON s.id = i.shortlist_id
+JOIN careers c ON c.id = s.job_id AND c.owner_id = ?
+JOIN voxire_career_applications a ON a.id = i.application_id
+WHERE i.shortlist_id = ?
+ORDER BY i.sort_order ASC, i.created_at ASC`
+	getShortlistItemScopedSQL = `
+SELECT i.id, i.shortlist_id, i.application_id, a.name, a.email,
+       COALESCE(a.status, 'new'), i.sort_order, COALESCE(i.notes, ''),
+       COALESCE(a.cv_profile_json, ''), i.created_at
+FROM voxhire_shortlist_items i
+JOIN voxhire_shortlists s ON s.id = i.shortlist_id
+JOIN careers c ON c.id = s.job_id AND c.owner_id = ?
+JOIN voxire_career_applications a ON a.id = i.application_id
+WHERE i.id = ?`
+	listShortlistTimelineEventsScopedSQL = `
+SELECT s.name, i.sort_order, i.created_at
+FROM voxhire_shortlist_items i
+JOIN voxhire_shortlists s ON s.id = i.shortlist_id
+JOIN voxire_career_applications a ON a.id = i.application_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+WHERE i.application_id = ?`
+	shortlistExistsScopedSQL = `
+SELECT COUNT(*)
+FROM voxhire_shortlists s
+JOIN careers c ON c.id = s.job_id AND c.owner_id = ?
+WHERE s.id = ?`
+	analyticsTaskStatusMixScopedSQL = `
+SELECT LOWER(COALESCE(NULLIF(t.status, ''), 'open')), COUNT(*)
+FROM voxhire_follow_up_tasks t
+JOIN voxire_career_applications a ON a.id = t.application_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+GROUP BY LOWER(COALESCE(NULLIF(t.status, ''), 'open'))
+ORDER BY count DESC, 1 ASC`
+	analyticsOpenTaskTotalsScopedSQL = `
+SELECT COUNT(*), COALESCE(SUM(CASE WHEN t.status = 'open' AND t.due_at IS NOT NULL
+    AND t.due_at < UTC_TIMESTAMP() THEN 1 ELSE 0 END), 0)
+FROM voxhire_follow_up_tasks t
+JOIN voxire_career_applications a ON a.id = t.application_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+WHERE t.status <> 'done'`
+	analyticsShortlistTotalsScopedSQL = `
+SELECT COUNT(DISTINCT s.id), COUNT(i.id)
+FROM voxhire_shortlists s
+JOIN careers c ON c.id = s.job_id AND c.owner_id = ?
+LEFT JOIN voxhire_shortlist_items i ON i.shortlist_id = s.id`
+)
 
 // ── Admin accounts ───────────────────────────────────────────────────
 
@@ -223,8 +351,12 @@ func (r *Repository) CountAdmins(ctx context.Context) (int64, error) {
 // ListOpenings returns the active job openings plus their application
 // counts for the recruiter panel's position picker.
 func (r *Repository) ListOpenings(ctx context.Context) ([]domain.Opening, error) {
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	// cross-schema read from careers — admin openings + application counts
-	rows, err := r.queries.ListOpenings(ctx, voxhireCareerOwnerID)
+	rows, err := r.queries.ListOpenings(ctx, ownerID)
 	if err != nil {
 		return nil, err
 	}
@@ -243,20 +375,45 @@ func (r *Repository) ListOpenings(ctx context.Context) ([]domain.Opening, error)
 }
 
 func (r *Repository) ListOpeningsPage(ctx context.Context, limit, offset int32) (domain.OpeningPage, error) {
-	rows, err := r.queries.ListOpeningsPage(ctx, sqlc.ListOpeningsPageParams{
-		OwnerID: voxhireCareerOwnerID,
-		Limit:   limit,
-		Offset:  offset,
-	})
+	ownerID, err := ownerIDFromContext(ctx)
 	if err != nil {
 		return domain.OpeningPage{}, err
 	}
-	total, err := r.queries.CountOpenings(ctx, voxhireCareerOwnerID)
+	query := `
+SELECT c.id, COALESCE(c.slug, ''), c.title, COALESCE(c.department, ''),
+       COALESCE(c.location, ''), COALESCE(c.employment_type, ''),
+       COALESCE(c.work_mode, ''), COALESCE(c.seniority, ''), COALESCE(c.details, ''),
+       COALESCE(c.salary_min, 0), COALESCE(c.salary_max, 0),
+       COALESCE(c.salary_currency, 'USD'), c.is_active,
+       COALESCE(SUM(CASE WHEN a.status = 'new' THEN 1 ELSE 0 END), 0),
+       COALESCE(COUNT(a.id), 0)
+FROM careers c
+LEFT JOIN voxire_career_applications a ON a.job_id = c.id
+WHERE c.owner_id = ?
+GROUP BY c.id, c.slug, c.title, c.department, c.location, c.employment_type,
+         c.work_mode, c.seniority, c.details, c.salary_min, c.salary_max,
+         c.salary_currency, c.is_active, c.created_at
+ORDER BY c.is_active DESC, c.created_at DESC, c.id DESC
+LIMIT ? OFFSET ?`
+	rows, err := r.db.QueryContext(ctx, query, ownerID, limit, offset)
 	if err != nil {
 		return domain.OpeningPage{}, err
 	}
-	openings := make([]domain.Opening, 0, len(rows))
-	for _, row := range rows {
+	defer rows.Close()
+	var total int64
+	err = r.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM careers WHERE owner_id = ?`, ownerID).Scan(&total)
+	if err != nil {
+		return domain.OpeningPage{}, err
+	}
+	openings := make([]domain.Opening, 0)
+	for rows.Next() {
+		var row sqlc.ListOpeningsRow
+		if err := rows.Scan(&row.ID, &row.Slug, &row.Title, &row.Department, &row.Location,
+			&row.EmploymentType, &row.WorkMode, &row.Seniority, &row.Details,
+			&row.SalaryMin, &row.SalaryMax, &row.SalaryCurrency, &row.IsActive,
+			&row.NewCount, &row.TotalCount); err != nil {
+			return domain.OpeningPage{}, err
+		}
 		openings = append(openings, domain.Opening{
 			ID: row.ID, Slug: row.Slug, Title: row.Title, Department: row.Department,
 			Location: row.Location, EmploymentType: row.EmploymentType, WorkMode: row.WorkMode,
@@ -266,7 +423,7 @@ func (r *Repository) ListOpeningsPage(ctx context.Context, limit, offset int32) 
 			NewCount: ifaceToInt64(row.NewCount), TotalCount: ifaceToInt64(row.TotalCount),
 		})
 	}
-	return domain.OpeningPage{Openings: openings, Total: total, Limit: limit, Offset: offset}, nil
+	return domain.OpeningPage{Openings: openings, Total: total, Limit: limit, Offset: offset}, rows.Err()
 }
 
 func (r *Repository) GetOpening(ctx context.Context, id int64) (*domain.Opening, error) {
@@ -275,13 +432,17 @@ func (r *Repository) GetOpening(ctx context.Context, id int64) (*domain.Opening,
 
 // GetAnalytics returns aggregate counts and activity for the recruiter overview.
 func (r *Repository) GetAnalytics(ctx context.Context) (*domain.Analytics, error) {
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	analytics := &domain.Analytics{}
 
-	if err := r.loadAnalyticsTotals(ctx, &analytics.Totals); err != nil {
+	if err := r.loadAnalyticsTotals(ctx, ownerID, &analytics.Totals); err != nil {
 		return nil, err
 	}
 
-	statusRows, err := r.queries.AnalyticsApplicationsByStatus(ctx, voxhireCareerOwnerID)
+	statusRows, err := r.queries.AnalyticsApplicationsByStatus(ctx, ownerID)
 	if err != nil {
 		return nil, err
 	}
@@ -290,7 +451,7 @@ func (r *Repository) GetAnalytics(ctx context.Context) (*domain.Analytics, error
 		analytics.ApplicationsByStatus = append(analytics.ApplicationsByStatus, analyticsBucketsFromRows(row.Bucket, row.Count))
 	}
 
-	cvRows, err := r.queries.AnalyticsCVStatusMix(ctx, voxhireCareerOwnerID)
+	cvRows, err := r.queries.AnalyticsCVStatusMix(ctx, ownerID)
 	if err != nil && !isOptionalAnalyticsSchemaError(err) {
 		return nil, err
 	}
@@ -301,18 +462,27 @@ func (r *Repository) GetAnalytics(ctx context.Context) (*domain.Analytics, error
 		}
 	}
 
-	taskRows, err := r.queries.AnalyticsTaskStatusMix(ctx)
+	rows, err := r.db.QueryContext(ctx, analyticsTaskStatusMixScopedSQL, ownerID)
 	if err != nil && !isOptionalAnalyticsSchemaError(err) {
 		return nil, err
 	}
 	if err == nil {
-		analytics.TaskStatusMix = make([]domain.AnalyticsBucket, 0, len(taskRows))
-		for _, row := range taskRows {
-			analytics.TaskStatusMix = append(analytics.TaskStatusMix, analyticsBucketsFromRows(row.Bucket, row.Count))
+		defer rows.Close()
+		analytics.TaskStatusMix = make([]domain.AnalyticsBucket, 0)
+		for rows.Next() {
+			var bucket string
+			var count interface{}
+			if err := rows.Scan(&bucket, &count); err != nil {
+				return nil, err
+			}
+			analytics.TaskStatusMix = append(analytics.TaskStatusMix, analyticsBucketsFromRows(bucket, count))
+		}
+		if err := rows.Err(); err != nil {
+			return nil, err
 		}
 	}
 
-	analytics.ProfileFunctions, err = r.optionalAnalyticsProfileFunctions(ctx)
+	analytics.ProfileFunctions, err = r.optionalAnalyticsProfileFunctions(ctx, ownerID)
 	if err != nil {
 		return nil, err
 	}
@@ -335,12 +505,12 @@ func (r *Repository) GetAnalytics(ctx context.Context) (*domain.Analytics, error
 		analytics.LeadTimelineMix = append(analytics.LeadTimelineMix, analyticsBucketsFromRows(row.Bucket, row.Count))
 	}
 
-	analytics.RecentDays, err = r.analyticsRecentDays(ctx)
+	analytics.RecentDays, err = r.analyticsRecentDays(ctx, ownerID)
 	if err != nil {
 		return nil, err
 	}
 
-	topRows, err := r.queries.AnalyticsTopOpenings(ctx, voxhireCareerOwnerID)
+	topRows, err := r.queries.AnalyticsTopOpenings(ctx, ownerID)
 	if err != nil {
 		return nil, err
 	}
@@ -354,7 +524,7 @@ func (r *Repository) GetAnalytics(ctx context.Context) (*domain.Analytics, error
 		analytics.TopOpenings = append(analytics.TopOpenings, opening)
 	}
 
-	activityRows, err := r.queries.AnalyticsRecentActivity(ctx, voxhireCareerOwnerID)
+	activityRows, err := r.queries.AnalyticsRecentActivity(ctx, ownerID)
 	if err != nil {
 		return nil, err
 	}
@@ -369,15 +539,15 @@ func (r *Repository) GetAnalytics(ctx context.Context) (*domain.Analytics, error
 	return analytics, nil
 }
 
-func (r *Repository) loadAnalyticsTotals(ctx context.Context, totals *domain.AnalyticsTotals) error {
-	jobTotals, err := r.queries.AnalyticsCareerJobTotals(ctx, voxhireCareerOwnerID)
+func (r *Repository) loadAnalyticsTotals(ctx context.Context, ownerID int64, totals *domain.AnalyticsTotals) error {
+	jobTotals, err := r.queries.AnalyticsCareerJobTotals(ctx, ownerID)
 	if err != nil {
 		return err
 	}
 	totals.OpenJobs = ifaceToInt64(jobTotals.OpenJobs)
 	totals.ClosedJobs = ifaceToInt64(jobTotals.ClosedJobs)
 
-	appTotals, err := r.queries.AnalyticsApplicationTotals(ctx, voxhireCareerOwnerID)
+	appTotals, err := r.queries.AnalyticsApplicationTotals(ctx, ownerID)
 	if err != nil {
 		return err
 	}
@@ -408,7 +578,7 @@ func (r *Repository) loadAnalyticsTotals(ctx context.Context, totals *domain.Ana
 		totals.TalentPool30d = ifaceToInt64(talentTotals.TalentPool30d)
 	}
 
-	cvTotals, err := r.queries.AnalyticsCVProcessingTotals(ctx, voxhireCareerOwnerID)
+	cvTotals, err := r.queries.AnalyticsCVProcessingTotals(ctx, ownerID)
 	if err != nil {
 		if !isOptionalAnalyticsSchemaError(err) {
 			return err
@@ -433,7 +603,10 @@ func (r *Repository) loadAnalyticsTotals(ctx context.Context, totals *domain.Ana
 	}
 	totals.AdminsTotal = admins
 
-	taskTotals, err := r.queries.AnalyticsOpenTaskTotals(ctx)
+	var taskTotals sqlc.AnalyticsOpenTaskTotalsRow
+	err = r.db.QueryRowContext(ctx, analyticsOpenTaskTotalsScopedSQL, ownerID).Scan(
+		&taskTotals.OpenTasks, &taskTotals.OverdueTasks,
+	)
 	if err != nil {
 		if !isOptionalAnalyticsSchemaError(err) {
 			return err
@@ -443,7 +616,10 @@ func (r *Repository) loadAnalyticsTotals(ctx context.Context, totals *domain.Ana
 		totals.OverdueTasks = ifaceToInt64(taskTotals.OverdueTasks)
 	}
 
-	shortlistTotals, err := r.queries.AnalyticsShortlistTotals(ctx)
+	var shortlistTotals sqlc.AnalyticsShortlistTotalsRow
+	err = r.db.QueryRowContext(ctx, analyticsShortlistTotalsScopedSQL, ownerID).Scan(
+		&shortlistTotals.ShortlistsTotal, &shortlistTotals.ShortlistedCandidates,
+	)
 	if err != nil {
 		if !isOptionalAnalyticsSchemaError(err) {
 			return err
@@ -455,8 +631,8 @@ func (r *Repository) loadAnalyticsTotals(ctx context.Context, totals *domain.Ana
 	return nil
 }
 
-func (r *Repository) optionalAnalyticsProfileFunctions(ctx context.Context) ([]domain.AnalyticsBucket, error) {
-	buckets, err := r.analyticsProfileFunctions(ctx)
+func (r *Repository) optionalAnalyticsProfileFunctions(ctx context.Context, ownerID int64) ([]domain.AnalyticsBucket, error) {
+	buckets, err := r.analyticsProfileFunctions(ctx, ownerID)
 	if err != nil && isOptionalAnalyticsSchemaError(err) {
 		return []domain.AnalyticsBucket{}, nil
 	}
@@ -477,7 +653,7 @@ func isOptionalAnalyticsSchemaError(err error) bool {
 	}
 }
 
-func (r *Repository) analyticsProfileFunctions(ctx context.Context) ([]domain.AnalyticsBucket, error) {
+func (r *Repository) analyticsProfileFunctions(ctx context.Context, ownerID int64) ([]domain.AnalyticsBucket, error) {
 	functions := []string{"Operations", "Sales", "Customer Support", "Finance", "HR", "Marketing", "Product", "Design", "Engineering", "Data", "Healthcare", "Retail", "Logistics"}
 	buckets := make([]domain.AnalyticsBucket, 0, len(functions))
 	for _, fn := range functions {
@@ -494,7 +670,7 @@ func (r *Repository) analyticsProfileFunctions(ctx context.Context) ([]domain.An
 			        SELECT COALESCE(cv_profile_json, '') AS profile_json
 			          FROM voxhire_talent_applications
 			       ) profiles
-			 WHERE profile_json LIKE ?`, voxhireCareerOwnerID, pattern).Scan(&count); err != nil {
+				 WHERE profile_json LIKE ?`, ownerID, pattern).Scan(&count); err != nil {
 			return nil, err
 		}
 		if count > 0 {
@@ -510,8 +686,8 @@ func (r *Repository) analyticsProfileFunctions(ctx context.Context) ([]domain.An
 	return buckets, nil
 }
 
-func (r *Repository) analyticsRecentDays(ctx context.Context) ([]domain.AnalyticsDay, error) {
-	appRows, err := r.queries.AnalyticsApplicationDailyCounts(ctx, voxhireCareerOwnerID)
+func (r *Repository) analyticsRecentDays(ctx context.Context, ownerID int64) ([]domain.AnalyticsDay, error) {
+	appRows, err := r.queries.AnalyticsApplicationDailyCounts(ctx, ownerID)
 	if err != nil {
 		return nil, err
 	}
@@ -544,14 +720,18 @@ func (r *Repository) analyticsRecentDays(ctx context.Context) ([]domain.Analytic
 
 // CreateCareer writes a new job posting to the shared careers table.
 func (r *Repository) CreateCareer(ctx context.Context, in domain.CareerInput) (*domain.Opening, error) {
-	slug, err := r.uniqueCareerSlug(ctx, in.Title, 0)
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	slug, err := r.uniqueCareerSlug(ctx, ownerID, in.Title, 0)
 	if err != nil {
 		return nil, err
 	}
 
 	// cross-schema write to careers
 	result, err := r.queries.CreateCareer(ctx, sqlc.CreateCareerParams{
-		OwnerID: voxhireCareerOwnerID, Slug: slug, Title: in.Title,
+		OwnerID: ownerID, Slug: slug, Title: in.Title,
 		Department: sqlNullString(in.Department), Location: sqlNullString(in.Location),
 		EmploymentType: sqlNullString(in.EmploymentType), WorkMode: sqlNullString(in.WorkMode),
 		Seniority: sqlNullString(in.Seniority), Details: in.Details,
@@ -571,7 +751,11 @@ func (r *Repository) CreateCareer(ctx context.Context, in domain.CareerInput) (*
 
 // UpdateCareer writes editable job posting fields to the shared careers table.
 func (r *Repository) UpdateCareer(ctx context.Context, in domain.CareerInput) (*domain.Opening, error) {
-	slug, err := r.uniqueCareerSlug(ctx, in.Title, in.ID)
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	slug, err := r.uniqueCareerSlug(ctx, ownerID, in.Title, in.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -584,7 +768,7 @@ func (r *Repository) UpdateCareer(ctx context.Context, in domain.CareerInput) (*
 		Seniority: sqlNullString(in.Seniority), Details: in.Details,
 		SalaryMin: sqlNullDecimal(in.SalaryMin), SalaryMax: sqlNullDecimal(in.SalaryMax),
 		SalaryCurrency: sqlNullString(in.SalaryCurrency),
-		ID:             in.ID, OwnerID: voxhireCareerOwnerID,
+		ID:             in.ID, OwnerID: ownerID,
 	}); err != nil {
 		logger.Ctx(ctx).Error("Failed to update voxhire career", logger.Error(err))
 		return nil, err
@@ -594,9 +778,13 @@ func (r *Repository) UpdateCareer(ctx context.Context, in domain.CareerInput) (*
 
 // SetCareerActive closes or reopens a job posting in the shared careers table.
 func (r *Repository) SetCareerActive(ctx context.Context, id int64, active bool) (*domain.Opening, error) {
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	// cross-schema write to careers
 	if err := r.queries.SetCareerActive(ctx, sqlc.SetCareerActiveParams{
-		IsActive: active, IsPublished: active, ID: id, OwnerID: voxhireCareerOwnerID,
+		IsActive: active, IsPublished: active, ID: id, OwnerID: ownerID,
 	}); err != nil {
 		logger.Ctx(ctx).Error("Failed to update voxhire career active state", logger.Error(err))
 		return nil, err
@@ -605,9 +793,13 @@ func (r *Repository) SetCareerActive(ctx context.Context, id int64, active bool)
 }
 
 func (r *Repository) getCareerOpeningByID(ctx context.Context, id int64) (*domain.Opening, error) {
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	// cross-schema read from careers — one admin opening + application counts
 	row, err := r.queries.GetCareerOpeningByID(ctx, sqlc.GetCareerOpeningByIDParams{
-		OwnerID: voxhireCareerOwnerID, ID: id,
+		OwnerID: ownerID, ID: id,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -619,7 +811,7 @@ func (r *Repository) getCareerOpeningByID(ctx context.Context, id int64) (*domai
 }
 
 // dynamic-query: squirrel
-func (r *Repository) uniqueCareerSlug(ctx context.Context, title string, excludeID int64) (string, error) {
+func (r *Repository) uniqueCareerSlug(ctx context.Context, ownerID int64, title string, excludeID int64) (string, error) {
 	base := slugifyCareerTitle(title)
 	for i := 0; i < 1000; i++ {
 		slug := base
@@ -630,7 +822,7 @@ func (r *Repository) uniqueCareerSlug(ctx context.Context, title string, exclude
 		q := sq.
 			Select("COUNT(*)").
 			From("careers").
-			Where(sq.Eq{"owner_id": voxhireCareerOwnerID}).
+			Where(sq.Eq{"owner_id": ownerID}).
 			Where(sq.Eq{"slug": slug})
 		if excludeID > 0 {
 			q = q.Where(sq.NotEq{"id": excludeID})
@@ -900,14 +1092,18 @@ func searchExcerpt(text, query string, radius int) string {
 // (e.g. "viewed", "new"). Returns domain.ErrApplicationNotFound if no
 // row matched.
 func (r *Repository) UpdateApplicationStatus(ctx context.Context, id int64, status string) error {
-	if err := r.queries.UpdateApplicationStatus(ctx, sqlc.UpdateApplicationStatusParams{Status: status, ID: id}); err != nil {
-		return err
-	}
-	n, err := r.queries.CountCareerApplications(ctx, id)
+	ownerID, err := ownerIDFromContext(ctx)
 	if err != nil {
 		return err
 	}
-	if n == 0 {
+	if _, err := r.db.ExecContext(ctx, updateApplicationStatusScopedSQL, ownerID, status, id); err != nil {
+		return err
+	}
+	ok, err := r.applicationExists(ctx, id)
+	if err != nil {
+		return err
+	}
+	if !ok {
 		return domain.ErrApplicationNotFound
 	}
 	_ = r.recordApplicationEvent(ctx, id, "status", "Status changed", status)
@@ -918,17 +1114,21 @@ func (r *Repository) UpdateApplicationStatus(ctx context.Context, id int64, stat
 // candidate application. Status is optional; an empty status preserves the
 // current pipeline state.
 func (r *Repository) UpdateApplicationReview(ctx context.Context, id int64, in domain.ApplicationReviewInput) error {
-	if err := r.queries.UpdateApplicationReview(ctx, sqlc.UpdateApplicationReviewParams{
-		Column1: in.Status, Status: in.Status, ReviewRating: int8(in.ReviewRating),
-		ReviewNotes: sqlNullString(in.ReviewNotes), NextStep: sqlNullString(in.NextStep), ID: id,
-	}); err != nil {
-		return err
-	}
-	exists, err := r.queries.ApplicationExists(ctx, id)
+	ownerID, err := ownerIDFromContext(ctx)
 	if err != nil {
 		return err
 	}
-	if exists == 0 {
+	if _, err := r.db.ExecContext(ctx, updateApplicationReviewScopedSQL,
+		ownerID, in.Status, in.Status, in.ReviewRating,
+		sqlNullString(in.ReviewNotes), sqlNullString(in.NextStep), id,
+	); err != nil {
+		return err
+	}
+	exists, err := r.applicationExists(ctx, id)
+	if err != nil {
+		return err
+	}
+	if !exists {
 		return domain.ErrApplicationNotFound
 	}
 	detail := strings.TrimSpace(in.ReviewNotes)
@@ -942,7 +1142,12 @@ func (r *Repository) UpdateApplicationReview(ctx context.Context, id int64, in d
 // GetApplicationCVKey returns the R2 object key of an application's CV,
 // or domain.ErrApplicationNotFound. An empty string means no CV.
 func (r *Repository) GetApplicationCVKey(ctx context.Context, id int64) (string, error) {
-	key, err := r.queries.GetApplicationCVKey(ctx, id)
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return "", err
+	}
+	var key string
+	err = r.db.QueryRowContext(ctx, getApplicationCVKeyScopedSQL, ownerID, id).Scan(&key)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", domain.ErrApplicationNotFound
@@ -1019,8 +1224,12 @@ const candidateUnionSQL = `
 
 // dynamic-query: squirrel
 func (r *Repository) ListCandidates(ctx context.Context, f domain.CandidateFilter) ([]domain.Candidate, int64, error) {
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
 	where, args := candidateFilterWhere(f)
-	countArgs := append([]any{voxhireCareerOwnerID}, args...)
+	countArgs := append([]any{ownerID}, args...)
 	countSQL := fmt.Sprintf("SELECT COUNT(*) FROM (%s) candidates WHERE %s", candidateUnionSQL, strings.Join(where, " AND "))
 
 	var total int64
@@ -1040,7 +1249,7 @@ func (r *Repository) ListCandidates(ctx context.Context, f domain.CandidateFilte
 		offset = 0
 	}
 
-	listArgs := append([]any{voxhireCareerOwnerID}, args...)
+	listArgs := append([]any{ownerID}, args...)
 	listArgs = append(listArgs, limit, offset)
 	listSQL := fmt.Sprintf(`
 		SELECT source, id, application_id, job_id, opening_title, name, email, phone, location,
@@ -1101,6 +1310,10 @@ func candidateFilterWhere(f domain.CandidateFilter) ([]string, []any) {
 
 // dynamic-query: squirrel
 func (r *Repository) ListCVJobs(ctx context.Context, f domain.CandidateFilter) ([]domain.CVJob, error) {
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	where, args := candidateFilterWhere(f)
 	where = append(where, "cv_key <> ''")
 
@@ -1168,7 +1381,7 @@ func (r *Repository) ListCVJobs(ctx context.Context, f domain.CandidateFilter) (
 		   created_at ASC
 		 LIMIT ?`, strings.Join(where, " AND "))
 
-	queryArgs := append([]any{voxhireCareerOwnerID}, args...)
+	queryArgs := append([]any{ownerID}, args...)
 	queryArgs = append(queryArgs, limit)
 	rows, err := r.db.QueryContext(ctx, sqlStr, queryArgs...)
 	if err != nil {
@@ -1196,26 +1409,37 @@ func (r *Repository) ListCVJobs(ctx context.Context, f domain.CandidateFilter) (
 }
 
 func (r *Repository) RetryCVProcessing(ctx context.Context, source string, id int64) error {
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return err
+	}
 	var table string
+	var query string
 	switch source {
 	case "talent":
 		table = "voxhire_talent_applications"
+		query = fmt.Sprintf(`
+			UPDATE %s
+			   SET cv_processing_status = 'pending', cv_processing_error = NULL,
+			       cv_extracted_text = NULL, cv_summary = NULL, cv_profile_json = NULL,
+			       cv_processed_at = NULL
+			 WHERE id = ? AND cv_key IS NOT NULL AND cv_key <> ''`, table)
 	case "career":
-		table = "voxire_career_applications"
+		query = `
+			UPDATE voxire_career_applications a
+			JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+			   SET a.cv_processing_status = 'pending', a.cv_processing_error = NULL,
+			       a.cv_extracted_text = NULL, a.cv_summary = NULL, a.cv_profile_json = NULL,
+			       a.cv_processed_at = NULL
+			 WHERE a.id = ? AND a.cv_key IS NOT NULL AND a.cv_key <> ''`
 	default:
 		return domain.ErrInvalidInput
 	}
-	res, err := r.db.ExecContext(ctx, fmt.Sprintf(`
-		UPDATE %s
-		   SET cv_processing_status = 'pending',
-		       cv_processing_error = NULL,
-		       cv_extracted_text = NULL,
-		       cv_summary = NULL,
-		       cv_profile_json = NULL,
-		       cv_processed_at = NULL
-		 WHERE id = ?
-		   AND cv_key IS NOT NULL
-		   AND cv_key <> ''`, table), id)
+	args := []any{id}
+	if source == "career" {
+		args = []any{ownerID, id}
+	}
+	res, err := r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return err
 	}
@@ -1233,21 +1457,41 @@ func (r *Repository) RetryCVProcessing(ctx context.Context, source string, id in
 }
 
 func (r *Repository) ListTasks(ctx context.Context, status string) ([]domain.Task, error) {
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 	var filterStatus sql.NullString
 	if status != "" && status != "all" {
 		filterStatus = sql.NullString{String: status, Valid: true}
 	}
-	rows, err := r.queries.ListTasks(ctx, sqlc.ListTasksParams{FilterStatus: filterStatus})
+	query := `
+SELECT t.id, t.application_id, a.job_id, COALESCE(c.title, ''),
+       a.name, a.email, t.title, t.status, t.due_at, t.completed_at, t.created_at
+FROM voxhire_follow_up_tasks t
+JOIN voxire_career_applications a ON a.id = t.application_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+WHERE (? IS NULL OR t.status = ?)
+ORDER BY CASE t.status WHEN 'open' THEN 0 WHEN 'done' THEN 2 ELSE 1 END,
+         t.due_at IS NULL, t.due_at ASC, t.created_at DESC`
+	rows, err := r.db.QueryContext(ctx, query, ownerID, filterStatus, filterStatus)
 	if err != nil {
 		return nil, err
 	}
-	tasks := make([]domain.Task, 0, len(rows))
-	for _, row := range rows {
+	defer rows.Close()
+	tasks := make([]domain.Task, 0)
+	for rows.Next() {
+		var row sqlc.ListTasksRow
+		if err := rows.Scan(&row.ID, &row.ApplicationID, &row.JobID, &row.OpeningTitle,
+			&row.CandidateName, &row.CandidateEmail, &row.Title, &row.Status,
+			&row.DueAt, &row.CompletedAt, &row.CreatedAt); err != nil {
+			return nil, err
+		}
 		tasks = append(tasks, taskFromRow(row.ID, row.ApplicationID, row.JobID, row.OpeningTitle,
 			row.CandidateName, row.CandidateEmail, row.Title, row.Status,
 			row.DueAt, row.CompletedAt, row.CreatedAt))
 	}
-	return tasks, nil
+	return tasks, rows.Err()
 }
 
 func (r *Repository) UpsertTask(ctx context.Context, in domain.TaskInput) (*domain.Task, error) {
@@ -1276,13 +1520,23 @@ func (r *Repository) UpsertTask(ctx context.Context, in domain.TaskInput) (*doma
 }
 
 func (r *Repository) UpdateTask(ctx context.Context, in domain.TaskInput) (*domain.Task, error) {
-	if err := r.queries.UpdateFollowUpTask(ctx, sqlc.UpdateFollowUpTaskParams{
-		Column1: in.Title, Title: in.Title, Column3: in.Status, Status: in.Status,
-		DueAt: sqlNullTimePtr(in.DueAt), Column6: in.Status, Column7: in.Status, ID: in.ID,
-	}); err != nil {
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
 		return nil, err
 	}
-	count, err := r.queries.CountFollowUpTasks(ctx, in.ID)
+	if _, err := r.db.ExecContext(ctx, updateFollowUpTaskScopedSQL,
+		ownerID, in.Title, in.Title, in.Status, in.Status, sqlNullTimePtr(in.DueAt),
+		in.Status, in.Status, in.ID,
+	); err != nil {
+		return nil, err
+	}
+	var count int64
+	err = r.db.QueryRowContext(ctx, `
+SELECT COUNT(*)
+FROM voxhire_follow_up_tasks t
+JOIN voxire_career_applications a ON a.id = t.application_id
+JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+WHERE t.id = ?`, ownerID, in.ID).Scan(&count)
 	if err != nil {
 		return nil, err
 	}
@@ -1298,7 +1552,15 @@ func (r *Repository) UpdateTask(ctx context.Context, in domain.TaskInput) (*doma
 }
 
 func (r *Repository) getTaskByID(ctx context.Context, id int64) (*domain.Task, error) {
-	row, err := r.queries.GetTaskByID(ctx, id)
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var row sqlc.GetTaskByIDRow
+	err = r.db.QueryRowContext(ctx, getTaskByIDScopedSQL, ownerID, id).Scan(
+		&row.ID, &row.ApplicationID, &row.JobID, &row.OpeningTitle, &row.CandidateName,
+		&row.CandidateEmail, &row.Title, &row.Status, &row.DueAt, &row.CompletedAt, &row.CreatedAt,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrApplicationNotFound
@@ -1312,13 +1574,24 @@ func (r *Repository) getTaskByID(ctx context.Context, id int64) (*domain.Task, e
 }
 
 func (r *Repository) ListShortlists(ctx context.Context, jobID int64) ([]domain.Shortlist, error) {
-	rows, err := r.queries.ListShortlists(ctx, sqlc.ListShortlistsParams{JobID: sqlNullInt64ID(jobID)})
+	ownerID, err := ownerIDFromContext(ctx)
 	if err != nil {
 		return nil, err
 	}
+	jobFilter := sqlNullInt64ID(jobID)
+	rows, err := r.db.QueryContext(ctx, listShortlistsScopedSQL, ownerID, jobFilter, jobFilter)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-	shortlists := make([]domain.Shortlist, 0, len(rows))
-	for _, row := range rows {
+	shortlists := make([]domain.Shortlist, 0)
+	for rows.Next() {
+		var row sqlc.ListShortlistsRow
+		if err := rows.Scan(&row.ID, &row.JobID, &row.JobTitle, &row.Name, &row.Status,
+			&row.Notes, &row.CreatedAt, &row.UpdatedAt); err != nil {
+			return nil, err
+		}
 		shortlist := domain.Shortlist{
 			ID: row.ID, JobID: row.JobID, JobTitle: row.JobTitle, Name: row.Name,
 			Status: row.Status, Notes: row.Notes,
@@ -1331,10 +1604,21 @@ func (r *Repository) ListShortlists(ctx context.Context, jobID int64) ([]domain.
 		shortlist.Items = items
 		shortlists = append(shortlists, shortlist)
 	}
-	return shortlists, nil
+	return shortlists, rows.Err()
 }
 
 func (r *Repository) CreateShortlist(ctx context.Context, in domain.ShortlistInput) (*domain.Shortlist, error) {
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var careerCount int64
+	if err := r.db.QueryRowContext(ctx, careerExistsScopedSQL, in.JobID, ownerID).Scan(&careerCount); err != nil {
+		return nil, err
+	}
+	if careerCount == 0 {
+		return nil, domain.ErrCareerNotFound
+	}
 	res, err := r.queries.CreateShortlist(ctx, sqlc.CreateShortlistParams{
 		JobID: in.JobID, Name: in.Name, Status: in.Status, Notes: sqlNullString(in.Notes),
 	})
@@ -1388,19 +1672,38 @@ func (r *Repository) AddShortlistItem(ctx context.Context, in domain.ShortlistIt
 }
 
 func (r *Repository) listShortlistItems(ctx context.Context, shortlistID int64) ([]domain.ShortlistItem, error) {
-	rows, err := r.queries.ListShortlistItems(ctx, shortlistID)
+	ownerID, err := ownerIDFromContext(ctx)
 	if err != nil {
 		return nil, err
 	}
-	items := make([]domain.ShortlistItem, 0, len(rows))
-	for _, row := range rows {
+	rows, err := r.db.QueryContext(ctx, listShortlistItemsScopedSQL, ownerID, shortlistID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := make([]domain.ShortlistItem, 0)
+	for rows.Next() {
+		var row sqlc.ListShortlistItemsRow
+		if err := rows.Scan(&row.ID, &row.ShortlistID, &row.ApplicationID, &row.CandidateName,
+			&row.CandidateEmail, &row.Status, &row.SortOrder, &row.Notes, &row.CvProfileJson,
+			&row.CreatedAt); err != nil {
+			return nil, err
+		}
 		items = append(items, shortlistItemFromRow(row))
 	}
-	return items, nil
+	return items, rows.Err()
 }
 
 func (r *Repository) getShortlistItemByID(ctx context.Context, id int64) (*domain.ShortlistItem, error) {
-	row, err := r.queries.GetShortlistItemByID(ctx, id)
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var row sqlc.GetShortlistItemByIDRow
+	err = r.db.QueryRowContext(ctx, getShortlistItemScopedSQL, ownerID, id).Scan(
+		&row.ID, &row.ShortlistID, &row.ApplicationID, &row.CandidateName, &row.CandidateEmail,
+		&row.Status, &row.SortOrder, &row.Notes, &row.CvProfileJson, &row.CreatedAt,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -1414,7 +1717,15 @@ func (r *Repository) getShortlistItemByID(ctx context.Context, id int64) (*domai
 }
 
 func (r *Repository) ListApplicationTimeline(ctx context.Context, id int64) ([]domain.TimelineEvent, error) {
-	meta, err := r.queries.GetApplicationTimelineMeta(ctx, id)
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var meta sqlc.GetApplicationTimelineMetaRow
+	err = r.db.QueryRowContext(ctx, getApplicationTimelineMetaScopedSQL, ownerID, id).Scan(
+		&meta.CreatedAt, &meta.CvProcessingStatus, &meta.CvProcessingError,
+		&meta.CvProcessedAt, &meta.ReviewedAt,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.ErrApplicationNotFound
@@ -1468,17 +1779,26 @@ func (r *Repository) ListApplicationTimeline(ctx context.Context, id int64) ([]d
 }
 
 func (r *Repository) listRecordedApplicationEvents(ctx context.Context, id int64) ([]domain.TimelineEvent, error) {
-	rows, err := r.queries.ListApplicationEvents(ctx, id)
+	ownerID, err := ownerIDFromContext(ctx)
 	if err != nil {
 		return nil, err
 	}
-	events := make([]domain.TimelineEvent, 0, len(rows))
-	for _, row := range rows {
+	rows, err := r.db.QueryContext(ctx, listApplicationEventsScopedSQL, ownerID, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	events := make([]domain.TimelineEvent, 0)
+	for rows.Next() {
+		var row sqlc.ListApplicationEventsRow
+		if err := rows.Scan(&row.Kind, &row.Title, &row.Detail, &row.CreatedAt); err != nil {
+			return nil, err
+		}
 		events = append(events, domain.TimelineEvent{
 			Kind: row.Kind, Title: row.Title, Detail: row.Detail, CreatedAt: adminCreatedAt(row.CreatedAt),
 		})
 	}
-	return events, nil
+	return events, rows.Err()
 }
 
 func (r *Repository) listTaskTimelineEvents(ctx context.Context, id int64) ([]domain.TimelineEvent, error) {
@@ -1486,7 +1806,7 @@ func (r *Repository) listTaskTimelineEvents(ctx context.Context, id int64) ([]do
 	if err != nil {
 		return nil, err
 	}
-	events := make([]domain.TimelineEvent, 0, len(rows))
+	events := make([]domain.TimelineEvent, 0)
 	for _, row := range rows {
 		events = append(events, domain.TimelineEvent{
 			Kind: "task", Title: "Task opened", Detail: row.Title, CreatedAt: adminCreatedAt(row.CreatedAt),
@@ -1503,12 +1823,21 @@ func (r *Repository) listTaskTimelineEvents(ctx context.Context, id int64) ([]do
 }
 
 func (r *Repository) listShortlistTimelineEvents(ctx context.Context, id int64) ([]domain.TimelineEvent, error) {
-	rows, err := r.queries.ListShortlistTimelineEvents(ctx, id)
+	ownerID, err := ownerIDFromContext(ctx)
 	if err != nil {
 		return nil, err
 	}
-	events := make([]domain.TimelineEvent, 0, len(rows))
-	for _, row := range rows {
+	rows, err := r.db.QueryContext(ctx, listShortlistTimelineEventsScopedSQL, ownerID, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	events := make([]domain.TimelineEvent, 0)
+	for rows.Next() {
+		var row sqlc.ListShortlistTimelineEventsRow
+		if err := rows.Scan(&row.Name, &row.SortOrder, &row.CreatedAt); err != nil {
+			return nil, err
+		}
 		events = append(events, domain.TimelineEvent{
 			Kind:      "shortlist",
 			Title:     "Added to shortlist",
@@ -1516,11 +1845,16 @@ func (r *Repository) listShortlistTimelineEvents(ctx context.Context, id int64) 
 			CreatedAt: adminCreatedAt(row.CreatedAt),
 		})
 	}
-	return events, nil
+	return events, rows.Err()
 }
 
 func (r *Repository) applicationExists(ctx context.Context, id int64) (bool, error) {
-	count, err := r.queries.ApplicationExists(ctx, id)
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return false, err
+	}
+	var count int64
+	err = r.db.QueryRowContext(ctx, applicationExistsScopedSQL, ownerID, id).Scan(&count)
 	if err != nil {
 		return false, err
 	}
@@ -1528,7 +1862,12 @@ func (r *Repository) applicationExists(ctx context.Context, id int64) (bool, err
 }
 
 func (r *Repository) shortlistExists(ctx context.Context, id int64) (bool, error) {
-	count, err := r.queries.ShortlistExists(ctx, id)
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return false, err
+	}
+	var count int64
+	err = r.db.QueryRowContext(ctx, shortlistExistsScopedSQL, ownerID, id).Scan(&count)
 	if err != nil {
 		return false, err
 	}

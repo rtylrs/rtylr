@@ -92,6 +92,7 @@ func AdminAuthMiddleware(svc *application.Service) func(http.Handler) http.Handl
 				return
 			}
 			ctx := context.WithValue(r.Context(), adminIDCtxKey, claims.AdminID)
+			ctx = domain.WithOwnerID(ctx, claims.AdminID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

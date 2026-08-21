@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	gosqlmysql "github.com/go-sql-driver/mysql"
@@ -26,5 +27,25 @@ func TestIsOptionalAnalyticsSchemaError(t *testing.T) {
 				t.Fatalf("isOptionalAnalyticsSchemaError() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestScopedRecruitQueriesRequireCareerOwnerJoin(t *testing.T) {
+	queries := []string{
+		updateApplicationStatusScopedSQL,
+		updateApplicationReviewScopedSQL,
+		getApplicationCVKeyScopedSQL,
+		getApplicationTimelineMetaScopedSQL,
+		listApplicationEventsScopedSQL,
+		getTaskByIDScopedSQL,
+		updateFollowUpTaskScopedSQL,
+		applicationExistsScopedSQL,
+	}
+
+	for _, query := range queries {
+		lower := strings.ToLower(query)
+		if !strings.Contains(lower, "join careers c") || !strings.Contains(lower, "c.owner_id = ?") {
+			t.Errorf("scoped query is missing the career owner predicate:\n%s", query)
+		}
 	}
 }
