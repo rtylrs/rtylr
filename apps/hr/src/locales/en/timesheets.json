@@ -44,6 +44,8 @@
     "emptyDescription": "No timesheets are pending approval.",
     "employeeId": "Employee #{{id}}",
     "approve": "Approve",
+    "approveTitle": "Approve Timesheet",
+    "approveDescription": "The submitted hours will be approved and locked.",
     "reject": "Reject",
     "rejectTitle": "Reject Timesheet",
     "reasonLabel": "Reason for rejection",

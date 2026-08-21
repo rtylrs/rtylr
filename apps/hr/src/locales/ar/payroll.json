@@ -41,6 +41,8 @@
   "runDetail": {
     "subtitle": "{{count}} إدخالات في هذه الدورة",
     "approve": "الموافقة على الدورة",
+    "approveTitle": "الموافقة على دورة الرواتب",
+    "approveDescription": "سيتم اعتماد رواتب {{count}} موظفًا وقفل الدورة. لا يمكن التراجع عن هذا الإجراء.",
     "exportCsv": "تصدير CSV",
     "notFound": "دورة الرواتب غير موجودة",
     "notFoundDescription": "تعذر تحميل دورة الرواتب هذه."

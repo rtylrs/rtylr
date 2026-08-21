@@ -11,7 +11,8 @@ interface Props {
 
 const ClockInOutButton: React.FC<Props> = ({ clockedIn, onToggle, location, loading }) => (
   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-    <button type="button"
+    <button
+      type="button"
       onClick={onToggle}
       disabled={loading}
       style={{

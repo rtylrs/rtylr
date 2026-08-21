@@ -135,6 +135,7 @@ const Schedule: React.FC = () => {
                     onSuccess: () => toast.success('Week published'),
                   })
                 }
+                disabled={publish.isPending}
               >
                 Publish week
               </Button>
@@ -201,7 +202,8 @@ const Schedule: React.FC = () => {
                         }}
                       />
                     ))}
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={() => openNew(dayStr(d))}
                       style={{
                         padding: '6px',

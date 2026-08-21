@@ -44,6 +44,8 @@
     "emptyDescription": "Aucune feuille de temps en attente d'approbation.",
     "employeeId": "Employé #{{id}}",
     "approve": "Approuver",
+    "approveTitle": "Approuver la feuille de temps",
+    "approveDescription": "Les heures soumises seront approuvées et verrouillées.",
     "reject": "Rejeter",
     "rejectTitle": "Rejeter la feuille de temps",
     "reasonLabel": "Motif du rejet",

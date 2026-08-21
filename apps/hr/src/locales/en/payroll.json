@@ -41,6 +41,8 @@
   "runDetail": {
     "subtitle": "{{count}} entries in this run",
     "approve": "Approve Run",
+    "approveTitle": "Approve Payroll Run",
+    "approveDescription": "This approves payroll for {{count}} employees and locks the run. This cannot be undone.",
     "exportCsv": "Export CSV",
     "notFound": "Payroll run not found",
     "notFoundDescription": "This payroll run could not be loaded."

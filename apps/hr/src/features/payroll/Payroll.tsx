@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useUserStore } from '@voxire/auth';
 import { Link } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
@@ -45,7 +45,17 @@ const Payroll = (): React.JSX.Element => {
   const canRunPayroll = canHrPermission(role, 'hr:payroll:run');
   const payrollConfigured = usePayrollConfigured();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [params] = useState<ListPayrollRunsParams>({ limit: 50, offset: 0 });
+  // Filter server-side: status tabs would otherwise page over page-1-of-50
+  // only. 'All' sends no status param; the client-side filter stays as a
+  // belt-and-braces pass.
+  const params = useMemo<ListPayrollRunsParams>(
+    () => ({
+      limit: 50,
+      offset: 0,
+      status: statusFilter === 'all' ? undefined : statusFilter,
+    }),
+    [statusFilter]
+  );
 
   const { data, isLoading, isError, isFetching, refetch } = useListPayrollRuns(params, {
     enabled: payrollConfigured,

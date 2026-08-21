@@ -21,6 +21,7 @@ import {
   Modal,
   Textarea,
   Label,
+  ConfirmDialog,
   ACCENT,
 } from '../../../shared/components/ui';
 import { canHrPermission } from '../../../shared/lib/hrPermissions';
@@ -42,6 +43,7 @@ const TimesheetApprovals = (): React.JSX.Element => {
 
   const [rejectTarget, setRejectTarget] = useState<TimesheetPayload | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
+  const [approveTargetId, setApproveTargetId] = useState<number | null>(null);
 
   const handleApprove = (timesheetId: number): void => {
     approveMutation.mutate(
@@ -170,7 +172,7 @@ const TimesheetApprovals = (): React.JSX.Element => {
                         <Button
                           variant="primary"
                           style={{ padding: '6px 12px', fontSize: 11 }}
-                          onClick={() => handleApprove(Number(ts.id ?? 0))}
+                          onClick={() => setApproveTargetId(Number(ts.id ?? 0))}
                           disabled={approveMutation.isPending}
                           icon={<CheckCircle size={13} />}
                         >
@@ -230,6 +232,21 @@ const TimesheetApprovals = (): React.JSX.Element => {
             </div>
           </div>
         </Modal>
+
+        {/* Approve confirmation */}
+        <ConfirmDialog
+          open={approveTargetId !== null}
+          title={t('timesheets.approvals.approveTitle')}
+          description={t('timesheets.approvals.approveDescription')}
+          confirmLabel={t('timesheets.approvals.approve')}
+          cancelLabel={t('common.cancel')}
+          variant="primary"
+          onConfirm={() => {
+            if (approveTargetId !== null) handleApprove(approveTargetId);
+            setApproveTargetId(null);
+          }}
+          onCancel={() => setApproveTargetId(null)}
+        />
       </div>
     </>
   );

@@ -18,6 +18,8 @@
   "roster": {
     "title": "بناء جدول المناوبات",
     "publish": "نشر الجدول",
+    "publishTitle": "نشر الجدول",
+    "publishDescription": "سيتم إشعار جميع الموظفين المجدولين بوردياتهم لهذا الأسبوع.",
     "employee": "الموظف",
     "assignShift": "تعيين مناوبة",
     "selectShift": "قالب المناوبة",

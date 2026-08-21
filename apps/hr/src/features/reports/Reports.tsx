@@ -140,7 +140,8 @@ const Reports: React.FC = () => {
                 const Icon = REPORT_ICONS[type];
                 const isActive = selectedType === type;
                 return (
-                  <button type="button"
+                  <button
+                    type="button"
                     key={type}
                     onClick={() => {
                       setSelectedType(type);

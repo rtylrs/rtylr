@@ -41,6 +41,8 @@
   "runDetail": {
     "subtitle": "{{count}} entrées dans ce cycle",
     "approve": "Approuver le cycle",
+    "approveTitle": "Approuver le cycle de paie",
+    "approveDescription": "Ceci approuve la paie de {{count}} employés et verrouille le cycle. Cette action est irréversible.",
     "exportCsv": "Exporter CSV",
     "notFound": "Cycle de paie introuvable",
     "notFoundDescription": "Ce cycle de paie n’a pas pu être chargé."

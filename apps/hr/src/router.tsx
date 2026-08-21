@@ -345,7 +345,8 @@ const timeOffNewRoute = createRoute({
     wrap(
       <Suspense fallback={<PageLoader />}>
         <TimeOffNew />
-      </Suspense>
+      </Suspense>,
+      'hr:time_off'
     ),
 });
 

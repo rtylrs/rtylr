@@ -146,7 +146,10 @@ const TimesheetDetail = (): React.JSX.Element => {
             />
             <div style={{ fontSize: 12, color: 'var(--hr-text)' }}>
               <span style={{ fontWeight: 600 }}>{t('timesheets.rejectionReason')}:</span>{' '}
-              {t('timesheets.noReasonProvided')}
+              {/* The timesheet payload carries no reason field; the reject
+                  endpoint stores it on the period's time entries. */}
+              {entriesList.find((entry) => entry.rejectionReason)?.rejectionReason ??
+                t('timesheets.noReasonProvided')}
             </div>
           </Card>
         )}

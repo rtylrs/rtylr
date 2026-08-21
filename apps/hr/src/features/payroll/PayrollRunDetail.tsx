@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useState } from 'react';
 import { useUserStore } from '@voxire/auth';
 import { getRouteApi, Link, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +8,14 @@ import { useGetPayrollRun, useApprovePayrollRun } from '../../shared/hooks/queri
 import type { PayrollEntryPayload } from '../../shared/hooks/queries/usePayroll';
 import { ErrorBoundary, EmptyState } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
-import { SectionHeader, Button, Skeleton, Pill, Breadcrumbs } from '../../shared/components/ui';
+import {
+  SectionHeader,
+  Button,
+  Skeleton,
+  Pill,
+  Breadcrumbs,
+  ConfirmDialog,
+} from '../../shared/components/ui';
 import { canHrPermission } from '../../shared/lib/hrPermissions';
 import { useHrSettings } from '../../shared/hooks/useHrExtras';
 import { formatCurrency } from '../../shared/lib/hrNumberUtils';
@@ -44,6 +51,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
   const { data: run, isLoading } = useGetPayrollRun(runId, { enabled: payrollConfigured });
   const approveRun = useApprovePayrollRun(payrollConfigured);
   const parentRef = useRef<HTMLDivElement>(null);
+  const [approveConfirmOpen, setApproveConfirmOpen] = useState(false);
 
   const entries = run?.entries ?? [];
 
@@ -139,7 +147,7 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
               <Button
                 variant="primary"
                 icon={<CheckCircle size={13} />}
-                onClick={handleApprove}
+                onClick={() => setApproveConfirmOpen(true)}
                 disabled={approveRun.isPending}
               >
                 {t('payroll.runDetail.approve')}
@@ -388,6 +396,21 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
         <ArrowLeft size={12} />
         {t('payroll.backToRuns')}
       </Link>
+
+      {/* Money action: approving a run locks it in, so require explicit confirmation. */}
+      <ConfirmDialog
+        open={approveConfirmOpen}
+        title={t('payroll.runDetail.approveTitle')}
+        description={t('payroll.runDetail.approveDescription', { count: entries.length })}
+        confirmLabel={t('payroll.runDetail.approve')}
+        cancelLabel={t('common.cancel')}
+        variant="primary"
+        onConfirm={() => {
+          setApproveConfirmOpen(false);
+          handleApprove();
+        }}
+        onCancel={() => setApproveConfirmOpen(false)}
+      />
     </div>
   );
 };

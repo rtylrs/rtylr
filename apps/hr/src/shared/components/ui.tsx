@@ -355,6 +355,7 @@ export const ConfirmDialog: React.FC<{
   title: string;
   description?: string;
   confirmLabel?: string;
+  cancelLabel?: string;
   variant?: 'danger' | 'primary';
   onConfirm: () => void;
   onCancel: () => void;
@@ -363,6 +364,7 @@ export const ConfirmDialog: React.FC<{
   title,
   description,
   confirmLabel = 'Confirm',
+  cancelLabel = 'Cancel',
   variant = 'primary',
   onConfirm,
   onCancel,
@@ -375,7 +377,7 @@ export const ConfirmDialog: React.FC<{
     )}
     <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
       <Button variant="ghost" onClick={onCancel}>
-        Cancel
+        {cancelLabel}
       </Button>
       <Button variant={variant === 'danger' ? 'danger' : 'primary'} onClick={onConfirm}>
         {confirmLabel}
@@ -492,7 +494,8 @@ export const Tabs: React.FC<{ tabs: string[]; active: string; onChange: (t: stri
     }}
   >
     {tabs.map((tab) => (
-      <button type="button"
+      <button
+        type="button"
         key={tab}
         onClick={() => onChange(tab)}
         style={{

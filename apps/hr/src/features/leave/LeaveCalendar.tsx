@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { useGetLeaveCalendar } from '../../shared/hooks/queries/useLeave';
-import { Card, Button, Skeleton, Select, Label } from '../../shared/components/ui';
+import { Card, Button, Skeleton } from '../../shared/components/ui';
 import { ErrorBoundary, EmptyState } from '@voxire/ui';
 
 const DAYS_OF_WEEK_KEYS = [
@@ -20,19 +20,8 @@ const LeaveCalendarInner = (): React.JSX.Element => {
   const now = new Date();
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [year, setYear] = useState(now.getFullYear());
-  const [departmentId, setDepartmentId] = useState<number | undefined>(undefined);
-  const [locationId, setLocationId] = useState<number | undefined>(undefined);
 
-  const {
-    data: entries,
-    isLoading,
-    refetch,
-  } = useGetLeaveCalendar({
-    month,
-    year,
-    departmentId,
-    locationId,
-  });
+  const { data: entries, isLoading, refetch } = useGetLeaveCalendar({ month, year });
 
   const prevMonth = useCallback((): void => {
     if (month === 1) {
@@ -113,29 +102,6 @@ const LeaveCalendarInner = (): React.JSX.Element => {
           <Button variant="ghost" onClick={nextMonth} aria-label={t('leave.calendar.nextMonth')}>
             <ChevronRight size={14} />
           </Button>
-        </div>
-
-        <div style={{ display: 'flex', gap: 8 }}>
-          <div>
-            <Label style={{ marginBottom: 2 }}>{t('leave.calendar.department')}</Label>
-            <Select
-              value={departmentId ?? ''}
-              onChange={(e) => setDepartmentId(e.target.value ? Number(e.target.value) : undefined)}
-              style={{ width: 140, fontSize: 11, padding: '4px 8px' }}
-            >
-              <option value="">{t('common.filter')}</option>
-            </Select>
-          </div>
-          <div>
-            <Label style={{ marginBottom: 2 }}>{t('leave.calendar.location')}</Label>
-            <Select
-              value={locationId ?? ''}
-              onChange={(e) => setLocationId(e.target.value ? Number(e.target.value) : undefined)}
-              style={{ width: 140, fontSize: 11, padding: '4px 8px' }}
-            >
-              <option value="">{t('common.filter')}</option>
-            </Select>
-          </div>
         </div>
       </div>
 
@@ -231,17 +197,7 @@ const LeaveCalendarInner = (): React.JSX.Element => {
           icon={Calendar}
           title={t('leave.calendar.emptyTitle')}
           description={t('leave.calendar.emptyDescription')}
-          action={
-            departmentId !== undefined || locationId !== undefined
-              ? {
-                  label: t('common.clearFilters'),
-                  onClick: () => {
-                    setDepartmentId(undefined);
-                    setLocationId(undefined);
-                  },
-                }
-              : { label: t('common.refresh'), onClick: () => refetch() }
-          }
+          action={{ label: t('common.refresh'), onClick: () => refetch() }}
         />
       )}
     </div>

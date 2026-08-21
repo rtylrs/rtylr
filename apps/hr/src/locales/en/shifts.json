@@ -18,6 +18,8 @@
   "roster": {
     "title": "Roster Builder",
     "publish": "Publish Roster",
+    "publishTitle": "Publish Roster",
+    "publishDescription": "Publishing notifies every scheduled employee of their shifts for this week.",
     "employee": "Employee",
     "assignShift": "Assign Shift",
     "selectShift": "Shift Template",

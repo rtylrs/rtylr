@@ -19,6 +19,7 @@ import {
   Modal,
   Select,
   Label,
+  ConfirmDialog,
 } from '../../shared/components/ui';
 import { ErrorBoundary, EmptyState } from '@voxire/ui';
 
@@ -72,6 +73,7 @@ const RosterBuilderInner = (): React.JSX.Element => {
     date: '',
   });
   const [selectedShiftId, setSelectedShiftId] = useState<number>(0);
+  const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
 
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -155,7 +157,7 @@ const RosterBuilderInner = (): React.JSX.Element => {
             <Button
               variant="primary"
               icon={<Send size={13} />}
-              onClick={handlePublish}
+              onClick={() => setPublishConfirmOpen(true)}
               disabled={publishMutation.isPending}
             >
               {publishMutation.isPending ? t('common.loading') : t('shifts.roster.publish')}
@@ -355,6 +357,21 @@ const RosterBuilderInner = (): React.JSX.Element => {
           </div>
         </div>
       </Modal>
+
+      {/* Publish notifies every scheduled employee, so require explicit confirmation. */}
+      <ConfirmDialog
+        open={publishConfirmOpen}
+        title={t('shifts.roster.publishTitle')}
+        description={t('shifts.roster.publishDescription')}
+        confirmLabel={t('shifts.roster.publish')}
+        cancelLabel={t('common.cancel')}
+        variant="primary"
+        onConfirm={() => {
+          setPublishConfirmOpen(false);
+          handlePublish();
+        }}
+        onCancel={() => setPublishConfirmOpen(false)}
+      />
     </div>
   );
 };

@@ -44,6 +44,8 @@
     "emptyDescription": "لا توجد سجلات دوام في انتظار الموافقة.",
     "employeeId": "الموظف #{{id}}",
     "approve": "موافقة",
+    "approveTitle": "الموافقة على سجل الدوام",
+    "approveDescription": "سيتم اعتماد الساعات المرسلة وقفلها.",
     "reject": "رفض",
     "rejectTitle": "رفض سجل الدوام",
     "reasonLabel": "سبب الرفض",

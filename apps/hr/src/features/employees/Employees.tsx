@@ -69,7 +69,8 @@ const Employees = (): React.JSX.Element => {
           <h1 className="text-lg font-semibold" style={{ color: 'var(--hr-text)' }}>
             {t('employees.directory')}
           </h1>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => navigate({ to: '/employees/new' })}
             className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium"
             style={{ background: 'var(--accent)', color: '#fff' }}
@@ -232,7 +233,8 @@ const Employees = (): React.JSX.Element => {
                 {/* Pagination */}
                 {total > PAGE_SIZE && (
                   <div className="flex items-center justify-center gap-4 py-2">
-                    <button type="button"
+                    <button
+                      type="button"
                       disabled={offset === 0}
                       onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
                       className="rounded px-3 py-1 text-sm disabled:opacity-40"
@@ -243,7 +245,8 @@ const Employees = (): React.JSX.Element => {
                     <span className="text-xs" style={{ color: 'var(--hr-text-dim)' }}>
                       {offset + 1}–{Math.min(offset + PAGE_SIZE, total)} / {total}
                     </span>
-                    <button type="button"
+                    <button
+                      type="button"
                       disabled={offset + PAGE_SIZE >= total}
                       onClick={() => setOffset(offset + PAGE_SIZE)}
                       className="rounded px-3 py-1 text-sm disabled:opacity-40"

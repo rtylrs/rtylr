@@ -23,6 +23,7 @@ interface UpdateOvertimeConfigData {
   dailyOtThresholdMinutes?: number;
   weeklyOtThresholdMinutes?: number;
   defaultMultiplier?: number;
+  autoDetectEnabled?: boolean;
 }
 
 export const useListOvertimeRequests = (params?: ListOvertimeRequestsRequest) => {
@@ -92,8 +93,11 @@ export const useUpdateOvertimeConfig = () => {
       await unwrap(
         hrTransport.put('/hr/overtime/config', {
           dailyThresholdMinutes: data.dailyOtThresholdMinutes,
+          weeklyThresholdMinutes: data.weeklyOtThresholdMinutes,
           defaultMultiplier: data.defaultMultiplier,
-          autoDetectEnabled: true,
+          // Preserve the caller's value - forcing true silently re-enabled
+          // overtime auto-detection for tenants that turned it off.
+          autoDetectEnabled: data.autoDetectEnabled,
         })
       );
     },

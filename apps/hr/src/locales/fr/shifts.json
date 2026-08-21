@@ -18,6 +18,8 @@
   "roster": {
     "title": "Planificateur de planning",
     "publish": "Publier le planning",
+    "publishTitle": "Publier le planning",
+    "publishDescription": "La publication notifiera à chaque employé planifié ses shifts pour cette semaine.",
     "employee": "Employé",
     "assignShift": "Attribuer un quart",
     "selectShift": "Modèle de quart",

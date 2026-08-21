@@ -11,7 +11,13 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
 export interface ClockInPayload {
-  ownerId: number;
+  /**
+   * Tenant owner id. Deliberately optional and normally omitted: the voxie
+   * contract (`hr.attendance.v1.AttendanceClockInRequest`) has no owner_id -
+   * tenancy resolves from the session server-side, and `owner_id` means the
+   * tenant owner, never the auth user id.
+   */
+  ownerId?: number;
   employeeId: number;
   method: string;
   locationId: number;
@@ -22,7 +28,7 @@ export interface ClockInPayload {
 }
 
 interface BackendClockInPayload {
-  ownerId: number;
+  ownerId?: number;
   employeeId: number;
   locationId: number;
   clockInMethod: string;
@@ -42,7 +48,7 @@ export interface SetPinPayload {
 }
 
 const toBackendClockInPayload = (data: ClockInPayload): BackendClockInPayload => ({
-  ownerId: data.ownerId,
+  ...(data.ownerId !== undefined ? { ownerId: data.ownerId } : {}),
   employeeId: data.employeeId,
   locationId: data.locationId,
   clockInMethod: data.method,

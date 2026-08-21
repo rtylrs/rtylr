@@ -2,8 +2,8 @@ import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LogIn, LogOut, QrCode, KeyRound, MapPin, Delete, Settings } from 'lucide-react';
 import { toast } from 'sonner';
-import { useUserStore } from '@voxire/auth';
 import { useClockIn, useClockOut, useSetPin } from '../../shared/hooks/queries/useAttendance';
+import { useMyEmployeeId } from '../../shared/hooks/useHrExtras';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import type { AttendanceRecordPayload } from '@voxire/voxie/hr/attendance/v1/types';
 import { Card, Button, Pill, Modal, ACCENT } from '../../shared/components/ui';
@@ -216,7 +216,14 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
   const clockIn = useClockIn();
   const clockOut = useClockOut();
   const setPin = useSetPin();
-  const userId = Number(useUserStore((s) => s.user?.id)) || 0;
+  // Attendance endpoints need hr_employees.id, not the auth user id - same
+  // contract as leave/overtime (see useMyEmployeeId). Clock-in stays disabled
+  // until it resolves rather than sending a wrong id.
+  const {
+    data: myEmployeeId,
+    isLoading: employeeIdLoading,
+    isError: employeeLookupFailed,
+  } = useMyEmployeeId();
 
   const [pinModalOpen, setPinModalOpen] = useState(false);
   const [pinMode, setPinMode] = useState<'clockIn' | 'setPin' | 'confirmPin'>('clockIn');
@@ -233,12 +240,14 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
   const isGpsEnabled = enabledMethods.includes('gps');
 
   const handleClockIn = useCallback((): void => {
-    clockIn.mutate({ ownerId: userId, employeeId: userId, method: 'app', locationId: 0 });
-  }, [clockIn, userId]);
+    if (!myEmployeeId) return;
+    clockIn.mutate({ employeeId: myEmployeeId, method: 'app', locationId: 0 });
+  }, [clockIn, myEmployeeId]);
 
   const handleClockOut = useCallback((): void => {
-    if (!activeRecord) return;
-    clockOut.mutate({ employeeId: Number(activeRecord.employeeId ?? 0) });
+    const employeeId = Number(activeRecord?.employeeId ?? 0);
+    if (!activeRecord || !employeeId) return;
+    clockOut.mutate({ employeeId });
   }, [activeRecord, clockOut]);
 
   /* ── PIN flow ─────────────────────────────────────────────── */
@@ -259,8 +268,9 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
   const handlePinSubmit = useCallback(
     (enteredPin: string): void => {
       if (pinMode === 'clockIn') {
+        if (!myEmployeeId) return;
         clockIn.mutate(
-          { ownerId: userId, employeeId: userId, method: 'pin', pin: enteredPin, locationId: 0 },
+          { employeeId: myEmployeeId, method: 'pin', pin: enteredPin, locationId: 0 },
           { onSuccess: () => setPinModalOpen(false) }
         );
       } else if (pinMode === 'setPin') {
@@ -268,12 +278,13 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
         setPinError(undefined);
         setPinMode('confirmPin');
       } else if (pinMode === 'confirmPin') {
+        if (!myEmployeeId) return;
         if (enteredPin !== pendingNewPin) {
           setPinError(t('attendance.pinModal.pinMismatch'));
           return;
         }
         setPin.mutate(
-          { employeeId: userId, pin: enteredPin },
+          { employeeId: myEmployeeId, pin: enteredPin },
           {
             onSuccess: () => {
               setPinModalOpen(false);
@@ -283,12 +294,13 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
         );
       }
     },
-    [pinMode, pendingNewPin, clockIn, setPin, t]
+    [pinMode, pendingNewPin, myEmployeeId, clockIn, setPin, t]
   );
 
   /* ── GPS flow ─────────────────────────────────────────────── */
 
   const handleGpsClockIn = useCallback((): void => {
+    if (!myEmployeeId) return;
     if (!navigator.geolocation) {
       toast.error(t('attendance.gps.locationUnavailable'));
       return;
@@ -300,8 +312,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
       (position) => {
         setGpsLoading(false);
         clockIn.mutate({
-          ownerId: userId,
-          employeeId: userId,
+          employeeId: myEmployeeId,
           method: 'gps',
           locationId: 0,
           lat: position.coords.latitude,
@@ -326,7 +337,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
       },
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
-  }, [clockIn, t]);
+  }, [clockIn, myEmployeeId, t]);
 
   return (
     <>
@@ -365,7 +376,9 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
             <Button
               variant="danger"
               onClick={handleClockOut}
-              disabled={clockOut.isPending}
+              disabled={
+                clockOut.isPending || !activeRecord || !Number(activeRecord.employeeId ?? 0)
+              }
               icon={<LogOut size={14} />}
             >
               {t('attendance.clockWidget.clockOutBtn')}
@@ -373,12 +386,17 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {employeeLookupFailed && (
+              <p style={{ margin: 0, fontSize: 11, color: 'var(--hr-error)' }}>
+                {t('timeLogging.employeeLookupFailed')}
+              </p>
+            )}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {isAppEnabled && (
                 <Button
                   variant="primary"
                   onClick={handleClockIn}
-                  disabled={clockIn.isPending}
+                  disabled={clockIn.isPending || employeeIdLoading || !myEmployeeId}
                   icon={<LogIn size={14} />}
                 >
                   {t('attendance.clockWidget.clockInApp')}
@@ -397,7 +415,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
                 <Button
                   variant="secondary"
                   onClick={handleOpenPinClockIn}
-                  disabled={clockIn.isPending}
+                  disabled={clockIn.isPending || employeeIdLoading || !myEmployeeId}
                   icon={<KeyRound size={14} />}
                 >
                   {t('attendance.clockWidget.clockInPin')}
@@ -407,7 +425,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
                 <Button
                   variant="secondary"
                   onClick={handleGpsClockIn}
-                  disabled={clockIn.isPending || gpsLoading}
+                  disabled={clockIn.isPending || gpsLoading || !myEmployeeId}
                   icon={<MapPin size={14} />}
                 >
                   {gpsLoading
@@ -417,8 +435,10 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
               )}
             </div>
             {isPinEnabled && (
-              <button type="button"
+              <button
+                type="button"
                 onClick={handleOpenSetPin}
+                disabled={!myEmployeeId}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -426,7 +446,7 @@ const ClockInWidget = ({ activeRecord }: ClockInWidgetProps): React.JSX.Element 
                   background: 'none',
                   border: 'none',
                   padding: '4px 0',
-                  cursor: 'pointer',
+                  cursor: myEmployeeId ? 'pointer' : 'not-allowed',
                   fontSize: 11,
                   color: 'var(--hr-text-dim)',
                 }}

@@ -142,16 +142,17 @@ const Leave = (): React.JSX.Element => {
                     </div>
                     {canApprove && isHrRequestStatus(req.status, 'pending') && (
                       <ApprovalButtons
+                        allowNote
                         onApprove={() =>
                           approveLeave.mutate({
                             requestId: req.id,
-                            body: { approved: true, rejectionReason: undefined },
+                            body: { approved: true },
                           })
                         }
-                        onReject={() =>
+                        onReject={(note) =>
                           approveLeave.mutate({
                             requestId: req.id,
-                            body: { approved: false, rejectionReason: undefined },
+                            body: { approved: false, rejectionReason: note || undefined },
                           })
                         }
                       />
