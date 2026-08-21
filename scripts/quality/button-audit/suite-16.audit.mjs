@@ -319,5 +319,6 @@ export const cases = [
   ["apps/dash/src/shared/hooks/queries/useTeam.test.tsx", "audit-batch-317-suite-16"],
   ["apps/erp/src/features/purchasing/Purchasing.test.tsx", "audit-batch-318-suite-16"],
   ["apps/erp/src/shared/components/BulkActionBar.tsx", "audit-batch-319-suite-16"],
+  ["apps/erp/src/shared/components/UnitSelector.tsx", "audit-batch-320-suite-16"],
 ];
 

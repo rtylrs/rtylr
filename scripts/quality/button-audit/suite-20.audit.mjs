@@ -319,5 +319,6 @@ export const cases = [
   ["apps/erp/src/features/barcodes/Barcodes.tsx", "audit-batch-317-suite-20"],
   ["apps/erp/src/features/reorder/Reorder.test.tsx", "audit-batch-318-suite-20"],
   ["apps/erp/src/shared/components/DateRangePicker.tsx", "audit-batch-319-suite-20"],
+  ["apps/finance/src/features/bank-feeds/BankFeeds.tsx", "audit-batch-320-suite-20"],
 ];
 
