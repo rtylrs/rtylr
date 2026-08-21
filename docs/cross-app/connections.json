@@ -47,7 +47,9 @@
       "shape": 3,
       "gap": "needs-endpoint",
       "status": "proposed",
-      "severity": "critical"
+      "severity": "critical",
+      "producerFact": "employment_status",
+      "consumerFact": "app_entitlement"
     },
     {
       "id": "ERP->FIN-01",
@@ -64,7 +66,9 @@
       "shape": 1,
       "gap": "available-today",
       "status": "proposed",
-      "severity": "high"
+      "severity": "high",
+      "producerFact": "supplier_identity",
+      "consumerFact": "payable_supplier"
     },
     {
       "id": "FLOW->FIN-01",
@@ -80,7 +84,9 @@
       "shape": 1,
       "gap": "needs-contract-field",
       "status": "proposed",
-      "severity": "high"
+      "severity": "high",
+      "producerFact": "logged_billable_hours",
+      "consumerFact": "unbilled_time_view"
     },
     {
       "id": "HR->FLOW-01",
@@ -96,7 +102,9 @@
       "shape": 2,
       "gap": "needs-endpoint",
       "status": "proposed",
-      "severity": "high"
+      "severity": "high",
+      "producerFact": "pay_rate",
+      "consumerFact": "project_labour_cost"
     },
     {
       "id": "HR->FLOW-02",
@@ -112,7 +120,9 @@
       "shape": 1,
       "gap": "needs-contract-field",
       "status": "proposed",
-      "severity": "medium"
+      "severity": "medium",
+      "producerFact": "approved_leave_dates",
+      "consumerFact": "assignment_warning"
     },
     {
       "id": "CRM->FIN-01",
@@ -128,7 +138,9 @@
       "shape": 1,
       "gap": "needs-contract-field",
       "status": "proposed",
-      "severity": "high"
+      "severity": "high",
+      "producerFact": "signed_contract",
+      "consumerFact": "invoice_draft"
     },
     {
       "id": "CRM->FIN-02",
@@ -145,7 +157,9 @@
       "shape": 5,
       "gap": "needs-contract-field",
       "status": "proposed",
-      "severity": "high"
+      "severity": "high",
+      "producerFact": "customer_identity",
+      "consumerFact": "invoice_customer_link"
     },
     {
       "id": "FIN->CRM-01",
@@ -161,7 +175,9 @@
       "shape": 1,
       "gap": "needs-contract-field",
       "status": "proposed",
-      "severity": "medium"
+      "severity": "medium",
+      "producerFact": "invoice_balance",
+      "consumerFact": "customer_credit_view"
     },
     {
       "id": "SUP->CRM-01",
@@ -176,7 +192,9 @@
       "shape": 1,
       "gap": "needs-contract-field",
       "status": "proposed",
-      "severity": "medium"
+      "severity": "medium",
+      "producerFact": "ticket_counts",
+      "consumerFact": "customer_health_view"
     },
     {
       "id": "ERP->POS-01",
@@ -193,7 +211,9 @@
       "shape": 5,
       "gap": "needs-contract-field",
       "status": "proposed",
-      "severity": "high"
+      "severity": "high",
+      "producerFact": "product_stock_and_cost",
+      "consumerFact": "sellable_item_margin"
     },
     {
       "id": "FLOW->HR-01",
@@ -242,7 +262,9 @@
       "shape": 1,
       "gap": "needs-contract-field",
       "status": "proposed",
-      "severity": "medium"
+      "severity": "medium",
+      "producerFact": "bill_payment_history",
+      "consumerFact": "supplier_payment_view"
     },
     {
       "id": "ERP->FIN-02",
@@ -258,7 +280,9 @@
       "shape": 1,
       "gap": "available-today",
       "status": "proposed",
-      "severity": "medium"
+      "severity": "medium",
+      "producerFact": "inventory_valuation",
+      "consumerFact": "balance_sheet_inventory"
     },
     {
       "id": "REC->HR-01",
@@ -275,7 +299,9 @@
       "shape": 1,
       "gap": "needs-endpoint",
       "status": "proposed",
-      "severity": "high"
+      "severity": "high",
+      "producerFact": "candidate_details",
+      "consumerFact": "employee_record"
     },
     {
       "id": "IDENTITY-01",
@@ -356,7 +382,9 @@
       "shape": 2,
       "gap": "needs-endpoint",
       "status": "proposed",
-      "severity": "medium"
+      "severity": "medium",
+      "producerFact": "pay_rate",
+      "consumerFact": "labour_cost_metric"
     },
     {
       "id": "BOOK->CRM-01",
@@ -421,7 +449,9 @@
       "shape": 1,
       "gap": "available-today",
       "status": "proposed",
-      "severity": "medium"
+      "severity": "medium",
+      "producerFact": "purchase_order_receipt",
+      "consumerFact": "payables_commitments"
     },
     {
       "id": "FIN->ERP-02",
@@ -437,7 +467,9 @@
       "shape": 3,
       "gap": "needs-contract-field",
       "status": "proposed",
-      "severity": "medium"
+      "severity": "medium",
+      "producerFact": "bill_settlement",
+      "consumerFact": "purchase_order_status"
     },
     {
       "id": "ERP->ERP-01",
@@ -550,7 +582,9 @@
       "shape": 1,
       "gap": "needs-endpoint",
       "status": "proposed",
-      "severity": "medium"
+      "severity": "medium",
+      "producerFact": "order_history",
+      "consumerFact": "customer_purchase_view"
     },
     {
       "id": "POS->INS-01",
@@ -583,7 +617,9 @@
       "shape": 2,
       "gap": "needs-endpoint",
       "status": "proposed",
-      "severity": "medium"
+      "severity": "medium",
+      "producerFact": "product_cost",
+      "consumerFact": "product_margin_metric"
     },
     {
       "id": "HUB->HR-01",
@@ -653,7 +689,9 @@
       "shape": 3,
       "gap": "available-today",
       "status": "proposed",
-      "severity": "high"
+      "severity": "high",
+      "producerFact": "payroll_total",
+      "consumerFact": "journal_entry"
     },
     {
       "id": "ERP->CRM-01",
