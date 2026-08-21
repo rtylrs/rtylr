@@ -194,5 +194,6 @@ export const cases = [
   ["apps/erp/src/shared/components/dialogAccessibility.test.tsx", "audit-batch-192-suite-02"],
   ["apps/finance/src/features/settings/Settings.tsx", "audit-batch-193-suite-02"],
   ["apps/finance/src/shared/components/PaymentBadge.tsx", "audit-batch-194-suite-02"],
+  ["apps/flow/src/features/leave/RequestLeaveDialog.tsx", "audit-batch-195-suite-02"],
 ];
 
