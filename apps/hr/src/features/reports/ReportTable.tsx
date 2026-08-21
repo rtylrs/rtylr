@@ -1,7 +1,8 @@
 import React, { useRef, useCallback, useState } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useTranslation } from 'react-i18next';
-import { Download, FileDown } from 'lucide-react';
+import { Download, FileDown, FileSearch } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { Button } from '../../shared/components/ui';
 import { useHRConfigStore } from '../../shared/stores/hrConfigStore';
 import type { ReportPayload } from '../../shared/schemas/reports';
@@ -10,6 +11,7 @@ interface ReportTableProps {
   report: ReportPayload;
   dateFrom?: string;
   dateTo?: string;
+  onRefresh: () => void;
 }
 
 /* ── CSV helpers ──────────────────────────────────────────────── */
@@ -143,7 +145,12 @@ const HEADER_HEIGHT = 40;
 
 /* ── ReportTable ──────────────────────────────────────────────── */
 
-const ReportTable = ({ report, dateFrom, dateTo }: ReportTableProps): React.JSX.Element => {
+const ReportTable = ({
+  report,
+  dateFrom,
+  dateTo,
+  onRefresh,
+}: ReportTableProps): React.JSX.Element => {
   const { t } = useTranslation();
   const parentRef = useRef<HTMLDivElement>(null);
   const config = useHRConfigStore((s) => s.config);
@@ -194,19 +201,11 @@ const ReportTable = ({ report, dateFrom, dateTo }: ReportTableProps): React.JSX.
 
   if (report.rows.length === 0) {
     return (
-      <div
-        style={{
-          padding: 32,
-          textAlign: 'center',
-          background: 'var(--hr-card)',
-          border: '1px dashed var(--hr-border)',
-          borderRadius: 12,
-        }}
-      >
-        <p style={{ margin: 0, fontSize: 13, color: 'var(--hr-text-muted)' }}>
-          {t('reports.noResults')}
-        </p>
-      </div>
+      <EmptyState
+        icon={FileSearch}
+        title={t('reports.noResults')}
+        action={{ label: t('common.refresh'), onClick: onRefresh }}
+      />
     );
   }
 

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Building2 } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import StepContainer from '../components/StepContainer';
 
 interface DepartmentRow {
@@ -22,6 +23,7 @@ const OrgStructureStep = ({
   const { t } = useTranslation();
   const [departments, setDepartments] = useState<DepartmentRow[]>([]);
   const [newName, setNewName] = useState('');
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const addDepartment = (): void => {
     const trimmed = newName.trim();
@@ -63,6 +65,7 @@ const OrgStructureStep = ({
       <div className="flex flex-col gap-4">
         <div className="flex gap-2">
           <input
+            ref={nameInputRef}
             type="text"
             placeholder={t('setup.orgStructure.departmentName')}
             value={newName}
@@ -85,9 +88,14 @@ const OrgStructureStep = ({
         </div>
 
         {departments.length === 0 ? (
-          <p className="text-center text-sm" style={{ color: 'var(--hr-text-dim)' }}>
-            {t('setup.orgStructure.noDepartments')}
-          </p>
+          <EmptyState
+            icon={Building2}
+            title={t('setup.orgStructure.noDepartments')}
+            action={{
+              label: t('setup.orgStructure.addDepartment'),
+              onClick: () => nameInputRef.current?.focus(),
+            }}
+          />
         ) : (
           <div className="flex flex-col gap-2">
             {departments.map((dept, index) => (

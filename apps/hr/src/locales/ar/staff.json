@@ -6,5 +6,16 @@
   "emptyState": {
     "title": "لا يوجد موظفون",
     "description": "عدّل الفلاتر أو ادعُ شخصاً إلى فريقك."
+  },
+  "profile": {
+    "notFoundTitle": "الموظف غير موجود",
+    "notFoundDescription": "قد تكون بيانات الموظف الذي تبحث عنه قد أُزيلت.",
+    "backToStaff": "الرجوع إلى الموظفين",
+    "noDocuments": "لا توجد مستندات مسجلة.",
+    "goToDocuments": "الانتقال إلى المستندات",
+    "noCourses": "لا توجد دورات بعد.",
+    "goToTraining": "الانتقال إلى التدريب",
+    "noBenefits": "لا توجد اشتراكات مزايا نشطة.",
+    "goToBenefits": "الانتقال إلى المزايا"
   }
 }

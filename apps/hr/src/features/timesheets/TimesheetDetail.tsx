@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useParams, useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
-import { ArrowLeft, Send, AlertCircle } from 'lucide-react';
+import { Send, AlertCircle, FileText } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import { useGetTimesheet, useSubmitTimesheet } from '../../shared/hooks/queries/useTimesheets';
 import type { TimeEntryPayload } from '@voxire/voxie/hr/time_entry/v1/types';
 import {
@@ -76,12 +77,11 @@ const TimesheetDetail = (): React.JSX.Element => {
 
   if (!timesheet) {
     return (
-      <div style={{ textAlign: 'center', padding: 40 }}>
-        <p style={{ color: 'var(--hr-text-muted)' }}>{t('errors.notFound')}</p>
-        <Button variant="ghost" onClick={() => navigate({ to: '/timesheets' })}>
-          {t('common.back')}
-        </Button>
-      </div>
+      <EmptyState
+        icon={FileText}
+        title={t('errors.notFound')}
+        action={{ label: t('common.back'), onClick: () => navigate({ to: '/timesheets' }) }}
+      />
     );
   }
 

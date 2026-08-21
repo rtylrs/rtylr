@@ -6,5 +6,16 @@
   "emptyState": {
     "title": "Aucun membre du personnel",
     "description": "Ajustez les filtres ou invitez quelqu'un dans votre équipe."
+  },
+  "profile": {
+    "notFoundTitle": "Employé introuvable",
+    "notFoundDescription": "L'employé que vous recherchez a peut-être été supprimé.",
+    "backToStaff": "Retour au personnel",
+    "noDocuments": "Aucun document enregistré.",
+    "goToDocuments": "Aller aux documents",
+    "noCourses": "Pas encore de cours.",
+    "goToTraining": "Aller à la formation",
+    "noBenefits": "Aucune inscription à un avantage active.",
+    "goToBenefits": "Aller aux avantages"
   }
 }

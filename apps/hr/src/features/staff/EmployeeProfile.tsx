@@ -1,5 +1,6 @@
 import React from 'react';
-import { useParams, Link } from '@tanstack/react-router';
+import { useParams, useNavigate, Link } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import {
   Mail,
@@ -11,7 +12,9 @@ import {
   Heart,
   Shield,
   ChevronLeft,
+  GraduationCap,
 } from 'lucide-react';
+import { EmptyState } from '@voxire/ui';
 import {
   useStaffById,
   useEmployeeProfile,
@@ -26,13 +29,14 @@ import {
   Skeleton,
   Breadcrumbs,
   ACCENT,
-  EmptyState,
   useIsMobile,
 } from '../../shared/components/ui';
 import TrainingProgress from '../../shared/components/TrainingProgress';
 import { initials, paletteFor } from '../../shared/components/EmployeeCard';
 
 const EmployeeProfile: React.FC = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile(900);
   const { id } = useParams({ strict: false });
   const staffId = id != null ? Number(id) : undefined;
@@ -54,14 +58,13 @@ const EmployeeProfile: React.FC = () => {
   if (!staff) {
     return (
       <EmptyState
-        icon={<Briefcase size={20} />}
-        title="Employee not found"
-        description="The employee you're looking for may have been removed."
-        action={
-          <Link to="/staff" style={{ color: ACCENT, fontSize: 12, textDecoration: 'none' }}>
-            Back to staff
-          </Link>
-        }
+        icon={Briefcase}
+        title={t('staff.profile.notFoundTitle')}
+        description={t('staff.profile.notFoundDescription')}
+        action={{
+          label: t('staff.profile.backToStaff'),
+          onClick: () => navigate({ to: '/staff' }),
+        }}
       />
     );
   }
@@ -230,7 +233,15 @@ const EmployeeProfile: React.FC = () => {
           <SectionHeader title="Documents" subtitle={`${myDocs.length} files`} />
           <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
             {myDocs.length === 0 && (
-              <p style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>No documents on file.</p>
+              <EmptyState
+                icon={FileText}
+                title={t('staff.profile.noDocuments')}
+                action={{
+                  label: t('staff.profile.goToDocuments'),
+                  onClick: () => navigate({ to: '/documents' }),
+                }}
+                size="compact"
+              />
             )}
             {myDocs.map((d) => (
               <div
@@ -261,7 +272,15 @@ const EmployeeProfile: React.FC = () => {
           <SectionHeader title="Training" />
           <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
             {myTraining.length === 0 && (
-              <p style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>No courses yet.</p>
+              <EmptyState
+                icon={GraduationCap}
+                title={t('staff.profile.noCourses')}
+                action={{
+                  label: t('staff.profile.goToTraining'),
+                  onClick: () => navigate({ to: '/training' }),
+                }}
+                size="compact"
+              />
             )}
             {myTraining.map((t) => (
               <TrainingProgress key={t.id} progress={t.progress} label={t.courseName} />
@@ -274,9 +293,15 @@ const EmployeeProfile: React.FC = () => {
           <SectionHeader title="Benefits" />
           <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {myBenefits.length === 0 && (
-              <p style={{ fontSize: 11, color: 'var(--hr-text-muted)' }}>
-                No active benefit enrollments.
-              </p>
+              <EmptyState
+                icon={Shield}
+                title={t('staff.profile.noBenefits')}
+                action={{
+                  label: t('staff.profile.goToBenefits'),
+                  onClick: () => navigate({ to: '/benefits' }),
+                }}
+                size="compact"
+              />
             )}
             {myBenefits.map((b) => (
               <div
