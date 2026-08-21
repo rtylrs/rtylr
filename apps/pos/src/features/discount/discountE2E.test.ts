@@ -69,9 +69,10 @@ describe('discount → checkout chain', () => {
     );
   });
 
-  it('percent discount is capped at 100% maximum', () => {
-    const discount = buildDiscountRequest({ orderId: '99', mode: 'percent', valueInput: '150' });
-    expect(discount.payload.discountValue).toBe(100);
+  it('percent discounts above 100% are rejected, not clamped', () => {
+    expect(() =>
+      buildDiscountRequest({ orderId: '99', mode: 'percent', valueInput: '150' }),
+    ).toThrow('Percent discounts cannot exceed 100%.');
   });
 
   it('zero discount value is rejected before checkout', () => {

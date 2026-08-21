@@ -3,8 +3,22 @@ import { buildDiscountRequest } from './discountWorkflow';
 
 describe('buildDiscountRequest', () => {
   it('builds a normalized percent discount request', () => {
-    expect(buildDiscountRequest({ orderId: '42.9', mode: 'percent', valueInput: '150' })).toEqual({
-      payload: { orderId: '42', discountType: 'percent', discountValue: 100, reason: '' },
+    expect(buildDiscountRequest({ orderId: '42.9', mode: 'percent', valueInput: '15' })).toEqual({
+      payload: { orderId: '42', discountType: 'percent', discountValue: 15, reason: '' },
+    });
+  });
+
+  it('rejects percent discounts above 100 instead of clamping them', () => {
+    expect(() =>
+      buildDiscountRequest({ orderId: '42', mode: 'percent', valueInput: '150' })
+    ).toThrow('Percent discounts cannot exceed 100%.');
+  });
+
+  it('forwards the trimmed audit reason', () => {
+    expect(
+      buildDiscountRequest({ orderId: '42', mode: 'flat', valueInput: '5', reason: '  comped dessert ' })
+    ).toEqual({
+      payload: { orderId: '42', discountType: 'flat', discountValue: 5, reason: 'comped dessert' },
     });
   });
 

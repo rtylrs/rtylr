@@ -17,10 +17,14 @@ const DiscountScreen: React.FC = () => {
   const { canApplyDiscount, maxDiscountPct } = useCapabilities();
   const [mode, setMode] = useState<DiscountMode>('percent');
   const [value, setValue] = useState('');
+  const [reason, setReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const submit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
     try {
-      const request = buildDiscountRequest({ orderId, mode, valueInput: value });
+      const request = buildDiscountRequest({ orderId, mode, valueInput: value, reason });
       // Enforce the operator's discount ceiling for percent discounts.
       if (
         mode === 'percent' &&
@@ -35,6 +39,8 @@ const DiscountScreen: React.FC = () => {
       navigate(-1);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Could not apply discount');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -67,10 +73,11 @@ const DiscountScreen: React.FC = () => {
               </button>
             </div>
             <div>
-              <label className="text-xs text-pos-muted">
+              <label htmlFor="discount-value" className="text-xs text-pos-muted">
                 {mode === 'percent' ? 'Discount %' : 'Amount'}
               </label>
               <input
+                id="discount-value"
                 type="number"
                 inputMode="decimal"
                 value={value}
@@ -79,12 +86,26 @@ const DiscountScreen: React.FC = () => {
                 className="w-full h-12 mt-1 px-4 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25"
               />
             </div>
+            <div>
+              <label htmlFor="discount-reason" className="text-xs text-pos-muted">
+                Reason
+              </label>
+              <input
+                id="discount-reason"
+                type="text"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="e.g. manager approval, comped item"
+                maxLength={200}
+                className="w-full h-12 mt-1 px-4 rounded-lg bg-white/8 border border-pos-border text-pos-text outline-none focus:border-white/25"
+              />
+            </div>
             <button
-              onClick={submit}
-              disabled={!canSubmit}
+              onClick={() => void submit()}
+              disabled={!canSubmit || submitting || (mode === 'percent' && discountPreview > 100)}
               className="w-full h-14 rounded-xl bg-pos-text text-pos-bg font-bold disabled:opacity-50"
             >
-              Apply{' '}
+              {submitting ? 'Applying…' : 'Apply'}{' '}
               {mode === 'percent'
                 ? `${Number.isFinite(discountPreview) ? discountPreview : 0}%`
                 : formatCurrency(Number.isFinite(discountPreview) ? discountPreview : 0)}
