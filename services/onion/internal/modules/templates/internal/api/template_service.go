@@ -48,6 +48,10 @@ func (a *TemplateAPI) ListTemplates(ctx context.Context, _ *crmtemplatev1.ListTe
 }
 
 func (a *TemplateAPI) CreateTemplate(ctx context.Context, req *crmtemplatev1.CreateTemplateRequest) (*crmtemplatev1.CreateTemplateResponse, error) {
+	if err := requireTemplateManager(ctx); err != nil {
+		return nil, err
+	}
+
 	if err := validateTemplateFields(req.GetName(), req.GetType(), req.GetBody()); err != nil {
 		return nil, err
 	}
@@ -85,6 +89,10 @@ func (a *TemplateAPI) CreateTemplate(ctx context.Context, req *crmtemplatev1.Cre
 }
 
 func (a *TemplateAPI) UpdateTemplate(ctx context.Context, req *crmtemplatev1.UpdateTemplateRequest) (*crmtemplatev1.UpdateTemplateResponse, error) {
+	if err := requireTemplateManager(ctx); err != nil {
+		return nil, err
+	}
+
 	if req.GetId() == 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Template ID is required")
 	}
@@ -93,8 +101,10 @@ func (a *TemplateAPI) UpdateTemplate(ctx context.Context, req *crmtemplatev1.Upd
 	if body == nil {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Template name is required")
 	}
-	if strings.TrimSpace(body.GetName()) == "" {
-		return nil, onekiterrors.New(http.StatusBadRequest, "Template name is required")
+	// Same field validation as create: updates previously skipped the
+	// type/body checks and could persist unusable templates.
+	if err := validateTemplateFields(body.GetName(), body.GetType(), body.GetBody()); err != nil {
+		return nil, err
 	}
 
 	device := authPkg.DeviceCtx(ctx)
@@ -135,6 +145,10 @@ func (a *TemplateAPI) UpdateTemplate(ctx context.Context, req *crmtemplatev1.Upd
 }
 
 func (a *TemplateAPI) DeleteTemplate(ctx context.Context, req *crmtemplatev1.DeleteTemplateRequest) (*crmtemplatev1.DeleteTemplateResponse, error) {
+	if err := requireTemplateManager(ctx); err != nil {
+		return nil, err
+	}
+
 	if req.GetId() == 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Template ID is required")
 	}
@@ -171,6 +185,22 @@ func validateTemplateFields(name, templateType, body string) error {
 		return onekiterrors.New(http.StatusBadRequest, "Template body is required")
 	}
 	return nil
+}
+
+// requireTemplateManager mirrors the HTTP layer's requireCRMManager gate:
+// creating/updating/deleting shared tenant templates must not be available to
+// every authenticated member role.
+func requireTemplateManager(ctx context.Context) error {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return onekiterrors.PermissionDenied()
+	}
+	switch strings.ToLower(strings.TrimSpace(device.User.Role)) {
+	case "owner", "admin", "console_admin":
+		return nil
+	default:
+		return onekiterrors.PermissionDenied()
+	}
 }
 
 func newTemplate(template domain.Template) *crmtemplatev1.Template {

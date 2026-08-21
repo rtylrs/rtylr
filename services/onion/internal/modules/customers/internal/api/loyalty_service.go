@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
@@ -31,6 +32,22 @@ func loyaltyBusinessID(ctx context.Context) (int64, int64, error) {
 		return 0, 0, onekiterrors.PermissionDenied()
 	}
 	return device.User.UserID, businessID, nil
+}
+
+// requireLoyaltyManager mirrors the HTTP layer's requireCRMManager gate:
+// authentication alone is not sufficient for changing loyalty rules or
+// mutating point balances through the RPC surface.
+func requireLoyaltyManager(ctx context.Context) error {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return onekiterrors.PermissionDenied()
+	}
+	switch strings.ToLower(strings.TrimSpace(device.User.Role)) {
+	case "owner", "admin", "console_admin":
+		return nil
+	default:
+		return onekiterrors.PermissionDenied()
+	}
 }
 
 func newLoyaltyConfigProto(cfg domain.LoyaltyConfig) *crmloyaltyv1.LoyaltyConfig {
@@ -98,9 +115,23 @@ func (a *LoyaltyAPI) GetLoyaltyConfig(ctx context.Context, _ *crmloyaltyv1.GetLo
 }
 
 func (a *LoyaltyAPI) UpdateLoyaltyConfig(ctx context.Context, req *crmloyaltyv1.UpdateLoyaltyConfigRequest) (*crmloyaltyv1.UpdateLoyaltyConfigResponse, error) {
+	if err := requireLoyaltyManager(ctx); err != nil {
+		return nil, err
+	}
+
 	ownerID, businessID, err := loyaltyBusinessID(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	// Same negative-value guards the HTTP handler enforces; a config with
+	// negative earn rates or discount percentages corrupts every later
+	// balance/tier calculation.
+	switch {
+	case req.GetPointsPerCurrencyUnit() < 0, req.GetCurrencyPerPoint() < 0,
+		req.GetBronzeDiscountPct() < 0, req.GetSilverDiscountPct() < 0,
+		req.GetGoldDiscountPct() < 0, req.GetPlatinumDiscountPct() < 0:
+		return nil, onekiterrors.New(http.StatusBadRequest, "Loyalty config values must not be negative")
 	}
 
 	input := domain.LoyaltyConfigInput{
@@ -147,6 +178,10 @@ func (a *LoyaltyAPI) ListLoyaltyTiers(ctx context.Context, _ *crmloyaltyv1.ListL
 }
 
 func (a *LoyaltyAPI) CreateLoyaltyTier(ctx context.Context, req *crmloyaltyv1.CreateLoyaltyTierRequest) (*crmloyaltyv1.CreateLoyaltyTierResponse, error) {
+	if err := requireLoyaltyManager(ctx); err != nil {
+		return nil, err
+	}
+
 	ownerID, businessID, err := loyaltyBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -174,6 +209,10 @@ func (a *LoyaltyAPI) CreateLoyaltyTier(ctx context.Context, req *crmloyaltyv1.Cr
 }
 
 func (a *LoyaltyAPI) UpdateLoyaltyTier(ctx context.Context, req *crmloyaltyv1.UpdateLoyaltyTierRequest) (*crmloyaltyv1.UpdateLoyaltyTierResponse, error) {
+	if err := requireLoyaltyManager(ctx); err != nil {
+		return nil, err
+	}
+
 	ownerID, businessID, err := loyaltyBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -244,6 +283,15 @@ func (a *LoyaltyAPI) AwardPoints(ctx context.Context, req *crmloyaltyv1.AwardPoi
 		return nil, err
 	}
 
+	// Mirrors the HTTP handler's Validate: a non-positive award would move a
+	// customer's balance backwards through the "earn" path.
+	if req.GetCustomerId() == 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
+	}
+	if req.GetPoints() <= 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
+	}
+
 	svcErr := a.Service.AwardPoints(ctx, domain.AwardPointsInput{
 		OwnerID:       ownerID,
 		BusinessID:    businessID,
@@ -267,6 +315,16 @@ func (a *LoyaltyAPI) RedeemPoints(ctx context.Context, req *crmloyaltyv1.RedeemP
 	ownerID, businessID, err := loyaltyBusinessID(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	// Mirrors the HTTP handler's Validate. Redeem applies -Points as the
+	// balance delta, so a negative input would credit points instead of
+	// spending them.
+	if req.GetCustomerId() == 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Customer ID is required")
+	}
+	if req.GetPoints() <= 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
 	}
 
 	svcErr := a.Service.RedeemPoints(ctx, domain.RedeemPointsInput{

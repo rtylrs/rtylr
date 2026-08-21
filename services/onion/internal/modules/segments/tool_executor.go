@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/segments/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -38,7 +39,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 }
 
 func (m *Module) executeListSegmentsTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := segmentToolOwnerID(ctx)
+	businessID, err := segmentToolBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +49,7 @@ func (m *Module) executeListSegmentsTool(ctx context.Context, input map[string]a
 		return nil, err
 	}
 
-	segments, err := m.service.List(ctx, ownerID)
+	segments, err := m.service.List(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -106,16 +107,25 @@ func parseListSegmentsToolInput(input map[string]any) (listSegmentsToolInput, er
 	return listSegmentsToolInput{Query: query, Page: page, Limit: limit}, nil
 }
 
-func segmentToolOwnerID(ctx context.Context) (int64, error) {
+// segmentToolBusinessID resolves the business id used to scope tenant data for
+// the caller. Segments are keyed by business_id, never by user id — scoping by
+// user id would both hide the caller's own segments and leak other tenants'
+// segments whenever users.id collides with businesses.id.
+func segmentToolBusinessID(ctx context.Context) (int64, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User != nil && device.User.UserID > 0 {
-		return device.User.UserID, nil
+	if device.User != nil {
+		resolved, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+		if err == nil && resolved > 0 {
+			return resolved, nil
+		}
 	}
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if ok && authUser != nil && authUser.UserID > 0 {
-		return authUser.UserID, nil
+	if authUser, ok := authPkg.GetAuthUser(ctx); ok && authUser != nil {
+		resolved, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+		if err == nil && resolved > 0 {
+			return resolved, nil
+		}
 	}
-	return 0, errors.New("authentication is required")
+	return 0, errors.New("cannot determine business context")
 }
 
 func filterSegmentsForTool(segments []domain.Segment, input listSegmentsToolInput) []domain.Segment {

@@ -12,6 +12,7 @@ var (
 	ErrContactNotFound    = errors.New("contact not found")
 	ErrTouchpointNotFound = errors.New("touchpoint not found")
 	ErrContractNotFound   = errors.New("contract not found")
+	ErrInvalidLeadStage   = errors.New("invalid lead stage")
 )
 
 type LeadStage string
@@ -25,6 +26,19 @@ const (
 	LeadStageContracted   LeadStage = "contracted"
 	LeadStageLost         LeadStage = "lost"
 )
+
+// IsValid reports whether the stage is one of the known pipeline stages.
+// Unvalidated stages used to be persisted verbatim and then surfaced as their
+// own bucket in GetPipeline (GROUP BY stage), corrupting funnel reporting.
+func (s LeadStage) IsValid() bool {
+	switch s {
+	case LeadStageCold, LeadStageContacted, LeadStageDemoBooked, LeadStageDemoDone,
+		LeadStageProposalSent, LeadStageContracted, LeadStageLost:
+		return true
+	default:
+		return false
+	}
+}
 
 type Lead struct {
 	ID           int64     `json:"id"`

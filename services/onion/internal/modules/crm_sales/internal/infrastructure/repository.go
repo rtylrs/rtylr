@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
@@ -326,7 +327,13 @@ func (r *Repository) UpdateContact(ctx context.Context, id, businessID int64, re
 }
 
 func (r *Repository) DeleteContact(ctx context.Context, id, businessID int64) error {
-	result, err := r.queries.DeleteContact(ctx, sqlc.DeleteContactParams{ID: id, BusinessID: businessID})
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	result, err := r.queries.WithTx(tx).DeleteContact(ctx, sqlc.DeleteContactParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		return err
 	}
@@ -337,7 +344,17 @@ func (r *Repository) DeleteContact(ctx context.Context, id, businessID int64) er
 	if rows == 0 {
 		return domain.ErrContactNotFound
 	}
-	return nil
+
+	// crm_touchpoints.contact_id is nullable: detach touchpoints instead of
+	// leaving them pointing at a deleted contact.
+	if _, err := tx.ExecContext(ctx,
+		"UPDATE crm_touchpoints SET contact_id = NULL WHERE business_id = ? AND contact_id = ?",
+		businessID, id,
+	); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 // ---------------------------------------------------------------------------
@@ -401,6 +418,11 @@ func (r *Repository) CreateTouchpoint(ctx context.Context, ownerID, createdBy in
 		}
 	}
 
+	nextFollowUp, err := nullableDatePtr(req.NextFollowUp)
+	if err != nil {
+		return domain.Touchpoint{}, err
+	}
+
 	result, err := r.queries.WithTx(tx).CreateTouchpoint(ctx, sqlc.CreateTouchpointParams{
 		OwnerID:      ownerID,
 		BusinessID:   businessID,
@@ -409,7 +431,7 @@ func (r *Repository) CreateTouchpoint(ctx context.Context, ownerID, createdBy in
 		Type:         tp,
 		Outcome:      outcome,
 		Notes:        nullableString(req.Notes),
-		NextFollowUp: nullableDatePtr(req.NextFollowUp),
+		NextFollowUp: nextFollowUp,
 		CreatedBy:    createdBy,
 	})
 	if err != nil {
@@ -501,6 +523,11 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 		return domain.Contract{}, err
 	}
 
+	signedAt, err := nullableDatePtr(req.SignedAt)
+	if err != nil {
+		return domain.Contract{}, err
+	}
+
 	result, err := r.queries.WithTx(tx).CreateContract(ctx, sqlc.CreateContractParams{
 		OwnerID:      ownerID,
 		BusinessID:   businessID,
@@ -508,7 +535,7 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 		Plan:         plan,
 		Mrr:          req.MRR.String(),
 		Seats:        int32(seats),
-		SignedAt:     nullableDatePtr(req.SignedAt),
+		SignedAt:     signedAt,
 		SignedByName: nullableString(req.SignedByName),
 		ClosedBy:     nullableInt64(req.ClosedBy),
 		Notes:        nullableString(req.Notes),
@@ -570,11 +597,15 @@ func (r *Repository) UpdateContract(ctx context.Context, id, businessID int64, r
 	if seats == 0 {
 		seats = 1
 	}
-	err := r.queries.UpdateContract(ctx, sqlc.UpdateContractParams{
+	signedAt, err := nullableDatePtr(req.SignedAt)
+	if err != nil {
+		return domain.Contract{}, err
+	}
+	err = r.queries.UpdateContract(ctx, sqlc.UpdateContractParams{
 		Plan:         req.Plan,
 		Mrr:          req.MRR.String(),
 		Seats:        int32(seats),
-		SignedAt:     nullableDatePtr(req.SignedAt),
+		SignedAt:     signedAt,
 		SignedByName: nullableString(req.SignedByName),
 		ClosedBy:     nullableInt64(req.ClosedBy),
 		Notes:        nullableString(req.Notes),
@@ -820,15 +851,15 @@ func nullableString(s string) sql.NullString {
 	return sql.NullString{String: s, Valid: s != ""}
 }
 
-func nullableDatePtr(s *string) sql.NullTime {
+func nullableDatePtr(s *string) (sql.NullTime, error) {
 	if s == nil || *s == "" {
-		return sql.NullTime{}
+		return sql.NullTime{}, nil
 	}
 	t, err := time.Parse("2006-01-02", *s)
 	if err != nil {
-		return sql.NullTime{}
+		return sql.NullTime{}, fmt.Errorf("invalid date %q: want YYYY-MM-DD", *s)
 	}
-	return sql.NullTime{Time: t, Valid: true}
+	return sql.NullTime{Time: t, Valid: true}, nil
 }
 
 func nullableInt64(v *int64) sql.NullInt64 {

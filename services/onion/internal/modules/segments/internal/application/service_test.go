@@ -42,7 +42,7 @@ func (m *mockRepo) Delete(_ context.Context, _, _ int64) error {
 	return m.delErr
 }
 
-func (m *mockRepo) ListCustomers(_ context.Context, _ int64, _, _ int) ([]domain.SegmentCustomer, int, error) {
+func (m *mockRepo) ListCustomers(_ context.Context, _ int64, _ []byte, _, _ int) ([]domain.SegmentCustomer, int, error) {
 	return m.customers, len(m.customers), m.customersErr
 }
 

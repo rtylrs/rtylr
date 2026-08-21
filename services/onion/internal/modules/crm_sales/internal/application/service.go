@@ -111,6 +111,9 @@ func (s *Service) CreateLead(ctx context.Context, businessID int64, req domain.C
 	if req.Stage == "" {
 		req.Stage = domain.LeadStageCold
 	}
+	if !req.Stage.IsValid() {
+		return domain.Lead{}, fmt.Errorf("%w: %q", domain.ErrInvalidLeadStage, string(req.Stage))
+	}
 	lead, err := s.repo.CreateLead(ctx, businessID, req)
 	if err == nil {
 		invalidateCRMSalesScope(ctx, businessID)
@@ -127,6 +130,9 @@ func (s *Service) UpdateLead(ctx context.Context, id, businessID int64, req doma
 	}
 	if req.Stage == "" {
 		req.Stage = domain.LeadStageCold
+	}
+	if !req.Stage.IsValid() {
+		return domain.Lead{}, fmt.Errorf("%w: %q", domain.ErrInvalidLeadStage, string(req.Stage))
 	}
 	lead, err := s.repo.UpdateLead(ctx, id, businessID, req)
 	if err == nil {

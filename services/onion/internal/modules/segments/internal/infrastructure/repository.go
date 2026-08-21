@@ -5,19 +5,23 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"strconv"
 
 	"github.com/voxire/onion/internal/modules/segments/internal/domain"
 	"github.com/voxire/onion/internal/modules/segments/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/segmentrules"
 )
 
 type Repository struct {
 	queries *sqlc.Queries
+	db      *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		queries: sqlc.New(db),
+		db:      db,
 	}
 }
 
@@ -107,11 +111,10 @@ func (r *Repository) Update(ctx context.Context, input domain.SegmentUpdateInput
 	return nil
 }
 
-// ListCustomers returns a paginated view of the business's active customers.
-// Segment membership isn't computed from filter rules yet - this mirrors the
-// customers module's pre-existing legacy behavior of returning all active
-// customers regardless of the segment's filters.
-func (r *Repository) ListCustomers(ctx context.Context, businessID int64, page, pageSize int) ([]domain.SegmentCustomer, int, error) {
+// ListCustomers returns a paginated view of the business's active customers,
+// filtered by the segment's stored rules when they are present and valid.
+// Segments with no rules keep the legacy "all active customers" behavior.
+func (r *Repository) ListCustomers(ctx context.Context, businessID int64, filters []byte, page, pageSize int) ([]domain.SegmentCustomer, int, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -122,41 +125,110 @@ func (r *Repository) ListCustomers(ctx context.Context, businessID int64, page, 
 
 	offset := (page - 1) * pageSize
 
-	total, err := r.queries.CountSegmentCustomers(ctx, businessID)
-	if err != nil {
+	where := "business_id = ? AND is_active = TRUE"
+	args := []any{businessID}
+	if frag, fargs := segmentrules.Filter(filters); frag != "" {
+		where += " AND " + frag
+		args = append(args, fargs...)
+	}
+
+	countSQL := "SELECT COUNT(*) FROM crm_customers WHERE " + where
+	var total int
+	if err := r.db.QueryRowContext(ctx, countSQL, args...).Scan(&total); err != nil {
 		logger.Ctx(ctx).Error("Failed to count segment customers", logger.Error(err))
 
 		return nil, 0, err
 	}
 
-	rows, err := r.queries.ListSegmentCustomers(ctx, sqlc.ListSegmentCustomersParams{
-		BusinessID: businessID,
-		Limit:      int32(pageSize),
-		Offset:     int32(offset),
-	})
+	listSQL := `SELECT id, owner_id, first_name, last_name, email, phone, date_of_birth, gender,
+       address, city, country, loyalty_points, total_spent, visit_count, last_visit_at,
+       loyalty_tier, tags, notes, is_active, created_at, updated_at
+FROM crm_customers WHERE ` + where + `
+ORDER BY created_at DESC LIMIT ? OFFSET ?`
+	rows, err := r.db.QueryContext(ctx, listSQL, append(args, pageSize, offset)...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list segment customers", logger.Error(err))
 
 		return nil, 0, err
 	}
+	defer rows.Close()
 
-	customers := make([]domain.SegmentCustomer, 0, len(rows))
+	customers := make([]domain.SegmentCustomer, 0, pageSize)
 
-	for _, row := range rows {
-		customers = append(customers, domain.SegmentCustomer{
-			ID:        row.ID,
-			FirstName: row.FirstName,
-			LastName:  row.LastName.String,
-			Email:     row.Email.String,
-			Phone:     row.Phone.String,
-		})
+	for rows.Next() {
+		var (
+			c           domain.SegmentCustomer
+			lastName    sql.NullString
+			email       sql.NullString
+			phone       sql.NullString
+			dob         sql.NullTime
+			gender      sql.NullString
+			address     sql.NullString
+			city        sql.NullString
+			country     sql.NullString
+			loyalPoints sql.NullInt64
+			totalSpent  sql.NullString
+			visitCount  sql.NullInt64
+			lastVisitAt sql.NullTime
+			tier        sql.NullString
+			tagsJSON    sql.NullString
+			notes       sql.NullString
+		)
+		if err := rows.Scan(&c.ID, &c.OwnerID, &c.FirstName, &lastName, &email, &phone, &dob, &gender,
+			&address, &city, &country, &loyalPoints, &totalSpent, &visitCount, &lastVisitAt,
+			&tier, &tagsJSON, &notes, &c.IsActive, &c.CreatedAt, &c.UpdatedAt); err != nil {
+			logger.Ctx(ctx).Error("Failed to scan segment customer", logger.Error(err))
+
+			return nil, 0, err
+		}
+
+		c.LastName = lastName.String
+		c.Email = email.String
+		c.Phone = phone.String
+		if dob.Valid {
+			t := dob.Time
+			c.DateOfBirth = &t
+		}
+		c.Gender = gender.String
+		c.Address = address.String
+		c.City = city.String
+		c.Country = country.String
+		if loyalPoints.Valid {
+			c.LoyaltyPoints = loyalPoints.Int64
+		}
+		if totalSpent.Valid {
+			c.TotalSpent, _ = strconv.ParseFloat(totalSpent.String, 64)
+		}
+		if visitCount.Valid {
+			c.VisitCount = visitCount.Int64
+		}
+		if lastVisitAt.Valid {
+			t := lastVisitAt.Time
+			c.LastVisitAt = &t
+		}
+		c.LoyaltyTier = tier.String
+		if tagsJSON.Valid && tagsJSON.String != "" {
+			var tags []string
+			if err := json.Unmarshal([]byte(tagsJSON.String), &tags); err == nil {
+				c.Tags = tags
+			}
+		}
+		if c.Tags == nil {
+			c.Tags = []string{}
+		}
+		c.Notes = notes.String
+
+		customers = append(customers, c)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
 	}
 
-	return customers, int(total), nil
+	return customers, total, nil
 }
 
 func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
-	_, err := r.queries.DeleteSegment(ctx, sqlc.DeleteSegmentParams{
+	result, err := r.queries.DeleteSegment(ctx, sqlc.DeleteSegmentParams{
 		ID:         id,
 		BusinessID: businessID,
 	})
@@ -164,6 +236,14 @@ func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
 		logger.Ctx(ctx).Error("Failed to delete segment", logger.Error(err))
 
 		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrSegmentNotFound
 	}
 
 	return nil

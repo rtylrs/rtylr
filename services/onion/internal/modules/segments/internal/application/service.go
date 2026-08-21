@@ -22,7 +22,7 @@ type repository interface {
 	Create(ctx context.Context, input domain.SegmentInput) (int64, error)
 	Update(ctx context.Context, input domain.SegmentUpdateInput) error
 	Delete(ctx context.Context, businessID, id int64) error
-	ListCustomers(ctx context.Context, businessID int64, page, pageSize int) ([]domain.SegmentCustomer, int, error)
+	ListCustomers(ctx context.Context, businessID int64, filters []byte, page, pageSize int) ([]domain.SegmentCustomer, int, error)
 }
 
 type Service struct {
@@ -84,7 +84,7 @@ func (s *Service) GetDetail(ctx context.Context, businessID, id int64) (domain.S
 		return domain.SegmentDetail{}, err
 	}
 
-	customers, _, err := s.repo.ListCustomers(ctx, businessID, 1, 50)
+	customers, _, err := s.repo.ListCustomers(ctx, businessID, segment.Filters, 1, 50)
 	if err != nil {
 		return domain.SegmentDetail{}, err
 	}
@@ -93,9 +93,10 @@ func (s *Service) GetDetail(ctx context.Context, businessID, id int64) (domain.S
 }
 
 func (s *Service) GetCustomers(ctx context.Context, businessID, id int64, page, pageSize int) ([]domain.SegmentCustomer, int, error) {
-	if _, err := s.Get(ctx, businessID, id); err != nil {
+	segment, err := s.Get(ctx, businessID, id)
+	if err != nil {
 		return nil, 0, err
 	}
 
-	return s.repo.ListCustomers(ctx, businessID, page, pageSize)
+	return s.repo.ListCustomers(ctx, businessID, segment.Filters, page, pageSize)
 }

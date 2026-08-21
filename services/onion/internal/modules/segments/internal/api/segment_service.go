@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/segments/internal/application"
@@ -42,6 +43,10 @@ func (a *SegmentAPI) CreateSegment(ctx context.Context, req *crmsegmentv1.Create
 		return nil, onekiterrors.New(http.StatusBadRequest, "Name is required")
 	}
 
+	if errModel := requireSegmentManager(ctx); errModel != nil {
+		return nil, errModel
+	}
+
 	businessID, ownerID, errModel := resolveRequestIdentity(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -62,6 +67,10 @@ func (a *SegmentAPI) CreateSegment(ctx context.Context, req *crmsegmentv1.Create
 }
 
 func (a *SegmentAPI) UpdateSegment(ctx context.Context, req *crmsegmentv1.UpdateSegmentRequest) (*crmsegmentv1.UpdateSegmentResponse, error) {
+	if errModel := requireSegmentManager(ctx); errModel != nil {
+		return nil, errModel
+	}
+
 	body := req.GetBody()
 	if body == nil || body.GetName() == "" {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Name is required")
@@ -91,6 +100,10 @@ func (a *SegmentAPI) UpdateSegment(ctx context.Context, req *crmsegmentv1.Update
 }
 
 func (a *SegmentAPI) DeleteSegment(ctx context.Context, req *crmsegmentv1.DeleteSegmentRequest) (*crmsegmentv1.DeleteSegmentResponse, error) {
+	if errModel := requireSegmentManager(ctx); errModel != nil {
+		return nil, errModel
+	}
+
 	businessID, _, errModel := resolveRequestIdentity(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -199,6 +212,22 @@ func resolveRequestIdentity(ctx context.Context) (businessID, ownerID int64, err
 		return 0, 0, onekiterrors.PermissionDenied()
 	}
 	return businessID, device.User.UserID, nil
+}
+
+// requireSegmentManager mirrors the HTTP layer's requireCRMManager gate:
+// creating/updating/deleting shared tenant segments is a policy-changing,
+// destructive action that authentication alone does not authorize.
+func requireSegmentManager(ctx context.Context) error {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil {
+		return onekiterrors.PermissionDenied()
+	}
+	switch strings.ToLower(strings.TrimSpace(device.User.Role)) {
+	case "owner", "admin", "console_admin":
+		return nil
+	default:
+		return onekiterrors.PermissionDenied()
+	}
 }
 
 func newSegments(items []domain.Segment) []*crmsegmentv1.Segment {

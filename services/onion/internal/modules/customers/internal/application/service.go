@@ -2,7 +2,10 @@ package application
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -40,10 +43,18 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 // ─── Customers ────────────────────────────────────────────────────────────────
 
 func (s *Service) ListCustomers(ctx context.Context, filter domain.CustomerListFilter) (domain.CustomerListResult, error) {
+	// Filter values are arbitrary user input; hashing them keeps separator
+	// characters like '|' from colliding two different filter sets onto one
+	// cached page within the same business.
+	filterKey := ""
+	if filter.Search != "" || filter.Tier != "" || filter.Tag != "" {
+		sum := sha256.Sum256([]byte(fmt.Sprintf("s=%s\nt=%s\ntag=%s", filter.Search, filter.Tier, filter.Tag)))
+		filterKey = hex.EncodeToString(sum[:8])
+	}
 	key := fmt.Sprintf(
-		"%s|s=%s|t=%s|tag=%s|p=%d|ps=%d",
+		"%s|f=%s|p=%d|ps=%d",
 		cacheKeys.CustomersList(filter.BusinessID),
-		filter.Search, filter.Tier, filter.Tag, filter.Page, filter.PageSize,
+		filterKey, filter.Page, filter.PageSize,
 	)
 	return cacher.Of[domain.CustomerListResult]().GetOrComputeSingle(
 		ctx,
@@ -90,10 +101,13 @@ func (s *Service) UpdateCustomer(ctx context.Context, input domain.CustomerUpdat
 	if input.LoyaltyTier != "" {
 		// Preserve existing points — only update tier label
 		existing, err := s.repo.GetCustomerByID(ctx, input.BusinessID, input.ID)
-		if err == nil {
-			if loyaltyErr := s.repo.UpdateCustomerLoyalty(ctx, input.BusinessID, input.ID, existing.LoyaltyPoints, input.LoyaltyTier); loyaltyErr != nil {
-				logger.Ctx(ctx).Error("Failed to update customer loyalty tier", logger.Error(loyaltyErr))
-			}
+		if err != nil {
+			return err
+		}
+		// An invalid tier (anything outside the ENUM) previously failed the
+		// UPDATE here while the API still answered 200 with the old tier.
+		if err := s.repo.UpdateCustomerLoyalty(ctx, input.BusinessID, input.ID, existing.LoyaltyPoints, input.LoyaltyTier); err != nil {
+			return err
 		}
 	}
 	invalidateCustomerScope(ctx, input.BusinessID)
@@ -112,6 +126,10 @@ func (s *Service) RecordVisit(ctx context.Context, input domain.RecordVisitInput
 	if err := s.repo.RecordVisit(ctx, input.BusinessID, input.CustomerID, input.Amount); err != nil {
 		return err
 	}
+
+	s.insertTimeline(ctx, input.BusinessID, input.OwnerID, input.CustomerID,
+		"visit", fmt.Sprintf("Visit recorded (spend: %.2f)", input.Amount),
+		map[string]any{"amount": input.Amount})
 
 	if input.AwardPoints && input.Amount > 0 {
 		cfg, err := s.GetLoyaltyConfig(ctx, input.BusinessID)
@@ -158,7 +176,12 @@ func (s *Service) AwardPoints(ctx context.Context, input domain.AwardPointsInput
 		Description:   input.Description,
 		ReferenceID:   input.ReferenceID,
 		ReferenceType: input.ReferenceType,
-	}, input.Points, func(balance int) string { return RecalculateTier(balance, cfg) })
+	}, input.Points, func(balance int) string { return RecalculateTier(balance, cfg) }, func() {
+		s.insertTimeline(ctx, input.BusinessID, input.OwnerID, input.CustomerID,
+			"award", input.Description, map[string]any{"points": input.Points})
+		invalidateCustomerScope(ctx, input.BusinessID)
+		s.invalidateDashboardCache(ctx, input.BusinessID)
+	})
 }
 
 func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemPointsInput) error {
@@ -175,7 +198,12 @@ func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemPointsInp
 		Description:   input.Description,
 		ReferenceID:   input.ReferenceID,
 		ReferenceType: input.ReferenceType,
-	}, -input.Points, func(balance int) string { return RecalculateTier(balance, cfg) })
+	}, -input.Points, func(balance int) string { return RecalculateTier(balance, cfg) }, func() {
+		s.insertTimeline(ctx, input.BusinessID, input.OwnerID, input.CustomerID,
+			"reward", input.Description, map[string]any{"points": input.Points})
+		invalidateCustomerScope(ctx, input.BusinessID)
+		s.invalidateDashboardCache(ctx, input.BusinessID)
+	})
 }
 
 func (s *Service) ListLoyaltyTransactions(ctx context.Context, businessID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {
@@ -343,12 +371,13 @@ func (s *Service) GetCustomerDetail(ctx context.Context, businessID, customerID 
 
 // -- Import ------------------------------------------------------------------
 
-func (s *Service) ImportCustomers(ctx context.Context, businessID int64, items []domain.CustomerImportItem, dedupe bool) (domain.CustomerImportResult, error) {
-	imported, failed, err := s.repo.BulkCreateCustomers(ctx, businessID, items, dedupe)
+func (s *Service) ImportCustomers(ctx context.Context, businessID, ownerID int64, items []domain.CustomerImportItem, dedupe bool) (domain.CustomerImportResult, error) {
+	imported, failed, err := s.repo.BulkCreateCustomers(ctx, businessID, ownerID, items, dedupe)
 	if err != nil {
 		return domain.CustomerImportResult{}, err
 	}
 
+	invalidateCustomerScope(ctx, businessID)
 	s.invalidateDashboardCache(ctx, businessID)
 
 	return domain.CustomerImportResult{
@@ -371,9 +400,36 @@ func (s *Service) MergeCustomers(ctx context.Context, input domain.MergeCustomer
 		return err
 	}
 
+	// Without this, the merged-away secondary keeps being served from the
+	// per-customer cache even though the DB no longer has it.
+	invalidateCustomerScope(ctx, input.BusinessID)
 	s.invalidateDashboardCache(ctx, input.BusinessID)
 
+	s.insertTimeline(ctx, input.BusinessID, input.OwnerID, input.PrimaryID,
+		"note", fmt.Sprintf("Merged customer #%d into this profile", input.SecondaryID),
+		map[string]any{"merged_customer_id": input.SecondaryID})
+
 	return nil
+}
+
+// insertTimeline best-effort records an entry in the customer timeline. The
+// timeline is auxiliary (profile activity feed + GDPR export); a failed write
+// must not fail the underlying business operation.
+func (s *Service) insertTimeline(ctx context.Context, businessID, ownerID, customerID int64, entryType, description string, metadata map[string]any) {
+	raw, err := json.Marshal(metadata)
+	if err != nil {
+		raw = []byte("{}")
+	}
+	if err := s.repo.InsertTimelineEntry(ctx, domain.TimelineEntry{
+		OwnerID:     ownerID,
+		BusinessID:  businessID,
+		CustomerID:  customerID,
+		Type:        entryType,
+		Description: description,
+		Metadata:    raw,
+	}); err != nil {
+		logger.Ctx(ctx).Warn("failed to write customer timeline entry", logger.Error(err))
+	}
 }
 
 // -- Loyalty Tiers -----------------------------------------------------------

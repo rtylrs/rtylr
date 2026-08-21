@@ -45,9 +45,17 @@ type ImportCustomersResponse struct {
 	Message        string `json:"message"`
 }
 
+// maxImportBatchSize bounds one import request. Imports run sequential
+// inserts; without a cap a single request could push an unbounded number of
+// PII rows in one shot.
+const maxImportBatchSize = 1000
+
 func (h *ImportCustomersHandler) Validate(_ context.Context, req *ImportCustomersRequest) error {
 	if len(req.Customers) == 0 {
 		return onekiterrors.New(http.StatusBadRequest, "At least one customer is required")
+	}
+	if len(req.Customers) > maxImportBatchSize {
+		return onekiterrors.New(http.StatusBadRequest, "Too many customers per import batch")
 	}
 
 	return nil
@@ -57,6 +65,11 @@ func (h *ImportCustomersHandler) Serve(ctx context.Context, req *ImportCustomers
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return ImportCustomersResponse{}, onekiterrors.PermissionDenied()
+	}
+	// Bulk-inserting PII is destructive/policy-changing, same as export,
+	// delete and merge.
+	if err := requireCRMManager(ctx); err != nil {
+		return ImportCustomersResponse{}, err
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
@@ -81,7 +94,7 @@ func (h *ImportCustomersHandler) Serve(ctx context.Context, req *ImportCustomers
 		}
 	}
 
-	result, err := h.CRMService.ImportCustomers(ctx, businessID, items, req.Dedupe)
+	result, err := h.CRMService.ImportCustomers(ctx, businessID, device.User.UserID, items, req.Dedupe)
 	if err != nil {
 		return ImportCustomersResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to import customers")
 	}

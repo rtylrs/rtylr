@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -18,6 +19,7 @@ import (
 	"github.com/voxire/onion/internal/modules/segments"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/searchutil"
+	"github.com/voxire/onion/internal/platform/segmentrules"
 )
 
 type Repository struct {
@@ -277,7 +279,13 @@ func (r *Repository) UpdateCustomer(ctx context.Context, input domain.CustomerUp
 }
 
 func (r *Repository) DeleteCustomer(ctx context.Context, businessID, customerID int64) error {
-	result, err := r.queries.DeleteCustomer(ctx, sqlc.DeleteCustomerParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	result, err := r.queries.WithTx(tx).DeleteCustomer(ctx, sqlc.DeleteCustomerParams{
 		ID:         customerID,
 		BusinessID: businessID,
 	})
@@ -296,7 +304,26 @@ func (r *Repository) DeleteCustomer(ctx context.Context, businessID, customerID 
 		return domain.ErrCustomerNotFound
 	}
 
-	return nil
+	// The CRM schema has no foreign keys: rows in these tables would keep
+	// referencing the deleted customer forever (campaign/feedback stats join
+	// on them). Tables with NOT NULL customer_id are purged; nullable
+	// references are detached.
+	cleanup := []string{
+		"DELETE FROM crm_campaign_sends WHERE business_id = ? AND customer_id = ?",
+		"DELETE FROM crm_feedback WHERE business_id = ? AND customer_id = ?",
+		"DELETE FROM crm_loyalty_transactions WHERE business_id = ? AND customer_id = ?",
+		"DELETE FROM crm_customer_timeline WHERE business_id = ? AND customer_id = ?",
+		"UPDATE crm_contacts SET customer_id = NULL WHERE business_id = ? AND customer_id = ?",
+	}
+	for _, stmt := range cleanup {
+		if _, err := tx.ExecContext(ctx, stmt, businessID, customerID); err != nil {
+			logger.Ctx(ctx).Error("Failed to clean up customer dependencies", logger.Error(err))
+
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
 func (r *Repository) UpdateCustomerLoyalty(ctx context.Context, businessID, customerID int64, newPoints int, newTier string) error {
@@ -352,8 +379,10 @@ func (r *Repository) CreateLoyaltyTransaction(ctx context.Context, tx domain.Loy
 
 // ApplyLoyaltyDelta serializes the balance update and audit insert in one
 // transaction. The customer row lock prevents concurrent awards/redeems from
-// calculating from the same stale balance.
-func (r *Repository) ApplyLoyaltyDelta(ctx context.Context, input domain.LoyaltyTransaction, delta int, tierFor func(int) string) error {
+// calculating from the same stale balance. onCommitted runs only after the
+// transaction commits, so callers can invalidate caches without racing a
+// rollback.
+func (r *Repository) ApplyLoyaltyDelta(ctx context.Context, input domain.LoyaltyTransaction, delta int, tierFor func(int) string, onCommitted func()) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -391,7 +420,13 @@ func (r *Repository) ApplyLoyaltyDelta(ctx context.Context, input domain.Loyalty
 	); err != nil {
 		return err
 	}
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	if onCommitted != nil {
+		onCommitted()
+	}
+	return nil
 }
 
 func (r *Repository) ListLoyaltyTransactions(ctx context.Context, businessID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error) {
@@ -858,7 +893,7 @@ func (r *Repository) InsertTimelineEntry(ctx context.Context, entry domain.Timel
 
 // ─── Import ──────────────────────────────────────────────────────────────────
 
-func (r *Repository) BulkCreateCustomers(ctx context.Context, businessID int64, items []domain.CustomerImportItem, dedupe bool) (int, int, error) {
+func (r *Repository) BulkCreateCustomers(ctx context.Context, businessID, ownerID int64, items []domain.CustomerImportItem, dedupe bool) (int, int, error) {
 	imported := 0
 	failed := 0
 
@@ -891,7 +926,7 @@ func (r *Repository) BulkCreateCustomers(ctx context.Context, businessID int64, 
 		}
 
 		_, err = r.queries.CreateCustomer(ctx, sqlc.CreateCustomerParams{
-			OwnerID:     businessID,
+			OwnerID:     ownerID,
 			BusinessID:  businessID,
 			FirstName:   item.FirstName,
 			LastName:    sql.NullString{String: item.LastName, Valid: item.LastName != ""},
@@ -951,6 +986,25 @@ func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCusto
 	defer func() { _ = tx.Rollback() }()
 	queries := r.queries.WithTx(tx)
 
+	// Lock both rows (in deterministic id order to avoid deadlocks between
+	// concurrent merges sharing a customer) so that an award/redeem/visit
+	// committed between the stat reads below and UpdateCustomerMergeStats
+	// cannot be silently lost.
+	lockOrder := []int64{input.PrimaryID, input.SecondaryID}
+	if lockOrder[1] < lockOrder[0] {
+		lockOrder[0], lockOrder[1] = lockOrder[1], lockOrder[0]
+	}
+	for _, id := range lockOrder {
+		if _, err := tx.ExecContext(ctx,
+			"SELECT id FROM crm_customers WHERE id = ? AND business_id = ? FOR UPDATE",
+			id, input.BusinessID,
+		); err != nil {
+			logger.Ctx(ctx).Error("Failed to lock customer during merge", logger.Error(err))
+
+			return err
+		}
+	}
+
 	secondaryRow, err := queries.GetCustomerByID(ctx, sqlc.GetCustomerByIDParams{ID: input.SecondaryID, BusinessID: input.BusinessID})
 	if err != nil {
 		return err
@@ -965,6 +1019,14 @@ func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCusto
 	newPoints := primary.LoyaltyPoints + secondary.LoyaltyPoints
 	newSpent := primary.TotalSpent + secondary.TotalSpent
 	newVisits := primary.VisitCount + secondary.VisitCount
+
+	// The columns are INT: clamp before the int32 cast instead of wrapping.
+	if newPoints > math.MaxInt32 {
+		newPoints = math.MaxInt32
+	}
+	if newVisits > math.MaxInt32 {
+		newVisits = math.MaxInt32
+	}
 
 	err = queries.UpdateCustomerMergeStats(ctx, sqlc.UpdateCustomerMergeStatsParams{
 		LoyaltyPoints: sql.NullInt32{Int32: int32(newPoints), Valid: true},
@@ -999,6 +1061,21 @@ func (r *Repository) MergeCustomers(ctx context.Context, input domain.MergeCusto
 		logger.Ctx(ctx).Error("Failed to migrate timeline during merge", logger.Error(err))
 
 		return err
+	}
+
+	// The CRM schema has no foreign keys: without migrating these, the
+	// survivor loses the secondary's campaign history and feedback, and
+	// lead contacts keep pointing at a deleted row.
+	for _, stmt := range []string{
+		"UPDATE crm_campaign_sends SET customer_id = ? WHERE customer_id = ? AND business_id = ?",
+		"UPDATE crm_feedback SET customer_id = ? WHERE customer_id = ? AND business_id = ?",
+		"UPDATE crm_contacts SET customer_id = ? WHERE customer_id = ? AND business_id = ?",
+	} {
+		if _, err := tx.ExecContext(ctx, stmt, input.PrimaryID, input.SecondaryID, input.BusinessID); err != nil {
+			logger.Ctx(ctx).Error("Failed to migrate customer references during merge", logger.Error(err))
+
+			return err
+		}
 	}
 
 	_, err = queries.DeleteCustomer(ctx, sqlc.DeleteCustomerParams{
@@ -1196,34 +1273,76 @@ func (r *Repository) GetSegmentCustomers(ctx context.Context, businessID, segmen
 
 	offset := (page - 1) * pageSize
 
-	_, err := r.GetSegmentByID(ctx, businessID, segmentID)
+	segment, err := r.GetSegmentByID(ctx, businessID, segmentID)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	total, err := r.queries.CountActiveCustomers(ctx, businessID)
+	conds := sq.And{
+		sq.Eq{"business_id": businessID},
+		sq.Eq{"is_active": true},
+	}
+	// Real rule-based membership: without this, every segment returned all
+	// active customers. Segments with no (valid) rules keep the legacy
+	// "all active customers" behavior.
+	if frag, args := segmentrules.Filter(segment.Rules); frag != "" {
+		conds = append(conds, sq.Expr(frag, args...))
+	}
+
+	countSQL, countArgs, err := sq.Select("COUNT(*)").
+		From("crm_customers").
+		Where(conds).
+		PlaceholderFormat(sq.Question).
+		ToSql()
 	if err != nil {
 		return nil, 0, err
 	}
 
-	rows, err := r.queries.ListActiveCustomers(ctx, sqlc.ListActiveCustomersParams{
-		BusinessID: businessID,
-		Limit:      int32(pageSize),
-		Offset:     int32(offset),
-	})
+	var total int
+	if err := r.pool.QueryRowContext(ctx, countSQL, countArgs...).Scan(&total); err != nil {
+		logger.Ctx(ctx).Error("Failed to count segment customers", logger.Error(err))
+
+		return nil, 0, err
+	}
+
+	listSQL, listArgs, err := sq.Select(
+		"id", "owner_id", "business_id", "first_name", "last_name", "email", "phone", "date_of_birth", "gender",
+		"address", "city", "country", "loyalty_points", "total_spent", "visit_count", "last_visit_at",
+		"loyalty_tier", "tags", "notes", "consent", "is_active", "created_at", "updated_at",
+	).
+		From("crm_customers").
+		Where(conds).
+		OrderBy("created_at DESC").
+		Limit(uint64(pageSize)).
+		Offset(uint64(offset)).
+		PlaceholderFormat(sq.Question).
+		ToSql()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	rows, err := r.pool.QueryContext(ctx, listSQL, listArgs...)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get segment customers", logger.Error(err))
 
 		return nil, 0, err
 	}
+	defer rows.Close()
 
-	customers := make([]domain.Customer, 0, len(rows))
+	customers := make([]domain.Customer, 0, pageSize)
 
-	for _, row := range rows {
-		customers = append(customers, customerFromRow(row))
+	for rows.Next() {
+		c, scanErr := scanCustomerRaw(rows)
+		if scanErr != nil {
+			return nil, 0, scanErr
+		}
+		customers = append(customers, c)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, 0, err
 	}
 
-	return customers, int(total), nil
+	return customers, total, nil
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -1313,12 +1432,13 @@ func scanCustomerRaw(rows *sql.Rows) (domain.Customer, error) {
 		lastVisitAt sql.NullTime
 		tagsJSON    sql.NullString
 		notes       sql.NullString
+		consent     []byte
 	)
 
 	if err := rows.Scan(
 		&c.ID, &c.OwnerID, &c.BusinessID, &c.FirstName, &lastName, &email, &phone, &dob, &gender,
 		&address, &city, &country, &c.LoyaltyPoints, &c.TotalSpent, &c.VisitCount, &lastVisitAt,
-		&c.LoyaltyTier, &tagsJSON, &notes, &c.IsActive, &c.CreatedAt, &c.UpdatedAt,
+		&c.LoyaltyTier, &tagsJSON, &notes, &consent, &c.IsActive, &c.CreatedAt, &c.UpdatedAt,
 	); err != nil {
 		return domain.Customer{}, err
 	}
@@ -1343,6 +1463,9 @@ func scanCustomerRaw(rows *sql.Rows) (domain.Customer, error) {
 	}
 
 	c.Notes = notes.String
+	if consent != nil {
+		c.Consent = append([]byte(nil), consent...)
+	}
 
 	if tagsJSON.Valid && tagsJSON.String != "" {
 		if err := json.Unmarshal([]byte(tagsJSON.String), &c.Tags); err != nil {

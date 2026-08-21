@@ -144,6 +144,9 @@ func (h *CreateLeadHandler) Serve(ctx context.Context, req *CreateLeadRequest) (
 		Notes:        req.Notes,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrInvalidLeadStage) {
+			return CreateLeadResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid lead stage")
+		}
 		logger.Ctx(ctx).Error("failed to create lead", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return CreateLeadResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create lead")
 	}
@@ -252,6 +255,9 @@ func (h *UpdateLeadHandler) Serve(ctx context.Context, req *UpdateLeadRequest) (
 		Notes:        req.Notes,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrInvalidLeadStage) {
+			return UpdateLeadResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid lead stage")
+		}
 		if errors.Is(err, domain.ErrLeadNotFound) {
 			return UpdateLeadResponse{}, onekiterrors.New(http.StatusNotFound, "Lead not found")
 		}
