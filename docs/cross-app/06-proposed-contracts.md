@@ -325,7 +325,7 @@ Three deliberate choices worth defending at review:
 
 - **`cost_minor_units: int64`, not `float64`.** Payroll already works in
   integer cents internally
-  (`~/Development/onion/internal/modules/hr_payroll/internal/application/service.go:234`)
+  (`~/Development/onion/internal/modules/hr_payroll/internal/application/service.go:236`)
   while Finance's contracts use `float64`. Returning minor units keeps the
   rounding decision with the caller instead of applying it twice.
 - **`rate_coverage`.** An employee with no `hourly_rate` contributes hours and

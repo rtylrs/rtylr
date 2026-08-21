@@ -362,7 +362,7 @@ lists each carry their own (`packages/voxie/api/erp/product/v1/models.onk:28`,
 carry no currency field at all**, so payroll amounts and POS takings are
 implicitly whatever the reader assumes. Finance stores money as
 `float64` in its contracts while payroll works in integer cents internally
-(`~/Development/onion/internal/modules/hr_payroll/internal/application/service.go:234`),
+(`~/Development/onion/internal/modules/hr_payroll/internal/application/service.go:236`),
 so any cross-domain money figure crosses a representation boundary as well as
 a currency one. Every derivation proposal in this audit that combines payroll
 with finance has to state its rounding, and they do.
