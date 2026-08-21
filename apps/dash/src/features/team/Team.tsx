@@ -128,9 +128,11 @@ const Team: React.FC = (): React.JSX.Element => {
 
   const handleAddToGroup = async (): Promise<void> => {
     if (!selectedGroupId) return;
-    const userIds = Array.from(selected)
-      .map(Number)
-      .filter((n) => !isNaN(n));
+    // Member ids are the wire's int64-as-string values; pass them through
+    // untouched instead of Number()-filtering, which silently dropped any
+    // id that was not purely numeric and still toasted success.
+    const userIds = Array.from(selected);
+    if (userIds.length === 0) return;
     try {
       await addGroupMembers.mutateAsync(userIds);
       clearSelection();

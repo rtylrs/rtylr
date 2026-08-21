@@ -203,13 +203,14 @@ export const useDeleteGroup = (): ReturnType<typeof useMutation<void, Error, num
 
 export const useAddGroupMembers = (
   groupId: string | undefined
-): ReturnType<typeof useMutation<void, Error, number[]>> => {
+): ReturnType<typeof useMutation<void, Error, (string | number)[]>> => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (userIds: number[]) => {
+    mutationFn: async (userIds: (string | number)[]) => {
       if (!groupId) throw new Error('Group id is required');
       await groupsClient.addGroupMembers({
         id: groupId,
+        // The wire carries int64 user ids as strings.
         userIds: userIds.map(String),
       });
     },
