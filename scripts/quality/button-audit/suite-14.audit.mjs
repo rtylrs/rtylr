@@ -289,5 +289,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/InvoiceAgingWidget.tsx", "audit-batch-287-suite-14"],
   ["apps/dash/src/features/integrations/Integrations.test.tsx", "audit-batch-288-suite-14"],
   ["apps/dash/src/features/settings/Settings/components/Businesses/Businesses.tsx", "audit-batch-289-suite-14"],
+  ["apps/dash/src/shared/components/dash/AppBadge.tsx", "audit-batch-290-suite-14"],
 ];
 

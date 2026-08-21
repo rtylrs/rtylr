@@ -289,5 +289,6 @@ export const cases = [
   ["apps/dash/src/features/chat/Chat.test.tsx", "audit-batch-287-suite-06"],
   ["apps/dash/src/features/design/Design.tsx", "audit-batch-288-suite-06"],
   ["apps/dash/src/features/qr-codes/templates.tsx", "audit-batch-289-suite-06"],
+  ["apps/dash/src/layouts/NoSidebarLayout.tsx", "audit-batch-290-suite-06"],
 ];
 

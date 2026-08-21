@@ -289,5 +289,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/widgets/PendingWidget.tsx", "audit-batch-287-suite-19"],
   ["apps/dash/src/features/menu/Menus.test.tsx", "audit-batch-288-suite-19"],
   ["apps/dash/src/features/team/GroupDetail.test.tsx", "audit-batch-289-suite-19"],
+  ["apps/dash/src/shared/components/dash/NotificationItem.tsx", "audit-batch-290-suite-19"],
 ];
 

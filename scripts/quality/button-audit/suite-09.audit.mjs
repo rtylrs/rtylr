@@ -289,5 +289,6 @@ export const cases = [
   ["apps/dash/src/features/dashboard/Dashboard/VendorDashboard.tsx", "audit-batch-287-suite-09"],
   ["apps/dash/src/features/developer/Webhooks.test.tsx", "audit-batch-288-suite-09"],
   ["apps/dash/src/features/settings/Settings/components/Account/Account.tsx", "audit-batch-289-suite-09"],
+  ["apps/dash/src/shared/components/Dropzone.tsx", "audit-batch-290-suite-09"],
 ];
 
