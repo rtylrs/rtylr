@@ -89,5 +89,6 @@ export const cases = [
   ["apps/erp/src/features/reorder/Reorder.test.tsx", "audit-batch-087-suite-08"],
   ["apps/erp/src/shared/components/DateRangePicker.tsx", "audit-batch-088-suite-08"],
   ["apps/finance/src/features/bank-feeds/BankFeeds.tsx", "audit-batch-089-suite-08"],
+  ["apps/finance/src/layouts/DefaultLayout.test.tsx", "audit-batch-090-suite-08"],
 ];
 

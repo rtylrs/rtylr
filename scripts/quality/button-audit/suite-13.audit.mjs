@@ -89,5 +89,6 @@ export const cases = [
   ["apps/erp/src/features/stock-takes/StockTakes.tsx", "audit-batch-087-suite-13"],
   ["apps/erp/src/shared/components/ImportCSV.test.tsx", "audit-batch-088-suite-13"],
   ["apps/finance/src/features/dashboard/Dashboard.tsx", "audit-batch-089-suite-13"],
+  ["apps/finance/src/shared/components/Breadcrumbs.tsx", "audit-batch-090-suite-13"],
 ];
 
