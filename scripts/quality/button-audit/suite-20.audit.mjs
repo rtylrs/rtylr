@@ -49,5 +49,6 @@ export const cases = [
   ["apps/hr/src/features/setup-wizard/steps/RolesPermissionsStep.tsx", "audit-batch-047-suite-20"],
   ["apps/hr/src/shared/components/BenefitPlanCard.tsx", "audit-batch-048-suite-20"],
   ["apps/insights/src/features/financial/Financial.test.tsx", "audit-batch-049-suite-20"],
+  ["apps/menu/src/layouts/Public/PublicHeader.tsx", "audit-batch-050-suite-20"],
 ];
 

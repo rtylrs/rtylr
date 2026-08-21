@@ -49,5 +49,6 @@ export const cases = [
   ["apps/hr/src/features/setup-wizard/components/StepContainer.tsx", "audit-batch-047-suite-08"],
   ["apps/hr/src/features/time-off/TimeOffNew.tsx", "audit-batch-048-suite-08"],
   ["apps/hr/src/shared/components/RatingStars.tsx", "audit-batch-049-suite-08"],
+  ["apps/insights/src/main.tsx", "audit-batch-050-suite-08"],
 ];
 
