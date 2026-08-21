@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   getSettings: vi.fn(),
   getMyEmployee: vi.fn(),
+  listBenefits: vi.fn(),
 }));
 
 vi.mock('../services/hrExtras', () => ({
@@ -17,14 +18,17 @@ vi.mock('../services/hrExtras', () => ({
 
 vi.mock('@voxire/api', () => ({
   unwrap: (value: unknown) => value,
-  createOneKitClient: () => ({}),
+  getOneKitErrorMessage: (_error: unknown, fallback: string) => fallback,
+  createOneKitClient: () => ({
+    listBenefits: mocks.listBenefits,
+  }),
 }));
 
 vi.mock('sonner', () => ({
-  toast: { error: vi.fn() },
+  toast: { error: vi.fn(), success: vi.fn() },
 }));
 
-import { useHrSettings, useMyEmployeeId } from './useHrExtras';
+import { useHrSettings, useMyEmployeeId, useBenefits } from './useHrExtras';
 
 const settings = {
   workWeekStart: 'Monday' as const,
@@ -70,5 +74,44 @@ describe('useMyEmployeeId', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data).toBe(4201);
+  });
+});
+
+describe('useBenefits', () => {
+  beforeEach(() => {
+    mocks.listBenefits.mockReset();
+  });
+
+  it('maps hr.benefit.v1 BenefitPlan fields into the UI shape instead of hitting the dead /hr/benefits REST route', async () => {
+    mocks.listBenefits.mockResolvedValue({
+      plans: [
+        {
+          id: '9001',
+          ownerId: '42',
+          name: 'Premium Health',
+          type: 'health',
+          provider: 'Acme Insurance',
+          costEmployer: 150,
+          costEmployee: 25,
+          isActive: true,
+          createdAt: '2026-01-01T00:00:00Z',
+        },
+      ],
+    });
+
+    const { result } = renderHook(() => useBenefits(), { wrapper: createWrapper() });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data).toEqual([
+      {
+        id: '9001',
+        name: 'Premium Health',
+        category: 'Health',
+        carrier: 'Acme Insurance',
+        monthlyCost: 25,
+      },
+    ]);
+    expect(mocks.listBenefits).toHaveBeenCalledWith({});
   });
 });
