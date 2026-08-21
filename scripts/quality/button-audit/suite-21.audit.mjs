@@ -97,5 +97,6 @@ export const cases = [
   ["apps/flow/src/shared/components/TaskContextMenu.tsx", "audit-batch-095-suite-21"],
   ["apps/hr/src/features/documents/DocumentVault.tsx", "audit-batch-096-suite-21"],
   ["apps/hr/src/features/payroll/Payroll.tsx", "audit-batch-097-suite-21"],
+  ["apps/hr/src/features/setup-wizard/steps/CompanyProfileStep.tsx", "audit-batch-098-suite-21"],
 ];
 
