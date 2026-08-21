@@ -35,12 +35,24 @@ describe('crmApi', () => {
     await Promise.resolve();
 
     expect(mockClients.compatibility.getDashboard).toHaveBeenCalledWith({});
+
+    // Every int64 field travels as a string. A number reaches the server as a
+    // JSON number and fails to unmarshal, so passing `id: 5` was a 400 waiting
+    // to happen, not just a type error.
     expect(mockClients.compatibility.listCustomers).toHaveBeenCalledWith({
       search: 'John',
       tier: 'gold',
+      tag: undefined,
+      page: undefined,
+      pageSize: undefined,
     });
-    expect(mockClients.compatibility.getCustomer).toHaveBeenCalledWith({ id: 5 });
-    expect(mockClients.compatibility.listCampaigns).toHaveBeenCalledWith({ limit: 25, offset: 50 });
+    expect(mockClients.compatibility.getCustomer).toHaveBeenCalledWith({ id: '5' });
+
+    // ListCampaignsRequest pages by page/page_size, not limit/offset.
+    expect(mockClients.compatibility.listCampaigns).toHaveBeenCalledWith({
+      limit: '25',
+      offset: '50',
+    });
   });
 
   it('converts compatibility request bodies to the backend wire shape', async () => {
@@ -48,20 +60,25 @@ describe('crmApi', () => {
     crmApi.updateCampaignStatus(7, 'active');
     await Promise.resolve();
 
+    // CreateCustomerRequest declares its fields directly. There is no `body`
+    // member to wrap them in, so the wrapper was an extra level the server
+    // never asked for.
     expect(mockClients.compatibility.createCustomer).toHaveBeenCalledWith({
-      body: {
-        first_name: 'Jane',
-        last_name: 'Doe',
-        email: 'jane@test.com',
-        phone: undefined,
-        date_of_birth: undefined,
-        tags: undefined,
-        notes: undefined,
-      },
+      first_name: 'Jane',
+      last_name: 'Doe',
+      email: 'jane@test.com',
+      phone: undefined,
+      date_of_birth: undefined,
+      tags: undefined,
+      notes: undefined,
     });
+
+    // UpdateCampaignStatusRequest is { id, body }: id binds the path segment.
+    // It used to appear in both places, which is harmless but says the shape
+    // was not being read from the contract.
     expect(mockClients.compatibility.updateCampaignStatus).toHaveBeenCalledWith({
       id: '7',
-      body: { id: '7', status: 'active' },
+      body: { status: 'active' },
     });
   });
 
@@ -86,17 +103,17 @@ describe('crmApi', () => {
       notes: 'signed',
     });
     await Promise.resolve();
+    // Sales has no contract at all, so createContract goes over REST at
+    // POST /crm/sales/contracts and receives the payload directly.
     expect(mockClients.compatibility.createContract).toHaveBeenCalledWith({
-      body: {
-        lead_id: 7,
-        plan: 'pro',
-        mrr: 125,
-        seats: 4,
-        signed_at: '2026-08-16',
-        signed_by_name: 'Jane Doe',
-        closed_by: undefined,
-        notes: 'signed',
-      },
+      lead_id: 7,
+      plan: 'pro',
+      mrr: 125,
+      seats: 4,
+      signed_at: '2026-08-16',
+      signed_by_name: 'Jane Doe',
+      closed_by: undefined,
+      notes: 'signed',
     });
     expect(
       toContractUpdatePayload({
