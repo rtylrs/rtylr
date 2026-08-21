@@ -96,5 +96,6 @@ export const cases = [
   ["apps/flow/src/features/views/Views.tsx", "audit-batch-094-suite-06"],
   ["apps/flow/src/shared/components/GateNotice.tsx", "audit-batch-095-suite-06"],
   ["apps/hr/src/features/dashboard/Dashboard.tsx", "audit-batch-096-suite-06"],
+  ["apps/hr/src/features/leave/Leave.tsx", "audit-batch-097-suite-06"],
 ];
 

@@ -96,5 +96,6 @@ export const cases = [
   ["apps/flow/src/shared/components/AttachmentUpload.tsx", "audit-batch-094-suite-19"],
   ["apps/flow/src/shared/components/TaskCard.tsx", "audit-batch-095-suite-19"],
   ["apps/hr/src/features/departments/Departments.tsx", "audit-batch-096-suite-19"],
+  ["apps/hr/src/features/payroll/MyPaySlips.tsx", "audit-batch-097-suite-19"],
 ];
 

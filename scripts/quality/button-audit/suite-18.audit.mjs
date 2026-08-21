@@ -96,5 +96,6 @@ export const cases = [
   ["apps/flow/src/shared/components/AssigneeAvatar.tsx", "audit-batch-094-suite-18"],
   ["apps/flow/src/shared/components/SubtaskList.tsx", "audit-batch-095-suite-18"],
   ["apps/hr/src/features/departments/CreateDepartmentForm.tsx", "audit-batch-096-suite-18"],
+  ["apps/hr/src/features/overtime/OvertimeRequestForm.tsx", "audit-batch-097-suite-18"],
 ];
 

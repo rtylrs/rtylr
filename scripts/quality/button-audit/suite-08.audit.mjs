@@ -96,5 +96,6 @@ export const cases = [
   ["apps/flow/src/features/workspace-manager/AddWorkspaceMemberDialog.test.tsx", "audit-batch-094-suite-08"],
   ["apps/flow/src/shared/components/PreviewRouteUnavailable.test.tsx", "audit-batch-095-suite-08"],
   ["apps/hr/src/features/dashboard/widgets/HoursThisWeekWidget.tsx", "audit-batch-096-suite-08"],
+  ["apps/hr/src/features/leave/LeaveCalendar.tsx", "audit-batch-097-suite-08"],
 ];
 
