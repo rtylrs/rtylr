@@ -95,5 +95,6 @@ export const cases = [
   ["apps/flow/src/features/tasks/components/DurationField.tsx", "audit-batch-093-suite-16"],
   ["apps/flow/src/routes/AppRoutes.tsx", "audit-batch-094-suite-16"],
   ["apps/flow/src/shared/components/Skeleton.tsx", "audit-batch-095-suite-16"],
+  ["apps/hr/src/features/dashboard/widgets/UpcomingShiftsWidget.tsx", "audit-batch-096-suite-16"],
 ];
 
