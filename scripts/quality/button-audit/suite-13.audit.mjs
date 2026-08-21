@@ -196,5 +196,6 @@ export const cases = [
   ["apps/flow/src/features/calendar/Calendar.test.tsx", "audit-batch-194-suite-13"],
   ["apps/flow/src/features/projects/ProjectList.test.tsx", "audit-batch-195-suite-13"],
   ["apps/flow/src/features/tasks/components/DurationField.tsx", "audit-batch-196-suite-13"],
+  ["apps/flow/src/routes/AppRoutes.tsx", "audit-batch-197-suite-13"],
 ];
 

@@ -196,5 +196,6 @@ export const cases = [
   ["apps/flow/src/features/focus-today/FocusToday.test.tsx", "audit-batch-194-suite-19"],
   ["apps/flow/src/features/projects/ProjectTimeline.test.tsx", "audit-batch-195-suite-19"],
   ["apps/flow/src/features/time/MyDay.test.tsx", "audit-batch-196-suite-19"],
+  ["apps/flow/src/shared/components/CommandBar.tsx", "audit-batch-197-suite-19"],
 ];
 

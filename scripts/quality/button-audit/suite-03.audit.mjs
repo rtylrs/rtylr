@@ -196,5 +196,6 @@ export const cases = [
   ["apps/finance/src/shared/components/PaymentReminderPanel.tsx", "audit-batch-194-suite-03"],
   ["apps/flow/src/features/milestones/Milestones.test.tsx", "audit-batch-195-suite-03"],
   ["apps/flow/src/features/settings/FlowSettings.test.tsx", "audit-batch-196-suite-03"],
+  ["apps/flow/src/features/views/Views.tsx", "audit-batch-197-suite-03"],
 ];
 
