@@ -548,7 +548,7 @@ const Addons: React.FC = () => {
                   >
                     Cancel
                   </button>
-                  <button
+                  <button type="button"
                     onClick={() => {
                       if (!isTrialMode) purchaseMutation.mutate(purchaseTarget.id);
                     }}

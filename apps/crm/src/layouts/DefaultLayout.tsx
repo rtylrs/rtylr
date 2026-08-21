@@ -620,7 +620,7 @@ const DefaultLayout: React.FC = () => {
                     ⌘K
                   </kbd>
                 </button>
-                <button
+                <button type="button"
                   aria-label="Notifications"
                   onClick={() => toast.info('No new notifications')}
                   style={{

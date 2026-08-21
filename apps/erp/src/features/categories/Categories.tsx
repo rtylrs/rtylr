@@ -186,7 +186,7 @@ const Categories: React.FC = () => {
                   >
                     ✓
                   </button>
-                  <button
+                  <button type="button"
                     aria-label="Cancel edit"
                     onClick={() => setEditingId(null)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center text-xs font-bold"

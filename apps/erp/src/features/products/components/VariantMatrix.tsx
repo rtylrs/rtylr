@@ -425,7 +425,7 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
             <Plus size={13} /> {t('erp.products.variants.addOption')}
           </button>
           {combos.length > 0 && (
-            <button
+            <button type="button"
               onClick={generate}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
               style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}

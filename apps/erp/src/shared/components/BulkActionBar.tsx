@@ -74,7 +74,7 @@ const BulkActionBar: React.FC<BulkActionBarProps> = ({
             </button>
           )}
           {onArchive && (
-            <button
+            <button type="button"
               onClick={onArchive}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
               style={{ color: 'var(--hub-text-muted)' }}

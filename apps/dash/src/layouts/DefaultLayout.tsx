@@ -607,7 +607,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 )}
               </div>
               <div className="flex items-center gap-1">
-                <button
+                <button type="button"
                   onClick={() => setCommandPaletteOpen(true)}
                   className="flex items-center gap-2 px-2.5 h-7 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]"
                   style={{

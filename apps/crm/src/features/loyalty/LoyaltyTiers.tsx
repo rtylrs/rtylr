@@ -118,7 +118,7 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
         />
       </div>
       <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-        <button
+        <button type="button"
           onClick={onClose}
           style={{
             padding: '5px 12px',

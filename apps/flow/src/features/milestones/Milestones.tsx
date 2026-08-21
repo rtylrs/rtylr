@@ -100,7 +100,7 @@ const Milestones: React.FC = () => {
             {t('flow.milestones.trackedCount', { count: milestones.length })}
           </p>
         </div>
-        <button
+        <button type="button"
           onClick={() => setShowCreate(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}

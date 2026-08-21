@@ -633,7 +633,7 @@ const ValuesEditor: React.FC<{
           </button>
         </div>
       ))}
-      <button
+      <button type="button"
         onClick={() => onChange([...items, { label: '' }])}
         className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-white/20 px-3 py-2 text-xs text-white/60 hover:bg-white/5"
       >

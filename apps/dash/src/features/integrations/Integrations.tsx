@@ -188,7 +188,7 @@ const Integrations: React.FC = () => {
                         Disconnect
                       </button>
                     ) : (
-                      <button
+                      <button type="button"
                         onClick={() => connect.mutate(i.id)}
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                         style={{ background: '#4583C4', color: '#fff' }}

@@ -9,7 +9,7 @@ interface Props {
 const ShiftCell: React.FC<Props> = ({ shift, onClick }) => {
   const color = shift.color ?? '#8b5cf6';
   return (
-    <button
+    <button type="button"
       onClick={onClick}
       style={{
         width: '100%',

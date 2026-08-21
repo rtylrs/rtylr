@@ -181,7 +181,7 @@ const AutomationBuilder: React.FC = () => {
                 Triggers
               </h4>
               {triggers.map((t) => (
-                <button
+                <button type="button"
                   key={t.label}
                   onClick={() => addTrigger(t)}
                   style={{

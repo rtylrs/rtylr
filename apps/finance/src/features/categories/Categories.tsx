@@ -304,7 +304,7 @@ const Categories: React.FC = () => {
         title="Edit Expense Category"
         footer={
           <>
-            <button
+            <button type="button"
               style={ghostBtn}
               onClick={() => setEditingCategory(null)}
               disabled={updateCategory.isPending}

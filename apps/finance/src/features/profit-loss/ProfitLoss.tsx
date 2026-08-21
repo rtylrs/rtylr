@@ -193,7 +193,7 @@ const ProfitLoss: React.FC = () => {
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button
+          <button type="button"
             style={{
               display: 'flex',
               alignItems: 'center',
