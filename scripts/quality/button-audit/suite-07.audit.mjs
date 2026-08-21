@@ -272,5 +272,6 @@ export const cases = [
   ["apps/finance/src/features/tax/Tax.tsx", "audit-batch-270-suite-07"],
   ["apps/finance/src/shared/components/PaymentReminderPanel.tsx", "audit-batch-271-suite-07"],
   ["apps/flow/src/features/milestones/Milestones.test.tsx", "audit-batch-272-suite-07"],
+  ["apps/flow/src/features/settings/FlowSettings.test.tsx", "audit-batch-273-suite-07"],
 ];
 
