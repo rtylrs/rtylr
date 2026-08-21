@@ -37,5 +37,6 @@ export const cases = [
   ["apps/erp/src/features/products/Products.tsx", "audit-batch-035-suite-15"],
   ["apps/erp/src/shared/components/BarcodeInput.tsx", "audit-batch-036-suite-15"],
   ["apps/erp/src/shared/components/SupplierSelect.tsx", "audit-batch-037-suite-15"],
+  ["apps/finance/src/features/quotes/Quotes.test.tsx", "audit-batch-038-suite-15"],
 ];
 
