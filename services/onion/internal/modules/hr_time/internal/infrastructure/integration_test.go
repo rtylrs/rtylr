@@ -233,3 +233,69 @@ func TestGetTimeEntryBySourceAndTask_NoError(t *testing.T) {
 	// Returns nil when not found -- that is acceptable.
 	_ = entry
 }
+
+// hr_time_entries is the table #871 calls out as both cross-tenant-exposable and
+// an input to payroll, and it is where Flow's work-day lines are stored.
+//
+// Every test above passes a single tenant id in and reads it back with the same
+// id, so they hold whether or not business_id scopes anything:
+// TestListTimeEntries_AllBelongToOwner asserts a property of the rows returned,
+// which is satisfied by returning the caller's rows and also by returning
+// nothing. This one writes under two tenants and asserts the second is absent.
+//
+// The id passed to these methods lands in business_id: the parameter is named
+// businessID on ListTimeEntries and CreateTimeEntry. The tests above pass
+// testutil.OwnerID into it, which is the owner/business conflation #871
+// documents; this test passes business ids so the two tenants are genuinely
+// distinct whichever convention a reader expects.
+func TestListTimeEntries_DoesNotReturnAnotherTenantsEntries(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	// Same employee id for both rows on purpose. What separates them is the
+	// tenant column, which is the only thing under test here.
+	entry := func(date string) domain.TimeEntryRecord {
+		return domain.TimeEntryRecord{
+			EmployeeID:      4101,
+			Date:            date,
+			DurationMinutes: 60,
+			Status:          "draft",
+			Source:          "manual",
+		}
+	}
+
+	mine, err := repo.CreateTimeEntry(ctx, testutil.BusinessID, entry("2025-07-15"))
+	if err != nil {
+		t.Fatalf("CreateTimeEntry for own tenant: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteTimeEntry(context.Background(), testutil.BusinessID, mine.ID) })
+
+	theirs, err := repo.CreateTimeEntry(ctx, testutil.OtherBusinessID, entry("2025-07-15"))
+	if err != nil {
+		t.Fatalf("CreateTimeEntry for the other tenant: %v", err)
+	}
+	t.Cleanup(func() { _ = repo.DeleteTimeEntry(context.Background(), testutil.OtherBusinessID, theirs.ID) })
+
+	// EmployeeID is mandatory, not optional: ListTimeEntries filters
+	// `employee_id = ?` unconditionally, so omitting it filters employee_id = 0
+	// and returns nothing. That is why TestListTimeEntries_AllBelongToOwner above
+	// passes without ever entering its loop.
+	entries, _, err := repo.ListTimeEntries(ctx, testutil.BusinessID, domain.ListTimeEntriesParams{
+		EmployeeID:  4101,
+		PeriodStart: "2025-07-01",
+		PeriodEnd:   "2025-07-31",
+		Limit:       100,
+		Offset:      0,
+	})
+	if err != nil {
+		t.Fatalf("ListTimeEntries: %v", err)
+	}
+
+	got := make([]int64, 0, len(entries))
+	for _, e := range entries {
+		got = append(got, e.ID)
+	}
+
+	testutil.AssertTenantIsolation(t, got, []int64{mine.ID}, []int64{theirs.ID})
+}

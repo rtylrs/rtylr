@@ -25,18 +25,29 @@ const (
 
 func insertPresenceEmployee(t *testing.T, db *sql.DB, userID int64, firstName string) int64 {
 	t.Helper()
+
+	return insertPresenceEmployeeFor(t, db, presenceOwnerID, presenceBusinessID, userID, firstName)
+}
+
+// insertPresenceEmployeeFor takes the tenant explicitly so a test can seed a
+// second one. Without that, every row belongs to the same business and a
+// tenant-scoped read cannot be distinguished from an unscoped one.
+func insertPresenceEmployeeFor(
+	t *testing.T, db *sql.DB, ownerID, businessID, userID int64, firstName string,
+) int64 {
+	t.Helper()
 	ctx := context.Background()
 	if _, err := db.ExecContext(ctx,
 		`INSERT INTO hr_employees (owner_id, business_id, user_id, first_name, last_name, email, status, employment_type)
 		 VALUES (?, ?, ?, ?, 'Presence', ?, 'active', 'full_time')`,
-		presenceOwnerID, presenceBusinessID, userID, firstName, fmt.Sprintf("%s.presence@example.test", firstName),
+		ownerID, businessID, userID, firstName, fmt.Sprintf("%s.presence@example.test", firstName),
 	); err != nil {
 		t.Fatalf("insert hr_employees(%s): %v", firstName, err)
 	}
 	var employeeID int64
 	if err := db.QueryRowContext(ctx,
 		`SELECT id FROM hr_employees WHERE owner_id = ? AND business_id = ? AND user_id = ?`,
-		presenceOwnerID, presenceBusinessID, userID,
+		ownerID, businessID, userID,
 	).Scan(&employeeID); err != nil {
 		t.Fatalf("read back hr_employees id(%s): %v", firstName, err)
 	}
@@ -170,4 +181,95 @@ func TestListPresenceForBusiness_DeniesCallerWithoutViewDirectory(t *testing.T) 
 	if err == nil {
 		t.Fatal("want an error for a caller with no view_directory permission")
 	}
+}
+
+// Distinct tenant for the isolation test below. Its own business is separate
+// from the one the other tests seed, so a failure here cannot be another test's
+// leftover row.
+const (
+	isoOwnerID      int64 = 930300
+	isoBusinessID   int64 = 930400
+	isoCallerUserID int64 = 930301
+	isoOwnUserID    int64 = 930302
+	isoOtherUserID  int64 = 930303
+)
+
+// ListPresenceForBusiness joins hr_employees, flow_work_days and hr_leave across
+// module schemas, which is the shape every proposed cross-app join takes. The
+// two tests above seed one tenant, so they pass whether or not the business_id
+// filter exists. This one seeds two and asserts the second is absent.
+//
+// Both halves are asserted through testutil.AssertTenantIsolation: absence alone
+// would pass if the query returned nothing at all.
+func TestListPresenceForBusiness_DoesNotLeakAnotherTenantsEmployees(t *testing.T) {
+	db := testutil.OpenDB(t)
+	ctx := context.Background()
+
+	hrCoreModule := hrcore.NewModule(ctx, db)
+	hrLeaveModule := hrleave.NewModule(ctx, db, hrCoreModule)
+	wsModule := workspaces.NewModule(ctx, db, hrCoreModule, hrLeaveModule)
+
+	callerEmployeeID := insertPresenceEmployeeFor(t, db, isoOwnerID, isoBusinessID, isoCallerUserID, "IsoCaller")
+	ownEmployeeID := insertPresenceEmployeeFor(t, db, isoOwnerID, isoBusinessID, isoOwnUserID, "IsoColleague")
+
+	// The other tenant. Same table, same date, different business.
+	otherEmployeeID := insertPresenceEmployeeFor(
+		t, db, testutil.OtherOwnerID, testutil.OtherBusinessID, isoOtherUserID, "IsoOutsider",
+	)
+
+	// The caller needs view_directory, granted the same way the test above does
+	// it: a real role row plus a real assignment.
+	if _, err := db.ExecContext(ctx,
+		`INSERT INTO hr_roles (owner_id, business_id, name, description, permissions, is_system)
+		 VALUES (?, ?, 'Iso Test Role', '', '{"view_directory": true}', false)`,
+		isoOwnerID, isoBusinessID,
+	); err != nil {
+		t.Fatalf("insert hr_roles: %v", err)
+	}
+	var roleID int64
+	if err := db.QueryRowContext(ctx,
+		`SELECT id FROM hr_roles WHERE business_id = ? AND name = 'Iso Test Role'`, isoBusinessID,
+	).Scan(&roleID); err != nil {
+		t.Fatalf("read back hr_roles id: %v", err)
+	}
+	t.Cleanup(func() { _, _ = db.ExecContext(context.Background(), "DELETE FROM hr_roles WHERE id = ?", roleID) })
+	if _, err := db.ExecContext(ctx,
+		`INSERT INTO hr_employee_roles (owner_id, business_id, employee_id, role_id) VALUES (?, ?, ?, ?)`,
+		isoOwnerID, isoBusinessID, callerEmployeeID, roleID,
+	); err != nil {
+		t.Fatalf("insert hr_employee_roles: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM hr_employee_roles WHERE role_id = ?", roleID)
+	})
+
+	// A work day for the other tenant's employee, so the row is reachable by any
+	// query that forgets to scope: the leak would be a real presence entry, not
+	// an employee with nothing to report.
+	if _, err := db.ExecContext(ctx,
+		`INSERT INTO flow_work_days (owner_id, business_id, employee_id, date, timezone, work_mode, logged_by)
+		 VALUES (?, ?, ?, ?, 'UTC', 'remote', ?)`,
+		testutil.OtherOwnerID, testutil.OtherBusinessID, otherEmployeeID, presenceDate, isoOtherUserID,
+	); err != nil {
+		t.Fatalf("insert flow_work_days for the other tenant: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM flow_work_days WHERE employee_id = ?", otherEmployeeID)
+	})
+
+	entries, err := wsModule.ListPresenceForBusiness(ctx, isoOwnerID, isoBusinessID, isoCallerUserID, presenceDate)
+	if err != nil {
+		t.Fatalf("ListPresenceForBusiness: %v", err)
+	}
+
+	got := make([]int64, 0, len(entries))
+	for _, e := range entries {
+		got = append(got, e.EmployeeID)
+	}
+
+	testutil.AssertTenantIsolation(t,
+		got,
+		[]int64{callerEmployeeID, ownEmployeeID},
+		[]int64{otherEmployeeID},
+	)
 }
