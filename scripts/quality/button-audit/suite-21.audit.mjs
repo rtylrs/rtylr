@@ -320,5 +320,6 @@ export const cases = [
   ["apps/erp/src/features/reorder/Reorder.tsx", "audit-batch-318-suite-21"],
   ["apps/erp/src/shared/components/ExportButton.test.tsx", "audit-batch-319-suite-21"],
   ["apps/finance/src/features/bills/Bills.tsx", "audit-batch-320-suite-21"],
+  ["apps/finance/src/layouts/DefaultLayout.tsx", "audit-batch-321-suite-21"],
 ];
 

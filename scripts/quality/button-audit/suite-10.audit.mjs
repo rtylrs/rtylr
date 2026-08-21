@@ -320,5 +320,6 @@ export const cases = [
   ["apps/erp/src/features/products/ProductDetail.test.tsx", "audit-batch-318-suite-10"],
   ["apps/erp/src/layouts/DefaultLayout.tsx", "audit-batch-319-suite-10"],
   ["apps/erp/src/shared/components/Skeleton.tsx", "audit-batch-320-suite-10"],
+  ["apps/finance/src/features/journal/Journal.tsx", "audit-batch-321-suite-10"],
 ];
 
