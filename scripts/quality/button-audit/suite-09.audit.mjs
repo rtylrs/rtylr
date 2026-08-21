@@ -104,5 +104,6 @@ export const cases = [
   ["apps/menu/src/router.tsx", "audit-batch-102-suite-09"],
   ["apps/recruit/src/features/public/RootLanding.tsx", "audit-batch-103-suite-09"],
   ["apps/auth/src/features/reset-password/ResetPasswordConfirm.tsx", "audit-batch-104-suite-09"],
+  ["apps/crm/src/features/dashboard/Dashboard.test.tsx", "audit-batch-105-suite-09"],
 ];
 
