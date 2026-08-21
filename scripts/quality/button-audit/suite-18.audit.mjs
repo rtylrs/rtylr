@@ -144,5 +144,6 @@ export const cases = [
   ["apps/finance/src/shared/components/PeriodSelector.tsx", "audit-batch-142-suite-18"],
   ["apps/flow/src/features/milestones/Milestones.tsx", "audit-batch-143-suite-18"],
   ["apps/flow/src/features/settings/FlowSettings.tsx", "audit-batch-144-suite-18"],
+  ["apps/flow/src/features/workspace-dashboard/WorkspaceDashboard.tsx", "audit-batch-145-suite-18"],
 ];
 

@@ -144,5 +144,6 @@ export const cases = [
   ["apps/finance/src/shared/components/GlobalSearch.tsx", "audit-batch-142-suite-06"],
   ["apps/flow/src/features/directory/DirectoryScreen.test.tsx", "audit-batch-143-suite-06"],
   ["apps/flow/src/features/projects/ProjectSettings.test.tsx", "audit-batch-144-suite-06"],
+  ["apps/flow/src/features/time/AddHours.test.tsx", "audit-batch-145-suite-06"],
 ];
 

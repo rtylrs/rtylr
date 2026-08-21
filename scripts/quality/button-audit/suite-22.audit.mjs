@@ -144,5 +144,6 @@ export const cases = [
   ["apps/finance/src/shared/components/Skeleton.tsx", "audit-batch-142-suite-22"],
   ["apps/flow/src/features/profile/ProfileScreen.tsx", "audit-batch-143-suite-22"],
   ["apps/flow/src/features/settings/sections/WorkTypesSection.tsx", "audit-batch-144-suite-22"],
+  ["apps/flow/src/features/workspace-manager/WorkspaceManager.tsx", "audit-batch-145-suite-22"],
 ];
 

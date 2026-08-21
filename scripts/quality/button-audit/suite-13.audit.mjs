@@ -144,5 +144,6 @@ export const cases = [
   ["apps/finance/src/shared/components/OverdueInvoicesWidget.tsx", "audit-batch-142-suite-13"],
   ["apps/flow/src/features/leave/LeaveScreen.test.tsx", "audit-batch-143-suite-13"],
   ["apps/flow/src/features/projects/components/AddProjectMemberDialog.tsx", "audit-batch-144-suite-13"],
+  ["apps/flow/src/features/time/TimeReports.tsx", "audit-batch-145-suite-13"],
 ];
 
