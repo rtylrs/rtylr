@@ -14,6 +14,20 @@ CREATE TABLE IF NOT EXISTS finance_accounts (
     CONSTRAINT chk_finance_accounts_balance_non_negative CHECK (balance >= 0)
 );
 
+-- Tenant-selected accounts used when posting payroll. Payroll must not invent
+-- chart-of-accounts entries; the accounts module owns this configuration.
+CREATE TABLE IF NOT EXISTS finance_payroll_account_mappings (
+    business_id BIGINT NOT NULL PRIMARY KEY,
+    expense_account_id BIGINT NOT NULL,
+    payable_account_id BIGINT NOT NULL,
+    deductions_payable_account_id BIGINT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_finance_payroll_mapping_expense (expense_account_id),
+    INDEX idx_finance_payroll_mapping_payable (payable_account_id),
+    INDEX idx_finance_payroll_mapping_deductions (deductions_payable_account_id)
+);
+
 CREATE TABLE IF NOT EXISTS finance_invoices (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
