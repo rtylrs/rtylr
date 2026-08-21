@@ -91,5 +91,6 @@ export const cases = [
   ["apps/erp/src/shared/components/dialogAccessibility.test.tsx", "audit-batch-089-suite-05"],
   ["apps/finance/src/features/settings/Settings.tsx", "audit-batch-090-suite-05"],
   ["apps/finance/src/shared/components/PaymentBadge.tsx", "audit-batch-091-suite-05"],
+  ["apps/flow/src/features/leave/RequestLeaveDialog.tsx", "audit-batch-092-suite-05"],
 ];
 

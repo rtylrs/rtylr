@@ -91,5 +91,6 @@ export const cases = [
   ["apps/finance/src/features/invoices/NewInvoice.tsx", "audit-batch-089-suite-22"],
   ["apps/finance/src/shared/components/InvoiceStatusFilter.tsx", "audit-batch-090-suite-22"],
   ["apps/flow/src/features/focus-today/FocusToday.test.tsx", "audit-batch-091-suite-22"],
+  ["apps/flow/src/features/projects/ProjectTimeline.test.tsx", "audit-batch-092-suite-22"],
 ];
 
