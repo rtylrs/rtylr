@@ -48,6 +48,7 @@ export const loyaltyConfigSchema = z
   });
 
 const legacyLoyaltyTransactionSchema = z.object({
+  id: z.union([z.string(), z.number()]).transform(Number).optional(),
   customer: z.string(),
   action: z.string(),
   time: z.string(),
@@ -70,18 +71,18 @@ export const loyaltyTransactionSchema = z
   .transform((value) => {
     if ('customerId' in value) {
       return {
+        id: value.id,
         customer: String(value.customerId),
         action: value.description || value.type,
         time: value.createdAt,
         type: value.type,
-        id: value.id,
         customerId: value.customerId,
         points: value.points,
         balanceBefore: value.balanceBefore,
         balanceAfter: value.balanceAfter,
       };
     }
-    return value;
+    return { ...value, id: value.id ?? 0 };
   });
 
 export const loyaltyMemberSchema = z.object({

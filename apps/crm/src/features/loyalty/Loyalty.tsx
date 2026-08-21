@@ -23,8 +23,12 @@ const TIER_ICON_MAP: Record<string, React.ComponentType<{ size?: number }>> = {
 
 const activityColor: Record<string, string> = {
   earn: '#10b981',
+  award: '#10b981',
   redeem: ACCENT,
+  reward: ACCENT,
   upgrade: '#f59e0b',
+  adjust: '#8b5cf6',
+  expire: '#94a3b8',
 };
 
 const Loyalty: React.FC = () => {
@@ -37,7 +41,9 @@ const Loyalty: React.FC = () => {
 
   const tiers: LoyaltyTier[] = tiersData ?? [];
 
-  const [programEnabled, setProgramEnabled] = useState(true);
+  // Start from the loaded config, not an assumed-on default that flashes the
+  // wrong program state before the query resolves.
+  const [programEnabled, setProgramEnabled] = useState(false);
   const [pointsPerDollar, setPointsPerDollar] = useState(1);
   const [pointsExpiry, setPointsExpiry] = useState(365);
 
@@ -66,7 +72,8 @@ const Loyalty: React.FC = () => {
             </p>
           </div>
           {canConfigureLoyalty && (
-            <button type="button"
+            <button
+              type="button"
               onClick={() => {
                 const next = !programEnabled;
                 updateConfig.mutate(
@@ -132,7 +139,8 @@ const Loyalty: React.FC = () => {
                 Points per $1 spent
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => setPointsPerDollar((v) => Math.max(1, v - 1))}
                   style={{
                     width: '32px',
@@ -161,7 +169,8 @@ const Loyalty: React.FC = () => {
                 >
                   {pointsPerDollar}
                 </span>
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => setPointsPerDollar((v) => Math.min(10, v + 1))}
                   style={{
                     width: '32px',
@@ -232,13 +241,16 @@ const Loyalty: React.FC = () => {
                 Redemption rate
               </label>
               <div style={{ fontSize: '13px', color: 'var(--hub-text)', lineHeight: '36px' }}>
-                100 pts = $1.00
+                {config && config.redemptionRate > 0
+                  ? `${Math.round(1 / config.redemptionRate)} pts = $1.00`
+                  : 'Set a redemption rate'}
               </div>
             </div>
           </div>
           {canConfigureLoyalty && (
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => updateConfig.mutate({ pointsPerDollar, pointsExpiry })}
                 disabled={updateConfig.isPending}
                 style={{
@@ -394,7 +406,7 @@ const Loyalty: React.FC = () => {
           </div>
           {activityLog.map((entry, i) => (
             <div
-              key={i}
+              key={entry.id}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -408,7 +420,7 @@ const Loyalty: React.FC = () => {
                   width: '8px',
                   height: '8px',
                   borderRadius: '50%',
-                  background: activityColor[entry.type],
+                  background: activityColor[entry.type] ?? 'var(--hub-border)',
                   flexShrink: 0,
                 }}
               />

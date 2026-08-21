@@ -187,7 +187,8 @@ export const TagChip: React.FC<{
   >
     {label}
     {onRemove && (
-      <button type="button"
+      <button
+        type="button"
         onClick={onRemove}
         style={{
           background: 'transparent',
@@ -242,7 +243,8 @@ export const NotesPanel: React.FC<{
           Notes
         </h4>
         {!editing && (
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setEditing(true)}
             style={{
               background: 'transparent',
@@ -338,7 +340,8 @@ export const EmailEditor: React.FC<{
           Insert:
         </span>
         {['first_name', 'last_name', 'points', 'tier', 'business_name'].map((v) => (
-          <button type="button"
+          <button
+            type="button"
             key={v}
             onClick={() => insertVar(v)}
             style={{
@@ -405,7 +408,8 @@ export const SMSComposer: React.FC<{
           Insert:
         </span>
         {['first_name', 'points', 'business_name'].map((v) => (
-          <button type="button"
+          <button
+            type="button"
             key={v}
             onClick={() => onChange(body + ` {{${v}}}`)}
             style={{
@@ -515,7 +519,8 @@ export const SegmentRuleRow: React.FC<{
       placeholder="value"
       style={{ width: '140px' }}
     />
-    <button type="button"
+    <button
+      type="button"
       onClick={onRemove}
       style={{
         background: 'transparent',
@@ -577,7 +582,8 @@ export const AutomationNode: React.FC<{
           {type}
         </span>
         {onRemove && (
-          <button type="button"
+          <button
+            type="button"
             onClick={onRemove}
             style={{
               marginLeft: 'auto',
@@ -741,12 +747,12 @@ export const LoyaltyPointsInput: React.FC<{
 
 // ── 28. ConsentBanner ───────────────────────────────────────────
 export const ConsentBanner: React.FC<{
-  consent: { email: boolean; sms: boolean; marketing: boolean };
+  consent: Record<string, boolean>;
 }> = ({ consent }) => {
   const items = [
-    { label: 'Email', allowed: consent.email },
-    { label: 'SMS', allowed: consent.sms },
-    { label: 'Marketing', allowed: consent.marketing },
+    { label: 'Email', allowed: consent.email === true },
+    { label: 'SMS', allowed: consent.sms === true },
+    { label: 'Marketing', allowed: consent.marketing === true },
   ];
   return (
     <div
@@ -950,7 +956,8 @@ export const SearchableCustomerSelect: React.FC<{
               </div>
             )}
             {filtered.map((c) => (
-              <button type="button"
+              <button
+                type="button"
                 key={c.id}
                 onClick={() => {
                   onChange(c.id);

@@ -46,7 +46,8 @@ export interface Customer {
   tags?: string[];
   notes?: string;
   birthday?: string;
-  consent?: { email: boolean; sms: boolean; marketing: boolean };
+  /** Backend persists an arbitrary JSON consent record; read keys defensively. */
+  consent?: Record<string, boolean>;
   createdAt?: string;
   referredBy?: number | null;
 }
@@ -582,6 +583,21 @@ function compatResult<T>(operation: () => Promise<unknown>) {
 
 function body(value: unknown) {
   return { body: toOneKitJson(value) };
+}
+
+/**
+ * Coerce wire values into finite numbers. Money fields (mrr, mrr_potential,
+ * total_mrr) are serialized by the backend's money.Amount as decimal strings
+ * ("1500.00"); without this, arithmetic like reduce(sum + mrr) concatenates
+ * strings. Returns 0 for anything that cannot be parsed.
+ */
+export function toFiniteNumber(value: unknown): number {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
 }
 
 export const crmApi = {

@@ -55,6 +55,9 @@ const AutomationBuilder: React.FC = () => {
       description: 'When a customer is created',
     },
   ]);
+  // Monotonic id source so removed nodes never free up an id that a later
+  // add would reuse (duplicate keys / removeNode deleting both).
+  const nextNodeId = React.useRef(2);
 
   React.useEffect(() => {
     if (!existing) return;
@@ -73,6 +76,10 @@ const AutomationBuilder: React.FC = () => {
         }))
       );
     }
+    // Seed the id counter past any loaded node ids.
+    const maxLoaded =
+      existing.nodes?.reduce((max, n) => Math.max(max, Number(n.id.replace('n', '')) || 0), 0) ?? 0;
+    nextNodeId.current = Math.max(nextNodeId.current, maxLoaded + 1);
   }, [existing]);
 
   const addTrigger = (t: (typeof triggers)[number]) => {
@@ -91,7 +98,7 @@ const AutomationBuilder: React.FC = () => {
     setNodes((n) => [
       ...n,
       {
-        id: 'n' + (n.length + 1),
+        id: 'n' + nextNodeId.current++,
         type: 'action',
         automationType: a.type,
         label: a.label,
@@ -112,8 +119,10 @@ const AutomationBuilder: React.FC = () => {
       triggerType: nodes[0]?.automationType,
       actions: nodes.slice(1).map((node) => ({ type: node.automationType })),
       nodes: nodes.map((node) => ({ ...node, x: 0, y: 0 })),
-      isActive: false,
-      status: 'paused' as const,
+      // Preserve the automation's current run state: saving an edit must not
+      // silently pause an active workflow.
+      isActive: existing?.isActive ?? false,
+      status: existing?.status ?? ('paused' as const),
     };
     const callbacks = {
       onSuccess: () => {
@@ -181,7 +190,8 @@ const AutomationBuilder: React.FC = () => {
                 Triggers
               </h4>
               {triggers.map((t) => (
-                <button type="button"
+                <button
+                  type="button"
                   key={t.label}
                   onClick={() => addTrigger(t)}
                   style={{
@@ -221,7 +231,8 @@ const AutomationBuilder: React.FC = () => {
               {actions.map((a) => {
                 const Icon = a.icon;
                 return (
-                  <button type="button"
+                  <button
+                    type="button"
                     key={a.label}
                     onClick={() => addAction(a)}
                     style={{

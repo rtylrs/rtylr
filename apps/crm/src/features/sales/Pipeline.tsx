@@ -275,7 +275,8 @@ const Pipeline: React.FC = () => {
 
                   {/* Add button - only on Cold column */}
                   {key === 'cold' && (
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={() => setCreateOpen(true)}
                       aria-label="Add new lead"
                       style={{

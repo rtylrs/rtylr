@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { useNavigate, useRouterState } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useUserStore } from '@voxire/auth';
 import { Eye, Save, Send } from 'lucide-react';
@@ -21,9 +21,8 @@ const EmailCampaign: React.FC = () => {
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canManageCampaigns = canCrmPermission(role, 'crm:campaigns');
   const canSendCampaigns = canCrmPermission(role, 'crm:campaigns:send');
-  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
-  const searchParams = new URLSearchParams(searchStr);
-  const campaignId = Number(searchParams.get('id') || 0) || undefined;
+  const search = useSearch({ from: '/layout/campaigns/email' });
+  const campaignId = search.id;
   const isEditing = !!campaignId;
 
   const create = useCreateCampaign();
@@ -32,13 +31,13 @@ const EmailCampaign: React.FC = () => {
   const { data: existingCampaign } = useGetCampaign(campaignId);
   const { data: fetchedSegments } = useListSegments();
   const { data: fetchedTemplates } = useTemplates();
-  const segments = fetchedSegments ?? [];
+  const segments = useMemo(() => fetchedSegments ?? [], [fetchedSegments]);
   const templates = (fetchedTemplates ?? []).filter((template) => template.channel === 'email');
 
-  const [name, setName] = useState(searchParams.get('name') || '');
-  const [segmentId, setSegmentId] = useState<string>('');
-  const [subject, setSubject] = useState(searchParams.get('subject') || '');
-  const [body, setBody] = useState(searchParams.get('body') || '');
+  const [name, setName] = useState(search.name || '');
+  const [segmentId, setSegmentId] = useState<string>(search.segment || '');
+  const [subject, setSubject] = useState(search.subject || '');
+  const [body, setBody] = useState(search.body || '');
   const [previewOpen, setPreviewOpen] = useState(false);
   const pending = create.isPending || update.isPending || updateStatus.isPending;
 
@@ -52,10 +51,14 @@ const EmailCampaign: React.FC = () => {
       setBody(existingCampaign.body ?? '');
       return;
     }
-    if (!isEditing && !segmentId && segments[0]) {
-      setSegmentId(segments[0].id);
+    if (!isEditing && !segmentId && segments.length > 0) {
+      // ?segment= preselects the audience the user navigated here from;
+      // otherwise fall back to the first segment.
+      const preselect =
+        (search.segment && segments.find((item) => item.id === search.segment)) || segments[0];
+      setSegmentId(preselect.id);
     }
-  }, [existingCampaign, isEditing, segmentId, segments]);
+  }, [existingCampaign, isEditing, segmentId, segments, search.segment]);
 
   const applyTemplate = (templateId: string): void => {
     const template = templates.find((item) => item.id === templateId);

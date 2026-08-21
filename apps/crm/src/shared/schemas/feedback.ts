@@ -6,14 +6,17 @@ import { z } from 'zod';
 export const FEEDBACK_TYPES = ['nps', 'review'] as const;
 export type FeedbackType = (typeof FEEDBACK_TYPES)[number];
 
+// Every field mirrors crm.feedback.v1.Feedback, where all fields are
+// optional on the wire (omitempty). Keeping them required here would make a
+// single row without e.g. `comment` throw and kill the whole list parse.
 export const feedbackItemSchema = z.object({
   id: z.string(),
-  customerName: z.string(),
+  customerName: z.string().default(''),
   type: z.enum(FEEDBACK_TYPES),
-  score: z.number(),
-  comment: z.string(),
+  score: z.number().default(0),
+  comment: z.string().default(''),
   createdAt: z.string(),
-  source: z.string(),
+  source: z.string().default(''),
 });
 
 export type FeedbackItem = z.infer<typeof feedbackItemSchema>;

@@ -10,7 +10,7 @@ import { CustomerAvatar, TierBadge } from '../../shared/components/crm';
 import { getCustomerTier } from '../../shared/lib/tiers';
 
 const SegmentDetail: React.FC = () => {
-  const { id } = useParams({ strict: false });
+  const { id } = useParams({ from: '/layout/segments/$id' });
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { data: fetched, isLoading: segmentLoading, error: segmentError } = useGetSegment(id);
@@ -47,7 +47,8 @@ const SegmentDetail: React.FC = () => {
       <HelmetContainer title="Segment detail · rtylr" />
       <div style={{ maxWidth: '1100px' }}>
         <Breadcrumbs items={[{ label: 'Segments', to: '/segments' }, { label: segment.name }]} />
-        <button type="button"
+        <button
+          type="button"
           onClick={() => navigate({ to: '/segments' })}
           style={{
             background: 'transparent',
@@ -112,14 +113,14 @@ const SegmentDetail: React.FC = () => {
             <div style={{ display: 'flex', gap: '6px' }}>
               <Button
                 variant="outline"
-                onClick={() => navigate({ to: `/campaigns/email?segment=${segment.id}` })}
+                onClick={() => navigate({ to: '/campaigns/email', search: { segment: id } })}
               >
                 <Mail size={13} />
                 Email
               </Button>
               <Button
                 variant="primary"
-                onClick={() => navigate({ to: `/campaigns/sms?segment=${segment.id}` })}
+                onClick={() => navigate({ to: '/campaigns/sms', search: { segment: id } })}
               >
                 <MessageSquare size={13} />
                 SMS

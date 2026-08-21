@@ -178,7 +178,8 @@ const Automations: React.FC = () => {
                         {a.status.toUpperCase()}
                       </span>
                       {a.status !== 'draft' && canManageAutomations && (
-                        <button type="button"
+                        <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleToggleStatus(a.id, a.status);
@@ -203,7 +204,8 @@ const Automations: React.FC = () => {
                         </button>
                       )}
                       {canManageAutomations && (
-                        <button type="button"
+                        <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setConfirmDeleteId(a.id);

@@ -136,7 +136,8 @@ const Dashboard: React.FC = () => {
     isLoading: dashLoading,
     refetch: refetchDashboard,
   } = useCrmDashboard();
-  const { data: fetchedCustomers } = useListCustomers({ limit: 200, offset: 0 });
+  // Backend caps page size at 100 — aggregates cover the first page.
+  const { data: fetchedCustomers } = useListCustomers({ limit: 100, offset: 0 });
   const { data: fetchedSegments } = useListSegments();
   const customersPool = fetchedCustomers ?? [];
   const segmentsPool = fetchedSegments ?? [];
@@ -145,9 +146,11 @@ const Dashboard: React.FC = () => {
     customersPool.length > 0
       ? Math.round(customersPool.reduce((s, c) => s + c.totalSpent, 0) / customersPool.length)
       : 0;
-  const atRisk = customersPool.filter((c) => isAtRisk(c, AT_RISK_DAYS)).slice(0, 4);
+  const atRiskAll = customersPool.filter((c) => isAtRisk(c, AT_RISK_DAYS));
   const churnRate =
-    customersPool.length > 0 ? Math.round((atRisk.length / customersPool.length) * 100) : 0;
+    customersPool.length > 0 ? Math.round((atRiskAll.length / customersPool.length) * 100) : 0;
+  // Display list is capped; the rate above uses the full pool.
+  const atRisk = atRiskAll.slice(0, 4);
   const topSegment =
     segmentsPool.length > 0
       ? segmentsPool.reduce((a, b) => (a.customerCount > b.customerCount ? a : b), segmentsPool[0])
@@ -475,13 +478,12 @@ const Dashboard: React.FC = () => {
                 At-risk customers
               </span>
               <span style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                not visited in 30+ days
+                not visited in {AT_RISK_DAYS}+ days
               </span>
             </div>
-            <button type="button"
-              onClick={() =>
-                navigate({ to: '/campaigns/email', search: { segment: 'atrisk' } as any })
-              }
+            <button
+              type="button"
+              onClick={() => navigate({ to: '/campaigns/email', search: { segment: 'atrisk' } })}
               style={{
                 fontSize: '12px',
                 color: '#3b82f6',
@@ -565,7 +567,7 @@ const Dashboard: React.FC = () => {
             <div>
               {topCustomers.map((c, i) => (
                 <div
-                  key={c.name}
+                  key={`${c.name}-${i}`}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -647,7 +649,7 @@ const Dashboard: React.FC = () => {
             <div>
               {campaigns.map((c, i) => (
                 <div
-                  key={c.name}
+                  key={`${c.name}-${i}`}
                   style={{
                     padding: '14px 20px',
                     borderBottom: i < campaigns.length - 1 ? '1px solid var(--hub-border)' : 'none',

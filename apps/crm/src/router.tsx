@@ -137,22 +137,35 @@ const loyaltyTiersRoute = createRoute({
   component: () => <>{lazy(<LoyaltyTiers />)}</>,
 });
 
-// Campaigns
+// Campaign
 const campaignsRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: '/campaigns',
   component: () => <>{lazy(<Campaigns />)}</>,
 });
 
+// Editor deep-links carry optional context (?id= for edit mode, ?segment=
+// when arriving from a segment, ?name/?subject/?body= prefills). Validated so
+// stale or hand-edited URLs degrade to defaults instead of erroring.
+const campaignEditorSearchSchema = z.object({
+  id: z.number().int().positive().optional().catch(undefined),
+  name: z.string().optional().catch(undefined),
+  subject: z.string().optional().catch(undefined),
+  body: z.string().optional().catch(undefined),
+  segment: z.string().optional().catch(undefined),
+});
+
 const campaignsEmailRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: '/campaigns/email',
+  validateSearch: campaignEditorSearchSchema,
   component: () => <>{lazy(<EmailCampaign />)}</>,
 });
 
 const campaignsSmsRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: '/campaigns/sms',
+  validateSearch: campaignEditorSearchSchema,
   component: () => <>{lazy(<SMSCampaign />)}</>,
 });
 

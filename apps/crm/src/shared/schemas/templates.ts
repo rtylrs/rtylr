@@ -10,7 +10,9 @@ export const templateSchema = z.object({
   subject: z.string().nullable().optional(),
   body: z.string(),
   thumbnail: z.string().nullable().optional(),
-  updatedAt: z.string(),
+  // Optional on the wire (crm.template.v1.Template.updatedAt is optional and
+  // emitted omitempty) - a required field here would break the whole list.
+  updatedAt: z.string().default(''),
 });
 
 export type Template = z.infer<typeof templateSchema>;

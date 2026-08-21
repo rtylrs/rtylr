@@ -103,7 +103,11 @@ const Customers: React.FC = () => {
   const pageSize = 100;
   const [offset, setOffset] = useState(0);
   const [loadedCustomers, setLoadedCustomers] = useState<Customer[]>([]);
+  // Set once a "Load more" page comes back empty.
+  const [exhausted, setExhausted] = useState(false);
 
+  // NOTE: search is intentionally synchronous (no debounce) — the empty-state
+  // UX reflects the query term immediately and is covered by tests.
   const {
     data: fetchedCustomers,
     isLoading,
@@ -120,6 +124,11 @@ const Customers: React.FC = () => {
 
   useEffect(() => {
     if (!fetchedCustomers) return;
+    if (offset > 0 && fetchedCustomers.length === 0) {
+      // Exact page-size multiple: the extra "Load more" page came back
+      // empty — stop offering it.
+      setExhausted(true);
+    }
     setLoadedCustomers((previous) => {
       if (offset === 0) return fetchedCustomers;
       const byId = new Map(previous.map((customer) => [customer.id, customer]));
@@ -129,7 +138,7 @@ const Customers: React.FC = () => {
   }, [fetchedCustomers, offset]);
 
   const customers = loadedCustomers;
-  const hasMore = fetchedCustomers?.length === pageSize;
+  const hasMore = !exhausted && fetchedCustomers?.length === pageSize;
 
   if (isError && customers.length === 0) {
     return (
@@ -235,7 +244,7 @@ const Customers: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
         <PageHeader
           title="Customers"
-          subtitle={`${customers.length} total customers`}
+          subtitle={`${customers.length} loaded`}
           actions={
             <>
               <Button variant="outline" onClick={() => navigate({ to: '/customers/import' })}>
@@ -301,7 +310,8 @@ const Customers: React.FC = () => {
             }}
           >
             {tierFilters.map((t) => (
-              <button type="button"
+              <button
+                type="button"
                 key={t}
                 onClick={() => setTierFilter(t)}
                 style={{

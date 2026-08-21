@@ -66,6 +66,8 @@ const Leads: React.FC = () => {
   const { t } = useTranslation();
   const pageSize = 100;
   const [offset, setOffset] = useState(0);
+  // Set once a "Load more" page comes back empty.
+  const [exhausted, setExhausted] = useState(false);
   const [loadedLeads, setLoadedLeads] = useState<Lead[]>([]);
   const {
     data: fetchedLeads,
@@ -78,6 +80,11 @@ const Leads: React.FC = () => {
 
   useEffect(() => {
     if (!fetchedLeads) return;
+    if (offset > 0 && fetchedLeads.length === 0) {
+      // Exact page-size multiple: the extra page came back empty — stop
+      // offering "Load more".
+      setExhausted(true);
+    }
     setLoadedLeads((previous) => {
       if (offset === 0) return fetchedLeads;
       const byId = new Map(previous.map((lead) => [lead.id, lead]));
@@ -87,7 +94,7 @@ const Leads: React.FC = () => {
   }, [fetchedLeads, offset]);
 
   const leads = loadedLeads;
-  const hasMore = fetchedLeads?.length === pageSize;
+  const hasMore = !exhausted && fetchedLeads?.length === pageSize;
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<LeadStage | 'all'>('all');
   const [sourceFilter, setSourceFilter] = useState('all');
@@ -124,7 +131,7 @@ const Leads: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
         <PageHeader
           title="Leads"
-          subtitle={`${leads.length} total leads`}
+          subtitle={`${leads.length} loaded`}
           actions={
             <Button variant="primary" onClick={() => setCreateOpen(true)}>
               <Plus size={13} />
@@ -355,7 +362,8 @@ const Leads: React.FC = () => {
                       </td>
                       <td style={{ padding: '12px 16px' }} onClick={(e) => e.stopPropagation()}>
                         <div style={{ display: 'flex', gap: '6px' }}>
-                          <button type="button"
+                          <button
+                            type="button"
                             aria-label="View lead"
                             onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
                             style={{
@@ -373,7 +381,8 @@ const Leads: React.FC = () => {
                           >
                             <Eye size={13} />
                           </button>
-                          <button type="button"
+                          <button
+                            type="button"
                             aria-label="Delete lead"
                             onClick={() => setDeleteId(lead.id)}
                             style={{

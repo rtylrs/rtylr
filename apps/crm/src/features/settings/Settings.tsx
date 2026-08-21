@@ -428,7 +428,11 @@ const TeamTab: React.FC = () => {
                   type="button"
                   aria-label={`Remove ${m.fullName || m.email}`}
                   onClick={() => {
-                    deactivate.mutate(m.id ?? '');
+                    const name = m.fullName || m.email || 'this member';
+                    // Destructive + irreversible: require confirmation.
+                    if (window.confirm(`Remove ${name} from the CRM team?`)) {
+                      deactivate.mutate(m.id ?? '');
+                    }
                   }}
                   style={{
                     height: 28,

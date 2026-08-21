@@ -148,8 +148,9 @@ export const useUpdateAutomation = (): UseMutationResult<
       );
       return res as Automation;
     },
-    onSuccess: (): void => {
+    onSuccess: (_data: Automation, payload: UpdateAutomationPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-automations'] });
+      void qc.invalidateQueries({ queryKey: ['crm-automation', payload.id] });
       toast.success(t('crm.automations.updated'));
     },
     onError: (): void => {
@@ -163,8 +164,9 @@ export const useDeleteAutomation = (): UseMutationResult<unknown, unknown, numbe
   const { t } = useTranslation();
   return useMutation<unknown, unknown, number>({
     mutationFn: (id: number): Promise<unknown> => unwrap(crmApi.deleteAutomation(id)),
-    onSuccess: (): void => {
+    onSuccess: (_data: unknown, id: number): void => {
       void qc.invalidateQueries({ queryKey: ['crm-automations'] });
+      void qc.invalidateQueries({ queryKey: ['crm-automation', id] });
       toast.success(t('crm.automations.deleted'));
     },
     onError: (): void => {

@@ -15,6 +15,8 @@ const LoyaltyMembers: React.FC = () => {
   const { t } = useTranslation();
   const pageSize = 100;
   const [offset, setOffset] = useState(0);
+  // Set once a "Load more" page comes back empty.
+  const [exhausted, setExhausted] = useState(false);
   const [loadedMembers, setLoadedMembers] = useState<LoyaltyMember[]>([]);
   const {
     data: fetched,
@@ -26,6 +28,11 @@ const LoyaltyMembers: React.FC = () => {
   const [search, setSearch] = useState('');
   useEffect(() => {
     if (!fetched) return;
+    if (offset > 0 && fetched.length === 0) {
+      // Exact page-size multiple: the extra page came back empty — stop
+      // offering "Load more".
+      setExhausted(true);
+    }
     setLoadedMembers((previous) => {
       if (offset === 0) return fetched;
       const byId = new Map(previous.map((member) => [member.id, member]));
@@ -36,7 +43,7 @@ const LoyaltyMembers: React.FC = () => {
 
   const members = [...(loadedMembers ?? [])].sort((a, b) => b.points - a.points);
   const filtered = members.filter((m) => m.name.toLowerCase().includes(search.toLowerCase()));
-  const hasMore = fetched?.length === pageSize;
+  const hasMore = !exhausted && fetched?.length === pageSize;
 
   return (
     <>

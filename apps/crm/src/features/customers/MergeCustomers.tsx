@@ -12,7 +12,8 @@ const MergeCustomers: React.FC = () => {
   const navigate = useNavigate();
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const merge = useMergeCustomers();
-  const { data: fetched } = useListCustomers({ limit: 200, offset: 0 });
+  // Backend caps page size at 100 — the picker covers the first page.
+  const { data: fetched } = useListCustomers({ limit: 100, offset: 0 });
   const customers = fetched ?? [];
 
   const [primaryId, setPrimaryId] = useState<number | null>(

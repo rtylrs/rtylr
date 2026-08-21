@@ -34,7 +34,9 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [cursor, setCursor] = useState(0);
-  const { data: fetchedCustomers } = useListCustomers({ limit: 50, offset: 0 });
+  // Only fetch the customer index while the palette is open — an eager query
+  // pulled 50 customer rows on every app mount.
+  const { data: fetchedCustomers } = useListCustomers({ limit: 50, offset: 0 }, open);
   const customers = fetchedCustomers ?? [];
 
   useEffect(() => {
@@ -337,7 +339,8 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
                     const isCustomer = item.group === 'Customers';
                     const Icon = item.icon;
                     return (
-                      <button type="button"
+                      <button
+                        type="button"
                         key={item.id}
                         onClick={() => {
                           item.action();

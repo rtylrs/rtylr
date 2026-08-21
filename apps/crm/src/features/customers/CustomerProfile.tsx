@@ -68,9 +68,15 @@ const CustomerProfile: React.FC = () => {
   const customer = fetched;
   useEffect(() => {
     if (!fetchedTimeline) return;
-    setTimelineEntries((entries) =>
-      timelineCursor ? [...entries, ...fetchedTimeline.entries] : fetchedTimeline.entries
-    );
+    setTimelineEntries((entries) => {
+      if (!timelineCursor) return fetchedTimeline.entries;
+      // The cursor-keyed query refetches whenever a points award/redeem
+      // invalidates the ['crm-customer', id] prefix; dedupe by id so the
+      // same page is never appended twice.
+      const seen = new Set(entries.map((entry) => entry.id));
+      const fresh = fetchedTimeline.entries.filter((entry) => !seen.has(entry.id));
+      return [...entries, ...fresh];
+    });
   }, [fetchedTimeline, timelineCursor]);
   useEffect(() => {
     setTimelineCursor(undefined);
@@ -108,8 +114,14 @@ const CustomerProfile: React.FC = () => {
   const tier = getCustomerTier(customer.loyaltyPoints, customer.loyaltyTier, thresholds);
   const next = pointsToNextTier(customer.loyaltyPoints, thresholds, customer.loyaltyTier);
   const tags = customer.tags || [];
-  // Missing consent means unknown, never opt-in. The backend now persists this map for new records.
-  const consent = customer.consent || { email: false, sms: false, marketing: false };
+  // Missing consent means unknown, never opt-in. The backend persists an
+  // arbitrary JSON record; read the known keys defensively.
+  const rawConsent = customer.consent ?? {};
+  const consent = {
+    email: rawConsent.email === true,
+    sms: rawConsent.sms === true,
+    marketing: rawConsent.marketing === true,
+  };
 
   const handleAddTag = () => {
     if (!newTag.trim()) {
@@ -214,7 +226,8 @@ const CustomerProfile: React.FC = () => {
       <HelmetContainer title="Customer profile · rtylr" />
       <div style={{ maxWidth: '1100px' }}>
         <Breadcrumbs items={[{ label: 'Customers', to: '/customers' }, { label: customer.name }]} />
-        <button type="button"
+        <button
+          type="button"
           onClick={() => navigate({ to: '/customers' })}
           style={{
             background: 'transparent',

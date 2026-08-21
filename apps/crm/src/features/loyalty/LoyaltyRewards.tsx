@@ -84,7 +84,8 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
             New reward
           </h3>
-          <button type="button"
+          <button
+            type="button"
             aria-label="Close"
             onClick={onClose}
             style={{

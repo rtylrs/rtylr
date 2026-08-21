@@ -8,10 +8,13 @@ import { Breadcrumbs, Button, Card, Input, Textarea, PageHeader } from '../../sh
 import { SegmentRuleRow } from '../../shared/components/crm';
 
 interface Rule {
+  id: number;
   field: string;
   operator: string;
   value: string;
 }
+
+let nextRuleId = 1;
 
 const SegmentBuilder: React.FC = () => {
   const navigate = useNavigate();
@@ -20,7 +23,7 @@ const SegmentBuilder: React.FC = () => {
   const [description, setDescription] = useState('');
   const [color, setColor] = useState('#3b82f6');
   const [rules, setRules] = useState<Rule[]>([
-    { field: 'totalSpent', operator: '>', value: '500' },
+    { id: nextRuleId++, field: 'totalSpent', operator: '>', value: '500' },
   ]);
   const [matchAll, setMatchAll] = useState(true);
 
@@ -28,7 +31,8 @@ const SegmentBuilder: React.FC = () => {
     setRules((r) => r.map((x, idx) => (idx === i ? rule : x)));
   };
 
-  const addRule = () => setRules((r) => [...r, { field: 'visits', operator: '>', value: '5' }]);
+  const addRule = () =>
+    setRules((r) => [...r, { id: nextRuleId++, field: 'visits', operator: '>', value: '5' }]);
   const removeRule = (i: number) => setRules((r) => r.filter((_, idx) => idx !== i));
 
   const handleSave = () => {
@@ -102,7 +106,8 @@ const SegmentBuilder: React.FC = () => {
                 </div>
                 <div style={{ display: 'flex', gap: '6px' }}>
                   {['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#e879f9'].map((c) => (
-                    <button type="button"
+                    <button
+                      type="button"
                       key={c}
                       onClick={() => setColor(c)}
                       style={{
@@ -160,7 +165,8 @@ const SegmentBuilder: React.FC = () => {
                   { key: true, label: 'Match all' },
                   { key: false, label: 'Match any' },
                 ].map((o) => (
-                  <button type="button"
+                  <button
+                    type="button"
                     key={String(o.key)}
                     onClick={() => setMatchAll(o.key)}
                     style={{
@@ -182,9 +188,9 @@ const SegmentBuilder: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {rules.map((r, i) => (
                 <SegmentRuleRow
-                  key={i}
+                  key={r.id}
                   rule={r}
-                  onChange={(updated) => updateRule(i, updated)}
+                  onChange={(updated) => updateRule(i, { ...r, ...updated })}
                   onRemove={() => removeRule(i)}
                 />
               ))}

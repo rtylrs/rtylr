@@ -7,7 +7,7 @@ import {
   type UseQueryResult,
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { crmApi } from '../../services/crmApi';
+import { crmApi, toFiniteNumber } from '../../services/crmApi';
 import { unwrapList } from '../../lib/unwrapList';
 import type {
   PipelineColumn,
@@ -45,18 +45,31 @@ export const usePipeline = (): UseQueryResult<PipelineColumn[]> =>
     queryKey: ['crm-sales-pipeline'],
     queryFn: async (): Promise<PipelineColumn[]> => {
       const res = await unwrap(crmApi.getSalesPipeline());
-      return unwrapList<PipelineColumn>(res, 'pipeline', 'columns');
+      // total_mrr arrives as a decimal string (money.Amount) — coerce or
+      // stage sums concatenate strings.
+      return unwrapList<PipelineColumn>(res, 'pipeline', 'columns').map((column) => ({
+        ...column,
+        count: toFiniteNumber(column.count),
+        totalMrr: toFiniteNumber(column.totalMrr),
+      }));
     },
   });
 
 // ── Leads ─────────────────────────────────────────────────────────
+
+const parseLead = (lead: Lead): Lead => ({
+  ...lead,
+  id: toFiniteNumber(lead.id),
+  mrrPotential: lead.mrrPotential === undefined ? undefined : toFiniteNumber(lead.mrrPotential),
+  dealValue: lead.dealValue === undefined ? undefined : toFiniteNumber(lead.dealValue),
+});
 
 export const useLeads = (limit = 100, offset = 0): UseQueryResult<Lead[]> =>
   useQuery<Lead[]>({
     queryKey: ['crm-sales-leads', { limit, offset }],
     queryFn: async (): Promise<Lead[]> => {
       const res = await unwrap(crmApi.getLeads(limit, offset));
-      return unwrapList<Lead>(res, 'leads');
+      return unwrapList<Lead>(res, 'leads').map(parseLead);
     },
   });
 
@@ -66,7 +79,7 @@ export const useLead = (id: number | undefined): UseQueryResult<Lead> =>
     queryFn: async (): Promise<Lead> => {
       const res = await unwrap(crmApi.getLead(id ?? 0));
       const envelope = (res ?? {}) as { lead?: Lead };
-      return (envelope.lead ?? res) as Lead;
+      return parseLead((envelope.lead ?? res) as Lead);
     },
     enabled: !!id,
   });
@@ -76,7 +89,8 @@ export const useCreateLead = (): UseMutationResult<Lead, unknown, CreateLeadRequ
   return useMutation<Lead, unknown, CreateLeadRequest>({
     mutationFn: async (data: CreateLeadRequest): Promise<Lead> => {
       const res = await unwrap(crmApi.createLead(data));
-      return res as Lead;
+      const envelope = (res ?? {}) as { lead?: Lead };
+      return parseLead((envelope.lead ?? res) as Lead);
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-leads'] });
@@ -98,8 +112,23 @@ export const useUpdateLead = (): UseMutationResult<Lead, unknown, UpdateLeadPayl
   const qc = useQueryClient();
   return useMutation<Lead, unknown, UpdateLeadPayload>({
     mutationFn: async (payload: UpdateLeadPayload): Promise<Lead> => {
-      const res = await unwrap(crmApi.updateLead(payload.id, payload.data));
-      return res as Lead;
+      // The backend PUT replaces the record; merging over the cached lead
+      // stops a stage-only update from wiping company/industry/etc. to "".
+      const cached = qc.getQueryData<Lead>(['crm-sales-lead', payload.id]);
+      const merged: UpdateLeadRequest = {
+        company: payload.data.company ?? cached?.company,
+        companyName: payload.data.companyName ?? cached?.companyName ?? cached?.company,
+        industry: payload.data.industry ?? cached?.industry,
+        size: payload.data.size ?? cached?.size,
+        source: payload.data.source ?? cached?.source,
+        stage: payload.data.stage ?? cached?.stage,
+        mrrPotential: payload.data.mrrPotential ?? cached?.mrrPotential,
+        assignedTo: payload.data.assignedTo ?? cached?.assignedTo ?? undefined,
+        notes: payload.data.notes ?? cached?.notes,
+      };
+      const res = await unwrap(crmApi.updateLead(payload.id, merged));
+      const envelope = (res ?? {}) as { lead?: Lead };
+      return parseLead((envelope.lead ?? res) as Lead);
     },
     onSuccess: (_data: Lead, variables: UpdateLeadPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-leads'] });
@@ -262,12 +291,22 @@ export const useDeleteContact = (): UseMutationResult<unknown, unknown, DeleteCo
 
 // ── Contracts ─────────────────────────────────────────────────────
 
+const parseContract = (contract: Contract): Contract => ({
+  ...contract,
+  id: toFiniteNumber(contract.id),
+  leadId: toFiniteNumber(contract.leadId),
+  mrr: toFiniteNumber(contract.mrr),
+  seats: toFiniteNumber(contract.seats),
+});
+
 export const useContracts = (limit = 100, offset = 0): UseQueryResult<Contract[]> =>
   useQuery<Contract[]>({
     queryKey: ['crm-sales-contracts', { limit, offset }],
     queryFn: async (): Promise<Contract[]> => {
       const res = await unwrap(crmApi.getContracts(limit, offset));
-      return unwrapList<Contract>(res, 'contracts');
+      // mrr arrives as a decimal string (money.Amount) — coerce or totals
+      // concatenate strings.
+      return unwrapList<Contract>(res, 'contracts').map(parseContract);
     },
   });
 
@@ -277,7 +316,7 @@ export const useContract = (id: number | undefined): UseQueryResult<Contract> =>
     queryFn: async (): Promise<Contract> => {
       const res = await unwrap(crmApi.getContract(id ?? 0));
       const envelope = (res ?? {}) as { contract?: Contract };
-      return (envelope.contract ?? res) as Contract;
+      return parseContract((envelope.contract ?? res) as Contract);
     },
     enabled: !!id,
   });
@@ -291,7 +330,8 @@ export const useCreateContract = (): UseMutationResult<
   return useMutation<Contract, unknown, CreateContractRequest>({
     mutationFn: async (data: CreateContractRequest): Promise<Contract> => {
       const res = await unwrap(crmApi.createContract(data));
-      return res as Contract;
+      const envelope = (res ?? {}) as { contract?: Contract };
+      return parseContract((envelope.contract ?? res) as Contract);
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contracts'] });
@@ -318,7 +358,8 @@ export const useUpdateContract = (): UseMutationResult<
   return useMutation<Contract, unknown, UpdateContractPayload>({
     mutationFn: async (payload: UpdateContractPayload): Promise<Contract> => {
       const res = await unwrap(crmApi.updateContract(payload.id, payload.data));
-      return res as Contract;
+      const envelope = (res ?? {}) as { contract?: Contract };
+      return parseContract((envelope.contract ?? res) as Contract);
     },
     onSuccess: (_data: Contract, variables: UpdateContractPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contracts'] });

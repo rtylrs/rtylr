@@ -252,7 +252,8 @@ export const Modal: React.FC<{
           <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
             {title}
           </h3>
-          <button type="button"
+          <button
+            type="button"
             onClick={onClose}
             style={{
               background: 'transparent',

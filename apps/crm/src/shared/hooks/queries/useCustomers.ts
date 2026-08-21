@@ -109,7 +109,10 @@ export interface CustomerTimelinePage {
 
 // ── Queries ──────────────────────────────────────────────────────────────────
 
-export const useListCustomers = (params: ListCustomersParams): UseQueryResult<Customer[]> =>
+export const useListCustomers = (
+  params: ListCustomersParams,
+  enabled = true
+): UseQueryResult<Customer[]> =>
   useQuery<Customer[]>({
     queryKey: ['crm-customers', 'filter', params],
     queryFn: async (): Promise<Customer[]> => {
@@ -125,6 +128,7 @@ export const useListCustomers = (params: ListCustomersParams): UseQueryResult<Cu
       const res = await unwrap(crmApi.getCustomers(requestParams));
       return z.array(customerSchema).parse(unwrapList(res, 'customers'));
     },
+    enabled,
   });
 
 export const useGetCustomer = (id: number | undefined): UseQueryResult<Customer> =>
@@ -207,6 +211,7 @@ export const useCreateCustomer = (): UseMutationResult<
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
+      void qc.invalidateQueries({ queryKey: ['crm-dashboard'] });
       toast.success(t('crm.customers.created'));
     },
     onError: (): void => {
@@ -255,8 +260,10 @@ export const useDeleteCustomer = (): UseMutationResult<unknown, unknown, number>
   const { t } = useTranslation();
   return useMutation<unknown, unknown, number>({
     mutationFn: (id: number): Promise<unknown> => unwrap(crmApi.deleteCustomer(id)),
-    onSuccess: (): void => {
+    onSuccess: (_data: unknown, id: number): void => {
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
+      void qc.invalidateQueries({ queryKey: ['crm-customer', id] });
+      void qc.invalidateQueries({ queryKey: ['crm-dashboard'] });
       toast.success(t('crm.customers.deleted'));
     },
     onError: (): void => {
@@ -271,8 +278,12 @@ export const useMergeCustomers = (): UseMutationResult<unknown, unknown, MergeCu
   return useMutation<unknown, unknown, MergeCustomersPayload>({
     mutationFn: (payload: MergeCustomersPayload): Promise<unknown> =>
       unwrap(crmApi.mergeCustomers(payload.primaryId, payload.secondaryId)),
-    onSuccess: (): void => {
+    onSuccess: (_data: unknown, payload: MergeCustomersPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
+      for (const id of [payload.primaryId, payload.secondaryId]) {
+        void qc.invalidateQueries({ queryKey: ['crm-customer', id] });
+      }
+      void qc.invalidateQueries({ queryKey: ['crm-dashboard'] });
       toast.success(t('crm.customers.merged'));
     },
     onError: (): void => {
@@ -307,6 +318,7 @@ export const useImportCustomerRows = (): UseMutationResult<
       )) as CustomerImportResult,
     onSuccess: (result: CustomerImportResult): void => {
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
+      void qc.invalidateQueries({ queryKey: ['crm-dashboard'] });
       toast.success(
         t('crm.customers.importSummary', {
           total: result.totalProcessed,

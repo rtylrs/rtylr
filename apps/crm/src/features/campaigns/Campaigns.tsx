@@ -314,7 +314,8 @@ function CampaignCard({
         </span>
         <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
           {campaign.status === 'Draft' && canSend && (
-            <button type="button"
+            <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onLaunch();
@@ -336,7 +337,8 @@ function CampaignCard({
             </button>
           )}
           {campaign.status === 'Active' && canManage && (
-            <button type="button"
+            <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onPause();
@@ -362,7 +364,8 @@ function CampaignCard({
             campaign.status === 'Sent' ||
             campaign.status === 'Cancelled' ||
             canManage) && (
-            <button type="button"
+            <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit();
@@ -382,7 +385,8 @@ function CampaignCard({
             </button>
           )}
           {canManage && (
-            <button type="button"
+            <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();
@@ -420,6 +424,8 @@ const Campaigns: React.FC = () => {
   const canSendCampaigns = canCrmPermission(role, 'crm:campaigns:send');
   const pageSize = 100;
   const [offset, setOffset] = useState(0);
+  // Set once a "Load more" page comes back empty.
+  const [exhausted, setExhausted] = useState(false);
   const [loadedCampaigns, setLoadedCampaigns] = useState<CampaignPayload[]>([]);
   const {
     data: fetchedCampaigns,
@@ -433,6 +439,11 @@ const Campaigns: React.FC = () => {
   const removeCampaign = useDeleteCampaign();
   useEffect(() => {
     if (!fetchedCampaigns) return;
+    if (offset > 0 && fetchedCampaigns.length === 0) {
+      // Exact page-size multiple: the extra page came back empty — stop
+      // offering "Load more".
+      setExhausted(true);
+    }
     setLoadedCampaigns((previous) => {
       if (offset === 0) return fetchedCampaigns;
       const byId = new Map(previous.map((campaign) => [campaign.id, campaign]));
@@ -441,7 +452,7 @@ const Campaigns: React.FC = () => {
     });
   }, [fetchedCampaigns, offset]);
 
-  const hasMore = fetchedCampaigns?.length === pageSize;
+  const hasMore = !exhausted && fetchedCampaigns?.length === pageSize;
   const audienceBySegment = useMemo(
     () =>
       new Map(
@@ -523,7 +534,8 @@ const Campaigns: React.FC = () => {
           </div>
           {canManageCampaigns && (
             <div style={{ display: 'flex', gap: '8px' }}>
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => navigate({ to: '/campaigns/sms' })}
                 style={{
                   display: 'flex',
@@ -541,7 +553,8 @@ const Campaigns: React.FC = () => {
               >
                 <MessageSquare size={14} /> New SMS
               </button>
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => navigate({ to: '/campaigns/email' })}
                 style={{
                   display: 'flex',
@@ -576,7 +589,8 @@ const Campaigns: React.FC = () => {
           }}
         >
           {statusFilters.map((f) => (
-            <button type="button"
+            <button
+              type="button"
               key={f}
               onClick={() => setStatusFilter(f)}
               style={{

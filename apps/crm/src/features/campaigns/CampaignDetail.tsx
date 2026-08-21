@@ -66,7 +66,8 @@ const CampaignDetail: React.FC = () => {
       <HelmetContainer title="Campaign detail · rtylr" />
       <div style={{ maxWidth: '1200px' }}>
         <Breadcrumbs items={[{ label: 'Campaigns', to: '/campaigns' }, { label: campaign.name }]} />
-        <button type="button"
+        <button
+          type="button"
           onClick={() => navigate({ to: '/campaigns' })}
           style={{
             background: 'transparent',
@@ -116,9 +117,13 @@ const CampaignDetail: React.FC = () => {
                 borderRadius: '9999px',
                 fontSize: '11px',
                 fontWeight: 600,
+                // Wire status is lowercase ('active'); comparing against the
+                // capitalized label left this pill permanently gray.
                 background:
-                  campaign.status === 'Active' ? 'rgba(16,185,129,0.12)' : 'rgba(148,163,184,0.12)',
-                color: campaign.status === 'Active' ? '#10b981' : '#94a3b8',
+                  campaign.status.toLowerCase() === 'active'
+                    ? 'rgba(16,185,129,0.12)'
+                    : 'rgba(148,163,184,0.12)',
+                color: campaign.status.toLowerCase() === 'active' ? '#10b981' : '#94a3b8',
               }}
             >
               {campaign.status}

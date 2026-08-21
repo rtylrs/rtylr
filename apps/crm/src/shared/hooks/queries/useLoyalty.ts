@@ -110,15 +110,18 @@ export const useLoyaltyRewards = (): UseQueryResult<LoyaltyReward[]> =>
     },
   });
 
+// With no customerId this returns the business-wide recent activity feed
+// (backend treats a missing/zero customer_id as "all customers"), which is
+// what the Loyalty page's activity log shows.
 export const useLoyaltyTransactions = (customerId?: number): UseQueryResult<LoyaltyTransaction[]> =>
   useQuery<LoyaltyTransaction[]>({
-    queryKey: ['crm-loyalty-transactions', customerId],
+    queryKey: ['crm-loyalty-transactions', customerId ?? 'all'],
     queryFn: async (): Promise<LoyaltyTransaction[]> => {
-      if (!customerId) return [];
+      // No customerId = business-wide recent activity feed; the generated
+      // client omits the param when undefined.
       const res = await unwrap(crmApi.getLoyaltyTransactions(customerId, 100, 0));
       return z.array(loyaltyTransactionSchema).parse(unwrapList(res, 'transactions'));
     },
-    enabled: typeof customerId === 'number' && customerId > 0,
   });
 
 // ── Mutations ────────────────────────────────────────────────────────────────
@@ -200,6 +203,7 @@ export const useAwardPoints = (): UseMutationResult<unknown, unknown, AwardRedee
     },
     onSuccess: (_data: unknown, variables: AwardRedeemPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-loyalty-transactions'] });
+      void qc.invalidateQueries({ queryKey: ['crm-loyalty-members'] });
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
       void qc.invalidateQueries({ queryKey: ['crm-customer', variables.customerId] });
       toast.success(t('crm.loyalty.pointsAwarded'));
@@ -219,6 +223,7 @@ export const useRedeemPoints = (): UseMutationResult<unknown, unknown, AwardRede
     },
     onSuccess: (_data: unknown, variables: AwardRedeemPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-loyalty-transactions'] });
+      void qc.invalidateQueries({ queryKey: ['crm-loyalty-members'] });
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
       void qc.invalidateQueries({ queryKey: ['crm-customer', variables.customerId] });
       toast.success(t('crm.loyalty.pointsRedeemed'));

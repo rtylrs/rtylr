@@ -55,6 +55,8 @@ const Contracts: React.FC = () => {
   const { t } = useTranslation();
   const pageSize = 100;
   const [offset, setOffset] = useState(0);
+  // Set once a "Load more" page comes back empty.
+  const [exhausted, setExhausted] = useState(false);
   const [loadedContracts, setLoadedContracts] = useState<Contract[]>([]);
   const {
     data: fetchedContracts,
@@ -68,6 +70,11 @@ const Contracts: React.FC = () => {
 
   useEffect(() => {
     if (!fetchedContracts) return;
+    if (offset > 0 && fetchedContracts.length === 0) {
+      // Exact page-size multiple: the extra page came back empty — stop
+      // offering "Load more".
+      setExhausted(true);
+    }
     setLoadedContracts((previous) => {
       if (offset === 0) return fetchedContracts;
       const byId = new Map(previous.map((contract) => [contract.id, contract]));
@@ -77,7 +84,7 @@ const Contracts: React.FC = () => {
   }, [fetchedContracts, offset]);
 
   const contracts = loadedContracts;
-  const hasMore = fetchedContracts?.length === pageSize;
+  const hasMore = !exhausted && fetchedContracts?.length === pageSize;
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [form, setForm] = useState({
@@ -485,10 +492,10 @@ const Contracts: React.FC = () => {
                 placeholder="John Smith"
               />
               <Input
-                label="Closed By (rep)"
+                label="Closed By (rep user ID)"
                 value={form.closedBy}
                 onChange={(e) => setForm((f) => ({ ...f, closedBy: e.target.value }))}
-                placeholder="Sales rep name"
+                placeholder="User ID of the sales rep"
               />
             </div>
             <Textarea

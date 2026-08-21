@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { useNavigate, useRouterState } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useUserStore } from '@voxire/auth';
 import { Save, Send } from 'lucide-react';
@@ -23,9 +23,8 @@ const SMSCampaign: React.FC = () => {
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canManageCampaigns = canCrmPermission(role, 'crm:campaigns');
   const canSendCampaigns = canCrmPermission(role, 'crm:campaigns:send');
-  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
-  const searchParams = new URLSearchParams(searchStr);
-  const campaignId = Number(searchParams.get('id') || 0) || undefined;
+  const search = useSearch({ from: '/layout/campaigns/sms' });
+  const campaignId = search.id;
   const isEditing = !!campaignId;
 
   const create = useCreateCampaign();
@@ -33,13 +32,13 @@ const SMSCampaign: React.FC = () => {
   const updateStatus = useUpdateCampaignStatus();
   const { data: existingCampaign } = useGetCampaign(campaignId);
   const { data: fetchedSegments } = useListSegments();
-  const { data: fetchedCustomers } = useListCustomers({ limit: 200, offset: 0 });
-  const segments = fetchedSegments ?? [];
+  const { data: fetchedCustomers } = useListCustomers({ limit: 100, offset: 0 });
+  const segments = useMemo(() => fetchedSegments ?? [], [fetchedSegments]);
   const customers = fetchedCustomers ?? [];
 
-  const [name, setName] = useState('');
-  const [segmentId, setSegmentId] = useState<string>('');
-  const [body, setBody] = useState(DEFAULT_SMS_BODY);
+  const [name, setName] = useState(search.name || '');
+  const [segmentId, setSegmentId] = useState<string>(search.segment || '');
+  const [body, setBody] = useState(search.body || DEFAULT_SMS_BODY);
   const pending = create.isPending || update.isPending || updateStatus.isPending;
 
   useEffect(() => {
@@ -51,10 +50,13 @@ const SMSCampaign: React.FC = () => {
       setBody(existingCampaign.body ?? '');
       return;
     }
-    if (!isEditing && !segmentId && segments[0]) {
-      setSegmentId(segments[0].id);
+    if (!isEditing && !segmentId && segments.length > 0) {
+      // ?segment= preselects the audience the user navigated here from.
+      const preselect =
+        (search.segment && segments.find((item) => item.id === search.segment)) || segments[0];
+      setSegmentId(preselect.id);
     }
-  }, [existingCampaign, isEditing, segmentId, segments]);
+  }, [existingCampaign, isEditing, segmentId, segments, search.segment]);
 
   const handleSave = (send: boolean): void => {
     const payload = {

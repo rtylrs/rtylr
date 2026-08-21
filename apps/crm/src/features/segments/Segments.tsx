@@ -159,7 +159,8 @@ function RuleBuilder({
               Segment Builder
             </span>
           </div>
-          <button type="button"
+          <button
+            type="button"
             onClick={onClose}
             style={{
               background: 'none',
@@ -267,7 +268,8 @@ function RuleBuilder({
                   ))}
                 </select>
                 {rules.length > 1 && (
-                  <button type="button"
+                  <button
+                    type="button"
                     onClick={() => removeRule(rule.id)}
                     style={{
                       background: 'none',
@@ -284,7 +286,8 @@ function RuleBuilder({
               </div>
             ))}
           </div>
-          <button type="button"
+          <button
+            type="button"
             onClick={addRule}
             style={{
               display: 'flex',
@@ -308,7 +311,8 @@ function RuleBuilder({
 
         {/* Actions */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '4px' }}>
-          <button type="button"
+          <button
+            type="button"
             onClick={onClose}
             style={{
               padding: '8px 16px',
@@ -323,7 +327,8 @@ function RuleBuilder({
           >
             Cancel
           </button>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => onSave(segmentName, rules)}
             style={{
               padding: '8px 16px',
@@ -447,7 +452,8 @@ function SegmentCard({
 
       {/* Actions */}
       <div style={{ display: 'flex', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
-        <button type="button"
+        <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation();
             onClick?.();
@@ -478,7 +484,8 @@ function SegmentCard({
           <ChevronRight size={13} />
         </button>
         {canDelete && (
-          <button type="button"
+          <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onDelete();
@@ -579,7 +586,8 @@ const Segments: React.FC = () => {
               total
             </p>
           </div>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setBuilderOpen(true)}
             style={{
               display: 'flex',

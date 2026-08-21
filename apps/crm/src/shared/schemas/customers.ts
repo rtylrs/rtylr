@@ -42,14 +42,11 @@ const customerWireSchema = z.object({
   isActive: z.boolean().optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
-  // Legacy / client-only fields the backend does not currently emit.
-  consent: z
-    .object({
-      email: z.boolean(),
-      sms: z.boolean(),
-      marketing: z.boolean(),
-    })
-    .optional(),
+  // Legacy / client-only fields the backend does not currently emit. The
+  // backend stores consent as an opaque JSON record, so accept any partial
+  // map instead of demanding all three keys (a row with only {email:true}
+  // would otherwise fail the parse and kill the whole list).
+  consent: z.record(z.string(), z.boolean()).optional(),
   referredBy: finiteNumber.nullable().optional(),
 });
 
