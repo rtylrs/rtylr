@@ -268,5 +268,6 @@ export const cases = [
   ["apps/erp/src/features/low-stock-alerts/LowStockAlerts.tsx", "audit-batch-266-suite-21"],
   ["apps/erp/src/features/variants/Variants.tsx", "audit-batch-267-suite-21"],
   ["apps/erp/src/shared/components/ProductTagInput.tsx", "audit-batch-268-suite-21"],
+  ["apps/finance/src/features/invoices/Invoices.test.tsx", "audit-batch-269-suite-21"],
 ];
 
