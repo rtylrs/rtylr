@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+	"math"
 	"strings"
 	"time"
 )
@@ -36,6 +37,13 @@ func ValidateQuoteInput(input QuoteInput) error {
 
 	if input.Discount < 0 {
 		return fmt.Errorf("discount must not be negative")
+	}
+
+	// Totals are otherwise client-supplied and persisted verbatim, so a
+	// mismatched header could later materialise into finance_invoices with
+	// arbitrary amounts. Enforce the identity at the boundary instead.
+	if math.Abs(input.Total-(input.Subtotal-input.Discount+input.Tax)) > 0.005 {
+		return fmt.Errorf("total must equal subtotal - discount + tax")
 	}
 
 	if input.Status != "" {

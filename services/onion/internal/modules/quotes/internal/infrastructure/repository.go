@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"time"
 
@@ -302,6 +303,23 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, businessID, quoteID i
 
 	// cross-schema write from quotes to finance_invoices — materialise quote
 	// header row. Column list matches finance_invoices schema.
+	// Totals are client-supplied on quote write paths, so re-verify the
+	// stored header is internally consistent before materialising it into
+	// finance_invoices. A tampered or legacy-bad row must not become an
+	// accounts-receivable document.
+	subtotal := parseFloatNull(quoteRow.Subtotal)
+	tax := parseFloatNull(quoteRow.Tax)
+	discount := parseFloatNull(quoteRow.Discount)
+	total := parseFloatNull(quoteRow.Total)
+	if math.Abs(total-(subtotal-discount+tax)) > 0.005 {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("Refusing to convert quote with inconsistent totals",
+			logger.Any("quoteId", quoteID),
+			logger.Any("total", total),
+		)
+		return 0, domain.ErrQuoteTotalMismatch
+	}
+
 	res, err := qtx.InsertInvoiceFromQuote(ctx, sqlc.InsertInvoiceFromQuoteParams{
 		OwnerID:        businessID,
 		BusinessID:     businessID,
@@ -377,14 +395,21 @@ func (r *Repository) ConvertToInvoice(ctx context.Context, businessID, quoteID i
 		}
 	}
 
-	if _, statusErr := qtx.UpdateQuoteStatus(ctx, sqlc.UpdateQuoteStatusParams{
-		Status:     sqlc.NullFinanceQuotesStatus{FinanceQuotesStatus: sqlc.FinanceQuotesStatus("converted"), Valid: true},
+	// The predicate makes the status flip conditional: under concurrency a
+	// second conversion's update matches zero rows once the first commits,
+	// so exactly one invoice can ever be created from a quote.
+	statusRes, statusErr := qtx.MarkQuoteConverted(ctx, sqlc.MarkQuoteConvertedParams{
 		ID:         quoteID,
 		BusinessID: businessID,
-	}); statusErr != nil {
+	})
+	if statusErr != nil {
 		_ = tx.Rollback()
 		logger.Ctx(ctx).Error("Failed to mark quote converted", logger.Error(statusErr))
 		return 0, statusErr
+	}
+	if rows, _ := statusRes.RowsAffected(); rows == 0 {
+		_ = tx.Rollback()
+		return 0, domain.ErrQuoteAlreadyConverted
 	}
 
 	if err := tx.Commit(); err != nil {

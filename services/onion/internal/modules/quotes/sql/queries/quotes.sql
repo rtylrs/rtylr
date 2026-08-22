@@ -54,3 +54,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 SELECT COUNT(*)
 FROM finance_invoices
 WHERE business_id = ? AND YEAR(created_at) = ?;
+
+-- name: MarkQuoteConverted :execresult
+UPDATE finance_quotes
+SET status = 'converted'
+WHERE id = ? AND business_id = ? AND status <> 'converted';
