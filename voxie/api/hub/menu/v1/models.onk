@@ -21,7 +21,7 @@ message MenuBanner {
   image_url: string
   link_url: string
   position: int32
-  is_active: bool? @nullable
+  is_active: bool?
   starts_at: string
   ends_at: string
   created_at: string
@@ -40,7 +40,7 @@ message CreateMenuBannerRequest {
   image_url: string
   link_url: string
   position: int32
-  is_active: bool? @nullable
+  is_active: bool?
   starts_at: string
   ends_at: string
 }

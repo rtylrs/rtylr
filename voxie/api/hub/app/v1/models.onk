@@ -16,8 +16,8 @@ message Addon {
   price: float64
   is_free: bool
   is_enabled: bool
-  enabled_at: string? @nullable
-  disabled_at: string? @nullable
+  enabled_at: string?
+  disabled_at: string?
 }
 
 message ListAppsRequest {}
