@@ -16,7 +16,9 @@
     "recordPayment": "تسجيل الدفع",
     "recording": "جارٍ التسجيل...",
     "recordFailed": "تعذّر تسجيل الدفع",
-    "createFailed": "تعذّر حفظ الفاتورة"
+    "createFailed": "تعذّر حفظ الفاتورة",
+    "prefillFromContract": "تعبئة من عقد موقّع",
+    "chooseContract": "اختر عقداً موقّعاً…"
   },
   "expenses": {
     "submit": "إرسال",
