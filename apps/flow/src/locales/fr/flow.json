@@ -749,10 +749,10 @@
   "bin": {
     "title": "Corbeille",
     "archived": "archivé",
-    "restore": "Restaurer {name}",
+    "restore": "Restaurer {{name}}",
     "restored": "Projet restauré",
     "purged": "Projet définitivement supprimé",
-    "purgeConfirm": "Ceci supprime définitivement {name} et tout son contenu. Cette action est irréversible.",
-    "retention": "Les projets restent dans la corbeille pendant {days} jours avant suppression automatique."
+    "purgeConfirm": "Ceci supprime définitivement {{name}} et tout son contenu. Cette action est irréversible.",
+    "retention": "Les projets restent dans la corbeille pendant {{days}} jours avant suppression automatique."
   }
 }

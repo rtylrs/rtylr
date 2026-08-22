@@ -749,10 +749,10 @@
   "bin": {
     "title": "Recycle bin",
     "archived": "archived",
-    "restore": "Restore {name}",
+    "restore": "Restore {{name}}",
     "restored": "Project restored",
     "purged": "Project permanently deleted",
-    "purgeConfirm": "This permanently deletes {name} and everything inside it. This cannot be undone.",
-    "retention": "Projects stay in the bin for {days} days before automatic deletion."
+    "purgeConfirm": "This permanently deletes {{name}} and everything inside it. This cannot be undone.",
+    "retention": "Projects stay in the bin for {{days}} days before automatic deletion."
   }
 }
