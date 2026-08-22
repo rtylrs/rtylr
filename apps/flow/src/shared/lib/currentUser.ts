@@ -7,7 +7,6 @@ import {
   projectMembersQueryOptions,
   useProjectMembers,
 } from '../../features/projects/useProjectMembers';
-import { useWorkspaceMembers } from '../../features/workspace-manager/useWorkspaceManager';
 import type { ApiProjectMember, FlowProjectRole } from '../services/flowApi';
 
 /** Fallback user id when no authenticated user is available (dev only) */
@@ -42,7 +41,7 @@ export function findProjectRole(
   userId: string | null
 ): FlowProjectRole | undefined {
   if (!members || userId === null) return undefined;
-  return members.find((m) => String(m.userId) === String(userId))?.role;
+  return members.find((m: { userId: string }) => String(m.userId) === String(userId))?.role;
 }
 
 /**
@@ -105,11 +104,8 @@ export function useMostRestrictiveProjectRole(projectIds: string[]): FlowProject
  * write would have succeeded had the button not been disabled.
  */
 function useCurrentWorkspaceRole(): string | undefined {
-  const userId = useCurrentUserId();
-  const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
-  const { data: members } = useWorkspaceMembers(activeWorkspaceId);
-  if (!members || userId === null) return undefined;
-  return members.find((m) => String(m.userId) === String(userId))?.role;
+	// Workspace layer removed; project roles are the only permission source.
+	return undefined;
 }
 
 /**
