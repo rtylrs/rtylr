@@ -125,3 +125,29 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 UPDATE crm_contracts
 SET plan = ?, mrr = ?, seats = ?, signed_at = ?, signed_by_name = ?, closed_by = ?, notes = ?
 WHERE id = ? AND business_id = ?;
+
+-- name: ListSignedContracts :many
+-- Signed-only variant backing crm.sales.v1's signed filter (#839): a caller
+-- asking for billable contracts must not page through drafts.
+SELECT id, owner_id, business_id, lead_id, plan, mrr, seats,
+       signed_at, COALESCE(signed_by_name,'') AS signed_by_name, closed_by, COALESCE(notes,'') AS notes,
+       created_at, updated_at
+FROM crm_contracts
+WHERE business_id = ? AND signed_at IS NOT NULL
+ORDER BY created_at DESC
+LIMIT ? OFFSET ?;
+
+-- name: ListUnsignedContracts :many
+SELECT id, owner_id, business_id, lead_id, plan, mrr, seats,
+       signed_at, COALESCE(signed_by_name,'') AS signed_by_name, closed_by, COALESCE(notes,'') AS notes,
+       created_at, updated_at
+FROM crm_contracts
+WHERE business_id = ? AND signed_at IS NULL
+ORDER BY created_at DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountSignedContracts :one
+SELECT COUNT(*) FROM crm_contracts WHERE business_id = ? AND signed_at IS NOT NULL;
+
+-- name: CountUnsignedContracts :one
+SELECT COUNT(*) FROM crm_contracts WHERE business_id = ? AND signed_at IS NULL;
