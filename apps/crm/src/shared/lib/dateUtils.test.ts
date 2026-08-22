@@ -100,6 +100,14 @@ describe('relativeDate', () => {
     expect(relativeDate(ref.toISOString())).toBe('3 days ago');
   });
 
+  it('does not describe future dates as being in the past', () => {
+    const ref = new Date();
+    ref.setDate(ref.getDate() + 1);
+    const result = relativeDate(ref.toISOString());
+    expect(result).toContain(String(ref.getFullYear()));
+    expect(result).not.toContain('ago');
+  });
+
   it('returns a formatted date for dates older than a week', () => {
     const result = relativeDate('2020-01-15T00:00:00.000Z');
     expect(result).toContain('2020');

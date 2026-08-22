@@ -51,6 +51,9 @@ export function relativeDate(dateStr: string): string {
   const diffDays = calendarDay(now) - calendarDay(date);
   if (diffDays === 0) return 'Today';
   if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 0) {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
   if (diffDays < 7) return `${diffDays} days ago`;
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
