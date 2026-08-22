@@ -777,8 +777,9 @@ func (r *Repository) ProcessPayment(ctx context.Context, businessID, orderID int
 		return err
 	}
 
+	committed := false
 	defer func() {
-		if err != nil {
+		if !committed {
 			_ = tx.Rollback()
 		}
 	}()
@@ -796,6 +797,9 @@ func (r *Repository) ProcessPayment(ctx context.Context, businessID, orderID int
 		logger.Ctx(ctx).Error("Failed to get order for payment", logger.Error(err))
 		return err
 	}
+	if paymentRow.PaymentStatus.Valid && paymentRow.PaymentStatus.PosOrdersPaymentStatus == sqlc.PosOrdersPaymentStatusPaid {
+		return domain.ErrOrderAlreadyPaid
+	}
 
 	total := decimalToFloat(paymentRow.Total.String)
 	changeDue := input.AmountPaid - total
@@ -805,7 +809,7 @@ func (r *Repository) ProcessPayment(ctx context.Context, businessID, orderID int
 
 	now := time.Now().UTC()
 
-	err = qtx.MarkOrderPaid(ctx, sqlc.MarkOrderPaidParams{
+	markResult, err := qtx.MarkOrderPaid(ctx, sqlc.MarkOrderPaidParams{
 		PaymentMethod: sqlc.NullPosOrdersPaymentMethod{PosOrdersPaymentMethod: sqlc.PosOrdersPaymentMethod(input.PaymentMethod), Valid: true},
 		AmountPaid:    sql.NullString{String: floatToDecimal(input.AmountPaid), Valid: true},
 		ChangeDue:     sql.NullString{String: floatToDecimal(changeDue), Valid: true},
@@ -816,6 +820,14 @@ func (r *Repository) ProcessPayment(ctx context.Context, businessID, orderID int
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to mark order paid", logger.Error(err))
 		return err
+	}
+	affected, err := markResult.RowsAffected()
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to inspect payment update", logger.Error(err))
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrOrderAlreadyPaid
 	}
 
 	if paymentRow.TableID.Valid && paymentRow.TableID.Int64 > 0 && string(paymentRow.Type.PosOrdersType) == string(domain.OrderTypeDineIn) {
@@ -838,6 +850,7 @@ func (r *Repository) ProcessPayment(ctx context.Context, businessID, orderID int
 		logger.Ctx(ctx).Error("Failed to commit payment transaction", logger.Error(err))
 		return err
 	}
+	committed = true
 
 	return nil
 }
@@ -905,6 +918,7 @@ func (r *Repository) deductSoldStock(ctx context.Context, tx *sql.Tx, businessID
 		oid := orderID
 		if _, _, err := stock_core.ApplyMovementTx(ctx, tx, stock_core.Movement{
 			OwnerID:       businessID,
+			BusinessID:    businessID,
 			LocationID:    stockLoc,
 			ProductID:     l.productID,
 			EntryType:     stock_core.EntrySale,

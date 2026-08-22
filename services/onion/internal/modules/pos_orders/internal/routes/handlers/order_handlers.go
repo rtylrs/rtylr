@@ -508,6 +508,9 @@ func (h *ProcessPaymentHandler) Serve(ctx context.Context, req *ProcessPaymentRe
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return ProcessPaymentResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
 		}
+		if errors.Is(err, domain.ErrOrderAlreadyPaid) {
+			return ProcessPaymentResponse{}, onekiterrors.New(http.StatusConflict, "Order is already paid")
+		}
 
 		return ProcessPaymentResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to process payment")
 	}
