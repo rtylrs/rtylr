@@ -521,6 +521,26 @@ export interface UpdateContactRequest {
   email?: string;
 }
 
+interface ContactMutationPayload {
+  leadId?: number;
+  name?: string;
+  role?: string;
+  phone?: string;
+  email?: string;
+}
+
+export function toContactMutationPayload(
+  data: CreateContactRequest | UpdateContactRequest
+): ContactMutationPayload {
+  return {
+    ...('leadId' in data ? { leadId: data.leadId } : {}),
+    name: data.name?.trim(),
+    role: data.role?.trim(),
+    phone: data.phone?.trim(),
+    email: data.email?.trim(),
+  };
+}
+
 export interface CreateContractRequest {
   leadId: number;
   plan: ContractPlan;
@@ -748,9 +768,9 @@ export const crmApi = {
       params: leadId ? { lead_id: leadId } : {},
     }),
   createContact: (data: CreateContactRequest) =>
-    safe.post<SalesContact>('/crm/sales/contacts', data),
+    safe.post<SalesContact>('/crm/sales/contacts', toContactMutationPayload(data)),
   updateContact: (id: number, data: UpdateContactRequest) =>
-    safe.put<SalesContact>(`/crm/sales/contacts/${id}`, data),
+    safe.put<SalesContact>(`/crm/sales/contacts/${id}`, toContactMutationPayload(data)),
   deleteContact: (id: number) => safe.delete(`/crm/sales/contacts/${id}`),
   getContracts: () => safe.get<Contract[]>('/crm/sales/contracts'),
   getContract: (id: number) => safe.get<Contract>(`/crm/sales/contracts/${id}`),

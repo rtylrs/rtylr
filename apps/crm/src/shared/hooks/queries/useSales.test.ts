@@ -8,7 +8,7 @@ import {
   toContractMutationPayload,
   normalizeSalesPageSize,
 } from './useSales';
-import { toLeadMutationPayload } from '../../services/crmApi';
+import { toContactMutationPayload, toLeadMutationPayload } from '../../services/crmApi';
 
 describe('sales pagination helpers', () => {
   it('clamps list pages to the backend limit', () => {
@@ -85,6 +85,24 @@ describe('sales contract wire mappings', () => {
       assignedTo: undefined,
       mrrPotential: undefined,
       notes: 'Important context',
+    });
+  });
+
+  it('trims contact fields before sending mutations', () => {
+    expect(
+      toContactMutationPayload({
+        leadId: 12,
+        name: ' Jane Smith ',
+        role: ' CEO ',
+        phone: ' +1 555 0100 ',
+        email: ' jane@example.com ',
+      })
+    ).toEqual({
+      leadId: 12,
+      name: 'Jane Smith',
+      role: 'CEO',
+      phone: '+1 555 0100',
+      email: 'jane@example.com',
     });
   });
 });

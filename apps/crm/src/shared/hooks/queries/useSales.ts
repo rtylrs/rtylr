@@ -9,7 +9,11 @@ import {
 import { toast } from 'sonner';
 import { safe } from '../../lib/api';
 import { unwrapList } from '../../lib/unwrapList';
-import { toLeadMutationPayload, toTouchpointMutationPayload } from '../../services/crmApi';
+import {
+  toContactMutationPayload,
+  toLeadMutationPayload,
+  toTouchpointMutationPayload,
+} from '../../services/crmApi';
 import type {
   PipelineColumn,
   Lead,
@@ -467,7 +471,9 @@ export const useCreateContact = (): UseMutationResult<
   const qc = useQueryClient();
   return useMutation<SalesContact, unknown, CreateContactRequest>({
     mutationFn: async (data: CreateContactRequest): Promise<SalesContact> => {
-      const res = await unwrap(safe.post<unknown>('/crm/sales/contacts', data));
+      const res = await unwrap(
+        safe.post<unknown>('/crm/sales/contacts', toContactMutationPayload(data))
+      );
       const envelope = asRecord(res);
       return normalizeSalesContact(envelope.contact ?? res);
     },
@@ -500,7 +506,9 @@ export const useUpdateContact = (): UseMutationResult<
         .flatMap(([, rows]) => rows ?? [])
         .find((contact) => contact.id === payload.id);
       const merged = mergeContactUpdate(cached, payload.data);
-      const res = await unwrap(safe.put<unknown>(`/crm/sales/contacts/${payload.id}`, merged));
+      const res = await unwrap(
+        safe.put<unknown>(`/crm/sales/contacts/${payload.id}`, toContactMutationPayload(merged))
+      );
       const envelope = asRecord(res);
       return normalizeSalesContact(envelope.contact ?? res);
     },
