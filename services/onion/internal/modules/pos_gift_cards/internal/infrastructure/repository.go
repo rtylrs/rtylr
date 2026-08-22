@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -58,10 +59,6 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.GiftC
 	return items, nil
 }
 
-func (r *Repository) Create(ctx context.Context, businessID int64, input domain.GiftCardInput) (int64, error) {
-	return r.create(ctx, businessID, 0, input)
-}
-
 func (r *Repository) CreateForOwner(ctx context.Context, businessID, ownerID int64, input domain.GiftCardInput) (int64, error) {
 	return r.create(ctx, businessID, ownerID, input)
 }
@@ -83,6 +80,11 @@ func (r *Repository) create(ctx context.Context, businessID, ownerID int64, inpu
 		return 0, err
 	}
 	defer tx.Rollback()
+
+	orderRef, err := lockPaidOrder(ctx, tx, businessID, input.PaidOrderID, input.InitialAmount)
+	if err != nil {
+		return 0, err
+	}
 
 	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  input.CustomerName,
@@ -112,8 +114,15 @@ func (r *Repository) create(ctx context.Context, businessID, ownerID int64, inpu
 	if err != nil {
 		return 0, err
 	}
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO pos_gift_card_transactions
+			(gift_card_id, owner_id, business_id, type, order_ref, amount, balance_after, created_by)
+		VALUES (?, ?, ?, 'issue', ?, ?, ?, ?)`,
+		id, ownerID, businessID, orderRef, amountStr, amountStr, ownerID); err != nil {
+		return 0, err
+	}
 	if err := tx.Commit(); err != nil {
-		logger.Ctx(ctx).Error("Failed to commit gift card transaction", logger.Error(err))
+		logger.Ctx(ctx).Error("Failed to commit gift card issuance", logger.Error(err))
 		return 0, err
 	}
 	return id, nil
@@ -135,7 +144,7 @@ func (r *Repository) GetByCode(ctx context.Context, businessID int64, code strin
 	return giftCardFromRow(row), nil
 }
 
-func (r *Repository) Redeem(ctx context.Context, businessID int64, input domain.RedeemInput) (*domain.GiftCard, error) {
+func (r *Repository) RedeemForOrder(ctx context.Context, businessID, actorID int64, input domain.RedeemInput) (*domain.GiftCard, error) {
 	tx, err := r.pool.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin redeem transaction",
@@ -148,6 +157,11 @@ func (r *Repository) Redeem(ctx context.Context, businessID int64, input domain.
 			panic(p)
 		}
 	}()
+
+	orderRef, err := lockGiftCardOrder(ctx, tx, businessID, input.OrderID, input.Amount)
+	if err != nil {
+		return nil, err
+	}
 
 	qtx := r.queries.WithTx(tx)
 
@@ -195,6 +209,13 @@ func (r *Repository) Redeem(ctx context.Context, businessID int64, input domain.
 		return nil, err
 	}
 
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO pos_gift_card_transactions
+			(gift_card_id, owner_id, business_id, type, order_ref, amount, balance_after, created_by)
+		VALUES (?, ?, ?, 'redeem', ?, ?, ?, ?)`,
+		gc.ID, gc.OwnerID, businessID, orderRef, floatToDecimal(input.Amount), floatToDecimal(newBalance), actorID); err != nil {
+		return nil, err
+	}
 	if err := tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit redeem transaction",
 			logger.Int("business_id", int(businessID)), logger.String("code", input.Code), logger.Error(err))
@@ -203,6 +224,69 @@ func (r *Repository) Redeem(ctx context.Context, businessID int64, input domain.
 
 	gc.CurrentBalance = newBalance
 	return gc, nil
+}
+
+func lockPaidOrder(ctx context.Context, tx *sql.Tx, businessID, orderID int64, amount float64) (string, error) {
+	var totalString, paymentStatus string
+	if err := tx.QueryRowContext(ctx, `
+		SELECT total, payment_status
+		FROM pos_orders WHERE business_id = ? AND id = ? FOR UPDATE`, businessID, orderID).
+		Scan(&totalString, &paymentStatus); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", domain.ErrInvalidTender
+		}
+		return "", err
+	}
+	orderTotal := decimalToFloat(totalString)
+	if paymentStatus != "paid" || orderTotal < amount {
+		return "", domain.ErrInvalidTender
+	}
+	orderRef := fmt.Sprintf("order:%d", orderID)
+	var issuedString string
+	if err := tx.QueryRowContext(ctx, `
+		SELECT COALESCE(SUM(amount), 0)
+		FROM pos_gift_card_transactions
+		WHERE business_id = ? AND type = 'issue' AND order_ref = ?`, businessID, orderRef).
+		Scan(&issuedString); err != nil {
+		return "", err
+	}
+	if decimalToFloat(issuedString)+amount > orderTotal {
+		return "", domain.ErrInvalidTender
+	}
+	return orderRef, nil
+}
+
+func lockGiftCardOrder(ctx context.Context, tx *sql.Tx, businessID, orderID int64, amount float64) (string, error) {
+	var totalString, status string
+	if err := tx.QueryRowContext(ctx, `
+		SELECT total, status
+		FROM pos_orders WHERE business_id = ? AND id = ? FOR UPDATE`, businessID, orderID).
+		Scan(&totalString, &status); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", domain.ErrInvalidOrder
+		}
+		return "", err
+	}
+	if status == "cancelled" || status == "refunded" || status == "voided" {
+		return "", domain.ErrInvalidOrder
+	}
+	orderTotal := decimalToFloat(totalString)
+	if orderTotal <= 0 || amount > orderTotal {
+		return "", domain.ErrInvalidOrder
+	}
+	orderRef := fmt.Sprintf("order:%d", orderID)
+	var redeemedString string
+	if err := tx.QueryRowContext(ctx, `
+		SELECT COALESCE(SUM(amount), 0)
+		FROM pos_gift_card_transactions
+		WHERE business_id = ? AND type = 'redeem' AND order_ref = ?`, businessID, orderRef).
+		Scan(&redeemedString); err != nil {
+		return "", err
+	}
+	if decimalToFloat(redeemedString)+amount > orderTotal {
+		return "", domain.ErrInvalidOrder
+	}
+	return orderRef, nil
 }
 
 // giftCardFromRow maps a sqlc PosGiftCard row to the domain GiftCard.
