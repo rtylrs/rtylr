@@ -66,15 +66,19 @@ const CreateCustomer: React.FC = () => {
 
   const handleSubmit = () => {
     if (create.isPending || !data.name.trim() || !contactValid) return;
+    const name = data.name.trim();
+    const email = data.email.trim();
+    const phone = data.phone.trim();
+    const address = data.address.trim();
     create.mutate(
       {
-        name: data.name,
-        firstName: data.name.trim().split(/\s+/)[0] ?? '',
-        lastName: data.name.trim().split(/\s+/).slice(1).join(' '),
-        email: data.email,
-        phone: data.phone,
+        name,
+        firstName: name.split(/\s+/)[0] ?? '',
+        lastName: name.split(/\s+/).slice(1).join(' '),
+        email,
+        phone,
         dateOfBirth: data.birthday,
-        address: data.address,
+        address,
         consent: {
           email: data.consentEmail,
           sms: data.consentSms,
