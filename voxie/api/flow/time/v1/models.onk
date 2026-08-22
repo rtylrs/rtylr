@@ -9,7 +9,7 @@ message WorkType {
   id: int64
   /// parent_id is the parent node, or null for a top-level type. The tree is
   /// exactly two levels deep.
-  parent_id: int64? @nullable
+  parent_id: int64?
   /// name is the display name of this work type.
   name: string
   /// description is a business-authored explanation of what this work type
@@ -18,7 +18,7 @@ message WorkType {
   /// employee types for what they actually did.
   description: string
   /// hr_category_id maps this node to an HR payroll category.
-  hr_category_id: int64? @nullable
+  hr_category_id: int64?
   /// sort_order controls the order the tree is presented in.
   sort_order: int32
   /// archived hides the node from pickers without breaking historic entries.
@@ -40,7 +40,7 @@ message WorkDay {
   /// resolved it (the team view, which joins against workspace membership).
   /// Callers reading their own day already know their own identity and get
   /// this unset.
-  user_id: int64? @nullable
+  user_id: int64?
   /// date is the calendar day in the person's own timezone, as YYYY-MM-DD.
   date: string
   /// timezone is the IANA zone the day was recorded in. Stored per record because
@@ -51,9 +51,9 @@ message WorkDay {
   work_mode: string
   /// start_time is the local start of the day as HH:MM, or null for a day that
   /// records only its lines.
-  start_time: string? @nullable
+  start_time: string?
   /// end_time is the local end of the day as HH:MM.
-  end_time: string? @nullable
+  end_time: string?
   /// break_minutes is unpaid break time, subtracted from the clocked total.
   break_minutes: int32
   /// status is one of draft, submitted, approved, rejected or reopened.
@@ -67,15 +67,15 @@ message WorkDay {
   gap_minutes: int32
   /// logged_by is the user who recorded the day, which differs from employee_id
   /// when a manager fills it in on someone's behalf.
-  logged_by: int64? @nullable
+  logged_by: int64?
   /// approved_by is the approver, once the day has been approved.
-  approved_by: int64? @nullable
+  approved_by: int64?
   /// approved_at is when it was approved.
-  approved_at: string? @nullable
+  approved_at: string?
   /// reopened_by is the manager who reopened an approved day.
-  reopened_by: int64? @nullable
+  reopened_by: int64?
   /// reopened_at is when it was reopened.
-  reopened_at: string? @nullable
+  reopened_at: string?
   /// created_at is when the record was created.
   created_at: string
   /// updated_at is when the record was last changed.
@@ -91,13 +91,13 @@ message WorkDayLine {
   work_day_id: int64
   /// project_id is the project the work was for. A line may have a project and no
   /// task, for work that is not tracked as one.
-  project_id: int64? @nullable
+  project_id: int64?
   /// task_id is the task the work was for.
-  task_id: int64? @nullable
+  task_id: int64?
   /// work_type_id is the classification node, at either level of the tree.
-  work_type_id: int64? @nullable
+  work_type_id: int64?
   /// work_mode overrides the day's mode for this line only. Null means inherit.
-  work_mode: string? @nullable
+  work_mode: string?
   /// description is what was done.
   description: string
   /// duration_minutes is the time spent.
@@ -110,7 +110,7 @@ message WorkDayLine {
   /// offline retry idempotent, so a field worker syncing twice does not log twice.
   client_key: string
   /// logged_by is who recorded the line.
-  logged_by: int64? @nullable
+  logged_by: int64?
   /// created_at is when the record was created.
   created_at: string
   /// updated_at is when the record was last changed.
@@ -122,12 +122,12 @@ message GetWorkDayRequest {
   date: string @required @query("date")
   /// employee_id reads another person's day, which requires manage team time.
   /// Omitted, it reads the caller's own.
-  employee_id: int64? @nullable @query("employee_id")
+  employee_id: int64? @query("employee_id")
 }
 
 message GetWorkDayResponse {
   /// work_day is null when nothing has been recorded for that date yet.
-  work_day: WorkDay? @nullable
+  work_day: WorkDay?
   /// lines are the day's pieces of work.
   lines: WorkDayLine[]
 }
@@ -140,13 +140,13 @@ message UpsertWorkDayRequest {
   /// work_mode is one of onsite, remote or hybrid.
   work_mode: string @required
   /// start_time is the local start as HH:MM.
-  start_time: string? @nullable
+  start_time: string?
   /// end_time is the local end as HH:MM.
-  end_time: string? @nullable
+  end_time: string?
   /// break_minutes is unpaid break time.
   break_minutes: int32
   /// employee_id records the day on someone else's behalf.
-  employee_id: int64? @nullable
+  employee_id: int64?
 }
 
 message UpsertWorkDayResponse {
@@ -159,7 +159,7 @@ message ListWorkDaysRequest {
   /// to is the inclusive end of the range, as YYYY-MM-DD.
   to: string @required @query("to")
   /// employee_id lists another person's days.
-  employee_id: int64? @nullable @query("employee_id")
+  employee_id: int64? @query("employee_id")
   /// The current result page.
   page: int32 @query("page")
   /// The maximum number of records to return.
@@ -199,11 +199,11 @@ message CreateWorkDayLineRequest {
   duration_minutes: int32 @required @gt(0)
   /// description is what was done.
   description: string @required
-  project_id: int64? @nullable
-  task_id: int64? @nullable
-  work_type_id: int64? @nullable
+  project_id: int64?
+  task_id: int64?
+  work_type_id: int64?
   /// work_mode overrides the day's mode for this line only.
-  work_mode: string? @nullable
+  work_mode: string?
   is_billable: bool
 }
 
@@ -216,10 +216,10 @@ message UpdateWorkDayLineRequest {
   id: int64 @required @gt(0)
   duration_minutes: int32 @required @gt(0)
   description: string @required
-  project_id: int64? @nullable
-  task_id: int64? @nullable
-  work_type_id: int64? @nullable
-  work_mode: string? @nullable
+  project_id: int64?
+  task_id: int64?
+  work_type_id: int64?
+  work_mode: string?
   is_billable: bool
 }
 
@@ -252,9 +252,9 @@ message CreateWorkTypeRequest {
   /// description is shown to employees as the task description once picked.
   description: string
   /// parent_id nests this node under a top-level type.
-  parent_id: int64? @nullable
+  parent_id: int64?
   /// hr_category_id maps the node onto an HR payroll category.
-  hr_category_id: int64? @nullable
+  hr_category_id: int64?
   sort_order: int32
 }
 
@@ -267,8 +267,8 @@ message UpdateWorkTypeRequest {
   name: string @required
   /// description is shown to employees as the task description once picked.
   description: string
-  parent_id: int64? @nullable
-  hr_category_id: int64? @nullable
+  parent_id: int64?
+  hr_category_id: int64?
   sort_order: int32
   archived: bool
 }
