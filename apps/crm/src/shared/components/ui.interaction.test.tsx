@@ -53,4 +53,37 @@ describe('Modal focus behavior', () => {
 
     expect(opener).toHaveFocus();
   });
+
+  it('keeps keyboard focus inside the dialog', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Modal
+        open
+        onClose={() => undefined}
+        title="Save customer"
+        footer={
+          <button type="button" onClick={() => undefined}>
+            Save
+          </button>
+        }
+      >
+        <input aria-label="Customer name" />
+      </Modal>
+    );
+
+    const close = screen.getByRole('button', { name: 'Close' });
+    const input = screen.getByRole('textbox', { name: 'Customer name' });
+    const save = screen.getByRole('button', { name: 'Save' });
+
+    expect(close).toHaveFocus();
+    await user.tab();
+    expect(input).toHaveFocus();
+    await user.tab();
+    expect(save).toHaveFocus();
+    await user.tab();
+    expect(close).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(save).toHaveFocus();
+  });
 });

@@ -115,6 +115,8 @@ function RuleBuilder({
     fontSize: '12px',
     cursor: 'pointer',
     outline: 'none',
+    flex: '1 1 120px',
+    minWidth: 0,
   };
 
   return (
@@ -239,7 +241,10 @@ function RuleBuilder({
           </label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {rules.map((rule, i) => (
-              <div key={rule.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div
+                key={rule.id}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}
+              >
                 {i > 0 && (
                   <span
                     style={{

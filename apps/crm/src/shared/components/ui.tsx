@@ -215,6 +215,7 @@ export const Modal: React.FC<{
   size?: 'sm' | 'md' | 'lg';
 }> = ({ open, onClose, title, children, footer, size = 'md' }) => {
   const titleId = React.useId();
+  const dialogRef = React.useRef<HTMLDivElement>(null);
   const closeButtonRef = React.useRef<HTMLButtonElement>(null);
   const onCloseRef = React.useRef(onClose);
 
@@ -230,6 +231,35 @@ export const Modal: React.FC<{
       if (event.key === 'Escape') {
         event.preventDefault();
         onCloseRef.current();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [contenteditable="true"], [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter(
+        (element) =>
+          !element.hasAttribute('hidden') && element.getAttribute('aria-hidden') !== 'true'
+      );
+      if (focusable.length === 0) {
+        event.preventDefault();
+        return;
+      }
+
+      const activeIndex = focusable.indexOf(document.activeElement as HTMLElement);
+      if (activeIndex === -1) {
+        event.preventDefault();
+        (event.shiftKey ? focusable[focusable.length - 1] : focusable[0]).focus();
+      } else if (event.shiftKey && activeIndex === 0) {
+        event.preventDefault();
+        focusable[focusable.length - 1].focus();
+      } else if (!event.shiftKey && activeIndex === focusable.length - 1) {
+        event.preventDefault();
+        focusable[0].focus();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -257,6 +287,7 @@ export const Modal: React.FC<{
       }}
     >
       <motion.div
+        ref={dialogRef}
         initial={{ opacity: 0, scale: 0.96, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         onClick={(e) => e.stopPropagation()}

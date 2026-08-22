@@ -466,212 +466,216 @@ const Customers: React.FC = () => {
             />
           ) : (
             <>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                    <th style={{ padding: '11px 12px 11px 16px', width: '28px' }}>
-                      <input
-                        aria-label={
-                          allSelected ? 'Deselect all customers' : 'Select all customers'
-                        }
-                        type="checkbox"
-                        checked={allSelected}
-                        onChange={toggleAll}
-                        style={{ accentColor: ACCENT, cursor: 'pointer' }}
-                      />
-                    </th>
-                    {[
-                      'Customer',
-                      'Email',
-                      'Phone',
-                      'Total Spent',
-                      'Visits',
-                      'Points',
-                      'Tags',
-                      'Last Visit',
-                      '',
-                    ].map((h, i) => (
-                      <th
-                        key={i}
-                        style={{
-                          padding: '11px 16px',
-                          textAlign: 'left',
-                          fontSize: '11px',
-                          fontWeight: 600,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          color: 'var(--hub-text-dim)',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {h}
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', minWidth: '900px', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
+                      <th style={{ padding: '11px 12px 11px 16px', width: '28px' }}>
+                        <input
+                          aria-label={
+                            allSelected ? 'Deselect all customers' : 'Select all customers'
+                          }
+                          type="checkbox"
+                          checked={allSelected}
+                          onChange={toggleAll}
+                          style={{ accentColor: ACCENT, cursor: 'pointer' }}
+                        />
                       </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  <AnimatePresence>
-                    {filtered.map((c) => {
-                      const tier = getCustomerTier(c.loyaltyPoints, c.loyaltyTier, thresholds);
-                      const isExpanded = expandedId === c.id;
-                      const isSelected = selected.has(c.id);
-                      return (
-                        <React.Fragment key={c.id}>
-                          <tr
-                            style={{
-                              borderBottom: isExpanded ? 'none' : '1px solid var(--hub-border)',
-                              cursor: 'pointer',
-                              transition: 'background 0.12s',
-                              background:
-                                isExpanded || isSelected ? 'rgba(59,130,246,0.04)' : 'transparent',
-                            }}
-                            onClick={() => setExpandedId(isExpanded ? null : c.id)}
-                            tabIndex={0}
-                            aria-expanded={isExpanded}
-                            onKeyDown={(event) =>
-                              activateOnKeyboard(event, () =>
-                                setExpandedId(isExpanded ? null : c.id)
-                              )
-                            }
-                            onMouseEnter={(e) => {
-                              if (!isExpanded)
-                                (e.currentTarget as HTMLElement).style.background =
-                                  'var(--hub-hover)';
-                            }}
-                            onMouseLeave={(e) => {
-                              if (!isExpanded)
-                                (e.currentTarget as HTMLElement).style.background = isSelected
-                                  ? 'rgba(59,130,246,0.04)'
-                                  : 'transparent';
-                            }}
-                          >
-                            <td
-                              style={{ padding: '12px 12px 12px 16px' }}
-                              onClick={(e) => e.stopPropagation()}
+                      {[
+                        'Customer',
+                        'Email',
+                        'Phone',
+                        'Total Spent',
+                        'Visits',
+                        'Points',
+                        'Tags',
+                        'Last Visit',
+                        '',
+                      ].map((h, i) => (
+                        <th
+                          key={i}
+                          style={{
+                            padding: '11px 16px',
+                            textAlign: 'left',
+                            fontSize: '11px',
+                            fontWeight: 600,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.05em',
+                            color: 'var(--hub-text-dim)',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <AnimatePresence>
+                      {filtered.map((c) => {
+                        const tier = getCustomerTier(c.loyaltyPoints, c.loyaltyTier, thresholds);
+                        const isExpanded = expandedId === c.id;
+                        const isSelected = selected.has(c.id);
+                        return (
+                          <React.Fragment key={c.id}>
+                            <tr
+                              style={{
+                                borderBottom: isExpanded ? 'none' : '1px solid var(--hub-border)',
+                                cursor: 'pointer',
+                                transition: 'background 0.12s',
+                                background:
+                                  isExpanded || isSelected
+                                    ? 'rgba(59,130,246,0.04)'
+                                    : 'transparent',
+                              }}
+                              onClick={() => setExpandedId(isExpanded ? null : c.id)}
+                              tabIndex={0}
+                              aria-expanded={isExpanded}
+                              onKeyDown={(event) =>
+                                activateOnKeyboard(event, () =>
+                                  setExpandedId(isExpanded ? null : c.id)
+                                )
+                              }
+                              onMouseEnter={(e) => {
+                                if (!isExpanded)
+                                  (e.currentTarget as HTMLElement).style.background =
+                                    'var(--hub-hover)';
+                              }}
+                              onMouseLeave={(e) => {
+                                if (!isExpanded)
+                                  (e.currentTarget as HTMLElement).style.background = isSelected
+                                    ? 'rgba(59,130,246,0.04)'
+                                    : 'transparent';
+                              }}
                             >
-                              <input
-                                aria-label={`${isSelected ? 'Deselect' : 'Select'} ${c.name}`}
-                                type="checkbox"
-                                checked={isSelected}
-                                onChange={() => toggleOne(c.id)}
-                                style={{ accentColor: ACCENT, cursor: 'pointer' }}
-                              />
-                            </td>
-                            <td style={{ padding: '12px 16px' }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <CustomerAvatar
-                                  initials={c.initials}
-                                  points={c.loyaltyPoints}
-                                  size={32}
+                              <td
+                                style={{ padding: '12px 12px 12px 16px' }}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <input
+                                  aria-label={`${isSelected ? 'Deselect' : 'Select'} ${c.name}`}
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => toggleOne(c.id)}
+                                  style={{ accentColor: ACCENT, cursor: 'pointer' }}
                                 />
-                                <div>
-                                  <div
-                                    style={{
-                                      fontSize: '13px',
-                                      fontWeight: 500,
-                                      color: 'var(--hub-text)',
-                                    }}
-                                  >
-                                    {c.name}
+                              </td>
+                              <td style={{ padding: '12px 16px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                  <CustomerAvatar
+                                    initials={c.initials}
+                                    points={c.loyaltyPoints}
+                                    size={32}
+                                  />
+                                  <div>
+                                    <div
+                                      style={{
+                                        fontSize: '13px',
+                                        fontWeight: 500,
+                                        color: 'var(--hub-text)',
+                                      }}
+                                    >
+                                      {c.name}
+                                    </div>
+                                    <TierBadge tier={tier} />
                                   </div>
-                                  <TierBadge tier={tier} />
                                 </div>
-                              </div>
-                            </td>
-                            <td
-                              style={{
-                                padding: '12px 16px',
-                                fontSize: '12px',
-                                color: 'var(--hub-text-muted)',
-                              }}
-                            >
-                              {c.email}
-                            </td>
-                            <td
-                              style={{
-                                padding: '12px 16px',
-                                fontSize: '12px',
-                                color: 'var(--hub-text-muted)',
-                              }}
-                            >
-                              {c.phone}
-                            </td>
-                            <td
-                              style={{
-                                padding: '12px 16px',
-                                fontSize: '13px',
-                                fontWeight: 600,
-                                color: 'var(--hub-text)',
-                              }}
-                            >
-                              ${c.totalSpent.toLocaleString()}
-                            </td>
-                            <td
-                              style={{
-                                padding: '12px 16px',
-                                fontSize: '13px',
-                                color: 'var(--hub-text)',
-                              }}
-                            >
-                              {c.visits}
-                            </td>
-                            <td style={{ padding: '12px 16px' }}>
-                              <span
+                              </td>
+                              <td
                                 style={{
+                                  padding: '12px 16px',
+                                  fontSize: '12px',
+                                  color: 'var(--hub-text-muted)',
+                                }}
+                              >
+                                {c.email}
+                              </td>
+                              <td
+                                style={{
+                                  padding: '12px 16px',
+                                  fontSize: '12px',
+                                  color: 'var(--hub-text-muted)',
+                                }}
+                              >
+                                {c.phone}
+                              </td>
+                              <td
+                                style={{
+                                  padding: '12px 16px',
+                                  fontSize: '13px',
+                                  fontWeight: 600,
+                                  color: 'var(--hub-text)',
+                                }}
+                              >
+                                ${c.totalSpent.toLocaleString()}
+                              </td>
+                              <td
+                                style={{
+                                  padding: '12px 16px',
                                   fontSize: '13px',
                                   color: 'var(--hub-text)',
-                                  fontWeight: 500,
                                 }}
                               >
-                                {c.loyaltyPoints.toLocaleString()}
-                              </span>
-                            </td>
-                            <td style={{ padding: '12px 16px' }}>
-                              <div
+                                {c.visits}
+                              </td>
+                              <td style={{ padding: '12px 16px' }}>
+                                <span
+                                  style={{
+                                    fontSize: '13px',
+                                    color: 'var(--hub-text)',
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  {c.loyaltyPoints.toLocaleString()}
+                                </span>
+                              </td>
+                              <td style={{ padding: '12px 16px' }}>
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    gap: '4px',
+                                    flexWrap: 'wrap',
+                                    maxWidth: '160px',
+                                  }}
+                                >
+                                  {(c.tags || []).slice(0, 2).map((t, i) => (
+                                    <TagChip key={`${t}-${i}`} label={t} />
+                                  ))}
+                                </div>
+                              </td>
+                              <td
                                 style={{
-                                  display: 'flex',
-                                  gap: '4px',
-                                  flexWrap: 'wrap',
-                                  maxWidth: '160px',
+                                  padding: '12px 16px',
+                                  fontSize: '12px',
+                                  color: 'var(--hub-text-muted)',
                                 }}
                               >
-                                {(c.tags || []).slice(0, 2).map((t, i) => (
-                                  <TagChip key={`${t}-${i}`} label={t} />
-                                ))}
-                              </div>
-                            </td>
-                            <td
-                              style={{
-                                padding: '12px 16px',
-                                fontSize: '12px',
-                                color: 'var(--hub-text-muted)',
-                              }}
-                            >
-                              {c.lastVisit}
-                            </td>
-                            <td style={{ padding: '12px 16px', textAlign: 'right' }}>
-                              {isExpanded ? (
-                                <ChevronUp size={14} style={{ color: ACCENT }} />
-                              ) : (
-                                <ChevronDown size={14} style={{ color: 'var(--hub-text-dim)' }} />
+                                {c.lastVisit}
+                              </td>
+                              <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+                                {isExpanded ? (
+                                  <ChevronUp size={14} style={{ color: ACCENT }} />
+                                ) : (
+                                  <ChevronDown size={14} style={{ color: 'var(--hub-text-dim)' }} />
+                                )}
+                              </td>
+                            </tr>
+                            <AnimatePresence>
+                              {isExpanded && (
+                                <ExpandedDetail
+                                  customer={c}
+                                  onView={() => navigate({ to: `/customers/${c.id}` })}
+                                  thresholds={thresholds}
+                                />
                               )}
-                            </td>
-                          </tr>
-                          <AnimatePresence>
-                            {isExpanded && (
-                              <ExpandedDetail
-                                customer={c}
-                                onView={() => navigate({ to: `/customers/${c.id}` })}
-                                thresholds={thresholds}
-                              />
-                            )}
-                          </AnimatePresence>
-                        </React.Fragment>
-                      );
-                    })}
-                  </AnimatePresence>
-                </tbody>
-              </table>
+                            </AnimatePresence>
+                          </React.Fragment>
+                        );
+                      })}
+                    </AnimatePresence>
+                  </tbody>
+                </table>
+              </div>
               {hasMore && filtered.length > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}>
                   <Button

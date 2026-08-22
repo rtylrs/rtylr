@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HelmetContainer } from '@voxire/components';
+import { TIMEZONES } from '@voxire/config';
 import { toast } from 'sonner';
 import { Save, Users, Settings2, UserPlus, UserMinus } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -60,6 +61,10 @@ const GeneralTab: React.FC = () => {
     setForm((f) => ({ ...f, [k]: v }));
 
   const settingsUnavailable = isLoading || isError;
+  const timezoneOptions =
+    form.timezone && !TIMEZONES.some((timezone) => timezone.value === form.timezone)
+      ? [{ value: form.timezone, label: `Current (${form.timezone})` }, ...TIMEZONES]
+      : TIMEZONES;
 
   const handleSave = (): void => {
     if (update.isPending || settingsUnavailable) return;
@@ -104,11 +109,12 @@ const GeneralTab: React.FC = () => {
             value={form.timezone}
             onChange={(e) => set('timezone', e.target.value)}
           >
-            <option value="America/Los_Angeles">Pacific Time (Los Angeles)</option>
-            <option value="America/New_York">Eastern Time (New York)</option>
-            <option value="Europe/London">London</option>
-            <option value="Europe/Paris">Paris</option>
-            <option value="Asia/Tokyo">Tokyo</option>
+            {!form.timezone && <option value="">Select a timezone...</option>}
+            {timezoneOptions.map((timezone) => (
+              <option key={timezone.value} value={timezone.value}>
+                {timezone.label}
+              </option>
+            ))}
           </Select>
           <p style={{ margin: 0, fontSize: '11px', color: 'var(--hub-text-muted)' }}>
             Business profile, currency, and at-risk policy are not available from the CRM settings

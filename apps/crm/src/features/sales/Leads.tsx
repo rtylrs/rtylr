@@ -261,158 +261,166 @@ const Leads: React.FC = () => {
               }
             />
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
-                  {[
-                    'Company',
-                    'Industry',
-                    'Stage',
-                    'Source',
-                    'Assigned Rep',
-                    'MRR Potential',
-                    'Actions',
-                  ].map((h, i) => (
-                    <th
-                      key={i}
-                      style={{
-                        padding: '11px 16px',
-                        textAlign: 'left',
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                        color: 'var(--hub-text-dim)',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <AnimatePresence>
-                  {filtered.map((lead: Lead) => (
-                    <motion.tr
-                      key={lead.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      style={{
-                        borderBottom: '1px solid var(--hub-border)',
-                        cursor: 'pointer',
-                        transition: 'background 0.12s',
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.background = 'transparent';
-                      }}
-                      onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
-                      tabIndex={0}
-                      onKeyDown={(event) =>
-                        activateOnKeyboard(event, () => navigate({ to: `/sales/leads/${lead.id}` }))
-                      }
-                    >
-                      <td style={{ padding: '12px 16px' }}>
-                        <p
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', minWidth: '720px', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
+                    {[
+                      'Company',
+                      'Industry',
+                      'Stage',
+                      'Source',
+                      'Assigned Rep',
+                      'MRR Potential',
+                      'Actions',
+                    ].map((h, i) => (
+                      <th
+                        key={i}
+                        style={{
+                          padding: '11px 16px',
+                          textAlign: 'left',
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em',
+                          color: 'var(--hub-text-dim)',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <AnimatePresence>
+                    {filtered.map((lead: Lead) => (
+                      <motion.tr
+                        key={lead.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        style={{
+                          borderBottom: '1px solid var(--hub-border)',
+                          cursor: 'pointer',
+                          transition: 'background 0.12s',
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLElement).style.background = 'transparent';
+                        }}
+                        onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
+                        tabIndex={0}
+                        onKeyDown={(event) =>
+                          activateOnKeyboard(event, () =>
+                            navigate({ to: `/sales/leads/${lead.id}` })
+                          )
+                        }
+                      >
+                        <td style={{ padding: '12px 16px' }}>
+                          <p
+                            style={{
+                              fontSize: '13px',
+                              fontWeight: 600,
+                              color: 'var(--hub-text)',
+                              margin: 0,
+                            }}
+                          >
+                            {lead.companyName ?? lead.company ?? '—'}
+                          </p>
+                        </td>
+                        <td
                           style={{
+                            padding: '12px 16px',
+                            fontSize: '12px',
+                            color: 'var(--hub-text-muted)',
+                          }}
+                        >
+                          {lead.industry}
+                        </td>
+                        <td style={{ padding: '12px 16px' }}>
+                          <StageBadge stage={lead.stage} />
+                        </td>
+                        <td
+                          style={{
+                            padding: '12px 16px',
+                            fontSize: '12px',
+                            color: 'var(--hub-text-muted)',
+                          }}
+                        >
+                          {lead.source}
+                        </td>
+                        <td
+                          style={{
+                            padding: '12px 16px',
+                            fontSize: '12px',
+                            color: 'var(--hub-text)',
+                          }}
+                        >
+                          {lead.assignedTo != null ? lead.assignedTo : '—'}
+                        </td>
+                        <td
+                          style={{
+                            padding: '12px 16px',
                             fontSize: '13px',
                             fontWeight: 600,
                             color: 'var(--hub-text)',
-                            margin: 0,
                           }}
                         >
-                          {lead.companyName ?? lead.company ?? '—'}
-                        </p>
-                      </td>
-                      <td
-                        style={{
-                          padding: '12px 16px',
-                          fontSize: '12px',
-                          color: 'var(--hub-text-muted)',
-                        }}
-                      >
-                        {lead.industry}
-                      </td>
-                      <td style={{ padding: '12px 16px' }}>
-                        <StageBadge stage={lead.stage} />
-                      </td>
-                      <td
-                        style={{
-                          padding: '12px 16px',
-                          fontSize: '12px',
-                          color: 'var(--hub-text-muted)',
-                        }}
-                      >
-                        {lead.source}
-                      </td>
-                      <td
-                        style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--hub-text)' }}
-                      >
-                        {lead.assignedTo != null ? lead.assignedTo : '—'}
-                      </td>
-                      <td
-                        style={{
-                          padding: '12px 16px',
-                          fontSize: '13px',
-                          fontWeight: 600,
-                          color: 'var(--hub-text)',
-                        }}
-                      >
-                        ${(lead.mrrPotential ?? lead.dealValue ?? 0).toLocaleString()}
-                      </td>
-                      <td style={{ padding: '12px 16px' }} onClick={(e) => e.stopPropagation()}>
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <button
-                            type="button"
-                            aria-label="View lead"
-                            onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
-                            style={{
-                              height: '28px',
-                              width: '28px',
-                              borderRadius: '6px',
-                              background: 'transparent',
-                              border: '1px solid var(--hub-border)',
-                              cursor: 'pointer',
-                              color: 'var(--hub-text-muted)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                            }}
-                          >
-                            <Eye size={13} />
-                          </button>
-                          <button
-                            type="button"
-                            aria-label="Delete lead"
-                            onClick={() => setDeleteId(lead.id)}
-                            disabled={deleteLead.isPending}
-                            style={{
-                              height: '28px',
-                              width: '28px',
-                              borderRadius: '6px',
-                              background: 'transparent',
-                              border: '1px solid var(--hub-border)',
-                              color: '#ef4444',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              cursor: deleteLead.isPending ? 'not-allowed' : 'pointer',
-                              opacity: deleteLead.isPending ? 0.5 : 1,
-                            }}
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </AnimatePresence>
-              </tbody>
-            </table>
+                          ${(lead.mrrPotential ?? lead.dealValue ?? 0).toLocaleString()}
+                        </td>
+                        <td style={{ padding: '12px 16px' }} onClick={(e) => e.stopPropagation()}>
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <button
+                              type="button"
+                              aria-label="View lead"
+                              onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
+                              style={{
+                                height: '28px',
+                                width: '28px',
+                                borderRadius: '6px',
+                                background: 'transparent',
+                                border: '1px solid var(--hub-border)',
+                                cursor: 'pointer',
+                                color: 'var(--hub-text-muted)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                            >
+                              <Eye size={13} />
+                            </button>
+                            <button
+                              type="button"
+                              aria-label="Delete lead"
+                              onClick={() => setDeleteId(lead.id)}
+                              disabled={deleteLead.isPending}
+                              style={{
+                                height: '28px',
+                                width: '28px',
+                                borderRadius: '6px',
+                                background: 'transparent',
+                                border: '1px solid var(--hub-border)',
+                                color: '#ef4444',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: deleteLead.isPending ? 'not-allowed' : 'pointer',
+                                opacity: deleteLead.isPending ? 0.5 : 1,
+                              }}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </AnimatePresence>
+                </tbody>
+              </table>
+            </div>
           )}
           {isError && leads.length > 0 && (
             <div
