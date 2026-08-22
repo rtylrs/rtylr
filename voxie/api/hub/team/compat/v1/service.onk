@@ -1,0 +1,10 @@
+package hub.team.compat.v1
+
+/// Compatibility contract for the legacy app team routes.
+service CompatibilityService {
+  base_path: "/team"
+
+  listMembers(ListMembersRequest) -> ListMembersResponse @get("/members")
+  inviteMember(InviteMemberRequest) -> EmptyJsonResponse @post("/invite") @body("body")
+  deactivateMember(DeactivateMemberRequest) -> EmptyJsonResponse @patch("/members/{id}/deactivate") @body("body")
+}
