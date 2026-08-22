@@ -117,14 +117,14 @@ SELECT id, order_id, menu_item_id, name, sku,
 FROM pos_order_items
 WHERE order_id = ?;
 
--- name: MarkOrderPaid :exec
+-- name: MarkOrderPaid :execresult
 UPDATE pos_orders
 SET status = 'paid', payment_status = 'paid', payment_method = ?,
     amount_paid = ?, change_due = ?, paid_at = ?
-WHERE business_id = ? AND id = ?;
+WHERE business_id = ? AND id = ? AND payment_status <> 'paid';
 
 -- name: GetOrderForPayment :one
-SELECT total, table_id, type FROM pos_orders WHERE business_id = ? AND id = ? FOR UPDATE;
+SELECT total, table_id, type, payment_status FROM pos_orders WHERE business_id = ? AND id = ? FOR UPDATE;
 
 -- name: CreateRefund :execresult
 INSERT INTO pos_refunds (owner_id, business_id, order_id, amount, reason, refunded_by)
