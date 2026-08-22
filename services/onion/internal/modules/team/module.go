@@ -8,6 +8,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/team/internal/api"
 	"github.com/voxire/onion/internal/modules/team/internal/application"
+	teamjobs "github.com/voxire/onion/internal/modules/team/internal/jobs"
+	platformjobs "github.com/voxire/onion/internal/platform/jobs"
 	hubteamaccessv1 "github.com/voxire/voxie/gen/go/hub/team/access/v1"
 	hubteamgroupsv1 "github.com/voxire/voxie/gen/go/hub/team/groups/v1"
 	hubteaminvitationsv1 "github.com/voxire/voxie/gen/go/hub/team/invitations/v1"
@@ -79,4 +81,10 @@ func (m *Module) GetAnonymousRoutes() []string {
 		"/hub/team/invitations/v1/invitations/verify",
 		"/hub/team/invitations/v1/invitations/accept",
 	}
+}
+
+// RegisterJobs registers the terminated-employee access reconciliation job
+// so the worker picks it up via platformjobs.AutoRegister (#834).
+func (m *Module) RegisterJobs(ctx context.Context, registry *platformjobs.Registry) {
+	teamjobs.Register(ctx, registry, m.service)
 }
