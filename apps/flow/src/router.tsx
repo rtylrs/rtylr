@@ -268,7 +268,6 @@ const myDayRoute = createRoute({
   component: () => withLayout(<MyDay />),
 });
 
-
 const leaveRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/leave',

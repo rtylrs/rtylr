@@ -77,7 +77,7 @@ export function useMarkEntriesInvoiced() {
         t('unbilled.markedDone', {
           marked: res.markedCount ?? 0,
           skipped: res.skippedCount ?? 0,
-        }),
+        })
       );
     },
     onError: () => toast.error(t('errors.generic')),

@@ -9,7 +9,10 @@ import type { CreateInvoiceRequest } from '@voxire/voxie/finance/invoices/v1/typ
 import PageHeader from '../../shared/components/PageHeader';
 import ClientSelect, { Client } from '../../shared/components/ClientSelect';
 import LineItemRow, { LineItem } from '../../shared/components/LineItemRow';
-import { useSignedContracts, type SignedContract } from '../../shared/hooks/queries/useSignedContracts';
+import {
+  useSignedContracts,
+  type SignedContract,
+} from '../../shared/hooks/queries/useSignedContracts';
 import TaxBreakdown from '../../shared/components/TaxBreakdown';
 import InvoicePreview from '../../shared/components/InvoicePreview';
 import { useTranslation } from 'react-i18next';
@@ -119,7 +122,7 @@ const NewInvoice: React.FC = () => {
     setNotes(
       `Prefilled from signed CRM contract #${contract.id}` +
         (contract.signedAt ? ` (signed ${contract.signedAt})` : '') +
-        `\n${settings.invoiceNotes}`,
+        `\n${settings.invoiceNotes}`
     );
   };
 

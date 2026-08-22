@@ -2,14 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type BusinessType =
-  | 'restaurant'
-  | 'gym'
-  | 'retail'
-  | 'salon'
-  | 'cafe'
-  | 'bar'
-  | 'hotel'
-  | 'other';
+  'restaurant' | 'gym' | 'retail' | 'salon' | 'cafe' | 'bar' | 'hotel' | 'other';
 
 interface BusinessState {
   businessType: BusinessType | null;

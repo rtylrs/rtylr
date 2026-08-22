@@ -135,7 +135,7 @@ const Invoices: React.FC = () => {
           markInvoiced.mutate({ entryIds: picked.map((e) => e.id), invoiceId: inv.id });
           setPickedHours(new Set());
         },
-      },
+      }
     );
   };
 

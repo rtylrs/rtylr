@@ -33,10 +33,17 @@ export const Profile: React.FC<{ userId: string }> = ({ userId }) => {
     return (
       <div className="h-full overflow-y-auto">
         <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
-          <div className="h-20 rounded-lg animate-pulse mb-4" style={{ background: 'var(--flow-hover)' }} />
+          <div
+            className="h-20 rounded-lg animate-pulse mb-4"
+            style={{ background: 'var(--flow-hover)' }}
+          />
           <div className="grid gap-3 sm:grid-cols-2">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-[88px] rounded-lg animate-pulse" style={{ background: 'var(--flow-hover)' }} />
+              <div
+                key={i}
+                className="h-[88px] rounded-lg animate-pulse"
+                style={{ background: 'var(--flow-hover)' }}
+              />
             ))}
           </div>
         </div>
@@ -111,23 +118,35 @@ export const Profile: React.FC<{ userId: string }> = ({ userId }) => {
                     <div className="flex items-center gap-2 min-w-0">
                       <span
                         className="h-7 w-7 rounded-md flex items-center justify-center text-xs shrink-0"
-                        style={{ background: `${pp.color ?? '#64C5B9'}20`, color: pp.color ?? '#64C5B9' }}
+                        style={{
+                          background: `${pp.color ?? '#64C5B9'}20`,
+                          color: pp.color ?? '#64C5B9',
+                        }}
                         aria-hidden
                       >
                         {pp.icon || '📋'}
                       </span>
-                      <p className="font-medium text-sm truncate" style={{ color: 'var(--flow-text)' }}>
+                      <p
+                        className="font-medium text-sm truncate"
+                        style={{ color: 'var(--flow-text)' }}
+                      >
                         {pp.name}
                       </p>
                     </div>
                     <Globe size={12} style={{ color: 'var(--flow-text-muted)' }} aria-hidden />
                   </div>
                   {pp.description ? (
-                    <p className="mt-1.5 text-xs line-clamp-2" style={{ color: 'var(--flow-text-muted)' }}>
+                    <p
+                      className="mt-1.5 text-xs line-clamp-2"
+                      style={{ color: 'var(--flow-text-muted)' }}
+                    >
                       {pp.description}
                     </p>
                   ) : null}
-                  <div className="mt-2 flex items-center gap-2 text-xs" style={{ color: 'var(--flow-text-muted)' }}>
+                  <div
+                    className="mt-2 flex items-center gap-2 text-xs"
+                    style={{ color: 'var(--flow-text-muted)' }}
+                  >
                     <span>{pp.taskCount ?? 0} tasks</span>
                     <span>{pp.completedCount ?? 0} done</span>
                   </div>
