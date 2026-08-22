@@ -38,6 +38,7 @@ import { AppServiceClient } from '@voxire/voxie/hub/app/v1/client';
 import type { Addon } from '@voxire/voxie/hub/app/v1/types';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
 import { toast } from 'sonner';
+import { useEscapeKey } from '../shared/lib/keyboard';
 
 const ACCENT = '#3b82f6';
 
@@ -190,6 +191,7 @@ const DefaultLayout: React.FC = () => {
   });
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  useEscapeKey(userMenuOpen, () => setUserMenuOpen(false));
 
   const pageTitle = getPageTitle(location.pathname);
   const caretPageContext = React.useMemo(
@@ -231,6 +233,8 @@ const DefaultLayout: React.FC = () => {
         >
           <button
             type="button"
+            aria-label="Open navigation"
+            aria-expanded={sidebarOpen}
             onClick={() => setSidebarOpen(true)}
             className="h-8 w-8 rounded-lg flex items-center justify-center"
             style={{ color: 'var(--hub-text-muted)' }}
@@ -288,6 +292,7 @@ const DefaultLayout: React.FC = () => {
             />
             <button
               type="button"
+              aria-label="Close navigation"
               onClick={() => setSidebarOpen(false)}
               className="h-7 w-7 rounded-lg flex md:hidden items-center justify-center"
               style={{ color: 'var(--hub-text-muted)' }}
@@ -381,6 +386,9 @@ const DefaultLayout: React.FC = () => {
             <CaretButton className="w-full justify-start mb-1" />
             <button
               type="button"
+              aria-label={`Open account menu for ${userName}`}
+              aria-expanded={userMenuOpen}
+              aria-haspopup="menu"
               onClick={() => setUserMenuOpen((v) => !v)}
               style={{
                 display: 'flex',
@@ -457,6 +465,7 @@ const DefaultLayout: React.FC = () => {
                     boxShadow: 'var(--hub-shadow)',
                     zIndex: 50,
                   }}
+                  role="menu"
                 >
                   <div style={{ marginBottom: '8px' }}>
                     <p
@@ -480,6 +489,8 @@ const DefaultLayout: React.FC = () => {
                       ].map(({ value, icon: Icon, label }) => (
                         <button
                           type="button"
+                          role="menuitemradio"
+                          aria-checked={theme === value}
                           key={value}
                           onClick={() => handleTheme(value)}
                           style={{
@@ -511,6 +522,7 @@ const DefaultLayout: React.FC = () => {
                   />
                   <button
                     type="button"
+                    role="menuitem"
                     onClick={handleLogout}
                     style={{
                       display: 'flex',
