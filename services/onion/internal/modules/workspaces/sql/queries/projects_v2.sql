@@ -100,3 +100,68 @@ WHERE id = ? AND business_id = ?;
 -- name: RestoreProjectV2 :execresult
 UPDATE flow_projects SET status = 'active', archived_at = NULL, purge_at = NULL, updated_at = NOW()
 WHERE id = ? AND business_id = ?;
+
+-- name: GetDashboardStatsV2 :one
+-- Business-scoped dashboard counts: no workspace dimension.
+SELECT
+    COUNT(CASE WHEN status = 'todo' THEN 1 END) AS open_tasks,
+    COUNT(CASE WHEN status = 'in_progress' THEN 1 END) AS in_progress_tasks,
+    COUNT(CASE WHEN status = 'done' AND completed_at >= ? AND completed_at < ? THEN 1 END) AS completed_this_week,
+    COUNT(CASE WHEN status NOT IN ('done','cancelled') AND due_date < NOW() THEN 1 END) AS overdue_tasks
+FROM flow_tasks WHERE business_id = ?;
+
+-- name: ListLabelsV2 :many
+SELECT id, business_id, name, color, created_at
+FROM flow_labels WHERE business_id = ?
+ORDER BY name ASC LIMIT ? OFFSET ?;
+
+-- name: CountLabelsV2 :one
+SELECT COUNT(*) FROM flow_labels WHERE business_id = ?;
+
+-- name: CreateLabelV2 :execresult
+INSERT INTO flow_labels (business_id, name, color) VALUES (?, ?, ?);
+
+-- name: GetInsightsTimeByMemberV2 :many
+SELECT CAST(u.id AS CHAR) AS member_id,
+       COALESCE(u.full_name, u.email) AS name,
+       COALESCE(SUM(tl.duration_minutes) / 60.0, 0) AS hours
+FROM flow_time_logs tl
+JOIN users u ON u.id = tl.user_id
+WHERE tl.business_id = ?
+GROUP BY u.id, u.full_name, u.email
+ORDER BY hours DESC;
+
+-- name: CreateCycleV2 :execresult
+INSERT INTO flow_cycles (business_id, project_id, name, start_date, end_date)
+VALUES (?, ?, ?, ?, ?);
+
+-- name: ListMilestonesByBusiness :many
+SELECT m.id, m.project_id, m.name,
+       COALESCE(m.target_date, '') AS target_date,
+       COALESCE(m.status, 'upcoming') AS status,
+       COALESCE(m.description, '') AS description,
+       (SELECT COUNT(*) FROM flow_milestone_tasks mt WHERE mt.milestone_id = m.id) AS task_count,
+       (SELECT COUNT(*) FROM flow_milestone_tasks mt JOIN flow_tasks t ON t.id = mt.task_id
+        WHERE mt.milestone_id = m.id AND t.status = 'done') AS done_count
+FROM flow_milestones m
+WHERE m.business_id = ?
+  AND (? = 0 OR m.project_id = ?)
+ORDER BY m.created_at DESC
+LIMIT ? OFFSET ?;
+
+-- name: CreateMilestoneV2 :execresult
+INSERT INTO flow_milestones (business_id, project_id, name, description, status)
+VALUES (?, ?, ?, ?, 'planning');
+
+-- name: ListViewsV2 :many
+SELECT id, business_id, name, COALESCE(icon,'') AS icon,
+       COALESCE(filters,'{}') AS filters,
+       COALESCE(group_by,'') AS group_by,
+       COALESCE(sort_by,'') AS sort_by,
+       COALESCE(sort_dir,'asc') AS sort_dir
+FROM flow_views WHERE business_id = ?
+ORDER BY created_at DESC LIMIT ? OFFSET ?;
+
+-- name: CreateViewV2 :execresult
+INSERT INTO flow_views (business_id, name, icon, filters, group_by, sort_by, sort_dir, created_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);

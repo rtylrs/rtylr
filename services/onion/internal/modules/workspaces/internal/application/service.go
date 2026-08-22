@@ -539,6 +539,25 @@ func (s *Service) ListTasks(ctx context.Context, filter domain.ListTasksFilter) 
 
 func (s *Service) CreateTask(ctx context.Context, input domain.TaskInput) (domain.Task, error) {
 	defer invalidateWorkspacesScope(ctx, input.BusinessID)
+
+	// R13: an omitted project means "file into my My Tasks bucket", which is
+	// lazily provisioned on first use. Every task belongs to exactly one
+	// project; "outside a project" is a UI concept.
+	if input.ProjectID == 0 {
+		bucketID, _, ensureErr := s.EnsureMyTasksProject(ctx, input.OwnerID, input.BusinessID, 0)
+		if ensureErr != nil {
+			return domain.Task{}, ensureErr
+		}
+		input.ProjectID = bucketID
+	}
+
+	// T1: assignment carries access with it.
+	if input.AssigneeID != nil && *input.AssigneeID != input.OwnerID {
+		if grantErr := s.EnsureAssigneeMembership(ctx, input.ProjectID, input.BusinessID, *input.AssigneeID); grantErr != nil {
+			return domain.Task{}, grantErr
+		}
+	}
+
 	// A new task lands in the assignee's my-tasks list, whose cached pages were
 	// computed before it existed.
 	defer invalidateUserScope(ctx, assigneeID(input.AssigneeID))

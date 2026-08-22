@@ -26,6 +26,13 @@ import (
 	flowprojectv2 "github.com/voxire/voxie/gen/go/flow/project/v2"
 	flowsettingv1 "github.com/voxire/voxie/gen/go/flow/setting/v1"
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
+	flowtaskv2 "github.com/voxire/voxie/gen/go/flow/task/v2"
+flowcyclev2 "github.com/voxire/voxie/gen/go/flow/cycle/v2"
+	flowdashboardv2 "github.com/voxire/voxie/gen/go/flow/dashboard/v2"
+	flowinsightsv2 "github.com/voxire/voxie/gen/go/flow/insights/v2"
+	flowlabelv2 "github.com/voxire/voxie/gen/go/flow/label/v2"
+	flowmilestonev2 "github.com/voxire/voxie/gen/go/flow/milestone/v2"
+	flowviewv2 "github.com/voxire/voxie/gen/go/flow/view/v2"
 	flowtimev1 "github.com/voxire/voxie/gen/go/flow/time/v1"
 	flowviewv1 "github.com/voxire/voxie/gen/go/flow/view/v1"
 	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
@@ -83,6 +90,48 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 		flowtaskv1.WithMux(mux),
 	); err != nil {
 		panic(fmt.Errorf("register flow task service: %w", err))
+	}
+	if err := flowtaskv2.RegisterTaskServiceServer(
+		api.NewTaskAPIV2(m.service),
+		flowtaskv2.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register flow task v2 service: %w", err))
+	}
+	if err := flowdashboardv2.RegisterDashboardServiceServer(
+		api.NewDashboardAPIV2(m.service),
+		flowdashboardv2.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register flow dashboard v2: %w", err))
+	}
+	if err := flowinsightsv2.RegisterInsightsServiceServer(
+		api.NewInsightsAPIV2(m.service),
+		flowinsightsv2.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register flow insights v2: %w", err))
+	}
+	if err := flowlabelv2.RegisterLabelServiceServer(
+		api.NewLabelAPIV2(m.service),
+		flowlabelv2.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register flow label v2: %w", err))
+	}
+	if err := flowcyclev2.RegisterCycleServiceServer(
+		api.NewCycleAPIV2(m.service),
+		flowcyclev2.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register flow cycle v2: %w", err))
+	}
+	if err := flowmilestonev2.RegisterMilestoneServiceServer(
+		api.NewMilestoneAPIV2(m.service),
+		flowmilestonev2.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register flow milestone v2: %w", err))
+	}
+	if err := flowviewv2.RegisterViewServiceServer(
+		api.NewViewAPIV2(m.service),
+		flowviewv2.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register flow view v2: %w", err))
 	}
 	if err := flowdashboardv1.RegisterDashboardServiceServer(
 		api.NewDashboardAPI(m.service),

@@ -265,3 +265,56 @@ SELECT
     COALESCE(SUM(status = 'done'), 0) AS done
 FROM flow_tasks
 WHERE project_id = ? AND parent_task_id IS NULL;
+
+-- ── v2: business/project-scoped replacements ─────────────────────────────
+
+-- name: ListCyclesV2 :many
+SELECT c.id, c.project_id, c.name, c.description, c.status,
+       c.start_date, c.end_date, c.created_by, c.created_at,
+       (SELECT COUNT(*) FROM flow_cycle_tasks ct WHERE ct.cycle_id = c.id) AS scope,
+       (SELECT COUNT(*) FROM flow_cycle_tasks ct JOIN flow_tasks t ON t.id = ct.task_id
+        WHERE ct.cycle_id = c.id AND t.status = 'done') AS completed
+FROM flow_cycles c
+WHERE c.project_id = ? AND c.business_id = ?
+ORDER BY c.start_date DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountCyclesV2 :one
+SELECT COUNT(*) FROM flow_cycles WHERE project_id = ? AND business_id = ?;
+
+-- name: GetInsightsTaskCountsV2 :one
+SELECT
+    COUNT(*) AS total_tasks,
+    COALESCE(SUM(status = 'done'), 0) AS done_tasks
+FROM flow_tasks WHERE business_id = ?;
+
+-- name: GetInsightsCycleTimeV2 :one
+SELECT AVG(DATEDIFF(completed_at, created_at)) AS avg_days
+FROM flow_tasks
+WHERE business_id = ? AND status = 'done' AND completed_at IS NOT NULL;
+
+-- name: GetInsightsVelocityV2 :many
+SELECT
+    DATE_FORMAT(DATE_SUB(completed_at, INTERVAL WEEKDAY(completed_at) DAY), '%Y-%m-%d') AS week_start,
+    COUNT(*) AS completed
+FROM flow_tasks
+WHERE business_id = ? AND status = 'done' AND completed_at IS NOT NULL
+GROUP BY week_start
+ORDER BY week_start DESC;
+
+-- name: GetInsightsOpenTaskCountV2 :one
+SELECT COUNT(*) AS open_tasks
+FROM flow_tasks
+WHERE business_id = ? AND status NOT IN ('done', 'cancelled') AND parent_task_id IS NULL;
+
+-- name: GetRoadmapV2 :many
+SELECT p.id, p.owner_id, p.name, p.description, p.icon, p.color,
+       p.status, p.start_date, p.due_date, p.created_by, p.created_at, p.updated_at
+FROM flow_projects p
+WHERE p.business_id = ? AND p.is_personal = FALSE AND p.archived_at IS NULL AND p.status != 'archived'
+ORDER BY p.due_date ASC, p.created_at DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountRoadmapV2 :one
+SELECT COUNT(*) FROM flow_projects
+WHERE business_id = ? AND is_personal = FALSE AND archived_at IS NULL AND status != 'archived';

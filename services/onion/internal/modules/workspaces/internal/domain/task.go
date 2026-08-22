@@ -184,6 +184,7 @@ type UpdateTaskStatusInput struct {
 
 type ListTasksFilter struct {
 	ProjectID   int64
+	BusinessID  int64
 	WorkspaceID int64
 	Status      string
 	AssigneeID  *int64

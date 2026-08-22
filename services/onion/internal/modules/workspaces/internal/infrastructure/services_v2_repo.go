@@ -1,0 +1,166 @@
+package infrastructure
+
+import (
+	"context"
+	"database/sql"
+	"encoding/json"
+	"time"
+
+	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
+	sqlc "github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/logger"
+)
+
+
+func (r *Repository) GetDashboardStatsV2(ctx context.Context, businessID int64) (domain.DashboardStats, error) {
+	now := time.Now()
+	weekStart := now.AddDate(0, 0, -int(now.Weekday()))
+	row, err := r.queries.GetDashboardStatsV2(ctx, sqlc.GetDashboardStatsV2Params{
+		CompletedAt:   sql.NullTime{Time: weekStart, Valid: true},
+		CompletedAt_2: sql.NullTime{Time: now, Valid: true},
+		BusinessID:    businessID,
+	})
+	if err != nil {
+		return domain.DashboardStats{}, err
+	}
+	return domain.DashboardStats{
+		OpenTasks:         row.OpenTasks,
+		InProgressTasks:   row.InProgressTasks,
+		CompletedThisWeek: row.CompletedThisWeek,
+		OverdueTasks:      row.OverdueTasks,
+	}, nil
+}
+
+func (r *Repository) ListLabelsV2(ctx context.Context, businessID, limit, offset int64) ([]domain.Label, int64, error) {
+	total, err := r.queries.CountLabelsV2(ctx, businessID)
+	if err != nil {
+		return nil, 0, err
+	}
+	rows, err := r.queries.ListLabelsV2(ctx, sqlc.ListLabelsV2Params{BusinessID: businessID, Limit: int32(limit), Offset: int32(offset)})
+	if err != nil {
+		return nil, 0, err
+	}
+	labels := make([]domain.Label, 0, len(rows))
+	for _, l := range rows {
+		labels = append(labels, domain.Label{ID: l.ID, Name: l.Name, Color: l.Color, CreatedAt: l.CreatedAt.Time})
+	}
+	return labels, total, nil
+}
+
+func (r *Repository) CreateLabelV2(ctx context.Context, businessID int64, name, color string) (int64, error) {
+	res, err := r.queries.CreateLabelV2(ctx, sqlc.CreateLabelV2Params{BusinessID: businessID, Name: name, Color: color})
+	if err != nil {
+		return 0, err
+	}
+	return res.LastInsertId()
+}
+
+func (r *Repository) ListCyclesV2(ctx context.Context, projectID, businessID, limit, offset int64) ([]domain.Cycle, int64, error) {
+	total, err := r.queries.CountCyclesV2(ctx, sqlc.CountCyclesV2Params{ProjectID: nullInt64(projectID), BusinessID: businessID})
+	if err != nil {
+		return nil, 0, err
+	}
+	rows, err := r.queries.ListCyclesV2(ctx, sqlc.ListCyclesV2Params{
+		ProjectID: nullInt64(projectID), BusinessID: businessID, Limit: int32(limit), Offset: int32(offset),
+	})
+	if err != nil {
+		return nil, 0, err
+	}
+	cycles := make([]domain.Cycle, 0, len(rows))
+	for _, c := range rows {
+		cycles = append(cycles, domain.Cycle{
+			ID: c.ID, Name: c.Name, Status: string(c.Status.FlowCyclesStatus),
+			Scope: int(c.Scope), Completed: int(c.Completed),
+		})
+	}
+	return cycles, total, nil
+}
+
+func (r *Repository) CreateCycleV2(ctx context.Context, input domain.CycleInput) (int64, error) {
+	res, err := r.queries.CreateCycleV2(ctx, sqlc.CreateCycleV2Params{
+		BusinessID: input.BusinessID,
+		ProjectID:  nullInt64Ptr(input.ProjectID),
+		Name:       input.Name,
+		StartDate:  sql.NullTime{Time: input.StartDate, Valid: !input.StartDate.IsZero()},
+		EndDate:    sql.NullTime{Time: input.EndDate, Valid: !input.EndDate.IsZero()},
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("CreateCycleV2 failed", logger.Error(err))
+		return 0, err
+	}
+	return res.LastInsertId()
+}
+
+func (r *Repository) ListMilestonesV2(ctx context.Context, businessID int64, projectID *int64, limit, offset int64) ([]domain.Milestone, int64, error) {
+	pid := int64(0)
+	if projectID != nil {
+		pid = *projectID
+	}
+	rows, err := r.queries.ListMilestonesByBusiness(ctx, sqlc.ListMilestonesByBusinessParams{
+		BusinessID: businessID, Column2: pid, ProjectID: pid, Limit: int32(limit), Offset: int32(offset),
+	})
+	if err != nil {
+		return nil, 0, err
+	}
+	milestones := make([]domain.Milestone, 0, len(rows))
+	for _, m := range rows {
+		milestones = append(milestones, domain.Milestone{
+			ID: m.ID, ProjectID: m.ProjectID, Name: m.Name,
+			Status: string(m.Status), DoneCount: int(m.DoneCount), TaskCount: int(m.TaskCount),
+		})
+	}
+	return milestones, int64(len(rows)), nil
+}
+
+func (r *Repository) CreateMilestoneV2(ctx context.Context, input domain.MilestoneInput) (int64, error) {
+	res, err := r.queries.CreateMilestoneV2(ctx, sqlc.CreateMilestoneV2Params{
+		BusinessID: input.BusinessID, ProjectID: input.ProjectID,
+		Name:        input.Name,
+		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
+	})
+	if err != nil {
+		return 0, err
+	}
+	return res.LastInsertId()
+}
+
+func (r *Repository) ListViewsV2(ctx context.Context, businessID, limit, offset int64) ([]domain.View, int64, error) {
+	rows, err := r.queries.ListViewsV2(ctx, sqlc.ListViewsV2Params{BusinessID: businessID, Limit: int32(limit), Offset: int32(offset)})
+	if err != nil {
+		return nil, 0, err
+	}
+	views := make([]domain.View, 0, len(rows))
+	for _, v := range rows {
+		var filters map[string]interface{}
+		if err := json.Unmarshal(v.Filters, &filters); err != nil {
+			logger.Ctx(ctx).Warn("ListViewsV2: failed to unmarshal view filters", logger.Error(err))
+		}
+		sortDir := string(v.SortDir)
+		views = append(views, domain.View{
+			ID: v.ID, Name: v.Name, Icon: v.Icon,
+			Filters: filters, GroupBy: v.GroupBy, SortBy: v.SortBy, SortDir: sortDir,
+		})
+	}
+	return views, int64(len(rows)), nil
+}
+
+func (r *Repository) CreateViewV2(ctx context.Context, input domain.ViewInput) (int64, error) {
+	res, err := r.queries.CreateViewV2(ctx, sqlc.CreateViewV2Params{
+		BusinessID: input.BusinessID, Name: input.Name,
+		Icon: sql.NullString{String: input.Icon, Valid: input.Icon != ""},
+		Filters: filtersJSON(input.Filters),
+		GroupBy: sql.NullString{String: input.GroupBy, Valid: input.GroupBy != ""},
+		SortBy: sql.NullString{String: input.SortBy, Valid: input.SortBy != ""},
+		SortDir: sqlc.NullFlowViewsSortDir{FlowViewsSortDir: sqlc.FlowViewsSortDir(input.SortDir), Valid: input.SortDir != ""},
+		CreatedBy: nullInt64Ptr(&input.CreatedBy),
+	})
+	if err != nil {
+		return 0, err
+	}
+	return res.LastInsertId()
+}
+
+func filtersJSON(m map[string]interface{}) json.RawMessage {
+	b, _ := json.Marshal(m)
+	return b
+}
