@@ -12,8 +12,7 @@ vi.mock('@voxire/components', () => ({
 
 const auditData = vi.hoisted(() => ({
   data: { entries: [] as { id: string }[], total: 0 } as
-    | { entries: { id: string }[]; total: number }
-    | undefined,
+    { entries: { id: string }[]; total: number } | undefined,
   isLoading: false,
   isFetching: false,
   refetch: vi.fn(),

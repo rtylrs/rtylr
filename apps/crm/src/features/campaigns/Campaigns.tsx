@@ -34,13 +34,7 @@ import { canCrmPermission } from '../../shared/lib/crmPermissions';
 const ACCENT = '#3b82f6';
 
 type CampaignStatus =
-  | 'Draft'
-  | 'Scheduled'
-  | 'Active'
-  | 'Paused'
-  | 'Completed'
-  | 'Sent'
-  | 'Cancelled';
+  'Draft' | 'Scheduled' | 'Active' | 'Paused' | 'Completed' | 'Sent' | 'Cancelled';
 type Channel = 'Email' | 'SMS' | 'Push';
 
 interface Campaign {
