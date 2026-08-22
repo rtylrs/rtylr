@@ -85,6 +85,26 @@ function formatDate(iso: string): string {
   });
 }
 
+const createEmptyTouchpointForm = () => ({
+  type: 'phone' as TouchpointType,
+  outcome: 'neutral' as TouchpointOutcome,
+  notes: '',
+  nextFollowUp: '',
+  contactId: '',
+});
+
+const createEmptyContactForm = () => ({ name: '', role: '', phone: '', email: '' });
+
+const createEmptyContractForm = () => ({
+  plan: 'pro' as ContractPlan,
+  mrr: '',
+  seats: '',
+  signedAt: '',
+  signedBy: '',
+  closedBy: '',
+  notes: '',
+});
+
 const LeadDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
   const leadId = id ? Number(id) : undefined;
@@ -124,13 +144,15 @@ const LeadDetail: React.FC = () => {
 
   // Touchpoint form
   const [tpOpen, setTpOpen] = useState(false);
-  const [tpForm, setTpForm] = useState({
-    type: 'phone' as TouchpointType,
-    outcome: 'neutral' as TouchpointOutcome,
-    notes: '',
-    nextFollowUp: '',
-    contactId: '',
-  });
+  const [tpForm, setTpForm] = useState(createEmptyTouchpointForm);
+  const openTouchpointForm = (): void => {
+    setTpForm(createEmptyTouchpointForm());
+    setTpOpen(true);
+  };
+  const closeTouchpointForm = (): void => {
+    setTpForm(createEmptyTouchpointForm());
+    setTpOpen(false);
+  };
 
   const submitTouchpoint = (): void => {
     if (!tpForm.notes.trim()) {
@@ -150,14 +172,7 @@ const LeadDetail: React.FC = () => {
       },
       {
         onSuccess: () => {
-          setTpForm({
-            type: 'phone',
-            outcome: 'neutral',
-            notes: '',
-            nextFollowUp: '',
-            contactId: '',
-          });
-          setTpOpen(false);
+          closeTouchpointForm();
         },
       }
     );
@@ -168,7 +183,15 @@ const LeadDetail: React.FC = () => {
 
   // Contact form
   const [contactOpen, setContactOpen] = useState(false);
-  const [contactForm, setContactForm] = useState({ name: '', role: '', phone: '', email: '' });
+  const [contactForm, setContactForm] = useState(createEmptyContactForm);
+  const openContactForm = (): void => {
+    setContactForm(createEmptyContactForm());
+    setContactOpen(true);
+  };
+  const closeContactForm = (): void => {
+    setContactForm(createEmptyContactForm());
+    setContactOpen(false);
+  };
 
   const submitContact = (): void => {
     if (!contactForm.name.trim()) {
@@ -180,8 +203,7 @@ const LeadDetail: React.FC = () => {
       { leadId, ...contactForm },
       {
         onSuccess: () => {
-          setContactForm({ name: '', role: '', phone: '', email: '' });
-          setContactOpen(false);
+          closeContactForm();
         },
       }
     );
@@ -192,15 +214,15 @@ const LeadDetail: React.FC = () => {
 
   // Contract form
   const [contractOpen, setContractOpen] = useState(false);
-  const [contractForm, setContractForm] = useState({
-    plan: 'pro' as ContractPlan,
-    mrr: '',
-    seats: '',
-    signedAt: '',
-    signedBy: '',
-    closedBy: '',
-    notes: '',
-  });
+  const [contractForm, setContractForm] = useState(createEmptyContractForm);
+  const openContractForm = (): void => {
+    setContractForm(createEmptyContractForm());
+    setContractOpen(true);
+  };
+  const closeContractForm = (): void => {
+    setContractForm(createEmptyContractForm());
+    setContractOpen(false);
+  };
 
   const submitContract = (): void => {
     if (!leadId) return;
@@ -227,7 +249,7 @@ const LeadDetail: React.FC = () => {
       },
       {
         onSuccess: () => {
-          setContractOpen(false);
+          closeContractForm();
         },
       }
     );
@@ -312,7 +334,7 @@ const LeadDetail: React.FC = () => {
               >
                 Activity Timeline
               </h3>
-              <Button variant="primary" onClick={() => setTpOpen((v) => !v)}>
+              <Button variant="primary" onClick={tpOpen ? closeTouchpointForm : openTouchpointForm}>
                 <Plus size={13} />
                 Log touchpoint
               </Button>
@@ -395,7 +417,7 @@ const LeadDetail: React.FC = () => {
                         </Select>
                       </div>
                       <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                        <Button variant="ghost" onClick={() => setTpOpen(false)}>
+                        <Button variant="ghost" onClick={closeTouchpointForm}>
                           Cancel
                         </Button>
                         <Button
@@ -637,7 +659,7 @@ const LeadDetail: React.FC = () => {
                 <button
                   type="button"
                   aria-label="Add contact"
-                  onClick={() => setContactOpen((v) => !v)}
+                  onClick={contactOpen ? closeContactForm : openContactForm}
                   disabled={createContact.isPending || deleteContact.isPending}
                   style={{
                     background: 'transparent',
@@ -699,7 +721,7 @@ const LeadDetail: React.FC = () => {
                       placeholder="jane@company.com"
                     />
                     <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                      <Button variant="ghost" onClick={() => setContactOpen(false)}>
+                      <Button variant="ghost" onClick={closeContactForm}>
                         Cancel
                       </Button>
                       <Button
@@ -838,7 +860,7 @@ const LeadDetail: React.FC = () => {
                   <button
                     type="button"
                     aria-label="Add contract"
-                    onClick={() => setContractOpen((v) => !v)}
+                    onClick={contractOpen ? closeContractForm : openContractForm}
                     style={{
                       background: 'transparent',
                       border: '1px solid var(--hub-border)',
@@ -973,7 +995,7 @@ const LeadDetail: React.FC = () => {
                           placeholder="Additional notes..."
                         />
                         <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                          <Button variant="ghost" onClick={() => setContractOpen(false)}>
+                          <Button variant="ghost" onClick={closeContractForm}>
                             Cancel
                           </Button>
                           <Button

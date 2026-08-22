@@ -23,7 +23,26 @@ const Templates: React.FC = () => {
   const [newBody, setNewBody] = useState('');
   const [newCategory, setNewCategory] = useState('general');
   const createDialogRef = useRef<HTMLDivElement>(null);
-  useDialogFocus(showCreate, createDialogRef, () => setShowCreate(false));
+
+  const resetCreateForm = (): void => {
+    setNewName('');
+    setNewChannel('email');
+    setNewSubject('');
+    setNewBody('');
+    setNewCategory('general');
+  };
+
+  const closeCreateDialog = (): void => {
+    setShowCreate(false);
+    resetCreateForm();
+  };
+
+  const openNewTemplate = (): void => {
+    resetCreateForm();
+    setShowCreate(true);
+  };
+
+  useDialogFocus(showCreate, createDialogRef, closeCreateDialog);
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim() || !newBody.trim()) {
@@ -38,11 +57,7 @@ const Templates: React.FC = () => {
         subject: newChannel === 'email' ? newSubject.trim() : undefined,
         body: newBody.trim(),
       });
-      setShowCreate(false);
-      setNewName('');
-      setNewSubject('');
-      setNewBody('');
-      setNewCategory('general');
+      closeCreateDialog();
     } catch {
       // The mutation hook reports the localized error.
       return;
@@ -80,7 +95,7 @@ const Templates: React.FC = () => {
           title="Templates library"
           subtitle="Reusable email and SMS templates"
           actions={
-            <Button variant="primary" onClick={() => setShowCreate(true)}>
+            <Button variant="primary" onClick={openNewTemplate}>
               <Plus size={13} />
               New template
             </Button>
@@ -129,7 +144,7 @@ const Templates: React.FC = () => {
               title="No templates"
               description="Create one to get started."
               action={
-                <Button variant="primary" onClick={() => setShowCreate(true)}>
+                <Button variant="primary" onClick={openNewTemplate}>
                   <Plus size={13} />
                   New template
                 </Button>
@@ -262,7 +277,7 @@ const Templates: React.FC = () => {
               zIndex: 9999,
             }}
             onClick={(e) => {
-              if (e.target === e.currentTarget) setShowCreate(false);
+              if (e.target === e.currentTarget) closeCreateDialog();
             }}
           >
             <div
@@ -372,7 +387,7 @@ const Templates: React.FC = () => {
                 }}
               />
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                <Button variant="outline" onClick={() => setShowCreate(false)}>
+                <Button variant="outline" onClick={closeCreateDialog}>
                   Cancel
                 </Button>
                 <Button
