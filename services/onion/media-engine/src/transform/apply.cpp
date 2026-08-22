@@ -19,6 +19,7 @@
 #include "ops/text.hpp"
 
 #include <algorithm>
+#include <cstdint>
 #include <map>
 #include <string>
 
@@ -207,6 +208,9 @@ std::optional<vips::VImage> tryApplyChainFromFile(const std::string& path,
     const int h = strH != p.end() && !strH->second.empty()
         ? parseIntStrict(strH->second, "h") : 0;
     if (w <= 0 && h <= 0) return std::nullopt;
+	if (w > 8000 || h > 8000 || (w > 0 && h > 0 && static_cast<int64_t>(w) * h > 24'000'000)) {
+		throw ProcessingError("requested geometry exceeds safety limits");
+	}
 
     const std::string crop = p.count("c") ? p.at("c") : "";
     const std::string gravity = p.count("g") ? p.at("g") : "";

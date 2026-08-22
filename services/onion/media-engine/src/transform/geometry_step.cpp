@@ -5,14 +5,19 @@
 #include "gravity.hpp"
 #include "color.hpp"
 
+#include <cstdint>
+
 namespace voxire {
 namespace transform {
 
 vips::VImage applyGeometry(vips::VImage img, int w, int h,
                            const std::string& crop, const std::string& gravity) {
-    if (w <= 0 && h <= 0) {
-        return img;
-    }
+	if (w <= 0 && h <= 0) {
+		return img;
+	}
+	if (w > 8000 || h > 8000 || (w > 0 && h > 0 && static_cast<int64_t>(w) * h > 24'000'000)) {
+		throw ProcessingError("requested geometry exceeds safety limits");
+	}
 
     if (crop == "scale") {
         const int tw = w > 0 ? w : img.width();

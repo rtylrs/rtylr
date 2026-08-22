@@ -3,6 +3,8 @@
 #include "common.hpp"
 #include "numeric.hpp"
 
+#include <algorithm>
+
 #include "ops/alpha.hpp"
 #include "ops/blur.hpp"
 #include "ops/brightness.hpp"
@@ -72,9 +74,9 @@ static double percentOrUnit(const std::string& value, double fallback) {
 
 vips::VImage applyEffect(vips::VImage img, const std::string& name,
                          const std::string& value) {
-    if (name == "blur") {
-        // Cloudinary strength ~1..2000; map to a libvips sigma.
-        return ops::blur(img, numOr(value, 300.0) / 100.0);
+	if (name == "blur") {
+		// Cloudinary strength ~1..2000; map to a libvips sigma.
+		return ops::blur(img, std::clamp(numOr(value, 300.0), 1.0, 2000.0) / 100.0);
     }
     if (name == "sharpen") {
         return ops::sharpen(img, numOr(value, 100.0) / 100.0);
@@ -129,15 +131,15 @@ vips::VImage applyEffect(vips::VImage img, const std::string& name,
     if (name == "blackwhite") {
         return ops::threshold(img, clampInt(static_cast<int>(numOr(value, 128.0)), 0, 255));
     }
-    if (name == "oil_paint") {
-        int size = static_cast<int>(numOr(value, 5.0));
-        if (size % 2 == 0) size += 1; // median needs an odd window
-        return ops::median(img, size < 3 ? 3 : size);
-    }
-    if (name == "median") {
-        int size = intOr(value, 5);
-        if (size % 2 == 0) size += 1;
-        return ops::median(img, size < 3 ? 3 : size);
+	if (name == "oil_paint") {
+		int size = std::clamp(static_cast<int>(numOr(value, 5.0)), 3, 31);
+		if (size % 2 == 0) size -= 1; // median needs an odd window
+		return ops::median(img, size);
+	}
+	if (name == "median") {
+		int size = std::clamp(intOr(value, 5), 3, 31);
+		if (size % 2 == 0) size -= 1;
+		return ops::median(img, size);
     }
     if (name == "trim") {
         return ops::trim(img, numOr(value, 10.0));
