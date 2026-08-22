@@ -73,13 +73,26 @@ func (s *Service) EarnPoints(ctx context.Context, input domain.EarnPointsInput) 
 	if err := domain.ValidateEarnPointsInput(input); err != nil {
 		return 0, err
 	}
-	currentBalance, err := s.repo.GetBalance(ctx, input.BusinessID, input.CustomerID)
+	if input.OrderID == nil || *input.OrderID == 0 {
+		return 0, domain.ErrOrderRequired
+	}
+	cfg, err := s.repo.GetConfig(ctx, input.BusinessID)
 	if err != nil {
 		return 0, err
 	}
-	newBalance := currentBalance + input.Points
-	note := "Points earned"
-	id, err := s.repo.CreateTransaction(ctx, input.BusinessID, input.CustomerID, input.OrderID, "earn", input.Points, newBalance, &note)
+	if !cfg.IsEnabled {
+		return 0, domain.ErrLoyaltyNotEnabled
+	}
+	orderTotal, err := s.repo.GetPaidOrderTotal(ctx, input.BusinessID, input.CustomerID, *input.OrderID)
+	if err != nil {
+		return 0, err
+	}
+	points := int32(orderTotal * cfg.PointsPerDollar)
+	if points <= 0 {
+		return 0, domain.ErrOrderNotPaid
+	}
+	note := "Points earned from paid order"
+	id, err := s.repo.CreateBalanceTransaction(ctx, input.BusinessID, input.CustomerID, input.OrderID, "earn", points, note)
 	if err != nil {
 		return 0, err
 	}
@@ -91,16 +104,18 @@ func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemPointsInp
 	if err := domain.ValidateRedeemPointsInput(input); err != nil {
 		return 0, err
 	}
-	currentBalance, err := s.repo.GetBalance(ctx, input.BusinessID, input.CustomerID)
+	cfg, err := s.repo.GetConfig(ctx, input.BusinessID)
 	if err != nil {
 		return 0, err
 	}
-	if currentBalance < input.Points {
-		return 0, domain.ErrInsufficientPoints
+	if !cfg.IsEnabled {
+		return 0, domain.ErrLoyaltyNotEnabled
 	}
-	newBalance := currentBalance - input.Points
-	note := "Points redeemed"
-	id, err := s.repo.CreateTransaction(ctx, input.BusinessID, input.CustomerID, nil, "redeem", -input.Points, newBalance, &note)
+	if input.Points < cfg.MinRedeemPoints {
+		return 0, domain.ErrMinRedeemNotReached
+	}
+	note := fmt.Sprintf("Points redeemed at rate %.4f", cfg.RedemptionRate)
+	id, err := s.repo.CreateBalanceTransaction(ctx, input.BusinessID, input.CustomerID, nil, "redeem", -input.Points, note)
 	if err != nil {
 		return 0, err
 	}
