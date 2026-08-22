@@ -59,6 +59,13 @@ func TestRender(t *testing.T) {
 	}
 }
 
+func TestHTMLToTextRemovesMarkupAndUnescapesEntities(t *testing.T) {
+	got := htmlToText(`<p>Hello <strong>Sam</strong> &amp; welcome.</p>`)
+	if got != "Hello  Sam  & welcome." {
+		t.Fatalf("htmlToText() = %q", got)
+	}
+}
+
 // TestWiredTemplatesCovered fails if a Go-wired Template has no render case,
 // keeping the typed templates and their tests in lockstep.
 func TestWiredTemplatesCovered(t *testing.T) {

@@ -52,7 +52,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 // EnqueueInviteEmail queues a team invitation email for the background worker to
-// deliver. Best-effort: returns an error to log, never blocks the invite flow.
+// deliver. Queue failures are returned to the invite workflow.
 func (s *Service) EnqueueInviteEmail(ctx context.Context, toEmail, inviteLink string) error {
 	if s.db == nil {
 		return nil
@@ -67,7 +67,7 @@ func (s *Service) EnqueueInviteEmail(ctx context.Context, toEmail, inviteLink st
 }
 
 // EnqueueAccessRequestEmail queues an app-access-request notification to the
-// business owner. Best-effort: returns an error to log, never blocks the request.
+// business owner. Queue failures are returned to the access-request workflow.
 func (s *Service) EnqueueAccessRequestEmail(ctx context.Context, businessID int64, requesterName, requesterEmail, app string) error {
 	if s.db == nil {
 		return nil
