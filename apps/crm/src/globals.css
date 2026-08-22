@@ -178,6 +178,27 @@
   grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
 }
 
+/* Caret is an inline column on desktop, but it must not collapse the CRM
+ * workspace on narrow screens. Keep the panel usable as an overlay instead. */
+.crm-caret-column {
+  position: relative;
+}
+
+@media (max-width: 860px) {
+  .crm-caret-column {
+    position: absolute;
+    inset: 0 0 0 auto;
+    z-index: 30;
+    max-width: 100%;
+    background: var(--hub-surface);
+    border-left: 1px solid var(--hub-border);
+  }
+
+  .crm-caret-column--open {
+    width: min(360px, 100%) !important;
+  }
+}
+
 @media (max-width: 1100px) {
   .crm-stats-grid--six {
     grid-template-columns: repeat(3, minmax(0, 1fr));

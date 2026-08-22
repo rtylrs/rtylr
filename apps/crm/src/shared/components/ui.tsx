@@ -450,6 +450,7 @@ export const Breadcrumbs: React.FC<{ items: Array<{ label: string; to?: string }
   items,
 }) => (
   <nav
+    aria-label="Breadcrumb"
     style={{
       display: 'flex',
       alignItems: 'center',
@@ -462,11 +463,20 @@ export const Breadcrumbs: React.FC<{ items: Array<{ label: string; to?: string }
     {items.map((item, i) => (
       <React.Fragment key={i}>
         {item.to ? (
-          <Link to={item.to} style={{ color: 'var(--hub-text-muted)', textDecoration: 'none' }}>
+          <Link
+            to={item.to}
+            aria-current={i === items.length - 1 ? 'page' : undefined}
+            style={{ color: 'var(--hub-text-muted)', textDecoration: 'none' }}
+          >
             {item.label}
           </Link>
         ) : (
-          <span style={{ color: 'var(--hub-text)' }}>{item.label}</span>
+          <span
+            aria-current={i === items.length - 1 ? 'page' : undefined}
+            style={{ color: 'var(--hub-text)' }}
+          >
+            {item.label}
+          </span>
         )}
         {i < items.length - 1 && <span style={{ color: 'var(--hub-text-dim)' }}>/</span>}
       </React.Fragment>

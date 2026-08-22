@@ -316,6 +316,7 @@ const DefaultLayout: React.FC = () => {
           {/* Navigation */}
           <nav
             ref={sidebarRef}
+            aria-label="Primary navigation"
             style={{
               flex: 1,
               overflowY: 'auto',
@@ -568,7 +569,7 @@ const DefaultLayout: React.FC = () => {
         </aside>
 
         {/* Main content + Caret AI inline column */}
-        <div className="flex flex-1 min-w-0 overflow-hidden">
+        <div className="relative flex flex-1 min-w-0 overflow-hidden">
           {/* Main area */}
           <div className="flex min-w-0 flex-col flex-1 overflow-hidden pt-11 md:pt-0">
             {/* Topbar */}
@@ -677,6 +678,7 @@ const DefaultLayout: React.FC = () => {
 
           {/* Caret AI - inline third column, pushes content left */}
           <div
+            className={cn('crm-caret-column', caretOpen && 'crm-caret-column--open')}
             style={{
               width: caretOpen ? '360px' : '0px',
               flexShrink: 0,
