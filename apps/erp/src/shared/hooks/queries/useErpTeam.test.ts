@@ -33,7 +33,7 @@ const sampleMembers = [
     apps: ['erp'],
     isActive: true,
   },
-  { id: '2', name: 'Bob', email: 'bob@example.com', role: 'member', apps: ['erp'], isActive: true },
+  { id: '2', name: 'Bob', email: 'bob@example.com', role: 'staff', apps: ['erp'], isActive: true },
 ];
 
 describe('useErpTeam', () => {
@@ -78,13 +78,13 @@ describe('useErpInviteMember', () => {
       await result.current.mutateAsync({
         email: 'new@example.com',
         fullName: 'New User',
-        role: 'member',
+        role: 'staff',
       });
     });
     expect(mockPost).toHaveBeenCalledWith('/team/invite', {
       email: 'new@example.com',
       fullName: 'New User',
-      role: 'member',
+      role: 'staff',
       apps: ['erp'],
     });
   });
