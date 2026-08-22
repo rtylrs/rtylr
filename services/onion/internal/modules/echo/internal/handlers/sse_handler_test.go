@@ -170,6 +170,7 @@ func TestStreamTokensToClientRecordsPartialFailedUsage(t *testing.T) {
 		cacheWritePlan{Mode: string(ModeAsk), PromptChars: 40, StartedAt: time.Now()},
 		nil,
 		"prompt",
+		0,
 	)
 
 	select {
@@ -214,14 +215,15 @@ func TestStreamRendererExtractsSplitThinkingMarker(t *testing.T) {
 
 type recordingQuotaService struct {
 	recorded chan int
+	reserved int64
 }
 
-func (s *recordingQuotaService) Authorize(_ context.Context, _, _ int64) (bool, string, int64, int64, int64) {
-	return true, "", 0, 0, 0
+func (s *recordingQuotaService) ReserveQuota(_ context.Context, _, _ int64) (bool, string, int64, int64, int64, int64) {
+	return true, "", 0, 0, 0, s.reserved
 }
 
-func (s *recordingQuotaService) RecordUsage(_ context.Context, _, _ int64, tokens int) {
-	s.recorded <- tokens
+func (s *recordingQuotaService) ReconcileUsage(_ context.Context, _, _, actualTokens, reservedTokens int64) {
+	s.recorded <- int(actualTokens - reservedTokens)
 }
 
 func TestBuildCacheWritePlanIgnoresRollingConversationMemory(t *testing.T) {

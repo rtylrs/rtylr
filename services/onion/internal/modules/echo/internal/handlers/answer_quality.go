@@ -46,14 +46,16 @@ var answerQualityPhraseReplacements = []struct {
 	{"customer data and product data tools", "customer and product data"},
 }
 
-var internalToolNameRe = regexp.MustCompile(`(?i)\b(?:business|memory|analytics|insights|crm|loyalty|pos|store|support|erp|hr|flow|finance|booking)\.[a-z][a-z0-9_]*\b`)
-var partialInternalToolNameRe = regexp.MustCompile(`(?i)\b(?:business|memory|analytics|insights|crm|loyalty|pos|store|support|erp|hr|flow|finance|booking)\.[a-z0-9_]*$`)
-var customerToolNameRe = regexp.MustCompile(`(?i)\b(?:insights\.(?:get_customer_kpis|list_top_customers|get_customer_churn|get_ltv_distribution)|crm\.[a-z][a-z0-9_]*)\b`)
-var productToolNameRe = regexp.MustCompile(`(?i)\b(?:insights\.(?:get_product_kpis|list_bestsellers|list_slow_movers|get_sales_by_category|get_margin_distribution)|(?:erp|store)\.[a-z][a-z0-9_]*)\b`)
-var internalProcessNarrationRe = regexp.MustCompile(`(?is)\b(?:i )?(?:obtained|got|retrieved|found) (?:this )?information using .*?(?:tools?|capabilit(?:y|ies)|catalog)\b[^.]*\.?`)
-var internalToolReferenceRe = regexp.MustCompile(`(?i)\b(?:customer|product|business) data tools?\b`)
-var internalNextActionRe = regexp.MustCompile(`(?im)^\s*(?:next move|next step)\s*:\s*(?:run|call|execute|use)\b[^\n]*(?:\n|$)`)
-var internalNextActionPrefixRe = regexp.MustCompile(`(?im)^\s*(?:next move|next step)\s*:\s*(?:run|call|execute|use)\b`)
+var (
+	internalToolNameRe         = regexp.MustCompile(`(?i)\b(?:business|memory|analytics|insights|crm|loyalty|pos|store|support|erp|hr|flow|finance|booking)\.[a-z][a-z0-9_]*\b`)
+	partialInternalToolNameRe  = regexp.MustCompile(`(?i)\b(?:business|memory|analytics|insights|crm|loyalty|pos|store|support|erp|hr|flow|finance|booking)\.[a-z0-9_]*$`)
+	customerToolNameRe         = regexp.MustCompile(`(?i)\b(?:insights\.(?:get_customer_kpis|list_top_customers|get_customer_churn|get_ltv_distribution)|crm\.[a-z][a-z0-9_]*)\b`)
+	productToolNameRe          = regexp.MustCompile(`(?i)\b(?:insights\.(?:get_product_kpis|list_bestsellers|list_slow_movers|get_sales_by_category|get_margin_distribution)|(?:erp|store)\.[a-z][a-z0-9_]*)\b`)
+	internalProcessNarrationRe = regexp.MustCompile(`(?is)\b(?:i )?(?:obtained|got|retrieved|found) (?:this )?information using .*?(?:tools?|capabilit(?:y|ies)|catalog)\b[^.]*\.?`)
+	internalToolReferenceRe    = regexp.MustCompile(`(?i)\b(?:customer|product|business) data tools?\b`)
+	internalNextActionRe       = regexp.MustCompile(`(?im)^\s*(?:next move|next step)\s*:\s*(?:run|call|execute|use)\b[^\n]*(?:\n|$)`)
+	internalNextActionPrefixRe = regexp.MustCompile(`(?im)^\s*(?:next move|next step)\s*:\s*(?:run|call|execute|use)\b`)
+)
 
 // These terms are held back at the streaming boundary so a chunk cannot end
 // in the middle of a private capability name or catalog phrase.
