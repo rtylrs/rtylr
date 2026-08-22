@@ -500,6 +500,11 @@ func initializeModules(ctx context.Context) *apiModules {
 	kpisModule := kpis.NewModule(ctx, dbclient.Pool())
 	posDaySummaryModule := posdaysummary.NewModule(ctx, dbclient.Pool())
 	invoicesModule := invoices.NewModule(ctx, dbclient.Pool())
+	// CRM->FIN-02 (#840): invoices verify a supplied customer_id against the
+	// customers module and snapshot its name/email/address onto the invoice.
+	// Port lives in invoices; customers implements it; no package imports.
+	invoicesModule.SetCustomerSnapshotProvider(customersModule.SnapshotProvider())
+
 	storeCategoriesModule := storecategories.NewModule(ctx, dbclient.Pool())
 	storeOrdersModule := storeorders.NewModule(ctx, dbclient.Pool())
 	storeProductsModule := storeproducts.NewModule(ctx, dbclient.Pool())

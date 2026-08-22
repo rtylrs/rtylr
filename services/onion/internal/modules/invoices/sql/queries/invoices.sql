@@ -1,5 +1,5 @@
 -- name: GetInvoiceByID :one
-SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id,
+SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id,
        status, issue_date, due_date, paid_date, reporting_date, currency, subtotal, discount_type,
        discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
        notes, terms, created_at, updated_at
@@ -13,7 +13,7 @@ WHERE id = ? AND business_id = ?
 FOR UPDATE;
 
 -- name: GetInvoiceByIDForUpdate :one
-SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id,
+SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id,
        status, issue_date, due_date, paid_date, reporting_date, currency, subtotal, discount_type,
        discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
        notes, terms, created_at, updated_at
@@ -22,7 +22,7 @@ WHERE id = ? AND business_id = ?
 FOR UPDATE;
 
 -- name: ListInvoicesByOwner :many
-SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id,
+SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id,
        status, issue_date, due_date, paid_date, reporting_date, currency, subtotal, discount_type,
        discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
        notes, terms, created_at, updated_at
@@ -35,7 +35,7 @@ LIMIT ? OFFSET ?;
 SELECT COUNT(*) FROM finance_invoices WHERE business_id = ?;
 
 -- name: ListInvoicesByOwnerAndStatus :many
-SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id,
+SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id,
        status, issue_date, due_date, paid_date, reporting_date, currency, subtotal, discount_type,
        discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
        notes, terms, created_at, updated_at
@@ -46,14 +46,14 @@ LIMIT 500;
 
 -- name: CreateInvoice :execresult
 INSERT INTO finance_invoices
-  (owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id,
+  (owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id,
    status, issue_date, due_date, currency, subtotal, discount_type, discount_value,
    discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due, notes, terms)
-VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
 
 -- name: UpdateInvoice :exec
 UPDATE finance_invoices SET
-  client_name = ?, client_email = ?, client_address = ?, client_tax_id = ?,
+  client_name = ?, client_email = ?, client_address = ?, client_tax_id = ?, customer_id = ?,
   issue_date = ?, due_date = ?, currency = ?, subtotal = ?, discount_type = ?,
   discount_value = ?, discount_amount = ?, tax_rate = ?, tax_amount = ?,
   total = ?, amount_due = ?, notes = ?, terms = ?
@@ -88,7 +88,7 @@ WHERE business_id = ?
 GROUP BY status;
 
 -- name: ListOverdueInvoices :many
-SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id,
+SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id,
        status, issue_date, due_date, paid_date, reporting_date, currency, subtotal, discount_type,
        discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
        notes, terms, created_at, updated_at
@@ -210,3 +210,18 @@ SELECT COALESCE(SUM(tax_amount),0) FROM finance_invoices WHERE business_id = ? A
 
 -- name: SumTaxOwed :one
 SELECT COALESCE(SUM(tax_amount),0) FROM finance_expenses WHERE business_id = ? AND is_tax_deductible = TRUE AND expense_date BETWEEN ? AND ?;
+
+-- name: ListInvoicesByCustomer :many
+-- Customer-filtered page backing crm.sales-style per-customer views; the
+-- index idx_finance_invoices_business_customer serves it.
+SELECT id, owner_id, business_id, invoice_number, client_name, client_email, client_address, client_tax_id, customer_id,
+       status, issue_date, due_date, paid_date, reporting_date, currency, subtotal, discount_type,
+       discount_value, discount_amount, tax_rate, tax_amount, total, amount_paid, amount_due,
+       notes, terms, created_at, updated_at
+FROM finance_invoices
+WHERE business_id = ? AND customer_id = ?
+ORDER BY created_at DESC, id DESC
+LIMIT ? OFFSET ?;
+
+-- name: CountInvoicesByCustomer :one
+SELECT COUNT(*) FROM finance_invoices WHERE business_id = ? AND customer_id = ?;

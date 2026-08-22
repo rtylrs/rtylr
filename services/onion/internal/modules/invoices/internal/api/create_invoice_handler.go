@@ -81,6 +81,7 @@ func newInvoiceDetailPayload(inv *domain.Invoice) *financeinvoicesv1.InvoiceDeta
 		ClientEmail:    inv.ClientEmail,
 		ClientAddress:  inv.ClientAddress,
 		ClientTaxId:    inv.ClientTaxID,
+		CustomerId:     inv.CustomerID,
 		Status:         inv.Status,
 		IssueDate:      inv.IssueDate.Format("2006-01-02"),
 		DueDate:        inv.DueDate.Format("2006-01-02"),

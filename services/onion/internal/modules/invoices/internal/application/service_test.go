@@ -828,3 +828,17 @@ func TestUpdateInvoiceStatus_RejectsReopeningInvoice(t *testing.T) {
 		t.Fatalf("expected ErrInvoiceNotDraft, got %v", err)
 	}
 }
+
+func (m *mockRepo) ListInvoicesByCustomer(_ context.Context, _, _ int64, _, _ int) ([]domain.Invoice, error) {
+	if m.invoice != nil {
+		return []domain.Invoice{*m.invoice}, nil
+	}
+	return nil, m.err
+}
+
+func (m *mockRepo) CountInvoicesByCustomer(_ context.Context, _, _ int64) (int64, error) {
+	if m.invoice != nil {
+		return 1, nil
+	}
+	return 0, m.err
+}

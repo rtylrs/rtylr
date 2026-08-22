@@ -153,6 +153,7 @@ func (r *Repository) CreateInvoiceWithItems(ctx context.Context, businessID int6
 		ClientEmail:    sqlNullString(inv.ClientEmail),
 		ClientAddress:  sqlNullString(inv.ClientAddress),
 		ClientTaxID:    sqlNullString(inv.ClientTaxID),
+		CustomerID:     nullableInt64FromPtr(inv.CustomerID),
 		Status:         sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(inv.Status), Valid: inv.Status != ""},
 		IssueDate:      inv.IssueDate,
 		DueDate:        inv.DueDate,
@@ -300,6 +301,7 @@ func (r *Repository) UpdateInvoiceWithItems(ctx context.Context, businessID int6
 		ClientEmail:    sqlNullString(inv.ClientEmail),
 		ClientAddress:  sqlNullString(inv.ClientAddress),
 		ClientTaxID:    sqlNullString(inv.ClientTaxID),
+		CustomerID:     nullableInt64FromPtr(inv.CustomerID),
 		IssueDate:      inv.IssueDate,
 		DueDate:        inv.DueDate,
 		Currency:       sqlNullString(inv.Currency),
@@ -1061,6 +1063,7 @@ func invoiceFromSqlc(row sqlc.FinanceInvoice) domain.Invoice {
 		ClientEmail:    nullStr(row.ClientEmail, ""),
 		ClientAddress:  nullStr(row.ClientAddress, ""),
 		ClientTaxID:    nullStr(row.ClientTaxID, ""),
+		CustomerID:     nullableInt64Ptr(row.CustomerID),
 		Status:         string(row.Status.FinanceInvoicesStatus),
 		IssueDate:      row.IssueDate,
 		DueDate:        row.DueDate,
@@ -1284,4 +1287,47 @@ func toFloat64FromInterface(v interface{}) float64 {
 	}
 
 	return f
+}
+
+func nullableInt64Ptr(v sql.NullInt64) *int64 {
+	if !v.Valid {
+		return nil
+	}
+	out := v.Int64
+	return &out
+}
+
+func nullableInt64FromPtr(v *int64) sql.NullInt64 {
+	if v == nil {
+		return sql.NullInt64{}
+	}
+	return sql.NullInt64{Int64: *v, Valid: true}
+}
+
+// ListInvoicesByCustomer pages one customer's invoices off the
+// business+customer index.
+func (r *Repository) ListInvoicesByCustomer(ctx context.Context, businessID, customerID int64, limit, offset int) ([]domain.Invoice, error) {
+	rows, err := r.queries.ListInvoicesByCustomer(ctx, sqlc.ListInvoicesByCustomerParams{
+		BusinessID: businessID,
+		CustomerID: sql.NullInt64{Int64: customerID, Valid: true},
+		Limit:      int32(limit),
+		Offset:     int32(offset),
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list invoices by customer", logger.Any("business_id", businessID), logger.Any("customer_id", customerID), logger.Error(err))
+		return nil, err
+	}
+	out := make([]domain.Invoice, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, invoiceFromSqlc(row))
+	}
+	return out, nil
+}
+
+// CountInvoicesByCustomer reports the customer's invoice count.
+func (r *Repository) CountInvoicesByCustomer(ctx context.Context, businessID, customerID int64) (int64, error) {
+	return r.queries.CountInvoicesByCustomer(ctx, sqlc.CountInvoicesByCustomerParams{
+		BusinessID: businessID,
+		CustomerID: sql.NullInt64{Int64: customerID, Valid: true},
+	})
 }
