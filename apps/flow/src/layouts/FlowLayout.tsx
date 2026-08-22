@@ -283,7 +283,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // IMPORTANT: use React Query data directly for display, never wait for the
   // Zustand store to hydrate, because the store is populated via useEffect which
   // fires *after* render, causing a flash of "No workspace".
-  const apiWorkspaces: { id: string; name: string; color: string }[] = [];
+  const apiWorkspaces = EMPTY_WORKSPACES;
   const workspacesLoading = false;
   const { data: businessName } = useFlowBusinessName();
 
@@ -1497,3 +1497,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 };
 
 export default FlowLayout;
+
+// Module-level constant: same reference every render, prevents the
+// useMemo → useEffect → setState → re-render infinite loop.
+const EMPTY_WORKSPACES: { id: string; name: string; color: string }[] = [];
