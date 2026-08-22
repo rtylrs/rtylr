@@ -258,7 +258,8 @@ const OrderStatus = (): React.JSX.Element => {
             <p style={{ color: '#dc2626', fontSize: '15px', marginBottom: 12 }}>
               Could not load order status.
             </p>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => void fetchStatus()}
               style={{
                 background: 'transparent',
@@ -291,7 +292,8 @@ const OrderStatus = (): React.JSX.Element => {
 
         {/* Order another */}
         {!notFound && (
-          <button type="button"
+          <button
+            type="button"
             onClick={handleOrderAnother}
             style={{
               marginTop: 'auto',
