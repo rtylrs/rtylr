@@ -11,6 +11,7 @@ var (
 	ErrSessionNotOpen           = errors.New("session is not open")
 	ErrOrderNotFound            = errors.New("order not found")
 	ErrOrderAlreadyPaid         = errors.New("order is already paid")
+	ErrPaymentInsufficient      = errors.New("amount paid is less than total")
 	ErrLocationNotFound         = errors.New("location not found")
 	ErrTableNotFound            = errors.New("table not found")
 	ErrOrderCannotBeTransferred = errors.New("order cannot be transferred in current status")

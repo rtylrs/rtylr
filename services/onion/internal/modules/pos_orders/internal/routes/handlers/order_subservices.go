@@ -54,6 +54,9 @@ func (a *PaymentAPI) ProcessPayment(ctx context.Context, req *posorderspaymentsv
 		if errors.Is(err, domain.ErrOrderAlreadyPaid) {
 			return nil, orderAPIStatusError(http.StatusConflict, "Order is already paid")
 		}
+		if errors.Is(err, domain.ErrPaymentInsufficient) {
+			return nil, orderAPIStatusError(http.StatusBadRequest, "Amount paid is less than order total")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to process payment")
 	}
 

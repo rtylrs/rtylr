@@ -1,6 +1,9 @@
 package domain
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestComputeChange_ExactPayment(t *testing.T) {
 	result, err := ComputeChange(50.00, 50.00)
@@ -26,6 +29,9 @@ func TestComputeChange_Underpayment_Errors(t *testing.T) {
 	_, err := ComputeChange(100.00, 80.00)
 	if err == nil {
 		t.Fatal("expected error for underpayment")
+	}
+	if !errors.Is(err, ErrPaymentInsufficient) {
+		t.Fatalf("expected ErrPaymentInsufficient, got %v", err)
 	}
 }
 
