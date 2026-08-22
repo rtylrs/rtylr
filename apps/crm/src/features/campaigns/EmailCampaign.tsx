@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -13,7 +13,7 @@ import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import { useTemplates } from '../../shared/hooks/queries/useTemplates';
 import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../shared/components/ui';
 import { EmailEditor } from '../../shared/components/crm';
-import { useEscapeKey } from '../../shared/lib/keyboard';
+import { useDialogFocus } from '../../shared/lib/keyboard';
 
 const EmailCampaign: React.FC = () => {
   const navigate = useNavigate();
@@ -42,7 +42,8 @@ const EmailCampaign: React.FC = () => {
   const [body, setBody] = useState(searchParams.get('body') || '');
   const [previewOpen, setPreviewOpen] = useState(false);
   const pending = create.isPending || update.isPending || updateStatus.isPending;
-  useEscapeKey(previewOpen, () => setPreviewOpen(false));
+  const previewDialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(previewOpen, previewDialogRef, () => setPreviewOpen(false));
 
   useEffect(() => {
     if (isEditing) return;
@@ -334,6 +335,7 @@ const EmailCampaign: React.FC = () => {
             }}
           >
             <div
+              ref={previewDialogRef}
               onClick={(event) => event.stopPropagation()}
               role="dialog"
               aria-modal="true"

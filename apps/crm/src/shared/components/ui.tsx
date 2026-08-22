@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { X, Loader2 } from 'lucide-react';
+import { useDialogFocus } from '../lib/keyboard';
 
 export const ACCENT = '#3b82f6';
 
@@ -217,58 +218,7 @@ export const Modal: React.FC<{
   const titleId = React.useId();
   const dialogRef = React.useRef<HTMLDivElement>(null);
   const closeButtonRef = React.useRef<HTMLButtonElement>(null);
-  const onCloseRef = React.useRef(onClose);
-
-  React.useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
-
-  React.useEffect(() => {
-    if (!open) return;
-    const previouslyFocused =
-      document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        onCloseRef.current();
-        return;
-      }
-      if (event.key !== 'Tab') return;
-
-      const dialog = dialogRef.current;
-      if (!dialog) return;
-      const focusable = Array.from(
-        dialog.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [contenteditable="true"], [tabindex]:not([tabindex="-1"])'
-        )
-      ).filter(
-        (element) =>
-          !element.hasAttribute('hidden') && element.getAttribute('aria-hidden') !== 'true'
-      );
-      if (focusable.length === 0) {
-        event.preventDefault();
-        return;
-      }
-
-      const activeIndex = focusable.indexOf(document.activeElement as HTMLElement);
-      if (activeIndex === -1) {
-        event.preventDefault();
-        (event.shiftKey ? focusable[focusable.length - 1] : focusable[0]).focus();
-      } else if (event.shiftKey && activeIndex === 0) {
-        event.preventDefault();
-        focusable[focusable.length - 1].focus();
-      } else if (!event.shiftKey && activeIndex === focusable.length - 1) {
-        event.preventDefault();
-        focusable[0].focus();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    closeButtonRef.current?.focus();
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      if (previouslyFocused?.isConnected) previouslyFocused.focus();
-    };
-  }, [open]);
+  useDialogFocus(open, dialogRef, onClose, closeButtonRef);
 
   if (!open) return null;
   const widths = { sm: '380px', md: '520px', lg: '720px' };

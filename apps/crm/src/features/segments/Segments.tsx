@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
@@ -20,7 +20,7 @@ import {
   useCreateSegment,
 } from '../../shared/hooks/queries/useSegments';
 import { Card, ConfirmModal, EmptyState, SkeletonList } from '../../shared/components/ui';
-import { useEscapeKey } from '../../shared/lib/keyboard';
+import { useDialogFocus } from '../../shared/lib/keyboard';
 
 const ACCENT = '#3b82f6';
 
@@ -80,7 +80,8 @@ function RuleBuilder({
     { id: 1, field: 'Total Spend', operator: '>', value: '$500' },
   ]);
   const [segmentName, setSegmentName] = useState('');
-  useEscapeKey(true, onClose);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialogRef, onClose);
 
   const addRule = () => {
     setRules((prev) => [
@@ -138,6 +139,7 @@ function RuleBuilder({
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"

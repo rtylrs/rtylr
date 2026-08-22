@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { Gift, Package, Plus, X } from 'lucide-react';
 import { useLoyaltyRewards, useUpsertReward } from '../../shared/hooks/queries/useLoyalty';
 import { PageHeader, Card, EmptyState, Button, SkeletonList } from '../../shared/components/ui';
-import { useEscapeKey } from '../../shared/lib/keyboard';
+import { useDialogFocus } from '../../shared/lib/keyboard';
 
 interface RewardForm {
   name: string;
@@ -16,7 +16,8 @@ interface RewardForm {
 
 const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const upsert = useUpsertReward();
-  useEscapeKey(true, onClose);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(true, dialogRef, onClose);
   const [form, setForm] = useState<RewardForm>({
     name: '',
     description: '',
@@ -76,6 +77,7 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="New reward"

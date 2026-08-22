@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useListCustomers } from '../hooks/queries/useCustomers';
 import { CustomerAvatar } from './crm';
+import { useDialogFocus } from '../lib/keyboard';
 
 interface CommandItem {
   id: string;
@@ -34,7 +35,11 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [cursor, setCursor] = useState(0);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { data: fetchedCustomers } = useListCustomers({ limit: 50, offset: 0 });
+
+  useDialogFocus(open, dialogRef, onClose, searchInputRef);
 
   useEffect(() => {
     if (!open) setQuery('');
@@ -202,10 +207,6 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onClose();
-      }
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         setCursor((c) => Math.min(c + 1, filtered.length - 1));
@@ -248,6 +249,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
           }}
         >
           <motion.div
+            ref={dialogRef}
             initial={{ opacity: 0, scale: 0.96, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -10 }}
@@ -279,7 +281,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
             >
               <Search size={16} style={{ color: 'var(--hub-text-muted)' }} />
               <input
-                autoFocus
+                ref={searchInputRef}
                 aria-label="Search command palette"
                 value={query}
                 onChange={(e) => {

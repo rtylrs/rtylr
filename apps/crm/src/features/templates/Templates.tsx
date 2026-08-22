@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { FileText, Mail, MessageSquare, Plus, Copy } from 'lucide-react';
 import { useTemplates, useCreateTemplate } from '../../shared/hooks/queries/useTemplates';
 import { PageHeader, Card, Button, EmptyState, SkeletonList } from '../../shared/components/ui';
-import { useEscapeKey } from '../../shared/lib/keyboard';
+import { useDialogFocus } from '../../shared/lib/keyboard';
 
 const Templates: React.FC = () => {
   const navigate = useNavigate();
@@ -22,7 +22,8 @@ const Templates: React.FC = () => {
   const [newSubject, setNewSubject] = useState('');
   const [newBody, setNewBody] = useState('');
   const [newCategory, setNewCategory] = useState('general');
-  useEscapeKey(showCreate, () => setShowCreate(false));
+  const createDialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(showCreate, createDialogRef, () => setShowCreate(false));
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim() || !newBody.trim()) {
@@ -259,6 +260,7 @@ const Templates: React.FC = () => {
             }}
           >
             <div
+              ref={createDialogRef}
               role="dialog"
               aria-modal="true"
               aria-label="New template"
