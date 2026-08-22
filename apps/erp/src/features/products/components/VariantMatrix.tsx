@@ -159,7 +159,8 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
       />
       <div className="flex items-center gap-1.5 justify-end">
         {dirty && (
-          <button type="button"
+          <button
+            type="button"
             onClick={handleSave}
             disabled={updateMut.isPending}
             aria-label={t('erp.products.variants.save')}
@@ -171,7 +172,8 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
         )}
         {confirming ? (
           <>
-            <button type="button"
+            <button
+              type="button"
               onClick={handleDelete}
               disabled={deleteMut.isPending}
               aria-label={t('common.delete')}
@@ -183,7 +185,8 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
             >
               {t('common.delete')}
             </button>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setConfirming(false)}
               aria-label={t('common.cancel')}
               className="h-7 w-7 rounded-lg flex items-center justify-center"
@@ -193,7 +196,8 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
             </button>
           </>
         ) : (
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setConfirming(true)}
             aria-label={t('common.delete')}
             className="h-7 w-7 rounded-lg flex items-center justify-center"
@@ -370,7 +374,8 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
                 placeholder={t('erp.products.variants.optionName')}
                 style={inputStyle}
               />
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => removeGroup(idx)}
                 aria-label={t('common.remove')}
                 className="h-8 w-8 shrink-0 rounded-lg flex items-center justify-center"
@@ -390,7 +395,8 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
                   style={{ background: 'var(--hub-card)', color: 'var(--hub-text)' }}
                 >
                   {v}
-                  <button type="button"
+                  <button
+                    type="button"
                     onClick={() => removeValue(idx, v)}
                     aria-label={t('common.remove')}
                     style={{ color: 'var(--hub-text-dim)' }}
@@ -417,7 +423,8 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
         ))}
 
         <div className="flex items-center gap-2 flex-wrap">
-          <button type="button"
+          <button
+            type="button"
             onClick={addGroup}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium"
             style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
@@ -425,7 +432,8 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
             <Plus size={13} /> {t('erp.products.variants.addOption')}
           </button>
           {combos.length > 0 && (
-            <button type="button"
+            <button
+              type="button"
               onClick={generate}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
               style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
@@ -483,7 +491,8 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
                   aria-label={t('erp.products.variants.stock')}
                   style={inputStyle}
                 />
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => removeDraft(idx)}
                   aria-label={t('common.remove')}
                   className="h-7 w-7 rounded-lg flex items-center justify-center justify-self-end"
@@ -494,7 +503,8 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
               </div>
             ))}
           </div>
-          <button type="button"
+          <button
+            type="button"
             onClick={createAll}
             disabled={createMut.isPending}
             className="px-4 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"

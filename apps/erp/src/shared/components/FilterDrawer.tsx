@@ -76,7 +76,8 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
             <div className="flex-1 overflow-y-auto p-4 space-y-4">{children}</div>
             <div className="p-4 flex gap-2" style={{ borderTop: '1px solid var(--hub-border)' }}>
               {onReset && (
-                <button type="button"
+                <button
+                  type="button"
                   onClick={onReset}
                   className="flex-1 px-3 py-2 rounded-lg text-xs font-medium"
                   style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
@@ -84,7 +85,8 @@ const FilterDrawer: React.FC<FilterDrawerProps> = ({
                   Reset
                 </button>
               )}
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => {
                   onApply?.();
                   onClose();

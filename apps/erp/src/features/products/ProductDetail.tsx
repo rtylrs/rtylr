@@ -172,7 +172,8 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <button type="button"
+          <button
+            type="button"
             data-testid="product-edit-button"
             onClick={() => setEditing(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
@@ -186,7 +187,8 @@ const ProductDetail: React.FC = () => {
             {t('erp.products.detail.edit')}
           </button>
           {canDeleteProduct && (
-            <button type="button"
+            <button
+              type="button"
               data-testid="product-delete-button"
               onClick={() => setConfirmDelete(true)}
               disabled={deleteProduct.isPending}

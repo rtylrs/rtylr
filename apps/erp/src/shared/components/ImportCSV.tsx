@@ -63,7 +63,8 @@ const ImportCSV: React.FC<ImportCSVProps> = ({ onImport, expectedColumns }) => {
           if (file) handleFile(file);
         }}
       />
-      <button type="button"
+      <button
+        type="button"
         onClick={() => fileRef.current?.click()}
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
         style={{
@@ -132,7 +133,8 @@ const ImportCSV: React.FC<ImportCSVProps> = ({ onImport, expectedColumns }) => {
               </p>
             )}
             <div className="flex gap-2 justify-end mt-4">
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setPreview(null)}
                 className="px-3 py-1.5 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
@@ -140,7 +142,8 @@ const ImportCSV: React.FC<ImportCSVProps> = ({ onImport, expectedColumns }) => {
               >
                 Cancel
               </button>
-              <button type="button"
+              <button
+                type="button"
                 onClick={confirm}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold"
                 style={{ background: 'var(--erp-accent)', color: 'var(--erp-accent-foreground)' }}

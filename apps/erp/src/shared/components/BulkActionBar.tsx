@@ -44,7 +44,8 @@ const BulkActionBar: React.FC<BulkActionBarProps> = ({
             {count} selected
           </span>
           {onEdit && (
-            <button type="button"
+            <button
+              type="button"
               onClick={onEdit}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
               style={{ color: 'var(--hub-text-muted)' }}
@@ -59,7 +60,8 @@ const BulkActionBar: React.FC<BulkActionBarProps> = ({
             </button>
           )}
           {onExport && (
-            <button type="button"
+            <button
+              type="button"
               onClick={onExport}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
               style={{ color: 'var(--hub-text-muted)' }}
@@ -74,7 +76,8 @@ const BulkActionBar: React.FC<BulkActionBarProps> = ({
             </button>
           )}
           {onArchive && (
-            <button type="button"
+            <button
+              type="button"
               onClick={onArchive}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
               style={{ color: 'var(--hub-text-muted)' }}
@@ -89,7 +92,8 @@ const BulkActionBar: React.FC<BulkActionBarProps> = ({
             </button>
           )}
           {onDelete && (
-            <button type="button"
+            <button
+              type="button"
               onClick={onDelete}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs"
               style={{ color: 'var(--erp-danger)' }}
@@ -104,7 +108,8 @@ const BulkActionBar: React.FC<BulkActionBarProps> = ({
               <Trash2 size={12} /> Delete
             </button>
           )}
-          <button type="button"
+          <button
+            type="button"
             onClick={onClear}
             className="ml-1 h-7 w-7 rounded-lg flex items-center justify-center"
             style={{ color: 'var(--hub-text-dim)' }}

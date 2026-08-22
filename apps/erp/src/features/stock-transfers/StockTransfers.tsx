@@ -124,7 +124,8 @@ const StockTransfers: React.FC = () => {
         description="Move inventory between warehouses"
         actions={
           canCreateTransfer && (
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setShowCreate(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
               style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
@@ -333,14 +334,16 @@ const StockTransfers: React.FC = () => {
               + Add item
             </button>
             <div className="flex gap-2 justify-end">
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setShowCreate(false)}
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
                 Cancel
               </button>
-              <button type="button"
+              <button
+                type="button"
                 onClick={handleCreate}
                 disabled={
                   createMut.isPending ||

@@ -175,7 +175,8 @@ const Products: React.FC = () => {
               ]}
             />
             <ExportButton data={exportable} getData={getAllExportable} filename="products.csv" />
-            <button type="button"
+            <button
+              type="button"
               data-testid="products-new-button"
               onClick={() => setShowAdd(true)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
@@ -212,7 +213,8 @@ const Products: React.FC = () => {
             }}
           />
         </div>
-        <button type="button"
+        <button
+          type="button"
           onClick={() => setDrawerOpen(true)}
           className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium"
           style={{
@@ -227,7 +229,8 @@ const Products: React.FC = () => {
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: AMBER }} />
           )}
         </button>
-        <button type="button"
+        <button
+          type="button"
           onClick={() =>
             updateFilters({
               ...filters,
@@ -249,7 +252,8 @@ const Products: React.FC = () => {
           className="flex rounded-lg p-0.5"
           style={{ background: 'var(--hub-hover)', border: '1px solid var(--hub-border)' }}
         >
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setViewMode('list')}
             className="h-7 w-7 rounded-md flex items-center justify-center"
             style={{
@@ -259,7 +263,8 @@ const Products: React.FC = () => {
           >
             <List size={12} />
           </button>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setViewMode('grid')}
             className="h-7 w-7 rounded-md flex items-center justify-center"
             style={{

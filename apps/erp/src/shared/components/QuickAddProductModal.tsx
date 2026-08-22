@@ -681,14 +681,16 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
         </div>
 
         <div className="flex gap-2 justify-end mt-4">
-          <button type="button"
+          <button
+            type="button"
             onClick={onClose}
             className="px-3 py-1.5 rounded-lg text-xs"
             style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
           >
             {t('common.cancel')}
           </button>
-          <button type="button"
+          <button
+            type="button"
             data-testid="qap-submit"
             onClick={handleSubmit}
             disabled={pending}

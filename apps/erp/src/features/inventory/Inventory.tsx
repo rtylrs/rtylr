@@ -98,7 +98,8 @@ const Inventory: React.FC = () => {
         <h2 className="text-xl font-semibold" style={{ color: 'var(--hub-text)' }}>
           {t('erp.inventory.title')}
         </h2>
-        <button type="button"
+        <button
+          type="button"
           data-testid="inventory-add-product-button"
           onClick={() => setQuickAddOpen(true)}
           className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
