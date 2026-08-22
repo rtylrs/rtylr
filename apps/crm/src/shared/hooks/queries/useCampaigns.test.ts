@@ -45,6 +45,17 @@ describe('campaign wire mappings', () => {
     ).toBe('2026-09-01T10:00:00Z');
   });
 
+  it('keeps valid date-only schedules on the same calendar day', () => {
+    expect(
+      toCampaignRequest({
+        name: 'Date-only schedule',
+        type: 'email',
+        body: 'Content',
+        scheduledAt: '2026-09-01',
+      }).scheduledAt
+    ).toBe('2026-09-01T00:00:00Z');
+  });
+
   it('drops impossible calendar dates instead of normalizing them', () => {
     expect(
       toCampaignRequest({

@@ -52,6 +52,7 @@ function normalizeScheduledAt(value: string | undefined): string | undefined {
   if (!trimmed) return undefined;
   const date = parseCrmDate(trimmed);
   if (!Number.isFinite(date.getTime())) return undefined;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return `${trimmed}T00:00:00Z`;
   return date.toISOString().replace(/\.\d{3}Z$/, 'Z');
 }
 
