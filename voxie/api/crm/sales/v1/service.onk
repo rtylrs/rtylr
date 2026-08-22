@@ -1,0 +1,18 @@
+package crm.sales.v1
+
+/// ContractService defines CRM sales contract endpoints: the read surface
+/// other apps need (Finance prefills invoices from signed contracts), plus
+/// create/update so the legacy routes have a contract to migrate onto.
+service ContractService {
+  /// Returns one page of contracts for this business.
+  listContracts(ListContractsRequest) -> ListContractsResponse @get("/contracts")
+
+  /// Returns a single contract by id.
+  getContract(GetContractRequest) -> GetContractResponse @get("/contracts/{id}")
+
+  /// Stages a new contract from a won lead.
+  createContract(CreateContractRequest) -> CreateContractResponse @post("/contracts")
+
+  /// Amends an existing contract.
+  updateContract(UpdateContractRequest) -> UpdateContractResponse @put("/contracts/{id}")
+}
