@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { type LoyaltyTransaction, type LoyaltyTier } from '../../shared/schemas/loyalty';
 import { Card, EmptyState, SkeletonList } from '../../shared/components/ui';
+import { formatDate } from '../../shared/lib/formatters';
 
 const ACCENT = '#3b82f6';
 
@@ -500,7 +501,9 @@ const Loyalty: React.FC = () => {
                     : {entry.action}
                   </span>
                 </div>
-                <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>{entry.time}</span>
+                <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
+                  {formatDate(entry.time) || 'Unknown date'}
+                </span>
               </div>
             ))
           )}

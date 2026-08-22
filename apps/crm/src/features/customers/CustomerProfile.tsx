@@ -37,6 +37,7 @@ import {
   LoyaltyPointsInput,
 } from '../../shared/components/crm';
 import { getCustomerTier, pointsToNextTier, thresholdsFromConfig } from '../../shared/lib/tiers';
+import { formatDate } from '../../shared/lib/formatters';
 
 const CustomerProfile: React.FC = () => {
   const { id } = useParams({ strict: false });
@@ -287,7 +288,7 @@ const CustomerProfile: React.FC = () => {
               {customer.createdAt && (
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Calendar size={12} />
-                  Since {customer.createdAt}
+                  Since {formatDate(customer.createdAt) || 'Unknown date'}
                 </span>
               )}
             </div>
