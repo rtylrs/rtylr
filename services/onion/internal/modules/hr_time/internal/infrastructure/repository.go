@@ -412,76 +412,6 @@ func (r *Repository) CreateApprovalAction(ctx context.Context, businessID int64,
 	})
 }
 
-func (r *Repository) ListApprovedBillableEntries(ctx context.Context, businessID int64) ([]domain.TimeEntryRecord, error) {
-	rows, err := r.queries.ListApprovedBillableEntries(ctx, businessID)
-	if err != nil {
-		logger.Ctx(ctx).Error("failed to list approved billable entries", logger.Any("business_id", businessID), logger.Error(err))
-		return nil, err
-	}
-	entries := make([]domain.TimeEntryRecord, 0, len(rows))
-	for _, row := range rows {
-		entries = append(entries, timeEntryFromApprovedRow(row))
-	}
-	return entries, nil
-}
-
-func (r *Repository) MarkEntryExported(ctx context.Context, businessID, entryID, exportBatchID int64) error {
-	return r.queries.MarkEntryExported(ctx, sqlc.MarkEntryExportedParams{
-		ExportBatchID: nullInt64(exportBatchID),
-		ID:            entryID,
-		BusinessID:    businessID,
-	})
-}
-
-// ExportApprovedBillableEntries atomically snapshots the approved billable
-// entries and marks every row in that snapshot with the export batch id. A
-// failed mark rolls the entire batch back so no entry can disappear from a
-// later export after a partial success.
-func (r *Repository) ExportApprovedBillableEntries(ctx context.Context, businessID, exportBatchID int64) (entries []domain.TimeEntryRecord, err error) {
-	tx, err := r.pool.BeginTx(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-	committed := false
-	defer func() {
-		if recovered := recover(); recovered != nil {
-			_ = tx.Rollback()
-			panic(recovered)
-		}
-		if !committed {
-			_ = tx.Rollback()
-		}
-	}()
-
-	queries := r.queries.WithTx(tx)
-	rows, err := queries.ListApprovedBillableEntries(ctx, businessID)
-	if err != nil {
-		return nil, err
-	}
-	entries = make([]domain.TimeEntryRecord, 0, len(rows))
-	for _, row := range rows {
-		if err := queries.MarkEntryExported(ctx, sqlc.MarkEntryExportedParams{
-			ExportBatchID: nullInt64(exportBatchID),
-			ID:            row.ID,
-			BusinessID:    businessID,
-		}); err != nil {
-			logger.Ctx(ctx).Error("failed to mark billable export batch",
-				logger.Any("business_id", businessID),
-				logger.Any("entry_id", row.ID),
-				logger.Error(err),
-			)
-			return nil, err
-		}
-		entries = append(entries, timeEntryFromApprovedRow(row))
-	}
-
-	if err := tx.Commit(); err != nil {
-		return nil, err
-	}
-	committed = true
-	return entries, nil
-}
-
 func (r *Repository) ListTimesheetBusinessIDs(ctx context.Context) ([]int64, error) {
 	rows, err := r.queries.ListTimesheetBusinessIDs(ctx)
 	if err != nil {
@@ -557,10 +487,6 @@ func timeEntryFromListRow(row sqlc.ListTimeEntriesRow) domain.TimeEntryRecord {
 }
 
 func timeEntryFromGetRow(row sqlc.GetTimeEntryRow) domain.TimeEntryRecord {
-	return timeEntryFromFields(row.ID, row.OwnerID, row.BusinessID, row.EmployeeID, row.TimesheetID, row.ProjectID, row.TaskID, row.CategoryID, row.Date, row.DurationMinutes, row.StartTime, row.EndTime, row.Description, row.IsBillable, row.Status, row.RejectionReason, row.ApprovedBy, row.Source, row.BillableInvoiceID, row.CreatedAt, row.UpdatedAt)
-}
-
-func timeEntryFromApprovedRow(row sqlc.ListApprovedBillableEntriesRow) domain.TimeEntryRecord {
 	return timeEntryFromFields(row.ID, row.OwnerID, row.BusinessID, row.EmployeeID, row.TimesheetID, row.ProjectID, row.TaskID, row.CategoryID, row.Date, row.DurationMinutes, row.StartTime, row.EndTime, row.Description, row.IsBillable, row.Status, row.RejectionReason, row.ApprovedBy, row.Source, row.BillableInvoiceID, row.CreatedAt, row.UpdatedAt)
 }
 
