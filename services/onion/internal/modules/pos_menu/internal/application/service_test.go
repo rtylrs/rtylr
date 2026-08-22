@@ -19,6 +19,10 @@ func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.MenuItem, error) {
 	return m.list, nil
 }
 
+func (m *mockRepo) IsOnlineOrderingEnabled(_ context.Context, _ int64) (bool, error) {
+	return true, nil
+}
+
 func (m *mockRepo) QuickCreate(_ context.Context, _, _ int64, _ domain.MenuItemInput) (int64, error) {
 	return m.createID, m.createErr
 }
