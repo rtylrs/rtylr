@@ -26,27 +26,14 @@ import { Button, EmptyState, PageHeader, SkeletonList } from '../../shared/compo
 import { CustomerAvatar, TierBadge, TagChip } from '../../shared/components/crm';
 import { activateOnKeyboard } from '../../shared/lib/keyboard';
 import { formatCustomerDate } from '../../shared/lib/customerUtils';
+import { customersToCsv } from './customerExport';
 
 const ACCENT = '#3b82f6';
 
 const tierFilters: Array<Tier | 'All'> = ['All', 'Platinum', 'Gold', 'Silver', 'Bronze'];
 
 function downloadCustomersCsv(rowsToExport: Customer[], thresholds: Record<Tier, number>): void {
-  const rows = [
-    ['Name', 'Email', 'Phone', 'Spent', 'Visits', 'Points', 'Tier'],
-    ...rowsToExport.map((c) => [
-      c.name,
-      c.email,
-      c.phone,
-      String(c.totalSpent),
-      String(c.visits),
-      String(c.loyaltyPoints),
-      getCustomerTier(c.loyaltyPoints, c.loyaltyTier, thresholds),
-    ]),
-  ];
-  const csv = rows
-    .map((r) => r.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(','))
-    .join('\n');
+  const csv = customersToCsv(rowsToExport, thresholds);
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
