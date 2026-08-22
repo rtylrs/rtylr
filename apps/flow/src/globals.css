@@ -356,3 +356,42 @@
 .flow-add-hours-spinner {
   animation: flow-add-hours-spin 0.7s linear infinite;
 }
+
+/* ── Reduced motion ────────────────────────────────────────────────────────
+ * AppearanceProvider writes data-motion to documentElement, and until this
+ * block existed nothing selected it: the setting persisted, the attribute
+ * landed, and every transition kept running. The copy on the control says it
+ * turns transitions off, so the absence of these rules made that string false.
+ *
+ * ::after matters as much as ::before. The switch knob on the very control that
+ * owns this setting is an ::after on several of Flow's toggles, so a rule
+ * covering only elements and ::before would leave the setting visibly ignored
+ * exactly where it is being turned on.
+ *
+ * The system preference is honoured on its own, not only through the store: a
+ * user who has asked their OS for reduced motion gets it before touching Flow,
+ * and the stored preference then wins in either direction because the
+ * attribute selector is more specific than the media query below it.
+ *
+ * animation-iteration-count rather than animation: none, so a spinner still
+ * shows its final frame instead of vanishing and leaving a control that looks
+ * dead while it is actually working. */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-motion='full']) *,
+  :root:not([data-motion='full']) *::before,
+  :root:not([data-motion='full']) *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:root[data-motion='reduce'] *,
+:root[data-motion='reduce'] *::before,
+:root[data-motion='reduce'] *::after {
+  transition-duration: 0.01ms !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+}
