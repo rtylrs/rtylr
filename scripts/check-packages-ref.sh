@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Git hooks export GIT_DIR, GIT_WORK_TREE and GIT_INDEX_FILE, and those override
+# both `-C` and normal repository discovery. Without unsetting them, every
+# `git -C "$repo_root/packages" ...` below silently answers from the PARENT
+# repository, so this script compares rtylr's own HEAD against the recorded
+# packages commit and can never match.
+#
+# The effect: this guard has never worked from inside a hook, only when run by
+# hand from a shell. It went unnoticed while it was reachable only via
+# `pnpm typecheck`. It is on the pre-push path now, where a false failure blocks
+# every push and the printed sha is the parent's, which reads as nonsense.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE
+
 repo_root="$(git rev-parse --show-toplevel)"
 
 recorded_packages="$(git -C "$repo_root" ls-files -s -- packages | awk '$1 == "160000" { print $2; exit }')"
