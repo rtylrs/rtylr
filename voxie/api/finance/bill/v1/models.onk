@@ -6,8 +6,19 @@ message Bill {
   id: int64
   /// owner_id identifies the tenant that owns the resource.
   owner_id: int64
-  /// supplier_id is the supplier id value for this contract.
-  supplier_id: int64
+  /// supplier_id is the ERP supplier this bill is owed to; absent on bills
+  /// entered before suppliers were linked, and on one-off bills for a party
+  /// with no supplier record. Callers must not invent a value: a bill with no
+  /// known supplier records none.
+  supplier_id: int64? @nullable
+  /// supplier_name is the supplier's name as it stood when the bill was
+  /// entered, so a bill list reads correctly without a second request and a
+  /// renamed supplier does not rewrite history. Required: every bill records
+  /// who it is owed to, by reference or by snapshot.
+  supplier_name: string @required
+  /// purchase_order_id is the ERP purchase order this bill settles; absent for
+  /// bills that did not originate from a purchase order.
+  purchase_order_id: int64? @nullable
   /// amount is the amount value for this contract.
   amount: float64
   /// currency is the currency value for this contract.
@@ -25,8 +36,18 @@ message Bill {
 }
 
 message CreateBillRequest {
-  /// supplier_id is the supplier id value for this contract.
-  supplier_id: int64 @required @gt(0)
+  /// supplier_id is the ERP supplier this bill is owed to. Optional: supply it
+  /// from ERP's supplier list when the party has a record, and omit it for a
+  /// one-off bill. Callers must never send a derived or placeholder value.
+  supplier_id: int64? @nullable
+  /// supplier_name is the vendor name as typed or picked at entry time. It is
+  /// the display snapshot for the bill and must always be present even when
+  /// supplier_id is set, so history survives a later rename.
+  supplier_name: string @required
+  /// purchase_order_id links this bill to the ERP purchase order it settles;
+  /// absent when the bill did not originate from a purchase order. The server
+  /// must verify the referenced order belongs to the caller's business.
+  purchase_order_id: int64? @nullable
   /// amount is the amount value for this contract.
   amount: float64 @gte(0)
   /// currency is the currency value for this contract.
@@ -63,6 +84,12 @@ message GetBillResponse {
 }
 
 message ListBillsRequest {
+  /// supplier_id filters to one ERP supplier's bills; absent to include all.
+  /// Absent supplier links are excluded when this filter is supplied.
+  supplier_id: int64? @query("supplier_id") @nullable
+  /// purchase_order_id filters to bills settling one purchase order; absent
+  /// to include all.
+  purchase_order_id: int64? @query("purchase_order_id") @nullable
   page: int64 @query("page") @encode(number)
   page_size: int64 @query("page_size") @encode(number)
 }
