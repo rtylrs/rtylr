@@ -774,13 +774,24 @@ func (r *Repository) CreateOrder(ctx context.Context, businessID, staffID int64,
 	}
 
 	if input.TableID > 0 {
-		err = qtx.SetTableOccupied(ctx, sqlc.SetTableOccupiedParams{
+		res, err := qtx.SetTableOccupied(ctx, sqlc.SetTableOccupiedParams{
 			CurrentSessionOrderID: sql.NullInt64{Int64: orderID, Valid: true},
+			BusinessID:            businessID,
 			ID:                    input.TableID,
 		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to set table occupied", logger.Error(err))
 			return 0, err
+		}
+		affected, err := res.RowsAffected()
+		if err != nil {
+			return 0, err
+		}
+		if affected == 0 {
+			// The table either doesn't exist or belongs to another business.
+			logger.Ctx(ctx).Warn("CreateOrder rejected: table not in business scope",
+				logger.Any("table_id", input.TableID), logger.Any("business_id", businessID))
+			return 0, domain.ErrTableNotFound
 		}
 	}
 
@@ -1028,6 +1039,40 @@ func (r *Repository) CreateRefund(ctx context.Context, businessID, orderID, refu
 	}()
 
 	qtx := r.queries.WithTx(tx)
+
+	// Lock the order row and validate before writing: only paid orders can
+	// be refunded, and cumulative refunds may never exceed the order total.
+	order, err := qtx.GetOrderForRefund(ctx, sqlc.GetOrderForRefundParams{
+		BusinessID: businessID,
+		ID:         orderID,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			err = domain.ErrOrderNotFound
+		}
+		logger.Ctx(ctx).Error("Failed to lock order for refund", logger.Error(err))
+		return 0, err
+	}
+	status := ""
+	if order.PaymentStatus.Valid {
+		status = string(order.PaymentStatus.PosOrdersPaymentStatus)
+	}
+	if status != "paid" && status != "refunded" {
+		err = domain.ErrOrderNotPaid
+		return 0, err
+	}
+	prevRefunds, err := qtx.SumRefundsForOrder(ctx, sqlc.SumRefundsForOrderParams{
+		BusinessID: businessID,
+		OrderID:    orderID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to sum prior refunds", logger.Error(err))
+		return 0, err
+	}
+	if interfaceToFloat(prevRefunds)+amount > decimalToFloat(order.Total.String) {
+		err = domain.ErrRefundExceedsTotal
+		return 0, err
+	}
 
 	res, err := qtx.CreateRefund(ctx, sqlc.CreateRefundParams{
 		OwnerID:    businessID,
@@ -1360,14 +1405,17 @@ func (r *Repository) ApplyDiscount(ctx context.Context, businessID int64, input 
 	} else {
 		discountAmount = input.DiscountValue
 	}
+	// Accumulate with any existing order-level discount so a second
+	// application neither erases the first from the money nor the audit.
+	totalDiscount := decimalToFloat(financials.ExistingDiscount) + discountAmount
 
-	newTotal := subtotal + taxAmount - discountAmount
+	newTotal := subtotal + taxAmount - totalDiscount
 	if newTotal < 0 {
 		newTotal = 0
 	}
 
 	err = r.queries.ApplyDiscount(ctx, sqlc.ApplyDiscountParams{
-		DiscountAmount: sql.NullString{String: floatToDecimal(discountAmount), Valid: true},
+		DiscountAmount: sql.NullString{String: floatToDecimal(totalDiscount), Valid: true},
 		Total:          sql.NullString{String: floatToDecimal(newTotal), Valid: true},
 		CONCAT:         fmt.Sprintf(" [Discount: %s]", input.Reason),
 		ID:             input.OrderID,
@@ -1629,10 +1677,9 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, or
 		}
 	}()
 
-	var subtotal float64
-	for _, item := range items {
-		subtotal += item.UnitPrice * item.Quantity
-	}
+	// Mirror the in-store ComputeTotals math: online orders must charge the
+	// same per-item tax as the POS path instead of silently dropping it.
+	totals := domain.ComputeTotals(items)
 
 	qtx := r.queries.WithTx(tx)
 	res, err := qtx.CreatePublicOrder(ctx, sqlc.CreatePublicOrderParams{
@@ -1642,8 +1689,9 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, or
 		CustomerID:    sql.NullInt64{},
 		CustomerName:  nullString(customerName),
 		CustomerPhone: nullString(customerPhone),
-		Subtotal:      sql.NullString{String: floatToDecimal(subtotal), Valid: true},
-		Total:         sql.NullString{String: floatToDecimal(subtotal), Valid: true},
+		Subtotal:      sql.NullString{String: floatToDecimal(totals.Subtotal), Valid: true},
+		TaxAmount:     sql.NullString{String: floatToDecimal(totals.TaxAmount), Valid: true},
+		Total:         sql.NullString{String: floatToDecimal(totals.Total), Valid: true},
 		Notes:         nullString(notes),
 	})
 	if err != nil {

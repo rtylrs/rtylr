@@ -80,6 +80,21 @@ func (r *Repository) MarkAuthCodeUsed(ctx context.Context, code string) error {
 	return r.queries.MarkAuthCodeUsed(ctx, code)
 }
 
+func (r *Repository) ConsumeAuthCode(ctx context.Context, code string) error {
+	res, err := r.queries.ConsumeAuthCode(ctx, code)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrCodeUsed
+	}
+	return nil
+}
+
 func (r *Repository) SaveToken(ctx context.Context, token *domain.Token) error {
 	return r.queries.SaveToken(ctx, sqlc.SaveTokenParams{
 		AccessToken:  token.AccessToken,

@@ -95,10 +95,16 @@ func (a *RefundAPI) ProcessRefund(ctx context.Context, req *posordersrefundsv1.P
 		Reason:  req.GetReason(),
 	})
 	if err != nil {
-		if errors.Is(err, domain.ErrOrderNotFound) {
+		switch {
+		case errors.Is(err, domain.ErrOrderNotFound):
 			return nil, orderAPIStatusError(http.StatusNotFound, "Order not found")
+		case errors.Is(err, domain.ErrOrderNotPaid):
+			return nil, orderAPIStatusError(http.StatusConflict, "Order has not been paid")
+		case errors.Is(err, domain.ErrRefundExceedsTotal):
+			return nil, orderAPIStatusError(http.StatusBadRequest, "Refund exceeds order total")
+		default:
+			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to process refund")
 		}
-		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to process refund")
 	}
 
 	return &posordersrefundsv1.ProcessRefundResponse{RefundId: refundID, Message: "Refund processed"}, nil

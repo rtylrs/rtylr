@@ -577,7 +577,16 @@ func (h *ProcessRefundHandler) Serve(ctx context.Context, req *ProcessRefundRequ
 		Reason:  req.Reason,
 	})
 	if err != nil {
-		return ProcessRefundResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to process refund")
+		switch {
+		case errors.Is(err, domain.ErrOrderNotFound):
+			return ProcessRefundResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
+		case errors.Is(err, domain.ErrOrderNotPaid):
+			return ProcessRefundResponse{}, onekiterrors.New(http.StatusConflict, "Order has not been paid")
+		case errors.Is(err, domain.ErrRefundExceedsTotal):
+			return ProcessRefundResponse{}, onekiterrors.New(http.StatusBadRequest, "Refund exceeds order total")
+		default:
+			return ProcessRefundResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to process refund")
+		}
 	}
 
 	return ProcessRefundResponse{RefundID: refundID, Message: "Refund processed"}, nil

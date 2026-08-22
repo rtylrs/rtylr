@@ -12,6 +12,7 @@ type mockRepo struct {
 	transactions []domain.LoyaltyTransaction
 	totalTx      int
 	config       domain.LoyaltyConfig
+	balance      int64
 	members      []domain.LoyaltyMember
 	rewards      []domain.LoyaltyReward
 	upsertID     int64
@@ -28,6 +29,10 @@ func (m *mockRepo) CreateTransaction(_ context.Context, _ domain.AwardInput, _ s
 
 func (m *mockRepo) CreateRedeemTransaction(_ context.Context, _ domain.RedeemInput) error {
 	return m.err
+}
+
+func (m *mockRepo) GetCustomerPointsBalance(_ context.Context, _, _ int64) (int64, error) {
+	return m.balance, m.err
 }
 
 func (m *mockRepo) GetConfig(_ context.Context, _ int64) (domain.LoyaltyConfig, error) {
@@ -102,10 +107,29 @@ func TestAwardPoints_PropagatesRepoError(t *testing.T) {
 }
 
 func TestRedeemPoints_HappyPath(t *testing.T) {
-	s := &Service{repo: &mockRepo{}}
+	s := &Service{repo: &mockRepo{balance: 100}}
 	err := s.RedeemPoints(context.Background(), domain.RedeemInput{OwnerID: 1, CustomerID: 1, Points: 20})
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestRedeemPoints_RejectsInsufficientBalance(t *testing.T) {
+	s := &Service{repo: &mockRepo{balance: 10}}
+	err := s.RedeemPoints(context.Background(), domain.RedeemInput{OwnerID: 1, CustomerID: 1, Points: 20})
+	if !errors.Is(err, domain.ErrInsufficientPoints) {
+		t.Errorf("expected ErrInsufficientPoints, got %v", err)
+	}
+}
+
+func TestRedeemPoints_RejectsBelowMinRedemption(t *testing.T) {
+	s := &Service{repo: &mockRepo{
+		config:  domain.LoyaltyConfig{MinRedemptionPoints: 50},
+		balance: 100,
+	}}
+	err := s.RedeemPoints(context.Background(), domain.RedeemInput{OwnerID: 1, CustomerID: 1, Points: 20})
+	if !errors.Is(err, domain.ErrInvalidLoyaltyConfig) {
+		t.Errorf("expected ErrInvalidLoyaltyConfig, got %v", err)
 	}
 }
 

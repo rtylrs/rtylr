@@ -18,8 +18,10 @@ func TestParamsPipeline(t *testing.T) {
 	}
 
 	// CacheKey is stable across repeated calls for the same inputs.
-	if p.CacheKey("uuid") != p.CacheKey("uuid") {
-		t.Error("cache key is not stable")
+	first := p.CacheKey("uuid")
+	second := p.CacheKey("uuid")
+	if first != second {
+		t.Errorf("cache key is not stable: %q != %q", first, second)
 	}
 
 	// CLIArgs hands the engine lowercased format/fit and omits the unset height.

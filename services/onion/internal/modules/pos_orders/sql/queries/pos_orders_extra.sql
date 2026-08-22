@@ -46,8 +46,8 @@ WHERE business_id = ? AND id = ? AND is_active = TRUE;
 -- name: CreatePublicOrder :execresult
 INSERT INTO pos_orders
 (owner_id, business_id, order_number, type, status, customer_id, customer_name, customer_phone,
- subtotal, total, payment_status, notes, created_at, updated_at)
-VALUES (?, ?, ?, 'online', 'pending', ?, ?, ?, ?, ?, 'unpaid', ?, NOW(), NOW());
+ subtotal, tax_amount, total, payment_status, notes, created_at, updated_at)
+VALUES (?, ?, ?, 'online', 'pending', ?, ?, ?, ?, ?, ?, 'unpaid', ?, NOW(), NOW());
 
 -- name: CreatePublicOrderItem :exec
 INSERT INTO pos_order_items

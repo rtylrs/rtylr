@@ -635,33 +635,6 @@ func productToolString(value any) string {
 	}
 }
 
-func productInputToolPayload(id int64, product domain.ProductInput) map[string]any {
-	return map[string]any{
-		"id":                  id,
-		"name":                product.Name,
-		"sku":                 product.SKU,
-		"barcode":             product.Barcode,
-		"description":         product.Description,
-		"unit":                product.Unit,
-		"category_id":         product.CategoryID,
-		"supplier_id":         product.SupplierID,
-		"brand_id":            product.BrandID,
-		"cost_price":          product.CostPrice,
-		"sale_price":          product.SalePrice,
-		"compare_at_price":    product.CompareAtPrice,
-		"tax_rate":            product.TaxRate,
-		"currency":            product.Currency,
-		"stock_quantity":      product.StockQuantity,
-		"low_stock_threshold": product.LowStockThreshold,
-		"reorder_quantity":    product.ReorderQuantity,
-		"is_active":           product.IsActive,
-		"track_inventory":     product.TrackInventory,
-		"allow_backorder":     product.AllowBackorder,
-		"lead_time_days":      product.LeadTimeDays,
-		"image_url":           product.ImageURL,
-	}
-}
-
 func reorderSuggestionToolPayload(suggestion domain.ReorderSuggestion) map[string]any {
 	return map[string]any{
 		"product_id":         suggestion.ProductID,

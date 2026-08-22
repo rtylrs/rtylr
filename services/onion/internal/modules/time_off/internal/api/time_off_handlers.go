@@ -19,6 +19,24 @@ func isValidTimeOffDate(s string) bool {
 	return err1 == nil || err2 == nil
 }
 
+// timeOffDateBefore reports whether a is earlier than b. Both must be valid
+// time-off dates (callers check first); unparseable values compare equal.
+func timeOffDateBefore(a, b string) bool {
+	pa, errA := parseTimeOffDate(a)
+	pb, errB := parseTimeOffDate(b)
+	if errA != nil || errB != nil {
+		return false
+	}
+	return pa.Before(pb)
+}
+
+func parseTimeOffDate(s string) (time.Time, error) {
+	if t, err := time.Parse("2006-01-02", s); err == nil {
+		return t, nil
+	}
+	return time.Parse(time.RFC3339, s)
+}
+
 func ListTimeOffRoutes() []string    { return []string{"/hr/time-off"} }
 func SubmitTimeOffRoutes() []string  { return []string{"/hr/time-off"} }
 func ApproveTimeOffRoutes() []string { return []string{"/hr/time-off/approve"} }
@@ -102,6 +120,9 @@ func (h *SubmitTimeOffHandler) Validate(_ context.Context, req *SubmitTimeOffReq
 	}
 	if !isValidTimeOffDate(req.EndDate) {
 		return onekiterrors.New(http.StatusBadRequest, "end_date is not a valid date")
+	}
+	if timeOffDateBefore(req.EndDate, req.StartDate) {
+		return onekiterrors.New(http.StatusBadRequest, "end_date cannot be before start_date")
 	}
 	if req.DaysCount <= 0 {
 		return onekiterrors.New(http.StatusBadRequest, "days_count must be greater than 0")

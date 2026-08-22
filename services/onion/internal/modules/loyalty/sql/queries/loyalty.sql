@@ -22,6 +22,12 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 INSERT INTO crm_loyalty_transactions (owner_id, business_id, customer_id, points, type, description, reference_id, reference_type)
 VALUES (?, ?, ?, ?, 'redeem', ?, ?, ?);
 
+-- Aggregated member balance over the transaction ledger; scoped to one
+-- customer per call so the result set is bounded.
+-- name: GetCustomerPointsBalance :one
+SELECT CAST(COALESCE(SUM(points), 0) AS SIGNED) AS balance
+FROM crm_loyalty_transactions WHERE business_id = ? AND customer_id = ?;
+
 -- name: GetConfig :one
 SELECT id, owner_id, business_id, points_per_currency_unit, currency_per_point, min_redemption_points, is_enabled, updated_at
 FROM crm_loyalty_config WHERE business_id = ?;

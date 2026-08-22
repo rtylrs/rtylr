@@ -63,7 +63,9 @@ func FromString(value string) (Amount, error) {
 		return 0, ErrInvalidAmount
 	}
 	cents := wholeValue*100 + fractionValue
-	if cents < 0 || cents > math.MaxInt64 {
+	// wholeValue is capped at MaxInt64/100 above; if the addition wraps it
+	// becomes negative and we reject it here.
+	if cents < 0 {
 		return 0, ErrInvalidAmount
 	}
 	if sign < 0 {

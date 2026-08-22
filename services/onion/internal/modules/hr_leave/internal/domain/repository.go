@@ -16,7 +16,7 @@ type Repository interface {
 	ApproveLeaveRequest(ctx context.Context, ownerID, requestID int64) error
 	ApproveLeaveRequestWithBalance(ctx context.Context, ownerID, requestID, employeeID, leaveTypeID int64, year int32, days float64) error
 	AdvanceLeaveApprovalLevel(ctx context.Context, ownerID, requestID int64) error
-	RejectLeaveRequest(ctx context.Context, ownerID, requestID int64, reason string) error
+	RejectLeaveRequest(ctx context.Context, ownerID, requestID int64, reason string) (bool, error)
 	CancelLeaveRequest(ctx context.Context, ownerID, requestID int64) (bool, error)
 	ListOverlappingLeaveRequests(ctx context.Context, ownerID, employeeID int64, startDate, endDate string) ([]LeaveRequestRecord, error)
 	ListLeaveCalendar(ctx context.Context, ownerID int64, dateFrom, dateTo string) ([]LeaveRequestRecord, error)

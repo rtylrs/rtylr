@@ -58,6 +58,9 @@ type Repository interface {
 	SaveAuthCode(ctx context.Context, code *AuthCode) error
 	GetAuthCode(ctx context.Context, code string) (*AuthCode, error)
 	MarkAuthCodeUsed(ctx context.Context, code string) error
+	// ConsumeAuthCode atomically marks a code used and reports ErrCodeUsed
+	// when the code was already consumed or does not exist.
+	ConsumeAuthCode(ctx context.Context, code string) error
 	SaveToken(ctx context.Context, token *Token) error
 	GetTokenByRefresh(ctx context.Context, refreshToken string) (*Token, error)
 	RevokeToken(ctx context.Context, refreshToken string) error

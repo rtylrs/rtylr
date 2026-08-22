@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -21,6 +22,7 @@ type repository interface {
 	ListTransactions(ctx context.Context, businessID, customerID int64, page, pageSize int) ([]domain.LoyaltyTransaction, int, error)
 	CreateTransaction(ctx context.Context, input domain.AwardInput, txType string) error
 	CreateRedeemTransaction(ctx context.Context, input domain.RedeemInput) error
+	GetCustomerPointsBalance(ctx context.Context, businessID, customerID int64) (int64, error)
 	GetConfig(ctx context.Context, businessID int64) (domain.LoyaltyConfig, error)
 	UpsertConfig(ctx context.Context, input domain.LoyaltyConfigInput) error
 	ListMembers(ctx context.Context, businessID int64, limit, offset int) ([]domain.LoyaltyMember, error)
@@ -68,6 +70,22 @@ func (s *Service) AwardPoints(ctx context.Context, input domain.AwardInput) erro
 }
 
 func (s *Service) RedeemPoints(ctx context.Context, input domain.RedeemInput) error {
+	// A redemption must respect the configured minimum and can never drive
+	// the member's ledger balance negative.
+	if cfg, cfgErr := s.repo.GetConfig(ctx, input.BusinessID); cfgErr == nil {
+		if cfg.MinRedemptionPoints > 0 && input.Points < cfg.MinRedemptionPoints {
+			return fmt.Errorf("%w: minimum redemption is %d points", domain.ErrInvalidLoyaltyConfig, cfg.MinRedemptionPoints)
+		}
+	} else if !errors.Is(cfgErr, domain.ErrLoyaltyConfigNotFound) {
+		return cfgErr
+	}
+	balance, balErr := s.repo.GetCustomerPointsBalance(ctx, input.BusinessID, input.CustomerID)
+	if balErr != nil {
+		return balErr
+	}
+	if balance < int64(input.Points) {
+		return domain.ErrInsufficientPoints
+	}
 	if err := s.repo.CreateRedeemTransaction(ctx, input); err != nil {
 		return err
 	}

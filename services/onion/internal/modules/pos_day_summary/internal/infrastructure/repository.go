@@ -57,10 +57,11 @@ func (r *Repository) GetDaySummary(ctx context.Context, businessID int64, date s
 		RefundedAtEnd: sql.NullTime{Time: end, Valid: true},
 	})
 	if err != nil {
+		// A financial report must not silently report zero refunds.
 		logger.Ctx(ctx).Error("Failed to get refund total", logger.Error(err))
-	} else {
-		summary.TotalRefunds = interfaceToFloat(refundTotal)
+		return summary, err
 	}
+	summary.TotalRefunds = interfaceToFloat(refundTotal)
 
 	breakdown, err := r.queries.GetPaymentBreakdownByDate(ctx, sqlc.GetPaymentBreakdownByDateParams{
 		BusinessID: businessID,

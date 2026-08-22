@@ -68,11 +68,14 @@ func (s *Service) ClockIn(ctx context.Context, businessID int64, record domain.A
 		}
 	}
 
+	// UTC everywhere else in the HR modules (payroll periods, report
+	// ranges) — the attendance day bucket must agree with them regardless
+	// of the host's local timezone.
 	if record.ClockInAt.IsZero() {
-		record.ClockInAt = time.Now()
+		record.ClockInAt = time.Now().UTC()
 	}
 	if record.Date == "" {
-		record.Date = record.ClockInAt.Format("2006-01-02")
+		record.Date = record.ClockInAt.UTC().Format("2006-01-02")
 	}
 	if record.Status == "" {
 		record.Status = "present"
@@ -90,7 +93,7 @@ func (s *Service) ClockOut(ctx context.Context, ownerID, employeeID int64) (*dom
 		return nil, domain.ErrNotClockedIn
 	}
 
-	now := time.Now()
+	now := time.Now().UTC()
 	duration := int32(now.Sub(active.ClockInAt).Minutes())
 
 	active.ClockOutAt = now

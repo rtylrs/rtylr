@@ -23,14 +23,14 @@ WHERE business_id = ? AND payment_status = 'paid'
 -- name: GetRefundTotalToday :one
 SELECT COALESCE(SUM(r.amount), 0) AS total_refunds FROM pos_refunds r
 JOIN pos_orders o ON o.id = r.order_id AND o.business_id = r.business_id
-WHERE r.business_id = ? AND o.payment_status = 'paid'
+WHERE r.business_id = ?
   AND refunded_at >= CURDATE()
   AND refunded_at < CURDATE() + INTERVAL 1 DAY;
 
 -- name: GetRefundTotalByDate :one
 SELECT COALESCE(SUM(r.amount), 0) AS total_refunds FROM pos_refunds r
 JOIN pos_orders o ON o.id = r.order_id AND o.business_id = r.business_id
-WHERE r.business_id = ? AND o.payment_status = 'paid'
+WHERE r.business_id = ?
   AND refunded_at >= sqlc.arg(refunded_at)
   AND refunded_at < sqlc.arg(refunded_at_end);
 

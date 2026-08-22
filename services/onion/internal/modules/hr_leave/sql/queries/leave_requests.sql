@@ -37,10 +37,10 @@ UPDATE hr_leave_requests
 SET current_approval_level = current_approval_level + 1, updated_at = NOW()
 WHERE id = ? AND business_id = ?;
 
--- name: RejectLeaveRequest :exec
+-- name: RejectLeaveRequest :execresult
 UPDATE hr_leave_requests
 SET status = 'rejected', rejection_reason = ?, updated_at = NOW()
-WHERE id = ? AND business_id = ?;
+WHERE id = ? AND business_id = ? AND status = 'pending';
 
 -- The status = 'pending' guard is a second, DB-level check alongside the
 -- service-layer one: RowsAffected = 0 tells the caller the request was no

@@ -444,8 +444,12 @@ func TestRejectLeaveRequest_ChangesStatus(t *testing.T) {
 		t.Fatalf("CreateLeaveRequest: %v", err)
 	}
 
-	if err := repo.RejectLeaveRequest(ctx, testutil.OwnerID, req.ID, "not approved"); err != nil {
+	stillPending, err := repo.RejectLeaveRequest(ctx, testutil.OwnerID, req.ID, "not approved")
+	if err != nil {
 		t.Fatalf("RejectLeaveRequest: %v", err)
+	}
+	if !stillPending {
+		t.Fatal("expected request to still be pending at reject time")
 	}
 
 	got, err := repo.GetLeaveRequest(ctx, testutil.OwnerID, req.ID)
