@@ -273,18 +273,61 @@ func (r *Repository) ListSessions(ctx context.Context, businessID, locationID in
 }
 
 func (r *Repository) OpenSession(ctx context.Context, businessID, staffID, locationID int64, openingCash float64) (int64, error) {
-	res, err := r.queries.OpenSession(ctx, sqlc.OpenSessionParams{
-		OwnerID:     businessID,
-		BusinessID:  businessID,
-		LocationID:  nullInt64(locationID),
-		StaffID:     staffID,
-		OpeningCash: sql.NullString{String: floatToDecimal(openingCash), Valid: true},
-	})
+	tx, err := r.pool.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+	lockName := fmt.Sprintf("pos_session:%d:%d", businessID, staffID)
+	var acquired int
+	if err := tx.QueryRowContext(ctx, `SELECT GET_LOCK(?, 5)`, lockName).Scan(&acquired); err != nil {
+		return 0, err
+	}
+	if acquired != 1 {
+		return 0, domain.ErrSessionAlreadyOpen
+	}
+	defer tx.ExecContext(ctx, `SELECT RELEASE_LOCK(?)`, lockName)
+	var exists int
+	if err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM pos_sessions WHERE business_id = ? AND staff_id = ? AND status = 'open')`, businessID, staffID).Scan(&exists); err != nil {
+		return 0, err
+	}
+	if exists == 1 {
+		return 0, domain.ErrSessionAlreadyOpen
+	}
+	res, err := tx.ExecContext(ctx, `
+		INSERT INTO pos_sessions (owner_id, business_id, location_id, staff_id, status, opening_cash)
+		VALUES (?, ?, ?, ?, 'open', ?)`, businessID, businessID, locationID, staffID, floatToDecimal(openingCash))
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to open pos session", logger.Error(err))
 		return 0, err
 	}
-	return res.LastInsertId()
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func (r *Repository) CloseSessionForStaff(ctx context.Context, businessID, staffID, sessionID int64, closingCash, expectedCash, cashDiff float64, notes string) error {
+	result, err := r.pool.ExecContext(ctx, `
+		UPDATE pos_sessions
+		SET status = 'closed', closing_cash = ?, expected_cash = ?, cash_difference = ?, closed_at = NOW(), notes = ?
+		WHERE business_id = ? AND id = ? AND staff_id = ? AND status = 'open'`,
+		floatToDecimal(closingCash), floatToDecimal(expectedCash), floatToDecimal(cashDiff), notes, businessID, sessionID, staffID)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrSessionNotFound
+	}
+	return nil
 }
 
 func (r *Repository) CloseSession(ctx context.Context, businessID, sessionID int64, closingCash, expectedCash, cashDiff float64, notes string) error {
@@ -315,6 +358,36 @@ func (r *Repository) GetSessionTotals(ctx context.Context, sessionID int64) (tot
 	onlineSales = interfaceToFloat(row.OnlineSales)
 	totalOrders = int(row.TotalOrders)
 	return totalSales, cashSales, cardSales, onlineSales, totalOrders, err
+}
+
+// GetSessionCashAdjustments returns the net drawer movement and refunds for a
+// session. Drops, pickups, and cash-outs leave the drawer; cash-ins and
+// adjustments add to it. Refunds reduce the cash that should remain.
+func (r *Repository) GetSessionCashAdjustments(ctx context.Context, businessID, sessionID int64) (netMovement, refunds float64, err error) {
+	err = r.pool.QueryRowContext(ctx, `
+		SELECT COALESCE(SUM(CASE
+			WHEN type IN ('drop', 'pickup', 'cash_out') THEN -amount
+			WHEN type IN ('cash_in', 'adjustment') THEN amount
+			ELSE 0
+		END), 0)
+		FROM pos_cash_movements
+		WHERE business_id = ? AND session_id = ?`, businessID, sessionID).Scan(&netMovement)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get session cash movements", logger.Error(err))
+		return 0, 0, err
+	}
+
+	err = r.pool.QueryRowContext(ctx, `
+		SELECT COALESCE(SUM(r.amount), 0)
+		FROM pos_refunds r
+		JOIN pos_orders o ON o.id = r.order_id AND o.business_id = r.business_id
+		WHERE r.business_id = ? AND o.session_id = ?`, businessID, sessionID).Scan(&refunds)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get session refunds", logger.Error(err))
+		return 0, 0, err
+	}
+
+	return netMovement, refunds, nil
 }
 
 func (r *Repository) UpdateSessionTotals(ctx context.Context, sessionID int64, totalSales, cashSales, cardSales, onlineSales float64, totalOrders int) error {

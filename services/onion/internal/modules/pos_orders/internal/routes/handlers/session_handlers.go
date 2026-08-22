@@ -181,7 +181,7 @@ func (h *CloseSessionHandler) Serve(ctx context.Context, req *CloseSessionReques
 		return CloseSessionResponse{}, bizErr
 	}
 
-	if err := h.Service.CloseSession(ctx, businessID, domain.CloseSessionInput{
+	if err := h.Service.CloseSession(ctx, businessID, user.UserID, domain.CloseSessionInput{
 		SessionID:   req.SessionID,
 		ClosingCash: req.ClosingCash,
 		Notes:       req.Notes,

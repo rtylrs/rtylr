@@ -43,6 +43,9 @@ func (s *Service) ListBySession(ctx context.Context, businessID, sessionID int64
 
 func (s *Service) create(ctx context.Context, input domain.CreateCashMovementInput, kind string) (int64, error) {
 	input.Type = kind
+	if err := domain.ValidateCreateCashMovementInput(input); err != nil {
+		return 0, err
+	}
 	id, err := s.repo.Create(ctx, input)
 	if err != nil {
 		return 0, err

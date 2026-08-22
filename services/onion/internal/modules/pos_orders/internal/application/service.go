@@ -169,7 +169,7 @@ func (s *Service) OpenSession(ctx context.Context, ownerID, staffID int64, input
 	return s.repo.OpenSession(ctx, ownerID, staffID, input.LocationID, input.OpeningCash)
 }
 
-func (s *Service) CloseSession(ctx context.Context, ownerID int64, input domain.CloseSessionInput) error {
+func (s *Service) CloseSession(ctx context.Context, ownerID, staffID int64, input domain.CloseSessionInput) error {
 	sess, err := s.repo.GetSessionByID(ctx, ownerID, input.SessionID)
 	if err != nil {
 		return err
@@ -178,16 +178,24 @@ func (s *Service) CloseSession(ctx context.Context, ownerID int64, input domain.
 	if sess.Status != domain.SessionStatusOpen {
 		return domain.ErrSessionNotOpen
 	}
+	if sess.StaffID != staffID {
+		return domain.ErrSessionNotFound
+	}
 
 	totalSales, cashSales, cardSales, onlineSales, totalOrders, err := s.repo.GetSessionTotals(ctx, input.SessionID)
 	if err != nil {
 		return err
 	}
 
-	expectedCash := sess.OpeningCash + cashSales
+	cashMovements, refunds, err := s.repo.GetSessionCashAdjustments(ctx, ownerID, input.SessionID)
+	if err != nil {
+		return err
+	}
+
+	expectedCash := sess.OpeningCash + cashSales + cashMovements - refunds
 	cashDiff := input.ClosingCash - expectedCash
 
-	if err := s.repo.CloseSession(ctx, ownerID, input.SessionID, input.ClosingCash, expectedCash, cashDiff, input.Notes); err != nil {
+	if err := s.repo.CloseSessionForStaff(ctx, ownerID, staffID, input.SessionID, input.ClosingCash, expectedCash, cashDiff, input.Notes); err != nil {
 		return err
 	}
 
