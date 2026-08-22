@@ -201,7 +201,7 @@ func (s *Service) RunDailyDetection(ctx context.Context) error {
 		}
 	}
 
-	yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
+	yesterday := time.Now().UTC().AddDate(0, 0, -1).Format("2006-01-02")
 
 	for _, businessID := range businessIDs {
 		if detectErr := s.DetectAndFlagOvertime(ctx, businessID, yesterday); detectErr != nil {

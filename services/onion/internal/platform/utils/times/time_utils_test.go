@@ -58,6 +58,20 @@ func TestRangeHelpersAreOrdered(t *testing.T) {
 	}
 }
 
+func TestRangeHelpersUseUTCAndMondayWeekStart(t *testing.T) {
+	dayStart, _ := GetDayRangeStartAndEnd()
+	if dayStart.Location() != time.UTC {
+		t.Fatalf("day range location = %v, want UTC", dayStart.Location())
+	}
+	weekStart, _ := GetWeekRangeStartAndEnd()
+	if weekStart.Location() != time.UTC {
+		t.Fatalf("week range location = %v, want UTC", weekStart.Location())
+	}
+	if weekStart.Weekday() != time.Monday {
+		t.Fatalf("week starts on %v, want Monday", weekStart.Weekday())
+	}
+}
+
 func TestGetDurationFromHHMMSS(t *testing.T) {
 	cases := []struct {
 		in   string

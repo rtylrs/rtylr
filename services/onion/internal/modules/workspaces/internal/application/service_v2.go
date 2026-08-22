@@ -2,8 +2,8 @@ package application
 
 import (
 	"context"
-	"errors"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -226,7 +226,7 @@ func (s *Service) CreateLabelV2(ctx context.Context, businessID int64, name, col
 	if err != nil {
 		return domain.Label{}, err
 	}
-	now := time.Now()
+	now := time.Now().UTC()
 	return domain.Label{ID: id, Name: name, Color: color, CreatedAt: now}, nil
 }
 
@@ -245,7 +245,7 @@ func (s *Service) CreateCycleV2(ctx context.Context, businessID, projectID int64
 		return domain.Cycle{}, err
 	}
 	status := "upcoming"
-	now := time.Now()
+	now := time.Now().UTC()
 	if now.After(sd) && now.Before(ed) {
 		status = "active"
 	}
@@ -287,4 +287,3 @@ func (s *Service) CreateViewV2(ctx context.Context, businessID, createdBy int64,
 func (s *Service) UpdateViewV2(ctx context.Context, actorID, viewID int64) error {
 	return s.repo.UpdateView(ctx, domain.UpdateViewInput{ID: viewID, ActorID: actorID})
 }
-

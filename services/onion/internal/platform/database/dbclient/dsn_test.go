@@ -1,6 +1,9 @@
 package dbclient
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestHostFromDSN(t *testing.T) {
 	cases := map[string]string{
@@ -29,6 +32,19 @@ func TestDBNameFromDSN(t *testing.T) {
 	for dsn, want := range cases {
 		if got := dbNameFromDSN(dsn); got != want {
 			t.Errorf("dbNameFromDSN(%q) = %q, want %q", dsn, got, want)
+		}
+	}
+}
+
+func TestNormalizeDSNPinsMySQLSessionTimezoneToUTC(t *testing.T) {
+	for _, dsn := range []string{
+		"user:pw@tcp(localhost:3306)/onion_dev",
+		"user:pw@tcp(localhost:3306)/onion_dev?parseTime=true",
+		"mysql://user:pw@localhost:3306/onion_dev?parseTime=true",
+	} {
+		got := normalizeDSN(dsn)
+		if !strings.Contains(got, "time_zone=%27UTC%27") {
+			t.Errorf("normalizeDSN(%q) missing UTC session timezone: %q", dsn, got)
 		}
 	}
 }

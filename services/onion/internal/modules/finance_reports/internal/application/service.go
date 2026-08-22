@@ -117,7 +117,7 @@ func (s *Service) computeCashFlow(ctx context.Context, businessID int64, period 
 }
 
 func resolvePeriodRange(period string) (string, string) {
-	now := time.Now()
+	now := time.Now().UTC()
 
 	switch period {
 	case "quarter":

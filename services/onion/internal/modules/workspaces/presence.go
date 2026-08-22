@@ -121,7 +121,7 @@ func (h *PresenceHandler) Serve(ctx context.Context, _ *PresenceRequest) (Presen
 		return PresenceResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to resolve business owner")
 	}
 
-	date := time.Now().Format("2006-01-02")
+	date := time.Now().UTC().Format("2006-01-02")
 	entries, err := h.Module.ListPresenceForBusiness(ctx, resolvedOwnerID, businessID, device.User.UserID, date)
 	if err != nil {
 		if errors.Is(err, errPresenceAccessDenied) {

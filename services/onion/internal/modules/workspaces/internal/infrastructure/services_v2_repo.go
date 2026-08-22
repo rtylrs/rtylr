@@ -4,20 +4,19 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"time"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	sqlc "github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/utils/times"
 )
 
-
 func (r *Repository) GetDashboardStatsV2(ctx context.Context, businessID int64) (domain.DashboardStats, error) {
-	now := time.Now()
-	weekStart := now.AddDate(0, 0, -int(now.Weekday()))
+	weekStart, _ := times.GetWeekRangeStartAndEnd()
+	weekEnd := weekStart.AddDate(0, 0, 7)
 	row, err := r.queries.GetDashboardStatsV2(ctx, sqlc.GetDashboardStatsV2Params{
 		CompletedAt:   sql.NullTime{Time: weekStart, Valid: true},
-		CompletedAt_2: sql.NullTime{Time: now, Valid: true},
+		CompletedAt_2: sql.NullTime{Time: weekEnd, Valid: true},
 		BusinessID:    businessID,
 	})
 	if err != nil {
@@ -147,11 +146,11 @@ func (r *Repository) ListViewsV2(ctx context.Context, businessID, limit, offset 
 func (r *Repository) CreateViewV2(ctx context.Context, input domain.ViewInput) (int64, error) {
 	res, err := r.queries.CreateViewV2(ctx, sqlc.CreateViewV2Params{
 		BusinessID: input.BusinessID, Name: input.Name,
-		Icon: sql.NullString{String: input.Icon, Valid: input.Icon != ""},
-		Filters: filtersJSON(input.Filters),
-		GroupBy: sql.NullString{String: input.GroupBy, Valid: input.GroupBy != ""},
-		SortBy: sql.NullString{String: input.SortBy, Valid: input.SortBy != ""},
-		SortDir: sqlc.NullFlowViewsSortDir{FlowViewsSortDir: sqlc.FlowViewsSortDir(input.SortDir), Valid: input.SortDir != ""},
+		Icon:      sql.NullString{String: input.Icon, Valid: input.Icon != ""},
+		Filters:   filtersJSON(input.Filters),
+		GroupBy:   sql.NullString{String: input.GroupBy, Valid: input.GroupBy != ""},
+		SortBy:    sql.NullString{String: input.SortBy, Valid: input.SortBy != ""},
+		SortDir:   sqlc.NullFlowViewsSortDir{FlowViewsSortDir: sqlc.FlowViewsSortDir(input.SortDir), Valid: input.SortDir != ""},
 		CreatedBy: nullInt64Ptr(&input.CreatedBy),
 	})
 	if err != nil {

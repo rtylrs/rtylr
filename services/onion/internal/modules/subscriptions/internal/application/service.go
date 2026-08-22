@@ -114,7 +114,7 @@ func (s *Service) GetBillingDetail(ctx context.Context, ownerID, businessID int6
 		return nil, err
 	}
 
-	now := time.Now()
+	now := time.Now().UTC()
 	currentMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 	periods, err := s.repo.GetPeriodsForMonth(ctx, ownerID, currentMonth)
 	if err != nil {
@@ -196,7 +196,7 @@ func (s *Service) RecordSeatChange(ctx context.Context, ownerID int64, newSeatCo
 		return err
 	}
 
-	now := time.Now()
+	now := time.Now().UTC()
 	billingMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 
 	activePeriod, err := s.repo.GetActivePeriod(ctx, sub.ID)
@@ -308,7 +308,7 @@ func computeLineItem(seatCount, pricePerSeatCents int, start time.Time, end *tim
 }
 
 func computeLineItemWithAllowance(seatCount, pricePerSeatCents int, start time.Time, end *time.Time, billingMonth time.Time, includedSeatLimit int) domain.BillingLineItem {
-	effectiveEnd := time.Now()
+	effectiveEnd := time.Now().UTC()
 	if end != nil {
 		effectiveEnd = *end
 	}

@@ -38,7 +38,7 @@ func (r *Repository) ListCycles(ctx context.Context, workspaceID, limit, offset 
 	}
 
 	cycles := make([]domain.Cycle, 0, len(rows))
-	now := time.Now()
+	now := time.Now().UTC()
 	for _, row := range rows {
 		c := domain.Cycle{
 			ID:          row.ID,
@@ -168,7 +168,7 @@ func (r *Repository) ListMilestones(ctx context.Context, workspaceID int64, proj
 
 func mapMilestoneWorkspaceRows(rows []sqlc.ListMilestonesByWorkspaceRow) []domain.Milestone {
 	milestones := make([]domain.Milestone, 0, len(rows))
-	now := time.Now()
+	now := time.Now().UTC()
 	for _, row := range rows {
 		m := domain.Milestone{
 			ID:          row.ID,
@@ -202,7 +202,7 @@ func mapMilestoneWorkspaceRows(rows []sqlc.ListMilestonesByWorkspaceRow) []domai
 
 func mapMilestoneProjectRows(rows []sqlc.ListMilestonesByProjectRow) []domain.Milestone {
 	milestones := make([]domain.Milestone, 0, len(rows))
-	now := time.Now()
+	now := time.Now().UTC()
 	for _, row := range rows {
 		m := domain.Milestone{
 			ID:          row.ID,

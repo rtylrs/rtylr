@@ -2,8 +2,8 @@ package application
 
 import (
 	"context"
-	"errors"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -482,7 +482,7 @@ func (s *Service) DeleteProject(ctx context.Context, id, businessID int64) error
 	defer invalidateWorkspacesScope(ctx, businessID)
 	// Archive now carries recycle-bin semantics: stamp the permanent-deletion
 	// deadline from the retention setting so every client sees the same clock.
-	deadline := binPurgeDeadline(time.Now())
+	deadline := binPurgeDeadline(time.Now().UTC())
 	return s.repo.ArchiveProject(ctx, id, businessID, &deadline)
 }
 
@@ -1040,7 +1040,7 @@ func (s *Service) CreateCycle(ctx context.Context, input domain.CycleInput) (dom
 		return domain.Cycle{}, err
 	}
 	status := "upcoming"
-	now := time.Now()
+	now := time.Now().UTC()
 	if now.After(input.StartDate) && now.Before(input.EndDate) {
 		status = "active"
 	}
