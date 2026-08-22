@@ -15,6 +15,7 @@ import {
   notificationClient,
   settingClient,
   userClient,
+  projectV2,
 } from '../lib/clients';
 
 // -- Types ----------------------------------------------------------------
@@ -494,31 +495,20 @@ export const flowApi = {
     flowResult<{ message: string }>(() => projectClient.moveTaskToColumn({ taskId, columnId })),
 
   createProject: (data: {
-    workspaceId: string;
     name: string;
     color?: string;
     description?: string;
     startDate?: string;
     dueDate?: string;
+    visibility?: string;
   }) =>
     flowResult<{ project: ApiProject }>(() =>
-      projectClient.createProject({
-        // int64 fields are wire-encoded as JSON strings, matching every other
-        // numeric id in this API - sending a bare number 400s with "cannot
-        // unmarshal number into Go struct field of type string".
-        //
-        // The `|| 0` fallback is NOT a "my personal workspace" sentinel, despite
-        // what this comment used to claim: CreateProjectRequest declares
-        // `workspace_id: int64 @required @gt(0)`, so "0" is rejected with
-        // "workspace_id must be greater than 0". Callers must gate on
-        // isApiWorkspaceId() before reaching this.
-        workspaceId: String(Number(data.workspaceId) || 0),
+      projectV2.createProject({
         name: data.name,
-        description: data.description ?? '-',
+        description: data.description ?? '',
         icon: 'folder',
         color: data.color ?? '#6366f1',
-        // An omitted date is an unset date. Never manufacture the Unix epoch,
-        // which becomes a real project date once the backend persists it.
+        visibility: data.visibility ?? 'private',
         startDate: data.startDate ?? '',
         dueDate: data.dueDate ?? '',
       })
