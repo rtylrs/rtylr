@@ -1,12 +1,10 @@
 .PHONY: clean generate install-onek install-js typecheck
 
-# v0.7.2: introduces schema_root so api/*.onk can stay in a subdirectory while
-# outputs anchor at the repo root (v0.7.1's output-containment check rejected
-# the previous "../gen/go" out paths). Also carries v0.7.0-v0.7.1 generator
-# fixes: errors.Is/errors.As matching and usage-gated validation helpers in Go,
-# guarded JSON.parse + escaped validation messages in TS, epoch-zero timestamp
-# round-trip for non-optional @encode(unix_*). See 1homsi/onekit@5d18b2f.
-ONK_VERSION := 5d18b2f5c869c204a34a03be5b45f7cdb6c3fbb5
+# v0.8.0: frontend platform release - opt-in [generate.ts-client] artifacts
+# (zod schemas, React Query hooks, MSW handlers) and the stdlib `onek mock`
+# dev server. No output changes for our current config; flags stay off until
+# a consumer needs them. See 1homsi/onekit@e526fb5.
+ONK_VERSION := e526fb5587d8963206cb29818266a70b627b1123
 
 # Clean generated code
 clean:
