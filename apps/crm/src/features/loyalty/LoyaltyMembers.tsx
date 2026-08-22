@@ -32,7 +32,10 @@ const LoyaltyMembers: React.FC = () => {
     <>
       <HelmetContainer title="Loyalty members · rtylr" />
       <div style={{ maxWidth: '1000px' }}>
-        <PageHeader title="Loyalty members" subtitle={`${members.length} active members`} />
+        <PageHeader
+          title="Loyalty members"
+          subtitle={`${members.length}${hasMore ? '+' : ''} active members loaded`}
+        />
 
         <div style={{ marginBottom: '16px', maxWidth: '320px' }}>
           <div

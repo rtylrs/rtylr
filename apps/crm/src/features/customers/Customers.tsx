@@ -263,7 +263,7 @@ const Customers: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
         <PageHeader
           title="Customers"
-          subtitle={`${customers.length} total customers`}
+          subtitle={`${customers.length}${hasMore ? '+' : ''} customers loaded`}
           actions={
             <>
               <Button variant="outline" onClick={() => navigate({ to: '/customers/import' })}>

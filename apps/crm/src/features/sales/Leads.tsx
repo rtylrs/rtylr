@@ -120,7 +120,7 @@ const Leads: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
         <PageHeader
           title="Leads"
-          subtitle={`${leads.length} total leads`}
+          subtitle={`${leads.length}${hasMore ? '+' : ''} leads loaded`}
           actions={
             <Button variant="primary" onClick={() => setCreateOpen(true)}>
               <Plus size={13} />
