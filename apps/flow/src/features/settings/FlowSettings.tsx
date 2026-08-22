@@ -621,6 +621,7 @@ export const AppearanceSection = (): React.JSX.Element => {
           className="grid grid-cols-3 gap-2"
           role="group"
           aria-labelledby="appearance-mode-label"
+          onPointerLeave={clearAudition}
         >
           {MODE_OPTIONS.map((value) => (
             <AppearanceOptionCard
@@ -660,6 +661,10 @@ export const AppearanceSection = (): React.JSX.Element => {
           className="grid grid-cols-1 gap-2 sm:grid-cols-2"
           role="group"
           aria-labelledby="appearance-palette-label"
+          // Clearing here rather than per card: the gap between two cards is
+          // unhovered space, and clearing on each card's leave made the preview
+          // flash back to the applied palette while crossing it.
+          onPointerLeave={clearAudition}
         >
           {presets.map((preset) => (
             <AppearanceOptionCard
@@ -689,6 +694,7 @@ export const AppearanceSection = (): React.JSX.Element => {
           style={{ gridTemplateColumns: 'repeat(5, minmax(0, 56px))' }}
           role="group"
           aria-labelledby="appearance-accent-label"
+          onPointerLeave={clearAudition}
         >
           {ACCENT_SWATCHES.map((swatch) => {
             const selected = accent !== null && normalizeHex(accent) === swatch.hex;
@@ -700,7 +706,6 @@ export const AppearanceSection = (): React.JSX.Element => {
                 aria-pressed={selected}
                 onClick={() => commitAccent(swatch.hex)}
                 onPointerEnter={() => setAudition({ accent: swatch.hex })}
-                onPointerLeave={clearAudition}
                 onFocus={() => setAudition({ accent: swatch.hex })}
                 onBlur={clearAudition}
                 className="flow-focus h-[44px] w-full"

@@ -8,7 +8,17 @@ import React from 'react';
  * child. That keeps the selection state, the hit area and the audition wiring in
  * one place, rather than once per control group.
  *
- * `onAuditionStart` fires on pointer enter and on focus, `onAuditionEnd` on
+ * `onAuditionStart` fires on pointer enter and on focus. Pointer LEAVE is
+ * deliberately not handled here: clearing per card meant that travelling from
+ * one card to its neighbour crossed the grid gap with nothing hovered, and the
+ * preview snapped back to the applied option for those few pixels. Measured as
+ * eight pixels of flashing between every pair of cards. The group container
+ * clears instead, so moving within the grid never reverts and leaving it does.
+ *
+ * `onAuditionEnd` remains for blur, where focus genuinely does leave the control
+ * rather than merely passing between two of them.
+ *
+ * `onAuditionEnd` fires on
  * leave and on blur. Neither writes anything: only `onSelect` commits. Keyboard
  * users get the same audition as pointer users because focus is wired alongside
  * hover, which is the whole reason both pairs exist rather than just the pointer
@@ -44,7 +54,6 @@ const AppearanceOptionCard = ({
     aria-pressed={selected}
     onClick={onSelect}
     onPointerEnter={onAuditionStart}
-    onPointerLeave={onAuditionEnd}
     onFocus={onAuditionStart}
     onBlur={onAuditionEnd}
     className="flow-focus flex min-h-[44px] w-full flex-col gap-2 p-2 text-start transition-colors"
