@@ -187,10 +187,40 @@ func (x *GiftCard) GetUpdatedAt() string {
 
 type CreateGiftCardRequest struct {
 	Code          string  `json:"code,omitempty"`
+	PaidOrderId   int64   `json:"paid_order_id,omitempty"`
 	InitialAmount float64 `json:"initial_amount,omitempty"`
 	CustomerName  string  `json:"customer_name,omitempty"`
 	CustomerEmail string  `json:"customer_email,omitempty"`
 	ExpiresAt     string  `json:"expires_at,omitempty"`
+}
+
+func (m *CreateGiftCardRequest) MarshalJSON() ([]byte, error) {
+	type alias CreateGiftCardRequest
+	aux := struct {
+		*alias
+		PaidOrderId string `json:"paid_order_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.PaidOrderId = strconv.FormatInt(m.PaidOrderId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *CreateGiftCardRequest) UnmarshalJSON(data []byte) error {
+	type alias CreateGiftCardRequest
+	aux := struct {
+		*alias
+		PaidOrderId string `json:"paid_order_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.PaidOrderId != "" {
+		v, err := strconv.ParseInt(aux.PaidOrderId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.PaidOrderId = v
+	}
+	return nil
 }
 
 func (x *CreateGiftCardRequest) GetCode() string {
@@ -199,6 +229,14 @@ func (x *CreateGiftCardRequest) GetCode() string {
 		return zero
 	}
 	return x.Code
+}
+
+func (x *CreateGiftCardRequest) GetPaidOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.PaidOrderId
 }
 
 func (x *CreateGiftCardRequest) GetInitialAmount() float64 {
@@ -323,8 +361,38 @@ func (x *ListGiftCardsResponse) GetGiftCards() []*GiftCard {
 }
 
 type RedeemGiftCardRequest struct {
-	Code   string  `json:"code,omitempty"`
-	Amount float64 `json:"amount,omitempty"`
+	Code    string  `json:"code,omitempty"`
+	OrderId int64   `json:"order_id,omitempty"`
+	Amount  float64 `json:"amount,omitempty"`
+}
+
+func (m *RedeemGiftCardRequest) MarshalJSON() ([]byte, error) {
+	type alias RedeemGiftCardRequest
+	aux := struct {
+		*alias
+		OrderId string `json:"order_id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.OrderId = strconv.FormatInt(m.OrderId, 10)
+	return json.Marshal(aux)
+}
+
+func (m *RedeemGiftCardRequest) UnmarshalJSON(data []byte) error {
+	type alias RedeemGiftCardRequest
+	aux := struct {
+		*alias
+		OrderId string `json:"order_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.OrderId != "" {
+		v, err := strconv.ParseInt(aux.OrderId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.OrderId = v
+	}
+	return nil
 }
 
 func (x *RedeemGiftCardRequest) GetCode() string {
@@ -333,6 +401,14 @@ func (x *RedeemGiftCardRequest) GetCode() string {
 		return zero
 	}
 	return x.Code
+}
+
+func (x *RedeemGiftCardRequest) GetOrderId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.OrderId
 }
 
 func (x *RedeemGiftCardRequest) GetAmount() float64 {

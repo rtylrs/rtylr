@@ -24,7 +24,10 @@ message GiftCard {
 
 message CreateGiftCardRequest {
   code: string @required
-  initial_amount: float64 @gte(0)
+  /// paid_order_id must identify a paid POS order for this business. The
+  /// server uses it as the tender reference for the liability entry.
+  paid_order_id: int64 @required @gt(0)
+  initial_amount: float64 @required @gt(0)
   customer_name: string @required
   customer_email: string @required @email
   expires_at: string @required
@@ -51,7 +54,9 @@ message ListGiftCardsResponse {
 
 message RedeemGiftCardRequest {
   code: string @required
-  amount: float64 @gte(0)
+  /// order_id identifies the POS order receiving this gift-card tender.
+  order_id: int64 @required @gt(0)
+  amount: float64 @required @gt(0)
 }
 
 message RedeemGiftCardResponse {

@@ -73,7 +73,8 @@ return violations;
 
 export interface CreateGiftCardRequest {
 code: string;
-initialAmount?: number;
+paidOrderId: string;
+initialAmount: number;
 customerName: string;
 customerEmail: string;
 expiresAt: string;
@@ -83,6 +84,7 @@ export function decodeCreateGiftCardRequest(v: any): CreateGiftCardRequest {
 if (v === null || v === undefined) return v;
 return {
 code: v.code,
+paidOrderId: v.paid_order_id,
 initialAmount: v.initial_amount,
 customerName: v.customer_name,
 customerEmail: v.customer_email,
@@ -93,6 +95,7 @@ expiresAt: v.expires_at,
 export function encodeCreateGiftCardRequest(v: CreateGiftCardRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.code !== undefined) { out.code = v.code; }
+if (v.paidOrderId !== undefined) { out.paid_order_id = v.paidOrderId; }
 if (v.initialAmount !== undefined) { out.initial_amount = v.initialAmount; }
 if (v.customerName !== undefined) { out.customer_name = v.customerName; }
 if (v.customerEmail !== undefined) { out.customer_email = v.customerEmail; }
@@ -104,8 +107,12 @@ export function validateCreateGiftCardRequest(v: CreateGiftCardRequest): string[
 const violations: string[] = [];
 if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
 if (!(v.code !== undefined && v.code !== null) || v.code === "") violations.push("code is required");
+if (v.paidOrderId !== undefined && v.paidOrderId !== null && !(typeof v.paidOrderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.paidOrderId))) violations.push("paid_order_id has invalid type");
+if (!(v.paidOrderId !== undefined && v.paidOrderId !== null)) violations.push("paid_order_id is required");
+if (v.paidOrderId !== undefined && v.paidOrderId !== null && !(Number(v.paidOrderId) > 0)) violations.push("paid_order_id violates @gt");
 if (v.initialAmount !== undefined && v.initialAmount !== null && !(typeof v.initialAmount === "number" && Number.isFinite(v.initialAmount))) violations.push("initial_amount has invalid type");
-if (v.initialAmount !== undefined && v.initialAmount !== null && !(Number(v.initialAmount) >= 0)) violations.push("initial_amount violates @gte");
+if (!(v.initialAmount !== undefined && v.initialAmount !== null)) violations.push("initial_amount is required");
+if (v.initialAmount !== undefined && v.initialAmount !== null && !(Number(v.initialAmount) > 0)) violations.push("initial_amount violates @gt");
 if (v.customerName !== undefined && v.customerName !== null && !(typeof v.customerName === "string")) violations.push("customer_name has invalid type");
 if (!(v.customerName !== undefined && v.customerName !== null) || v.customerName === "") violations.push("customer_name is required");
 if (v.customerEmail !== undefined && v.customerEmail !== null && !(typeof v.customerEmail === "string")) violations.push("customer_email has invalid type");
@@ -236,13 +243,15 @@ return violations;
 
 export interface RedeemGiftCardRequest {
 code: string;
-amount?: number;
+orderId: string;
+amount: number;
 }
 
 export function decodeRedeemGiftCardRequest(v: any): RedeemGiftCardRequest {
 if (v === null || v === undefined) return v;
 return {
 code: v.code,
+orderId: v.order_id,
 amount: v.amount,
 };
 }
@@ -250,6 +259,7 @@ amount: v.amount,
 export function encodeRedeemGiftCardRequest(v: RedeemGiftCardRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.code !== undefined) { out.code = v.code; }
+if (v.orderId !== undefined) { out.order_id = v.orderId; }
 if (v.amount !== undefined) { out.amount = v.amount; }
 return out;
 }
@@ -258,8 +268,12 @@ export function validateRedeemGiftCardRequest(v: RedeemGiftCardRequest): string[
 const violations: string[] = [];
 if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
 if (!(v.code !== undefined && v.code !== null) || v.code === "") violations.push("code is required");
+if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
+if (!(v.orderId !== undefined && v.orderId !== null)) violations.push("order_id is required");
+if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) violations.push("order_id violates @gt");
 if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
-if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) >= 0)) violations.push("amount violates @gte");
+if (!(v.amount !== undefined && v.amount !== null)) violations.push("amount is required");
+if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) > 0)) violations.push("amount violates @gt");
 return violations;
 }
 
