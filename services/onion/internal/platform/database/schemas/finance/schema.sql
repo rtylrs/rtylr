@@ -174,6 +174,7 @@ CREATE TABLE IF NOT EXISTS finance_bills (
     owner_id BIGINT NOT NULL,
     business_id BIGINT NOT NULL DEFAULT 0,
     supplier_id BIGINT,
+    supplier_name VARCHAR(255) NOT NULL DEFAULT '',
     amount DECIMAL(10,2) NOT NULL,
     currency VARCHAR(10) DEFAULT 'USD',
     due_date DATE NOT NULL,
