@@ -148,3 +148,10 @@ Sequence: `CRM->FIN-02` first. Then the filter. Then the panel.
 | Backend             | 1 day for the filter, or 2 if it becomes a Finance-owned aggregate  |
 | Frontend            | 1.5 days: balance panel with per-currency subtotals and role gating |
 | Ongoing maintenance | ~0.25 days per year                                                 |
+
+## Backend section (round two)
+
+Confirmed blocked exactly as stated: invoices carry no customer reference at
+any layer, so nothing to filter by. Dependency on CRM->FIN-02 unchanged.
+
+*Round two (2026-08-22): confirmed unchanged.*

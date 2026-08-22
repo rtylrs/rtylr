@@ -92,7 +92,7 @@ route, on the grounds that it "takes no parameters, returns the whole
 business, and allocates a batch id as a side effect of a GET". Two of those
 three are wrong:
 
-- **It is a POST**, not a GET. `routes.go:49` registers it through
+- **It is a POST**, not a GET. `internal/platform/server/http/register.go:83` registers it through
   `RegisterPOSTWithValidation`, which calls `router.Post`. A mutation behind
   a POST is the correct verb, not a defect.
 - **It is bounded.** `ListApprovedBillableEntries` carries `LIMIT 500` and a
@@ -413,3 +413,27 @@ caller.
 - **No `hr_category_id` consumer.** The field already exists and is dead
   (`02-entity-graph.md`). Proposing more contract surface around a link nothing
   reads would repeat the mistake that made it a useful warning.
+
+## Round two: drafts landed in voxie
+
+Round two moves these drafts from prose to a real branch. **voxie branch
+`docs/cross-app-round2`** (cut from `main` at `847a34c8`) carries one commit
+per draft; `gen/` is untouched and the vendored copy under `packages/voxie` was
+not synced.
+
+| Round-one draft | Voxie state on the branch                                                            | Notes                                                                                                             |
+| --------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| 1 time-entry filters | **Landed upstream before round two opened**: voxie #46, onion #783                 | Excluded from the round-two PR; issue #855 gets a comment pointing at the landing commits                            |
+| 2 leave range + pagination | drafted (`api/hr/leave/v1/models.onk`)                                        | Adds from_date/to_date plus limit/offset; overlap semantics documented                                               |
+| 3 invoice customer_id | drafted (`api/finance/invoices/v1/models.onk`)                                    | InvoiceDetail, CreateInvoiceRequest (client_name/client_email relaxed to optional-with-customer rule), ListInvoicesRequest |
+| 4 menu item product link | drafted (`api/pos/menu_item/v1/models.onk`)                                    | product_id plus unit_cost snapshot                                                                                   |
+| 5 bill purchase_order_id | drafted with 6 (`api/finance/bill/v1/models.onk`)                              |                                                                                                                      |
+| 6 bill supplier relax | drafted with 5                                                                    | supplier_id nullable, required supplier_name snapshot, ListBillsRequest gains supplier_id/purchase_order_id filters   |
+| 7 support customer reference | drafted (`api/support/customer/v1/models.onk`)                             |                                                                                                                      |
+| 8a labour-cost aggregate | **Superseded in part and re-drafted** (`api/flow/project/v1/service.onk` + `models.onk`) | The port exists (#743). The draft binds it to an RPC on Flow's project service rather than proposing a parallel hr.cost.v1 message set. Field names follow the live implementation (cost_minor_units, costed_minutes, uncosted_minutes, uncosted_employee_count); billable-only scope is documented rather than hidden. HR->INS-01 can consume the same RPC. |
+| 8b per-product margin | **Narrowed and re-drafted** (`api/insights/product/v1/models.onk`)                | A margins distribution RPC already exists and is implemented; the draft adds an additive per-product rows list carrying cost_minor_units |
+
+Two wire rules the round-one text established are preserved verbatim in every
+new draft: int64 ids travel as strings, so no draft puts @gt(0) on a field
+whose legitimate value is absence; and every foreign-id write documents the
+server-side same-business verification requirement.

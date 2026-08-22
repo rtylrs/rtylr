@@ -53,29 +53,32 @@ RecurringInvoice,finance,recurring_invoice,v1,id,owner_id:int64; template_invoic
 TaxConfig,finance,report,v1,id,owner_id:int64; owner_id:int64,packages/voxie/api/finance/tax/v1/models.onk,6
 UnmatchedBankTransaction,finance,reconciliation,v1,id,bank_account_id:int64; external_id:string,packages/voxie/api/finance/reconciliation/v1/models.onk,3
 UnmatchedInvoice,finance,reconciliation,v1,id,,packages/voxie/api/finance/reconciliation/v1/models.onk,13
-Attachment,flow,task,v1,id,task_id:int64,packages/voxie/api/flow/task/v1/models.onk,119
-Cycle,flow,cycle,v1,id,workspace_id:int64,packages/voxie/api/flow/cycle/v1/models.onk,3
-Label,flow,label,v1,id,workspace_id:int64,packages/voxie/api/flow/label/v1/models.onk,3
-MemberTime,flow,insights,v1,id,,packages/voxie/api/flow/insights/v1/models.onk,16
-Milestone,flow,milestone,v1,id,project_id:int64,packages/voxie/api/flow/milestone/v1/models.onk,8
+Attachment,flow,task,v1,id,task_id:int64; task_id:int64,packages/voxie/api/flow/task/v2/models.onk,133
+Cycle,flow,cycle,v1,id,workspace_id:int64; project_id:int64,packages/voxie/api/flow/cycle/v2/models.onk,6
+DashboardTask,flow,dashboard,v2,id,,packages/voxie/api/flow/dashboard/v2/models.onk,10
+FlowTask,flow,task,v2,id,project_id:int64; owner_id:int64; parent_task_id:int64; assignee_id:int64; reporter_id:int64; section_id:int64; cycle_id:int64; milestone_id:int64,packages/voxie/api/flow/task/v2/models.onk,6
+Label,flow,label,v1,id,workspace_id:int64,packages/voxie/api/flow/label/v2/models.onk,7
+MemberTime,flow,insights,v1,id,,packages/voxie/api/flow/insights/v2/models.onk,16
+Milestone,flow,milestone,v1,id,project_id:int64; project_id:int64,packages/voxie/api/flow/milestone/v2/models.onk,8
 Notification,flow,notification,v1,id,task_id:string,packages/voxie/api/flow/notification/v1/models.onk,3
-Project,flow,project,v1,id,workspace_id:int64; owner_id:int64,packages/voxie/api/flow/project/v1/models.onk,3
-ProjectColumn,flow,project,v1,id,project_id:int64; workspace_id:int64,packages/voxie/api/flow/project/v1/models.onk,40
-ProjectMember,flow,project,v1,id,project_id:int64; user_id:int64,packages/voxie/api/flow/project/v1/models.onk,59
-RoadmapProject,flow,insights,v1,id,workspace_id:string,packages/voxie/api/flow/insights/v1/models.onk,45
+ProfileProject,flow,profile,v1,id,,packages/voxie/api/flow/profile/v1/models.onk,28
+Project,flow,project,v1,id,workspace_id:int64; owner_id:int64; owner_id:int64,packages/voxie/api/flow/project/v2/models.onk,7
+ProjectColumn,flow,project,v1,id,project_id:int64; workspace_id:int64; project_id:int64,packages/voxie/api/flow/project/v2/models.onk,58
+ProjectMember,flow,project,v1,id,project_id:int64; user_id:int64; project_id:int64; user_id:int64,packages/voxie/api/flow/project/v2/models.onk,75
+RoadmapProject,flow,insights,v1,id,workspace_id:string,packages/voxie/api/flow/insights/v2/models.onk,48
 Task,flow,task,v1,id,project_id:int64; workspace_id:int64; owner_id:int64; parent_task_id:int64; assignee_id:int64; reporter_id:int64; section_id:int64; cycle_id:int64; milestone_id:int64,packages/voxie/api/flow/task/v1/models.onk,3
-TaskActivity,flow,task,v1,id,task_id:int64; user_id:int64,packages/voxie/api/flow/task/v1/models.onk,87
-TaskComment,flow,task,v1,id,task_id:int64; user_id:int64,packages/voxie/api/flow/task/v1/models.onk,70
-TaskPayloadCompact,flow,task,v1,id,,packages/voxie/api/flow/task/v1/models.onk,104
-TeamMemberWorkload,flow,insights,v1,id,,packages/voxie/api/flow/insights/v1/models.onk,35
-TeamTaskSummary,flow,insights,v1,id,,packages/voxie/api/flow/insights/v1/models.onk,27
-TimeLog,flow,task,v1,id,task_id:int64; user_id:int64,packages/voxie/api/flow/task/v1/models.onk,136
-View,flow,view,v1,id,,packages/voxie/api/flow/view/v1/models.onk,3
-WorkDay,flow,time,v1,id,employee_id:int64; user_id:int64,packages/voxie/api/flow/time/v1/models.onk,34
-WorkDayLine,flow,time,v1,id,work_day_id:int64; project_id:int64; task_id:int64; work_type_id:int64,packages/voxie/api/flow/time/v1/models.onk,87
+TaskActivity,flow,task,v1,id,task_id:int64; user_id:int64; task_id:int64; user_id:int64,packages/voxie/api/flow/task/v2/models.onk,101
+TaskComment,flow,task,v1,id,task_id:int64; user_id:int64; task_id:int64; user_id:int64,packages/voxie/api/flow/task/v2/models.onk,84
+TaskPayloadCompact,flow,task,v1,id,,packages/voxie/api/flow/task/v2/models.onk,118
+TeamMemberWorkload,flow,insights,v1,id,,packages/voxie/api/flow/insights/v2/models.onk,35
+TeamTaskSummary,flow,insights,v1,id,,packages/voxie/api/flow/insights/v2/models.onk,27
+TimeLog,flow,task,v1,id,task_id:int64; user_id:int64; task_id:int64; user_id:int64,packages/voxie/api/flow/task/v2/models.onk,150
+View,flow,view,v1,id,,packages/voxie/api/flow/view/v2/models.onk,7
+WorkDay,flow,time,v1,id,employee_id:int64; user_id:int64; employee_id:int64; user_id:int64,packages/voxie/api/flow/time/v2/models.onk,33
+WorkDayLine,flow,time,v1,id,work_day_id:int64; project_id:int64; task_id:int64; work_type_id:int64; work_day_id:int64; project_id:int64; task_id:int64; work_type_id:int64,packages/voxie/api/flow/time/v2/models.onk,86
 Workspace,flow,workspace,v1,id,owner_id:int64,packages/voxie/api/flow/workspace/v1/models.onk,3
 WorkspaceMember,flow,workspace,v1,id,workspace_id:int64; user_id:int64,packages/voxie/api/flow/workspace/v1/models.onk,31
-WorkType,flow,time,v1,id,parent_id:int64; hr_category_id:int64,packages/voxie/api/flow/time/v1/models.onk,7
+WorkType,flow,time,v1,id,parent_id:int64; hr_category_id:int64; parent_id:int64; hr_category_id:int64,packages/voxie/api/flow/time/v2/models.onk,13
 ApprovalChainLevelPayload,hr,approval_chain,v1,id,owner_id:int64; chain_id:int64; approver_role_id:int64; approver_employee_id:int64,packages/voxie/api/hr/approval_chain/v1/models.onk,4
 ApprovalChainPayload,hr,approval_chain,v1,id,owner_id:int64,packages/voxie/api/hr/approval_chain/v1/models.onk,34
 ApproveTimeOffRequestMsg,hr,time_off,v1,id,,packages/voxie/api/hr/time_off/v1/models.onk,26
@@ -88,7 +91,7 @@ ChecklistItemPayload,hr,onboarding,v1,id,owner_id:int64; template_id:int64,packa
 ChecklistTemplatePayload,hr,onboarding,v1,id,owner_id:int64; role_id:int64,packages/voxie/api/hr/onboarding/v1/models.onk,28
 DashboardWidgetPayload,hr,dashboard,v1,id,owner_id:int64; role_id:int64,packages/voxie/api/hr/dashboard/v1/models.onk,15
 DepartmentPayload,hr,department,v1,id,owner_id:int64; business_id:int64; manager_staff_id:int64,packages/voxie/api/hr/department/v1/models.onk,4
-DirectoryStaffEntry,hr,staff,v1,id,department_id:int64,packages/voxie/api/hr/staff/v1/models.onk,138
+DirectoryStaffEntry,hr,staff,v1,id,department_id:int64,packages/voxie/api/hr/staff/v1/models.onk,171
 Document,hr,document,v1,id,owner_id:int64; staff_id:int64,packages/voxie/api/hr/document/v1/models.onk,3
 EmployeeChecklistItemPayload,hr,onboarding,v1,id,owner_id:int64; employee_checklist_id:int64; checklist_item_id:int64; assigned_to_employee_id:int64,packages/voxie/api/hr/onboarding/v1/models.onk,48
 EmployeeChecklistPayload,hr,onboarding,v1,id,owner_id:int64; employee_id:int64; template_id:int64,packages/voxie/api/hr/onboarding/v1/models.onk,74

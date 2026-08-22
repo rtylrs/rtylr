@@ -10,25 +10,13 @@ auth,shared,useLogin,,AuthService.login,LoginRequest,LoginResponse,,apps/auth/sr
 auth,shared,useRegisterRestaurant,,AuthService.register,RegisterRequest,RegisterResponse,,apps/auth/src/shared/hooks/useAuth.ts,68,onekit,common
 auth,shared,checkEmailExists,,AuthService.checkEmailExists,CheckEmailExistsRequest,CheckEmailExistsResponse,,apps/auth/src/shared/hooks/useAuth.ts,95,onekit,common
 auth,shared,useGoogleAuth,,AuthService.googleAuth,GoogleAuthRequest,GoogleAuthResponse,,apps/auth/src/shared/hooks/useAuth.ts,101,onekit,common
-auth,shared,res,POST,/hub/feature/v1/features,,FeaturesResponse,,apps/auth/src/shared/hooks/useFeatureGate.ts,40,safeFetch,hub
+auth,shared,res,,FeatureService.resolveFeatures,ResolveFeaturesRequest,ResolveFeaturesResponse,,apps/auth/src/shared/hooks/useFeatureGate.ts,38,onekit,hub
+auth,lib,result,GET,/license/state,,LicenseState,,apps/auth/src/shared/lib/api.ts,28,safeFetch,
 auth,lib,startSocialLogin,,AuthService.socialAuthorize,SocialAuthorizeRequest,SocialAuthorizeResponse,,apps/auth/src/shared/lib/social.ts,21,onekit,common
 crm,layouts,res,,AppService.listAddons,ListAddonsRequest,ListAddonsResponse,['crm-addons'],apps/crm/src/layouts/DefaultLayout.tsx,51,onekit,hub
-crm,,rootRoute,GET,/hub/user/v1/users/me,,"Record<string, unknown>",,apps/crm/src/router.tsx,59,safeFetch,hub
-crm,,res,,AppService.listAddons,ListAddonsRequest,ListAddonsResponse,['crm-addons'],apps/crm/src/router.tsx,226,onekit,hub
+crm,,rootRoute,,UserService.getMe,GetMeRequest,GetMeResponse,,apps/crm/src/router.tsx,59,onekit,hub
+crm,,res,,AppService.listAddons,ListAddonsRequest,ListAddonsResponse,['crm-addons'],apps/crm/src/router.tsx,239,onekit,hub
 crm,shared,today,,SubscriptionService.getMySubscription,GetMySubscriptionRequest,GetMySubscriptionResponse,['subscription-banner'],apps/crm/src/shared/components/TrialBanner.tsx,23,onekit,hub
-crm,hooks/queries,res,GET,/crm/automations,,unknown,['crm-automations'],apps/crm/src/shared/hooks/queries/useAutomations.ts,96,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/automations/${id},,unknown,"['crm-automation', id]",apps/crm/src/shared/hooks/queries/useAutomations.ts,105,safeFetch,crm
-crm,hooks/queries,res,POST,/crm/automations,,Automation,['crm-automations'],apps/crm/src/shared/hooks/queries/useAutomations.ts,121,safeFetch,crm
-crm,hooks/queries,res,PUT,/crm/automations/${payload.id},,Automation,['crm-automations'],apps/crm/src/shared/hooks/queries/useAutomations.ts,147,safeFetch,crm
-crm,hooks/queries,qc,DELETE,/crm/automations/${id},,,['crm-automations'],apps/crm/src/shared/hooks/queries/useAutomations.ts,168,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/campaigns,,unknown,"['crm-campaigns', { limit, offset }]",apps/crm/src/shared/hooks/queries/useCampaigns.ts,40,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/campaigns/${id},,unknown,"['crm-campaign', id]",apps/crm/src/shared/hooks/queries/useCampaigns.ts,49,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/campaigns/stats,,unknown,"['crm-campaign', id, 'stats']",apps/crm/src/shared/hooks/queries/useCampaigns.ts,61,safeFetch,crm
-crm,hooks/queries,res,POST,/crm/campaigns,,unknown,"['crm-campaign', id, 'stats']",apps/crm/src/shared/hooks/queries/useCampaigns.ts,79,safeFetch,crm
-crm,hooks/queries,res,PUT,/crm/campaigns/${payload.id},,CampaignMutationResponse,['crm-campaigns'],apps/crm/src/shared/hooks/queries/useCampaigns.ts,104,safeFetch,crm
-crm,hooks/queries,qc,DELETE,/crm/campaigns/${id},,,['crm-campaigns'],apps/crm/src/shared/hooks/queries/useCampaigns.ts,126,safeFetch,crm
-crm,hooks/queries,qc,PUT,/crm/campaigns/${payload.id}/status,,,['crm-campaigns'],apps/crm/src/shared/hooks/queries/useCampaigns.ts,147,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/dashboard,,unknown,['crm-dashboard'],apps/crm/src/shared/hooks/queries/useCrmDashboard.ts,11,safeFetch,crm
 crm,hooks/queries,res,,SettingsService.getSettings,GetSettingsRequest,GetSettingsResponse,['crm-settings'],apps/crm/src/shared/hooks/queries/useCrmSettings.ts,21,onekit,support
 crm,hooks/queries,merged,,SettingsService.updateSettings,UpdateSettingsRequest,UpdateSettingsResponse,['crm-settings'],apps/crm/src/shared/hooks/queries/useCrmSettings.ts,35,onekit,support
 crm,hooks/queries,useCrmSubscription,,SubscriptionService.getMySubscription,GetMySubscriptionRequest,GetMySubscriptionResponse,['crm-subscription'],apps/crm/src/shared/hooks/queries/useCrmSubscription.ts,89,onekit,hub
@@ -36,45 +24,7 @@ crm,hooks/queries,useCrmSubscriptionBilling,,SubscriptionService.getBillingDetai
 crm,hooks/queries,res,,MembersService.listTeam,ListTeamRequest,ListTeamResponse,['crm-team'],apps/crm/src/shared/hooks/queries/useCrmTeam.ts,27,onekit,hub
 crm,hooks/queries,qc,,InvitationsService.inviteUser,InviteUserRequest,InviteUserResponse,['crm-team'],apps/crm/src/shared/hooks/queries/useCrmTeam.ts,38,onekit,hub
 crm,hooks/queries,qc,,MembersService.removeMember,RemoveMemberRequest,RemoveMemberResponse,['crm-team'],apps/crm/src/shared/hooks/queries/useCrmTeam.ts,53,onekit,hub
-crm,hooks/queries,res,GET,/crm/customers,,unknown,"['crm-customers', 'filter', params]",apps/crm/src/shared/hooks/queries/useCustomers.ts,125,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/customers/detail,,unknown,"['crm-customer', id]",apps/crm/src/shared/hooks/queries/useCustomers.ts,134,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/customers/detail/full,,unknown,"['crm-customer', id, 'full']",apps/crm/src/shared/hooks/queries/useCustomers.ts,144,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/customers/timeline,,unknown,"['crm-customer', id, 'timeline', cursor]",apps/crm/src/shared/hooks/queries/useCustomers.ts,171,safeFetch,crm
-crm,hooks/queries,res,POST,/crm/customers,,CustomerMutationResponse,,apps/crm/src/shared/hooks/queries/useCustomers.ts,208,safeFetch,crm
-crm,hooks/queries,res,PUT,/crm/customers,,CustomerMutationResponse,['crm-customers'],apps/crm/src/shared/hooks/queries/useCustomers.ts,244,safeFetch,crm
-crm,hooks/queries,qc,DELETE,/crm/customers,,,['crm-customers'],apps/crm/src/shared/hooks/queries/useCustomers.ts,264,safeFetch,crm
-crm,hooks/queries,qc,POST,/crm/customers/merge,,,['crm-customers'],apps/crm/src/shared/hooks/queries/useCustomers.ts,280,safeFetch,crm
-crm,hooks/queries,qc,POST,/crm/customers/import,,CustomerImportResult,['crm-customers'],apps/crm/src/shared/hooks/queries/useCustomers.ts,312,safeFetch,crm
-crm,hooks/queries,useExportCustomers,GET,/crm/customers/export,,CustomerExportPayload,['crm-customers'],apps/crm/src/shared/hooks/queries/useCustomers.ts,340,safeFetch,crm
 crm,hooks/queries,res,,FeedbackService.listFeedback,ListFeedbackRequest,ListFeedbackResponse,"['crm-feedback', params]",apps/crm/src/shared/hooks/queries/useFeedback.ts,34,onekit,crm
-crm,hooks/queries,res,GET,/crm/loyalty/config,,unknown,['crm-loyalty-config'],apps/crm/src/shared/hooks/queries/useLoyalty.ts,80,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/loyalty/tiers,,unknown,['crm-loyalty-tiers'],apps/crm/src/shared/hooks/queries/useLoyalty.ts,90,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/loyalty/members,,unknown,"['crm-loyalty-members', { limit, offset }]",apps/crm/src/shared/hooks/queries/useLoyalty.ts,100,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/loyalty/rewards,,unknown,['crm-loyalty-rewards'],apps/crm/src/shared/hooks/queries/useLoyalty.ts,110,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/loyalty/transactions,,unknown,"['crm-loyalty-transactions', customerId]",apps/crm/src/shared/hooks/queries/useLoyalty.ts,121,safeFetch,crm
-crm,hooks/queries,request,PUT,/crm/loyalty/config,,,,apps/crm/src/shared/hooks/queries/useLoyalty.ts,143,safeFetch,crm
-crm,hooks/queries,request,PUT,/crm/loyalty/tiers,,,['crm-loyalty-config'],apps/crm/src/shared/hooks/queries/useLoyalty.ts,166,safeFetch,crm
-crm,hooks/queries,request,POST,/crm/loyalty/tiers,,,['crm-loyalty-tiers'],apps/crm/src/shared/hooks/queries/useLoyalty.ts,167,safeFetch,crm
-crm,hooks/queries,qc,POST,/crm/loyalty/rewards/upsert,,,['crm-loyalty-tiers'],apps/crm/src/shared/hooks/queries/useLoyalty.ts,185,safeFetch,crm
-crm,hooks/queries,request,POST,/crm/loyalty/award,,,['crm-loyalty-transactions'],apps/crm/src/shared/hooks/queries/useLoyalty.ts,211,safeFetch,crm
-crm,hooks/queries,request,POST,/crm/loyalty/redeem,,,['crm-loyalty-transactions'],apps/crm/src/shared/hooks/queries/useLoyalty.ts,236,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/sales/pipeline,,unknown,['crm-sales-pipeline'],apps/crm/src/shared/hooks/queries/useSales.ts,52,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/sales/leads,,unknown,"['crm-sales-leads', { limit, offset }]",apps/crm/src/shared/hooks/queries/useSales.ts,64,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/sales/leads/${id},,unknown,"['crm-sales-lead', id]",apps/crm/src/shared/hooks/queries/useSales.ts,74,safeFetch,crm
-crm,hooks/queries,res,POST,/crm/sales/leads,,Lead,['crm-sales-leads'],apps/crm/src/shared/hooks/queries/useSales.ts,85,safeFetch,crm
-crm,hooks/queries,res,PUT,/crm/sales/leads/${payload.id},,Lead,['crm-sales-pipeline'],apps/crm/src/shared/hooks/queries/useSales.ts,109,safeFetch,crm
-crm,hooks/queries,qc,DELETE,/crm/sales/leads/${id},,,['crm-sales-leads'],apps/crm/src/shared/hooks/queries/useSales.ts,128,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/sales/leads/${leadId}/touchpoints,,unknown,"['crm-sales-touchpoints', leadId]",apps/crm/src/shared/hooks/queries/useSales.ts,146,safeFetch,crm
-crm,hooks/queries,res,POST,/crm/sales/touchpoints,,Touchpoint,"['crm-sales-touchpoints', leadId]",apps/crm/src/shared/hooks/queries/useSales.ts,160,safeFetch,crm
-crm,hooks/queries,qc,DELETE,/crm/sales/touchpoints/${id},,,['crm-sales-touchpoints'],apps/crm/src/shared/hooks/queries/useSales.ts,179,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/sales/contacts,,unknown,"['crm-sales-contacts', { leadId: leadId ?? 'all', limit, offset }]",apps/crm/src/shared/hooks/queries/useSales.ts,201,safeFetch,crm
-crm,hooks/queries,res,POST,/crm/sales/contacts,,SalesContact,"['crm-sales-contacts', { leadId: leadId ?? 'all', limit, offset }]",apps/crm/src/shared/hooks/queries/useSales.ts,217,safeFetch,crm
-crm,hooks/queries,res,PUT,/crm/sales/contacts/${payload.id},,SalesContact,['crm-sales-contacts'],apps/crm/src/shared/hooks/queries/useSales.ts,245,safeFetch,crm
-crm,hooks/queries,qc,DELETE,/crm/sales/contacts/${payload.id},,,['crm-sales-contacts'],apps/crm/src/shared/hooks/queries/useSales.ts,268,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/sales/contracts,,unknown,"['crm-sales-contracts', { limit, offset }]",apps/crm/src/shared/hooks/queries/useSales.ts,286,safeFetch,crm
-crm,hooks/queries,res,GET,/crm/sales/contracts/${id},,Contract,"['crm-sales-contract', id]",apps/crm/src/shared/hooks/queries/useSales.ts,296,safeFetch,crm
-crm,hooks/queries,res,POST,/crm/sales/contracts,,Contract,"['crm-sales-contract', id]",apps/crm/src/shared/hooks/queries/useSales.ts,312,safeFetch,crm
-crm,hooks/queries,res,PUT,/crm/sales/contracts/${payload.id},,Contract,['crm-sales-leads'],apps/crm/src/shared/hooks/queries/useSales.ts,341,safeFetch,crm
 crm,hooks/queries,res,,SegmentService.listSegments,ListSegmentsRequest,ListSegmentsResponse,['crm-segments'],apps/crm/src/shared/hooks/queries/useSegments.ts,74,onekit,crm
 crm,hooks/queries,res,,SegmentService.getSegmentDetail,GetSegmentDetailRequest,GetSegmentDetailResponse,"['crm-segment', id]",apps/crm/src/shared/hooks/queries/useSegments.ts,88,onekit,crm
 crm,hooks/queries,res,,SegmentService.getSegmentCustomers,GetSegmentCustomersRequest,GetSegmentCustomersResponse,"['crm-segment', id, 'customers']",apps/crm/src/shared/hooks/queries/useSegments.ts,100,onekit,crm
@@ -85,141 +35,114 @@ crm,hooks/queries,res,,TemplateService.listTemplates,ListTemplatesRequest,ListTe
 crm,hooks/queries,res,,TemplateService.createTemplate,CreateTemplateRequest,CreateTemplateResponse,['crm-templates'],apps/crm/src/shared/hooks/queries/useTemplates.ts,46,onekit,crm
 crm,hooks/queries,qc,,TemplateService.updateTemplate,UpdateTemplateRequest,UpdateTemplateResponse,['crm-templates'],apps/crm/src/shared/hooks/queries/useTemplates.ts,83,onekit,crm
 crm,hooks/queries,qc,,TemplateService.deleteTemplate,DeleteTemplateRequest,DeleteTemplateResponse,['crm-templates'],apps/crm/src/shared/hooks/queries/useTemplates.ts,118,onekit,crm
-crm,services,crmApi,GET,/crm/dashboard,,DashboardStats,,apps/crm/src/shared/services/crmApi.ts,578,safeFetch,crm
-crm,services,crmApi,GET,/crm/customers,,Customer[],,apps/crm/src/shared/services/crmApi.ts,581,safeFetch,crm
-crm,services,crmApi,GET,/crm/customers/detail,,Customer,,apps/crm/src/shared/services/crmApi.ts,584,safeFetch,crm
-crm,services,crmApi,GET,/crm/customers/timeline,,TimelineEntry[],,apps/crm/src/shared/services/crmApi.ts,587,safeFetch,crm
-crm,services,crmApi,POST,/crm/customers,,Customer,,apps/crm/src/shared/services/crmApi.ts,590,safeFetch,crm
-crm,services,crmApi,PUT,/crm/customers,,Customer,,apps/crm/src/shared/services/crmApi.ts,593,safeFetch,crm
-crm,services,crmApi,DELETE,/crm/customers,,,,apps/crm/src/shared/services/crmApi.ts,595,safeFetch,crm
-crm,services,crmApi,POST,/crm/customers/record-visit,,,,apps/crm/src/shared/services/crmApi.ts,597,safeFetch,crm
-crm,services,crmApi,POST,/crm/customers/import,,,,apps/crm/src/shared/services/crmApi.ts,600,safeFetch,crm
-crm,services,crmApi,POST,/crm/customers/merge,,,,apps/crm/src/shared/services/crmApi.ts,603,safeFetch,crm
-crm,services,crmApi,GET,/crm/customers/export,,,,apps/crm/src/shared/services/crmApi.ts,605,safeFetch,crm
-crm,services,crmApi,POST,/crm/loyalty/award,,,,apps/crm/src/shared/services/crmApi.ts,609,safeFetch,crm
-crm,services,crmApi,POST,/crm/loyalty/redeem,,,,apps/crm/src/shared/services/crmApi.ts,612,safeFetch,crm
-crm,services,crmApi,GET,/crm/loyalty/config,,LoyaltyConfig,,apps/crm/src/shared/services/crmApi.ts,614,safeFetch,crm
-crm,services,crmApi,PUT,/crm/loyalty/config,,LoyaltyConfig,,apps/crm/src/shared/services/crmApi.ts,617,safeFetch,crm
-crm,services,crmApi,GET,/crm/loyalty/transactions,,LoyaltyTransaction[],,apps/crm/src/shared/services/crmApi.ts,619,safeFetch,crm
-crm,services,crmApi,GET,/crm/loyalty/members,,LoyaltyMember[],,apps/crm/src/shared/services/crmApi.ts,621,safeFetch,crm
-crm,services,crmApi,GET,/crm/loyalty/rewards,,LoyaltyReward[],,apps/crm/src/shared/services/crmApi.ts,623,safeFetch,crm
-crm,services,crmApi,GET,/crm/loyalty/tiers,,LoyaltyTier[],,apps/crm/src/shared/services/crmApi.ts,625,safeFetch,crm
-crm,services,crmApi,PUT,/crm/loyalty/tiers,,,,apps/crm/src/shared/services/crmApi.ts,628,safeFetch,crm
-crm,services,crmApi,GET,/crm/segments,,Segment[],,apps/crm/src/shared/services/crmApi.ts,631,safeFetch,crm
-crm,services,crmApi,GET,/crm/segments/detail,,Segment,,apps/crm/src/shared/services/crmApi.ts,633,safeFetch,crm
-crm,services,crmApi,GET,/crm/segments/customers,,Customer[],,apps/crm/src/shared/services/crmApi.ts,636,safeFetch,crm
-crm,services,crmApi,POST,/crm/segments,,Segment,,apps/crm/src/shared/services/crmApi.ts,639,safeFetch,crm
-crm,services,crmApi,PUT,/crm/segments,,Segment,,apps/crm/src/shared/services/crmApi.ts,642,safeFetch,crm
-crm,services,crmApi,DELETE,/crm/segments,,,,apps/crm/src/shared/services/crmApi.ts,644,safeFetch,crm
-crm,services,crmApi,GET,/crm/campaigns,,Campaign[],,apps/crm/src/shared/services/crmApi.ts,647,safeFetch,crm
-crm,services,crmApi,GET,/crm/campaigns/detail,,Campaign,,apps/crm/src/shared/services/crmApi.ts,649,safeFetch,crm
-crm,services,crmApi,GET,/crm/campaigns/stats,,CampaignStats,,apps/crm/src/shared/services/crmApi.ts,652,safeFetch,crm
-crm,services,crmApi,POST,/crm/campaigns,,Campaign,,apps/crm/src/shared/services/crmApi.ts,655,safeFetch,crm
-crm,services,crmApi,PUT,/crm/campaigns/${id},,Campaign,,apps/crm/src/shared/services/crmApi.ts,658,safeFetch,crm
-crm,services,crmApi,PUT,/crm/campaigns/${id}/status,,,,apps/crm/src/shared/services/crmApi.ts,661,safeFetch,crm
-crm,services,crmApi,DELETE,/crm/campaigns/${id},,,,apps/crm/src/shared/services/crmApi.ts,663,safeFetch,crm
-crm,services,crmApi,GET,/crm/automations,,Automation[],,apps/crm/src/shared/services/crmApi.ts,666,safeFetch,crm
-crm,services,crmApi,POST,/crm/automations,,Automation,,apps/crm/src/shared/services/crmApi.ts,669,safeFetch,crm
-crm,services,crmApi,PUT,/crm/automations/${id},,Automation,,apps/crm/src/shared/services/crmApi.ts,672,safeFetch,crm
-crm,services,crmApi,DELETE,/crm/automations/${id},,,,apps/crm/src/shared/services/crmApi.ts,674,safeFetch,crm
-crm,services,crmApi,GET,/crm/templates,,Template[],,apps/crm/src/shared/services/crmApi.ts,677,safeFetch,crm
-crm,services,crmApi,POST,/crm/templates,,Template,,apps/crm/src/shared/services/crmApi.ts,680,safeFetch,crm
-crm,services,crmApi,GET,/crm/feedback,,FeedbackItem[],,apps/crm/src/shared/services/crmApi.ts,683,safeFetch,crm
-crm,services,crmApi,GET,/crm/settings,,Settings,,apps/crm/src/shared/services/crmApi.ts,686,safeFetch,crm
-crm,services,crmApi,PUT,/crm/settings,,Settings,,apps/crm/src/shared/services/crmApi.ts,689,safeFetch,crm
-crm,services,crmApi,GET,/crm/sales/pipeline,,PipelineColumn[],,apps/crm/src/shared/services/crmApi.ts,692,safeFetch,crm
-crm,services,crmApi,GET,/crm/sales/leads,,Lead[],,apps/crm/src/shared/services/crmApi.ts,693,safeFetch,crm
-crm,services,crmApi,GET,/crm/sales/leads/${id},,Lead,,apps/crm/src/shared/services/crmApi.ts,694,safeFetch,crm
-crm,services,crmApi,POST,/crm/sales/leads,,Lead,,apps/crm/src/shared/services/crmApi.ts,696,safeFetch,crm
-crm,services,crmApi,PUT,/crm/sales/leads/${id},,Lead,,apps/crm/src/shared/services/crmApi.ts,698,safeFetch,crm
-crm,services,crmApi,DELETE,/crm/sales/leads/${id},,,,apps/crm/src/shared/services/crmApi.ts,699,safeFetch,crm
-crm,services,crmApi,GET,/crm/sales/leads/${leadId}/touchpoints,,Touchpoint[],,apps/crm/src/shared/services/crmApi.ts,701,safeFetch,crm
-crm,services,crmApi,POST,/crm/sales/touchpoints,,Touchpoint,,apps/crm/src/shared/services/crmApi.ts,703,safeFetch,crm
-crm,services,crmApi,DELETE,/crm/sales/touchpoints/${id},,,,apps/crm/src/shared/services/crmApi.ts,704,safeFetch,crm
-crm,services,crmApi,GET,/crm/sales/contacts,,SalesContact[],,apps/crm/src/shared/services/crmApi.ts,706,safeFetch,crm
-crm,services,crmApi,POST,/crm/sales/contacts,,SalesContact,,apps/crm/src/shared/services/crmApi.ts,710,safeFetch,crm
-crm,services,crmApi,PUT,/crm/sales/contacts/${id},,SalesContact,,apps/crm/src/shared/services/crmApi.ts,712,safeFetch,crm
-crm,services,crmApi,DELETE,/crm/sales/contacts/${id},,,,apps/crm/src/shared/services/crmApi.ts,713,safeFetch,crm
-crm,services,crmApi,GET,/crm/sales/contracts,,Contract[],,apps/crm/src/shared/services/crmApi.ts,714,safeFetch,crm
-crm,services,crmApi,GET,/crm/sales/contracts/${id},,Contract,,apps/crm/src/shared/services/crmApi.ts,715,safeFetch,crm
-crm,services,crmApi,POST,/crm/sales/contracts,,Contract,,apps/crm/src/shared/services/crmApi.ts,717,safeFetch,crm
-crm,services,crmApi,PUT,/crm/sales/contracts/${id},,Contract,,apps/crm/src/shared/services/crmApi.ts,719,safeFetch,crm
-dash,analytics,res,GET,/insights/product/v1/best-sellers,,{ products?: RawBestSeller[] } | RawBestSeller[],"['dash-best-sellers', range]",apps/dash/src/features/analytics/Analytics.tsx,68,safeFetch,insights
-dash,dashboard,res,GET,/insights/financial/v1/invoice-aging,,ApiResponse,['insights-invoice-aging'],apps/dash/src/features/dashboard/Dashboard/widgets/InvoiceAgingWidget.tsx,50,safeFetch,insights
-dash,dashboard,res,GET,/erp/inventory/v1/low-stock,,LowStockResponse | StockItem[],['low-stock-widget'],apps/dash/src/features/dashboard/Dashboard/widgets/LowStockWidget.tsx,27,safeFetch,erp
-dash,dashboard,res,GET,/hr/time-off/v1/requests,,{ requests?: PendingRequest[] } | PendingRequest[],['pending-widget'],apps/dash/src/features/dashboard/Dashboard/widgets/PendingWidget.tsx,20,safeFetch,hr
-dash,dashboard,res,GET,/insights/revenue/v1/by-app,,ApiResponse,['insights-revenue-by-app'],apps/dash/src/features/dashboard/Dashboard/widgets/RevenueByAppWidget.tsx,48,safeFetch,insights
-dash,dashboard,res,GET,/insights/customer/v1/top,,ApiResponse,"['insights-top-customers', { limit: 5 }]",apps/dash/src/features/dashboard/Dashboard/widgets/TopCustomersWidget.tsx,41,safeFetch,insights
-dash,dashboard,res,GET,/insights/product/v1/best-sellers,,BestSellersResponse | RawWidgetProduct[],['top-products-widget'],apps/dash/src/features/dashboard/Dashboard/widgets/TopProductsWidget.tsx,46,safeFetch,insights
-dash,qr-codes,res,GET,/pos/table/v1/tables,,{ tables?: QrTable[] } | QrTable[],['qr-tables'],apps/dash/src/features/qr-codes/QrCodes.tsx,24,safeFetch,pos
-dash,settings,response,GET,/hub/security/v1/login-history?${params.toString()},,LoginHistoryResponse,"['security', 'login-history', { page: loginHistoryPage }]",apps/dash/src/features/settings/Settings/components/Account/Account.tsx,181,safeFetch,hub
-dash,settings,updateProfile,PATCH,/hub/user/v1/users/me,,,,apps/dash/src/features/settings/Settings/components/Account/Account.tsx,238,safeFetch,hub
-dash,settings,invalidateSessions,POST,/hub/security/v1/invalidate-sessions,,,,apps/dash/src/features/settings/Settings/components/Account/Account.tsx,250,safeFetch,hub
-dash,settings,testSmtpMutation,POST,/hub/settings/email/test,,,,apps/dash/src/features/settings/Settings/components/Email/Email.tsx,202,safeFetch,hub
-dash,team,res,GET,/hub/team/groups/v1/users/${id}/groups,,,"['user-groups', id]",apps/dash/src/features/team/MemberDetail.tsx,107,safeFetch,hub
-dash,team,removeFromGroup,DELETE,/hub/team/groups/v1/groups/${groupId}/members/${userId},,,"['user-groups', id]",apps/dash/src/features/team/MemberDetail.tsx,116,safeFetch,hub
-dash,hooks/queries,res,,ActivityService.listActivity,ListActivityRequest,ListActivityResponse,"['activity', limit]",apps/dash/src/shared/hooks/queries/useActivity.ts,67,onekit,hub
-dash,hooks/queries,res,,ActivityService.listActivity,ListActivityRequest,ListActivityResponse,"['audit', { page, pageSize }]",apps/dash/src/shared/hooks/queries/useActivity.ts,86,onekit,hub
+crm,lib,result,GET,/license/state,,LicenseState,,apps/crm/src/shared/lib/api.ts,28,safeFetch,
+crm,lib,crmCompatibilityClient,,DashboardService.getDashboard,GetDashboardRequest,GetDashboardResponse,,apps/crm/src/shared/lib/clients.ts,81,onekit,crm
+crm,lib,crmCompatibilityClient,,CustomerService.listCustomers,ListCustomersRequest,ListCustomersResponse,,apps/crm/src/shared/lib/clients.ts,85,onekit,support
+crm,lib,crmCompatibilityClient,,CustomerService.getCustomer,GetCustomerRequest,GetCustomerResponse,,apps/crm/src/shared/lib/clients.ts,87,onekit,support
+crm,lib,crmCompatibilityClient,,CustomerService.createCustomer,CreateCustomerRequest,CreateCustomerResponse,,apps/crm/src/shared/lib/clients.ts,89,onekit,crm
+crm,lib,crmCompatibilityClient,,CustomerService.updateCustomer,UpdateCustomerRequest,UpdateCustomerResponse,,apps/crm/src/shared/lib/clients.ts,91,onekit,crm
+crm,lib,crmCompatibilityClient,,SegmentService.listSegments,ListSegmentsRequest,ListSegmentsResponse,,apps/crm/src/shared/lib/clients.ts,102,onekit,crm
+crm,lib,crmCompatibilityClient,,SegmentService.getSegmentDetail,GetSegmentDetailRequest,GetSegmentDetailResponse,,apps/crm/src/shared/lib/clients.ts,104,onekit,crm
+crm,lib,crmCompatibilityClient,,SegmentService.getSegmentCustomers,GetSegmentCustomersRequest,GetSegmentCustomersResponse,,apps/crm/src/shared/lib/clients.ts,106,onekit,crm
+crm,lib,crmCompatibilityClient,,SegmentService.createSegment,CreateSegmentRequest,CreateSegmentResponse,,apps/crm/src/shared/lib/clients.ts,108,onekit,crm
+crm,lib,crmCompatibilityClient,,SegmentService.updateSegment,UpdateSegmentRequest,UpdateSegmentResponse,,apps/crm/src/shared/lib/clients.ts,110,onekit,crm
+crm,lib,crmCompatibilityClient,,CampaignService.listCampaigns,ListCampaignsRequest,ListCampaignsResponse,,apps/crm/src/shared/lib/clients.ts,114,onekit,crm
+crm,lib,crmCompatibilityClient,,CampaignService.getCampaignDetail,GetCampaignDetailRequest,GetCampaignDetailResponse,,apps/crm/src/shared/lib/clients.ts,116,onekit,crm
+crm,lib,crmCompatibilityClient,,CampaignService.getCampaignStats,GetCampaignStatsRequest,GetCampaignStatsResponse,,apps/crm/src/shared/lib/clients.ts,118,onekit,crm
+crm,lib,crmCompatibilityClient,,CampaignService.createCampaign,CreateCampaignRequest,CreateCampaignResponse,,apps/crm/src/shared/lib/clients.ts,120,onekit,crm
+crm,lib,crmCompatibilityClient,,CampaignService.updateCampaign,UpdateCampaignRequest,UpdateCampaignResponse,,apps/crm/src/shared/lib/clients.ts,122,onekit,crm
+crm,lib,crmCompatibilityClient,,CampaignService.updateCampaignStatus,UpdateCampaignStatusRequest,UpdateCampaignStatusResponse,,apps/crm/src/shared/lib/clients.ts,124,onekit,crm
+crm,lib,crmCompatibilityClient,,LoyaltyService.getLoyaltyConfig,GetLoyaltyConfigRequest,GetLoyaltyConfigResponse,,apps/crm/src/shared/lib/clients.ts,131,onekit,pos
+crm,lib,crmCompatibilityClient,,LoyaltyService.updateLoyaltyConfig,UpdateLoyaltyConfigRequest,UpdateLoyaltyConfigResponse,,apps/crm/src/shared/lib/clients.ts,133,onekit,pos
+crm,lib,crmCompatibilityClient,,LoyaltyService.listLoyaltyTiers,ListLoyaltyTiersRequest,ListLoyaltyTiersResponse,,apps/crm/src/shared/lib/clients.ts,135,onekit,crm
+crm,lib,crmCompatibilityClient,,LoyaltyService.createLoyaltyTier,CreateLoyaltyTierRequest,CreateLoyaltyTierResponse,,apps/crm/src/shared/lib/clients.ts,137,onekit,crm
+crm,lib,crmCompatibilityClient,,LoyaltyService.updateLoyaltyTier,UpdateLoyaltyTierRequest,UpdateLoyaltyTierResponse,,apps/crm/src/shared/lib/clients.ts,139,onekit,crm
+crm,lib,crmCompatibilityClient,,LoyaltyService.listLoyaltyTransactions,ListLoyaltyTransactionsRequest,ListLoyaltyTransactionsResponse,,apps/crm/src/shared/lib/clients.ts,141,onekit,pos
+crm,lib,crmCompatibilityClient,,LoyaltyService.awardPoints,AwardPointsRequest,AwardPointsResponse,,apps/crm/src/shared/lib/clients.ts,143,onekit,crm
+crm,lib,crmCompatibilityClient,,LoyaltyService.redeemPoints,RedeemPointsRequest,RedeemPointsResponse,,apps/crm/src/shared/lib/clients.ts,145,onekit,pos
+crm,lib,crmCompatibilityClient,,TemplateService.listTemplates,ListTemplatesRequest,ListTemplatesResponse,,apps/crm/src/shared/lib/clients.ts,153,onekit,crm
+crm,lib,crmCompatibilityClient,,TemplateService.createTemplate,CreateTemplateRequest,CreateTemplateResponse,,apps/crm/src/shared/lib/clients.ts,155,onekit,crm
+crm,lib,crmCompatibilityClient,,FeedbackService.listFeedback,ListFeedbackRequest,ListFeedbackResponse,,apps/crm/src/shared/lib/clients.ts,159,onekit,crm
+crm,lib,crmCompatibilityClient,,SettingsService.getSettings,GetSettingsRequest,GetSettingsResponse,,apps/crm/src/shared/lib/clients.ts,163,onekit,support
+crm,lib,crmCompatibilityClient,,SettingsService.updateSettings,UpdateSettingsRequest,UpdateSettingsResponse,,apps/crm/src/shared/lib/clients.ts,165,onekit,support
+crm,services,crmApi,,CustomerService.deleteCustomer,DeleteCustomerRequest,DeleteCustomerResponse,,apps/crm/src/shared/services/crmApi.ts,666,onekit,crm
+crm,services,crmApi,,SegmentService.deleteSegment,DeleteSegmentRequest,DeleteSegmentResponse,,apps/crm/src/shared/services/crmApi.ts,761,onekit,crm
+dash,analytics,res,,InsightsProductService.getBestSellers,GetBestSellersRequest,GetBestSellersResponse,"['dash-best-sellers', range]",apps/dash/src/features/analytics/Analytics.tsx,72,onekit,insights
+dash,dashboard,res,,FinancialService.getInvoiceAging,GetInvoiceAgingRequest,GetInvoiceAgingResponse,['insights-invoice-aging'],apps/dash/src/features/dashboard/Dashboard/widgets/InvoiceAgingWidget.tsx,48,onekit,insights
+dash,dashboard,res,,InventoryService.getLowStock,GetLowStockRequest,GetLowStockResponse,['low-stock-widget'],apps/dash/src/features/dashboard/Dashboard/widgets/LowStockWidget.tsx,20,onekit,erp
+dash,dashboard,res,,TimeOffService.listTimeOff,ListTimeOffRequest,ListTimeOffResponse,['pending-widget'],apps/dash/src/features/dashboard/Dashboard/widgets/PendingWidget.tsx,26,onekit,hr
+dash,dashboard,res,,RevenueService.getRevenueByApp,GetRevenueByAppRequest,GetRevenueByAppResponse,['insights-revenue-by-app'],apps/dash/src/features/dashboard/Dashboard/widgets/RevenueByAppWidget.tsx,39,onekit,insights
+dash,dashboard,res,,InsightsCustomerService.getTopCustomers,GetTopCustomersRequest,GetTopCustomersResponse,"['insights-top-customers', { limit: 5 }]",apps/dash/src/features/dashboard/Dashboard/widgets/TopCustomersWidget.tsx,43,onekit,insights
+dash,dashboard,res,,InsightsProductService.getBestSellers,GetBestSellersRequest,GetBestSellersResponse,['top-products-widget'],apps/dash/src/features/dashboard/Dashboard/widgets/TopProductsWidget.tsx,48,onekit,insights
+dash,qr-codes,res,,TableService.listTables,ListTablesRequest,ListTablesResponse,['qr-tables'],apps/dash/src/features/qr-codes/QrCodes.tsx,24,onekit,pos
+dash,settings,response,,SecurityService.loginHistory,LoginHistoryRequest,LoginHistoryResponse,"['security', 'login-history', { page: loginHistoryPage }]",apps/dash/src/features/settings/Settings/components/Account/Account.tsx,180,onekit,hub
+dash,settings,updateProfile,,UserService.updateProfile,UpdateProfileRequest,UpdateProfileResponse,,apps/dash/src/features/settings/Settings/components/Account/Account.tsx,237,onekit,hub
+dash,settings,invalidateSessions,,SecurityService.invalidateSessions,InvalidateSessionsRequest,InvalidateSessionsResponse,,apps/dash/src/features/settings/Settings/components/Account/Account.tsx,246,onekit,hub
+dash,settings,testSmtpMutation,POST,/hub/settings/email/test,,,,apps/dash/src/features/settings/Settings/components/Email/Email.tsx,203,safeFetch,hub
+dash,team,res,,GroupsService.getUserGroups,GetUserGroupsRequest,GetUserGroupsResponse,"['user-groups', id]",apps/dash/src/features/team/MemberDetail.tsx,109,onekit,hub
+dash,team,removeFromGroup,,GroupsService.removeGroupMember,RemoveGroupMemberRequest,RemoveGroupMemberResponse,"['user-groups', id]",apps/dash/src/features/team/MemberDetail.tsx,118,onekit,hub
+dash,hooks/queries,res,,ActivityService.listActivity,ListActivityRequest,ListActivityResponse,"['activity', limit]",apps/dash/src/shared/hooks/queries/useActivity.ts,65,onekit,hub
+dash,hooks/queries,res,,ActivityService.listActivity,ListActivityRequest,ListActivityResponse,"['audit', { page, pageSize }]",apps/dash/src/shared/hooks/queries/useActivity.ts,84,onekit,hub
 dash,hooks/queries,response,,AppService.listAddons,ListAddonsRequest,ListAddonsResponse,,apps/dash/src/shared/hooks/queries/useAddons.ts,23,onekit,hub
 dash,hooks/queries,enableAddon,,AppService.enableAddon,EnableAddonRequest,EnableAddonResponse,,apps/dash/src/shared/hooks/queries/useAddons.ts,36,onekit,hub
 dash,hooks/queries,disableAddon,,AppService.disableAddon,DisableAddonRequest,DisableAddonResponse,,apps/dash/src/shared/hooks/queries/useAddons.ts,38,onekit,hub
-dash,hooks/queries,res,GET,/hub/ai/v1/usage,,{ usage?: RawAiUsage },['ai-usage'],apps/dash/src/shared/hooks/queries/useAiQuota.ts,57,safeFetch,hub
-dash,hooks/queries,res,GET,/hub/ai/v1/quota-settings,,{ settings: { mode: AiQuotaMode } },['ai-quota-settings'],apps/dash/src/shared/hooks/queries/useAiQuota.ts,68,safeFetch,hub
-dash,hooks/queries,qc,PUT,/hub/ai/v1/quota-settings,,,['ai-quota-settings'],apps/dash/src/shared/hooks/queries/useAiQuota.ts,81,safeFetch,hub
-dash,hooks/queries,res,GET,/hub/developer/v1/api-keys,,,['api-keys'],apps/dash/src/shared/hooks/queries/useApiKeys.ts,16,safeFetch,hub
-dash,hooks/queries,res,POST,/hub/developer/v1/api-keys,,,['api-keys'],apps/dash/src/shared/hooks/queries/useApiKeys.ts,27,safeFetch,hub
-dash,hooks/queries,qc,POST,/hub/developer/v1/api-keys/revoke,,,['api-keys'],apps/dash/src/shared/hooks/queries/useApiKeys.ts,42,safeFetch,hub
-dash,hooks/queries,res,GET,/hub/app/v1/apps,,,['apps'],apps/dash/src/shared/hooks/queries/useApps.ts,138,safeFetch,hub
-dash,hooks/queries,setWebsiteData,PATCH,/hub/business/v1/businesses/slug,,,,apps/dash/src/shared/hooks/queries/useBusiness.ts,13,safeFetch,hub
-dash,hooks/queries,setIfPresent,PUT,/hub/config/v1/config,,,,apps/dash/src/shared/hooks/queries/useBusiness.ts,69,safeFetch,hub
-dash,hooks/queries,queryClient,PUT,/hub/config/v1/config,,,['business'],apps/dash/src/shared/hooks/queries/useBusiness.ts,103,safeFetch,hub
-dash,hooks/queries,response,GET,/hub/business/v1/businesses/mine,,ListMyBusinessesResponse,"['businesses', 'mine']",apps/dash/src/shared/hooks/queries/useBusinesses.ts,39,safeFetch,hub
-dash,hooks/queries,queryClient,POST,/hub/business/v1/businesses,,CreateSubBusinessResponse,"['businesses', 'mine']",apps/dash/src/shared/hooks/queries/useBusinesses.ts,59,safeFetch,hub
-dash,hooks/queries,queryClient,PATCH,/hub/business/v1/businesses/${encodeURIComponent(String(businessId))}/name,,{ business?: unknown },['business'],apps/dash/src/shared/hooks/queries/useBusinesses.ts,85,safeFetch,hub
-dash,hooks/queries,queryClient,PATCH,/hub/business/v1/businesses/${encodeURIComponent(String(businessId))}/logo,,{ business?: unknown },['user'],apps/dash/src/shared/hooks/queries/useBusinesses.ts,118,safeFetch,hub
-dash,hooks/queries,queryClient,DELETE,/hub/business/v1/businesses/${encodeURIComponent(String(businessId))},,,"['businesses', 'mine']",apps/dash/src/shared/hooks/queries/useBusinesses.ts,145,safeFetch,hub
-dash,hooks/queries,useSwitchBusiness,POST,/hub/user/v1/users/switch-business,,SwitchBusinessResponse,['user'],apps/dash/src/shared/hooks/queries/useBusinesses.ts,158,safeFetch,hub
-dash,hooks/queries,useBusinessExists,GET,/hub/business/v1/businesses/name-exists,,{ exists: boolean },"['business-exists', name.trim()]",apps/dash/src/shared/hooks/queries/useBusinesses.ts,176,safeFetch,hub
-dash,hooks/queries,useOnboardBusiness,POST,/hub/business/v1/businesses/onboard,,OnboardBusinessResponse,"['business-exists', name.trim()]",apps/dash/src/shared/hooks/queries/useBusinesses.ts,189,safeFetch,hub
-dash,hooks/queries,res,GET,/hub/team/groups/v1/groups,,,['groups'],apps/dash/src/shared/hooks/queries/useGroups.ts,59,safeFetch,hub
-dash,hooks/queries,res,GET,/hub/team/groups/v1/groups/${id},,,"['groups', id]",apps/dash/src/shared/hooks/queries/useGroups.ts,72,safeFetch,hub
-dash,hooks/queries,res,POST,/hub/team/groups/v1/groups,,,"['groups', id]",apps/dash/src/shared/hooks/queries/useGroups.ts,98,safeFetch,hub
-dash,hooks/queries,res,PUT,/hub/team/groups/v1/groups/${id},,,['groups'],apps/dash/src/shared/hooks/queries/useGroups.ts,131,safeFetch,hub
-dash,hooks/queries,qc,DELETE,/hub/team/groups/v1/groups/${groupId},,,"['groups', id]",apps/dash/src/shared/hooks/queries/useGroups.ts,147,safeFetch,hub
-dash,hooks/queries,qc,POST,/hub/team/groups/v1/groups/${groupId}/members,,,['groups'],apps/dash/src/shared/hooks/queries/useGroups.ts,164,safeFetch,hub
-dash,hooks/queries,qc,DELETE,/hub/team/groups/v1/groups/${groupId}/members/${userId},,,"['groups', groupId]",apps/dash/src/shared/hooks/queries/useGroups.ts,182,safeFetch,hub
-dash,hooks/queries,res,,InvitationsService.bulkInvite,BulkInviteRequest,BulkInviteResponse,['team'],apps/dash/src/shared/hooks/queries/useGroups.ts,208,onekit,hub
-dash,hooks/queries,res,GET,/hub/config/v1/industries,,,['industries'],apps/dash/src/shared/hooks/queries/useIndustries.ts,28,safeFetch,hub
-dash,hooks/queries,res,GET,/hub/integration/v1/integrations,,,['integrations'],apps/dash/src/shared/hooks/queries/useIntegrations.ts,15,safeFetch,hub
-dash,hooks/queries,qc,POST,/hub/integration/v1/integrations/connect,,,['integrations'],apps/dash/src/shared/hooks/queries/useIntegrations.ts,26,safeFetch,hub
-dash,hooks/queries,qc,POST,/hub/integration/v1/integrations/disconnect,,,['integrations'],apps/dash/src/shared/hooks/queries/useIntegrations.ts,42,safeFetch,hub
-dash,hooks/queries,res,GET,/hub/dashboard/v1/kpis,,,"['dash-kpis', range]",apps/dash/src/shared/hooks/queries/useKpis.ts,12,safeFetch,hub
+dash,hooks/queries,res,,AiService.getAiUsage,GetAiUsageRequest,GetAiUsageResponse,['ai-quota-settings'],apps/dash/src/shared/hooks/queries/useAiQuota.ts,65,onekit,hub
+dash,hooks/queries,res,,AiService.getAiQuotaSettings,GetAiQuotaSettingsRequest,GetAiQuotaSettingsResponse,['ai-quota-settings'],apps/dash/src/shared/hooks/queries/useAiQuota.ts,75,onekit,hub
+dash,hooks/queries,qc,,AiService.updateAiQuotaSettings,UpdateAiQuotaSettingsRequest,UpdateAiQuotaSettingsResponse,['ai-quota-settings'],apps/dash/src/shared/hooks/queries/useAiQuota.ts,86,onekit,hub
+dash,hooks/queries,res,,DeveloperService.listApiKeys,ListApiKeysRequest,ListApiKeysResponse,['api-keys'],apps/dash/src/shared/hooks/queries/useApiKeys.ts,15,onekit,hub
+dash,hooks/queries,qc,,DeveloperService.createApiKey,CreateApiKeyRequest,CreateApiKeyResponse,['api-keys'],apps/dash/src/shared/hooks/queries/useApiKeys.ts,26,onekit,hub
+dash,hooks/queries,qc,,DeveloperService.revokeApiKey,RevokeApiKeyRequest,RevokeApiKeyResponse,['api-keys'],apps/dash/src/shared/hooks/queries/useApiKeys.ts,40,onekit,hub
+dash,hooks/queries,res,,AppService.listApps,ListAppsRequest,ListAppsResponse,['apps'],apps/dash/src/shared/hooks/queries/useApps.ts,137,onekit,hub
+dash,hooks/queries,setWebsiteData,,BusinessService.setSlug,SetSlugRequest,SetSlugResponse,,apps/dash/src/shared/hooks/queries/useBusiness.ts,13,onekit,hub
+dash,hooks/queries,setIfPresent,,ConfigService.updateConfig,UpdateConfigRequest,UpdateConfigResponse,,apps/dash/src/shared/hooks/queries/useBusiness.ts,71,onekit,hub
+dash,hooks/queries,queryClient,,ConfigService.updateConfig,UpdateConfigRequest,UpdateConfigResponse,['business'],apps/dash/src/shared/hooks/queries/useBusiness.ts,103,onekit,hub
+dash,hooks/queries,response,,BusinessService.listMyBusinesses,ListMyBusinessesRequest,ListMyBusinessesResponse,"['businesses', 'mine']",apps/dash/src/shared/hooks/queries/useBusinesses.ts,25,onekit,hub
+dash,hooks/queries,queryClient,,BusinessService.createSubBusiness,CreateSubBusinessRequest,CreateSubBusinessResponse,"['businesses', 'mine']",apps/dash/src/shared/hooks/queries/useBusinesses.ts,46,onekit,hub
+dash,hooks/queries,queryClient,,BusinessService.renameBusiness,RenameBusinessRequest,RenameBusinessResponse,"['businesses', 'mine']",apps/dash/src/shared/hooks/queries/useBusinesses.ts,70,onekit,hub
+dash,hooks/queries,queryClient,,BusinessService.setLogo,SetLogoRequest,SetLogoResponse,"['businesses', 'mine']",apps/dash/src/shared/hooks/queries/useBusinesses.ts,98,onekit,hub
+dash,hooks/queries,queryClient,,BusinessService.deleteBusiness,DeleteBusinessRequest,DeleteBusinessResponse,"['businesses', 'mine']",apps/dash/src/shared/hooks/queries/useBusinesses.ts,121,onekit,hub
+dash,hooks/queries,useSwitchBusiness,,UserService.switchBusiness,SwitchBusinessRequest,SwitchBusinessResponse,['user'],apps/dash/src/shared/hooks/queries/useBusinesses.ts,133,onekit,hub
+dash,hooks/queries,useBusinessExists,,BusinessService.checkBusinessNameExists,CheckBusinessNameExistsRequest,CheckBusinessNameExistsResponse,"['business-exists', name.trim()]",apps/dash/src/shared/hooks/queries/useBusinesses.ts,148,onekit,hub
+dash,hooks/queries,useOnboardBusiness,,BusinessService.onboardBusiness,OnboardBusinessRequest,OnboardBusinessResponse,"['business-exists', name.trim()]",apps/dash/src/shared/hooks/queries/useBusinesses.ts,157,onekit,hub
+dash,hooks/queries,res,,GroupsService.listGroups,ListGroupsRequest,ListGroupsResponse,['groups'],apps/dash/src/shared/hooks/queries/useGroups.ts,103,onekit,hub
+dash,hooks/queries,res,,GroupsService.getGroupDetail,GetGroupDetailRequest,GetGroupDetailResponse,"['groups', id]",apps/dash/src/shared/hooks/queries/useGroups.ts,116,onekit,hub
+dash,hooks/queries,res,,GroupsService.createGroup,CreateGroupRequest,CreateGroupResponse,"['groups', id]",apps/dash/src/shared/hooks/queries/useGroups.ts,142,onekit,hub
+dash,hooks/queries,res,,GroupsService.updateGroup,UpdateGroupRequest,UpdateGroupResponse,['groups'],apps/dash/src/shared/hooks/queries/useGroups.ts,177,onekit,hub
+dash,hooks/queries,qc,,GroupsService.deleteGroup,DeleteGroupRequest,DeleteGroupResponse,"['groups', id]",apps/dash/src/shared/hooks/queries/useGroups.ts,194,onekit,hub
+dash,hooks/queries,qc,,GroupsService.addGroupMembers,AddGroupMembersRequest,AddGroupMembersResponse,['groups'],apps/dash/src/shared/hooks/queries/useGroups.ts,211,onekit,hub
+dash,hooks/queries,qc,,GroupsService.removeGroupMember,RemoveGroupMemberRequest,RemoveGroupMemberResponse,['team'],apps/dash/src/shared/hooks/queries/useGroups.ts,235,onekit,hub
+dash,hooks/queries,res,,InvitationsService.bulkInvite,BulkInviteRequest,BulkInviteResponse,['team'],apps/dash/src/shared/hooks/queries/useGroups.ts,261,onekit,hub
+dash,hooks/queries,useIndustries,,ConfigService.getIndustries,GetIndustriesRequest,GetIndustriesResponse,['industries'],apps/dash/src/shared/hooks/queries/useIndustries.ts,27,onekit,hub
+dash,hooks/queries,res,,IntegrationService.listIntegrations,ListIntegrationsRequest,ListIntegrationsResponse,['integrations'],apps/dash/src/shared/hooks/queries/useIntegrations.ts,14,onekit,hub
+dash,hooks/queries,qc,,IntegrationService.connectIntegration,ConnectIntegrationRequest,ConnectIntegrationResponse,['integrations'],apps/dash/src/shared/hooks/queries/useIntegrations.ts,25,onekit,hub
+dash,hooks/queries,qc,,IntegrationService.disconnectIntegration,DisconnectIntegrationRequest,DisconnectIntegrationResponse,['integrations'],apps/dash/src/shared/hooks/queries/useIntegrations.ts,41,onekit,hub
+dash,hooks/queries,res,,DashboardService.getKPIs,GetKPIsRequest,GetKPIsResponse,"['dash-kpis', range]",apps/dash/src/shared/hooks/queries/useKpis.ts,11,onekit,hub
 dash,hooks/queries,res,,MenuItemService.listMenuItems,ListMenuItemsRequest,ListMenuItemsResponse,"['menus', restaurantId]",apps/dash/src/shared/hooks/queries/useMenu.ts,72,onekit,pos
 dash,hooks/queries,res,,MenuItemService.listMenuItems,ListMenuItemsRequest,ListMenuItemsResponse,"['menu', userId, disabled]",apps/dash/src/shared/hooks/queries/useMenu.ts,85,onekit,pos
-dash,hooks/queries,res,GET,/hub/notification/v1/notifications,,,['notifications'],apps/dash/src/shared/hooks/queries/useNotifications.ts,27,safeFetch,hub
-dash,hooks/queries,params,GET,/hub/notification/v1/notifications?${params.toString()},,,"['notifications', 'pages']",apps/dash/src/shared/hooks/queries/useNotifications.ts,43,safeFetch,hub
-dash,hooks/queries,qc,PATCH,/hub/notification/v1/notifications/${encodeURIComponent(id)}/read,,,['notifications'],apps/dash/src/shared/hooks/queries/useNotifications.ts,55,safeFetch,hub
-dash,hooks/queries,qc,PATCH,/hub/notification/v1/notifications/read-all,,,['notifications'],apps/dash/src/shared/hooks/queries/useNotifications.ts,94,safeFetch,hub
-dash,hooks/queries,res,GET,/pos/orders/v1/orders?${searchParams.toString()},,,"['dash-orders', { limit, offset, status }]",apps/dash/src/shared/hooks/queries/useOrders.ts,28,safeFetch,pos
-dash,hooks/queries,queryClient,PUT,/pos/orders/v1/orders/${id}/status,,,['dash-orders'],apps/dash/src/shared/hooks/queries/useOrders.ts,40,safeFetch,pos
+dash,hooks/queries,res,,NotificationService.listNotifications,ListNotificationsRequest,ListNotificationsResponse,['notifications'],apps/dash/src/shared/hooks/queries/useNotifications.ts,31,onekit,hub
+dash,hooks/queries,useNotificationPages,,NotificationService.listNotifications,ListNotificationsRequest,ListNotificationsResponse,"['notifications', 'pages']",apps/dash/src/shared/hooks/queries/useNotifications.ts,45,onekit,hub
+dash,hooks/queries,qc,,NotificationService.markNotificationRead,MarkNotificationReadRequest,MarkNotificationReadResponse,['notifications'],apps/dash/src/shared/hooks/queries/useNotifications.ts,60,onekit,hub
+dash,hooks/queries,qc,,NotificationService.markAllRead,MarkAllReadRequest,MarkAllReadResponse,['notifications'],apps/dash/src/shared/hooks/queries/useNotifications.ts,99,onekit,hub
+dash,hooks/queries,res,GET,/pos/orders/v1/orders?{searchParams},,,"['dash-orders', { limit, offset, status }]",apps/dash/src/shared/hooks/queries/useOrders.ts,28,safeFetch,pos
+dash,hooks/queries,queryClient,PUT,/pos/orders/v1/orders/{id}/status,,,['dash-orders'],apps/dash/src/shared/hooks/queries/useOrders.ts,40,safeFetch,pos
 dash,hooks/queries,res,,AccessService.getMyLocations,GetMyLocationsRequest,GetMyLocationsResponse,['pos-locations'],apps/dash/src/shared/hooks/queries/usePOSAccess.ts,20,onekit,pos
 dash,hooks/queries,qc,,AccessService.assignLocation,AssignLocationRequest,AssignLocationResponse,,apps/dash/src/shared/hooks/queries/usePOSAccess.ts,49,onekit,pos
 dash,hooks/queries,qc,,AccessService.removeLocation,RemoveLocationRequest,RemoveLocationResponse,['pos-member-locations'],apps/dash/src/shared/hooks/queries/usePOSAccess.ts,72,onekit,pos
 dash,hooks/queries,res,,AccessService.getMemberLocations,GetMemberLocationsRequest,GetMemberLocationsResponse,"['pos-member-locations', String(userId ?? '')]",apps/dash/src/shared/hooks/queries/usePOSAccess.ts,99,onekit,pos
-dash,hooks/queries,res,GET,/hub/permission/v1/permissions,,,['custom-roles'],apps/dash/src/shared/hooks/queries/usePermissions.ts,18,safeFetch,hub
-dash,hooks/queries,res,GET,/hub/permission/v1/roles,,,['custom-roles'],apps/dash/src/shared/hooks/queries/usePermissions.ts,28,safeFetch,hub
-dash,hooks/queries,qc,PUT,/hub/permission/v1/permissions,,,['custom-roles'],apps/dash/src/shared/hooks/queries/usePermissions.ts,39,safeFetch,hub
-dash,hooks/queries,qc,POST,/hub/permission/v1/roles,,,['permissions'],apps/dash/src/shared/hooks/queries/usePermissions.ts,59,safeFetch,hub
+dash,hooks/queries,res,,PermissionService.getPermissions,GetPermissionsRequest,GetPermissionsResponse,['permissions'],apps/dash/src/shared/hooks/queries/usePermissions.ts,18,onekit,hub
+dash,hooks/queries,res,,PermissionService.listRoles,ListRolesRequest,ListRolesResponse,['custom-roles'],apps/dash/src/shared/hooks/queries/usePermissions.ts,28,onekit,hub
+dash,hooks/queries,qc,,PermissionService.updatePermissionMatrix,UpdatePermissionMatrixRequest,UpdatePermissionMatrixResponse,['custom-roles'],apps/dash/src/shared/hooks/queries/usePermissions.ts,38,onekit,hub
+dash,hooks/queries,qc,,PermissionService.createRole,CreateRoleRequest,CreateRoleResponse,['custom-roles'],apps/dash/src/shared/hooks/queries/usePermissions.ts,62,onekit,hub
 dash,hooks/queries,res,,RevenueService.getRevenueOverview,GetRevenueOverviewRequest,GetRevenueOverviewResponse,"['insights', 'revenue', { days }]",apps/dash/src/shared/hooks/queries/useRevenueSeries.ts,36,onekit,insights
-dash,hooks/queries,res,GET,/hub/security/v1/state,,{ state?: unknown },['security'],apps/dash/src/shared/hooks/queries/useSecurity.ts,14,safeFetch,hub
-dash,hooks/queries,qc,PATCH,/hub/security/v1/2fa,,,['security'],apps/dash/src/shared/hooks/queries/useSecurity.ts,24,safeFetch,hub
-dash,hooks/queries,qc,POST,/hub/security/v1/invalidate-sessions,,,['security'],apps/dash/src/shared/hooks/queries/useSecurity.ts,46,safeFetch,hub
-dash,hooks/queries,useMySubscription,GET,/hub/subscription/v1/my,,MySubscriptionResponse,['subscription'],apps/dash/src/shared/hooks/queries/useSubscription.ts,415,safeFetch,hub
-dash,hooks/queries,useListPlans,GET,/hub/subscription/v1/plans,,ListPlansResponse,"['subscription', 'plans']",apps/dash/src/shared/hooks/queries/useSubscription.ts,422,safeFetch,hub
-dash,hooks/queries,useBillingDetail,GET,/hub/subscription/v1/billing,,BillingDetailResponse,"['subscription', 'billing']",apps/dash/src/shared/hooks/queries/useSubscription.ts,429,safeFetch,hub
-dash,hooks/queries,useBillingHistory,GET,/hub/subscription/v1/billing/history,,BillingHistoryResponse,"['subscription', 'billing', 'history']",apps/dash/src/shared/hooks/queries/useSubscription.ts,436,safeFetch,hub
-dash,hooks/queries,queryClient,POST,/hub/subscription/v1/my,,,['subscription'],apps/dash/src/shared/hooks/queries/useSubscription.ts,446,safeFetch,hub
-dash,hooks/queries,useCheckout,POST,/hub/subscription/v1/checkout,,CheckoutResponse,['subscription'],apps/dash/src/shared/hooks/queries/useSubscription.ts,461,safeFetch,hub
+dash,hooks/queries,res,,SecurityService.getSecurityState,GetSecurityStateRequest,GetSecurityStateResponse,['security'],apps/dash/src/shared/hooks/queries/useSecurity.ts,13,onekit,hub
+dash,hooks/queries,qc,,SecurityService.update2FA,Update2FARequest,Update2FAResponse,['security'],apps/dash/src/shared/hooks/queries/useSecurity.ts,23,onekit,hub
+dash,hooks/queries,qc,,SecurityService.invalidateSessions,InvalidateSessionsRequest,InvalidateSessionsResponse,['security'],apps/dash/src/shared/hooks/queries/useSecurity.ts,45,onekit,hub
+dash,hooks/queries,useMySubscription,,SubscriptionService.getMySubscription,GetMySubscriptionRequest,GetMySubscriptionResponse,['subscription'],apps/dash/src/shared/hooks/queries/useSubscription.ts,414,onekit,hub
+dash,hooks/queries,useListPlans,,SubscriptionService.listPlans,ListPlansRequest,ListPlansResponse,"['subscription', 'plans']",apps/dash/src/shared/hooks/queries/useSubscription.ts,421,onekit,hub
+dash,hooks/queries,useBillingDetail,,SubscriptionService.getBillingDetail,GetBillingDetailRequest,GetBillingDetailResponse,"['subscription', 'billing']",apps/dash/src/shared/hooks/queries/useSubscription.ts,428,onekit,hub
+dash,hooks/queries,useBillingHistory,,SubscriptionService.getBillingHistory,GetBillingHistoryRequest,GetBillingHistoryResponse,"['subscription', 'billing', 'history']",apps/dash/src/shared/hooks/queries/useSubscription.ts,435,onekit,hub
+dash,hooks/queries,queryClient,,SubscriptionService.upsertSubscription,UpsertSubscriptionRequest,UpsertSubscriptionResponse,['subscription'],apps/dash/src/shared/hooks/queries/useSubscription.ts,448,onekit,hub
+dash,hooks/queries,useCheckout,,SubscriptionService.createCheckout,CreateCheckoutRequest,CreateCheckoutResponse,['subscription'],apps/dash/src/shared/hooks/queries/useSubscription.ts,462,onekit,hub
 dash,hooks/queries,res,,MembersService.listTeam,ListTeamRequest,ListTeamResponse,"['team', { page, pageSize }]",apps/dash/src/shared/hooks/queries/useTeam.ts,93,onekit,hub
 dash,hooks/queries,res,,MembersService.getMember,GetMemberRequest,GetMemberResponse,"['team', id]",apps/dash/src/shared/hooks/queries/useTeam.ts,112,onekit,hub
 dash,hooks/queries,qc,,InvitationsService.inviteUser,InviteUserRequest,InviteUserResponse,"['team', id]",apps/dash/src/shared/hooks/queries/useTeam.ts,132,onekit,hub
@@ -227,13 +150,12 @@ dash,hooks/queries,qc,,PermissionsService.updatePermissions,UpdatePermissionsReq
 dash,hooks/queries,qc,,MembersService.removeMember,RemoveMemberRequest,RemoveMemberResponse,,apps/dash/src/shared/hooks/queries/useTeam.ts,195,onekit,hub
 dash,hooks/queries,res,,AccessService.listAccessRequests,ListAccessRequestsRequest,ListAccessRequestsResponse,"['team', 'access-requests']",apps/dash/src/shared/hooks/queries/useTeam.ts,225,onekit,hub
 dash,hooks/queries,qc,,AccessService.approveAccessRequest,ApproveAccessRequestRequest,ApproveAccessRequestResponse,"['team', 'access-requests']",apps/dash/src/shared/hooks/queries/useTeam.ts,244,onekit,hub
-dash,hooks/queries,res,GET,/hub/developer/v1/webhooks,,,['webhooks'],apps/dash/src/shared/hooks/queries/useWebhooks.ts,16,safeFetch,hub
-dash,hooks/queries,res,POST,/hub/developer/v1/webhooks,,,['webhooks'],apps/dash/src/shared/hooks/queries/useWebhooks.ts,27,safeFetch,hub
-dash,hooks/queries,qc,DELETE,/hub/developer/v1/webhooks/${encodeURIComponent(id)},,,['webhooks'],apps/dash/src/shared/hooks/queries/useWebhooks.ts,44,safeFetch,hub
-dash,shared,persistCompletion,PATCH,/hub/team/onboarding/v1/onboarded,,,,apps/dash/src/shared/hooks/useOnboardingTour.ts,156,safeFetch,hub
-dash,shared,handleRequestAccess,POST,/hub/team/access/v1/requests,,,,apps/dash/src/shared/utils/BusinessRoute.tsx,117,safeFetch,hub
-dash,shared,pathname,GET,/hub/user/v1/users/me,,"Record<string, unknown>",,apps/dash/src/shared/utils/BusinessRoute.tsx,400,safeFetch,hub
-dash,shared,pathname,GET,/hub/config/v1/config,,"{ business?: Record<string, unknown>; maintenance?: boolean }",,apps/dash/src/shared/utils/BusinessRoute.tsx,404,safeFetch,hub
+dash,hooks/queries,res,,DeveloperService.listWebhooks,ListWebhooksRequest,ListWebhooksResponse,['webhooks'],apps/dash/src/shared/hooks/queries/useWebhooks.ts,15,onekit,hub
+dash,hooks/queries,qc,,DeveloperService.createWebhook,CreateWebhookRequest,CreateWebhookResponse,['webhooks'],apps/dash/src/shared/hooks/queries/useWebhooks.ts,26,onekit,hub
+dash,hooks/queries,qc,,DeveloperService.deleteWebhook,DeleteWebhookRequest,DeleteWebhookResponse,['webhooks'],apps/dash/src/shared/hooks/queries/useWebhooks.ts,42,onekit,hub
+dash,shared,persistCompletion,,OnboardingService.markOnboarded,MarkOnboardedRequest,MarkOnboardedResponse,,apps/dash/src/shared/hooks/useOnboardingTour.ts,156,onekit,hub
+dash,lib,result,GET,/license/state,,LicenseState,,apps/dash/src/shared/lib/api.ts,28,safeFetch,
+dash,shared,handleRequestAccess,,AccessService.requestAccess,RequestAccessRequest,RequestAccessResponse,,apps/dash/src/shared/utils/BusinessRoute.tsx,123,onekit,hub
 erp,brands,response,,BrandService.listBrands,ListBrandsRequest,ListBrandsResponse,['brands'],apps/erp/src/features/brands/useBrands.ts,23,onekit,erp
 erp,brands,qc,,BrandService.createBrand,CreateBrandRequest,CreateBrandResponse,['brands'],apps/erp/src/features/brands/useBrands.ts,32,onekit,erp
 erp,brands,qc,,BrandService.deleteBrand,DeleteBrandRequest,DeleteBrandResponse,['brands'],apps/erp/src/features/brands/useBrands.ts,41,onekit,erp
@@ -281,8 +203,7 @@ erp,warehouses,response,,WarehouseService.listWarehouses,ListWarehousesRequest,L
 erp,warehouses,qc,,WarehouseService.createWarehouse,CreateWarehouseRequest,CreateWarehouseResponse,['warehouses'],apps/erp/src/features/warehouses/useWarehouses.ts,36,onekit,erp
 erp,warehouses,qc,,WarehouseService.updateWarehouse,UpdateWarehouseRequest,UpdateWarehouseResponse,['warehouses'],apps/erp/src/features/warehouses/useWarehouses.ts,45,onekit,erp
 erp,warehouses,qc,,WarehouseService.deleteWarehouse,DeleteWarehouseRequest,DeleteWarehouseResponse,['warehouses'],apps/erp/src/features/warehouses/useWarehouses.ts,54,onekit,erp
-erp,layouts,setAuthUser,GET,/account,,{ user: { id: number; name: string; email: string } | null },,apps/erp/src/layouts/DefaultLayout.tsx,215,safeFetch,
-erp,,rootRoute,GET,/hub/user/v1/users/me,,"Record<string, unknown>",,apps/erp/src/router.tsx,63,safeFetch,hub
+erp,,rootRoute,,UserService.getMe,GetMeRequest,GetMeResponse,,apps/erp/src/router.tsx,62,onekit,hub
 erp,hooks/queries,useDashboardStats,,ProductService.getDashboard,GetDashboardRequest,GetDashboardResponse,['erp-dashboard-stats'],apps/erp/src/shared/hooks/queries/useDashboardStats.ts,14,onekit,erp
 erp,hooks/queries,response,,SettingsService.getErpSettings,GetErpSettingsRequest,GetErpSettingsResponse,,apps/erp/src/shared/hooks/queries/useErpSettings.ts,37,onekit,erp
 erp,hooks/queries,response,,SettingsService.updateErpSettings,UpdateErpSettingsRequest,UpdateErpSettingsResponse,,apps/erp/src/shared/hooks/queries/useErpSettings.ts,54,onekit,erp
@@ -290,19 +211,19 @@ erp,hooks/queries,useErpSubscription,,SubscriptionService.getMySubscription,GetM
 erp,hooks/queries,useErpSubscriptionBilling,,SubscriptionService.getBillingDetail,GetBillingDetailRequest,GetBillingDetailResponse,"['erp-subscription', 'billing']",apps/erp/src/shared/hooks/queries/useErpSubscription.ts,101,onekit,hub
 erp,hooks/queries,res,GET,/team/members,,ListMembersResponse,['erp-team'],apps/erp/src/shared/hooks/queries/useErpTeam.ts,35,safeFetch,
 erp,hooks/queries,qc,POST,/team/invite,,,['erp-team'],apps/erp/src/shared/hooks/queries/useErpTeam.ts,46,safeFetch,
-erp,hooks/queries,qc,PATCH,/team/members/${id}/deactivate,,,['erp-team'],apps/erp/src/shared/hooks/queries/useErpTeam.ts,61,safeFetch,
+erp,hooks/queries,qc,PATCH,/team/members/{id}/deactivate,,,['erp-team'],apps/erp/src/shared/hooks/queries/useErpTeam.ts,61,safeFetch,
 erp,shared,response,,ActivityService.listActivity,ListActivityRequest,ListActivityResponse,"['activity', limit]",apps/erp/src/shared/hooks/useActivity.ts,14,onekit,hub
+erp,lib,result,GET,/license/state,,LicenseState,,apps/erp/src/shared/lib/api.ts,28,safeFetch,
 finance,balance-sheet,res,,StatementService.getBalanceSheet,GetBalanceSheetRequest,GetBalanceSheetResponse,"['balance-sheet', { asOfDate: asOfDate || 'today' }]",apps/finance/src/features/balance-sheet/useBalanceSheet.ts,14,onekit,finance
 finance,bills,res,,BillService.listBills,ListBillsRequest,ListBillsResponse,['bills'],apps/finance/src/features/bills/useBills.ts,13,onekit,finance
-finance,cash-flow,res,GET,/insights/financial/cash-flow,,unknown,"['cash-flow', 'filter', { from, to, period }]",apps/finance/src/features/cash-flow/useCashFlow.ts,47,safeFetch,insights
-finance,dashboard,res,GET,/finance/dashboard,,unknown,['finance-dashboard'],apps/finance/src/features/dashboard/useDashboard.ts,11,safeFetch,finance
+finance,cash-flow,res,,FinancialService.getCashFlowAnalytics,GetCashFlowAnalyticsRequest,GetCashFlowAnalyticsResponse,"['cash-flow', 'filter', { period }]",apps/finance/src/features/cash-flow/useCashFlow.ts,32,onekit,insights
+finance,dashboard,res,,FinanceDashboardService.getFinanceDashboard,GetFinanceDashboardRequest,GetFinanceDashboardResponse,['finance-dashboard'],apps/finance/src/features/dashboard/useDashboard.ts,11,onekit,finance
 finance,expenses,res,,ExpensesService.getExpense,GetExpenseRequest,GetExpenseResponse,"['expense', id]",apps/finance/src/features/expenses/useExpenseById.ts,12,onekit,finance
 finance,expenses,res,,ExpensesService.listExpenses,ListExpensesRequest,ListExpensesResponse,"['expenses', 'filter', { page, pageSize }]",apps/finance/src/features/expenses/useExpenses.ts,51,onekit,finance
 finance,expenses,res,,ExpensesService.listExpenseCategories,ListExpenseCategoriesRequest,ListExpenseCategoriesResponse,['expense-categories'],apps/finance/src/features/expenses/useExpenses.ts,69,onekit,finance
 finance,expenses,res,,ExpensesService.createExpense,CreateExpenseRequest,CreateExpenseResponse,['expense-categories'],apps/finance/src/features/expenses/useExpenses.ts,80,onekit,finance
 finance,expenses,res,,ExpensesService.updateExpense,UpdateExpenseRequest,UpdateExpenseResponse,['expenses'],apps/finance/src/features/expenses/useExpenses.ts,107,onekit,finance
 finance,expenses,res,,ExpensesService.deleteExpense,DeleteExpenseRequest,DeleteExpenseResponse,['expenses'],apps/finance/src/features/expenses/useExpenses.ts,131,onekit,finance
-finance,invoices,updateInvoiceStatus,GET,/crm/customers,,Client[],,apps/finance/src/features/invoices/NewInvoice.tsx,79,safeFetch,crm
 finance,invoices,res,,InvoicesService.getInvoice,GetInvoiceRequest,GetInvoiceResponse,"['invoice', id]",apps/finance/src/features/invoices/useInvoices.ts,107,onekit,finance
 finance,invoices,res,,InvoicesService.createInvoice,CreateInvoiceRequest,CreateInvoiceResponse,"['invoice', id]",apps/finance/src/features/invoices/useInvoices.ts,120,onekit,finance
 finance,invoices,res,,InvoicesService.updateInvoice,UpdateInvoiceRequest,UpdateInvoiceResponse,['invoices'],apps/finance/src/features/invoices/useInvoices.ts,140,onekit,finance
@@ -313,97 +234,79 @@ finance,quotes,res,,QuoteService.listQuotes,ListQuotesRequest,ListQuotesResponse
 finance,quotes,qc,,QuoteService.createQuote,CreateQuoteRequest,CreateQuoteResponse,"['quotes', 'filter', { page, pageSize }]",apps/finance/src/features/quotes/useQuotes.ts,76,onekit,finance
 finance,quotes,qc,,QuoteService.updateQuoteStatus,UpdateQuoteStatusRequest,UpdateQuoteStatusResponse,['quotes'],apps/finance/src/features/quotes/useQuotes.ts,111,onekit,finance
 finance,quotes,qc,,QuoteService.convertQuote,ConvertQuoteRequest,ConvertQuoteResponse,['invoices'],apps/finance/src/features/quotes/useQuotes.ts,125,onekit,finance
-finance,reconcile,match,POST,/finance/reconcile/match,,,,apps/finance/src/features/reconcile/Reconcile.tsx,46,safeFetch,finance
-finance,reconcile,item,POST,/finance/reconcile/match,,,,apps/finance/src/features/reconcile/Reconcile.tsx,73,safeFetch,finance
-finance,recurring-invoices,qc,POST,/finance/recurring-invoices/${id}/trigger,,,['recurring-invoices'],apps/finance/src/features/recurring-invoices/useRecurringInvoices.ts,67,safeFetch,finance
 finance,recurring-invoices,res,,RecurringInvoiceService.listRecurringInvoices,ListRecurringInvoicesRequest,ListRecurringInvoicesResponse,['recurring-invoices'],apps/finance/src/features/recurring-invoices/useRecurringInvoices.ts,16,onekit,finance
 finance,recurring-invoices,qc,,RecurringInvoiceService.createRecurringInvoice,CreateRecurringInvoiceRequest,CreateRecurringInvoiceResponse,['recurring-invoices'],apps/finance/src/features/recurring-invoices/useRecurringInvoices.ts,35,onekit,finance
 finance,recurring-invoices,qc,,RecurringInvoiceService.pauseRecurringInvoice,PauseRecurringInvoiceRequest,PauseRecurringInvoiceResponse,['recurring-invoices'],apps/finance/src/features/recurring-invoices/useRecurringInvoices.ts,55,onekit,finance
 finance,recurring-invoices,qc,,RecurringInvoiceService.resumeRecurringInvoice,ResumeRecurringInvoiceRequest,ResumeRecurringInvoiceResponse,['recurring-invoices'],apps/finance/src/features/recurring-invoices/useRecurringInvoices.ts,56,onekit,finance
-finance,layouts,visibleNavGroups,GET,/account,,{ user: { id: number; name: string; email: string } | null },,apps/finance/src/layouts/DefaultLayout.tsx,257,safeFetch,
-finance,,rootRoute,GET,/hub/user/v1/users/me,,"Record<string, unknown>",,apps/finance/src/router.tsx,52,safeFetch,hub
-finance,shared,ClientSelect,GET,/crm/customers,,unknown,,apps/finance/src/shared/components/ClientSelect.tsx,25,safeFetch,crm
-finance,shared,navigate,GET,/crm/customers,,unknown,,apps/finance/src/shared/components/GlobalSearch.tsx,95,safeFetch,crm
+finance,,rootRoute,,UserService.getMe,GetMeRequest,GetMeResponse,,apps/finance/src/router.tsx,51,onekit,hub
 finance,hooks/queries,queryClient,,BillService.createBill,CreateBillRequest,CreateBillResponse,['bills'],apps/finance/src/shared/hooks/queries/useBills.ts,21,onekit,finance
 finance,hooks/queries,queryClient,,BillService.updateBill,UpdateBillRequest,UpdateBillResponse,['bills'],apps/finance/src/shared/hooks/queries/useBills.ts,38,onekit,finance
-finance,hooks/queries,res,GET,/finance/dashboard,,GetFinanceDashboardResponse,['finance-dashboard'],apps/finance/src/shared/hooks/queries/useFinanceDashboard.ts,10,safeFetch,finance
+finance,hooks/queries,useFinanceDashboard,,FinanceDashboardService.getFinanceDashboard,GetFinanceDashboardRequest,GetFinanceDashboardResponse,['finance-dashboard'],apps/finance/src/shared/hooks/queries/useFinanceDashboard.ts,9,onekit,finance
 finance,hooks/queries,useFinanceSubscription,,SubscriptionService.getMySubscription,GetMySubscriptionRequest,GetMySubscriptionResponse,['finance-subscription'],apps/finance/src/shared/hooks/queries/useFinanceSubscription.ts,93,onekit,hub
 finance,hooks/queries,useFinanceSubscriptionBilling,,SubscriptionService.getBillingDetail,GetBillingDetailRequest,GetBillingDetailResponse,"['finance-subscription', 'billing']",apps/finance/src/shared/hooks/queries/useFinanceSubscription.ts,103,onekit,hub
-finance,hooks/queries,res,GET,/team/members,,ListMembersResponse,['finance-team'],apps/finance/src/shared/hooks/queries/useFinanceTeam.ts,35,safeFetch,
-finance,hooks/queries,qc,POST,/team/invite,,,['finance-team'],apps/finance/src/shared/hooks/queries/useFinanceTeam.ts,46,safeFetch,
-finance,hooks/queries,qc,PATCH,/team/members/${id}/deactivate,,,['finance-team'],apps/finance/src/shared/hooks/queries/useFinanceTeam.ts,61,safeFetch,
+finance,hooks/queries,res,,MembersService.listTeam,ListTeamRequest,ListTeamResponse,['finance-team'],apps/finance/src/shared/hooks/queries/useFinanceTeam.ts,36,onekit,hub
+finance,hooks/queries,qc,,InvitationsService.inviteUser,InviteUserRequest,InviteUserResponse,['finance-team'],apps/finance/src/shared/hooks/queries/useFinanceTeam.ts,49,onekit,hub
+finance,hooks/queries,qc,,MembersService.removeMember,RemoveMemberRequest,RemoveMemberResponse,['finance-team'],apps/finance/src/shared/hooks/queries/useFinanceTeam.ts,68,onekit,hub
 finance,hooks/queries,pageSize,,InvoicesService.listInvoices,ListInvoicesRequest,ListInvoicesResponse,,apps/finance/src/shared/hooks/queries/useInvoices.ts,37,onekit,finance
 finance,hooks/queries,res,,InvoicesService.sendInvoice,SendInvoiceRequest,SendInvoiceResponse,,apps/finance/src/shared/hooks/queries/useInvoices.ts,62,onekit,finance
-finance,shared,res,GET,/finance/bank-feeds,,unknown,"['bank-tx', accountId ?? 'all']",apps/finance/src/shared/hooks/useBankAccounts.ts,76,safeFetch,finance
 finance,shared,res,,BankAccountService.listBankAccounts,ListBankAccountsRequest,ListBankAccountsResponse,['bank-accounts'],apps/finance/src/shared/hooks/useBankAccounts.ts,17,onekit,finance
 finance,shared,queryClient,,BankAccountService.createBankAccount,CreateBankAccountRequest,CreateBankAccountResponse,,apps/finance/src/shared/hooks/useBankAccounts.ts,51,onekit,finance
 finance,shared,res,,AccountService.listAccounts,ListAccountsRequest,ListAccountsResponse,['chart-of-accounts'],apps/finance/src/shared/hooks/useChartOfAccounts.ts,19,onekit,finance
 finance,shared,qc,,AccountService.createAccount,CreateAccountRequest,CreateAccountResponse,['chart-of-accounts'],apps/finance/src/shared/hooks/useChartOfAccounts.ts,37,onekit,finance
 finance,shared,res,,JournalService.listJournalEntries,ListJournalEntriesRequest,ListJournalEntriesResponse,"['journal', 'filter', { page, pageSize }]",apps/finance/src/shared/hooks/useChartOfAccounts.ts,72,onekit,finance
 finance,shared,qc,,JournalService.createJournalEntry,CreateJournalEntryRequest,CreateJournalEntryResponse,,apps/finance/src/shared/hooks/useChartOfAccounts.ts,119,onekit,finance
-finance,shared,response,PUT,/finance/expense-categories/${id},,{ message?: string; category?: any },['expense-categories'],apps/finance/src/shared/hooks/useExpenseCategories.ts,61,safeFetch,finance
-finance,shared,response,DELETE,/finance/expense-categories/${id},,{ message?: string },['expense-categories'],apps/finance/src/shared/hooks/useExpenseCategories.ts,88,safeFetch,finance
 finance,shared,res,,ExpensesService.listExpenseCategories,ListExpenseCategoriesRequest,ListExpenseCategoriesResponse,['expense-categories'],apps/finance/src/shared/hooks/useExpenseCategories.ts,17,onekit,finance
 finance,shared,response,,ReportService.createExpenseCategoryDetail,CreateExpenseCategoryDetailRequest,CreateExpenseCategoryDetailResponse,['expense-categories'],apps/finance/src/shared/hooks/useExpenseCategories.ts,33,onekit,finance
 finance,shared,res,,ReportService.listTaxConfig,ListTaxConfigRequest,ListTaxConfigResponse,['tax-config'],apps/finance/src/shared/hooks/useTax.ts,16,onekit,finance
 finance,shared,res,,ReportService.getTaxReport,GetTaxReportRequest,GetTaxReportResponse,['tax-report'],apps/finance/src/shared/hooks/useTax.ts,26,onekit,finance
 finance,shared,qc,,ReportService.createTaxConfig,CreateTaxConfigRequest,CreateTaxConfigResponse,['tax-report'],apps/finance/src/shared/hooks/useTax.ts,37,onekit,finance
 finance,shared,res,,ReportService.getPLReport,GetPLReportRequest,GetPLReportResponse,"['pl', 'filter', { period }]",apps/finance/src/shared/hooks/useTax.ts,73,onekit,finance
-finance,services,financeApi,GET,/finance/dashboard,,DashboardStats,,apps/finance/src/shared/services/financeApi.ts,231,safeFetch,finance
-finance,services,financeApi,GET,/finance/invoices,,Invoice[],,apps/finance/src/shared/services/financeApi.ts,234,safeFetch,finance
-finance,services,financeApi,GET,/finance/invoices/detail,,Invoice,,apps/finance/src/shared/services/financeApi.ts,237,safeFetch,finance
-finance,services,financeApi,POST,/finance/invoices,,Invoice,,apps/finance/src/shared/services/financeApi.ts,239,safeFetch,finance
-finance,services,financeApi,PUT,/finance/invoices,,Invoice,,apps/finance/src/shared/services/financeApi.ts,242,safeFetch,finance
-finance,services,financeApi,DELETE,/finance/invoices,,,,apps/finance/src/shared/services/financeApi.ts,244,safeFetch,finance
-finance,services,financeApi,PUT,/finance/invoices/status,,,,apps/finance/src/shared/services/financeApi.ts,247,safeFetch,finance
-finance,services,financeApi,POST,/finance/invoices/payment,,,,apps/finance/src/shared/services/financeApi.ts,250,safeFetch,finance
-finance,services,financeApi,GET,/finance/expenses,,Expense[],,apps/finance/src/shared/services/financeApi.ts,253,safeFetch,finance
-finance,services,financeApi,POST,/finance/expenses,,Expense,,apps/finance/src/shared/services/financeApi.ts,256,safeFetch,finance
-finance,services,financeApi,PUT,/finance/expenses,,Expense,,apps/finance/src/shared/services/financeApi.ts,259,safeFetch,finance
-finance,services,financeApi,DELETE,/finance/expenses,,,,apps/finance/src/shared/services/financeApi.ts,261,safeFetch,finance
-finance,services,financeApi,GET,/finance/expense-categories,,ExpenseCategory[],,apps/finance/src/shared/services/financeApi.ts,264,safeFetch,finance
-finance,services,financeApi,POST,/finance/expense-categories,,ExpenseCategory,,apps/finance/src/shared/services/financeApi.ts,267,safeFetch,finance
-finance,services,financeApi,GET,/finance/report/v1/pl,,PLReport,,apps/finance/src/shared/services/financeApi.ts,274,safeFetch,finance
-finance,services,financeApi,GET,/finance/tax/config,,TaxConfig[],,apps/finance/src/shared/services/financeApi.ts,279,safeFetch,finance
-finance,services,financeApi,POST,/finance/tax/config,,TaxConfig,,apps/finance/src/shared/services/financeApi.ts,282,safeFetch,finance
-finance,services,financeApi,GET,/finance/tax/report,,TaxReport,,apps/finance/src/shared/services/financeApi.ts,284,safeFetch,finance
-finance,services,financeApi,GET,/finance/recurring-invoices,,,,apps/finance/src/shared/services/financeApi.ts,287,safeFetch,finance
-finance,services,financeApi,POST,/finance/recurring-invoices,,,,apps/finance/src/shared/services/financeApi.ts,290,safeFetch,finance
-finance,services,financeApi,PUT,/finance/recurring-invoices,,,,apps/finance/src/shared/services/financeApi.ts,293,safeFetch,finance
-finance,services,financeApi,GET,/finance/quotes,,,,apps/finance/src/shared/services/financeApi.ts,296,safeFetch,finance
-finance,services,financeApi,POST,/finance/quotes,,,,apps/finance/src/shared/services/financeApi.ts,298,safeFetch,finance
-finance,services,financeApi,PUT,/finance/quotes,,,,apps/finance/src/shared/services/financeApi.ts,301,safeFetch,finance
-finance,services,financeApi,DELETE,/finance/quotes,,,,apps/finance/src/shared/services/financeApi.ts,303,safeFetch,finance
-finance,services,financeApi,GET,/finance/bills,,,,apps/finance/src/shared/services/financeApi.ts,306,safeFetch,finance
-finance,services,financeApi,POST,/finance/bills,,,,apps/finance/src/shared/services/financeApi.ts,308,safeFetch,finance
-finance,services,financeApi,PUT,/finance/bills,,,,apps/finance/src/shared/services/financeApi.ts,311,safeFetch,finance
-finance,services,financeApi,GET,/finance/bank-accounts,,,,apps/finance/src/shared/services/financeApi.ts,314,safeFetch,finance
-finance,services,financeApi,POST,/finance/bank-accounts,,,,apps/finance/src/shared/services/financeApi.ts,317,safeFetch,finance
-finance,services,financeApi,GET,/finance/reconciliation,,,,apps/finance/src/shared/services/financeApi.ts,320,safeFetch,finance
-finance,services,financeApi,POST,/finance/reconciliation/match,,,,apps/finance/src/shared/services/financeApi.ts,326,safeFetch,finance
-finance,services,financeApi,GET,/finance/balance-sheet,,,,apps/finance/src/shared/services/financeApi.ts,333,safeFetch,finance
-finance,services,financeApi,GET,/finance/cash-flow,,,,apps/finance/src/shared/services/financeApi.ts,336,safeFetch,finance
-finance,services,financeApi,GET,/finance/accounts,,,,apps/finance/src/shared/services/financeApi.ts,339,safeFetch,finance
-finance,services,financeApi,POST,/finance/accounts,,,,apps/finance/src/shared/services/financeApi.ts,341,safeFetch,finance
-finance,services,financeApi,GET,/finance/journal,,,,apps/finance/src/shared/services/financeApi.ts,344,safeFetch,finance
-finance,services,financeApi,POST,/finance/journal,,,,apps/finance/src/shared/services/financeApi.ts,346,safeFetch,finance
-finance,services,financeApi,GET,/finance/expenses,,,,apps/finance/src/shared/services/financeApi.ts,349,safeFetch,finance
-finance,services,financeService,GET,/finance/dashboard,,,,apps/finance/src/shared/services/financeService.ts,60,safeFetch,finance
-finance,services,financeService,GET,/finance/invoices,,,,apps/finance/src/shared/services/financeService.ts,62,safeFetch,finance
-finance,services,financeService,POST,/finance/invoices,,,,apps/finance/src/shared/services/financeService.ts,63,safeFetch,finance
-finance,services,financeService,GET,/finance/invoices/detail,,,,apps/finance/src/shared/services/financeService.ts,64,safeFetch,finance
-finance,services,financeService,PUT,/finance/invoices,,,,apps/finance/src/shared/services/financeService.ts,66,safeFetch,finance
-finance,services,financeService,DELETE,/finance/invoices,,,,apps/finance/src/shared/services/financeService.ts,67,safeFetch,finance
-finance,services,financeService,PUT,/finance/invoices/status,,,,apps/finance/src/shared/services/financeService.ts,69,safeFetch,finance
-finance,services,financeService,POST,/finance/invoices/payment,,,,apps/finance/src/shared/services/financeService.ts,71,safeFetch,finance
-finance,services,financeService,GET,/finance/expenses,,,,apps/finance/src/shared/services/financeService.ts,73,safeFetch,finance
-finance,services,financeService,POST,/finance/expenses,,,,apps/finance/src/shared/services/financeService.ts,74,safeFetch,finance
-finance,services,financeService,PUT,/finance/expenses/${id},,,,apps/finance/src/shared/services/financeService.ts,76,safeFetch,finance
-finance,services,financeService,DELETE,/finance/expenses/${id},,,,apps/finance/src/shared/services/financeService.ts,77,safeFetch,finance
-finance,services,financeService,GET,/finance/expenses/categories,,,,apps/finance/src/shared/services/financeService.ts,78,safeFetch,finance
-finance,services,financeService,GET,/finance/tax,,,,apps/finance/src/shared/services/financeService.ts,80,safeFetch,finance
-finance,services,financeService,PUT,/finance/tax,,,,apps/finance/src/shared/services/financeService.ts,81,safeFetch,finance
-finance,services,financeService,GET,/finance/report/v1/pl,,,,apps/finance/src/shared/services/financeService.ts,83,safeFetch,finance
+finance,lib,financeCompatibilityClient,PUT,/finance/expense-categories,,unknown,,apps/finance/src/shared/lib/clients.ts,180,safeFetch,finance
+finance,lib,financeCompatibilityClient,DELETE,/finance/expense-categories,,unknown,,apps/finance/src/shared/lib/clients.ts,183,safeFetch,finance
+finance,lib,financeCompatibilityClient,PUT,/finance/quotes/{req},,unknown,,apps/finance/src/shared/lib/clients.ts,186,safeFetch,finance
+finance,lib,financeCompatibilityClient,DELETE,/finance/quotes/{req},,unknown,,apps/finance/src/shared/lib/clients.ts,188,safeFetch,finance
+finance,lib,financeCompatibilityClient,GET,/finance/bank-feeds,,unknown,,apps/finance/src/shared/lib/clients.ts,191,safeFetch,finance
+finance,lib,financeCompatibilityClient,POST,/finance/recurring-invoices/{req}/trigger,,unknown,,apps/finance/src/shared/lib/clients.ts,199,safeFetch,finance
+finance,lib,financeCompatibilityClient,,AccountService.listAccounts,ListAccountsRequest,ListAccountsResponse,,apps/finance/src/shared/lib/clients.ts,70,onekit,finance
+finance,lib,financeCompatibilityClient,,AccountService.createAccount,CreateAccountRequest,CreateAccountResponse,,apps/finance/src/shared/lib/clients.ts,72,onekit,finance
+finance,lib,financeCompatibilityClient,,BankAccountService.listBankAccounts,ListBankAccountsRequest,ListBankAccountsResponse,,apps/finance/src/shared/lib/clients.ts,76,onekit,finance
+finance,lib,financeCompatibilityClient,,BankAccountService.createBankAccount,CreateBankAccountRequest,CreateBankAccountResponse,,apps/finance/src/shared/lib/clients.ts,78,onekit,finance
+finance,lib,financeCompatibilityClient,,BillService.listBills,ListBillsRequest,ListBillsResponse,,apps/finance/src/shared/lib/clients.ts,81,onekit,finance
+finance,lib,financeCompatibilityClient,,BillService.createBill,CreateBillRequest,CreateBillResponse,,apps/finance/src/shared/lib/clients.ts,82,onekit,finance
+finance,lib,financeCompatibilityClient,,BillService.updateBill,UpdateBillRequest,UpdateBillResponse,,apps/finance/src/shared/lib/clients.ts,83,onekit,finance
+finance,lib,financeCompatibilityClient,,ExpensesService.listExpenses,ListExpensesRequest,ListExpensesResponse,,apps/finance/src/shared/lib/clients.ts,87,onekit,finance
+finance,lib,financeCompatibilityClient,,ExpensesService.createExpense,CreateExpenseRequest,CreateExpenseResponse,,apps/finance/src/shared/lib/clients.ts,89,onekit,finance
+finance,lib,financeCompatibilityClient,,ExpensesService.updateExpense,UpdateExpenseRequest,UpdateExpenseResponse,,apps/finance/src/shared/lib/clients.ts,91,onekit,finance
+finance,lib,financeCompatibilityClient,,ReportService.listExpenseCategoryDetails,ListExpenseCategoryDetailsRequest,ListExpenseCategoryDetailsResponse,,apps/finance/src/shared/lib/clients.ts,95,onekit,finance
+finance,lib,financeCompatibilityClient,,ReportService.createExpenseCategoryDetail,CreateExpenseCategoryDetailRequest,CreateExpenseCategoryDetailResponse,,apps/finance/src/shared/lib/clients.ts,97,onekit,finance
+finance,lib,financeCompatibilityClient,,InvoicesService.listInvoices,ListInvoicesRequest,ListInvoicesResponse,,apps/finance/src/shared/lib/clients.ts,101,onekit,finance
+finance,lib,financeCompatibilityClient,,InvoicesService.getInvoice,GetInvoiceRequest,GetInvoiceResponse,,apps/finance/src/shared/lib/clients.ts,103,onekit,finance
+finance,lib,financeCompatibilityClient,,InvoicesService.createInvoice,CreateInvoiceRequest,CreateInvoiceResponse,,apps/finance/src/shared/lib/clients.ts,105,onekit,finance
+finance,lib,financeCompatibilityClient,,InvoicesService.updateInvoice,UpdateInvoiceRequest,UpdateInvoiceResponse,,apps/finance/src/shared/lib/clients.ts,107,onekit,finance
+finance,lib,financeCompatibilityClient,,InvoicesService.updateInvoiceStatus,UpdateInvoiceStatusRequest,UpdateInvoiceStatusResponse,,apps/finance/src/shared/lib/clients.ts,109,onekit,finance
+finance,lib,financeCompatibilityClient,,InvoicePaymentService.recordPayment,RecordPaymentRequest,RecordPaymentResponse,,apps/finance/src/shared/lib/clients.ts,111,onekit,finance
+finance,lib,financeCompatibilityClient,,JournalService.listJournalEntries,ListJournalEntriesRequest,ListJournalEntriesResponse,,apps/finance/src/shared/lib/clients.ts,115,onekit,finance
+finance,lib,financeCompatibilityClient,,JournalService.createJournalEntry,CreateJournalEntryRequest,CreateJournalEntryResponse,,apps/finance/src/shared/lib/clients.ts,117,onekit,finance
+finance,lib,financeCompatibilityClient,,QuoteService.listQuotes,ListQuotesRequest,ListQuotesResponse,,apps/finance/src/shared/lib/clients.ts,121,onekit,finance
+finance,lib,financeCompatibilityClient,,QuoteService.createQuote,CreateQuoteRequest,CreateQuoteResponse,,apps/finance/src/shared/lib/clients.ts,123,onekit,finance
+finance,lib,financeCompatibilityClient,,ReconciliationService.getOverview,GetOverviewRequest,GetOverviewResponse,,apps/finance/src/shared/lib/clients.ts,127,onekit,finance
+finance,lib,financeCompatibilityClient,,ReconciliationService.match,MatchRequest,MatchResponse,,apps/finance/src/shared/lib/clients.ts,129,onekit,finance
+finance,lib,financeCompatibilityClient,,ReconciliationService.match,MatchRequest,MatchResponse,,apps/finance/src/shared/lib/clients.ts,131,onekit,finance
+finance,lib,financeCompatibilityClient,,RecurringInvoiceService.listRecurringInvoices,ListRecurringInvoicesRequest,ListRecurringInvoicesResponse,,apps/finance/src/shared/lib/clients.ts,136,onekit,finance
+finance,lib,financeCompatibilityClient,,RecurringInvoiceService.createRecurringInvoice,CreateRecurringInvoiceRequest,CreateRecurringInvoiceResponse,,apps/finance/src/shared/lib/clients.ts,139,onekit,finance
+finance,lib,financeCompatibilityClient,,RecurringInvoiceService.updateRecurringInvoice,UpdateRecurringInvoiceRequest,UpdateRecurringInvoiceResponse,,apps/finance/src/shared/lib/clients.ts,142,onekit,finance
+finance,lib,financeCompatibilityClient,,ReportService.getPLReport,GetPLReportRequest,GetPLReportResponse,,apps/finance/src/shared/lib/clients.ts,146,onekit,finance
+finance,lib,financeCompatibilityClient,,ReportService.getTaxReport,GetTaxReportRequest,GetTaxReportResponse,,apps/finance/src/shared/lib/clients.ts,148,onekit,finance
+finance,lib,financeCompatibilityClient,,ReportService.listTaxConfig,ListTaxConfigRequest,ListTaxConfigResponse,,apps/finance/src/shared/lib/clients.ts,150,onekit,finance
+finance,lib,financeCompatibilityClient,,ReportService.createTaxConfig,CreateTaxConfigRequest,CreateTaxConfigResponse,,apps/finance/src/shared/lib/clients.ts,152,onekit,finance
+finance,lib,financeCompatibilityClient,,StatementService.getBalanceSheet,GetBalanceSheetRequest,GetBalanceSheetResponse,,apps/finance/src/shared/lib/clients.ts,156,onekit,finance
+finance,lib,financeCompatibilityClient,,StatementService.getCashFlow,GetCashFlowRequest,GetCashFlowResponse,,apps/finance/src/shared/lib/clients.ts,158,onekit,finance
+finance,lib,financeCompatibilityClient,,TaxService.updateTaxConfig,UpdateTaxConfigRequest,UpdateTaxConfigResponse,,apps/finance/src/shared/lib/clients.ts,162,onekit,finance
+finance,lib,financeCompatibilityClient,,FinanceDashboardService.getFinanceDashboard,GetFinanceDashboardRequest,GetFinanceDashboardResponse,,apps/finance/src/shared/lib/clients.ts,166,onekit,finance
+finance,lib,financeCompatibilityClient,,ExpensesService.getExpense,GetExpenseRequest,GetExpenseResponse,,apps/finance/src/shared/lib/clients.ts,168,onekit,finance
+finance,lib,listCrmCustomers,,CustomerService.listCustomers,ListCustomersRequest,ListCustomersResponse,,apps/finance/src/shared/lib/clients.ts,202,onekit,support
+finance,services,financeApi,,InvoicesService.deleteInvoice,DeleteInvoiceRequest,DeleteInvoiceResponse,,apps/finance/src/shared/services/financeApi.ts,284,onekit,finance
+finance,services,financeApi,,ExpensesService.deleteExpense,DeleteExpenseRequest,DeleteExpenseResponse,,apps/finance/src/shared/services/financeApi.ts,318,onekit,finance
 flow,directory,useDirectory,,StaffService.listStaff,ListStaffRequest,ListStaffResponse,"['directory', search]",apps/flow/src/features/directory/useDirectory.ts,25,onekit,hr
 flow,directory,useDirectory,,DepartmentService.listDepartments,ListDepartmentsRequest,ListDepartmentsResponse,"['directory', search]",apps/flow/src/features/directory/useDirectory.ts,26,onekit,hr
 flow,leave,res,,LeaveService.listLeaveTypes,ListLeaveTypesRequest,ListLeaveTypesResponse,['leave-types'],apps/flow/src/features/leave/useLeave.ts,23,onekit,hr
@@ -411,10 +314,9 @@ flow,leave,res,,LeaveService.listLeaveRequests,ListLeaveRequestsRequest,ListLeav
 flow,leave,res,,LeaveService.listLeaveBalances,ListLeaveBalancesRequest,ListLeaveBalancesResponse,"['leave-balances', employeeId]",apps/flow/src/features/leave/useLeave.ts,45,onekit,hr
 flow,leave,queryClient,,LeaveService.createLeaveRequest,CreateLeaveRequestRequest,CreateLeaveRequestResponse,['leave-requests'],apps/flow/src/features/leave/useLeave.ts,54,onekit,hr
 flow,leave,queryClient,,LeaveService.cancelLeaveRequest,CancelLeaveRequestRequest,CancelLeaveResponse,['leave-requests'],apps/flow/src/features/leave/useLeave.ts,67,onekit,hr
-flow,presence,res,GET,/flow/presence/today,,unknown,['presence-today'],apps/flow/src/features/presence/usePresence.ts,15,safeFetch,flow
-flow,profile,res,GET,/hr/staff/detail,,unknown,"['my-profile-detail', staffId]",apps/flow/src/features/profile/useProfile.ts,48,safeFetch,hr
-flow,profile,useMyStaffRecord,,StaffService.listStaff,ListStaffRequest,ListStaffResponse,"['my-staff-record', authUserId]",apps/flow/src/features/profile/useProfile.ts,30,onekit,hr
-flow,profile,useMyStaffRecord,,DepartmentService.listDepartments,ListDepartmentsRequest,ListDepartmentsResponse,"['my-staff-record', authUserId]",apps/flow/src/features/profile/useProfile.ts,31,onekit,hr
+flow,presence,res,GET,/flow/presence/today,,unknown,['presence-today'],apps/flow/src/features/presence/usePresence.ts,17,safeFetch,flow
+flow,profile,useMyStaffRecord,,StaffService.listStaff,ListStaffRequest,ListStaffResponse,"['my-staff-record', authUserId]",apps/flow/src/features/profile/useProfile.ts,28,onekit,hr
+flow,profile,useMyStaffRecord,,DepartmentService.listDepartments,ListDepartmentsRequest,ListDepartmentsResponse,"['my-staff-record', authUserId]",apps/flow/src/features/profile/useProfile.ts,29,onekit,hr
 flow,time,useWorkDay,,TimeService.getWorkDay,GetWorkDayRequest,GetWorkDayResponse,,apps/flow/src/features/time/useWorkDay.ts,48,onekit,flow
 flow,time,useWorkTypes,,TimeService.listWorkTypes,ListWorkTypesRequest,ListWorkTypesResponse,"[...workTypesKey, includeArchived]",apps/flow/src/features/time/useWorkDay.ts,58,onekit,flow
 flow,time,queryClient,,TimeService.createWorkType,CreateWorkTypeRequest,CreateWorkTypeResponse,"[...workTypesKey, includeArchived]",apps/flow/src/features/time/useWorkDay.ts,71,onekit,flow
@@ -425,82 +327,87 @@ flow,time,useWorkDaysForWorkspace,,TimeService.listWorkDaysForWorkspace,ListWork
 flow,time,queryClient,,TimeService.upsertWorkDay,UpsertWorkDayRequest,UpsertWorkDayResponse,,apps/flow/src/features/time/useWorkDay.ts,161,onekit,flow
 flow,time,queryClient,,TimeService.createWorkDayLine,CreateWorkDayLineRequest,CreateWorkDayLineResponse,['work-days-range'],apps/flow/src/features/time/useWorkDay.ts,196,onekit,flow
 flow,time,queryClient,,TimeService.deleteWorkDayLine,DeleteWorkDayLineRequest,DeleteWorkDayLineResponse,['work-days-range'],apps/flow/src/features/time/useWorkDay.ts,220,onekit,flow
-flow,,rootRoute,GET,/hub/user/v1/users/me,,"Record<string, unknown>",,apps/flow/src/router.tsx,100,safeFetch,hub
-flow,hooks/queries,res,,SubscriptionService.getMySubscription,GetMySubscriptionRequest,GetMySubscriptionResponse,['flow-subscription'],apps/flow/src/shared/hooks/queries/useFlowSubscription.ts,63,onekit,hub
+flow,,rootRoute,,UserService.getMe,GetMeRequest,GetMeResponse,,apps/flow/src/router.tsx,99,onekit,hub
+flow,hooks/queries,res,,SubscriptionService.getMySubscription,GetMySubscriptionRequest,GetMySubscriptionResponse,['flow-subscription'],apps/flow/src/shared/hooks/queries/useFlowSubscription.ts,77,onekit,hub
 flow,hooks/queries,res,,MembersService.listTeam,ListTeamRequest,ListTeamResponse,['flow-team'],apps/flow/src/shared/hooks/queries/useFlowTeam.ts,64,onekit,hub
 flow,hooks/queries,nextApps,,PermissionsService.updatePermissions,UpdatePermissionsRequest,UpdatePermissionsResponse,,apps/flow/src/shared/hooks/queries/useFlowTeam.ts,79,onekit,hub
 flow,hooks/queries,qc,,MembersService.removeMember,RemoveMemberRequest,RemoveMemberResponse,['flow-team'],apps/flow/src/shared/hooks/queries/useFlowTeam.ts,95,onekit,hub
-flow,shared,res,GET,/hr/employees/me,,unknown,['my-employee-id'],apps/flow/src/shared/hooks/useMyEmployeeId.ts,16,safeFetch,hr
-flow,services,flowApi,GET,/flow/dashboard/v1/dashboard,,DashboardStats,,apps/flow/src/shared/services/flowApi.ts,424,safeFetch,flow
-flow,services,flowApi,GET,/flow/workspace/v1/workspaces,,{ workspaces: ApiWorkspace[] },,apps/flow/src/shared/services/flowApi.ts,429,safeFetch,flow
-flow,services,flowApi,GET,/hub/business/v1/businesses/mine,,{ businesses: ApiBusinessSummary[] },,apps/flow/src/shared/services/flowApi.ts,432,safeFetch,hub
-flow,services,flowApi,POST,/flow/workspace/v1/workspaces,,{ workspace: ApiWorkspace },,apps/flow/src/shared/services/flowApi.ts,435,safeFetch,flow
-flow,services,flowApi,PUT,/flow/workspace/v1/workspaces/${id},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,446,safeFetch,flow
-flow,services,flowApi,DELETE,/flow/workspace/v1/workspaces/${id},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,456,safeFetch,flow
-flow,services,flowApi,GET,/flow/workspace/v1/workspaces/members,,{ members: ApiWorkspaceMember[] },,apps/flow/src/shared/services/flowApi.ts,459,safeFetch,flow
-flow,services,flowApi,POST,/flow/workspace/v1/workspaces/members,,,,apps/flow/src/shared/services/flowApi.ts,464,safeFetch,flow
-flow,services,flowApi,DELETE,/flow/workspace/v1/workspaces/members,,,,apps/flow/src/shared/services/flowApi.ts,471,safeFetch,flow
-flow,services,flowApi,PUT,/flow/workspace/v1/workspaces/members/role,,,,apps/flow/src/shared/services/flowApi.ts,476,safeFetch,flow
-flow,services,flowApi,GET,/flow/project/v1/projects,,{ projects: ApiProject[] },,apps/flow/src/shared/services/flowApi.ts,481,safeFetch,flow
-flow,services,flowApi,GET,/flow/project/v1/projects/columns,,{ columns: ApiProjectColumn[] },,apps/flow/src/shared/services/flowApi.ts,488,safeFetch,flow
-flow,services,flowApi,POST,/flow/project/v1/projects/columns,,{ column: ApiProjectColumn },,apps/flow/src/shared/services/flowApi.ts,498,safeFetch,flow
-flow,services,flowApi,PUT,/flow/project/v1/projects/columns/${data.id},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,501,safeFetch,flow
-flow,services,flowApi,DELETE,/flow/project/v1/projects/columns/${id},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,508,safeFetch,flow
-flow,services,flowApi,PUT,/flow/project/v1/projects/columns/move,,{ message: string },,apps/flow/src/shared/services/flowApi.ts,511,safeFetch,flow
-flow,services,flowApi,POST,/flow/project/v1/projects,,{ project: ApiProject },,apps/flow/src/shared/services/flowApi.ts,524,safeFetch,flow
-flow,services,flowApi,PUT,/flow/project/v1/projects/${id},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,550,safeFetch,flow
-flow,services,flowApi,DELETE,/flow/project/v1/projects/${id},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,561,safeFetch,flow
-flow,services,flowApi,GET,/flow/project/v1/projects/members,,{ members: ApiProjectMember[] },,apps/flow/src/shared/services/flowApi.ts,564,safeFetch,flow
-flow,services,flowApi,POST,/flow/project/v1/projects/members,,,,apps/flow/src/shared/services/flowApi.ts,569,safeFetch,flow
-flow,services,flowApi,POST,/flow/project/v1/projects/members/invite,,,,apps/flow/src/shared/services/flowApi.ts,572,safeFetch,flow
-flow,services,flowApi,DELETE,/flow/project/v1/projects/members,,,,apps/flow/src/shared/services/flowApi.ts,575,safeFetch,flow
-flow,services,flowApi,PUT,/flow/project/v1/projects/members/role,,,,apps/flow/src/shared/services/flowApi.ts,580,safeFetch,flow
-flow,services,flowApi,PUT,/flow/project/v1/projects/transfer,,,,apps/flow/src/shared/services/flowApi.ts,583,safeFetch,flow
-flow,services,flowApi,PUT,/flow/project/v1/projects/move,,,,apps/flow/src/shared/services/flowApi.ts,586,safeFetch,flow
-flow,services,q,GET,/flow/task/v1/tasks,,{ tasks: ApiTask[] },,apps/flow/src/shared/services/flowApi.ts,605,safeFetch,flow
-flow,services,q,GET,/flow/task/v1/tasks/my,,{ tasks: ApiTask[] },,apps/flow/src/shared/services/flowApi.ts,608,safeFetch,flow
-flow,services,q,GET,/flow/task/v1/tasks/my-project,,{ projectId: string; workspaceId: string },,apps/flow/src/shared/services/flowApi.ts,613,safeFetch,flow
-flow,services,q,GET,/flow/task/v1/tasks/search,,{ tasks: ApiTask[] },,apps/flow/src/shared/services/flowApi.ts,616,safeFetch,flow
-flow,services,q,GET,/flow/task/v1/tasks/${id},,ApiTaskDetail,,apps/flow/src/shared/services/flowApi.ts,620,safeFetch,flow
-flow,services,q,POST,/flow/task/v1/tasks,,{ task: ApiTask },,apps/flow/src/shared/services/flowApi.ts,638,safeFetch,flow
-flow,services,q,PUT,/flow/task/v1/tasks/${id},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,651,safeFetch,flow
-flow,services,q,DELETE,/flow/task/v1/tasks/${id},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,670,safeFetch,flow
-flow,services,q,PATCH,/flow/task/v1/tasks/${id}/status,,{ message: string },,apps/flow/src/shared/services/flowApi.ts,673,safeFetch,flow
-flow,services,q,POST,/flow/task/v1/tasks/${data.taskId}/comments,,{ comment: ApiTaskComment },,apps/flow/src/shared/services/flowApi.ts,678,safeFetch,flow
-flow,services,q,DELETE,/flow/task/v1/tasks/comments/${id},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,683,safeFetch,flow
-flow,services,q,GET,/flow/task/v1/tasks/${taskId}/activity,,{ activity: ApiTaskActivity[] },,apps/flow/src/shared/services/flowApi.ts,688,safeFetch,flow
-flow,services,q,GET,/flow/task/v1/tasks/${id}/subtasks,,{ subtasks: ApiSubtask[] },,apps/flow/src/shared/services/flowApi.ts,691,safeFetch,flow
-flow,services,q,POST,/flow/task/v1/tasks/subtasks,,{ task_id: number; message: string },,apps/flow/src/shared/services/flowApi.ts,699,safeFetch,flow
-flow,services,q,GET,/flow/task/v1/tasks/${id}/attachments,,{ attachments: ApiAttachment[] },,apps/flow/src/shared/services/flowApi.ts,712,safeFetch,flow
-flow,services,q,POST,/flow/task/v1/tasks/attachments,,{ attachment_id: number; message: string },,apps/flow/src/shared/services/flowApi.ts,718,safeFetch,flow
-flow,services,q,DELETE,/flow/task/v1/tasks/attachments/${attachmentId},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,726,safeFetch,flow
-flow,services,q,GET,/flow/task/v1/tasks/${taskId}/time-logs,,{ timeLogs: ApiTimeLog[] },,apps/flow/src/shared/services/flowApi.ts,731,safeFetch,flow
-flow,services,q,POST,/flow/task/v1/tasks/${data.task_id}/time-logs,,{ time_log_id: number; message: string },,apps/flow/src/shared/services/flowApi.ts,734,safeFetch,flow
-flow,services,q,DELETE,/flow/task/v1/tasks/time-logs/${id},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,744,safeFetch,flow
-flow,services,q,GET,/flow/label/v1/labels,,{ labels: ApiLabel[] },,apps/flow/src/shared/services/flowApi.ts,749,safeFetch,flow
-flow,services,q,POST,/flow/label/v1/labels,,{ label: ApiLabel },,apps/flow/src/shared/services/flowApi.ts,759,safeFetch,flow
-flow,services,q,PUT,/flow/label/v1/labels/${data.id},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,762,safeFetch,flow
-flow,services,q,DELETE,/flow/label/v1/labels/${id},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,767,safeFetch,flow
-flow,services,q,PUT,/flow/label/v1/tasks/labels,,,,apps/flow/src/shared/services/flowApi.ts,774,safeFetch,flow
-flow,services,q,GET,/flow/label/v1/labels,,{ labels: ApiLabel[] },,apps/flow/src/shared/services/flowApi.ts,780,safeFetch,flow
-flow,services,params,GET,/flow/milestone/v1/milestones,,{ milestones: ApiMilestone[] },,apps/flow/src/shared/services/flowApi.ts,797,safeFetch,flow
-flow,services,params,POST,/flow/milestone/v1/milestones,,{ milestone: ApiMilestone },,apps/flow/src/shared/services/flowApi.ts,803,safeFetch,flow
-flow,services,params,PUT,/flow/milestone/v1/milestones/${id},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,809,safeFetch,flow
-flow,services,params,GET,/flow/cycle/v1/cycles,,{ cycles: ApiCycle[] },,apps/flow/src/shared/services/flowApi.ts,817,safeFetch,flow
-flow,services,params,POST,/flow/cycle/v1/cycles,,{ cycle: ApiCycle },,apps/flow/src/shared/services/flowApi.ts,822,safeFetch,flow
-flow,services,params,PUT,/flow/cycle/v1/cycles/${id},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,825,safeFetch,flow
-flow,services,params,PUT,/flow/view/v1/views/${id},,{ message: string },,apps/flow/src/shared/services/flowApi.ts,845,safeFetch,flow
-flow,services,params,DELETE,/flow/view/v1/views/${id},,,,apps/flow/src/shared/services/flowApi.ts,847,safeFetch,flow
-flow,services,params,GET,/flow/insights/v1/overview,,ApiInsights,,apps/flow/src/shared/services/flowApi.ts,852,safeFetch,flow
-flow,services,params,GET,/flow/insights/v1/team/workload,,{ members: ApiTeamWorkload[] },,apps/flow/src/shared/services/flowApi.ts,859,safeFetch,flow
-flow,services,params,GET,/flow/insights/v1/roadmap,,{ projects: ApiRoadmap[] },,apps/flow/src/shared/services/flowApi.ts,866,safeFetch,flow
-flow,services,params,GET,/flow/notification/v1/notifications,,{ notifications: ApiNotification[] },,apps/flow/src/shared/services/flowApi.ts,873,safeFetch,flow
-flow,services,params,PUT,/flow/notification/v1/notifications/${id}/read,,,,apps/flow/src/shared/services/flowApi.ts,876,safeFetch,flow
-flow,services,params,PUT,/flow/notification/v1/notifications/read-all,,,,apps/flow/src/shared/services/flowApi.ts,878,safeFetch,flow
-flow,services,params,GET,/flow/setting/v1/settings,,ApiUserSettings,,apps/flow/src/shared/services/flowApi.ts,882,safeFetch,flow
-flow,services,params,PUT,/flow/setting/v1/settings,,,,apps/flow/src/shared/services/flowApi.ts,885,safeFetch,flow
-flow,services,params,PATCH,/hub/user/v1/users/me,,,,apps/flow/src/shared/services/flowApi.ts,890,safeFetch,hub
-flow,services,params,POST,/hub/user/v1/users/password,,,,apps/flow/src/shared/services/flowApi.ts,896,safeFetch,hub
+flow,hooks/queries,useMemberCapacityHours,,EmployeeService.listEmployees,ListEmployeesRequest,ListEmployeesResponse,['member-capacity-hours'],apps/flow/src/shared/hooks/queries/useMemberCapacity.ts,31,onekit,hr
+flow,hooks/queries,useMemberCapacityHours,,WorkScheduleService.listWorkSchedules,ListWorkSchedulesRequest,ListWorkSchedulesResponse,['member-capacity-hours'],apps/flow/src/shared/hooks/queries/useMemberCapacity.ts,32,onekit,hr
+flow,shared,res,GET,/hr/employees/me,,unknown,['my-employee-id'],apps/flow/src/shared/hooks/useMyEmployeeId.ts,17,safeFetch,hr
+flow,lib,result,GET,/license/state,,LicenseState,,apps/flow/src/shared/lib/api.ts,26,safeFetch,
+flow,services,flowApi,,DashboardService.getFlowDashboard,GetFlowDashboardRequest,GetFlowDashboardResponse,,apps/flow/src/shared/services/flowApi.ts,444,onekit,flow
+flow,services,flowApi,,WorkspaceService.listWorkspaces,ListWorkspacesRequest,ListWorkspacesResponse,,apps/flow/src/shared/services/flowApi.ts,449,onekit,flow
+flow,services,flowApi,,BusinessService.listMyBusinesses,ListMyBusinessesRequest,ListMyBusinessesResponse,,apps/flow/src/shared/services/flowApi.ts,452,onekit,hub
+flow,services,flowApi,,WorkspaceService.createWorkspace,CreateWorkspaceRequest,CreateWorkspaceResponse,,apps/flow/src/shared/services/flowApi.ts,456,onekit,flow
+flow,services,flowApi,,WorkspaceService.updateWorkspace,UpdateWorkspaceRequest,UpdateWorkspaceResponse,,apps/flow/src/shared/services/flowApi.ts,469,onekit,flow
+flow,services,flowApi,,WorkspaceService.deleteWorkspace,DeleteWorkspaceRequest,DeleteWorkspaceResponse,,apps/flow/src/shared/services/flowApi.ts,481,onekit,flow
+flow,services,flowApi,,WorkspaceService.listWorkspaceMembers,ListWorkspaceMembersRequest,ListWorkspaceMembersResponse,,apps/flow/src/shared/services/flowApi.ts,485,onekit,flow
+flow,services,flowApi,,WorkspaceService.addWorkspaceMember,AddWorkspaceMemberRequest,AddWorkspaceMemberResponse,,apps/flow/src/shared/services/flowApi.ts,490,onekit,flow
+flow,services,flowApi,,WorkspaceService.removeWorkspaceMember,RemoveWorkspaceMemberRequest,RemoveWorkspaceMemberResponse,,apps/flow/src/shared/services/flowApi.ts,499,onekit,flow
+flow,services,flowApi,,WorkspaceService.updateWorkspaceMemberRole,UpdateWorkspaceMemberRoleRequest,UpdateWorkspaceMemberRoleResponse,,apps/flow/src/shared/services/flowApi.ts,507,onekit,flow
+flow,services,flowApi,,ProjectService.listProjects,ListProjectsRequest,ListProjectsResponse,,apps/flow/src/shared/services/flowApi.ts,517,onekit,flow
+flow,services,flowApi,,ProjectService.listProjectColumns,ListProjectColumnsRequest,ListProjectColumnsResponse,,apps/flow/src/shared/services/flowApi.ts,523,onekit,flow
+flow,services,flowApi,,ProjectService.createProjectColumn,CreateProjectColumnRequest,CreateProjectColumnResponse,,apps/flow/src/shared/services/flowApi.ts,534,onekit,flow
+flow,services,flowApi,,ProjectService.updateProjectColumn,UpdateProjectColumnRequest,UpdateProjectColumnResponse,,apps/flow/src/shared/services/flowApi.ts,545,onekit,flow
+flow,services,flowApi,,ProjectService.deleteProjectColumn,DeleteProjectColumnRequest,DeleteProjectColumnResponse,,apps/flow/src/shared/services/flowApi.ts,554,onekit,flow
+flow,services,flowApi,,ProjectService.moveTaskToColumn,MoveTaskToColumnRequest,MoveTaskToColumnResponse,,apps/flow/src/shared/services/flowApi.ts,557,onekit,flow
+flow,services,flowApi,,ProjectService.createProject,CreateProjectRequest,CreateProjectResponse,,apps/flow/src/shared/services/flowApi.ts,568,onekit,flow
+flow,services,flowApi,,ProjectService.updateProject,UpdateProjectRequest,UpdateProjectResponse,,apps/flow/src/shared/services/flowApi.ts,596,onekit,flow
+flow,services,flowApi,,ProjectService.deleteProject,DeleteProjectRequest,DeleteProjectResponse,,apps/flow/src/shared/services/flowApi.ts,611,onekit,flow
+flow,services,flowApi,,ProjectService.listProjectMembers,ListProjectMembersRequest,ListProjectMembersResponse,,apps/flow/src/shared/services/flowApi.ts,615,onekit,flow
+flow,services,flowApi,,ProjectService.addProjectMember,AddProjectMemberRequest,AddProjectMemberResponse,,apps/flow/src/shared/services/flowApi.ts,620,onekit,flow
+flow,services,flowApi,,ProjectService.inviteProjectMember,InviteProjectMemberRequest,InviteProjectMemberResponse,,apps/flow/src/shared/services/flowApi.ts,629,onekit,flow
+flow,services,flowApi,,ProjectService.removeProjectMember,RemoveProjectMemberRequest,RemoveProjectMemberResponse,,apps/flow/src/shared/services/flowApi.ts,638,onekit,flow
+flow,services,flowApi,,ProjectService.updateProjectMemberRole,UpdateProjectMemberRoleRequest,UpdateProjectMemberRoleResponse,,apps/flow/src/shared/services/flowApi.ts,646,onekit,flow
+flow,services,flowApi,,ProjectService.transferProjectOwnership,TransferProjectOwnershipRequest,TransferProjectOwnershipResponse,,apps/flow/src/shared/services/flowApi.ts,655,onekit,flow
+flow,services,flowApi,,ProjectService.moveProject,MoveProjectRequest,MoveProjectResponse,,apps/flow/src/shared/services/flowApi.ts,663,onekit,flow
+flow,services,q,,TaskService.listTasks,ListTasksRequest,ListTasksResponse,,apps/flow/src/shared/services/flowApi.ts,687,onekit,flow
+flow,services,q,,TaskService.getMyTasks,GetMyTasksRequest,GetMyTasksResponse,,apps/flow/src/shared/services/flowApi.ts,696,onekit,flow
+flow,services,q,,TaskService.getMyTasksProject,GetMyTasksProjectRequest,GetMyTasksProjectResponse,,apps/flow/src/shared/services/flowApi.ts,701,onekit,flow
+flow,services,q,,TaskService.searchTasks,SearchTasksRequest,SearchTasksResponse,,apps/flow/src/shared/services/flowApi.ts,704,onekit,flow
+flow,services,q,,TaskService.getTaskDetail,GetTaskDetailRequest,GetTaskDetailResponse,,apps/flow/src/shared/services/flowApi.ts,706,onekit,flow
+flow,services,payload,,TaskService.createTask,CreateTaskRequest,CreateTaskResponse,,apps/flow/src/shared/services/flowApi.ts,727,onekit,flow
+flow,services,payload,,TaskService.updateTask,UpdateTaskRequest,UpdateTaskResponse,,apps/flow/src/shared/services/flowApi.ts,753,onekit,flow
+flow,services,payload,,TaskService.deleteTask,DeleteTaskRequest,DeleteTaskResponse,,apps/flow/src/shared/services/flowApi.ts,774,onekit,flow
+flow,services,payload,,TaskService.updateTaskStatus,UpdateTaskStatusRequest,UpdateTaskStatusResponse,,apps/flow/src/shared/services/flowApi.ts,777,onekit,flow
+flow,services,payload,,TaskService.addComment,AddCommentRequest,AddCommentResponse,,apps/flow/src/shared/services/flowApi.ts,781,onekit,flow
+flow,services,payload,,TaskService.deleteComment,DeleteCommentRequest,DeleteCommentResponse,,apps/flow/src/shared/services/flowApi.ts,785,onekit,flow
+flow,services,payload,,TaskService.getTaskActivity,GetTaskActivityRequest,GetTaskActivityResponse,,apps/flow/src/shared/services/flowApi.ts,790,onekit,flow
+flow,services,payload,,TaskService.getSubtasks,GetSubtasksRequest,GetSubtasksResponse,,apps/flow/src/shared/services/flowApi.ts,793,onekit,flow
+flow,services,payload,,TaskService.createSubtask,CreateSubtaskRequest,CreateSubtaskResponse,,apps/flow/src/shared/services/flowApi.ts,802,onekit,flow
+flow,services,payload,,TaskService.getAttachments,GetAttachmentsRequest,GetAttachmentsResponse,,apps/flow/src/shared/services/flowApi.ts,816,onekit,flow
+flow,services,payload,,TaskService.createAttachment,CreateAttachmentRequest,CreateAttachmentResponse,,apps/flow/src/shared/services/flowApi.ts,823,onekit,flow
+flow,services,payload,,TaskService.deleteAttachment,DeleteAttachmentRequest,DeleteAttachmentResponse,,apps/flow/src/shared/services/flowApi.ts,832,onekit,flow
+flow,services,payload,,TaskService.getTimeLogs,GetTimeLogsRequest,GetTimeLogsResponse,,apps/flow/src/shared/services/flowApi.ts,837,onekit,flow
+flow,services,payload,,TaskService.createTimeLog,CreateTimeLogRequest,CreateTimeLogResponse,,apps/flow/src/shared/services/flowApi.ts,841,onekit,flow
+flow,services,payload,,TaskService.deleteTimeLog,DeleteTimeLogRequest,DeleteTimeLogResponse,,apps/flow/src/shared/services/flowApi.ts,849,onekit,flow
+flow,services,payload,,LabelService.listLabels,ListLabelsRequest,ListLabelsResponse,,apps/flow/src/shared/services/flowApi.ts,854,onekit,flow
+flow,services,payload,,LabelService.createLabel,CreateLabelRequest,CreateLabelResponse,,apps/flow/src/shared/services/flowApi.ts,863,onekit,flow
+flow,services,payload,,LabelService.updateLabel,UpdateLabelRequest,UpdateLabelResponse,,apps/flow/src/shared/services/flowApi.ts,872,onekit,flow
+flow,services,payload,,LabelService.deleteLabel,DeleteLabelRequest,DeleteLabelResponse,,apps/flow/src/shared/services/flowApi.ts,876,onekit,flow
+flow,services,payload,,LabelService.setTaskLabels,SetTaskLabelsRequest,SetTaskLabelsResponse,,apps/flow/src/shared/services/flowApi.ts,884,onekit,flow
+flow,services,payload,,LabelService.listLabels,ListLabelsRequest,ListLabelsResponse,,apps/flow/src/shared/services/flowApi.ts,891,onekit,flow
+flow,services,params,,MilestoneService.listMilestones,ListMilestonesRequest,ListMilestonesResponse,,apps/flow/src/shared/services/flowApi.ts,909,onekit,flow
+flow,services,params,,MilestoneService.createMilestone,CreateMilestoneRequest,CreateMilestoneResponse,,apps/flow/src/shared/services/flowApi.ts,918,onekit,flow
+flow,services,params,,MilestoneService.updateMilestone,UpdateMilestoneRequest,UpdateMilestoneResponse,,apps/flow/src/shared/services/flowApi.ts,926,onekit,flow
+flow,services,params,,CycleService.listCycles,ListCyclesRequest,ListCyclesResponse,,apps/flow/src/shared/services/flowApi.ts,932,onekit,flow
+flow,services,params,,CycleService.createCycle,CreateCycleRequest,CreateCycleResponse,,apps/flow/src/shared/services/flowApi.ts,936,onekit,flow
+flow,services,params,,CycleService.updateCycle,UpdateCycleRequest,UpdateCycleResponse,,apps/flow/src/shared/services/flowApi.ts,943,onekit,flow
+flow,services,res,,ViewService.listViews,ListViewsRequest,ListViewsResponse,,apps/flow/src/shared/services/flowApi.ts,950,onekit,flow
+flow,services,res,,ViewService.createView,CreateViewRequest,CreateViewResponse,,apps/flow/src/shared/services/flowApi.ts,956,onekit,flow
+flow,services,res,,ViewService.updateView,UpdateViewRequest,UpdateViewResponse,,apps/flow/src/shared/services/flowApi.ts,964,onekit,flow
+flow,services,res,,ViewService.deleteView,DeleteViewRequest,DeleteViewResponse,,apps/flow/src/shared/services/flowApi.ts,970,onekit,flow
+flow,services,res,,InsightsService.getInsights,GetInsightsRequest,GetInsightsResponse,,apps/flow/src/shared/services/flowApi.ts,975,onekit,flow
+flow,services,res,,InsightsService.getTeamWorkload,GetTeamWorkloadRequest,GetTeamWorkloadResponse,,apps/flow/src/shared/services/flowApi.ts,981,onekit,flow
+flow,services,res,,InsightsService.getRoadmap,GetRoadmapRequest,GetRoadmapResponse,,apps/flow/src/shared/services/flowApi.ts,987,onekit,flow
+flow,services,res,,NotificationService.listNotifications,ListNotificationsRequest,ListNotificationsResponse,,apps/flow/src/shared/services/flowApi.ts,993,onekit,hub
+flow,services,res,,NotificationService.markNotificationRead,MarkNotificationReadRequest,MarkNotificationReadResponse,,apps/flow/src/shared/services/flowApi.ts,997,onekit,hub
+flow,services,res,,NotificationService.markAllNotificationsRead,MarkAllNotificationsReadRequest,MarkAllNotificationsReadResponse,,apps/flow/src/shared/services/flowApi.ts,999,onekit,flow
+flow,services,res,,SettingService.getUserSettings,GetUserSettingsRequest,GetUserSettingsResponse,,apps/flow/src/shared/services/flowApi.ts,1003,onekit,flow
+flow,services,res,,SettingService.updateUserSettings,UpdateUserSettingsRequest,UpdateUserSettingsResponse,,apps/flow/src/shared/services/flowApi.ts,1006,onekit,flow
+flow,services,res,,UserService.updateProfile,UpdateProfileRequest,UpdateProfileResponse,,apps/flow/src/shared/services/flowApi.ts,1012,onekit,hub
+flow,services,res,,UserService.changePassword,ChangePasswordRequest,ChangePasswordResponse,,apps/flow/src/shared/services/flowApi.ts,1020,onekit,hub
 hr,departments,departmentsRes,,DepartmentService.listDepartments,ListDepartmentsRequest,ListDepartmentsResponse,"['departments', includeCompensation]",apps/hr/src/features/departments/useDepartments.ts,19,onekit,hr
 hr,departments,response,,StaffService.listStaff,ListStaffRequest,ListStaffResponse,"['departments', includeCompensation]",apps/hr/src/features/departments/useDepartments.ts,23,onekit,hr
 hr,departments,qc,,DepartmentService.createDepartment,CreateDepartmentRequest,CreateDepartmentResponse,['departments'],apps/hr/src/features/departments/useDepartments.ts,61,onekit,hr
@@ -509,27 +416,26 @@ hr,payroll,enabled,,PayrollService.listPayroll,ListPayrollRequest,ListPayrollRes
 hr,payroll,enabled,,StaffService.listStaff,ListStaffRequest,ListStaffResponse,"['payroll-legacy', params?.period ?? '', enabled]",apps/hr/src/features/payroll/usePayroll.ts,28,onekit,hr
 hr,staff,useStaff,,StaffService.listStaff,ListStaffRequest,ListStaffResponse,['staff'],apps/hr/src/features/staff/useStaff.ts,30,onekit,hr
 hr,staff,useStaff,,DepartmentService.listDepartments,ListDepartmentsRequest,ListDepartmentsResponse,['staff'],apps/hr/src/features/staff/useStaff.ts,31,onekit,hr
-hr,layouts,setAuthUser,GET,/account,,{ user: { id: number; name: string; email: string } | null },,apps/hr/src/layouts/DefaultLayout.tsx,556,safeFetch,
-hr,,rootRoute,GET,/hub/user/v1/users/me,,"Record<string, unknown>",,apps/hr/src/router.tsx,142,safeFetch,hub
-hr,hooks/queries,res,GET,/hr/attendance,,ListAttendanceResponse,"['attendance', 'filter', params]",apps/hr/src/shared/hooks/queries/useAttendance.ts,59,safeFetch,hr
-hr,hooks/queries,res,POST,/hr/attendance/clock-in,,AttendanceClockInResponse,"['attendance', 'filter', params]",apps/hr/src/shared/hooks/queries/useAttendance.ts,72,safeFetch,hr
-hr,hooks/queries,res,PUT,/hr/employees/me/pin,,{ success: boolean },['attendance'],apps/hr/src/shared/hooks/queries/useAttendance.ts,94,safeFetch,hr
-hr,hooks/queries,res,POST,/hr/attendance/clock-out,,AttendanceClockOutResponse,,apps/hr/src/shared/hooks/queries/useAttendance.ts,113,safeFetch,hr
-hr,hooks/queries,useAvailability,GET,<dynamic:AVAILABILITY_PATH>,,ListAvailabilityResponse,['availability'],apps/hr/src/shared/hooks/queries/useAvailability.ts,69,safeFetch,
-hr,hooks/queries,body,POST,<dynamic:AVAILABILITY_PATH>,,SetAvailabilityResponse,['availability'],apps/hr/src/shared/hooks/queries/useAvailability.ts,115,safeFetch,
+hr,,rootRoute,,UserService.getMe,GetMeRequest,GetMeResponse,,apps/hr/src/router.tsx,141,onekit,hub
+hr,hooks/queries,res,GET,/hr/attendance,,ListAttendanceResponse,"['attendance', 'filter', params]",apps/hr/src/shared/hooks/queries/useAttendance.ts,60,safeFetch,hr
+hr,hooks/queries,res,POST,/hr/attendance/clock-in,,AttendanceClockInResponse,"['attendance', 'filter', params]",apps/hr/src/shared/hooks/queries/useAttendance.ts,74,safeFetch,hr
+hr,hooks/queries,res,PUT,/hr/employees/me/pin,,{ success: boolean },['attendance'],apps/hr/src/shared/hooks/queries/useAttendance.ts,96,safeFetch,hr
+hr,hooks/queries,res,POST,/hr/attendance/clock-out,,AttendanceClockOutResponse,,apps/hr/src/shared/hooks/queries/useAttendance.ts,115,safeFetch,hr
+hr,hooks/queries,useAvailability,GET,/hr/shifts/availability,,ListAvailabilityResponse,['availability'],apps/hr/src/shared/hooks/queries/useAvailability.ts,69,safeFetch,hr
+hr,hooks/queries,body,POST,/hr/shifts/availability,,SetAvailabilityResponse,['availability'],apps/hr/src/shared/hooks/queries/useAvailability.ts,115,safeFetch,hr
 hr,hooks/queries,useAvailability,,StaffService.listStaff,ListStaffRequest,ListStaffResponse,['availability'],apps/hr/src/shared/hooks/queries/useAvailability.ts,73,onekit,hr
 hr,hooks/queries,res,GET,/hr/documents,,ListEmployeeDocumentsResponse,"['employee-documents', employeeId]",apps/hr/src/shared/hooks/queries/useDocuments.ts,33,safeFetch,hr
 hr,hooks/queries,res,POST,/hr/documents,,UploadDocumentResponse,"['employee-documents', employeeId]",apps/hr/src/shared/hooks/queries/useDocuments.ts,49,safeFetch,hr
 hr,hooks/queries,res,GET,/hr/employees,,ListEmployeesResponse,"['employees', 'filter', params]",apps/hr/src/shared/hooks/queries/useEmployees.ts,62,safeFetch,hr
-hr,hooks/queries,res,GET,/hr/employees/${id},,{ employee: EmployeePayload },"['employee', id]",apps/hr/src/shared/hooks/queries/useEmployees.ts,72,safeFetch,hr
-hr,hooks/queries,res,POST,/hr/employees,,CreateEmployeeResponse,['employees'],apps/hr/src/shared/hooks/queries/useEmployees.ts,85,safeFetch,hr
-hr,hooks/queries,res,PUT,/hr/employees/${id},,UpdateEmployeeResponse,['employees'],apps/hr/src/shared/hooks/queries/useEmployees.ts,105,safeFetch,hr
-hr,hooks/queries,res,POST,/hr/employees/invite,,InviteEmployeeResponse,"['employee', variables.id]",apps/hr/src/shared/hooks/queries/useEmployees.ts,135,safeFetch,hr
+hr,hooks/queries,res,GET,/hr/employees/{id},,{ employee: EmployeePayload },"['employee', id]",apps/hr/src/shared/hooks/queries/useEmployees.ts,73,safeFetch,hr
+hr,hooks/queries,res,POST,/hr/employees,,CreateEmployeeResponse,"['employee', id]",apps/hr/src/shared/hooks/queries/useEmployees.ts,87,safeFetch,hr
+hr,hooks/queries,res,PUT,/hr/employees/{id},,UpdateEmployeeResponse,['employees'],apps/hr/src/shared/hooks/queries/useEmployees.ts,108,safeFetch,hr
+hr,hooks/queries,res,POST,/hr/employees/invite,,InviteEmployeeResponse,"['employee', variables.id]",apps/hr/src/shared/hooks/queries/useEmployees.ts,139,safeFetch,hr
 hr,hooks/queries,useListEquipmentRequests,,EquipmentService.listEquipmentRequests,ListEquipmentRequestsRequest,ListEquipmentRequestsResponse,"['equipment-requests', params]",apps/hr/src/shared/hooks/queries/useEquipment.ts,20,onekit,hr
 hr,hooks/queries,queryClient,,EquipmentService.createEquipmentRequest,CreateEquipmentRequestRequest,CreateEquipmentRequestResponse,['equipment-requests'],apps/hr/src/shared/hooks/queries/useEquipment.ts,30,onekit,hr
 hr,hooks/queries,queryClient,,EquipmentService.approveEquipment,ApproveEquipmentRequest,ApproveEquipmentResponse,['equipment-requests'],apps/hr/src/shared/hooks/queries/useEquipment.ts,46,onekit,hr
 hr,hooks/queries,useListAssets,,EquipmentService.listAssets,ListAssetsRequest,ListAssetsResponse,"['assets', employeeId]",apps/hr/src/shared/hooks/queries/useEquipment.ts,61,onekit,hr
-hr,hooks/queries,res,GET,/hr/leave/calendar,,LeaveCalendarResponse,"['leave-calendar', params]",apps/hr/src/shared/hooks/queries/useLeave.ts,121,safeFetch,hr
+hr,hooks/queries,res,GET,/hr/leave/calendar,,LeaveCalendarResponse,"['leave-calendar', params]",apps/hr/src/shared/hooks/queries/useLeave.ts,122,safeFetch,hr
 hr,hooks/queries,res,,LeaveService.listLeaveTypes,ListLeaveTypesRequest,ListLeaveTypesResponse,['leave-types'],apps/hr/src/shared/hooks/queries/useLeave.ts,34,onekit,hr
 hr,hooks/queries,queryClient,,LeaveService.createLeaveType,CreateLeaveTypeRequest,CreateLeaveTypeResponse,['leave-balances'],apps/hr/src/shared/hooks/queries/useLeave.ts,45,onekit,hr
 hr,hooks/queries,res,,LeaveService.listLeaveRequests,ListLeaveRequestsRequest,ListLeaveRequestsResponse,"['leave-requests', params]",apps/hr/src/shared/hooks/queries/useLeave.ts,61,onekit,hr
@@ -540,37 +446,37 @@ hr,hooks/queries,useCreateLocation,POST,/hr/locations,,CreateLocationResponse,,a
 hr,hooks/queries,res,GET,/hr/onboarding/templates,,ListChecklistTemplatesResponse,['checklist-templates'],apps/hr/src/shared/hooks/queries/useOnboarding.ts,40,safeFetch,hr
 hr,hooks/queries,res,POST,/hr/onboarding/templates,,CreateChecklistTemplateResponse,['checklist-templates'],apps/hr/src/shared/hooks/queries/useOnboarding.ts,56,safeFetch,hr
 hr,hooks/queries,res,GET,/hr/onboarding/checklists,,ListEmployeeChecklistsResponse,"['employee-checklists', employeeId]",apps/hr/src/shared/hooks/queries/useOnboarding.ts,75,safeFetch,hr
-hr,hooks/queries,res,GET,/hr/onboarding/checklists/summary,,unknown,"['employee-checklist-summaries', 'filter', params]",apps/hr/src/shared/hooks/queries/useOnboarding.ts,89,safeFetch,hr
-hr,hooks/queries,res,POST,/hr/onboarding/checklists/items/${data.itemId}/complete,,CompleteChecklistItemResponse,"['employee-checklist-summaries', 'filter', params]",apps/hr/src/shared/hooks/queries/useOnboarding.ts,104,safeFetch,hr
-hr,hooks/queries,res,GET,/hr/overtime/config,,{ config: OvertimeConfigData },['overtime-config'],apps/hr/src/shared/hooks/queries/useOvertime.ts,78,safeFetch,hr
-hr,hooks/queries,queryClient,PUT,/hr/overtime/config,,,['overtime-config'],apps/hr/src/shared/hooks/queries/useOvertime.ts,91,safeFetch,hr
+hr,hooks/queries,res,GET,/hr/onboarding/checklists/summary,,unknown,"['employee-checklist-summaries', 'filter', params]",apps/hr/src/shared/hooks/queries/useOnboarding.ts,90,safeFetch,hr
+hr,hooks/queries,res,POST,/hr/onboarding/checklists/items/{data}/complete,,CompleteChecklistItemResponse,"['employee-checklist-summaries', 'filter', params]",apps/hr/src/shared/hooks/queries/useOnboarding.ts,106,safeFetch,hr
+hr,hooks/queries,res,GET,/hr/overtime/config,,{ config: OvertimeConfigData },['overtime-config'],apps/hr/src/shared/hooks/queries/useOvertime.ts,79,safeFetch,hr
+hr,hooks/queries,queryClient,PUT,/hr/overtime/config,,,['overtime-config'],apps/hr/src/shared/hooks/queries/useOvertime.ts,93,safeFetch,hr
 hr,hooks/queries,res,,OvertimeService.listOvertimeRequests,ListOvertimeRequestsRequest,ListOvertimeRequestsResponse,"['overtime-requests', params]",apps/hr/src/shared/hooks/queries/useOvertime.ts,32,onekit,hr
 hr,hooks/queries,queryClient,,OvertimeService.createOvertimeRequest,CreateOvertimeRequestRequest,CreateOvertimeRequestResponse,['overtime-requests'],apps/hr/src/shared/hooks/queries/useOvertime.ts,45,onekit,hr
 hr,hooks/queries,queryClient,,OvertimeService.approveOvertime,ApproveOvertimeRequest,ApproveOvertimeResponse,['overtime-requests'],apps/hr/src/shared/hooks/queries/useOvertime.ts,61,onekit,hr
 hr,hooks/queries,res,GET,/hr/payroll/config,,"Record<string, unknown>",['payroll-config'],apps/hr/src/shared/hooks/queries/usePayroll.ts,77,safeFetch,hr
 hr,hooks/queries,res,PUT,/hr/payroll/config,,{ config: PayrollConfigData },,apps/hr/src/shared/hooks/queries/usePayroll.ts,109,safeFetch,hr
-hr,hooks/queries,res,GET,/hr/payroll/runs,,ListPayrollRunsResponse,"['payroll-runs', params]",apps/hr/src/shared/hooks/queries/usePayroll.ts,139,safeFetch,hr
-hr,hooks/queries,res,GET,/hr/payroll/runs/${id},,{ run: PayrollRunPayload },"['payroll-run', id]",apps/hr/src/shared/hooks/queries/usePayroll.ts,150,safeFetch,hr
-hr,hooks/queries,res,GET,/hr/payroll/my-runs,,ListPayrollRunsResponse,"['my-payroll-runs', params]",apps/hr/src/shared/hooks/queries/usePayroll.ts,177,safeFetch,hr
-hr,hooks/queries,res,GET,/hr/payroll/my-runs/${id},,{ run: PayrollRunPayload },"['my-payroll-run', id]",apps/hr/src/shared/hooks/queries/usePayroll.ts,193,safeFetch,hr
-hr,hooks/queries,queryClient,POST,/hr/payroll/runs/trigger,,,['payroll-runs'],apps/hr/src/shared/hooks/queries/usePayroll.ts,207,safeFetch,hr
-hr,hooks/queries,queryClient,POST,/hr/payroll/runs/${data.runId}/approve,,,['payroll-runs'],apps/hr/src/shared/hooks/queries/usePayroll.ts,226,safeFetch,hr
+hr,hooks/queries,res,GET,/hr/payroll/runs,,ListPayrollRunsResponse,"['payroll-runs', params]",apps/hr/src/shared/hooks/queries/usePayroll.ts,140,safeFetch,hr
+hr,hooks/queries,res,GET,/hr/payroll/runs/{id},,{ run: PayrollRunPayload },"['payroll-run', id]",apps/hr/src/shared/hooks/queries/usePayroll.ts,153,safeFetch,hr
+hr,hooks/queries,res,GET,/hr/payroll/my-runs,,ListPayrollRunsResponse,"['my-payroll-runs', params]",apps/hr/src/shared/hooks/queries/usePayroll.ts,181,safeFetch,hr
+hr,hooks/queries,res,GET,/hr/payroll/my-runs/{id},,{ run: PayrollRunPayload },"['my-payroll-run', id]",apps/hr/src/shared/hooks/queries/usePayroll.ts,198,safeFetch,hr
+hr,hooks/queries,queryClient,POST,/hr/payroll/runs/trigger,,,['payroll-runs'],apps/hr/src/shared/hooks/queries/usePayroll.ts,213,safeFetch,hr
+hr,hooks/queries,queryClient,POST,/hr/payroll/runs/{data}/approve,,,['payroll-runs'],apps/hr/src/shared/hooks/queries/usePayroll.ts,232,safeFetch,hr
 hr,hooks/queries,res,GET,/hr/performance/cycles,,ListReviewCyclesResponse,"['review-cycles', 'filter', params]",apps/hr/src/shared/hooks/queries/usePerformance.ts,93,safeFetch,hr
-hr,hooks/queries,res,GET,/hr/performance/cycles/${id},,{ cycle: ReviewCyclePayload },"['review-cycle', id]",apps/hr/src/shared/hooks/queries/usePerformance.ts,105,safeFetch,hr
+hr,hooks/queries,res,GET,/hr/performance/cycles/{id},,{ cycle: ReviewCyclePayload },"['review-cycle', id]",apps/hr/src/shared/hooks/queries/usePerformance.ts,105,safeFetch,hr
 hr,hooks/queries,res,POST,/hr/performance/cycles,,CreateReviewCycleResponse,"['review-cycle', id]",apps/hr/src/shared/hooks/queries/usePerformance.ts,122,safeFetch,hr
-hr,hooks/queries,res,POST,/hr/performance/cycles/${data.cycleId}/open,,OpenReviewCycleResponse,['review-cycles'],apps/hr/src/shared/hooks/queries/usePerformance.ts,149,safeFetch,hr
-hr,hooks/queries,res,GET,/hr/performance/goals,,ListGoalsResponse,"['review-goals', 'filter', params]",apps/hr/src/shared/hooks/queries/usePerformance.ts,170,safeFetch,hr
-hr,hooks/queries,res,POST,/hr/performance/goals,,CreateGoalResponse,"['review-goals', 'filter', params]",apps/hr/src/shared/hooks/queries/usePerformance.ts,182,safeFetch,hr
-hr,hooks/queries,res,PUT,/hr/performance/goals/${data.goalId},,UpdateGoalResponse,['review-goals'],apps/hr/src/shared/hooks/queries/usePerformance.ts,203,safeFetch,hr
-hr,hooks/queries,res,GET,/hr/performance/reviews,,ListPerformanceReviewsResponse,"['performance-reviews', 'filter', params]",apps/hr/src/shared/hooks/queries/usePerformance.ts,229,safeFetch,hr
-hr,hooks/queries,res,POST,/hr/performance/reviews/${data.reviewId}/submit,,SubmitReviewResponse,"['performance-reviews', 'filter', params]",apps/hr/src/shared/hooks/queries/usePerformance.ts,250,safeFetch,hr
-hr,hooks/queries,res,POST,/hr/performance/reviews/${data.reviewId}/share,,ShareReviewResponse,['performance-reviews'],apps/hr/src/shared/hooks/queries/usePerformance.ts,275,safeFetch,hr
+hr,hooks/queries,res,POST,/hr/performance/cycles/{data}/open,,OpenReviewCycleResponse,['review-cycles'],apps/hr/src/shared/hooks/queries/usePerformance.ts,149,safeFetch,hr
+hr,hooks/queries,res,GET,/hr/performance/goals,,ListGoalsResponse,"['review-goals', 'filter', params]",apps/hr/src/shared/hooks/queries/usePerformance.ts,171,safeFetch,hr
+hr,hooks/queries,res,POST,/hr/performance/goals,,CreateGoalResponse,"['review-goals', 'filter', params]",apps/hr/src/shared/hooks/queries/usePerformance.ts,184,safeFetch,hr
+hr,hooks/queries,res,PUT,/hr/performance/goals/{data},,UpdateGoalResponse,['review-goals'],apps/hr/src/shared/hooks/queries/usePerformance.ts,205,safeFetch,hr
+hr,hooks/queries,res,GET,/hr/performance/reviews,,ListPerformanceReviewsResponse,"['performance-reviews', 'filter', params]",apps/hr/src/shared/hooks/queries/usePerformance.ts,231,safeFetch,hr
+hr,hooks/queries,res,POST,/hr/performance/reviews/{data}/submit,,SubmitReviewResponse,"['performance-reviews', 'filter', params]",apps/hr/src/shared/hooks/queries/usePerformance.ts,252,safeFetch,hr
+hr,hooks/queries,res,POST,/hr/performance/reviews/{data}/share,,ShareReviewResponse,['performance-reviews'],apps/hr/src/shared/hooks/queries/usePerformance.ts,277,safeFetch,hr
 hr,hooks/queries,res,GET,/hr/roles,,{ roles: unknown[] },['roles'],apps/hr/src/shared/hooks/queries/useRoles.ts,14,safeFetch,hr
 hr,hooks/queries,res,GET,/hr/permissions,,{ permissions: unknown[] },"['roles', 'permission-catalog']",apps/hr/src/shared/hooks/queries/useRoles.ts,24,safeFetch,hr
 hr,hooks/queries,res,POST,/hr/roles,,{ role: unknown },"['roles', 'permission-catalog']",apps/hr/src/shared/hooks/queries/useRoles.ts,43,safeFetch,hr
-hr,hooks/queries,res,PUT,/hr/roles/${id},,{ role: unknown },['roles'],apps/hr/src/shared/hooks/queries/useRoles.ts,66,safeFetch,hr
+hr,hooks/queries,res,PUT,/hr/roles/{id},,{ role: unknown },['roles'],apps/hr/src/shared/hooks/queries/useRoles.ts,66,safeFetch,hr
 hr,hooks/queries,res,GET,/hr/setup/status,,GetSetupStatusResponse,['hr-setup-status'],apps/hr/src/shared/hooks/queries/useSetup.ts,16,safeFetch,hr
-hr,hooks/queries,queryClient,POST,/hr/setup/steps/${stepKey}/complete,,,['hr-setup-status'],apps/hr/src/shared/hooks/queries/useSetup.ts,33,safeFetch,hr
+hr,hooks/queries,queryClient,POST,/hr/setup/steps/{stepKey}/complete,,,['hr-setup-status'],apps/hr/src/shared/hooks/queries/useSetup.ts,33,safeFetch,hr
 hr,hooks/queries,res,GET,/hr/config,,{ config: HRCompanyConfigPayload },['hr-config'],apps/hr/src/shared/hooks/queries/useSetup.ts,48,safeFetch,hr
 hr,hooks/queries,res,PUT,/hr/config,,{ config: HRCompanyConfigPayload },['hr-config'],apps/hr/src/shared/hooks/queries/useSetup.ts,62,safeFetch,hr
 hr,hooks/queries,res,GET,/hr/shifts,,ListShiftsResponse,['shifts'],apps/hr/src/shared/hooks/queries/useShifts.ts,54,safeFetch,hr
@@ -578,79 +484,77 @@ hr,hooks/queries,queryClient,POST,/hr/shifts,,,['shifts'],apps/hr/src/shared/hoo
 hr,hooks/queries,res,GET,/hr/shifts/roster,,RosterResponse,"['roster', params]",apps/hr/src/shared/hooks/queries/useShifts.ts,90,safeFetch,hr
 hr,hooks/queries,queryClient,POST,/hr/shifts/roster/assignments,,CreateShiftAssignmentResponse,"['roster', params]",apps/hr/src/shared/hooks/queries/useShifts.ts,103,safeFetch,hr
 hr,hooks/queries,queryClient,POST,/hr/shifts/roster/publish,,,['roster'],apps/hr/src/shared/hooks/queries/useShifts.ts,136,safeFetch,hr
-hr,hooks/queries,res,GET,/hr/time-entries,,ListTimeEntriesResponse,"['time-entries', 'filter', params]",apps/hr/src/shared/hooks/queries/useTimeEntries.ts,24,safeFetch,hr
-hr,hooks/queries,res,POST,/hr/time-entries,,CreateTimeEntryResponse,"['time-entries', 'filter', params]",apps/hr/src/shared/hooks/queries/useTimeEntries.ts,36,safeFetch,hr
-hr,hooks/queries,res,PUT,/hr/time-entries/${id},,{ entry: TimeEntryPayload },['timesheets'],apps/hr/src/shared/hooks/queries/useTimeEntries.ts,60,safeFetch,hr
-hr,hooks/queries,res,POST,/hr/time-entries/import-flow,,FlowImportResponse,['timesheets'],apps/hr/src/shared/hooks/queries/useTimeEntries.ts,92,safeFetch,hr
-hr,hooks/queries,queryClient,DELETE,/hr/time-entries/${id},,,['time-entries'],apps/hr/src/shared/hooks/queries/useTimeEntries.ts,124,safeFetch,hr
-hr,hooks/queries,res,GET,/hr/timesheets/current,,{ timesheet: TimesheetPayload },"['timesheets', 'current']",apps/hr/src/shared/hooks/queries/useTimesheets.ts,38,safeFetch,hr
-hr,hooks/queries,res,GET,/hr/timesheets,,ListTimesheetsResponse,"['timesheets', 'filter', params]",apps/hr/src/shared/hooks/queries/useTimesheets.ts,48,safeFetch,hr
-hr,hooks/queries,res,GET,/hr/timesheets/${id},,{ timesheet: TimesheetPayload },"['timesheet', id]",apps/hr/src/shared/hooks/queries/useTimesheets.ts,58,safeFetch,hr
-hr,hooks/queries,res,POST,/hr/timesheets/${data.timesheetId}/submit,,SubmitTimesheetResponse,"['timesheet', id]",apps/hr/src/shared/hooks/queries/useTimesheets.ts,72,safeFetch,hr
-hr,hooks/queries,res,POST,/hr/timesheets/${data.timesheetId}/approve,,ApproveTimesheetResponse,['timesheets'],apps/hr/src/shared/hooks/queries/useTimesheets.ts,93,safeFetch,hr
-hr,hooks/queries,res,POST,/hr/timesheets/${data.timesheetId}/reject,,ApproveTimesheetResponse,"['timesheet', variables.timesheetId]",apps/hr/src/shared/hooks/queries/useTimesheets.ts,115,safeFetch,hr
-hr,shared,useStaffById,,StaffService.getStaff,GetStaffRequest,GetStaffResponse,"['staff', id]",apps/hr/src/shared/hooks/useHrExtras.ts,65,onekit,hr
-hr,shared,useStaffById,,DepartmentService.listDepartments,ListDepartmentsRequest,ListDepartmentsResponse,"['staff', id]",apps/hr/src/shared/hooks/useHrExtras.ts,66,onekit,hr
-hr,shared,res,,BenefitService.listMyBenefitEnrollments,ListMyBenefitEnrollmentsRequest,ListMyBenefitEnrollmentsResponse,"['benefits', 'my-enrollments']",apps/hr/src/shared/hooks/useHrExtras.ts,344,onekit,hr
-hr,shared,qc,,BenefitService.enrollInBenefit,EnrollInBenefitRequest,EnrollInBenefitResponse,['benefits'],apps/hr/src/shared/hooks/useHrExtras.ts,355,onekit,hr
+hr,hooks/queries,res,GET,/hr/time-entries,,ListTimeEntriesResponse,"['time-entries', 'filter', params]",apps/hr/src/shared/hooks/queries/useTimeEntries.ts,25,safeFetch,hr
+hr,hooks/queries,res,POST,/hr/time-entries,,CreateTimeEntryResponse,"['time-entries', 'filter', params]",apps/hr/src/shared/hooks/queries/useTimeEntries.ts,38,safeFetch,hr
+hr,hooks/queries,res,PUT,/hr/time-entries/{id},,{ entry: TimeEntryPayload },['timesheets'],apps/hr/src/shared/hooks/queries/useTimeEntries.ts,62,safeFetch,hr
+hr,hooks/queries,queryClient,DELETE,/hr/time-entries/{id},,,['time-entries'],apps/hr/src/shared/hooks/queries/useTimeEntries.ts,83,safeFetch,hr
+hr,hooks/queries,res,GET,/hr/timesheets/current,,{ timesheet: TimesheetPayload },"['timesheets', 'current']",apps/hr/src/shared/hooks/queries/useTimesheets.ts,39,safeFetch,hr
+hr,hooks/queries,res,GET,/hr/timesheets,,ListTimesheetsResponse,"['timesheets', 'filter', params]",apps/hr/src/shared/hooks/queries/useTimesheets.ts,51,safeFetch,hr
+hr,hooks/queries,res,GET,/hr/timesheets/{id},,{ timesheet: TimesheetPayload },"['timesheet', id]",apps/hr/src/shared/hooks/queries/useTimesheets.ts,63,safeFetch,hr
+hr,hooks/queries,res,POST,/hr/timesheets/{data}/submit,,SubmitTimesheetResponse,"['timesheet', id]",apps/hr/src/shared/hooks/queries/useTimesheets.ts,78,safeFetch,hr
+hr,hooks/queries,res,POST,/hr/timesheets/{data}/approve,,ApproveTimesheetResponse,['timesheets'],apps/hr/src/shared/hooks/queries/useTimesheets.ts,99,safeFetch,hr
+hr,hooks/queries,res,POST,/hr/timesheets/{data}/reject,,ApproveTimesheetResponse,"['timesheet', variables.timesheetId]",apps/hr/src/shared/hooks/queries/useTimesheets.ts,121,safeFetch,hr
+hr,shared,useStaffById,,StaffService.getStaff,GetStaffRequest,GetStaffResponse,"['staff', id]",apps/hr/src/shared/hooks/useHrExtras.ts,61,onekit,hr
+hr,shared,useStaffById,,DepartmentService.listDepartments,ListDepartmentsRequest,ListDepartmentsResponse,"['staff', id]",apps/hr/src/shared/hooks/useHrExtras.ts,62,onekit,hr
+hr,shared,res,,BenefitService.listBenefits,ListBenefitsRequest,ListBenefitsResponse,"['benefits', 'plans']",apps/hr/src/shared/hooks/useHrExtras.ts,323,onekit,hr
+hr,shared,res,,BenefitService.listMyBenefitEnrollments,ListMyBenefitEnrollmentsRequest,ListMyBenefitEnrollmentsResponse,"['benefits', 'my-enrollments']",apps/hr/src/shared/hooks/useHrExtras.ts,358,onekit,hr
+hr,shared,qc,,BenefitService.enrollInBenefit,EnrollInBenefitRequest,EnrollInBenefitResponse,['benefits'],apps/hr/src/shared/hooks/useHrExtras.ts,369,onekit,hr
+hr,lib,result,GET,/license/state,,LicenseState,,apps/hr/src/shared/lib/api.ts,26,safeFetch,
 hr,services,hrApi,POST,/hr/staff,,StaffMember,,apps/hr/src/shared/services/hrApi.ts,132,safeFetch,hr
 hr,services,hrApi,PUT,/hr/staff,,StaffMember,,apps/hr/src/shared/services/hrApi.ts,134,safeFetch,hr
-hr,services,hrApi,DELETE,/hr/staff,,{ success: boolean },,apps/hr/src/shared/services/hrApi.ts,135,safeFetch,hr
-hr,services,hrApi,POST,/hr/staff/clock-in,,{ success: boolean; time: string },,apps/hr/src/shared/services/hrApi.ts,137,safeFetch,hr
-hr,services,hrApi,POST,/hr/staff/clock-out,,{ success: boolean; time: string },,apps/hr/src/shared/services/hrApi.ts,139,safeFetch,hr
-hr,services,hrApi,GET,/hr/shifts,,Shift[],,apps/hr/src/shared/services/hrApi.ts,143,safeFetch,hr
-hr,services,hrApi,POST,/hr/shifts,,Shift,,apps/hr/src/shared/services/hrApi.ts,150,safeFetch,hr
-hr,services,hrApi,PUT,/hr/shifts,,Shift,,apps/hr/src/shared/services/hrApi.ts,152,safeFetch,hr
-hr,services,hrApi,GET,/hr/dashboard/v1/dashboard,,HRDashboardStats,,apps/hr/src/shared/services/hrApi.ts,157,safeFetch,hr
-hr,services,hrApi,GET,/hr/dashboard/v1/dashboard/widgets,,unknown,,apps/hr/src/shared/services/hrApi.ts,158,safeFetch,hr
-hr,services,hrApi,PUT,/hr/dashboard/v1/dashboard/widgets,,{ success: boolean },,apps/hr/src/shared/services/hrApi.ts,160,safeFetch,hr
-hr,services,hrApi,POST,/hr/reports/generate,,unknown,,apps/hr/src/shared/services/hrApi.ts,163,safeFetch,hr
-hr,services,hrExtras,GET,/hr/employees/me,,{ employee: { id: number | string } },,apps/hr/src/shared/services/hrExtras.ts,298,safeFetch,hr
-hr,services,hrExtras,GET,/hr/staff/detail,,EmployeeProfile,,apps/hr/src/shared/services/hrExtras.ts,301,safeFetch,hr
-hr,services,hrExtras,PUT,/hr/staff,,EmployeeProfile,,apps/hr/src/shared/services/hrExtras.ts,303,safeFetch,hr
-hr,services,hrExtras,GET,/hr/time-off,,TimeOffEntry[],,apps/hr/src/shared/services/hrExtras.ts,306,safeFetch,hr
-hr,services,hrExtras,POST,/hr/time-off,,TimeOffEntry,,apps/hr/src/shared/services/hrExtras.ts,308,safeFetch,hr
-hr,services,hrExtras,POST,/hr/time-off/approve,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,310,safeFetch,hr
-hr,services,hrExtras,GET,/hr/shifts,,ScheduleShift[],,apps/hr/src/shared/services/hrExtras.ts,318,safeFetch,hr
-hr,services,hrExtras,PUT,/hr/shifts,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,321,safeFetch,hr
-hr,services,hrExtras,POST,/hr/shifts,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,322,safeFetch,hr
-hr,services,hrExtras,DELETE,/hr/shifts,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,324,safeFetch,hr
-hr,services,hrExtras,POST,/hr/shifts/roster/publish,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,329,safeFetch,hr
-hr,services,hrExtras,GET,/hr/timesheets,,TimesheetRow[],,apps/hr/src/shared/services/hrExtras.ts,332,safeFetch,hr
-hr,services,hrExtras,POST,/hr/timesheets/${id}/approve,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,334,safeFetch,hr
-hr,services,hrExtras,POST,/hr/timesheets/${row.id}/submit,,TimesheetRow,,apps/hr/src/shared/services/hrExtras.ts,336,safeFetch,hr
-hr,services,hrExtras,GET,/hr/reviews,,Review[],,apps/hr/src/shared/services/hrExtras.ts,339,safeFetch,hr
-hr,services,hrExtras,POST,/hr/reviews,,Review,,apps/hr/src/shared/services/hrExtras.ts,341,safeFetch,hr
-hr,services,hrExtras,GET,/hr/one-on-ones,,OneOnOne[],,apps/hr/src/shared/services/hrExtras.ts,344,safeFetch,hr
-hr,services,hrExtras,POST,/hr/one-on-ones,,OneOnOne,,apps/hr/src/shared/services/hrExtras.ts,346,safeFetch,hr
-hr,services,hrExtras,POST,/hr/one-on-ones,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,348,safeFetch,hr
-hr,services,hrExtras,GET,/hr/training,,OnboardingTask[],,apps/hr/src/shared/services/hrExtras.ts,351,safeFetch,hr
-hr,services,hrExtras,GET,/hr/training,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,353,safeFetch,hr
-hr,services,hrExtras,POST,/hr/training,,OnboardingTask,,apps/hr/src/shared/services/hrExtras.ts,355,safeFetch,hr
-hr,services,hrExtras,GET,/hr/training,,OffboardingTask[],,apps/hr/src/shared/services/hrExtras.ts,359,safeFetch,hr
-hr,services,hrExtras,GET,/hr/training,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,361,safeFetch,hr
-hr,services,hrExtras,GET,/hr/documents,,DocumentItem[],,apps/hr/src/shared/services/hrExtras.ts,366,safeFetch,hr
-hr,services,hrExtras,POST,/hr/documents,,DocumentItem,,apps/hr/src/shared/services/hrExtras.ts,368,safeFetch,hr
-hr,services,hrExtras,DELETE,/hr/documents/${id},,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,375,safeFetch,hr
-hr,services,hrExtras,GET,/hr/documents/expiring,,DocumentItem[],,apps/hr/src/shared/services/hrExtras.ts,377,safeFetch,hr
-hr,services,hrExtras,GET,/hr/benefits,,BenefitPlan[],,apps/hr/src/shared/services/hrExtras.ts,380,safeFetch,hr
-hr,services,hrExtras,GET,/hr/benefits,,BenefitEnrollment[],,apps/hr/src/shared/services/hrExtras.ts,387,safeFetch,hr
-hr,services,hrExtras,GET,/hr/training,,TrainingCourse[],,apps/hr/src/shared/services/hrExtras.ts,390,safeFetch,hr
-hr,services,hrExtras,GET,/hr/training,,TrainingProgress[],,apps/hr/src/shared/services/hrExtras.ts,392,safeFetch,hr
-hr,services,hrExtras,GET,/hr/training,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,394,safeFetch,hr
-hr,services,hrExtras,GET,/hr/staff,,Birthday[],,apps/hr/src/shared/services/hrExtras.ts,399,safeFetch,hr
-hr,services,hrExtras,GET,/hr/staff,,Anniversary[],,apps/hr/src/shared/services/hrExtras.ts,401,safeFetch,hr
-hr,services,hrExtras,GET,/hr/shifts,,SwapRequest[],,apps/hr/src/shared/services/hrExtras.ts,409,safeFetch,hr
-hr,services,hrExtras,POST,/hr/shifts,,SwapRequest,,apps/hr/src/shared/services/hrExtras.ts,411,safeFetch,hr
-hr,services,hrExtras,PUT,/hr/shifts,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,417,safeFetch,hr
-hr,services,hrExtras,GET,/hr/shifts,,BreakLog[],,apps/hr/src/shared/services/hrExtras.ts,423,safeFetch,hr
-hr,services,hrExtras,POST,/hr/staff/clock-in,,BreakLog,,apps/hr/src/shared/services/hrExtras.ts,425,safeFetch,hr
-hr,services,hrExtras,POST,/hr/staff/clock-out,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,428,safeFetch,hr
-hr,services,hrExtras,GET,/hr/shifts,,OvertimeAlert[],,apps/hr/src/shared/services/hrExtras.ts,432,safeFetch,hr
-hr,services,hrExtras,GET,/hr/config,,{ config: HrSettings },,apps/hr/src/shared/services/hrExtras.ts,435,safeFetch,hr
-hr,services,hrExtras,PUT,/hr/config,,HrSettings,,apps/hr/src/shared/services/hrExtras.ts,437,safeFetch,hr
-insights,layouts,pageItems,GET,/account,,{ user: { id: number; name: string; email: string } | null },,apps/insights/src/layouts/DefaultLayout.tsx,92,safeFetch,
-insights,,rootRoute,GET,/hub/user/v1/users/me,,"Record<string, unknown>",,apps/insights/src/router.tsx,54,safeFetch,hub
+hr,services,hrApi,DELETE,/hr/staff,,{ success: boolean },,apps/hr/src/shared/services/hrApi.ts,136,safeFetch,hr
+hr,services,hrApi,POST,/hr/staff/clock-in,,{ success: boolean; time: string },,apps/hr/src/shared/services/hrApi.ts,138,safeFetch,hr
+hr,services,hrApi,POST,/hr/staff/clock-out,,{ success: boolean; time: string },,apps/hr/src/shared/services/hrApi.ts,140,safeFetch,hr
+hr,services,hrApi,GET,/hr/shifts,,Shift[],,apps/hr/src/shared/services/hrApi.ts,144,safeFetch,hr
+hr,services,hrApi,POST,/hr/shifts,,Shift,,apps/hr/src/shared/services/hrApi.ts,151,safeFetch,hr
+hr,services,hrApi,PUT,/hr/shifts,,Shift,,apps/hr/src/shared/services/hrApi.ts,153,safeFetch,hr
+hr,services,hrApi,GET,/hr/dashboard/v1/dashboard,,HRDashboardStats,,apps/hr/src/shared/services/hrApi.ts,158,safeFetch,hr
+hr,services,hrApi,GET,/hr/dashboard/v1/dashboard/widgets,,unknown,,apps/hr/src/shared/services/hrApi.ts,159,safeFetch,hr
+hr,services,hrApi,PUT,/hr/dashboard/v1/dashboard/widgets,,{ success: boolean },,apps/hr/src/shared/services/hrApi.ts,161,safeFetch,hr
+hr,services,hrApi,POST,/hr/reports/generate,,unknown,,apps/hr/src/shared/services/hrApi.ts,165,safeFetch,hr
+hr,services,hrExtras,GET,/hr/employees/me,,{ employee: { id: number | string } },,apps/hr/src/shared/services/hrExtras.ts,276,safeFetch,hr
+hr,services,hrExtras,GET,/hr/time-off,,TimeOffEntry[],,apps/hr/src/shared/services/hrExtras.ts,279,safeFetch,hr
+hr,services,hrExtras,POST,/hr/time-off,,TimeOffEntry,,apps/hr/src/shared/services/hrExtras.ts,281,safeFetch,hr
+hr,services,hrExtras,POST,/hr/time-off/approve,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,283,safeFetch,hr
+hr,services,hrExtras,GET,/hr/shifts,,ScheduleShift[],,apps/hr/src/shared/services/hrExtras.ts,291,safeFetch,hr
+hr,services,hrExtras,PUT,/hr/shifts,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,296,safeFetch,hr
+hr,services,hrExtras,POST,/hr/shifts,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,297,safeFetch,hr
+hr,services,hrExtras,DELETE,/hr/shifts,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,299,safeFetch,hr
+hr,services,hrExtras,POST,/hr/shifts/roster/publish,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,304,safeFetch,hr
+hr,services,hrExtras,GET,/hr/timesheets,,TimesheetRow[],,apps/hr/src/shared/services/hrExtras.ts,307,safeFetch,hr
+hr,services,hrExtras,POST,/hr/timesheets/{id}/approve,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,309,safeFetch,hr
+hr,services,hrExtras,POST,/hr/timesheets/{row}/submit,,TimesheetRow,,apps/hr/src/shared/services/hrExtras.ts,311,safeFetch,hr
+hr,services,hrExtras,GET,/hr/reviews,,Review[],,apps/hr/src/shared/services/hrExtras.ts,314,safeFetch,hr
+hr,services,hrExtras,POST,/hr/reviews,,Review,,apps/hr/src/shared/services/hrExtras.ts,316,safeFetch,hr
+hr,services,hrExtras,GET,/hr/one-on-ones,,OneOnOne[],,apps/hr/src/shared/services/hrExtras.ts,319,safeFetch,hr
+hr,services,hrExtras,POST,/hr/one-on-ones,,OneOnOne,,apps/hr/src/shared/services/hrExtras.ts,321,safeFetch,hr
+hr,services,hrExtras,POST,/hr/one-on-ones,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,323,safeFetch,hr
+hr,services,hrExtras,GET,/hr/training,,OnboardingTask[],,apps/hr/src/shared/services/hrExtras.ts,326,safeFetch,hr
+hr,services,hrExtras,GET,/hr/training,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,328,safeFetch,hr
+hr,services,hrExtras,POST,/hr/training,,OnboardingTask,,apps/hr/src/shared/services/hrExtras.ts,330,safeFetch,hr
+hr,services,hrExtras,GET,/hr/training,,OffboardingTask[],,apps/hr/src/shared/services/hrExtras.ts,334,safeFetch,hr
+hr,services,hrExtras,GET,/hr/training,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,336,safeFetch,hr
+hr,services,hrExtras,GET,/hr/documents,,DocumentItem[],,apps/hr/src/shared/services/hrExtras.ts,341,safeFetch,hr
+hr,services,hrExtras,POST,/hr/documents,,DocumentItem,,apps/hr/src/shared/services/hrExtras.ts,343,safeFetch,hr
+hr,services,hrExtras,DELETE,/hr/documents/{id},,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,350,safeFetch,hr
+hr,services,hrExtras,GET,/hr/documents/expiring,,DocumentItem[],,apps/hr/src/shared/services/hrExtras.ts,352,safeFetch,hr
+hr,services,hrExtras,GET,/hr/benefits,,BenefitPlan[],,apps/hr/src/shared/services/hrExtras.ts,355,safeFetch,hr
+hr,services,hrExtras,GET,/hr/benefits,,BenefitEnrollment[],,apps/hr/src/shared/services/hrExtras.ts,362,safeFetch,hr
+hr,services,hrExtras,GET,/hr/training,,TrainingCourse[],,apps/hr/src/shared/services/hrExtras.ts,366,safeFetch,hr
+hr,services,hrExtras,GET,/hr/training,,TrainingProgress[],,apps/hr/src/shared/services/hrExtras.ts,368,safeFetch,hr
+hr,services,hrExtras,GET,/hr/training,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,370,safeFetch,hr
+hr,services,hrExtras,GET,/hr/staff,,Birthday[],,apps/hr/src/shared/services/hrExtras.ts,375,safeFetch,hr
+hr,services,hrExtras,GET,/hr/staff,,Anniversary[],,apps/hr/src/shared/services/hrExtras.ts,377,safeFetch,hr
+hr,services,hrExtras,GET,/hr/shifts,,SwapRequest[],,apps/hr/src/shared/services/hrExtras.ts,385,safeFetch,hr
+hr,services,hrExtras,POST,/hr/shifts,,SwapRequest,,apps/hr/src/shared/services/hrExtras.ts,387,safeFetch,hr
+hr,services,hrExtras,PUT,/hr/shifts,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,393,safeFetch,hr
+hr,services,hrExtras,GET,/hr/shifts,,BreakLog[],,apps/hr/src/shared/services/hrExtras.ts,399,safeFetch,hr
+hr,services,hrExtras,POST,/hr/staff/clock-in,,BreakLog,,apps/hr/src/shared/services/hrExtras.ts,401,safeFetch,hr
+hr,services,hrExtras,POST,/hr/staff/clock-out,,{ success: boolean },,apps/hr/src/shared/services/hrExtras.ts,405,safeFetch,hr
+hr,services,hrExtras,GET,/hr/shifts,,OvertimeAlert[],,apps/hr/src/shared/services/hrExtras.ts,409,safeFetch,hr
+hr,services,hrExtras,GET,/hr/config,,{ config: HrSettings },,apps/hr/src/shared/services/hrExtras.ts,412,safeFetch,hr
+hr,services,hrExtras,PUT,/hr/config,,HrSettings,,apps/hr/src/shared/services/hrExtras.ts,414,safeFetch,hr
+insights,,rootRoute,,UserService.getMe,GetMeRequest,GetMeResponse,,apps/insights/src/router.tsx,53,onekit,hub
 insights,hooks/queries,res,,CustomerService.getCustomerAnalytics,GetCustomerAnalyticsRequest,GetCustomerAnalyticsResponse,"['insights-customers', { from, to }]",apps/insights/src/shared/hooks/queries/useInsightsCustomers.ts,21,onekit,insights
 insights,hooks/queries,res,,CustomerService.getTopCustomers,GetTopCustomersRequest,GetTopCustomersResponse,"['insights-customers-top', { limit, from, to }]",apps/insights/src/shared/hooks/queries/useInsightsCustomers.ts,48,onekit,insights
 insights,hooks/queries,res,,CustomerService.getLTVAnalysis,GetLTVAnalysisRequest,GetLTVAnalysisResponse,['insights-customers-ltv'],apps/insights/src/shared/hooks/queries/useInsightsCustomers.ts,72,onekit,insights
@@ -679,35 +583,13 @@ insights,hooks/queries,res,,ReportService.deleteScheduledReport,DeleteScheduledR
 insights,hooks/queries,res,,RevenueService.getRevenueOverview,GetRevenueOverviewRequest,GetRevenueOverviewResponse,"['insights-revenue', { from, to }]",apps/insights/src/shared/hooks/queries/useRevenue.ts,22,onekit,insights
 insights,hooks/queries,res,,RevenueService.getRevenueByApp,GetRevenueByAppRequest,GetRevenueByAppResponse,"['insights-revenue-by-app', { from, to }]",apps/insights/src/shared/hooks/queries/useRevenue.ts,39,onekit,insights
 insights,hooks/queries,res,,RevenueService.getRevenueComparison,GetRevenueComparisonRequest,GetRevenueComparisonResponse,"['insights-revenue-comparison', { from, to }]",apps/insights/src/shared/hooks/queries/useRevenue.ts,58,onekit,insights
-menu,cart,res,POST,/pos/orders/v1/orders/public,,PlaceOrderResponse,,apps/menu/src/features/cart/Checkout.tsx,116,axios,pos
-menu,cart,res,GET,/pos/orders/v1/orders/${id}/public-status,,OrderStatusResponse,,apps/menu/src/features/cart/OrderStatus.tsx,81,axios,pos
-menu,menu,handleReviewSubmit,POST,/crm/feedback/v1/feedback/public,,,,apps/menu/src/features/menu/Menu/Menu.tsx,164,axios,crm
-menu,shared,res,GET,<dynamic:API_ROUTES.GET.GET_ALL>,,,,apps/menu/src/shared/api/api/business/index.ts,5,axios,
-menu,shared,res,GET,<dynamic:API_ROUTES.GET.GET_NEWS>,,,,apps/menu/src/shared/api/api/config/index.ts,5,axios,
-menu,shared,res,GET,<dynamic:API_ROUTES.GET.GET_NEWS_WITH_ID>,,,,apps/menu/src/shared/api/api/config/index.ts,10,axios,
-menu,shared,res,GET,<dynamic:API_ROUTES.GET.GET_MENU_WITH_ID>,,,,apps/menu/src/shared/api/api/menu/index.ts,5,axios,
-menu,shared,res,GET,<dynamic:API_ROUTES.GET.GET_MENU_WITH_MENU_ID>,,,,apps/menu/src/shared/api/api/menu/index.ts,14,axios,
-menu,shared,res,PATCH,<dynamic:API_ROUTES.PATCH.EDIT_ADDON>,,,,apps/menu/src/shared/api/api/user/index.ts,6,axios,
-menu,shared,res,GET,/hub/business/v1/businesses/public,,{ business: BusinessApiResponse },,apps/menu/src/shared/hooks/usePublicMenu.ts,74,axios,hub
-menu,shared,res,GET,/pos/menu-item/v1/menu-items/public,,MenuApiResponse,,apps/menu/src/shared/hooks/usePublicMenu.ts,94,axios,pos
-menu,shared,res,GET,/hub/business/v1/businesses/by-slug,,PublicBusinessBySlugApi,"['public-business-by-slug', slug]",apps/menu/src/shared/hooks/usePublicMenu.ts,157,axios,hub
-menu,stores,response,GET,/config,,,,apps/menu/src/stores/configStore.ts,59,axios,
-menu,stores,response,PUT,/config/update,,,,apps/menu/src/stores/configStore.ts,78,axios,
-menu,stores,response,GET,/config/faqs,,,,apps/menu/src/stores/configStore.ts,85,axios,
-menu,stores,response,GET,/menu/menus/${restaurantId},,,,apps/menu/src/stores/menuStore.ts,67,axios,
-menu,stores,response,GET,/menu/${userId},,,,apps/menu/src/stores/menuStore.ts,88,axios,
-menu,stores,response,GET,/menu/${menuId},,,,apps/menu/src/stores/menuStore.ts,109,axios,
-menu,stores,response,POST,/menu/category/${categoryId}/item,,,,apps/menu/src/stores/menuStore.ts,137,axios,
-menu,stores,response,PUT,/menu/item/${itemId},,,,apps/menu/src/stores/menuStore.ts,153,axios,
-menu,stores,items,DELETE,/menu/category/${categoryId}/item/${itemId},,,,apps/menu/src/stores/menuStore.ts,170,axios,
-menu,stores,response,POST,/menu/category,,,,apps/menu/src/stores/menuStore.ts,187,axios,
-menu,stores,response,PUT,/menu/category/${categoryId},,,,apps/menu/src/stores/menuStore.ts,192,axios,
-menu,stores,items,DELETE,/menu/category/${categoryId},,,,apps/menu/src/stores/menuStore.ts,205,axios,
-menu,stores,response,PUT,/menu/category/${categoryId},,,,apps/menu/src/stores/menuStore.ts,212,axios,
-menu,stores,response,POST,/menu/banner,,,,apps/menu/src/stores/menuStore.ts,225,axios,
-menu,stores,response,POST,/menu/set-active-menu,,,,apps/menu/src/stores/menuStore.ts,232,axios,
-menu,stores,response,POST,/menu/createNewMenu,,,,apps/menu/src/stores/menuStore.ts,237,axios,
-recruit,,adminGuardRoute,GET,/hub/user/v1/users/me,,"Record<string, unknown>",,apps/recruit/src/router.tsx,78,safeFetch,hub
+insights,lib,result,GET,/license/state,,LicenseState,,apps/insights/src/shared/lib/api.ts,26,safeFetch,
+menu,cart,response,,OrderService.createPublicOrder,CreatePublicOrderRequest,CreatePublicOrderResponse,,apps/menu/src/features/cart/Checkout.tsx,94,onekit,pos
+menu,cart,res,,OrderService.getPublicOrderStatus,GetPublicOrderStatusRequest,GetPublicOrderStatusResponse,,apps/menu/src/features/cart/OrderStatus.tsx,75,onekit,pos
+menu,shared,response,,BusinessService.getPublicBusiness,GetPublicBusinessRequest,GetPublicBusinessResponse,,apps/menu/src/shared/hooks/usePublicMenu.ts,32,onekit,hub
+menu,shared,response,,MenuItemService.listPublicMenuItems,ListPublicMenuItemsRequest,ListPublicMenuItemsResponse,,apps/menu/src/shared/hooks/usePublicMenu.ts,49,onekit,pos
+menu,shared,response,,BusinessService.lookupBusinessBySlug,LookupBusinessBySlugRequest,LookupBusinessBySlugResponse,"['public-business-by-slug', slug]",apps/menu/src/shared/hooks/usePublicMenu.ts,97,onekit,hub
+recruit,,adminGuardRoute,,UserService.getMe,GetMeRequest,GetMeResponse,,apps/recruit/src/router.tsx,78,onekit,hub
 recruit,hooks/queries,useAdminCareers,GET,/recruit/careers,,ListCareersResponse,"['recruit', 'admin', 'careers']",apps/recruit/src/shared/hooks/queries/useAdmin.ts,17,safeFetch,
 recruit,hooks/queries,qc,POST,/recruit/careers,,CreateCareerResponse,"['recruit', 'admin', 'careers']",apps/recruit/src/shared/hooks/queries/useAdmin.ts,47,safeFetch,
 recruit,hooks/queries,qc,PUT,/recruit/careers,,{ message: string },"['recruit', 'admin', 'careers']",apps/recruit/src/shared/hooks/queries/useAdmin.ts,58,safeFetch,
@@ -731,14 +613,71 @@ recruit,hooks/queries,usePublicCareer,GET,/recruit/public/career,,GetPublicCaree
 recruit,hooks/queries,useSubmitApplication,POST,/recruit/public/apply,,SubmitApplicationResponse,,apps/recruit/src/shared/hooks/queries/usePublic.ts,71,safeFetch,
 recruit,hooks/queries,requestUploadURL,POST,/recruit/public/resume-upload-url,,ResumeUploadURLResponse,,apps/recruit/src/shared/hooks/queries/usePublic.ts,97,safeFetch,
 recruit,hooks/queries,putRes,,<dynamic:presigned.uploadUrl>,,,,apps/recruit/src/shared/hooks/queries/usePublic.ts,132,fetch,
-packages/api,,safeFetch,GET,<dynamic:url>,,T,,packages/api/src/result.ts,150,axios,
-packages/api,,safeFetch,POST,<dynamic:url>,,T,,packages/api/src/result.ts,156,axios,
-packages/api,,safeFetch,PUT,<dynamic:url>,,T,,packages/api/src/result.ts,162,axios,
-packages/api,,safeFetch,PATCH,<dynamic:url>,,T,,packages/api/src/result.ts,168,axios,
-packages/api,,safeFetch,DELETE,<dynamic:url>,,T,,packages/api/src/result.ts,174,axios,
 packages/api,,response,,${getCdnBaseUrl(options.cdnBaseUrl)}/upload,,,,packages/api/src/upload.ts,60,fetch,
 packages/caret,,response,,${baseUrl}caret/tools/decision,,,,packages/caret/src/components/CaretPanel.tsx,272,fetch,
 packages/caret,,response,,<dynamic:url>,,,,packages/caret/src/hooks/useCaretStream.ts,79,fetch,
 packages/components,,safeIcon,,/icons/${safeIcon}.svg,,,,packages/components/src/Icon/index.tsx,50,fetch,
-packages/components,,useLicenseState,GET,/license/state,,LicenseState,"['license', 'state']",packages/components/src/license/useLicenseState.ts,25,safeFetch,
 packages/config,,res,,${base}/runtime-config,,,,packages/config/src/runtimeConfig.ts,204,fetch,
+pos,cash-drop,request,,CashService.cashDrop,CashDropRequest,CashDropResponse,,pos/src/features/cash-drop/cashMovementQueueSync.ts,43,onekit,pos
+pos,cash-drop,request,,CashService.cashPickup,CashPickupRequest,CashPickupResponse,,pos/src/features/cash-drop/cashMovementQueueSync.ts,48,onekit,pos
+pos,cash-drop,request,,CashService.cashAdjust,CashAdjustRequest,CashAdjustResponse,,pos/src/features/cash-drop/cashMovementQueueSync.ts,52,onekit,pos
+pos,close-session,res,,SessionService.listSessions,ListSessionsRequest,ListSessionsResponse,,pos/src/features/close-session/closeSessionWorkflow.ts,62,onekit,pos
+pos,close-session,result,,SessionService.closeSession,CloseSessionRequest,CloseSessionResponse,,pos/src/features/close-session/index.tsx,46,onekit,pos
+pos,close-session,sessionId,,SessionService.closeSession,CloseSessionRequest,CloseSessionResponse,,pos/src/features/close-session/sessionCloseQueueSync.ts,20,onekit,pos
+pos,combos,res,,ComboService.listCombos,ListCombosRequest,ListCombosResponse,['pos-combos'],pos/src/features/combos/useCombos.ts,39,onekit,pos
+pos,customer-lookup,res,,CustomerService.searchCustomers,SearchCustomersRequest,SearchCustomersResponse,,pos/src/features/customer-lookup/useCustomerLookup.ts,28,onekit,pos
+pos,day-summary,res,,DaySummaryService.daySummary,DaySummaryRequest,DaySummaryResponse,,pos/src/features/day-summary/useDaySummary.ts,25,onekit,pos
+pos,discount,request,,OrderDiscountService.discountOrder,DiscountOrderRequest,DiscountOrderResponse,,pos/src/features/discount/index.tsx,37,onekit,pos
+pos,gift-cards,amount,,GiftCardService.createGiftCard,CreateGiftCardRequest,CreateGiftCardResponse,,pos/src/features/gift-cards/giftCardWorkflow.ts,30,onekit,pos
+pos,gift-cards,res,,GiftCardService.listGiftCards,ListGiftCardsRequest,ListGiftCardsResponse,,pos/src/features/gift-cards/useGiftCards.ts,40,onekit,pos
+pos,gift-cards,res,,GiftCardService.getGiftCardByCode,GetGiftCardByCodeRequest,GetGiftCardByCodeResponse,,pos/src/features/gift-cards/useGiftCards.ts,55,onekit,pos
+pos,gift-cards,res,,GiftCardService.redeemGiftCard,RedeemGiftCardRequest,RedeemGiftCardResponse,,pos/src/features/gift-cards/useGiftCards.ts,77,onekit,pos
+pos,inventory,load,,StockService.listInventory,ListInventoryRequest,ListInventoryResponse,,pos/src/features/inventory/index.tsx,163,onekit,pos
+pos,inventory,load,,StockService.lowStock,LowStockRequest,LowStockResponse,,pos/src/features/inventory/index.tsx,164,onekit,pos
+pos,inventory,load,,AccessService.getMyLocations,GetMyLocationsRequest,GetMyLocationsResponse,,pos/src/features/inventory/index.tsx,180,onekit,pos
+pos,inventory,load,,LocationService.listLocations,ListLocationsRequest,ListLocationsResponse,,pos/src/features/inventory/index.tsx,180,onekit,pos
+pos,inventory,call,,StockService.receiveStock,ReceiveStockRequest,ReceiveStockResponse,,pos/src/features/inventory/index.tsx,214,onekit,pos
+pos,inventory,call,,StockService.adjustStock,AdjustStockRequest,AdjustStockResponse,,pos/src/features/inventory/index.tsx,216,onekit,pos
+pos,inventory,call,,StockService.wasteStock,WasteStockRequest,WasteStockResponse,,pos/src/features/inventory/index.tsx,218,onekit,pos
+pos,inventory,call,,StockService.transferStock,TransferStockRequest,TransferStockResponse,,pos/src/features/inventory/index.tsx,220,onekit,pos
+pos,kds,res,,KDSService.listKDSOrders,ListKDSOrdersRequest,ListKDSOrdersResponse,,pos/src/features/kds/useKDSOrders.ts,48,onekit,pos
+pos,kds,itemUpdates,,KDSService.updateKDSItemStatus,UpdateKDSItemStatusRequest,UpdateKDSItemStatusResponse,,pos/src/features/kds/useKDSOrders.ts,94,onekit,pos
+pos,login,canCreateLocation,,AccessService.getMyLocations,GetMyLocationsRequest,GetMyLocationsResponse,,pos/src/features/login/LocationSelect.tsx,55,onekit,pos
+pos,login,canCreateLocation,,LocationService.listLocations,ListLocationsRequest,ListLocationsResponse,,pos/src/features/login/LocationSelect.tsx,56,onekit,pos
+pos,login,data,,TerminalService.listTerminals,ListTerminalsRequest,ListTerminalsResponse,,pos/src/features/login/LocationSelect.tsx,94,onekit,pos
+pos,login,data,,LocationService.createLocation,CreateLocationRequest,CreateLocationResponse,,pos/src/features/login/LocationSelect.tsx,112,onekit,pos
+pos,login,data,,TerminalService.createTerminal,CreateTerminalRequest,CreateTerminalResponse,,pos/src/features/login/LocationSelect.tsx,142,onekit,pos
+pos,login,data,,AccessService.getLocationRoster,GetLocationRosterRequest,GetLocationRosterResponse,,pos/src/features/login/index.tsx,51,onekit,pos
+pos,login,submitSetup,,UserService.setPIN,SetPINRequest,SetPINResponse,,pos/src/features/login/index.tsx,140,onekit,pos
+pos,loyalty,earned,,LoyaltyService.earnPoints,EarnPointsRequest,EarnPointsResponse,,pos/src/features/loyalty/loyaltyWorkflow.ts,65,onekit,pos
+pos,loyalty,discountAmount,,LoyaltyService.redeemPoints,RedeemPointsRequest,RedeemPointsResponse,,pos/src/features/loyalty/loyaltyWorkflow.ts,85,onekit,pos
+pos,menu-items,res,,MenuItemService.listMenuItems,ListMenuItemsRequest,ListMenuItemsResponse,['pos-menu-items'],pos/src/features/menu-items/useMenuItems.ts,23,onekit,pos
+pos,modifiers,res,,ModifierService.listModifiers,ListModifiersRequest,ListModifiersResponse,['pos-modifiers'],pos/src/features/modifiers/useModifiers.ts,46,onekit,pos
+pos,offline-queue,syncOrderWithApi,,OrderService.createOrder,CreateOrderRequest,CreateOrderResponse,,pos/src/features/offline-queue/offlineQueueSync.ts,13,onekit,pos
+pos,offline-queue,syncOrder,,OrderService.createOrder,CreateOrderRequest,CreateOrderResponse,,pos/src/features/offline-queue/useOfflineQueue.ts,19,onekit,pos
+pos,orders,response,,OrderHoldService.listHeldOrders,ListHeldOrdersRequest,ListHeldOrdersResponse,"['pos', 'held-orders']",pos/src/features/orders/HeldOrders.tsx,36,onekit,pos
+pos,orders,res,,OrderService.listOrders,ListOrdersRequest,ListOrdersResponse,,pos/src/features/orders/index.tsx,61,onekit,pos
+pos,orders,handleReopen,,OrderService.updateOrderStatus,UpdateOrderStatusRequest,UpdateOrderStatusResponse,,pos/src/features/orders/index.tsx,90,onekit,pos
+pos,orders,handleVoid,,OrderService.voidOrder,VoidOrderRequest,VoidOrderResponse,,pos/src/features/orders/index.tsx,112,onekit,pos
+pos,payment,res,,OrderService.getOrderDetail,GetOrderDetailRequest,GetOrderDetailResponse,,pos/src/features/payment/MultiPayment.tsx,54,onekit,pos
+pos,payment,finalize,,OrderPaymentService.processPayment,ProcessPaymentRequest,ProcessPaymentResponse,,pos/src/features/payment/MultiPayment.tsx,120,onekit,pos
+pos,payment,confirm,,OrderSplitService.splitOrder,SplitOrderRequest,SplitOrderResponse,,pos/src/features/payment/SplitBill.tsx,89,onekit,pos
+pos,payment,result,,OrderService.createOrder,CreateOrderRequest,CreateOrderResponse,,pos/src/features/payment/index.tsx,107,onekit,pos
+pos,payment,result,,OrderPaymentService.processPayment,ProcessPaymentRequest,ProcessPaymentResponse,,pos/src/features/payment/index.tsx,109,onekit,pos
+pos,pos,created,,OrderService.createOrder,CreateOrderRequest,CreateOrderResponse,,pos/src/features/pos/components/OrderPanel/index.tsx,154,onekit,pos
+pos,product-quick-edit,draft,,MenuItemService.updateMenuItem,UpdateMenuItemRequest,UpdateMenuItemResponse,,pos/src/features/product-quick-edit/index.tsx,63,onekit,pos
+pos,receipts,res,,ReceiptService.listReceipts,ListReceiptsRequest,ListReceiptsResponse,,pos/src/features/receipts/useReceipts.ts,28,onekit,pos
+pos,receipts,remoteId,,ReceiptService.emailReceipt,EmailReceiptRequest,EmailReceiptResponse,,pos/src/features/receipts/useReceipts.ts,48,onekit,pos
+pos,refund,submit,,OrderRefundService.processRefund,ProcessRefundRequest,ProcessRefundResponse,,pos/src/features/refund/index.tsx,48,onekit,pos
+pos,settings,response,,SettingsService.updatePOSSettings,UpdatePOSSettingsRequest,UpdatePOSSettingsResponse,,pos/src/features/settings/index.tsx,126,onekit,pos
+pos,staff,data,,UserService.listPOSUsers,ListPOSUsersRequest,ListPOSUsersResponse,,pos/src/features/staff/index.tsx,55,onekit,pos
+pos,staff,save,,UserService.updatePOSUser,UpdatePOSUserRequest,UpdatePOSUserResponse,,pos/src/features/staff/index.tsx,83,onekit,pos
+pos,staff,deactivate,,UserService.deactivatePOSUser,DeactivatePOSUserRequest,DeactivatePOSUserResponse,,pos/src/features/staff/index.tsx,96,onekit,pos
+pos,tables,res,,TableService.listTables,ListTablesRequest,ListTablesResponse,,pos/src/features/tables/index.tsx,24,onekit,pos
+pos,services,res,,${base}runtime-config,,,,pos/src/shared/services/server/runtimeConfig.ts,29,fetch,
+pos,services,terminalId,,TerminalService.heartbeatTerminal,HeartbeatTerminalRequest,HeartbeatTerminalResponse,,pos/src/shared/services/terminal/useTerminalHeartbeat.ts,16,onekit,pos
+pos,stores,data,,UserService.verifyPOSUserPIN,VerifyPOSUserPINRequest,VerifyPOSUserPINResponse,,pos/src/shared/stores/employeeSessionStore.ts,110,onekit,pos
+pos,stores,useUserStore,,OauthService.me,MeRequest,MeResponse,,pos/src/shared/stores/userStore.ts,168,onekit,common
+pos,stores,useUserStore,,ConfigService.getConfig,GetConfigRequest,GetConfigResponse,,pos/src/shared/stores/userStore.ts,169,onekit,hub
+pos,stores,current,,SettingsService.getPOSSettings,GetPOSSettingsRequest,GetPOSSettingsResponse,,pos/src/shared/stores/userStore.ts,202,onekit,pos
+pos,stores,response,,SettingsService.updatePOSSettings,UpdatePOSSettingsRequest,UpdatePOSSettingsResponse,,pos/src/shared/stores/userStore.ts,203,onekit,pos

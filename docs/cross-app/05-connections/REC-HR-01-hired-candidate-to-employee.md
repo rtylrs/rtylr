@@ -177,3 +177,11 @@ so the connection's shape is the read.
 | Backend             | 1.5 days: a minimal recruit contract with one RPC, the `employee_id` column and link, tenant scoping, role gating                                 |
 | Frontend            | 1 day: prefill path on HR create-employee, converted-state handling on the recruit submission row                                                 |
 | Ongoing maintenance | ~0.25 days per year, plus the standing cost of a new contract capability that must be kept in step with the legacy routes until those are retired |
+
+## Backend section (round two)
+
+Confirmed: careers serves 23 legacy chi routes with no contract domain
+(`backend_handlers.csv`, careers rows); `EmployeeService.createEmployee` exists
+as cited. Round one's numbers survive precise re-measurement.
+
+*Round two (2026-08-22): confirmed unchanged.*

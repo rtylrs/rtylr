@@ -20,7 +20,7 @@ has earned and not asked for.
 Nothing compares them, so unbilled time is invisible.
 
 The producer side is unusually well prepared. Flow's work day lines persist
-into `hr_time_entries` rather than a Flow-private table: the `workspaces`
+into `internal/modules/hr_time_entries` rather than a Flow-private table: the `workspaces`
 module writes there directly, and the contract documents the intent
 (`packages/voxie/api/flow/time/v1/service.onk:6`). Each entry already carries
 `project_id`, `task_id`, `is_billable` and a `status`
@@ -46,7 +46,7 @@ exactly this export and no UI for it: `GET /hr/time-entries/export-billable`
 (`~/Development/onion/internal/modules/hr_time/internal/routes/handlers/export_billable_handler.go:15`)
 returns per-entry `project_id`, `duration_minutes` and `is_billable`
 (`~/Development/onion/internal/modules/hr_time/internal/domain/types.go:90`),
-and **no frontend calls it** (zero rows in `inventory/endpoints.csv`). Somebody
+and **no frontend calls it** (zero rows in `internal/modules/inventory/endpoints.csv`). Somebody
 already recognised this need and built half of it.
 
 ## ROI
@@ -94,10 +94,10 @@ and says so on the screen.
 
 ## What exists today
 
-- Flow writes into `hr_time_entries` (verified across
+- Flow writes into `internal/modules/hr_time_entries` (verified across
   `~/Development/onion/internal/modules/workspaces/sql/queries/worktime.sql`,
-  whose statements touch `flow_work_days`, `flow_work_types`, `hr_employees`
-  and `hr_time_entries`).
+  whose statements touch `flow_work_days`, `flow_work_types`, `internal/modules/hr_employees`
+  and `internal/modules/hr_time_entries`).
 - `is_billable` and `project_id` are contract fields, populated.
 - `ListTimeEntriesRequest` exists (`packages/voxie/api/hr/time_entry/v1/service.onk:6`).
 - An unused billable-export route exists, described above.
@@ -118,7 +118,7 @@ and says so on the screen.
 
 Flow already reads the HR domain 11 times (`01-inventory.md`), so a Flow/HR/
 Finance triangle is not novel territory. The precedent that matters more is the
-cautionary one: `hr_category_id` is a Flow-to-HR link that was declared and
+cautionary one: `internal/modules/hr_category_id` is a Flow-to-HR link that was declared and
 never consumed (`02-entity-graph.md`). This proposal is the opposite bet, since
 every field it needs is already populated by a live write path, and the only
 missing piece is the ability to ask for them.
@@ -193,3 +193,25 @@ build the screen against the unpaginated endpoint.
 | Backend             | 1 day: add `from_date`, `to_date`, `project_id`, `is_billable`, `status`, `limit`, `offset` to `ListTimeEntriesRequest`, and honour them |
 | Frontend            | 2 days: unbilled-time view grouped by project, period picker, the honest "not automatically reconciled" statement                        |
 | Ongoing maintenance | ~0.5 days per year. Slightly higher than a plain read because the aggregation logic lives in the client.                                 |
+
+## Backend section (round two)
+
+Two developments, one closing the gap and one widening it.
+
+Closing: the missing filters landed upstream the day after round one filed.
+voxie #46 added `from_date`, `to_date`, `project_id`, `is_billable`, `status`,
+`limit` and `offset` to `ListTimeEntriesRequest` (`api/hr/time_entry/v1/models.onk`),
+onion #783 served them, packages #66 and rtylr #917 bumped the pointer through.
+The landed contract mirrors round-one draft 1 nearly verbatim. The gap bucket
+moves from "needs a contract field" to frontend work.
+
+Widening: `internal/modules/hr_time_entries.billable_invoice_id`
+(`internal/platform/database/schemas/hr_time/schema.sql:22`) is read by the unbilled filter
+(`internal/modules/hr_time/sql/queries/time_entries.sql:52`: `AND billable_invoice_id IS NULL`) and written by
+nothing anywhere in the repo. "Unbilled" is currently true of every row forever;
+recording that an hour got invoiced exists at no layer. Any implementation of
+this dossier must include the invoice-side marker write or the unbilled number
+never moves.
+
+*Round two (2026-08-22): corrected-by-progress upstream plus a new storage gap
+recorded in 14-layer-reconciliation.md A1/A2.*
