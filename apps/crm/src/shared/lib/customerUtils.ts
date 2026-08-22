@@ -1,4 +1,5 @@
 import type { Customer } from '../schemas/customers';
+import { parseCrmDate } from './dateUtils';
 
 /** Returns true if the customer has opted in to email marketing. */
 export function hasEmailConsent(customer: Customer): boolean {
@@ -12,7 +13,7 @@ export function hasSmsConsent(customer: Customer): boolean {
 
 /** Returns the number of days since the customer's last visit. */
 export function daysSinceLastVisit(customer: Customer, now = new Date()): number {
-  const lastTimestamp = new Date(customer.lastVisit).getTime();
+  const lastTimestamp = parseCrmDate(customer.lastVisit).getTime();
   if (!customer.lastVisit.trim() || !Number.isFinite(lastTimestamp)) return Infinity;
   const diff = now.getTime() - lastTimestamp;
   return Math.floor(diff / (1000 * 60 * 60 * 24));

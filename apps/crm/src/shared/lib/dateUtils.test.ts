@@ -9,16 +9,21 @@ import {
   relativeDate,
 } from './dateUtils';
 
+const localDateKey = (date: Date): string =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+    date.getDate()
+  ).padStart(2, '0')}`;
+
 describe('isToday', () => {
   it('returns true for today', () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = localDateKey(new Date());
     expect(isToday(today)).toBe(true);
   });
 
   it('returns false for yesterday', () => {
     const d = new Date();
     d.setDate(d.getDate() - 1);
-    expect(isToday(d.toISOString().split('T')[0])).toBe(false);
+    expect(isToday(localDateKey(d))).toBe(false);
   });
 });
 
@@ -36,7 +41,7 @@ describe('isThisMonth', () => {
 
 describe('daysAgo', () => {
   it('returns a date exactly N days before the reference', () => {
-    const ref = new Date('2024-05-10');
+    const ref = new Date(2024, 4, 10, 12);
     expect(daysAgo(5, ref)).toBe('2024-05-05');
   });
 
@@ -48,7 +53,7 @@ describe('daysAgo', () => {
 
 describe('daysFromNow', () => {
   it('returns a date exactly N days after the reference', () => {
-    const ref = new Date('2024-05-10');
+    const ref = new Date(2024, 4, 10, 12);
     expect(daysFromNow(5, ref)).toBe('2024-05-15');
   });
 
