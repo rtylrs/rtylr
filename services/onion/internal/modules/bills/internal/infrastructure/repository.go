@@ -108,9 +108,10 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 	}
 
 	res, err := r.queries.CreateBill(ctx, sqlc.CreateBillParams{
-		OwnerID:     businessID,
-		BusinessID:  businessID,
-		SupplierID:  sql.NullInt64{Int64: input.SupplierID, Valid: input.SupplierID != 0},
+		OwnerID:      businessID,
+		BusinessID:   businessID,
+		SupplierID:   sql.NullInt64{Int64: input.SupplierID, Valid: input.SupplierID != 0},
+		SupplierName: input.SupplierName,
 		Amount:      formatAmount(input.Amount),
 		Currency:    nullableString(currency),
 		DueDate:     dueDate,
@@ -133,7 +134,8 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 	}
 
 	err = r.queries.UpdateBill(ctx, sqlc.UpdateBillParams{
-		SupplierID:  sql.NullInt64{Int64: input.SupplierID, Valid: input.SupplierID != 0},
+		SupplierID:   sql.NullInt64{Int64: input.SupplierID, Valid: input.SupplierID != 0},
+		SupplierName: input.SupplierName,
 		Amount:      formatAmount(input.Amount),
 		Currency:    nullableString(input.Currency),
 		DueDate:     dueDate,
