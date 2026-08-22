@@ -450,7 +450,23 @@
       "deleteConfirmSuffix": "؟ ستتم إزالته من كل مهمة مرتبط بها."
     },
     "chooseColorLabel": "اختيار اللون {{color}}",
-    "deleteLabelLabel": "حذف التسمية"
+    "deleteLabelLabel": "حذف التسمية",
+    "bin": {
+      "section": "سلة المحذوفات",
+      "description": "المشاريع المؤرشفة في نطاق العمل بالكامل. استعد مشروعًا أو احذف نهائيًا ما لم تعد بحاجة إليه.",
+      "emptyTitle": "السلة فارغة",
+      "emptyDescription": "تظهر المشاريع المؤرشفة هنا حتى يتم حذفها نهائيًا.",
+      "refreshCta": "تحديث",
+      "selectAll": "تحديد الكل ({{count}})",
+      "purgeSelected": "حذف {{count}} نهائيًا",
+      "selectProject": "تحديد {{name}}",
+      "purgesOn": "يُحذف في {{date}}",
+      "truncated": "يتم عرض {{shown}} من {{total}}. استعد أو احذف بعضها لعرض الباقي.",
+      "purgeTitle": "حذف نهائي",
+      "purgeConfirm": "سيؤدي هذا إلى حذف {{count}} مشروع وكل ما داخله نهائيًا. لا يمكن التراجع عن ذلك.",
+      "purgeKeyword": "حذف",
+      "retentionNote": "تُحذف المشاريع تلقائيًا بعد انتهاء مدة الاحتفاظ."
+    }
   },
   "presence": {
     "heading": "من موجود اليوم",
