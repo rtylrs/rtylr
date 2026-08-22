@@ -56,8 +56,8 @@ const CustomerProfile: React.FC = () => {
   const update = useUpdateCustomer();
   const tagUpdate = useUpdateCustomer({ notify: false });
   const remove = useDeleteCustomer();
-  const award = useAwardPoints();
-  const redeem = useRedeemPoints();
+  const award = useAwardPoints({ notify: false });
+  const redeem = useRedeemPoints({ notify: false });
   const { data: loyaltyConfig } = useLoyaltyConfig();
   const exportData = useExportCustomers();
   const [confirmDelete, setConfirmDelete] = useState(false);

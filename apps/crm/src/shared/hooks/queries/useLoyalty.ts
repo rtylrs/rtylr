@@ -44,6 +44,10 @@ interface AwardRedeemPayload {
   reason?: string;
 }
 
+interface LoyaltyMutationOptions {
+  notify?: boolean;
+}
+
 const DEFAULT_LOYALTY_CONFIG: LoyaltyConfig = {
   programEnabled: true,
   pointsPerDollar: 1,
@@ -224,7 +228,11 @@ export const useUpsertReward = (): UseMutationResult<unknown, unknown, UpsertRew
   });
 };
 
-export const useAwardPoints = (): UseMutationResult<unknown, unknown, AwardRedeemPayload> => {
+export const useAwardPoints = ({ notify = true }: LoyaltyMutationOptions = {}): UseMutationResult<
+  unknown,
+  unknown,
+  AwardRedeemPayload
+> => {
   const qc = useQueryClient();
   const { t } = useTranslation();
   return useMutation<unknown, unknown, AwardRedeemPayload>({
@@ -242,15 +250,19 @@ export const useAwardPoints = (): UseMutationResult<unknown, unknown, AwardRedee
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
       void qc.invalidateQueries({ queryKey: ['crm-customer', variables.customerId] });
       void qc.invalidateQueries({ queryKey: ['crm-customer', variables.customerId, 'full'] });
-      toast.success(t('crm.loyalty.pointsAwarded'));
+      if (notify) toast.success(t('crm.loyalty.pointsAwarded'));
     },
     onError: (): void => {
-      toast.error(t('errors.generic'));
+      if (notify) toast.error(t('errors.generic'));
     },
   });
 };
 
-export const useRedeemPoints = (): UseMutationResult<unknown, unknown, AwardRedeemPayload> => {
+export const useRedeemPoints = ({ notify = true }: LoyaltyMutationOptions = {}): UseMutationResult<
+  unknown,
+  unknown,
+  AwardRedeemPayload
+> => {
   const qc = useQueryClient();
   const { t } = useTranslation();
   return useMutation<unknown, unknown, AwardRedeemPayload>({
@@ -268,10 +280,10 @@ export const useRedeemPoints = (): UseMutationResult<unknown, unknown, AwardRede
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
       void qc.invalidateQueries({ queryKey: ['crm-customer', variables.customerId] });
       void qc.invalidateQueries({ queryKey: ['crm-customer', variables.customerId, 'full'] });
-      toast.success(t('crm.loyalty.pointsRedeemed'));
+      if (notify) toast.success(t('crm.loyalty.pointsRedeemed'));
     },
     onError: (): void => {
-      toast.error(t('errors.generic'));
+      if (notify) toast.error(t('errors.generic'));
     },
   });
 };
