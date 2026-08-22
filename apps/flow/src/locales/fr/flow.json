@@ -700,5 +700,18 @@
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection"
+  },
+  "allProjects": {
+    "title": "Tous les projets",
+    "search": "Rechercher des projets…",
+    "filterStatus": "Filtrer par statut",
+    "filterVisibility": "Filtrer par visibilité",
+    "allStatuses": "Tous les statuts",
+    "allVisibilities": "Toutes les visibilités",
+    "noResults": "Aucun projet ne correspond à vos filtres.",
+    "tryClearing": "Essayez de vider votre recherche ou vos filtres.",
+    "emptyTitle": "Aucun projet pour le moment",
+    "emptyDescription": "Créez votre premier projet pour commencer.",
+    "createFirst": "Créer un projet"
   }
 }
