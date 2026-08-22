@@ -753,6 +753,9 @@
     "restored": "Project restored",
     "purged": "Project permanently deleted",
     "purgeConfirm": "This permanently deletes {{name}} and everything inside it. This cannot be undone.",
-    "retention": "Projects stay in the bin for {{days}} days before automatic deletion."
+    "retention": "Projects stay in the bin for {{days}} days before automatic deletion.",
+    "purge": "Permanently delete {{name}}",
+    "purgeTitle": "Delete permanently",
+    "purgeCta": "Delete permanently"
   }
 }
