@@ -162,10 +162,41 @@ Rewrite of `AppearanceSection`. Seven controls, in this order:
 6. **Corners**: sharp / soft / round.
 7. **Reduce motion**: defaults on when the system asks for it.
 
-**No preview pane.** The panel lives inside Flow, so the application is the
-preview and every change applies live. The prototype needed one only because it
-runs outside the app. Building one here would be duplicated surface with no
-information the surrounding screen does not already carry.
+**A preview pane, after all.** The first draft of this spec argued against one:
+the panel lives inside Flow, so the application is already the preview. That
+reasoning was incomplete. A preview lets a user **audition** a palette without
+committing the whole app to it, which is the difference between trying six
+palettes and being willing to try one. It also gives density and corners
+somewhere to demonstrate themselves on more than one shape.
+
+**Audition on hover, commit on click. No Apply button.** A draft-plus-Apply model
+was the obvious way to build this and it is the wrong one: it contradicts
+"applies instantly, nothing to save", and it introduces two-tier state whose
+failure mode is showing the user a palette they are not actually getting.
+
+Instead, the preview pane reflects **applied** state by default, and shows a
+**hovered or focused** option instead whenever one is active. Point at a palette
+card and the pane shows that palette; move away and it snaps back; click and the
+whole app changes. Auditioning costs a mouse movement, committing stays instant,
+and there is exactly one source of truth.
+
+Requirements, so it stays cheap:
+
+- Renders the same token consumers as the app at miniature scale: a rail, a task
+  row with chip and avatar, a primary button, a progress bar.
+- Takes an optional `previewOverride: Partial<AppearancePrefs>` prop. The panel
+  sets it from `onPointerEnter` / `onFocus` and clears it on leave and blur. No
+  store writes, no second copy of the preferences.
+- Derives its tokens by calling the same `appearanceTokens()` the provider uses,
+  and applies them **scoped to its own subtree**, never to `documentElement`.
+  This is the one place a second token writer is legitimate, and it is legitimate
+  precisely because it writes to a container rather than the root.
+- Local component under `features/settings/components/`. Flow's panel, not a
+  shared primitive, until a second app needs one.
+
+**Touch has no hover.** On touch, the pane simply shows applied state and
+auditioning happens by tapping, which is safe because every change is instant and
+reversible. Do not build a long-press affordance for this.
 
 **De-duplication.** `FlowLayout`'s inline switcher keeps its quick mode toggle,
 because it is a genuinely useful shortcut, but both call sites render one shared
