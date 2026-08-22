@@ -86,7 +86,8 @@ const Apps: React.FC = () => {
           </div>
           <div className="flex items-center gap-1 flex-wrap">
             {CATEGORIES.map((c) => (
-              <button type="button"
+              <button
+                type="button"
                 key={c.key}
                 onClick={() => setCategory(c.key)}
                 className="px-2.5 py-1 rounded-md text-[11px] font-semibold uppercase tracking-wider transition-colors"

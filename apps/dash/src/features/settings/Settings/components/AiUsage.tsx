@@ -127,7 +127,8 @@ const AiUsage: React.FC = () => {
               const active = (mode ?? 'pool') === m.id;
               const Icon = m.icon;
               return (
-                <button type="button"
+                <button
+                  type="button"
                   key={m.id}
                   disabled={!isOwner || updateMode.isPending || active}
                   onClick={() => updateMode.mutate(m.id)}

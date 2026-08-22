@@ -71,7 +71,8 @@ const Integrations: React.FC = () => {
         {/* Category pills */}
         <div className="flex items-center gap-1.5 flex-wrap">
           {CATEGORIES.map((c) => (
-            <button type="button"
+            <button
+              type="button"
               key={c.key}
               onClick={() => setCat(c.key)}
               className="px-3 py-1 rounded-lg text-xs font-medium transition-colors"
@@ -164,7 +165,8 @@ const Integrations: React.FC = () => {
 
                   <div className="flex items-center justify-end">
                     {i.status === 'coming_soon' ? (
-                      <button type="button"
+                      <button
+                        type="button"
                         disabled
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold opacity-50 cursor-not-allowed"
                         style={{
@@ -176,7 +178,8 @@ const Integrations: React.FC = () => {
                         Coming Soon
                       </button>
                     ) : isConnected ? (
-                      <button type="button"
+                      <button
+                        type="button"
                         onClick={() => disconnect.mutate(i.id)}
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                         style={{
@@ -188,7 +191,8 @@ const Integrations: React.FC = () => {
                         Disconnect
                       </button>
                     ) : (
-                      <button type="button"
+                      <button
+                        type="button"
                         onClick={() => connect.mutate(i.id)}
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                         style={{ background: '#4583C4', color: '#fff' }}

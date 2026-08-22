@@ -42,7 +42,8 @@ const sizeClasses: Record<ButtonSize, string> = {
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = 'default', size = 'md', className, children, ...props }, ref) => {
     return (
-      <button type="button"
+      <button
+        type="button"
         ref={ref}
         className={cn(
           'inline-flex items-center justify-center gap-2 font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/40 disabled:pointer-events-none disabled:opacity-40 hover:opacity-90',
