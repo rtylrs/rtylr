@@ -255,6 +255,16 @@ describe('JSON API', () => {
     assert.equal(res.headers.get('allow'), 'GET, HEAD, OPTIONS');
   });
 
+  it('advertises RateLimit-* headers on success and error API responses', async () => {
+    const ok = await worker.fetch(req('/api/v1/status'), env);
+    assert.ok(ok.headers.get('ratelimit-limit'));
+    assert.ok(ok.headers.get('ratelimit-remaining'));
+    assert.ok(ok.headers.get('ratelimit-reset'));
+
+    const notFound = await worker.fetch(req('/api/nope'), env);
+    assert.ok(notFound.headers.get('ratelimit-limit'));
+  });
+
   it('API errors are JSON even when the client asks for markdown', async () => {
     const res = await worker.fetch(req('/api/unknown-endpoint/', { accept: 'text/markdown' }), env);
     assert.equal(res.status, 404);

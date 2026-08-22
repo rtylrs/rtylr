@@ -203,6 +203,25 @@ function varyOnNegotiation(headers) {
 // Error envelope (structured JSON — agents parse this, not HTML)
 // ---------------------------------------------------------------------------
 
+// Advertised, not (yet) individually metered per client — this is a
+// read-only, cacheable JSON surface with no per-caller state in the worker.
+// The headers still let well-behaved agents self-throttle to the documented
+// ceiling instead of guessing; real abuse is stopped at Cloudflare's edge.
+const RATE_LIMIT_WINDOW_SECONDS = 60;
+const RATE_LIMIT_MAX_REQUESTS = 60;
+
+/** RFC-draft `RateLimit-*` headers (draft-ietf-httpapi-ratelimit-headers). */
+export function rateLimitHeaders() {
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  const secondsIntoWindow = nowSeconds % RATE_LIMIT_WINDOW_SECONDS;
+  return {
+    'RateLimit-Limit': String(RATE_LIMIT_MAX_REQUESTS),
+    'RateLimit-Remaining': String(RATE_LIMIT_MAX_REQUESTS),
+    'RateLimit-Reset': String(RATE_LIMIT_WINDOW_SECONDS - secondsIntoWindow),
+    'RateLimit-Policy': `${RATE_LIMIT_MAX_REQUESTS};w=${RATE_LIMIT_WINDOW_SECONDS}`,
+  };
+}
+
 export function jsonError(status, code, message, hint) {
   const body = {
     error: {
@@ -218,6 +237,7 @@ export function jsonError(status, code, message, hint) {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
+      ...rateLimitHeaders(),
     },
   });
 }
@@ -294,6 +314,7 @@ async function handleApi(request, url, env) {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
         'Cache-Control': cacheControl,
+        ...rateLimitHeaders(),
       },
     });
 
@@ -342,7 +363,7 @@ async function handleApi(request, url, env) {
   }
 
   if (method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: { Allow: allowMethods } });
+    return new Response(null, { status: 204, headers: { Allow: allowMethods, ...rateLimitHeaders() } });
   }
   if (method !== 'GET' && method !== 'HEAD') {
     const res = jsonError(

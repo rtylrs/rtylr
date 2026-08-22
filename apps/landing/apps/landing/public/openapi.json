@@ -4,7 +4,7 @@
     "title": "rtylr.com site API",
     "version": "1.0.0",
     "summary": "Read-only JSON surface of the rtylr.com marketing site",
-    "description": "Machine-readable metadata endpoints for the rtylr marketing site.\n\nAll responses are JSON (`application/json; charset=utf-8`). Errors always use the structured Error envelope defined below - never HTML.\n\nThe site's human pages additionally support content negotiation: request any page URL with `Accept: text/markdown` to receive a Markdown representation (see https://acceptmarkdown.com). Agents should start from `/llms.txt` or `/sitemap.xml` to discover content.",
+    "description": "Machine-readable metadata endpoints for the rtylr marketing site.\n\nAll responses are JSON (`application/json; charset=utf-8`). Errors always use the structured Error envelope defined below - never HTML.\n\nThe site's human pages additionally support content negotiation: request any page URL with `Accept: text/markdown` to receive a Markdown representation (see https://acceptmarkdown.com). Agents should start from `/llms.txt` or `/sitemap.xml` to discover content.\n\n**Versioning & deprecation policy**: this API is versioned in the URL path (`/api/v1/...`). Breaking changes ship under a new version prefix (`/api/v2/...`) rather than mutating `v1` in place. Before a version is retired, responses on it will carry a `Deprecation` header and, once a removal date is set, a `Sunset` header (RFC 8594) for at least 90 days; the timeline will also be announced here and in `/llms.txt`.\n\n**Rate limits**: every response carries `RateLimit-Limit` / `RateLimit-Remaining` / `RateLimit-Reset` (draft-ietf-httpapi-ratelimit-headers) so agents can self-throttle.",
     "contact": {
       "name": "rtylr",
       "url": "https://rtylr.com/contact/"
@@ -23,12 +23,13 @@
         "summary": "Service liveness and endpoint discovery",
         "description": "Returns the current service status together with links to the other machine-readable surfaces. Suitable as a health probe.",
         "tags": ["site"],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Service is live.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Status" },
+                "schema": { "$ref": "#/components/schemas/Status", "type": "object" },
                 "example": {
                   "service": "rtylr.com",
                   "status": "ok",
@@ -69,12 +70,13 @@
         "summary": "Index of all public pages",
         "description": "Returns every public marketing page with its canonical URL, human title and meta description. Regenerated on each deploy. Prefer this (or `/llms.txt`) over crawling for content discovery.",
         "tags": ["site"],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Page index.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/PageList" },
+                "schema": { "$ref": "#/components/schemas/PageList", "type": "object" },
                 "example": {
                   "generatedAt": "2026-08-22T09:41:00.000Z",
                   "count": 2,

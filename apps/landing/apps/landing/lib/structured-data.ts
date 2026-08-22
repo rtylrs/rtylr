@@ -227,10 +227,16 @@ export function organizationSchema(): Record<string, unknown> {
       'All-in-one business OS for modern teams. POS, ERP, CRM, HR, Finance, and Flow in a single platform.',
     foundingDate: '2024',
     sameAs: ['https://voxire.com'],
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'LB',
+      addressLocality: 'Beirut',
+    },
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'customer support',
       email: 'info@voxire.com',
+      telephone: '+961-3-940-708',
       availableLanguage: ['English', 'Arabic', 'French'],
     },
   };

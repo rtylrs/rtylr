@@ -187,6 +187,20 @@ describe('organizationSchema', () => {
     const out = organizationSchema() as { foundingDate: string };
     expect(out.foundingDate).toBe('2024');
   });
+
+  it('includes a PostalAddress', () => {
+    const out = organizationSchema() as { address: { '@type': string } };
+    expect(out.address['@type']).toBe('PostalAddress');
+  });
+
+  it('includes a contactPoint with an email and phone', () => {
+    const out = organizationSchema() as {
+      contactPoint: { '@type': string; email: string; telephone: string };
+    };
+    expect(out.contactPoint['@type']).toBe('ContactPoint');
+    expect(out.contactPoint.email).toBeTruthy();
+    expect(out.contactPoint.telephone).toBeTruthy();
+  });
 });
 
 describe('webSiteSchema', () => {
