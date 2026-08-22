@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"net/http"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
@@ -32,7 +31,7 @@ func (a *InsightsAPI) GetInsights(ctx context.Context, req *flowinsightsv1.GetIn
 
 	ins, err := a.Service.GetInsights(ctx, wsID)
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "GetInsights failed", err)
 	}
 
 	resp := &flowinsightsv1.GetInsightsResponse{
@@ -100,7 +99,7 @@ func (a *InsightsAPI) GetTeamWorkload(ctx context.Context, req *flowinsightsv1.G
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	workload, total, err := a.Service.GetTeamWorkload(ctx, wsID, int64(limit), offset)
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "GetTeamWorkload failed", err)
 	}
 
 	members := make([]*flowinsightsv1.TeamMemberWorkload, 0, len(workload))
@@ -148,7 +147,7 @@ func (a *InsightsAPI) GetRoadmap(ctx context.Context, req *flowinsightsv1.GetRoa
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	projects, total, err := a.Service.GetRoadmap(ctx, wsID, int64(limit), offset)
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "GetRoadmap failed", err)
 	}
 
 	payloads := make([]*flowinsightsv1.RoadmapProject, 0, len(projects))

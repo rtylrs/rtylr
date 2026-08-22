@@ -48,7 +48,7 @@ func (a *NotificationAPI) ListNotifications(ctx context.Context, req *flownotifi
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	notifs, total, err := a.Service.ListNotifications(ctx, authUser.UserID, int64(limit), offset)
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "ListNotifications failed", err)
 	}
 
 	out := make([]*flownotificationv1.Notification, 0, len(notifs))
@@ -72,7 +72,7 @@ func (a *NotificationAPI) MarkNotificationRead(ctx context.Context, req *flownot
 	}
 
 	if err := a.Service.MarkNotificationRead(ctx, req.GetId(), authUser.UserID); err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "MarkNotificationRead failed", err)
 	}
 	return &flownotificationv1.MarkNotificationReadResponse{}, nil
 }
@@ -84,7 +84,7 @@ func (a *NotificationAPI) MarkAllNotificationsRead(ctx context.Context, _ *flown
 	}
 
 	if err := a.Service.MarkAllNotificationsRead(ctx, authUser.UserID); err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "MarkAllNotificationsRead failed", err)
 	}
 	return &flownotificationv1.MarkAllNotificationsReadResponse{}, nil
 }

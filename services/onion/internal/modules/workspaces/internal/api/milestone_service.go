@@ -72,7 +72,7 @@ func (a *MilestoneAPI) ListMilestones(ctx context.Context, req *flowmilestonev1.
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	milestones, total, err := a.Service.ListMilestones(ctx, wsID, projID, int64(limit), offset)
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "ListMilestones failed", err)
 	}
 
 	out := make([]*flowmilestonev1.Milestone, 0, len(milestones))
@@ -123,7 +123,7 @@ func (a *MilestoneAPI) CreateMilestone(ctx context.Context, req *flowmilestonev1
 		CreatedBy:   authUser.UserID,
 	})
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "CreateMilestone failed", err)
 	}
 
 	return &flowmilestonev1.CreateMilestoneResponse{Milestone: toMilestone(milestone)}, nil
@@ -160,7 +160,7 @@ func (a *MilestoneAPI) UpdateMilestone(ctx context.Context, req *flowmilestonev1
 		if errors.Is(err, domain.ErrUnauthorized) {
 			return nil, onekiterrors.PermissionDenied()
 		}
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "UpdateMilestone failed", err)
 	}
 	return &flowmilestonev1.UpdateMilestoneResponse{}, nil
 }
