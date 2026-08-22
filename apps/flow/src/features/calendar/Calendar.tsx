@@ -134,7 +134,7 @@ const Calendar: React.FC = () => {
             <ChevronLeft size={13} />
           </button>
           <span
-            className="text-[12px] font-semibold w-32 text-center"
+            className="text-[12px] font-semibold w-[128px] text-center"
             style={{ color: 'var(--flow-text)' }}
           >
             {monthLabel}

@@ -147,7 +147,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
 
       {/* Due date */}
       <span
-        className="text-[11px] flex items-center gap-1 w-24 justify-end"
+        className="text-[11px] flex items-center gap-1 w-[96px] justify-end"
         style={{ color: 'var(--flow-text-dim)' }}
       >
         <Calendar size={11} />
@@ -345,7 +345,7 @@ const ProjectList: React.FC = () => {
         <div className="w-2" />
         <div className="flex-1">Title</div>
         <div className="w-5" />
-        <div className="w-24 text-right">Due Date</div>
+        <div className="w-[96px] text-right">Due Date</div>
         <div className="w-5" />
       </div>
 

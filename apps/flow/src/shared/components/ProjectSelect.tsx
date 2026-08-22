@@ -40,7 +40,7 @@ export const ProjectSelect: React.FC<ProjectSelectProps> = ({
       </button>
       {open && (
         <div
-          className="absolute top-full start-0 mt-1 rounded-lg py-1 z-50 min-w-full max-h-60 overflow-y-auto"
+          className="absolute top-full start-0 mt-1 rounded-lg py-1 z-50 min-w-full max-h-[240px] overflow-y-auto"
           style={{
             background: 'var(--flow-card)',
             border: '1px solid var(--flow-border)',

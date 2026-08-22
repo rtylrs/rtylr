@@ -552,7 +552,7 @@ const TaskDetail: React.FC = () => {
 
       {/* Side panel, below main on small screens */}
       <aside
-        className="w-full shrink-0 overflow-y-auto border-t border-[var(--flow-border)] px-4 py-6 sm:px-5 lg:w-64 lg:border-s lg:border-t-0"
+        className="w-full shrink-0 overflow-y-auto border-t border-[var(--flow-border)] px-4 py-6 sm:px-5 lg:w-[256px] lg:border-s lg:border-t-0"
         style={{
           background: 'var(--flow-surface)',
         }}

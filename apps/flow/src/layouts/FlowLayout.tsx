@@ -674,7 +674,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
         <aside
           className={cn(
-            'fixed inset-y-0 start-0 z-50 flex h-full w-[min(18rem,88vw)] flex-col overflow-hidden border-e border-[var(--flow-border)] transition-transform duration-300 ease-out lg:static lg:inset-auto lg:z-auto lg:h-full lg:min-h-0 lg:w-60 lg:max-w-none lg:shrink-0 lg:translate-x-0',
+            'fixed inset-y-0 start-0 z-50 flex h-full w-[min(18rem,88vw)] flex-col overflow-hidden border-e border-[var(--flow-border)] transition-transform duration-300 ease-out lg:static lg:inset-auto lg:z-auto lg:h-full lg:min-h-0 lg:w-[240px] lg:max-w-none lg:shrink-0 lg:translate-x-0',
             mobileNavOpen
               ? 'translate-x-0'
               : '-translate-x-full rtl:translate-x-full lg:translate-x-0 lg:rtl:translate-x-0'

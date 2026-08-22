@@ -409,7 +409,7 @@ const ColumnRow = ({
           value=""
           placeholder={t('flow.board.wipLimitNone')}
           aria-label={t('flow.board.wipLimitFor', { name: column.name })}
-          className="w-20 rounded px-2 py-1 text-[13px] opacity-50"
+          className="w-[80px] rounded px-2 py-1 text-[13px] opacity-50"
           style={{
             background: 'var(--flow-input-bg)',
             border: '1px solid var(--flow-border)',

@@ -122,7 +122,7 @@ const AddWorkspaceMemberDialog: React.FC<AddWorkspaceMemberDialogProps> = ({
 
           {search && availableMembers.length > 0 && (
             <div
-              className="rounded-lg overflow-hidden divide-y divide-[var(--flow-border)] max-h-48 overflow-y-auto"
+              className="rounded-lg overflow-hidden divide-y divide-[var(--flow-border)] max-h-[192px] overflow-y-auto"
               style={{ border: '1px solid var(--flow-border)' }}
             >
               {availableMembers.map((m) => (

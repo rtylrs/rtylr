@@ -102,7 +102,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         </button>
         <PriorityIcon priority={task.priority} />
         <span
-          className="text-[10px] font-mono w-16 shrink-0"
+          className="text-[10px] font-mono w-[64px] shrink-0"
           style={{ color: 'var(--flow-text-dim)' }}
         >
           {task.identifier}
@@ -157,7 +157,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         </div>
         {task.dueDate && (
           <span
-            className="text-[11px] shrink-0 w-16 text-right"
+            className="text-[11px] shrink-0 w-[64px] text-right"
             style={{ color: overdue ? '#ef4444' : 'var(--flow-text-dim)' }}
           >
             {formatDate(task.dueDate)}

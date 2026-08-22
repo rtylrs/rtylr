@@ -98,7 +98,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
       </div>
       {mentionOpen && (
         <div
-          className="absolute start-2 bottom-full mb-1 rounded-lg py-1 z-20 w-48"
+          className="absolute start-2 bottom-full mb-1 rounded-lg py-1 z-20 w-[192px]"
           style={{
             background: 'var(--flow-card)',
             border: '1px solid var(--flow-border)',
