@@ -43,6 +43,7 @@ vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 vi.mock('./useInvoices', () => ({
   useInvoices: useInvoicesMock,
   useUpdateInvoiceStatus: () => ({ mutate: vi.fn(), isPending: false }),
+  useCreateInvoice: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock('../../shared/hooks/queries/useUnbilledBillableEntries', () => ({
