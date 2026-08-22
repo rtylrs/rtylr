@@ -29,10 +29,11 @@ func (r *Repository) List(ctx context.Context, businessID int64, dateFrom, dateT
 	var receipts []domain.Receipt
 
 	if dateFrom != "" && dateTo != "" {
+		end := parseTime(dateTo).AddDate(0, 0, 1)
 		rows, err := r.queries.ListReceiptsWithDateRange(ctx, sqlc.ListReceiptsWithDateRangeParams{
 			BusinessID: businessID,
 			PaidAt:     sql.NullTime{Time: parseTime(dateFrom), Valid: true},
-			PaidAt_2:   sql.NullTime{Time: parseTime(dateTo), Valid: true},
+			PaidAt_2:   sql.NullTime{Time: end, Valid: true},
 		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to list receipts", logger.Error(err))

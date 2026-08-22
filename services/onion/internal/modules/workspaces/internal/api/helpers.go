@@ -2,8 +2,6 @@ package api
 
 import (
 	"context"
-	"net/http"
-	"strconv"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -56,14 +54,14 @@ func buildPagination(page, limit int32, total int64, returned int) *commonpagina
 func resolveWorkspaceQuery(ctx context.Context, svc *application.Service, authUser *authPkg.AuthUser, businessID int64, workspaceID string) (int64, error) {
 	wsID := businessID
 	if workspaceID == "" {
+		if !svc.IsWorkspaceMember(ctx, authUser.UserID, wsID) {
+			return 0, onekiterrors.PermissionDenied()
+		}
 		return wsID, nil
-	}
-	if id, err := strconv.ParseInt(workspaceID, 10, 64); err == nil {
-		return id, nil
 	}
 	resolved, err := svc.ResolveWorkspaceID(ctx, authUser.UserID, businessID, workspaceID)
 	if err != nil || resolved == 0 {
-		return 0, onekiterrors.New(http.StatusBadRequest, "Invalid workspace_id")
+		return 0, onekiterrors.PermissionDenied()
 	}
 	return resolved, nil
 }

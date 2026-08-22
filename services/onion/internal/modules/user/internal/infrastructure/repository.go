@@ -16,7 +16,7 @@ import (
 // userFromRow maps the explicit columns selected by GetUserByEmail/GetUserByID
 // into a domain.User. Both queries select the same column set, so they share
 // this mapper.
-func userFromRow(id int64, email, passwordHash string, fullName, signupIP, deviceInfo sql.NullString, createdAt, updatedAt sql.NullTime, isConsoleAdmin bool) *domain.User {
+func userFromRow(id int64, email, passwordHash string, fullName, signupIP, deviceInfo sql.NullString, createdAt, updatedAt sql.NullTime, isConsoleAdmin bool, tokenEpoch int64) *domain.User {
 	u := &domain.User{
 		ID:               id,
 		Email:            email,
@@ -24,6 +24,7 @@ func userFromRow(id int64, email, passwordHash string, fullName, signupIP, devic
 		FullName:         convert.ToString(fullName),
 		SignupDeviceInfo: convert.ToString(deviceInfo),
 		IsConsoleAdmin:   isConsoleAdmin,
+		TokenEpoch:       tokenEpoch,
 	}
 	if signupIP.Valid {
 		u.SignupIPAddress = signupIP.String
@@ -86,6 +87,7 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*domain.
 		row.FullName, row.SignupIpAddress, row.SignupDeviceInfo,
 		row.CreatedAt, row.UpdatedAt,
 		row.IsConsoleAdmin,
+		row.TokenEpoch,
 	), nil
 }
 
@@ -118,6 +120,7 @@ func (r *Repository) GetUserByID(ctx context.Context, id int64) (*domain.User, e
 		row.FullName, row.SignupIpAddress, row.SignupDeviceInfo,
 		row.CreatedAt, row.UpdatedAt,
 		row.IsConsoleAdmin,
+		row.TokenEpoch,
 	), nil
 }
 

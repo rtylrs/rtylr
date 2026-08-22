@@ -10,6 +10,7 @@ var (
 	ErrQuoteNotFound         = errors.New("quote not found")
 	ErrQuoteNotEditable      = errors.New("quote is not editable")
 	ErrQuoteAlreadyConverted = errors.New("quote already converted")
+	ErrQuoteTotalMismatch    = errors.New("quote total does not equal subtotal - discount + tax")
 )
 
 type Quote struct {

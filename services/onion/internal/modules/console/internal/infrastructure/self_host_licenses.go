@@ -191,12 +191,13 @@ func (r *Repository) CreateSelfHostLicense(ctx context.Context, params CreateSel
 	return result.LastInsertId()
 }
 
-func (r *Repository) RegenerateSelfHostLicenseKey(ctx context.Context, id int64, licenseKey, keyHash string, updatedBy int64) error {
+func (r *Repository) RegenerateSelfHostLicenseKey(ctx context.Context, id int64, ownerEmail, licenseKey, keyHash string, updatedBy int64) error {
 	affected, err := r.queries.RegenerateSelfHostLicenseKey(ctx, sqlc.RegenerateSelfHostLicenseKeyParams{
 		LicenseKey: licenseKey,
 		KeyHash:    keyHash,
 		UpdatedBy:  sql.NullInt64{Int64: updatedBy, Valid: true},
 		ID:         id,
+		OwnerEmail: ownerEmail,
 	})
 	if err != nil {
 		return err
@@ -207,10 +208,11 @@ func (r *Repository) RegenerateSelfHostLicenseKey(ctx context.Context, id int64,
 	return nil
 }
 
-func (r *Repository) RevokeSelfHostLicense(ctx context.Context, id, updatedBy int64) error {
+func (r *Repository) RevokeSelfHostLicense(ctx context.Context, id int64, ownerEmail string, updatedBy int64) error {
 	affected, err := r.queries.RevokeSelfHostLicense(ctx, sqlc.RevokeSelfHostLicenseParams{
-		UpdatedBy: sql.NullInt64{Int64: updatedBy, Valid: true},
-		ID:        id,
+		UpdatedBy:  sql.NullInt64{Int64: updatedBy, Valid: true},
+		ID:         id,
+		OwnerEmail: ownerEmail,
 	})
 	if err != nil {
 		return err

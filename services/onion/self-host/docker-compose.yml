@@ -47,6 +47,9 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile
+      args:
+        DEPLOYMENT_MODE: self_hosted
+        LICENSE_VENDOR_PUBLIC_KEY: ${LICENSE_VENDOR_PUBLIC_KEY:-}
     restart: unless-stopped
     env_file:
       - path: .env.example
@@ -125,6 +128,9 @@ services:
     build:
       context: ..
       dockerfile: Dockerfile.license
+      args:
+        DEPLOYMENT_MODE: self_hosted
+        LICENSE_VENDOR_PUBLIC_KEY: ${LICENSE_VENDOR_PUBLIC_KEY:-}
     restart: unless-stopped
     env_file:
       - path: .env.example
@@ -135,8 +141,12 @@ services:
       RUN_MODE: license
       SERVICE_NAME: license
       PORT: "8082"
-    ports:
-      - "8082:8082"
+      DB_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "8082"
 
 volumes:
   rtylr_mysql:

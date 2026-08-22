@@ -14,11 +14,13 @@ import (
 
 type Repository struct {
 	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		queries: sqlc.New(db),
+		pool:    db,
 	}
 }
 
@@ -99,6 +101,82 @@ func (r *Repository) GetBalance(ctx context.Context, businessID, customerID int6
 		return 0, err
 	}
 	return int32(interfaceToInt(raw)), nil
+}
+
+// GetPaidOrderTotal is deliberately scoped by business, customer, and paid
+// status. Loyalty awards must be derived from payment data, not client input.
+func (r *Repository) GetPaidOrderTotal(ctx context.Context, businessID, customerID, orderID int64) (float64, error) {
+	var total string
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT total FROM pos_orders
+		WHERE business_id = ? AND id = ? AND customer_id = ? AND payment_status = 'paid'
+		LIMIT 1`, businessID, orderID, customerID).Scan(&total)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, domain.ErrOrderNotPaid
+	}
+	if err != nil {
+		return 0, err
+	}
+	return decimalToFloat(total), nil
+}
+
+// CreateBalanceTransaction serializes the balance read/modify/write with a
+// MySQL advisory lock. This also covers the first transaction for a customer,
+// where a row-level FOR UPDATE would have nothing to lock.
+func (r *Repository) CreateBalanceTransaction(ctx context.Context, businessID, customerID int64, orderID *int64, txnType string, points int32, note string) (int64, error) {
+	tx, err := r.pool.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+	lockName := fmt.Sprintf("pos_loyalty:%d:%d", businessID, customerID)
+	var acquired int
+	if err := tx.QueryRowContext(ctx, `SELECT GET_LOCK(?, 5)`, lockName).Scan(&acquired); err != nil {
+		return 0, err
+	}
+	if acquired != 1 {
+		return 0, fmt.Errorf("could not lock loyalty balance")
+	}
+	defer tx.ExecContext(ctx, `SELECT RELEASE_LOCK(?)`, lockName)
+
+	var current int32
+	if err := tx.QueryRowContext(ctx, `
+		SELECT COALESCE((SELECT balance_after FROM pos_loyalty_transactions
+		 WHERE business_id = ? AND customer_id = ? ORDER BY id DESC LIMIT 1), 0)`, businessID, customerID).Scan(&current); err != nil {
+		return 0, err
+	}
+	if txnType == "earn" {
+		var exists int
+		if err := tx.QueryRowContext(ctx, `SELECT EXISTS(
+			SELECT 1 FROM pos_loyalty_transactions
+			WHERE business_id = ? AND customer_id = ? AND order_id = ? AND type = 'earn')`, businessID, customerID, *orderID).Scan(&exists); err != nil {
+			return 0, err
+		}
+		if exists == 1 {
+			return 0, domain.ErrOrderAlreadyEarned
+		}
+	} else if current+points < 0 {
+		return 0, domain.ErrInsufficientPoints
+	}
+	newBalance := current + points
+	var orderValue any
+	if orderID != nil {
+		orderValue = *orderID
+	}
+	result, err := tx.ExecContext(ctx, `
+		INSERT INTO pos_loyalty_transactions (business_id, customer_id, order_id, type, points, balance_after, note)
+		VALUES (?, ?, ?, ?, ?, ?, ?)`, businessID, customerID, orderValue, txnType, points, newBalance, note)
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 func (r *Repository) CreateTransaction(ctx context.Context, businessID, customerID int64, orderID *int64, txnType string, points, balanceAfter int32, note *string) (int64, error) {

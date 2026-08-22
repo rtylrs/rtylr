@@ -28,6 +28,7 @@ type ReportRecord struct {
 }
 
 type ReportParams struct {
+	ActorID      int64
 	OwnerID      int64
 	BusinessID   int64
 	DateFrom     time.Time

@@ -21,7 +21,7 @@ func (m *mockRepo) List(_ context.Context, _ int64) ([]domain.GiftCard, error) {
 	return m.list, nil
 }
 
-func (m *mockRepo) Create(_ context.Context, _ int64, _ domain.GiftCardInput) (int64, error) {
+func (m *mockRepo) CreateForOwner(_ context.Context, _ int64, _ int64, _ domain.GiftCardInput) (int64, error) {
 	return m.createID, m.createErr
 }
 
@@ -29,7 +29,7 @@ func (m *mockRepo) GetByCode(_ context.Context, _ int64, _ string) (*domain.Gift
 	return m.card, m.getErr
 }
 
-func (m *mockRepo) Redeem(_ context.Context, _ int64, _ domain.RedeemInput) (*domain.GiftCard, error) {
+func (m *mockRepo) RedeemForOrder(_ context.Context, _ int64, _ int64, _ domain.RedeemInput) (*domain.GiftCard, error) {
 	return m.card, m.redErr
 }
 
@@ -44,8 +44,8 @@ func TestList_Delegates(t *testing.T) {
 func TestCreate_PropagatesError(t *testing.T) {
 	want := errors.New("boom")
 	s := &Service{repo: &mockRepo{createErr: want}}
-	input := domain.GiftCardInput{Code: "GC-1", InitialAmount: 50}
-	if _, err := s.Create(context.Background(), 1, input); !errors.Is(err, want) {
+	input := domain.GiftCardInput{PaidOrderID: 1, Code: "GC-1", InitialAmount: 50}
+	if _, err := s.CreateForOwner(context.Background(), 1, 1, input); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
@@ -61,15 +61,15 @@ func TestGetByCode_PropagatesError(t *testing.T) {
 func TestRedeem_PropagatesError(t *testing.T) {
 	want := errors.New("invalid")
 	s := &Service{repo: &mockRepo{redErr: want}}
-	input := domain.RedeemInput{Code: "GC-1", Amount: 10}
-	if _, err := s.Redeem(context.Background(), 1, input); !errors.Is(err, want) {
+	input := domain.RedeemInput{OrderID: 1, Code: "GC-1", Amount: 10}
+	if _, err := s.RedeemForOrder(context.Background(), 1, 1, input); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
 
 func TestCreate_RejectsBlankCode(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
-	_, err := s.Create(context.Background(), 1, domain.GiftCardInput{InitialAmount: 50})
+	_, err := s.CreateForOwner(context.Background(), 1, 1, domain.GiftCardInput{PaidOrderID: 1, InitialAmount: 50})
 	if err == nil {
 		t.Fatal("expected error for blank code")
 	}
@@ -77,7 +77,7 @@ func TestCreate_RejectsBlankCode(t *testing.T) {
 
 func TestCreate_RejectsZeroAmount(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
-	_, err := s.Create(context.Background(), 1, domain.GiftCardInput{Code: "GC1", InitialAmount: 0})
+	_, err := s.CreateForOwner(context.Background(), 1, 1, domain.GiftCardInput{PaidOrderID: 1, Code: "GC1", InitialAmount: 0})
 	if err == nil {
 		t.Fatal("expected error for zero initial amount")
 	}
@@ -85,7 +85,7 @@ func TestCreate_RejectsZeroAmount(t *testing.T) {
 
 func TestRedeem_RejectsBlankCode(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
-	_, err := s.Redeem(context.Background(), 1, domain.RedeemInput{Amount: 10})
+	_, err := s.RedeemForOrder(context.Background(), 1, 1, domain.RedeemInput{OrderID: 1, Amount: 10})
 	if err == nil {
 		t.Fatal("expected error for blank code")
 	}
@@ -93,7 +93,7 @@ func TestRedeem_RejectsBlankCode(t *testing.T) {
 
 func TestRedeem_RejectsZeroAmount(t *testing.T) {
 	s := &Service{repo: &mockRepo{}}
-	_, err := s.Redeem(context.Background(), 1, domain.RedeemInput{Code: "GC1", Amount: 0})
+	_, err := s.RedeemForOrder(context.Background(), 1, 1, domain.RedeemInput{OrderID: 1, Code: "GC1", Amount: 0})
 	if err == nil {
 		t.Fatal("expected error for zero amount")
 	}

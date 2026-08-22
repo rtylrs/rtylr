@@ -62,27 +62,6 @@ func rawCreateSelfHostLicense(_ context.Context, svc *application.Service) http.
 	}
 }
 
-func rawRevealSelfHostLicenseKey(_ context.Context, svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required")
-			return
-		}
-		id, ok := getIDParam(r, "id")
-		if !ok {
-			writeError(w, http.StatusBadRequest, "Invalid self-host license ID")
-			return
-		}
-
-		result, err := svc.RevealSelfHostLicenseKey(r.Context(), id)
-		if err != nil {
-			writeSelfHostLicenseError(w, err)
-			return
-		}
-		writeJSON(w, http.StatusOK, result)
-	}
-}
-
 func rawRegenerateSelfHostLicenseKey(_ context.Context, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		admin, ok := checkAdmin(r)

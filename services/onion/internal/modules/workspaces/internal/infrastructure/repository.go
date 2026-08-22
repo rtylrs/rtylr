@@ -329,6 +329,9 @@ func taskListConditions(scopeCol string, scopeVal int64, filter domain.ListTasks
 		sq.Eq{scopeCol: scopeVal},
 		sq.Expr("t.parent_task_id IS NULL"),
 	}
+	if filter.BusinessID != 0 {
+		conds = append(conds, sq.Eq{"t.business_id": filter.BusinessID})
+	}
 	if filter.Status != "" {
 		conds = append(conds, sq.Eq{"t.status": filter.Status})
 	} else if filter.ActiveOnly {
@@ -1194,7 +1197,13 @@ func (r *Repository) listEnrichedTasks(ctx context.Context, builder sq.SelectBui
 	}
 	rows, err := r.pool.QueryContext(ctx, q, args...)
 	if err != nil {
-		logger.Ctx(ctx).Error("listEnrichedTasks failed", logger.Error(err))
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			// Request cancellation is expected when a client navigates away or
+			// disconnects; it is not an application/database failure.
+			logger.Ctx(ctx).Debug("listEnrichedTasks canceled", logger.Error(err))
+		} else {
+			logger.Ctx(ctx).Error("listEnrichedTasks failed", logger.Error(err))
+		}
 		return nil, err
 	}
 	defer func() {

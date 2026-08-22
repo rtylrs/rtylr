@@ -111,10 +111,17 @@ WHERE owner_id = ? AND billing_month < ?
 ORDER BY billing_month DESC, period_start ASC
 LIMIT ?;
 
--- name: UpdatePaddleSubscription :exec
+-- name: UpdatePaddleSubscription :execresult
 UPDATE subscriptions
 SET paddle_subscription_id = ?, paddle_customer_id = ?, status = ?, updated_at = CURRENT_TIMESTAMP
 WHERE owner_id = ?;
 
 -- name: GetOwnerIDByPaddleSubscription :one
 SELECT owner_id FROM subscriptions WHERE paddle_subscription_id = ? ORDER BY id ASC LIMIT 1;
+
+-- name: InsertPaddleEventIfNew :execresult
+INSERT IGNORE INTO paddle_webhook_events (event_id, paddle_subscription_id, occurred_at)
+VALUES (?, ?, ?);
+
+-- name: MaxPaddleEventOccurredAt :one
+SELECT MAX(occurred_at) AS last_occurred FROM paddle_webhook_events WHERE paddle_subscription_id = ?;

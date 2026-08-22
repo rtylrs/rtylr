@@ -45,7 +45,7 @@ func (a *CashAPI) CashDrop(ctx context.Context, req *poscashv1.CashDropRequest) 
 		return nil, err
 	}
 
-	id, createErr := a.Service.CashDrop(ctx, cashMovementInput(user.BusinessID, req.GetBranchId(), req.GetTerminalId(), req.GetSessionId(), req.GetEmployeeId(), req.GetAmount(), req.GetReason()))
+	id, createErr := a.Service.CashDrop(ctx, cashMovementInput(user.BusinessID, req.GetBranchId(), req.GetTerminalId(), req.GetSessionId(), user.UserID, req.GetAmount(), req.GetReason()))
 	if createErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create cash drop")
 	}
@@ -59,7 +59,7 @@ func (a *CashAPI) CashPickup(ctx context.Context, req *poscashv1.CashPickupReque
 		return nil, err
 	}
 
-	id, createErr := a.Service.CashPickup(ctx, cashMovementInput(user.BusinessID, req.GetBranchId(), req.GetTerminalId(), req.GetSessionId(), req.GetEmployeeId(), req.GetAmount(), req.GetReason()))
+	id, createErr := a.Service.CashPickup(ctx, cashMovementInput(user.BusinessID, req.GetBranchId(), req.GetTerminalId(), req.GetSessionId(), user.UserID, req.GetAmount(), req.GetReason()))
 	if createErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create cash pickup")
 	}
@@ -75,8 +75,13 @@ func (a *CashAPI) CashAdjust(ctx context.Context, req *poscashv1.CashAdjustReque
 	if strings.TrimSpace(req.GetReason()) == "" {
 		return nil, onekiterrors.New(http.StatusBadRequest, "reason is required for adjustments")
 	}
+	if authUser, ok := authPkg.GetAuthUser(ctx); !ok || !authPkg.HasAnyRole(authUser, "owner", "admin", "console_admin", "pos_manager") {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
-	id, createErr := a.Service.CashAdjust(ctx, cashMovementInput(user.BusinessID, req.GetBranchId(), req.GetTerminalId(), req.GetSessionId(), req.GetEmployeeId(), req.GetAmount(), req.GetReason()))
+	input := cashMovementInput(user.BusinessID, req.GetBranchId(), req.GetTerminalId(), req.GetSessionId(), user.UserID, req.GetAmount(), req.GetReason())
+	input.ApprovedBy = &user.UserID
+	id, createErr := a.Service.CashAdjust(ctx, input)
 	if createErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create cash adjustment")
 	}

@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/loyalty/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -60,12 +61,12 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 }
 
 func (m *Module) executeGetLoyaltyConfigTool(ctx context.Context) (map[string]any, error) {
-	ownerID, err := loyaltyToolOwnerID(ctx)
+	businessID, err := loyaltyToolBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	config, err := m.service.GetConfig(ctx, ownerID)
+	config, err := m.service.GetConfig(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +77,7 @@ func (m *Module) executeGetLoyaltyConfigTool(ctx context.Context) (map[string]an
 }
 
 func (m *Module) executeListLoyaltyMembersTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := loyaltyToolOwnerID(ctx)
+	businessID, err := loyaltyToolBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +88,7 @@ func (m *Module) executeListLoyaltyMembersTool(ctx context.Context, input map[st
 	}
 	offset := int((parsed.Page - 1) * parsed.Limit)
 
-	members, err := m.service.ListMembers(ctx, ownerID, int(parsed.Limit), offset)
+	members, err := m.service.ListMembers(ctx, businessID, int(parsed.Limit), offset)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +108,7 @@ func (m *Module) executeListLoyaltyMembersTool(ctx context.Context, input map[st
 }
 
 func (m *Module) executeListLoyaltyRewardsTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := loyaltyToolOwnerID(ctx)
+	businessID, err := loyaltyToolBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +118,7 @@ func (m *Module) executeListLoyaltyRewardsTool(ctx context.Context, input map[st
 		return nil, err
 	}
 
-	rewards, err := m.service.ListRewards(ctx, ownerID, parsed.ActiveOnly)
+	rewards, err := m.service.ListRewards(ctx, businessID, parsed.ActiveOnly)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +137,7 @@ func (m *Module) executeListLoyaltyRewardsTool(ctx context.Context, input map[st
 }
 
 func (m *Module) executeListLoyaltyTransactionsTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := loyaltyToolOwnerID(ctx)
+	businessID, err := loyaltyToolBusinessID(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +147,7 @@ func (m *Module) executeListLoyaltyTransactionsTool(ctx context.Context, input m
 		return nil, err
 	}
 
-	transactions, total, err := m.service.ListTransactions(ctx, ownerID, parsed.CustomerID, int(parsed.Page), int(parsed.Limit))
+	transactions, total, err := m.service.ListTransactions(ctx, businessID, parsed.CustomerID, int(parsed.Page), int(parsed.Limit))
 	if err != nil {
 		return nil, err
 	}
@@ -220,6 +221,26 @@ func parseLoyaltyToolPageLimit(input map[string]any, maxLimit int64) (int64, int
 	}
 
 	return page, limit, nil
+}
+
+
+// loyaltyToolBusinessID resolves the caller's business scope; loyalty reads
+// keyed by user id would leak cross-tenant balances on id collisions.
+func loyaltyToolBusinessID(ctx context.Context) (int64, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User != nil {
+		resolved, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+		if err == nil && resolved > 0 {
+			return resolved, nil
+		}
+	}
+	if authUser, ok := authPkg.GetAuthUser(ctx); ok && authUser != nil {
+		resolved, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+		if err == nil && resolved > 0 {
+			return resolved, nil
+		}
+	}
+	return 0, errors.New("cannot determine business context")
 }
 
 func loyaltyToolOwnerID(ctx context.Context) (int64, error) {

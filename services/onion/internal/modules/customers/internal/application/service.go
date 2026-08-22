@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/domain"
@@ -140,7 +141,7 @@ func (s *Service) RecordVisit(ctx context.Context, input domain.RecordVisitInput
 		}
 
 		if cfg.IsEnabled && cfg.PointsPerCurrencyUnit > 0 {
-			points := int(input.Amount * cfg.PointsPerCurrencyUnit)
+			points := loyaltyPointsFromCents(input.Amount, cfg.PointsPerCurrencyUnit)
 			if points > 0 {
 				if awardErr := s.AwardPoints(ctx, domain.AwardPointsInput{
 					OwnerID:     input.OwnerID,
@@ -158,6 +159,14 @@ func (s *Service) RecordVisit(ctx context.Context, input domain.RecordVisitInput
 	s.invalidateDashboardCache(ctx, input.BusinessID)
 
 	return nil
+}
+
+// loyaltyPointsFromCents rounds the purchase to integer minor units before
+// applying the configured rate. This avoids binary-float truncation such as
+// 99.99 * 0.1 becoming 9 points instead of the configured 10-point result.
+func loyaltyPointsFromCents(amount, pointsPerCurrencyUnit float64) int {
+	amountCents := math.Round(amount * 100)
+	return int(math.Round(amountCents * pointsPerCurrencyUnit / 100))
 }
 
 // ─── Loyalty ──────────────────────────────────────────────────────────────────

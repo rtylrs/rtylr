@@ -35,6 +35,8 @@ RUN bash scripts/generate_sqlc.sh
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_TIME=unknown
+ARG LICENSE_VENDOR_PUBLIC_KEY
+ARG DEPLOYMENT_MODE=hosted
 # TARGETARCH is provided by buildx; defaults to the build arch for plain builds
 # so the hosted (amd64) path is unchanged while multi-arch publishes work.
 ARG TARGETARCH
@@ -44,7 +46,9 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
     -ldflags="-s -w \
       -X 'github.com/voxire/onion/internal/platform/server/http.Version=${VERSION}' \
       -X 'github.com/voxire/onion/internal/platform/server/http.Commit=${COMMIT}' \
-      -X 'github.com/voxire/onion/internal/platform/server/http.BuildTime=${BUILD_TIME}'" \
+      -X 'github.com/voxire/onion/internal/platform/server/http.BuildTime=${BUILD_TIME}' \
+      -X 'github.com/voxire/onion/internal/platform/license.VendorPublicKey=${LICENSE_VENDOR_PUBLIC_KEY}' \
+      -X 'github.com/voxire/onion/internal/platform/license.BuildDeploymentMode=${DEPLOYMENT_MODE}'" \
     -o /app/api ./cmd/api
 
 # Final stage — minimal image

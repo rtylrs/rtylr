@@ -45,14 +45,14 @@ func TestParseCreateQuoteToolInputKeepsProvidedTotal(t *testing.T) {
 		"subtotal":    100,
 		"tax":         11,
 		"discount":    5,
-		"total":       120,
+		"total":       106,
 		"status":      "sent",
 	})
 	if err != nil {
 		t.Fatalf("parseCreateQuoteToolInput returned error: %v", err)
 	}
-	if parsed.Total != 120 {
-		t.Fatalf("Total = %v, want provided total 120", parsed.Total)
+	if parsed.Total != 106 {
+		t.Fatalf("Total = %v, want provided total 106", parsed.Total)
 	}
 	if parsed.Status != "sent" {
 		t.Fatalf("Status = %q, want sent", parsed.Status)
@@ -99,5 +99,20 @@ func TestParseCreateQuoteToolInputRejectsNegativeDiscount(t *testing.T) {
 	})
 	if err == nil || !strings.Contains(err.Error(), "discount") {
 		t.Fatalf("error = %v, want discount validation", err)
+	}
+}
+
+func TestParseCreateQuoteToolInputRejectsInconsistentTotal(t *testing.T) {
+	_, err := parseCreateQuoteToolInput(map[string]any{
+		"client_name": "Maya Haddad",
+		"items":       "Monthly subscription package",
+		"subtotal":    100,
+		"tax":         11,
+		"discount":    5,
+		"total":       120,
+		"status":      "sent",
+	})
+	if err == nil {
+		t.Fatal("expected error when provided total does not match subtotal - discount + tax")
 	}
 }

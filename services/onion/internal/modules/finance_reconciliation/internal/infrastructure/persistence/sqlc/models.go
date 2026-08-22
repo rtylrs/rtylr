@@ -590,6 +590,7 @@ type SubscriptionsStatus string
 const (
 	SubscriptionsStatusActive    SubscriptionsStatus = "active"
 	SubscriptionsStatusTrial     SubscriptionsStatus = "trial"
+	SubscriptionsStatusPastDue   SubscriptionsStatus = "past_due"
 	SubscriptionsStatusCancelled SubscriptionsStatus = "cancelled"
 	SubscriptionsStatusExpired   SubscriptionsStatus = "expired"
 )
@@ -1036,17 +1037,18 @@ type FinanceBankFeed struct {
 }
 
 type FinanceBill struct {
-	ID          int64                  `db:"id" json:"id"`
-	OwnerID     int64                  `db:"owner_id" json:"owner_id"`
-	BusinessID  int64                  `db:"business_id" json:"business_id"`
-	SupplierID  sql.NullInt64          `db:"supplier_id" json:"supplier_id"`
-	Amount      string                 `db:"amount" json:"amount"`
-	Currency    sql.NullString         `db:"currency" json:"currency"`
-	DueDate     time.Time              `db:"due_date" json:"due_date"`
-	Status      NullFinanceBillsStatus `db:"status" json:"status"`
-	Description sql.NullString         `db:"description" json:"description"`
-	CreatedAt   sql.NullTime           `db:"created_at" json:"created_at"`
-	UpdatedAt   sql.NullTime           `db:"updated_at" json:"updated_at"`
+	ID           int64                  `db:"id" json:"id"`
+	OwnerID      int64                  `db:"owner_id" json:"owner_id"`
+	BusinessID   int64                  `db:"business_id" json:"business_id"`
+	SupplierID   sql.NullInt64          `db:"supplier_id" json:"supplier_id"`
+	SupplierName string                 `db:"supplier_name" json:"supplier_name"`
+	Amount       string                 `db:"amount" json:"amount"`
+	Currency     sql.NullString         `db:"currency" json:"currency"`
+	DueDate      time.Time              `db:"due_date" json:"due_date"`
+	Status       NullFinanceBillsStatus `db:"status" json:"status"`
+	Description  sql.NullString         `db:"description" json:"description"`
+	CreatedAt    sql.NullTime           `db:"created_at" json:"created_at"`
+	UpdatedAt    sql.NullTime           `db:"updated_at" json:"updated_at"`
 }
 
 type FinanceExpense struct {
@@ -1278,6 +1280,13 @@ type ManualAddonGrant struct {
 	UpdatedAt      sql.NullTime `db:"updated_at" json:"updated_at"`
 }
 
+type PaddleWebhookEvent struct {
+	EventID              string       `db:"event_id" json:"event_id"`
+	PaddleSubscriptionID string       `db:"paddle_subscription_id" json:"paddle_subscription_id"`
+	OccurredAt           time.Time    `db:"occurred_at" json:"occurred_at"`
+	ReceivedAt           sql.NullTime `db:"received_at" json:"received_at"`
+}
+
 type Plan struct {
 	ID   int64  `db:"id" json:"id"`
 	Name string `db:"name" json:"name"`
@@ -1401,6 +1410,7 @@ type User struct {
 	BanReason        sql.NullString `db:"ban_reason" json:"ban_reason"`
 	BannedAt         sql.NullTime   `db:"banned_at" json:"banned_at"`
 	AuthProvider     string         `db:"auth_provider" json:"auth_provider"`
+	TokenEpoch       int64          `db:"token_epoch" json:"token_epoch"`
 	TwoFactorEnabled bool           `db:"two_factor_enabled" json:"two_factor_enabled"`
 }
 

@@ -8,6 +8,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func GenerateQRRoutes() []string { return []string{"/hr/attendance/qr/generate"} }
@@ -35,9 +36,14 @@ func (h *GenerateQRHandler) Serve(ctx context.Context, req *GenerateQRRequest) (
 		return GenerateQRResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	token, err := h.Service.GenerateQRToken(ctx, device.User.UserID, req.LocationID)
+	ownerID, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to generate QR token", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		return GenerateQRResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	token, err := h.Service.GenerateQRToken(ctx, ownerID, req.LocationID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to generate QR token", logger.Any("owner_id", ownerID), logger.Error(err))
 		return GenerateQRResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to generate QR token")
 	}
 

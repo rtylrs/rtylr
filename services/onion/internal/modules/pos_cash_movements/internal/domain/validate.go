@@ -19,8 +19,8 @@ func ValidateCreateCashMovementInput(input CreateCashMovementInput) error {
 	if input.Amount <= 0 {
 		return fmt.Errorf("amount must be positive")
 	}
-	if input.Type != "cash_in" && input.Type != "cash_out" {
-		return fmt.Errorf("type must be 'cash_in' or 'cash_out', got %q", input.Type)
+	if input.Type != "drop" && input.Type != "pickup" && input.Type != "adjustment" && input.Type != "cash_in" && input.Type != "cash_out" {
+		return fmt.Errorf("invalid cash movement type %q", input.Type)
 	}
 	return nil
 }

@@ -15,6 +15,7 @@ type User struct {
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 	IsConsoleAdmin   bool
+	TokenEpoch       int64
 }
 
 func NewUser(email, passwordHash, fullName, signupIP, deviceInfo string) *User {

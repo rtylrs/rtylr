@@ -61,6 +61,15 @@ func (r *Repository) ListBySession(ctx context.Context, businessID, sessionID in
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.CreateCashMovementInput) (int64, error) {
+	var sessionOK int
+	if err := r.pool.QueryRowContext(ctx, `SELECT EXISTS(
+		SELECT 1 FROM pos_sessions
+		WHERE id = ? AND business_id = ? AND staff_id = ? AND status = 'open')`, input.SessionID, input.BusinessID, input.EmployeeID).Scan(&sessionOK); err != nil {
+		return 0, err
+	}
+	if sessionOK != 1 {
+		return 0, fmt.Errorf("cash movement requires the employee's open session")
+	}
 	var termID sql.NullInt64
 	if input.TerminalID != nil {
 		termID = sql.NullInt64{Int64: *input.TerminalID, Valid: true}

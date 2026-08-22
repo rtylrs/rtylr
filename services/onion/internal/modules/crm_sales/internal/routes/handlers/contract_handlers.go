@@ -74,14 +74,14 @@ func CreateContractRoutes() []string { return []string{"/crm/sales/contracts"} }
 type CreateContractHandler struct{ Service *application.Service }
 
 type CreateContractRequest struct {
-	LeadID       int64   `json:"lead_id"`
-	Plan         string  `json:"plan"`
+	LeadID       int64        `json:"lead_id"`
+	Plan         string       `json:"plan"`
 	MRR          money.Amount `json:"mrr"`
-	Seats        int     `json:"seats"`
-	SignedAt     *string `json:"signed_at"`
-	SignedByName string  `json:"signed_by_name"`
-	ClosedBy     *int64  `json:"closed_by"`
-	Notes        string  `json:"notes"`
+	Seats        int          `json:"seats"`
+	SignedAt     *string      `json:"signed_at"`
+	SignedByName string       `json:"signed_by_name"`
+	ClosedBy     *int64       `json:"closed_by"`
+	Notes        string       `json:"notes"`
 }
 
 type CreateContractResponse struct {
@@ -122,6 +122,9 @@ func (h *CreateContractHandler) Serve(ctx context.Context, req *CreateContractRe
 	if err != nil {
 		if errors.Is(err, domain.ErrLeadNotFound) {
 			return CreateContractResponse{}, onekiterrors.New(http.StatusNotFound, "Lead not found")
+		}
+		if errors.Is(err, domain.ErrInvalidLeadTransition) {
+			return CreateContractResponse{}, onekiterrors.New(http.StatusConflict, "Lead cannot be contracted from its current stage")
 		}
 		logger.Ctx(ctx).Error("failed to create contract", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return CreateContractResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create contract")
@@ -182,13 +185,13 @@ func UpdateContractRoutes() []string { return []string{"/crm/sales/contracts/{id
 type UpdateContractHandler struct{ Service *application.Service }
 
 type UpdateContractRequest struct {
-	Plan         string  `json:"plan"`
+	Plan         string       `json:"plan"`
 	MRR          money.Amount `json:"mrr"`
-	Seats        int     `json:"seats"`
-	SignedAt     *string `json:"signed_at"`
-	SignedByName string  `json:"signed_by_name"`
-	ClosedBy     *int64  `json:"closed_by"`
-	Notes        string  `json:"notes"`
+	Seats        int          `json:"seats"`
+	SignedAt     *string      `json:"signed_at"`
+	SignedByName string       `json:"signed_by_name"`
+	ClosedBy     *int64       `json:"closed_by"`
+	Notes        string       `json:"notes"`
 }
 
 type UpdateContractResponse struct {

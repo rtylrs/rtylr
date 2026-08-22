@@ -34,5 +34,6 @@ type CloseSessionInput struct {
 	ID           int64
 	OwnerID      int64
 	BusinessID   int64
+	StaffID      int64
 	ClosingFloat float64
 }

@@ -1,6 +1,9 @@
 package domain
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestIsSent_WhenSent(t *testing.T) {
 	c := Campaign{Status: StatusSent}
@@ -84,5 +87,16 @@ func TestValidateCampaignInput_Valid(t *testing.T) {
 	err := ValidateCampaignInput(CampaignInput{Name: "Summer Sale", Type: "email"})
 	if err != nil {
 		t.Errorf("expected no validation error, got %v", err)
+	}
+}
+
+func TestValidateCampaignStatus(t *testing.T) {
+	for _, status := range []string{StatusDraft, StatusScheduled, StatusSent, StatusActive, StatusPaused, StatusCompleted, StatusCancelled} {
+		if err := ValidateCampaignStatus(status); err != nil {
+			t.Errorf("ValidateCampaignStatus(%q) = %v", status, err)
+		}
+	}
+	if err := ValidateCampaignStatus("bogus"); !errors.Is(err, ErrInvalidCampaignStatus) {
+		t.Fatalf("expected invalid status error, got %v", err)
 	}
 }

@@ -23,7 +23,13 @@ import (
 func GenerateReportRoutes() []string { return []string{"/hr/reports/generate"} }
 
 type GenerateReportHandler struct {
-	Service *application.Service
+	Service     *application.Service
+	Permissions PermissionChecker
+}
+
+type PermissionChecker interface {
+	GetEmployeeIDByUserID(ctx context.Context, businessID, userID int64) (int64, error)
+	HasPermission(ctx context.Context, businessID, employeeID int64, permissionKey string) (bool, error)
 }
 
 type GenerateReportRequest struct {
@@ -50,6 +56,20 @@ func (h *GenerateReportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
+		writeError(w, onekiterrors.PermissionDenied())
+		return
+	}
+	if h.Permissions == nil {
+		writeError(w, onekiterrors.PermissionDenied())
+		return
+	}
+	employeeID, employeeErr := h.Permissions.GetEmployeeIDByUserID(ctx, businessID, device.User.UserID)
+	if employeeErr != nil {
+		writeError(w, onekiterrors.PermissionDenied())
+		return
+	}
+	allowed, permissionErr := h.Permissions.HasPermission(ctx, businessID, employeeID, "view_reports")
+	if permissionErr != nil || !allowed {
 		writeError(w, onekiterrors.PermissionDenied())
 		return
 	}
@@ -100,6 +120,7 @@ func (h *GenerateReportHandler) ServeHTTP(w http.ResponseWriter, r *http.Request
 	}
 
 	params := domain.ReportParams{
+		ActorID:      device.User.UserID,
 		OwnerID:      device.User.UserID,
 		BusinessID:   businessID,
 		DateFrom:     dateFrom,
@@ -169,11 +190,23 @@ func writeCSV(w http.ResponseWriter, rows []map[string]interface{}) {
 	for _, row := range rows {
 		record := make([]string, 0, len(headers))
 		for _, h := range headers {
-			record = append(record, fmt.Sprintf("%v", row[h]))
+			record = append(record, sanitizeCSVCell(fmt.Sprintf("%v", row[h])))
 		}
 		if err := writer.Write(record); err != nil {
 			return
 		}
+	}
+}
+
+func sanitizeCSVCell(value string) string {
+	if value == "" {
+		return value
+	}
+	switch value[0] {
+	case '=', '+', '-', '@', '\t', '\r':
+		return "'" + value
+	default:
+		return value
 	}
 }
 

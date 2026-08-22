@@ -14,21 +14,9 @@ import (
 	crmcampaignv1 "github.com/voxire/voxie/gen/go/crm/campaign/v1"
 )
 
-func CampaignListRoutes() []string {
-	return []string{"/crm/campaigns"}
-}
 
-func CampaignCreateRoutes() []string {
-	return []string{"/crm/campaigns"}
-}
 
-func CampaignUpdateRoutes() []string {
-	return []string{"/crm/campaigns"}
-}
 
-func CampaignStatusRoutes() []string {
-	return []string{"/crm/campaigns/status"}
-}
 
 func newCampaignPayload(c domain.Campaign) *crmcampaignv1.Campaign {
 	p := &crmcampaignv1.Campaign{

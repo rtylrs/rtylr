@@ -3,9 +3,21 @@ package domain
 import "testing"
 
 func TestValidateQuoteInput_HappyPath(t *testing.T) {
-	input := QuoteInput{CustomerName: "Acme", Status: "draft", Total: 100}
+	input := QuoteInput{CustomerName: "Acme", Status: "draft", Subtotal: 100, Total: 100}
 	if err := ValidateQuoteInput(input); err != nil {
 		t.Errorf("unexpected error: %v", err)
+	}
+}
+
+func TestValidateQuoteInput_TotalMustMatchComponents(t *testing.T) {
+	input := QuoteInput{CustomerName: "Acme", Subtotal: 100, Discount: 10, Tax: 8.5, Total: 100}
+	if err := ValidateQuoteInput(input); err == nil {
+		t.Fatal("expected error when total != subtotal - discount + tax")
+	}
+
+	consistent := QuoteInput{CustomerName: "Acme", Subtotal: 100, Discount: 10, Tax: 8.5, Total: 98.5}
+	if err := ValidateQuoteInput(consistent); err != nil {
+		t.Errorf("unexpected error for consistent totals: %v", err)
 	}
 }
 

@@ -309,8 +309,12 @@ func TestSubscriptions_UpdatePaddleSubscription_NoError(t *testing.T) {
 	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 14, 1); err != nil {
 		t.Fatalf("UpsertSubscription: %v", err)
 	}
-	if err := repo.UpdatePaddleSubscription(ctx, testOwner, "paddle-sub-test-001", "paddle-cust-001", "active"); err != nil {
+	updated, err := repo.UpdatePaddleSubscription(ctx, testOwner, "paddle-sub-test-001", "paddle-cust-001", "active")
+	if err != nil {
 		t.Fatalf("UpdatePaddleSubscription: %v", err)
+	}
+	if !updated {
+		t.Fatal("expected the existing subscription row to be updated")
 	}
 }
 
@@ -332,7 +336,7 @@ func TestSubscriptions_GetOwnerIDByPaddleSubscription_AfterUpdate(t *testing.T) 
 	if err := repo.UpsertSubscription(ctx, testOwner, plans[0].ID, 0, 1); err != nil {
 		t.Fatalf("UpsertSubscription: %v", err)
 	}
-	if err := repo.UpdatePaddleSubscription(ctx, testOwner, paddleSubID, "paddle-cust-lookup", "active"); err != nil {
+	if _, err := repo.UpdatePaddleSubscription(ctx, testOwner, paddleSubID, "paddle-cust-lookup", "active"); err != nil {
 		t.Fatalf("UpdatePaddleSubscription: %v", err)
 	}
 

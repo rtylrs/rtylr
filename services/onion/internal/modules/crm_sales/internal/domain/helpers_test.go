@@ -132,3 +132,18 @@ func TestAllStages_ReturnsAllSeven(t *testing.T) {
 		t.Errorf("expected 7 stages, got %d", len(stages))
 	}
 }
+
+func TestLeadStage_CannotMoveBackwardsOrLeaveTerminal(t *testing.T) {
+	if !LeadStageCold.CanTransitionTo(LeadStageProposalSent) {
+		t.Fatal("expected forward transition to be allowed")
+	}
+	if LeadStageProposalSent.CanTransitionTo(LeadStageContacted) {
+		t.Fatal("expected backward transition to be rejected")
+	}
+	if LeadStageLost.CanTransitionTo(LeadStageContacted) {
+		t.Fatal("expected lost stage to be immutable")
+	}
+	if !LeadStageDemoDone.CanTransitionTo(LeadStageLost) {
+		t.Fatal("expected active lead to be markable as lost")
+	}
+}

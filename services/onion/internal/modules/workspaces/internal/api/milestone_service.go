@@ -57,9 +57,13 @@ func (a *MilestoneAPI) ListMilestones(ctx context.Context, req *flowmilestonev1.
 
 	wsID := businessID
 	if req.GetWorkspaceId() != "" {
-		if id, err := strconv.ParseInt(req.GetWorkspaceId(), 10, 64); err == nil {
-			wsID = id
+		resolved, err := a.Service.ResolveWorkspaceID(ctx, authUser.UserID, businessID, req.GetWorkspaceId())
+		if err != nil || resolved == 0 {
+			return nil, onekiterrors.PermissionDenied()
 		}
+		wsID = resolved
+	} else if !a.Service.IsWorkspaceMember(ctx, authUser.UserID, wsID) {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	var projID *int64
@@ -98,7 +102,12 @@ func (a *MilestoneAPI) CreateMilestone(ctx context.Context, req *flowmilestonev1
 
 	wsID := businessID
 	if req.GetWorkspaceId() != 0 {
+		if !a.Service.IsWorkspaceMember(ctx, authUser.UserID, req.GetWorkspaceId()) {
+			return nil, onekiterrors.PermissionDenied()
+		}
 		wsID = req.GetWorkspaceId()
+	} else if !a.Service.IsWorkspaceMember(ctx, authUser.UserID, wsID) {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	var dueDate time.Time

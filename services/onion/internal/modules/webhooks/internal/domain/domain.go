@@ -1,6 +1,11 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var ErrWebhookNotFound = errors.New("webhook not found")
 
 type Webhook struct {
 	ID              int64      `json:"id"`
