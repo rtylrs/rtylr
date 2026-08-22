@@ -369,6 +369,7 @@ function SegmentCard({
   deletePending: boolean;
 }) {
   const Icon = segment.icon;
+  const hasTrend = Boolean(segment.trend.trim());
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -413,8 +414,13 @@ function SegmentCard({
             <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)' }}>
               {segment.name}
             </div>
-            <div style={{ fontSize: '11px', color: segment.trendUp ? '#10b981' : '#ef4444' }}>
-              {segment.trend}
+            <div
+              style={{
+                fontSize: '11px',
+                color: hasTrend ? (segment.trendUp ? '#10b981' : '#ef4444') : 'var(--hub-text-dim)',
+              }}
+            >
+              {hasTrend ? segment.trend : 'Trend unavailable'}
             </div>
           </div>
         </div>
@@ -591,7 +597,7 @@ const Segments: React.FC = () => {
             <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
               {isLoading
                 ? 'Loading segment data…'
-                : `${segments.length} active segments · ${segments.reduce((sum, s) => sum + s.customerCount, 0).toLocaleString()} customers total`}
+                : `${segments.length} segments · ${segments.reduce((sum, s) => sum + s.customerCount, 0).toLocaleString()} customers total`}
             </p>
           </div>
           <button

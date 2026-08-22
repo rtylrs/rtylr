@@ -21,7 +21,6 @@ const Templates: React.FC = () => {
   const [newChannel, setNewChannel] = useState<'email' | 'sms'>('email');
   const [newSubject, setNewSubject] = useState('');
   const [newBody, setNewBody] = useState('');
-  const [newCategory, setNewCategory] = useState('general');
   const createDialogRef = useRef<HTMLDivElement>(null);
 
   const resetCreateForm = (): void => {
@@ -29,7 +28,6 @@ const Templates: React.FC = () => {
     setNewChannel('email');
     setNewSubject('');
     setNewBody('');
-    setNewCategory('general');
   };
 
   const closeCreateDialog = (): void => {
@@ -54,7 +52,6 @@ const Templates: React.FC = () => {
       await createMut.mutateAsync({
         name: newName.trim(),
         channel: newChannel,
-        category: newCategory.trim() || 'general',
         subject: newChannel === 'email' ? newSubject.trim() : undefined,
         body: newBody.trim(),
       });
@@ -84,7 +81,6 @@ const Templates: React.FC = () => {
     setNewChannel(t.channel as 'email' | 'sms');
     setNewSubject(t.subject ?? '');
     setNewBody(t.body);
-    setNewCategory(t.category);
     setShowCreate(true);
   };
 
@@ -208,7 +204,7 @@ const Templates: React.FC = () => {
                         textTransform: 'uppercase',
                       }}
                     >
-                      {t.category}
+                      {t.channel}
                     </span>
                   </div>
                   <div>
@@ -337,21 +333,6 @@ const Templates: React.FC = () => {
                 <option value="email">Email</option>
                 <option value="sms">SMS</option>
               </select>
-              <input
-                aria-label="Template category"
-                placeholder="Category (e.g. promo, welcome)"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--hub-border)',
-                  background: 'var(--hub-input-bg)',
-                  color: 'var(--hub-text)',
-                  fontSize: '13px',
-                  outline: 'none',
-                }}
-              />
               {newChannel === 'email' && (
                 <input
                   aria-label="Template subject"

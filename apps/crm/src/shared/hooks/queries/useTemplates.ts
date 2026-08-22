@@ -54,10 +54,8 @@ export const useCreateTemplate = (): UseMutationResult<Template, unknown, Partia
         id: res.templateId,
         name: data.name ?? '',
         channel: data.channel ?? 'email',
-        category: data.category,
         subject: data.subject,
         body: data.body ?? '',
-        thumbnail: data.thumbnail,
         updatedAt: new Date().toISOString(),
       });
     },
@@ -98,10 +96,8 @@ export const useUpdateTemplate = (): UseMutationResult<
         id: payload.id,
         name: merged.name ?? '',
         channel: merged.channel ?? 'email',
-        category: merged.category,
         subject: merged.subject,
         body: merged.body ?? '',
-        thumbnail: merged.thumbnail,
         updatedAt: new Date().toISOString(),
       });
     },
