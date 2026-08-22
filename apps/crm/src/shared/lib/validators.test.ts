@@ -7,6 +7,7 @@ import {
   isIsoDate,
   isValidPoints,
   isValidUrl,
+  isOptionalPositiveInteger,
 } from './validators';
 
 describe('isValidEmail', () => {
@@ -87,6 +88,20 @@ describe('isValidPoints', () => {
   });
   it('rejects a decimal number', () => {
     expect(isValidPoints(1.5)).toBe(false);
+  });
+});
+
+describe('isOptionalPositiveInteger', () => {
+  it('allows an empty optional value', () => {
+    expect(isOptionalPositiveInteger('')).toBe(true);
+  });
+  it('accepts a positive whole number', () => {
+    expect(isOptionalPositiveInteger('42')).toBe(true);
+  });
+  it('rejects zero, decimals, and non-numeric values', () => {
+    expect(isOptionalPositiveInteger('0')).toBe(false);
+    expect(isOptionalPositiveInteger('1.5')).toBe(false);
+    expect(isOptionalPositiveInteger('user-1')).toBe(false);
   });
 });
 

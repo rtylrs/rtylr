@@ -27,6 +27,13 @@ export function isValidPoints(points: number): boolean {
   return Number.isInteger(points) && points >= 0;
 }
 
+export function isOptionalPositiveInteger(value: string): boolean {
+  const trimmed = value.trim();
+  if (!trimmed) return true;
+  const parsed = Number(trimmed);
+  return Number.isInteger(parsed) && parsed > 0;
+}
+
 export function isValidUrl(value: string): boolean {
   try {
     const url = new URL(value.trim());

@@ -45,6 +45,7 @@ import {
 } from '../../shared/components/ui';
 import { formatDate } from '../../shared/lib/formatters';
 import { compareDatesDescending } from '../../shared/lib/sort';
+import { isOptionalPositiveInteger } from '../../shared/lib/validators';
 
 const STAGE_OPTIONS: Array<{ value: LeadStage; label: string }> = [
   { value: 'cold', label: 'Cold' },
@@ -227,6 +228,10 @@ const LeadDetail: React.FC = () => {
       toast.error('Enter a valid MRR and a whole number of at least one seat');
       return;
     }
+    if (!isOptionalPositiveInteger(contractForm.closedBy)) {
+      toast.error('Closed by must be a positive whole-number user ID');
+      return;
+    }
     createContract.mutate(
       {
         leadId,
@@ -255,7 +260,8 @@ const LeadDetail: React.FC = () => {
     Number.isFinite(contractMrr) &&
     contractMrr >= 0 &&
     Number.isInteger(contractSeats) &&
-    contractSeats >= 1;
+    contractSeats >= 1 &&
+    isOptionalPositiveInteger(contractForm.closedBy);
 
   if (leadLoading) {
     return (

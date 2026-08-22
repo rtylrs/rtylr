@@ -21,6 +21,7 @@ import {
 } from '../../shared/components/ui';
 import { activateOnKeyboard } from '../../shared/lib/keyboard';
 import { formatDate } from '../../shared/lib/formatters';
+import { isOptionalPositiveInteger } from '../../shared/lib/validators';
 
 const PLAN_COLORS: Record<ContractPlan, { bg: string; color: string }> = {
   free: { bg: 'rgba(107,114,128,0.12)', color: '#6b7280' },
@@ -103,6 +104,10 @@ const Contracts: React.FC = () => {
     const seats = Number(form.seats);
     if (!Number.isFinite(mrr) || mrr < 0 || !Number.isInteger(seats) || seats < 1) {
       toast.error('Enter a valid MRR and a whole number of at least one seat');
+      return;
+    }
+    if (!isOptionalPositiveInteger(form.closedBy)) {
+      toast.error('Closed by must be a positive whole-number user ID');
       return;
     }
     createContract.mutate(
@@ -420,7 +425,8 @@ const Contracts: React.FC = () => {
                   Number(form.mrr) < 0 ||
                   !form.seats ||
                   !Number.isInteger(Number(form.seats)) ||
-                  Number(form.seats) < 1
+                  Number(form.seats) < 1 ||
+                  !isOptionalPositiveInteger(form.closedBy)
                 }
               >
                 {createContract.isPending ? 'Saving...' : 'Save contract'}
