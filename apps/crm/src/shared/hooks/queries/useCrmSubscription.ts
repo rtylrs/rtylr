@@ -77,11 +77,15 @@ export function formatPeriodRange(start: string, end: string | null): string {
   ];
   const sMonth = months[s.getUTCMonth()];
   const eMonth = months[e.getUTCMonth()];
-  const year = e.getUTCFullYear();
+  const sYear = s.getUTCFullYear();
+  const eYear = e.getUTCFullYear();
   if (s.getUTCMonth() === e.getUTCMonth() && s.getUTCFullYear() === e.getUTCFullYear()) {
-    return `${sMonth} ${s.getUTCDate()} – ${e.getUTCDate()}, ${year}`;
+    return `${sMonth} ${s.getUTCDate()} – ${e.getUTCDate()}, ${eYear}`;
   }
-  return `${sMonth} ${s.getUTCDate()} – ${eMonth} ${e.getUTCDate()}, ${year}`;
+  if (sYear === eYear) {
+    return `${sMonth} ${s.getUTCDate()} – ${eMonth} ${e.getUTCDate()}, ${eYear}`;
+  }
+  return `${sMonth} ${s.getUTCDate()}, ${sYear} – ${eMonth} ${e.getUTCDate()}, ${eYear}`;
 }
 
 // ── Hooks ─────────────────────────────────────────────────────────────────────

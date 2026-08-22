@@ -11,4 +11,10 @@ describe('subscription date helpers', () => {
     expect(formatPeriodRange('not-a-date', null)).toBe('');
     expect(formatPeriodRange('2026-08-01', 'not-a-date')).toBe('');
   });
+
+  it('includes both years when a billing period crosses New Year', () => {
+    expect(formatPeriodRange('2025-12-31T00:00:00Z', '2026-01-02T00:00:00Z')).toBe(
+      'Dec 31, 2025 – Jan 2, 2026'
+    );
+  });
 });
