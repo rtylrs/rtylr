@@ -65,6 +65,10 @@ const CustomerProfile: React.FC = () => {
 
   const customer = fetched;
   useEffect(() => {
+    setTimelineCursor(undefined);
+    setTimelineEntries([]);
+  }, [customerId]);
+  useEffect(() => {
     if (!fetchedTimeline) return;
     setTimelineEntries((entries) =>
       timelineCursor
@@ -76,10 +80,6 @@ const CustomerProfile: React.FC = () => {
         : fetchedTimeline.entries
     );
   }, [fetchedTimeline, timelineCursor]);
-  useEffect(() => {
-    setTimelineCursor(undefined);
-    setTimelineEntries([]);
-  }, [customerId]);
   const timeline = timelineEntries;
 
   if (isLoading) {
