@@ -90,6 +90,29 @@ describe('@voxire/ui components', () => {
       fireEvent.click(switchBtn);
       expect(handleToggle).toHaveBeenCalledWith(true);
     });
+
+    it('carries a 44px hit area expressed as a literal, not in spacing units', () => {
+      render(<Switch checked={false} onCheckedChange={vi.fn()} label="Enable feature" />);
+      const cls = screen.getByRole('switch').className;
+
+      // Asserting class strings is usually a poor test. It is the right one here
+      // because the defect this guards against is a plausible tidy-up rather
+      // than a logic error, and no unit environment loads the compiled CSS to
+      // measure the pseudo-element for real.
+      //
+      // `after:h-11` looks equivalent and is not: it compiles to
+      // calc(var(--spacing) * 11), and Flow re-points --spacing at a runtime
+      // density multiplier, so the 0.75 step would take this target to 33px. A
+      // minimum has to be a minimum. Measured in a browser, not assumed.
+      expect(cls).toContain('after:h-[44px]');
+      expect(cls).toContain('after:w-[44px]');
+      expect(cls).not.toMatch(/after:[hw]-\d/);
+
+      // The visual track deliberately stays 20x36: growing it would move the
+      // switch in every consumer's layout.
+      expect(cls).toContain('h-5');
+      expect(cls).toContain('w-9');
+    });
   });
 
   describe('Spinner & FullScreenLoader', () => {
