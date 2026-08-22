@@ -46,6 +46,11 @@ func (h *RecordVisitHandler) Serve(ctx context.Context, req *RecordVisitRequest)
 	if device.User == nil {
 		return RecordVisitResponse{}, onekiterrors.PermissionDenied()
 	}
+	if req.AwardPoints {
+		if err := requireCRMManager(ctx); err != nil {
+			return RecordVisitResponse{}, err
+		}
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

@@ -149,6 +149,9 @@ func (s *Service) Update(ctx context.Context, input domain.CampaignUpdateInput) 
 }
 
 func (s *Service) UpdateStatus(ctx context.Context, businessID, id int64, status string) error {
+	if err := domain.ValidateCampaignStatus(status); err != nil {
+		return err
+	}
 	if err := s.repo.UpdateStatus(ctx, businessID, id, status); err != nil {
 		return err
 	}

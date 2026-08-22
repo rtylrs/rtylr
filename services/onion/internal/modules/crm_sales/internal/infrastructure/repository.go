@@ -117,6 +117,25 @@ func (r *Repository) UpdateLead(ctx context.Context, id, businessID int64, req d
 	return r.GetLead(ctx, id, businessID)
 }
 
+func (r *Repository) ValidateLeadAssignee(ctx context.Context, businessID, userID int64) error {
+	var exists bool
+	err := r.db.QueryRowContext(ctx, `
+		SELECT EXISTS(
+			SELECT 1 FROM businesses b
+			WHERE b.id = ? AND (b.owner_id = ? OR EXISTS (
+				SELECT 1 FROM user_business_access uba
+				WHERE uba.business_id = b.id AND uba.user_id = ?
+			))
+		)`, businessID, userID, userID).Scan(&exists)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return domain.ErrInvalidLeadAssignee
+	}
+	return nil
+}
+
 func (r *Repository) DeleteLead(ctx context.Context, id, businessID int64) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -530,6 +549,9 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 	if err := ensureLeadInBusiness(ctx, tx, businessID, req.LeadID); err != nil {
 		return domain.Contract{}, err
 	}
+	if err := ensureLeadCanContract(ctx, tx, businessID, req.LeadID); err != nil {
+		return domain.Contract{}, err
+	}
 
 	signedAt, err := nullableDatePtr(req.SignedAt)
 	if err != nil {
@@ -549,6 +571,12 @@ func (r *Repository) CreateContract(ctx context.Context, ownerID int64, req doma
 		Notes:        nullableString(req.Notes),
 	})
 	if err != nil {
+		return domain.Contract{}, err
+	}
+	if _, err := tx.ExecContext(ctx,
+		"UPDATE crm_leads SET stage = ? WHERE id = ? AND business_id = ?",
+		string(domain.LeadStageContracted), req.LeadID, businessID,
+	); err != nil {
 		return domain.Contract{}, err
 	}
 	id, err := result.LastInsertId()
@@ -584,6 +612,23 @@ func ensureLeadInBusiness(ctx context.Context, tx *sql.Tx, businessID, leadID in
 		return domain.ErrLeadNotFound
 	}
 	return err
+}
+
+func ensureLeadCanContract(ctx context.Context, tx *sql.Tx, businessID, leadID int64) error {
+	var stage string
+	if err := tx.QueryRowContext(ctx,
+		"SELECT stage FROM crm_leads WHERE id = ? AND business_id = ? FOR UPDATE",
+		leadID, businessID,
+	).Scan(&stage); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrLeadNotFound
+		}
+		return err
+	}
+	if !domain.LeadStage(stage).CanTransitionTo(domain.LeadStageContracted) {
+		return domain.ErrInvalidLeadTransition
+	}
+	return nil
 }
 
 func ensureContactForLead(ctx context.Context, tx *sql.Tx, businessID, leadID, contactID int64) error {

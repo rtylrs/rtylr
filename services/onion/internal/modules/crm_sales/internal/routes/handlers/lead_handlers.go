@@ -107,7 +107,7 @@ type CreateLeadRequest struct {
 	Source       string           `json:"source"`
 	Stage        domain.LeadStage `json:"stage"`
 	AssignedTo   *int64           `json:"assigned_to"`
-	MRRPotential *money.Amount         `json:"mrr_potential"`
+	MRRPotential *money.Amount    `json:"mrr_potential"`
 	Notes        string           `json:"notes"`
 }
 
@@ -146,6 +146,9 @@ func (h *CreateLeadHandler) Serve(ctx context.Context, req *CreateLeadRequest) (
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidLeadStage) {
 			return CreateLeadResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid lead stage")
+		}
+		if errors.Is(err, domain.ErrInvalidLeadAssignee) {
+			return CreateLeadResponse{}, onekiterrors.New(http.StatusBadRequest, "Assigned user is not a member of this business")
 		}
 		logger.Ctx(ctx).Error("failed to create lead", logger.Any("owner_id", device.User.UserID), logger.Error(err))
 		return CreateLeadResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create lead")
@@ -212,7 +215,7 @@ type UpdateLeadRequest struct {
 	Source       string           `json:"source"`
 	Stage        domain.LeadStage `json:"stage"`
 	AssignedTo   *int64           `json:"assigned_to"`
-	MRRPotential *money.Amount         `json:"mrr_potential"`
+	MRRPotential *money.Amount    `json:"mrr_potential"`
 	Notes        string           `json:"notes"`
 }
 
@@ -257,6 +260,12 @@ func (h *UpdateLeadHandler) Serve(ctx context.Context, req *UpdateLeadRequest) (
 	if err != nil {
 		if errors.Is(err, domain.ErrInvalidLeadStage) {
 			return UpdateLeadResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid lead stage")
+		}
+		if errors.Is(err, domain.ErrInvalidLeadAssignee) {
+			return UpdateLeadResponse{}, onekiterrors.New(http.StatusBadRequest, "Assigned user is not a member of this business")
+		}
+		if errors.Is(err, domain.ErrInvalidLeadTransition) {
+			return UpdateLeadResponse{}, onekiterrors.New(http.StatusConflict, "Lead stage cannot move backwards or leave a terminal stage")
 		}
 		if errors.Is(err, domain.ErrLeadNotFound) {
 			return UpdateLeadResponse{}, onekiterrors.New(http.StatusNotFound, "Lead not found")

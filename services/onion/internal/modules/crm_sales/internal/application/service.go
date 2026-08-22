@@ -29,6 +29,7 @@ type repository interface {
 	GetLead(ctx context.Context, id, businessID int64) (domain.Lead, error)
 	CreateLead(ctx context.Context, businessID int64, req domain.CreateLeadRequest) (domain.Lead, error)
 	UpdateLead(ctx context.Context, id, businessID int64, req domain.UpdateLeadRequest) (domain.Lead, error)
+	ValidateLeadAssignee(ctx context.Context, businessID, userID int64) error
 	DeleteLead(ctx context.Context, id, businessID int64) error
 	GetPipeline(ctx context.Context, businessID int64) ([]domain.PipelineSummary, error)
 	ListSignedContracts(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Contract, error)
@@ -118,6 +119,11 @@ func (s *Service) CreateLead(ctx context.Context, businessID int64, req domain.C
 	if !req.Stage.IsValid() {
 		return domain.Lead{}, fmt.Errorf("%w: %q", domain.ErrInvalidLeadStage, string(req.Stage))
 	}
+	if req.AssignedTo != nil {
+		if err := s.repo.ValidateLeadAssignee(ctx, businessID, *req.AssignedTo); err != nil {
+			return domain.Lead{}, err
+		}
+	}
 	lead, err := s.repo.CreateLead(ctx, businessID, req)
 	if err == nil {
 		invalidateCRMSalesScope(ctx, businessID)
@@ -126,17 +132,29 @@ func (s *Service) CreateLead(ctx context.Context, businessID int64, req domain.C
 }
 
 func (s *Service) UpdateLead(ctx context.Context, id, businessID int64, req domain.UpdateLeadRequest) (domain.Lead, error) {
+	current, err := s.repo.GetLead(ctx, id, businessID)
+	if err != nil {
+		return domain.Lead{}, err
+	}
 	if req.CompanyName == "" {
-		req.CompanyName = "Unknown"
+		req.CompanyName = current.CompanyName
 	}
 	if req.Source == "" {
-		req.Source = "cold_email"
+		req.Source = current.Source
 	}
 	if req.Stage == "" {
-		req.Stage = domain.LeadStageCold
+		req.Stage = current.Stage
 	}
 	if !req.Stage.IsValid() {
 		return domain.Lead{}, fmt.Errorf("%w: %q", domain.ErrInvalidLeadStage, string(req.Stage))
+	}
+	if !current.Stage.CanTransitionTo(req.Stage) {
+		return domain.Lead{}, fmt.Errorf("%w: %s -> %s", domain.ErrInvalidLeadTransition, current.Stage, req.Stage)
+	}
+	if req.AssignedTo != nil {
+		if err := s.repo.ValidateLeadAssignee(ctx, businessID, *req.AssignedTo); err != nil {
+			return domain.Lead{}, err
+		}
 	}
 	lead, err := s.repo.UpdateLead(ctx, id, businessID, req)
 	if err == nil {

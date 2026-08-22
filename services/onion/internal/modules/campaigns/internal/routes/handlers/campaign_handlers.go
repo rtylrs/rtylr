@@ -184,6 +184,9 @@ func (h *CreateCampaignHandler) Serve(ctx context.Context, req *CreateCampaignRe
 	if device.User == nil {
 		return CreateCampaignResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCampaignManager(ctx); err != nil {
+		return CreateCampaignResponse{}, err
+	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return CreateCampaignResponse{}, onekiterrors.PermissionDenied()
@@ -248,6 +251,9 @@ func (h *UpdateCampaignHandler) Serve(ctx context.Context, req *UpdateCampaignRe
 	if device.User == nil {
 		return UpdateCampaignResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCampaignManager(ctx); err != nil {
+		return UpdateCampaignResponse{}, err
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -306,6 +312,9 @@ func (h *UpdateCampaignStatusHandler) Serve(ctx context.Context, req *UpdateCamp
 	if device.User == nil {
 		return UpdateCampaignStatusResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCampaignManager(ctx); err != nil {
+		return UpdateCampaignStatusResponse{}, err
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -326,6 +335,9 @@ func (h *UpdateCampaignStatusHandler) Serve(ctx context.Context, req *UpdateCamp
 		return UpdateCampaignStatusResponse{}, onekiterrors.PermissionDenied()
 	}
 	if updateErr := h.Service.UpdateStatus(ctx, businessID, id, req.Status); updateErr != nil {
+		if errors.Is(updateErr, domain.ErrInvalidCampaignStatus) {
+			return UpdateCampaignStatusResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid campaign status")
+		}
 		return UpdateCampaignStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update campaign status")
 	}
 	return UpdateCampaignStatusResponse{Message: "Campaign status updated successfully"}, nil
