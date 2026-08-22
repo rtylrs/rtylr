@@ -24,6 +24,10 @@ export interface ListCustomersParams {
   tag?: string;
 }
 
+interface ListCustomersOptions {
+  enabled?: boolean;
+}
+
 export type CustomerListFilters = Pick<ListCustomersParams, 'search' | 'tier' | 'tag'>;
 
 type CustomerInput = Partial<Customer>;
@@ -191,9 +195,13 @@ async function fetchCustomerPage(
   return { customers, total: Number.isFinite(total) ? total : undefined };
 }
 
-export const useListCustomers = (params: ListCustomersParams): UseQueryResult<Customer[]> =>
+export const useListCustomers = (
+  params: ListCustomersParams,
+  options: ListCustomersOptions = {}
+): UseQueryResult<Customer[]> =>
   useQuery<Customer[]>({
     queryKey: ['crm-customers', 'filter', params],
+    enabled: options.enabled ?? true,
     queryFn: async (): Promise<Customer[]> => {
       const limit = normalizeCustomerPageSize(params.limit);
       const page = Math.floor(normalizeCustomerOffset(params.offset) / limit) + 1;

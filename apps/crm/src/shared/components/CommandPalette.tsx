@@ -39,11 +39,14 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
   const dialogRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const debouncedQuery = useDebounce(query, 150);
-  const { data: fetchedCustomers } = useListCustomers({
-    limit: 50,
-    offset: 0,
-    search: debouncedQuery.trim() || undefined,
-  });
+  const { data: fetchedCustomers } = useListCustomers(
+    {
+      limit: 50,
+      offset: 0,
+      search: debouncedQuery.trim() || undefined,
+    },
+    { enabled: open }
+  );
 
   useDialogFocus(open, dialogRef, onClose, searchInputRef);
 
