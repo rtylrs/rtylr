@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { Search, Plus, Lock, Globe, Archive } from 'lucide-react';
@@ -9,6 +9,7 @@ const STATUS_FILTERS = ['', 'active', 'completed'] as const;
 const VISIBILITY_FILTERS = ['', 'private', 'public'] as const;
 
 function ProjectCard({ project }: { project: Project }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const isArchived = !!project.archivedAt;
 
@@ -44,12 +45,24 @@ function ProjectCard({ project }: { project: Project }) {
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           {project.visibility === 'public' ? (
-            <Globe size={13} style={{ color: 'var(--flow-text-muted)' }} aria-label="Public" />
+            <Globe
+              size={13}
+              style={{ color: 'var(--flow-text-muted)' }}
+              aria-label={t('flow.visibility.public')}
+            />
           ) : (
-            <Lock size={13} style={{ color: 'var(--flow-text-muted)' }} aria-label="Private" />
+            <Lock
+              size={13}
+              style={{ color: 'var(--flow-text-muted)' }}
+              aria-label={t('flow.visibility.private')}
+            />
           )}
           {isArchived && (
-            <Archive size={13} style={{ color: 'var(--flow-text-muted)' }} aria-label="Archived" />
+            <Archive
+              size={13}
+              style={{ color: 'var(--flow-text-muted)' }}
+              aria-label={t('flow.visibility.archived')}
+            />
           )}
         </div>
       </div>
@@ -145,7 +158,7 @@ export const AllProjects: React.FC = () => {
             >
               {VISIBILITY_FILTERS.map((v) => (
                 <option key={v} value={v}>
-                  {v === '' ? t('flow.allProjects.allVisibilities') : v}
+                  {v === '' ? t('flow.allProjects.allVisibilities') : t(`flow.visibility.${v}`)}
                 </option>
               ))}
             </select>
