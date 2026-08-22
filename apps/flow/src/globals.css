@@ -253,20 +253,19 @@
  * The fallback matters for the same reason it does on the radius block: an
  * unresolvable var() would leave every spacing utility in the app at zero.
  *
- * One behaviour change is deliberate and worth knowing about. The preset value
- * is 0.25rem, so today spacing is the only dimension in Flow that follows a
- * browser font-size setting; --flow-u is a px length and there is no way to turn
- * a px length back into rem inside calc(). Flow's type is 97% px literals, so
- * the effect of that setting was already roomier boxes around same-size text
- * rather than a larger UI. The honest fix is the type migration in section 7 of
- * the design, which makes both scale together.
+ * The base stays in rem on purpose. --flow-u is a unitless multiplier, not a
+ * length, so 0.25rem survives here and spacing keeps following a browser
+ * font-size setting the way it does today. Emitting a px length from the
+ * provider would have been simpler and would have silently removed that: a px
+ * value cannot be turned back into rem inside calc(), so every spacing utility
+ * in the app would have stopped responding to a user's default font size.
  *
  * Large layout dimensions (the rail, the side panels, the aligned label
  * gutters) are pinned to literal px at their call sites so they do not track
  * this. Interactive controls need the same treatment: `h-11` is Flow's 44px
- * touch target and reads 33px at the compact step. */
+ * touch target and reads 33px at the compact multiplier of 0.75. */
 :root {
-  --spacing: var(--flow-u, 4px);
+  --spacing: calc(0.25rem * var(--flow-u, 1));
 }
 
 @layer base {
