@@ -7,7 +7,7 @@ import FlowLayout from './FlowLayout';
 // caret panel, command bar, etc.). This test only exercises the account menu
 // (avatar/name trigger in the sidebar footer - issue #785: it didn't close on
 // Escape or on an outside click), so every react-query-backed hook/component
-// FlowLayout pulls in is stubbed out. Store hooks (userStore, themeStore,
+// FlowLayout pulls in is stubbed out. Store hooks (userStore, appearanceStore,
 // flowStore) and other pure/local hooks (useSidebarSections, useKeyboardShortcuts,
 // useLifePreferences, useForesightLinks) are left real - none of them touch the
 // network and they're already exercised by other passing tests in this app.
