@@ -74,30 +74,30 @@ func UnixFromTime(t time.Time) int64 {
 }
 
 func GetDayRangeStartAndEnd() (start, end time.Time) {
-	now := time.Now()
-	start = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	now := time.Now().UTC()
+	start = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	end = start.Add(24 * time.Hour).Add(-time.Nanosecond)
 
 	return start, end
 }
 
 func GetWeekRangeStartAndEnd() (start, end time.Time) {
-	now := time.Now()
+	now := time.Now().UTC()
 
 	weekday := now.Weekday()
 	if weekday == 0 {
 		weekday = 7
 	}
 
-	start = time.Date(now.Year(), now.Month(), now.Day()-int(weekday)+1, 0, 0, 0, 0, now.Location())
+	start = time.Date(now.Year(), now.Month(), now.Day()-int(weekday)+1, 0, 0, 0, 0, time.UTC)
 	end = start.Add(7 * 24 * time.Hour).Add(-time.Nanosecond)
 
 	return start, end
 }
 
 func GetMonthRangeStartAndEnd() (start, end time.Time) {
-	now := time.Now()
-	start = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+	now := time.Now().UTC()
+	start = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 	end = start.AddDate(0, 1, 0).Add(-time.Nanosecond)
 
 	return start, end

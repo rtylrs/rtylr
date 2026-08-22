@@ -120,7 +120,7 @@ func (m *Module) executeGetLeaveBalancesTool(ctx context.Context, input map[stri
 		return nil, fmt.Errorf("invalid year: %w", err)
 	}
 	if year == 0 {
-		year = int32(time.Now().Year())
+		year = int32(time.Now().UTC().Year())
 	}
 
 	balances, err := m.service.GetLeaveBalances(ctx, ownerID, ownerID, employeeID, year)
@@ -159,7 +159,7 @@ func (m *Module) executeGetLeaveCalendarTool(ctx context.Context, input map[stri
 		return nil, err
 	}
 	if dateFrom == "" {
-		dateFrom = time.Now().Format("2006-01-02")
+		dateFrom = time.Now().UTC().Format("2006-01-02")
 	}
 	if dateTo == "" {
 		start, parseErr := time.Parse("2006-01-02", dateFrom)
@@ -245,7 +245,7 @@ func hrLeaveToolDate(value any, field string) (string, error) {
 		return "", nil
 	}
 	if strings.EqualFold(date, "today") {
-		return time.Now().Format("2006-01-02"), nil
+		return time.Now().UTC().Format("2006-01-02"), nil
 	}
 	if _, err := time.Parse("2006-01-02", date); err != nil {
 		return "", fmt.Errorf("%s must be in YYYY-MM-DD format", field)

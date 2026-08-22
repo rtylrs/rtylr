@@ -127,7 +127,7 @@ func (s *Service) CreateLeaveRequest(ctx context.Context, ownerID, callerUserID 
 
 	// Validate min notice
 	if lt.MinNoticeDays > 0 {
-		minStart := time.Now().AddDate(0, 0, int(lt.MinNoticeDays))
+		minStart := time.Now().UTC().AddDate(0, 0, int(lt.MinNoticeDays))
 		if startDate.Before(minStart) {
 			return nil, domain.ErrInsufficientNotice
 		}
@@ -478,7 +478,7 @@ func (s *Service) GetLeaveBalances(ctx context.Context, ownerID, callerUserID, e
 
 func (s *Service) fetchBalances(ctx context.Context, ownerID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, error) {
 	if year == 0 {
-		year = int32(time.Now().Year())
+		year = int32(time.Now().UTC().Year())
 	}
 	return s.repo.ListLeaveBalances(ctx, ownerID, employeeID, year)
 }
@@ -496,7 +496,7 @@ func (s *Service) GetLeaveCalendar(ctx context.Context, ownerID int64, params do
 // --- Background Job: Monthly Accrual ---
 
 func (s *Service) RunMonthlyAccrual(ctx context.Context) error {
-	now := time.Now()
+	now := time.Now().UTC()
 	currentMonth := int32(now.Month())
 	currentYear := int32(now.Year())
 

@@ -58,7 +58,7 @@ func (a *AppointmentAPI) ListTodayAppointments(ctx context.Context, _ *bookingap
 		return nil, errModel
 	}
 
-	todayKey := "today:" + time.Now().Format("2006-01-02")
+	todayKey := "today:" + time.Now().UTC().Format("2006-01-02")
 	res, cacheErr := cacher.Of[[]domain.Appointment]().GetOrComputeSingle(
 		ctx,
 		cacheKeys.Scoped(appointmentsCacheScope, businessID, todayKey),

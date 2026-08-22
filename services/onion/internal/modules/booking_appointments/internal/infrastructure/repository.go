@@ -35,8 +35,8 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Appoi
 }
 
 func (r *Repository) ListToday(ctx context.Context, businessID int64) ([]domain.Appointment, error) {
-	now := time.Now()
-	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	now := time.Now().UTC()
+	startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	endOfDay := startOfDay.Add(24 * time.Hour)
 	rows, err := r.queries.ListAppointmentsByDateRange(ctx, sqlc.ListAppointmentsByDateRangeParams{
 		BusinessID:  businessID,

@@ -110,7 +110,7 @@ func (a *MilestoneAPI) CreateMilestone(ctx context.Context, req *flowmilestonev1
 		dueDate = parsed
 	}
 	if dueDate.IsZero() {
-		dueDate = time.Now().AddDate(0, 1, 0)
+		dueDate = time.Now().UTC().AddDate(0, 1, 0)
 	}
 
 	milestone, err := a.Service.CreateMilestone(ctx, domain.MilestoneInput{

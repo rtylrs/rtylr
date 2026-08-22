@@ -58,7 +58,7 @@ func posDaySummaryToolAuth(ctx context.Context) (*authPkg.AuthUser, int64, error
 func posDaySummaryToolDate(input map[string]any) (string, error) {
 	date := strings.TrimSpace(posDaySummaryToolString(firstPOSDaySummaryToolValue(input, "date", "day")))
 	if date == "" || strings.EqualFold(date, "today") {
-		date = time.Now().Format("2006-01-02")
+		date = time.Now().UTC().Format("2006-01-02")
 	}
 	if _, err := time.Parse("2006-01-02", date); err != nil {
 		return "", fmt.Errorf("date must be in YYYY-MM-DD format")

@@ -15,6 +15,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/searchutil"
+	"github.com/voxire/onion/internal/platform/utils/times"
 )
 
 type Repository struct {
@@ -455,7 +456,7 @@ func (r *Repository) GetMyTasks(ctx context.Context, userID, workspaceID, limit,
 	// recent window so the board's Done column isn't always empty. Cancelled tasks
 	// stay hidden. completed_at is stamped by both the status and partial-update
 	// paths when a task moves to 'done'.
-	doneCutoff := time.Now().AddDate(0, 0, -myTasksDoneWindowDays)
+	doneCutoff := time.Now().UTC().AddDate(0, 0, -myTasksDoneWindowDays)
 	conds := sq.And{
 		sq.Eq{"t.assignee_id": userID},
 		sq.Expr("t.parent_task_id IS NULL"),
@@ -1090,7 +1091,7 @@ func (r *Repository) RecalcActualHours(ctx context.Context, taskID, actorID int6
 func (r *Repository) GetDashboardStats(ctx context.Context, workspaceID, businessID int64) (domain.DashboardStats, error) {
 	var stats domain.DashboardStats
 
-	weekStart := time.Now().AddDate(0, 0, -int(time.Now().Weekday()))
+	weekStart, _ := times.GetWeekRangeStartAndEnd()
 	weekEnd := weekStart.AddDate(0, 0, 7)
 
 	row, err := r.queries.GetDashboardStats(ctx, sqlc.GetDashboardStatsParams{
