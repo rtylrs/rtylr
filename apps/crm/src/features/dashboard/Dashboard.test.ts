@@ -13,5 +13,6 @@ describe('isAtRiskCustomer', () => {
     expect(isAtRiskCustomer('45 days ago')).toBe(true);
     expect(isAtRiskCustomer('Never')).toBe(true);
     expect(isAtRiskCustomer('')).toBe(true);
+    expect(isAtRiskCustomer('not-a-date')).toBe(true);
   });
 });

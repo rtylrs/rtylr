@@ -67,7 +67,7 @@ export function isAtRiskCustomer(lastVisit: string, thresholdDays = 30): boolean
   }
   if (/(?:today|yesterday|minute|minutes|hour|hours)\b/i.test(value)) return false;
   if (/(?:never|no visits?|unknown)\b/i.test(value)) return true;
-  return /(?:month|months|week|weeks|year|years)\b/i.test(value);
+  return true;
 }
 
 function StatCard({ stat, index }: { stat: StatItem; index: number }): React.JSX.Element {
