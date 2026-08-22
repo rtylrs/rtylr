@@ -69,6 +69,14 @@ function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
 }
 
+function firstNonEmptyString(...values: unknown[]): string {
+  for (const value of values) {
+    const text = String(value ?? '').trim();
+    if (text) return text;
+  }
+  return '';
+}
+
 function finiteNumber(value: unknown, fallback = 0): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
@@ -82,8 +90,8 @@ function optionalNumber(value: unknown): number | undefined {
 
 export function normalizeLead(value: unknown): Lead {
   const raw = asRecord(value);
-  const company = String(raw.company ?? raw.companyName ?? raw.company_name ?? '');
-  const companyName = String(raw.companyName ?? raw.company_name ?? raw.company ?? '');
+  const company = firstNonEmptyString(raw.company, raw.companyName, raw.company_name);
+  const companyName = firstNonEmptyString(raw.companyName, raw.company_name, raw.company);
   const stageValue = String(raw.stage ?? 'cold');
   const dealValue = optionalNumber(raw.dealValue ?? raw.deal_value);
   const mrrPotential = optionalNumber(raw.mrrPotential ?? raw.mrr_potential ?? dealValue);
@@ -152,7 +160,7 @@ export function normalizeContract(value: unknown): Contract {
   return {
     id: finiteNumber(raw.id),
     leadId: finiteNumber(raw.leadId ?? raw.lead_id),
-    company: String(raw.company ?? raw.companyName ?? raw.company_name ?? ''),
+    company: firstNonEmptyString(raw.company, raw.companyName, raw.company_name),
     plan,
     mrr: finiteNumber(raw.mrr),
     seats: finiteNumber(raw.seats),

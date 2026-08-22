@@ -127,6 +127,14 @@ describe('sales response normalization', () => {
     });
   });
 
+  it('falls back to a populated company alias when the preferred field is blank', () => {
+    expect(normalizeLead({ companyName: '   ', company: 'Acme Inc' })).toMatchObject({
+      company: 'Acme Inc',
+      companyName: 'Acme Inc',
+    });
+    expect(normalizeContract({ company: '', company_name: 'Acme Inc' }).company).toBe('Acme Inc');
+  });
+
   it('normalizes touchpoint field aliases and defaults invalid enums safely', () => {
     expect(
       normalizeTouchpoint({
