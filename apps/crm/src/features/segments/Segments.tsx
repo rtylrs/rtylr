@@ -20,6 +20,7 @@ import {
   useCreateSegment,
 } from '../../shared/hooks/queries/useSegments';
 import { Card, ConfirmModal, EmptyState, SkeletonList } from '../../shared/components/ui';
+import { activateOnKeyboard } from '../../shared/lib/keyboard';
 
 const ACCENT = '#3b82f6';
 
@@ -368,6 +369,9 @@ function SegmentCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, duration: 0.2 }}
       onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (event) => activateOnKeyboard(event, onClick) : undefined}
       style={{
         background: 'var(--hub-card)',
         border: '1px solid var(--hub-border)',

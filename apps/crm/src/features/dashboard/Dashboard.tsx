@@ -335,6 +335,11 @@ const Dashboard: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.22 }}
             onClick={() => navigate({ to: '/customers/new' })}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) =>
+              activateOnKeyboard(event, () => navigate({ to: '/customers/new' }))
+            }
             style={{
               background: 'var(--hub-card)',
               border: '1px solid var(--hub-border)',

@@ -5,6 +5,7 @@ import { ArrowLeft, Mail, MessageSquare, PieChart } from 'lucide-react';
 import { useGetSegment, useSegmentCustomers } from '../../shared/hooks/queries/useSegments';
 import { Breadcrumbs, Button, Card, EmptyState, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge } from '../../shared/components/crm';
+import { activateOnKeyboard } from '../../shared/lib/keyboard';
 import { getCustomerTier } from '../../shared/lib/tiers';
 
 const SegmentDetail: React.FC = () => {
@@ -190,6 +191,11 @@ const SegmentDetail: React.FC = () => {
                 <div
                   key={c.id}
                   onClick={() => navigate({ to: `/customers/${c.id}` })}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(event) =>
+                    activateOnKeyboard(event, () => navigate({ to: `/customers/${c.id}` }))
+                  }
                   style={{
                     display: 'flex',
                     alignItems: 'center',
