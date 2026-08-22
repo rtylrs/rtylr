@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { InvoicesServiceClient } from '@voxire/voxie/finance/invoices/v1/client';
 import type {
   CreateInvoiceRequest,
+  UpdateInvoiceBody,
   InvoiceSummary,
   InvoiceDetail,
 } from '@voxire/voxie/finance/invoices/v1/types';
@@ -135,7 +136,16 @@ export function useUpdateInvoice() {
       data,
     }: {
       id: string;
-      data: Omit<CreateInvoiceRequest, never>;
+      // UpdateInvoiceBody, which is what the client's `body` parameter takes.
+      //
+      // This was `Omit<CreateInvoiceRequest, never>`, a no-op Omit that made the
+      // create shape structurally assignable to the update shape. It stopped
+      // being assignable when client_name was relaxed from @required to
+      // optional: clientName became `string | undefined` on the create side
+      // while the update body still requires it. Naming the real type is both
+      // the fix and the more honest signature, since this mutation only ever
+      // calls updateInvoice.
+      data: UpdateInvoiceBody;
     }): Promise<Invoice> => {
       const res = await invoicesClient.updateInvoice({ id, body: data });
       if (!res.invoice) throw new Error('Invoice updated but not returned');
