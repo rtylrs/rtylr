@@ -166,6 +166,22 @@ describe('loyaltyMemberSchema', () => {
     });
     expect(isActiveMember(member)).toBe(false);
   });
+
+  it('keeps members with missing activity dates renderable', () => {
+    const member = loyaltyMemberSchema.parse({
+      id: 101,
+      name: 'No Activity',
+      initials: 'NA',
+      points: 0,
+      tier: 'Bronze',
+      visits: 0,
+      joinedAt: null,
+      lastActive: null,
+    });
+    expect(member.joinedAt).toBe('');
+    expect(member.lastActive).toBe('');
+    expect(isActiveMember(member)).toBe(false);
+  });
 });
 
 describe('loyaltyRewardSchema', () => {

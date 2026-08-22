@@ -123,8 +123,14 @@ export const loyaltyMemberSchema = z.object({
   points: finiteNumber,
   tier: z.string(),
   visits: finiteNumber,
-  joinedAt: z.string(),
-  lastActive: z.string(),
+  joinedAt: z
+    .string()
+    .nullish()
+    .transform((value) => value ?? ''),
+  lastActive: z
+    .string()
+    .nullish()
+    .transform((value) => value ?? ''),
 });
 
 export const loyaltyRewardSchema = z.object({
