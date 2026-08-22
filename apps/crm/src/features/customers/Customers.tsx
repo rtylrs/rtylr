@@ -51,7 +51,7 @@ function downloadCustomersCsv(rowsToExport: Customer[], thresholds: Record<Tier,
   a.href = url;
   a.download = 'customers.csv';
   a.click();
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 0);
   toast.success('CSV exported');
 }
 
