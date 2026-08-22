@@ -9,10 +9,10 @@ message StockMovement {
   /// type is the type value for this contract.
   type: string
   quantity: float64
-  reference_id: int64? @nullable
-  reference_type: string? @nullable
-  note: string? @nullable
-  employee_id: int64? @nullable
+  reference_id: int64?
+  reference_type: string?
+  note: string?
+  employee_id: int64?
   /// created_at is when the record was created.
   created_at: string
 }

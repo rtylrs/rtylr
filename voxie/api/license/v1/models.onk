@@ -5,10 +5,10 @@ message LicenseState {
   mode: string
   valid: bool
   status: string
-  reason: string? @nullable
-  expires_at: string? @nullable
-  grace_until: string? @nullable
-  checked_at: string? @nullable
+  reason: string?
+  expires_at: string?
+  grace_until: string?
+  checked_at: string?
 }
 
 message GetLicenseStateRequest {}
