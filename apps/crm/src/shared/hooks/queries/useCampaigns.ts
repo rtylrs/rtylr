@@ -9,6 +9,7 @@ import {
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { safe } from '../../lib/api';
+import { parseCrmDate } from '../../lib/dateUtils';
 import { unwrapList } from '../../lib/unwrapList';
 import { campaignSchema, campaignStatsSchema } from '../../schemas/campaigns';
 import type { Campaign, CampaignStats } from '../../schemas/campaigns';
@@ -49,7 +50,7 @@ export interface CampaignMutationResponse {
 function normalizeScheduledAt(value: string | undefined): string | undefined {
   const trimmed = value?.trim();
   if (!trimmed) return undefined;
-  const date = new Date(trimmed);
+  const date = parseCrmDate(trimmed);
   if (!Number.isFinite(date.getTime())) return undefined;
   return date.toISOString().replace(/\.\d{3}Z$/, 'Z');
 }

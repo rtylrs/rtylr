@@ -3,6 +3,7 @@
  */
 
 import type { Campaign } from '../schemas/campaigns';
+import { parseCrmDate } from './dateUtils';
 import { compareDatesDescending } from './sort';
 
 /** Filter campaigns by status. */
@@ -39,5 +40,6 @@ export function sortByRecency(campaigns: Campaign[]): Campaign[] {
 /** Return true if a campaign is scheduled for a future date. */
 export function isScheduledInFuture(campaign: Campaign): boolean {
   if (!campaign.scheduledAt) return false;
-  return new Date(campaign.scheduledAt).getTime() > Date.now();
+  const timestamp = parseCrmDate(campaign.scheduledAt).getTime();
+  return Number.isFinite(timestamp) && timestamp > Date.now();
 }

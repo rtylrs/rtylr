@@ -44,4 +44,15 @@ describe('campaign wire mappings', () => {
       }).scheduledAt
     ).toBe('2026-09-01T10:00:00Z');
   });
+
+  it('drops impossible calendar dates instead of normalizing them', () => {
+    expect(
+      toCampaignRequest({
+        name: 'Invalid schedule',
+        type: 'email',
+        body: 'Content',
+        scheduledAt: '2026-02-30',
+      }).scheduledAt
+    ).toBeUndefined();
+  });
 });

@@ -120,4 +120,9 @@ describe('isScheduledInFuture', () => {
     const c = makeCampaign({ scheduledAt: '2099-12-31' });
     expect(isScheduledInFuture(c)).toBe(true);
   });
+
+  it('returns false for an impossible scheduled date', () => {
+    const c = makeCampaign({ scheduledAt: '2099-02-30' });
+    expect(isScheduledInFuture(c)).toBe(false);
+  });
 });
