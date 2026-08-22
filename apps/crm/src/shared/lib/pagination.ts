@@ -14,6 +14,23 @@ export interface PaginationInfo extends PaginationState {
   endIndex: number;
 }
 
+/** Append only records whose ids have not already been collected. */
+export function appendUniqueById<T extends { id: number | string }>(
+  target: T[],
+  records: readonly T[]
+): number {
+  const seen = new Set(target.map((record) => String(record.id)));
+  let added = 0;
+  for (const record of records) {
+    const key = String(record.id);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    target.push(record);
+    added += 1;
+  }
+  return added;
+}
+
 export function getPaginationInfo(state: PaginationState): PaginationInfo {
   const { page, pageSize, total } = state;
   const totalPages = pageSize > 0 ? Math.ceil(total / pageSize) : 0;

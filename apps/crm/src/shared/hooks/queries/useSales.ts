@@ -9,6 +9,7 @@ import {
 import { toast } from 'sonner';
 import { safe } from '../../lib/api';
 import { unwrapList } from '../../lib/unwrapList';
+import { appendUniqueById } from '../../lib/pagination';
 import {
   toContactMutationPayload,
   toLeadMutationPayload,
@@ -299,8 +300,9 @@ export const useListAllLeads = (): UseQueryResult<Lead[]> =>
 
       for (let page = 0; page < maxPages; page += 1) {
         const result = await fetchLeadsPage(SALES_PAGE_SIZE, offset);
-        leads.push(...result.leads);
+        const added = appendUniqueById(leads, result.leads);
         if (
+          added === 0 ||
           result.leads.length < SALES_PAGE_SIZE ||
           (result.total !== undefined && leads.length >= result.total)
         ) {
@@ -587,8 +589,9 @@ export const useListAllContracts = (): UseQueryResult<Contract[]> =>
 
       for (let page = 0; page < maxPages; page += 1) {
         const result = await fetchContractsPage(SALES_PAGE_SIZE, offset);
-        contracts.push(...result.contracts);
+        const added = appendUniqueById(contracts, result.contracts);
         if (
+          added === 0 ||
           result.contracts.length < SALES_PAGE_SIZE ||
           (result.total !== undefined && contracts.length >= result.total)
         ) {

@@ -11,6 +11,7 @@ import {
 } from '../../shared/hooks/queries/useCampaigns';
 import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import { useTemplates } from '../../shared/hooks/queries/useTemplates';
+import { useCrmSettings } from '../../shared/hooks/queries/useCrmSettings';
 import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../shared/components/ui';
 import { EmailEditor } from '../../shared/components/crm';
 import { useDialogFocus } from '../../shared/lib/keyboard';
@@ -26,13 +27,18 @@ const EmailCampaign: React.FC = () => {
   const create = useCreateCampaign();
   const update = useUpdateCampaign();
   const updateStatus = useUpdateCampaignStatus();
-  const { data: existingCampaign } = useGetCampaign(campaignId);
+  const {
+    data: existingCampaign,
+    isLoading: campaignLoading,
+    isError: campaignError,
+  } = useGetCampaign(campaignId);
   const {
     data: fetchedSegments,
     isLoading: segmentsLoading,
     isError: segmentsError,
   } = useListSegments();
   const { data: fetchedTemplates } = useTemplates();
+  const { data: settings, isLoading: settingsLoading, isError: settingsError } = useCrmSettings();
   const segments = useMemo(() => fetchedSegments ?? [], [fetchedSegments]);
   const templates = (fetchedTemplates ?? []).filter((template) => template.channel === 'email');
 
@@ -74,6 +80,18 @@ const EmailCampaign: React.FC = () => {
   const segment = segments.find((item) => String(item.id) === segmentId);
   const audienceUnavailable =
     segmentsLoading || segmentsError || !segment || segment.customerCount <= 0;
+  const campaignReady =
+    !isEditing || (!campaignLoading && !campaignError && existingCampaign?.id === campaignId);
+  const previewSender =
+    settings?.fromName && settings.fromEmail
+      ? `${settings.fromName} <${settings.fromEmail}>`
+      : settings?.fromEmail ||
+        settings?.fromName ||
+        (settingsLoading
+          ? 'Loading sender…'
+          : settingsError
+            ? 'Sender unavailable'
+            : 'Sender not configured');
 
   const applyTemplate = (templateId: string): void => {
     const template = templates.find((item) => item.id === templateId);
@@ -85,6 +103,12 @@ const EmailCampaign: React.FC = () => {
 
   const handleSave = (send: boolean): void => {
     if (pending) return;
+    if (isEditing && !campaignReady) {
+      toast.error(
+        campaignError ? 'Campaign could not be loaded' : 'Campaign details are still loading'
+      );
+      return;
+    }
     if (send) {
       if (segmentsLoading) {
         toast.error('Audience data is still loading');
@@ -163,7 +187,7 @@ const EmailCampaign: React.FC = () => {
               <Button
                 variant="outline"
                 onClick={() => handleSave(false)}
-                disabled={pending || !name.trim() || !body.trim()}
+                disabled={pending || !campaignReady || !name.trim() || !body.trim()}
               >
                 <Save size={13} />
                 {pending ? 'Saving…' : 'Save draft'}
@@ -172,7 +196,12 @@ const EmailCampaign: React.FC = () => {
                 variant="primary"
                 onClick={() => handleSave(true)}
                 disabled={
-                  pending || !name.trim() || !subject.trim() || !body.trim() || audienceUnavailable
+                  pending ||
+                  !campaignReady ||
+                  !name.trim() ||
+                  !subject.trim() ||
+                  !body.trim() ||
+                  audienceUnavailable
                 }
               >
                 <Send size={13} />
@@ -181,6 +210,16 @@ const EmailCampaign: React.FC = () => {
             </>
           }
         />
+        {isEditing && !campaignReady && (
+          <p
+            role={campaignError ? 'alert' : 'status'}
+            style={{ color: campaignError ? '#ef4444' : 'var(--hub-text-muted)', fontSize: '12px' }}
+          >
+            {campaignError
+              ? 'Unable to load this campaign. Refresh and try again.'
+              : 'Loading campaign details…'}
+          </p>
+        )}
 
         <div className="crm-two-column" style={{ display: 'grid', gap: '20px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -354,7 +393,7 @@ const EmailCampaign: React.FC = () => {
               }}
             >
               <div style={{ fontSize: '11px', color: '#666', marginBottom: '8px' }}>
-                From: hello@rtylr.com
+                From: {previewSender}
               </div>
               <div
                 style={{

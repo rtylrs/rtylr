@@ -5,6 +5,7 @@ import { FeedbackServiceClient } from '@voxire/voxie/crm/feedback/v1/client';
 import type { Feedback } from '@voxire/voxie/crm/feedback/v1/types';
 import { FEEDBACK_TYPES, feedbackItemSchema, type FeedbackType } from '../../schemas/feedback';
 import type { FeedbackItem } from '../../schemas/feedback';
+import { appendUniqueById } from '../../lib/pagination';
 
 const feedbackClient = createOneKitClient(FeedbackServiceClient, 'crm');
 
@@ -51,9 +52,13 @@ export const useListFeedback = (params?: ListFeedbackParams): UseQueryResult<Fee
         const currentPage = z
           .array(feedbackItemSchema)
           .parse((res.feedback ?? []).map(fromApiFeedback));
-        feedback.push(...currentPage);
+        const added = appendUniqueById(feedback, currentPage);
         const total = Number(res.total);
-        if (currentPage.length < pageSize || (Number.isFinite(total) && feedback.length >= total)) {
+        if (
+          added === 0 ||
+          currentPage.length < pageSize ||
+          (Number.isFinite(total) && feedback.length >= total)
+        ) {
           break;
         }
         page += 1;

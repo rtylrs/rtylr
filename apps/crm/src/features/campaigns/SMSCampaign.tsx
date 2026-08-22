@@ -198,8 +198,18 @@ const SMSCampaign: React.FC = () => {
                   letterSpacing: '0.05em',
                 }}
               >
-                Recipient preview
+                Opted-in sample
               </h4>
+              <p
+                style={{
+                  fontSize: '11px',
+                  color: 'var(--hub-text-muted)',
+                  margin: '0 0 10px',
+                  lineHeight: 1.5,
+                }}
+              >
+                Sampled from loaded opted-in customers; this is not a segment membership list.
+              </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {customersLoading ? (
                   <p style={{ fontSize: '12px', color: 'var(--hub-text-muted)', margin: 0 }}>

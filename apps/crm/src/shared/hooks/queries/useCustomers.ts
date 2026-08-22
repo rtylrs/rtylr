@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { safe } from '../../lib/api';
 import { unwrapList } from '../../lib/unwrapList';
+import { appendUniqueById } from '../../lib/pagination';
 import { customerSchema, timelineEntrySchema } from '../../schemas/customers';
 import type { Customer, TimelineEntry } from '../../schemas/customers';
 
@@ -225,8 +226,9 @@ export const useListAllCustomers = (
 
       for (let pageIndex = 0; pageIndex < maxPages; pageIndex += 1) {
         const result = await fetchCustomerPage(filters, page, CUSTOMER_PAGE_SIZE);
-        customers.push(...result.customers);
+        const added = appendUniqueById(customers, result.customers);
         if (
+          added === 0 ||
           result.customers.length < CUSTOMER_PAGE_SIZE ||
           (result.total !== undefined && customers.length >= result.total)
         ) {

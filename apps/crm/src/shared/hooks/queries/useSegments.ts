@@ -16,6 +16,7 @@ import { segmentSchema } from '../../schemas/segments';
 import type { Segment } from '../../schemas/segments';
 import { customerSchema } from '../../schemas/customers';
 import type { Customer } from '../../schemas/customers';
+import { appendUniqueById } from '../../lib/pagination';
 
 const segmentClient = createOneKitClient(SegmentServiceClient, 'crm');
 
@@ -137,10 +138,11 @@ export const useSegmentCustomers = (id: string | undefined): UseQueryResult<Cust
         const pageCustomers = z
           .array(customerSchema)
           .parse((res.customers ?? []).map(fromApiSegmentCustomer));
-        customers.push(...pageCustomers);
+        const added = appendUniqueById(customers, pageCustomers);
 
         const total = Number(res.total);
         if (
+          added === 0 ||
           pageCustomers.length === 0 ||
           (Number.isFinite(total) ? customers.length >= total : pageCustomers.length < pageSize)
         ) {

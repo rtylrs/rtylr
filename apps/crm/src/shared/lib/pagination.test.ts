@@ -1,5 +1,28 @@
 import { describe, it, expect } from 'vitest';
-import { getPaginationInfo, clampPage, getPageNumbers } from './pagination';
+import { appendUniqueById, getPaginationInfo, clampPage, getPageNumbers } from './pagination';
+
+describe('appendUniqueById', () => {
+  it('preserves order while skipping records already loaded', () => {
+    const target = [{ id: 1, name: 'First' }];
+    const added = appendUniqueById(target, [
+      { id: 1, name: 'Duplicate' },
+      { id: 2, name: 'Second' },
+      { id: '3', name: 'Third' },
+    ]);
+
+    expect(added).toBe(2);
+    expect(target).toEqual([
+      { id: 1, name: 'First' },
+      { id: 2, name: 'Second' },
+      { id: '3', name: 'Third' },
+    ]);
+  });
+
+  it('reports no additions for a repeated page', () => {
+    const target = [{ id: 1 }];
+    expect(appendUniqueById(target, [{ id: 1 }])).toBe(0);
+  });
+});
 
 // ── getPaginationInfo ─────────────────────────────────────────────────────────
 
