@@ -132,5 +132,6 @@
     "selectTask": "Select task",
     "deselectTask": "Deselect task"
   },
-  "saving": "Saving…"
+  "saving": "Saving…",
+  "saveChanges": "Save changes"
 }

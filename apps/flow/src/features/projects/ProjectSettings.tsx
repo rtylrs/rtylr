@@ -234,7 +234,8 @@ const ProjectSettings: React.FC = () => {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
-              <Save size={11} /> {updateProject.isPending ? t('common.saving') : t('common.save')}
+              <Save size={11} />{' '}
+              {updateProject.isPending ? t('common.saving') : t('common.saveChanges')}
             </button>
           </>
         )}
