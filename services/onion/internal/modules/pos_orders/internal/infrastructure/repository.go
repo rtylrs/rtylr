@@ -1541,7 +1541,7 @@ func (r *Repository) GetPublicMenuItem(ctx context.Context, businessID, menuItem
 	return item, nil
 }
 
-func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, orderNumber, customerName, customerEmail, customerPhone, notes string, items []domain.OrderItemInput) (int64, error) {
+func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin public order transaction", logger.Error(err))
