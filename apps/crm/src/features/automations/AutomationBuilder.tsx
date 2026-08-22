@@ -77,6 +77,7 @@ const AutomationBuilder: React.FC = () => {
   };
 
   const handleSave = () => {
+    if (create.isPending || update.isPending) return;
     const trimmedName = name.trim();
     if (!trimmedName) return;
     const payload = {

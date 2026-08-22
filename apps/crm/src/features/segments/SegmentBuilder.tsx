@@ -31,6 +31,7 @@ const SegmentBuilder: React.FC = () => {
   const removeRule = (i: number) => setRules((r) => r.filter((_, idx) => idx !== i));
 
   const handleSave = () => {
+    if (create.isPending) return;
     const ruleStrings = rules.map((r) => `${r.field} ${r.operator} ${r.value}`);
     create.mutate(
       {

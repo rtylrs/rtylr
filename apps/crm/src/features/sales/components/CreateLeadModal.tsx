@@ -29,6 +29,7 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
   }, [open]);
 
   const handleSubmit = (): void => {
+    if (createLead.isPending) return;
     if (!form.company.trim()) {
       toast.error('Company name is required');
       return;

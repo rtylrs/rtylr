@@ -45,6 +45,7 @@ const Templates: React.FC = () => {
   useDialogFocus(showCreate, createDialogRef, closeCreateDialog);
 
   const handleCreate = async (): Promise<void> => {
+    if (createMut.isPending) return;
     if (!newName.trim() || !newBody.trim()) {
       toast.error('Template name and body are required');
       return;

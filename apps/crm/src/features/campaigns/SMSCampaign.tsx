@@ -74,6 +74,7 @@ const SMSCampaign: React.FC = () => {
   const bodyTooLong = body.length > SMS_MAX_LENGTH;
 
   const handleSave = (send: boolean): void => {
+    if (pending) return;
     if (bodyTooLong) {
       toast.error(`SMS messages must be ${SMS_MAX_LENGTH} characters or fewer`);
       return;

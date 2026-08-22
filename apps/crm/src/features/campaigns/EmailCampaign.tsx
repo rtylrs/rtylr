@@ -82,6 +82,7 @@ const EmailCampaign: React.FC = () => {
   };
 
   const handleSave = (send: boolean): void => {
+    if (pending) return;
     if (send) {
       if (segmentsLoading) {
         toast.error('Audience data is still loading');
