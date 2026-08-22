@@ -95,8 +95,8 @@ WHERE business_id = ? AND id = ?;
 -- name: CreateOrder :execresult
 INSERT INTO pos_orders
 (owner_id, business_id, session_id, table_id, location_id, order_number, type, status,
- customer_id, customer_name, staff_id, subtotal, total, payment_method, notes, kitchen_notes)
-VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?);
+ customer_id, customer_name, staff_id, subtotal, tax_amount, total, payment_method, notes, kitchen_notes)
+VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: CreateOrderItem :execresult
 INSERT INTO pos_order_items
@@ -176,7 +176,13 @@ WHERE id = ?;
 UPDATE pos_orders SET status = 'cancelled' WHERE id = ? AND business_id = ?;
 
 -- name: GetOrderSubtotal :one
-SELECT subtotal FROM pos_orders WHERE business_id = ? AND id = ?;
+SELECT o.id,
+       COALESCE(SUM((i.unit_price * i.quantity) - COALESCE(i.discount_amount, 0)), 0) AS subtotal,
+       COALESCE(SUM(((i.unit_price * i.quantity) - COALESCE(i.discount_amount, 0)) * COALESCE(i.tax_rate, 0) / 100), 0) AS tax_amount
+FROM pos_orders o
+LEFT JOIN pos_order_items i ON i.order_id = o.id AND i.status != 'cancelled'
+WHERE o.business_id = ? AND o.id = ?
+GROUP BY o.id;
 
 -- name: ApplyDiscount :exec
 UPDATE pos_orders SET discount_amount = ?, total = ?, notes = CONCAT(COALESCE(notes,''), ?)
@@ -212,14 +218,17 @@ SELECT COUNT(*) FROM pos_paddle_events_processed WHERE transaction_id = ?;
 UPDATE pos_order_items SET status = 'cancelled' WHERE id = ? AND order_id = ? AND status IN ('pending','preparing');
 
 -- name: GetActiveOrderItemsTotal :one
-SELECT COALESCE(SUM(total), 0) AS subtotal
+SELECT COALESCE(SUM((unit_price * quantity) - COALESCE(discount_amount, 0)), 0) AS subtotal,
+       COALESCE(SUM(((unit_price * quantity) - COALESCE(discount_amount, 0)) * COALESCE(tax_rate, 0) / 100), 0) AS tax_amount
 FROM pos_order_items
 WHERE order_id = ?
   AND status != 'cancelled';
 
 -- name: UpdateOrderTotal :exec
 UPDATE pos_orders
-SET subtotal = sqlc.arg(subtotal), total = sqlc.arg(total) + tax_amount - discount_amount
+SET subtotal = sqlc.arg(subtotal),
+    tax_amount = sqlc.arg(tax_amount),
+    total = GREATEST(sqlc.arg(subtotal) + sqlc.arg(tax_amount) - discount_amount, 0)
 WHERE id = ? AND business_id = ?;
 
 -- name: IsOnlineOrderingEnabled :one

@@ -636,18 +636,22 @@ func (r *Repository) CreateOrder(ctx context.Context, businessID, staffID int64,
 
 	// Compute per-item discount and totals once; reuse them in the insert loop
 	// below instead of recomputing the same arithmetic a second time.
-	var subtotal float64
+	totals := domain.ComputeTotals(input.Items)
 	discAmts := make([]float64, len(input.Items))
 	itemTotals := make([]float64, len(input.Items))
 	for i, item := range input.Items {
-		discAmt := item.UnitPrice * item.Quantity * item.DiscountPct / 100
-		itemTotal := (item.UnitPrice*item.Quantity - discAmt) * (1 + item.TaxRate/100)
+		lineSubtotal := item.UnitPrice * item.Quantity
+		discAmt := lineSubtotal * item.DiscountPct / 100
+		lineAfterDiscount := lineSubtotal - discAmt
+		lineTax := lineAfterDiscount * item.TaxRate / 100
+		itemTotal := lineAfterDiscount + lineTax
 		discAmts[i] = discAmt
 		itemTotals[i] = itemTotal
-		subtotal += itemTotal
 	}
 
-	total := subtotal
+	subtotal := totals.Subtotal
+	taxAmount := totals.TaxAmount
+	total := totals.Total
 
 	res, err := qtx.CreateOrder(ctx, sqlc.CreateOrderParams{
 		OwnerID:       businessID,
@@ -661,6 +665,7 @@ func (r *Repository) CreateOrder(ctx context.Context, businessID, staffID int64,
 		CustomerName:  nullString(input.CustomerName),
 		StaffID:       nullInt64(staffID),
 		Subtotal:      sql.NullString{String: floatToDecimal(subtotal), Valid: true},
+		TaxAmount:     sql.NullString{String: floatToDecimal(taxAmount), Valid: true},
 		Total:         sql.NullString{String: floatToDecimal(total), Valid: true},
 		PaymentMethod: sqlc.NullPosOrdersPaymentMethod{PosOrdersPaymentMethod: sqlc.PosOrdersPaymentMethod(input.PaymentMethod), Valid: input.PaymentMethod != ""},
 		Notes:         nullString(input.Notes),
@@ -1038,10 +1043,11 @@ func (r *Repository) VoidOrderItem(ctx context.Context, businessID, orderID, ite
 		return err
 	}
 
-	itemsTotalDecimal := nullableDecimal(itemsTotal)
+	itemsSubtotal := nullableDecimal(itemsTotal.Subtotal)
+	itemsTaxAmount := nullableDecimal(itemsTotal.TaxAmount)
 	if err := qtx.UpdateOrderTotal(ctx, sqlc.UpdateOrderTotalParams{
-		Subtotal:   itemsTotalDecimal,
-		Total:      itemsTotalDecimal,
+		Subtotal:   itemsSubtotal,
+		TaxAmount:  itemsTaxAmount,
 		ID:         orderID,
 		BusinessID: businessID,
 	}); err != nil {
@@ -1198,6 +1204,7 @@ func (r *Repository) SplitOrder(ctx context.Context, businessID, orderID int64, 
 			CustomerName:  nullString(order.CustomerName),
 			StaffID:       nullInt64(order.StaffID),
 			Subtotal:      sql.NullString{String: "0", Valid: true},
+			TaxAmount:     sql.NullString{String: "0", Valid: true},
 			Total:         sql.NullString{String: "0", Valid: true},
 			PaymentMethod: sqlc.NullPosOrdersPaymentMethod{PosOrdersPaymentMethod: sqlc.PosOrdersPaymentMethod(order.PaymentMethod), Valid: true},
 			Notes:         nullString(order.Notes),
@@ -1261,7 +1268,7 @@ func (r *Repository) SplitOrder(ctx context.Context, businessID, orderID int64, 
 }
 
 func (r *Repository) ApplyDiscount(ctx context.Context, businessID int64, input domain.DiscountInput) error {
-	subtotal, err := r.queries.GetOrderSubtotal(ctx, sqlc.GetOrderSubtotalParams{
+	financials, err := r.queries.GetOrderSubtotal(ctx, sqlc.GetOrderSubtotalParams{
 		BusinessID: businessID,
 		ID:         input.OrderID,
 	})
@@ -1272,15 +1279,16 @@ func (r *Repository) ApplyDiscount(ctx context.Context, businessID int64, input 
 		return err
 	}
 
-	total := decimalToFloat(subtotal.String)
+	subtotal := interfaceToFloat(financials.Subtotal)
+	taxAmount := interfaceToFloat(financials.TaxAmount)
 	var discountAmount float64
 	if input.DiscountType == "percentage" {
-		discountAmount = total * input.DiscountValue / 100
+		discountAmount = subtotal * input.DiscountValue / 100
 	} else {
 		discountAmount = input.DiscountValue
 	}
 
-	newTotal := total - discountAmount
+	newTotal := subtotal + taxAmount - discountAmount
 	if newTotal < 0 {
 		newTotal = 0
 	}
