@@ -17,6 +17,11 @@ const (
 // ErrLicenseNotFound is returned by LookupByKeyHash when no row matches the hash.
 var ErrLicenseNotFound = errors.New("license not found")
 
+var (
+	ErrSeatLimitExceeded = errors.New("license seat limit exceeded")
+	ErrInstanceIDMissing = errors.New("instance id is required")
+)
+
 // LicenseRecord is the subset of self_host_licenses the authority needs to apply
 // revocation and DB-side expiry on top of the signature/expiry verification.
 //
@@ -93,4 +98,68 @@ func ApplyRevocation(report StatusReport, record *LicenseRecord, now time.Time) 
 		}
 	}
 	return report
+}
+
+// EnsureActivationTable creates the small authority-side activation ledger.
+// It is intentionally initialized by the license service because this table
+// belongs to the authority database, not to an application module schema.
+func EnsureActivationTable(ctx context.Context, db *sql.DB) error {
+	if db == nil {
+		return sql.ErrConnDone
+	}
+	_, err := db.ExecContext(ctx, `
+		CREATE TABLE IF NOT EXISTS self_host_license_activations (
+			id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+			key_hash CHAR(64) NOT NULL,
+			instance_id VARCHAR(255) NOT NULL,
+			activated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			UNIQUE KEY uq_license_activation (key_hash, instance_id),
+			KEY idx_license_activation_key (key_hash)
+		)`)
+	return err
+}
+
+// Activate records an instance once and enforces the signed seat limit. A
+// repeated activation of the same instance is idempotent.
+func Activate(ctx context.Context, db *sql.DB, keyHash, instanceID string, seatLimit int) error {
+	if db == nil {
+		return sql.ErrConnDone
+	}
+	if instanceID == "" {
+		return ErrInstanceIDMissing
+	}
+	tx, err := db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	var existing int
+	err = tx.QueryRowContext(ctx, `
+		SELECT COUNT(*) FROM self_host_license_activations
+		WHERE key_hash = ? AND instance_id = ?`, keyHash, instanceID).Scan(&existing)
+	if err != nil {
+		return err
+	}
+	if existing > 0 {
+		return tx.Commit()
+	}
+
+	if seatLimit > 0 {
+		var count int
+		if err := tx.QueryRowContext(ctx, `
+			SELECT COUNT(*) FROM self_host_license_activations
+			WHERE key_hash = ? FOR UPDATE`, keyHash).Scan(&count); err != nil {
+			return err
+		}
+		if count >= seatLimit {
+			return ErrSeatLimitExceeded
+		}
+	}
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO self_host_license_activations (key_hash, instance_id)
+		VALUES (?, ?)`, keyHash, instanceID); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
