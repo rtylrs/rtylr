@@ -5,7 +5,7 @@ message Table {
   id: int64
   /// owner_id identifies the tenant that owns the resource.
   owner_id: int64
-  location_id: int64? @nullable
+  location_id: int64?
   label: string
   seats: int32
   /// status is the current lifecycle state.
@@ -23,7 +23,7 @@ message ListTablesResponse {
 }
 
 message CreateTableRequest {
-  location_id: int64? @nullable
+  location_id: int64?
   label: string @required
   seats: int32 @required @gt(0)
 }
@@ -34,7 +34,7 @@ message CreateTableResponse {
 }
 
 message UpdateTableBody {
-  location_id: int64? @nullable
+  location_id: int64?
   label: string @required
   seats: int32 @required @gt(0)
   /// status is the current lifecycle state.

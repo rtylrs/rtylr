@@ -20,7 +20,7 @@ message CreateLocationRequest {
   address: string
   phone: string
   /// Defaults to true when absent.
-  is_active: bool? @nullable
+  is_active: bool?
 }
 
 message CreateLocationResponse {
@@ -39,7 +39,7 @@ message UpdateLocationBody {
   address: string
   phone: string
   /// Unchanged when absent.
-  is_active: bool? @nullable
+  is_active: bool?
 }
 
 message UpdateLocationRequest {

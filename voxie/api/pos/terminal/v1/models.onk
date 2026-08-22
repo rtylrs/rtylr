@@ -6,9 +6,9 @@ message Terminal {
   business_id: int64
   branch_id: int64
   name: string
-  device_id: string? @nullable
+  device_id: string?
   is_active: bool
-  last_seen_at: string? @nullable
+  last_seen_at: string?
   /// created_at is when the record was created.
   created_at: string
 }
