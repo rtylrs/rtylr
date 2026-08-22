@@ -202,7 +202,6 @@ func (h *Hub) Run(ctx context.Context) {
 		case c := <-h.register:
 			h.mu.Lock()
 			h.clients[c] = struct{}{}
-			h.userCap[c.userID]++
 			h.mu.Unlock()
 
 		case c := <-h.unregister:
@@ -226,6 +225,14 @@ func (h *Hub) Run(ctx context.Context) {
 
 		case s := <-h.subscribe:
 			h.mu.Lock()
+			if _, connected := h.clients[s.client]; !connected {
+				h.mu.Unlock()
+				continue
+			}
+			if _, alreadySubscribed := s.client.topics[s.topic]; alreadySubscribed || len(s.client.topics) >= maxTopicsPerClient {
+				h.mu.Unlock()
+				continue
+			}
 			if h.topics[s.topic] == nil {
 				h.topics[s.topic] = make(map[*client]struct{})
 			}
@@ -336,12 +343,9 @@ func (h *Hub) shutdown() {
 // resolved userID. We do NOT re-authenticate here; topic subscriptions
 // authorize against `userID` via the hub's AuthorizeFn.
 func (h *Hub) ServeWS(w http.ResponseWriter, r *http.Request, userID int64) {
-	h.mu.RLock()
-	open := h.userCap[userID]
-	h.mu.RUnlock()
-	if open >= maxConnectionsPerUser {
+	if !h.reserveConnection(userID) {
 		logger.Ctx(r.Context()).Warn("wsbus connection rejected: per-user cap",
-			logger.Any("user_id", userID), logger.Any("open", open))
+			logger.Any("user_id", userID), logger.Any("open", maxConnectionsPerUser))
 		http.Error(w, "too many connections", http.StatusTooManyRequests)
 		return
 	}
@@ -350,6 +354,7 @@ func (h *Hub) ServeWS(w http.ResponseWriter, r *http.Request, userID int64) {
 		OriginPatterns: origins.AllowedPatternStrings(),
 	})
 	if err != nil {
+		h.releaseConnection(userID)
 		logger.Ctx(r.Context()).Warn("wsbus accept failed", logger.Error(err))
 		return
 	}
@@ -367,6 +372,7 @@ func (h *Hub) ServeWS(w http.ResponseWriter, r *http.Request, userID int64) {
 	select {
 	case h.register <- c:
 	case <-r.Context().Done():
+		h.releaseConnection(userID)
 		cancel()
 		_ = conn.Close(websocket.StatusNormalClosure, "")
 		return
@@ -411,9 +417,6 @@ func (h *Hub) readLoop(c *client) {
 			}
 			allowed := make([]string, 0, len(topics))
 			for _, topic := range topics {
-				if len(c.topics) >= maxTopicsPerClient {
-					break
-				}
 				if h.authorize(c.ctx, c.userID, topic) {
 					h.subscribe <- subscription{client: c, topic: topic}
 					allowed = append(allowed, topic)
@@ -430,6 +433,27 @@ func (h *Hub) readLoop(c *client) {
 		default:
 			h.sendErr(c, "unknown op: "+msg.Op)
 		}
+	}
+}
+
+// reserveConnection accounts for a connection before websocket negotiation
+// completes. Reserving under the hub lock closes the check-then-increment race
+// where concurrent upgrades could all observe the same open count.
+func (h *Hub) reserveConnection(userID int64) bool {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.userCap[userID] >= maxConnectionsPerUser {
+		return false
+	}
+	h.userCap[userID]++
+	return true
+}
+
+func (h *Hub) releaseConnection(userID int64) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.userCap[userID] > 0 {
+		h.userCap[userID]--
 	}
 }
 

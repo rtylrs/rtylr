@@ -91,3 +91,19 @@ func TestNilAuthorizerAlwaysAllows(t *testing.T) {
 		t.Fatal("nil authorizer must allow")
 	}
 }
+
+func TestConnectionCapReservationIsAtomic(t *testing.T) {
+	h := New(nil)
+	for i := 0; i < maxConnectionsPerUser; i++ {
+		if !h.reserveConnection(42) {
+			t.Fatalf("reservation %d unexpectedly rejected", i+1)
+		}
+	}
+	if h.reserveConnection(42) {
+		t.Fatal("reservation beyond the per-user cap was accepted")
+	}
+	h.releaseConnection(42)
+	if !h.reserveConnection(42) {
+		t.Fatal("reservation was not released after a connection closed")
+	}
+}
