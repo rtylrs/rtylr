@@ -237,40 +237,6 @@ func (s *Service) RejectTimesheet(ctx context.Context, businessID, timesheetID i
 	return rec, err
 }
 
-// --- Flow Import ---
-
-// --- Billable Export ---
-
-func (s *Service) ExportBillableEntries(ctx context.Context, businessID int64) ([]domain.BillableExportItem, int64, error) {
-	batchID := time.Now().UnixMilli()
-	entries, err := s.repo.ExportApprovedBillableEntries(ctx, businessID, batchID)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	if len(entries) == 0 {
-		return nil, 0, nil
-	}
-
-	items := make([]domain.BillableExportItem, 0, len(entries))
-	var totalMinutes int32
-	for _, e := range entries {
-		items = append(items, domain.BillableExportItem{
-			EntryID:         e.ID,
-			EmployeeID:      e.EmployeeID,
-			ProjectID:       e.ProjectID,
-			TaskID:          e.TaskID,
-			Date:            e.Date,
-			DurationMinutes: e.DurationMinutes,
-			Description:     e.Description,
-			IsBillable:      e.IsBillable,
-		})
-		totalMinutes += e.DurationMinutes
-	}
-
-	return items, batchID, nil
-}
-
 // --- Background Job ---
 
 func (s *Service) RunUnsubmittedTimesheetReminder(ctx context.Context) error {
