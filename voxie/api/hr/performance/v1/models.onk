@@ -15,9 +15,9 @@ message ReviewGoalPayload {
   /// Detailed description of the goal and expectations.
   description: string
   /// Relative importance of this goal within the cycle; absent if all goals are weighted equally.
-  weight: float64? @nullable
+  weight: float64?
   /// Measurable criteria that define goal achievement; absent if not yet specified.
-  success_criteria: string? @nullable
+  success_criteria: string?
   /// Goal status (active | achieved | missed).
   status: string
   /// Unix timestamp when this record was created.
@@ -41,13 +41,13 @@ message PerformanceReviewPayload {
   /// Type of review (self | manager | peer).
   review_type: string
   /// Overall rating assigned by the reviewer; absent while still in draft.
-  overall_rating: string? @nullable
+  overall_rating: string?
   /// Free-form written feedback from the reviewer; absent while still in draft.
-  narrative: string? @nullable
+  narrative: string?
   /// Workflow status (draft | submitted | completed | shared).
   status: string
   /// Unix timestamp when the review was shared with the employee; absent if not yet shared.
-  shared_with_employee_at: int64? @nullable
+  shared_with_employee_at: int64?
   /// Unix timestamp when this record was created.
   created_at: int64
   /// Unix timestamp when this record was last updated.
@@ -117,9 +117,9 @@ message OpenReviewCycleResponse {
 
 message ListGoalsRequest {
   /// Filter by employee; absent to include all employees.
-  employee_id: int64? @query("employee_id") @nullable
+  employee_id: int64? @query("employee_id")
   /// Filter by review cycle; absent to include all cycles.
-  review_cycle_id: int64? @query("review_cycle_id") @nullable
+  review_cycle_id: int64? @query("review_cycle_id")
 }
 
 message ListGoalsResponse {

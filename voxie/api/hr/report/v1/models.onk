@@ -12,11 +12,11 @@ message ReportRequestPayload {
   /// End of the reporting period (ISO-8601 date).
   date_to: string
   /// Filter by location; absent to include all locations.
-  location_id: int64? @nullable
+  location_id: int64?
   /// Filter by department; absent to include all departments.
-  department_id: int64? @nullable
+  department_id: int64?
   /// Filter by employee; absent to include all employees.
-  employee_id: int64? @nullable
+  employee_id: int64?
   /// Output format (json | csv | pdf).
   format: string
 }

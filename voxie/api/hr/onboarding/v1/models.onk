@@ -35,7 +35,7 @@ message ChecklistTemplatePayload {
   /// Event that triggers this checklist (onboarding | offboarding).
   trigger_type: string
   /// Role this template applies to; absent if it applies to all roles.
-  role_id: int64? @nullable
+  role_id: int64?
   /// Items included in this template.
   items: ChecklistItemPayload[]
   /// Unix timestamp when this record was created.
@@ -61,9 +61,9 @@ message EmployeeChecklistItemPayload {
   /// Completion status (incomplete | in_progress | complete).
   status: string
   /// Unix timestamp when the item was completed; absent if not yet complete.
-  completed_at: int64? @nullable
+  completed_at: int64?
   /// URL of the uploaded attachment; absent if none provided.
-  attachment_url: string? @nullable
+  attachment_url: string?
   /// Unix timestamp when this record was created.
   created_at: int64
   /// Unix timestamp when this record was last updated.
@@ -92,7 +92,7 @@ message EmployeeChecklistPayload {
 
 message ListChecklistTemplatesRequest {
   /// Filter by trigger type; absent to include all types.
-  trigger_type: string? @query("trigger_type") @nullable
+  trigger_type: string? @query("trigger_type")
 }
 
 message ListChecklistTemplatesResponse {
@@ -110,9 +110,9 @@ message CreateChecklistTemplateRequest {
   /// Human-readable name for the template.
   name: string @required
   /// trigger_type is the event that triggers this checklist (onboarding | offboarding).
-  trigger_type: string? @nullable
+  trigger_type: string?
   /// Role this template applies to; absent if it applies to all roles.
-  role_id: int64? @nullable
+  role_id: int64?
 }
 
 message CreateChecklistTemplateResponse {
@@ -125,7 +125,7 @@ message UpdateChecklistTemplateBody {
   /// name is the human-readable name for the template.
   name: string @required
   /// trigger_type is the event that triggers this checklist (onboarding | offboarding).
-  trigger_type: string? @nullable
+  trigger_type: string?
 }
 
 message UpdateChecklistTemplateRequest {
@@ -145,13 +145,13 @@ message AddItemToChecklistTemplateRequest {
   /// title is the checklist item title.
   title: string @required
   /// description is the optional supporting text for the checklist item.
-  description: string? @nullable
+  description: string?
   /// assignee_role is the role responsible for completing this item.
-  assignee_role: string? @nullable
+  assignee_role: string?
   /// due_offset_days is the number of days after trigger date by which this item is due.
-  due_offset_days: int32? @nullable
+  due_offset_days: int32?
   /// requires_attachment indicates whether completion needs an uploaded attachment.
-  requires_attachment: bool? @nullable
+  requires_attachment: bool?
 }
 
 message AddItemToChecklistTemplateResponse {
@@ -163,9 +163,9 @@ message ListEmployeeChecklistsRequest {
   /// employee_id is the employee whose checklists should be listed.
   employee_id: int64 @required @gt(0) @query("employee_id")
   /// limit is the maximum number of checklists to return.
-  limit: int32? @query("limit") @nullable
+  limit: int32? @query("limit")
   /// offset is the number of checklists to skip before returning results.
-  offset: int32? @query("offset") @nullable
+  offset: int32? @query("offset")
 }
 
 message ListEmployeeChecklistsResponse {

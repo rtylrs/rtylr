@@ -15,15 +15,15 @@ message EquipmentRequestPayload {
   /// Priority level (low | medium | high).
   urgency: string
   /// Date by which the equipment is needed (ISO-8601 date); absent if no deadline.
-  needed_by_date: string? @nullable
+  needed_by_date: string?
   /// Workflow status (pending | approved | ordered | delivered | rejected).
   status: string
   /// Current step in a multi-level approval chain.
   current_approval_level: int32
   /// Employee who approved the request; absent if not yet approved.
-  approved_by: int64? @nullable
+  approved_by: int64?
   /// Unix timestamp when the equipment was delivered; absent if not yet delivered.
-  delivered_at: int64? @nullable
+  delivered_at: int64?
   /// Unix timestamp when this record was created.
   created_at: int64
   /// Unix timestamp when this record was last updated.
@@ -41,11 +41,11 @@ message AssetPayload {
   /// Human-readable name of the asset (e.g. "MacBook Pro 16-inch").
   name: string
   /// Manufacturer serial number; absent if not tracked.
-  serial_number: string? @nullable
+  serial_number: string?
   /// Date the asset was assigned to the employee (ISO-8601 date).
   assigned_date: string
   /// Date the asset was returned; absent if still assigned (ISO-8601 date).
-  returned_date: string? @nullable
+  returned_date: string?
   /// Physical condition of the asset (new | good | fair | damaged).
   condition: string
   /// Unix timestamp when this record was created.
@@ -56,9 +56,9 @@ message AssetPayload {
 
 message ListAssetsRequest {
   /// Filter by employee; absent to include all employees.
-  employee_id: int64? @query("employee_id") @nullable
+  employee_id: int64? @query("employee_id")
   /// Filter by condition; absent to include all conditions.
-  condition: string? @query("condition") @nullable
+  condition: string? @query("condition")
 }
 
 message ListAssetsResponse {
@@ -74,9 +74,9 @@ message ListAssetsResponse {
 
 message ListEquipmentRequestsRequest {
   /// Filter by employee; absent to include all employees.
-  employee_id: int64? @query("employee_id") @nullable
+  employee_id: int64? @query("employee_id")
   /// Filter by status; absent to include all statuses.
-  status: string? @query("status") @nullable
+  status: string? @query("status")
 }
 
 message ListEquipmentRequestsResponse {
@@ -100,7 +100,7 @@ message CreateEquipmentRequestRequest {
   /// Priority level (low | medium | high).
   urgency: string @required
   /// Date by which the equipment is needed (ISO-8601 date); absent if no deadline.
-  needed_by_date: string? @nullable
+  needed_by_date: string?
 }
 
 message CreateEquipmentRequestResponse {

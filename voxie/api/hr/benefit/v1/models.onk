@@ -46,7 +46,7 @@ message BenefitEnrollment {
   /// enrolled_at is when the employee enrolled, in ISO-8601 format.
   enrolled_at: string
   /// cancelled_at is when the enrollment was cancelled, in ISO-8601 format; absent while the enrollment is active.
-  cancelled_at: string? @nullable
+  cancelled_at: string?
 }
 
 message EnrollInBenefitRequest {

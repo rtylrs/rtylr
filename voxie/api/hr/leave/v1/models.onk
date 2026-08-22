@@ -13,13 +13,13 @@ message LeaveTypePayload {
   /// Whether leave requests of this type require manager approval.
   requires_approval: bool
   /// Rule describing how entitlement accrues (e.g. "monthly", "yearly"); absent if entitlement is fixed.
-  accrual_rule: string? @nullable
+  accrual_rule: string?
   /// Maximum unused days that may carry over to the next year.
   max_carryover_days: int32
   /// Minimum calendar days of notice required before the leave starts.
   min_notice_days: int32
   /// Number of consecutive days after which supporting documentation is required; absent if never required.
-  requires_documentation_after_days: int32? @nullable
+  requires_documentation_after_days: int32?
   /// Whether this leave type is currently available for new requests.
   is_active: bool
   /// Unix timestamp when this record was created.
@@ -45,13 +45,13 @@ message LeaveRequestPayload {
   /// Total number of working days requested (may be fractional for half-days).
   total_days: float64
   /// Additional context from the employee; absent if none provided.
-  notes: string? @nullable
+  notes: string?
   /// Workflow status (pending | approved | rejected | cancelled).
   status: string
   /// Current step in a multi-level approval chain.
   current_approval_level: int32
   /// Reason the request was rejected; absent unless status is rejected.
-  rejection_reason: string? @nullable
+  rejection_reason: string?
   /// Unix timestamp when this record was created.
   created_at: int64
   /// Unix timestamp when this record was last updated.
@@ -86,9 +86,9 @@ message LeaveBalancePayload {
 
 message ListLeaveRequestsRequest {
   /// Filter by employee; absent to include all employees.
-  employee_id: int64? @query("employee_id") @nullable
+  employee_id: int64? @query("employee_id")
   /// Filter by status; absent to include all statuses.
-  status: string? @query("status") @nullable
+  status: string? @query("status")
 }
 
 message ListLeaveRequestsResponse {
@@ -114,7 +114,7 @@ message CreateLeaveRequestRequest {
   /// Total number of working days requested.
   total_days: float64 @required @gt(0)
   /// Additional context from the employee; absent if none provided.
-  notes: string? @nullable
+  notes: string?
 }
 
 message CreateLeaveRequestResponse {
@@ -127,7 +127,7 @@ message ApproveLeaveBody {
   /// True to approve, false to reject.
   approved: bool
   /// Reason for rejection; absent if approving.
-  rejection_reason: string? @nullable
+  rejection_reason: string?
 }
 
 message ApproveLeaveRequest {
@@ -174,13 +174,13 @@ message CreateLeaveTypeRequest {
   /// Whether leave requests of this type require manager approval.
   requires_approval: bool
   /// Accrual rule; absent if entitlement is fixed.
-  accrual_rule: string? @nullable
+  accrual_rule: string?
   /// Maximum unused days that may carry over to the next year.
   max_carryover_days: int32 @required @gt(0)
   /// Minimum calendar days of notice required.
   min_notice_days: int32 @required @gt(0)
   /// Consecutive days after which documentation is required; absent if never.
-  requires_documentation_after_days: int32? @nullable
+  requires_documentation_after_days: int32?
 }
 
 message CreateLeaveTypeResponse {
@@ -191,21 +191,21 @@ message CreateLeaveTypeResponse {
 /// UpdateLeaveTypeBody carries updatable leave type fields bound from the HTTP payload.
 message UpdateLeaveTypeBody {
   /// Updated name; absent to keep current value.
-  name: string? @nullable
+  name: string?
   /// Updated paid status; absent to keep current value.
-  is_paid: bool? @nullable
+  is_paid: bool?
   /// Updated approval requirement; absent to keep current value.
-  requires_approval: bool? @nullable
+  requires_approval: bool?
   /// Updated accrual rule; absent to keep current value.
-  accrual_rule: string? @nullable
+  accrual_rule: string?
   /// Updated max carryover days; absent to keep current value.
-  max_carryover_days: int32? @nullable
+  max_carryover_days: int32?
   /// Updated min notice days; absent to keep current value.
-  min_notice_days: int32? @nullable
+  min_notice_days: int32?
   /// Updated documentation threshold; absent to keep current value.
-  requires_documentation_after_days: int32? @nullable
+  requires_documentation_after_days: int32?
   /// Updated active status; absent to keep current value.
-  is_active: bool? @nullable
+  is_active: bool?
 }
 
 message UpdateLeaveTypeRequest {
@@ -221,9 +221,9 @@ message UpdateLeaveTypeResponse {
 
 message ListLeaveBalancesRequest {
   /// Filter by employee; absent to include all employees.
-  employee_id: int64? @query("employee_id") @nullable
+  employee_id: int64? @query("employee_id")
   /// Filter by year; absent to return current year.
-  year: int32? @query("year") @nullable
+  year: int32? @query("year")
 }
 
 message ListLeaveBalancesResponse {
