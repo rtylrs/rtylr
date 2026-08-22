@@ -321,7 +321,9 @@ return violations;
 }
 
 export interface UpdateBillBody {
-supplierId: string;
+supplierId?: string;
+supplierName?: string;
+purchaseOrderId?: string;
 amount?: number;
 currency: string;
 dueDate: string;
@@ -333,6 +335,8 @@ export function decodeUpdateBillBody(v: any): UpdateBillBody {
 if (v === null || v === undefined) return v;
 return {
 supplierId: v.supplier_id,
+supplierName: v.supplier_name,
+purchaseOrderId: v.purchase_order_id,
 amount: v.amount,
 currency: v.currency,
 dueDate: v.due_date,
@@ -344,6 +348,8 @@ description: v.description,
 export function encodeUpdateBillBody(v: UpdateBillBody): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.supplierId !== undefined) { out.supplier_id = v.supplierId; }
+if (v.supplierName !== undefined) { out.supplier_name = v.supplierName; }
+if (v.purchaseOrderId !== undefined) { out.purchase_order_id = v.purchaseOrderId; }
 if (v.amount !== undefined) { out.amount = v.amount; }
 if (v.currency !== undefined) { out.currency = v.currency; }
 if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
@@ -355,8 +361,8 @@ return out;
 export function validateUpdateBillBody(v: UpdateBillBody): string[] {
 const violations: string[] = [];
 if (v.supplierId !== undefined && v.supplierId !== null && !(typeof v.supplierId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.supplierId))) violations.push("supplier_id has invalid type");
-if (!(v.supplierId !== undefined && v.supplierId !== null)) violations.push("supplier_id is required");
-if (v.supplierId !== undefined && v.supplierId !== null && !(Number(v.supplierId) > 0)) violations.push("supplier_id violates @gt");
+if (v.supplierName !== undefined && v.supplierName !== null && !(typeof v.supplierName === "string")) violations.push("supplier_name has invalid type");
+if (v.purchaseOrderId !== undefined && v.purchaseOrderId !== null && !(typeof v.purchaseOrderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.purchaseOrderId))) violations.push("purchase_order_id has invalid type");
 if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
 if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) >= 0)) violations.push("amount violates @gte");
 if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
