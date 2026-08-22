@@ -6,6 +6,7 @@ import (
 	"errors"
 	"path"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/allegro/bigcache/v3"
@@ -21,6 +22,7 @@ const (
 
 type LocalCache struct {
 	cache *bigcache.BigCache
+	mu    sync.Mutex
 }
 
 func (c *LocalCache) GetMulti(ctx context.Context, keys []string) (results map[string][]byte, notFound []string) {
@@ -45,6 +47,12 @@ func (c *LocalCache) PutMulti(ctx context.Context, keyVals map[string][]byte, tt
 }
 
 func (c *LocalCache) Get(ctx context.Context, key string) []byte {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.get(ctx, key)
+}
+
+func (c *LocalCache) get(ctx context.Context, key string) []byte {
 	if c.cache == nil {
 		return nil // Gracefully handle uninitialized cache
 	}
@@ -86,7 +94,26 @@ func (c *LocalCache) Get(ctx context.Context, key string) []byte {
 	return result[expiryBytesLen:]
 }
 
+// GetDel retrieves and removes a value from the local cache. BigCache performs
+// the delete under its own lock, so one-time credentials cannot be replayed by
+// concurrent requests within a process.
+func (c *LocalCache) GetDel(ctx context.Context, key string) []byte {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	value := c.get(ctx, key)
+	if value != nil {
+		c.delete(ctx, []string{key})
+	}
+	return value
+}
+
 func (c *LocalCache) Put(ctx context.Context, key string, val []byte, ttl time.Duration) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.put(ctx, key, val, ttl)
+}
+
+func (c *LocalCache) put(ctx context.Context, key string, val []byte, ttl time.Duration) {
 	if c.cache == nil {
 		return // Gracefully handle uninitialized cache
 	}
@@ -105,6 +132,12 @@ func (c *LocalCache) Put(ctx context.Context, key string, val []byte, ttl time.D
 }
 
 func (c *LocalCache) Delete(ctx context.Context, keys []string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.delete(ctx, keys)
+}
+
+func (c *LocalCache) delete(ctx context.Context, keys []string) {
 	if c.cache == nil {
 		return // Gracefully handle uninitialized cache
 	}

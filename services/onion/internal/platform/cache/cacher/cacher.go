@@ -264,6 +264,37 @@ func (c Cache[M]) Get(ctx context.Context, key string, options ...ClientOption) 
 	return *model, true
 }
 
+// GetAndDelete atomically consumes a cached value when Redis is available and
+// removes the local replica as well. It is intended for one-time credentials.
+func (c Cache[M]) GetAndDelete(ctx context.Context, key string, options ...ClientOption) (M, bool) {
+	configuration := getConfiguration(options...)
+	cacheKey := c.appendIdentifierPrefix(key)
+	var bytes []byte
+
+	if !configuration.memoryOnly {
+		bytes = getRedisCache().GetDel(ctx, cacheKey)
+		if bytes != nil && !configuration.remoteOnly {
+			GetInMemoryCache(ctx).Delete(ctx, []string{cacheKey})
+		}
+	}
+	if bytes == nil && !configuration.remoteOnly {
+		bytes = GetInMemoryCache(ctx).GetDel(ctx, cacheKey)
+	}
+	if bytes == nil {
+		return *new(M), false
+	}
+
+	model := new(M)
+	if err := c.unmarshal(bytes, model); err != nil {
+		logger.Ctx(ctx).Warn("Error while unmarshalling consumed cache value",
+			logger.String("key", cacheKey),
+			logger.Error(err),
+		)
+		return *new(M), false
+	}
+	return *model, true
+}
+
 // GetMulti retrieves multiple key-value pairs from cache.
 func (c Cache[M]) getMultiByTransformedKeys(ctx context.Context, transformedKeys []string, options ...ClientOption) (results map[string]M, notFound []string) {
 	configuration := getConfiguration(options...)
