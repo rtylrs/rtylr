@@ -374,9 +374,6 @@ export const financeApi = {
       financeCompatibilityClient.updateRecurringInvoice(withId(id, data))
     ),
 
-  triggerRecurringInvoice: (id: string) =>
-    compatResult<unknown>(() => financeCompatibilityClient.triggerRecurringInvoice({ id })),
-
   // Quotes
   getQuotes: () => compatResult<unknown>(() => financeCompatibilityClient.listQuotes({})),
 
