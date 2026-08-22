@@ -12,6 +12,7 @@ func TestErrorsAreDistinct(t *testing.T) {
 		ErrSessionNotOpen,
 		ErrOrderNotFound,
 		ErrOrderAlreadyPaid,
+		ErrPaymentInsufficient,
 		ErrLocationNotFound,
 		ErrTableNotFound,
 	}

@@ -807,10 +807,11 @@ func (r *Repository) ProcessPayment(ctx context.Context, businessID, orderID int
 	}
 
 	total := decimalToFloat(paymentRow.Total.String)
-	changeDue := input.AmountPaid - total
-	if changeDue < 0 {
-		changeDue = 0
+	change, err := domain.ComputeChange(total, input.AmountPaid)
+	if err != nil {
+		return err
 	}
+	changeDue := change.Change
 
 	now := time.Now().UTC()
 

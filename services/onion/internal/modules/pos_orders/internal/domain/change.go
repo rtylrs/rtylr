@@ -13,7 +13,7 @@ type ChangeResult struct {
 // It returns an error if amountPaid is less than total.
 func ComputeChange(total, amountPaid float64) (ChangeResult, error) {
 	if amountPaid < total {
-		return ChangeResult{}, fmt.Errorf("amount paid (%.2f) is less than total (%.2f)", amountPaid, total)
+		return ChangeResult{}, fmt.Errorf("%w: amount paid (%.2f), total (%.2f)", ErrPaymentInsufficient, amountPaid, total)
 	}
 	return ChangeResult{
 		AmountDue:  total,
