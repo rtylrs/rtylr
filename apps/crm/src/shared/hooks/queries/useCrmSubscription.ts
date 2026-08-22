@@ -16,10 +16,10 @@ export function centsToDisplay(cents: number): string {
   return `$${(safeCents / 100).toFixed(2)}`;
 }
 
-export function trialDaysLeft(trialEndsAt: string | null): number {
-  if (!trialEndsAt) return 0;
+export function trialDaysLeft(trialEndsAt: string | null): number | null {
+  if (!trialEndsAt) return null;
   const end = new Date(trialEndsAt).getTime();
-  if (!Number.isFinite(end)) return 0;
+  if (!Number.isFinite(end)) return null;
   return Math.max(0, Math.ceil((end - Date.now()) / 86_400_000));
 }
 

@@ -31,7 +31,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
   if (!data || data.status !== 'trial' || dismissed) return null;
 
   const days = trialDaysLeft(data.trialEndsAt ?? null);
-  if (days > 7) return null;
+  if (days === null || days > 7) return null;
 
   const dismiss = (): void => {
     localStorage.setItem(DISMISSED_KEY, today);
