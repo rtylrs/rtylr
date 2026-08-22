@@ -64,7 +64,7 @@ export function toUpdateLoyaltyConfigRequest(
   config: Partial<LoyaltyConfig>
 ): Record<string, unknown> {
   return {
-    isEnabled: config.programEnabled ?? false,
+    isEnabled: config.programEnabled ?? true,
     pointsPerCurrencyUnit: config.pointsPerDollar ?? 1,
     currencyPerPoint: config.redemptionRate ?? 0.01,
     bronzeMin: config.bronzeMin ?? 0,

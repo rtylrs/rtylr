@@ -400,7 +400,7 @@ interface LoyaltyConfigPayload {
 
 function toLoyaltyConfigPayload(config: Partial<LoyaltyConfig>): LoyaltyConfigPayload {
   return {
-    isEnabled: config.programEnabled ?? false,
+    isEnabled: config.programEnabled ?? true,
     pointsPerCurrencyUnit: config.pointsPerDollar ?? 1,
     currencyPerPoint: config.redemptionRate ?? 0.01,
     bronzeMin: config.bronzeMin ?? 0,

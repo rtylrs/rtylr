@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 const finiteNumber = z.preprocess((value) => {
+  if (value === undefined) return undefined;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
 }, z.number());
@@ -11,12 +12,31 @@ const optionalFiniteNumber = z.preprocess((value) => {
   return Number.isFinite(parsed) ? parsed : undefined;
 }, z.number().optional());
 
+function formatSpend(value: number | string | undefined): string {
+  if (value === undefined || value === null || value === '') return '$0';
+  if (typeof value === 'string' && value.trim().startsWith('$')) {
+    const numeric = Number(value.replace(/[$,\s]/g, ''));
+    if (!Number.isFinite(numeric)) return value.trim();
+    return '$' + numeric.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  }
+  const numeric = Number(value);
+  return Number.isFinite(numeric)
+    ? '$' + numeric.toLocaleString('en-US', { maximumFractionDigits: 2 })
+    : String(value);
+}
+
+function displayTier(value: string | undefined): string {
+  const tier = value?.trim() ?? '';
+  return tier ? tier.charAt(0).toUpperCase() + tier.slice(1).toLowerCase() : '';
+}
+
 // Accept both the backend proto shape (firstName/lastName/totalSpent/
 // loyaltyTier) and the legacy display shape, and normalize to what
 // Dashboard.tsx renders. The backend has no "visits" field, so it remains
 // undefined instead of being presented as a real zero.
 export const topCustomerSchema = z
   .object({
+    id: z.string().optional(),
     name: z.string().optional(),
     firstName: z.string().optional(),
     lastName: z.string().optional(),
@@ -27,10 +47,11 @@ export const topCustomerSchema = z
     loyaltyTier: z.string().optional(),
   })
   .transform((c) => ({
+    id: c.id,
     name: c.name ?? `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim(),
-    spend: c.spend ?? String(c.totalSpent ?? 0),
+    spend: formatSpend(c.spend ?? c.totalSpent),
     visits: c.visits,
-    tier: c.tier ?? c.loyaltyTier ?? '',
+    tier: displayTier(c.tier ?? c.loyaltyTier),
   }));
 
 export const recentCampaignSchema = z.object({

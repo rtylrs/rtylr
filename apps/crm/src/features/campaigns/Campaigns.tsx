@@ -448,24 +448,12 @@ const Campaigns: React.FC = () => {
       toast.error('No eligible recipients for this campaign');
       return;
     }
-    updateStatus.mutate(
-      { id, status: 'active' },
-      {
-        onSuccess: () => toast.success('Campaign activated'),
-        onError: () => toast.error('Failed to activate campaign'),
-      }
-    );
+    updateStatus.mutate({ id, status: 'active' });
   };
 
   const handlePause = (id: number): void => {
     if (updateStatus.isPending) return;
-    updateStatus.mutate(
-      { id, status: 'paused' },
-      {
-        onSuccess: () => toast.success('Campaign paused'),
-        onError: () => toast.error('Failed to pause campaign'),
-      }
-    );
+    updateStatus.mutate({ id, status: 'paused' });
   };
 
   const handleEdit = (c: Campaign): void => {
@@ -480,14 +468,7 @@ const Campaigns: React.FC = () => {
   const handleDelete = (id: number): void => {
     if (removeCampaign.isPending) return;
     removeCampaign.mutate(id, {
-      onSuccess: () => {
-        toast.success('Campaign deleted');
-        setConfirmDeleteId(null);
-      },
-      onError: () => {
-        toast.error('Failed to delete campaign');
-        setConfirmDeleteId(null);
-      },
+      onSuccess: () => setConfirmDeleteId(null),
     });
   };
 

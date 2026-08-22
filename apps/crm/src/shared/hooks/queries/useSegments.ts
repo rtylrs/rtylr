@@ -24,6 +24,13 @@ interface UpdateSegmentPayload {
   data: Partial<Segment>;
 }
 
+export function mergeSegmentData(
+  current: Segment | undefined,
+  data: Partial<Segment>
+): Partial<Segment> {
+  return { ...current, ...data };
+}
+
 function fromApiSegment(s: ApiSegment): Segment {
   return segmentSchema.parse({
     id: s.id,
@@ -183,26 +190,29 @@ export const useUpdateSegment = (): UseMutationResult<Segment, unknown, UpdateSe
   const { t } = useTranslation();
   return useMutation<Segment, unknown, UpdateSegmentPayload>({
     mutationFn: async (payload: UpdateSegmentPayload): Promise<Segment> => {
+      const current = qc
+        .getQueryData<Segment[]>(['crm-segments'])
+        ?.find((segment) => segment.id === payload.id);
+      const merged = mergeSegmentData(current, payload.data);
       await segmentClient.updateSegment({
         id: payload.id,
         body: {
-          name: payload.data.name ?? '',
-          description:
-            payload.data.description?.trim() || payload.data.name?.trim() || 'Customer segment',
-          filters: rulesToFilters(payload.data.rules, payload.data.filters, payload.data.matchAll),
+          name: merged.name ?? '',
+          description: merged.description?.trim() || merged.name?.trim() || 'Customer segment',
+          filters: rulesToFilters(merged.rules, merged.filters, merged.matchAll),
         },
       });
       return segmentSchema.parse({
         id: payload.id,
-        name: payload.data.name ?? '',
-        description:
-          payload.data.description?.trim() || payload.data.name?.trim() || 'Customer segment',
-        filters: rulesToFilters(payload.data.rules, payload.data.filters, payload.data.matchAll),
-        customerCount: payload.data.customerCount ?? 0,
-        color: payload.data.color,
-        rules: payload.data.rules,
-        trend: payload.data.trend,
-        trendUp: payload.data.trendUp,
+        name: merged.name ?? '',
+        description: merged.description?.trim() || merged.name?.trim() || 'Customer segment',
+        filters: rulesToFilters(merged.rules, merged.filters, merged.matchAll),
+        customerCount: merged.customerCount ?? 0,
+        color: merged.color,
+        rules: merged.rules,
+        trend: merged.trend,
+        trendUp: merged.trendUp,
+        matchAll: merged.matchAll,
       });
     },
     onSuccess: (_data: Segment, variables: UpdateSegmentPayload): void => {

@@ -2,7 +2,6 @@ import React, { useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { toast } from 'sonner';
 import {
   Users,
   Star,
@@ -528,11 +527,9 @@ const Segments: React.FC = () => {
     if (removeSegment.isPending) return;
     removeSegment.mutate(id, {
       onSuccess: () => {
-        toast.success('Segment deleted');
         setConfirmDeleteId(null);
       },
       onError: () => {
-        toast.error('Failed to delete segment');
         setConfirmDeleteId(null);
       },
     });
@@ -548,11 +545,7 @@ const Segments: React.FC = () => {
       },
       {
         onSuccess: () => {
-          toast.success('Segment created');
           setBuilderOpen(false);
-        },
-        onError: () => {
-          toast.error('Failed to create segment');
         },
       }
     );

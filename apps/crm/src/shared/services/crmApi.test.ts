@@ -152,7 +152,7 @@ describe('crmApi', () => {
     const config = { pointsPerDollar: 2 };
     crmApi.updateLoyaltyConfig(config);
     expect(safe.put).toHaveBeenCalledWith('/crm/loyalty/config', {
-      isEnabled: false,
+      isEnabled: true,
       pointsPerCurrencyUnit: 2,
       currencyPerPoint: 0.01,
       bronzeMin: 0,

@@ -62,7 +62,6 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
           });
           onClose();
         },
-        onError: () => toast.error('Failed to create lead'),
       }
     );
   };

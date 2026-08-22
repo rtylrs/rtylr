@@ -245,11 +245,7 @@ const ImportCustomers: React.FC = () => {
       { customers: payload, dedupe },
       {
         onSuccess: () => {
-          toast.success(`Imported ${payload.length} customers`);
           navigate({ to: '/customers' });
-        },
-        onError: () => {
-          toast.error('Failed to import customers');
         },
       }
     );

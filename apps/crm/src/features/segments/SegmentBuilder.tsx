@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
-import { toast } from 'sonner';
 import { Plus, Save } from 'lucide-react';
 import { useCreateSegment } from '../../shared/hooks/queries/useSegments';
 import { Breadcrumbs, Button, Card, Input, Textarea, PageHeader } from '../../shared/components/ui';
@@ -46,11 +45,7 @@ const SegmentBuilder: React.FC = () => {
       },
       {
         onSuccess: () => {
-          toast.success('Segment created');
           navigate({ to: '/segments' });
-        },
-        onError: () => {
-          toast.error('Failed to create segment');
         },
       }
     );

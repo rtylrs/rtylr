@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useSearch } from '@tanstack/react-router';
-import { toast } from 'sonner';
 import { Save, Plus, Zap, Mail, MessageSquare, Gift } from 'lucide-react';
 import {
   useCreateAutomation,
@@ -88,11 +87,7 @@ const AutomationBuilder: React.FC = () => {
     };
     const callbacks = {
       onSuccess: () => {
-        toast.success('Automation saved');
         navigate({ to: '/automations' });
-      },
-      onError: () => {
-        toast.error('Failed to save automation');
       },
     };
     if (isEditing) {

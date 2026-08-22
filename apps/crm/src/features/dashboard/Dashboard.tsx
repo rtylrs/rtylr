@@ -672,7 +672,7 @@ const Dashboard: React.FC = () => {
                   const color = tierColor[c.tier] ?? '#94a3b8';
                   return (
                     <div
-                      key={c.name}
+                      key={[c.name, i].join('-')}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -730,7 +730,7 @@ const Dashboard: React.FC = () => {
                             color,
                           }}
                         >
-                          {c.tier}
+                          {c.tier || 'Unranked'}
                         </span>
                       </div>
                     </div>

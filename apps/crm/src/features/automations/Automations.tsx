@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
-import { toast } from 'sonner';
 import { Zap, Plus, Play, Pause, Trash2, Cake, UserPlus, RotateCcw, Star } from 'lucide-react';
 import {
   useListAutomations,
@@ -28,27 +27,16 @@ const Automations: React.FC = () => {
   const handleToggleStatus = (id: number, current: string): void => {
     if (updateAutomation.isPending) return;
     const next = current === 'active' ? 'paused' : 'active';
-    updateAutomation.mutate(
-      { id, data: { status: next as 'active' | 'paused', isActive: next === 'active' } },
-      {
-        onSuccess: () =>
-          toast.success(next === 'active' ? 'Automation resumed' : 'Automation paused'),
-        onError: () => toast.error('Failed to update automation'),
-      }
-    );
+    updateAutomation.mutate({
+      id,
+      data: { status: next as 'active' | 'paused', isActive: next === 'active' },
+    });
   };
 
   const handleDelete = (id: number): void => {
     if (removeAutomation.isPending) return;
     removeAutomation.mutate(id, {
-      onSuccess: () => {
-        toast.success('Automation deleted');
-        setConfirmDeleteId(null);
-      },
-      onError: () => {
-        toast.error('Failed to delete automation');
-        setConfirmDeleteId(null);
-      },
+      onSuccess: () => setConfirmDeleteId(null),
     });
   };
 

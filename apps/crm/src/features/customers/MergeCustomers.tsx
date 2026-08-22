@@ -49,11 +49,7 @@ const MergeCustomers: React.FC = () => {
       { primaryId, secondaryId },
       {
         onSuccess: () => {
-          toast.success('Customers merged');
           navigate({ to: '/customers' });
-        },
-        onError: () => {
-          toast.error('Failed to merge customers');
         },
       }
     );

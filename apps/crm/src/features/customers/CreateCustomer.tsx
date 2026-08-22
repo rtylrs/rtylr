@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
-import { toast } from 'sonner';
 import { Check, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useCreateCustomer } from '../../shared/hooks/queries/useCustomers';
 import { useCrmSettings } from '../../shared/hooks/queries/useCrmSettings';
@@ -84,11 +83,7 @@ const CreateCustomer: React.FC = () => {
       },
       {
         onSuccess: () => {
-          toast.success('Customer created');
           navigate({ to: '/customers' });
-        },
-        onError: () => {
-          toast.error('Failed to create customer');
         },
       }
     );

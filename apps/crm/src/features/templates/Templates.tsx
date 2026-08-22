@@ -35,14 +35,14 @@ const Templates: React.FC = () => {
         subject: newChannel === 'email' ? newSubject.trim() : undefined,
         body: newBody.trim(),
       });
-      toast.success('Template created');
       setShowCreate(false);
       setNewName('');
       setNewSubject('');
       setNewBody('');
       setNewCategory('general');
     } catch {
-      toast.error('Failed to create template');
+      // The mutation hook reports the localized error.
+      return;
     }
   };
 

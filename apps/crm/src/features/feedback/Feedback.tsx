@@ -7,6 +7,7 @@ import { PageHeader, Card, EmptyState, SkeletonList } from '../../shared/compone
 const Feedback: React.FC = () => {
   const { data: fetched, isLoading, isError } = useListFeedback();
   const feedback = fetched ?? [];
+  const metricsUnavailable = isLoading || isError;
 
   const npsResponses = feedback.filter((f) => f.type === 'nps');
   const reviews = feedback.filter((f) => f.type === 'review');
@@ -22,7 +23,16 @@ const Feedback: React.FC = () => {
     <>
       <HelmetContainer title="Feedback · rtylr" />
       <div style={{ maxWidth: '1100px' }}>
-        <PageHeader title="Feedback and NPS" subtitle={`${feedback.length} responses`} />
+        <PageHeader
+          title="Feedback and NPS"
+          subtitle={
+            isLoading
+              ? 'Loading responses…'
+              : isError
+                ? 'Feedback is unavailable'
+                : feedback.length + ' responses'
+          }
+        />
 
         <div
           style={{
@@ -52,7 +62,7 @@ const Feedback: React.FC = () => {
                 marginTop: '4px',
               }}
             >
-              {nps}
+              {metricsUnavailable ? '—' : npsResponses.length > 0 ? nps : '—'}
             </div>
           </Card>
           <Card>
@@ -69,7 +79,7 @@ const Feedback: React.FC = () => {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
               <span style={{ fontSize: '28px', fontWeight: 700, color: 'var(--hub-text)' }}>
-                {avgRating.toFixed(1)}
+                {metricsUnavailable ? '—' : reviews.length > 0 ? avgRating.toFixed(1) : '—'}
               </span>
               <Star size={18} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
             </div>
@@ -87,10 +97,14 @@ const Feedback: React.FC = () => {
               Promoters
             </div>
             <div style={{ fontSize: '28px', fontWeight: 700, color: '#10b981', marginTop: '4px' }}>
-              {promoters}
+              {metricsUnavailable ? '—' : promoters}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-              {Math.round((promoters / npsTotal) * 100)}% of nps responses
+              {metricsUnavailable
+                ? 'Loading…'
+                : npsResponses.length > 0
+                  ? Math.round((promoters / npsTotal) * 100) + '% of NPS responses'
+                  : 'No NPS responses'}
             </div>
           </Card>
           <Card>
@@ -106,10 +120,14 @@ const Feedback: React.FC = () => {
               Detractors
             </div>
             <div style={{ fontSize: '28px', fontWeight: 700, color: '#ef4444', marginTop: '4px' }}>
-              {detractors}
+              {metricsUnavailable ? '—' : detractors}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-              {Math.round((detractors / npsTotal) * 100)}% of nps responses
+              {metricsUnavailable
+                ? 'Loading…'
+                : npsResponses.length > 0
+                  ? Math.round((detractors / npsTotal) * 100) + '% of NPS responses'
+                  : 'No NPS responses'}
             </div>
           </Card>
         </div>
@@ -126,7 +144,7 @@ const Feedback: React.FC = () => {
                 letterSpacing: '0.05em',
               }}
             >
-              Recent reviews
+              Recent feedback
             </h4>
           </div>
           {isLoading ? (
@@ -215,7 +233,7 @@ const Feedback: React.FC = () => {
                     {f.comment}
                   </p>
                   <div style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginTop: '4px' }}>
-                    via {f.source}
+                    via {f.source || 'unknown source'}
                   </div>
                 </div>
               ))}

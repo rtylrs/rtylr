@@ -23,6 +23,21 @@ describe('topCustomerSchema', () => {
     expect(result.name).toBe('Alice');
     expect(result.tier).toBe('Gold');
   });
+
+  it('normalizes backend tier, spend, and missing visit fields', () => {
+    const result = topCustomerSchema.parse({
+      id: '42',
+      firstName: 'Alice',
+      lastName: 'Smith',
+      totalSpent: 1200.5,
+      loyaltyTier: 'gold',
+    });
+
+    expect(result.id).toBe('42');
+    expect(result.spend).toBe('$1,200.5');
+    expect(result.tier).toBe('Gold');
+    expect(result.visits).toBeUndefined();
+  });
 });
 
 describe('recentCampaignSchema', () => {

@@ -42,7 +42,6 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       { data: { ...form, active: true } },
       {
         onSuccess: () => onClose(),
-        onError: () => toast.error('Failed to save reward'),
       }
     );
   };

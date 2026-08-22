@@ -36,4 +36,8 @@ describe('loyalty mutation wire mappings', () => {
       pointsExpiryDays: 365,
     });
   });
+
+  it('keeps the loyalty program enabled for a partial update by default', () => {
+    expect(toUpdateLoyaltyConfigRequest({ pointsPerDollar: 2 }).isEnabled).toBe(true);
+  });
 });

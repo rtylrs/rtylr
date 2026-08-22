@@ -63,10 +63,7 @@ const GeneralTab: React.FC = () => {
 
   const handleSave = (): void => {
     if (update.isPending || settingsUnavailable) return;
-    update.mutate(form, {
-      onSuccess: () => toast.success('Settings saved'),
-      onError: () => toast.error('Failed to save settings'),
-    });
+    update.mutate(form);
   };
 
   return (
