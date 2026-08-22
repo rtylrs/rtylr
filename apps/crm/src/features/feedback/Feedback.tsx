@@ -3,6 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { MessageSquare, Star } from 'lucide-react';
 import { useListFeedback } from '../../shared/hooks/queries/useFeedback';
 import { PageHeader, Card, EmptyState, SkeletonList } from '../../shared/components/ui';
+import { formatDate } from '../../shared/lib/formatters';
 
 const Feedback: React.FC = () => {
   const { data: fetched, isLoading, isError } = useListFeedback();
@@ -215,7 +216,7 @@ const Feedback: React.FC = () => {
                     <span
                       style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginLeft: 'auto' }}
                     >
-                      {f.createdAt}
+                      {formatDate(f.createdAt) || 'Unknown date'}
                     </span>
                   </div>
                   <p

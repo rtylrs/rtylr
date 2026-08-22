@@ -305,7 +305,7 @@ function CampaignCard({
       {/* Footer */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
-          Updated {campaign.updatedAt}
+          Updated {campaign.updatedAt || 'Unknown date'}
         </span>
         <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
           {onClick && (

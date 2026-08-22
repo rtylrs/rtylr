@@ -126,7 +126,7 @@ const LoyaltyMembers: React.FC = () => {
                       {m.name}
                     </div>
                     <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                      {m.visits} visits • last active {m.lastActive}
+                      {m.visits} visits • last active {m.lastActive || 'Never'}
                     </div>
                   </div>
                   <TierBadge tier={getCustomerTier(m.points, m.tier)} />
