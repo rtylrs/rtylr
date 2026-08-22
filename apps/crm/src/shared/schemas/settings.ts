@@ -9,3 +9,14 @@ export const settingsSchema = z.object({
 });
 
 export type Settings = z.infer<typeof settingsSchema>;
+
+export function normalizeSettings(value: Partial<Settings>): Settings {
+  const parsed = settingsSchema.parse(value);
+  return {
+    ...parsed,
+    timezone: parsed.timezone.trim(),
+    fromEmail: parsed.fromEmail.trim(),
+    fromName: parsed.fromName.trim(),
+    smsSenderId: parsed.smsSenderId.trim(),
+  };
+}

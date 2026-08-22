@@ -9,7 +9,7 @@ import {
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { SettingsServiceClient } from '@voxire/voxie/crm/settings/v1/client';
-import { settingsSchema } from '../../schemas/settings';
+import { normalizeSettings } from '../../schemas/settings';
 import type { Settings } from '../../schemas/settings';
 
 const settingsClient = createOneKitClient(SettingsServiceClient, 'crm');
@@ -19,7 +19,7 @@ export const useCrmSettings = (): UseQueryResult<Settings> =>
     queryKey: ['crm-settings'],
     queryFn: async (): Promise<Settings> => {
       const res = await settingsClient.getSettings({});
-      return settingsSchema.parse(res.settings ?? {});
+      return normalizeSettings(res.settings ?? {});
     },
   });
 
@@ -29,7 +29,7 @@ export const useUpdateCrmSettings = (): UseMutationResult<Settings, unknown, Par
   return useMutation<Settings, unknown, Partial<Settings>>({
     mutationFn: async (data: Partial<Settings>): Promise<Settings> => {
       const current = qc.getQueryData<Settings>(['crm-settings']);
-      const merged = settingsSchema.parse({ ...current, ...data });
+      const merged = normalizeSettings({ ...current, ...data });
       // UpdateSettingsResponse only returns a confirmation message, not the
       // updated record, so merge the confirmed request into the local cache.
       await settingsClient.updateSettings({
