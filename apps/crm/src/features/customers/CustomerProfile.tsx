@@ -332,7 +332,7 @@ const CustomerProfile: React.FC = () => {
                 { label: 'Total Spent', value: `$${customer.totalSpent.toLocaleString()}` },
                 { label: 'Visits', value: customer.visits },
                 { label: 'Loyalty Points', value: customer.loyaltyPoints.toLocaleString() },
-                { label: 'Last Visit', value: customer.lastVisit },
+                { label: 'Last Visit', value: customer.lastVisit || 'Never' },
               ].map((s) => (
                 <Card key={s.label}>
                   <div

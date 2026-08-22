@@ -902,7 +902,9 @@ export const CustomerQuickView: React.FC<{ customer: Customer }> = ({ customer }
           >
             Last seen
           </div>
-          <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>{customer.lastVisit}</div>
+          <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>
+            {customer.lastVisit || 'Never'}
+          </div>
         </div>
       </div>
       {next !== null && (

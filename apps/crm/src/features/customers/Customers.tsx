@@ -650,7 +650,7 @@ const Customers: React.FC = () => {
                                   color: 'var(--hub-text-muted)',
                                 }}
                               >
-                                {c.lastVisit}
+                                {c.lastVisit || 'Never'}
                               </td>
                               <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                                 {isExpanded ? (

@@ -92,6 +92,11 @@ function splitName(
   return { firstName: parts.shift() ?? '', lastName: lastName || parts.join(' ') };
 }
 
+function trimOptionalString(value: unknown): string | undefined {
+  const trimmed = String(value ?? '').trim();
+  return trimmed || undefined;
+}
+
 export function toCustomerWireInput(
   input: CustomerInput,
   preferCombinedName = false
@@ -100,16 +105,18 @@ export function toCustomerWireInput(
   return {
     firstName,
     lastName,
-    email: String(input.email ?? ''),
-    phone: String(input.phone ?? ''),
+    email: String(input.email ?? '').trim(),
+    phone: String(input.phone ?? '').trim(),
     dateOfBirth: String(input.dateOfBirth ?? input.birthday ?? '').trim() || undefined,
-    gender: input.gender,
-    address: input.address,
-    city: input.city,
-    country: input.country,
-    loyaltyTier: input.loyaltyTier,
-    tags: Array.isArray(input.tags) ? input.tags : [],
-    notes: String(input.notes ?? ''),
+    gender: trimOptionalString(input.gender),
+    address: trimOptionalString(input.address),
+    city: trimOptionalString(input.city),
+    country: trimOptionalString(input.country),
+    loyaltyTier: trimOptionalString(input.loyaltyTier),
+    tags: Array.isArray(input.tags)
+      ? input.tags.map((tag) => String(tag).trim()).filter(Boolean)
+      : [],
+    notes: String(input.notes ?? '').trim(),
     isActive: input.isActive,
     consent: input.consent,
   };

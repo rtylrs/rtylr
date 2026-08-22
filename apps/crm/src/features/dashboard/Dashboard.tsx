@@ -635,7 +635,7 @@ const Dashboard: React.FC = () => {
                       {c.name}
                     </div>
                     <div style={{ fontSize: '10px', color: 'var(--hub-text-muted)' }}>
-                      Last: {c.lastVisit}
+                      Last: {c.lastVisit || 'Never'}
                     </div>
                   </div>
                 </div>

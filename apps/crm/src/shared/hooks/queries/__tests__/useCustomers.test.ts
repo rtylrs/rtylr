@@ -93,6 +93,39 @@ describe('useCustomers & customer helpers', () => {
     ).toMatchObject({ firstName: 'Ada', lastName: 'Byron Lovelace' });
   });
 
+  it('trims customer text fields before sending them to the API', () => {
+    expect(
+      toCustomerWireInput({
+        firstName: ' Ada ',
+        lastName: ' Lovelace ',
+        email: ' ada@example.com ',
+        phone: ' +1 555 0100 ',
+        gender: ' female ',
+        address: ' 1 Main St ',
+        city: ' London ',
+        country: ' GB ',
+        loyaltyTier: ' Gold ',
+        tags: [' vip ', '  ', 'newsletter'],
+        notes: ' Important note ',
+      })
+    ).toEqual({
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      email: 'ada@example.com',
+      phone: '+1 555 0100',
+      dateOfBirth: undefined,
+      gender: 'female',
+      address: '1 Main St',
+      city: 'London',
+      country: 'GB',
+      loyaltyTier: 'Gold',
+      tags: ['vip', 'newsletter'],
+      notes: 'Important note',
+      isActive: undefined,
+      consent: undefined,
+    });
+  });
+
   it('omits update-only fields from create requests', () => {
     expect(
       toCustomerCreateWireInput({
