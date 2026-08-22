@@ -251,7 +251,7 @@ func (s *Service) ListWorkDaysForWorkspace(ctx context.Context, callerID, worksp
 		userIDByEmployeeID[employeeID] = userID
 	}
 
-	days, total, err := s.repo.ListWorkDaysByEmployeeIDs(ctx, ownerID, businessID, employeeIDs, from, to, limit, offset)
+	days, total, err := s.repo.ListWorkDaysByEmployeeIDs(ctx, ownerID, businessID, employeeIDs, from, to, int32(limit), offset)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -259,4 +259,62 @@ func (s *Service) ListWorkDaysForWorkspace(ctx context.Context, callerID, worksp
 		days[i].UserID = userIDByEmployeeID[days[i].EmployeeID]
 	}
 	return days, total, nil
+}
+
+// ListTeamWorkDays is the v2 replacement for ListWorkDaysForWorkspace.
+// Instead of scoping by workspace membership, it uses the business team roster
+// resolved through hr_employees. Visibility is governed by the business's
+// configured policy; until the config surface lands, the default policy is
+// hub admin+ sees everyone, project admins see people sharing their projects.
+func (s *Service) ListTeamWorkDays(ctx context.Context, callerID, businessID int64, from, to string, limit, offset int64) ([]domain.WorkDay, int64, error) {
+	// Default policy gate: hub owner/admin/operator always pass.
+	if s.hubProfileBypasses(ctx, callerID, businessID) {
+		return s.listAllBusinessWorkDays(ctx, businessID, from, to, limit, offset)
+	}
+	// Project-admin visibility: callers who administer at least one project
+	// see the people on those projects. This is a simplified default; the
+	// per-business config policy will refine it when the settings panel lands.
+	return s.listVisibleProjectMemberDays(ctx, callerID, businessID, from, to, limit, offset)
+}
+
+func (s *Service) listAllBusinessWorkDays(ctx context.Context, businessID int64, from, to string, limit, offset int64) ([]domain.WorkDay, int64, error) {
+	employeeIDs, err := s.repo.BusinessEmployeeIDs(ctx, businessID)
+	if err != nil {
+		return nil, 0, err
+	}
+	return s.repo.ListWorkDaysByEmployeeIDs(ctx, businessID, businessID, employeeIDs, from, to, int32(limit), offset)
+}
+
+func (s *Service) listVisibleProjectMemberDays(ctx context.Context, callerID, businessID int64, from, to string, limit, offset int64) ([]domain.WorkDay, int64, error) {
+	// Find projects this admin oversees, then collect their members' employee ids.
+	projects, _, err := s.repo.GetProjectsByCreatorOrMembership(ctx, businessID, callerID, 500, 0)
+	if err != nil {
+		return nil, 0, err
+	}
+	userIDs := make([]int64, 0)
+	seen := make(map[int64]bool)
+	for _, p := range projects {
+		members, _, mErr := s.repo.ListProjectMembers(ctx, p.ID, 500, 0)
+		if mErr != nil {
+			continue
+		}
+		for _, m := range members {
+			if !seen[m.UserID] {
+				seen[m.UserID] = true
+				userIDs = append(userIDs, m.UserID)
+			}
+		}
+	}
+	if len(userIDs) == 0 {
+		return []domain.WorkDay{}, 0, nil
+	}
+	byUserID, err := s.repo.EmployeeIDsByUserIDs(ctx, businessID, businessID, userIDs)
+	if err != nil {
+		return nil, 0, err
+	}
+	employeeIDs := make([]int64, 0, len(byUserID))
+	for _, eid := range byUserID {
+		employeeIDs = append(employeeIDs, eid)
+	}
+	return s.repo.ListWorkDaysByEmployeeIDs(ctx, businessID, businessID, employeeIDs, from, to, int32(limit), offset)
 }

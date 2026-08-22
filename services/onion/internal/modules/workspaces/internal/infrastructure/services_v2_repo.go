@@ -164,3 +164,28 @@ func filtersJSON(m map[string]interface{}) json.RawMessage {
 	b, _ := json.Marshal(m)
 	return b
 }
+
+// BusinessEmployeeIDs returns every HR employee id for a business.
+func (r *Repository) BusinessEmployeeIDs(ctx context.Context, businessID int64) ([]int64, error) {
+	rows, err := r.pool.QueryContext(ctx,
+		"SELECT e.id FROM hr_employees e WHERE e.business_id = ? AND e.status = 'active'", businessID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var ids []int64
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, rows.Err()
+}
+
+// GetProjectsByCreatorOrMembership lists projects where the caller is the
+// creator or a member (the curation rule from the v2 project listing).
+func (r *Repository) GetProjectsByCreatorOrMembership(ctx context.Context, businessID, callerID int64, limit, offset int64) ([]domain.Project, int64, error) {
+	return r.ListProjectsV2(ctx, businessID, callerID, false, "", "", "", limit, offset)
+}
