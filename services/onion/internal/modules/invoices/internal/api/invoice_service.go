@@ -36,7 +36,18 @@ func (a *InvoicesAPI) ListInvoices(ctx context.Context, req *financeinvoicesv1.L
 		pageSize = 50
 	}
 
-	invoices, hasMore, err := a.Service.ListInvoices(ctx, businessID, req.GetStatus(), req.GetSearch(), req.GetDateFrom(), req.GetDateTo(), page, pageSize)
+	var (
+		invoices []domain.Invoice
+		hasMore  bool
+		err      error
+	)
+	// CRM->FIN-02's read surface: per-customer revenue starts here. The
+	// business+customer index serves this shape (schemas zz migration).
+	if req.GetCustomerId() > 0 {
+		invoices, hasMore, err = a.Service.ListInvoicesByCustomer(ctx, businessID, req.GetCustomerId(), page, pageSize)
+	} else {
+		invoices, hasMore, err = a.Service.ListInvoices(ctx, businessID, req.GetStatus(), req.GetSearch(), req.GetDateFrom(), req.GetDateTo(), page, pageSize)
+	}
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list invoices")
 	}
