@@ -160,12 +160,15 @@ func (s *Service) CreateInvoice(ctx context.Context, businessID int64, input dom
 
 	// Calculate line-item totals
 	var subtotal float64
+	var itemTaxAmount float64
 
 	items := make([]domain.InvoiceItem, 0, len(input.Items))
 
 	for i, itemInput := range input.Items {
 		lineTotal := itemInput.CalculateTotal()
-		subtotal += lineTotal
+		lineComponents := itemInput.CalculateComponents()
+		subtotal += lineComponents.Base
+		itemTaxAmount += lineComponents.Tax
 
 		unit := itemInput.Unit
 		if unit == "" {
@@ -201,8 +204,9 @@ func (s *Service) CreateInvoice(ctx context.Context, businessID int64, input dom
 
 	afterDiscount := subtotal - discountAmount
 
-	// Header-level tax is applied on top of the item totals (which may already include per-item tax)
-	taxAmount := afterDiscount * (input.TaxRate / 100)
+	// Header-level tax applies once to the discounted pre-tax base; item tax
+	// is carried separately so it is never taxed or discounted twice.
+	taxAmount := afterDiscount*(input.TaxRate/100) + itemTaxAmount
 	total := afterDiscount + taxAmount
 
 	currency := input.Currency
@@ -274,12 +278,15 @@ func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64
 	}
 
 	var subtotal float64
+	var itemTaxAmount float64
 
 	items := make([]domain.InvoiceItem, 0, len(input.Items))
 
 	for i, itemInput := range input.Items {
 		lineTotal := itemInput.CalculateTotal()
-		subtotal += lineTotal
+		lineComponents := itemInput.CalculateComponents()
+		subtotal += lineComponents.Base
+		itemTaxAmount += lineComponents.Tax
 
 		unit := itemInput.Unit
 		if unit == "" {
@@ -314,7 +321,7 @@ func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64
 	}
 
 	afterDiscount := subtotal - discountAmount
-	taxAmount := afterDiscount * (input.TaxRate / 100)
+	taxAmount := afterDiscount*(input.TaxRate/100) + itemTaxAmount
 	total := afterDiscount + taxAmount
 
 	currency := input.Currency
