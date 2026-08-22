@@ -27,6 +27,7 @@ import {
 import { ConfirmModal } from '../../shared/components/ui';
 import { activateOnKeyboard } from '../../shared/lib/keyboard';
 import { formatDate } from '../../shared/lib/formatters';
+import { canEditCampaign, hasVerifiedCampaignAudience } from './campaignActions';
 
 const ACCENT = '#3b82f6';
 
@@ -477,7 +478,7 @@ const Campaigns: React.FC = () => {
       );
       return;
     }
-    if ((campaign?.audience ?? 0) <= 0) {
+    if (!campaign || !hasVerifiedCampaignAudience(campaign, audienceBySegment)) {
       toast.error('No eligible recipients for this campaign');
       return;
     }
@@ -490,7 +491,7 @@ const Campaigns: React.FC = () => {
   };
 
   const handleEdit = (c: Campaign): void => {
-    if (c.status === 'Completed' || c.status === 'Sent' || c.status === 'Cancelled') {
+    if (!canEditCampaign(c)) {
       navigate({ to: `/campaigns/${c.id}` });
       return;
     }
