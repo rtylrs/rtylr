@@ -19,7 +19,7 @@ import {
   useDeleteSegment,
   useCreateSegment,
 } from '../../shared/hooks/queries/useSegments';
-import { Card, ConfirmModal, EmptyState, SkeletonList } from '../../shared/components/ui';
+import { Button, Card, ConfirmModal, EmptyState, SkeletonList } from '../../shared/components/ui';
 import { useDialogFocus } from '../../shared/lib/keyboard';
 
 const ACCENT = '#3b82f6';
@@ -590,8 +590,16 @@ const Segments: React.FC = () => {
       <HelmetContainer title="Segments · rtylr" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+          }}
+        >
+          <div style={{ minWidth: 0 }}>
             <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
               Segments
             </h2>
@@ -634,6 +642,20 @@ const Segments: React.FC = () => {
               icon={AlertTriangle}
               title="Unable to load segments"
               description="Refresh and try again."
+            />
+          </Card>
+        ) : segments.length === 0 ? (
+          <Card>
+            <EmptyState
+              icon={Filter}
+              title="No segments yet"
+              description="Create a segment to target the right customers with personalized campaigns."
+              action={
+                <Button variant="primary" onClick={() => setBuilderOpen(true)}>
+                  <Plus size={13} />
+                  Create segment
+                </Button>
+              }
             />
           </Card>
         ) : (

@@ -128,6 +128,12 @@ const Templates: React.FC = () => {
               icon={FileText}
               title="No templates"
               description="Create one to get started."
+              action={
+                <Button variant="primary" onClick={() => setShowCreate(true)}>
+                  <Plus size={13} />
+                  New template
+                </Button>
+              }
             />
           </Card>
         ) : (

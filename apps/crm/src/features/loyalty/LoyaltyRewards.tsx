@@ -240,6 +240,12 @@ const LoyaltyRewards: React.FC = () => {
               icon={Gift}
               title="No rewards yet"
               description="Add your first reward to the catalog."
+              action={
+                <Button variant="primary" onClick={() => setShowAdd(true)}>
+                  <Plus size={13} />
+                  Add reward
+                </Button>
+              }
             />
           </Card>
         ) : (
