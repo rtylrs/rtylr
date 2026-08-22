@@ -335,7 +335,9 @@ describe('Appearance panel audition', () => {
     fireEvent.pointerEnter(
       screen.getByRole('button', { name: 'flow.settings.appearance.density.roomy' })
     );
-    expect(previewToken('--flow-u')).toBe('5px');
+    // A unitless multiplier, not a length: --spacing keeps its rem base so
+    // spacing still follows a browser font-size setting.
+    expect(previewToken('--flow-u')).toBe('1.25');
     for (const spy of everySetter()) expect(spy).not.toHaveBeenCalled();
   });
 
@@ -363,7 +365,7 @@ describe('Appearance panel text size gate', () => {
     expect(setters.setTextSize).not.toHaveBeenCalled();
     // The audition is wired off too, so the pane never previews a value the
     // user has no way of selecting.
-    expect(previewToken('--flow-fs')).toBe('14px');
+    expect(previewToken('--flow-fs')).toBe('1');
   });
 
   it('still shows the concept: all three steps are present', () => {
