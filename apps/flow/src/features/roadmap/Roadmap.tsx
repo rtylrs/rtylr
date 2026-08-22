@@ -42,7 +42,8 @@ const Roadmap: React.FC = () => {
             transition={{ duration: 0.18, delay: i * 0.04 }}
           >
             <Link
-              to={`/w/${p.workspaceId}/p/${p.id}/overview` as string}
+              to="/p/$projectId/overview"
+              params={{ projectId: p.id }}
               className="block rounded-xl p-5"
               style={{
                 background: 'var(--flow-card)',

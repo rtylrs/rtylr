@@ -201,7 +201,7 @@ export const CommandBar: React.FC = () => {
       id: `proj-${p.id}`,
       label: p.name,
       icon: FolderKanban,
-      action: () => navigate({ to: `/w/${p.workspaceId}/p/${p.id}` as string }),
+      action: () => navigate({ to: '/p/$projectId', params: { projectId: p.id } }),
       group: 'project',
     }));
     return [...actionItems, ...navItems, ...projectItems, ...taskItems];
