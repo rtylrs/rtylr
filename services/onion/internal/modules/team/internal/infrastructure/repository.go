@@ -119,6 +119,35 @@ func (r *Repository) DeactivateUser(ctx context.Context, ownerID, userID int64) 
 	return nil
 }
 
+// RevokeBusinessUserPermissions deactivates one user's permission rows in one
+// business when hr_core marks that user's employee record terminated. The
+// employment decision stays in hr_employees; this module only owns the write.
+func (r *Repository) RevokeBusinessUserPermissions(ctx context.Context, businessID, userID int64) (int64, error) {
+	rows, err := r.queries.RevokeBusinessUserPermissions(ctx, sqlc.RevokeBusinessUserPermissionsParams{
+		BusinessID: nullBusinessID(businessID),
+		UserID:     userID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to revoke permissions for terminated employee",
+			logger.Any("business_id", businessID), logger.Any("user_id", userID), logger.Error(err))
+		return 0, err
+	}
+	return rows, nil
+}
+
+// ReconcileTerminatedEmployeeAccess sweeps every business and deactivates any
+// still-active permission row whose user is a terminated employee of that
+// same business. Idempotent; the daily job runs it so a missed synchronous
+// revoke is corrected within a day.
+func (r *Repository) ReconcileTerminatedEmployeeAccess(ctx context.Context) (int64, error) {
+	rows, err := r.queries.ReconcileTerminatedEmployeeAccess(ctx)
+	if err != nil {
+		logger.Ctx(ctx).Error("terminated-employee access reconciliation failed", logger.Error(err))
+		return 0, err
+	}
+	return rows, nil
+}
+
 // ─── Users ────────────────────────────────────────────────────────────────────
 
 func (r *Repository) GetUserByEmail(ctx context.Context, email string) (int64, string, string, error) {
@@ -905,3 +934,8 @@ func (r *Repository) BulkCreateHubNotification(ctx context.Context, ownerID int6
 	}
 	return nil
 }
+
+// nullBusinessID wraps the join-side business id so sqlc's named parameter
+// (shared by both placeholders in RevokeBusinessUserPermissions) scans as
+// NOT NULL int64.
+func nullBusinessID(v int64) sql.NullInt64 { return sql.NullInt64{Int64: v, Valid: true} }
