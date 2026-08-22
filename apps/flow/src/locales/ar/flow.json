@@ -731,5 +731,18 @@
   },
   "bulkEdit": {
     "clearSelectionLabel": "إلغاء التحديد"
+  },
+  "allProjects": {
+    "title": "جميع المشاريع",
+    "search": "البحث في المشاريع…",
+    "filterStatus": "تصفية حسب الحالة",
+    "filterVisibility": "تصفية حسب الرؤية",
+    "allStatuses": "كل الحالات",
+    "allVisibilities": "كل أنواع الرؤية",
+    "noResults": "لا توجد مشاريع تطابق عوامل التصفية.",
+    "tryClearing": "حاول مسح البحث أو عوامل التصفية.",
+    "emptyTitle": "لا توجد مشاريع بعد",
+    "emptyDescription": "أنشئ مشروعك الأول للبدء.",
+    "createFirst": "إنشاء مشروع"
   }
 }
