@@ -3,6 +3,7 @@ package emailqueue
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"sync/atomic"
 	"time"
 
@@ -149,9 +150,9 @@ func (p *Pool) processOne(ctx context.Context) bool {
 
 	job, err := p.q.GetClaimedJob(ctx, claimID)
 	if err != nil {
+		p.releaseClaim(ctx, claimID)
 		return false
 	}
-
 	params := email.SendParams{
 		To:      []string{job.ToEmail},
 		Subject: job.Subject,
@@ -170,6 +171,29 @@ func (p *Pool) processOne(ctx context.Context) bool {
 	_, sendErr := email.Send(ctx, params)
 
 	if sendErr != nil {
+		var rateLimitErr *email.RateLimitError
+		if errors.As(sendErr, &rateLimitErr) {
+			delay := int(rateLimitErr.RetryAfter / time.Second)
+			if delay < 1 {
+				delay = 1
+			}
+			if err := p.q.RescheduleJob(ctx, sqlc.RescheduleJobParams{
+				Status:    sqlc.EmailJobsStatusPending,
+				Attempts:  job.Attempts,
+				LastError: sql.NullString{String: sendErr.Error(), Valid: true},
+				JobID:     sql.NullString{},
+				DATEADD:   delay,
+				ID:        job.ID,
+			}); err != nil {
+				logger.Ctx(ctx).Error("failed to reschedule rate-limited email job",
+					logger.Any("job_id", job.ID), logger.Error(err))
+			}
+			return true
+		}
+		if errors.Is(sendErr, context.Canceled) || errors.Is(sendErr, context.DeadlineExceeded) {
+			p.releaseClaim(ctx, claimID)
+			return false
+		}
 		newAttempts := int(job.Attempts) + 1
 		newStatus := sqlc.EmailJobsStatusPending // NULL job_id below makes it retryable
 		if newAttempts >= int(job.MaxAttempts) {
@@ -201,6 +225,14 @@ func (p *Pool) processOne(ctx context.Context) bool {
 	}
 
 	return true
+}
+
+func (p *Pool) releaseClaim(ctx context.Context, claimID sql.NullString) {
+	releaseCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if _, err := p.q.ReleaseClaim(releaseCtx, claimID); err != nil {
+		logger.Ctx(releaseCtx).Error("failed to release email job claim", logger.Error(err))
+	}
 }
 
 func (p *Pool) recoverStuck(ctx context.Context) {

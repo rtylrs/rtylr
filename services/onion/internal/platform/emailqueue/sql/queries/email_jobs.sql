@@ -10,12 +10,18 @@ WHERE status = 'pending' AND job_id IS NULL AND scheduled_at <= NOW();
 UPDATE email_jobs
 SET job_id = ?, status = 'processing'
 WHERE status = 'pending' AND job_id IS NULL AND scheduled_at <= NOW()
-ORDER BY priority DESC, scheduled_at ASC
+ORDER BY (priority + LEAST(TIMESTAMPDIFF(MINUTE, created_at, NOW()) DIV 60, 10)) DESC,
+         scheduled_at ASC
 LIMIT 1;
 
 -- name: GetClaimedJob :one
 SELECT id, to_email, subject, html, text_body, from_email, reply_to, attempts, max_attempts
 FROM email_jobs WHERE job_id = ?;
+
+-- name: ReleaseClaim :execresult
+UPDATE email_jobs
+SET status = 'pending', job_id = NULL, scheduled_at = NOW()
+WHERE status = 'processing' AND job_id = ?;
 
 -- name: MarkJobSent :exec
 UPDATE email_jobs SET status = 'sent', sent_at = NOW(), attempts = ?, job_id = NULL WHERE id = ?;
@@ -28,5 +34,8 @@ WHERE id = ?;
 
 -- name: RecoverStuckJobs :execresult
 UPDATE email_jobs
-SET status = 'pending', job_id = NULL
+SET status = CASE WHEN attempts + 1 >= max_attempts THEN 'failed' ELSE 'pending' END,
+    attempts = attempts + 1,
+    job_id = NULL,
+    last_error = COALESCE(last_error, 'worker claim expired during delivery')
 WHERE status = 'processing' AND updated_at < DATE_SUB(NOW(), INTERVAL 5 MINUTE);
