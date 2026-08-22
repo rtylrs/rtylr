@@ -19,9 +19,6 @@ import { useTranslation } from 'react-i18next';
 // The preview-route fallback is eager so a disabled deep link can explain its state
 // without waiting for a lazy route component to load.
 
-const WorkspaceDashboard = React.lazy(
-  () => import('./features/workspace-dashboard/WorkspaceDashboard')
-);
 const ProjectBoard = React.lazy(() => import('./features/projects/ProjectBoard'));
 const ProjectList = React.lazy(() => import('./features/projects/ProjectList'));
 const ProjectOverview = React.lazy(() => import('./features/projects/ProjectOverview'));
@@ -51,7 +48,6 @@ const Triage = React.lazy(() => import('./features/triage/Triage'));
 const FocusToday = React.lazy(() => import('./features/focus-today/FocusToday'));
 const MyIssues = React.lazy(() => import('./features/tasks/MyIssues'));
 const Archive = React.lazy(() => import('./features/archive/Archive'));
-const WorkspaceManager = React.lazy(() => import('./features/workspace-manager/WorkspaceManager'));
 
 const RouteLoading = (): React.JSX.Element => {
   const { t } = useTranslation();
@@ -111,18 +107,6 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: () => <Navigate to="/my-issues" replace />,
-});
-
-const workspaceDashboardRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/w/$workspaceId',
-  component: () => withLayout(<WorkspaceDashboard />),
-});
-
-const workspaceMembersRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/w/$workspaceId/members',
-  component: () => withLayout(<WorkspaceManager />),
 });
 
 const projectBoardRoute = createRoute({
@@ -313,14 +297,14 @@ const catchAllRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '*',
   component: () => (
-    <Navigate to="/w/$workspaceId" params={{ workspaceId: PERSONAL_WORKSPACE_ID }} replace />
+    <Navigate to="/my-issues" replace />
   ),
 });
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  workspaceDashboardRoute,
-  workspaceMembersRoute,
+  
+  
   projectBoardRoute,
   projectBoardExplicitRoute,
   projectListRoute,

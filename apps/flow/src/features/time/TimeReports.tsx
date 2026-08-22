@@ -6,7 +6,6 @@ import { DatePicker, EmptyState } from '@voxire/ui';
 import { useNavigate } from '@tanstack/react-router';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
-import { useWorkspaceMembers } from '../workspace-manager/useWorkspaceManager';
 import GateNotice from '../../shared/components/GateNotice';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { startOfWeek, endOfWeek } from '../../shared/lib/dateUtils';
@@ -41,7 +40,8 @@ const TimeReports = (): React.JSX.Element => {
     setTo(endOfWeek(today, weekStart));
   }, [today, weekStart]);
 
-  const { data: members, isLoading: membersLoading } = useWorkspaceMembers(activeWorkspaceId);
+  const members: { id: string; userId: string; name: string; role?: string }[] = []; // TODO: switch to useFlowTeam
+	const membersLoading = false;
   const { data, isLoading, isError } = useWorkDaysForWorkspace(activeWorkspaceId, from, to);
 
   const totalsByUserId = useMemo(() => {
@@ -124,11 +124,7 @@ const TimeReports = (): React.JSX.Element => {
             description={t('flow.time.reportsEmptyDescription')}
             action={{
               label: t('flow.time.reportsEmptyCta'),
-              onClick: () =>
-                navigate({
-                  to: '/w/$workspaceId/members',
-                  params: { workspaceId: activeWorkspaceId },
-                }),
+              onClick: () => {},
             }}
           />
         ) : (

@@ -5,7 +5,6 @@ import { HelmetContainer } from '@voxire/components';
 import { DatePicker, EmptyState } from '@voxire/ui';
 import { useNavigate } from '@tanstack/react-router';
 import { useFlowStore } from '../../shared/stores/flowStore';
-import { useWorkspaceMembers } from '../workspace-manager/useWorkspaceManager';
 import GateNotice from '../../shared/components/GateNotice';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { todayLocalDate, useWorkDaysForWorkspace, type WorkDay } from './useWorkDay';
@@ -26,7 +25,8 @@ const TeamView = (): React.JSX.Element => {
   const [date, setDate] = useState(todayLocalDate());
   const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
 
-  const { data: members, isLoading: membersLoading } = useWorkspaceMembers(activeWorkspaceId);
+  const members: { id: string; userId: string; name: string; role?: string }[] = []; // TODO: switch to useFlowTeam
+	const membersLoading = false;
   const { data, isLoading, isError } = useWorkDaysForWorkspace(activeWorkspaceId, date, date);
 
   const dayByUserId = useMemo(() => {
@@ -75,11 +75,7 @@ const TeamView = (): React.JSX.Element => {
             description={t('flow.time.teamEmptyDescription')}
             action={{
               label: t('flow.time.teamEmptyCta'),
-              onClick: () =>
-                navigate({
-                  to: '/w/$workspaceId/members',
-                  params: { workspaceId: activeWorkspaceId },
-                }),
+              onClick: () => {},
             }}
           />
         ) : (

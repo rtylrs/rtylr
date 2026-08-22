@@ -69,10 +69,6 @@ import SegmentedControl from './components/SegmentedControl';
 import { useSystemDark } from './components/useSystemDark';
 import TimeSection from './sections/TimeSection';
 import { canInviteMembers, toFlowMemberRole } from '../../shared/lib/roleUtils';
-import {
-  useWorkspaces,
-  useCreateWorkspace,
-} from '../../features/workspace-dashboard/useWorkspaces';
 
 interface SettingsSection {
   id: string;
@@ -109,169 +105,6 @@ function buildSections(
   }
   return sections;
 }
-
-const WorkspacesSection: React.FC = () => {
-  const { t } = useTranslation();
-  const { data: workspaces = [], isLoading } = useWorkspaces();
-  const createWorkspace = useCreateWorkspace();
-  const [showCreate, setShowCreate] = useState(false);
-  const [wsName, setWsName] = useState('');
-  const [wsColor, setWsColor] = useState('#64C5B9');
-
-  const WORKSPACE_COLORS = [
-    '#64C5B9',
-    '#3b82f6',
-    '#8b5cf6',
-    '#f59e0b',
-    '#ef4444',
-    '#22c55e',
-    '#ec4899',
-    '#f97316',
-  ];
-
-  const inputStyle = {
-    background: 'var(--flow-input-bg)',
-    border: '1px solid var(--flow-border)',
-    color: 'var(--flow-text)',
-  };
-
-  const handleCreate = (): void => {
-    const name = wsName.trim();
-    if (!name) {
-      toast.error(t('toasts.workspace.nameRequired'));
-      return;
-    }
-    createWorkspace.mutate(
-      { name, color: wsColor },
-      {
-        onSuccess: () => {
-          toast.success(t('toasts.workspace.created'));
-          setWsName('');
-          setWsColor('#64C5B9');
-          setShowCreate(false);
-        },
-        onError: () => toast.error(t('toasts.workspace.createFailed')),
-      }
-    );
-  };
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-          {t('flow.settings.workspaces.section')}
-        </h2>
-        <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
-          {t('flow.settings.workspaces.subtitle')}
-        </p>
-      </div>
-
-      {showCreate ? (
-        <div
-          className="rounded-xl p-4 space-y-3"
-          style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
-        >
-          <h3 className="text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-            {t('flow.settings.workspaces.newWorkspace')}
-          </h3>
-          <input
-            type="text"
-            placeholder={t('flow.settings.workspaces.namePlaceholder')}
-            value={wsName}
-            onChange={(e) => setWsName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-            className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
-            style={inputStyle}
-          />
-          <div>
-            <p className="text-[11px] mb-2" style={{ color: 'var(--flow-text-muted)' }}>
-              {t('flow.settings.workspaces.color')}
-            </p>
-            <div className="flex gap-2">
-              {WORKSPACE_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setWsColor(c)}
-                  aria-label={t('flow.settings.workspaces.chooseColorLabel', { color: c })}
-                  aria-pressed={wsColor === c}
-                  className="h-6 w-6 rounded-full transition-all"
-                  style={{
-                    background: c,
-                    outline: wsColor === c ? `2px solid ${c}` : 'none',
-                    outlineOffset: 2,
-                    boxShadow: wsColor === c ? '0 0 0 2px var(--flow-bg)' : 'none',
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={!wsName.trim() || createWorkspace.isPending}
-              onClick={handleCreate}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
-              style={{ background: 'var(--accent)', color: '#0a0a0a' }}
-            >
-              <Plus size={12} />
-              {createWorkspace.isPending
-                ? t('flow.settings.workspaces.creating')
-                : t('flow.settings.workspaces.createWorkspace')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowCreate(false)}
-              className="px-3 py-1.5 rounded-lg text-[12px]"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              {t('common.cancel')}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold"
-          style={{ background: 'var(--accent)', color: '#0a0a0a' }}
-        >
-          <Plus size={12} />
-          {t('flow.settings.workspaces.newWorkspace')}
-        </button>
-      )}
-
-      {isLoading ? (
-        <div className="space-y-2">
-          {[1, 2].map((i) => (
-            <div
-              key={i}
-              className="h-12 rounded-xl animate-pulse"
-              style={{ background: 'var(--flow-hover)' }}
-            />
-          ))}
-        </div>
-      ) : (
-        <div
-          className="rounded-xl divide-y divide-[var(--flow-border)]"
-          style={{ border: '1px solid var(--flow-border)' }}
-        >
-          {workspaces.map((ws) => (
-            <div key={ws.id} className="flex items-center gap-3 px-4 py-3">
-              <span
-                className="h-3 w-3 rounded-full shrink-0"
-                style={{ background: ws.color || 'var(--accent)' }}
-              />
-              <p className="text-[13px] font-medium flex-1" style={{ color: 'var(--flow-text)' }}>
-                {ws.name}
-              </p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
 
 const NotificationsSection: React.FC = () => {
   const { t } = useTranslation();
@@ -1415,7 +1248,7 @@ export const TeamSection: React.FC = () => {
 // ── Section content map ───────────────────────────────────────────────────────
 
 const SECTION_CONTENT: Record<string, React.FC> = {
-  workspaces: WorkspacesSection,
+  
   team: TeamSection,
   notifications: NotificationsSection,
   appearance: AppearanceSection,
