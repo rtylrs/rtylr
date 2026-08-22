@@ -77,7 +77,7 @@ const DurationField = ({
             onCancel();
           }
         }}
-        className="flow-focus min-h-[44px] w-full rounded px-2 py-2 text-[16px] md:min-h-0 md:py-1 md:text-[11px]"
+        className="flow-focus min-h-[44px] w-full rounded-sm px-2 py-2 text-[16px] md:min-h-0 md:py-1 md:text-[11px]"
         style={{
           background: 'var(--flow-input-bg)',
           border: `1px solid ${invalid ? 'var(--flow-status-rejected-border)' : 'var(--flow-border)'}`,

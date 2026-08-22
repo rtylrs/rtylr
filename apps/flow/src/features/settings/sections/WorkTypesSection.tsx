@@ -10,7 +10,7 @@ import {
 } from '../../time/useWorkDay';
 
 const inputClass =
-  'flow-focus min-h-[44px] w-full rounded px-2 py-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]';
+  'flow-focus min-h-[44px] w-full rounded-sm px-2 py-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]';
 
 function inputStyle(): React.CSSProperties {
   return {
@@ -122,7 +122,7 @@ const WorkTypesSection = (): React.JSX.Element => {
                       <button
                         type="button"
                         onClick={() => setEditingId(null)}
-                        className="flow-focus min-h-[44px] rounded px-3 text-[13px] font-medium md:min-h-0 md:py-1.5"
+                        className="flow-focus min-h-[44px] rounded-sm px-3 text-[13px] font-medium md:min-h-0 md:py-1.5"
                         style={{ color: 'var(--flow-text-muted)' }}
                       >
                         {t('flow.settings.workTypes.cancel')}
@@ -131,7 +131,7 @@ const WorkTypesSection = (): React.JSX.Element => {
                         type="button"
                         onClick={() => saveEdit(id)}
                         disabled={updateWorkType.isPending}
-                        className="flow-focus min-h-[44px] rounded px-3 text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"
+                        className="flow-focus min-h-[44px] rounded-sm px-3 text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"
                         style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
                       >
                         {t('flow.settings.workTypes.save')}
@@ -143,7 +143,7 @@ const WorkTypesSection = (): React.JSX.Element => {
                     <button
                       type="button"
                       onClick={() => startEdit(id, wt.name ?? '', wt.description ?? '')}
-                      className="flow-focus min-w-0 flex-1 rounded px-1 py-0.5 text-left"
+                      className="flow-focus min-w-0 flex-1 rounded-sm px-1 py-0.5 text-left"
                     >
                       <p
                         className="truncate text-[13px] font-medium"
@@ -164,7 +164,7 @@ const WorkTypesSection = (): React.JSX.Element => {
                       type="button"
                       onClick={() => deleteWorkType.mutate(id)}
                       aria-label={t('flow.settings.workTypes.removeLabel', { name: wt.name })}
-                      className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded md:h-8 md:w-8"
+                      className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm md:h-8 md:w-8"
                       style={{ color: 'var(--flow-text-muted)' }}
                     >
                       <X size={14} aria-hidden="true" />
@@ -205,7 +205,7 @@ const WorkTypesSection = (): React.JSX.Element => {
           type="button"
           onClick={addWorkType}
           disabled={!newName.trim() || createWorkType.isPending}
-          className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 self-start rounded px-3 text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-2"
+          className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 self-start rounded-sm px-3 text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-2"
           style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
         >
           <Plus size={14} aria-hidden="true" />

@@ -154,8 +154,28 @@ What it could not reach or resolve:
   `~/Development/onion/internal/platform/server/http/license_routes.go:21`),
   legacy frontend calls to endpoints that no longer exist (see
   `10-doc-drift.md` and the dossiers; the confirmed example is Flow's
-  `/hr/staff/detail` at `apps/flow/src/features/profile/useProfile.ts:48`,
+  `/hr/staff/detail` at `the /hr/staff/detail call site (file since rewritten; see 15-round-one-verification.md)`,
   served nowhere in onion), and unresolved `<dynamic:...>` rows.
 - The onion sweep reads route strings and generated-import evidence; it does
   not execute the router. A module that composes paths at runtime would be
   under-attributed. None of the spot-checked modules do.
+
+## Round two coverage
+
+The sweep was regenerated against this branch (contracts `847a34c8` via
+packages `5ece9b79`) and extended: pos swept as an eleventh consumer surface,
+the apps' migrated transport idiom (`hrTransport` and friends delegating to
+safe) recognized, OneKit client declarations resolved scope-wide after the
+centralization into shared/lib, template-literal paths folded to route shapes,
+and constant folding applied to previously dynamic paths.
+
+| Artifact            | Round one | Round two | Change                                                            |
+| ------------------- | --------- | --------- | ------------------------------------------------------------------- |
+| Request call sites  | 743       | 682       | menu migrated to oneKit (-28 axios), dynamic paths folded, pos +63   |
+| Idioms              | 4         | 3         | raw axios eliminated from apps (515 onekit / 160 safeFetch / 7 fetch) |
+| Unresolved dynamics | 13        | 1         | recruit presigned upload remains (object storage, not the API)      |
+| onekit NO-RPC       | several   | 0         | RPC metadata join fixed for prefixed client names                   |
+
+Per-app request counts (round two): hr 150, flow 101, finance 93, dash 89,
+pos 63, erp 58, crm 54, insights 30, recruit 24, auth 14, menu 5, plus
+packages 10. Backend coverage figures live in `13-backend-inventory.md`.

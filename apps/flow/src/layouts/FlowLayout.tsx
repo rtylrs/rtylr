@@ -12,8 +12,6 @@ import {
   Settings,
   LogOut,
   Sun,
-  Moon,
-  Monitor,
   Circle,
   ListTodo,
   Calendar,
@@ -37,21 +35,22 @@ import {
   Radar,
 } from 'lucide-react';
 import { useFeatureFlag, FLAG_KEYS, getAvatarUrl } from '@voxire/config';
-import { Avatar } from '@voxire/ui';
+import { AppearanceProvider, Avatar } from '@voxire/ui';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useClickOutside, useForesightLinks } from '@voxire/utils';
 import { useMemberCapacityHours } from '../shared/hooks/queries/useMemberCapacity';
 import { signOut, useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useUserStore } from '../shared/stores/userStore';
 import { useTranslation } from 'react-i18next';
-import { useThemeStore } from '../shared/stores/themeStore';
-import { accentTints, ACCENT_DEFAULT, type ResolvedTheme } from '../shared/lib/colorUtils';
+import { useAppearanceStore } from '../shared/stores/appearanceStore';
+import { ACCENT_DEFAULT } from '../shared/lib/colorUtils';
 import { useFlowStore } from '../shared/stores/flowStore';
 import { cn } from '../shared/lib/utils';
 import CommandBar from '../shared/components/CommandBar';
 import QuickCreate from '../shared/components/QuickCreate';
 import BulkEditBar from '../shared/components/BulkEditBar';
 import GateNotice from '../shared/components/GateNotice';
+import ModeToggle from '../shared/components/ModeToggle';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useProjects, useCreateProject } from '../features/projects/useProjects';
 import { useMyTasksProject } from '../features/tasks/useMyTasksProject';
@@ -124,7 +123,7 @@ const SidebarSectionReorder: React.FC<{
         aria-label={t('flow.shell.moveSectionUp')}
         title={t('flow.shell.moveUp')}
         className={cn(
-          'rounded p-px transition-colors flex items-center justify-center',
+          'rounded-sm p-px transition-colors flex items-center justify-center',
           canUp ? 'hover:bg-[var(--flow-hover)]' : 'opacity-25 cursor-not-allowed'
         )}
         onClick={() => canUp && moveSection(id, 'up')}
@@ -137,7 +136,7 @@ const SidebarSectionReorder: React.FC<{
         aria-label={t('flow.shell.moveSectionDown')}
         title={t('flow.shell.moveDown')}
         className={cn(
-          'rounded p-px transition-colors flex items-center justify-center',
+          'rounded-sm p-px transition-colors flex items-center justify-center',
           canDown ? 'hover:bg-[var(--flow-hover)]' : 'opacity-25 cursor-not-allowed'
         )}
         onClick={() => canDown && moveSection(id, 'down')}
@@ -260,7 +259,12 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
       businessName: authUser.businessName,
     });
   }, [authUser, setUser]);
-  const { theme, setTheme } = useThemeStore();
+  // The provider takes the whole preference set, so this reads the store
+  // unselected. Zustand hands back the same object until something is set, and
+  // the provider re-derives from the individual fields, so a render that changes
+  // nothing does not re-write a token.
+  const appearance = useAppearanceStore();
+  const { mode } = appearance;
   const {
     workspaces,
     projects,
@@ -464,23 +468,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     color: ACCENT_DEFAULT,
   };
 
-  // Sync --accent CSS vars to the active workspace color so every component
-  // in the tree can reference var(--accent) without prop-drilling.
-  //
-  // These land as inline styles on documentElement, which beats every stylesheet
-  // rule - so the per-mode alphas have to be applied here. A light-mode value for
-  // --accent-muted written in globals.css is silently overridden the moment this
-  // layout mounts, which is on every authenticated screen.
-  useEffect(() => {
-    const resolved: ResolvedTheme =
-      document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-    const root = document.documentElement;
-    for (const [name, value] of Object.entries(
-      accentTints(activeWorkspace.color || ACCENT_DEFAULT, resolved)
-    )) {
-      root.style.setProperty(name, value);
-    }
-  }, [activeWorkspace.color, theme]);
   // Hide the auto-provisioned personal project - it's the backend's bucket for
   // the dedicated "My Tasks" page (top nav) and, like Asana, must not surface in
   // the Projects list. The authoritative match is the id returned by
@@ -583,15 +570,24 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const modKey = isMac ? '⌘' : 'Ctrl';
 
   const logoSrc =
-    theme === 'dark' ||
-    (theme === 'system' &&
+    mode === 'dark' ||
+    (mode === 'system' &&
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-color-scheme: dark)').matches)
       ? '/logo.png'
       : '/logo-dark.png';
 
   return (
-    <>
+    // The single writer of the appearance tokens, mounted here rather than in
+    // main.tsx because the workspace accent it falls back to is resolved here,
+    // from the route params and the workspaces query. Its effect targets
+    // documentElement, so the position in the tree governs when it writes and
+    // never what it reaches; initAppearance in main.tsx covers the window
+    // before this mounts.
+    <AppearanceProvider
+      prefs={appearance}
+      workspaceAccent={activeWorkspace.color || ACCENT_DEFAULT}
+    >
       <div
         className="flex h-[100dvh] min-h-0 flex-col overflow-hidden lg:flex-row"
         style={{ background: 'var(--flow-bg)' }}
@@ -654,7 +650,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
         <aside
           className={cn(
-            'fixed inset-y-0 start-0 z-50 flex h-full w-[min(18rem,88vw)] flex-col overflow-hidden border-e border-[var(--flow-border)] transition-transform duration-300 ease-out lg:static lg:inset-auto lg:z-auto lg:h-full lg:min-h-0 lg:w-60 lg:max-w-none lg:shrink-0 lg:translate-x-0',
+            'fixed inset-y-0 start-0 z-50 flex h-full w-[min(18rem,88vw)] flex-col overflow-hidden border-e border-[var(--flow-border)] transition-transform duration-300 ease-out lg:static lg:inset-auto lg:z-auto lg:h-full lg:min-h-0 lg:w-[240px] lg:max-w-none lg:shrink-0 lg:translate-x-0',
             mobileNavOpen
               ? 'translate-x-0'
               : '-translate-x-full rtl:translate-x-full lg:translate-x-0 lg:rtl:translate-x-0'
@@ -690,7 +686,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               style={{ color: 'var(--flow-text-muted)' }}
             >
               <span
-                className="h-4 w-4 rounded shrink-0 flex items-center justify-center text-[9px] font-bold"
+                className="h-4 w-4 rounded-sm shrink-0 flex items-center justify-center text-[9px] font-bold"
                 style={{
                   background: `${activeWorkspace.color}22`,
                   color: activeWorkspace.color,
@@ -745,7 +741,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       }}
                     >
                       <span
-                        className="h-5 w-5 rounded shrink-0 flex items-center justify-center text-[10px] font-bold"
+                        className="h-5 w-5 rounded-sm shrink-0 flex items-center justify-center text-[10px] font-bold"
                         style={{
                           background: `${ws.color}22`,
                           color: ws.color,
@@ -778,7 +774,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               <Search size={12} />
               <span className="flex-1 text-start">{t('flow.shell.searchPlaceholder')}</span>
               <span
-                className="hidden text-[9px] font-mono px-1.5 py-0.5 rounded sm:inline"
+                className="hidden text-[9px] font-mono px-1.5 py-0.5 rounded-sm sm:inline"
                 style={{ background: 'var(--flow-active)' }}
               >
                 {modKey}K
@@ -1188,34 +1184,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       >
                         {t('flow.shell.appearance')}
                       </p>
-                      <div className="flex gap-1">
-                        {(
-                          [
-                            { value: 'light', icon: Sun, label: t('flow.shell.light') },
-                            { value: 'dark', icon: Moon, label: t('flow.shell.dark') },
-                            { value: 'system', icon: Monitor, label: t('flow.shell.system') },
-                          ] as const
-                        ).map(({ value, icon: Icon, label }) => (
-                          <button
-                            type="button"
-                            key={value}
-                            onClick={() => setTheme(value)}
-                            className="flex-1 flex flex-col items-center gap-1 py-2 rounded-md text-[10px] font-medium transition-colors"
-                            style={{
-                              background:
-                                theme === value ? 'var(--accent-muted)' : 'var(--flow-hover)',
-                              color: theme === value ? 'var(--accent)' : 'var(--flow-text-muted)',
-                              border:
-                                theme === value
-                                  ? '1px solid var(--accent-border)'
-                                  : '1px solid transparent',
-                            }}
-                          >
-                            <Icon size={12} />
-                            {label}
-                          </button>
-                        ))}
-                      </div>
+                      <ModeToggle />
                     </div>
                     <div
                       style={{
@@ -1467,7 +1436,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
         <QuickCreate />
         <BulkEditBar />
       </div>
-    </>
+    </AppearanceProvider>
   );
 };
 

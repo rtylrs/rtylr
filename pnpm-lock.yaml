@@ -1726,6 +1726,9 @@ importers:
       '@tanstack/react-router':
         specifier: ^1.170.8
         version: 1.170.8(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      '@voxire/utils':
+        specifier: workspace:*
+        version: link:../utils
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1

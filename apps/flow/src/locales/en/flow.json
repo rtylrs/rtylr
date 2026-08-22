@@ -356,7 +356,53 @@
     },
     "appearance": {
       "subtitle": "Customize the look and feel of Flow.",
-      "theme": "Theme"
+      "perDevice": "These settings apply to this device only. They are not shared with your team and do not carry to another browser.",
+      "groups": {
+        "mode": "Mode",
+        "palette": "Palette",
+        "accent": "Accent",
+        "density": "Density",
+        "textSize": "Text size",
+        "corners": "Corners",
+        "motion": "Reduce motion"
+      },
+      "motionHint": "Turns off transitions and animations across Flow.",
+      "paletteDescriptions": {
+        "midnight": "Flow's default: near-black, maximum contrast.",
+        "graphite": "Warmer dark grey, softer on bright screens.",
+        "ink": "Cool blue-black for long evening sessions.",
+        "moss": "Dark with a green cast and low glare.",
+        "paper": "Flow's default light: white cards on soft grey.",
+        "linen": "Warm off-white, easier under lamplight.",
+        "mist": "Cool light grey with crisp white cards.",
+        "slate": "Deeper light grey, stronger card separation."
+      },
+      "accentHex": "Hex value",
+      "accentPicker": "Pick a custom accent color",
+      "accentInvalid": "Enter a six-digit hex color, for example #64c5b9.",
+      "accentWorkspace": "Follow the workspace color",
+      "density": {
+        "compact": "Compact",
+        "cozy": "Cozy",
+        "roomy": "Roomy"
+      },
+      "textSize": {
+        "s": "Small",
+        "m": "Default",
+        "l": "Large"
+      },
+      "textSizeGate": "Flow's type sizes are written as fixed pixel values, so a text-size multiplier cannot reach them yet.",
+      "corners": {
+        "sharp": "Sharp",
+        "soft": "Soft",
+        "round": "Round"
+      },
+      "preview": {
+        "label": "Preview",
+        "taskTitle": "Draft the launch checklist",
+        "chip": "In progress",
+        "action": "Assign"
+      }
     },
     "shortcuts": {
       "subtitle": "Move fast through Flow without touching the mouse.",

@@ -297,7 +297,7 @@ export const CommandBar: React.FC = () => {
                 style={{ color: 'var(--flow-text)' }}
               />
               <span
-                className="text-[10px] px-1.5 py-0.5 rounded font-mono"
+                className="text-[10px] px-1.5 py-0.5 rounded-sm font-mono"
                 style={{
                   background: 'var(--flow-hover)',
                   color: 'var(--flow-text-dim)',
@@ -333,7 +333,8 @@ export const CommandBar: React.FC = () => {
                       const active = idx === selected;
                       const Icon = item.icon;
                       return (
-                        <button type="button"
+                        <button
+                          type="button"
                           key={item.id}
                           onMouseEnter={() => setSelected(idx)}
                           onClick={() => run(item)}
@@ -347,7 +348,7 @@ export const CommandBar: React.FC = () => {
                           <span className="flex-1 truncate">{item.label}</span>
                           {item.hint && (
                             <span
-                              className="text-[10px] font-mono px-1.5 py-0.5 rounded"
+                              className="text-[10px] font-mono px-1.5 py-0.5 rounded-sm"
                               style={{
                                 background: 'var(--flow-active)',
                                 color: 'var(--flow-text-dim)',

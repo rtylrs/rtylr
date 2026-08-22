@@ -79,5 +79,11 @@
     "enableBonuses": "Enable bonuses",
     "saved": "Payroll configuration saved",
     "notConfiguredNotice": "Payroll is not yet configured - fill in the form to get started"
+  },
+  "payroll": {
+    "runDetail": {
+      "postToJournal": "Post to journal",
+      "posted": "Payroll posted to the finance journal"
+    }
   }
 }

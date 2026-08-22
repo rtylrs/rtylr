@@ -108,7 +108,7 @@ const MyIssues: React.FC = () => {
                       {t(`flow.taskDetail.${col.labelKey}`)}
                     </span>
                     <span
-                      className="text-[10px] px-1.5 py-0.5 rounded font-medium"
+                      className="text-[10px] px-1.5 py-0.5 rounded-sm font-medium"
                       style={{
                         background: `${col.color}1a`,
                         color: col.color,
@@ -218,11 +218,12 @@ const QuickAddRow: React.FC<QuickAddRowProps> = ({ inputRef }) => {
         style={{ color: 'var(--flow-text)' }}
       />
       {title.trim().length > 0 && (
-        <button type="button"
+        <button
+          type="button"
           onClick={submit}
           disabled={createTask.isPending || hasNoLabels}
           title={hasNoLabels ? t('flow.myIssues.quickAddNoLabelsReason') : undefined}
-          className="text-[11px] font-semibold px-2.5 py-1 rounded transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="text-[11px] font-semibold px-2.5 py-1 rounded-sm transition-opacity hover:opacity-90 disabled:opacity-50"
           style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
         >
           {t('flow.myIssues.quickAddButton')}

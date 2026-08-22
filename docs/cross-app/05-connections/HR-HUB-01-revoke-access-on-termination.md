@@ -30,7 +30,7 @@ _, err := h.Service.UpdateEmployeeForWriter(ctx, businessID, device.User.UserID,
 
 `~/Development/onion/internal/modules/hr_core/internal/routes/handlers/employee_handlers.go:426`
 
-Nothing else happens. The employee's `hr_employees.user_id`
+Nothing else happens. The employee's `internal/modules/hr_employees.user_id`
 (`packages/voxie/api/hr/employee/v1/models.onk:10`) still points at a live hub
 user. Their app entitlements, which hub models with `is_enabled`
 (`packages/voxie/api/hub/app/v1/models.onk:8`), are untouched. Their Flow
@@ -80,7 +80,7 @@ One fact moves: an employee's employment status became terminal.
 
 No formula. The consequence is a state change, not a calculation.
 
-Note the identity dependency: this works because `hr_employees.user_id` is one
+Note the identity dependency: this works because `internal/modules/hr_employees.user_id` is one
 of the four real joins in the product (`02-entity-graph.md`), and there is
 already a resolver query in the opposite direction
 (`~/Development/onion/internal/modules/hr_core/sql/queries/employees.sql:47`).
@@ -92,7 +92,7 @@ success.
 
 - `hr.EmployeePayload.status` already carries `terminated` as a documented
   value (`packages/voxie/api/hr/employee/v1/models.onk:19`).
-- `hr_staff.status` separately carries `terminated` in an ENUM
+- `internal/modules/hr_staff.status` separately carries `terminated` in an ENUM
   (`~/Development/onion/internal/platform/database/schemas/hr/schema.sql:28`),
   which is the second person record problem (`HR->HR-01`). **Both must be
   handled or the revocation is bypassable through whichever record the tenant
@@ -117,7 +117,7 @@ success.
 
 ## Precedent in the codebase
 
-The nearest precedent is a warning, not a model. `hr_category_id` shows what
+The nearest precedent is a warning, not a model. `internal/modules/hr_category_id` shows what
 happens when a cross-domain link is declared and no consumer is written
 (`02-entity-graph.md`): it sits unread. This proposal is the inverse shape, a
 consequence with no declaration, and it should be built consumer-first: write
@@ -158,7 +158,7 @@ Order of work, and it matters:
    It is independently valuable, it quantifies the existing exposure, and it is
    the test oracle for the rest.
 2. The hub-side revocation, callable and tested on its own.
-3. The emission from `hr_core`, covering both `hr_employees` and `hr_staff`.
+3. The emission from `internal/modules/hr_core`, covering both `internal/modules/hr_employees` and `internal/modules/hr_staff`.
 
 ## Coupling cost
 
@@ -187,7 +187,7 @@ Order of work, and it matters:
   which is HR data, so it must be gated to administrators, not shown to every
   dash user. No role gains sight of data it cannot see today: the list contains
   facts an HR admin already sees.
-- **The second person record.** `hr_staff` and `hr_employees` both carry
+- **The second person record.** `internal/modules/hr_staff` and `internal/modules/hr_employees` both carry
   status. If only one is wired, a tenant maintaining the other gets no
   revocation and a false sense of safety. This is a hard dependency on
   understanding `HR->HR-01`, though not on completing it.
@@ -205,3 +205,18 @@ Order of work, and it matters:
 | Backend             | 3 days: reconciliation query, hub revocation, emission from both person tables, multi-business scoping tests                                              |
 | Frontend            | 0.5 days: the reconciliation list in dash, plus confirmation copy on termination stating what will be revoked                                             |
 | Ongoing maintenance | ~0.25 days per year. Low: one event, one consumer, no schema. Rises if future apps take their own dependency on the event rather than on hub entitlement. |
+
+## Backend section (round two)
+
+Verified against onion at `ab6ff7ff`. The claim stands and one fact strengthens
+it: seat provisioning already writes across the boundary in the opposite
+direction. Team's invite flow INSERTs an `internal/modules/hr_employees` row cross-schema
+(`internal/modules/team/sql/queries/team.sql:192-201`), so employment is coupled
+to entitlements at hire time. At termination time the coupling disappears:
+`internal/modules/hr_core/internal/routes/handlers/employee_handlers.go:425-427` sets `Status: "terminated"` via
+`UpdateEmployeeForWriter`, `internal/modules/staff/sql/queries/staff.sql:26`
+terminates the hr_staff row, and no module anywhere reads a terminated status to
+revoke `user_app_permissions` or edit any apps array.
+
+*Round two (2026-08-22): backend re-verified, claim confirmed; provisioning-side
+cross-schema write added as supporting evidence.*

@@ -33,7 +33,7 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
           type="button"
           onClick={() => !disabled && setOpen((o) => !o)}
           disabled={disabled}
-          className="flex items-center gap-1.5 px-2 py-1 rounded transition-colors hover:bg-[var(--flow-hover)] disabled:opacity-60 disabled:hover:bg-transparent"
+          className="flex items-center gap-1.5 px-2 py-1 rounded-sm transition-colors hover:bg-[var(--flow-hover)] disabled:opacity-60 disabled:hover:bg-transparent"
         >
           <CalendarIcon size={12} />
           {value ? formatDate(value) : t('common.datePicker.setDate')}
@@ -66,7 +66,8 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
             d.setDate(d.getDate() + o.days);
             const iso = d.toISOString().split('T')[0];
             return (
-              <button type="button"
+              <button
+                type="button"
                 key={o.label}
                 onClick={() => {
                   onChange(iso);

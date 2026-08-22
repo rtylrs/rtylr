@@ -82,6 +82,14 @@ describe('flow locale parity', () => {
       // Pure placeholder with no prose to translate, same as the duration
       // placeholders above.
       'time.add.noteCounter',
+      // "Mode", "Palette" and "Compact" are all ordinary French words, same
+      // reasoning as "Date" and "Type" above. Worth noting for whoever adds the
+      // next appearance string: this list is the mechanism, not a workaround,
+      // but it only covers a genuine cognate. An entry here for a word that
+      // does have a French translation would hide a real gap.
+      'settings.appearance.groups.mode',
+      'settings.appearance.groups.palette',
+      'settings.appearance.density.compact',
     ]);
 
     const copied = keyPaths(en).filter((path) => {

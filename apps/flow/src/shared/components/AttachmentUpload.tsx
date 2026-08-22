@@ -71,10 +71,11 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
                 </p>
               </div>
               {onRemove && !disabled && (
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => onRemove(a.id)}
                   aria-label={t('flow.taskDetail.removeAttachmentLabel')}
-                  className="h-5 w-5 rounded opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-[var(--flow-active)]"
+                  className="h-5 w-5 rounded-sm opacity-0 group-hover:opacity-100 flex items-center justify-center hover:bg-[var(--flow-active)]"
                   style={{ color: 'var(--flow-text-dim)' }}
                 >
                   <X size={12} />
@@ -84,7 +85,8 @@ export const AttachmentUpload: React.FC<AttachmentUploadProps> = ({
           );
         })}
       </div>
-      <button type="button"
+      <button
+        type="button"
         onClick={() => {
           if (!uploading && !disabled) ref.current?.click();
         }}

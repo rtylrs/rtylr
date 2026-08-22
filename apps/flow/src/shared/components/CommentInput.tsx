@@ -67,7 +67,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
             type="button"
             onClick={() => setMentionOpen((o) => !o)}
             disabled={disabled}
-            className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
+            className="h-6 w-6 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
             style={{ color: 'var(--flow-text-dim)' }}
             title={t('flow.taskDetail.mentionSomeone')}
             aria-label={t('flow.taskDetail.mentionSomeone')}
@@ -77,7 +77,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
           <button
             type="button"
             disabled
-            className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
+            className="h-6 w-6 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
             style={{ color: 'var(--flow-text-dim)' }}
             title={t('common.emojiPickerComingSoon')}
             aria-label={t('common.emojiPickerComingSoon')}
@@ -89,7 +89,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
           type="button"
           onClick={handleSubmit}
           disabled={disabled || !value.trim()}
-          className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold transition-opacity disabled:opacity-40"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-sm text-[11px] font-semibold transition-opacity disabled:opacity-40"
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           <Send size={11} />
@@ -98,7 +98,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
       </div>
       {mentionOpen && (
         <div
-          className="absolute start-2 bottom-full mb-1 rounded-lg py-1 z-20 w-48"
+          className="absolute start-2 bottom-full mb-1 rounded-lg py-1 z-20 w-[192px]"
           style={{
             background: 'var(--flow-card)',
             border: '1px solid var(--flow-border)',
@@ -106,7 +106,8 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
           }}
         >
           {members.slice(0, 5).map((m) => (
-            <button type="button"
+            <button
+              type="button"
               key={m.id}
               onClick={() => insertMention('@' + m.name)}
               className="w-full text-start px-3 py-1.5 text-[12px] hover:bg-[var(--flow-hover)] flex items-center gap-2"

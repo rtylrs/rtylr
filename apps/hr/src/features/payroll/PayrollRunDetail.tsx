@@ -3,8 +3,12 @@ import { useUserStore } from '@voxire/auth';
 import { getRouteApi, Link, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { CheckCircle, Download, ArrowLeft, AlertTriangle, DollarSign } from 'lucide-react';
-import { useGetPayrollRun, useApprovePayrollRun } from '../../shared/hooks/queries/usePayroll';
+import { BookUp2, CheckCircle, Download, ArrowLeft, AlertTriangle, DollarSign } from 'lucide-react';
+import {
+  useGetPayrollRun,
+  useApprovePayrollRun,
+  useExportPayrollRun,
+} from '../../shared/hooks/queries/usePayroll';
 import type { PayrollEntryPayload } from '../../shared/hooks/queries/usePayroll';
 import { ErrorBoundary, EmptyState } from '@voxire/ui';
 import { HelmetContainer } from '@voxire/components';
@@ -43,6 +47,8 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
   const canRunPayroll = canHrPermission(role, 'hr:payroll:run');
   const { data: run, isLoading } = useGetPayrollRun(runId, { enabled: payrollConfigured });
   const approveRun = useApprovePayrollRun(payrollConfigured);
+  // HR->FIN-01: posts the approved run to the finance journal server-side.
+  const exportRun = useExportPayrollRun(payrollConfigured);
   const parentRef = useRef<HTMLDivElement>(null);
 
   const entries = run?.entries ?? [];
@@ -57,6 +63,10 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
   const handleApprove = useCallback((): void => {
     if (runId) approveRun.mutate({ runId });
   }, [runId, approveRun]);
+
+  const handlePostToJournal = useCallback((): void => {
+    if (runId) exportRun.mutate(runId);
+  }, [runId, exportRun]);
 
   const handleExport = useCallback((): void => {
     if (!run) return;
@@ -143,6 +153,16 @@ const PayrollRunDetailContent = (): React.JSX.Element => {
                 disabled={approveRun.isPending}
               >
                 {t('payroll.runDetail.approve')}
+              </Button>
+            )}
+            {canRunPayroll && run.status === 'approved' && (
+              <Button
+                variant="primary"
+                icon={<BookUp2 size={13} />}
+                onClick={handlePostToJournal}
+                disabled={exportRun.isPending}
+              >
+                {t('payroll.runDetail.postToJournal')}
               </Button>
             )}
             {canRunPayroll && (

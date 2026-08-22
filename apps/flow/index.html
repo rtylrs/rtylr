@@ -26,17 +26,31 @@
       `background: #0a0a0a` inline, which meant light mode rendered a dark body:
       an inline style cannot follow a theme. Stamping data-theme here instead lets
       globals.css paint the right palette immediately, with no flash either way.
-      Kept in step with themeStore's DEFAULT_THEME and its persist key.
+
+      This runs while the head is parsed, ahead of the module that calls
+      initAppearance, so both keys have to be read here: `flow-appearance` is
+      where the appearance store persists, and `flow-theme` is the retired
+      themeStore entry the appearance store migrates from on first load.
+      Preferring the retired key would show one frame of the wrong palette to
+      anyone who has changed mode since the migration.
+      Kept in step with APPEARANCE_DEFAULTS.mode in @voxire/utils.
     -->
     <script>
       (function () {
+        function read(key, field) {
+          try {
+            var raw = localStorage.getItem(key);
+            return raw ? JSON.parse(raw).state?.[field] : null;
+          } catch (e) {
+            return null;
+          }
+        }
         try {
-          var stored = localStorage.getItem('flow-theme');
-          var theme = stored ? JSON.parse(stored).state?.theme : 'dark';
+          var theme = read('flow-appearance', 'mode') || read('flow-theme', 'theme') || 'dark';
           if (theme === 'system') {
             theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
           }
-          document.documentElement.setAttribute('data-theme', theme || 'dark');
+          document.documentElement.setAttribute('data-theme', theme);
         } catch (e) {
           document.documentElement.setAttribute('data-theme', 'dark');
         }

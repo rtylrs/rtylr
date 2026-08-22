@@ -1,0 +1,27 @@
+mechanism,module,name,detail,consumers,file,line
+job,hr_leave,hr_leave.monthly_accrual,schedule=0 0 1 * *,worker scheduler,internal/modules/hr_leave/internal/jobs/jobs.go,17
+job,hr_overtime,hr_overtime.daily_detection,schedule=0 0 * * *,worker scheduler,internal/modules/hr_overtime/internal/jobs/jobs.go,17
+job,hr_payroll,hr_payroll.period_open_notifications,schedule=0 9 * * *,worker scheduler,internal/modules/hr_payroll/internal/jobs/jobs.go,17
+job,hr_time,hr_time.unsubmitted_timesheet_reminder,schedule=0 9 * * MON,worker scheduler,internal/modules/hr_time/internal/jobs/jobs.go,17
+job,recurring_invoices,recurring_invoices.generate_due,schedule=0 * * * *,worker scheduler,internal/modules/recurring_invoices/internal/jobs/jobs.go,17
+job,voxhire,voxhire.process_cvs,schedule=*/10 * * * *,worker scheduler,internal/modules/voxhire/internal/jobs/jobs.go,17
+webhook-emission,search,POST-to-webhook-URL,,,internal/platform/paddle/client.go,0
+wsbus-publish,pos_kds,business:,type=pos:kds:item:updated,,internal/modules/pos_kds/internal/application/service.go,81
+wsbus-publish,pos_kds,business:,type=pos:kds:item:updated,,internal/modules/pos_kds/internal/application/service.go,94
+wsbus-publish,pos_orders,ownerTopic(ownerID),type=pos:table:status,,internal/modules/pos_orders/internal/application/service.go,127
+wsbus-publish,pos_orders,ownerTopic(ownerID),type=pos:order:created,,internal/modules/pos_orders/internal/application/service.go,267
+wsbus-publish,pos_orders,ownerTopic(ownerID),type=pos:kds:item:updated,,internal/modules/pos_orders/internal/application/service.go,295
+wsbus-publish,pos_orders,ownerTopic(ownerID),type=pos:order:paid,,internal/modules/pos_orders/internal/application/service.go,313
+wsbus-publish,pos_orders,ownerTopic(ownerID),type=pos:order:voided,,internal/modules/pos_orders/internal/application/service.go,400
+wsbus-publish,pos_orders,ownerTopic(ownerID),type=pos:order:preparing,,internal/modules/pos_orders/internal/application/service.go,440
+wsbus-publish,workspaces,fmt.Sprintf(,,,internal/modules/workspaces/internal/api/project_columns_members.go,20
+wsbus-publish,workspaces,fmt.Sprintf(,,,internal/modules/workspaces/internal/api/project_service.go,58
+wsbus-publish,workspaces,fmt.Sprintf(,,,internal/modules/workspaces/internal/api/task_convert.go,127
+wsbus-publish,workspaces,fmt.Sprintf(,,,internal/modules/workspaces/internal/api/task_convert.go,137
+wsbus-publish,workspaces,fmt.Sprintf(,,,internal/modules/workspaces/internal/api/task_convert.go,149
+wsbus-publish,workspaces,fmt.Sprintf(,,,internal/modules/workspaces/internal/api/workspace_service.go,45
+wsbus-publish,workspaces,fmt.Sprintf(,type=workspace.evicted,,internal/modules/workspaces/internal/api/workspace_service.go,233
+wsbus-publish,workspaces,c.topic,,,internal/modules/workspaces/internal/application/assignee_events_test.go,150
+wsbus-publish,workspaces,c.topic,,,internal/modules/workspaces/internal/application/assignee_events_test.go,208
+wsbus-publish,workspaces,fmt.Sprintf(,,,internal/modules/workspaces/internal/application/service.go,754
+wsbus-publish,workspaces,fmt.Sprintf(,type=notification.created,,internal/modules/workspaces/internal/application/service.go,1140

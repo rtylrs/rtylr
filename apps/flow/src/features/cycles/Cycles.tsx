@@ -45,9 +45,10 @@ const Cycles: React.FC = () => {
             {t('flow.cycles.subtitle')}
           </p>
         </div>
-        <button type="button"
+        <button
+          type="button"
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-semibold"
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           <Plus size={11} /> {t('flow.cycles.newCycle')}
@@ -99,7 +100,8 @@ const Cycles: React.FC = () => {
             />
           </div>
           <div className="flex gap-2">
-            <button type="button"
+            <button
+              type="button"
               onClick={() => {
                 if (!newName.trim() || !newStart || !newEnd) {
                   toast.error(t('errors.generic'));
@@ -123,19 +125,20 @@ const Cycles: React.FC = () => {
                 );
               }}
               disabled={createCycle.isPending || !newName.trim() || !newStart || !newEnd}
-              className="px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-50"
+              className="px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-50"
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
               {createCycle.isPending ? t('flow.cycles.creating') : t('flow.cycles.create')}
             </button>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => {
                 setShowCreate(false);
                 setNewName('');
                 setNewStart('');
                 setNewEnd('');
               }}
-              className="px-3 py-1.5 rounded text-[11px]"
+              className="px-3 py-1.5 rounded-sm text-[11px]"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               {t('flow.cycles.cancel')}

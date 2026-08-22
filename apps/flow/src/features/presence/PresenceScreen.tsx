@@ -89,7 +89,7 @@ const PresenceScreen = (): React.JSX.Element => {
                     {fullName}
                   </span>
                   <span
-                    className="rounded px-1.5 py-0.5 text-[11px] font-semibold"
+                    className="rounded-sm px-1.5 py-0.5 text-[11px] font-semibold"
                     style={{ color: statusTone[entry.status] ?? 'var(--accent-fg)' }}
                   >
                     {statusLabel(entry.status)}

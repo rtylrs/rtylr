@@ -50,14 +50,15 @@ export const SubtaskList: React.FC<SubtaskListProps> = ({
           </div>
           <div className="space-y-1">
             {subtasks.map((s) => (
-              <button type="button"
+              <button
+                type="button"
                 key={s.id}
                 onClick={() => onToggle(s.id)}
                 disabled={disabled}
-                className="w-full flex items-center gap-2 px-2 py-1 rounded hover:bg-[var(--flow-hover)] transition-colors text-left disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full flex items-center gap-2 px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)] transition-colors text-left disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <span
-                  className="h-4 w-4 rounded flex items-center justify-center shrink-0"
+                  className="h-4 w-4 rounded-sm flex items-center justify-center shrink-0"
                   style={{
                     border: '1px solid var(--flow-border)',
                     background: s.completed ? 'var(--accent)' : 'transparent',

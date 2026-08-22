@@ -53,7 +53,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
         type="button"
         aria-label="Dismiss"
         onClick={dismiss}
-        className="h-6 w-6 flex items-center justify-center rounded shrink-0 hover:bg-amber-100 transition-colors"
+        className="h-6 w-6 flex items-center justify-center rounded-sm shrink-0 hover:bg-amber-100 transition-colors"
         style={{ color: 'var(--flow-warning-dark, #92400e)' }}
       >
         <X size={12} />

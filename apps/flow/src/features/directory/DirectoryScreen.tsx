@@ -56,7 +56,7 @@ const DirectoryScreen = (): React.JSX.Element => {
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t('flow.directory.searchPlaceholder')}
             aria-label={t('flow.directory.searchPlaceholder')}
-            className="flow-focus min-h-[44px] w-full rounded pl-9 pr-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
+            className="flow-focus min-h-[44px] w-full rounded-sm pl-9 pr-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]"
             style={inputStyle}
           />
         </div>

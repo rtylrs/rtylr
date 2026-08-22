@@ -112,7 +112,7 @@ The good precedent is `pos.Order.customer_id`
 So "a domain outside CRM referencing a CRM customer by id" is already an
 established, functioning pattern in this product. This proposal extends a
 pattern rather than inventing one, which materially raises the odds it gets
-consumed, unlike `hr_category_id`.
+consumed, unlike `internal/modules/hr_category_id`.
 
 The bad precedent is `finance.Bill.supplier_id`, a required FK to a domain
 Finance never reads, which the UI satisfies by fabrication
@@ -188,3 +188,13 @@ Order of work: contract and validator first, then the picker. The
 | Backend             | 2 days: nullable column, snapshot on create, conditional validator, tenant validation of the foreign id, list filter      |
 | Frontend            | 1.5 days: customer picker with free-text fallback, customer column on the invoice list                                    |
 | Ongoing maintenance | ~0.5 days per year, rising if the snapshot-versus-live question gets relitigated. The doc comment exists to prevent that. |
+
+## Backend section (round two)
+
+Verified at the storage layer for the first time: `finance_invoices` declares
+exactly the four client_* columns and no customer column
+(`internal/platform/database/schemas/finance/schema.sql`, finance_invoices
+block). The contract matches the schema field for field. Nothing in the 63
+commits since round one touches this.
+
+*Round two (2026-08-22): confirmed unchanged across schema, contract and code.*

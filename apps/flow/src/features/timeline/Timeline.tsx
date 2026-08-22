@@ -63,7 +63,7 @@ const Timeline: React.FC = () => {
             }}
           >
             <div
-              className="w-48 shrink-0 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider"
+              className="w-[192px] shrink-0 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider"
               style={{ color: 'var(--flow-text-dim)', borderRight: '1px solid var(--flow-border)' }}
             >
               {t('flow.timeline.projectColumn')}
@@ -100,7 +100,7 @@ const Timeline: React.FC = () => {
                 style={{ borderBottom: '1px solid var(--flow-border)' }}
               >
                 <div
-                  className="w-48 shrink-0 px-4 py-3 flex items-center gap-2"
+                  className="w-[192px] shrink-0 px-4 py-3 flex items-center gap-2"
                   style={{ borderRight: '1px solid var(--flow-border)' }}
                 >
                   <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />

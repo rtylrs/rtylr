@@ -1,0 +1,297 @@
+table,owner_schema_domain,modules_reading,modules_writing,module_count,multi_module,owner_declared_in_schemas
+businesses,shared,apps business config console crm_sales hub_menu oauth platform/customer_sync platform/tenant pos_member_locations pos_menu pos_stock_movements subscriptions team user,business console user,15,yes,yes
+erp_products,erp,brands insights inventory kpis pos_menu pos_orders pos_stock_movements products purchase_orders stock_takes stock_transfers store_orders store_products,platform/stock_core pos_menu products store_products,14,yes,yes
+users,shared,activity console featuresupport flow_insights oauth platform/tenant pos_member_locations security subscriptions team user workspaces,console security team user,12,yes,yes
+hr_employees,hr_core,hr_attendance hr_core hr_payroll hr_performance hr_reports insights staff team user workspaces,hr_attendance hr_core staff team user,10,yes,yes
+crm_customers,crm,customers feedback insights kpis loyalty platform/customer_sync segments store_orders,customers platform/customer_sync store_orders,8,yes,yes
+user_app_permissions,shared,apps business console oauth subscriptions team user,team,7,yes,yes
+finance_expenses,finance,expenses finance_reconciliation finance_reports insights invoices tax,expenses invoices,6,yes,yes
+finance_invoices,finance,finance_reconciliation finance_reports insights invoices quotes tax,invoices quotes,6,yes,yes
+pos_orders,pos,insights kpis pos_day_summary pos_kds pos_orders pos_receipts,pos_orders,6,yes,yes
+erp_categories,erp,categories insights inventory pos_menu products,categories,5,yes,yes
+hr_shifts,hr_shifts,hr_shifts insights payroll staff timesheets,hr_shifts staff,5,yes,yes
+plans,shared,aiquota console subscriptions team user,console,5,yes,yes
+subscriptions,shared,aiquota console subscriptions team,console subscriptions team user,5,yes,yes
+booking_appointments,book,booking_appointments booking_calendar booking_dashboard booking_reminders,booking_appointments,4,yes,yes
+business_addons,shared,addons apps console pos_orders,addons console,4,yes,yes
+erp_warehouses,erp,platform/stock_core stock_takes stock_transfers warehouses,warehouses,4,yes,yes
+hr_locations,hr_core,business hr_attendance hr_core hr_reports,hr_core,4,yes,yes
+hr_staff,hr,kpis payroll staff timesheets,staff,4,yes,yes
+pos_locations,pos,platform/stock_core pos_locations pos_member_locations pos_orders,pos_locations pos_orders,4,yes,yes
+booking_services,book,booking_dashboard booking_services booking_waitlist,booking_services,3,yes,yes
+config,shared,business config platform/slack,config,3,yes,yes
+erp_inventory_transactions,erp,,inventory purchase_orders stock_takes,3,yes,yes
+erp_product_images,erp,pos_menu store_products,products store_products,3,yes,yes
+erp_suppliers,erp,products purchase_orders suppliers,suppliers,3,yes,yes
+finance_bank_accounts,finance,bank_accounts finance_bank_feeds finance_reports,bank_accounts finance_bank_feeds,3,yes,yes
+finance_expense_categories,finance,expenses insights invoices,invoices,3,yes,yes
+hr_departments,hr|hr_core,departments hr_core hr_reports,departments hr_core,3,yes,yes
+hr_leave_balances,hr_core|hr_leave,hr_leave hr_reports,hr_core hr_leave,3,yes,yes
+hr_leave_requests,hr_leave,hr_leave hr_reports insights,hr_leave,3,yes,yes
+hr_overtime_requests,hr_overtime,hr_overtime hr_payroll hr_reports,hr_overtime,3,yes,yes
+hr_time_entries,hr_time,hr_payroll hr_time workspaces,hr_time workspaces,3,yes,yes
+hr_timesheets,hr_time,hr_payroll hr_reports hr_time,hr_time,3,yes,yes
+pos_order_items,pos,insights pos_kds pos_orders,pos_kds pos_orders,3,yes,yes
+stock_ledger,erp,pos_orders pos_stock_movements,platform/stock_core pos_stock_movements,3,yes,yes
+stock_levels,erp,inventory platform/stock_core pos_stock_movements,platform/stock_core,3,yes,yes
+stock_locations,erp,inventory platform/stock_core pos_stock_movements,platform/stock_core,3,yes,yes
+user_business_access,,business platform/tenant user,business,3,yes,NO-TABLE-CREATION-FOUND
+addons,shared,addons console,,2,yes,yes
+cache,,platform/cache platform/license,,2,yes,NO-TABLE-CREATION-FOUND
+careers,voxire,careers voxhire,careers voxhire,2,yes,yes
+crm_loyalty_config,crm,customers loyalty,customers loyalty,2,yes,yes
+crm_loyalty_transactions,crm,customers loyalty,customers loyalty,2,yes,yes
+erp_brands,erp,brands products,brands,2,yes,yes
+erp_purchase_orders,erp,products purchase_orders,purchase_orders,2,yes,yes
+finance_accounts,finance,accounts finance_reports,accounts,2,yes,yes
+finance_bank_feeds,finance,finance_bank_feeds finance_reconciliation,,2,yes,yes
+finance_bills,finance,bills finance_reports,bills,2,yes,yes
+finance_invoice_items,finance,invoices,invoices quotes,2,yes,yes
+finance_tax_config,finance,invoices tax,invoices tax,2,yes,yes
+flow_milestone_tasks,flow,flow_insights workspaces,,2,yes,yes
+flow_milestones,flow,flow_insights workspaces,workspaces,2,yes,yes
+flow_projects,flow,flow_insights workspaces,workspaces,2,yes,yes
+flow_tasks,flow,flow_insights workspaces,workspaces,2,yes,yes
+hr_attendance_records,hr_attendance,hr_attendance hr_reports,hr_attendance,2,yes,yes
+hr_leave_types,hr_leave,hr_leave hr_reports,hr_leave,2,yes,yes
+hr_overtime_config,hr_overtime,hr_overtime hr_payroll,hr_overtime,2,yes,yes
+hr_payroll_entries,hr_payroll,hr_payroll hr_reports,hr_payroll,2,yes,yes
+hr_payroll_records,hr,payroll staff,payroll,2,yes,yes
+hr_payroll_runs,hr_payroll,hr_payroll hr_reports,hr_payroll,2,yes,yes
+hr_setup_steps,hr_core|hr_setup,hr_core hr_setup,hr_core hr_setup,2,yes,yes
+hr_shift_assignments,hr_shifts,hr_shifts insights,hr_shifts,2,yes,yes
+hr_time_off_requests,hr,staff time_off,time_off,2,yes,yes
+hub_notifications,hub,notifications,notifications team,2,yes,yes
+login_history,shared,security,security user,2,yes,yes
+manual_access_grants,shared,console subscriptions,console,2,yes,yes
+pos_member_locations,pos,pos_member_locations pos_users,pos_member_locations,2,yes,yes
+pos_refunds,pos,pos_day_summary,pos_orders,2,yes,yes
+pos_sessions,pos,pos_orders pos_sessions,pos_orders pos_sessions,2,yes,yes
+pos_tables,pos,pos_orders pos_tables,pos_orders pos_tables,2,yes,yes
+pos_users,pos,pos_member_locations pos_users,pos_users,2,yes,yes
+seat_periods,shared,subscriptions,subscriptions team,2,yes,yes
+store_themes,store,store_themes storefronts,store_themes,2,yes,yes
+support_customers,support,support_customers support_tickets,support_tickets,2,yes,yes
+support_messages,support,support_inbox support_tickets,support_tickets,2,yes,yes
+support_tickets,support,support_inbox support_tickets,support_tickets,2,yes,yes
+voxire_career_applications,voxire,voxhire,careers voxhire,2,yes,yes
+access_requests,shared,team,team,1,no,yes
+activity_log,shared,activity,,1,no,yes
+adding,,platform/snips,,1,no,NO-TABLE-CREATION-FOUND
+ai_quota_settings,shared,aiquota,aiquota,1,no,yes
+ai_usage_monthly,shared,aiquota,aiquota,1,no,yes
+application_counts,,voxhire,,1,no,NO-TABLE-CREATION-FOUND
+auth,,platform/auth,,1,no,NO-TABLE-CREATION-FOUND
+becoming,,platform/storage,,1,no,NO-TABLE-CREATION-FOUND
+billable,,platform/labourcost,,1,no,NO-TABLE-CREATION-FOUND
+booking_reminders,book,booking_reminders,booking_reminders,1,no,yes
+booking_resources,book,booking_resources,booking_resources,1,no,yes
+booking_waitlist,book,booking_waitlist,booking_waitlist,1,no,yes
+brand_page,,brands,,1,no,NO-TABLE-CREATION-FOUND
+buckets,,insights,,1,no,NO-TABLE-CREATION-FOUND
+careers_customizations,recruit,careers,careers,1,no,yes
+careers_form_fields,recruit,careers,careers,1,no,yes
+careers_sections,recruit,careers,careers,1,no,yes
+careers_submissions,recruit,careers,careers,1,no,yes
+catalog_images,,store_products,,1,no,NO-TABLE-CREATION-FOUND
+catalog_product_page,,store_products,,1,no,NO-TABLE-CREATION-FOUND
+chat_sessions,rtylr,memory,memory,1,no,yes
+console_stats,migrations|shared,console,,1,no,yes
+conversation_messages,rtylr,memory,memory,1,no,yes
+conversation_summaries,rtylr,memory,memory,1,no,yes
+crm_automations,crm,automations,automations,1,no,yes
+crm_campaign_sends,crm,customers,,1,no,yes
+crm_campaigns,crm,campaigns,campaigns,1,no,yes
+crm_contacts,crm,crm_sales,crm_sales,1,no,yes
+crm_contracts,crm,crm_sales,crm_sales,1,no,yes
+crm_customer_timeline,crm,customers,customers,1,no,yes
+crm_feedback,crm,feedback,feedback,1,no,yes
+crm_leads,crm,crm_sales,crm_sales,1,no,yes
+crm_loyalty_rewards,crm,loyalty,loyalty,1,no,yes
+crm_loyalty_tiers,crm,customers,customers,1,no,yes
+crm_segments,crm,segments,segments,1,no,yes
+crm_settings,crm,crm_settings,crm_settings,1,no,yes
+crm_templates,crm,templates,templates,1,no,yes
+crm_touchpoints,crm,crm_sales,crm_sales,1,no,yes
+custom_domains,shared,custom_domains,custom_domains,1,no,yes
+customer_spend,,insights,,1,no,NO-TABLE-CREATION-FOUND
+device,,,platform/auth,1,no,NO-TABLE-CREATION-FOUND
+doubling,,platform/storage,,1,no,NO-TABLE-CREATION-FOUND
+each,,platform/slack,,1,no,NO-TABLE-CREATION-FOUND
+either,,platform/database,,1,no,NO-TABLE-CREATION-FOUND
+email_jobs,shared,,platform/emailqueue,1,no,yes
+erp_price_lists,erp,price_lists,price_lists,1,no,yes
+erp_product_attributes,erp,products,products,1,no,yes
+erp_product_variants,erp,variants,variants,1,no,yes
+erp_purchase_order_items,erp,purchase_orders,purchase_orders,1,no,yes
+erp_stock_take_items,erp,stock_takes,stock_takes,1,no,yes
+erp_stock_takes,erp,stock_takes,stock_takes,1,no,yes
+erp_stock_transfer_items,erp,stock_transfers,stock_transfers,1,no,yes
+erp_stock_transfers,erp,stock_transfers,stock_transfers,1,no,yes
+every,,,platform/utils,1,no,NO-TABLE-CREATION-FOUND
+feature_flags,shared,featuresupport,featuresupport,1,no,yes
+feature_rule_conditions,shared,featuresupport,featuresupport,1,no,yes
+feature_rules,shared,featuresupport,featuresupport,1,no,yes
+feature_targets,shared,featuresupport,featuresupport,1,no,yes
+fighting,,platform/server,,1,no,NO-TABLE-CREATION-FOUND
+finance_journal_entries,finance,journal,journal,1,no,yes
+finance_journal_lines,finance,journal,journal,1,no,yes
+finance_payments,finance,invoices,invoices,1,no,yes
+finance_payroll_account_mappings,finance,accounts,,1,no,yes
+finance_quotes,finance,quotes,quotes,1,no,yes
+finance_reconciliation_matches,finance,finance_reconciliation,finance_reconciliation,1,no,yes
+finance_recurring_invoices,finance,recurring_invoices,recurring_invoices,1,no,yes
+flow_cycle_tasks,flow,workspaces,,1,no,yes
+flow_cycles,flow,workspaces,workspaces,1,no,yes
+flow_labels,flow,workspaces,workspaces,1,no,yes
+flow_notifications,flow,workspaces,workspaces,1,no,yes
+flow_project_columns,flow,workspaces,workspaces,1,no,yes
+flow_project_members,flow,workspaces,workspaces,1,no,yes
+flow_task_activity,flow,workspaces,workspaces,1,no,yes
+flow_task_attachments,flow,workspaces,workspaces,1,no,yes
+flow_task_comments,flow,workspaces,workspaces,1,no,yes
+flow_time_logs,flow,workspaces,workspaces,1,no,yes
+flow_user_settings,flow,workspaces,workspaces,1,no,yes
+flow_views,flow,workspaces,workspaces,1,no,yes
+flow_work_day_actions,flow,,workspaces,1,no,yes
+flow_work_days,flow,workspaces,workspaces,1,no,yes
+flow_work_types,flow,workspaces,workspaces,1,no,yes
+flow_workspace_members,flow,workspaces,workspaces,1,no,yes
+flow_workspaces,flow,workspaces,workspaces,1,no,yes
+global,,platform/server,,1,no,NO-TABLE-CREATION-FOUND
+hanging,,platform/database,,1,no,NO-TABLE-CREATION-FOUND
+hash,,platform/cache,,1,no,NO-TABLE-CREATION-FOUND
+hr_approval_chain_levels,hr_core,hr_core,hr_core,1,no,yes
+hr_approval_chains,hr_core,hr_core,hr_core,1,no,yes
+hr_assets,hr_equipment,hr_equipment,hr_equipment,1,no,yes
+hr_attendance_config,hr_attendance,hr_attendance,,1,no,yes
+hr_benefit_enrollments,hr,benefits,benefits,1,no,yes
+hr_benefit_plans,hr,benefits,benefits,1,no,yes
+hr_company_config,hr_core,hr_core,hr_core,1,no,yes
+hr_configs,hr_setup,hr_setup,hr_setup,1,no,yes
+hr_dashboard_widgets,hr|hr_dashboard,hr_dashboard,,1,no,yes
+hr_documents,hr,documents,documents,1,no,yes
+hr_employee_documents,hr|hr_documents,hr_documents,hr_documents,1,no,yes
+hr_employee_invites,hr_core,hr_core,hr_core,1,no,yes
+hr_employee_roles,hr_core,hr_core,hr_core,1,no,yes
+hr_equipment_requests,hr_equipment,hr_equipment,hr_equipment,1,no,yes
+hr_onboarding_checklist_items,hr_onboarding,hr_onboarding,hr_onboarding,1,no,yes
+hr_onboarding_checklist_templates,hr_onboarding,hr_onboarding,hr_onboarding,1,no,yes
+hr_onboarding_employee_checklist_items,hr_onboarding,hr_onboarding,hr_onboarding,1,no,yes
+hr_onboarding_employee_checklists,hr_onboarding,hr_onboarding,hr_onboarding,1,no,yes
+hr_one_on_ones,hr,one_on_ones,one_on_ones,1,no,yes
+hr_payroll_config,hr_payroll,hr_payroll,hr_payroll,1,no,yes
+hr_performance_config,hr_performance,hr_performance,hr_performance,1,no,yes
+hr_performance_review_cycles,hr_performance,hr_performance,hr_performance,1,no,yes
+hr_performance_review_goals,hr_performance,hr_performance,hr_performance,1,no,yes
+hr_performance_reviews,hr_performance,hr_performance,hr_performance,1,no,yes
+hr_reviews,hr,reviews,reviews,1,no,yes
+hr_roles,hr_core,hr_core,hr_core,1,no,yes
+hr_staff_availability,hr_shifts,hr_shifts,hr_shifts,1,no,yes
+hr_timesheet_approval_actions,hr_time,,hr_time,1,no,yes
+hr_training_courses,hr,training,training,1,no,yes
+hr_work_schedules,hr_core,hr_core,hr_core,1,no,yes
+hub_api_keys,hub,api_keys,api_keys,1,no,yes
+hub_integrations,hub,integrations,integrations,1,no,yes
+hub_menu_banners,hub,hub_menu,hub_menu,1,no,yes
+hub_navigation_menus,hub,hub_menu,hub_menu,1,no,yes
+hub_roles,hub,roles,roles,1,no,yes
+hub_webhooks,hub,webhooks,webhooks,1,no,yes
+insights_scheduled_reports,insights,insights,insights,1,no,yes
+insights_settings,insights,insights,insights,1,no,yes
+instance,,platform/storage,,1,no,NO-TABLE-CREATION-FOUND
+internal,,platform/cache,,1,no,NO-TABLE-CREATION-FOUND
+inventory_cost_layers,erp,inventory,,1,no,yes
+invite_tokens,shared,team,team,1,no,yes
+killing,,platform/wsbus,,1,no,NO-TABLE-CREATION-FOUND
+level,,,platform/stock_core,1,no,NO-TABLE-CREATION-FOUND
+main,,platform/wsbus,,1,no,NO-TABLE-CREATION-FOUND
+manual_addon_grants,shared,console,console,1,no,yes
+member_counts,,workspaces,,1,no,NO-TABLE-CREATION-FOUND
+memory,,platform/cache,,1,no,NO-TABLE-CREATION-FOUND
+modern,,platform/server,,1,no,NO-TABLE-CREATION-FOUND
+module,,platform/server,,1,no,NO-TABLE-CREATION-FOUND
+oauth_auth_codes,oauth,oauth,oauth,1,no,yes
+oauth_clients,oauth,oauth,,1,no,yes
+oauth_tokens,oauth,oauth,oauth,1,no,yes
+opening_page,,voxhire,,1,no,NO-TABLE-CREATION-FOUND
+pos_audit_log,pos,pos_audit,pos_audit,1,no,yes
+pos_business_settings,pos,pos_settings,pos_settings,1,no,yes
+pos_cash_movements,pos,pos_cash_movements,pos_cash_movements,1,no,yes
+pos_combos,pos,pos_combos,pos_combos,1,no,yes
+pos_floors,pos,pos_floors,pos_floors,1,no,yes
+pos_gift_cards,pos,pos_gift_cards,pos_gift_cards,1,no,yes
+pos_loyalty_config,pos,pos_loyalty,pos_loyalty,1,no,yes
+pos_loyalty_transactions,pos,pos_loyalty,pos_loyalty,1,no,yes
+pos_manager_pins,pos,pos_manager,,1,no,yes
+pos_modifiers,pos,pos_modifiers,pos_modifiers,1,no,yes
+pos_paddle_events_processed,pos,pos_orders,pos_orders,1,no,yes
+pos_terminals,pos,pos_terminals,pos_terminals,1,no,yes
+product,,platform/cache,,1,no,NO-TABLE-CREATION-FOUND
+product_counts,,brands,,1,no,NO-TABLE-CREATION-FOUND
+product_stock_total,,pos_menu,,1,no,NO-TABLE-CREATION-FOUND
+project_page,,workspaces,,1,no,NO-TABLE-CREATION-FOUND
+provider,,platform/snips,,1,no,NO-TABLE-CREATION-FOUND
+receiving,,platform/wsbus,,1,no,NO-TABLE-CREATION-FOUND
+recent_messages,,memory,,1,no,NO-TABLE-CREATION-FOUND
+redis,,platform/cache,,1,no,NO-TABLE-CREATION-FOUND
+remote,,,platform/cache,1,no,NO-TABLE-CREATION-FOUND
+segments,,,platform/server,1,no,NO-TABLE-CREATION-FOUND
+self_host_licenses,shared,console,console,1,no,yes
+session_summary,,memory,,1,no,NO-TABLE-CREATION-FOUND
+some_table,,,platform/utils,1,no,NO-TABLE-CREATION-FOUND
+sorted,,platform/cache,,1,no,NO-TABLE-CREATION-FOUND
+storage,,platform/storage,,1,no,NO-TABLE-CREATION-FOUND
+store_categories,store,store_categories,store_categories,1,no,yes
+store_checkouts,store,store_checkout,store_checkout,1,no,yes
+store_order_items,store,store_orders,store_orders,1,no,yes
+store_orders,store,store_orders,store_orders,1,no,yes
+store_payment_methods,store,store_payments,store_payments,1,no,yes
+store_product_page,,store_products,,1,no,NO-TABLE-CREATION-FOUND
+store_products,store,store_products,store_products,1,no,yes
+store_shipping_methods,store,store_shipping,store_shipping,1,no,yes
+store_sites,store,storefronts,storefronts,1,no,yes
+string,,platform/email,,1,no,NO-TABLE-CREATION-FOUND
+support_articles,support,support_knowledge,support_knowledge,1,no,yes
+support_canned_responses,support,support_canned,support_canned,1,no,yes
+support_settings,support,support_settings,support_settings,1,no,yes
+task_counts,,workspaces,,1,no,NO-TABLE-CREATION-FOUND
+themes,shared,config,,1,no,yes
+unwrapping,,platform/cache,,1,no,NO-TABLE-CREATION-FOUND
+user_group_members,shared,team,team,1,no,yes
+user_group_resource_permissions,shared,team,team,1,no,yes
+user_groups,shared,team,team,1,no,yes
+user_memories,,memory,,1,no,NO-TABLE-CREATION-FOUND
+user_memory,rtylr,memory,memory,1,no,yes
+user_sessions,shared,,security,1,no,yes
+voxhire_admins,voxire,voxhire,voxhire,1,no,yes
+voxhire_application_events,,voxhire,voxhire,1,no,NO-TABLE-CREATION-FOUND
+voxhire_company_leads,shared,voxhire,voxhire,1,no,yes
+voxhire_follow_up_tasks,,voxhire,voxhire,1,no,NO-TABLE-CREATION-FOUND
+voxhire_shortlist_items,,voxhire,voxhire,1,no,NO-TABLE-CREATION-FOUND
+voxhire_shortlists,,voxhire,voxhire,1,no,NO-TABLE-CREATION-FOUND
+voxhire_talent_applications,shared,voxhire,voxhire,1,no,yes
+voxire_website_leads,voxire,,websitelead,1,no,yes
+ai_cache_events,shared,,,0,no,yes
+cdn_files,cdn,,,0,no,yes
+cdn_transformations,cdn,,,0,no,yes
+clients,voxire,,,0,no,yes
+erp_activity_log,erp,,,0,no,yes
+expenses,voxire,,,0,no,yes
+faq,voxire,,,0,no,yes
+flow_businesses,flow,,,0,no,yes
+flow_task_dependencies,flow,,,0,no,yes
+flow_task_focus_pins,flow,,,0,no,yes
+hr_training_progress,hr,,,0,no,yes
+pos_customers,pos,,,0,no,yes
+pos_order_payments,pos,,,0,no,yes
+pos_scheduled_prices,pos,,,0,no,yes
+pos_store_credit,pos,,,0,no,yes
+pos_store_credit_transactions,pos,,,0,no,yes
+user_group_app_permissions,shared,,,0,no,yes
+vox_permission_group_permissions,voxire,,,0,no,yes
+vox_permission_groups,voxire,,,0,no,yes
+vox_permissions,voxire,,,0,no,yes
+vox_user_permission_groups,voxire,,,0,no,yes
+vox_users,voxire,,,0,no,yes
+waitlist,shared,,,0,no,yes

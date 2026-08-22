@@ -178,3 +178,11 @@ the point to revisit.
 | Backend             | 2 days: customer-scoped order summary aggregate, per-currency handling, tenant validation |
 | Frontend            | 1 day: panel on the CRM customer page, hidden when POS is absent                          |
 | Ongoing maintenance | ~0.5 days per year                                                                        |
+
+## Backend section (round two)
+
+Confirmed: `ListOrdersRequest.session_id` remains `@required @gt(0)`
+(`packages/voxie/api/pos/orders/v1/models.onk:145`); a customer-scoped order
+query still cannot be expressed.
+
+*Round two (2026-08-22): confirmed unchanged.*

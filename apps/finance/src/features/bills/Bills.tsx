@@ -12,6 +12,7 @@ import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useBills } from './useBills';
 import { useCreateBill, useUpdateBill } from '../../shared/hooks/queries/useBills';
+import { useErpReceivedPurchaseOrders } from '../../shared/hooks/queries/useErpReceivedPurchaseOrders';
 import { useSettings } from '../../shared/lib/settings';
 import {
   cardStyle,
@@ -56,14 +57,21 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
       toast.error(t('bills.amountPositive'));
       return;
     }
-    const derivedSupplierId =
-      form.vendor
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '-') || '1';
     createBill.mutate(
       {
-        supplierId: derivedSupplierId,
+        // No supplierId. This form has no ERP supplier picker, so every bill it
+        // creates is a one-off, and the contract is explicit that supplier_id is
+        // omitted in that case and that callers must never send a derived or
+        // placeholder value.
+        //
+        // It used to send a slug of the vendor name. That was not merely against
+        // the contract's intent, it never worked: supplier_id is an int64, which
+        // OneKit carries as a numeric string, and the generated validator
+        // rejected anything failing /^-?(0|[1-9][0-9]*)$/. So "acme-corp" failed
+        // client-side validation, and a vendor name with no alphanumerics fell
+        // back to '1' and posted a real but wrong supplier. Bill creation was
+        // broken for any vendor whose name contains a letter.
+        supplierName: form.vendor.trim(),
         amount: form.amount,
         currency: baseCurrency ?? 'USD',
         dueDate: form.dueDate,
@@ -95,7 +103,8 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
           <button type="button" style={ghostBtn} onClick={onClose} disabled={createBill.isPending}>
             {t('common.cancel')}
           </button>
-          <button type="button"
+          <button
+            type="button"
             style={{ ...primaryBtn, opacity: createBill.isPending ? 0.6 : 1 }}
             onClick={handleSubmit}
             disabled={createBill.isPending}
@@ -149,6 +158,9 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
 const Bills: React.FC = () => {
   const { t } = useTranslation();
   const { data = [], isLoading } = useBills();
+  // ERP->FIN-03: received purchase orders are a payables commitment Finance
+  // cannot see today. Hidden entirely when ERP is absent; never zero-filled.
+  const { data: receivedPos } = useErpReceivedPurchaseOrders();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showCreate, setShowCreate] = useState(false);
 
@@ -209,7 +221,12 @@ const Bills: React.FC = () => {
                 <CheckCircle size={13} /> Pay selected ({selected.size})
               </button>
             )}
-            <button type="button" style={ghostBtn} aria-label="New Bill" onClick={() => setShowCreate(true)}>
+            <button
+              type="button"
+              style={ghostBtn}
+              aria-label="New Bill"
+              onClick={() => setShowCreate(true)}
+            >
               <Plus size={13} /> {t('bills.new')}
             </button>
           </>
@@ -217,6 +234,48 @@ const Bills: React.FC = () => {
       />
 
       <NewBillModal open={showCreate} onClose={() => setShowCreate(false)} />
+
+      {receivedPos && receivedPos.length > 0 && (
+        <div
+          style={{
+            ...cardStyle,
+            padding: 16,
+            border: '1px solid var(--finance-info)',
+          }}
+          role="region"
+          aria-label={t('bills.receivedFromErp')}
+        >
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--hub-text)' }}>
+            {t('bills.receivedFromErp')} ({receivedPos.length})
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)', marginTop: 2 }}>
+            {t('bills.receivedFromErpHint')}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 10 }}>
+            {receivedPos.slice(0, 5).map((po) => (
+              <div
+                key={po.id}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: 12,
+                  color: 'var(--hub-text)',
+                }}
+              >
+                <span>{po.poNumber || po.id}</span>
+                <span style={{ fontWeight: 600 }}>
+                  <MoneyDisplay amount={po.total} />
+                </span>
+              </div>
+            ))}
+            {receivedPos.length > 5 && (
+              <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>
+                +{receivedPos.length - 5}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {isLoading ? (
         <div style={{ ...cardStyle, padding: 20 }}>
@@ -312,7 +371,8 @@ const Bills: React.FC = () => {
                   </td>
                   <td style={{ padding: '12px 16px' }}>
                     {b.status === 'unpaid' || b.status === 'overdue' ? (
-                      <button type="button"
+                      <button
+                        type="button"
                         style={{
                           ...ghostBtn,
                           padding: '4px 10px',

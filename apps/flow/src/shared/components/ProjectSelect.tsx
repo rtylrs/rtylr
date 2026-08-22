@@ -19,9 +19,10 @@ export const ProjectSelect: React.FC<ProjectSelectProps> = ({
 
   return (
     <div className="relative">
-      <button type="button"
+      <button
+        type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 px-2.5 py-1.5 rounded text-[12px] transition-colors hover:bg-[var(--flow-hover)] w-full"
+        className="flex items-center gap-2 px-2.5 py-1.5 rounded-sm text-[12px] transition-colors hover:bg-[var(--flow-hover)] w-full"
         style={{
           color: current ? 'var(--flow-text)' : 'var(--flow-text-muted)',
           background: 'var(--flow-input-bg)',
@@ -40,7 +41,7 @@ export const ProjectSelect: React.FC<ProjectSelectProps> = ({
       </button>
       {open && (
         <div
-          className="absolute top-full start-0 mt-1 rounded-lg py-1 z-50 min-w-full max-h-60 overflow-y-auto"
+          className="absolute top-full start-0 mt-1 rounded-lg py-1 z-50 min-w-full max-h-[240px] overflow-y-auto"
           style={{
             background: 'var(--flow-card)',
             border: '1px solid var(--flow-border)',
@@ -48,7 +49,8 @@ export const ProjectSelect: React.FC<ProjectSelectProps> = ({
           }}
         >
           {projects.map((p) => (
-            <button type="button"
+            <button
+              type="button"
               key={p.id}
               onClick={() => {
                 onChange(p.id);

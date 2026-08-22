@@ -1,0 +1,158 @@
+file,domain,tables_created,tables_altered,view_count,has_contract_domain
+internal/platform/database/schemas/_perf/005_perf_indexes.sql,_perf,,,0,no
+internal/platform/database/schemas/ai/ai_views.sql,ai,,,0,no
+internal/platform/database/schemas/book/schema.sql,book,booking_appointments booking_reminders booking_resources booking_services booking_waitlist,,0,no
+internal/platform/database/schemas/book/zz_booking_tenant_indexes.sql,book,,booking_appointments,0,no
+internal/platform/database/schemas/book/zz_booking_waitlist_hot_path_indexes.sql,book,,booking_waitlist,0,no
+internal/platform/database/schemas/cdn/cdn_files.sql,cdn,cdn_files,,0,no
+internal/platform/database/schemas/cdn/cdn_transformations.sql,cdn,cdn_transformations,,0,no
+internal/platform/database/schemas/crm/crm_automations.sql,crm,crm_automations,,0,yes
+internal/platform/database/schemas/crm/crm_customer_timeline.sql,crm,crm_customer_timeline,,0,yes
+internal/platform/database/schemas/crm/crm_feedback.sql,crm,crm_feedback,,0,yes
+internal/platform/database/schemas/crm/crm_loyalty_rewards.sql,crm,crm_loyalty_rewards,,0,yes
+internal/platform/database/schemas/crm/crm_loyalty_tiers.sql,crm,crm_loyalty_tiers,,0,yes
+internal/platform/database/schemas/crm/crm_settings.sql,crm,crm_settings,,0,yes
+internal/platform/database/schemas/crm/crm_templates.sql,crm,crm_templates,,0,yes
+internal/platform/database/schemas/crm/schema.sql,crm,crm_campaign_sends crm_campaigns crm_customers crm_loyalty_config crm_loyalty_transactions crm_segments,,0,yes
+internal/platform/database/schemas/crm/v2_sales_pipeline.sql,crm,crm_contacts crm_contracts crm_leads crm_touchpoints,,0,yes
+internal/platform/database/schemas/crm/zz_crm_customer_search_indexes.sql,crm,,crm_customers,0,yes
+internal/platform/database/schemas/crm/zz_crm_customer_timeline_page_index.sql,crm,,crm_customer_timeline,0,yes
+internal/platform/database/schemas/crm/zz_crm_hot_path_indexes.sql,crm,,crm_segments crm_templates,0,yes
+internal/platform/database/schemas/crm_migrations/zz_crm_customer_consent.sql,crm_migrations,,crm_customers,0,no
+internal/platform/database/schemas/erp/activity.sql,erp,erp_activity_log,,0,yes
+internal/platform/database/schemas/erp/brands.sql,erp,erp_brands,,0,yes
+internal/platform/database/schemas/erp/inventory_cost_layers.sql,erp,inventory_cost_layers,,0,yes
+internal/platform/database/schemas/erp/migrations/001_constraints.sql,erp,,erp_brands erp_categories erp_inventory_transactions erp_product_variants erp_products erp_purchase_order_items erp_purchase_orders erp_stock_take_items erp_stock_takes erp_stock_transfer_items erp_stock_transfers erp_suppliers erp_warehouses,0,yes
+internal/platform/database/schemas/erp/migrations/002_unified_stock.sql,erp,stock_ledger stock_levels stock_locations,erp_purchase_orders,0,yes
+internal/platform/database/schemas/erp/migrations/003_backfill_stock.sql,erp,,,0,yes
+internal/platform/database/schemas/erp/migrations/004_stock_precision.sql,erp,,erp_product_variants erp_products,0,yes
+internal/platform/database/schemas/erp/migrations/005_product_pim.sql,erp,erp_product_attributes erp_product_images,erp_products,0,yes
+internal/platform/database/schemas/erp/migrations/006_inventory_cost_layers.sql,erp,,,0,yes
+internal/platform/database/schemas/erp/price_lists.sql,erp,erp_price_lists,,0,yes
+internal/platform/database/schemas/erp/product_extras.sql,erp,erp_product_attributes erp_product_images,,0,yes
+internal/platform/database/schemas/erp/schema.sql,erp,erp_categories erp_inventory_transactions erp_products erp_purchase_order_items erp_purchase_orders erp_suppliers,,0,yes
+internal/platform/database/schemas/erp/stock_takes.sql,erp,erp_stock_take_items erp_stock_takes,,0,yes
+internal/platform/database/schemas/erp/stock_transfers.sql,erp,erp_stock_transfer_items erp_stock_transfers,,0,yes
+internal/platform/database/schemas/erp/variants.sql,erp,erp_product_variants,,0,yes
+internal/platform/database/schemas/erp/warehouses.sql,erp,erp_warehouses,,0,yes
+internal/platform/database/schemas/erp/zz_erp_hot_path_indexes.sql,erp,,erp_product_variants stock_ledger,0,yes
+internal/platform/database/schemas/erp/zz_erp_prelaunch_lookup_indexes.sql,erp,,erp_categories erp_inventory_transactions erp_product_attributes erp_product_images erp_products erp_purchase_order_items erp_purchase_orders erp_suppliers,0,yes
+internal/platform/database/schemas/erp/zz_erp_product_search_indexes.sql,erp,,erp_products,0,yes
+internal/platform/database/schemas/finance/schema_v4_bank_feeds.sql,finance,finance_bank_feeds,,0,yes
+internal/platform/database/schemas/finance/schema_v5_reconciliation.sql,finance,finance_reconciliation_matches,,0,yes
+internal/platform/database/schemas/finance/schema.sql,finance,finance_accounts finance_bank_accounts finance_bills finance_expense_categories finance_expenses finance_invoice_items finance_invoices finance_journal_entries finance_journal_lines finance_payments finance_payroll_account_mappings finance_quotes finance_recurring_invoices finance_tax_config,,0,yes
+internal/platform/database/schemas/finance/zz_finance_journal_sources.sql,finance,,finance_journal_entries,0,yes
+internal/platform/database/schemas/finance/zz_finance_payment_constraints.sql,finance,,finance_payments,0,yes
+internal/platform/database/schemas/finance/zz_finance_reconciliation_constraints.sql,finance,,finance_reconciliation_matches,0,yes
+internal/platform/database/schemas/finance/zz_finance_search_indexes.sql,finance,,finance_expenses finance_invoices,0,yes
+internal/platform/database/schemas/finance/zz_finance_tax_config_canonical.sql,finance,,finance_tax_config,0,yes
+internal/platform/database/schemas/finance/zz_finance_tenant_indexes.sql,finance,,finance_bank_accounts finance_bills finance_journal_entries,0,yes
+internal/platform/database/schemas/finance/zz_payroll_account_mappings.sql,finance,finance_payroll_account_mappings,,0,yes
+internal/platform/database/schemas/flow/schema.sql,flow,flow_businesses flow_cycle_tasks flow_cycles flow_labels flow_milestone_tasks flow_milestones flow_notifications flow_project_columns flow_project_members flow_projects flow_task_activity flow_task_attachments flow_task_comments flow_task_dependencies flow_task_focus_pins flow_tasks flow_time_logs flow_user_settings flow_views flow_workspace_members flow_workspaces,,0,yes
+internal/platform/database/schemas/flow/v6_status_backlog.sql,flow,,flow_tasks,0,yes
+internal/platform/database/schemas/flow/v7_task_project_status_index.sql,flow,,flow_tasks,0,yes
+internal/platform/database/schemas/flow/v8_time_tracking.sql,flow,flow_work_day_actions flow_work_days flow_work_types,hr_time_entries,0,yes
+internal/platform/database/schemas/flow/zz_flow_hot_path_indexes.sql,flow,,flow_tasks,0,yes
+internal/platform/database/schemas/flow/zz_flow_project_task_count_index.sql,flow,,flow_tasks,0,yes
+internal/platform/database/schemas/flow/zz_flow_task_search_indexes.sql,flow,,flow_tasks,0,yes
+internal/platform/database/schemas/flow/zz_flow_task_sidebar_fields.sql,flow,IF in,flow_tasks,0,yes
+internal/platform/database/schemas/flow/zz_flow_tenant_indexes.sql,flow,,flow_projects flow_tasks,0,yes
+internal/platform/database/schemas/flow/zz_flow_time_logs_time_entry_id.sql,flow,,flow_time_logs,0,yes
+internal/platform/database/schemas/flow/zz_flow_work_types_description.sql,flow,,flow_work_types,0,yes
+internal/platform/database/schemas/hr/schema.sql,hr,hr_benefit_plans hr_dashboard_widgets hr_departments hr_documents hr_employee_documents hr_one_on_ones hr_payroll_records hr_reviews hr_staff hr_time_off_requests hr_training_courses hr_training_progress,,0,yes
+internal/platform/database/schemas/hr/zz_hr_benefit_enrollments.sql,hr,hr_benefit_enrollments,,0,yes
+internal/platform/database/schemas/hr/zz_hr_staff_profile_fields.sql,hr,,hr_staff,0,yes
+internal/platform/database/schemas/hr/zz_hr_staff_search_indexes.sql,hr,,hr_staff,0,yes
+internal/platform/database/schemas/hr_attendance/schema.sql,hr_attendance,hr_attendance_config hr_attendance_records,,0,no
+internal/platform/database/schemas/hr_core/schema.sql,hr_core,hr_approval_chain_levels hr_approval_chains hr_company_config hr_departments hr_employee_invites hr_employee_roles hr_employees hr_leave_balances hr_locations hr_roles hr_setup_steps hr_work_schedules,,0,no
+internal/platform/database/schemas/hr_core/zz_hr_company_config_directory_enabled.sql,hr_core,IF,hr_company_config,0,no
+internal/platform/database/schemas/hr_core/zz_hr_employee_lookup_indexes.sql,hr_core,,hr_employees,0,no
+internal/platform/database/schemas/hr_dashboard/schema.sql,hr_dashboard,hr_dashboard_widgets,,0,no
+internal/platform/database/schemas/hr_documents/schema.sql,hr_documents,hr_employee_documents,,0,no
+internal/platform/database/schemas/hr_equipment/schema.sql,hr_equipment,hr_assets hr_equipment_requests,,0,no
+internal/platform/database/schemas/hr_leave/schema.sql,hr_leave,hr_leave_balances hr_leave_requests hr_leave_types,,0,no
+internal/platform/database/schemas/hr_onboarding/schema.sql,hr_onboarding,hr_onboarding_checklist_items hr_onboarding_checklist_templates hr_onboarding_employee_checklist_items hr_onboarding_employee_checklists,,0,no
+internal/platform/database/schemas/hr_overtime/schema.sql,hr_overtime,hr_overtime_config hr_overtime_requests,,0,no
+internal/platform/database/schemas/hr_payroll/schema.sql,hr_payroll,hr_payroll_config hr_payroll_entries hr_payroll_runs,,0,no
+internal/platform/database/schemas/hr_payroll/zz_payroll_run_uniqueness.sql,hr_payroll,,hr_payroll_runs,0,no
+internal/platform/database/schemas/hr_performance/schema.sql,hr_performance,hr_performance_config hr_performance_review_cycles hr_performance_review_goals hr_performance_reviews,,0,no
+internal/platform/database/schemas/hr_setup/schema.sql,hr_setup,hr_configs hr_setup_steps,,0,no
+internal/platform/database/schemas/hr_shifts/schema.sql,hr_shifts,hr_shift_assignments hr_shifts,,0,no
+internal/platform/database/schemas/hr_shifts/zz_hr_staff_availability.sql,hr_shifts,hr_staff_availability,,0,no
+internal/platform/database/schemas/hr_time/schema.sql,hr_time,hr_time_entries hr_timesheet_approval_actions hr_timesheets,,0,no
+internal/platform/database/schemas/hr_time/zz_flow_client_key_tenant_scope.sql,hr_time,,hr_time_entries,0,no
+internal/platform/database/schemas/hr_time/zz_hr_billable_export_reference.sql,hr_time,,hr_time_entries,0,no
+internal/platform/database/schemas/hr_time/zz_hr_business_indexes.sql,hr_time,,hr_approval_chain_levels hr_approval_chains hr_attendance_config hr_attendance_records hr_company_config hr_dashboard_widgets hr_departments hr_documents hr_employee_invites hr_employee_roles hr_employees hr_leave_balances hr_leave_requests hr_leave_types hr_locations hr_onboarding_checklist_items hr_onboarding_checklist_templates hr_onboarding_employee_checklist_items hr_onboarding_employee_checklists hr_one_on_ones hr_overtime_config hr_overtime_requests hr_payroll_config hr_payroll_entries hr_payroll_records hr_payroll_runs hr_performance_review_cycles hr_performance_review_goals hr_performance_reviews hr_reviews hr_roles hr_setup_steps hr_shift_assignments hr_staff hr_time_entries hr_time_off_requests hr_timesheet_approval_actions hr_timesheets hr_work_schedules,0,no
+internal/platform/database/schemas/hr_time/zz_hr_time_owner_identity.sql,hr_time,,,0,no
+internal/platform/database/schemas/hr_time/zz_hr_time_project_indexes.sql,hr_time,,hr_time_entries,0,no
+internal/platform/database/schemas/hub/hub_api_keys.sql,hub,hub_api_keys,,0,yes
+internal/platform/database/schemas/hub/hub_integrations.sql,hub,hub_integrations,,0,yes
+internal/platform/database/schemas/hub/hub_menu_banners.sql,hub,hub_menu_banners,,0,yes
+internal/platform/database/schemas/hub/hub_navigation_menus.sql,hub,hub_navigation_menus,,0,yes
+internal/platform/database/schemas/hub/hub_notifications.sql,hub,hub_notifications,,0,yes
+internal/platform/database/schemas/hub/hub_roles.sql,hub,hub_roles,,0,yes
+internal/platform/database/schemas/hub/hub_webhooks.sql,hub,hub_webhooks,,0,yes
+internal/platform/database/schemas/hub/zz_hub_hot_path_indexes.sql,hub,,hub_api_keys hub_notifications hub_webhooks,0,yes
+internal/platform/database/schemas/insights/schema.sql,insights,insights_scheduled_reports insights_settings,,0,yes
+internal/platform/database/schemas/migrations/console_stats_summary.sql,migrations,console_stats,,0,no
+internal/platform/database/schemas/oauth/schema.sql,oauth,oauth_auth_codes oauth_clients oauth_tokens,,0,no
+internal/platform/database/schemas/pos/schema.sql,pos,pos_business_settings pos_combos pos_customers pos_gift_cards pos_locations pos_manager_pins pos_member_locations pos_modifiers pos_order_items pos_orders pos_refunds pos_sessions pos_tables pos_users,,0,yes
+internal/platform/database/schemas/pos/v2_schema.sql,pos,pos_audit_log pos_cash_movements pos_floors pos_loyalty_config pos_loyalty_transactions pos_order_payments pos_scheduled_prices pos_store_credit pos_store_credit_transactions pos_terminals,erp_products pos_customers pos_order_items pos_orders pos_tables,0,yes
+internal/platform/database/schemas/pos/v3_paddle_schema.sql,pos,pos_paddle_events_processed,,0,yes
+internal/platform/database/schemas/pos/zz_pos_order_search_indexes.sql,pos,,pos_orders,0,yes
+internal/platform/database/schemas/pos/zz_pos_prelaunch_lookup_indexes.sql,pos,,pos_locations pos_member_locations pos_orders pos_sessions pos_tables pos_users,0,yes
+internal/platform/database/schemas/pos/zz_pos_users_remove_plaintext_pin.sql,pos,,pos_users,0,yes
+internal/platform/database/schemas/recruit/recruit_v1_base.sql,recruit,careers_customizations careers_submissions,careers,0,no
+internal/platform/database/schemas/recruit/recruit_v2_visuals.sql,recruit,,careers_customizations,0,no
+internal/platform/database/schemas/recruit/recruit_v3_sections.sql,recruit,careers_sections,,0,no
+internal/platform/database/schemas/recruit/recruit_v4_forms.sql,recruit,careers_form_fields,careers_submissions,0,no
+internal/platform/database/schemas/recruit/recruit_v5_seo.sql,recruit,,careers_customizations,0,no
+internal/platform/database/schemas/recruit/recruit_v6_notifications.sql,recruit,,careers_customizations,0,no
+internal/platform/database/schemas/rtylr/chat_sessions.sql,rtylr,chat_sessions,,0,no
+internal/platform/database/schemas/rtylr/conversation_messages.sql,rtylr,conversation_messages,,0,no
+internal/platform/database/schemas/rtylr/conversation_summaries.sql,rtylr,conversation_summaries,,0,no
+internal/platform/database/schemas/rtylr/user_memory.sql,rtylr,user_memory,,0,no
+internal/platform/database/schemas/rtylr/zz_conversation_hot_path_indexes.sql,rtylr,,conversation_messages,0,no
+internal/platform/database/schemas/rtylr/zz_user_memory_search_indexes.sql,rtylr,,user_memory,0,no
+internal/platform/database/schemas/shared/access_requests.sql,shared,access_requests,,0,no
+internal/platform/database/schemas/shared/activity_log.sql,shared,activity_log,,0,no
+internal/platform/database/schemas/shared/addons.sql,shared,addons business_addons manual_addon_grants,,0,no
+internal/platform/database/schemas/shared/ai_cache_events.sql,shared,ai_cache_events,,0,no
+internal/platform/database/schemas/shared/ai_usage.sql,shared,ai_quota_settings ai_usage_monthly,,0,no
+internal/platform/database/schemas/shared/businesses.sql,shared,businesses,,0,no
+internal/platform/database/schemas/shared/config.sql,shared,config,,0,no
+internal/platform/database/schemas/shared/email_jobs.sql,shared,email_jobs,,0,no
+internal/platform/database/schemas/shared/feature_support_desktop_mode_default.sql,shared,,,0,no
+internal/platform/database/schemas/shared/feature_support.sql,shared,feature_flags feature_rule_conditions feature_rules feature_targets,,0,no
+internal/platform/database/schemas/shared/invite_tokens.sql,shared,invite_tokens,,0,no
+internal/platform/database/schemas/shared/self_host_licenses.sql,shared,self_host_licenses,,0,no
+internal/platform/database/schemas/shared/sessions.sql,shared,login_history user_sessions,,0,no
+internal/platform/database/schemas/shared/subscriptions.sql,shared,plans seat_periods subscriptions,,0,no
+internal/platform/database/schemas/shared/theme.sql,shared,themes,,0,no
+internal/platform/database/schemas/shared/user_apps.sql,shared,user_app_permissions,,0,no
+internal/platform/database/schemas/shared/user_groups.sql,shared,user_group_app_permissions user_group_members user_group_resource_permissions user_groups,,0,no
+internal/platform/database/schemas/shared/users.sql,shared,console_stats manual_access_grants users,,0,no
+internal/platform/database/schemas/shared/voxhire.sql,shared,voxhire_company_leads voxhire_talent_applications,,0,no
+internal/platform/database/schemas/shared/waitlist.sql,shared,waitlist,,0,no
+internal/platform/database/schemas/shared/zz_backfill_user_app_permissions_business_id.sql,shared,,,0,no
+internal/platform/database/schemas/shared/zz_config_email_settings.sql,shared,,config,0,no
+internal/platform/database/schemas/shared/zz_config_lookup_indexes.sql,shared,,config,0,no
+internal/platform/database/schemas/shared/zz_config_profile_fields.sql,shared,,config,0,no
+internal/platform/database/schemas/shared/zz_custom_domains.sql,shared,custom_domains,,0,no
+internal/platform/database/schemas/shared/zz_self_host_license_search_indexes.sql,shared,,self_host_licenses,0,no
+internal/platform/database/schemas/store/schema.sql,store,store_categories store_checkouts store_order_items store_orders store_payment_methods store_products store_shipping_methods store_sites store_themes,,0,no
+internal/platform/database/schemas/store/zz_store_tenant_indexes.sql,store,,store_orders,0,no
+internal/platform/database/schemas/support/schema.sql,support,support_articles support_canned_responses support_customers support_messages support_settings support_tickets,,0,yes
+internal/platform/database/schemas/support/zz_support_lookup_indexes.sql,support,,support_articles support_customers,0,yes
+internal/platform/database/schemas/voxire/career_applications.sql,voxire,voxhire_admins voxire_career_applications,,0,no
+internal/platform/database/schemas/voxire/careers.sql,voxire,careers,,0,no
+internal/platform/database/schemas/voxire/clients.sql,voxire,clients,,0,no
+internal/platform/database/schemas/voxire/expenses.sql,voxire,expenses,,0,no
+internal/platform/database/schemas/voxire/faq.sql,voxire,faq,,0,no
+internal/platform/database/schemas/voxire/vox_permission_group_permissions.sql,voxire,vox_permission_group_permissions,,0,no
+internal/platform/database/schemas/voxire/vox_permission_groups.sql,voxire,vox_permission_groups,,0,no
+internal/platform/database/schemas/voxire/vox_permissions.sql,voxire,vox_permissions,,0,no
+internal/platform/database/schemas/voxire/vox_user_permission_groups.sql,voxire,vox_user_permission_groups,,0,no
+internal/platform/database/schemas/voxire/vox_users.sql,voxire,vox_users,,0,no
+internal/platform/database/schemas/voxire/website_leads.sql,voxire,voxire_website_leads,,0,no
+internal/platform/database/schemas/voxire/zz_voxhire_application_job_status_index.sql,voxire,,voxire_career_applications,0,no

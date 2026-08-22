@@ -96,7 +96,7 @@ const Insights: React.FC = () => {
           {data.burndown.length === 0 ? (
             <EmptyChart onGoToCycles={() => navigate({ to: '/cycles' })} />
           ) : (
-            <div className="relative h-40">
+            <div className="relative h-[160px]">
               <svg width="100%" height="100%" viewBox="0 0 400 160" preserveAspectRatio="none">
                 <defs>
                   <linearGradient id="bgrad" x1="0" x2="0" y1="0" y2="1">
@@ -142,14 +142,14 @@ const Insights: React.FC = () => {
 
         <div className="grid grid-cols-2 gap-4">
           <ChartCard title={t('common.insights.throughput')}>
-            <div className="flex items-end gap-2 h-40">
+            <div className="flex items-end gap-2 h-[160px]">
               {data.throughput.map((t) => (
                 <div key={t.week} className="flex-1 flex flex-col items-center gap-1">
                   <motion.div
                     initial={{ height: 0 }}
                     animate={{ height: `${(t.completed / maxThroughput) * 100}%` }}
                     transition={{ duration: 0.4 }}
-                    className="w-full rounded-t"
+                    className="w-full rounded-t-sm"
                     style={{ background: '#4583C4' }}
                   />
                   <span className="text-[9px]" style={{ color: 'var(--flow-text-dim)' }}>
@@ -192,7 +192,10 @@ const Insights: React.FC = () => {
           <div className="space-y-2">
             {data.timeByMember.map((m) => (
               <div key={m.id} className="flex items-center gap-3">
-                <span className="text-[12px] w-24 shrink-0" style={{ color: 'var(--flow-text)' }}>
+                <span
+                  className="text-[12px] w-[96px] shrink-0"
+                  style={{ color: 'var(--flow-text)' }}
+                >
                   {m.name}
                 </span>
                 <div
@@ -275,7 +278,7 @@ const ChartCard: React.FC<{ title: string; children: React.ReactNode }> = ({ tit
 const EmptyChart: React.FC<{ onGoToCycles: () => void }> = ({ onGoToCycles }) => {
   const { t } = useTranslation();
   return (
-    <div className="flex h-40 items-center justify-center">
+    <div className="flex h-[160px] items-center justify-center">
       <EmptyState
         icon={BarChart3}
         title={t('common.insights.noData')}
