@@ -174,96 +174,120 @@ const CampaignDetail: React.FC = () => {
               >
                 Engagement by day
               </h4>
-              <div
-                style={{ display: 'flex', alignItems: 'flex-end', gap: '10px', height: '160px' }}
-              >
-                {stats.timeline.map((t, i) => {
-                  const max = Math.max(1, ...stats.timeline.map((x) => x.opens));
-                  const openH = (t.opens / max) * 130;
-                  const clickH = (t.clicks / max) * 130;
-                  return (
-                    <div
-                      key={[t.day, i].join('-')}
+              {stats.timeline.length === 0 ? (
+                <p
+                  style={{
+                    color: 'var(--hub-text-muted)',
+                    fontSize: '13px',
+                    margin: 0,
+                    padding: '36px 0',
+                    textAlign: 'center',
+                  }}
+                >
+                  Day-by-day engagement data is not available yet.
+                </p>
+              ) : (
+                <>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-end',
+                      gap: '10px',
+                      minHeight: '160px',
+                      overflowX: 'auto',
+                    }}
+                  >
+                    {stats.timeline.map((t, i) => {
+                      const max = Math.max(1, ...stats.timeline.map((x) => x.opens));
+                      const openH = (t.opens / max) * 130;
+                      const clickH = (t.clicks / max) * 130;
+                      return (
+                        <div
+                          key={[t.day, i].join('-')}
+                          style={{
+                            flex: '1 0 42px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '6px',
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: 'flex',
+                              gap: '4px',
+                              alignItems: 'flex-end',
+                              height: '130px',
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: '14px',
+                                height: `${openH}px`,
+                                background: '#3b82f6',
+                                borderRadius: '3px 3px 0 0',
+                              }}
+                            />
+                            <div
+                              style={{
+                                width: '14px',
+                                height: `${clickH}px`,
+                                background: '#8b5cf6',
+                                borderRadius: '3px 3px 0 0',
+                              }}
+                            />
+                          </div>
+                          <span style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                            {t.day}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div
+                    style={{ display: 'flex', gap: '16px', marginTop: '16px', fontSize: '11px' }}
+                  >
+                    <span
                       style={{
-                        flex: 1,
                         display: 'flex',
-                        flexDirection: 'column',
                         alignItems: 'center',
-                        gap: '6px',
+                        gap: '4px',
+                        color: 'var(--hub-text-muted)',
                       }}
                     >
-                      <div
+                      <span
                         style={{
-                          display: 'flex',
-                          gap: '4px',
-                          alignItems: 'flex-end',
-                          height: '130px',
+                          width: '10px',
+                          height: '10px',
+                          background: '#3b82f6',
+                          borderRadius: '2px',
+                          display: 'inline-block',
                         }}
-                      >
-                        <div
-                          style={{
-                            width: '14px',
-                            height: `${openH}px`,
-                            background: '#3b82f6',
-                            borderRadius: '3px 3px 0 0',
-                          }}
-                        />
-                        <div
-                          style={{
-                            width: '14px',
-                            height: `${clickH}px`,
-                            background: '#8b5cf6',
-                            borderRadius: '3px 3px 0 0',
-                          }}
-                        />
-                      </div>
-                      <span style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                        {t.day}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-              <div style={{ display: 'flex', gap: '16px', marginTop: '16px', fontSize: '11px' }}>
-                <span
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    color: 'var(--hub-text-muted)',
-                  }}
-                >
-                  <span
-                    style={{
-                      width: '10px',
-                      height: '10px',
-                      background: '#3b82f6',
-                      borderRadius: '2px',
-                      display: 'inline-block',
-                    }}
-                  />{' '}
-                  Opens
-                </span>
-                <span
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    color: 'var(--hub-text-muted)',
-                  }}
-                >
-                  <span
-                    style={{
-                      width: '10px',
-                      height: '10px',
-                      background: '#8b5cf6',
-                      borderRadius: '2px',
-                      display: 'inline-block',
-                    }}
-                  />{' '}
-                  Clicks
-                </span>
-              </div>
+                      />{' '}
+                      Opens
+                    </span>
+                    <span
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        color: 'var(--hub-text-muted)',
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: '10px',
+                          height: '10px',
+                          background: '#8b5cf6',
+                          borderRadius: '2px',
+                          display: 'inline-block',
+                        }}
+                      />{' '}
+                      Clicks
+                    </span>
+                  </div>
+                </>
+              )}
             </Card>
           </>
         )}
