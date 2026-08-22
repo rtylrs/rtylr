@@ -151,6 +151,7 @@ const Loyalty: React.FC = () => {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
                   type="button"
+                  aria-label="Decrease points per dollar"
                   onClick={() => setPointsPerDollar((v) => Math.max(1, v - 1))}
                   style={{
                     width: '32px',
@@ -181,6 +182,7 @@ const Loyalty: React.FC = () => {
                 </span>
                 <button
                   type="button"
+                  aria-label="Increase points per dollar"
                   onClick={() => setPointsPerDollar((v) => Math.min(10, v + 1))}
                   style={{
                     width: '32px',

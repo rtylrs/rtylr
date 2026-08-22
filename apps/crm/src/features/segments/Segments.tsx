@@ -158,6 +158,7 @@ function RuleBuilder({
           </div>
           <button
             type="button"
+            aria-label="Close segment builder"
             onClick={onClose}
             style={{
               background: 'none',
@@ -267,6 +268,7 @@ function RuleBuilder({
                 {rules.length > 1 && (
                   <button
                     type="button"
+                    aria-label="Remove rule"
                     onClick={() => removeRule(rule.id)}
                     style={{
                       background: 'none',

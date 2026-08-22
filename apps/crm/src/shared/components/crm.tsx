@@ -194,6 +194,7 @@ export const TagChip: React.FC<{
     {onRemove && (
       <button
         type="button"
+        aria-label={`Remove ${label}`}
         disabled={disabled}
         onClick={onRemove}
         style={{
@@ -543,6 +544,7 @@ export const SegmentRuleRow: React.FC<{
     />
     <button
       type="button"
+      aria-label="Remove rule"
       onClick={onRemove}
       style={{
         background: 'transparent',
@@ -606,6 +608,7 @@ export const AutomationNode: React.FC<{
         {onRemove && (
           <button
             type="button"
+            aria-label={`Remove ${label}`}
             onClick={onRemove}
             style={{
               marginLeft: 'auto',

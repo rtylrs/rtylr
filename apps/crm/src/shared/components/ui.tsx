@@ -255,6 +255,7 @@ export const Modal: React.FC<{
           </h3>
           <button
             type="button"
+            aria-label="Close"
             onClick={onClose}
             style={{
               background: 'transparent',
