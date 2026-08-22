@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"time"
 
@@ -505,7 +506,7 @@ func (s *Service) CreatePaddlePayment(ctx context.Context, ownerID, orderID int6
 		return PaddlePaymentResult{}, errors.New("order already paid")
 	}
 
-	amountMinor := int64(order.Total * 100)
+	amountMinor := int64(math.Round(order.Total * 100))
 	if amountMinor <= 0 {
 		return PaddlePaymentResult{}, errors.New("order total must be positive")
 	}

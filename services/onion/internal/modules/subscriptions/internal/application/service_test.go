@@ -13,36 +13,38 @@ import (
 // ─── mock repository ──────────────────────────────────────────────────────────
 
 type mockRepo struct {
-	plans              []domain.Plan
-	plan               *domain.Plan
-	planSlug           string
-	subscription       *domain.Subscription
-	getSubCalls        int
-	ownerApps          []string
-	billingHistory     []domain.BillingHistoryMonth
-	addonPeriods       []domain.AddonBillingPeriod
-	activePeriod       *domain.SeatPeriod
-	ownerID            int64
-	upsertOwnerID      int64
-	upsertPlanID       int64
-	upsertTrialDays    int
-	upsertSeatCount    int
-	activeSeats        int
-	listPlansErr       error
-	planBySlugErr      error
-	getSubErr          error
-	upsertSubErr       error
-	countSeatsErr      error
-	getAppsErr         error
-	getPeriodsErr      error
-	getAddonPeriodsErr error
-	getActivePeriodErr error
-	closePeriodErr     error
-	openPeriodErr      error
-	updateSeatErr      error
-	billingHistErr     error
-	paddleUpdateErr    error
-	paddleOwnerErr     error
+	eventNew            bool
+	paddleUpdateMissing bool
+	plans               []domain.Plan
+	plan                *domain.Plan
+	planSlug            string
+	subscription        *domain.Subscription
+	getSubCalls         int
+	ownerApps           []string
+	billingHistory      []domain.BillingHistoryMonth
+	addonPeriods        []domain.AddonBillingPeriod
+	activePeriod        *domain.SeatPeriod
+	ownerID             int64
+	upsertOwnerID       int64
+	upsertPlanID        int64
+	upsertTrialDays     int
+	upsertSeatCount     int
+	activeSeats         int
+	listPlansErr        error
+	planBySlugErr       error
+	getSubErr           error
+	upsertSubErr        error
+	countSeatsErr       error
+	getAppsErr          error
+	getPeriodsErr       error
+	getAddonPeriodsErr  error
+	getActivePeriodErr  error
+	closePeriodErr      error
+	openPeriodErr       error
+	updateSeatErr       error
+	billingHistErr      error
+	paddleUpdateErr     error
+	paddleOwnerErr      error
 }
 
 func (m *mockRepo) ListPlans(_ context.Context) ([]domain.Plan, error) {
@@ -122,8 +124,32 @@ func (m *mockRepo) GetBillingHistory(_ context.Context, _ int64, _ int) ([]domai
 	return m.billingHistory, m.billingHistErr
 }
 
-func (m *mockRepo) UpdatePaddleSubscription(_ context.Context, _ int64, _, _, _ string) error {
-	return m.paddleUpdateErr
+func (m *mockRepo) UpdatePaddleSubscription(_ context.Context, _ int64, _, _, _ string) (bool, error) {
+	return !m.paddleUpdateMissing, m.paddleUpdateErr
+}
+
+func (m *mockRepo) ApplyPaddleSubscriptionEvent(_ context.Context, _, _ string, _ time.Time, fallbackOwnerID int64, _, _ string) (bool, int64, error) {
+	if !m.eventNew {
+		return false, 0, nil
+	}
+	if m.paddleUpdateErr != nil {
+		return false, 0, m.paddleUpdateErr
+	}
+	if m.paddleUpdateMissing {
+		return false, 0, errors.New("no subscription row")
+	}
+	if m.paddleOwnerErr != nil && fallbackOwnerID == 0 {
+		return false, 0, m.paddleOwnerErr
+	}
+	return m.eventNew, fallbackOwnerID, nil
+}
+
+func (m *mockRepo) RecordPaddleEvent(_ context.Context, _, _ string, _ time.Time) (bool, error) {
+	return m.eventNew, nil
+}
+
+func (m *mockRepo) LastPaddleEventAt(_ context.Context, _ string) (time.Time, bool, error) {
+	return time.Time{}, false, nil
 }
 
 func (m *mockRepo) GetOwnerIDByPaddleSubscription(_ context.Context, _ string) (int64, error) {
@@ -339,16 +365,16 @@ func TestHandlePaddleWebhook_ResolvesOwnerFromCustomData(t *testing.T) {
 		Status:     "active",
 		CustomData: map[string]string{"owner_id": "42"},
 	}
-	err := s.HandlePaddleWebhook(context.Background(), paddlePkg.WebhookEvent{}, data)
-	// Will fail at UpdatePaddleSubscription since the mock returns nil for that,
-	// meaning the owner resolution succeeded and we got to the repo call.
+	err := s.HandlePaddleWebhook(context.Background(), paddlePkg.WebhookEvent{EventID: "evt_owner"}, data)
+	// The transaction mock treats this as a duplicate after the fallback owner
+	// was parsed, so the handler acknowledges it without a second write.
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
 
 func TestHandlePaddleWebhook_FailsWithNoOwnerInfo(t *testing.T) {
-	s := &Service{repo: &mockRepo{paddleOwnerErr: errors.New("not found")}}
+	s := &Service{repo: &mockRepo{paddleOwnerErr: errors.New("not found"), eventNew: true}}
 	data := paddlePkg.SubscriptionData{
 		ID:         "sub_xyz",
 		Status:     "active",
@@ -375,5 +401,61 @@ func TestComputeLineItem_PeriodEndPreservedOnResult(t *testing.T) {
 	li := computeLineItem(1, 100, billing, &end, billing)
 	if li.PeriodEnd == nil {
 		t.Error("expected PeriodEnd to be preserved")
+	}
+}
+
+func TestHandlePaddleWebhook_DuplicateEventAckedWithoutProcessing(t *testing.T) {
+	// A redelivered event_id must short-circuit before any owner resolution or
+	// status write, so Paddle retries cannot re-apply stale transitions.
+	s := &Service{repo: &mockRepo{paddleOwnerErr: errors.New("must not be reached")}}
+	data := paddlePkg.SubscriptionData{
+		ID:         "sub_dup",
+		Status:     "active",
+		CustomData: map[string]string{},
+	}
+	event := paddlePkg.WebhookEvent{EventID: "evt_1", EventType: "subscription.updated"}
+	if err := s.HandlePaddleWebhook(context.Background(), event, data); err != nil {
+		t.Fatalf("duplicate event should ack cleanly, got %v", err)
+	}
+}
+
+func TestHandlePaddleWebhook_MissingRowReturnsErrorForRetry(t *testing.T) {
+	// RowsAffected==0 must surface as an error so the handler answers 500 and
+	// Paddle retries after the lazily-created subscription row exists (#755).
+	s := &Service{repo: &mockRepo{
+		eventNew:            true,
+		paddleUpdateMissing: true,
+	}}
+	data := paddlePkg.SubscriptionData{
+		ID:         "sub_missing",
+		Status:     "active",
+		CustomData: map[string]string{"owner_id": "42"},
+	}
+	if err := s.HandlePaddleWebhook(context.Background(), paddlePkg.WebhookEvent{EventID: "evt_2"}, data); err == nil {
+		t.Fatal("expected error when no subscription row matched")
+	}
+}
+
+func TestMapPaddleStatus(t *testing.T) {
+	cases := map[string]string{
+		"active":    "active",
+		"trialing":  "trial",
+		"past_due":  "past_due",
+		"canceled":  "cancelled",
+		"paused":    "cancelled",
+		"expired":   "expired",
+		"scheduled": "",
+	}
+	for in, want := range cases {
+		got, ok := mapPaddleStatus(in)
+		if want == "" {
+			if ok {
+				t.Errorf("mapPaddleStatus(%q) accepted unknown status", in)
+			}
+			continue
+		}
+		if !ok || got != want {
+			t.Errorf("mapPaddleStatus(%q) = %q,%v; want %q", in, got, ok, want)
+		}
 	}
 }

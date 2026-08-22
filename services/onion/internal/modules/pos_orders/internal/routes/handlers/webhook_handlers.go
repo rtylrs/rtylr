@@ -68,7 +68,10 @@ func PaddlePOSWebhookHTTPHandler(service *application.Service) http.HandlerFunc 
 				logger.String("transaction_id", tx.ID),
 				logger.Error(handleErr),
 			)
-			// Always ack 200 to prevent Paddle retries on business logic errors.
+			// Unexpected errors must 500 so Paddle retries; acking 200 here
+			// permanently dropped billing events on transient failures (#755).
+			http.Error(w, `{"error":"failed to process transaction"}`, http.StatusInternalServerError)
+			return
 		}
 
 		w.WriteHeader(http.StatusOK)
