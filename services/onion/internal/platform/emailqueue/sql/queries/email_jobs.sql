@@ -39,3 +39,8 @@ SET status = CASE WHEN attempts + 1 >= max_attempts THEN 'failed' ELSE 'pending'
     job_id = NULL,
     last_error = COALESCE(last_error, 'worker claim expired during delivery')
 WHERE status = 'processing' AND updated_at < DATE_SUB(NOW(), INTERVAL 5 MINUTE);
+
+-- name: DeleteFinishedJobsOlderThan :execrows
+DELETE FROM email_jobs
+WHERE status IN ('sent', 'failed')
+  AND created_at < ?;
