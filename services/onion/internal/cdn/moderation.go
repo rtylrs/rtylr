@@ -32,6 +32,7 @@ var ErrImageBlocked = errors.New("image rejected by content moderation")
 // provider. Larger images skip the check (fail-open) rather than shipping
 // tens of megabytes to an external API per upload.
 const moderationMaxBytes = 8 << 20 // 8 MiB
+const moderationMaxPixels int64 = 24_000_000
 
 // ImageModerator decides whether an uploaded image is allowed. Implementations
 // must be safe for concurrent use.
@@ -120,6 +121,13 @@ func (m *openAIModerator) Check(ctx context.Context, mimeType string, data []byt
 type localNudeModerator struct{}
 
 func (m *localNudeModerator) Check(_ context.Context, _ string, data []byte) (bool, string, error) {
+	config, _, err := image.DecodeConfig(bytes.NewReader(data))
+	if err != nil {
+		return false, "", fmt.Errorf("reading image metadata for moderation: %w", err)
+	}
+	if config.Width <= 0 || config.Height <= 0 || int64(config.Width)*int64(config.Height) > moderationMaxPixels {
+		return false, "", fmt.Errorf("image dimensions exceed moderation limit")
+	}
 	img, _, err := image.Decode(bytes.NewReader(data))
 	if err != nil {
 		return false, "", fmt.Errorf("decoding image for moderation: %w", err)

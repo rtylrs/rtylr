@@ -38,6 +38,20 @@ func TestParamsValidate_ChainMode(t *testing.T) {
 	}
 }
 
+func TestParamsValidate_ChainModeRejectsUnboundedGeometryAndEffects(t *testing.T) {
+	for _, chain := range []string{
+		"w_20000",
+		"z_30",
+		"e_blur:5000",
+		"e_median:99",
+	} {
+		p := Params{Chain: chain, Format: "webp", Quality: 80}
+		if err := p.Validate(); err == nil {
+			t.Errorf("chain %q should be rejected", chain)
+		}
+	}
+}
+
 func TestParamsCLIArgs_ChainMode(t *testing.T) {
 	p := Params{Chain: "w_400,c_fill,e_blur:300", Format: "WEBP", Quality: 80}
 	args := strings.Join(p.CLIArgs("/in", "/out"), " ")

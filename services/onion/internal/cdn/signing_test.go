@@ -41,3 +41,10 @@ func TestSignedDeliveryRejectsTamperedQuery(t *testing.T) {
 		t.Fatalf("status=%d body=%q", rec.Code, rec.Body.String())
 	}
 }
+
+func TestDeliveryCacheControlPrivateForSignedRequests(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/files/id?expires=1&sig=x", nil)
+	if got := deliveryCacheControl(req); got != "private, no-store" {
+		t.Fatalf("signed cache control = %q", got)
+	}
+}

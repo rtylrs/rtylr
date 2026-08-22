@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -24,20 +25,21 @@ import (
 //  3. a normal signed app JWT, so browser apps can upload directly to the
 //     upload runmode without proxying bytes through the API runmode.
 //
-// When no shared key is configured the middleware is a no-op (local dev only),
-// preserving the historical "auth disabled if unset" behaviour. The user-key
-// path stays active regardless so DB-backed keys work in every environment.
+// When no shared key is configured the middleware is open only in an explicit
+// development environment. The user-key path stays active regardless so
+// DB-backed keys and app JWTs work in every environment.
 func (c *CDN) apiKeyAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 
-		// Shared key path (back-compat). Empty configured key => dev-open.
-		if c.apiKey == "" {
+		// An explicitly configured development environment may intentionally run
+		// without a shared service key. Empty/unknown environments fail closed.
+		if c.apiKey == "" && cdnDevelopmentEnvironment() && token == "" {
 			next.ServeHTTP(w, r)
 			return
 		}
 		// Constant-time compare so a timing side-channel can't reveal the key.
-		if token != "" && subtle.ConstantTimeCompare([]byte(token), []byte(c.apiKey)) == 1 {
+		if c.apiKey != "" && token != "" && subtle.ConstantTimeCompare([]byte(token), []byte(c.apiKey)) == 1 {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -58,6 +60,34 @@ func (c *CDN) apiKeyAuth(next http.Handler) http.Handler {
 
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 	})
+}
+
+func cdnDevelopmentEnvironment() bool {
+	env := strings.ToLower(strings.TrimSpace(os.Getenv("APP_ENV")))
+	if config.GlobalConfig != nil && strings.TrimSpace(config.GlobalConfig.AppEnv) != "" {
+		env = strings.ToLower(strings.TrimSpace(config.GlobalConfig.AppEnv))
+	}
+	switch env {
+	case "dev", "development", "local", "test":
+		return true
+	default:
+		return false
+	}
+}
+
+// ValidateSecurityConfig lets the upload runmode fail at startup rather than
+// waiting for the first write request to reveal a missing production secret.
+func ValidateSecurityConfig(appEnv, apiKey string) error {
+	if strings.TrimSpace(apiKey) == "" {
+		env := strings.ToLower(strings.TrimSpace(appEnv))
+		switch env {
+		case "dev", "development", "local", "test":
+			return nil
+		default:
+			return fmt.Errorf("CDN_API_KEY is required outside development environments")
+		}
+	}
+	return nil
 }
 
 type uploadJWTClaims struct {

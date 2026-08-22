@@ -53,3 +53,18 @@ func TestLoadAndValidate_RejectsShortJWTSecret(t *testing.T) {
 		t.Fatal("expected short JWT_SECRET to fail validation")
 	}
 }
+
+func TestPositiveEnvIntOrDefaultRejectsNonPositiveCaps(t *testing.T) {
+	t.Setenv("CDN_MAX_UPLOAD_MB", "0")
+	if got := positiveEnvIntOrDefault("CDN_MAX_UPLOAD_MB", 100); got != 100 {
+		t.Fatalf("zero cap = %d, want fallback 100", got)
+	}
+	t.Setenv("CDN_MAX_UPLOAD_MB", "-5")
+	if got := positiveEnvIntOrDefault("CDN_MAX_UPLOAD_MB", 100); got != 100 {
+		t.Fatalf("negative cap = %d, want fallback 100", got)
+	}
+	t.Setenv("CDN_MAX_UPLOAD_MB", "25")
+	if got := positiveEnvIntOrDefault("CDN_MAX_UPLOAD_MB", 100); got != 25 {
+		t.Fatalf("positive cap = %d, want 25", got)
+	}
+}

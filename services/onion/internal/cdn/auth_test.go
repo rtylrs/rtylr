@@ -14,6 +14,7 @@ func TestAPIKeyAuth(t *testing.T) {
 	})
 
 	t.Run("dev-open when no shared key is configured", func(t *testing.T) {
+		t.Setenv("APP_ENV", "development")
 		c := &CDN{apiKey: ""}
 		rec := httptest.NewRecorder()
 		c.apiKeyAuth(next).ServeHTTP(rec, httptest.NewRequest("POST", "/upload", nil))
@@ -41,4 +42,23 @@ func TestAPIKeyAuth(t *testing.T) {
 			t.Errorf("expected 401, got %d", rec.Code)
 		}
 	})
+
+	t.Run("fails closed without a key outside development", func(t *testing.T) {
+		t.Setenv("APP_ENV", "production")
+		c := &CDN{apiKey: ""}
+		rec := httptest.NewRecorder()
+		c.apiKeyAuth(next).ServeHTTP(rec, httptest.NewRequest("POST", "/upload", nil))
+		if rec.Code != http.StatusUnauthorized {
+			t.Errorf("expected 401, got %d", rec.Code)
+		}
+	})
+}
+
+func TestValidateSecurityConfig(t *testing.T) {
+	if err := ValidateSecurityConfig("production", ""); err == nil {
+		t.Fatal("expected production without CDN_API_KEY to fail")
+	}
+	if err := ValidateSecurityConfig("development", ""); err != nil {
+		t.Fatalf("development without CDN_API_KEY should be allowed: %v", err)
+	}
 }

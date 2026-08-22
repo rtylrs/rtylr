@@ -44,7 +44,7 @@ func TestDefaultUsesFlociWhenEnabled(t *testing.T) {
 		t.Fatalf("Bucket() = %q, want %q", got, want)
 	}
 
-	url, err := client.PresignUpload(context.Background(), "resumes/test.pdf", "application/pdf", time.Minute)
+	url, err := client.PresignUpload(context.Background(), "resumes/test.pdf", "application/pdf", MaxResumeBytes, time.Minute)
 	if err != nil {
 		t.Fatalf("PresignUpload() returned error: %v", err)
 	}

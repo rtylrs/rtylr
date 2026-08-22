@@ -208,12 +208,16 @@ type ObjectMetadata struct {
 // PresignUpload returns a short-lived PUT URL the browser can upload
 // to directly. The key is caller-controlled; the content-type lock
 // means a candidate can't swap a PDF for an executable after signing.
-func (c *Client) PresignUpload(ctx context.Context, key, contentType string, expiresIn time.Duration) (string, error) {
+func (c *Client) PresignUpload(ctx context.Context, key, contentType string, contentLength int64, expiresIn time.Duration) (string, error) {
+	if contentLength <= 0 {
+		return "", fmt.Errorf("content length must be positive")
+	}
 	presign := s3.NewPresignClient(c.s3)
 	req, err := presign.PresignPutObject(ctx, &s3.PutObjectInput{
-		Bucket:      aws.String(c.bucket),
-		Key:         aws.String(key),
-		ContentType: aws.String(contentType),
+		Bucket:        aws.String(c.bucket),
+		Key:           aws.String(key),
+		ContentType:   aws.String(contentType),
+		ContentLength: aws.Int64(contentLength),
 	}, func(opts *s3.PresignOptions) {
 		opts.Expires = expiresIn
 	})

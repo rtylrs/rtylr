@@ -302,7 +302,7 @@ func (c *CDN) serveStorageKeyImage(w http.ResponseWriter, r *http.Request, key s
 	}
 	if uploadURLShouldTransform(parsed, mimeType) && r.Method == http.MethodHead {
 		w.Header().Set("Content-Type", mimeForFormat(parsed.params.Format))
-		w.Header().Set("Cache-Control", uploadURLCacheControl)
+		w.Header().Set("Cache-Control", deliveryCacheControl(r))
 		setImageVariantHeaders(w, parsed.params, parsed.varyAccept, uploadURLSurrogateKey("storage:"+key), parsed.surrogateKey)
 		return
 	}
@@ -311,7 +311,7 @@ func (c *CDN) serveStorageKeyImage(w http.ResponseWriter, r *http.Request, key s
 	if !uploadURLShouldTransform(parsed, mimeType) {
 		w.Header().Set("ETag", etag)
 		w.Header().Set("Content-Type", mimeType)
-		w.Header().Set("Cache-Control", uploadURLCacheControl)
+		w.Header().Set("Cache-Control", deliveryCacheControl(r))
 		if etagMatches(r.Header.Get("If-None-Match"), etag) {
 			w.WriteHeader(http.StatusNotModified)
 			return
@@ -432,7 +432,7 @@ func (c *CDN) proxyRemoteImage(w http.ResponseWriter, r *http.Request, target *u
 
 	copyProxyCacheHeaders(w.Header(), resp.Header)
 	w.Header().Set("Content-Type", mimeType)
-	w.Header().Set("Cache-Control", uploadURLCacheControl)
+	w.Header().Set("Cache-Control", deliveryCacheControl(r))
 	if resp.ContentLength > 0 {
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", resp.ContentLength))
 	}
@@ -478,7 +478,7 @@ func (c *CDN) serveUploadURLTransform(w http.ResponseWriter, r *http.Request, so
 	p := parsed.params
 	if r.Method == http.MethodHead {
 		w.Header().Set("Content-Type", mimeForFormat(p.Format))
-		w.Header().Set("Cache-Control", uploadURLCacheControl)
+		w.Header().Set("Cache-Control", deliveryCacheControl(r))
 		setImageVariantHeaders(w, p, parsed.varyAccept, uploadURLSurrogateKey(source.cacheSeed), parsed.surrogateKey)
 		return
 	}
@@ -499,7 +499,7 @@ func (c *CDN) serveUploadURLTransform(w http.ResponseWriter, r *http.Request, so
 	etag := quoteETag(key)
 	w.Header().Set("ETag", etag)
 	w.Header().Set("Content-Type", mimeForFormat(p.Format))
-	w.Header().Set("Cache-Control", uploadURLCacheControl)
+	w.Header().Set("Cache-Control", deliveryCacheControl(r))
 	w.Header().Set("Voxire-CDN-Info", uploadURLInfoHeader(source, p))
 	setImageVariantHeaders(w, p, parsed.varyAccept, uploadURLSurrogateKey(source.cacheSeed), parsed.surrogateKey)
 	if etagMatches(r.Header.Get("If-None-Match"), etag) {
@@ -693,7 +693,7 @@ func serveStagedUploadURLOriginal(w http.ResponseWriter, r *http.Request, staged
 	w.Header().Del("Content-Length")
 	w.Header().Set("ETag", etag)
 	w.Header().Set("Content-Type", source.mimeType)
-	w.Header().Set("Cache-Control", uploadURLCacheControl)
+	w.Header().Set("Cache-Control", deliveryCacheControl(r))
 	if etagMatches(r.Header.Get("If-None-Match"), etag) {
 		w.WriteHeader(http.StatusNotModified)
 		return

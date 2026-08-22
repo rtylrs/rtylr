@@ -48,6 +48,9 @@ func main() {
 	if err != nil {
 		logger.Global().Fatal("Configuration validation failed", logger.Error(err))
 	}
+	if err := cdn.ValidateSecurityConfig(cfg.AppEnv, cfg.CDNAPIKey); err != nil {
+		logger.Global().Fatal("CDN security configuration failed", logger.Error(err))
+	}
 
 	if err := dbclient.Connect(ctx); err != nil {
 		logger.Global().Fatal("database connection failed", logger.Error(err))
