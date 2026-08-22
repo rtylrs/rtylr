@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
-import { toast } from 'sonner';
 import { Plus, Search, Trash2, Eye } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useLeads, useDeleteLead } from '../../shared/hooks/queries/useSales';
@@ -107,11 +106,7 @@ const Leads: React.FC = () => {
   const handleDelete = (): void => {
     if (deleteId === null || deleteLead.isPending) return;
     deleteLead.mutate(deleteId, {
-      onSuccess: () => {
-        toast.success('Lead deleted');
-        setDeleteId(null);
-      },
-      onError: () => toast.error('Failed to delete lead'),
+      onSuccess: () => setDeleteId(null),
     });
   };
 
