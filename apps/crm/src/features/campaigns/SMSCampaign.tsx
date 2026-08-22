@@ -61,12 +61,14 @@ const SMSCampaign: React.FC = () => {
         existingCampaign.audienceSegmentId != null ? String(existingCampaign.audienceSegmentId) : ''
       );
       setBody(existingCampaign.body ?? '');
-      return;
     }
+  }, [existingCampaign]);
+
+  useEffect(() => {
     if (!isEditing && !segmentId && segments[0]) {
       setSegmentId(segments[0].id);
     }
-  }, [existingCampaign, isEditing, segmentId, segments]);
+  }, [isEditing, segmentId, segments]);
 
   const segment = segments.find((item) => String(item.id) === segmentId);
   const audienceUnavailable =

@@ -62,12 +62,14 @@ const EmailCampaign: React.FC = () => {
       );
       setSubject(existingCampaign.subject ?? '');
       setBody(existingCampaign.body ?? '');
-      return;
     }
+  }, [existingCampaign]);
+
+  useEffect(() => {
     if (!isEditing && !segmentId && segments[0]) {
       setSegmentId(segments[0].id);
     }
-  }, [existingCampaign, isEditing, segmentId, segments]);
+  }, [isEditing, segmentId, segments]);
 
   const segment = segments.find((item) => String(item.id) === segmentId);
   const audienceUnavailable =
