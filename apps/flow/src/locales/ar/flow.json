@@ -759,7 +759,11 @@
     "refreshMembersCta": "تحديث",
     "moveGateReason": "يمكن لمسؤولي المشروع فقط نقل هذا المشروع إلى مساحة عمل أخرى.",
     "transferGateReason": "يمكن لمسؤولي المشروع فقط نقل ملكية هذا المشروع.",
-    "deleteGateReason": "يمكن لمسؤولي المشروع فقط حذف هذا المشروع."
+    "deleteGateReason": "يمكن لمسؤولي المشروع فقط حذف هذا المشروع.",
+    "visibility": "الظهور",
+    "visibilitySaved": "تم تحديث الظهور",
+    "visibilityGateReason": "يمكن لمسؤول المشروع فقط تغيير الظهور.",
+    "visibilityPersonalGate": "مشروع \"مهامي\" خاص دائمًا."
   },
   "bulkEdit": {
     "clearSelectionLabel": "إلغاء التحديد"
@@ -788,5 +792,11 @@
     "purge": "حذف {{name}} نهائيًا",
     "purgeTitle": "حذف نهائي",
     "purgeCta": "حذف نهائي"
+  },
+  "visibility": {
+    "private": "خاص",
+    "public": "عام",
+    "archived": "مؤرشف",
+    "publicHint": "يعرض الوضع العام اسم المشروع ولونه وحالته وتواريخه في ملفات الأعضاء لزملاء العمل. ولا يمنح ذلك أي وصول إلى مهامه."
   }
 }

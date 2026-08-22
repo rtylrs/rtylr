@@ -135,5 +135,6 @@
     "openTask": "فتح المهمة {{identifier}}: {{title}}",
     "selectTask": "تحديد المهمة",
     "deselectTask": "إلغاء تحديد المهمة"
-  }
+  },
+  "saving": "جارٍ الحفظ…"
 }
