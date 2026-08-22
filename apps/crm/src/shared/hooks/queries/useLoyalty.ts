@@ -95,6 +95,18 @@ export function toLoyaltyTierRequest(tier: Partial<LoyaltyTier>): Record<string,
   };
 }
 
+export function toLoyaltyRewardRequest(reward: Partial<LoyaltyReward>): Record<string, unknown> {
+  const request: Record<string, unknown> = {};
+  if ('name' in reward) request.name = reward.name?.trim() ?? '';
+  if ('description' in reward) request.description = reward.description?.trim() ?? '';
+  if ('pointsCost' in reward) request.pointsCost = reward.pointsCost;
+  if ('stock' in reward) request.stock = reward.stock;
+  if ('category' in reward) request.category = reward.category?.trim() || 'general';
+  if ('active' in reward) request.active = reward.active;
+  if ('icon' in reward) request.icon = reward.icon?.trim() || null;
+  return request;
+}
+
 // ── Queries ──────────────────────────────────────────────────────────────────
 
 export const useLoyaltyConfig = (): UseQueryResult<LoyaltyConfig> =>
@@ -215,7 +227,9 @@ export const useUpsertReward = (): UseMutationResult<unknown, unknown, UpsertRew
       unwrap(
         safe.post(
           '/crm/loyalty/rewards/upsert',
-          payload.id ? { id: payload.id, ...payload.data } : payload.data
+          payload.id
+            ? { id: payload.id, ...toLoyaltyRewardRequest(payload.data) }
+            : toLoyaltyRewardRequest(payload.data)
         )
       ),
     onSuccess: (): void => {

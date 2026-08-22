@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { toLoyaltyTierRequest, toUpdateLoyaltyConfigRequest } from './useLoyalty';
+import {
+  toLoyaltyRewardRequest,
+  toLoyaltyTierRequest,
+  toUpdateLoyaltyConfigRequest,
+} from './useLoyalty';
 
 describe('loyalty mutation wire mappings', () => {
   it('sends tier perks as an array instead of a quoted JSON string', () => {
@@ -39,5 +43,25 @@ describe('loyalty mutation wire mappings', () => {
 
   it('keeps the loyalty program enabled for a partial update by default', () => {
     expect(toUpdateLoyaltyConfigRequest({ pointsPerDollar: 2 }).isEnabled).toBe(true);
+  });
+
+  it('trims reward text fields and preserves explicit optional values', () => {
+    expect(
+      toLoyaltyRewardRequest({
+        name: '  Free coffee  ',
+        description: '  One drink  ',
+        category: '  beverage  ',
+        pointsCost: 100,
+        stock: null,
+        active: true,
+      })
+    ).toEqual({
+      name: 'Free coffee',
+      description: 'One drink',
+      category: 'beverage',
+      pointsCost: 100,
+      stock: null,
+      active: true,
+    });
   });
 });
