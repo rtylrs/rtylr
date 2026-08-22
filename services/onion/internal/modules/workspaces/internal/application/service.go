@@ -223,8 +223,8 @@ func (s *Service) CreatePersonalWorkspace(ctx context.Context, userID, businessI
 
 // ResolveWorkspaceID converts a workspace_id coming from the frontend into
 // a numeric DB ID. The frontend uses the sentinel string "personal" to mean
-// "the user's Personal workspace", which is created on demand. Any numeric
-// string (or empty) is parsed as-is; numbers round-trip unchanged. businessID
+// "the user's Personal workspace", which is created on demand. Numeric IDs
+// are accepted only for workspaces the caller owns or belongs to. businessID
 // must be the caller's resolved tenant id, used only on the "personal" path.
 func (s *Service) ResolveWorkspaceID(ctx context.Context, userID, businessID int64, raw string) (int64, error) {
 	if raw == "" {
@@ -233,7 +233,14 @@ func (s *Service) ResolveWorkspaceID(ctx context.Context, userID, businessID int
 	if raw == "personal" {
 		return s.repo.CreatePersonalWorkspace(ctx, userID, businessID)
 	}
-	return strconv.ParseInt(raw, 10, 64)
+	workspaceID, err := strconv.ParseInt(raw, 10, 64)
+	if err != nil || workspaceID <= 0 {
+		return 0, fmt.Errorf("invalid workspace id")
+	}
+	if !s.repo.IsWorkspaceMember(ctx, userID, workspaceID) {
+		return 0, fmt.Errorf("workspace access denied")
+	}
+	return workspaceID, nil
 }
 
 // IsWorkspaceMember reports whether userID is on the workspace's member
@@ -1286,6 +1293,8 @@ func (s *Service) EnsureMyTasksProject(
 			return 0, 0, wsErr
 		}
 		workspaceID = wsID
+	} else if !s.repo.IsWorkspaceMember(ctx, userID, workspaceID) {
+		return 0, 0, fmt.Errorf("workspace access denied")
 	}
 
 	if existingID, existingName := s.repo.GetMyTasksProject(ctx, userID, workspaceID); existingID != 0 {

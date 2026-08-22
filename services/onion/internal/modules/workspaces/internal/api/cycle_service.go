@@ -55,6 +55,8 @@ func (a *CycleAPI) ListCycles(ctx context.Context, req *flowcyclev1.ListCyclesRe
 		if resolved != 0 {
 			wsID = resolved
 		}
+	} else if !a.Service.IsWorkspaceMember(ctx, authUser.UserID, wsID) {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
@@ -93,6 +95,8 @@ func (a *CycleAPI) CreateCycle(ctx context.Context, req *flowcyclev1.CreateCycle
 		if resolved != 0 {
 			wsID = resolved
 		}
+	} else if !a.Service.IsWorkspaceMember(ctx, authUser.UserID, wsID) {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	var start time.Time
