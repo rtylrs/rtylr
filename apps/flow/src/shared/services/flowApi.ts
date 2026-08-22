@@ -505,10 +505,19 @@ export const flowApi = {
     flowResult<{ project: ApiProject }>(() =>
       projectV2.createProject({
         name: data.name,
-        description: data.description ?? '',
+        // CreateProjectRequest still declares description as @required, and the
+        // generated validator rejects "" for a required string, so an omitted
+        // description has to travel as the '-' sentinel the rest of this file
+        // uses. Sending '' 400s with "description is required".
+        description: data.description ?? '-',
         icon: 'folder',
         color: data.color ?? '#6366f1',
+        // visibility is optional in the contract and empty already means
+        // private, but sending it explicitly keeps the default visible at the
+        // call site rather than implied by omission.
         visibility: data.visibility ?? 'private',
+        // An omitted date is an unset date. Never manufacture the Unix epoch,
+        // which becomes a real project date once the backend persists it.
         startDate: data.startDate ?? '',
         dueDate: data.dueDate ?? '',
       })
