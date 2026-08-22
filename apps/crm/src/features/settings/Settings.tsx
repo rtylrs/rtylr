@@ -502,6 +502,7 @@ const SettingsScreen: React.FC = () => {
 
         {/* Tab bar */}
         <div
+          role="tablist"
           style={{
             display: 'flex',
             borderBottom: '1px solid var(--hub-border)',
@@ -515,6 +516,8 @@ const SettingsScreen: React.FC = () => {
               <button
                 key={tab.id}
                 type="button"
+                role="tab"
+                aria-selected={isActive}
                 onClick={() => setActiveTab(tab.id)}
                 style={{
                   display: 'flex',
@@ -543,6 +546,8 @@ const SettingsScreen: React.FC = () => {
 
         <motion.div
           key={activeTab}
+          role="tabpanel"
+          aria-label={TABS.find((tab) => tab.id === activeTab)?.label}
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.15 }}

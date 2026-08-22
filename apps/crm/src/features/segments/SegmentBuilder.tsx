@@ -74,12 +74,8 @@ const SegmentBuilder: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <Card>
             <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '2fr 1fr',
-                gap: '12px',
-                marginBottom: '12px',
-              }}
+              className="crm-form-grid"
+              style={{ display: 'grid', gap: '12px', marginBottom: '12px' }}
             >
               <Input
                 label="Name"
@@ -106,6 +102,8 @@ const SegmentBuilder: React.FC = () => {
                       type="button"
                       key={c}
                       onClick={() => setColor(c)}
+                      aria-label={`Use ${c} color`}
+                      aria-pressed={color === c}
                       style={{
                         width: '28px',
                         height: '28px',
@@ -165,6 +163,7 @@ const SegmentBuilder: React.FC = () => {
                     type="button"
                     key={String(o.key)}
                     onClick={() => setMatchAll(o.key)}
+                    aria-pressed={matchAll === o.key}
                     style={{
                       padding: '4px 12px',
                       borderRadius: '6px',
