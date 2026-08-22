@@ -196,4 +196,4 @@ touches only `finance_bills`; none references `erp_suppliers`.
 (`packages/voxie/api/finance/bill/v1/models.onk:29`). The frontend fabrication
 risk described above is therefore still live end to end.
 
-*Round two (2026-08-22): confirmed unchanged.*
+_Round two (2026-08-22): confirmed unchanged._

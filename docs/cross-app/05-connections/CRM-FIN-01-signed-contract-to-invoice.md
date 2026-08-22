@@ -176,4 +176,4 @@ chi routes (`backend_handlers.csv`, crm_sales); the CRM app hand-writes its
 lead/contact/contract payload types at
 `apps/crm/src/shared/hooks/queries/useSales.ts:106,245,272,347`.
 
-*Round two (2026-08-22): confirmed unchanged.*
+_Round two (2026-08-22): confirmed unchanged._

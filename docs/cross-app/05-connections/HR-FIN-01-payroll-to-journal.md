@@ -190,4 +190,4 @@ the journal contract and account config both stay Finance's.
 Remaining work is the UI button plus optionally a posted-marker on the run.
 No frontend caller exists today (verified in rtylr and pos).
 
-*Round two (2026-08-22): corrected-by-progress; effort drops to S-frontend.*
+_Round two (2026-08-22): corrected-by-progress; effort drops to S-frontend._

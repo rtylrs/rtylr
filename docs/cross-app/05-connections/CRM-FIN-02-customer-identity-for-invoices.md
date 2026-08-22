@@ -192,9 +192,9 @@ Order of work: contract and validator first, then the picker. The
 ## Backend section (round two)
 
 Verified at the storage layer for the first time: `finance_invoices` declares
-exactly the four client_* columns and no customer column
+exactly the four client\_\* columns and no customer column
 (`internal/platform/database/schemas/finance/schema.sql`, finance_invoices
 block). The contract matches the schema field for field. Nothing in the 63
 commits since round one touches this.
 
-*Round two (2026-08-22): confirmed unchanged across schema, contract and code.*
+_Round two (2026-08-22): confirmed unchanged across schema, contract and code._

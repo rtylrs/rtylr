@@ -12,31 +12,31 @@ seam), `backend_events.csv` (the async backbone).
 
 ## The four mechanisms, and how much each carries
 
-| Mechanism                              | Volume today                                                                 | Declared?                                                     |
-| -------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| Shared table (two modules' SQL on one) | 24 domain pairs share at least one table; 76 of 296 tables are multi-module   | Mostly **undeclared**: no registry records them                   |
-| Module imports module                  | 19 edges (see below)                                                         | Declared only in the sense that Go forces it; policy says avoid    |
-| Platform package (`internal/modules/internal/platform`) | 41 packages; the universal ones carry every module                            | **Declared**: this is onion's sanctioned seam                      |
-| Event / job / webhook                  | wsbus: UI realtime only. Jobs: 6, all intra-module maintenance. Webhooks: registration with no delivery | Declared where it exists; the integration vocabulary is absent     |
+| Mechanism                                               | Volume today                                                                                            | Declared?                                                       |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Shared table (two modules' SQL on one)                  | 24 domain pairs share at least one table; 76 of 296 tables are multi-module                             | Mostly **undeclared**: no registry records them                 |
+| Module imports module                                   | 19 edges (see below)                                                                                    | Declared only in the sense that Go forces it; policy says avoid |
+| Platform package (`internal/modules/internal/platform`) | 41 packages; the universal ones carry every module                                                      | **Declared**: this is onion's sanctioned seam                   |
+| Event / job / webhook                                   | wsbus: UI realtime only. Jobs: 6, all intra-module maintenance. Webhooks: registration with no delivery | Declared where it exists; the integration vocabulary is absent  |
 
 ## Shared-table crossings by domain pair
 
 Aggregating `backend_tables.csv` to contract-domain granularity:
 
-| Domain pair          | Tables shared | Examples and notes                                                                                          |
-| -------------------- | ------------- | ------------------------------------------------------------------------------------------------------------- |
-| console <-> hub      | 8             | addons, business_addons, businesses, manual_access_grants: console's admin projections over hub-owned state     |
+| Domain pair          | Tables shared | Examples and notes                                                                                                                      |
+| -------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| console <-> hub      | 8             | addons, business_addons, businesses, manual_access_grants: console's admin projections over hub-owned state                             |
 | erp <-> pos          | 5             | erp_products, erp_categories, erp_product_images, stock_levels/locations/ledger: the ERP->POS-01 coupling already flows through storage |
-| insights <-> pos     | 5             | pos_order_items, crm_customers, erp_*: Insights is a cross-domain reader by design                             |
-| hr <-> insights      | 5             | hr_employees, hr_shifts(+assignments), hr_leave_requests: same reader pattern                                  |
-| finance <-> insights | 5             | finance_invoices/expenses/categories plus hr_shifts                                                            |
-| finance <-> hr       | 3             | hr_payroll_records (payroll module), hr_shifts, hr_staff                                                       |
-| crm <-> pos          | 2             | crm_customers written by store_orders and platform/customer_sync; businesses                                    |
-| erp <-> insights     | 2             | erp_products, erp_categories                                                                                    |
-| flow <-> hr          | 2             | **hr_time_entries** (workspaces writes, hr_payroll reads via labourcost) and hr_employees                        |
-| flow <-> hub         | 2             | users, hr_employees                                                                                            |
-| hr <-> hub           | 2             | hr_employees (team writes), hr_locations                                                                       |
-| 12 further pairs     | 1 each        | mostly `businesses` or `users` reach-through                                                                    |
+| insights <-> pos     | 5             | pos*order_items, crm_customers, erp*\*: Insights is a cross-domain reader by design                                                     |
+| hr <-> insights      | 5             | hr_employees, hr_shifts(+assignments), hr_leave_requests: same reader pattern                                                           |
+| finance <-> insights | 5             | finance_invoices/expenses/categories plus hr_shifts                                                                                     |
+| finance <-> hr       | 3             | hr_payroll_records (payroll module), hr_shifts, hr_staff                                                                                |
+| crm <-> pos          | 2             | crm_customers written by store_orders and platform/customer_sync; businesses                                                            |
+| erp <-> insights     | 2             | erp_products, erp_categories                                                                                                            |
+| flow <-> hr          | 2             | **hr_time_entries** (workspaces writes, hr_payroll reads via labourcost) and hr_employees                                               |
+| flow <-> hub         | 2             | users, hr_employees                                                                                                                     |
+| hr <-> hub           | 2             | hr_employees (team writes), hr_locations                                                                                                |
+| 12 further pairs     | 1 each        | mostly `businesses` or `users` reach-through                                                                                            |
 
 Classification. **Declared** (sanctioned by a written register or port):
 flow<->hr on `internal/modules/hr_time_entries` (onion CLAUDE.md documents ownership;
@@ -89,11 +89,11 @@ All 41 packages verdicted in `platform_packages.csv`. Summary:
 
 ## Async backbone
 
-| Mechanism | Publishers | Consumers | Verdict for cross-domain use |
-| --------- | ---------- | --------- | ------------------------------ |
-| wsbus     | workspaces, pos_orders, pos_kds publish per-user/per-workspace/per-business realtime notifications | browser clients via `packages/api/src/realtime.ts` | Transport live, vocabulary UI-only; not an integration bus today |
-| jobs      | 6 registered jobs, all intra-module maintenance (accrual, overtime detection, reminders, recurring invoice generation, CV processing) | worker scheduler | No job propagates state between domains |
-| webhooks  | CRUD only, exposed to dash via hubdeveloper port | none: no delivery engine exists anywhere in the repo | Registration without emission |
+| Mechanism | Publishers                                                                                                                            | Consumers                                            | Verdict for cross-domain use                                     |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------------- |
+| wsbus     | workspaces, pos_orders, pos_kds publish per-user/per-workspace/per-business realtime notifications                                    | browser clients via `packages/api/src/realtime.ts`   | Transport live, vocabulary UI-only; not an integration bus today |
+| jobs      | 6 registered jobs, all intra-module maintenance (accrual, overtime detection, reminders, recurring invoice generation, CV processing) | worker scheduler                                     | No job propagates state between domains                          |
+| webhooks  | CRUD only, exposed to dash via hubdeveloper port                                                                                      | none: no delivery engine exists anywhere in the repo | Registration without emission                                    |
 
 Consequence for proposals: any round-two item shaped as "an event" must either
 fill the webhook delivery gap, put a domain event on wsbus (new vocabulary),

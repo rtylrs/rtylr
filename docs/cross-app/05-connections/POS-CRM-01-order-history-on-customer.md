@@ -185,4 +185,4 @@ Confirmed: `ListOrdersRequest.session_id` remains `@required @gt(0)`
 (`packages/voxie/api/pos/orders/v1/models.onk:145`); a customer-scoped order
 query still cannot be expressed.
 
-*Round two (2026-08-22): confirmed unchanged.*
+_Round two (2026-08-22): confirmed unchanged._

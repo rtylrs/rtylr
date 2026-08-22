@@ -213,5 +213,5 @@ recording that an hour got invoiced exists at no layer. Any implementation of
 this dossier must include the invoice-side marker write or the unbilled number
 never moves.
 
-*Round two (2026-08-22): corrected-by-progress upstream plus a new storage gap
-recorded in 14-layer-reconciliation.md A1/A2.*
+_Round two (2026-08-22): corrected-by-progress upstream plus a new storage gap
+recorded in 14-layer-reconciliation.md A1/A2._

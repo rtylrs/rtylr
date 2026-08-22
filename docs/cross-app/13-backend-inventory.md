@@ -26,15 +26,15 @@ node scripts/cross-app/sweep-migrations.mjs
 
 ## Headline counts
 
-| Artifact                   | Records | One record is                                            |
-| -------------------------- | ------- | -------------------------------------------------------- |
-| `backend_handlers.csv`     | 709     | one served route: 577 oneKit RPCs, 118 legacy chi routes, 15 platform-level routes |
-| `backend_queries.csv`      | 1,393   | one sqlc query across 129 module-owned query sets        |
-| `backend_tables.csv`       | 296     | one table with owner and every module that reads/writes it |
-| `backend_imports.csv`      | 771     | one directed import edge (module-module, module-platform, platform-module) |
-| `platform_packages.csv`    | 41      | one `internal/platform/*` package with a verdict         |
-| `backend_events.csv`       | 26      | one wsbus publish, wsbus subscribe, registered job, or webhook-emission probe |
-| `migrations.csv`           | 157     | one schema file with tables created/altered              |
+| Artifact                | Records | One record is                                                                      |
+| ----------------------- | ------- | ---------------------------------------------------------------------------------- |
+| `backend_handlers.csv`  | 709     | one served route: 577 oneKit RPCs, 118 legacy chi routes, 15 platform-level routes |
+| `backend_queries.csv`   | 1,393   | one sqlc query across 129 module-owned query sets                                  |
+| `backend_tables.csv`    | 296     | one table with owner and every module that reads/writes it                         |
+| `backend_imports.csv`   | 771     | one directed import edge (module-module, module-platform, platform-module)         |
+| `platform_packages.csv` | 41      | one `internal/platform/*` package with a verdict                                   |
+| `backend_events.csv`    | 26      | one wsbus publish, wsbus subscribe, registered job, or webhook-emission probe      |
+| `migrations.csv`        | 157     | one schema file with tables created/altered                                        |
 
 Handler counts by module: hr_core 148, crm_sales 127, careers 105, workspaces
 81, hr_time 54, hr_shifts 49, insights 35, hr_payroll 29. Full distribution in
@@ -47,18 +47,18 @@ coupling rows the brief calls the most important output of this phase: nothing
 in the type system records them, and each is a join waiting to be written
 wrongly. Ranked by how many distinct modules touch them:
 
-| Modules | Table                | Owner (schema dir) | Writers beyond owner                        |
-| ------- | -------------------- | ------------------ | ------------------------------------------- |
-| 15      | `businesses`         | shared             | business, console, user (+12 readers)       |
-| 14      | `erp_products`       | erp                | pos_menu, store_products, platform/stock_core (+10 readers incl. insights) |
-| 12      | `users`              | shared             | console, security, team, user               |
-| 10      | `internal/modules/hr_employees`       | hr_core            | staff, team, user (+5 readers incl. workspaces) |
-| 8       | `crm_customers`      | crm                | customers, platform/customer_sync, store_orders (+4 readers) |
-| 7       | `user_app_permissions` | shared           | team                                        |
-| 6       | `pos_orders`         | pos                | pos_kds, pos_day_summary, pos_receipts write items/refs |
-| 6       | `finance_invoices`   | finance            | quotes, tax                                 |
-| 6       | `finance_expenses`   | finance            | invoices                                    |
-| 5       | `subscriptions` / `plans` / `internal/modules/hr_shifts` / `erp_categories` | shared/hr_shifts/erp | console, subscriptions, team / staff / categories |
+| Modules | Table                                                                       | Owner (schema dir)   | Writers beyond owner                                                       |
+| ------- | --------------------------------------------------------------------------- | -------------------- | -------------------------------------------------------------------------- |
+| 15      | `businesses`                                                                | shared               | business, console, user (+12 readers)                                      |
+| 14      | `erp_products`                                                              | erp                  | pos_menu, store_products, platform/stock_core (+10 readers incl. insights) |
+| 12      | `users`                                                                     | shared               | console, security, team, user                                              |
+| 10      | `internal/modules/hr_employees`                                             | hr_core              | staff, team, user (+5 readers incl. workspaces)                            |
+| 8       | `crm_customers`                                                             | crm                  | customers, platform/customer_sync, store_orders (+4 readers)               |
+| 7       | `user_app_permissions`                                                      | shared               | team                                                                       |
+| 6       | `pos_orders`                                                                | pos                  | pos_kds, pos_day_summary, pos_receipts write items/refs                    |
+| 6       | `finance_invoices`                                                          | finance              | quotes, tax                                                                |
+| 6       | `finance_expenses`                                                          | finance              | invoices                                                                   |
+| 5       | `subscriptions` / `plans` / `internal/modules/hr_shifts` / `erp_categories` | shared/hr_shifts/erp | console, subscriptions, team / staff / categories                          |
 
 Reading of the top rows:
 
@@ -73,8 +73,8 @@ Reading of the top rows:
   employee row (`docs/sqlc-query-ownership.md` "Ensure employee for user"
   group). HR's person record is therefore already co-owned by hub-side
   modules, which raises the cost of `HR->HR-01` beyond an intra-HR migration.
-- **`insights` reads five domains' tables directly**: finance_expenses,
-  finance_invoices, pos_orders, hr_* and erp_products all appear in its query
+- **`insights` reads five domains' tables directly**: finance*expenses,
+  finance_invoices, pos_orders, hr*\* and erp_products all appear in its query
   files. Insights is a cross-domain reader by construction; that is its job,
   but it means margin-style aggregates need no new mechanism, only queries.
 - **`stock_ledger` is written by both `internal/platform/stock_core` and
