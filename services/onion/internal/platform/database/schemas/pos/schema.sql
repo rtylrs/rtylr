@@ -193,6 +193,27 @@ CREATE TABLE IF NOT EXISTS pos_gift_cards (
     INDEX idx_pos_gift_cards_customer (owner_id, customer_id)
 );
 
+-- Gift-card liability journal. Every issuance, redemption, top-up, refund,
+-- or adjustment must retain the business order/tender reference and the
+-- resulting balance so the stored-value liability can be audited and
+-- reconciled without relying on the mutable card balance alone.
+CREATE TABLE IF NOT EXISTS pos_gift_card_transactions (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    gift_card_id BIGINT NOT NULL,
+    owner_id BIGINT NOT NULL,
+    business_id BIGINT NOT NULL DEFAULT 0,
+    type ENUM('issue','redeem','top_up','refund','adjustment') NOT NULL,
+    order_ref VARCHAR(128) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    balance_after DECIMAL(10,2) NOT NULL,
+    created_by BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_pos_gift_card_transaction_ref (gift_card_id, type, order_ref),
+    INDEX idx_pos_gift_card_transactions_business (business_id, created_at),
+    INDEX idx_pos_gift_card_transactions_card (gift_card_id, created_at),
+    INDEX idx_pos_gift_card_transactions_order_ref (business_id, order_ref)
+);
+
 CREATE TABLE IF NOT EXISTS pos_manager_pins (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL,
