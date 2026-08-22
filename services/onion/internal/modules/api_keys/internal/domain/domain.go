@@ -1,9 +1,6 @@
 package domain
 
-import (
-	"errors"
-	"time"
-)
+import "time"
 
 type APIKey struct {
 	ID         int64      `json:"id"`
@@ -22,5 +19,3 @@ type CreateAPIKeyInput struct {
 	Name   string   `json:"name"`
 	Scopes []string `json:"scopes"`
 }
-
-var ErrAPIKeyNotFound = errors.New("api key not found")

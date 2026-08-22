@@ -26,20 +26,6 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-
-// BillExistsInBusiness reports whether the row exists within the business. The write queries
-// in this module are :exec and cannot report a zero-row match, so writes
-// pre-check existence to avoid silent success on wrong/foreign ids.
-func (r *Repository) BillExistsInBusiness(ctx context.Context, businessID, id int64) bool {
-	var exists bool
-	if err := r.pool.QueryRowContext(ctx,
-		"SELECT EXISTS(SELECT 1 FROM finance_bills WHERE id = ? AND business_id = ?)",
-		id, businessID,
-	).Scan(&exists); err != nil {
-		return false
-	}
-	return exists
-}
 func (r *Repository) Get(ctx context.Context, businessID, id int64) (domain.Bill, error) {
 	row, err := r.queries.GetBill(ctx, sqlc.GetBillParams{ID: id, BusinessID: businessID})
 	if err != nil {
