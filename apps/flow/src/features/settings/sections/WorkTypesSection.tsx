@@ -164,7 +164,7 @@ const WorkTypesSection = (): React.JSX.Element => {
                       type="button"
                       onClick={() => deleteWorkType.mutate(id)}
                       aria-label={t('flow.settings.workTypes.removeLabel', { name: wt.name })}
-                      className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded md:h-8 md:w-8"
+                      className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded md:h-8 md:w-8"
                       style={{ color: 'var(--flow-text-muted)' }}
                     >
                       <X size={14} aria-hidden="true" />

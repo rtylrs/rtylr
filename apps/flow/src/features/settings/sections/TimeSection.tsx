@@ -367,7 +367,7 @@ const TimeSection = (): React.JSX.Element => {
                 onClick={() => settings.deleteCategory(category.id)}
                 disabled={settings.categories.length === 1}
                 aria-label={t('flow.settings.time.removeCategoryLabel', { name: category.name })}
-                className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded disabled:opacity-30 md:h-8 md:w-8"
+                className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded disabled:opacity-30 md:h-8 md:w-8"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
                 <X size={14} aria-hidden="true" />

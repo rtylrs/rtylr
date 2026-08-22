@@ -278,7 +278,7 @@ const TimePanel = ({
                     aria-label={t('flow.time.deleteEntryLabel', {
                       duration: formatDurationClock(log.durationMinutes),
                     })}
-                    className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded md:h-6 md:w-6"
+                    className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded md:h-6 md:w-6"
                     style={{ color: 'var(--flow-text-muted)' }}
                   >
                     <Trash2 size={12} aria-hidden="true" />

@@ -209,7 +209,7 @@ const Calendar: React.FC = () => {
                           year: 'numeric',
                         }),
                       })}
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded text-[9px] opacity-0 group-hover:opacity-60 group-focus-within:opacity-60 focus:opacity-100 transition-opacity focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] md:h-8 md:w-8"
+                      className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded text-[9px] opacity-0 group-hover:opacity-60 group-focus-within:opacity-60 focus:opacity-100 transition-opacity focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] md:h-8 md:w-8"
                       style={{ color: 'var(--flow-text-dim)' }}
                     >
                       {t('flow.calendar.addHint')}

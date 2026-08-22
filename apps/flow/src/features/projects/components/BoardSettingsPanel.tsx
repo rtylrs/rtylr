@@ -130,7 +130,7 @@ const BoardSettingsPanel = ({
             type="button"
             onClick={onClose}
             aria-label={t('flow.board.closeSettings')}
-            className="flow-focus flex h-11 w-11 items-center justify-center rounded md:h-8 md:w-8"
+            className="flow-focus flex h-[44px] w-[44px] items-center justify-center rounded md:h-8 md:w-8"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             <X size={16} aria-hidden="true" />
@@ -364,7 +364,7 @@ const ColumnRow = ({
           onClick={() => onMove(index, -1)}
           disabled={!canManage || index === 0}
           aria-label={t('flow.board.moveUpLabel', { name: column.name })}
-          className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded disabled:opacity-30 md:h-8 md:w-8"
+          className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded disabled:opacity-30 md:h-8 md:w-8"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           <ChevronUp size={14} aria-hidden="true" />
@@ -374,7 +374,7 @@ const ColumnRow = ({
           onClick={() => onMove(index, 1)}
           disabled={!canManage || index === total - 1}
           aria-label={t('flow.board.moveDownLabel', { name: column.name })}
-          className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded disabled:opacity-30 md:h-8 md:w-8"
+          className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded disabled:opacity-30 md:h-8 md:w-8"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           <ChevronDown size={14} aria-hidden="true" />
@@ -384,7 +384,7 @@ const ColumnRow = ({
           onClick={onRequestDelete}
           disabled={!canManage || isLastColumn}
           aria-label={t('flow.board.removeColumnLabel', { name: column.name })}
-          className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded disabled:opacity-30 md:h-8 md:w-8"
+          className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded disabled:opacity-30 md:h-8 md:w-8"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           <X size={14} aria-hidden="true" />

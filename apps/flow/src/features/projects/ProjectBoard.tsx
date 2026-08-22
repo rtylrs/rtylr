@@ -304,7 +304,7 @@ const ProjectBoard: React.FC = () => {
               type="button"
               onClick={() => setBoardSettingsOpen(true)}
               aria-label={t('flow.board.openSettings')}
-              className="flow-focus flex h-11 w-11 items-center justify-center rounded-md md:h-8 md:w-8"
+              className="flow-focus flex h-[44px] w-[44px] items-center justify-center rounded-md md:h-8 md:w-8"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               <Settings2 size={14} aria-hidden="true" />
