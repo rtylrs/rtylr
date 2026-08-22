@@ -10,6 +10,9 @@ var (
 	ErrInsufficientPoints  = errors.New("insufficient loyalty points")
 	ErrLoyaltyNotEnabled   = errors.New("loyalty program is not enabled")
 	ErrMinRedeemNotReached = errors.New("minimum redeem points not reached")
+	ErrOrderRequired       = errors.New("a paid order is required to earn points")
+	ErrOrderNotPaid        = errors.New("order is not paid for this customer")
+	ErrOrderAlreadyEarned  = errors.New("points were already earned for this order")
 )
 
 type LoyaltyConfig struct {
@@ -47,7 +50,9 @@ type EarnPointsInput struct {
 	BusinessID int64
 	CustomerID int64
 	OrderID    *int64
-	Points     int32
+	// Points is retained for wire compatibility but ignored by the service;
+	// awards are calculated from the paid order total and configuration.
+	Points int32
 }
 
 type RedeemPointsInput struct {

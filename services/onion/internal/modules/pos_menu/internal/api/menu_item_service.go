@@ -44,16 +44,28 @@ func (a *MenuItemAPI) ListPublicMenuItems(ctx context.Context, req *posmenuitemv
 		return nil, onekiterrors.New(http.StatusBadRequest, "business_id is required")
 	}
 
-	items, listErr := a.Service.List(ctx, req.GetBusinessId())
+	items, listErr := a.Service.ListPublic(ctx, req.GetBusinessId())
 	if listErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load public menu")
 	}
 
 	payloads := make([]*posmenuitemv1.MenuItem, len(items))
 	for i, item := range items {
-		payloads[i] = toProtoMenuItem(item)
+		payloads[i] = toPublicProtoMenuItem(item)
 	}
 	return &posmenuitemv1.ListPublicMenuItemsResponse{Items: payloads}, nil
+}
+
+func toPublicProtoMenuItem(item domain.MenuItem) *posmenuitemv1.MenuItem {
+	return &posmenuitemv1.MenuItem{
+		Id:          item.ID,
+		Name:        item.Name,
+		SalePrice:   item.SalePrice,
+		IsActive:    item.IsActive,
+		ImageUrl:    item.ImageURL,
+		Category:    item.Category,
+		Description: item.Description,
+	}
 }
 
 func (a *MenuItemAPI) CreateMenuItem(ctx context.Context, req *posmenuitemv1.CreateMenuItemRequest) (*posmenuitemv1.CreateMenuItemResponse, error) {

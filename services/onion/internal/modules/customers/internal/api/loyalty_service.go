@@ -278,6 +278,9 @@ func (a *LoyaltyAPI) ListLoyaltyTransactions(ctx context.Context, req *crmloyalt
 }
 
 func (a *LoyaltyAPI) AwardPoints(ctx context.Context, req *crmloyaltyv1.AwardPointsRequest) (*crmloyaltyv1.AwardPointsResponse, error) {
+	if err := requireLoyaltyManager(ctx); err != nil {
+		return nil, err
+	}
 	ownerID, businessID, err := loyaltyBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -312,6 +315,9 @@ func (a *LoyaltyAPI) AwardPoints(ctx context.Context, req *crmloyaltyv1.AwardPoi
 }
 
 func (a *LoyaltyAPI) RedeemPoints(ctx context.Context, req *crmloyaltyv1.RedeemPointsRequest) (*crmloyaltyv1.RedeemPointsResponse, error) {
+	if err := requireLoyaltyManager(ctx); err != nil {
+		return nil, err
+	}
 	ownerID, businessID, err := loyaltyBusinessID(ctx)
 	if err != nil {
 		return nil, err

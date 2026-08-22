@@ -21,7 +21,7 @@ func TestValidateGiftCardInput_RejectsNegativeAmount(t *testing.T) {
 }
 
 func TestValidateGiftCardInput_AcceptsValid(t *testing.T) {
-	if err := ValidateGiftCardInput(GiftCardInput{Code: "GC-001", InitialAmount: 100}); err != nil {
+	if err := ValidateGiftCardInput(GiftCardInput{PaidOrderID: 1, Code: "GC-001", InitialAmount: 100}); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
@@ -45,7 +45,7 @@ func TestValidateRedeemInput_RejectsNegativeAmount(t *testing.T) {
 }
 
 func TestValidateRedeemInput_AcceptsValid(t *testing.T) {
-	if err := ValidateRedeemInput(RedeemInput{Code: "GC-001", Amount: 25}); err != nil {
+	if err := ValidateRedeemInput(RedeemInput{OrderID: 1, Code: "GC-001", Amount: 25}); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }

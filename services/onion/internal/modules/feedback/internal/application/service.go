@@ -20,6 +20,13 @@ const (
 type repository interface {
 	List(ctx context.Context, businessID int64, filters domain.ListFilters, page, pageSize int) ([]domain.Feedback, int, error)
 	Create(ctx context.Context, input domain.FeedbackInput) (int64, error)
+	CustomerExistsInBusiness(ctx context.Context, businessID, customerID int64) bool
+}
+
+// CustomerExistsInBusiness guards feedback writes against cross-tenant
+// customer ids (crm_feedback has no FK).
+func (s *Service) CustomerExistsInBusiness(ctx context.Context, businessID, customerID int64) bool {
+	return s.repo.CustomerExistsInBusiness(ctx, businessID, customerID)
 }
 
 type Service struct {

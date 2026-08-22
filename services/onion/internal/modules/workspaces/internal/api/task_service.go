@@ -54,6 +54,7 @@ func (a *TaskAPI) ListTasks(ctx context.Context, req *flowtaskv1.ListTasksReques
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	filter := domain.ListTasksFilter{
 		ProjectID:   req.GetProjectId(),
+		BusinessID:  businessID,
 		WorkspaceID: workspaceID,
 		Status:      req.GetStatus(),
 		AssigneeID:  req.AssigneeId,

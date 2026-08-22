@@ -106,7 +106,7 @@ func (h *ListAutomationsHandler) Serve(ctx context.Context, _ *ListAutomationsRe
 	}
 	res, cacheErr := cacher.Of[ListAutomationsResponse]().GetOrComputeSingle(
 		ctx,
-		cacheKeys.Scoped(automationsCacheScope, businessID, "list"),
+		cacheKeys.Scoped(automationsCacheScope, businessID, "list:http"),
 		func(ctx context.Context) (ListAutomationsResponse, error) {
 			return h.computeList(ctx, businessID)
 		},
@@ -175,6 +175,9 @@ func (h *CreateAutomationHandler) Serve(ctx context.Context, req *CreateAutomati
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return CreateAutomationResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireAutomationManager(ctx); err != nil {
+		return CreateAutomationResponse{}, err
 	}
 
 	triggerConfig := []byte(req.TriggerConfig)
@@ -246,6 +249,9 @@ func (h *UpdateAutomationHandler) Serve(ctx context.Context, req *UpdateAutomati
 	if device.User == nil {
 		return UpdateAutomationResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireAutomationManager(ctx); err != nil {
+		return UpdateAutomationResponse{}, err
+	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
@@ -305,6 +311,9 @@ func (h *DeleteAutomationHandler) Serve(ctx context.Context, _ *DeleteAutomation
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return DeleteAutomationResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireAutomationManager(ctx); err != nil {
+		return DeleteAutomationResponse{}, err
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")

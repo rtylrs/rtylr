@@ -15,9 +15,21 @@ const menuCacheTTL = 5 * time.Minute
 
 type repository interface {
 	List(ctx context.Context, businessID int64) ([]domain.MenuItem, error)
+	IsOnlineOrderingEnabled(ctx context.Context, businessID int64) (bool, error)
 	QuickCreate(ctx context.Context, ownerID, businessID int64, input domain.MenuItemInput) (int64, error)
 	Update(ctx context.Context, businessID, id int64, input domain.MenuItemUpdateInput) error
 	BusinessOwnerID(ctx context.Context, businessID int64) (int64, error)
+}
+
+func (s *Service) ListPublic(ctx context.Context, businessID int64) ([]domain.MenuItem, error) {
+	enabled, err := s.repo.IsOnlineOrderingEnabled(ctx, businessID)
+	if err != nil {
+		return nil, err
+	}
+	if !enabled {
+		return []domain.MenuItem{}, nil
+	}
+	return s.List(ctx, businessID)
 }
 
 type Service struct {

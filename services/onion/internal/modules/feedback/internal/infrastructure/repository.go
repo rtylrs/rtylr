@@ -27,6 +27,21 @@ func NewRepository(db *sql.DB) *Repository {
 // type, source, and score range. Always filters by owner_id.
 //
 // dynamic-query: squirrel
+// CustomerExistsInBusiness reports whether the customer id belongs to the
+// business. crm_feedback has no FK, so the write path must verify ownership
+// itself or its scoped list will disclose other tenants' customer names.
+func (r *Repository) CustomerExistsInBusiness(ctx context.Context, businessID, customerID int64) bool {
+	var exists bool
+	if err := r.pool.QueryRowContext(ctx,
+		"SELECT EXISTS(SELECT 1 FROM crm_customers WHERE id = ? AND business_id = ?)",
+		customerID, businessID,
+	).Scan(&exists); err != nil {
+		logger.Ctx(ctx).Error("feedback customer ownership lookup failed", logger.Error(err))
+		return false
+	}
+	return exists
+}
+
 func (r *Repository) List(ctx context.Context, businessID int64, filters domain.ListFilters, page, pageSize int) ([]domain.Feedback, int, error) {
 	if page < 1 {
 		page = 1

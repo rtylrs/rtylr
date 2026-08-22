@@ -29,6 +29,13 @@ const (
 )
 
 var (
+	// VendorPublicKey is injected into released binaries with -ldflags. It is
+	// intentionally not read from customer-controlled runtime configuration.
+	VendorPublicKey string
+	// BuildDeploymentMode is injected into released binaries with -ldflags so
+	// deployment mode cannot be changed by flipping an environment variable.
+	BuildDeploymentMode string
+
 	ErrMissingLicense    = errors.New("license key is missing")
 	ErrMissingPublicKey  = errors.New("license public key is missing")
 	ErrMissingPrivateKey = errors.New("license signing private key is missing")
@@ -73,22 +80,26 @@ type StatusReport struct {
 }
 
 func IsSelfHosted(cfg *platformconfig.AppConfig) bool {
-	if cfg == nil {
-		return isSelfHostedMode(os.Getenv("DEPLOYMENT_MODE")) || isTruthy(os.Getenv("SELF_HOSTED"))
-	}
-	return isSelfHostedMode(cfg.DeploymentMode) || isTruthy(os.Getenv("SELF_HOSTED"))
+	return isSelfHostedMode(deploymentMode(cfg))
 }
 
 func VerifyConfigured(cfg *platformconfig.AppConfig) StatusReport {
+	return VerifyConfiguredAt(cfg, time.Now().UTC())
+}
+
+func VerifyConfiguredAt(cfg *platformconfig.AppConfig, now time.Time) StatusReport {
 	key, err := configuredKey(cfg)
 	if err != nil {
-		return missingOrInvalidReport(cfg, err)
+		return missingOrInvalidReportAt(cfg, err, now)
 	}
-	return VerifyKey(cfg, key)
+	return VerifyKeyAt(cfg, key, now)
 }
 
 func VerifyKey(cfg *platformconfig.AppConfig, rawKey string) StatusReport {
-	now := time.Now().UTC()
+	return VerifyKeyAt(cfg, rawKey, time.Now().UTC())
+}
+
+func VerifyKeyAt(cfg *platformconfig.AppConfig, rawKey string, now time.Time) StatusReport {
 	mode := deploymentMode(cfg)
 	rawKey = strings.TrimSpace(rawKey)
 
@@ -317,11 +328,11 @@ func decodeBase64(raw string) ([]byte, error) {
 	return nil, lastErr
 }
 
-func missingOrInvalidReport(cfg *platformconfig.AppConfig, err error) StatusReport {
+func missingOrInvalidReportAt(cfg *platformconfig.AppConfig, err error, now time.Time) StatusReport {
 	if !IsSelfHosted(cfg) {
-		return hostedReport(cfg, time.Now().UTC())
+		return hostedReport(cfg, now)
 	}
-	return statusFromError(deploymentMode(cfg), err, time.Now().UTC())
+	return statusFromError(deploymentMode(cfg), err, now)
 }
 
 func hostedReport(cfg *platformconfig.AppConfig, now time.Time) StatusReport {
@@ -354,6 +365,9 @@ func statusFromError(mode string, err error, now time.Time) StatusReport {
 }
 
 func deploymentMode(cfg *platformconfig.AppConfig) string {
+	if BuildDeploymentMode != "" {
+		return normalizeMode(BuildDeploymentMode)
+	}
 	if cfg == nil {
 		if mode := strings.TrimSpace(os.Getenv("DEPLOYMENT_MODE")); mode != "" {
 			return normalizeMode(mode)
@@ -379,11 +393,8 @@ func issuer(cfg *platformconfig.AppConfig) string {
 	return "voxire"
 }
 
-func publicKey(cfg *platformconfig.AppConfig) string {
-	if cfg != nil {
-		return cfg.LicensePublicKey
-	}
-	return os.Getenv("LICENSE_PUBLIC_KEY")
+func publicKey(_ *platformconfig.AppConfig) string {
+	return VendorPublicKey
 }
 
 func gracePeriod(cfg *platformconfig.AppConfig) time.Duration {

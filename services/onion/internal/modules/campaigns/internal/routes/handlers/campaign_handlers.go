@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -176,9 +177,15 @@ func (h *CreateCampaignHandler) Validate(_ context.Context, req *CreateCampaignR
 }
 
 func (h *CreateCampaignHandler) Serve(ctx context.Context, req *CreateCampaignRequest) (CreateCampaignResponse, error) {
+	if err := requireCampaignManager(ctx); err != nil {
+		return CreateCampaignResponse{}, err
+	}
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return CreateCampaignResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCampaignManager(ctx); err != nil {
+		return CreateCampaignResponse{}, err
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -237,9 +244,15 @@ func (h *UpdateCampaignHandler) Validate(_ context.Context, req *UpdateCampaignR
 }
 
 func (h *UpdateCampaignHandler) Serve(ctx context.Context, req *UpdateCampaignRequest) (UpdateCampaignResponse, error) {
+	if err := requireCampaignManager(ctx); err != nil {
+		return UpdateCampaignResponse{}, err
+	}
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return UpdateCampaignResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCampaignManager(ctx); err != nil {
+		return UpdateCampaignResponse{}, err
 	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -299,16 +312,32 @@ func (h *UpdateCampaignStatusHandler) Serve(ctx context.Context, req *UpdateCamp
 	if device.User == nil {
 		return UpdateCampaignStatusResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCampaignManager(ctx); err != nil {
+		return UpdateCampaignStatusResponse{}, err
+	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		return UpdateCampaignStatusResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid campaign ID")
 	}
+	status := strings.TrimSpace(req.Status)
+	switch status {
+	case "draft", "scheduled", "active", "paused", "completed", "sent", "cancelled":
+	default:
+		return UpdateCampaignStatusResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid campaign status")
+	}
+	if err := requireCampaignManager(ctx); err != nil {
+		return UpdateCampaignStatusResponse{}, err
+	}
+
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return UpdateCampaignStatusResponse{}, onekiterrors.PermissionDenied()
 	}
 	if updateErr := h.Service.UpdateStatus(ctx, businessID, id, req.Status); updateErr != nil {
+		if errors.Is(updateErr, domain.ErrInvalidCampaignStatus) {
+			return UpdateCampaignStatusResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid campaign status")
+		}
 		return UpdateCampaignStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update campaign status")
 	}
 	return UpdateCampaignStatusResponse{Message: "Campaign status updated successfully"}, nil

@@ -49,6 +49,9 @@ func (h *AwardPointsHandler) Serve(ctx context.Context, req *AwardPointsRequest)
 	if device.User == nil {
 		return AwardPointsResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCRMManager(ctx); err != nil {
+		return AwardPointsResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

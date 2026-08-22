@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -148,7 +147,7 @@ func (a *OrderAPI) CreatePublicOrder(ctx context.Context, req *posordersv1.Creat
 		})
 	}
 
-	orderID, orderNumber, err := a.Service.CreatePublicOrder(ctx, req.GetOwnerId(), application.PublicOrderInput{
+	orderID, orderNumber, publicToken, err := a.Service.CreatePublicOrder(ctx, req.GetOwnerId(), application.PublicOrderInput{
 		CustomerName:  req.GetCustomerName(),
 		CustomerPhone: req.GetCustomerPhone(),
 		CustomerEmail: req.GetCustomerEmail(),
@@ -156,13 +155,14 @@ func (a *OrderAPI) CreatePublicOrder(ctx context.Context, req *posordersv1.Creat
 		Items:         items,
 	})
 	if err != nil {
-		return nil, orderAPIStatusError(http.StatusInternalServerError, fmt.Sprintf("Failed to create order: %v", err))
+		return nil, orderAPIStatusError(http.StatusInternalServerError, "Failed to create order")
 	}
 
 	return &posordersv1.CreatePublicOrderResponse{
 		OrderId:     orderID,
 		OrderNumber: orderNumber,
 		Status:      "pending",
+		PublicToken: publicToken,
 	}, nil
 }
 
@@ -175,8 +175,11 @@ func (a *OrderAPI) GetPublicOrderStatus(ctx context.Context, req *posordersv1.Ge
 	if businessID <= 0 {
 		return nil, orderAPIStatusError(http.StatusBadRequest, "Invalid business id")
 	}
+	if req.GetPublicToken() == "" {
+		return nil, orderAPIStatusError(http.StatusBadRequest, "public_token is required")
+	}
 
-	orderNumber, status, err := a.Service.GetPublicOrderStatus(ctx, businessID, orderID)
+	orderNumber, status, err := a.Service.GetPublicOrderStatus(ctx, businessID, orderID, req.GetPublicToken())
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, orderAPIStatusError(http.StatusNotFound, "Order not found")

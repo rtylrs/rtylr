@@ -73,6 +73,15 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.MenuI
 	return items, nil
 }
 
+func (r *Repository) IsOnlineOrderingEnabled(ctx context.Context, businessID int64) (bool, error) {
+	var enabled int
+	err := r.pool.QueryRowContext(ctx,
+		"SELECT COUNT(*) FROM business_addons WHERE business_id = ? AND addon_id = 'online_ordering' AND is_enabled = TRUE",
+		businessID,
+	).Scan(&enabled)
+	return enabled > 0, err
+}
+
 func (r *Repository) QuickCreate(ctx context.Context, ownerID, businessID int64, input domain.MenuItemInput) (int64, error) {
 	result, err := r.queries.QuickCreateMenuItem(ctx, sqlc.QuickCreateMenuItemParams{
 		OwnerID:    ownerID,

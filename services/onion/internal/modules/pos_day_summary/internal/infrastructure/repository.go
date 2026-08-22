@@ -28,76 +28,52 @@ func NewRepository(db *sql.DB) *Repository {
 func (r *Repository) GetDaySummary(ctx context.Context, businessID int64, date string) (domain.DaySummary, error) {
 	var summary domain.DaySummary
 
-	if date != "" {
-		t, parseErr := time.Parse("2006-01-02", date)
-		if parseErr != nil {
-			logger.Ctx(ctx).Error("Failed to parse date for GetDaySummary", logger.Error(parseErr))
-			return summary, parseErr
-		}
-		end := t.AddDate(0, 0, 1)
-		row, err := r.queries.GetDaySummaryByDate(ctx, sqlc.GetDaySummaryByDateParams{
-			BusinessID: businessID,
-			PaidAt:     sql.NullTime{Time: t, Valid: true},
-			PaidAtEnd:  sql.NullTime{Time: end, Valid: true},
-		})
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to get day summary", logger.Error(err))
-			return summary, err
-		}
-		summary.TotalSales = interfaceToFloat(row.TotalSales)
-		summary.TotalTax = interfaceToFloat(row.TotalTax)
-		summary.TotalOrders = int(row.TotalOrders)
+	if date == "" {
+		date = time.Now().UTC().Format("2006-01-02")
+	}
+	t, parseErr := time.Parse("2006-01-02", date)
+	if parseErr != nil {
+		logger.Ctx(ctx).Error("Failed to parse date for GetDaySummary", logger.Error(parseErr))
+		return summary, parseErr
+	}
+	end := t.AddDate(0, 0, 1)
+	row, err := r.queries.GetDaySummaryByDate(ctx, sqlc.GetDaySummaryByDateParams{
+		BusinessID: businessID,
+		PaidAt:     sql.NullTime{Time: t, Valid: true},
+		PaidAtEnd:  sql.NullTime{Time: end, Valid: true},
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get day summary", logger.Error(err))
+		return summary, err
+	}
+	summary.TotalSales = interfaceToFloat(row.TotalSales)
+	summary.TotalTax = interfaceToFloat(row.TotalTax)
+	summary.TotalTips = interfaceToFloat(row.TotalTips)
+	summary.TotalOrders = int(row.TotalOrders)
 
-		refundTotal, err := r.queries.GetRefundTotalByDate(ctx, sqlc.GetRefundTotalByDateParams{
-			BusinessID:    businessID,
-			RefundedAt:    sql.NullTime{Time: t, Valid: true},
-			RefundedAtEnd: sql.NullTime{Time: end, Valid: true},
-		})
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to get refund total", logger.Error(err))
-		} else {
-			summary.TotalRefunds = interfaceToFloat(refundTotal)
-		}
-
-		breakdown, err := r.queries.GetPaymentBreakdownByDate(ctx, sqlc.GetPaymentBreakdownByDateParams{
-			BusinessID: businessID,
-			PaidAt:     sql.NullTime{Time: t, Valid: true},
-			PaidAtEnd:  sql.NullTime{Time: end, Valid: true},
-		})
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to get payment breakdown", logger.Error(err))
-			return summary, err
-		}
-		summary.PaymentBreakdown = make(map[string]float64, len(breakdown))
-		for _, b := range breakdown {
-			summary.PaymentBreakdown[string(b.PaymentMethod.PosOrdersPaymentMethod)] = interfaceToFloat(b.MethodTotal)
-		}
+	refundTotal, err := r.queries.GetRefundTotalByDate(ctx, sqlc.GetRefundTotalByDateParams{
+		BusinessID:    businessID,
+		RefundedAt:    sql.NullTime{Time: t, Valid: true},
+		RefundedAtEnd: sql.NullTime{Time: end, Valid: true},
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get refund total", logger.Error(err))
 	} else {
-		row, err := r.queries.GetDaySummaryToday(ctx, businessID)
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to get day summary", logger.Error(err))
-			return summary, err
-		}
-		summary.TotalSales = interfaceToFloat(row.TotalSales)
-		summary.TotalTax = interfaceToFloat(row.TotalTax)
-		summary.TotalOrders = int(row.TotalOrders)
+		summary.TotalRefunds = interfaceToFloat(refundTotal)
+	}
 
-		refundTotal, err := r.queries.GetRefundTotalToday(ctx, businessID)
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to get refund total", logger.Error(err))
-		} else {
-			summary.TotalRefunds = interfaceToFloat(refundTotal)
-		}
-
-		breakdown, err := r.queries.GetPaymentBreakdownToday(ctx, businessID)
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to get payment breakdown", logger.Error(err))
-			return summary, err
-		}
-		summary.PaymentBreakdown = make(map[string]float64, len(breakdown))
-		for _, b := range breakdown {
-			summary.PaymentBreakdown[string(b.PaymentMethod.PosOrdersPaymentMethod)] = interfaceToFloat(b.MethodTotal)
-		}
+	breakdown, err := r.queries.GetPaymentBreakdownByDate(ctx, sqlc.GetPaymentBreakdownByDateParams{
+		BusinessID: businessID,
+		PaidAt:     sql.NullTime{Time: t, Valid: true},
+		PaidAtEnd:  sql.NullTime{Time: end, Valid: true},
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to get payment breakdown", logger.Error(err))
+		return summary, err
+	}
+	summary.PaymentBreakdown = make(map[string]float64, len(breakdown))
+	for _, b := range breakdown {
+		summary.PaymentBreakdown[string(b.PaymentMethod.PosOrdersPaymentMethod)] = interfaceToFloat(b.MethodTotal)
 	}
 
 	return summary, nil

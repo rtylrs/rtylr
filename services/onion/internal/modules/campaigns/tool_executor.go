@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/campaigns/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -45,17 +46,16 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 }
 
 func (m *Module) executeListCampaignsTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := campaignToolOwnerID(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	parsed, err := parseListCampaignsToolInput(input)
 	if err != nil {
 		return nil, err
 	}
 
-	campaigns, err := m.service.List(ctx, ownerID)
+	businessID, err := campaignToolBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	campaigns, err := m.service.List(ctx, businessID)
 	if err != nil {
 		return nil, err
 	}
@@ -92,11 +92,6 @@ func (m *Module) executeListCampaignsTool(ctx context.Context, input map[string]
 }
 
 func (m *Module) executeGetCampaignTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := campaignToolOwnerID(ctx)
-	if err != nil {
-		return nil, err
-	}
-
 	campaignID, err := campaignToolInt64(firstCampaignToolValue(input, "campaign_id", "id"))
 	if err != nil {
 		return nil, fmt.Errorf("invalid campaign_id: %w", err)
@@ -105,7 +100,11 @@ func (m *Module) executeGetCampaignTool(ctx context.Context, input map[string]an
 		return nil, errors.New("campaign_id is required")
 	}
 
-	campaign, err := m.service.GetByID(ctx, ownerID, campaignID)
+	businessID, err := campaignToolBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	campaign, err := m.service.GetByID(ctx, businessID, campaignID)
 	if err != nil {
 		return nil, err
 	}
@@ -113,6 +112,27 @@ func (m *Module) executeGetCampaignTool(ctx context.Context, input map[string]an
 	return map[string]any{
 		"campaign": campaignToolPayload(campaign),
 	}, nil
+}
+
+
+// campaignToolBusinessID resolves the caller's business scope. Campaign data
+// is keyed by business_id — scoping by user id leaks other tenants' campaigns
+// whenever users.id collides with businesses.id.
+func campaignToolBusinessID(ctx context.Context) (int64, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User != nil {
+		resolved, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+		if err == nil && resolved > 0 {
+			return resolved, nil
+		}
+	}
+	if authUser, ok := authPkg.GetAuthUser(ctx); ok && authUser != nil {
+		resolved, err := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+		if err == nil && resolved > 0 {
+			return resolved, nil
+		}
+	}
+	return 0, errors.New("cannot determine business context")
 }
 
 func parseListCampaignsToolInput(input map[string]any) (listCampaignsToolInput, error) {

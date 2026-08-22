@@ -137,7 +137,7 @@ func TestProcessPayment_RejectsZeroOrderID(t *testing.T) {
 
 func TestCreatePublicOrder_RejectsZeroOwnerID(t *testing.T) {
 	s := &Service{}
-	if _, _, err := s.CreatePublicOrder(context.Background(), 0, PublicOrderInput{
+	if _, _, _, err := s.CreatePublicOrder(context.Background(), 0, PublicOrderInput{
 		Items: []PublicOrderItemInput{{Name: "Burger", Quantity: 1}},
 	}); err == nil {
 		t.Error("expected error for zero owner_id")
@@ -146,7 +146,7 @@ func TestCreatePublicOrder_RejectsZeroOwnerID(t *testing.T) {
 
 func TestCreatePublicOrder_RejectsEmptyItems(t *testing.T) {
 	s := &Service{}
-	if _, _, err := s.CreatePublicOrder(context.Background(), 1, PublicOrderInput{}); err == nil {
+	if _, _, _, err := s.CreatePublicOrder(context.Background(), 1, PublicOrderInput{}); err == nil {
 		t.Error("expected error for empty items")
 	}
 }

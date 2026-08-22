@@ -32,8 +32,14 @@ func (a *FeedbackAPI) ListFeedback(ctx context.Context, req *crmfeedbackv1.ListF
 	}
 
 	pageSize := req.GetPageSize()
-	if pageSize < 1 {
-		pageSize = 20
+	if pageSize < 1 || pageSize > 100 {
+		// Mirror the repository's internal clamp so the echoed metadata
+		// matches the rows actually returned.
+		if pageSize > 100 {
+			pageSize = 100
+		} else {
+			pageSize = 20
+		}
 	}
 
 	filters := domain.ListFilters{
@@ -98,6 +104,16 @@ func (a *FeedbackAPI) CreateFeedback(ctx context.Context, req *crmfeedbackv1.Cre
 		return nil, onekiterrors.New(http.StatusBadRequest, "Feedback type must be 'nps' or 'review'")
 	}
 
+	// Score bounds: NPS is 0-10, reviews are 1-5. Unbounded scores corrupt
+	// aggregates and filtering.
+	score := int(req.GetScore())
+	switch {
+	case req.GetType() == "nps" && (score < 0 || score > 10):
+		return nil, onekiterrors.New(http.StatusBadRequest, "NPS score must be between 0 and 10")
+	case req.GetType() == "review" && (score < 1 || score > 5):
+		return nil, onekiterrors.New(http.StatusBadRequest, "Review score must be between 1 and 5")
+	}
+
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
@@ -106,6 +122,13 @@ func (a *FeedbackAPI) CreateFeedback(ctx context.Context, req *crmfeedbackv1.Cre
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return nil, onekiterrors.PermissionDenied()
+	}
+
+	// Verify the customer belongs to the caller's business before writing —
+	// otherwise the scoped list later joins and discloses another tenant's
+	// name (crm_feedback has no FK).
+	if !a.service.CustomerExistsInBusiness(ctx, businessID, req.GetCustomerId()) {
+		return nil, onekiterrors.New(http.StatusNotFound, "Customer not found")
 	}
 
 	id, err := a.service.Create(ctx, domain.FeedbackInput{

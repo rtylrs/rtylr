@@ -115,8 +115,10 @@ func (s *Service) CreateSelfHostLicense(ctx context.Context, input CreateSelfHos
 			return nil, err
 		}
 		return &SelfHostLicenseKeyResult{
-			License:    toSelfHostLicenseDTO(*existing),
-			LicenseKey: existing.LicenseKey,
+			License: toSelfHostLicenseDTO(*existing),
+			// Keys are shown only on the initial successful issuance. Existing
+			// records are never allowed to re-disclose their secret.
+			LicenseKey: "",
 			PublicKey:  publicKey,
 		}, nil
 	} else if !errors.Is(err, infrastructure.ErrSelfHostLicenseNotFound) {
@@ -140,9 +142,11 @@ func (s *Service) CreateSelfHostLicense(ctx context.Context, input CreateSelfHos
 		SeatLimit:    input.SeatLimit,
 		ExpiresAt:    expiresAt,
 		GraceUntil:   graceUntil,
-		LicenseKey:   licenseKey,
-		KeyHash:      license.HashKey(licenseKey),
-		CreatedBy:    adminID,
+		// Keep only the hash at rest. The signed key is returned once to the
+		// administrator and can be regenerated if it is lost.
+		LicenseKey: "",
+		KeyHash:    license.HashKey(licenseKey),
+		CreatedBy:  adminID,
 	})
 	if err != nil {
 		return nil, err
@@ -157,25 +161,6 @@ func (s *Service) CreateSelfHostLicense(ctx context.Context, input CreateSelfHos
 	return &SelfHostLicenseKeyResult{
 		License:    toSelfHostLicenseDTO(*row),
 		LicenseKey: licenseKey,
-		PublicKey:  publicKey,
-	}, nil
-}
-
-func (s *Service) RevealSelfHostLicenseKey(ctx context.Context, id int64) (*SelfHostLicenseKeyResult, error) {
-	row, err := s.repo.GetSelfHostLicenseByID(ctx, id)
-	if err != nil {
-		if errors.Is(err, infrastructure.ErrSelfHostLicenseNotFound) {
-			return nil, ErrSelfHostLicenseNotFound
-		}
-		return nil, err
-	}
-	publicKey, err := currentLicensePublicKey()
-	if err != nil {
-		return nil, err
-	}
-	return &SelfHostLicenseKeyResult{
-		License:    toSelfHostLicenseDTO(*row),
-		LicenseKey: row.LicenseKey,
 		PublicKey:  publicKey,
 	}, nil
 }
@@ -202,7 +187,7 @@ func (s *Service) RegenerateSelfHostLicenseKey(ctx context.Context, id, adminID 
 		return nil, err
 	}
 
-	if err := s.repo.RegenerateSelfHostLicenseKey(ctx, id, licenseKey, license.HashKey(licenseKey), adminID); err != nil {
+	if err := s.repo.RegenerateSelfHostLicenseKey(ctx, id, row.OwnerEmail, "", license.HashKey(licenseKey), adminID); err != nil {
 		if errors.Is(err, infrastructure.ErrSelfHostLicenseNotFound) {
 			return nil, ErrSelfHostLicenseNotFound
 		}
@@ -222,13 +207,20 @@ func (s *Service) RegenerateSelfHostLicenseKey(ctx context.Context, id, adminID 
 }
 
 func (s *Service) RevokeSelfHostLicense(ctx context.Context, id, adminID int64) (*SelfHostLicenseDTO, error) {
-	if err := s.repo.RevokeSelfHostLicense(ctx, id, adminID); err != nil {
+	row, err := s.repo.GetSelfHostLicenseByID(ctx, id)
+	if err != nil {
 		if errors.Is(err, infrastructure.ErrSelfHostLicenseNotFound) {
 			return nil, ErrSelfHostLicenseNotFound
 		}
 		return nil, err
 	}
-	row, err := s.repo.GetSelfHostLicenseByID(ctx, id)
+	if err := s.repo.RevokeSelfHostLicense(ctx, id, row.OwnerEmail, adminID); err != nil {
+		if errors.Is(err, infrastructure.ErrSelfHostLicenseNotFound) {
+			return nil, ErrSelfHostLicenseNotFound
+		}
+		return nil, err
+	}
+	row, err = s.repo.GetSelfHostLicenseByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -380,7 +372,8 @@ func toSelfHostLicenseDTO(row infrastructure.SelfHostLicenseRow) SelfHostLicense
 		Plan:       row.Plan,
 		Features:   featuresFromRow(row),
 		Status:     row.Status,
-		KeyPreview: previewLicenseKey(row.LicenseKey),
+		// License material is never returned from list/detail responses.
+		KeyPreview: "",
 		CreatedAt:  formatNullTime(row.CreatedAt),
 		UpdatedAt:  formatNullTime(row.UpdatedAt),
 	}
@@ -406,14 +399,6 @@ func featuresFromRow(row infrastructure.SelfHostLicenseRow) []string {
 		return append([]string(nil), defaultSelfHostFeatures...)
 	}
 	return normalizeSelfHostFeatures(features)
-}
-
-func previewLicenseKey(raw string) string {
-	raw = strings.TrimSpace(raw)
-	if len(raw) <= 34 {
-		return raw
-	}
-	return raw[:22] + "..." + raw[len(raw)-12:]
 }
 
 func nullTimePtr(value sql.NullTime) *time.Time {

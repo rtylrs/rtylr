@@ -228,12 +228,15 @@ func perRouteRateLimitWithKeyFn(limit int, window time.Duration, keyFn func(*htt
 // register variants 3/min/IP. Password-reset request and invite acceptance
 // sit at 5/min because both mint account-access tokens.
 var authRouteLimiters = map[string]func(http.Handler) http.Handler{
-	"/common/auth/v1/login":                  PerRouteRateLimit(5, time.Minute),
-	"/common/auth/v1/register":               PerRouteRateLimit(3, time.Minute),
-	"/common/auth/v1/register/google":        PerRouteRateLimit(3, time.Minute),
-	"/common/auth/v1/password-reset/request": PerRouteRateLimit(5, time.Minute),
-	"/common/auth/v1/password-reset/confirm": PerRouteRateLimit(5, time.Minute),
-	"/common/auth/v1/invite/accept":          PerRouteRateLimit(5, time.Minute),
+	"/common/auth/v1/login":                          PerRouteRateLimit(5, time.Minute),
+	"/common/auth/v1/register":                       PerRouteRateLimit(3, time.Minute),
+	"/common/auth/v1/register/google":                PerRouteRateLimit(3, time.Minute),
+	"/common/auth/v1/password-reset/request":         PerRouteRateLimit(5, time.Minute),
+	"/common/auth/v1/password-reset/confirm":         PerRouteRateLimit(5, time.Minute),
+	"/common/auth/v1/invite/accept":                  PerRouteRateLimit(5, time.Minute),
+	"/pos/orders/v1/orders/public":                   PerRouteRateLimit(10, time.Minute),
+	"/pos/orders/v1/orders/{order_id}/public-status": PerRouteRateLimit(60, time.Minute),
+	"/pos/menu-item/v1/menu-items/public":            PerRouteRateLimit(60, time.Minute),
 }
 
 // AuthRouteRateLimit applies the per-route auth budgets by exact request
@@ -244,6 +247,12 @@ func AuthRouteRateLimit(next http.Handler) http.Handler {
 		if limiter, ok := authRouteLimiters[r.URL.Path]; ok {
 			limiter(next).ServeHTTP(w, r)
 			return
+		}
+		for route, limiter := range authRouteLimiters {
+			if routePatternMatchesPath(route, r.URL.Path) {
+				limiter(next).ServeHTTP(w, r)
+				return
+			}
 		}
 		next.ServeHTTP(w, r)
 	})

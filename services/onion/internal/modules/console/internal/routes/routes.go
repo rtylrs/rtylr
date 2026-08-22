@@ -66,7 +66,6 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	// Self-host licenses
 	router.Get("/console/self-host-licenses", rawListSelfHostLicenses(ctx, service))
 	router.Post("/console/self-host-licenses", rawCreateSelfHostLicense(ctx, service))
-	router.Get("/console/self-host-licenses/{id}/key", rawRevealSelfHostLicenseKey(ctx, service))
 	router.Post("/console/self-host-licenses/{id}/regenerate", rawRegenerateSelfHostLicenseKey(ctx, service))
 	router.Post("/console/self-host-licenses/{id}/revoke", rawRevokeSelfHostLicense(ctx, service))
 }

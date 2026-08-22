@@ -42,6 +42,10 @@ func (m *mockRepo) UpdateLead(_ context.Context, _, _ int64, _ domain.UpdateLead
 	return m.lead, m.err
 }
 
+func (m *mockRepo) ValidateLeadAssignee(_ context.Context, _, _ int64) error {
+	return m.err
+}
+
 func (m *mockRepo) DeleteLead(_ context.Context, _, _ int64) error {
 	return m.err
 }
@@ -166,7 +170,7 @@ func TestCreateLead_PropagatesError(t *testing.T) {
 }
 
 func TestUpdateLead_AppliesDefaultsAndPropagates(t *testing.T) {
-	m := &mockRepo{lead: domain.Lead{ID: 3}}
+	m := &mockRepo{lead: domain.Lead{ID: 3, Stage: domain.LeadStageCold}}
 	s := &Service{repo: m}
 	_, err := s.UpdateLead(context.Background(), 3, 10, domain.UpdateLeadRequest{})
 	if err != nil {

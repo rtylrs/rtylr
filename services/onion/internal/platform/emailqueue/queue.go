@@ -43,11 +43,13 @@ func Enqueue(ctx context.Context, db *sql.DB, job Job) error {
 	if priority <= 0 {
 		priority = PriorityNormal
 	}
+	// Reset and invite mails carry live account-takeover links; the rendered
+	// body is encrypted at rest whenever EMAIL_ENCRYPTION_KEY is configured.
 	return sqlc.New(db).EnqueueJob(ctx, sqlc.EnqueueJobParams{
 		Priority:  int8(priority),
 		ToEmail:   job.To,
 		Subject:   job.Subject,
-		Html:      job.HTML,
+		Html:      sealHTML(job.HTML),
 		TextBody:  nullStr(job.Text),
 		FromEmail: nullStr(job.From),
 		ReplyTo:   nullStr(job.ReplyTo),
@@ -81,6 +83,9 @@ func (p *Pool) Run(ctx context.Context) {
 	recoveryTick := time.NewTicker(60 * time.Second)
 	defer recoveryTick.Stop()
 
+	retentionTick := time.NewTicker(retentionInterval)
+	defer retentionTick.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -92,6 +97,8 @@ func (p *Pool) Run(ctx context.Context) {
 			return
 		case <-recoveryTick.C:
 			p.recoverStuck(ctx)
+		case <-retentionTick.C:
+			p.CleanupOld(ctx, defaultRetention)
 		case <-watchTick.C:
 			p.spawnWorkers(ctx)
 		}
@@ -153,10 +160,27 @@ func (p *Pool) processOne(ctx context.Context) bool {
 		p.releaseClaim(ctx, claimID)
 		return false
 	}
+	// An encrypted body that cannot be decrypted must not loop forever: mark
+	// the job failed instead of releasing the claim back to pending.
+	html := openHTML(job.Html)
+	if job.Html != "" && html == "" {
+		if failErr := p.q.RescheduleJob(ctx, sqlc.RescheduleJobParams{
+			Status:    sqlc.EmailJobsStatusFailed,
+			Attempts:  job.MaxAttempts,
+			LastError: sql.NullString{String: "body undecryptable (EMAIL_ENCRYPTION_KEY missing or changed)", Valid: true},
+			JobID:     sql.NullString{},
+			DATEADD:   0,
+			ID:        job.ID,
+		}); failErr != nil {
+			logger.Ctx(ctx).Error("failed to mark undecryptable email job as failed",
+				logger.Any("job_id", job.ID), logger.Error(failErr))
+		}
+		return true
+	}
 	params := email.SendParams{
 		To:      []string{job.ToEmail},
 		Subject: job.Subject,
-		HTML:    job.Html,
+		HTML:    html,
 	}
 	if job.TextBody.Valid {
 		params.Text = job.TextBody.String

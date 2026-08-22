@@ -4,6 +4,9 @@ const (
 	StatusDraft     = "draft"
 	StatusScheduled = "scheduled"
 	StatusSent      = "sent"
+	StatusActive    = "active"
+	StatusPaused    = "paused"
+	StatusCompleted = "completed"
 	StatusCancelled = "cancelled"
 
 	TypeEmail = "email"
