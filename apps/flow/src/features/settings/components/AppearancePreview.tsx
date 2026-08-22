@@ -78,6 +78,11 @@ const AppearancePreview = ({
         background: 'var(--flow-bg)',
         border: '1px solid var(--flow-border)',
         borderRadius: 'var(--flow-r)',
+        // --flow-u is a unitless multiplier, so it is not a length and cannot be
+        // used as one: `gap: var(--flow-u)` is `gap: 1`, which is invalid and
+        // gets dropped, collapsing the pane to zero padding. Turn it into a
+        // length once, here, exactly the way globals.css derives --spacing.
+        ['--pane-u' as string]: 'calc(0.25rem * var(--flow-u, 1))',
       })}
     >
       <div
@@ -85,8 +90,8 @@ const AppearancePreview = ({
         style={{
           background: 'var(--flow-surface)',
           borderInlineEnd: '1px solid var(--flow-border)',
-          gap: 'var(--flow-u)',
-          padding: 'calc(var(--flow-u) * 2)',
+          gap: 'var(--pane-u)',
+          padding: 'calc(var(--pane-u) * 2)',
         }}
       >
         {railItems.map((item) => (
@@ -97,8 +102,8 @@ const AppearancePreview = ({
               background: item.active ? 'var(--accent-muted)' : 'transparent',
               borderRadius: 'var(--flow-r)',
               color: item.active ? 'var(--accent-fg)' : 'var(--flow-text-muted)',
-              gap: 'var(--flow-u)',
-              padding: 'var(--flow-u) calc(var(--flow-u) * 1.5)',
+              gap: 'var(--pane-u)',
+              padding: 'var(--pane-u) calc(var(--pane-u) * 1.5)',
             }}
           >
             <span
@@ -112,7 +117,7 @@ const AppearancePreview = ({
 
       <div
         className="flex min-w-0 flex-1 flex-col"
-        style={{ gap: 'calc(var(--flow-u) * 2)', padding: 'calc(var(--flow-u) * 2.5)' }}
+        style={{ gap: 'calc(var(--pane-u) * 2)', padding: 'calc(var(--pane-u) * 2.5)' }}
       >
         <div
           className="flex min-w-0 items-center"
@@ -120,8 +125,8 @@ const AppearancePreview = ({
             background: 'var(--flow-card)',
             border: '1px solid var(--flow-border)',
             borderRadius: 'var(--flow-r)',
-            gap: 'calc(var(--flow-u) * 1.5)',
-            padding: 'calc(var(--flow-u) * 2)',
+            gap: 'calc(var(--pane-u) * 1.5)',
+            padding: 'calc(var(--pane-u) * 2)',
           }}
         >
           <span
@@ -141,7 +146,7 @@ const AppearancePreview = ({
               border: '1px solid var(--accent-border)',
               borderRadius: 'var(--flow-r)',
               color: 'var(--accent-fg)',
-              padding: 'calc(var(--flow-u) * 0.5) var(--flow-u)',
+              padding: 'calc(var(--pane-u) * 0.5) var(--pane-u)',
             }}
           >
             {t('flow.settings.appearance.preview.chip')}
@@ -165,7 +170,7 @@ const AppearancePreview = ({
             background: 'var(--accent)',
             borderRadius: 'var(--flow-r)',
             color: 'var(--flow-on-accent)',
-            padding: 'var(--flow-u) calc(var(--flow-u) * 2.5)',
+            padding: 'var(--pane-u) calc(var(--pane-u) * 2.5)',
           }}
         >
           {t('flow.settings.appearance.preview.action')}
