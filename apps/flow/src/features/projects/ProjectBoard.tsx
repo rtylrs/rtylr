@@ -274,7 +274,6 @@ const ProjectBoard: React.FC = () => {
       <div className="flex flex-col h-full">
         <ProjectViewTabs
           project={project}
-          workspaceId={workspaceId}
           projectId={projectId}
           taskCount={tasks.length}
           onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
@@ -293,7 +292,6 @@ const ProjectBoard: React.FC = () => {
       <HelmetContainer title={t('flow.board.pageTitle')} />
       <ProjectViewTabs
         project={project}
-        workspaceId={workspaceId}
         projectId={projectId}
         taskCount={tasks.length}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}

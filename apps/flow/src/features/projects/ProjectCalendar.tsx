@@ -90,7 +90,6 @@ const ProjectCalendar: React.FC = () => {
       <HelmetContainer title={t('flow.projectCalendar.pageTitle')} />
       <ProjectViewTabs
         project={project}
-        workspaceId={workspaceId}
         projectId={projectId}
         taskCount={apiTasks.length}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}

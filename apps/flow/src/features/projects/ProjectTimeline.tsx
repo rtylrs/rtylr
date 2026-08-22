@@ -75,7 +75,6 @@ const ProjectTimeline: React.FC = () => {
       <HelmetContainer title={t('flow.projectTimeline.pageTitle')} />
       <ProjectViewTabs
         project={project}
-        workspaceId={workspaceId}
         projectId={projectId}
         taskCount={apiTasks.length}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}

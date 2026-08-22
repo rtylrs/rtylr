@@ -68,7 +68,6 @@ const ProjectOverview: React.FC = () => {
       <HelmetContainer title={t('flow.projectOverview.pageTitle')} />
       <ProjectViewTabs
         project={project}
-        workspaceId={workspaceId}
         projectId={projectId}
         taskCount={stats.total}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
