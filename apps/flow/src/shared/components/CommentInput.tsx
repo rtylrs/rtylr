@@ -106,7 +106,8 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
           }}
         >
           {members.slice(0, 5).map((m) => (
-            <button type="button"
+            <button
+              type="button"
               key={m.id}
               onClick={() => insertMention('@' + m.name)}
               className="w-full text-start px-3 py-1.5 text-[12px] hover:bg-[var(--flow-hover)] flex items-center gap-2"

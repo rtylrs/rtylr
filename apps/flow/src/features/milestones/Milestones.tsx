@@ -62,7 +62,8 @@ const Milestones: React.FC = () => {
               {t('flow.milestones.trackedCount', { count: 0 })}
             </p>
           </div>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-semibold"
             style={{ background: 'var(--accent)', color: '#0a0a0a' }}
@@ -100,7 +101,8 @@ const Milestones: React.FC = () => {
             {t('flow.milestones.trackedCount', { count: milestones.length })}
           </p>
         </div>
-        <button type="button"
+        <button
+          type="button"
           onClick={() => setShowCreate(true)}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-semibold"
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}
@@ -138,7 +140,8 @@ const Milestones: React.FC = () => {
             className="text-[12px]"
           />
           <div className="flex gap-2">
-            <button type="button"
+            <button
+              type="button"
               onClick={() => {
                 if (!newName.trim() || !newDate) {
                   toast.error(t('errors.generic'));
@@ -169,7 +172,8 @@ const Milestones: React.FC = () => {
                 ? t('flow.milestones.creating')
                 : t('flow.milestones.create')}
             </button>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => {
                 setShowCreate(false);
                 setNewName('');

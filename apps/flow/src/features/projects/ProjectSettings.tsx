@@ -140,7 +140,8 @@ const ProjectSettings: React.FC = () => {
         </h1>
         <div className="flex gap-4 mt-3">
           {tabs.map((t) => (
-            <button type="button"
+            <button
+              type="button"
               key={t.id}
               onClick={() => setTab(t.id)}
               className="text-[12px] pb-1 border-b-2 transition-colors"
@@ -195,7 +196,8 @@ const ProjectSettings: React.FC = () => {
                 }}
               />
             </Field>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => {
                 if (!canManageProject) return;
                 updateProject.mutate(
@@ -247,7 +249,8 @@ const ProjectSettings: React.FC = () => {
                 {members.length} member{members.length !== 1 ? 's' : ''}
               </p>
               {canManageProject && (
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => setShowAddMember(true)}
                   className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-sm"
                   style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
@@ -365,7 +368,8 @@ const ProjectSettings: React.FC = () => {
                           <option value="viewer">Viewer</option>
                         </select>
                       </div>
-                      <button type="button"
+                      <button
+                        type="button"
                         onClick={() => {
                           if (!canManageProject) return;
                           removeMember.mutate(
@@ -436,7 +440,8 @@ const ProjectSettings: React.FC = () => {
                     </select>
                     {confirmMove ? (
                       <>
-                        <button type="button"
+                        <button
+                          type="button"
                           onClick={() => {
                             if (!canManageProject) return;
                             moveProject.mutate(
@@ -459,7 +464,8 @@ const ProjectSettings: React.FC = () => {
                         >
                           {moveProject.isPending ? 'Moving…' : 'Confirm'}
                         </button>
-                        <button type="button"
+                        <button
+                          type="button"
                           onClick={() => setConfirmMove(false)}
                           className="px-3 py-1.5 rounded-sm text-[11px]"
                           style={{ color: 'var(--flow-text-muted)' }}
@@ -468,7 +474,8 @@ const ProjectSettings: React.FC = () => {
                         </button>
                       </>
                     ) : (
-                      <button type="button"
+                      <button
+                        type="button"
                         onClick={() => {
                           if (!canManageProject) return;
                           if (!targetWorkspaceId)
@@ -535,7 +542,8 @@ const ProjectSettings: React.FC = () => {
                   </select>
                   {confirmTransfer ? (
                     <>
-                      <button type="button"
+                      <button
+                        type="button"
                         onClick={() => {
                           if (!canManageProject) return;
                           const newOwnerId = Number(transferRef.current?.value);
@@ -556,7 +564,8 @@ const ProjectSettings: React.FC = () => {
                       >
                         {transferOwnership.isPending ? 'Transferring…' : 'Confirm'}
                       </button>
-                      <button type="button"
+                      <button
+                        type="button"
                         onClick={() => setConfirmTransfer(false)}
                         className="px-3 py-1.5 rounded-sm text-[11px]"
                         style={{ color: 'var(--flow-text-muted)' }}
@@ -565,7 +574,8 @@ const ProjectSettings: React.FC = () => {
                       </button>
                     </>
                   ) : (
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={() => {
                         if (!canManageProject) return;
                         const newOwnerId = Number(transferRef.current?.value);
@@ -620,7 +630,8 @@ const ProjectSettings: React.FC = () => {
                     {description}
                   </p>
                 </div>
-                <button type="button"
+                <button
+                  type="button"
                   className="text-[11px] px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-muted)' }}
                   disabled
@@ -658,7 +669,8 @@ const ProjectSettings: React.FC = () => {
                   Once deleted, tasks are archived and cannot be restored.
                 </p>
               </div>
-              <button type="button"
+              <button
+                type="button"
                 className="px-3 py-1 rounded-sm text-[11px] font-semibold disabled:opacity-40"
                 style={{ background: '#ef4444', color: '#fff' }}
                 disabled={deleteProject.isPending || !canManageProject}

@@ -330,7 +330,8 @@ const TaskDetail: React.FC = () => {
           style={{ borderBottom: '1px solid var(--flow-border)' }}
         >
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <button type="button"
+            <button
+              type="button"
               onClick={() => window.history.back()}
               aria-label={t('common.back')}
               className="h-6 w-6 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
@@ -349,7 +350,8 @@ const TaskDetail: React.FC = () => {
             />
           </div>
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
-            <button type="button"
+            <button
+              type="button"
               onClick={() => {
                 navigator.clipboard?.writeText(task.identifier ?? task.id);
                 toast.success(t('toasts.task.copied', { id: task.identifier ?? task.id }));
@@ -361,7 +363,8 @@ const TaskDetail: React.FC = () => {
               <Copy size={11} />
               <span className="hidden sm:inline">{t('flow.taskDetail.copyId')}</span>
             </button>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => {
                 updateTaskMut.mutate(
                   { id: task.id, data: { archived: true } },
@@ -382,7 +385,8 @@ const TaskDetail: React.FC = () => {
             >
               <Archive size={12} />
             </button>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => {
                 // Wait for the mutation to actually succeed before
                 // toasting + navigating away - otherwise on API
@@ -488,7 +492,8 @@ const TaskDetail: React.FC = () => {
               style={{ borderBottom: '1px solid var(--flow-border)' }}
             >
               {(['comments', 'activity'] as const).map((tabName) => (
-                <button type="button"
+                <button
+                  type="button"
                   key={tabName}
                   onClick={() => setTab(tabName)}
                   className="px-3 py-2 text-[12px] font-medium capitalize"
@@ -893,7 +898,8 @@ const TaskDetail: React.FC = () => {
         <DetailField icon={Tag} label={t('flow.taskDetail.labels')}>
           <div className="flex flex-wrap gap-1 relative">
             {taskLabels.length === 0 && canEdit && (
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setLabelPickerOpen((v) => !v)}
                 className="text-[10px] px-1.5 py-0.5 rounded-sm hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-dim)' }}
@@ -910,7 +916,8 @@ const TaskDetail: React.FC = () => {
               />
             ))}
             {taskLabels.length > 0 && canEdit && (
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setLabelPickerOpen((v) => !v)}
                 className="text-[10px] px-1.5 py-0.5 rounded-sm hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-dim)' }}
@@ -931,7 +938,8 @@ const TaskDetail: React.FC = () => {
                 {allLabels.map((l) => {
                   const active = taskLabelIds.includes(l.id);
                   return (
-                    <button type="button"
+                    <button
+                      type="button"
                       key={l.id}
                       onClick={() => handleToggleLabel(l.id)}
                       className="w-full flex items-center gap-2 px-2 py-1 rounded-sm text-start hover:bg-[var(--flow-hover)]"

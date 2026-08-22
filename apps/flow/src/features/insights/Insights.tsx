@@ -192,7 +192,10 @@ const Insights: React.FC = () => {
           <div className="space-y-2">
             {data.timeByMember.map((m) => (
               <div key={m.id} className="flex items-center gap-3">
-                <span className="text-[12px] w-[96px] shrink-0" style={{ color: 'var(--flow-text)' }}>
+                <span
+                  className="text-[12px] w-[96px] shrink-0"
+                  style={{ color: 'var(--flow-text)' }}
+                >
                   {m.name}
                 </span>
                 <div

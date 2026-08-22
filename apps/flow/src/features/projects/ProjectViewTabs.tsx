@@ -164,7 +164,8 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
 
         {/* Primary CTA. White text on teal - the old near-black-on-teal
             combo was failing WCAG on anything but the darkest teal. */}
-        <button type="button"
+        <button
+          type="button"
           onClick={onNewTask}
           className="flex items-center gap-1.5 h-7 px-2.5 rounded-sm text-[11px] font-semibold transition-opacity hover:opacity-90"
           style={{ background: 'var(--accent)', color: '#ffffff' }}

@@ -333,7 +333,8 @@ export const CommandBar: React.FC = () => {
                       const active = idx === selected;
                       const Icon = item.icon;
                       return (
-                        <button type="button"
+                        <button
+                          type="button"
                           key={item.id}
                           onMouseEnter={() => setSelected(idx)}
                           onClick={() => run(item)}

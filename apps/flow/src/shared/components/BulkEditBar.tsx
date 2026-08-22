@@ -70,7 +70,8 @@ export const BulkEditBar: React.FC = () => {
           {selectedTaskIds.length} selected
         </span>
         <div className="h-4 w-px mx-1" style={{ background: 'var(--flow-border)' }} />
-        <button type="button"
+        <button
+          type="button"
           disabled={isPending || !canEdit}
           title={!canEdit ? t('common.readOnlyAccess') : undefined}
           onClick={() =>
@@ -84,7 +85,8 @@ export const BulkEditBar: React.FC = () => {
         >
           <Check size={11} /> Mark done
         </button>
-        <button type="button"
+        <button
+          type="button"
           disabled={isPending || !canEdit}
           title={!canEdit ? t('common.readOnlyAccess') : undefined}
           onClick={() =>
@@ -98,7 +100,8 @@ export const BulkEditBar: React.FC = () => {
         >
           <Flag size={11} /> Set urgent
         </button>
-        <button type="button"
+        <button
+          type="button"
           disabled={isPending || !canEdit}
           title={!canEdit ? t('common.readOnlyAccess') : undefined}
           onClick={() =>
@@ -112,7 +115,8 @@ export const BulkEditBar: React.FC = () => {
         >
           <Archive size={11} /> Archive
         </button>
-        <button type="button"
+        <button
+          type="button"
           disabled={isPending || !canRemove}
           title={!canRemove ? t('common.deleteRestricted') : undefined}
           onClick={() =>
@@ -127,7 +131,8 @@ export const BulkEditBar: React.FC = () => {
           <Trash2 size={11} /> Delete
         </button>
         <div className="h-4 w-px mx-1" style={{ background: 'var(--flow-border)' }} />
-        <button type="button"
+        <button
+          type="button"
           onClick={clearSelection}
           aria-label={t('flow.bulkEdit.clearSelectionLabel')}
           className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
