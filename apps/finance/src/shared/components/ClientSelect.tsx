@@ -5,6 +5,10 @@ import { listCrmCustomers } from '../lib/clients';
 import { parseClientsResponse } from '../schemas/clients';
 
 export interface Client {
+  /** CRM customer id when this client came from the CRM directory; absent
+   *  for free-typed or cloned clients, which must not claim a customer link
+   *  (#840). */
+  crmCustomerId?: string;
   id: string;
   name: string;
   email?: string | null;
@@ -104,7 +108,10 @@ const ClientSelect: React.FC<ClientSelectProps> = ({ value, onChange }) => {
               type="button"
               key={c.id}
               onClick={() => {
-                onChange(c);
+                // Preserve the CRM id so invoices can carry a verified
+                // customer link (#840). The generic id stays untouched for
+                // existing consumers of this component.
+                onChange({ ...c, crmCustomerId: c.id });
                 setOpen(false);
                 setQuery('');
               }}

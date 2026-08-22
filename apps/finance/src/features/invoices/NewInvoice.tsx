@@ -63,6 +63,7 @@ const NewInvoice: React.FC = () => {
   useEffect(() => {
     if (sourceInvoice) {
       setClient({
+        crmCustomerId: undefined,
         id: sourceInvoice.id,
         name: sourceInvoice.client,
         email: sourceInvoice.clientEmail,
@@ -157,6 +158,7 @@ const NewInvoice: React.FC = () => {
       total: it.quantity * it.unitPrice,
     }));
     const payload: CreateInvoiceRequest = {
+      customerId: client.crmCustomerId,
       clientName: client.name,
       clientEmail: client.email ?? '',
       clientAddress: '',
