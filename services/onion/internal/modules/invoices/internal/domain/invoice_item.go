@@ -55,14 +55,28 @@ type InvoiceItemInput struct {
 	SortOrder   int     `json:"sort_order"`
 }
 
-// CalculateTotal computes the line total after per-item discount and tax.
-func (i InvoiceItemInput) CalculateTotal() float64 {
+// LineComponents splits a line into its pre-tax base and its own tax so
+// header-level discount and tax can be applied without compounding item tax.
+type LineComponents struct {
+	Base float64
+	Tax  float64
+}
+
+// CalculateComponents returns the line's pre-tax base (after per-item
+// discount) and its per-item tax amount.
+func (i InvoiceItemInput) CalculateComponents() LineComponents {
 	lineBase := i.Quantity * i.UnitPrice
 	discountAmt := lineBase * (i.DiscountPct / 100)
-	afterDiscount := lineBase - discountAmt
-	taxAmt := afterDiscount * (i.TaxRate / 100)
+	base := lineBase - discountAmt
 
-	return afterDiscount + taxAmt
+	return LineComponents{Base: base, Tax: base * (i.TaxRate / 100)}
+}
+
+// CalculateTotal computes the line total after per-item discount and tax.
+func (i InvoiceItemInput) CalculateTotal() float64 {
+	components := i.CalculateComponents()
+
+	return components.Base + components.Tax
 }
 
 // Money precision verified: minor integer units enforced.
