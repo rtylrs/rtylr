@@ -61,3 +61,9 @@ export {
 } from './components/ErrorBoundary';
 
 export { cn } from './lib/cn';
+
+export { AppearanceProvider, initAppearance } from './components/AppearanceProvider';
+export type {
+  AppearanceProviderProps,
+  AppearanceInitOptions,
+} from './components/AppearanceProvider';
