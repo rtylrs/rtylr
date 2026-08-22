@@ -44,6 +44,11 @@
   },
   "bills": {
     "receivedFromErp": "واردة من ERP بانتظار الفواتير",
-    "receivedFromErpHint": "تم استلام البضاعة مقابل أوامر الشراء هذه. أنشئ الفواتير ليعكسها حساب الدفعات."
+    "receivedFromErpHint": "تم استلام البضاعة مقابل أوامر الشراء هذه. أنشئ الفواتير ليعكسها حساب الدفعات.",
+"balanceSheet": {
+    "inventory": "المخزون",
+    "inventoryHint": "قيمة المخزون الحية من نظام ERP؛ تظهر فقط عند تفعيل ERP لهذا النشاط.",
+    "inventoryUnavailable": "ERP غير متصل"
   }
+}
 }

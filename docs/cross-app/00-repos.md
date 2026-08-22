@@ -1,0 +1,52 @@
+# 00. Repositories
+
+Enumerated with `gh repo list tryrtylr --limit 100 --json name,description,updatedAt,isArchived`
+on 2026-08-22. It returns **21 repos**, none archived. "All repos" means this
+list, not the six-row table in the round-two brief. Every repo is accounted for
+below: covered or not, and why.
+
+## Coverage summary
+
+| Status                        | Count | Repos                                                                                                          |
+| ----------------------------- | ----- | -------------------------------------------------------------------------------------------------------------- |
+| Audited, branch + PR          | 4     | rtylr, onion, voxie, packages                                                                                  |
+| Audited read-only             | 3     | vault, pos (cloned this run), schemas (via onion's submodule checkout)                                         |
+| Not covered, reason recorded  | 14    | see table below                                                                                                 |
+
+## The full list
+
+| Repo             | Local path                                             | Role                                                            | Round-two treatment                                                                                                                                                     |
+| ---------------- | ------------------------------------------------------ | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **rtylr**        | `~/Development/rtylr`                                  | Frontend monorepo, 10 Vite apps                                 | Branch `docs/cross-app-round2` cut from `origin/docs/flow-cross-app-deep-dive` so round one's history is continuous. PR opened.                                          |
+| **onion**        | `~/Development/onion`                                  | Go backend: modules, platform packages, sqlc, worker            | Branch `docs/cross-app-round2` from `origin/main`. Backend inventory scripts land in `scripts/cross-app/`. PR opened.                                                    |
+| **voxie**        | `~/Development/voxie` (vendored copy inside rtylr/packages/voxie) | `.onk` contracts plus committed generated `gen/ts` and `gen/go` | Branch `docs/cross-app-round2` from `origin/main`. Drafted `.onk` changes land here only. `gen/` untouched. The vendored copy in rtylr is not synced. PR opened (draft). |
+| **packages**     | `~/Development/rtylr/packages` (submodule of rtylr)    | The 16 `@voxire/*` shared packages                              | Branch if documentation changes are warranted; code changes proposed, not made. Highest blast radius: any change redeploys all ten Pages apps.                           |
+| **pos**          | `~/Development/pos`, cloned read-only this run         | Tauri POS terminal; consumes the same packages submodule        | Cloned (`--depth 50`) and swept for request call sites to extend the frontend inventory. No writes.                                                                      |
+| **vault**        | `~/Development/vault`                                  | Abed's written source of truth                                  | Read-only. Cross-checked where it makes claims about backend behaviour.                                                                                                  |
+| **schemas**      | via `~/Development/onion/internal/platform/database/schemas` | Git submodule of onion holding every SQL schema file       | Read-only through onion's checkout. Cited as `tryrtylr/schemas` paths under that location; the migration and table inventories derive from it.                            |
+| deploy           | not cloned                                             | Release promotion manifests, deployment control plane           | Not covered: deploys images, holds no business data flow.                                                                                                               |
+| infra            | not cloned                                             | Infrastructure ("meow")                                         | Not covered: no API surface.                                                                                                                                            |
+| pipelines        | not cloned                                             | CI pipelines                                                    | Not covered: build plumbing only.                                                                                                                                       |
+| raple            | not cloned                                             | TypeScript, last push 2026-04-05, size 65 KB                    | Not covered: dormant four months before the audit window; nothing in it can have changed the current data-sharing picture.                                              |
+| rtylr-docs       | not cloned                                             | Docs site                                                       | Not covered: publishes documentation, owns no runtime surface.                                                                                                          |
+| rtylr-landing    | not cloned                                             | Marketing site                                                  | Not covered: marketing only; round one already recorded its removal from this monorepo.                                                                                 |
+| rtylr-mcp        | not cloned                                             | MCP server                                                      | Not covered: developer tooling.                                                                                                                                         |
+| rtylr-os         | not cloned                                             | Linux distribution with prebaked rtylr                          | Not covered: packaging.                                                                                                                                                 |
+| rtylr-self-host  | not cloned                                             | Self-host bundle                                                | Not covered: packaging. Its licence server (`cmd/license` in onion) is audited where onion touches it.                                                                  |
+| rtylr-version    | not cloned                                             | Single source of truth for suite version                        | Not covered: version pinning.                                                                                                                                           |
+| system-map       | not cloned                                             | JavaScript, size 253 KB                                         | Not covered: diagramming material, no runtime surface found in its description or metadata.                                                                             |
+| email-templates  | not cloned (submodule of onion at `internal/platform/email/templates`) | Email template content                          | Not covered: content only. The `emailqueue` mechanism that sends them is inventoried on the onion side.                                                                 |
+| voxtooling       | not cloned                                             | Custom dashboard for Voxire                                     | Not covered: internal Voxire tooling, not part of the RTYLR tenant-facing product.                                                                                      |
+| pablo            | not cloned                                             | Mobile app for the RTYLR platform (Rust), last push 2026-08-12  | Not covered this run: it is a fourth frontend consumer of the same API and would deserve its own sweep, but it had no clone, and cloning and auditing an unknown Rust/TS mobile codebase was judged beyond what the remaining run could verify to citation standard. Recorded in `BLOCKED.md`. |
+
+## What coverage means per repo
+
+- rtylr, pos: every browser-leaving request call site swept (round two adds pos;
+  round one reached only the ten Vite apps).
+- onion: every module directory, every sqlc query file, every hand-registered
+  route literal, every `internal/platform/*` package, every wsbus publish,
+  every registered job, every webhook emission/consumption, every schema file.
+- voxie: contract corpus swept by round one's script; round two drafts changes
+  against specific files.
+- packages: swept as a request idiom source in round one; round two reads it
+  only where a proposal would touch it.

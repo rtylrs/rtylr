@@ -56,10 +56,10 @@ export interface CustomersParams {
   search?: string;
   tier?: string;
   tag?: string;
+  /** One-based page number, matching ListCustomersRequest.page. */
   page?: number;
+  /** Page size, matching ListCustomersRequest.page_size. */
   pageSize?: number;
-  limit?: number;
-  offset?: number;
 }
 
 export interface TimelineEntry {
@@ -619,9 +619,7 @@ export const crmApi = {
 
   // Customers
   // ListCustomersRequest takes search, tier, tag, page and page_size, and the
-  // int64 fields travel as strings. It has no limit/offset, so those two
-  // CustomersParams fields were never reaching the server and are dropped here
-  // rather than silently passed: see #913.
+  // int64 fields travel as strings (#913 removed the phantom limit/offset).
   getCustomers: (params?: CustomersParams) =>
     compatResult<Customer[]>(() =>
       crmCompatibilityClient.listCustomers({
@@ -706,18 +704,14 @@ export const crmApi = {
       crmCompatibilityClient.updateLoyaltyConfig(flat(toLoyaltyConfigPayload(config)))
     ),
 
-  getLoyaltyTransactions: (customerId?: number, limit?: number, offset?: number) =>
+  getLoyaltyTransactions: (customerId?: number, page?: number, pageSize?: number) =>
     compatResult<LoyaltyTransaction[]>(() =>
-      // The contract pages by page/page_size. Translating rather than dropping
-      // the caller's limit/offset, which is a faithful mapping while both are
-      // multiples: page is 1-based, so offset 0 is page 1.
+      // Contract paging verbatim: ListLoyaltyTransactionsRequest is
+      // customer_id, page, page_size. int64 travels as a string (#913).
       crmCompatibilityClient.getLoyaltyTransactions({
         customerId: customerId === undefined ? undefined : String(customerId),
-        pageSize: limit === undefined ? undefined : String(limit),
-        page:
-          offset === undefined || limit === undefined || limit === 0
-            ? undefined
-            : String(Math.floor(offset / limit) + 1),
+        page: page === undefined ? undefined : String(page),
+        pageSize: pageSize === undefined ? undefined : String(pageSize),
       })
     ),
 

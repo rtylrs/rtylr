@@ -143,3 +143,12 @@ Sequence: `ERP->FIN-01` (real supplier ids), then the filter, then the panel.
 | Backend             | 1 day: `supplier_id` filter on `ListBillsRequest`, or a summary aggregate if statuses stay unenumerated |
 | Frontend            | 1 day: panel on the ERP supplier page with role gating and per-currency subtotals                       |
 | Ongoing maintenance | ~0.25 days per year                                                                                     |
+
+## Backend section (round two)
+
+Confirmed: `ListBillsRequest` accepts page and page_size only
+(`packages/voxie/api/finance/bill/v1/models.onk`). Blocked-by quality note from
+verification: until ERP->FIN-01 lands, filtering bills by supplier would filter
+on fabricated ids, exactly as the dossier warns.
+
+*Round two (2026-08-22): confirmed unchanged.*

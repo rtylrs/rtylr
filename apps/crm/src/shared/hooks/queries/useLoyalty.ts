@@ -119,7 +119,7 @@ export const useLoyaltyTransactions = (customerId?: number): UseQueryResult<Loya
     queryFn: async (): Promise<LoyaltyTransaction[]> => {
       // No customerId = business-wide recent activity feed; the generated
       // client omits the param when undefined.
-      const res = await unwrap(crmApi.getLoyaltyTransactions(customerId, 100, 0));
+      const res = await unwrap(crmApi.getLoyaltyTransactions(customerId, 1, 100));
       return z.array(loyaltyTransactionSchema).parse(unwrapList(res, 'transactions'));
     },
   });

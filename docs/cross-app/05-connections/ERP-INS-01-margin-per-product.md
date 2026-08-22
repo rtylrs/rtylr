@@ -163,3 +163,13 @@ without it, but say what the figure covers.
 | Backend             | 3 days: `ProductMargin` contract, Insights-owned aggregate reading ERP cost, nullable-cost and currency-mismatch handling |
 | Frontend            | 1 day: margin column, missing-cost indication, scope and current-cost labelling                                           |
 | Ongoing maintenance | ~0.5 days per year                                                                                                        |
+
+## Backend section (round two)
+
+Confirmed, plus one cheapening nuance: Insights' own SQL already reads
+`erp_products` directly (`backend_tables.csv`, erp_products row lists insights
+among readers). An Insights-owned margin aggregate therefore needs no new
+cross-domain mechanism, only a query in its existing query set. Draft 8b stands
+as written.
+
+*Round two (2026-08-22): confirmed; build cost reduced.*

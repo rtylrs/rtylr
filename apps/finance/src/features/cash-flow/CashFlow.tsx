@@ -12,8 +12,7 @@ import { cardStyle, ACCENT } from '../../shared/lib/tokens';
 const CashFlow: React.FC = () => {
   const { t } = useTranslation('finance');
   const [period, setPeriod] = useState<'month' | 'quarter' | 'year'>('month');
-  const [date, setDate] = useState(new Date());
-  const { data = [] } = useCashFlow({ period, date });
+  const { data = [] } = useCashFlow({ period });
 
   const net = data.reduce((s: number, d) => s + (d.inflow - d.outflow), 0);
   const totalIn = data.reduce((s: number, d) => s + d.inflow, 0);
@@ -30,12 +29,7 @@ const CashFlow: React.FC = () => {
         title={t('cashFlow.title')}
         breadcrumbs={[{ label: t('cashFlow.reports') }, { label: t('cashFlow.title') }]}
         actions={
-          <PeriodSelector
-            period={period}
-            onPeriodChange={setPeriod}
-            date={date}
-            onDateChange={setDate}
-          />
+          <PeriodSelector period={period} onPeriodChange={setPeriod} />
         }
       />
 

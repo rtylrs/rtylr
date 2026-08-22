@@ -59,3 +59,44 @@ verdict in `03-sharing-matrix.md`.
 **What would unblock it.** Constant-folding in `sweep-endpoints.mjs`: resolve
 imported identifiers to their declaration when the declaration is a string
 literal in the same package.
+
+## Round two additions
+
+### 1. pablo (mobile app) not audited
+
+`tryrtylr/pablo`, the mobile client, is a fourth frontend consumer of the same
+API. It had no local clone; cloning and auditing an unfamiliar Rust/TypeScript
+mobile codebase to this audit's citation standard did not fit the remaining
+run. Recorded as uncovered in `00-repos.md`.
+
+**What would unblock it.** Clone `tryrtylr/pablo` and run a request-sweep over
+its networking layer, mapping calls to contract domains like
+`sweep-endpoints.mjs` does.
+
+### 2. onion sqlc generation required a local generate step
+
+Generated sqlc code is gitignored, so the round-two worktree could not build
+until `scripts/generate_sqlc.sh` ran locally (132 modules) after syncing the
+schemas submodule pointer. This matches the brief's warning about fresh clones.
+No action needed beyond documenting: any CI or reviewer building this branch
+must run the generator first.
+
+**What would unblock it.** Committing generated output is a repo policy change;
+alternatively a CI job that generates before building.
+
+### 3. A parallel working session shares two primary clones
+
+Another session actively committed implementation branches in
+`~/Development/onion` and `~/Development/rtylr` during this audit, switching
+branch heads mid-run twice. All round-two work therefore lives in dedicated
+worktrees (`~/Development/onion-worktrees/cross-app-round2`,
+`~/Development/rtylr-worktrees/cross-app-round2`). Nothing was blocked; the
+worktree isolation decision (R2-6/R2-8) kept both sessions running.
+
+### 4. Live endpoint verification still not performed
+
+Same constraint as round one: no dev server started, no requests issued against
+`api.voxire.dev`. Every runtime claim remains static-analysis. The 67 unmatched
+frontend paths from round one were reduced but not eliminated by better route
+extraction; remaining unknowns are recorded in `01-inventory.md` coverage notes
+and `backend_handlers.csv`.

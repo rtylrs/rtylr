@@ -82,7 +82,7 @@ const rpcMeta = new Map();
     const [domain, capability, version, kind, name, fieldName, fieldType] = cols;
     if (kind !== 'rpc') continue;
     const http = rest.match(/@(\w+)\("([^"]*)"\)/);
-    rpcMeta.set(name, {
+    const meta = {
       domain,
       capability,
       version,
@@ -90,7 +90,14 @@ const rpcMeta = new Map();
       response: fieldType,
       method: http ? http[1] : '',
       path: http ? `/${domain}/${capability}/${version}${http[2]}` : '',
-    });
+    };
+    rpcMeta.set(name, meta);
+    // Frontend vars are often prefixed (InsightsProductServiceClient) while
+    // the contract name is ProductService.getBestSellers, so index the bare
+    // method too for a second-chance lookup.
+    const bare = name.includes('.') ? name.split('.')[1] : name;
+    if (!rpcMeta.has('bare:' + bare)) rpcMeta.set('bare:' + bare, []);
+    rpcMeta.get('bare:' + bare).push(meta);
   }
 }
 
@@ -129,17 +136,137 @@ for (const pkg of readdirSync(join(ROOT, 'packages'))) {
     /* not a directory */
   }
 }
+// Round two: the pos terminal repo is swept as a pseudo-app when cloned.
+import { existsSync as _exists } from 'node:fs';
+import { homedir as _homedir } from 'node:os';
+const POS_ROOT = process.env.CROSS_APP_POS || join(_homedir(), 'Development', 'pos');
+if (_exists(join(POS_ROOT, 'src'))) scopes.push([null, 'pos']);
+
+// ---- Constant folding for <dynamic:...> paths (round two) -----------------
+// Two passes: first collect every module-scope const whose initializer is a
+// string literal or an object literal of strings, per scope; then resolve
+// dotted identifier expressions like API_ROUTES.GET.GET_ALL at call sites.
+function parseStringInit(src, eqIdx) {
+  // Returns the raw literal contents starting after '=', or null.
+  let i = eqIdx + 1;
+  while (/\s/.test(src[i])) i++;
+  const q = src[i];
+  if (q === "'" || q === '"') {
+    let j = i + 1;
+    let out = '';
+    while (j < src.length && src[j] !== q) {
+      if (src[j] === '\\') {
+        out += src[j + 1];
+        j += 2;
+      } else out += src[j++];
+    }
+    return { value: out, template: false };
+  }
+  if (q === '`') return { value: src.slice(i), template: true };
+  if (q === '{') {
+    // Object literal of nested string values.
+    let depth = 0;
+    const start = i;
+    while (i < src.length) {
+      if (src[i] === '{') depth++;
+      else if (src[i] === '}') {
+        depth--;
+        if (depth === 0) break;
+      }
+      i++;
+    }
+    const body = src.slice(start + 1, i);
+    const map = {};
+    for (const mm of body.matchAll(/([A-Za-z_$][\w$]*)\s*:\s*(?:'([^']*)'|"([^"]*)")/g))
+      map[mm[1]] = mm[2] ?? mm[3];
+    for (const mm of body.matchAll(/([A-Za-z_$][\w$]*)\s*:\s*\{/g)) {
+      // Nested objects handled by recursion on the substring.
+      const key = mm[1];
+      const subStart = body.indexOf('{', mm.index);
+      let depth2 = 0;
+      let k = subStart;
+      while (k < body.length) {
+        if (body[k] === '{') depth2++;
+        else if (body[k] === '}') {
+          depth2--;
+          if (depth2 === 0) break;
+        }
+        k++;
+      }
+      map[key] = foldObject(body.slice(subStart + 1, k));
+    }
+    return { value: map };
+  }
+  return null;
+}
+function foldObject(body) {
+  const map = {};
+  for (const mm of body.matchAll(/([A-Za-z_$][\w$]*)\s*:\s*(?:'([^']*)'|"([^"]*)")/g))
+    map[mm[1]] = mm[2] ?? mm[3];
+  return map;
+}
+function buildConstMap(scopeAbs) {
+  const map = new Map();
+  let files;
+  try {
+    files = walk(scopeAbs);
+  } catch {
+    return { consts: map, onekitClients: new Map() };
+  }
+  // Round two: apps now centralise OneKit client instantiation in shared/lib
+  // and import the variables elsewhere, so client declarations must be
+  // collected for the whole scope, not per file.
+  const onekitClients = new Map();
+  const declRe = /(?:const|let)\s+(\w+)\s*=\s*createOneKitClient\(\s*(\w+)Client\b/g;
+  const constRe = /(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*/g;
+  for (const f of files) {
+    const src = readFileSync(f, 'utf8');
+    let mm;
+    while ((mm = constRe.exec(src))) {
+      const parsed = parseStringInit(src, mm.index + mm[0].length - 1);
+      if (parsed && !parsed.template && typeof parsed.value !== 'undefined')
+        map.set(mm[1], parsed.value);
+    }
+    while ((mm = declRe.exec(src))) onekitClients.set(mm[1], mm[2]);
+  }
+  return { consts: map, onekitClients };
+}
+// Fold a template-literal body into a route shape, resolving known
+// identifiers inside interpolations where possible.
+function resolveTemplate(body, constMap) {
+  return body.replace(/\$\{([^}]*)\}/g, (_, expr) => {
+    const trimmed = expr.trim();
+    const folded = resolveIdent(trimmed.replace(/^\w+\./, ''), constMap);
+    if (folded) return folded;
+    return '{' + trimmed.split(/[^\w$]/)[0] + '}';
+  });
+}
+function resolveIdent(expr, constMap) {
+  const parts = expr.split('.');
+  let v = constMap.get(parts[0]);
+  if (v === undefined) return null;
+  for (let i = 1; i < parts.length; i++) {
+    if (v && typeof v === 'object' && parts[i] in v) v = v[parts[i]];
+    else return null;
+  }
+  return typeof v === 'string' ? v : null;
+}
 
 let unresolvedOnekit = 0;
 for (const [scope, app] of scopes) {
+  const scopeAbs = scope ? join(ROOT, scope) : POS_ROOT;
   let files;
   try {
-    files = walk(join(ROOT, scope));
+    files = walk(scopeAbs);
   } catch {
     continue;
   }
+  // Per-scope constant table for folding dynamic paths.
+  const { consts: constMap, onekitClients } = buildConstMap(scopeAbs);
   for (const file of files) {
-    const rel = relative(ROOT, file);
+    const rel = scope
+      ? relative(ROOT, file)
+      : 'pos/' + relative(POS_ROOT, file);
     // Blank out full-line comments so documentation examples (e.g. the
     // api.get('/user/me') sample in AppGuard's JSDoc) are not counted as
     // requests. Offsets are preserved so file:line citations stay exact.
@@ -158,8 +285,11 @@ for (const [scope, app] of scopes) {
     while ((m = headRe.exec(src))) {
       const [, recv, verb] = m;
       const isSafe = recv === 'safe';
+      // Round two: apps migrated to named transports (e.g. hrTransport) that
+      // delegate straight to safe; treat them as the same idiom.
+      const isTransport = /Transport$/.test(recv);
       const isAxiosish = ['api', 'publicApi', 'client', 'http'].includes(recv);
-      if (!isSafe && !isAxiosish) continue;
+      if (!isSafe && !isAxiosish && !isTransport) continue;
       let i = m.index + m[0].length;
       let generic = '';
       if (src[i] === '<') {
@@ -190,12 +320,22 @@ for (const [scope, app] of scopes) {
           j++;
         }
         path = src.slice(i + 1, j);
-        if (!path.startsWith('/')) continue;
+        // Template literals become route shapes: /a/${id} -> /a/{id}.
+        if (q === '`') {
+          const foldedTpl = resolveTemplate(path, constMap);
+          if (!foldedTpl.startsWith('/')) continue;
+          path = foldedTpl;
+        }
       } else {
-        // Path built elsewhere (a const or an expression). Record the
-        // identifier so the row is countable rather than silently dropped.
+        // Path built elsewhere: try to fold the identifier through this
+        // scope's constant table before recording it as unresolved. Bare
+        // parameter names (path, url) are pass-through wrapper definitions,
+        // not request sites.
         const id = src.slice(i).match(/^[\w$.]+/);
-        path = `<dynamic:${id ? id[0] : 'expr'}>`;
+        const expr = id ? id[0] : '';
+        if (['path', 'url', 'input'].includes(expr)) continue;
+        const folded = expr ? resolveIdent(expr, constMap) : null;
+        path = folded ?? `<dynamic:${expr || 'expr'}>`;
       }
       rows.push([
         app,
@@ -208,7 +348,7 @@ for (const [scope, app] of scopes) {
         nearbyQueryKey(src, m.index),
         rel,
         lineOf(src, m.index),
-        isSafe ? 'safeFetch' : 'axios',
+        isSafe || isTransport ? 'safeFetch' : 'axios',
         domainOfPath(path),
       ]);
     }
@@ -216,7 +356,8 @@ for (const [scope, app] of scopes) {
     // --- Idiom: raw fetch (caret streaming, presigned uploads) --------------
     const fetchRe = /\bfetch\(\s*(['"`])((?:\\.|(?!\1).)*)\1|\bfetch\(\s*([\w$.]+)/g;
     while ((m = fetchRe.exec(src))) {
-      const path = m[2] ?? `<dynamic:${m[3]}>`;
+      const foldedFetch = m[3] ? resolveIdent(m[3], constMap) : null;
+      const path = m[2] ?? foldedFetch ?? `<dynamic:${m[3]}>`;
       if (m[3] === 'input') continue; // pass-through wrapper, not a request site
       rows.push([
         app,
@@ -235,7 +376,7 @@ for (const [scope, app] of scopes) {
     }
 
     // --- Idiom: OneKit generated clients ------------------------------------
-    const clients = new Map(); // varName -> ServiceName
+    const clients = new Map(onekitClients); // varName -> ServiceName
     const declRe = /(?:const|let)\s+(\w+)\s*=\s*createOneKitClient\(\s*(\w+)Client\b/g;
     while ((m = declRe.exec(src))) clients.set(m[1], m[2]);
     if (clients.size) {
@@ -244,7 +385,13 @@ for (const [scope, app] of scopes) {
         const service = clients.get(m[1]);
         const method = m[2];
         if (['toString', 'then', 'catch'].includes(method)) continue;
-        const meta = rpcMeta.get(`${service}.${method}`);
+        let meta = rpcMeta.get(`${service}.${method}`);
+        if (!meta) {
+          // Second chance: strip the app prefix from the client-side service
+          // name and match on the bare RPC name when it is unambiguous.
+          const candidates = rpcMeta.get('bare:' + method);
+          if (candidates && candidates.length === 1) meta = candidates[0];
+        }
         if (!meta) {
           unresolvedOnekit++;
           process.stderr.write(`NO-RPC ${rel}:${lineOf(src, m.index)}: ${service}.${method}\n`);

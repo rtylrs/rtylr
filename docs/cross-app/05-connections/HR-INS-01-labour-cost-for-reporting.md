@@ -58,7 +58,7 @@ whatever revenue picture they have, outside RTYLR.
 Identical inputs to `HR->FLOW-01`: `project_id`, `duration_minutes` and
 `employee_id` from `hr.time_entry.v1`
 (`packages/voxie/api/hr/time_entry/v1/models.onk:12`, `:20`, `:10`), priced with
-`hr_employees.hourly_rate`
+`internal/modules/hr_employees.hourly_rate`
 (`~/Development/onion/internal/platform/database/schemas/hr_core/schema.sql:91`).
 
 The difference is the shape of the question: a period total across projects
@@ -154,3 +154,11 @@ Sequence: after `HR->FLOW-01`.
 | Backend             | 0.5 days after `HR->FLOW-01`; 4 days standalone                                         |
 | Frontend            | 1.5 days: cost and margin series with coverage annotation and hide-not-zero degradation |
 | Ongoing maintenance | shared with `HR->FLOW-01`                                                               |
+
+## Backend section (round two)
+
+Confirmed: insights declares no labour-cost message. With the labourcost port
+now live (see HR->FLOW-01's backend section), the same provider can serve both
+consumers once exposed, preserving the single-number design.
+
+*Round two (2026-08-22): confirmed; serving mechanism identified.*

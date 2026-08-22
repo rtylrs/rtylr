@@ -46,7 +46,6 @@ import { flowApi } from './flowApi';
 import {
   businessClient,
   dashboardClient,
-  workspaceClient,
   projectClient,
   taskClient,
   labelClient,
@@ -69,26 +68,6 @@ describe('flowApi OneKit adapters', () => {
 
     expect(dashboardClient.getFlowDashboard).toHaveBeenCalledWith({ workspaceId: 'ws-1' });
     expect(businessClient.listMyBusinesses).toHaveBeenCalledWith({});
-  });
-
-  it('uses generated workspace methods with canonical camelCase payloads', async () => {
-    await Promise.all([
-      flowApi.createWorkspace({ name: 'Dev', color: '#ff0000' }),
-      flowApi.updateWorkspace('5', { name: 'Updated' }),
-      flowApi.deleteWorkspace('5'),
-    ]);
-
-    expect(workspaceClient.createWorkspace).toHaveBeenCalledWith({
-      name: 'Dev',
-      description: '-',
-      icon: 'folder',
-      color: '#ff0000',
-    });
-    expect(workspaceClient.updateWorkspace).toHaveBeenCalledWith({
-      id: '5',
-      body: { name: 'Updated', description: '-', icon: 'folder', color: '#6366f1' },
-    });
-    expect(workspaceClient.deleteWorkspace).toHaveBeenCalledWith({ id: '5' });
   });
 
   it('uses generated project and member methods', async () => {

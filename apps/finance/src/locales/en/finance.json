@@ -45,5 +45,10 @@
   "bills": {
     "receivedFromErp": "Received from ERP, awaiting bills",
     "receivedFromErpHint": "Stock has arrived against these purchase orders. Raise the bills so accounts payable reflects it."
+  },
+  "balanceSheet": {
+    "inventory": "Inventory",
+    "inventoryHint": "Live stock value from ERP; shown only when ERP is enabled for this business.",
+    "inventoryUnavailable": "ERP not connected"
   }
 }

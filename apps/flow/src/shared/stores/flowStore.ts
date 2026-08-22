@@ -236,7 +236,8 @@ export interface Notification {
 // -- Store ---------------------------------------------------------------
 
 interface FlowState {
-  activeWorkspaceId: string;
+  /** @deprecated Workspace layer removed. */
+	activeWorkspaceId: string;
   workspaces: Workspace[];
   members: Member[];
   projects: Project[];

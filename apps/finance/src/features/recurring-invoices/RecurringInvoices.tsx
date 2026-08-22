@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
-import { Play, Pause, RotateCcw, Repeat } from 'lucide-react';
+import { Play, Pause, Repeat } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { getOneKitErrorMessage } from '@voxire/api';
@@ -13,7 +13,6 @@ import {
   useRecurringInvoices,
   useSetRecurringStatus,
   useCreateRecurringInvoice,
-  useRunRecurringInvoiceNow,
 } from './useRecurringInvoices';
 import {
   cardStyle,
@@ -148,7 +147,6 @@ const RecurringInvoices: React.FC = () => {
   const { t } = useTranslation();
   const { data = [], isLoading } = useRecurringInvoices();
   const setStatus = useSetRecurringStatus();
-  const runNow = useRunRecurringInvoiceNow();
   const [showCreate, setShowCreate] = useState(false);
 
   const togglePause = (id: string, isActive: boolean): void => {
@@ -284,18 +282,6 @@ const RecurringInvoices: React.FC = () => {
                       >
                         {r.isActive ? <Pause size={12} /> : <Play size={12} />}
                         {r.isActive ? 'Pause' : 'Resume'}
-                      </button>
-                      <button type="button"
-                        style={{
-                          ...ghostBtn,
-                          padding: '4px 10px',
-                          opacity: runNow.isPending ? 0.6 : 1,
-                        }}
-                        aria-label={`Run invoice now for ${r.id}`}
-                        disabled={runNow.isPending}
-                        onClick={() => runNow.mutate({ id: r.id })}
-                      >
-                        <RotateCcw size={12} /> {runNow.isPending ? 'Running…' : 'Run now'}
                       </button>
                     </div>
                   </td>

@@ -7,19 +7,13 @@ import type { CashFlowPoint } from '../../shared/components/CashFlowChart';
 import { unwrapList } from '../../shared/lib/unwrapList';
 
 export interface UseCashFlowOptions {
-  period?: 'month' | 'quarter' | 'year';
   /**
-   * Ignored by the server, and kept only so CashFlow.tsx keeps compiling.
-   *
-   * GetCashFlowAnalyticsRequest accepts `period` and nothing else; the handler
-   * derives the date range itself through resolveDateRangeFromPeriod. This hook
-   * used to compute `from` and `to` from this date and send them, which the
-   * server discarded. The date picker on the screen therefore changes nothing.
-   *
-   * Left in place rather than removed because deleting it means deciding what
-   * that control should become, which is a UI change. Tracked in #910.
+   * Reporting granularity. GetCashFlowAnalyticsRequest accepts `period` and
+   * nothing else: the server derives the date range itself through
+   * resolveDateRangeFromPeriod, so there is deliberately no date option here.
+   * A user-picked range needs a contract change first (#910).
    */
-  date?: Date;
+  period?: 'month' | 'quarter' | 'year';
 }
 
 export function useCashFlow(options?: UseCashFlowOptions) {

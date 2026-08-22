@@ -96,9 +96,53 @@ function lineCount(abs) {
   return lineCountCache.get(abs);
 }
 
+// Round two: bare repo-relative citations are resolved against the repo they
+// name, so documents can cite onion and voxie files without the ~/ prefix.
+// The onion worktree is preferred (it carries this branch's tree) with the
+// primary clone as fallback; voxie resolves to its own clone.
+const ONION_TREE = process.env.CROSS_APP_ONION || join(homedir(), 'Development', 'onion-worktrees', 'cross-app-round2');
+const VOXIE_TREE = join(homedir(), 'Development', 'voxie');
+
+// Tracked-file sets for the sibling repos, computed lazily on first use.
+const SIBLING_TRACKED = (() => {
+  const out = [];
+  for (const root of [ONION_TREE, join(homedir(), 'Development', 'onion'), VOXIE_TREE]) {
+    try {
+      const files = new Set(
+        execFileSync('git', ['ls-files', '--recurse-submodules'], {
+          cwd: root,
+          encoding: 'utf8',
+          maxBuffer: 64 * 1024 * 1024,
+        }).split('\n').filter(Boolean),
+      );
+      out.push([root, files]);
+    } catch {
+      // Not a checkout; skip.
+    }
+  }
+  return out;
+})();
+
 function resolveTarget(p) {
   if (p.startsWith('~/')) return join(homedir(), p.slice(2));
   if (p.startsWith('/')) return p;
+  if (
+    p.startsWith('internal/') ||
+    p.startsWith('cmd/') ||
+    p.startsWith('docs/sqlc-query-ownership.md') ||
+    p.startsWith('docs/platform-patterns.md') ||
+    p.startsWith('docs/tenant-index-matrix.md') ||
+    p.startsWith('scripts/generate_sqlc.sh')
+  ) {
+    for (const root of [ONION_TREE, join(homedir(), 'Development', 'onion')]) {
+      const abs = join(root, p);
+      if (existsSync(abs)) return abs;
+    }
+    return join(ONION_TREE, p);
+  }
+  if (p.startsWith('api/') && p.includes('/v1')) {
+    return join(VOXIE_TREE, p);
+  }
   return join(ROOT, p);
 }
 
@@ -161,9 +205,20 @@ for (const doc of walk(DOCS)) {
           continue;
         }
         // Present on disk is not enough for a path inside this repository. An
-        // untracked file satisfies the citation here and nowhere else.
+        // untracked file satisfies the citation here and nowhere else. Paths
+        // resolved into a sibling repo (onion, voxie) are tracked-checked
+        // against that repo instead.
         const isRepoRelative = !p.startsWith('~/') && !p.startsWith('/');
-        if (isClaim && isRepoRelative && !TRACKED.has(p)) {
+        let trackedHere = TRACKED.has(p);
+        if (isRepoRelative && !trackedHere) {
+          for (const [root, set] of SIBLING_TRACKED) {
+            if (abs.startsWith(root + '/')) {
+              trackedHere = set.has(abs.slice(root.length + 1));
+              break;
+            }
+          }
+        }
+        if (isClaim && isRepoRelative && !trackedHere) {
           failures.push(`${relDoc}:${ln}  present on disk but not tracked in git: ${p}`);
           continue;
         }
