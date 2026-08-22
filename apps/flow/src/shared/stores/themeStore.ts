@@ -1,54 +1,29 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-
-type Theme = 'dark' | 'light' | 'system';
+import type { ThemeMode } from '@voxire/utils';
+import { useAppearanceStore } from './appearanceStore';
 
 /**
- * Dark, because that is the mode Flow is designed in: every screen in the design
- * set is drawn dark, and a bare `:root` in globals.css resolves to the dark
- * palette. Light remains a first-class opt-in, and a stored preference always
- * wins, so anyone who already chose light keeps it.
+ * A forwarding shim, kept only until its last consumer moves.
+ *
+ * This file used to be a store in its own right: it held the mode and it wrote
+ * `data-theme` to documentElement. Both jobs moved. The mode lives in
+ * `useAppearanceStore`, and the only writer of the appearance tokens and
+ * attributes is `AppearanceProvider` from `@voxire/ui`. Its shipped behaviour is
+ * preserved there rather than here: dark is still the default, because that is
+ * the mode Flow is designed in, and a stored preference still wins, including
+ * the `flow-theme` entry this file used to own, which the appearance store reads
+ * once as `legacyModeKey`.
+ *
+ * What is deliberately gone is the DOM write. Two stores each stamping
+ * `data-theme` from their own copy of the mode is how the palette and the tokens
+ * end up disagreeing, so this forwards to the one store instead of shadowing it.
+ *
+ * @deprecated Read `mode` and `setMode` from `useAppearanceStore`, or render
+ * `shared/components/ModeCards`. This file exists so
+ * `features/settings/FlowSettings.tsx` keeps compiling while its Appearance
+ * section is rewritten, and should be deleted with that rewrite.
  */
-export const DEFAULT_THEME: Theme = 'dark';
-
-interface ThemeState {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-}
-
-function applyTheme(theme: Theme) {
-  const root = document.documentElement;
-  if (theme === 'system') {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
-  } else {
-    root.setAttribute('data-theme', theme);
-  }
-}
-
-export const useThemeStore = create<ThemeState>()(
-  persist(
-    (set) => ({
-      theme: DEFAULT_THEME,
-      setTheme: (theme) => {
-        applyTheme(theme);
-        set({ theme });
-      },
-    }),
-    { name: 'flow-theme' }
-  )
-);
-
-export function initTheme() {
-  const stored = localStorage.getItem('flow-theme');
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored);
-      if (parsed.state?.theme) {
-        applyTheme(parsed.state.theme);
-        return;
-      }
-    } catch {}
-  }
-  applyTheme(DEFAULT_THEME);
+export function useThemeStore(): { theme: ThemeMode; setTheme: (theme: ThemeMode) => void } {
+  const theme = useAppearanceStore((s) => s.mode);
+  const setTheme = useAppearanceStore((s) => s.setMode);
+  return { theme, setTheme };
 }
