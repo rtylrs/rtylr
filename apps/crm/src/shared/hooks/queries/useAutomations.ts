@@ -60,11 +60,46 @@ export function actionTypeFor(value: unknown): unknown {
   return map[value] ?? value;
 }
 
+function actionTypeValue(action: unknown): unknown {
+  if (typeof action === 'string') return action;
+  if (action && typeof action === 'object' && !Array.isArray(action)) {
+    const record = action as Record<string, unknown>;
+    return record.type ?? record.action ?? record.label;
+  }
+  return undefined;
+}
+
+/**
+ * Convert the builder's visible action nodes back into backend actions while
+ * retaining configuration from actions that still exist in the workflow.
+ */
+export function actionsFromNodes(
+  nodes: NonNullable<Automation['nodes']>,
+  existingActions: unknown[] = []
+): unknown[] {
+  const remaining = [...existingActions];
+  return nodes.slice(1).map((node) => {
+    const type = actionTypeFor(node.label);
+    const existingIndex = remaining.findIndex(
+      (action) => actionTypeFor(actionTypeValue(action)) === type
+    );
+    if (existingIndex === -1) return { type };
+
+    const existing = remaining.splice(existingIndex, 1)[0];
+    if (existing && typeof existing === 'object' && !Array.isArray(existing)) {
+      return { ...(existing as Record<string, unknown>), type };
+    }
+    return { type };
+  });
+}
+
 export function toBackendRequest(data: Partial<Automation>): BackendAutomationRequest {
   const actions = (
-    Array.isArray(data.actions)
-      ? data.actions
-      : (data.nodes ?? []).slice(1).map((node) => ({ type: node.label }))
+    Array.isArray(data.nodes)
+      ? actionsFromNodes(data.nodes, Array.isArray(data.actions) ? data.actions : [])
+      : Array.isArray(data.actions)
+        ? data.actions
+        : []
   ).map((action) =>
     typeof action === 'object' && action !== null
       ? {
@@ -73,7 +108,10 @@ export function toBackendRequest(data: Partial<Automation>): BackendAutomationRe
         }
       : actionTypeFor(action)
   );
-  const triggerType = data.triggerType ?? triggerTypeFor(data.trigger);
+  const triggerType =
+    data.trigger !== undefined
+      ? triggerTypeFor(data.trigger)
+      : (data.triggerType ?? 'customer_signup');
   const triggerConfig =
     data.triggerConfig && typeof data.triggerConfig === 'object'
       ? (data.triggerConfig as Record<string, unknown>)
