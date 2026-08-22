@@ -1,0 +1,130 @@
+# 15. Round-one verification
+
+Every round-one dossier and contract draft, checked against the backend as it
+exists on 2026-08-22: the Go handlers and SQL, not only the `.onk`.
+
+**Pins.** onion verified at `ab6ff7ff` (branch tip `cb7d6d5a` plus sweep
+scripts); voxie at `847a34c8`; packages at `5ece9b79`; this repo's vendored
+contracts read through the worktree submodule. Round one shipped against onion
+`ccf239fc` and voxie `0e48b902`. **The backend moved under round one's feet:
+63 commits have landed on onion main since 2026-08-20**, several of them direct
+implementations of round-one issues by a parallel working session. Where a
+round-one claim was true when written and false now, the verdict is
+`corrected-by-progress`, with what landed and when.
+
+Method: each row below re-reads the cited handler, SQL or schema in this run's
+worktrees. Frontend claims were re-checked against this branch's checkout.
+Claims that needed a live request remain labelled as round one left them.
+
+## The backend movement that matters first
+
+| What landed (all dated 2026-08-22 unless noted)          | Where                                                                 | Round-one item it satisfies            |
+| -------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------- |
+| `platform/labourcost` port: contract, HR implementation, Flow consumption wired | `internal/platform/labourcost/contract.go`; `internal/modules/hr_payroll/internal/application/service.go:53`; `cmd/api/main.go:466` (#743) | the backend half of HR->FLOW-01         |
+| Payroll export to journal: route, idempotent claim, Finance-owned poster, tenant account mapping | `POST /hr/payroll/runs/{id}/export` (`export_payroll_handler.go:18`); `financejournal` + `financeaccounts` ports wired at `cmd/api/main.go:498-499` | all of HR->FIN-01's backend             |
+| Time-entry range/project/billability filters              | voxie #46 (`847a34c8`), onion #783 (`5996d065`), packages #66, rtylr #917 | contract issue #855 / round-one draft 1 |
+| Insights delivery dashboard implemented (was four stubs)  | `setting_service.go:116,136,165` over a `FlowReader` port from `flow_insights` (`main.go:464`) | flow-deep-dive #870; strengthens FLOW->INS-01's rejection |
+| Per-task hour rollups sum both hour stores                | onion #781 (`ab6ff7ff`)                                                | flow-deep-dive correction to Finding 1  |
+| getKPIs deleted with its duplicate contract               | onion #780, voxie #45, rtylr #916                                      | reduces contract surface drift          |
+
+## Dossier verdicts
+
+Verdicts: `confirmed`, `confirmed-strengthened`, `corrected-by-progress`
+(true when written, since implemented upstream), `overturned`. None overturned.
+
+| Id           | Verdict                  | Backend reality on 2026-08-22                                                                                                                                                                                                                   | Citation(s)                                                                                                   |
+| ------------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| HR->HUB-01   | confirmed-strengthened   | Termination still writes status columns and nothing else: `UpdateEmployeeForWriter(... Status: "terminated")` in hr_core, and hr_staff's own terminate UPDATE. No module reads a terminated status to revoke `user_app_permissions` or edit any apps array. New strengthening fact: seat provisioning already writes across the boundary in the opposite direction: team's invite INSERTs an `hr_employees` row cross-schema. Employment is coupled to entitlements at hire time and decoupled at termination time. | `employee_handlers.go:425-427`; `staff/sql/queries/staff.sql:26`; `team/sql/queries/team.sql:192-201`          |
+| ERP->FIN-01  | confirmed                | The bills module's SQL touches only `finance_bills`; no statement references `erp_suppliers`. `Bill.supplier_id` remains `@required @gt(0)` with no supplier name field.                                                                          | `bills/sql/queries/bills.sql:1-45`; `packages/voxie/api/finance/bill/v1/models.onk:29`                         |
+| CRM->FIN-01  | confirmed                | No `crm/sales/` directory exists in voxie's api tree; crm_sales serves 17 legacy chi routes; the CRM app hand-writes its lead/contact/contract payload types.                                                                                    | `packages/voxie/api/crm/` listing; `apps/crm/src/shared/hooks/queries/useSales.ts:106,245,272,347`            |
+| CRM->FIN-02  | confirmed                | `finance_invoices` stores exactly the four client strings and no customer column; the Invoice contract matches.                                                                                                                                  | `schemas/finance/schema.sql` (finance_invoices block); `packages/voxie/api/finance/invoices/v1/models.onk`     |
+| ERP->FIN-02  | confirmed-strengthened   | `GetValuation` is not just contracted but implemented server-side end to end. The gap remains the single frontend read.                                                                                                                           | `inventory/internal/api/inventory_service.go:57`; `inventory/internal/application/service.go:82`               |
+| ERP->FIN-03  | confirmed                | Purchase order contract carries `quantity_received` and `received_at` as claimed.                                                                                                                                                                 | `packages/voxie/api/erp/purchase_order/v1/models.onk:8,24`                                                     |
+| ERP->POS-01  | confirmed                | MenuItem still declares no product reference and no cost field.                                                                                                                                                                                   | `packages/voxie/api/pos/menu_item/v1/models.onk`                                                               |
+| FLOW->FIN-01 | corrected-by-progress    | The missing filters exist upstream now, mirroring round-one draft 1 nearly verbatim including the date-vs-range precedence note. Gap bucket moves to frontend work. **New storage finding:** `billable_invoice_id` is filtered on by the unbilled query but written by nothing anywhere in the repo, so "unbilled" is currently true of every row forever; recording "this hour got invoiced" exists at no layer. The invoice-side marker is required companion work the dossier did not know about. | `api/hr/time_entry/v1/models.onk` (filters block); `hr_time/sql/queries/time_entries.sql:52`; A1/A2 in 14-layer-reconciliation.md |
+| HR->FIN-01   | corrected-by-progress    | Even the action endpoint round one expected Finance to host already exists server-side, hosted by HR behind a Finance-owned port: export route, self-approval guard, idempotent claim/release around the poster call, tenant-selected account mapping via `financeaccounts`, cents-to-dollars conversion stated at the boundary. No frontend caller exists in rtylr or pos. Effort drops to UI plus an optional posted-marker. | `export_payroll_handler.go:18`; `hr_payroll/internal/application/service.go:375-409`; `journal/module.go:32,40`; `main.go:498-499` |
+| HR->FLOW-01  | corrected-by-progress    | The aggregate exists as the `labourcost` platform port: SQL joins `hr_time_entries` to `hr_employees.hourly_rate` inside HR, workspaces consumes it through the port with a noop fallback, main wires them. Not exposed over any RPC; zero frontend. Remaining work is one RPC plus UI, not a new capability. Deltas versus draft 8a: billable-only (non-billable minutes excluded rather than reported), one project per call, no date-range parameters, coverage reported as `uncosted_minutes`/`uncosted_employee_count` rather than `rate_coverage`, and no contributor-count field. Draft 8a must be revised to bind this port instead of proposing a parallel shape. | `labourcost/contract.go`; `hr_payroll/sql/queries/labour_cost.sql:1-33`; `workspaces/internal/application/service.go:113-129`; `main.go:466` |
+| HR->FLOW-02  | confirmed                | `ListLeaveRequestsRequest` still filters by employee and status only; no date range, no pagination fields.                                                                                                                                        | `packages/voxie/api/hr/leave/v1/models.onk` (request message)                                                  |
+| HR->HR-01    | confirmed-strengthened   | Both person tables still carry salary, hourly rate and overtime rate bridged by nullable `employee_id`. Strengthening fact: team provisioning writes `hr_employees` directly, so unification scope includes hub-side seat flows, not just HR modules. | `schemas/hr/schema.sql:29-30`; `schemas/hr_core/schema.sql:90-91`; `team/sql/queries/team.sql:194`             |
+| HR->INS-01   | confirmed                | Insights declares no labour-cost message. Once exposed, the same labourcost port serves both consumers without a second number path.                                                                                                              | insights api tree; `backend_handlers.csv`                                                                      |
+| IDENTITY-01  | confirmed                | Exactly one identity-resolution query exists product-wide (hub user to hr employee). POS-to-CRM contact matching in customer_sync remains the only other matcher and is contact-based, not identity-based.                                        | `hr_core/sql/queries/employees.sql:47`; `platform/customer_sync/customer_sync.go:47`                           |
+| POS->CRM-01  | confirmed                | Order listing still requires a till session id.                                                                                                                                                                                                   | `packages/voxie/api/pos/orders/v1/models.onk:145`                                                              |
+| REC->HR-01   | confirmed                | Careers serves 23 legacy routes with no contract domain; EmployeeService.createEmployee exists. Nothing changed.                                                                                                                                  | `backend_handlers.csv` (careers rows); `packages/voxie/api/hr/employee/v1/service.onk`                         |
+| SUP->CRM-01  | confirmed                | Support customers remain their own table with no CRM reference in queries or schema.                                                                                                                                                              | support_customers query set; `migrations.csv`                                                                  |
+| ERP->INS-01  | confirmed                | BestSeller carries revenue without cost. Nuance: Insights' own SQL already reads `erp_products` directly, so an Insights-owned margin aggregate needs no new mechanism, only a query.                                                              | `packages/voxie/api/insights/product/v1/models.onk:5`; `backend_tables.csv` (erp_products row)                 |
+| FIN->CRM-01  | confirmed                | Still blocked on CRM->FIN-02; invoices still carry no customer id to filter by.                                                                                                                                                                    | as CRM->FIN-02                                                                                                 |
+| FIN->ERP-01  | confirmed                | `ListBillsRequest` still accepts only page and page_size.                                                                                                                                                                                          | `packages/voxie/api/finance/bill/v1/models.onk` (request message)                                              |
+| FIN->ERP-02  | confirmed                | Bill carries no purchase order reference; ERP owns the status-change RPC as round one assumed.                                                                                                                                                    | `packages/voxie/api/finance/bill/v1/models.onk`; `erp/purchase_order/v1/service.onk`                           |
+| HUB->ALL-01  | confirmed                | Every app reads hub identity/team/config endpoints; unchanged precedent.                                                                                                                                                                           | round one `endpoints.csv`                                                                                      |
+
+## Contract draft verdicts
+
+| Draft | Round-one state        | Reality 2026-08-22                                                                                                  | Disposition for round two                                                        |
+| ----- | ---------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| 1 time-entry filters | drafted       | **Landed upstream** as voxie #46, onion #783, packages #66, rtylr #917. Field-for-field the draft, including pagination. | Exclude from the round-two voxie PR; comment on issue #855 pointing at the landing PRs |
+| 2 leave range        | drafted       | Open: request message unchanged.                                                                                      | Include                                                                            |
+| 3 invoice customer_id | drafted      | Open: no customer column in schema or contract.                                                                       | Include                                                                            |
+| 4 menu item product_id | drafted     | Open.                                                                                                                 | Include                                                                            |
+| 5 bill purchase_order_id | drafted   | Open.                                                                                                                 | Include                                                                            |
+| 6 bill supplier relax | drafted      | Open: `supplier_id` still `@required @gt(0)` with no name field.                                                      | Include                                                                            |
+| 7 support customer_id | drafted      | Open.                                                                                                                 | Include                                                                            |
+| 8a labour-cost aggregate | drafted   | **Partly superseded**: the port and SQL exist (#743) with different shape details (billable-only, per-project calls, no range, different coverage field names). | Revise to bind the existing port to an RPC; do not draft a parallel message set      |
+| 8b product margin    | drafted       | Open. Insights' direct table access makes it cheap.                                                                    | Include                                                                            |
+
+## Rejection re-checks
+
+Round one rejected 18 candidates. All rejections stand; none overturned. Two
+had evidence changes worth recording:
+
+- **FLOW->INS-01** was rejected partly because the insights aggregates were
+  assumed built while the handlers returned stubs (flow-deep-dive disputed the
+  evidence). The handlers are now genuinely implemented
+  (`setting_service.go:116-165`). The rejection's conclusion survives with
+  stronger evidence: adding a second path would now duplicate a live aggregate.
+- **FIN->FLOW-01** was rejected because Finance holds no project attribution.
+  Confirmed mechanically: `project_id` appears zero times across the finance
+  and erp contract trees. Rejection stands unchanged.
+
+The remaining sixteen re-checks found no changed facts: HUB->HR-01's negative
+ROI reasoning, the bar-3 surfaceless-domain group (no booking or support app
+exists), FIN->HUB-01's two-money-flows confusion, and the low-value singles all
+match the codebase as verified above.
+
+## Corrections owed to 10-doc-drift.md
+
+Three entries are appended by this phase (they are recorded there, not here):
+
+1. The round-two brief itself claimed `platform/labourcost` was "a seam
+   declared and never filled". False since #743: declared-only became
+   live-port. The brief inherited the stale claim from the interval between
+   round one's snapshot and this run.
+2. onion's `AGENTS.md` Definition-of-Done says every tenant-scoped query
+   filters by `owner_id`; onion's `CLAUDE.md` says `hr_time_entries.owner_id`
+   is the business id and must be scoped by `business_id`;
+   `docs/tenant-index-matrix.md` indexes business-leading. Three different
+   tenancy key stories in one repo; the CLAUDE.md convention note is the most
+   recent and most specific.
+3. `docs/platform-patterns.md` recommends `runmode.Spec` for new runmodes;
+   nothing imports `platform/runmode` anywhere in the repo.
+
+## flow-deep-dive items, re-verified
+
+| Item                          | State on 2026-08-22                                                                                                            |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| #867 ratesByUserId            | Still present in `apps/flow/src/shared/stores/timeSettingsStore.ts` with no additional reader.                                   |
+| #868 capacity 40              | **Fixed**: `apps/flow/src/shared/hooks/queries/useMemberCapacity.ts` resolves real contracted hours in two hops and cites #868.  |
+| #869 import-flow hook         | Hook still has zero call sites; route still uncontracted legacy chi.                                                            |
+| #870 insights stubs           | **Fixed** (see movement table).                                                                                                  |
+| #871 business_id defaults     | Schema submodule unchanged this run; round one's measurement stands as cited.                                                    |
+| #872 business currency        | `Business.currency` still absent from the `/businesses/mine` entry shape.                                                        |
+| I5 `/hr/staff/detail`         | Route still registered by no module (`backend_handlers.csv` contains no such row).                                               |
+
+## What verification changes downstream
+
+- Wave 1 of the roadmap loses three items to progress (time-entry filters,
+  payroll export backend, insights dashboards) and gains sharper versions:
+  mark-hours-invoiced storage, the labour-cost RPC exposure, and the payroll
+  export button.
+- The fifth gap bucket ("already exists on the backend, simply not exposed")
+  is no longer hypothetical: three of twenty-two dossiers moved into it within
+  one day of round one filing them.
