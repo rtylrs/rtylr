@@ -121,10 +121,7 @@ message UpdateBillBody {
   status: string @required
   /// description is the description value for this contract.
   description: string @required
-
-  /// supplier_name replaces the vendor snapshot; absent means unchanged.
-  supplier_name: string
-
+}
 
 message UpdateBillRequest {
   /// id is the unique identifier for the resource.
