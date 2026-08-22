@@ -264,9 +264,7 @@ for (const [scope, app] of scopes) {
   // Per-scope constant table for folding dynamic paths.
   const { consts: constMap, onekitClients } = buildConstMap(scopeAbs);
   for (const file of files) {
-    const rel = scope
-      ? relative(ROOT, file)
-      : 'pos/' + relative(POS_ROOT, file);
+    const rel = scope ? relative(ROOT, file) : 'pos/' + relative(POS_ROOT, file);
     // Blank out full-line comments so documentation examples (e.g. the
     // api.get('/user/me') sample in AppGuard's JSDoc) are not counted as
     // requests. Offsets are preserved so file:line citations stay exact.

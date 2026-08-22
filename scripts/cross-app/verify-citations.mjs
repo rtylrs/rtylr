@@ -100,7 +100,9 @@ function lineCount(abs) {
 // name, so documents can cite onion and voxie files without the ~/ prefix.
 // The onion worktree is preferred (it carries this branch's tree) with the
 // primary clone as fallback; voxie resolves to its own clone.
-const ONION_TREE = process.env.CROSS_APP_ONION || join(homedir(), 'Development', 'onion-worktrees', 'cross-app-round2');
+const ONION_TREE =
+  process.env.CROSS_APP_ONION ||
+  join(homedir(), 'Development', 'onion-worktrees', 'cross-app-round2');
 const VOXIE_TREE = join(homedir(), 'Development', 'voxie');
 
 // Tracked-file sets for the sibling repos, computed lazily on first use.
@@ -113,7 +115,9 @@ const SIBLING_TRACKED = (() => {
           cwd: root,
           encoding: 'utf8',
           maxBuffer: 64 * 1024 * 1024,
-        }).split('\n').filter(Boolean),
+        })
+          .split('\n')
+          .filter(Boolean)
       );
       out.push([root, files]);
     } catch {
