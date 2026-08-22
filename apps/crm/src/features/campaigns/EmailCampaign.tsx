@@ -43,6 +43,15 @@ const EmailCampaign: React.FC = () => {
   const pending = create.isPending || update.isPending || updateStatus.isPending;
 
   useEffect(() => {
+    if (isEditing) return;
+    const params = new URLSearchParams(searchStr);
+    setName(params.get('name') ?? '');
+    setSegmentId(params.get('segment') ?? '');
+    setSubject(params.get('subject') ?? '');
+    setBody(params.get('body') ?? '');
+  }, [isEditing, searchStr]);
+
+  useEffect(() => {
     if (existingCampaign) {
       setName(existingCampaign.name);
       setSegmentId(
