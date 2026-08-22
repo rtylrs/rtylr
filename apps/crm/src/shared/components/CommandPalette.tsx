@@ -340,6 +340,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
                     const Icon = item.icon;
                     return (
                       <button
+                        aria-label="Run command"
                         type="button"
                         key={item.id}
                         onClick={() => {

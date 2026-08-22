@@ -594,6 +594,7 @@ const DefaultLayout: React.FC = () => {
               </h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
+                  aria-label="Open command palette"
                   type="button"
                   onClick={openPalette}
                   style={{

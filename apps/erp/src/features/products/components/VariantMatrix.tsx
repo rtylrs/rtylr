@@ -137,7 +137,7 @@ const VariantRow: React.FC<VariantRowProps> = ({ variant }) => {
         value={sku}
         onChange={(e) => setSku(e.target.value)}
         aria-label={t('erp.products.variants.sku')}
-        style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '12px' }}
+        style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '16px' }}
       />
       <input
         type="number"
@@ -471,7 +471,7 @@ const VariantMatrix: React.FC<VariantMatrixProps> = ({ productId, productSku, ba
                   value={d.sku}
                   onChange={(e) => updateDraft(idx, { sku: e.target.value })}
                   aria-label={t('erp.products.variants.sku')}
-                  style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '12px' }}
+                  style={{ ...inputStyle, fontFamily: 'monospace', fontSize: '16px' }}
                 />
                 <input
                   type="number"

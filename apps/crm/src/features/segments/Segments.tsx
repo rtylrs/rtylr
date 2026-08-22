@@ -160,6 +160,7 @@ function RuleBuilder({
             </span>
           </div>
           <button
+            aria-label="Close"
             type="button"
             onClick={onClose}
             style={{
@@ -287,6 +288,7 @@ function RuleBuilder({
             ))}
           </div>
           <button
+            aria-label="Add rule"
             type="button"
             onClick={addRule}
             style={{

@@ -253,6 +253,7 @@ export const Modal: React.FC<{
             {title}
           </h3>
           <button
+            aria-label="Close dialog"
             type="button"
             onClick={onClose}
             style={{
