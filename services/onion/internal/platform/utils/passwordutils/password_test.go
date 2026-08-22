@@ -44,3 +44,21 @@ func TestHashPIN_RoundTrip(t *testing.T) {
 		t.Fatal("empty hash should not match")
 	}
 }
+
+func TestHashPassword_UsesOWASPCost(t *testing.T) {
+	hash, err := HashPassword("hunter2")
+	if err != nil {
+		t.Fatalf("hash: %v", err)
+	}
+	if len(hash) < 7 || hash[:7] != "$2a$12$" {
+		t.Errorf("hash cost prefix = %q, want $2a$12$", hash[:min(7, len(hash))])
+	}
+}
+
+func TestCheckDummyHash_NeverMatches(t *testing.T) {
+	for _, password := range []string{"", "hunter2", "correct horse", "password123"} {
+		if CheckDummyHash(password) {
+			t.Errorf("dummy hash matched %q", password)
+		}
+	}
+}

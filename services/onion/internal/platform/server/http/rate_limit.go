@@ -220,3 +220,31 @@ func perRouteRateLimitWithKeyFn(limit int, window time.Duration, keyFn func(*htt
 		})
 	}
 }
+
+// authRouteLimiters pins the anonymous brute-force-sensitive auth routes to
+// tight per-IP budgets, closing the gap between the 1000 req/s global
+// guardrail and what a login endpoint may absorb. Budgets follow the rollout
+// table on PerRouteRateLimit: login and password-reset confirm allow 5/min/IP,
+// register variants 3/min/IP. Password-reset request and invite acceptance
+// sit at 5/min because both mint account-access tokens.
+var authRouteLimiters = map[string]func(http.Handler) http.Handler{
+	"/common/auth/v1/login":                  PerRouteRateLimit(5, time.Minute),
+	"/common/auth/v1/register":               PerRouteRateLimit(3, time.Minute),
+	"/common/auth/v1/register/google":        PerRouteRateLimit(3, time.Minute),
+	"/common/auth/v1/password-reset/request": PerRouteRateLimit(5, time.Minute),
+	"/common/auth/v1/password-reset/confirm": PerRouteRateLimit(5, time.Minute),
+	"/common/auth/v1/invite/accept":          PerRouteRateLimit(5, time.Minute),
+}
+
+// AuthRouteRateLimit applies the per-route auth budgets by exact request
+// path and passes everything else through untouched. It runs after the global
+// limiter in the middleware stack so authenticated traffic never pays for it.
+func AuthRouteRateLimit(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if limiter, ok := authRouteLimiters[r.URL.Path]; ok {
+			limiter(next).ServeHTTP(w, r)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}

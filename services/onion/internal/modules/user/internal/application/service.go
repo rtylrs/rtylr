@@ -169,6 +169,10 @@ func (s *Service) Authenticate(ctx context.Context, email, password string) (int
 	user, err := s.repo.GetUserByEmail(ctx, strings.ToLower(email))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
+			// Burn the same bcrypt time as the hash-compare branch below so
+			// response latency cannot reveal whether the account exists.
+			passwordutils.CheckDummyHash(password)
+
 			return 0, ErrInvalidCredentials
 		}
 

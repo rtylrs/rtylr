@@ -37,6 +37,9 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 	// never throttles real use (a SPA session bursts many calls/sec). Per-route
 	// limits (login/register/AI) stay tight via PerRouteRateLimit.
 	r.Use(RateLimitMiddleware(1000, time.Second))
+	// Tight per-IP budgets on the anonymous auth routes (login, register,
+	// password reset, invite acceptance); no-op on every other path.
+	r.Use(AuthRouteRateLimit)
 	// Hard 15 s request deadline — cancels in-flight DB queries when
 	// the deadline fires. Also logs a warn for requests >5 s.
 	r.Use(RequestTimeoutMiddleware)
