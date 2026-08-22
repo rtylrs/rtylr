@@ -45,6 +45,11 @@ vi.mock('./useInvoices', () => ({
   useUpdateInvoiceStatus: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
+vi.mock('../../shared/hooks/queries/useUnbilledBillableEntries', () => ({
+  useUnbilledBillableEntries: vi.fn(() => ({ data: null })),
+  useMarkEntriesInvoiced: vi.fn(() => ({ mutate: vi.fn(), isPending: false })),
+}));
+
 vi.mock('../../shared/components/PageHeader', () => ({
   default: ({ actions }: { actions?: React.ReactNode }) => <div>{actions}</div>,
 }));
