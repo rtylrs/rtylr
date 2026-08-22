@@ -52,3 +52,9 @@ func TestRecalculateTier_DefaultsWhenConfigZero(t *testing.T) {
 		}
 	}
 }
+
+func TestLoyaltyPointsFromCents_RoundsCurrencyBeforeRate(t *testing.T) {
+	if got := loyaltyPointsFromCents(99.99, 0.1); got != 10 {
+		t.Fatalf("loyaltyPointsFromCents(99.99, 0.1) = %d, want 10", got)
+	}
+}
