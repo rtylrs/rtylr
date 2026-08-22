@@ -16,7 +16,9 @@
     "recordPayment": "Record Payment",
     "recording": "Recording...",
     "recordFailed": "Failed to record payment",
-    "createFailed": "Failed to save invoice"
+    "createFailed": "Failed to save invoice",
+    "prefillFromContract": "Prefill from signed contract",
+    "chooseContract": "Choose a signed contract…"
   },
   "expenses": {
     "submit": "Submit",
