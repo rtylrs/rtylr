@@ -472,6 +472,10 @@ const Campaigns: React.FC = () => {
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const filtered = campaigns.filter((c) => statusFilter === 'All' || c.status === statusFilter);
+  const activeCampaignCount = campaigns.filter((c) => c.status === 'Active').length;
+  const campaignSummary = hasMore
+    ? `${campaigns.length}+ campaigns loaded · ${activeCampaignCount} active in loaded results`
+    : `${activeCampaignCount} active campaigns`;
 
   const handleLaunch = (id: number): void => {
     if (updateStatus.isPending) return;
@@ -536,7 +540,7 @@ const Campaigns: React.FC = () => {
               Campaigns
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
-              {campaigns.filter((c) => c.status === 'Active').length} active campaigns
+              {campaignSummary}
             </p>
           </div>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
