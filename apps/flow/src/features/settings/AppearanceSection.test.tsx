@@ -67,15 +67,6 @@ vi.mock('../../shared/hooks/queries/useFlowSubscription', () => ({
   }),
 }));
 
-// The workspace whose colour the accent falls back to while `accent` is null.
-vi.mock('../../features/workspace-dashboard/useWorkspaces', () => ({
-  useWorkspaces: () => ({
-    data: [{ id: 'ws-1', name: 'Studio', color: '#8b5cf6' }],
-    isLoading: false,
-  }),
-  useCreateWorkspace: () => ({ mutate: vi.fn(), isPending: false }),
-}));
-
 vi.mock('../../features/tasks/useLabels', () => ({
   useLabels: () => ({ data: [], isLoading: false }),
   useCreateLabel: () => ({ mutate: vi.fn(), isPending: false }),
@@ -88,8 +79,15 @@ vi.mock('@tanstack/react-router', () => ({
   getRouteApi: () => ({ useSearch: () => ({ section: undefined }) }),
 }));
 
+// The workspace whose colour the accent falls back to while `accent` is null.
+// This comes from the store rather than a query hook: the workspaces API was
+// stubbed out when Flow moved to the v2 contracts, so a mock of the old
+// useWorkspaces hook would be mocking a module that no longer exists.
 vi.mock('../../shared/stores/flowStore', () => ({
-  useFlowStore: () => ({ activeWorkspaceId: 'ws-1' }),
+  useFlowStore: () => ({
+    activeWorkspaceId: 'ws-1',
+    workspaces: [{ id: 'ws-1', name: 'Studio', color: '#8b5cf6' }],
+  }),
 }));
 
 /**
