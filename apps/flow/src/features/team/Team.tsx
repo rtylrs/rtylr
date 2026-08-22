@@ -61,7 +61,8 @@ const Team: React.FC = () => {
                 style={{ borderTop: '1px solid var(--flow-border)' }}
               >
                 {m.tasks.slice(0, 5).map((t) => (
-                  <button type="button"
+                  <button
+                    type="button"
                     key={t.id}
                     onClick={() => navigate({ to: `/task/${t.id}` as string })}
                     className="w-full flex items-center gap-2 py-1 text-left hover:bg-[var(--flow-hover)] rounded px-1.5"

@@ -105,7 +105,8 @@ const AddProjectMemberDialog: React.FC<AddProjectMemberDialogProps> = ({
               </option>
             ))}
           </select>
-          <button type="button"
+          <button
+            type="button"
             onClick={handleInvite}
             disabled={inviteMember.isPending}
             className="min-h-[44px] px-3 rounded text-[11px] font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"

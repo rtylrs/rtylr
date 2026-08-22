@@ -63,7 +63,8 @@ function SegmentGroup<T extends string>({
       }}
     >
       {options.map((o) => (
-        <button type="button"
+        <button
+          type="button"
           key={o.value}
           onClick={() => onChange(o.value)}
           style={{
@@ -107,7 +108,8 @@ function ToggleRow({
       }}
     >
       <span style={{ fontSize: '13px', color: 'var(--dash-text)' }}>{label}</span>
-      <button type="button"
+      <button
+        type="button"
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
@@ -167,7 +169,8 @@ function SectionCard({
         overflow: 'hidden',
       }}
     >
-      <button type="button"
+      <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
         style={{
           width: '100%',
@@ -752,7 +755,8 @@ const Design: React.FC = () => {
                     {preset.name}
                   </span>
                   {presets.length > 1 && (
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         deletePreset(preset.id);
@@ -802,7 +806,8 @@ const Design: React.FC = () => {
                   outline: 'none',
                 }}
               />
-              <button type="button"
+              <button
+                type="button"
                 onClick={handleAddPreset}
                 disabled={!newPresetName.trim()}
                 style={{

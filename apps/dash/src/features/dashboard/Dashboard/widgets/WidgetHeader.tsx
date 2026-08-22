@@ -38,7 +38,8 @@ const WidgetHeader: React.FC<WidgetHeaderProps> = ({
         </p>
       </div>
       {action && (
-        <button type="button"
+        <button
+          type="button"
           onClick={action.onClick}
           className="flex items-center gap-1 shrink-0 text-xs font-medium transition-colors duration-150"
           style={{ color: 'var(--accent)' }}

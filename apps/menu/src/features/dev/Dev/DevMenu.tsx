@@ -294,7 +294,8 @@ const BtnGroup = <T extends string | number>({
 }) => (
   <div className="flex rounded-lg overflow-hidden border border-black/10">
     {options.map((o) => (
-      <button type="button"
+      <button
+        type="button"
         key={String(o.value)}
         className={cn(
           'px-2.5 py-1 text-xs font-medium transition-colors',
@@ -596,7 +597,8 @@ const DevMenu: React.FC = () => {
               <Section label="Accent">
                 <div className="flex gap-2 flex-wrap">
                   {ACCENT_OPTIONS.map((a) => (
-                    <button type="button"
+                    <button
+                      type="button"
                       key={a.value}
                       className={cn(
                         'w-7 h-7 rounded-full transition-all',
@@ -624,7 +626,8 @@ const DevMenu: React.FC = () => {
           )}
         </AnimatePresence>
 
-        <button type="button"
+        <button
+          type="button"
           className="w-12 h-12 rounded-full bg-gray-900 text-white shadow-lg hover:opacity-90 transition-opacity flex items-center justify-center text-lg relative"
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle dev toolbar"

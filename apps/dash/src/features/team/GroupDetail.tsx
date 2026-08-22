@@ -152,7 +152,8 @@ const GroupDetail = (): React.JSX.Element => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button type="button"
+            <button
+              type="button"
               onClick={() => navigate({ to: '/team/groups' })}
               aria-label={t('team.groupDetail.backAriaLabel')}
               className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"
@@ -224,7 +225,8 @@ const GroupDetail = (): React.JSX.Element => {
             </label>
             <div className="flex items-center gap-2 flex-wrap">
               {PRESET_COLORS.map((c) => (
-                <button type="button"
+                <button
+                  type="button"
                   key={c}
                   aria-label={t('team.groupDetail.colorAriaLabel', { color: c })}
                   onClick={() => {
@@ -250,7 +252,8 @@ const GroupDetail = (): React.JSX.Element => {
             style={{ borderBottom: '1px solid var(--dash-border)' }}
           >
             {(['apps', 'members'] as const).map((tabKey) => (
-              <button type="button"
+              <button
+                type="button"
                 key={tabKey}
                 onClick={() => setTab(tabKey)}
                 className="px-4 py-2 text-sm font-medium transition-colors"
@@ -327,7 +330,8 @@ const GroupDetail = (): React.JSX.Element => {
                       </div>
                       {LEVELS.map((l) => (
                         <div key={l.value} className="col-span-2 flex justify-center">
-                          <button type="button"
+                          <button
+                            type="button"
                             aria-label={t('team.groupDetail.radioAriaLabel', {
                               section: section.label,
                               level: t(l.tKey),
@@ -365,7 +369,8 @@ const GroupDetail = (): React.JSX.Element => {
                   { count: group?.members?.length ?? 0 }
                 )}
               </p>
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setShowAddMembers(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
                 style={{
@@ -417,7 +422,8 @@ const GroupDetail = (): React.JSX.Element => {
                         </p>
                       </div>
                     </div>
-                    <button type="button"
+                    <button
+                      type="button"
                       aria-label={t('team.groupDetail.removeMemberAriaLabel', {
                         name: m.fullName || m.email,
                       })}
@@ -489,7 +495,8 @@ const GroupDetail = (): React.JSX.Element => {
                   </div>
                 )}
                 <div className="flex items-center justify-end gap-2">
-                  <button type="button"
+                  <button
+                    type="button"
                     onClick={() => {
                       setShowAddMembers(false);
                       setSelectedToAdd([]);

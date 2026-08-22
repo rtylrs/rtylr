@@ -102,7 +102,8 @@ const Views: React.FC = () => {
           >
             {t('flow.views.heading')}
           </h2>
-          <button type="button"
+          <button
+            type="button"
             onClick={handleCreateView}
             disabled={createView.isPending}
             className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
@@ -139,7 +140,8 @@ const Views: React.FC = () => {
                       className="flex-1 bg-transparent text-[12px] outline-none"
                       style={{ color: 'var(--flow-text)' }}
                     />
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={() => commitEdit(v)}
                       aria-label={t('flow.views.confirmRenameLabel')}
                       className="h-4 w-4 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"
@@ -147,7 +149,8 @@ const Views: React.FC = () => {
                     >
                       <Check size={10} />
                     </button>
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={() => setEditingId(null)}
                       aria-label={t('flow.views.cancelRenameLabel')}
                       className="h-4 w-4 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"
@@ -158,7 +161,8 @@ const Views: React.FC = () => {
                   </div>
                 ) : (
                   <>
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={() => setSelected(v)}
                       className="flex items-center gap-2 px-3 py-1.5 rounded text-[12px] text-left flex-1 min-w-0"
                       style={{ color: active ? 'var(--flow-text)' : 'var(--flow-text-muted)' }}
@@ -167,7 +171,8 @@ const Views: React.FC = () => {
                       <span className="truncate">{v.name}</span>
                     </button>
                     <div className="flex items-center gap-0.5 pr-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button type="button"
+                      <button
+                        type="button"
                         onClick={(e) => startEdit(v, e)}
                         className="h-5 w-5 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"
                         style={{ color: 'var(--flow-text-dim)' }}
@@ -176,7 +181,8 @@ const Views: React.FC = () => {
                       >
                         <Pencil size={9} />
                       </button>
-                      <button type="button"
+                      <button
+                        type="button"
                         onClick={(e) => handleDelete(v, e)}
                         className="h-5 w-5 flex items-center justify-center rounded hover:bg-[var(--flow-hover)]"
                         style={{ color: 'var(--flow-text-dim)' }}

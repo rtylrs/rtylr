@@ -66,7 +66,8 @@ export const DueDatePicker: React.FC<DueDatePickerProps> = ({ value, onChange, d
             d.setDate(d.getDate() + o.days);
             const iso = d.toISOString().split('T')[0];
             return (
-              <button type="button"
+              <button
+                type="button"
                 key={o.label}
                 onClick={() => {
                   onChange(iso);

@@ -109,7 +109,8 @@ const SettingsLayout: React.FC = () => {
           className="flex items-center gap-2 px-4 py-3.5 shrink-0"
           style={{ borderBottom: '1px solid var(--dash-border)' }}
         >
-          <button type="button"
+          <button
+            type="button"
             onClick={() => navigate({ to: '/' })}
             className="h-6 w-6 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--dash-hover)]"
             style={{ color: 'var(--dash-text-muted)' }}
