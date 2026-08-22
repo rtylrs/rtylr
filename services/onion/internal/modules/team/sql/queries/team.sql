@@ -199,3 +199,31 @@ SELECT ?, COALESCE(u.business_id, 0), u.id,
 FROM users u
 WHERE u.id = ?
   AND NOT EXISTS (SELECT 1 FROM hr_employees e WHERE e.user_id = u.id);
+
+-- name: RevokeBusinessUserPermissions :execrows
+-- Employment-driven revocation (#834): one business, one user. The join to
+-- hr_employees keeps the decision inside this module's SQL while the
+-- employment fact stays authoritative in hr_core's table. The join column is
+-- pinned with sqlc.arg so both business-id placeholders type as int64.
+UPDATE user_app_permissions p
+JOIN hr_employees e
+  ON e.user_id = p.user_id
+ AND e.business_id = sqlc.arg('business_id')
+SET p.is_active = FALSE, p.updated_at = NOW()
+WHERE p.business_id = sqlc.arg('business_id')
+  AND p.user_id = sqlc.arg('user_id')
+  AND p.is_active = TRUE
+  AND e.status = 'terminated';
+
+-- name: ReconcileTerminatedEmployeeAccess :execrows
+-- Daily sweep: every still-active permission row whose user is a terminated
+-- employee of that same business is deactivated. Catches anything the
+-- synchronous hook missed (crash between status write and revoke, direct SQL,
+-- or the hook being unwired).
+UPDATE user_app_permissions p
+JOIN hr_employees e
+  ON e.user_id = p.user_id
+ AND e.business_id = p.business_id
+SET p.is_active = FALSE, p.updated_at = NOW()
+WHERE e.status = 'terminated'
+  AND p.is_active = TRUE;
