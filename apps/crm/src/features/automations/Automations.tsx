@@ -15,6 +15,7 @@ import {
   SkeletonList,
   ConfirmModal,
 } from '../../shared/components/ui';
+import { activateOnKeyboard } from '../../shared/lib/keyboard';
 
 const Automations: React.FC = () => {
   const navigate = useNavigate();
@@ -104,6 +105,14 @@ const Automations: React.FC = () => {
                 <div
                   key={a.id}
                   onClick={() => navigate({ to: '/automations/new', search: { id: a.id } })}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Open ${a.name} automation`}
+                  onKeyDown={(event) =>
+                    activateOnKeyboard(event, () =>
+                      navigate({ to: '/automations/new', search: { id: a.id } })
+                    )
+                  }
                   style={{
                     background: 'var(--hub-card)',
                     border: '1px solid var(--hub-border)',

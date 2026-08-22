@@ -20,7 +20,7 @@ import {
   useCreateSegment,
 } from '../../shared/hooks/queries/useSegments';
 import { Button, Card, ConfirmModal, EmptyState, SkeletonList } from '../../shared/components/ui';
-import { useDialogFocus } from '../../shared/lib/keyboard';
+import { activateOnKeyboard, useDialogFocus } from '../../shared/lib/keyboard';
 
 const ACCENT = '#3b82f6';
 
@@ -396,6 +396,12 @@ function SegmentCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, duration: 0.2 }}
       onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-label={onClick ? `View ${segment.name}` : undefined}
+      onKeyDown={(event) => {
+        if (onClick) activateOnKeyboard(event, onClick);
+      }}
       style={{
         background: 'var(--hub-card)',
         border: '1px solid var(--hub-border)',

@@ -25,6 +25,7 @@ import {
   type Campaign as CampaignPayload,
 } from '../../shared/schemas/campaigns';
 import { ConfirmModal } from '../../shared/components/ui';
+import { activateOnKeyboard } from '../../shared/lib/keyboard';
 
 const ACCENT = '#3b82f6';
 
@@ -193,6 +194,12 @@ function CampaignCard({
       exit={{ opacity: 0, scale: 0.97 }}
       transition={{ delay: index * 0.05, duration: 0.2 }}
       onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-label={onClick ? `View ${campaign.name}` : undefined}
+      onKeyDown={(event) => {
+        if (onClick) activateOnKeyboard(event, onClick);
+      }}
       style={{
         background: 'var(--hub-card)',
         border: '1px solid var(--hub-border)',
