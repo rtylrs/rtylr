@@ -15,15 +15,15 @@ message AttendanceRecordPayload {
   /// Unix timestamp when the employee clocked in.
   clock_in_at: int64
   /// Unix timestamp when the employee clocked out; absent if still clocked in.
-  clock_out_at: int64? @nullable
+  clock_out_at: int64?
   /// Total worked duration in minutes; absent if still clocked in.
-  duration_minutes: int32? @nullable
+  duration_minutes: int32?
   /// Method used to clock in (app | qr | gps | pin | facial).
   clock_in_method: string
   /// Latitude at clock-in; absent if location not captured.
-  clock_in_lat: float64? @nullable
+  clock_in_lat: float64?
   /// Longitude at clock-in; absent if location not captured.
-  clock_in_lng: float64? @nullable
+  clock_in_lng: float64?
   /// Whether the employee clocked in after the scheduled start.
   is_late: bool
   /// Number of minutes late; zero if on time.
@@ -42,13 +42,13 @@ message AttendanceClockInRequest {
   /// Work location where the employee is clocking in.
   location_id: int64 @required @gt(0)
   /// Latitude at clock-in; absent if location not available.
-  lat: float64? @nullable
+  lat: float64?
   /// Longitude at clock-in; absent if location not available.
-  lng: float64? @nullable
+  lng: float64?
   /// QR token scanned at a terminal; absent if not using QR method.
-  qr_token: string? @nullable
+  qr_token: string?
   /// PIN entered by the employee; absent if not using PIN method. Sensitive: do not log this field.
-  pin: string? @nullable
+  pin: string?
 }
 
 message AttendanceClockInResponse {
@@ -68,9 +68,9 @@ message AttendanceClockOutResponse {
 
 message ListAttendanceRequest {
   /// Filter by employee; absent to include all employees.
-  employee_id: int64? @query("employee_id") @nullable
+  employee_id: int64? @query("employee_id")
   /// Filter by date; absent to include all dates.
-  date: string? @query("date") @nullable
+  date: string? @query("date")
 }
 
 message ListAttendanceResponse {

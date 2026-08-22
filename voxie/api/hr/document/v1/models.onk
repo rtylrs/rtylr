@@ -20,7 +20,7 @@ message EmployeeDocumentPayload {
   name: string
   storage_mode: string
   file_url: string
-  expiry_date: string? @nullable
+  expiry_date: string?
   uploaded_by: int64
   uploaded_at: int64
   created_at: int64

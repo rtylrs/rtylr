@@ -9,7 +9,7 @@ message SetupWizardStepPayload {
   /// Which setup step this represents (company_profile | work_schedule | leave_policy | org_structure | locations | roles_permissions | payroll | notifications | employees).
   step_key: string
   /// Unix timestamp when this step was completed; absent if not yet completed.
-  completed_at: int64? @nullable
+  completed_at: int64?
   /// Unix timestamp when this step record was created.
   created_at: int64
   /// Unix timestamp when this step record was last updated.
@@ -31,7 +31,7 @@ message HRCompanyConfigPayload {
   /// How gross pay is calculated (hourly | salary | both).
   payroll_gross_model: string
   /// Unix timestamp when the full setup wizard was completed; absent if still in progress.
-  setup_completed_at: int64? @nullable
+  setup_completed_at: int64?
   /// Unix timestamp when this config was created.
   created_at: int64
   /// Unix timestamp when this config was last updated.

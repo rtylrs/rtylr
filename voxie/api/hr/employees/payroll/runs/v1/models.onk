@@ -45,9 +45,9 @@ message PayrollRunPayload {
   /// Employee who initiated the payroll run.
   created_by: int64
   /// Employee who approved the run; absent if not yet approved.
-  approved_by: int64? @nullable
+  approved_by: int64?
   /// Unix timestamp when the run was exported; absent if not yet exported.
-  exported_at: int64? @nullable
+  exported_at: int64?
   /// Sum of all entry gross pay amounts in this run.
   total_gross: float64
   /// Sum of all entry net pay amounts in this run.

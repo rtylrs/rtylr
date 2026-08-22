@@ -19,9 +19,9 @@ message OvertimeRequestPayload {
   /// Current step in a multi-level approval chain.
   current_approval_level: int32
   /// Employee ID of the approver; absent if not yet approved.
-  approved_by: int64? @nullable
+  approved_by: int64?
   /// Pay multiplier applied to the overtime hours (e.g. 1.5); absent if not yet calculated.
-  multiplier_applied: float64? @nullable
+  multiplier_applied: float64?
   /// Unix timestamp when this record was created.
   created_at: int64
   /// Unix timestamp when this record was last updated.
@@ -30,9 +30,9 @@ message OvertimeRequestPayload {
 
 message ListOvertimeRequestsRequest {
   /// Filter by employee; absent to include all employees.
-  employee_id: int64? @query("employee_id") @nullable
+  employee_id: int64? @query("employee_id")
   /// Filter by status; absent to include all statuses.
-  status: string? @query("status") @nullable
+  status: string? @query("status")
 }
 
 message ListOvertimeRequestsResponse {
@@ -67,9 +67,9 @@ message ApproveOvertimeBody {
   /// True to approve, false to reject.
   approved: bool
   /// Pay multiplier to apply (e.g. 1.5); absent to use the default rate.
-  multiplier_applied: float64? @nullable
+  multiplier_applied: float64?
   /// Reason for rejection; absent if approving.
-  rejection_reason: string? @nullable
+  rejection_reason: string?
 }
 
 message ApproveOvertimeRequest {

@@ -70,17 +70,17 @@ message ShiftAssignmentPayload {
 
 message ListShiftsRequest {
   /// Filter by location; absent to include all locations.
-  location_id: int64? @query("location_id") @nullable
+  location_id: int64? @query("location_id")
   /// Filter to one staff member's attendance rows; absent to include all.
-  staff_id: int64? @query("staff_id") @nullable
+  staff_id: int64? @query("staff_id")
   /// Filter attendance rows to a single date (ISO-8601); absent to include all.
-  date: string? @query("date") @nullable
+  date: string? @query("date")
   /// Restrict to one record kind (template | attendance); absent returns both.
-  kind: string? @query("kind") @nullable
+  kind: string? @query("kind")
   /// Page size; absent applies the server default.
-  limit: int32? @query("limit") @nullable
+  limit: int32? @query("limit")
   /// Offset for pagination; absent starts at the first page.
-  offset: int32? @query("offset") @nullable
+  offset: int32? @query("offset")
 }
 
 message ListShiftsResponse {
@@ -276,20 +276,20 @@ message AvailabilityPayload {
 message ListAvailabilityRequest {
   /// Filter to one staff member; absent returns entries for every staff member
   /// in the tenant, which is what the weekly roster grid loads in one call.
-  staff_id: int64? @query("staff_id") @nullable
+  staff_id: int64? @query("staff_id")
   /// Filter recurring patterns to one weekday, 0 = Monday through 6 = Sunday;
   /// absent includes every weekday.
-  day_of_week: int32? @query("day_of_week") @nullable
+  day_of_week: int32? @query("day_of_week")
   /// Inclusive start of a date range matched against specific_date (ISO-8601);
   /// absent leaves the range open at the start.
-  date_from: string? @query("date_from") @nullable
+  date_from: string? @query("date_from")
   /// Inclusive end of a date range matched against specific_date (ISO-8601);
   /// absent leaves the range open at the end.
-  date_to: string? @query("date_to") @nullable
+  date_to: string? @query("date_to")
   /// Page size; absent applies the server default.
-  limit: int32? @query("limit") @nullable
+  limit: int32? @query("limit")
   /// Offset for pagination; absent starts at the first page.
-  offset: int32? @query("offset") @nullable
+  offset: int32? @query("offset")
 }
 
 message ListAvailabilityResponse {
