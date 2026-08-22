@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+
+	"github.com/voxire/onion/internal/platform/config"
 )
 
 // testClaims is a minimal Claims implementation used by the tests.
@@ -55,6 +57,20 @@ func TestValidateToken_RejectsExpired(t *testing.T) {
 
 	if err := helper.ValidateToken(context.Background(), tok, &testClaims{}); !errors.Is(err, ErrTokenExpired) {
 		t.Errorf("expected ErrTokenExpired, got %v", err)
+	}
+}
+
+func TestValidateToken_RejectsMissingExpiration(t *testing.T) {
+	claims := &testClaims{}
+	claims.SetIssuer("i")
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte("k"))
+	if err != nil {
+		t.Fatalf("sign: %v", err)
+	}
+
+	helper := NewJWTHelper("k", "i")
+	if err := helper.ValidateToken(context.Background(), token, &testClaims{}); !errors.Is(err, ErrInvalidToken) {
+		t.Errorf("expected ErrInvalidToken for missing exp, got %v", err)
 	}
 }
 
@@ -116,16 +132,25 @@ func TestInitializeJWT_PopulatesContext(t *testing.T) {
 	}
 }
 
-func TestInitializeJWT_BadDurationFallsBackToZero(t *testing.T) {
+func TestInitializeJWT_BadDurationFails(t *testing.T) {
 	os.Unsetenv("JWT_DURATION")
 	t.Setenv("JWT_SECRET", "x")
 	t.Setenv("JWT_DURATION", "not-a-duration")
+
+	if _, err := InitializeJWT(context.Background()); err == nil {
+		t.Fatal("expected invalid JWT_DURATION to fail initialization")
+	}
+}
+
+func TestInitializeJWT_DefaultsDuration(t *testing.T) {
+	t.Setenv("JWT_SECRET", "test-secret-value")
+	t.Setenv("JWT_DURATION", "")
 
 	ctx, err := InitializeJWT(context.Background())
 	if err != nil {
 		t.Fatalf("init: %v", err)
 	}
-	if d, _ := ctx.Value(JWTDurationKey).(time.Duration); d != 0 {
-		t.Errorf("expected duration 0 for unparseable input, got %v", d)
+	if d, _ := ctx.Value(JWTDurationKey).(time.Duration); d != config.DefaultJWTDuration {
+		t.Errorf("default duration: got %v, want %v", d, config.DefaultJWTDuration)
 	}
 }

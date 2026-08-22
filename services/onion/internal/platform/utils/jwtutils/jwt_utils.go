@@ -35,11 +35,14 @@ func NewJWTHelper(secretKey, issuer string) *JWTHelper {
 	return &JWTHelper{
 		SecretKey:     secretKey,
 		Issuer:        issuer,
-		TokenDuration: 0,
+		TokenDuration: config.DefaultJWTDuration,
 	}
 }
 
 func NewJWTHelperWithDuration(secretKey, issuer string, duration time.Duration) *JWTHelper {
+	if duration == 0 {
+		duration = config.DefaultJWTDuration
+	}
 	return &JWTHelper{
 		SecretKey:     secretKey,
 		Issuer:        issuer,
@@ -68,7 +71,8 @@ func (jwtHelper *JWTHelper) ValidateToken(ctx context.Context, token string, pay
 		return []byte(jwtHelper.SecretKey), nil
 	}
 
-	_, err = jwt.ParseWithClaims(token, payload, keyVerification, jwt.WithIssuer(jwtHelper.Issuer))
+	_, err = jwt.ParseWithClaims(token, payload, keyVerification,
+		jwt.WithIssuer(jwtHelper.Issuer), jwt.WithExpirationRequired())
 
 	if errors.Is(err, jwt.ErrTokenExpired) {
 		logger.Ctx(ctx).Warn("Token expired")
@@ -124,18 +128,26 @@ const (
 
 func InitializeJWT(ctx context.Context) (context.Context, error) {
 	var jwtSecret string
-	var jwtDuration time.Duration
+	jwtDuration := config.DefaultJWTDuration
 
 	if config.GlobalConfig != nil {
 		jwtSecret = config.GlobalConfig.JWTSecret
 		jwtDuration = config.GlobalConfig.JWTDuration
 	} else {
 		jwtSecret = os.Getenv("JWT_SECRET")
-		if d := os.Getenv("JWT_DURATION"); d != "" {
-			if parsed, err := time.ParseDuration(d); err == nil {
-				jwtDuration = parsed
+		if rawDuration := os.Getenv("JWT_DURATION"); rawDuration != "" {
+			parsed, err := time.ParseDuration(rawDuration)
+			if err != nil || parsed <= 0 {
+				if err != nil {
+					return ctx, errors.New("JWT_DURATION is invalid")
+				}
+				return ctx, errors.New("JWT_DURATION must be greater than zero")
 			}
+			jwtDuration = parsed
 		}
+	}
+	if jwtDuration <= 0 {
+		jwtDuration = config.DefaultJWTDuration
 	}
 
 	if jwtSecret == "" {
@@ -152,18 +164,21 @@ func InitializeJWT(ctx context.Context) (context.Context, error) {
 // request context so handlers can call ctx.Value(JWTSecretKey).
 func JWTMiddleware() func(http.Handler) http.Handler {
 	var secret string
-	var duration time.Duration
+	duration := config.DefaultJWTDuration
 
 	if config.GlobalConfig != nil {
 		secret = config.GlobalConfig.JWTSecret
 		duration = config.GlobalConfig.JWTDuration
 	} else {
 		secret = os.Getenv("JWT_SECRET")
-		if d := os.Getenv("JWT_DURATION"); d != "" {
-			if parsed, err := time.ParseDuration(d); err == nil {
+		if rawDuration := os.Getenv("JWT_DURATION"); rawDuration != "" {
+			if parsed, err := time.ParseDuration(rawDuration); err == nil && parsed > 0 {
 				duration = parsed
 			}
 		}
+	}
+	if duration <= 0 {
+		duration = config.DefaultJWTDuration
 	}
 
 	return func(next http.Handler) http.Handler {

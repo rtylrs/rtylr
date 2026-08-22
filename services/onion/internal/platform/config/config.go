@@ -19,6 +19,13 @@ const (
 )
 
 const (
+	// DefaultJWTDuration is used when JWT_DURATION is not configured. Access
+	// tokens must always have a bounded lifetime.
+	DefaultJWTDuration = 24 * time.Hour
+	MinJWTSecretLength = 32
+)
+
+const (
 	// DeepSeek is the primary LLM provider. Only the API key is an env secret
 	// (set DEEPSEEK_API_KEY on AWS / in .env); the base URL and model are fixed
 	// here on purpose — the product chooses the model internally, users never do.
@@ -200,11 +207,16 @@ var GlobalConfig *AppConfig
 // LoadAndValidate reads the environment configuration at startup,
 // validating the presence of critical variables.
 func LoadAndValidate() (*AppConfig, error) {
-	var jwtDuration time.Duration
-	if d := os.Getenv("JWT_DURATION"); d != "" {
-		if parsed, err := time.ParseDuration(d); err == nil {
-			jwtDuration = parsed
+	jwtDuration := DefaultJWTDuration
+	if rawDuration := os.Getenv("JWT_DURATION"); rawDuration != "" {
+		parsed, err := time.ParseDuration(rawDuration)
+		if err != nil || parsed <= 0 {
+			if err != nil {
+				return nil, fmt.Errorf("invalid JWT_DURATION %q: %w", rawDuration, err)
+			}
+			return nil, fmt.Errorf("JWT_DURATION must be greater than zero, got %q", rawDuration)
 		}
+		jwtDuration = parsed
 	}
 
 	hosts := os.Getenv("REDIS_HOSTS")
@@ -396,6 +408,9 @@ func LoadAndValidate() (*AppConfig, error) {
 		if cfg.JWTSecret == "" {
 			missing = append(missing, "JWT_SECRET")
 		}
+	}
+	if cfg.JWTSecret != "" && len(cfg.JWTSecret) < MinJWTSecretLength {
+		return nil, fmt.Errorf("JWT_SECRET must be at least %d characters", MinJWTSecretLength)
 	}
 
 	if len(missing) > 0 {
