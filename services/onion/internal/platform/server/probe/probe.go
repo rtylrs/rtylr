@@ -2,11 +2,13 @@ package probe
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/logger"
@@ -17,6 +19,7 @@ type Check func(context.Context) error
 type Config struct {
 	ServiceName string
 	Port        string
+	StopToken   string
 	ReadyChecks []Check
 	Stop        func()
 }
@@ -40,6 +43,10 @@ func Start(ctx context.Context, cfg Config) error {
 	if cfg.ServiceName == "" {
 		cfg.ServiceName = logger.ServiceName()
 	}
+	stopToken := strings.TrimSpace(cfg.StopToken)
+	if stopToken == "" {
+		stopToken = strings.TrimSpace(os.Getenv("PROBE_STOP_TOKEN"))
+	}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
@@ -59,20 +66,14 @@ func Start(ctx context.Context, cfg Config) error {
 			if err != nil {
 				writeJSON(w, http.StatusServiceUnavailable, map[string]string{
 					"status": "unready",
-					"error":  err.Error(),
 				})
 				return
 			}
 		}
 		writeJSON(w, http.StatusOK, map[string]string{"status": "ready"})
 	})
-	mux.HandleFunc("/stop", func(w http.ResponseWriter, _ *http.Request) {
-		if cfg.Stop == nil {
-			writeJSON(w, http.StatusNotImplemented, map[string]string{"status": "unsupported"})
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]string{"status": "stopping"})
-		go cfg.Stop()
+	mux.HandleFunc("/stop", func(w http.ResponseWriter, r *http.Request) {
+		handleStop(w, r, stopToken, cfg.Stop)
 	})
 	mux.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
 		if os.Getenv("PROBE_METRICS_ENABLED") != "true" {
@@ -111,6 +112,34 @@ func Start(ctx context.Context, cfg Config) error {
 	}()
 
 	return nil
+}
+
+func authorizedStopRequest(r *http.Request, expectedToken string) bool {
+	if r == nil || expectedToken == "" {
+		return false
+	}
+	providedToken := strings.TrimSpace(r.Header.Get("X-Probe-Token"))
+	if providedToken == "" {
+		return false
+	}
+	return subtle.ConstantTimeCompare([]byte(providedToken), []byte(expectedToken)) == 1
+}
+
+func handleStop(w http.ResponseWriter, r *http.Request, expectedToken string, stop func()) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	if !authorizedStopRequest(r, expectedToken) {
+		http.NotFound(w, r)
+		return
+	}
+	if stop == nil {
+		writeJSON(w, http.StatusNotImplemented, map[string]string{"status": "unsupported"})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": "stopping"})
+	go stop()
 }
 
 func writeJSON(w http.ResponseWriter, status int, payload any) {

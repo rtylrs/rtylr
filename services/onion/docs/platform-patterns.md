@@ -72,7 +72,10 @@ logical database tag.
 
 `cmd/api`, `cmd/upload`, `cmd/license`, and `cmd/worker` start a probe server
 when `PROBE_PORT` is set or when running in Kubernetes. pprof starts only when
-`PPROF_ENABLED=true` or `PPROF_PORT` is set.
+`PPROF_ENABLED=true` or `PPROF_PORT` is set. The destructive probe `POST
+/stop` requires the `PROBE_STOP_TOKEN` value in the `X-Probe-Token` header;
+without that token it is disabled. pprof binds to loopback so operators should
+use port-forwarding rather than exposing it on a pod or host interface.
 
 ## Secure Keys
 

@@ -3,6 +3,7 @@ package profiling
 import (
 	"context"
 	"errors"
+	"net"
 	"net/http"
 	"net/http/pprof"
 	"os"
@@ -34,7 +35,7 @@ func Start(ctx context.Context, port string) error {
 	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 
 	srv := &http.Server{
-		Addr:              ":" + port,
+		Addr:              net.JoinHostPort("127.0.0.1", port),
 		Handler:           mux,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
