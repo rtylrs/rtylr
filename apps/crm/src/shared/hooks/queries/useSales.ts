@@ -184,6 +184,25 @@ export function mergeContactUpdate(
   };
 }
 
+export function mergeLeadUpdate(
+  current: Lead | undefined,
+  data: UpdateLeadRequest
+): UpdateLeadRequest {
+  const companyName =
+    data.companyName ?? data.company ?? current?.companyName ?? current?.company ?? '';
+  return {
+    company: companyName,
+    companyName,
+    industry: data.industry ?? current?.industry,
+    size: data.size ?? current?.size,
+    source: data.source ?? current?.source,
+    stage: data.stage ?? current?.stage,
+    mrrPotential: data.mrrPotential ?? current?.mrrPotential ?? current?.dealValue,
+    assignedTo: data.assignedTo ?? current?.assignedTo ?? undefined,
+    notes: data.notes ?? current?.notes,
+  };
+}
+
 export function mergeContractUpdate(
   current: Contract | undefined,
   data: UpdateContractRequest
@@ -339,26 +358,9 @@ export const useUpdateLead = (): UseMutationResult<Lead, unknown, UpdateLeadPayl
         qc
           .getQueriesData<Lead[]>({ queryKey: ['crm-sales-leads'] })
           .flatMap(([, rows]) => rows ?? [])
-          .find((lead) => lead.id === payload.id);
-      const companyName =
-        payload.data.companyName ??
-        payload.data.company ??
-        cached?.companyName ??
-        cached?.company ??
-        '';
-      const merged: UpdateLeadRequest = {
-        company: companyName,
-        companyName,
-        industry: payload.data.industry ?? cached?.industry,
-        size: payload.data.size ?? cached?.size,
-        source: payload.data.source ?? cached?.source,
-        stage: payload.data.stage ?? cached?.stage,
-        mrrPotential: payload.data.mrrPotential ?? cached?.mrrPotential ?? cached?.dealValue,
-        assignedTo:
-          payload.data.assignedTo ??
-          (typeof cached?.assignedTo === 'number' ? cached.assignedTo : undefined),
-        notes: payload.data.notes ?? cached?.notes,
-      };
+          .find((lead) => lead.id === payload.id) ??
+        qc.getQueryData<Lead[]>(['crm-sales-leads-all'])?.find((lead) => lead.id === payload.id);
+      const merged = mergeLeadUpdate(cached, payload.data);
       const res = await unwrap(
         safe.put<unknown>(`/crm/sales/leads/${payload.id}`, toLeadMutationPayload(merged))
       );
@@ -654,7 +656,10 @@ export const useUpdateContract = (): UseMutationResult<
         qc
           .getQueriesData<Contract[]>({ queryKey: ['crm-sales-contracts'] })
           .flatMap(([, rows]) => rows ?? [])
-          .find((contract) => contract.id === payload.id);
+          .find((contract) => contract.id === payload.id) ??
+        qc
+          .getQueryData<Contract[]>(['crm-sales-contracts-all'])
+          ?.find((contract) => contract.id === payload.id);
       const merged = mergeContractUpdate(cached, payload.data);
       const res = await unwrap(
         safe.put<unknown>(`/crm/sales/contracts/${payload.id}`, toContractMutationPayload(merged))

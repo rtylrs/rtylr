@@ -105,7 +105,11 @@ const LeadDetail: React.FC = () => {
   const { data: lead, isLoading: leadLoading, isError: leadError } = useLead(leadId);
   const { data: touchpoints, isError: touchpointsError } = useLeadTouchpoints(leadId);
   const { data: contacts, isError: contactsError } = useContacts(leadId);
-  const { data: allContracts, isError: contractsError } = useListAllContracts();
+  const {
+    data: allContracts,
+    isLoading: contractsLoading,
+    isError: contractsError,
+  } = useListAllContracts();
   const updateLead = useUpdateLead();
   const deleteLead = useDeleteLead();
   const createTouchpoint = useCreateTouchpoint();
@@ -853,7 +857,7 @@ const LeadDetail: React.FC = () => {
                 >
                   Contract
                 </p>
-                {!contract && !contractsError && (
+                {!contractsLoading && !contract && !contractsError && (
                   <button
                     type="button"
                     aria-label="Add contract"
@@ -880,6 +884,10 @@ const LeadDetail: React.FC = () => {
               {contractsError ? (
                 <p style={{ fontSize: '12px', color: 'var(--hub-text-muted)' }}>
                   Unable to load the contract. Please refresh and try again.
+                </p>
+              ) : contractsLoading ? (
+                <p style={{ fontSize: '12px', color: 'var(--hub-text-muted)' }}>
+                  Loading contract…
                 </p>
               ) : contract ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

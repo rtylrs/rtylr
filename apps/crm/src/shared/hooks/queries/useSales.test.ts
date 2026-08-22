@@ -3,6 +3,7 @@ import {
   normalizeContract,
   normalizeLead,
   normalizeTouchpoint,
+  mergeLeadUpdate,
   mergeContactUpdate,
   mergeContractUpdate,
   toContractMutationPayload,
@@ -168,6 +169,38 @@ describe('sales response normalization', () => {
         { email: 'b' }
       )
     ).toEqual({ name: 'Jane', role: 'CTO', phone: '1', email: 'b' });
+  });
+
+  it('preserves lead fields for a stage-only update', () => {
+    expect(
+      mergeLeadUpdate(
+        {
+          id: 4,
+          company: 'Acme',
+          companyName: 'Acme',
+          industry: 'SaaS',
+          size: '50-200',
+          source: 'Referral',
+          stage: 'cold',
+          mrrPotential: 1200,
+          assignedTo: 17,
+          notes: 'Existing context',
+          createdAt: '',
+          updatedAt: '',
+        },
+        { stage: 'contacted' }
+      )
+    ).toMatchObject({
+      company: 'Acme',
+      companyName: 'Acme',
+      industry: 'SaaS',
+      size: '50-200',
+      source: 'Referral',
+      stage: 'contacted',
+      mrrPotential: 1200,
+      assignedTo: 17,
+      notes: 'Existing context',
+    });
   });
 
   it('preserves required contract fields for partial updates', () => {
