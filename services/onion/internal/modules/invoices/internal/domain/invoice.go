@@ -21,6 +21,7 @@ type Invoice struct {
 	ClientEmail    string        `json:"client_email"`
 	ClientAddress  string        `json:"client_address"`
 	ClientTaxID    string        `json:"client_tax_id"`
+	CustomerID     *int64        `json:"customer_id"`
 	Status         string        `json:"status"`
 	IssueDate      time.Time     `json:"issue_date"`
 	DueDate        time.Time     `json:"due_date"`
@@ -127,6 +128,7 @@ func (inv *Invoice) FromRow(row *sql.Rows) error {
 }
 
 type InvoiceInput struct {
+	CustomerID    int64              `json:"customer_id"`
 	ClientName    string             `json:"client_name"`
 	ClientEmail   string             `json:"client_email"`
 	ClientAddress string             `json:"client_address"`
@@ -143,6 +145,7 @@ type InvoiceInput struct {
 }
 
 type InvoiceUpdateInput struct {
+	CustomerID    *int64             `json:"customer_id"`
 	ClientName    string             `json:"client_name"`
 	ClientEmail   string             `json:"client_email"`
 	ClientAddress string             `json:"client_address"`

@@ -36,6 +36,8 @@ func invalidateInvoicesScope(ctx context.Context, businessID int64) {
 
 type repository interface {
 	ListInvoices(ctx context.Context, businessID int64, status, search, dateFrom, dateTo string, limit, offset int) ([]domain.Invoice, error)
+	ListInvoicesByCustomer(ctx context.Context, businessID, customerID int64, limit, offset int) ([]domain.Invoice, error)
+	CountInvoicesByCustomer(ctx context.Context, businessID, customerID int64) (int64, error)
 	GetInvoiceByID(ctx context.Context, businessID, invoiceID int64) (*domain.Invoice, error)
 	CreateInvoice(ctx context.Context, businessID int64, inv domain.Invoice) (int64, error)
 	CreateInvoiceItems(ctx context.Context, invoiceID int64, items []domain.InvoiceItem) error
@@ -66,8 +68,9 @@ type repository interface {
 }
 
 type Service struct {
-	repo repository
-	db   *sql.DB
+	repo              repository
+	db                *sql.DB
+	customerSnapshots CustomerSnapshotProvider
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
@@ -130,6 +133,22 @@ func (s *Service) GetInvoice(ctx context.Context, businessID, invoiceID int64) (
 
 func (s *Service) CreateInvoice(ctx context.Context, businessID int64, input domain.InvoiceInput) (*domain.Invoice, error) {
 	defer invalidateInvoicesScope(ctx, businessID)
+
+	// CRM->FIN-02: a supplied customer_id is verified against this business
+	// and its name/email/address are snapshotted onto the invoice. The tax id
+	// stays caller-supplied (CRM customers carry none today).
+	name, email, address, snapErr := s.resolveCustomerSnapshot(ctx, businessID, input.CustomerID)
+	if snapErr != nil {
+		return nil, snapErr
+	}
+	if input.CustomerID > 0 {
+		input.ClientName = name
+		input.ClientEmail = email
+		if address != "" {
+			input.ClientAddress = address
+		}
+	}
+
 	issueDate, err := time.Parse("2006-01-02", input.IssueDate)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to parse issue date", logger.Error(err))
@@ -263,6 +282,24 @@ func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64
 		return nil, domain.ErrInvoiceNotDraft
 	}
 
+	// Optional re-link on a draft: verify like create, snapshot when present,
+	// and keep the existing link when the field is absent.
+	var newCustomerID *int64
+	if input.CustomerID != nil {
+		name, email, address, snapErr := s.resolveCustomerSnapshot(ctx, businessID, *input.CustomerID)
+		if snapErr != nil {
+			return nil, snapErr
+		}
+		newCustomerID = input.CustomerID
+		input.ClientName = name
+		input.ClientEmail = email
+		if address != "" {
+			input.ClientAddress = address
+		}
+	} else {
+		newCustomerID = existing.CustomerID
+	}
+
 	issueDate, err := time.Parse("2006-01-02", input.IssueDate)
 	if err != nil {
 		return nil, err
@@ -333,6 +370,7 @@ func (s *Service) UpdateInvoice(ctx context.Context, businessID, invoiceID int64
 	existing.ClientEmail = input.ClientEmail
 	existing.ClientAddress = input.ClientAddress
 	existing.ClientTaxID = input.ClientTaxID
+	existing.CustomerID = newCustomerID
 	existing.IssueDate = issueDate
 	existing.DueDate = dueDate
 	existing.Currency = currency
@@ -781,4 +819,30 @@ func FloatToCents(amount float64) int64 {
 // CentsToFloat converts integer cents to standard float amount.
 func CentsToFloat(cents int64) float64 {
 	return float64(cents) / 100.0
+}
+
+// ListInvoicesByCustomer returns one page of a customer's invoices
+// (CRM->FIN-02's read surface), backed by the business+customer index.
+func (s *Service) ListInvoicesByCustomer(ctx context.Context, businessID, customerID int64, page, pageSize int64) ([]domain.Invoice, bool, error) {
+	limit, offset := paginateInvoices(page, pageSize)
+	key := cacheKeys.Scoped(invoicesScope, businessID, fmt.Sprintf("by-customer=%d|p=%d|ps=%d", customerID, page, pageSize))
+	rows, err := cacher.Of[[]domain.Invoice]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) ([]domain.Invoice, error) {
+			return s.repo.ListInvoicesByCustomer(ctx, businessID, customerID, limit+1, offset)
+		},
+		cacher.WithExpiry(ctx, invoicesTTL),
+	)
+	if err != nil {
+		return nil, false, err
+	}
+	hasMore := len(rows) > int(limit)
+	if hasMore {
+		rows = rows[:limit]
+	}
+	return rows, hasMore, nil
+}
+
+// CountInvoicesByCustomer reports how many invoices carry the customer link.
+func (s *Service) CountInvoicesByCustomer(ctx context.Context, businessID, customerID int64) (int64, error) {
+	return s.repo.CountInvoicesByCustomer(ctx, businessID, customerID)
 }
