@@ -131,11 +131,9 @@ func (r *Repository) CreateInvoiceWithItems(ctx context.Context, businessID int6
 		logger.Ctx(ctx).Error("Failed to begin invoice transaction", logger.Error(err))
 		return 0, err
 	}
-	defer func() {
-		if err != nil {
-			_ = tx.Rollback()
-		}
-	}()
+	// Rollback is a no-op after a successful commit and also fires on panic,
+	// so an interrupted transaction never lingers on the pooled connection.
+	defer func() { _ = tx.Rollback() }()
 
 	if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  inv.ClientName,
@@ -268,11 +266,9 @@ func (r *Repository) UpdateInvoiceWithItems(ctx context.Context, businessID int6
 		logger.Ctx(ctx).Error("Failed to begin invoice update transaction", logger.Error(err))
 		return err
 	}
-	defer func() {
-		if err != nil {
-			_ = tx.Rollback()
-		}
-	}()
+	// Rollback is a no-op after a successful commit and also fires on panic,
+	// so an interrupted transaction never lingers on the pooled connection.
+	defer func() { _ = tx.Rollback() }()
 
 	qtx := r.queries.WithTx(tx)
 	status, err := qtx.GetInvoiceStatusForUpdate(ctx, sqlc.GetInvoiceStatusForUpdateParams{

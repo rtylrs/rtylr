@@ -27,11 +27,18 @@ type mockRepo struct {
 	sumVal      float64
 	seqCount    int64
 	err         error
+	writeErr    error
 	created     *domain.Invoice
-	sumCalls    atomic.Int64
-	delay       time.Duration
-	activeCalls atomic.Int64
-	maxActive   atomic.Int64
+
+	createWithItemsCalls int
+	lastCreatedItems     []domain.InvoiceItem
+
+	updateWithItemsCalls int
+	lastUpdatedItems     []domain.InvoiceItem
+	sumCalls             atomic.Int64
+	delay                time.Duration
+	activeCalls          atomic.Int64
+	maxActive            atomic.Int64
 }
 
 func (m *mockRepo) ListInvoices(_ context.Context, _ int64, _, _, _, _ string, _, _ int) ([]domain.Invoice, error) {
@@ -42,21 +49,26 @@ func (m *mockRepo) GetInvoiceByID(_ context.Context, _, _ int64) (*domain.Invoic
 	return m.invoice, m.err
 }
 
-func (m *mockRepo) CreateInvoice(_ context.Context, _ int64, inv domain.Invoice) (int64, error) {
+func (m *mockRepo) CreateInvoiceWithItems(_ context.Context, _ int64, inv domain.Invoice, items []domain.InvoiceItem) (int64, error) {
+	m.createWithItemsCalls++
+	m.lastCreatedItems = items
 	m.created = &inv
-
+	if m.writeErr != nil {
+		return 0, m.writeErr
+	}
 	return m.generatedID, m.err
-}
-
-func (m *mockRepo) CreateInvoiceItems(_ context.Context, _ int64, _ []domain.InvoiceItem) error {
-	return m.err
 }
 
 func (m *mockRepo) GetInvoiceItems(_ context.Context, _ int64) ([]domain.InvoiceItem, error) {
 	return m.items, m.err
 }
-func (m *mockRepo) DeleteInvoiceItems(_ context.Context, _ int64) error { return m.err }
-func (m *mockRepo) UpdateInvoice(_ context.Context, _ int64, _ domain.Invoice) error {
+
+func (m *mockRepo) UpdateInvoiceWithItems(_ context.Context, _ int64, _ domain.Invoice, items []domain.InvoiceItem) error {
+	m.updateWithItemsCalls++
+	m.lastUpdatedItems = items
+	if m.writeErr != nil {
+		return m.writeErr
+	}
 	return m.err
 }
 func (m *mockRepo) UpdateInvoiceStatus(_ context.Context, _, _ int64, _ string) error { return m.err }
@@ -396,6 +408,125 @@ func TestCreateInvoice_RejectsInvalidIssueDate(t *testing.T) {
 	})
 	if err == nil {
 		t.Error("expected parse error, got nil")
+	}
+}
+
+// ---- Invoice atomic writes ----
+
+func TestCreateInvoice_WritesHeaderAndItemsAtomically(t *testing.T) {
+	repo := &mockRepo{generatedID: 42}
+	s := &Service{repo: repo}
+
+	inv, err := s.CreateInvoice(context.Background(), 1, domain.InvoiceInput{
+		ClientName: "Acme",
+		IssueDate:  "2024-06-15",
+		DueDate:    "2024-06-30",
+		Items: []domain.InvoiceItemInput{
+			{Description: "Widget", Quantity: 2, UnitPrice: 10},
+			{Description: "Gadget", Quantity: 1, UnitPrice: 5},
+		},
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if repo.createWithItemsCalls != 1 {
+		t.Fatalf("CreateInvoiceWithItems calls = %d, want exactly 1", repo.createWithItemsCalls)
+	}
+	if len(repo.lastCreatedItems) != 2 {
+		t.Fatalf("expected items persisted together with header, got %+v", repo.lastCreatedItems)
+	}
+	if repo.lastCreatedItems[0].Description != "Widget" || repo.lastCreatedItems[0].SortOrder != 0 ||
+		repo.lastCreatedItems[1].Description != "Gadget" || repo.lastCreatedItems[1].SortOrder != 1 {
+		t.Errorf("unexpected items passed to repo: %+v", repo.lastCreatedItems)
+	}
+	if inv.ID != 42 {
+		t.Errorf("expected ID=42, got %d", inv.ID)
+	}
+	if len(inv.Items) != 2 {
+		t.Errorf("expected returned invoice to carry 2 items, got %d", len(inv.Items))
+	}
+	if inv.Subtotal != 25 || inv.Total != 25 {
+		t.Errorf("expected subtotal=total=25, got subtotal=%f total=%f", inv.Subtotal, inv.Total)
+	}
+}
+
+func TestCreateInvoice_RepoFailurePropagatesWithoutPartialWrites(t *testing.T) {
+	want := errors.New("atomic create failed")
+	repo := &mockRepo{writeErr: want}
+	s := &Service{repo: repo}
+
+	_, err := s.CreateInvoice(context.Background(), 1, domain.InvoiceInput{
+		IssueDate: "2024-06-15",
+		DueDate:   "2024-06-30",
+		Items: []domain.InvoiceItemInput{
+			{Description: "Widget", Quantity: 1, UnitPrice: 10},
+		},
+	})
+	if !errors.Is(err, want) {
+		t.Fatalf("expected sentinel, got %v", err)
+	}
+	if repo.createWithItemsCalls != 1 {
+		t.Errorf("CreateInvoiceWithItems calls = %d, want exactly 1 (no split writes)", repo.createWithItemsCalls)
+	}
+	if repo.updateWithItemsCalls != 0 {
+		t.Errorf("UpdateInvoiceWithItems calls = %d, want 0", repo.updateWithItemsCalls)
+	}
+}
+
+func TestUpdateInvoice_WritesHeaderAndItemsAtomically(t *testing.T) {
+	repo := &mockRepo{invoice: &domain.Invoice{ID: 10, Status: domain.StatusDraft}}
+	s := &Service{repo: repo}
+
+	updated, err := s.UpdateInvoice(context.Background(), 1, 10, domain.InvoiceUpdateInput{
+		ClientName: "Acme",
+		IssueDate:  "2024-06-15",
+		DueDate:    "2024-06-30",
+		Items: []domain.InvoiceItemInput{
+			{Description: "Gadget", Quantity: 3, UnitPrice: 5},
+		},
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if repo.updateWithItemsCalls != 1 {
+		t.Fatalf("UpdateInvoiceWithItems calls = %d, want exactly 1", repo.updateWithItemsCalls)
+	}
+	if len(repo.lastUpdatedItems) != 1 || repo.lastUpdatedItems[0].Description != "Gadget" {
+		t.Fatalf("expected replacement items written with header in one call, got %+v", repo.lastUpdatedItems)
+	}
+	if updated.Items == nil || len(updated.Items) != 1 {
+		t.Errorf("expected returned invoice to carry 1 item, got %+v", updated.Items)
+	}
+	if updated.Total != 15 || updated.AmountDue != 15 {
+		t.Errorf("expected total=amountDue=15, got total=%f amountDue=%f", updated.Total, updated.AmountDue)
+	}
+}
+
+func TestUpdateInvoice_RepoFailurePropagatesWithoutPartialWrites(t *testing.T) {
+	want := errors.New("atomic update failed")
+	repo := &mockRepo{
+		invoice:  &domain.Invoice{ID: 10, Status: domain.StatusDraft},
+		writeErr: want,
+	}
+	s := &Service{repo: repo}
+
+	_, err := s.UpdateInvoice(context.Background(), 1, 10, domain.InvoiceUpdateInput{
+		IssueDate: "2024-06-15",
+		DueDate:   "2024-06-30",
+		Items: []domain.InvoiceItemInput{
+			{Description: "Widget", Quantity: 1, UnitPrice: 10},
+		},
+	})
+	if !errors.Is(err, want) {
+		t.Fatalf("expected sentinel, got %v", err)
+	}
+	if repo.updateWithItemsCalls != 1 {
+		t.Errorf("UpdateInvoiceWithItems calls = %d, want exactly 1 (no split delete+recreate)", repo.updateWithItemsCalls)
+	}
+	if repo.createWithItemsCalls != 0 {
+		t.Errorf("CreateInvoiceWithItems calls = %d, want 0", repo.createWithItemsCalls)
 	}
 }
 
