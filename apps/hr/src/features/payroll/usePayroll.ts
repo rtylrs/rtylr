@@ -52,6 +52,7 @@ export {
   useGetPayrollRun,
   useTriggerPayrollRun,
   useApprovePayrollRun,
+  useExportPayrollRun,
   useGetPayrollConfig,
   useUpsertPayrollConfig,
 } from '../../shared/hooks/queries/usePayroll';

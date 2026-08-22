@@ -222,6 +222,34 @@ export const useTriggerPayrollRun = (enabled = true) => {
   });
 };
 
+/**
+ * Posts an approved payroll run to the central finance journal
+ * (HR->FIN-01). onion's POST /hr/payroll/runs/{id}/export takes an
+ * idempotent claim, converts internally-stored cents at the boundary and
+ * posts through the Finance-owned financejournal port, using this tenant's
+ * configured payroll account mapping. Re-posting an exported run is a
+ * server-side no-op error, so the button only shows for approved runs.
+ */
+export const useExportPayrollRun = (enabled = true) => {
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (runId: number): Promise<void> => {
+      if (!enabled) return;
+      await unwrap(hrTransport.post(`/hr/payroll/runs/${runId}/export`));
+    },
+    onSuccess: (_data: void, runId: number) => {
+      queryClient.invalidateQueries({ queryKey: ['payroll-runs'] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-run', runId] });
+      toast.success(t('payroll.runDetail.posted'));
+    },
+    onError: () => {
+      toast.error(t('errors.generic'));
+    },
+  });
+};
+
 export const useApprovePayrollRun = (enabled = true) => {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
