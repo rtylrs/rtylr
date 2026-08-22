@@ -157,6 +157,9 @@ const query = new URLSearchParams();
 if (req.businessId !== undefined) {
 query.set("business_id", String(req.businessId));
 }
+if (req.publicToken !== undefined) {
+query.set("public_token", String(req.publicToken));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
