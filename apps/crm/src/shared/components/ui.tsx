@@ -209,6 +209,21 @@ export const Modal: React.FC<{
   size?: 'sm' | 'md' | 'lg';
 }> = ({ open, onClose, title, children, footer, size = 'md' }) => {
   const titleId = React.useId();
+  const closeButtonRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    closeButtonRef.current?.focus();
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose, open]);
+
   if (!open) return null;
   const widths = { sm: '380px', md: '520px', lg: '720px' };
   return (
@@ -263,6 +278,7 @@ export const Modal: React.FC<{
           <button
             type="button"
             aria-label="Close"
+            ref={closeButtonRef}
             onClick={onClose}
             style={{
               background: 'transparent',
