@@ -150,6 +150,7 @@ const Loyalty: React.FC = () => {
               </label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <button
+                  type="button"
                   onClick={() => setPointsPerDollar((v) => Math.max(1, v - 1))}
                   style={{
                     width: '32px',
@@ -179,6 +180,7 @@ const Loyalty: React.FC = () => {
                   {pointsPerDollar}
                 </span>
                 <button
+                  type="button"
                   onClick={() => setPointsPerDollar((v) => Math.min(10, v + 1))}
                   style={{
                     width: '32px',
@@ -256,6 +258,7 @@ const Loyalty: React.FC = () => {
           )}
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
             <button
+              type="button"
               onClick={() => updateConfig.mutate({ pointsPerDollar })}
               disabled={updateConfig.isPending || configUnavailable}
               style={{
@@ -452,7 +455,9 @@ const Loyalty: React.FC = () => {
           ) : (
             activityLog.map((entry, i) => (
               <div
-                key={i}
+                key={
+                  'id' in entry ? entry.id : `${entry.customer}-${entry.time}-${entry.action}-${i}`
+                }
                 style={{
                   display: 'flex',
                   alignItems: 'center',

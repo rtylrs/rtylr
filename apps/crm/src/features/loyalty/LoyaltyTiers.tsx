@@ -210,9 +210,9 @@ const LoyaltyTiers: React.FC = () => {
               gap: '14px',
             }}
           >
-            {tiers.map((t) => (
+            {tiers.map((t, i) => (
               <div
-                key={t.id}
+                key={`${t.id}-${t.name}-${i}`}
                 style={{
                   background: 'var(--hub-card)',
                   border: `1px solid ${t.color}40`,

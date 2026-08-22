@@ -386,9 +386,9 @@ const CustomerProfile: React.FC = () => {
                 </h4>
               </div>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
-                {tags.map((t) => (
+                {tags.map((t, i) => (
                   <TagChip
-                    key={t}
+                    key={`${t}-${i}`}
                     label={t}
                     onRemove={() => handleRemoveTag(t)}
                     disabled={update.isPending}

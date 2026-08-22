@@ -621,8 +621,8 @@ const Customers: React.FC = () => {
                                   maxWidth: '160px',
                                 }}
                               >
-                                {(c.tags || []).slice(0, 2).map((t) => (
-                                  <TagChip key={t} label={t} />
+                                {(c.tags || []).slice(0, 2).map((t, i) => (
+                                  <TagChip key={`${t}-${i}`} label={t} />
                                 ))}
                               </div>
                             </td>
