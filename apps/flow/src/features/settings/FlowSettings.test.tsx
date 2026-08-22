@@ -207,15 +207,19 @@ describe('FlowSettings section gating (#793)', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('does render WorkspacesSection for an admin via ?section=workspaces (the gate is not overly strict)', () => {
-    tokenState.token = makeToken('admin');
-    searchState.section = 'workspaces';
-    renderSettings();
-
-    expect(
-      screen.getByRole('heading', { name: 'flow.settings.workspaces.section' })
-    ).toBeInTheDocument();
-  });
+  // The positive case for ?section=workspaces is deliberately gone. #925 removed
+  // WorkspacesSection along with the workspace layer, and SECTION_CONTENT no
+  // longer maps the id, so an admin selecting Workspaces now falls through to
+  // PlaceholderSection. There is no heading to assert.
+  //
+  // The three sibling cases above still hold and are still worth keeping: the
+  // nav entry is still built for an admin and still withheld from a member, so
+  // the #793 gate itself is unchanged.
+  //
+  // Left alone on purpose: that nav entry is now dead, offering a Workspaces
+  // item that renders a placeholder. Removing it means changing buildSections
+  // and would break the two sibling assertions, so it belongs in its own change
+  // rather than in a test repair.
 });
 
 // #793 finding 2, defense in depth: even if TeamSection were ever reached
