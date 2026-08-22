@@ -113,22 +113,28 @@ CREATE TABLE IF NOT EXISTS flow_work_types (
 );
 
 -- The line columns hr_time_entries lacks. All nullable or defaulted: the table has
--- live rows, and every existing entry predates work days.
-ALTER TABLE hr_time_entries
-    ADD COLUMN work_day_id BIGINT NULL,
-    ADD COLUMN work_type_id BIGINT NULL,
-    -- Null means inherit the day's mode; set means this line differed.
-    ADD COLUMN work_mode VARCHAR(20) NULL,
-    ADD COLUMN timezone VARCHAR(64) NULL,
-    -- Client-generated before the line is sent, so an offline retry is idempotent.
-    -- This is the difference between a field worker syncing twice and logging twice.
-    ADD COLUMN client_key VARCHAR(64) NULL,
-    ADD COLUMN logged_by BIGINT NULL;
+-- live rows, and every existing entry predates work days. MySQL 8.4 has no
+-- portable ADD COLUMN IF NOT EXISTS, so guard each alteration explicitly.
+SET @sql := IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'hr_time_entries' AND COLUMN_NAME = 'work_day_id') = 0, 'ALTER TABLE hr_time_entries ADD COLUMN work_day_id BIGINT NULL', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+SET @sql := IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'hr_time_entries' AND COLUMN_NAME = 'work_type_id') = 0, 'ALTER TABLE hr_time_entries ADD COLUMN work_type_id BIGINT NULL', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+-- Null means inherit the day's mode; set means this line differed.
+SET @sql := IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'hr_time_entries' AND COLUMN_NAME = 'work_mode') = 0, 'ALTER TABLE hr_time_entries ADD COLUMN work_mode VARCHAR(20) NULL', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+SET @sql := IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'hr_time_entries' AND COLUMN_NAME = 'timezone') = 0, 'ALTER TABLE hr_time_entries ADD COLUMN timezone VARCHAR(64) NULL', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+-- Client-generated before the line is sent, so an offline retry is idempotent.
+-- This is the difference between a field worker syncing twice and logging twice.
+SET @sql := IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'hr_time_entries' AND COLUMN_NAME = 'client_key') = 0, 'ALTER TABLE hr_time_entries ADD COLUMN client_key VARCHAR(64) NULL', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+SET @sql := IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'hr_time_entries' AND COLUMN_NAME = 'logged_by') = 0, 'ALTER TABLE hr_time_entries ADD COLUMN logged_by BIGINT NULL', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
-ALTER TABLE hr_time_entries
-    ADD INDEX idx_time_entries_work_day (owner_id, work_day_id);
+SET @sql := IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'hr_time_entries' AND INDEX_NAME = 'idx_time_entries_work_day') = 0, 'ALTER TABLE hr_time_entries ADD INDEX idx_time_entries_work_day (owner_id, work_day_id)', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 -- Idempotency is only meaningful if the retry collides. Unique per tenant, and
 -- NULL client_keys do not collide in MySQL, so legacy rows are unaffected.
-ALTER TABLE hr_time_entries
-    ADD UNIQUE KEY uk_time_entries_client_key (owner_id, client_key);
+SET @sql := IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'hr_time_entries' AND INDEX_NAME = 'uk_time_entries_client_key') = 0, 'ALTER TABLE hr_time_entries ADD UNIQUE KEY uk_time_entries_client_key (owner_id, client_key)', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
