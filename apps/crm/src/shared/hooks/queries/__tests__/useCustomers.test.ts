@@ -74,6 +74,18 @@ describe('useCustomers & customer helpers', () => {
     });
   });
 
+  it('does not repeat the mapped first name when deriving a missing last name', () => {
+    const headers = ['Full Name', 'First Name', 'Email'];
+    const mapping = autoMapHeaders(headers);
+
+    expect(
+      toCustomerImportRow(['Ada Lovelace', 'Ada', 'ada@example.com'], headers, mapping)
+    ).toMatchObject({
+      first_name: 'Ada',
+      last_name: 'Lovelace',
+    });
+  });
+
   it('imports the selected duplicate header column instead of the first match', () => {
     const headers = ['Name', 'Email', 'Email'];
     const mapping = { name: 'Name', email: importColumnValue(headers, 2) };

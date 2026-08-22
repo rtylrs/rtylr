@@ -159,11 +159,16 @@ export function toCustomerImportRow(
   mapping: Partial<Record<ImportField, string>>
 ): Record<string, unknown> {
   const fullName = mappedValue(row, headers, mapping, 'name');
-  const firstNameFromFullName = fullName.split(/\s+/).filter(Boolean);
-  const firstName =
-    mappedValue(row, headers, mapping, 'first_name') || firstNameFromFullName.shift() || '';
-  const lastName =
-    mappedValue(row, headers, mapping, 'last_name') || firstNameFromFullName.join(' ');
+  const fullNameParts = fullName.split(/\s+/).filter(Boolean);
+  const mappedFirstName = mappedValue(row, headers, mapping, 'first_name');
+  const firstName = mappedFirstName || fullNameParts.shift() || '';
+  if (mappedFirstName) {
+    const mappedFirstNameIndex = fullNameParts.findIndex(
+      (part) => part.toLowerCase() === mappedFirstName.toLowerCase()
+    );
+    if (mappedFirstNameIndex >= 0) fullNameParts.splice(mappedFirstNameIndex, 1);
+  }
+  const lastName = mappedValue(row, headers, mapping, 'last_name') || fullNameParts.join(' ');
   const customer: Record<string, unknown> = {
     first_name: firstName,
     last_name: lastName,
