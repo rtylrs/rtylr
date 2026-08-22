@@ -103,8 +103,14 @@ message ListBillsResponse {
 }
 
 message UpdateBillBody {
-  /// supplier_id is the supplier id value for this contract.
-  supplier_id: int64 @required @gt(0)
+  /// supplier_id is the ERP supplier this bill is owed to; absent keeps the
+  /// stored value, and a one-off bill may clear it by sending nothing here.
+  supplier_id: int64? @nullable
+  /// supplier_name replaces the vendor snapshot; absent means unchanged.
+  supplier_name: string
+  /// purchase_order_id re-links this bill to an ERP purchase order; absent
+  /// keeps the stored link.
+  purchase_order_id: int64? @nullable
   /// amount is the amount value for this contract.
   amount: float64 @gte(0)
   /// currency is the currency value for this contract.
@@ -115,7 +121,10 @@ message UpdateBillBody {
   status: string @required
   /// description is the description value for this contract.
   description: string @required
-}
+
+  /// supplier_name replaces the vendor snapshot; absent means unchanged.
+  supplier_name: string
+
 
 message UpdateBillRequest {
   /// id is the unique identifier for the resource.
