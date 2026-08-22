@@ -20,7 +20,7 @@ import {
   useDeleteSegment,
   useCreateSegment,
 } from '../../shared/hooks/queries/useSegments';
-import { Card, ConfirmModal, EmptyState } from '../../shared/components/ui';
+import { Card, ConfirmModal, EmptyState, SkeletonList } from '../../shared/components/ui';
 
 const ACCENT = '#3b82f6';
 
@@ -511,7 +511,7 @@ const iconMap: Record<string, React.ComponentType<{ size?: number; color?: strin
 
 const Segments: React.FC = () => {
   const navigate = useNavigate();
-  const { data: fetchedSegments, isError } = useListSegments();
+  const { data: fetchedSegments, isLoading, isError } = useListSegments();
   const removeSegment = useDeleteSegment();
   const createSegment = useCreateSegment();
   const [builderOpen, setBuilderOpen] = useState(false);
@@ -571,9 +571,9 @@ const Segments: React.FC = () => {
               Segments
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
-              {segments.length} active segments ·{' '}
-              {segments.reduce((sum, s) => sum + s.customerCount, 0).toLocaleString()} customers
-              total
+              {isLoading
+                ? 'Loading segment data…'
+                : `${segments.length} active segments · ${segments.reduce((sum, s) => sum + s.customerCount, 0).toLocaleString()} customers total`}
             </p>
           </div>
           <button
@@ -598,7 +598,11 @@ const Segments: React.FC = () => {
         </div>
 
         {/* Segment grid */}
-        {isError ? (
+        {isLoading ? (
+          <Card>
+            <SkeletonList count={3} />
+          </Card>
+        ) : isError ? (
           <Card>
             <EmptyState
               icon={AlertTriangle}
