@@ -238,9 +238,17 @@ func (s *Service) buildAccessTokenClaims(ctx context.Context, userID int64) *Acc
 	return claims
 }
 
-func (s *Service) hydrateAccessTokenClaims(ctx context.Context, claims *AccessTokenClaims) {
+func (s *Service) hydrateAccessTokenClaims(ctx context.Context, claims *AccessTokenClaims) *domain.User {
 	if claims == nil || claims.UserID <= 0 {
-		return
+		return nil
+	}
+
+	user, err := s.GetUserByID(ctx, claims.UserID)
+	if err == nil && user != nil {
+		// The epoch is the revocation anchor: tokens whose embedded epoch is
+		// behind the stored one were issued before a password change or
+		// credential reset and must stop validating.
+		claims.TokenEpoch = user.TokenEpoch
 	}
 
 	if claims.BusinessID <= 0 {
@@ -249,15 +257,25 @@ func (s *Service) hydrateAccessTokenClaims(ctx context.Context, claims *AccessTo
 		}
 	}
 
-	if claims.BusinessID > 0 && claims.Role == "" {
+	if claims.BusinessID > 0 {
+		// Re-read the role on every validation instead of trusting the JWT:
+		// a demoted member must not keep "admin" until the token expires.
 		if role, err := s.getUserBusinessRole(ctx, claims.BusinessID, claims.UserID); err == nil {
 			claims.Role = role
 		}
 	}
 
-	if user, err := s.GetUserByID(ctx, claims.UserID); err == nil && user.IsConsoleAdmin {
-		claims.Role = "console_admin"
+	// console_admin is additive while the flag is set, but a stale claim from
+	// before a demotion must be cleared rather than carried forward.
+	if err == nil && user != nil {
+		if user.IsConsoleAdmin {
+			claims.Role = "console_admin"
+		} else if claims.Role == "console_admin" {
+			claims.Role = ""
+		}
 	}
+
+	return user
 }
 
 func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*AccessTokenClaims, error) {
@@ -268,7 +286,17 @@ func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*Acces
 		return nil, err
 	}
 
-	s.hydrateAccessTokenClaims(ctx, claims)
+	// Capture the epoch exactly as embedded at issuance: hydration refreshes
+	// claims from the database and would otherwise mask a stale token.
+	tokenEpoch := claims.TokenEpoch
+
+	user := s.hydrateAccessTokenClaims(ctx, claims)
+
+	// Deleted or missing users never validate, closing the deleted-token hole
+	// alongside epoch-based revocation.
+	if user == nil || tokenEpoch != user.TokenEpoch {
+		return nil, ErrInvalidCredentials
+	}
 
 	return claims, nil
 }
@@ -429,6 +457,7 @@ type AccessTokenClaims struct {
 	Platform       string `json:"platform,omitempty"`
 	PlatformUserID int64  `json:"platform_user_id,omitempty"`
 	PlanID         int64  `json:"plan_id,omitempty"`
+	TokenEpoch     int64  `json:"token_epoch,omitempty"`
 	jwt.RegisteredClaims
 }
 

@@ -2932,6 +2932,7 @@ type User struct {
 	BanReason        sql.NullString `db:"ban_reason" json:"ban_reason"`
 	BannedAt         sql.NullTime   `db:"banned_at" json:"banned_at"`
 	AuthProvider     string         `db:"auth_provider" json:"auth_provider"`
+	TokenEpoch       int64          `db:"token_epoch" json:"token_epoch"`
 	TwoFactorEnabled bool           `db:"two_factor_enabled" json:"two_factor_enabled"`
 }
 

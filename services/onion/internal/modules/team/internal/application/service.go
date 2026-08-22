@@ -356,6 +356,10 @@ func (s *Service) VerifyInviteToken(ctx context.Context, token string) (int64, s
 
 // AcceptInvite sets the user's password and marks the token as used.
 func (s *Service) AcceptInvite(ctx context.Context, token, password string) (int64, error) {
+	if err := passwordutils.ValidateStrength(password); err != nil {
+		return 0, err
+	}
+
 	userID, _, _, err := s.repo.GetInviteToken(ctx, token)
 	if err != nil {
 		return 0, err

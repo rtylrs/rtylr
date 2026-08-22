@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
+	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
 func TestInviteUser_RequiresEmail(t *testing.T) {
@@ -174,5 +175,14 @@ func TestCreateGroup_EmptyNameAlwaysErrors(t *testing.T) {
 	_, err := s.CreateGroup(context.Background(), 0, domain.CreateGroupInput{Name: ""})
 	if err == nil {
 		t.Fatal("expected error for empty name with zero ownerID")
+	}
+}
+
+func TestAcceptInvite_RejectsWeakPassword(t *testing.T) {
+	s := NewService(context.Background(), nil)
+	for _, password := range []string{"", "short1A", "alllowercase1", "NOLOWERCASE1", "NoDigitsHere"} {
+		if _, err := s.AcceptInvite(context.Background(), "any-token", password); !errors.Is(err, passwordutils.ErrWeakPassword) {
+			t.Errorf("AcceptInvite(password=%q): got err=%v, want ErrWeakPassword", password, err)
+		}
 	}
 }

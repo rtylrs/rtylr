@@ -1,6 +1,9 @@
 package passwordutils
 
 import (
+	"errors"
+	"unicode"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -60,4 +63,33 @@ func CheckPINHash(pin, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(pin))
 
 	return err == nil
+}
+
+// ErrWeakPassword reports a password that fails the shared strength policy:
+// at least 8 characters with an upper-case letter, a lower-case letter and a
+// digit.
+var ErrWeakPassword = errors.New("password does not meet the strength policy")
+
+// ValidateStrength enforces the account-password policy shared by register,
+// password change/reset and invite acceptance. PINs are validated separately
+// by their owners and intentionally not subject to this rule.
+func ValidateStrength(password string) error {
+	if len(password) < 8 {
+		return ErrWeakPassword
+	}
+	hasUpper, hasLower, hasDigit := false, false, false
+	for _, r := range password {
+		switch {
+		case unicode.IsUpper(r):
+			hasUpper = true
+		case unicode.IsLower(r):
+			hasLower = true
+		case unicode.IsDigit(r):
+			hasDigit = true
+		}
+	}
+	if !hasUpper || !hasLower || !hasDigit {
+		return ErrWeakPassword
+	}
+	return nil
 }
