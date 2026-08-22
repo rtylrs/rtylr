@@ -118,7 +118,7 @@ export const TimelineEntryRow: React.FC<{ entry: TimelineEntry }> = ({ entry }) 
           </div>
         )}
         <div style={{ fontSize: '11px', color: 'var(--hub-text-dim)', marginTop: '3px' }}>
-          {entry.at}
+          {formatCustomerDate(entry.at, 'Unknown date')}
         </div>
       </div>
     </div>
