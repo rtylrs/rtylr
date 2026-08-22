@@ -79,3 +79,26 @@ func TestCalculateTotal_FractionalQuantity(t *testing.T) {
 		t.Errorf("CalculateTotal() = %f, want 300", got)
 	}
 }
+
+func TestCalculateComponents_SplitsBaseAndTax(t *testing.T) {
+	// base=200, discount 10%=20, pre-tax base=180, tax 5%=9
+	item := InvoiceItemInput{Quantity: 2, UnitPrice: 100, DiscountPct: 10, TaxRate: 5}
+	got := item.CalculateComponents()
+	if !almostEqual(got.Base, 180) {
+		t.Errorf("Base = %f, want 180", got.Base)
+	}
+	if !almostEqual(got.Tax, 9) {
+		t.Errorf("Tax = %f, want 9", got.Tax)
+	}
+	if !almostEqual(item.CalculateTotal(), got.Base+got.Tax) {
+		t.Errorf("CalculateTotal() %f != Base+Tax %f", item.CalculateTotal(), got.Base+got.Tax)
+	}
+}
+
+func TestCalculateComponents_ZeroTax(t *testing.T) {
+	item := InvoiceItemInput{Quantity: 3, UnitPrice: 10}
+	got := item.CalculateComponents()
+	if !almostEqual(got.Base, 30) || got.Tax != 0 {
+		t.Errorf("got base=%f tax=%f, want base=30 tax=0", got.Base, got.Tax)
+	}
+}

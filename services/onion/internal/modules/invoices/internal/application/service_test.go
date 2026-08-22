@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"errors"
+	"math"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -26,6 +27,7 @@ type mockRepo struct {
 	sumVal      float64
 	seqCount    int64
 	err         error
+	created     *domain.Invoice
 	sumCalls    atomic.Int64
 	delay       time.Duration
 	activeCalls atomic.Int64
@@ -40,7 +42,9 @@ func (m *mockRepo) GetInvoiceByID(_ context.Context, _, _ int64) (*domain.Invoic
 	return m.invoice, m.err
 }
 
-func (m *mockRepo) CreateInvoice(_ context.Context, _ int64, _ domain.Invoice) (int64, error) {
+func (m *mockRepo) CreateInvoice(_ context.Context, _ int64, inv domain.Invoice) (int64, error) {
+	m.created = &inv
+
 	return m.generatedID, m.err
 }
 
@@ -392,6 +396,133 @@ func TestCreateInvoice_RejectsInvalidIssueDate(t *testing.T) {
 	})
 	if err == nil {
 		t.Error("expected parse error, got nil")
+	}
+}
+
+// ---- CreateInvoice totals ----
+
+func almostEqualAmount(a, b float64) bool {
+	return math.Abs(a-b) < 0.001
+}
+
+func TestCreateInvoice_Totals_Table(t *testing.T) {
+	tests := []struct {
+		name string
+		in   domain.InvoiceInput
+		want domain.Invoice
+	}{
+		{
+			name: "header tax not stacked on item tax",
+			// $100 line at 10% item tax plus 10% header tax: one $10 item tax
+			// and one $10 header tax on the same base, not $21.
+			in: domain.InvoiceInput{
+				IssueDate: "2024-06-15",
+				DueDate:   "2024-06-20",
+				TaxRate:   10,
+				Items: []domain.InvoiceItemInput{
+					{Quantity: 1, UnitPrice: 100, TaxRate: 10},
+				},
+			},
+			want: domain.Invoice{Subtotal: 100, DiscountAmount: 0, TaxAmount: 20, Total: 120},
+		},
+		{
+			name: "header discount applies to pre-tax base only",
+			in: domain.InvoiceInput{
+				IssueDate:     "2024-06-15",
+				DueDate:       "2024-06-20",
+				DiscountType:  "percentage",
+				DiscountValue: 10,
+				TaxRate:       10,
+				Items: []domain.InvoiceItemInput{
+					{Quantity: 1, UnitPrice: 100, TaxRate: 10},
+				},
+			},
+			want: domain.Invoice{Subtotal: 100, DiscountAmount: 10, TaxAmount: 19, Total: 109},
+		},
+		{
+			name: "no item tax keeps legacy behavior",
+			in: domain.InvoiceInput{
+				IssueDate: "2024-06-15",
+				DueDate:   "2024-06-20",
+				TaxRate:   5,
+				Items: []domain.InvoiceItemInput{
+					{Quantity: 2, UnitPrice: 100},
+				},
+			},
+			want: domain.Invoice{Subtotal: 200, DiscountAmount: 0, TaxAmount: 10, Total: 210},
+		},
+		{
+			name: "fixed discount with mixed item tax rates",
+			in: domain.InvoiceInput{
+				IssueDate:     "2024-06-15",
+				DueDate:       "2024-06-20",
+				DiscountValue: 20,
+				Items: []domain.InvoiceItemInput{
+					{Quantity: 1, UnitPrice: 100},
+					{Quantity: 1, UnitPrice: 50, TaxRate: 10},
+				},
+			},
+			want: domain.Invoice{Subtotal: 150, DiscountAmount: 20, TaxAmount: 5, Total: 135},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := &mockRepo{}
+			s := &Service{repo: repo}
+			inv, err := s.CreateInvoice(context.Background(), 1, tt.in)
+			if err != nil {
+				t.Fatalf("CreateInvoice() error = %v", err)
+			}
+			if repo.created == nil {
+				t.Fatal("expected invoice to reach the repository")
+			}
+			if !almostEqualAmount(inv.Subtotal, tt.want.Subtotal) {
+				t.Errorf("Subtotal = %f, want %f", inv.Subtotal, tt.want.Subtotal)
+			}
+			if !almostEqualAmount(inv.DiscountAmount, tt.want.DiscountAmount) {
+				t.Errorf("DiscountAmount = %f, want %f", inv.DiscountAmount, tt.want.DiscountAmount)
+			}
+			if !almostEqualAmount(inv.TaxAmount, tt.want.TaxAmount) {
+				t.Errorf("TaxAmount = %f, want %f", inv.TaxAmount, tt.want.TaxAmount)
+			}
+			if !almostEqualAmount(inv.Total, tt.want.Total) {
+				t.Errorf("Total = %f, want %f", inv.Total, tt.want.Total)
+			}
+			if !almostEqualAmount(inv.AmountDue, tt.want.Total) {
+				t.Errorf("AmountDue = %f, want %f", inv.AmountDue, tt.want.Total)
+			}
+			if inv.Total != inv.Subtotal-inv.DiscountAmount+inv.TaxAmount && !almostEqualAmount(inv.Total, inv.Subtotal-inv.DiscountAmount+inv.TaxAmount) {
+				t.Errorf("invariant broken: Subtotal - DiscountAmount + TaxAmount = %f, Total = %f", inv.Subtotal-inv.DiscountAmount+inv.TaxAmount, inv.Total)
+			}
+		})
+	}
+}
+
+func TestUpdateInvoice_TotalsMatchCreatePath(t *testing.T) {
+	repo := &mockRepo{
+		invoice: &domain.Invoice{ID: 7, Status: domain.StatusDraft},
+	}
+	s := &Service{repo: repo}
+	inv, err := s.UpdateInvoice(context.Background(), 1, 7, domain.InvoiceUpdateInput{
+		IssueDate: "2024-06-15",
+		DueDate:   "2024-06-20",
+		TaxRate:   10,
+		Items: []domain.InvoiceItemInput{
+			{Quantity: 1, UnitPrice: 100, TaxRate: 10},
+		},
+	})
+	if err != nil {
+		t.Fatalf("UpdateInvoice() error = %v", err)
+	}
+	if !almostEqualAmount(inv.Subtotal, 100) {
+		t.Errorf("Subtotal = %f, want 100", inv.Subtotal)
+	}
+	if !almostEqualAmount(inv.TaxAmount, 20) {
+		t.Errorf("TaxAmount = %f, want 20", inv.TaxAmount)
+	}
+	if !almostEqualAmount(inv.Total, 120) {
+		t.Errorf("Total = %f, want 120", inv.Total)
 	}
 }
 
