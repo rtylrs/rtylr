@@ -100,7 +100,7 @@ const MemberRow: React.FC<{
           if (isLastAdmin) return toast.error(t('toasts.workspaceMember.cannotRemoveLastAdmin'));
           setConfirmRemove(true);
         }}
-        className="h-7 w-7 rounded flex items-center justify-center shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="h-7 w-7 rounded-sm flex items-center justify-center shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
         style={{ color: 'var(--flow-text-dim)' }}
         onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
         onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--flow-text-dim)')}
@@ -163,7 +163,7 @@ const WorkspaceManager: React.FC = () => {
           </div>
           <button type="button"
             onClick={() => setShowInvite(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-semibold"
             style={{ background: 'var(--accent)', color: '#0a0a0a' }}
           >
             <Plus size={11} /> {t('workspaceManager.addMember')}

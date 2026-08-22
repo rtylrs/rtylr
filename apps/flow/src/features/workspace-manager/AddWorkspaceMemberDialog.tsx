@@ -98,7 +98,7 @@ const AddWorkspaceMemberDialog: React.FC<AddWorkspaceMemberDialogProps> = ({
 
         <div className="space-y-3">
           <div
-            className="flex items-center gap-2 rounded px-3 py-2"
+            className="flex items-center gap-2 rounded-sm px-3 py-2"
             style={{
               background: 'var(--flow-input-bg)',
               border: '1px solid var(--flow-border)',
@@ -178,7 +178,7 @@ const AddWorkspaceMemberDialog: React.FC<AddWorkspaceMemberDialogProps> = ({
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value as 'admin' | 'member' | 'viewer')}
               aria-label={t('workspaceManager.roleLabel')}
-              className="min-h-[44px] rounded px-3 text-[16px] outline-none md:min-h-0 md:py-2 md:text-[12px]"
+              className="min-h-[44px] rounded-sm px-3 text-[16px] outline-none md:min-h-0 md:py-2 md:text-[12px]"
               style={{
                 background: 'var(--flow-input-bg)',
                 border: '1px solid var(--flow-border)',
@@ -195,7 +195,7 @@ const AddWorkspaceMemberDialog: React.FC<AddWorkspaceMemberDialogProps> = ({
               type="button"
               onClick={handleAddMember}
               disabled={!selectedUserId || addMember.isPending}
-              className="flex-1 min-h-[44px] px-4 rounded text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-2"
+              className="flex-1 min-h-[44px] px-4 rounded-sm text-[13px] font-semibold disabled:opacity-40 md:min-h-0 md:py-2"
               style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
             >
               {addMember.isPending

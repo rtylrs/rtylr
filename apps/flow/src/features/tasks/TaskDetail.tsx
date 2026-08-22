@@ -333,7 +333,7 @@ const TaskDetail: React.FC = () => {
             <button type="button"
               onClick={() => window.history.back()}
               aria-label={t('common.back')}
-              className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+              className="h-6 w-6 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               <ArrowLeft size={13} className="flow-directional-icon" />
@@ -354,7 +354,7 @@ const TaskDetail: React.FC = () => {
                 navigator.clipboard?.writeText(task.identifier ?? task.id);
                 toast.success(t('toasts.task.copied', { id: task.identifier ?? task.id }));
               }}
-              className="flex h-8 items-center gap-1 rounded px-2 text-[11px] hover:bg-[var(--flow-hover)] sm:h-7"
+              className="flex h-8 items-center gap-1 rounded-sm px-2 text-[11px] hover:bg-[var(--flow-hover)] sm:h-7"
               style={{ color: 'var(--flow-text-muted)' }}
               title={t('flow.taskDetail.copyId')}
             >
@@ -374,7 +374,7 @@ const TaskDetail: React.FC = () => {
                   }
                 );
               }}
-              className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
+              className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
               style={{ color: 'var(--flow-text-muted)' }}
               title={!canEdit ? t('common.readOnlyAccess') : t('flow.taskDetail.archive')}
               aria-label={!canEdit ? t('common.readOnlyAccess') : t('flow.taskDetail.archive')}
@@ -396,7 +396,7 @@ const TaskDetail: React.FC = () => {
                   // useDeleteTask already toasts on error.
                 });
               }}
-              className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
+              className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
               style={{ color: '#ef4444' }}
               title={!canRemove ? t('common.deleteRestricted') : t('flow.taskDetail.delete')}
               aria-label={!canRemove ? t('common.deleteRestricted') : t('flow.taskDetail.delete')}
@@ -502,7 +502,7 @@ const TaskDetail: React.FC = () => {
                     : t('flow.taskDetail.activity')}
                   {tabName === 'comments' && (
                     <span
-                      className="ms-1.5 text-[10px] px-1 rounded"
+                      className="ms-1.5 text-[10px] px-1 rounded-sm"
                       style={{
                         background: 'var(--flow-hover)',
                         color: 'var(--flow-text-dim)',
@@ -860,7 +860,7 @@ const TaskDetail: React.FC = () => {
                 <select
                   value={depId}
                   onChange={(e) => setDepId(e.target.value)}
-                  className="bg-transparent text-[11px] outline-none flex-1 min-w-0 rounded px-1"
+                  className="bg-transparent text-[11px] outline-none flex-1 min-w-0 rounded-sm px-1"
                   style={{ color: 'var(--flow-text)', border: '1px solid var(--flow-border)' }}
                 >
                   <option value="">{t('flow.taskDetail.addDependency')}</option>
@@ -880,7 +880,7 @@ const TaskDetail: React.FC = () => {
                     });
                     setDepId('');
                   }}
-                  className="text-[10px] px-1.5 py-0.5 rounded font-semibold disabled:opacity-40"
+                  className="text-[10px] px-1.5 py-0.5 rounded-sm font-semibold disabled:opacity-40"
                   style={{ background: 'var(--accent)', color: '#0a0a0a' }}
                 >
                   {t('flow.taskDetail.add')}
@@ -895,7 +895,7 @@ const TaskDetail: React.FC = () => {
             {taskLabels.length === 0 && canEdit && (
               <button type="button"
                 onClick={() => setLabelPickerOpen((v) => !v)}
-                className="text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"
+                className="text-[10px] px-1.5 py-0.5 rounded-sm hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 {t('flow.taskDetail.addLabel')}
@@ -912,7 +912,7 @@ const TaskDetail: React.FC = () => {
             {taskLabels.length > 0 && canEdit && (
               <button type="button"
                 onClick={() => setLabelPickerOpen((v) => !v)}
-                className="text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"
+                className="text-[10px] px-1.5 py-0.5 rounded-sm hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 {t('flow.taskDetail.addShort')}
@@ -934,7 +934,7 @@ const TaskDetail: React.FC = () => {
                     <button type="button"
                       key={l.id}
                       onClick={() => handleToggleLabel(l.id)}
-                      className="w-full flex items-center gap-2 px-2 py-1 rounded text-start hover:bg-[var(--flow-hover)]"
+                      className="w-full flex items-center gap-2 px-2 py-1 rounded-sm text-start hover:bg-[var(--flow-hover)]"
                     >
                       <span
                         className="h-2 w-2 rounded-full shrink-0"

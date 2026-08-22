@@ -62,7 +62,7 @@ const LeaveScreen = (): React.JSX.Element => {
           <button
             type="button"
             onClick={() => setDialogOpen(true)}
-            className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded px-3 text-[13px] font-semibold md:min-h-0 md:py-2"
+            className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-sm px-3 text-[13px] font-semibold md:min-h-0 md:py-2"
             style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
           >
             <Plus size={14} aria-hidden="true" />
@@ -183,7 +183,7 @@ const LeaveScreen = (): React.JSX.Element => {
                     {request.endDate}
                   </span>
                   <span
-                    className="rounded px-1.5 py-0.5 text-[11px] font-semibold"
+                    className="rounded-sm px-1.5 py-0.5 text-[11px] font-semibold"
                     style={{ color: statusTone[request.status ?? ''] ?? 'var(--flow-text-muted)' }}
                   >
                     {t(`flow.leave.status.${request.status}`)}
@@ -193,7 +193,7 @@ const LeaveScreen = (): React.JSX.Element => {
                       type="button"
                       onClick={() => cancelRequest.mutate(request.id!)}
                       aria-label={t('flow.leave.cancelRequestLabel')}
-                      className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded md:h-8 md:w-8"
+                      className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm md:h-8 md:w-8"
                       style={{ color: 'var(--flow-text-muted)' }}
                     >
                       <X size={14} aria-hidden="true" />

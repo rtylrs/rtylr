@@ -130,7 +130,7 @@ const BoardSettingsPanel = ({
             type="button"
             onClick={onClose}
             aria-label={t('flow.board.closeSettings')}
-            className="flow-focus flex h-[44px] w-[44px] items-center justify-center rounded md:h-8 md:w-8"
+            className="flow-focus flex h-[44px] w-[44px] items-center justify-center rounded-sm md:h-8 md:w-8"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             <X size={16} aria-hidden="true" />
@@ -195,7 +195,7 @@ const BoardSettingsPanel = ({
                   }
                 }}
                 placeholder={t('flow.board.newColumnPlaceholder')}
-                className="flow-focus min-h-[44px] rounded px-2 text-[16px] sm:flex-1 md:min-h-0 md:py-1.5 md:text-[13px]"
+                className="flow-focus min-h-[44px] rounded-sm px-2 text-[16px] sm:flex-1 md:min-h-0 md:py-1.5 md:text-[13px]"
                 style={{
                   background: 'var(--flow-input-bg)',
                   border: '1px solid var(--flow-border)',
@@ -205,7 +205,7 @@ const BoardSettingsPanel = ({
               <button
                 type="button"
                 onClick={addColumn}
-                className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded px-3 text-[13px] font-semibold md:min-h-0 md:py-2"
+                className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-sm px-3 text-[13px] font-semibold md:min-h-0 md:py-2"
                 style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
               >
                 <Plus size={14} aria-hidden="true" />
@@ -286,7 +286,7 @@ const BoardSettingsPanel = ({
                 role="radio"
                 aria-checked={groupBy === key}
                 onClick={() => onGroupByChange(key)}
-                className="flow-focus flex min-h-[44px] w-full items-center gap-2 rounded px-2 text-start text-[13px] md:min-h-0 md:py-1.5"
+                className="flow-focus flex min-h-[44px] w-full items-center gap-2 rounded-sm px-2 text-start text-[13px] md:min-h-0 md:py-1.5"
                 style={{
                   background: groupBy === key ? 'var(--flow-active)' : 'transparent',
                   color: groupBy === key ? 'var(--flow-text)' : 'var(--flow-text-muted)',
@@ -355,7 +355,7 @@ const ColumnRow = ({
             }
             if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
           }}
-          className="flow-focus min-h-[44px] min-w-0 flex-1 rounded bg-transparent px-2 text-[16px] disabled:opacity-70 md:min-h-0 md:py-1 md:text-[13px]"
+          className="flow-focus min-h-[44px] min-w-0 flex-1 rounded-sm bg-transparent px-2 text-[16px] disabled:opacity-70 md:min-h-0 md:py-1 md:text-[13px]"
           style={{ color: 'var(--flow-text)' }}
         />
 
@@ -364,7 +364,7 @@ const ColumnRow = ({
           onClick={() => onMove(index, -1)}
           disabled={!canManage || index === 0}
           aria-label={t('flow.board.moveUpLabel', { name: column.name })}
-          className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded disabled:opacity-30 md:h-8 md:w-8"
+          className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm disabled:opacity-30 md:h-8 md:w-8"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           <ChevronUp size={14} aria-hidden="true" />
@@ -374,7 +374,7 @@ const ColumnRow = ({
           onClick={() => onMove(index, 1)}
           disabled={!canManage || index === total - 1}
           aria-label={t('flow.board.moveDownLabel', { name: column.name })}
-          className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded disabled:opacity-30 md:h-8 md:w-8"
+          className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm disabled:opacity-30 md:h-8 md:w-8"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           <ChevronDown size={14} aria-hidden="true" />
@@ -384,7 +384,7 @@ const ColumnRow = ({
           onClick={onRequestDelete}
           disabled={!canManage || isLastColumn}
           aria-label={t('flow.board.removeColumnLabel', { name: column.name })}
-          className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded disabled:opacity-30 md:h-8 md:w-8"
+          className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm disabled:opacity-30 md:h-8 md:w-8"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           <X size={14} aria-hidden="true" />
@@ -409,7 +409,7 @@ const ColumnRow = ({
           value=""
           placeholder={t('flow.board.wipLimitNone')}
           aria-label={t('flow.board.wipLimitFor', { name: column.name })}
-          className="w-[80px] rounded px-2 py-1 text-[13px] opacity-50"
+          className="w-[80px] rounded-sm px-2 py-1 text-[13px] opacity-50"
           style={{
             background: 'var(--flow-input-bg)',
             border: '1px solid var(--flow-border)',
@@ -427,7 +427,7 @@ const ColumnRow = ({
             <button
               type="button"
               onClick={onConfirmDelete}
-              className="flow-focus min-h-[44px] rounded px-3 text-[11px] font-semibold md:min-h-0 md:py-1"
+              className="flow-focus min-h-[44px] rounded-sm px-3 text-[11px] font-semibold md:min-h-0 md:py-1"
               style={{
                 background: 'var(--flow-status-rejected-bg)',
                 border: '1px solid var(--flow-status-rejected-border)',
@@ -439,7 +439,7 @@ const ColumnRow = ({
             <button
               type="button"
               onClick={onCancelDelete}
-              className="flow-focus min-h-[44px] rounded px-3 text-[11px] md:min-h-0 md:py-1"
+              className="flow-focus min-h-[44px] rounded-sm px-3 text-[11px] md:min-h-0 md:py-1"
               style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
             >
               {t('flow.board.cancel')}

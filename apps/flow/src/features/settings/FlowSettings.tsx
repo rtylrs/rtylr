@@ -904,7 +904,7 @@ const ShortcutsSection: React.FC = () => {
         {shortcuts.map((s, i) => (
           <div
             key={i}
-            className="flex items-center justify-between py-2 px-3 rounded hover:bg-[var(--flow-hover)]"
+            className="flex items-center justify-between py-2 px-3 rounded-sm hover:bg-[var(--flow-hover)]"
           >
             <span className="text-[12px]" style={{ color: 'var(--flow-text)' }}>
               {s.desc}
@@ -913,7 +913,7 @@ const ShortcutsSection: React.FC = () => {
               {s.keys.map((k, j) => (
                 <kbd
                   key={j}
-                  className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold"
+                  className="px-1.5 py-0.5 rounded-sm text-[10px] font-mono font-semibold"
                   style={{
                     background: 'var(--flow-hover)',
                     color: 'var(--flow-text)',
@@ -1123,7 +1123,7 @@ export const LabelsSection: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setPendingDeleteLabel({ id: label.id, name: label.name })}
-                  className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+                  className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-dim)' }}
                   title={t('flow.settings.labels.deleteLabel')}
                   aria-label={t('flow.settings.deleteLabelLabel')}
@@ -1394,7 +1394,7 @@ export const TeamSection: React.FC = () => {
                   deactivate.mutate(m.id);
                 }}
                 disabled={!canManageTeam}
-                className="h-7 w-7 flex items-center justify-center rounded hover:bg-[var(--flow-hover)] transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="h-7 w-7 flex items-center justify-center rounded-sm hover:bg-[var(--flow-hover)] transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 <UserMinus size={13} />

@@ -102,7 +102,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
         onClick={handleToggle}
         aria-label={t('flow.projectList.toggleDoneLabel')}
         aria-pressed={checked}
-        className="h-4 w-4 rounded shrink-0 flex items-center justify-center transition-colors border"
+        className="h-4 w-4 rounded-sm shrink-0 flex items-center justify-center transition-colors border"
         style={{
           background: checked ? 'var(--accent)' : 'transparent',
           borderColor: checked ? 'var(--accent)' : 'var(--flow-border)',
@@ -158,7 +158,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, depth = 0 }) => {
       <button type="button"
         onClick={handleMoreClick}
         aria-label="More options"
-        className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+        className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
         style={{ color: 'var(--flow-text-dim)' }}
       >
         <MoreHorizontal size={13} />
@@ -216,7 +216,7 @@ export const StatusGroup: React.FC<{
               onClick={() => useFlowStore.getState().setQuickCreateOpen(true)}
             >
               <div
-                className="h-4 w-4 rounded border flex items-center justify-center"
+                className="h-4 w-4 rounded-sm border flex items-center justify-center"
                 style={{ borderColor: 'var(--flow-border)' }}
               >
                 <Plus size={10} style={{ color: 'var(--flow-text-dim)' }} />

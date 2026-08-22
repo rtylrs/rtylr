@@ -149,7 +149,7 @@ const Insights: React.FC = () => {
                     initial={{ height: 0 }}
                     animate={{ height: `${(t.completed / maxThroughput) * 100}%` }}
                     transition={{ duration: 0.4 }}
-                    className="w-full rounded-t"
+                    className="w-full rounded-t-sm"
                     style={{ background: '#4583C4' }}
                   />
                   <span className="text-[9px]" style={{ color: 'var(--flow-text-dim)' }}>

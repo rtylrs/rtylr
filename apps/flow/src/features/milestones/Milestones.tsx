@@ -64,7 +64,7 @@ const Milestones: React.FC = () => {
           </div>
           <button type="button"
             onClick={() => setShowCreate(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-semibold"
             style={{ background: 'var(--accent)', color: '#0a0a0a' }}
           >
             <Plus size={11} /> {t('flow.milestones.newMilestone')}
@@ -102,7 +102,7 @@ const Milestones: React.FC = () => {
         </div>
         <button type="button"
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-semibold"
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           <Plus size={11} /> {t('flow.milestones.newMilestone')}
@@ -162,7 +162,7 @@ const Milestones: React.FC = () => {
                 );
               }}
               disabled={createMilestone.isPending || !newName.trim() || !newDate}
-              className="px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-50"
+              className="px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-50"
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
               {createMilestone.isPending
@@ -175,7 +175,7 @@ const Milestones: React.FC = () => {
                 setNewName('');
                 setNewDate('');
               }}
-              className="px-3 py-1.5 rounded text-[11px]"
+              className="px-3 py-1.5 rounded-sm text-[11px]"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               {t('flow.milestones.cancel')}

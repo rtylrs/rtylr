@@ -30,7 +30,7 @@ const DAY_LABEL_KEYS: Record<DayKey, string> = {
 
 const labelClass = 'mb-1 block text-[10px] font-semibold uppercase tracking-wider';
 const inputClass =
-  'flow-focus min-h-[44px] w-full rounded px-2 py-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]';
+  'flow-focus min-h-[44px] w-full rounded-sm px-2 py-2 text-[16px] md:min-h-0 md:py-1.5 md:text-[13px]';
 
 function inputStyle(): React.CSSProperties {
   return {
@@ -264,7 +264,7 @@ const TimeSection = (): React.JSX.Element => {
               <button
                 type="button"
                 onClick={undoLock}
-                className="flow-focus mt-2 min-h-[44px] rounded px-2 text-[11px] font-semibold md:min-h-0 md:py-1"
+                className="flow-focus mt-2 min-h-[44px] rounded-sm px-2 text-[11px] font-semibold md:min-h-0 md:py-1"
                 style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
               >
                 {t('flow.settings.time.undo')}
@@ -353,7 +353,7 @@ const TimeSection = (): React.JSX.Element => {
                 aria-label={t('flow.settings.time.categoryName')}
                 value={category.name}
                 onChange={(e) => settings.renameCategory(category.id, e.target.value)}
-                className="flow-focus min-h-[44px] flex-1 rounded bg-transparent px-2 text-[16px] md:min-h-0 md:py-1 md:text-[13px]"
+                className="flow-focus min-h-[44px] flex-1 rounded-sm bg-transparent px-2 text-[16px] md:min-h-0 md:py-1 md:text-[13px]"
                 style={{ color: 'var(--flow-text)' }}
               />
               <Switch
@@ -367,7 +367,7 @@ const TimeSection = (): React.JSX.Element => {
                 onClick={() => settings.deleteCategory(category.id)}
                 disabled={settings.categories.length === 1}
                 aria-label={t('flow.settings.time.removeCategoryLabel', { name: category.name })}
-                className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded disabled:opacity-30 md:h-8 md:w-8"
+                className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm disabled:opacity-30 md:h-8 md:w-8"
                 style={{ color: 'var(--flow-text-muted)' }}
               >
                 <X size={14} aria-hidden="true" />
@@ -394,7 +394,7 @@ const TimeSection = (): React.JSX.Element => {
           <button
             type="button"
             onClick={addCategory}
-            className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded px-3 text-[13px] font-semibold md:min-h-0 md:py-2"
+            className="flow-focus inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-sm px-3 text-[13px] font-semibold md:min-h-0 md:py-2"
             style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
           >
             <Plus size={14} aria-hidden="true" />

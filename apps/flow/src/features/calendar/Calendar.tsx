@@ -128,7 +128,7 @@ const Calendar: React.FC = () => {
           <button type="button"
             onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1))}
             aria-label={t('flow.calendar.prevMonthLabel')}
-            className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+            className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             <ChevronLeft size={13} />
@@ -142,14 +142,14 @@ const Calendar: React.FC = () => {
           <button type="button"
             onClick={() => setCursor(new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1))}
             aria-label={t('flow.calendar.nextMonthLabel')}
-            className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+            className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             <ChevronRight size={13} />
           </button>
           <button type="button"
             onClick={() => setCursor(new Date())}
-            className="text-[11px] px-2 py-1 rounded hover:bg-[var(--flow-hover)] font-medium"
+            className="text-[11px] px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)] font-medium"
             style={{ color: 'var(--flow-text-muted)' }}
           >
             {t('flow.calendar.today')}
@@ -209,7 +209,7 @@ const Calendar: React.FC = () => {
                           year: 'numeric',
                         }),
                       })}
-                      className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded text-[9px] opacity-0 group-hover:opacity-60 group-focus-within:opacity-60 focus:opacity-100 transition-opacity focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] md:h-8 md:w-8"
+                      className="flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm text-[9px] opacity-0 group-hover:opacity-60 group-focus-within:opacity-60 focus:opacity-100 transition-opacity focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] md:h-8 md:w-8"
                       style={{ color: 'var(--flow-text-dim)' }}
                     >
                       {t('flow.calendar.addHint')}
@@ -224,7 +224,7 @@ const Calendar: React.FC = () => {
                         e.stopPropagation();
                         navigate({ to: `/task/${t.id}` as string });
                       }}
-                      className="w-full text-left px-1.5 py-0.5 rounded text-[10px] truncate flex items-center gap-1 hover:bg-[var(--flow-hover)]"
+                      className="w-full text-left px-1.5 py-0.5 rounded-sm text-[10px] truncate flex items-center gap-1 hover:bg-[var(--flow-hover)]"
                       style={{
                         background: 'var(--flow-card)',
                         color: 'var(--flow-text)',
@@ -283,7 +283,7 @@ const Calendar: React.FC = () => {
                 <button type="button"
                   onClick={() => setCreateModal(null)}
                   aria-label={t('common.close')}
-                  className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+                  className="h-6 w-6 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-dim)' }}
                 >
                   <X size={12} />
@@ -349,7 +349,7 @@ const Calendar: React.FC = () => {
               <div className="flex justify-end gap-2">
                 <button type="button"
                   onClick={() => setCreateModal(null)}
-                  className="px-3 py-1.5 rounded text-[12px]"
+                  className="px-3 py-1.5 rounded-sm text-[12px]"
                   style={{ color: 'var(--flow-text-muted)' }}
                 >
                   {t('flow.calendar.cancel')}
@@ -357,7 +357,7 @@ const Calendar: React.FC = () => {
                 <button type="button"
                   onClick={submitCreate}
                   disabled={!newTitle.trim() || createTask.isPending}
-                  className="px-3 py-1.5 rounded text-[12px] font-semibold disabled:opacity-40"
+                  className="px-3 py-1.5 rounded-sm text-[12px] font-semibold disabled:opacity-40"
                   style={{ background: ACCENT_VAR, color: '#0a0a0a' }}
                 >
                   {createTask.isPending ? t('flow.calendar.creating') : t('flow.calendar.create')}

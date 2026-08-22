@@ -21,7 +21,7 @@ export const ProjectSelect: React.FC<ProjectSelectProps> = ({
     <div className="relative">
       <button type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 px-2.5 py-1.5 rounded text-[12px] transition-colors hover:bg-[var(--flow-hover)] w-full"
+        className="flex items-center gap-2 px-2.5 py-1.5 rounded-sm text-[12px] transition-colors hover:bg-[var(--flow-hover)] w-full"
         style={{
           color: current ? 'var(--flow-text)' : 'var(--flow-text-muted)',
           background: 'var(--flow-input-bg)',

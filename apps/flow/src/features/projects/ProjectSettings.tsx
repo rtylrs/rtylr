@@ -225,7 +225,7 @@ const ProjectSettings: React.FC = () => {
                 );
               }}
               disabled={updateProject.isPending || !canManageProject}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-40"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
               <Save size={11} /> {updateProject.isPending ? 'Saving...' : 'Save changes'}
@@ -249,7 +249,7 @@ const ProjectSettings: React.FC = () => {
               {canManageProject && (
                 <button type="button"
                   onClick={() => setShowAddMember(true)}
-                  className="flex items-center gap-1 text-[11px] px-2 py-1 rounded"
+                  className="flex items-center gap-1 text-[11px] px-2 py-1 rounded-sm"
                   style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
                 >
                   <Plus size={10} /> Add
@@ -376,7 +376,7 @@ const ProjectSettings: React.FC = () => {
                           );
                         }}
                         disabled={!canManageProject}
-                        className="h-6 w-6 rounded flex items-center justify-center shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="h-6 w-6 rounded-sm flex items-center justify-center shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
                         style={{ color: 'var(--flow-text-dim)' }}
                         onMouseEnter={(e) => {
                           if (canManageProject) e.currentTarget.style.color = '#ef4444';
@@ -420,7 +420,7 @@ const ProjectSettings: React.FC = () => {
                         setTargetWorkspaceId(e.target.value);
                         setConfirmMove(false);
                       }}
-                      className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none disabled:opacity-60"
+                      className="flex-1 rounded-sm px-2 py-1.5 text-[11px] outline-none disabled:opacity-60"
                       style={{
                         background: 'var(--flow-input-bg)',
                         border: '1px solid var(--flow-border)',
@@ -454,14 +454,14 @@ const ProjectSettings: React.FC = () => {
                             );
                           }}
                           disabled={moveProject.isPending || !canManageProject}
-                          className="px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-40"
+                          className="px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
                           style={{ background: '#ef4444', color: '#fff' }}
                         >
                           {moveProject.isPending ? 'Moving…' : 'Confirm'}
                         </button>
                         <button type="button"
                           onClick={() => setConfirmMove(false)}
-                          className="px-3 py-1.5 rounded text-[11px]"
+                          className="px-3 py-1.5 rounded-sm text-[11px]"
                           style={{ color: 'var(--flow-text-muted)' }}
                         >
                           Cancel
@@ -476,7 +476,7 @@ const ProjectSettings: React.FC = () => {
                           setConfirmMove(true);
                         }}
                         disabled={!canManageProject}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-40"
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
                         style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
                       >
                         <ArrowRightLeft size={10} /> Move
@@ -516,7 +516,7 @@ const ProjectSettings: React.FC = () => {
                     disabled={!canManageProject}
                     aria-describedby={canManageProject ? undefined : 'flow-project-transfer-gate'}
                     onChange={() => setConfirmTransfer(false)}
-                    className="flex-1 rounded px-2 py-1.5 text-[11px] outline-none disabled:opacity-60"
+                    className="flex-1 rounded-sm px-2 py-1.5 text-[11px] outline-none disabled:opacity-60"
                     style={{
                       background: 'var(--flow-input-bg)',
                       border: '1px solid var(--flow-border)',
@@ -551,14 +551,14 @@ const ProjectSettings: React.FC = () => {
                           );
                         }}
                         disabled={transferOwnership.isPending || !canManageProject}
-                        className="px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-40"
+                        className="px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
                         style={{ background: '#ef4444', color: '#fff' }}
                       >
                         {transferOwnership.isPending ? 'Transferring…' : 'Confirm'}
                       </button>
                       <button type="button"
                         onClick={() => setConfirmTransfer(false)}
-                        className="px-3 py-1.5 rounded text-[11px]"
+                        className="px-3 py-1.5 rounded-sm text-[11px]"
                         style={{ color: 'var(--flow-text-muted)' }}
                       >
                         Cancel
@@ -574,7 +574,7 @@ const ProjectSettings: React.FC = () => {
                         setConfirmTransfer(true);
                       }}
                       disabled={!canManageProject}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded text-[11px] font-semibold disabled:opacity-40"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
                       style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
                     >
                       <ArrowRightLeft size={10} /> Transfer
@@ -621,7 +621,7 @@ const ProjectSettings: React.FC = () => {
                   </p>
                 </div>
                 <button type="button"
-                  className="text-[11px] px-2 py-1 rounded hover:bg-[var(--flow-hover)]"
+                  className="text-[11px] px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-muted)' }}
                   disabled
                   title={t('common.comingSoon')}
@@ -659,7 +659,7 @@ const ProjectSettings: React.FC = () => {
                 </p>
               </div>
               <button type="button"
-                className="px-3 py-1 rounded text-[11px] font-semibold disabled:opacity-40"
+                className="px-3 py-1 rounded-sm text-[11px] font-semibold disabled:opacity-40"
                 style={{ background: '#ef4444', color: '#fff' }}
                 disabled={deleteProject.isPending || !canManageProject}
                 aria-describedby={canManageProject ? undefined : 'flow-project-delete-gate'}

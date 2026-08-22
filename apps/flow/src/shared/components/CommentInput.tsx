@@ -67,7 +67,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
             type="button"
             onClick={() => setMentionOpen((o) => !o)}
             disabled={disabled}
-            className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
+            className="h-6 w-6 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
             style={{ color: 'var(--flow-text-dim)' }}
             title={t('flow.taskDetail.mentionSomeone')}
             aria-label={t('flow.taskDetail.mentionSomeone')}
@@ -77,7 +77,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
           <button
             type="button"
             disabled
-            className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
+            className="h-6 w-6 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
             style={{ color: 'var(--flow-text-dim)' }}
             title={t('common.emojiPickerComingSoon')}
             aria-label={t('common.emojiPickerComingSoon')}
@@ -89,7 +89,7 @@ export const CommentInput: React.FC<CommentInputProps> = ({ onSubmit, placeholde
           type="button"
           onClick={handleSubmit}
           disabled={disabled || !value.trim()}
-          className="flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-semibold transition-opacity disabled:opacity-40"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-sm text-[11px] font-semibold transition-opacity disabled:opacity-40"
           style={{ background: 'var(--accent)', color: '#0a0a0a' }}
         >
           <Send size={11} />

@@ -123,7 +123,7 @@ const SidebarSectionReorder: React.FC<{
         aria-label={t('flow.shell.moveSectionUp')}
         title={t('flow.shell.moveUp')}
         className={cn(
-          'rounded p-px transition-colors flex items-center justify-center',
+          'rounded-sm p-px transition-colors flex items-center justify-center',
           canUp ? 'hover:bg-[var(--flow-hover)]' : 'opacity-25 cursor-not-allowed'
         )}
         onClick={() => canUp && moveSection(id, 'up')}
@@ -136,7 +136,7 @@ const SidebarSectionReorder: React.FC<{
         aria-label={t('flow.shell.moveSectionDown')}
         title={t('flow.shell.moveDown')}
         className={cn(
-          'rounded p-px transition-colors flex items-center justify-center',
+          'rounded-sm p-px transition-colors flex items-center justify-center',
           canDown ? 'hover:bg-[var(--flow-hover)]' : 'opacity-25 cursor-not-allowed'
         )}
         onClick={() => canDown && moveSection(id, 'down')}
@@ -710,7 +710,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               style={{ color: 'var(--flow-text-muted)' }}
             >
               <span
-                className="h-4 w-4 rounded shrink-0 flex items-center justify-center text-[9px] font-bold"
+                className="h-4 w-4 rounded-sm shrink-0 flex items-center justify-center text-[9px] font-bold"
                 style={{
                   background: `${activeWorkspace.color}22`,
                   color: activeWorkspace.color,
@@ -765,7 +765,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       }}
                     >
                       <span
-                        className="h-5 w-5 rounded shrink-0 flex items-center justify-center text-[10px] font-bold"
+                        className="h-5 w-5 rounded-sm shrink-0 flex items-center justify-center text-[10px] font-bold"
                         style={{
                           background: `${ws.color}22`,
                           color: ws.color,
@@ -798,7 +798,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               <Search size={12} />
               <span className="flex-1 text-start">{t('flow.shell.searchPlaceholder')}</span>
               <span
-                className="hidden text-[9px] font-mono px-1.5 py-0.5 rounded sm:inline"
+                className="hidden text-[9px] font-mono px-1.5 py-0.5 rounded-sm sm:inline"
                 style={{ background: 'var(--flow-active)' }}
               >
                 {modKey}K

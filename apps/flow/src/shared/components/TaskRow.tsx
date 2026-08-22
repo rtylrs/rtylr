@@ -89,7 +89,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
           onClick={handleCheckbox}
           onKeyDown={(e) => e.stopPropagation()}
           className={cn(
-            'flow-focus shrink-0 h-4 w-4 rounded border flex items-center justify-center transition-all',
+            'flow-focus shrink-0 h-4 w-4 rounded-sm border flex items-center justify-center transition-all',
             selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
           )}
           style={{
@@ -120,7 +120,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         </div>
         {showProject && project && (
           <span
-            className="text-[11px] px-2 py-0.5 rounded shrink-0 font-medium"
+            className="text-[11px] px-2 py-0.5 rounded-sm shrink-0 font-medium"
             style={{
               background: `${project.color}22`,
               color: project.color,
