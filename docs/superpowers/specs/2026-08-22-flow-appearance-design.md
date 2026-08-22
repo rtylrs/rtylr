@@ -75,7 +75,7 @@ case 4.60:1.
 | Where it lives    | Extract to `packages`, Flow is first consumer | `packages/utils/src/hooks/useTheme.ts` already exports `createThemeStore`, and Flow, dash, and menu each hand-rolled their own instead. Four divergent copies is the alternative. |
 | Accent precedence | User accent overrides workspace               | A personal choice beats an org default. Workspace colour still paints the workspace's own dot and chip, so the identity cue survives.                                             |
 | Accent input      | Curated swatches **and** custom hex           | Makes the derivation mandatory rather than optional. This is the decision that selects the architecture in section 4.                                                             |
-| Panel scope       | All seven controls                            | Density and corners carry real cost (section 7). Flagged, reaffirmed, sequenced last.                                                                                             |
+| Panel scope       | All seven controls, one of them disabled      | Corners and density turned out cheap (section 7). Text size cannot work against px literals, so it ships disabled with the reason stated rather than silently absent.             |
 | Persistence       | Per-device, stated in the UI                  | No appearance contract exists in `packages/voxie/api`. Nothing server-side reads these values, so per-device is honest rather than a broken setting.                              |
 
 ## 4. Architecture
@@ -113,7 +113,7 @@ Two constraints on the extraction:
 2. **Migrate the legacy key.** Read the existing `flow-theme` localStorage entry
    on init so anyone who already chose light keeps it.
 
-### 4.2 `appearanceTokens(prefs, resolvedMode)` (packages/utils)
+### 4.2 `appearanceTokens(prefs, ctx)` (packages/utils)
 
 Pure function returning `Record<string, string>`. No DOM, no React.
 
@@ -229,43 +229,157 @@ once before it was fixed.
   ten accent names are user-facing strings and cannot be hardcoded.
 - Keyboard navigable throughout, with a visible focus state on every control.
 
-## 7. Density and corners: cost, and sequencing
+## 7. Density, corners, and text size: the premise was wrong
 
-This is the largest single piece of the work and the only one with genuine
-unknown cost. Flow's spacing and radii are literal Tailwind classes across
-hundreds of components, so `--flow-u` and `--flow-r` have nothing to consume them
-until those surfaces are migrated.
+The first version of this section assumed literal Tailwind classes cannot
+respond to a custom property, and therefore that honouring these controls meant
+migrating hundreds of call sites. **That assumption was false.** A survey
+measured it and a compiled probe confirmed it independently.
 
-Scope the migration to the surfaces that constitute Flow's screens: list rows,
-cards, chips, and nav items. That is a bounded set and it covers the great
-majority of what a user sees.
+Tailwind v4, as this repo configures it, already routes its utilities through
+theme custom properties:
 
-**Sequence these two controls last**, so they can be dropped without unpicking
-anything else if the estimate comes back worse than expected. A density control
-that visibly moves only part of the app is the misleading-control problem: the
-concept is real and has nowhere to fully land, so it would need to be disabled
-with the reason stated rather than shipped half-working.
+```css
+.p-3 {
+  padding: calc(var(--spacing) * 3);
+}
+.gap-2 {
+  gap: calc(var(--spacing) * 2);
+}
+.h-10 {
+  height: calc(var(--spacing) * 10);
+}
+.rounded-lg {
+  border-radius: var(--radius-lg);
+}
+.text-xs {
+  font-size: var(--text-xs);
+}
+.rounded {
+  border-radius: 0.25rem;
+} /* the one exception */
+```
+
+So overriding `--spacing` in `:root` moves every spacing utility in the app at
+once. This is not a new technique here: `apps/flow/src/globals.css:177` already
+re-points `--color-accent` at a runtime property by exactly this mechanism.
+
+### Verdicts, which differ per control
+
+| Control   | Verdict                                   | The number behind it                                                                                                                                                                                                         |
+| --------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Corners   | **Ship first.** Cheapest.                 | 170 of 335 addressable radius declarations already resolve through `var(--radius-*)`. The remaining 165 are bare `rounded`, fixed by one rename to `rounded-sm`, which has zero existing uses in Flow and so cannot collide. |
+| Density   | **Ship second.** Roughly one line of CSS. | 1368 of 1409 spacing declarations (97.1%) already resolve through `var(--spacing)`.                                                                                                                                          |
+| Text size | **Cannot work as designed.**              | 618 of 637 font-size declarations (97.0%) are px literals like `text-[12px]`. No token reaches them.                                                                                                                         |
+
+**The sequencing in the earlier draft was backwards.** Corners goes first, not
+last: it is the cheapest, and it exercises the provider's token plumbing across
+170 declarations without touching a single component.
+
+### The four-category scope is abandoned
+
+The earlier draft proposed migrating only list rows, cards, chips, and nav items.
+That is both unnecessary, given the above, and would not have worked: those
+components account for 50 spacing declarations, 3.5% of the app's 1409. The
+shared components are also not used by the screens the draft named. `TaskRow` is
+imported only by Views and Triage; `Inbox.tsx` imports none of them and hand
+rolls its own rows. Measured against each screen's full render tree, that scope
+would have moved 16% of Inbox and 27% of My Tasks. Well under half, exactly the
+misleading-control problem it was meant to avoid.
+
+### Text size: disabled, with the reason stated
+
+The concept is real. Text scaling is a genuine accessibility need, not a
+decoration, so leaving it out entirely teaches the user nothing. But shipping a
+control that moves 3% of the app's type would be a lie.
+
+Per the repo's own rule for a control that cannot do its job, it ships
+**disabled with the reason beside it**, using `GateNotice`. The reason is
+specific and true: Flow's type sizes are px literals, so a multiplier cannot
+reach them yet.
+
+Making it work later is a bounded, mechanical migration: 618 declarations from
+`text-[Npx]` to Tailwind's `text-*` scale, which resolves through `var(--text-*)`.
+It is not attempted here because the scale will not match every arbitrary px
+value exactly, so it changes rendering and needs its own visual review.
+
+### Two hazards before a density swap
+
+1. **`--spacing` also backs 447 dimension declarations** (`h-*` 157, `w-*` 136,
+   `min-h-*` 58, `min-w-*` 44, and others), so changing it moves 1856
+   declarations, not 1409. Mostly desirable, but 19 large layout dimensions
+   (`w-64`, `w-48`, `h-40`) should be pinned to fixed values first, or the
+   sidebar and panels resize with density.
+2. **53 fixed heights already sit under 44px at multiplier 1.0.** Compact density
+   makes those worse, so the touch-target floor has to be checked at the
+   smallest multiplier, not the default.
+
+### A pre-existing defect found on the way
+
+`globals.css:98` states Flow's type floor is 10px. Eleven declarations already
+breach it at multiplier 1.0: ten `text-[9px]` and one `text-[9.5px]`. That is a
+live accessibility defect independent of this feature, and it is tracked
+separately rather than fixed here.
 
 ## 8. Testing
 
-- **Contrast sweep.** Every palette times every accent fixture, asserting
-  `--accent-fg` and `--flow-on-accent` both clear 4.5:1. The fixture list is the
-  ten curated swatches **plus four deliberately dark hexes** (a navy, a plum, a
-  forest, a brick), which is what makes it 8 times 14 rather than 8 times 10. The
-  dark four are the only values that exercise the `--flow-on-accent` failure at
-  all, so a sweep over curated swatches alone would pass while proving nothing.
-  This is the test that makes the accessibility claim real.
-- **Curated pairs as oracle.** The hand-checked foregrounds are the regression
-  test for the derivation: point the algorithm at them and assert it reproduces
-  them within tolerance.
-- **Mutation probe on the derivation gate.** Force the predicate to a constant
-  both ways and confirm the suite fails each time. An assertion over a dead
-  branch passes for the wrong reason.
-- **Store migration.** A stored `flow-theme` value survives the move to the new
-  store.
+### The contrast sweep, and why it is not sufficient on its own
+
+Every palette times every accent fixture, asserting `--accent-fg` and
+`--flow-on-accent` both clear 4.5:1. The fixture list is the ten curated swatches
+**plus four deliberately dark hexes** (a navy, a plum, a forest, a brick), which
+is what makes it 8 times 14 rather than 8 times 10. The dark four are the only
+values that exercise the `--flow-on-accent` failure at all, so a sweep over
+curated swatches alone would pass while proving nothing.
+
+Measured result: 112 combinations, zero failures. Worst `--accent-fg` is 4.6010:1
+on the linen card with the iris accent. Worst `--flow-on-accent` is 6.6117:1.
+
+**The sweep alone cannot detect a dead derivation gate, and this was proven, not
+assumed.** Forcing the `>= CONTRAST_TARGET` comparison to always-false makes the
+lightness walk exhaust to pure black or white. Black on a dark card measures
+16.19:1, so every floor assertion in the sweep still passes over completely dead
+logic.
+
+What catches it is the **hue-preservation test**: with the gate dead, drift goes
+from about 1 degree to 172.6 degrees. That test is therefore load-bearing rather
+than a nicety, and it must not be deleted as redundant. Anyone tempted to trim
+the suite should read this paragraph first.
+
+### The oracle idea does not survive contact
+
+An earlier draft proposed asserting the derivation reproduces Flow's
+hand-authored pairs within tolerance. That is not achievable, and the reason is
+instructive: the shipped light foreground `#1f7d72` measures 4.9590:1 on white,
+while a first-crossing walk at target 4.6 stops one stop brighter at `#308177`
+and 4.6336:1. Both clear AA and both are the same hue. Asserting equality would
+assert that a hand-picked value and a first-crossing walk agree exactly, which
+they cannot.
+
+Assert **hue proximity** (within 6 degrees) and **floor clearance** instead.
+
+### The rest
+
+- **Exhaustion is reachable and must be tested live.** There exist surfaces where
+  neither pure black nor pure white clears 4.6: `#006cff` measures 4.589 against
+  black and 4.576 against white. Use it as a fixture so the fallback branch is
+  proven rather than dead code.
+- **Mutation probes on every gate, both directions.** Required by this repo's
+  convention. A probe that stops detecting a mutation is not automatically a
+  regression: when the provider started importing the pure `resolveMode`, one
+  probe went from 4 failures to 2 because an errant subscription can no longer
+  corrupt an explicit mode's resolution. The mutation became genuinely harmless.
+  Record why sensitivity changed rather than restoring it artificially.
+- **Store migration.** A stored `flow-theme` value survives the move, and legacy
+  dark must beat an explicitly light default, or the test passes for the wrong
+  reason because dark is also the default.
 - **Provider applies before paint.** No flash of the default palette on load.
 - **`accent: null` falls back to the workspace colour**, and a stored accent
   overrides it.
+- **One integration test with no mocks.** The unit suites mock across the package
+  boundary so each side stays independently green, which means nothing proves the
+  two halves meet. That check belongs at the Flow wiring site, where a real store
+  exists.
 
 ## 9. Out of scope
 
