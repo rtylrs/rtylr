@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { useDebounce } from '@voxire/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Search,
@@ -37,7 +38,12 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
   const [cursor, setCursor] = useState(0);
   const dialogRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const { data: fetchedCustomers } = useListCustomers({ limit: 50, offset: 0 });
+  const debouncedQuery = useDebounce(query, 150);
+  const { data: fetchedCustomers } = useListCustomers({
+    limit: 50,
+    offset: 0,
+    search: debouncedQuery.trim() || undefined,
+  });
 
   useDialogFocus(open, dialogRef, onClose, searchInputRef);
 
