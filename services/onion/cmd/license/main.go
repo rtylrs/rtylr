@@ -32,7 +32,8 @@ type licenseRunMode struct {
 	cfg *platformconfig.AppConfig
 	// db is the optional self_host_licenses lookup pool. When nil (DB not
 	// configured/reachable) verification falls back to signature/expiry only.
-	db *sql.DB
+	db    *sql.DB
+	clock *license.ClockGuard
 }
 
 type verifyRequest struct {
@@ -54,16 +55,16 @@ func (m licenseRunMode) UsesDatabaseHealthCheck() bool {
 func (m licenseRunMode) Setup(_ context.Context, r *chi.Mux) {
 	r.Get("/license/status", m.status)
 	r.Post("/license/verify", m.verify)
-	r.Post("/license/activate", m.verify)
+	r.Post("/license/activate", m.activate)
 	r.Post("/license/refresh", m.refresh)
 }
 
 func (m licenseRunMode) status(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, http.StatusOK, license.VerifyConfigured(m.cfg))
+	writeJSON(w, http.StatusOK, license.VerifyConfiguredAt(m.cfg, m.now()))
 }
 
 func (m licenseRunMode) refresh(w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, http.StatusOK, license.VerifyConfigured(m.cfg))
+	writeJSON(w, http.StatusOK, license.VerifyConfiguredAt(m.cfg, m.now()))
 }
 
 func (m licenseRunMode) verify(w http.ResponseWriter, r *http.Request) {
@@ -73,35 +74,102 @@ func (m licenseRunMode) verify(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if strings.TrimSpace(req.LicenseKey) == "" {
-		writeJSON(w, http.StatusOK, license.VerifyConfigured(m.cfg))
+		writeJSON(w, http.StatusOK, license.VerifyConfiguredAt(m.cfg, m.now()))
 		return
 	}
 
-	report := license.VerifyKey(m.cfg, req.LicenseKey)
+	report := license.VerifyKeyAt(m.cfg, req.LicenseKey, m.now())
 	report = m.applyDBRevocation(r.Context(), req.LicenseKey, report)
 	writeJSON(w, http.StatusOK, report)
 }
 
+func (m licenseRunMode) activate(w http.ResponseWriter, r *http.Request) {
+	req, ok := decodeVerifyRequest(w, r)
+	if !ok {
+		return
+	}
+	if strings.TrimSpace(req.InstanceID) == "" {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": license.ErrInstanceIDMissing.Error()})
+		return
+	}
+	rawKey := strings.TrimSpace(req.LicenseKey)
+	if rawKey == "" {
+		rawKey, _ = licenseKeyFromConfig(m.cfg)
+	}
+	report := license.VerifyKeyAt(m.cfg, rawKey, m.now())
+	report = m.applyDBRevocation(r.Context(), rawKey, report)
+	if !report.Valid {
+		writeJSON(w, http.StatusPaymentRequired, report)
+		return
+	}
+	if err := license.Activate(r.Context(), m.db, license.HashKey(rawKey), req.InstanceID, report.SeatLimit); err != nil {
+		if errors.Is(err, license.ErrSeatLimitExceeded) {
+			writeJSON(w, http.StatusConflict, map[string]string{"error": err.Error()})
+			return
+		}
+		logger.Ctx(r.Context()).Warn("license activation failed", logger.Error(err))
+		writeJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "license activation unavailable"})
+		return
+	}
+	writeJSON(w, http.StatusOK, report)
+}
+
+func (m licenseRunMode) now() time.Time {
+	if m.clock != nil {
+		return m.clock.Now()
+	}
+	return time.Now().UTC()
+}
+
+func licenseKeyFromConfig(cfg *platformconfig.AppConfig) (string, error) {
+	if cfg == nil {
+		return "", license.ErrMissingLicense
+	}
+	if strings.TrimSpace(cfg.LicenseKey) != "" {
+		return strings.TrimSpace(cfg.LicenseKey), nil
+	}
+	if strings.TrimSpace(cfg.LicenseFile) != "" {
+		contents, err := os.ReadFile(cfg.LicenseFile)
+		if err != nil {
+			return "", err
+		}
+		return strings.TrimSpace(string(contents)), nil
+	}
+	return "", license.ErrMissingLicense
+}
+
 // applyDBRevocation overlays self_host_licenses revocation/expiry onto a
-// signature-valid report so revoking a key in voxtooling takes effect. It is
-// resilient: a signature-invalid report, an absent DB, an unknown key, or a DB
-// error all leave the signature-based result untouched.
+// signature-valid report so revoking a key in voxtooling takes effect. A
+// self-host license is not trusted unless the authority database confirms it;
+// missing database state and unknown key hashes fail closed.
 func (m licenseRunMode) applyDBRevocation(ctx context.Context, rawKey string, report license.StatusReport) license.StatusReport {
-	if !report.Valid || m.db == nil {
+	if !report.Valid {
 		return report
+	}
+	if m.db == nil {
+		return licenseAuthorityUnavailable(report, "license authority database is unavailable")
 	}
 
 	record, err := license.LookupByKeyHash(ctx, m.db, license.HashKey(rawKey))
 	if err != nil {
-		if !errors.Is(err, license.ErrLicenseNotFound) {
-			logger.Ctx(ctx).Warn("license DB lookup failed; falling back to signature result",
-				logger.Error(err),
-			)
+		if errors.Is(err, license.ErrLicenseNotFound) {
+			report.Valid = false
+			report.Status = license.StatusInvalid
+			report.Reason = "license is not registered with the authority"
+			return report
 		}
-		return report
+		logger.Ctx(ctx).Warn("license DB lookup failed", logger.Error(err))
+		return licenseAuthorityUnavailable(report, "license authority lookup failed")
 	}
 
 	return license.ApplyRevocation(report, record, time.Now().UTC())
+}
+
+func licenseAuthorityUnavailable(report license.StatusReport, reason string) license.StatusReport {
+	report.Valid = false
+	report.Status = license.StatusUnreachable
+	report.Reason = reason
+	return report
 }
 
 func decodeVerifyRequest(w http.ResponseWriter, r *http.Request) (verifyRequest, bool) {
@@ -178,7 +246,14 @@ func main() {
 			)
 		} else {
 			db = dbclient.Pool()
-			defer dbclient.Close()
+			if tableErr := license.EnsureActivationTable(ctx, db); tableErr != nil {
+				logger.Ctx(ctx).Warn("license activation ledger unavailable", logger.Error(tableErr))
+				db = nil
+				dbclient.Close()
+			}
+			if db != nil {
+				defer dbclient.Close()
+			}
 		}
 	}
 	if err := probe.Start(ctx, probe.Config{
@@ -200,7 +275,7 @@ func main() {
 		logger.Global().Warn("pprof server failed to start", logger.Error(err))
 	}
 
-	if err := serverhttp.Start(ctx, licenseRunMode{cfg: cfg, db: db}, port); err != nil {
+	if err := serverhttp.Start(ctx, licenseRunMode{cfg: cfg, db: db, clock: license.NewClockGuard(cfg.LicenseClockStateFile)}, port); err != nil {
 		logger.Global().Fatal("license server failed", logger.Error(err))
 	}
 }
