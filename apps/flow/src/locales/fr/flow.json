@@ -454,24 +454,10 @@
     }
   },
   "profile": {
-    "heading": "Profil",
-    "hrDetails": "Détails RH",
-    "noRecordTitle": "Aucune fiche RH associée pour l'instant",
-    "noRecordDescription": "Votre compte n'est pas encore associé à une fiche employé dans RH. Demandez à un administrateur de l'associer.",
-    "noRecordCta": "Actualiser",
-    "role": "Poste",
-    "department": "Département",
-    "employmentType": "Type d'emploi",
-    "status": "Statut",
-    "startDate": "Date d'entrée",
-    "email": "E-mail",
-    "phone": "Téléphone",
-    "address": "Adresse",
-    "emergencyContact": "Contact d'urgence",
-    "bio": "À propos",
-    "activity": "Activité Flow",
-    "hoursLoggedThisWeek": "{{hours}} saisies cette semaine",
-    "viewMyDay": "Voir Ma journée"
+    "back": "Retour",
+    "notFound": "Profil introuvable.",
+    "publicProjects": "Projets publics",
+    "noPublicProjects": "Aucun projet public."
   },
   "board": {
     "pageTitle": "Tableau · rtylr",
@@ -713,5 +699,14 @@
     "emptyTitle": "Aucun projet pour le moment",
     "emptyDescription": "Créez votre premier projet pour commencer.",
     "createFirst": "Créer un projet"
+  },
+  "bin": {
+    "title": "Corbeille",
+    "archived": "archivé",
+    "restore": "Restaurer {name}",
+    "restored": "Projet restauré",
+    "purged": "Projet définitivement supprimé",
+    "purgeConfirm": "Ceci supprime définitivement {name} et tout son contenu. Cette action est irréversible.",
+    "retention": "Les projets restent dans la corbeille pendant {days} jours avant suppression automatique."
   }
 }
