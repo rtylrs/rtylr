@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"net/http"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -74,7 +73,7 @@ func (a *ViewAPI) ListViews(ctx context.Context, req *flowviewv1.ListViewsReques
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	views, total, err := a.Service.ListViews(ctx, businessID, wsID, int64(limit), offset)
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "ListViews failed", err)
 	}
 
 	out := make([]*flowviewv1.View, 0, len(views))
@@ -116,7 +115,7 @@ func (a *ViewAPI) CreateView(ctx context.Context, req *flowviewv1.CreateViewRequ
 		CreatedBy:   authUser.UserID,
 	})
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "CreateView failed", err)
 	}
 
 	return &flowviewv1.CreateViewResponse{View: toView(view)}, nil
@@ -146,7 +145,7 @@ func (a *ViewAPI) UpdateView(ctx context.Context, req *flowviewv1.UpdateViewRequ
 		if errors.Is(err, domain.ErrUnauthorized) {
 			return nil, onekiterrors.PermissionDenied()
 		}
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "UpdateView failed", err)
 	}
 	return &flowviewv1.UpdateViewResponse{}, nil
 }
@@ -165,7 +164,7 @@ func (a *ViewAPI) DeleteView(ctx context.Context, req *flowviewv1.DeleteViewRequ
 		if errors.Is(err, domain.ErrUnauthorized) {
 			return nil, onekiterrors.PermissionDenied()
 		}
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "DeleteView failed", err)
 	}
 	return &flowviewv1.DeleteViewResponse{}, nil
 }

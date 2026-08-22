@@ -75,7 +75,7 @@ func (a *WorkTimeAPI) scope(ctx context.Context, employeeID int64) (ownerID, bus
 
 	ownerID, ownerErr := tenant.ResolveOwnerID(ctx, businessID, authUser.UserID)
 	if ownerErr != nil {
-		return 0, 0, 0, onekiterrors.New(http.StatusInternalServerError, ownerErr.Error())
+		return 0, 0, 0, workspaceInternalError(ctx, "ResolveOwnerID failed", ownerErr)
 	}
 
 	return ownerID, businessID, authUser.UserID, nil
@@ -92,21 +92,23 @@ func actor(ctx context.Context) int64 {
 
 // mapServiceError turns a domain rule into the status a caller should see.
 // Without this every rule reads as a 500, and a locked day looks like an outage.
-func mapServiceError(err error) error {
+func mapServiceError(ctx context.Context, err error) error {
 	switch {
 	case errors.Is(err, application.ErrInvalidWorkMode),
-		errors.Is(err, application.ErrWorkTypeTooDeep),
-		errors.Is(err, application.ErrProjectRequired):
-		return onekiterrors.New(http.StatusBadRequest, err.Error())
-	case errors.Is(err, application.ErrWorkDayNotFound),
-		errors.Is(err, application.ErrWorkTypeNotFound):
-		return onekiterrors.New(http.StatusNotFound, err.Error())
+		errors.Is(err, application.ErrWorkTypeTooDeep):
+		return onekiterrors.New(http.StatusBadRequest, "Invalid work type")
+	case errors.Is(err, application.ErrProjectRequired):
+		return onekiterrors.New(http.StatusBadRequest, "Project is required")
+	case errors.Is(err, application.ErrWorkDayNotFound):
+		return onekiterrors.New(http.StatusNotFound, "Work day not found")
+	case errors.Is(err, application.ErrWorkTypeNotFound):
+		return onekiterrors.New(http.StatusNotFound, "Work type not found")
 	case errors.Is(err, application.ErrDayLocked):
-		return onekiterrors.New(http.StatusConflict, err.Error())
+		return onekiterrors.New(http.StatusConflict, "Work day is locked")
 	case errors.Is(err, domain.ErrUnauthorized):
 		return onekiterrors.PermissionDenied()
 	default:
-		return onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return workspaceInternalError(ctx, "Worktime operation failed", err)
 	}
 }
 
@@ -202,7 +204,7 @@ func (a *WorkTimeAPI) GetWorkDay(ctx context.Context, req *flowtimev1.GetWorkDay
 
 	day, lines, found, err := a.Service.GetWorkDay(ctx, ownerID, businessID, employeeID, req.GetDate())
 	if err != nil {
-		return nil, mapServiceError(err)
+		return nil, mapServiceError(ctx, err)
 	}
 	// A day nobody has filled in yet is an empty response, not a 404: the client
 	// renders a blank day for that date either way.
@@ -236,7 +238,7 @@ func (a *WorkTimeAPI) UpsertWorkDay(ctx context.Context, req *flowtimev1.UpsertW
 		LoggedBy:     actor(ctx),
 	})
 	if err != nil {
-		return nil, mapServiceError(err)
+		return nil, mapServiceError(ctx, err)
 	}
 	return &flowtimev1.UpsertWorkDayResponse{WorkDay: toContractWorkDay(day)}, nil
 }
@@ -250,7 +252,7 @@ func (a *WorkTimeAPI) ListWorkDays(ctx context.Context, req *flowtimev1.ListWork
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	days, total, err := a.Service.ListWorkDays(ctx, ownerID, businessID, employeeID, req.GetFrom(), req.GetTo(), limit, offset)
 	if err != nil {
-		return nil, mapServiceError(err)
+		return nil, mapServiceError(ctx, err)
 	}
 
 	out := make([]*flowtimev1.WorkDay, 0, len(days))
@@ -280,7 +282,7 @@ func (a *WorkTimeAPI) ListWorkDaysForWorkspace(ctx context.Context, req *flowtim
 		ctx, callerID, req.GetWorkspaceId(), ownerID, businessID, req.GetFrom(), req.GetTo(), limit, offset,
 	)
 	if err != nil {
-		return nil, mapServiceError(err)
+		return nil, mapServiceError(ctx, err)
 	}
 
 	out := make([]*flowtimev1.WorkDay, 0, len(days))
@@ -314,7 +316,7 @@ func (a *WorkTimeAPI) CreateWorkDayLine(ctx context.Context, req *flowtimev1.Cre
 		LoggedBy:        actor(ctx),
 	})
 	if err != nil {
-		return nil, mapServiceError(err)
+		return nil, mapServiceError(ctx, err)
 	}
 	return &flowtimev1.CreateWorkDayLineResponse{Line: toContractLine(line)}, nil
 }
@@ -338,7 +340,7 @@ func (a *WorkTimeAPI) UpdateWorkDayLine(ctx context.Context, req *flowtimev1.Upd
 		IsBillable:      req.GetIsBillable(),
 	})
 	if err != nil {
-		return nil, mapServiceError(err)
+		return nil, mapServiceError(ctx, err)
 	}
 	return &flowtimev1.UpdateWorkDayLineResponse{Line: toContractLine(line)}, nil
 }
@@ -351,7 +353,7 @@ func (a *WorkTimeAPI) DeleteWorkDayLine(ctx context.Context, req *flowtimev1.Del
 
 	removed, err := a.Service.DeleteWorkDayLine(ctx, req.GetId(), businessID, businessID)
 	if err != nil {
-		return nil, mapServiceError(err)
+		return nil, mapServiceError(ctx, err)
 	}
 	// Reporting 404 rather than success on a foreign id: a caller that deleted
 	// nothing should not be told it worked.
@@ -369,7 +371,7 @@ func (a *WorkTimeAPI) ListWorkTypes(ctx context.Context, req *flowtimev1.ListWor
 
 	types, err := a.Service.ListWorkTypes(ctx, ownerID, businessID, businessID, req.GetIncludeArchived())
 	if err != nil {
-		return nil, mapServiceError(err)
+		return nil, mapServiceError(ctx, err)
 	}
 
 	out := make([]*flowtimev1.WorkType, 0, len(types))
@@ -396,7 +398,7 @@ func (a *WorkTimeAPI) CreateWorkType(ctx context.Context, req *flowtimev1.Create
 		SortOrder:    req.GetSortOrder(),
 	})
 	if err != nil {
-		return nil, mapServiceError(err)
+		return nil, mapServiceError(ctx, err)
 	}
 	return &flowtimev1.CreateWorkTypeResponse{WorkType: toContractWorkType(workType)}, nil
 }
@@ -420,7 +422,7 @@ func (a *WorkTimeAPI) UpdateWorkType(ctx context.Context, req *flowtimev1.Update
 		Archived:     req.GetArchived(),
 	})
 	if err != nil {
-		return nil, mapServiceError(err)
+		return nil, mapServiceError(ctx, err)
 	}
 	return &flowtimev1.UpdateWorkTypeResponse{WorkType: toContractWorkType(workType)}, nil
 }
@@ -433,7 +435,7 @@ func (a *WorkTimeAPI) DeleteWorkType(ctx context.Context, req *flowtimev1.Delete
 
 	removed, err := a.Service.DeleteWorkType(ctx, req.GetId(), ownerID, businessID)
 	if err != nil {
-		return nil, mapServiceError(err)
+		return nil, mapServiceError(ctx, err)
 	}
 	if !removed {
 		return nil, onekiterrors.New(http.StatusNotFound, "work type not found")

@@ -60,7 +60,7 @@ func (a *CycleAPI) ListCycles(ctx context.Context, req *flowcyclev1.ListCyclesRe
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	cycles, total, err := a.Service.ListCycles(ctx, wsID, int64(limit), offset)
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "ListCycles failed", err)
 	}
 
 	out := make([]*flowcyclev1.Cycle, 0, len(cycles))
@@ -124,7 +124,7 @@ func (a *CycleAPI) CreateCycle(ctx context.Context, req *flowcyclev1.CreateCycle
 		CreatedBy:   authUser.UserID,
 	})
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "CreateCycle failed", err)
 	}
 
 	return &flowcyclev1.CreateCycleResponse{Cycle: toCycle(cycle)}, nil
@@ -161,7 +161,7 @@ func (a *CycleAPI) UpdateCycle(ctx context.Context, req *flowcyclev1.UpdateCycle
 		if errors.Is(err, domain.ErrUnauthorized) {
 			return nil, onekiterrors.PermissionDenied()
 		}
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "UpdateCycle failed", err)
 	}
 	return &flowcyclev1.UpdateCycleResponse{}, nil
 }

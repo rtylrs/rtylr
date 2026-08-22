@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -27,7 +26,7 @@ func (a *SettingAPI) GetUserSettings(ctx context.Context, _ *flowsettingv1.GetUs
 
 	s, err := a.Service.GetUserSettings(ctx, authUser.UserID)
 	if err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "GetUserSettings failed", err)
 	}
 
 	return &flowsettingv1.GetUserSettingsResponse{
@@ -55,7 +54,7 @@ func (a *SettingAPI) UpdateUserSettings(ctx context.Context, req *flowsettingv1.
 		WeeklyDigest:       req.GetWeeklyDigest(),
 		EmailNotifications: req.GetEmailNotifications(),
 	}); err != nil {
-		return nil, onekiterrors.New(http.StatusInternalServerError, err.Error())
+		return nil, workspaceInternalError(ctx, "UpdateUserSettings failed", err)
 	}
 	return &flowsettingv1.UpdateUserSettingsResponse{}, nil
 }
