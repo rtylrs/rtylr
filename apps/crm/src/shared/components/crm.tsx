@@ -933,6 +933,12 @@ export const SearchableCustomerSelect: React.FC<{
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.email.toLowerCase().includes(search.toLowerCase())
   );
+  const safeActiveIndex = filtered.length > 0 ? Math.min(activeIndex, filtered.length - 1) : 0;
+  useEffect(() => {
+    if (activeIndex >= filtered.length && activeIndex !== 0) {
+      setActiveIndex(Math.max(0, filtered.length - 1));
+    }
+  }, [activeIndex, filtered.length]);
   const close = React.useCallback(() => {
     setOpen(false);
     setSearch('');
@@ -1012,7 +1018,9 @@ export const SearchableCustomerSelect: React.FC<{
             aria-expanded={open}
             aria-controls={listboxId}
             aria-activedescendant={
-              filtered[activeIndex] ? `${listboxId}-option-${filtered[activeIndex].id}` : undefined
+              filtered[safeActiveIndex]
+                ? `${listboxId}-option-${filtered[safeActiveIndex].id}`
+                : undefined
             }
             value={search}
             onChange={(e) => {
@@ -1022,13 +1030,13 @@ export const SearchableCustomerSelect: React.FC<{
             onKeyDown={(event) => {
               if (event.key === 'ArrowDown' && filtered.length > 0) {
                 event.preventDefault();
-                setActiveIndex((current) => (current + 1) % filtered.length);
+                setActiveIndex((safeActiveIndex + 1) % filtered.length);
               } else if (event.key === 'ArrowUp' && filtered.length > 0) {
                 event.preventDefault();
-                setActiveIndex((current) => (current - 1 + filtered.length) % filtered.length);
-              } else if (event.key === 'Enter' && filtered[activeIndex]) {
+                setActiveIndex((safeActiveIndex - 1 + filtered.length) % filtered.length);
+              } else if (event.key === 'Enter' && filtered[safeActiveIndex]) {
                 event.preventDefault();
-                onChange(filtered[activeIndex].id);
+                onChange(filtered[safeActiveIndex].id);
                 close();
               }
             }}
@@ -1079,7 +1087,7 @@ export const SearchableCustomerSelect: React.FC<{
                   gap: '8px',
                   width: '100%',
                   padding: '8px 12px',
-                  background: index === activeIndex ? 'var(--hub-hover)' : 'transparent',
+                  background: index === safeActiveIndex ? 'var(--hub-hover)' : 'transparent',
                   border: 'none',
                   cursor: 'pointer',
                   color: 'var(--hub-text)',
