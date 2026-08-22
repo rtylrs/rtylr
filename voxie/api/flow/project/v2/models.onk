@@ -48,11 +48,11 @@ message Project {
   /// Short project code used to build Task.identifier (e.g. "FLW" -> "FLW-42").
   code: string
   /// archived_at is when the project moved to the recycle bin. Empty while active.
-  archived_at: string? @nullable
+  archived_at: string?
   /// purge_at is when the recycle bin will permanently delete this project and
   /// everything inside it. Stamped at archive time from the business's
   /// retention setting; later retention changes affect future archives only.
-  purge_at: string? @nullable
+  purge_at: string?
 }
 
 message ProjectColumn {
