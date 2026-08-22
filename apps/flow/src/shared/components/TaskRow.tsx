@@ -85,11 +85,12 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         {/* Checkbox, always visible when selected, appears on row hover otherwise.
             Its own click/keydown stop propagation so activating it never also
             triggers the row's activateRow (open task), and vice versa. */}
-        <button type="button"
+        <button
+          type="button"
           onClick={handleCheckbox}
           onKeyDown={(e) => e.stopPropagation()}
           className={cn(
-            'flow-focus shrink-0 h-4 w-4 rounded border flex items-center justify-center transition-all',
+            'flow-focus shrink-0 h-4 w-4 rounded-sm border flex items-center justify-center transition-all',
             selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
           )}
           style={{
@@ -102,7 +103,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         </button>
         <PriorityIcon priority={task.priority} />
         <span
-          className="text-[10px] font-mono w-16 shrink-0"
+          className="text-[10px] font-mono w-[64px] shrink-0"
           style={{ color: 'var(--flow-text-dim)' }}
         >
           {task.identifier}
@@ -120,7 +121,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         </div>
         {showProject && project && (
           <span
-            className="text-[11px] px-2 py-0.5 rounded shrink-0 font-medium"
+            className="text-[11px] px-2 py-0.5 rounded-sm shrink-0 font-medium"
             style={{
               background: `${project.color}22`,
               color: project.color,
@@ -157,7 +158,7 @@ export const TaskRow: React.FC<TaskRowProps> = ({ task, showProject, selected, o
         </div>
         {task.dueDate && (
           <span
-            className="text-[11px] shrink-0 w-16 text-right"
+            className="text-[11px] shrink-0 w-[64px] text-right"
             style={{ color: overdue ? '#ef4444' : 'var(--flow-text-dim)' }}
           >
             {formatDate(task.dueDate)}

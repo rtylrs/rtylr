@@ -137,7 +137,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
                 key={v.key}
                 to={v.path(workspaceId, projectId) as string}
                 className={[
-                  'flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-medium transition-colors',
+                  'flex items-center gap-1.5 px-2 py-1 rounded-sm text-[11px] font-medium transition-colors',
                   active ? '' : 'hover:bg-[var(--flow-hover)]',
                 ].join(' ')}
                 style={
@@ -155,7 +155,7 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
 
         <Link
           to={`/w/${workspaceId}/p/${projectId}/settings` as string}
-          className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] transition-colors"
+          className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] transition-colors"
           style={{ color: 'var(--flow-text-dim)' }}
           aria-label="Project settings"
         >
@@ -164,9 +164,10 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
 
         {/* Primary CTA. White text on teal - the old near-black-on-teal
             combo was failing WCAG on anything but the darkest teal. */}
-        <button type="button"
+        <button
+          type="button"
           onClick={onNewTask}
-          className="flex items-center gap-1.5 h-7 px-2.5 rounded text-[11px] font-semibold transition-opacity hover:opacity-90"
+          className="flex items-center gap-1.5 h-7 px-2.5 rounded-sm text-[11px] font-semibold transition-opacity hover:opacity-90"
           style={{ background: 'var(--accent)', color: '#ffffff' }}
         >
           <Plus size={12} strokeWidth={2.5} /> New task

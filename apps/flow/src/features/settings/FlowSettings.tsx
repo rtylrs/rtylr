@@ -31,7 +31,25 @@ import {
   centsToDisplay,
   computeSeatProration,
 } from '../../shared/hooks/queries/useFlowSubscription';
-import { useThemeStore } from '../../shared/stores/themeStore';
+import {
+  ACCENT_DEFAULT,
+  ACCENT_SWATCHES,
+  appearanceTokens,
+  isValidHex,
+  normalizeHex,
+  palettesForMode,
+  resolveMode,
+  resolvePalette,
+} from '@voxire/utils';
+import type {
+  AppearancePrefs,
+  AppearanceTokens,
+  Corners,
+  Density,
+  TextSize,
+  ThemeMode,
+} from '@voxire/utils';
+import { useAppearanceStore } from '../../shared/stores/appearanceStore';
 import { cn } from '../../shared/lib/utils';
 import { useLifePreferences } from '../../shared/lib/lifePreferences';
 import { flowApi } from '../../shared/services/flowApi';
@@ -43,6 +61,12 @@ import { useFlowStore } from '../../shared/stores/flowStore';
 import { useLabels, useCreateLabel, useDeleteLabel } from '../../features/tasks/useLabels';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import GateNotice from '../../shared/components/GateNotice';
+import AppearanceMiniature from './components/AppearanceMiniature';
+import AppearanceOptionCard from './components/AppearanceOptionCard';
+import AppearancePreview from './components/AppearancePreview';
+import AppearanceSwitch from './components/AppearanceSwitch';
+import SegmentedControl from './components/SegmentedControl';
+import { useSystemDark } from './components/useSystemDark';
 import TimeSection from './sections/TimeSection';
 import { canInviteMembers, toFlowMemberRole } from '../../shared/lib/roleUtils';
 
@@ -285,55 +309,393 @@ const LifeRhythmSection: React.FC = () => {
   );
 };
 
-const AppearanceSection: React.FC = () => {
+// ── Appearance ────────────────────────────────────────────────────────────────
+
+const MODE_OPTIONS: readonly ThemeMode[] = ['light', 'dark', 'system'];
+const DENSITY_OPTIONS: readonly Density[] = ['compact', 'cozy', 'roomy'];
+const TEXT_SIZE_OPTIONS: readonly TextSize[] = ['s', 'm', 'l'];
+const CORNER_OPTIONS: readonly Corners[] = ['sharp', 'soft', 'round'];
+
+/** id the disabled text-size control points its aria-describedby at. */
+const TEXT_SIZE_GATE_ID = 'appearance-text-size-gate';
+
+/** A colour input rejects a value it cannot parse, so it never receives one. */
+function safeSwatch(value: string): string {
+  return isValidHex(value) ? normalizeHex(value) : ACCENT_DEFAULT;
+}
+
+/**
+ * The Appearance panel: seven controls, one of them deliberately disabled.
+ *
+ * Every control commits on click, straight to the store, and the provider in
+ * `@voxire/ui` applies the result. There is no Apply button and no draft copy of
+ * the preferences: `audition` holds only what is being hovered or focused, it
+ * feeds the preview pane and nothing else, and it is cleared on leave and blur.
+ *
+ * Text size ships disabled with its reason stated. 618 of Flow's 637 font-size
+ * declarations are px literals, so no custom property reaches them and a control
+ * that moved the other 3% would be a lie. The concept is real, which is why it
+ * is disabled rather than absent.
+ *
+ * Design: docs/superpowers/specs/2026-08-22-flow-appearance-design.md (rtylr),
+ * sections 5 to 7.
+ */
+export const AppearanceSection = (): React.JSX.Element => {
   const { t } = useTranslation();
-  const { theme, setTheme } = useThemeStore();
+  const {
+    mode,
+    palette,
+    accent,
+    density,
+    textSize,
+    corners,
+    reduceMotion,
+    setMode,
+    setPalette,
+    setAccent,
+    setDensity,
+    setTextSize,
+    setCorners,
+    setReduceMotion,
+  } = useAppearanceStore();
+
+  const prefersDark = useSystemDark();
+  // Read from the store rather than a query hook: the workspaces API was stubbed
+  // out when Flow moved to the v2 contracts, so the store is the only remaining
+  // source and it is what FlowLayout resolves the same colour from.
+  const { activeWorkspaceId, workspaces } = useFlowStore();
+
+  // The accent the derivation falls back to while `accent` is null, which is
+  // what "a personal accent overrides the workspace one" means in practice.
+  const workspaceAccent = safeSwatch(
+    workspaces.find((w) => w.id === activeWorkspaceId)?.color || ACCENT_DEFAULT
+  );
+
+  const prefs = useMemo<AppearancePrefs>(
+    () => ({ mode, palette, accent, density, textSize, corners, reduceMotion }),
+    [mode, palette, accent, density, textSize, corners, reduceMotion]
+  );
+
+  // The audition. Never written to the store, never persisted, cleared the
+  // moment the pointer or the focus leaves the option that set it.
+  const [audition, setAudition] = useState<Partial<AppearancePrefs> | undefined>(undefined);
+  const clearAudition = (): void => setAudition(undefined);
+
+  const resolvedMode = resolveMode(mode, prefersDark);
+  const presets = palettesForMode(resolvedMode);
+  const activePalette = resolvePalette(palette, resolvedMode);
+
+  const tokensFor = (override: Partial<AppearancePrefs>): AppearanceTokens => {
+    const next = { ...prefs, ...override };
+    return appearanceTokens(next, {
+      resolvedMode: resolveMode(next.mode, prefersDark),
+      workspaceAccent,
+    });
+  };
+
+  const appliedAccent = safeSwatch(accent ?? workspaceAccent);
+  const [hexDraft, setHexDraft] = useState<string | null>(null);
+  const hexValue = hexDraft ?? appliedAccent;
+  const hexInvalid = hexDraft !== null && !isValidHex(hexDraft);
+
+  /** Writes only a parseable value, so a half-typed hex never reaches the store. */
+  const onHexChange = (raw: string): void => {
+    setHexDraft(raw);
+    if (isValidHex(raw)) setAccent(normalizeHex(raw));
+  };
+
+  const commitAccent = (hex: string | null): void => {
+    setHexDraft(null);
+    setAccent(hex);
+  };
+
+  const labelClass = 'mb-3 block text-[12px] font-medium';
+  const labelStyle = { color: 'var(--flow-text-muted)' };
+  const inputStyle = {
+    background: 'var(--flow-input-bg)',
+    border: '1px solid var(--flow-border)',
+    borderRadius: 'var(--flow-r)',
+    color: 'var(--flow-text)',
+  };
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-[15px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
+        <h2 className="mb-1 text-[15px] font-semibold" style={{ color: 'var(--flow-text)' }}>
           {t('common.settings.appearance')}
         </h2>
         <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.appearance.subtitle')}
         </p>
+        <p className="mt-1 text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+          {t('flow.settings.appearance.perDevice')}
+        </p>
+      </div>
+
+      {/* Sticky so an option lower down can still be auditioned against it. */}
+      <div
+        className="sticky top-0 z-10 space-y-2 pb-3"
+        style={{ background: 'var(--flow-bg)', borderBlockEnd: '1px solid var(--flow-border)' }}
+      >
+        <p className="text-[11px] font-medium" style={labelStyle}>
+          {t('flow.settings.appearance.preview.label')}
+        </p>
+        <AppearancePreview
+          prefs={prefs}
+          previewOverride={audition}
+          workspaceAccent={workspaceAccent}
+          prefersDark={prefersDark}
+        />
       </div>
 
       <div>
-        <label
-          className="block text-[12px] font-medium mb-3"
-          style={{ color: 'var(--flow-text-muted)' }}
+        <p id="appearance-mode-label" className={labelClass} style={labelStyle}>
+          {t('flow.settings.appearance.groups.mode')}
+        </p>
+        <div
+          className="grid grid-cols-3 gap-2"
+          role="group"
+          aria-labelledby="appearance-mode-label"
+          onPointerLeave={clearAudition}
         >
-          {t('flow.settings.appearance.theme')}
-        </label>
-        <div className="grid grid-cols-3 gap-3">
-          {(
-            [
-              { value: 'light', label: t('flow.shell.light'), preview: '#f4f4f5' },
-              { value: 'dark', label: t('flow.shell.dark'), preview: '#0a0a0a' },
-              {
-                value: 'system',
-                label: t('flow.shell.system'),
-                preview: 'linear-gradient(135deg, #f4f4f5 50%, #0a0a0a 50%)',
-              },
-            ] as const
-          ).map(({ value, label, preview }) => (
-            <button type="button"
+          {MODE_OPTIONS.map((value) => (
+            <AppearanceOptionCard
               key={value}
-              onClick={() => setTheme(value)}
-              className="p-3 rounded-xl border-2 text-[12px] font-medium transition-all text-center"
-              style={{
-                borderColor: theme === value ? 'var(--accent)' : 'var(--flow-border)',
-                background: 'var(--flow-card)',
-                color: theme === value ? 'var(--accent)' : 'var(--flow-text-muted)',
-              }}
+              label={t(`flow.shell.${value}`)}
+              selected={mode === value}
+              onSelect={() => setMode(value)}
+              onAuditionStart={() => setAudition({ mode: value })}
+              onAuditionEnd={clearAudition}
             >
-              <div className="w-full h-12 rounded-lg mb-2" style={{ background: preview }} />
-              {label}
-            </button>
+              {value === 'system' ? (
+                // Two miniatures rather than one, because what `system` shows is
+                // exactly "whichever of these the OS is asking for".
+                <span className="flex w-full gap-1">
+                  <AppearanceMiniature
+                    tokens={tokensFor({ mode: 'light' })}
+                    className="min-w-0 flex-1"
+                  />
+                  <AppearanceMiniature
+                    tokens={tokensFor({ mode: 'dark' })}
+                    className="min-w-0 flex-1"
+                  />
+                </span>
+              ) : (
+                <AppearanceMiniature tokens={tokensFor({ mode: value })} />
+              )}
+            </AppearanceOptionCard>
           ))}
         </div>
+      </div>
+
+      <div>
+        <p id="appearance-palette-label" className={labelClass} style={labelStyle}>
+          {t('flow.settings.appearance.groups.palette')}
+        </p>
+        <div
+          className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+          role="group"
+          aria-labelledby="appearance-palette-label"
+          // Clearing here rather than per card: the gap between two cards is
+          // unhovered space, and clearing on each card's leave made the preview
+          // flash back to the applied palette while crossing it.
+          onPointerLeave={clearAudition}
+        >
+          {presets.map((preset) => (
+            <AppearanceOptionCard
+              key={preset.id}
+              label={t(preset.labelKey)}
+              description={t(`flow.settings.appearance.paletteDescriptions.${preset.id}`)}
+              selected={activePalette.id === preset.id}
+              onSelect={() => setPalette(preset.id)}
+              onAuditionStart={() => setAudition({ palette: preset.id })}
+              onAuditionEnd={clearAudition}
+            >
+              <AppearanceMiniature tokens={tokensFor({ palette: preset.id })} />
+            </AppearanceOptionCard>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p id="appearance-accent-label" className={labelClass} style={labelStyle}>
+          {t('flow.settings.appearance.groups.accent')}
+        </p>
+
+        {/* Capped columns, not 1fr: at full panel width 1fr stretches a swatch to
+            178px, which reads as a colour bar rather than a swatch. */}
+        <div
+          className="grid gap-2"
+          style={{ gridTemplateColumns: 'repeat(5, minmax(0, 56px))' }}
+          role="group"
+          aria-labelledby="appearance-accent-label"
+          onPointerLeave={clearAudition}
+        >
+          {ACCENT_SWATCHES.map((swatch) => {
+            const selected = accent !== null && normalizeHex(accent) === swatch.hex;
+            return (
+              <button
+                key={swatch.id}
+                type="button"
+                aria-label={t(swatch.labelKey)}
+                aria-pressed={selected}
+                onClick={() => commitAccent(swatch.hex)}
+                onPointerEnter={() => setAudition({ accent: swatch.hex })}
+                onFocus={() => setAudition({ accent: swatch.hex })}
+                onBlur={clearAudition}
+                className="flow-focus h-[44px] w-full"
+                style={{
+                  // The one place a literal colour is right: a swatch that does
+                  // not paint its own colour is not a preview of anything. The
+                  // value is data from ACCENT_SWATCHES, never a typed literal.
+                  background: swatch.hex,
+                  border: `2px solid ${selected ? 'var(--flow-text)' : 'var(--flow-border)'}`,
+                  borderRadius: 'var(--flow-r)',
+                }}
+              />
+            );
+          })}
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-end gap-2">
+          <div className="min-w-0 flex-1">
+            <label
+              htmlFor="appearance-accent-hex"
+              className="mb-1.5 block text-[11px]"
+              style={labelStyle}
+            >
+              {t('flow.settings.appearance.accentHex')}
+            </label>
+            <input
+              id="appearance-accent-hex"
+              type="text"
+              spellCheck={false}
+              autoComplete="off"
+              value={hexValue}
+              aria-invalid={hexInvalid}
+              aria-describedby={hexInvalid ? 'appearance-accent-hex-error' : undefined}
+              onChange={(e) => onHexChange(e.target.value)}
+              /* 16px minimum, or iOS auto-zooms the whole panel on focus. */
+              className="flow-focus min-h-[44px] w-full px-3 text-[16px] outline-none"
+              style={inputStyle}
+            />
+          </div>
+          <label htmlFor="appearance-accent-picker" className="sr-only">
+            {t('flow.settings.appearance.accentPicker')}
+          </label>
+          <input
+            id="appearance-accent-picker"
+            type="color"
+            value={appliedAccent}
+            onChange={(e) => commitAccent(normalizeHex(e.target.value))}
+            className="flow-focus h-[44px] w-[44px] shrink-0 cursor-pointer bg-transparent p-0.5"
+            style={{ border: '1px solid var(--flow-border)', borderRadius: 'var(--flow-r)' }}
+          />
+        </div>
+
+        {hexInvalid && (
+          <p
+            id="appearance-accent-hex-error"
+            className="mt-1.5 text-[11px]"
+            style={{ color: 'var(--flow-danger-fg)' }}
+          >
+            {t('flow.settings.appearance.accentInvalid')}
+          </p>
+        )}
+
+        <button
+          type="button"
+          aria-pressed={accent === null}
+          onClick={() => commitAccent(null)}
+          onPointerEnter={() => setAudition({ accent: null })}
+          onPointerLeave={clearAudition}
+          onFocus={() => setAudition({ accent: null })}
+          onBlur={clearAudition}
+          className="flow-focus mt-3 inline-flex min-h-[44px] items-center gap-2 px-3 text-[13px] font-medium"
+          style={{
+            background: accent === null ? 'var(--accent-muted)' : 'var(--flow-card)',
+            border: `1px solid ${accent === null ? 'var(--accent-border)' : 'var(--flow-border)'}`,
+            borderRadius: 'var(--flow-r)',
+            color: accent === null ? 'var(--accent-fg)' : 'var(--flow-text-muted)',
+          }}
+        >
+          <span
+            aria-hidden="true"
+            className="block h-4 w-4 shrink-0 rounded-full"
+            style={{ background: workspaceAccent }}
+          />
+          {t('flow.settings.appearance.accentWorkspace')}
+        </button>
+      </div>
+
+      <div>
+        <p id="appearance-density-label" className={labelClass} style={labelStyle}>
+          {t('flow.settings.appearance.groups.density')}
+        </p>
+        <SegmentedControl
+          labelledBy="appearance-density-label"
+          value={density}
+          options={DENSITY_OPTIONS.map((value) => ({
+            value,
+            label: t(`flow.settings.appearance.density.${value}`),
+          }))}
+          onChange={setDensity}
+          onAudition={(value) => setAudition(value === null ? undefined : { density: value })}
+        />
+      </div>
+
+      <div>
+        <p id="appearance-textSize-label" className={labelClass} style={labelStyle}>
+          {t('flow.settings.appearance.groups.textSize')}
+        </p>
+        <SegmentedControl
+          labelledBy="appearance-textSize-label"
+          value={textSize}
+          options={TEXT_SIZE_OPTIONS.map((value) => ({
+            value,
+            label: t(`flow.settings.appearance.textSize.${value}`),
+          }))}
+          onChange={setTextSize}
+          disabled
+          describedBy={TEXT_SIZE_GATE_ID}
+        />
+        <GateNotice
+          id={TEXT_SIZE_GATE_ID}
+          className="mt-2"
+          reason={t('flow.settings.appearance.textSizeGate')}
+        />
+      </div>
+
+      <div>
+        <p id="appearance-corners-label" className={labelClass} style={labelStyle}>
+          {t('flow.settings.appearance.groups.corners')}
+        </p>
+        <SegmentedControl
+          labelledBy="appearance-corners-label"
+          value={corners}
+          options={CORNER_OPTIONS.map((value) => ({
+            value,
+            label: t(`flow.settings.appearance.corners.${value}`),
+          }))}
+          onChange={setCorners}
+          onAudition={(value) => setAudition(value === null ? undefined : { corners: value })}
+        />
+      </div>
+
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[13px] font-medium" style={{ color: 'var(--flow-text)' }}>
+            {t('flow.settings.appearance.groups.motion')}
+          </p>
+          <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+            {t('flow.settings.appearance.motionHint')}
+          </p>
+        </div>
+        <AppearanceSwitch
+          checked={reduceMotion}
+          onChange={setReduceMotion}
+          label={t('flow.settings.appearance.groups.motion')}
+        />
       </div>
     </div>
   );
@@ -382,7 +744,7 @@ const ShortcutsSection: React.FC = () => {
         {shortcuts.map((s, i) => (
           <div
             key={i}
-            className="flex items-center justify-between py-2 px-3 rounded hover:bg-[var(--flow-hover)]"
+            className="flex items-center justify-between py-2 px-3 rounded-sm hover:bg-[var(--flow-hover)]"
           >
             <span className="text-[12px]" style={{ color: 'var(--flow-text)' }}>
               {s.desc}
@@ -391,7 +753,7 @@ const ShortcutsSection: React.FC = () => {
               {s.keys.map((k, j) => (
                 <kbd
                   key={j}
-                  className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold"
+                  className="px-1.5 py-0.5 rounded-sm text-[10px] font-mono font-semibold"
                   style={{
                     background: 'var(--flow-hover)',
                     color: 'var(--flow-text)',
@@ -601,7 +963,7 @@ export const LabelsSection: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setPendingDeleteLabel({ id: label.id, name: label.name })}
-                  className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+                  className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
                   style={{ color: 'var(--flow-text-dim)' }}
                   title={t('flow.settings.labels.deleteLabel')}
                   aria-label={t('flow.settings.deleteLabelLabel')}
@@ -872,7 +1234,7 @@ export const TeamSection: React.FC = () => {
                   deactivate.mutate(m.id);
                 }}
                 disabled={!canManageTeam}
-                className="h-7 w-7 flex items-center justify-center rounded hover:bg-[var(--flow-hover)] transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="h-7 w-7 flex items-center justify-center rounded-sm hover:bg-[var(--flow-hover)] transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 <UserMinus size={13} />
@@ -888,7 +1250,6 @@ export const TeamSection: React.FC = () => {
 // ── Section content map ───────────────────────────────────────────────────────
 
 const SECTION_CONTENT: Record<string, React.FC> = {
-  
   team: TeamSection,
   notifications: NotificationsSection,
   appearance: AppearanceSection,

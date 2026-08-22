@@ -330,10 +330,11 @@ const TaskDetail: React.FC = () => {
           style={{ borderBottom: '1px solid var(--flow-border)' }}
         >
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-            <button type="button"
+            <button
+              type="button"
               onClick={() => window.history.back()}
               aria-label={t('common.back')}
-              className="h-6 w-6 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+              className="h-6 w-6 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               <ArrowLeft size={13} className="flow-directional-icon" />
@@ -349,19 +350,21 @@ const TaskDetail: React.FC = () => {
             />
           </div>
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
-            <button type="button"
+            <button
+              type="button"
               onClick={() => {
                 navigator.clipboard?.writeText(task.identifier ?? task.id);
                 toast.success(t('toasts.task.copied', { id: task.identifier ?? task.id }));
               }}
-              className="flex h-8 items-center gap-1 rounded px-2 text-[11px] hover:bg-[var(--flow-hover)] sm:h-7"
+              className="flex h-8 items-center gap-1 rounded-sm px-2 text-[11px] hover:bg-[var(--flow-hover)] sm:h-7"
               style={{ color: 'var(--flow-text-muted)' }}
               title={t('flow.taskDetail.copyId')}
             >
               <Copy size={11} />
               <span className="hidden sm:inline">{t('flow.taskDetail.copyId')}</span>
             </button>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => {
                 updateTaskMut.mutate(
                   { id: task.id, data: { archived: true } },
@@ -374,7 +377,7 @@ const TaskDetail: React.FC = () => {
                   }
                 );
               }}
-              className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
+              className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
               style={{ color: 'var(--flow-text-muted)' }}
               title={!canEdit ? t('common.readOnlyAccess') : t('flow.taskDetail.archive')}
               aria-label={!canEdit ? t('common.readOnlyAccess') : t('flow.taskDetail.archive')}
@@ -382,7 +385,8 @@ const TaskDetail: React.FC = () => {
             >
               <Archive size={12} />
             </button>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => {
                 // Wait for the mutation to actually succeed before
                 // toasting + navigating away - otherwise on API
@@ -396,7 +400,7 @@ const TaskDetail: React.FC = () => {
                   // useDeleteTask already toasts on error.
                 });
               }}
-              className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
+              className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] disabled:opacity-40"
               style={{ color: '#ef4444' }}
               title={!canRemove ? t('common.deleteRestricted') : t('flow.taskDetail.delete')}
               aria-label={!canRemove ? t('common.deleteRestricted') : t('flow.taskDetail.delete')}
@@ -488,7 +492,8 @@ const TaskDetail: React.FC = () => {
               style={{ borderBottom: '1px solid var(--flow-border)' }}
             >
               {(['comments', 'activity'] as const).map((tabName) => (
-                <button type="button"
+                <button
+                  type="button"
                   key={tabName}
                   onClick={() => setTab(tabName)}
                   className="px-3 py-2 text-[12px] font-medium capitalize"
@@ -502,7 +507,7 @@ const TaskDetail: React.FC = () => {
                     : t('flow.taskDetail.activity')}
                   {tabName === 'comments' && (
                     <span
-                      className="ms-1.5 text-[10px] px-1 rounded"
+                      className="ms-1.5 text-[10px] px-1 rounded-sm"
                       style={{
                         background: 'var(--flow-hover)',
                         color: 'var(--flow-text-dim)',
@@ -552,7 +557,7 @@ const TaskDetail: React.FC = () => {
 
       {/* Side panel, below main on small screens */}
       <aside
-        className="w-full shrink-0 overflow-y-auto border-t border-[var(--flow-border)] px-4 py-6 sm:px-5 lg:w-64 lg:border-s lg:border-t-0"
+        className="w-full shrink-0 overflow-y-auto border-t border-[var(--flow-border)] px-4 py-6 sm:px-5 lg:w-[256px] lg:border-s lg:border-t-0"
         style={{
           background: 'var(--flow-surface)',
         }}
@@ -860,7 +865,7 @@ const TaskDetail: React.FC = () => {
                 <select
                   value={depId}
                   onChange={(e) => setDepId(e.target.value)}
-                  className="bg-transparent text-[11px] outline-none flex-1 min-w-0 rounded px-1"
+                  className="bg-transparent text-[11px] outline-none flex-1 min-w-0 rounded-sm px-1"
                   style={{ color: 'var(--flow-text)', border: '1px solid var(--flow-border)' }}
                 >
                   <option value="">{t('flow.taskDetail.addDependency')}</option>
@@ -880,7 +885,7 @@ const TaskDetail: React.FC = () => {
                     });
                     setDepId('');
                   }}
-                  className="text-[10px] px-1.5 py-0.5 rounded font-semibold disabled:opacity-40"
+                  className="text-[10px] px-1.5 py-0.5 rounded-sm font-semibold disabled:opacity-40"
                   style={{ background: 'var(--accent)', color: '#0a0a0a' }}
                 >
                   {t('flow.taskDetail.add')}
@@ -893,9 +898,10 @@ const TaskDetail: React.FC = () => {
         <DetailField icon={Tag} label={t('flow.taskDetail.labels')}>
           <div className="flex flex-wrap gap-1 relative">
             {taskLabels.length === 0 && canEdit && (
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setLabelPickerOpen((v) => !v)}
-                className="text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"
+                className="text-[10px] px-1.5 py-0.5 rounded-sm hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 {t('flow.taskDetail.addLabel')}
@@ -910,9 +916,10 @@ const TaskDetail: React.FC = () => {
               />
             ))}
             {taskLabels.length > 0 && canEdit && (
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setLabelPickerOpen((v) => !v)}
-                className="text-[10px] px-1.5 py-0.5 rounded hover:bg-[var(--flow-hover)]"
+                className="text-[10px] px-1.5 py-0.5 rounded-sm hover:bg-[var(--flow-hover)]"
                 style={{ color: 'var(--flow-text-dim)' }}
               >
                 {t('flow.taskDetail.addShort')}
@@ -931,10 +938,11 @@ const TaskDetail: React.FC = () => {
                 {allLabels.map((l) => {
                   const active = taskLabelIds.includes(l.id);
                   return (
-                    <button type="button"
+                    <button
+                      type="button"
                       key={l.id}
                       onClick={() => handleToggleLabel(l.id)}
-                      className="w-full flex items-center gap-2 px-2 py-1 rounded text-start hover:bg-[var(--flow-hover)]"
+                      className="w-full flex items-center gap-2 px-2 py-1 rounded-sm text-start hover:bg-[var(--flow-hover)]"
                     >
                       <span
                         className="h-2 w-2 rounded-full shrink-0"

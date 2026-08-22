@@ -304,7 +304,7 @@ const ProjectBoard: React.FC = () => {
               type="button"
               onClick={() => setBoardSettingsOpen(true)}
               aria-label={t('flow.board.openSettings')}
-              className="flow-focus flex h-11 w-11 items-center justify-center rounded-md md:h-8 md:w-8"
+              className="flow-focus flex h-[44px] w-[44px] items-center justify-center rounded-md md:h-8 md:w-8"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               <Settings2 size={14} aria-hidden="true" />
@@ -376,17 +376,19 @@ const ProjectBoard: React.FC = () => {
                   style={{ color: 'var(--flow-text)' }}
                 />
                 <div className="flex items-center gap-1.5">
-                  <button type="button"
+                  <button
+                    type="button"
                     onClick={handleAddColumn}
                     disabled={!newColumnName.trim() || createColumn.isPending}
-                    className="h-6 px-2.5 rounded text-[11px] font-semibold disabled:opacity-40"
+                    className="h-6 px-2.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
                     style={{ background: 'var(--accent)', color: '#ffffff' }}
                   >
                     Add
                   </button>
-                  <button type="button"
+                  <button
+                    type="button"
                     onClick={() => setAddingColumn(false)}
-                    className="h-6 px-2 rounded text-[11px] hover:bg-[var(--flow-hover)]"
+                    className="h-6 px-2 rounded-sm text-[11px] hover:bg-[var(--flow-hover)]"
                     style={{ color: 'var(--flow-text-muted)' }}
                   >
                     Cancel
@@ -394,7 +396,8 @@ const ProjectBoard: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setAddingColumn(true)}
                 className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] transition-colors hover:bg-[var(--flow-hover)]"
                 style={{
@@ -522,7 +525,8 @@ const KanbanColumn: React.FC<{
             style={{ color: 'var(--flow-text)' }}
           />
         ) : (
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setEditing(true)}
             className="flex-1 text-start text-[12px] font-semibold truncate hover:opacity-70 transition-opacity"
             style={{ color: 'var(--flow-text)' }}
@@ -540,18 +544,20 @@ const KanbanColumn: React.FC<{
 
         {/* Actions (visible on header hover) */}
         <div className="flex items-center gap-0.5 opacity-0 group-hover/header:opacity-100 transition-opacity shrink-0">
-          <button type="button"
+          <button
+            type="button"
             onClick={onAddTask}
-            className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+            className="h-5 w-5 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-dim)' }}
             title={t('flow.board.addTaskLabel')}
             aria-label={t('flow.board.addTaskLabel')}
           >
             <Plus size={11} />
           </button>
-          <button type="button"
+          <button
+            type="button"
             onClick={onDelete}
-            className="h-5 w-5 rounded flex items-center justify-center hover:bg-[var(--flow-hover)] hover:text-red-400"
+            className="h-5 w-5 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] hover:text-red-400"
             style={{ color: 'var(--flow-text-dim)' }}
             title={t('flow.board.deleteColumnLabel')}
             aria-label={t('flow.board.deleteColumnLabel')}
@@ -576,9 +582,10 @@ const KanbanColumn: React.FC<{
               />
             ))}
             {colTaskCount === 0 && (
-              <button type="button"
+              <button
+                type="button"
                 onClick={onAddTask}
-                className="flex-1 flex items-center justify-center rounded text-[11px] min-h-[44px] hover:bg-[var(--flow-hover)] transition-colors"
+                className="flex-1 flex items-center justify-center rounded-sm text-[11px] min-h-[44px] hover:bg-[var(--flow-hover)] transition-colors"
                 style={{
                   color: 'var(--flow-text-dim)',
                   border: '1px dashed var(--flow-border)',
@@ -615,7 +622,7 @@ const KanbanColumn: React.FC<{
                 ))}
                 {lane.tasks.length === 0 && (
                   <div
-                    className="rounded text-[10px] min-h-[28px] flex items-center justify-center"
+                    className="rounded-sm text-[10px] min-h-[28px] flex items-center justify-center"
                     style={{
                       color: 'var(--flow-text-dim)',
                       border: '1px dashed var(--flow-border)',
@@ -649,7 +656,8 @@ const GroupByPicker: React.FC<{
 
   return (
     <div ref={ref} className="relative">
-      <button type="button"
+      <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-1.5 h-7 px-2 rounded-md text-[11px] font-medium transition-colors hover:bg-[var(--flow-hover)]"
         style={{
@@ -671,7 +679,8 @@ const GroupByPicker: React.FC<{
           }}
         >
           {GROUP_OPTIONS.map((o) => (
-            <button type="button"
+            <button
+              type="button"
               key={o.key}
               onClick={() => {
                 onChange(o.key);

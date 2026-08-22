@@ -174,7 +174,7 @@ const TimePanel = ({
       {(realtimeStatus === 'reconnecting' || realtimeStatus === 'disconnected') && (
         <p
           role="status"
-          className="mt-2 rounded px-2 py-1 text-[10px] leading-snug"
+          className="mt-2 rounded-sm px-2 py-1 text-[10px] leading-snug"
           style={{
             background: 'var(--flow-status-pending-bg)',
             border: '1px solid var(--flow-status-pending-border)',
@@ -210,7 +210,7 @@ const TimePanel = ({
           <button
             type="button"
             onClick={() => void refetch()}
-            className="flow-focus mt-1.5 inline-flex min-h-[44px] items-center gap-1 rounded px-2 text-[11px] font-semibold md:min-h-0 md:py-1"
+            className="flow-focus mt-1.5 inline-flex min-h-[44px] items-center gap-1 rounded-sm px-2 text-[11px] font-semibold md:min-h-0 md:py-1"
             style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
           >
             <RotateCcw size={11} aria-hidden="true" />
@@ -249,7 +249,7 @@ const TimePanel = ({
             return (
               <li
                 key={log.id}
-                className="flex items-start gap-2 rounded px-2 py-2 md:py-1.5"
+                className="flex items-start gap-2 rounded-sm px-2 py-2 md:py-1.5"
                 style={{ background: 'var(--flow-hover)' }}
               >
                 <Avatar size="sm" initials={initialsFromName(authorName)} aria-hidden="true" />
@@ -278,7 +278,7 @@ const TimePanel = ({
                     aria-label={t('flow.time.deleteEntryLabel', {
                       duration: formatDurationClock(log.durationMinutes),
                     })}
-                    className="flow-focus flex h-11 w-11 shrink-0 items-center justify-center rounded md:h-6 md:w-6"
+                    className="flow-focus flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-sm md:h-6 md:w-6"
                     style={{ color: 'var(--flow-text-muted)' }}
                   >
                     <Trash2 size={12} aria-hidden="true" />
@@ -290,7 +290,7 @@ const TimePanel = ({
 
           {pendingMinutes !== null && (
             <li
-              className="flex items-start gap-2 rounded px-2 py-2 opacity-60 md:py-1.5"
+              className="flex items-start gap-2 rounded-sm px-2 py-2 opacity-60 md:py-1.5"
               style={{ background: 'var(--flow-hover)' }}
             >
               <div className="min-w-0 flex-1">
@@ -319,7 +319,7 @@ const TimePanel = ({
           <button
             type="button"
             onClick={() => setFormOpen(true)}
-            className="flow-focus mt-2 inline-flex min-h-[44px] w-full items-center justify-center rounded px-3 text-[11px] font-semibold md:min-h-0 md:w-auto md:py-1.5"
+            className="flow-focus mt-2 inline-flex min-h-[44px] w-full items-center justify-center rounded-sm px-3 text-[11px] font-semibold md:min-h-0 md:w-auto md:py-1.5"
             style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
           >
             {t('flow.time.logTime')}
@@ -360,7 +360,7 @@ const TimePanel = ({
               readOnly
               disabled
               aria-describedby={`time-date-gate-${taskId}`}
-              className="min-h-[44px] w-full rounded px-2 py-2 text-[16px] md:min-h-0 md:py-1 md:text-[11px]"
+              className="min-h-[44px] w-full rounded-sm px-2 py-2 text-[16px] md:min-h-0 md:py-1 md:text-[11px]"
               style={{
                 background: 'var(--flow-hover)',
                 border: '1px solid var(--flow-border)',
@@ -397,7 +397,7 @@ const TimePanel = ({
                   closeForm();
                 }
               }}
-              className="flow-focus min-h-[44px] w-full rounded px-2 py-2 text-[16px] md:min-h-0 md:py-1 md:text-[11px]"
+              className="flow-focus min-h-[44px] w-full rounded-sm px-2 py-2 text-[16px] md:min-h-0 md:py-1 md:text-[11px]"
               style={{
                 background: 'var(--flow-input-bg)',
                 border: '1px solid var(--flow-border)',
@@ -424,7 +424,7 @@ const TimePanel = ({
               type="button"
               onClick={submit}
               disabled={parsedPreview === null || logTime.isPending}
-              className="flow-focus min-h-[44px] flex-1 rounded px-3 text-[11px] font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"
+              className="flow-focus min-h-[44px] flex-1 rounded-sm px-3 text-[11px] font-semibold disabled:opacity-40 md:min-h-0 md:py-1.5"
               style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
             >
               {roundedPreview !== null
@@ -434,7 +434,7 @@ const TimePanel = ({
             <button
               type="button"
               onClick={closeForm}
-              className="flow-focus min-h-[44px] rounded px-3 text-[11px] md:min-h-0 md:py-1.5"
+              className="flow-focus min-h-[44px] rounded-sm px-3 text-[11px] md:min-h-0 md:py-1.5"
               style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
             >
               {t('flow.time.cancel')}
@@ -448,7 +448,7 @@ const TimePanel = ({
 
 const EntrySkeleton = (): React.JSX.Element => (
   <div
-    className="flow-shimmer h-10 rounded md:h-8"
+    className="flow-shimmer h-10 rounded-sm md:h-8"
     style={{
       background:
         'linear-gradient(90deg, var(--flow-hover) 25%, var(--flow-active) 50%, var(--flow-hover) 75%)',

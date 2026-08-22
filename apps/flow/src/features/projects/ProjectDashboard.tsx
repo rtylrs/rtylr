@@ -194,7 +194,7 @@ const ProjectDashboard: React.FC = () => {
               {stats.byAssignee.slice(0, 8).map((a) => (
                 <div key={a.name} className="flex items-center gap-3">
                   <span
-                    className="text-[11px] w-32 truncate"
+                    className="text-[11px] w-[128px] truncate"
                     style={{ color: 'var(--flow-text-muted)' }}
                   >
                     {a.name}

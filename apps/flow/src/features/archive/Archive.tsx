@@ -48,7 +48,8 @@ const Archive: React.FC = () => {
               style={{ borderBottom: '1px solid var(--flow-border)' }}
             >
               <PriorityIcon priority={task.priority} size={12} />
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => navigate({ to: `/task/${task.id}` as string })}
                 className="flex-1 text-left text-[12px] truncate"
                 style={{ color: 'var(--flow-text-muted)', textDecoration: 'line-through' }}
@@ -61,7 +62,8 @@ const Archive: React.FC = () => {
               >
                 {task.projectName}
               </span>
-              <button type="button"
+              <button
+                type="button"
                 onClick={() =>
                   restoreTask.mutate(
                     { id: task.id, data: { archived: false } },
@@ -72,7 +74,7 @@ const Archive: React.FC = () => {
                   )
                 }
                 disabled={restoreTask.isPending}
-                className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+                className="flex items-center gap-1 px-2 py-1 rounded-sm text-[10px] font-medium opacity-0 group-hover:opacity-100 transition-opacity"
                 style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
                 title={t('archive.restoreTitle')}
               >

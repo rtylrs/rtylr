@@ -93,7 +93,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
           </div>
           {showProject && (project || task.projectName) && (
             <span
-              className="min-w-0 max-w-[8rem] truncate rounded px-1.5 py-0.5 text-[10px] font-semibold"
+              className="min-w-0 max-w-[8rem] truncate rounded-sm px-1.5 py-0.5 text-[10px] font-semibold"
               style={{
                 background: `${project?.color ?? '#64C5B9'}22`,
                 color: project?.color ?? 'var(--accent)',

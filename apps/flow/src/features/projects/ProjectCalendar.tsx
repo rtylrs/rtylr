@@ -98,17 +98,19 @@ const ProjectCalendar: React.FC = () => {
 
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-2">
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setCursor((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
-            className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+            className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-muted)' }}
             aria-label="Previous month"
           >
             <ChevronLeft size={14} />
           </button>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setCursor((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
-            className="h-7 w-7 rounded flex items-center justify-center hover:bg-[var(--flow-hover)]"
+            className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text-muted)' }}
             aria-label="Next month"
           >
@@ -118,13 +120,14 @@ const ProjectCalendar: React.FC = () => {
             {monthLabel}
           </h2>
         </div>
-        <button type="button"
+        <button
+          type="button"
           onClick={() => {
             const d = new Date();
             d.setDate(1);
             setCursor(d);
           }}
-          className="text-[11px] px-2 py-1 rounded hover:bg-[var(--flow-hover)]"
+          className="text-[11px] px-2 py-1 rounded-sm hover:bg-[var(--flow-hover)]"
           style={{ color: 'var(--flow-text-muted)' }}
         >
           Today
@@ -180,7 +183,7 @@ const ProjectCalendar: React.FC = () => {
                       {dayTasks.slice(0, 3).map((t) => (
                         <div
                           key={t.id}
-                          className="text-[10px] px-1.5 py-0.5 rounded truncate"
+                          className="text-[10px] px-1.5 py-0.5 rounded-sm truncate"
                           style={{
                             background: `${project.color}22`,
                             color: project.color,

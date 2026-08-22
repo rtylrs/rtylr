@@ -5,14 +5,29 @@ import { Toaster } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { bootObservability } from '@voxire/observability';
 import { loadRuntimeConfig } from '@voxire/config';
+import { initAppearance } from '@voxire/ui';
+import { APPEARANCE_DEFAULTS, LEGACY_THEME_STORAGE_KEY } from '@voxire/utils';
 import { router } from './router';
-import { initTheme } from './shared/stores/themeStore';
+import { FLOW_APPEARANCE_STORAGE_KEY } from './shared/stores/appearanceStore';
+import { ACCENT_DEFAULT } from './shared/lib/colorUtils';
 import { useTranslation } from 'react-i18next';
 import './shared/services/i18next';
 import './globals.css';
 
-// Apply persisted theme before first render to prevent flash
-initTheme();
+// Apply the persisted appearance before the first render so the first paint is
+// already the right palette rather than the stylesheet default.
+//
+// This is the pre-paint half of a pair. AppearanceProvider, mounted in
+// FlowLayout, owns every write from mount onwards; this call covers the window
+// before it exists, which is the AppGuard fetch. The workspace accent is not
+// known yet at this point, so the brand teal stands in until the layout
+// resolves the active workspace, exactly as it did before.
+initAppearance({
+  storageKey: FLOW_APPEARANCE_STORAGE_KEY,
+  defaults: APPEARANCE_DEFAULTS,
+  workspaceAccent: ACCENT_DEFAULT,
+  legacyModeKey: LEGACY_THEME_STORAGE_KEY,
+});
 
 bootObservability({ app: 'flow' });
 

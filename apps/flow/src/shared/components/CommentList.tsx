@@ -27,7 +27,7 @@ function renderBody(body: string): React.ReactNode {
       return (
         <span
           key={i}
-          className="rounded px-1 font-medium"
+          className="rounded-sm px-1 font-medium"
           style={{ background: 'var(--accent-muted)', color: 'var(--accent)' }}
         >
           {p}
@@ -44,7 +44,7 @@ function renderBody(body: string): React.ReactNode {
       return (
         <code
           key={i}
-          className="rounded px-1 py-0.5 font-mono text-[11px]"
+          className="rounded-sm px-1 py-0.5 font-mono text-[11px]"
           style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
         >
           {p.slice(1, -1)}
