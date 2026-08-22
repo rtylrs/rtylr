@@ -20,6 +20,7 @@ import {
   Textarea,
 } from '../../shared/components/ui';
 import { activateOnKeyboard } from '../../shared/lib/keyboard';
+import { formatDate } from '../../shared/lib/formatters';
 
 const PLAN_COLORS: Record<ContractPlan, { bg: string; color: string }> = {
   free: { bg: 'rgba(107,114,128,0.12)', color: '#6b7280' },
@@ -37,17 +38,6 @@ const createEmptyContractForm = () => ({
   closedBy: '',
   notes: '',
 });
-
-function formatDate(iso: string): string {
-  if (!iso) return '-';
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
 
 const PlanBadge: React.FC<{ plan: ContractPlan }> = ({ plan }) => {
   const colors = PLAN_COLORS[plan];

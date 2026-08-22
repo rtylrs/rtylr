@@ -52,9 +52,7 @@ describe('formatDate', () => {
     expect(formatDate('not-a-date')).toBe('');
   });
   it('formats a valid ISO date string', () => {
-    const result = formatDate('2024-01-15');
-    expect(result).toContain('2024');
-    expect(result).toContain('Jan');
+    expect(formatDate('2024-01-15')).toBe('Jan 15, 2024');
   });
 });
 

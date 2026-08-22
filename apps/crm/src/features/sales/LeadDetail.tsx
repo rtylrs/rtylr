@@ -43,6 +43,7 @@ import {
   SkeletonList,
   ConfirmModal,
 } from '../../shared/components/ui';
+import { formatDate } from '../../shared/lib/formatters';
 
 const STAGE_OPTIONS: Array<{ value: LeadStage; label: string }> = [
   { value: 'cold', label: 'Cold' },
@@ -73,17 +74,6 @@ const OUTCOME_ICONS: Record<TouchpointOutcome, React.ReactNode> = {
   negative: <XCircle size={12} />,
   no_answer: <MinusCircle size={12} />,
 };
-
-function formatDate(iso: string): string {
-  if (!iso) return '-';
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
 
 const createEmptyTouchpointForm = () => ({
   type: 'phone' as TouchpointType,
