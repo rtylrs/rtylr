@@ -10,8 +10,15 @@ const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'crm');
 
 const DISMISSED_KEY = 'trial_banner_dismissed_date';
 
+function localDateKey(date = new Date()): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 const TrialBanner: React.FC = (): React.JSX.Element | null => {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateKey();
   const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISSED_KEY) === today);
 
   const { data } = useQuery({

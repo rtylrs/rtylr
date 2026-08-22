@@ -147,6 +147,8 @@ function RuleBuilder({
           padding: '24px',
           width: '540px',
           maxWidth: '90vw',
+          maxHeight: 'calc(100vh - 32px)',
+          overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
           gap: '20px',

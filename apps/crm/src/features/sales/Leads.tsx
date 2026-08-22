@@ -107,7 +107,10 @@ const Leads: React.FC = () => {
   const handleDelete = (): void => {
     if (deleteId === null || deleteLead.isPending) return;
     deleteLead.mutate(deleteId, {
-      onSuccess: () => setDeleteId(null),
+      onSuccess: () => {
+        setLoadedLeads((current) => current.filter((lead) => lead.id !== deleteId));
+        setDeleteId(null);
+      },
     });
   };
 

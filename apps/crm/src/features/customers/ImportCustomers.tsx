@@ -341,6 +341,7 @@ const ImportCustomers: React.FC = () => {
                       {IMPORT_FIELD_LABELS[field]}
                     </div>
                     <Select
+                      aria-label={`Map ${IMPORT_FIELD_LABELS[field]}`}
                       value={mapping[field] || ''}
                       onChange={(e) => setMapping((m) => ({ ...m, [field]: e.target.value }))}
                     >

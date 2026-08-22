@@ -493,7 +493,10 @@ const Campaigns: React.FC = () => {
   const handleDelete = (id: number): void => {
     if (removeCampaign.isPending) return;
     removeCampaign.mutate(id, {
-      onSuccess: () => setConfirmDeleteId(null),
+      onSuccess: () => {
+        setLoadedCampaigns((current) => current.filter((campaign) => campaign.id !== id));
+        setConfirmDeleteId(null);
+      },
     });
   };
 

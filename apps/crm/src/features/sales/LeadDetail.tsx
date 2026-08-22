@@ -962,7 +962,7 @@ const LeadDetail: React.FC = () => {
                           onChange={(e) =>
                             setContractForm((f) => ({ ...f, closedBy: e.target.value }))
                           }
-                          placeholder="Your name"
+                          placeholder="User ID"
                         />
                         <Textarea
                           label="Notes"

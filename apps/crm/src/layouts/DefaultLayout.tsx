@@ -160,6 +160,7 @@ const DefaultLayout: React.FC = () => {
   const { openPalette } = useShortcuts();
   const [theme, setThemeState] = useState<Theme>(getStoredTheme);
   const sidebarRef = useRef<HTMLElement | null>(null);
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
   const crmUser = useUserStore((s) => s.user);
   const setAuthUser = useUserStore((s) => s.setUser);
   useEffect(() => {
@@ -193,6 +194,15 @@ const DefaultLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   useEscapeKey(userMenuOpen, () => setUserMenuOpen(false));
 
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handlePointerDown = (event: PointerEvent): void => {
+      if (!userMenuRef.current?.contains(event.target as Node)) setUserMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, [userMenuOpen]);
+
   const pageTitle = getPageTitle(location.pathname);
   const caretPageContext = React.useMemo(
     () =>
@@ -209,6 +219,7 @@ const DefaultLayout: React.FC = () => {
 
   useEffect(() => {
     setSidebarOpen(false);
+    setUserMenuOpen(false);
   }, [location.pathname]);
 
   const handleTheme = (t: Theme) => {
@@ -355,6 +366,7 @@ const DefaultLayout: React.FC = () => {
 
           {/* Footer, user */}
           <div
+            ref={userMenuRef}
             style={{
               padding: '8px',
               borderTop: '1px solid var(--hub-border)',

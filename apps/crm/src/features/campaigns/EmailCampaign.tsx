@@ -229,6 +229,7 @@ const EmailCampaign: React.FC = () => {
                 Audience
               </h4>
               <Select
+                aria-label="Campaign audience segment"
                 value={segmentId}
                 onChange={(event) => setSegmentId(event.target.value)}
                 disabled={pending || segmentsLoading}

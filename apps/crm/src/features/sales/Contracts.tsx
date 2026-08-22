@@ -535,7 +535,7 @@ const Contracts: React.FC = () => {
                 type="number"
                 value={form.closedBy}
                 onChange={(e) => setForm((f) => ({ ...f, closedBy: e.target.value }))}
-                placeholder="Sales rep name"
+                placeholder="User ID"
               />
             </div>
             <Textarea
