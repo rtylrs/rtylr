@@ -7,10 +7,9 @@ import (
 )
 
 var (
-	ErrInvoiceNotFound     = errors.New("invoice not found")
-	ErrInvoiceNotDeletable = errors.New("only draft invoices can be deleted")
-	ErrInvoiceNotDraft     = errors.New("invoice is not in draft status")
-	ErrInvalidInvoiceDate  = errors.New("due date must be on or after issue date")
+	ErrInvoiceNotFound    = errors.New("invoice not found")
+	ErrInvoiceNotDraft    = errors.New("invoice is not in draft status")
+	ErrInvalidInvoiceDate = errors.New("due date must be on or after issue date")
 )
 
 type Invoice struct {

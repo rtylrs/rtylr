@@ -24,20 +24,6 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
-
-// DocumentExistsInBusiness reports whether the row exists within the business. The write queries
-// in this module are :exec and cannot report a zero-row match, so writes
-// pre-check existence to avoid silent success on wrong/foreign ids.
-func (r *Repository) DocumentExistsInBusiness(ctx context.Context, businessID, id int64) bool {
-	var exists bool
-	if err := r.pool.QueryRowContext(ctx,
-		"SELECT EXISTS(SELECT 1 FROM hr_documents WHERE id = ? AND business_id = ?)",
-		id, businessID,
-	).Scan(&exists); err != nil {
-		return false
-	}
-	return exists
-}
 func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Document, error) {
 	rows, err := r.queries.ListDocuments(ctx, businessID)
 	if err != nil {
