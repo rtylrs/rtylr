@@ -7,6 +7,7 @@ import { bootObservability } from '@voxire/observability';
 import { loadRuntimeConfig } from '@voxire/config';
 import { FullScreenLoader } from '@voxire/components';
 import { router } from './router';
+import { readLocalStorage } from './shared/lib/storage';
 
 import './shared/services/i18next';
 import './globals.css';
@@ -22,7 +23,7 @@ const queryClient = new QueryClient({
 });
 
 // Apply persisted theme before first render to prevent flash
-const saved = localStorage.getItem('crm-theme');
+const saved = readLocalStorage('crm-theme');
 const theme = saved === 'light' || saved === 'dark' || saved === 'system' ? saved : 'dark';
 document.documentElement.setAttribute(
   'data-theme',
