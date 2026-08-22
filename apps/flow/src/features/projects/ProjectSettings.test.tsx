@@ -64,6 +64,7 @@ vi.mock('../../shared/hooks/queries/useFlowTeam', () => ({
 // screen. The gating describe block below flips this per test.
 const canManageProjectMock = vi.hoisted(() => vi.fn(() => true));
 vi.mock('../../shared/lib/currentUser', () => ({
+  useCanAdministerProject: () => canManageProjectMock(),
   useCanDeleteResource: () => canManageProjectMock(),
 }));
 
@@ -126,7 +127,7 @@ describe('ProjectSettings integrations tab', () => {
     fireEvent.change(screen.getByDisplayValue('Demo project'), {
       target: { value: 'Renamed project' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.saveChanges' }));
 
     expect(updateProjectMutate).toHaveBeenCalledWith(
       {
@@ -169,7 +170,7 @@ describe('ProjectSettings integrations tab', () => {
 
   it('saves the "-" sentinel (not an empty string) when the description was never filled in', () => {
     renderProjectSettings('-');
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.saveChanges' }));
 
     expect(updateProjectMutate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -185,7 +186,7 @@ describe('ProjectSettings integrations tab', () => {
     fireEvent.change(screen.getByPlaceholderText('flow.projectSettings.descriptionPlaceholder'), {
       target: { value: 'New real description' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.saveChanges' }));
 
     expect(updateProjectMutate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -223,7 +224,7 @@ describe('ProjectSettings role gating (#793)', () => {
     expect(
       screen.getByPlaceholderText('flow.projectSettings.descriptionPlaceholder')
     ).toBeDisabled();
-    expect(screen.getByRole('button', { name: /Save changes/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'common.saveChanges' })).toBeDisabled();
   });
 
   it('leaves rename/describe and Save changes enabled for a project admin', () => {
@@ -234,7 +235,7 @@ describe('ProjectSettings role gating (#793)', () => {
     expect(
       screen.getByPlaceholderText('flow.projectSettings.descriptionPlaceholder')
     ).toBeEnabled();
-    expect(screen.getByRole('button', { name: /Save changes/ })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'common.saveChanges' })).toBeEnabled();
   });
 
   it('disables the member role select and remove button for a non-admin, and hides Add', () => {
@@ -472,7 +473,7 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
 
   it('does not show a call-site toast when saving a project update fails - the hook already shows one', () => {
     renderProjectSettings();
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    fireEvent.click(screen.getByRole('button', { name: 'common.saveChanges' }));
 
     const [, options] = updateProjectMutate.mock.calls[0];
     expect(options.onError).toBeUndefined();
