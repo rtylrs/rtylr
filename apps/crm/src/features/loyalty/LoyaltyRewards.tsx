@@ -325,7 +325,7 @@ const LoyaltyRewards: React.FC = () => {
                     }}
                   >
                     <Package size={9} />
-                    {r.stock === null ? 'Unlimited' : `${r.stock} left`}
+                    {r.stock === null || r.stock < 0 ? 'Unlimited' : `${r.stock} left`}
                   </span>
                 </div>
                 <div
