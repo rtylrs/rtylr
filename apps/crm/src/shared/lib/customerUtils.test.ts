@@ -7,6 +7,7 @@ import {
   getTags,
   hasTag,
   customerLabel,
+  formatCustomerDate,
 } from './customerUtils';
 import { customerSchema, type Customer } from '../schemas/customers';
 
@@ -117,5 +118,20 @@ describe('customerLabel', () => {
   it('formats name and email together', () => {
     const c = makeCustomer({ firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com' });
     expect(customerLabel(c)).toBe('Jane Doe <jane@example.com>');
+  });
+});
+
+describe('formatCustomerDate', () => {
+  it('formats ISO timestamps for display', () => {
+    expect(formatCustomerDate('2024-01-15')).toBe('Jan 15, 2024');
+  });
+
+  it('preserves supported relative labels', () => {
+    expect(formatCustomerDate('45 days ago')).toBe('45 days ago');
+  });
+
+  it('uses clear fallbacks for missing and malformed dates', () => {
+    expect(formatCustomerDate('')).toBe('Never');
+    expect(formatCustomerDate('not-a-date')).toBe('Unknown date');
   });
 });

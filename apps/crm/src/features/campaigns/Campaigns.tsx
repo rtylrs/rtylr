@@ -26,6 +26,7 @@ import {
 } from '../../shared/schemas/campaigns';
 import { ConfirmModal } from '../../shared/components/ui';
 import { activateOnKeyboard } from '../../shared/lib/keyboard';
+import { formatDate } from '../../shared/lib/formatters';
 
 const ACCENT = '#3b82f6';
 
@@ -305,7 +306,7 @@ function CampaignCard({
       {/* Footer */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
-          Updated {campaign.updatedAt || 'Unknown date'}
+          Updated {formatDate(campaign.updatedAt) || 'Unknown date'}
         </span>
         <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
           {onClick && (

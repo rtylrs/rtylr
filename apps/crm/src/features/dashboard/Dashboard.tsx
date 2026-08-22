@@ -24,6 +24,7 @@ import type { DashboardStats } from '../../shared/schemas/dashboard';
 import { CustomerAvatar } from '../../shared/components/crm';
 import { activateOnKeyboard } from '../../shared/lib/keyboard';
 import { parseCrmDate } from '../../shared/lib/dateUtils';
+import { formatCustomerDate } from '../../shared/lib/customerUtils';
 
 const ACCENT = '#3b82f6';
 
@@ -636,7 +637,7 @@ const Dashboard: React.FC = () => {
                       {c.name}
                     </div>
                     <div style={{ fontSize: '10px', color: 'var(--hub-text-muted)' }}>
-                      Last: {c.lastVisit || 'Never'}
+                      Last: {formatCustomerDate(c.lastVisit)}
                     </div>
                   </div>
                 </div>

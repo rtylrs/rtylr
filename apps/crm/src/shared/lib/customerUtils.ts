@@ -1,5 +1,6 @@
 import type { Customer } from '../schemas/customers';
 import { parseCrmDate } from './dateUtils';
+import { formatDate } from './formatters';
 
 /** Returns true if the customer has opted in to email marketing. */
 export function hasEmailConsent(customer: Customer): boolean {
@@ -37,4 +38,20 @@ export function hasTag(customer: Customer, tag: string): boolean {
 /** Returns the customer's display label (name + email). */
 export function customerLabel(customer: Customer): string {
   return `${customer.name} <${customer.email}>`;
+}
+
+/** Formats customer activity dates while preserving supported relative labels. */
+export function formatCustomerDate(value: string | null | undefined, fallback = 'Never'): string {
+  const trimmed = value?.trim() ?? '';
+  if (!trimmed) return fallback;
+  const formatted = formatDate(trimmed);
+  if (formatted) return formatted;
+  if (
+    /^(?:just now|today|yesterday|never|unknown|no visits?|\d+\s+(?:sec(?:ond)?|min(?:ute)?|hr|hour|day|week|month|year)s?\s+ago)$/i.test(
+      trimmed
+    )
+  ) {
+    return trimmed;
+  }
+  return 'Unknown date';
 }

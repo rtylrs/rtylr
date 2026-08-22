@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { Tier, tierColor, getTier, getCustomerTier, pointsToNextTier } from '../lib/tiers';
 import { activateOnKeyboard, useEscapeKey } from '../lib/keyboard';
+import { formatCustomerDate } from '../lib/customerUtils';
 import { ACCENT, Input, Select, Button } from './ui';
 import type { TimelineEntry, Customer } from '../services/crmApi';
 
@@ -903,7 +904,7 @@ export const CustomerQuickView: React.FC<{ customer: Customer }> = ({ customer }
             Last seen
           </div>
           <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>
-            {customer.lastVisit || 'Never'}
+            {formatCustomerDate(customer.lastVisit)}
           </div>
         </div>
       </div>

@@ -25,6 +25,7 @@ import { getCustomerTier, thresholdsFromConfig, Tier, tierColor } from '../../sh
 import { Button, EmptyState, PageHeader, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge, TagChip } from '../../shared/components/crm';
 import { activateOnKeyboard } from '../../shared/lib/keyboard';
+import { formatCustomerDate } from '../../shared/lib/customerUtils';
 
 const ACCENT = '#3b82f6';
 
@@ -654,7 +655,7 @@ const Customers: React.FC = () => {
                                   color: 'var(--hub-text-muted)',
                                 }}
                               >
-                                {c.lastVisit || 'Never'}
+                                {formatCustomerDate(c.lastVisit)}
                               </td>
                               <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                                 {isExpanded ? (

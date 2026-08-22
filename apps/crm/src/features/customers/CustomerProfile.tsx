@@ -37,6 +37,7 @@ import {
   LoyaltyPointsInput,
 } from '../../shared/components/crm';
 import { getCustomerTier, pointsToNextTier, thresholdsFromConfig } from '../../shared/lib/tiers';
+import { formatCustomerDate } from '../../shared/lib/customerUtils';
 import { formatDate } from '../../shared/lib/formatters';
 
 const CustomerProfile: React.FC = () => {
@@ -333,7 +334,7 @@ const CustomerProfile: React.FC = () => {
                 { label: 'Total Spent', value: `$${customer.totalSpent.toLocaleString()}` },
                 { label: 'Visits', value: customer.visits },
                 { label: 'Loyalty Points', value: customer.loyaltyPoints.toLocaleString() },
-                { label: 'Last Visit', value: customer.lastVisit || 'Never' },
+                { label: 'Last Visit', value: formatCustomerDate(customer.lastVisit) },
               ].map((s) => (
                 <Card key={s.label}>
                   <div

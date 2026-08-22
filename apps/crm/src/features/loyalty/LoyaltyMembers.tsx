@@ -6,6 +6,7 @@ import type { LoyaltyMember } from '../../shared/hooks/queries/useLoyalty';
 import { Button, PageHeader, Card, EmptyState, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge, PointsBadge } from '../../shared/components/crm';
 import { getCustomerTier } from '../../shared/lib/tiers';
+import { formatCustomerDate } from '../../shared/lib/customerUtils';
 import { Users } from 'lucide-react';
 
 const LoyaltyMembers: React.FC = () => {
@@ -126,7 +127,7 @@ const LoyaltyMembers: React.FC = () => {
                       {m.name}
                     </div>
                     <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                      {m.visits} visits • last active {m.lastActive || 'Never'}
+                      {m.visits} visits • last active {formatCustomerDate(m.lastActive)}
                     </div>
                   </div>
                   <TierBadge tier={getCustomerTier(m.points, m.tier)} />
