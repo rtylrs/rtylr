@@ -67,7 +67,9 @@ export function useKeyboardShortcuts() {
             navigate({ to: '/my-issues' });
             break;
           case 'd':
-            navigate({ to: `/w/${activeWorkspaceId}` as string });
+            // Was the workspace dashboard, which never had a route of its own.
+            // All projects is the reachability replacement for it.
+            navigate({ to: '/projects' });
             break;
           case 'c':
             navigate({ to: '/calendar' });

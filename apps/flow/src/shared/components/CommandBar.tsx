@@ -92,10 +92,10 @@ export const CommandBar: React.FC = () => {
         hint: 'G M',
       },
       {
-        id: 'nav-dash',
-        label: t('flow.commandBar.workspaceDashboard'),
+        id: 'nav-projects',
+        label: t('flow.allProjects.title'),
         icon: LayoutGrid,
-        action: () => navigate({ to: `/w/${activeWorkspaceId}` as string }),
+        action: () => navigate({ to: '/projects' }),
         group: 'nav',
       },
       {
@@ -205,7 +205,7 @@ export const CommandBar: React.FC = () => {
       group: 'project',
     }));
     return [...actionItems, ...navItems, ...projectItems, ...taskItems];
-  }, [tasks, projects, activeWorkspaceId, navigate, setQuickCreateOpen, query, searchResults, t]);
+  }, [tasks, projects, navigate, setQuickCreateOpen, query, searchResults, t]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return items;
