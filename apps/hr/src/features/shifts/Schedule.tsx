@@ -201,7 +201,8 @@ const Schedule: React.FC = () => {
                         }}
                       />
                     ))}
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={() => openNew(dayStr(d))}
                       style={{
                         padding: '6px',

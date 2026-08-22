@@ -177,7 +177,8 @@ const Documents: React.FC = () => {
                         {d.uploadedAt}
                       </td>
                       <td style={{ padding: '10px 12px', textAlign: 'right' }}>
-                        <button type="button"
+                        <button
+                          type="button"
                           onClick={() => setDeleteId(d.id)}
                           style={{
                             background: 'transparent',

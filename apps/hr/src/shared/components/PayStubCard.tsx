@@ -81,7 +81,8 @@ const PayStubCard: React.FC<Props> = ({ row, onPay, currency }) => {
           </div>
         </div>
         {row.status !== 'Paid' && onPay && (
-          <button type="button"
+          <button
+            type="button"
             onClick={() => onPay(row.id)}
             style={{
               display: 'flex',

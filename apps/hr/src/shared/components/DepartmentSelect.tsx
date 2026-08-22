@@ -102,7 +102,8 @@ const DepartmentSelect: React.FC<Props> = ({
             </div>
           )}
           {options.map((d: { id: number; name: string }) => (
-            <button type="button"
+            <button
+              type="button"
               key={d.id}
               onClick={() => {
                 onChange(d.name);
