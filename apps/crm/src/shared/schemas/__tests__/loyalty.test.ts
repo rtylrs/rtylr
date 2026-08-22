@@ -8,6 +8,7 @@ import {
   LOYALTY_TRANSACTION_TYPES,
   isEarnTransaction,
   isRedeemTransaction,
+  isActiveMember,
   getTransactionIcon,
   getTransactionLabel,
 } from '../loyalty';
@@ -150,6 +151,20 @@ describe('loyaltyMemberSchema', () => {
     };
     const result = loyaltyMemberSchema.parse(member);
     expect(result.id).toBe(99);
+  });
+
+  it('treats malformed activity dates as inactive', () => {
+    const member = loyaltyMemberSchema.parse({
+      id: 100,
+      name: 'Unknown',
+      initials: 'U',
+      points: 0,
+      tier: 'Bronze',
+      visits: 0,
+      joinedAt: '2024-01-01',
+      lastActive: 'not-a-date',
+    });
+    expect(isActiveMember(member)).toBe(false);
   });
 });
 

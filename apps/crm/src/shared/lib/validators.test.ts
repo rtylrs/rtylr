@@ -73,6 +73,9 @@ describe('isIsoDate', () => {
   it('rejects an empty string', () => {
     expect(isIsoDate('')).toBe(false);
   });
+  it('rejects an impossible calendar date', () => {
+    expect(isIsoDate('2024-02-30')).toBe(false);
+  });
 });
 
 describe('isValidPoints', () => {

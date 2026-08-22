@@ -95,6 +95,14 @@ describe('sortByRecency', () => {
     sortByRecency(campaigns);
     expect(campaigns).toEqual(original);
   });
+
+  it('keeps malformed timestamps after valid campaigns', () => {
+    const sorted = sortByRecency([
+      makeCampaign({ id: 1, updatedAt: 'not-a-date' }),
+      makeCampaign({ id: 2, updatedAt: '2024-05-10' }),
+    ]);
+    expect(sorted.map((campaign) => campaign.id)).toEqual([2, 1]);
+  });
 });
 
 describe('isScheduledInFuture', () => {

@@ -51,6 +51,9 @@ describe('formatDate', () => {
   it('returns empty string for an invalid date string', () => {
     expect(formatDate('not-a-date')).toBe('');
   });
+  it('returns empty string for an impossible calendar date', () => {
+    expect(formatDate('2024-02-30')).toBe('');
+  });
   it('formats a valid ISO date string', () => {
     expect(formatDate('2024-01-15')).toBe('Jan 15, 2024');
   });

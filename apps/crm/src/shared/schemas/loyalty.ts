@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { parseCrmDate } from '../lib/dateUtils';
 
 const finiteNumber = z.preprocess((value) => {
   if (value === null || value === undefined || value === '') return value;
@@ -299,8 +300,9 @@ export function getTransactionLabel(type: LoyaltyTransaction['type']): string {
 }
 
 export function isActiveMember(member: LoyaltyMember, atRiskDays = 90): boolean {
-  const last = new Date(member.lastActive);
+  const last = parseCrmDate(member.lastActive);
   const now = new Date();
+  if (!Number.isFinite(last.getTime())) return false;
   const diffMs = now.getTime() - last.getTime();
   const diffDays = diffMs / (1000 * 60 * 60 * 24);
   return diffDays <= atRiskDays;

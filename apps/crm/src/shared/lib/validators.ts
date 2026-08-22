@@ -1,5 +1,7 @@
 // Validation helpers for CRM forms.
 
+import { parseCrmDate } from './dateUtils';
+
 export function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
@@ -18,7 +20,7 @@ export function isInRange(value: number, min: number, max: number): boolean {
 
 export function isIsoDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  return !isNaN(new Date(value).getTime());
+  return Number.isFinite(parseCrmDate(value).getTime());
 }
 
 export function isValidPoints(points: number): boolean {

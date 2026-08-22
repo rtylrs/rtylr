@@ -1,5 +1,7 @@
 // Sorting utilities for CRM list views.
 
+import { parseCrmDate } from './dateUtils';
+
 export function compareStrings(a: string | undefined | null, b: string | undefined | null): number {
   return (a ?? '').toLowerCase().localeCompare((b ?? '').toLowerCase());
 }
@@ -8,13 +10,30 @@ export function compareNumbers(a: number, b: number): number {
   return a - b;
 }
 
+function dateTimestamp(value: string | undefined | null): number {
+  return value ? parseCrmDate(value).getTime() : NaN;
+}
+
 export function compareDates(a: string | undefined | null, b: string | undefined | null): number {
-  const ta = a ? new Date(a).getTime() : NaN;
-  const tb = b ? new Date(b).getTime() : NaN;
-  if (isNaN(ta) && isNaN(tb)) return 0;
-  if (isNaN(ta)) return 1;
-  if (isNaN(tb)) return -1;
+  const ta = dateTimestamp(a);
+  const tb = dateTimestamp(b);
+  if (!Number.isFinite(ta) && !Number.isFinite(tb)) return 0;
+  if (!Number.isFinite(ta)) return 1;
+  if (!Number.isFinite(tb)) return -1;
   return ta - tb;
+}
+
+/** Sorts valid dates newest first while keeping missing or malformed dates last. */
+export function compareDatesDescending(
+  a: string | undefined | null,
+  b: string | undefined | null
+): number {
+  const ta = dateTimestamp(a);
+  const tb = dateTimestamp(b);
+  if (!Number.isFinite(ta) && !Number.isFinite(tb)) return 0;
+  if (!Number.isFinite(ta)) return 1;
+  if (!Number.isFinite(tb)) return -1;
+  return tb - ta;
 }
 
 export function sortByKey<T>(

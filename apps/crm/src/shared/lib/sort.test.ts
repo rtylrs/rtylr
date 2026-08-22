@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { compareStrings, compareNumbers, compareDates, sortByKey } from './sort';
+import {
+  compareStrings,
+  compareNumbers,
+  compareDates,
+  compareDatesDescending,
+  sortByKey,
+} from './sort';
 
 describe('compareStrings', () => {
   it('returns 0 for equal strings', () => {
@@ -40,6 +46,18 @@ describe('compareDates', () => {
   });
   it('returns 0 when both are null', () => {
     expect(compareDates(null, null)).toBe(0);
+  });
+  it('puts malformed dates after valid dates', () => {
+    expect(compareDates('not-a-date', '2024-01-01')).toBeGreaterThan(0);
+    expect(compareDates('2024-01-01', 'not-a-date')).toBeLessThan(0);
+  });
+  it('rejects impossible calendar dates', () => {
+    expect(compareDates('2024-02-30', '2024-03-01')).toBeGreaterThan(0);
+  });
+
+  it('sorts descending without moving malformed dates ahead', () => {
+    expect(compareDatesDescending('2024-05-10', '2024-05-01')).toBeLessThan(0);
+    expect(compareDatesDescending('not-a-date', '2024-05-01')).toBeGreaterThan(0);
   });
 });
 

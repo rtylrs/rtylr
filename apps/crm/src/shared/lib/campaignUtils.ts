@@ -3,6 +3,7 @@
  */
 
 import type { Campaign } from '../schemas/campaigns';
+import { compareDatesDescending } from './sort';
 
 /** Filter campaigns by status. */
 export function filterCampaignsByStatus(campaigns: Campaign[], status: string): Campaign[] {
@@ -32,9 +33,7 @@ export function openRate(campaign: Campaign): number {
 
 /** Sort campaigns by updatedAt descending (newest first). Does not mutate. */
 export function sortByRecency(campaigns: Campaign[]): Campaign[] {
-  return [...campaigns].sort(
-    (a, b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime()
-  );
+  return [...campaigns].sort((a, b) => compareDatesDescending(a.updatedAt, b.updatedAt));
 }
 
 /** Return true if a campaign is scheduled for a future date. */

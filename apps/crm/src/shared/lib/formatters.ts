@@ -1,6 +1,7 @@
 // Formatting utilities for the CRM app.
 
 import { toFiniteNumber } from '@voxire/api';
+import { parseCrmDate } from './dateUtils';
 
 export function formatCurrency(amount: number, currency = 'USD', locale = 'en-US'): string {
   return new Intl.NumberFormat(locale, {
@@ -19,17 +20,9 @@ export function formatNumber(value: number, locale = 'en-US'): string {
   return new Intl.NumberFormat(locale).format(toFiniteNumber(value));
 }
 
-function parseDate(value: string): Date {
-  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (dateOnly) {
-    return new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]));
-  }
-  return new Date(value);
-}
-
 export function formatDate(value: string | Date | null | undefined, locale = 'en-US'): string {
   if (!value) return '';
-  const date = typeof value === 'string' ? parseDate(value) : value;
+  const date = typeof value === 'string' ? parseCrmDate(value) : value;
   if (isNaN(date.getTime())) return '';
   return date.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
 }

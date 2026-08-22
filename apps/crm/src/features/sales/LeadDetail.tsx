@@ -44,6 +44,7 @@ import {
   ConfirmModal,
 } from '../../shared/components/ui';
 import { formatDate } from '../../shared/lib/formatters';
+import { compareDatesDescending } from '../../shared/lib/sort';
 
 const STAGE_OPTIONS: Array<{ value: LeadStage; label: string }> = [
   { value: 'cold', label: 'Cold' },
@@ -113,8 +114,8 @@ const LeadDetail: React.FC = () => {
   const createContract = useCreateContract();
 
   const contract = (allContracts ?? []).find((c) => c.leadId === leadId);
-  const sortedTouchpoints = [...(touchpoints ?? [])].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  const sortedTouchpoints = [...(touchpoints ?? [])].sort((a, b) =>
+    compareDatesDescending(a.createdAt, b.createdAt)
   );
 
   // Stage change
