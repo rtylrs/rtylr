@@ -54,6 +54,7 @@ const CustomerProfile: React.FC = () => {
     NonNullable<typeof fetchedTimeline>['entries']
   >([]);
   const update = useUpdateCustomer();
+  const tagUpdate = useUpdateCustomer({ notify: false });
   const remove = useDeleteCustomer();
   const award = useAwardPoints();
   const redeem = useRedeemPoints();
@@ -115,7 +116,7 @@ const CustomerProfile: React.FC = () => {
   const consent = customer.consent || { email: false, sms: false, marketing: false };
 
   const handleAddTag = () => {
-    if (update.isPending) return;
+    if (tagUpdate.isPending) return;
     if (!newTag.trim()) {
       toast.error('Tag name is required');
       return;
@@ -126,7 +127,7 @@ const CustomerProfile: React.FC = () => {
       return;
     }
     const updated = [...tags, tagName];
-    update.mutate(
+    tagUpdate.mutate(
       { id: customer.id, data: { tags: updated } },
       {
         onSuccess: () => {
@@ -139,9 +140,9 @@ const CustomerProfile: React.FC = () => {
   };
 
   const handleRemoveTag = (tag: string) => {
-    if (update.isPending) return;
+    if (tagUpdate.isPending) return;
     const updated = tags.filter((t) => t !== tag);
-    update.mutate(
+    tagUpdate.mutate(
       { id: customer.id, data: { tags: updated } },
       {
         onSuccess: () => toast.success(`Tag "${tag}" removed`),
@@ -385,7 +386,7 @@ const CustomerProfile: React.FC = () => {
                     key={`${t}-${i}`}
                     label={t}
                     onRemove={() => handleRemoveTag(t)}
-                    disabled={update.isPending}
+                    disabled={tagUpdate.isPending}
                   />
                 ))}
                 {tags.length === 0 && (
@@ -420,7 +421,7 @@ const CustomerProfile: React.FC = () => {
                 <Button
                   variant="primary"
                   onClick={handleAddTag}
-                  disabled={update.isPending || !newTag.trim()}
+                  disabled={tagUpdate.isPending || !newTag.trim()}
                   style={{ padding: '6px 12px' }}
                 >
                   Add
