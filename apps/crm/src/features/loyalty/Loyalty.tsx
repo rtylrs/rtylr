@@ -269,7 +269,14 @@ const Loyalty: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
             <button
               type="button"
-              onClick={() => updateConfig.mutate({ pointsPerDollar })}
+              onClick={() =>
+                updateConfig.mutate(
+                  { pointsPerDollar },
+                  {
+                    onError: () => setPointsPerDollar(config?.pointsPerDollar ?? 1),
+                  }
+                )
+              }
               disabled={updateConfig.isPending || configUnavailable}
               style={{
                 padding: '8px 20px',
