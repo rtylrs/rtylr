@@ -128,6 +128,22 @@ func (m *mockRepo) UpdatePaddleSubscription(_ context.Context, _ int64, _, _, _ 
 	return !m.paddleUpdateMissing, m.paddleUpdateErr
 }
 
+func (m *mockRepo) ApplyPaddleSubscriptionEvent(_ context.Context, _, _ string, _ time.Time, fallbackOwnerID int64, _, _ string) (bool, int64, error) {
+	if !m.eventNew {
+		return false, 0, nil
+	}
+	if m.paddleUpdateErr != nil {
+		return false, 0, m.paddleUpdateErr
+	}
+	if m.paddleUpdateMissing {
+		return false, 0, errors.New("no subscription row")
+	}
+	if m.paddleOwnerErr != nil && fallbackOwnerID == 0 {
+		return false, 0, m.paddleOwnerErr
+	}
+	return m.eventNew, fallbackOwnerID, nil
+}
+
 func (m *mockRepo) RecordPaddleEvent(_ context.Context, _, _ string, _ time.Time) (bool, error) {
 	return m.eventNew, nil
 }
@@ -349,9 +365,9 @@ func TestHandlePaddleWebhook_ResolvesOwnerFromCustomData(t *testing.T) {
 		Status:     "active",
 		CustomData: map[string]string{"owner_id": "42"},
 	}
-	err := s.HandlePaddleWebhook(context.Background(), paddlePkg.WebhookEvent{}, data)
-	// Will fail at UpdatePaddleSubscription since the mock returns nil for that,
-	// meaning the owner resolution succeeded and we got to the repo call.
+	err := s.HandlePaddleWebhook(context.Background(), paddlePkg.WebhookEvent{EventID: "evt_owner"}, data)
+	// The transaction mock treats this as a duplicate after the fallback owner
+	// was parsed, so the handler acknowledges it without a second write.
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}

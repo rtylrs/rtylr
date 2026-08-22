@@ -596,6 +596,96 @@ func (r *Repository) UpdatePaddleSubscription(ctx context.Context, ownerID int64
 	return n > 0, nil
 }
 
+// ApplyPaddleSubscriptionEvent atomically deduplicates and orders a webhook
+// with the subscription transition. A failed update rolls back the ledger
+// insert so Paddle can retry when a subscription row is created later.
+func (r *Repository) ApplyPaddleSubscriptionEvent(ctx context.Context, eventID, paddleSubID string, occurredAt time.Time, fallbackOwnerID int64, paddleCustID, status string) (bool, int64, error) {
+	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		return false, 0, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	var lastOccurred sql.NullTime
+	err = tx.QueryRowContext(ctx, `
+		SELECT occurred_at
+		FROM paddle_webhook_events
+		WHERE paddle_subscription_id = ?
+		ORDER BY occurred_at DESC
+		LIMIT 1
+		FOR UPDATE`, paddleSubID).Scan(&lastOccurred)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return false, 0, err
+	}
+	if err == nil && lastOccurred.Valid && occurredAt.Before(lastOccurred.Time) {
+		if _, err := tx.ExecContext(ctx, `
+			INSERT IGNORE INTO paddle_webhook_events (event_id, paddle_subscription_id, occurred_at)
+			VALUES (?, ?, ?)`, eventID, paddleSubID, occurredAt); err != nil {
+			return false, 0, err
+		}
+		if err := tx.Commit(); err != nil {
+			return false, 0, err
+		}
+		return false, 0, nil
+	}
+
+	qtx := r.queries.WithTx(tx)
+	res, err := qtx.InsertPaddleEventIfNew(ctx, sqlc.InsertPaddleEventIfNewParams{
+		EventID:              eventID,
+		PaddleSubscriptionID: paddleSubID,
+		OccurredAt:           occurredAt,
+	})
+	if err != nil {
+		return false, 0, err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return false, 0, err
+	}
+	if n == 0 {
+		if err := tx.Commit(); err != nil {
+			return false, 0, err
+		}
+		return false, 0, nil
+	}
+
+	ownerID, ownerErr := qtx.GetOwnerIDByPaddleSubscription(ctx, sql.NullString{String: paddleSubID, Valid: true})
+	if errors.Is(ownerErr, sql.ErrNoRows) {
+		ownerID = fallbackOwnerID
+		ownerErr = nil
+	}
+	if ownerErr != nil {
+		return false, 0, ownerErr
+	}
+	if ownerID == 0 {
+		return false, 0, fmt.Errorf("cannot resolve owner from paddle subscription %s", paddleSubID)
+	}
+
+	updateResult, err := qtx.UpdatePaddleSubscription(ctx, sqlc.UpdatePaddleSubscriptionParams{
+		PaddleSubscriptionID: sql.NullString{String: paddleSubID, Valid: true},
+		PaddleCustomerID:     sql.NullString{String: paddleCustID, Valid: paddleCustID != ""},
+		Status: sqlc.NullSubscriptionsStatus{
+			SubscriptionsStatus: sqlc.SubscriptionsStatus(status),
+			Valid:               status != "",
+		},
+		OwnerID: ownerID,
+	})
+	if err != nil {
+		return false, 0, err
+	}
+	updated, err := updateResult.RowsAffected()
+	if err != nil {
+		return false, 0, err
+	}
+	if updated == 0 {
+		return false, 0, fmt.Errorf("no subscription row for owner %d yet; retry after local creation", ownerID)
+	}
+	if err := tx.Commit(); err != nil {
+		return false, 0, err
+	}
+	return true, ownerID, nil
+}
+
 // RecordPaddleEvent inserts the event id into the dedupe ledger and reports
 // whether it was new. Duplicate deliveries return false so handlers can ack
 // without re-applying a transition.

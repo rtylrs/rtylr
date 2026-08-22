@@ -402,36 +402,11 @@ func (s *Service) CreateCheckout(ctx context.Context, ownerID int64, planSlug, o
 // later cancellation (#755). Unknown statuses leave the row untouched rather
 // than silently re-activating it.
 func (s *Service) HandlePaddleWebhook(ctx context.Context, event paddlePkg.WebhookEvent, data paddlePkg.SubscriptionData) error {
-	isNew, err := s.repo.RecordPaddleEvent(ctx, event.EventID, data.ID, event.OccurredAt)
-	if err != nil {
-		return fmt.Errorf("record paddle event %s: %w", event.EventID, err)
+	if event.EventID == "" {
+		return errors.New("paddle webhook event_id required")
 	}
-	if !isNew {
-		logger.Ctx(ctx).Info("duplicate paddle webhook ignored",
-			logger.String("event_id", event.EventID),
-			logger.String("event_type", event.EventType))
-		return nil
-	}
-
-	if last, exists, lerr := s.repo.LastPaddleEventAt(ctx, data.ID); lerr == nil && exists && event.OccurredAt.Before(last) {
-		logger.Ctx(ctx).Warn("out-of-order paddle webhook ignored",
-			logger.String("event_id", event.EventID),
-			logger.Any("occurred_at", event.OccurredAt),
-			logger.Any("last_applied", last))
-		return nil
-	}
-
-	ownerID, err := s.repo.GetOwnerIDByPaddleSubscription(ctx, data.ID)
-	if err != nil {
-		// Subscription might not exist yet (first webhook before our DB is updated)
-		ownerIDRaw := data.CustomData["owner_id"]
-		if ownerIDRaw == "" {
-			return fmt.Errorf("cannot resolve owner from paddle subscription %s", data.ID)
-		}
-		_, scanErr := fmt.Sscanf(ownerIDRaw, "%d", &ownerID)
-		if scanErr != nil || ownerID == 0 {
-			return fmt.Errorf("invalid owner_id in custom_data: %s", ownerIDRaw)
-		}
+	if data.ID == "" {
+		return errors.New("paddle subscription id required")
 	}
 
 	status, ok := mapPaddleStatus(data.Status)
@@ -442,14 +417,22 @@ func (s *Service) HandlePaddleWebhook(ctx context.Context, event paddlePkg.Webho
 		return nil
 	}
 
-	updated, err := s.repo.UpdatePaddleSubscription(ctx, ownerID, data.ID, data.CustomerID, status)
+	var fallbackOwnerID int64
+	if ownerIDRaw := data.CustomData["owner_id"]; ownerIDRaw != "" {
+		if _, err := fmt.Sscanf(ownerIDRaw, "%d", &fallbackOwnerID); err != nil || fallbackOwnerID == 0 {
+			return fmt.Errorf("invalid owner_id in custom_data: %s", ownerIDRaw)
+		}
+	}
+
+	applied, ownerID, err := s.repo.ApplyPaddleSubscriptionEvent(ctx, event.EventID, data.ID, event.OccurredAt, fallbackOwnerID, data.CustomerID, status)
 	if err != nil {
 		return err
 	}
-	if !updated {
-		// Row not there yet — fail so Paddle retries after normal signup flow
-		// creates it, instead of silently leaving a paying customer locked out.
-		return fmt.Errorf("no subscription row for owner %d yet; retry after local creation", ownerID)
+	if !applied {
+		logger.Ctx(ctx).Info("duplicate or out-of-order paddle webhook ignored",
+			logger.String("event_id", event.EventID),
+			logger.String("event_type", event.EventType))
+		return nil
 	}
 	invalidateSubscriptionScope(ctx, ownerID)
 	return nil

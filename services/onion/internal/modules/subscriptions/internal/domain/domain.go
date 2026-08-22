@@ -149,6 +149,7 @@ type Repository interface {
 	UpdateSeatCount(ctx context.Context, ownerID int64, seatCount int) error
 	GetBillingHistory(ctx context.Context, ownerID int64, limit int) ([]BillingHistoryMonth, error)
 	UpdatePaddleSubscription(ctx context.Context, ownerID int64, paddleSubID, paddleCustID, status string) (bool, error)
+	ApplyPaddleSubscriptionEvent(ctx context.Context, eventID, paddleSubID string, occurredAt time.Time, fallbackOwnerID int64, paddleCustID, status string) (bool, int64, error)
 	RecordPaddleEvent(ctx context.Context, eventID, paddleSubID string, occurredAt time.Time) (bool, error)
 	LastPaddleEventAt(ctx context.Context, paddleSubID string) (time.Time, bool, error)
 	GetOwnerIDByPaddleSubscription(ctx context.Context, paddleSubID string) (int64, error)
