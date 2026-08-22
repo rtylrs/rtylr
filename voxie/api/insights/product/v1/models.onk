@@ -61,9 +61,29 @@ message GetCategoryPerformanceResponse {
 
 message GetProductMarginsRequest {}
 
+message ProductMargin {
+  /// product_id is the ERP product.
+  product_id: int64
+  /// name is the product name at the time of the report.
+  name: string
+  /// units_sold is the quantity sold in the period.
+  units_sold: float64
+  /// revenue_minor_units is gross sales value in the smallest unit of the
+  /// reporting currency.
+  revenue_minor_units: int64
+  /// cost_minor_units is units_sold multiplied by the product's cost price,
+  /// in the same minor unit. Absent when the product has no cost price on
+  /// record, which is distinct from a cost of zero.
+  cost_minor_units: int64? @nullable
+}
+
 message GetProductMarginsResponse {
   /// buckets is the buckets value for this contract.
   buckets: MarginBucket[]
+  /// products is one row per product sold in the period, so margin per item
+  /// is answerable without pulling the ERP catalogue client-side. Absent when
+  /// the report is requested at distribution granularity only.
+  products: ProductMargin[]
 }
 
 message GetProductPerformanceRequest {}
