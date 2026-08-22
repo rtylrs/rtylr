@@ -338,6 +338,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
                     const Icon = item.icon;
                     return (
                       <button
+                        type="button"
                         key={item.id}
                         onClick={() => {
                           item.action();

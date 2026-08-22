@@ -41,6 +41,7 @@ const SegmentDetail: React.FC = () => {
       <div style={{ maxWidth: '1100px' }}>
         <Breadcrumbs items={[{ label: 'Segments', to: '/segments' }, { label: segment.name }]} />
         <button
+          type="button"
           onClick={() => navigate({ to: '/segments' })}
           style={{
             background: 'transparent',

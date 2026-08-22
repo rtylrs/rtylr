@@ -303,6 +303,7 @@ function CampaignCard({
         <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
           {campaign.status === 'Draft' && (
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onLaunch();
@@ -325,6 +326,7 @@ function CampaignCard({
           )}
           {campaign.status === 'Active' && (
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onPause();
@@ -346,6 +348,7 @@ function CampaignCard({
             </button>
           )}
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onEdit();
@@ -364,6 +367,7 @@ function CampaignCard({
             {campaign.status === 'Completed' ? 'View Report' : 'Edit'}
           </button>
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onDelete();
@@ -490,6 +494,7 @@ const Campaigns: React.FC = () => {
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button
+              type="button"
               onClick={() => navigate({ to: '/campaigns/sms' })}
               style={{
                 display: 'flex',
@@ -508,6 +513,7 @@ const Campaigns: React.FC = () => {
               <MessageSquare size={14} /> New SMS
             </button>
             <button
+              type="button"
               onClick={() => navigate({ to: '/campaigns/email' })}
               style={{
                 display: 'flex',
@@ -542,6 +548,7 @@ const Campaigns: React.FC = () => {
         >
           {statusFilters.map((f) => (
             <button
+              type="button"
               key={f}
               onClick={() => setStatusFilter(f)}
               style={{

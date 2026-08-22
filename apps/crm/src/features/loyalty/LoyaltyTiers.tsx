@@ -128,6 +128,7 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
       </div>
       <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
         <button
+          type="button"
           onClick={onClose}
           style={{
             padding: '5px 12px',
@@ -143,6 +144,7 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
           Cancel
         </button>
         <button
+          type="button"
           onClick={handleSave}
           disabled={
             upsert.isPending ||
@@ -255,6 +257,7 @@ const LoyaltyTiers: React.FC = () => {
                     <Award size={22} />
                   </div>
                   <button
+                    type="button"
                     aria-label={`Edit ${t.name} tier`}
                     onClick={() => setEditingId(editingId === t.id ? null : t.id)}
                     style={{

@@ -330,6 +330,7 @@ const Customers: React.FC = () => {
           >
             {tierFilters.map((t) => (
               <button
+                type="button"
                 key={t}
                 onClick={() => {
                   setTierFilter(t);

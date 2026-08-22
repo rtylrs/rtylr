@@ -179,6 +179,7 @@ const Automations: React.FC = () => {
                       </span>
                       {a.status !== 'draft' && (
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleToggleStatus(a.id, a.status);
@@ -203,6 +204,7 @@ const Automations: React.FC = () => {
                         </button>
                       )}
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           setConfirmDeleteId(a.id);

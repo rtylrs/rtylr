@@ -148,6 +148,7 @@ const AutomationBuilder: React.FC = () => {
               </h4>
               {triggers.map((t) => (
                 <button
+                  type="button"
                   key={t.label}
                   onClick={() => addTrigger(t)}
                   style={{
@@ -188,6 +189,7 @@ const AutomationBuilder: React.FC = () => {
                 const Icon = a.icon;
                 return (
                   <button
+                    type="button"
                     key={a.label}
                     onClick={() => addAction(a)}
                     style={{

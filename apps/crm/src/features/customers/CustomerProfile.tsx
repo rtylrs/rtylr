@@ -219,6 +219,7 @@ const CustomerProfile: React.FC = () => {
       <div style={{ maxWidth: '1100px' }}>
         <Breadcrumbs items={[{ label: 'Customers', to: '/customers' }, { label: customer.name }]} />
         <button
+          type="button"
           onClick={() => navigate({ to: '/customers' })}
           style={{
             background: 'transparent',

@@ -57,6 +57,7 @@ const CampaignDetail: React.FC = () => {
       <div style={{ maxWidth: '1200px' }}>
         <Breadcrumbs items={[{ label: 'Campaigns', to: '/campaigns' }, { label: campaign.name }]} />
         <button
+          type="button"
           onClick={() => navigate({ to: '/campaigns' })}
           style={{
             background: 'transparent',

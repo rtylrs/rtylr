@@ -103,6 +103,7 @@ const SegmentBuilder: React.FC = () => {
                 <div style={{ display: 'flex', gap: '6px' }}>
                   {['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#e879f9'].map((c) => (
                     <button
+                      type="button"
                       key={c}
                       onClick={() => setColor(c)}
                       style={{
@@ -161,6 +162,7 @@ const SegmentBuilder: React.FC = () => {
                   { key: false, label: 'Match any' },
                 ].map((o) => (
                   <button
+                    type="button"
                     key={String(o.key)}
                     onClick={() => setMatchAll(o.key)}
                     style={{

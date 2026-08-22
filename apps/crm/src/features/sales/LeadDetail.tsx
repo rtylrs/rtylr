@@ -267,6 +267,7 @@ const LeadDetail: React.FC = () => {
         {/* Back + header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button
+            type="button"
             aria-label="Back to leads"
             onClick={() => navigate({ to: '/sales/leads' })}
             style={{
@@ -521,6 +522,7 @@ const LeadDetail: React.FC = () => {
                         )}
                       </div>
                       <button
+                        type="button"
                         aria-label="Delete touchpoint"
                         onClick={() => {
                           if (!deleteTouchpoint.isPending) setDeleteTpId(tp.id);
@@ -634,6 +636,7 @@ const LeadDetail: React.FC = () => {
                   Contacts
                 </p>
                 <button
+                  type="button"
                   aria-label="Add contact"
                   onClick={() => setContactOpen((v) => !v)}
                   disabled={createContact.isPending || deleteContact.isPending}
@@ -794,6 +797,7 @@ const LeadDetail: React.FC = () => {
                       )}
                     </div>
                     <button
+                      type="button"
                       aria-label="Delete contact"
                       onClick={() => {
                         if (!deleteContact.isPending) setDeleteContactId(c.id);
@@ -833,6 +837,7 @@ const LeadDetail: React.FC = () => {
                 </p>
                 {!contract && !contractsError && (
                   <button
+                    type="button"
                     aria-label="Add contract"
                     onClick={() => setContractOpen((v) => !v)}
                     style={{

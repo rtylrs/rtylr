@@ -545,6 +545,7 @@ const Dashboard: React.FC = () => {
               </span>
             </div>
             <button
+              type="button"
               onClick={() => navigate({ to: '/campaigns/email', search: { name: 'Win-back' } })}
               style={{
                 fontSize: '12px',

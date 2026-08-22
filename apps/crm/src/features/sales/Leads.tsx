@@ -356,6 +356,7 @@ const Leads: React.FC = () => {
                       <td style={{ padding: '12px 16px' }} onClick={(e) => e.stopPropagation()}>
                         <div style={{ display: 'flex', gap: '6px' }}>
                           <button
+                            type="button"
                             aria-label="View lead"
                             onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
                             style={{
@@ -374,6 +375,7 @@ const Leads: React.FC = () => {
                             <Eye size={13} />
                           </button>
                           <button
+                            type="button"
                             aria-label="Delete lead"
                             onClick={() => setDeleteId(lead.id)}
                             disabled={deleteLead.isPending}
