@@ -256,6 +256,7 @@ const TeamTab: React.FC = () => {
           <div className="crm-form-grid" style={{ display: 'grid', gap: 12, marginBottom: 12 }}>
             <div>
               <label
+                htmlFor="crm-team-full-name"
                 style={{
                   display: 'block',
                   fontSize: 11,
@@ -267,7 +268,9 @@ const TeamTab: React.FC = () => {
                 Full name
               </label>
               <input
+                id="crm-team-full-name"
                 type="text"
+                autoComplete="name"
                 placeholder="Jane Smith"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
@@ -276,6 +279,7 @@ const TeamTab: React.FC = () => {
             </div>
             <div>
               <label
+                htmlFor="crm-team-email"
                 style={{
                   display: 'block',
                   fontSize: 11,
@@ -287,7 +291,9 @@ const TeamTab: React.FC = () => {
                 Email
               </label>
               <input
+                id="crm-team-email"
                 type="email"
+                autoComplete="email"
                 placeholder="jane@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

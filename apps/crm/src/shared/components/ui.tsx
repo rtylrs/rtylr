@@ -216,19 +216,29 @@ export const Modal: React.FC<{
 }> = ({ open, onClose, title, children, footer, size = 'md' }) => {
   const titleId = React.useId();
   const closeButtonRef = React.useRef<HTMLButtonElement>(null);
+  const onCloseRef = React.useRef(onClose);
+
+  React.useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   React.useEffect(() => {
     if (!open) return;
+    const previouslyFocused =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onClose();
+        onCloseRef.current();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     closeButtonRef.current?.focus();
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose, open]);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      if (previouslyFocused?.isConnected) previouslyFocused.focus();
+    };
+  }, [open]);
 
   if (!open) return null;
   const widths = { sm: '380px', md: '520px', lg: '720px' };
@@ -306,6 +316,7 @@ export const Modal: React.FC<{
             style={{
               display: 'flex',
               justifyContent: 'flex-end',
+              flexWrap: 'wrap',
               gap: '8px',
               padding: '12px 18px',
               borderTop: '1px solid var(--hub-border)',

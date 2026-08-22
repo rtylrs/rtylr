@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -27,6 +27,19 @@ const MergeCustomers: React.FC = () => {
   );
   const [secondaryId, setSecondaryId] = useState<number | null>(null);
   const [confirmMerge, setConfirmMerge] = useState(false);
+
+  useEffect(() => {
+    const requestedPrimary = Number(new URLSearchParams(searchStr).get('primary'));
+    const nextPrimary =
+      Number.isInteger(requestedPrimary) && requestedPrimary > 0 ? requestedPrimary : null;
+    setPrimaryId(nextPrimary);
+    setSecondaryId((current) => (current === nextPrimary ? null : current));
+  }, [searchStr]);
+
+  const handlePrimaryChange = (nextPrimary: number | null): void => {
+    setPrimaryId(nextPrimary);
+    setSecondaryId((current) => (current === nextPrimary ? null : current));
+  };
 
   const primary = customers.find((c) => c.id === primaryId);
   const secondary = customers.find((c) => c.id === secondaryId);
@@ -157,7 +170,8 @@ const MergeCustomers: React.FC = () => {
               <SearchableCustomerSelect
                 customers={customers}
                 value={primaryId}
-                onChange={setPrimaryId}
+                onChange={handlePrimaryChange}
+                ariaLabel="Primary customer"
               />
               {primary && (
                 <div
@@ -196,6 +210,7 @@ const MergeCustomers: React.FC = () => {
                 customers={customers.filter((c) => c.id !== primaryId)}
                 value={secondaryId}
                 onChange={setSecondaryId}
+                ariaLabel="Secondary customer"
               />
               {secondary && (
                 <div

@@ -19,7 +19,7 @@ import {
   User,
 } from 'lucide-react';
 import { Tier, tierColor, getTier, getCustomerTier, pointsToNextTier } from '../lib/tiers';
-import { activateOnKeyboard } from '../lib/keyboard';
+import { activateOnKeyboard, useEscapeKey } from '../lib/keyboard';
 import { ACCENT, Input, Select, Button } from './ui';
 import type { TimelineEntry, Customer } from '../services/crmApi';
 
@@ -452,6 +452,7 @@ export const SMSComposer: React.FC<{
         ))}
       </div>
       <textarea
+        aria-label="SMS message"
         value={body}
         onChange={(e) => onChange(e.target.value)}
         rows={5}
@@ -516,6 +517,7 @@ export const SegmentRuleRow: React.FC<{
     }}
   >
     <Select
+      aria-label="Segment rule field"
       value={rule.field}
       onChange={(e) => onChange({ ...rule, field: e.target.value })}
       style={{ flex: 1 }}
@@ -527,6 +529,7 @@ export const SegmentRuleRow: React.FC<{
       ))}
     </Select>
     <Select
+      aria-label="Segment rule operator"
       value={rule.operator}
       onChange={(e) => onChange({ ...rule, operator: e.target.value })}
       style={{ width: '130px' }}
@@ -538,6 +541,7 @@ export const SegmentRuleRow: React.FC<{
       ))}
     </Select>
     <Input
+      aria-label="Segment rule value"
       value={rule.value}
       onChange={(e) => onChange({ ...rule, value: e.target.value })}
       placeholder="value"
@@ -729,11 +733,13 @@ export const LoyaltyPointsInput: React.FC<{
       </h4>
       <Input
         type="number"
+        aria-label="Points amount"
         placeholder="Amount"
         value={points || ''}
         onChange={(e) => setPoints(Number(e.target.value) || 0)}
       />
       <Input
+        aria-label="Points adjustment reason"
         placeholder="Reason (optional)"
         value={reason}
         onChange={(e) => setReason(e.target.value)}
@@ -914,20 +920,40 @@ export const SearchableCustomerSelect: React.FC<{
   value: number | null;
   onChange: (id: number | null) => void;
   placeholder?: string;
-}> = ({ customers, value, onChange, placeholder = 'Select customer...' }) => {
+  ariaLabel?: string;
+}> = ({ customers, value, onChange, placeholder = 'Select customer...', ariaLabel }) => {
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const listboxId = React.useId();
   const selected = customers.find((c) => c.id === value);
   const filtered = customers.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.email.toLowerCase().includes(search.toLowerCase())
   );
+  const close = React.useCallback(() => {
+    setOpen(false);
+    setSearch('');
+  }, []);
+  useEscapeKey(open, close);
+  useEffect(() => {
+    if (!open) return;
+    const handlePointerDown = (event: PointerEvent): void => {
+      if (!containerRef.current?.contains(event.target as Node)) close();
+    };
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, [close, open]);
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div ref={containerRef} style={{ position: 'relative' }}>
       <button
         type="button"
+        aria-label={ariaLabel ?? placeholder}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        aria-controls={listboxId}
         onClick={() => setOpen((o) => !o)}
         style={{
           width: '100%',
@@ -967,6 +993,9 @@ export const SearchableCustomerSelect: React.FC<{
             display: 'flex',
             flexDirection: 'column',
           }}
+          id={listboxId}
+          role="listbox"
+          aria-label={`${ariaLabel ?? placeholder} options`}
         >
           <input
             autoFocus
@@ -1000,11 +1029,12 @@ export const SearchableCustomerSelect: React.FC<{
             {filtered.map((c) => (
               <button
                 type="button"
+                role="option"
+                aria-selected={c.id === value}
                 key={c.id}
                 onClick={() => {
                   onChange(c.id);
-                  setOpen(false);
-                  setSearch('');
+                  close();
                 }}
                 style={{
                   display: 'flex',
