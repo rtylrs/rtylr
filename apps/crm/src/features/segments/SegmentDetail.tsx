@@ -11,7 +11,7 @@ const SegmentDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
   const navigate = useNavigate();
   const { data: fetched, isLoading: segmentLoading, error: segmentError } = useGetSegment(id);
-  const { data: fetchedCustomers, isLoading } = useSegmentCustomers(id);
+  const { data: fetchedCustomers, isLoading, isError: customersError } = useSegmentCustomers(id);
   const segment = fetched;
   const customers = fetchedCustomers ?? [];
 
@@ -179,6 +179,12 @@ const SegmentDetail: React.FC = () => {
             <div style={{ padding: '16px' }}>
               <SkeletonList count={5} />
             </div>
+          ) : customersError ? (
+            <EmptyState
+              icon={PieChart}
+              title="Unable to load customers"
+              description="Refresh and try again."
+            />
           ) : customers.length === 0 ? (
             <EmptyState icon={PieChart} title="No customers" description="This segment is empty." />
           ) : (

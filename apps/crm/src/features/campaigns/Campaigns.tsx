@@ -110,7 +110,7 @@ const statusColor: Record<CampaignStatus, { bg: string; text: string; dot: strin
   Cancelled: { bg: 'rgba(239,68,68,0.12)', text: '#ef4444', dot: '#ef4444' },
 };
 
-const channelIcon: Record<Channel, React.ComponentType<{ size?: number }>> = {
+const channelIcon: Record<Channel, React.ComponentType<{ size?: number; color?: string }>> = {
   Email: Mail,
   SMS: MessageSquare,
   Push: Bell,
@@ -228,10 +228,7 @@ function CampaignCard({
               flexShrink: 0,
             }}
           >
-            <ChannelIcon
-              size={16}
-              {...({ style: { color: channelColor[campaign.channel] } } as any)}
-            />
+            <ChannelIcon size={16} color={channelColor[campaign.channel]} />
           </div>
           <div style={{ minWidth: 0 }}>
             <div
@@ -406,7 +403,7 @@ const Campaigns: React.FC = () => {
     isFetching,
     isError,
   } = useListCampaigns(pageSize, offset);
-  const { data: fetchedSegments } = useListSegments();
+  const { data: fetchedSegments, isError: segmentsError } = useListSegments();
   const updateStatus = useUpdateCampaignStatus();
   const removeCampaign = useDeleteCampaign();
   useEffect(() => {
@@ -437,8 +434,17 @@ const Campaigns: React.FC = () => {
   const filtered = campaigns.filter((c) => statusFilter === 'All' || c.status === statusFilter);
 
   const handleLaunch = (id: number): void => {
+    if (updateStatus.isPending) return;
     const campaign = campaigns.find((c) => c.id === id);
-    if (fetchedSegments !== undefined && (campaign?.audience ?? 0) <= 0) {
+    if (segmentsError || fetchedSegments === undefined) {
+      toast.error(
+        segmentsError
+          ? 'Cannot verify the campaign audience right now'
+          : 'Audience data is still loading'
+      );
+      return;
+    }
+    if ((campaign?.audience ?? 0) <= 0) {
       toast.error('No eligible recipients for this campaign');
       return;
     }
@@ -452,6 +458,7 @@ const Campaigns: React.FC = () => {
   };
 
   const handlePause = (id: number): void => {
+    if (updateStatus.isPending) return;
     updateStatus.mutate(
       { id, status: 'paused' },
       {
@@ -471,6 +478,7 @@ const Campaigns: React.FC = () => {
   };
 
   const handleDelete = (id: number): void => {
+    if (removeCampaign.isPending) return;
     removeCampaign.mutate(id, {
       onSuccess: () => {
         toast.success('Campaign deleted');
@@ -627,6 +635,15 @@ const Campaigns: React.FC = () => {
                 : 'No campaigns in this status.'}
             </div>
           )}
+          {isError && campaigns.length > 0 && (
+            <div
+              role="alert"
+              style={{ padding: '10px 16px', color: 'var(--hub-text-muted)', fontSize: '12px' }}
+            >
+              Unable to load more campaigns. The cards shown may be incomplete; refresh and try
+              again.
+            </div>
+          )}
           {hasMore && (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0 8px' }}>
               <button
@@ -659,7 +676,8 @@ const Campaigns: React.FC = () => {
               ? `Are you sure you want to delete ${deleteTarget.name}? This action cannot be undone.`
               : ''
           }
-          confirmLabel="Delete"
+          confirmLabel={removeCampaign.isPending ? 'Deleting…' : 'Delete'}
+          confirmDisabled={removeCampaign.isPending}
           variant="danger"
         />
       </div>

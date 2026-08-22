@@ -38,6 +38,86 @@ describe('loyaltyTransactionSchema', () => {
     const result = loyaltyTransactionSchema.parse(tx);
     expect(result.type).toBe('earn');
   });
+
+  it('parses backend upgrade transactions in the activity log', () => {
+    const result = loyaltyTransactionSchema.parse({
+      id: 8,
+      customerId: 42,
+      type: 'upgrade',
+      points: 0,
+      balanceBefore: 500,
+      balanceAfter: 500,
+      description: 'Reached Gold tier',
+      createdAt: '2026-08-21T10:00:00Z',
+    });
+    expect(result.type).toBe('upgrade');
+    expect(result.customer).toBe('42');
+  });
+
+  it('coerces backend int64 strings without losing points or balances', () => {
+    const result = loyaltyTransactionSchema.parse({
+      id: '9',
+      customerId: '42',
+      type: 'earn',
+      points: '125',
+      balanceBefore: '500',
+      balanceAfter: '625',
+      description: 'Purchase',
+      createdAt: '2026-08-21T10:00:00Z',
+    });
+    expect(result.points).toBe(125);
+    expect(result.balanceAfter).toBe(625);
+  });
+});
+
+describe('backend loyalty config and tier values', () => {
+  it('coerces int64 configuration and tier thresholds', () => {
+    const config = loyaltyConfigSchema.parse({
+      isEnabled: true,
+      pointsPerCurrencyUnit: 2,
+      currencyPerPoint: 0.01,
+      bronzeMin: '0',
+      silverMin: '500',
+      goldMin: '1500',
+      platinumMin: '5000',
+      bronzeDiscountPct: 0,
+      silverDiscountPct: 5,
+      goldDiscountPct: 10,
+      platinumDiscountPct: 15,
+      pointsExpiryDays: '730',
+    });
+    const tier = loyaltyTierSchema.parse({
+      id: '1',
+      name: 'Gold',
+      minPoints: '1500',
+      discountPct: 10,
+      perks: '[]',
+      sortOrder: '2',
+    });
+
+    expect(config.goldMin).toBe(1500);
+    expect(config.pointsExpiry).toBe(730);
+    expect(tier.threshold).toBe(1500);
+    expect(tier.sortOrder).toBe(2);
+  });
+
+  it('parses the mounted legacy loyalty config response', () => {
+    const config = loyaltyConfigSchema.parse({
+      id: '7',
+      ownerId: '3',
+      pointsPerDollar: 2,
+      minRedemptionPoints: 100,
+      pointsValue: 0.01,
+      isActive: true,
+      updatedAt: '2026-08-22T00:00:00Z',
+    });
+
+    expect(config.programEnabled).toBe(true);
+    expect(config.pointsPerDollar).toBe(2);
+    expect(config.minRedemptionPoints).toBe(100);
+    expect(config.redemptionRate).toBe(0.01);
+    expect(config.pointsExpiry).toBe(365);
+  });
 });
 
 describe('loyaltyMemberSchema', () => {

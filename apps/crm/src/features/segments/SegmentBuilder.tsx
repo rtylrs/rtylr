@@ -35,10 +35,11 @@ const SegmentBuilder: React.FC = () => {
     const ruleStrings = rules.map((r) => `${r.field} ${r.operator} ${r.value}`);
     create.mutate(
       {
-        name,
-        description,
+        name: name.trim(),
+        description: description.trim() || name.trim(),
         color,
         rules: ruleStrings,
+        matchAll,
         customerCount: 0,
         trend: '+0%',
         trendUp: true,
@@ -64,7 +65,11 @@ const SegmentBuilder: React.FC = () => {
           title="New segment"
           subtitle="Build dynamic rules to target customers"
           actions={
-            <Button variant="primary" onClick={handleSave} disabled={!name || create.isPending}>
+            <Button
+              variant="primary"
+              onClick={handleSave}
+              disabled={!name.trim() || create.isPending}
+            >
               <Save size={13} />
               {create.isPending ? 'Saving…' : 'Save segment'}
             </Button>

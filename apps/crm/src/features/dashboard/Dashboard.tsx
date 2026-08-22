@@ -18,7 +18,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { useCrmDashboard } from '../../shared/hooks/queries/useCrmDashboard';
-import { useListCustomers } from '../../shared/hooks/queries/useCustomers';
+import { useListAllCustomers } from '../../shared/hooks/queries/useCustomers';
 import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import type { DashboardStats } from '../../shared/schemas/dashboard';
 import { CustomerAvatar } from '../../shared/components/crm';
@@ -40,6 +40,32 @@ const tierColor: Record<string, string> = {
   Silver: '#94a3b8',
   Bronze: '#b45309',
 };
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+export function isAtRiskCustomer(lastVisit: string, thresholdDays = 30): boolean {
+  const value = lastVisit.trim();
+  if (!value) return true;
+  const timestamp = Date.parse(value);
+  if (Number.isFinite(timestamp)) {
+    return Date.now() - timestamp >= Math.max(0, thresholdDays) * DAY_MS;
+  }
+  const relative = value.match(/(\d+)\s+(minute|hour|day|week|month|year)s?\s+ago/i);
+  if (relative) {
+    const units: Record<string, number> = {
+      minute: 1 / (24 * 60),
+      hour: 1 / 24,
+      day: 1,
+      week: 7,
+      month: 30,
+      year: 365,
+    };
+    return Number(relative[1]) * (units[relative[2].toLowerCase()] ?? 0) >= thresholdDays;
+  }
+  if (/(?:today|yesterday|minute|minutes|hour|hours)\b/i.test(value)) return false;
+  if (/(?:never|no visits?|unknown)\b/i.test(value)) return true;
+  return /(?:month|months|week|weeks|year|years)\b/i.test(value);
+}
 
 function StatCard({ stat, index }: { stat: StatItem; index: number }): React.JSX.Element {
   const Icon = stat.icon;
@@ -126,21 +152,41 @@ function StatCard({ stat, index }: { stat: StatItem; index: number }): React.JSX
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { data: dashboardData, isLoading: dashLoading } = useCrmDashboard();
-  const { data: fetchedCustomers } = useListCustomers({ limit: 200, offset: 0 });
-  const { data: fetchedSegments } = useListSegments();
+  const {
+    data: dashboardData,
+    isLoading: dashLoading,
+    isError: dashboardError,
+  } = useCrmDashboard();
+  const {
+    data: fetchedCustomers,
+    isLoading: customersLoading,
+    isError: customersError,
+  } = useListAllCustomers();
+  const {
+    data: fetchedSegments,
+    isLoading: segmentsLoading,
+    isError: segmentsError,
+  } = useListSegments();
   const customersPool = fetchedCustomers ?? [];
   const segmentsPool = fetchedSegments ?? [];
 
   const ltv =
-    customersPool.length > 0
-      ? Math.round(customersPool.reduce((s, c) => s + c.totalSpent, 0) / customersPool.length)
-      : 0;
-  const atRisk = customersPool.filter((c) => /month|weeks/.test(c.lastVisit)).slice(0, 4);
+    customersLoading || customersError
+      ? null
+      : customersPool.length > 0
+        ? Math.round(customersPool.reduce((s, c) => s + c.totalSpent, 0) / customersPool.length)
+        : 0;
+  const atRiskCustomers = customersPool.filter((c) => isAtRiskCustomer(c.lastVisit));
+  const atRisk = atRiskCustomers.slice(0, 4);
   const churnRate =
-    customersPool.length > 0 ? Math.round((atRisk.length / customersPool.length) * 100) : 0;
-  const topSegment =
-    segmentsPool.length > 0
+    customersLoading || customersError
+      ? null
+      : customersPool.length > 0
+        ? Math.round((atRiskCustomers.length / customersPool.length) * 100)
+        : 0;
+  const topSegment = segmentsError
+    ? null
+    : segmentsPool.length > 0
       ? segmentsPool.reduce((a, b) => (a.customerCount > b.customerCount ? a : b), segmentsPool[0])
       : null;
 
@@ -192,23 +238,40 @@ const Dashboard: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1280px' }}>
         {/* Stats grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-          {dashLoading
-            ? [0, 1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  style={{
-                    background: 'var(--hub-card)',
-                    border: '1px solid var(--hub-border)',
-                    borderRadius: '12px',
-                    padding: '16px',
-                  }}
-                >
-                  <Skeleton height={12} width="60%" style={{ marginBottom: 12 }} />
-                  <Skeleton height={28} width="50%" style={{ marginBottom: 6 }} />
-                  <Skeleton height={10} width="40%" />
-                </div>
-              ))
-            : stats.map((stat, i) => <StatCard key={stat.label} stat={stat} index={i} />)}
+          {dashLoading ? (
+            [0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                style={{
+                  background: 'var(--hub-card)',
+                  border: '1px solid var(--hub-border)',
+                  borderRadius: '12px',
+                  padding: '16px',
+                }}
+              >
+                <Skeleton height={12} width="60%" style={{ marginBottom: 12 }} />
+                <Skeleton height={28} width="50%" style={{ marginBottom: 6 }} />
+                <Skeleton height={10} width="40%" />
+              </div>
+            ))
+          ) : dashboardError ? (
+            <div
+              role="alert"
+              style={{
+                gridColumn: '1 / -1',
+                padding: '24px',
+                borderRadius: '12px',
+                border: '1px solid rgba(239,68,68,0.25)',
+                background: 'rgba(239,68,68,0.08)',
+                color: 'var(--hub-text-muted)',
+                fontSize: '13px',
+              }}
+            >
+              Unable to load dashboard metrics. Refresh and try again.
+            </div>
+          ) : (
+            stats.map((stat, i) => <StatCard key={stat.label} stat={stat} index={i} />)
+          )}
         </div>
 
         {/* Extended KPI widgets */}
@@ -259,7 +322,7 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>
-              ${ltv.toLocaleString()}
+              {ltv === null ? 'Unavailable' : `$${ltv.toLocaleString()}`}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>
               per customer
@@ -314,10 +377,18 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>
-              {dashLoading ? <Skeleton width={60} /> : (dashboardData?.newThisMonth ?? 0)}
+              {dashLoading ? (
+                <Skeleton width={60} />
+              ) : dashboardError ? (
+                'Unavailable'
+              ) : (
+                (dashboardData?.newThisMonth?.toLocaleString() ?? 'Unavailable')
+              )}
             </div>
             <div style={{ fontSize: '11px', color: '#10b981', marginTop: '2px' }}>
-              {dashboardData?.newThisMonthChange ?? ''}
+              {dashboardError
+                ? 'Dashboard data unavailable'
+                : (dashboardData?.newThisMonthChange ?? 'No trend data')}
             </div>
           </motion.div>
 
@@ -367,7 +438,7 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--hub-text)' }}>
-              {churnRate}%
+              {churnRate === null ? 'Unavailable' : `${churnRate}%`}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)', marginTop: '2px' }}>
               customers at risk
@@ -429,12 +500,16 @@ const Dashboard: React.FC = () => {
                 marginTop: '2px',
               }}
             >
-              {topSegment?.name ?? '-'}
+              {segmentsLoading ? 'Loading…' : (topSegment?.name ?? '-')}
             </div>
             <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-              {topSegment
-                ? `${topSegment.customerCount.toLocaleString()} members`
-                : 'No segments yet'}
+              {segmentsLoading
+                ? 'Loading segment data…'
+                : segmentsError
+                  ? 'Segment data unavailable'
+                  : topSegment
+                    ? `${topSegment.customerCount.toLocaleString()} members`
+                    : 'No segments yet'}
             </div>
           </motion.div>
         </div>
@@ -470,9 +545,7 @@ const Dashboard: React.FC = () => {
               </span>
             </div>
             <button
-              onClick={() =>
-                navigate({ to: '/campaigns/email', search: { segment: 'atrisk' } as any })
-              }
+              onClick={() => navigate({ to: '/campaigns/email', search: { name: 'Win-back' } })}
               style={{
                 fontSize: '12px',
                 color: '#3b82f6',
@@ -496,32 +569,60 @@ const Dashboard: React.FC = () => {
               padding: '14px 20px',
             }}
           >
-            {atRisk.slice(0, 4).map((c) => (
+            {customersLoading ? (
               <div
-                key={c.id}
-                onClick={() => navigate({ to: `/customers/${c.id}` })}
+                role="status"
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '8px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  background: 'var(--hub-hover)',
+                  gridColumn: '1 / -1',
+                  fontSize: '12px',
+                  color: 'var(--hub-text-muted)',
+                  textAlign: 'center',
+                  padding: '10px',
                 }}
               >
-                <CustomerAvatar initials={c.initials} points={c.loyaltyPoints} size={30} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)' }}>
-                    {c.name}
-                  </div>
-                  <div style={{ fontSize: '10px', color: 'var(--hub-text-muted)' }}>
-                    Last: {c.lastVisit}
+                Loading customer activity…
+              </div>
+            ) : customersError ? (
+              <div
+                role="status"
+                style={{
+                  gridColumn: '1 / -1',
+                  fontSize: '12px',
+                  color: 'var(--hub-text-muted)',
+                  textAlign: 'center',
+                  padding: '10px',
+                }}
+              >
+                Customer activity data is unavailable right now.
+              </div>
+            ) : (
+              atRisk.slice(0, 4).map((c) => (
+                <div
+                  key={c.id}
+                  onClick={() => navigate({ to: `/customers/${c.id}` })}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '8px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    background: 'var(--hub-hover)',
+                  }}
+                >
+                  <CustomerAvatar initials={c.initials} points={c.loyaltyPoints} size={30} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--hub-text)' }}>
+                      {c.name}
+                    </div>
+                    <div style={{ fontSize: '10px', color: 'var(--hub-text-muted)' }}>
+                      Last: {c.lastVisit}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-            {atRisk.length === 0 && (
+              ))
+            )}
+            {!customersLoading && !customersError && atRisk.length === 0 && (
               <div
                 style={{
                   fontSize: '12px',
@@ -555,67 +656,87 @@ const Dashboard: React.FC = () => {
               </span>
             </div>
             <div>
-              {topCustomers.map((c, i) => (
+              {dashboardError ? (
                 <div
-                  key={c.name}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '12px 20px',
-                    borderBottom:
-                      i < topCustomers.length - 1 ? '1px solid var(--hub-border)' : 'none',
-                  }}
+                  role="status"
+                  style={{ padding: '20px', color: 'var(--hub-text-muted)', fontSize: '13px' }}
                 >
-                  {/* Avatar */}
-                  <div
-                    style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '8px',
-                      background: `rgba(59,130,246,0.12)`,
-                      color: ACCENT,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                      fontWeight: 700,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {c.name
-                      .split(' ')
-                      .map((n) => n[0])
-                      .join('')}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>
-                      {c.name}
-                    </div>
-                    <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                      {c.visits === undefined ? 'Visits unavailable' : `${c.visits} visits`}
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}>
-                      {c.spend}
-                    </div>
-                    <span
+                  Customer ranking data is unavailable right now.
+                </div>
+              ) : topCustomers.length === 0 ? (
+                <div style={{ padding: '20px', color: 'var(--hub-text-muted)', fontSize: '13px' }}>
+                  No customer ranking data yet.
+                </div>
+              ) : (
+                topCustomers.map((c, i) => {
+                  const color = tierColor[c.tier] ?? '#94a3b8';
+                  return (
+                    <div
+                      key={c.name}
                       style={{
-                        display: 'inline-block',
-                        padding: '1px 7px',
-                        borderRadius: '9999px',
-                        fontSize: '10px',
-                        fontWeight: 600,
-                        background: `${tierColor[c.tier]}18`,
-                        color: tierColor[c.tier],
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '12px 20px',
+                        borderBottom:
+                          i < topCustomers.length - 1 ? '1px solid var(--hub-border)' : 'none',
                       }}
                     >
-                      {c.tier}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                      {/* Avatar */}
+                      <div
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '8px',
+                          background: `rgba(59,130,246,0.12)`,
+                          color: ACCENT,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {c.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}
+                        >
+                          {c.name}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                          {c.visits === undefined ? 'Visits unavailable' : `${c.visits} visits`}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div
+                          style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hub-text)' }}
+                        >
+                          {c.spend}
+                        </div>
+                        <span
+                          style={{
+                            display: 'inline-block',
+                            padding: '1px 7px',
+                            borderRadius: '9999px',
+                            fontSize: '10px',
+                            fontWeight: 600,
+                            background: `${color}18`,
+                            color,
+                          }}
+                        >
+                          {c.tier}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </motion.div>
 
@@ -637,68 +758,75 @@ const Dashboard: React.FC = () => {
               </span>
             </div>
             <div>
-              {campaigns.map((c, i) => (
+              {dashboardError ? (
                 <div
-                  key={c.name}
-                  style={{
-                    padding: '14px 20px',
-                    borderBottom: i < campaigns.length - 1 ? '1px solid var(--hub-border)' : 'none',
-                  }}
+                  role="status"
+                  style={{ padding: '20px', color: 'var(--hub-text-muted)', fontSize: '13px' }}
                 >
+                  Campaign performance data is unavailable right now.
+                </div>
+              ) : campaigns.length === 0 ? (
+                <div
+                  style={{ padding: '24px 20px', color: 'var(--hub-text-muted)', fontSize: '12px' }}
+                >
+                  No recent campaigns.
+                </div>
+              ) : (
+                campaigns.map((c, i) => (
                   <div
+                    key={c.name}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '8px',
-                    }}
-                  >
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}>
-                        {c.name}
-                      </div>
-                      <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                        {c.channel} · {c.sent.toLocaleString()} sent
-                      </div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '13px', fontWeight: 600, color: '#10b981' }}>
-                        {c.revenue}
-                      </div>
-                      <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                        {c.openRate} open
-                      </div>
-                    </div>
-                  </div>
-                  {/* Open rate bar */}
-                  <div
-                    style={{
-                      height: '4px',
-                      borderRadius: '9999px',
-                      background: 'var(--hub-border)',
+                      padding: '14px 20px',
+                      borderBottom:
+                        i < campaigns.length - 1 ? '1px solid var(--hub-border)' : 'none',
                     }}
                   >
                     <div
                       style={{
-                        height: '100%',
-                        width: c.openRate,
-                        borderRadius: '9999px',
-                        background: ACCENT,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: '8px',
                       }}
-                    />
+                    >
+                      <div>
+                        <div
+                          style={{ fontSize: '13px', fontWeight: 500, color: 'var(--hub-text)' }}
+                        >
+                          {c.name}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                          {c.channel} · {c.sent.toLocaleString()} sent
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '13px', fontWeight: 600, color: '#10b981' }}>
+                          {c.revenue}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                          {c.openRate} open
+                        </div>
+                      </div>
+                    </div>
+                    {/* Open rate bar */}
+                    <div
+                      style={{
+                        height: '4px',
+                        borderRadius: '9999px',
+                        background: 'var(--hub-border)',
+                      }}
+                    >
+                      <div
+                        style={{
+                          height: '100%',
+                          width: c.openRate,
+                          borderRadius: '9999px',
+                          background: ACCENT,
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
-              {campaigns.length === 0 && (
-                <div
-                  style={{
-                    padding: '24px 20px',
-                    color: 'var(--hub-text-muted)',
-                    fontSize: '12px',
-                  }}
-                >
-                  Campaign performance is unavailable from the CRM dashboard API.
-                </div>
+                ))
               )}
             </div>
           </motion.div>

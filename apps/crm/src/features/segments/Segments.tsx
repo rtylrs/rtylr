@@ -20,7 +20,7 @@ import {
   useDeleteSegment,
   useCreateSegment,
 } from '../../shared/hooks/queries/useSegments';
-import { ConfirmModal } from '../../shared/components/ui';
+import { Card, ConfirmModal, EmptyState } from '../../shared/components/ui';
 
 const ACCENT = '#3b82f6';
 
@@ -29,7 +29,7 @@ interface Segment {
   name: string;
   description: string;
   customerCount: number;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: React.ComponentType<{ size?: number; color?: string }>;
   color: string;
   rules: string[];
   trend: string;
@@ -322,7 +322,8 @@ function RuleBuilder({
             Cancel
           </button>
           <button
-            onClick={() => onSave(segmentName, rules)}
+            onClick={() => onSave(segmentName.trim(), rules)}
+            disabled={!segmentName.trim()}
             style={{
               padding: '8px 16px',
               borderRadius: '8px',
@@ -331,7 +332,8 @@ function RuleBuilder({
               background: ACCENT,
               color: '#fff',
               border: 'none',
-              cursor: 'pointer',
+              cursor: segmentName.trim() ? 'pointer' : 'not-allowed',
+              opacity: segmentName.trim() ? 1 : 0.6,
             }}
           >
             Create Segment
@@ -388,7 +390,7 @@ function SegmentCard({
               flexShrink: 0,
             }}
           >
-            <Icon size={17} {...({ style: { color: segment.color } } as any)} />
+            <Icon size={17} color={segment.color} />
           </div>
           <div>
             <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)' }}>
@@ -499,7 +501,7 @@ function SegmentCard({
   );
 }
 
-const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
+const iconMap: Record<string, React.ComponentType<{ size?: number; color?: string }>> = {
   Star,
   Users,
   AlertTriangle,
@@ -509,7 +511,7 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
 
 const Segments: React.FC = () => {
   const navigate = useNavigate();
-  const { data: fetchedSegments, isLoading } = useListSegments();
+  const { data: fetchedSegments, isError } = useListSegments();
   const removeSegment = useDeleteSegment();
   const createSegment = useCreateSegment();
   const [builderOpen, setBuilderOpen] = useState(false);
@@ -523,6 +525,7 @@ const Segments: React.FC = () => {
   }, [fetchedSegments]);
 
   const handleDelete = (id: string): void => {
+    if (removeSegment.isPending) return;
     removeSegment.mutate(id, {
       onSuccess: () => {
         toast.success('Segment deleted');
@@ -536,8 +539,13 @@ const Segments: React.FC = () => {
   };
 
   const handleCreate = (name: string, rules: Rule[]): void => {
+    if (createSegment.isPending) return;
     createSegment.mutate(
-      { name, rules: rules.map((r) => `${r.field} ${r.operator} ${r.value}`) },
+      {
+        name: name.trim(),
+        description: name.trim(),
+        rules: rules.map((r) => `${r.field} ${r.operator} ${r.value}`),
+      },
       {
         onSuccess: () => {
           toast.success('Segment created');
@@ -590,18 +598,28 @@ const Segments: React.FC = () => {
         </div>
 
         {/* Segment grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-          {segments.map((segment, i) => (
-            <SegmentCard
-              key={segment.id}
-              segment={segment}
-              index={i}
-              onClick={() => navigate({ to: `/segments/${segment.id}` })}
-              onDelete={() => setConfirmDeleteId(segment.id)}
-              deletePending={removeSegment.isPending}
+        {isError ? (
+          <Card>
+            <EmptyState
+              icon={AlertTriangle}
+              title="Unable to load segments"
+              description="Refresh and try again."
             />
-          ))}
-        </div>
+          </Card>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+            {segments.map((segment, i) => (
+              <SegmentCard
+                key={segment.id}
+                segment={segment}
+                index={i}
+                onClick={() => navigate({ to: `/segments/${segment.id}` })}
+                onDelete={() => setConfirmDeleteId(segment.id)}
+                deletePending={removeSegment.isPending}
+              />
+            ))}
+          </div>
+        )}
 
         <ConfirmModal
           open={confirmDeleteId !== null}
@@ -613,7 +631,8 @@ const Segments: React.FC = () => {
               ? `Are you sure you want to delete "${deleteTarget.name}"? This action cannot be undone.`
               : ''
           }
-          confirmLabel="Delete"
+          confirmLabel={removeSegment.isPending ? 'Deleting…' : 'Delete'}
+          confirmDisabled={removeSegment.isPending}
           variant="danger"
         />
 

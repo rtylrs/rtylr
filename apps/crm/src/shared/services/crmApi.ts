@@ -1,5 +1,5 @@
 import { safe } from '../lib/api';
-import { toOptionalFiniteNumber, unwrap } from '@voxire/api';
+import { toOptionalFiniteNumber } from '@voxire/api';
 
 // ── Types ────────────────────────────────────────────────────────
 
@@ -75,7 +75,7 @@ export interface TimelineEntry {
   title: string;
   description?: string;
   at: string;
-  meta?: Record<string, any>;
+  meta?: Record<string, unknown>;
 }
 
 export interface Segment {
@@ -130,6 +130,15 @@ export interface LoyaltyConfig {
   pointsPerDollar: number;
   pointsExpiry: number;
   redemptionRate: number;
+  minRedemptionPoints?: number;
+  bronzeMin?: number;
+  silverMin?: number;
+  goldMin?: number;
+  platinumMin?: number;
+  bronzeDiscountPct?: number;
+  silverDiscountPct?: number;
+  goldDiscountPct?: number;
+  platinumDiscountPct?: number;
 }
 
 export interface LoyaltyTransaction {
@@ -371,39 +380,63 @@ function toCustomerMutationPayload(data: Partial<Customer>): CustomerMutationPay
 
 interface ImportCustomersPayload {
   customers: Record<string, unknown>[];
-}
-
-interface LoyaltyPointsPayload {
-  customerId: number;
-  points: number;
-  description?: string;
+  dedupe?: boolean;
 }
 
 interface LoyaltyConfigPayload {
-  pointsPerDollar?: number;
-  pointsValue?: number;
-  isActive?: boolean;
+  isEnabled: boolean;
+  pointsPerCurrencyUnit: number;
+  currencyPerPoint: number;
+  bronzeMin: number;
+  silverMin: number;
+  goldMin: number;
+  platinumMin: number;
+  bronzeDiscountPct: number;
+  silverDiscountPct: number;
+  goldDiscountPct: number;
+  platinumDiscountPct: number;
+  pointsExpiryDays: number;
 }
 
 function toLoyaltyConfigPayload(config: Partial<LoyaltyConfig>): LoyaltyConfigPayload {
   return {
-    pointsPerDollar: config.pointsPerDollar,
-    pointsValue: config.redemptionRate,
-    isActive: config.programEnabled,
+    isEnabled: config.programEnabled ?? false,
+    pointsPerCurrencyUnit: config.pointsPerDollar ?? 1,
+    currencyPerPoint: config.redemptionRate ?? 0.01,
+    bronzeMin: config.bronzeMin ?? 0,
+    silverMin: config.silverMin ?? 500,
+    goldMin: config.goldMin ?? 1500,
+    platinumMin: config.platinumMin ?? 5000,
+    bronzeDiscountPct: config.bronzeDiscountPct ?? 0,
+    silverDiscountPct: config.silverDiscountPct ?? 5,
+    goldDiscountPct: config.goldDiscountPct ?? 10,
+    platinumDiscountPct: config.platinumDiscountPct ?? 15,
+    pointsExpiryDays: config.pointsExpiry ?? 365,
   };
+}
+
+function toCustomerListParams(params?: CustomersParams): Record<string, unknown> | undefined {
+  if (!params) return undefined;
+
+  const { limit, offset, ...filters } = params;
+  if (limit === undefined && offset === undefined) return filters;
+
+  const pageSize = Math.max(1, Math.floor(limit ?? 100));
+  const page = Math.floor(Math.max(0, offset ?? 0) / pageSize) + 1;
+  return { ...filters, page, pageSize };
 }
 
 interface SegmentMutationPayload {
   name?: string;
   description?: string;
-  filters?: { rules: string[] };
+  rules?: string[];
 }
 
 function toSegmentMutationPayload(data: Partial<Segment>): SegmentMutationPayload {
   return {
     name: data.name,
     description: data.description,
-    filters: { rules: data.rules ?? [] },
+    rules: data.rules ?? [],
   };
 }
 
@@ -518,7 +551,9 @@ interface TouchpointMutationPayload {
   nextFollowUp?: string | null;
 }
 
-function toTouchpointMutationPayload(data: CreateTouchpointRequest): TouchpointMutationPayload {
+export function toTouchpointMutationPayload(
+  data: CreateTouchpointRequest
+): TouchpointMutationPayload {
   return {
     leadId: data.leadId,
     type: data.type,
@@ -575,13 +610,14 @@ export const crmApi = {
   getDashboard: () => safe.get<DashboardStats>('/crm/dashboard'),
 
   // Customers
-  getCustomers: (params?: CustomersParams) => safe.get<Customer[]>('/crm/customers', { params }),
+  getCustomers: (params?: CustomersParams) =>
+    safe.get<Customer[]>('/crm/customers', { params: toCustomerListParams(params) }),
 
   getCustomerDetail: (id: number) =>
     safe.get<Customer>('/crm/customers/detail', { params: { id } }),
 
   getCustomerTimeline: (id: number) =>
-    safe.get<TimelineEntry[]>('/crm/customers/timeline', { params: { id } }),
+    safe.get<TimelineEntry[]>('/crm/customers/timeline', { params: { customerId: id } }),
 
   createCustomer: (data: Partial<Customer>) =>
     safe.post<Customer>('/crm/customers', toCustomerMutationPayload(data)),
@@ -593,13 +629,17 @@ export const crmApi = {
 
   recordVisit: (customerId: number) => safe.post('/crm/customers/record-visit', { customerId }),
 
-  importCustomers: (customers: Record<string, unknown>[], _dedupe?: boolean) =>
-    safe.post('/crm/customers/import', { customers } satisfies ImportCustomersPayload),
+  importCustomers: (customers: Record<string, unknown>[], dedupe?: boolean) =>
+    safe.post('/crm/customers/import', {
+      customers,
+      ...(dedupe === undefined ? {} : { dedupe }),
+    } satisfies ImportCustomersPayload),
 
   mergeCustomers: (primaryId: number, secondaryId: number) =>
     safe.post('/crm/customers/merge', { primaryId, secondaryId }),
 
-  exportCustomerData: (id: number) => safe.get('/crm/customers/export', { params: { id } }),
+  exportCustomerData: (id: number) =>
+    safe.get('/crm/customers/export', { params: { customerId: id } }),
 
   // Loyalty
   awardPoints: (customerId: number, points: number, reason?: string) =>
@@ -613,9 +653,13 @@ export const crmApi = {
   updateLoyaltyConfig: (config: Partial<LoyaltyConfig>) =>
     safe.put<LoyaltyConfig>('/crm/loyalty/config', toLoyaltyConfigPayload(config)),
 
-  getLoyaltyTransactions: () => safe.get<LoyaltyTransaction[]>('/crm/loyalty/transactions'),
+  getLoyaltyTransactions: () =>
+    safe.get<LoyaltyTransaction[]>('/crm/loyalty/transactions', {
+      params: { page: 1, pageSize: 100 },
+    }),
 
-  getLoyaltyMembers: () => safe.get<LoyaltyMember[]>('/crm/loyalty/members'),
+  getLoyaltyMembers: () =>
+    safe.get<LoyaltyMember[]>('/crm/loyalty/members', { params: { limit: 100, offset: 0 } }),
 
   getLoyaltyRewards: () => safe.get<LoyaltyReward[]>('/crm/loyalty/rewards'),
 
@@ -671,19 +715,19 @@ export const crmApi = {
   deleteAutomation: (id: number) => safe.delete(`/crm/automations/${id}`),
 
   // Templates
-  getTemplates: () => safe.get<Template[]>('/crm/templates'),
+  getTemplates: () => safe.get<Template[]>('/crm/template/v1/templates'),
 
   createTemplate: (data: Omit<Template, 'id' | 'updatedAt'>) =>
-    safe.post<Template>('/crm/templates', { ...data, type: data.channel }),
+    safe.post<Template>('/crm/template/v1/templates', { ...data, type: data.channel }),
 
   // Feedback
-  getFeedback: () => safe.get<FeedbackItem[]>('/crm/feedback'),
+  getFeedback: () => safe.get<FeedbackItem[]>('/crm/feedback/v1/feedback'),
 
   // Settings
-  getSettings: () => safe.get<Settings>('/crm/settings'),
+  getSettings: () => safe.get<Settings>('/crm/settings/v1/settings'),
 
   updateSettings: (data: Partial<Settings>) =>
-    safe.put<Settings>('/crm/settings', toSettingsMutationPayload(data)),
+    safe.put<Settings>('/crm/settings/v1/settings', toSettingsMutationPayload(data)),
 
   // Sales Pipeline
   getSalesPipeline: () => safe.get<PipelineColumn[]>('/crm/sales/pipeline'),

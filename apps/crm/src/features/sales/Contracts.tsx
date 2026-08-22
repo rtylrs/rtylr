@@ -3,7 +3,11 @@ import { HelmetContainer } from '@voxire/components';
 import { toast } from 'sonner';
 import { ChevronDown, ChevronUp, Plus, FileText } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { useContracts, useLeads, useCreateContract } from '../../shared/hooks/queries/useSales';
+import {
+  useContracts,
+  useListAllLeads,
+  useCreateContract,
+} from '../../shared/hooks/queries/useSales';
 import type { Contract, ContractPlan } from '../../shared/hooks/queries/useSales';
 import {
   Button,
@@ -24,7 +28,9 @@ const PLAN_COLORS: Record<ContractPlan, { bg: string; color: string }> = {
 
 function formatDate(iso: string): string {
   if (!iso) return '-';
-  return new Date(iso).toLocaleDateString('en-US', {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -55,7 +61,7 @@ const Contracts: React.FC = () => {
   const [offset, setOffset] = useState(0);
   const [loadedContracts, setLoadedContracts] = useState<Contract[]>([]);
   const { data: fetchedContracts, isLoading, isFetching, isError } = useContracts(pageSize, offset);
-  const { data: leads } = useLeads();
+  const { data: leads, isLoading: leadsLoading, isError: leadsError } = useListAllLeads();
   const createContract = useCreateContract();
 
   useEffect(() => {
@@ -95,12 +101,18 @@ const Contracts: React.FC = () => {
       toast.error('Lead, signed date, and signed by are required');
       return;
     }
+    const mrr = Number(form.mrr);
+    const seats = Number(form.seats);
+    if (!Number.isFinite(mrr) || mrr < 0 || !Number.isInteger(seats) || seats < 1) {
+      toast.error('Enter a valid MRR and a whole number of at least one seat');
+      return;
+    }
     createContract.mutate(
       {
         leadId: Number(form.leadId),
         plan: form.plan,
-        mrr: Number(form.mrr),
-        seats: Number(form.seats),
+        mrr,
+        seats,
         signedAt: form.signedAt,
         signedBy: form.signedBy,
         closedBy: form.closedBy,
@@ -186,7 +198,7 @@ const Contracts: React.FC = () => {
                   textAlign: 'right',
                 }}
               >
-                {contracts.length} active contract{contracts.length !== 1 ? 's' : ''}
+                {contracts.length} contract{contracts.length !== 1 ? 's' : ''} loaded
               </p>
             </div>
           </div>
@@ -271,7 +283,7 @@ const Contracts: React.FC = () => {
                             margin: '2px 0 0',
                           }}
                         >
-                          Closed by {c.closedBy} · Signed {formatDate(c.signedAt)}
+                          Closed by {c.closedBy || '—'} · Signed {formatDate(c.signedAt)}
                         </p>
                       </div>
                       <div
@@ -377,6 +389,15 @@ const Contracts: React.FC = () => {
                   </Button>
                 </div>
               )}
+              {isError && contracts.length > 0 && (
+                <div
+                  role="alert"
+                  style={{ padding: '10px 20px', color: 'var(--hub-text-muted)', fontSize: '12px' }}
+                >
+                  Unable to load more contracts. The rows shown may be incomplete; refresh and try
+                  again.
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -396,7 +417,16 @@ const Contracts: React.FC = () => {
                 variant="primary"
                 onClick={handleSubmit}
                 disabled={
-                  createContract.isPending || !form.leadId || !form.signedAt || !form.signedBy
+                  createContract.isPending ||
+                  !form.leadId ||
+                  !form.signedAt ||
+                  !form.signedBy.trim() ||
+                  !form.mrr ||
+                  !Number.isFinite(Number(form.mrr)) ||
+                  Number(form.mrr) < 0 ||
+                  !form.seats ||
+                  !Number.isInteger(Number(form.seats)) ||
+                  Number(form.seats) < 1
                 }
               >
                 {createContract.isPending ? 'Saving...' : 'Save contract'}
@@ -421,6 +451,7 @@ const Contracts: React.FC = () => {
               <select
                 value={form.leadId}
                 onChange={(e) => setForm((f) => ({ ...f, leadId: e.target.value }))}
+                disabled={leadsLoading || leadsError}
                 style={{
                   width: '100%',
                   height: '36px',
@@ -434,13 +465,25 @@ const Contracts: React.FC = () => {
                   cursor: 'pointer',
                 }}
               >
-                <option value="">Select a lead...</option>
-                {(leads ?? []).map((l) => (
-                  <option key={l.id} value={String(l.id)}>
-                    {l.company}
-                  </option>
-                ))}
+                <option value="">
+                  {leadsLoading
+                    ? 'Loading leads…'
+                    : leadsError
+                      ? 'Unable to load leads'
+                      : 'Select a lead...'}
+                </option>
+                {!leadsError &&
+                  (leads ?? []).map((l) => (
+                    <option key={l.id} value={String(l.id)}>
+                      {l.companyName ?? l.company ?? `Lead #${l.id}`}
+                    </option>
+                  ))}
               </select>
+              {leadsError && (
+                <p style={{ fontSize: '11px', color: '#ef4444', margin: '6px 0 0' }}>
+                  Leads could not be loaded. Close and refresh before creating a contract.
+                </p>
+              )}
             </div>
             <Select
               label="Plan"
@@ -481,7 +524,8 @@ const Contracts: React.FC = () => {
                 placeholder="John Smith"
               />
               <Input
-                label="Closed By (rep)"
+                label="Closed By (user ID, optional)"
+                type="number"
                 value={form.closedBy}
                 onChange={(e) => setForm((f) => ({ ...f, closedBy: e.target.value }))}
                 placeholder="Sales rep name"

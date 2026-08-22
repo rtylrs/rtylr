@@ -19,13 +19,14 @@ import {
 
 const Automations: React.FC = () => {
   const navigate = useNavigate();
-  const { data: fetched, isLoading } = useListAutomations();
+  const { data: fetched, isLoading, isError } = useListAutomations();
   const updateAutomation = useUpdateAutomation();
   const removeAutomation = useDeleteAutomation();
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const automations = fetched ?? [];
 
   const handleToggleStatus = (id: number, current: string): void => {
+    if (updateAutomation.isPending) return;
     const next = current === 'active' ? 'paused' : 'active';
     updateAutomation.mutate(
       { id, data: { status: next as 'active' | 'paused', isActive: next === 'active' } },
@@ -38,6 +39,7 @@ const Automations: React.FC = () => {
   };
 
   const handleDelete = (id: number): void => {
+    if (removeAutomation.isPending) return;
     removeAutomation.mutate(id, {
       onSuccess: () => {
         toast.success('Automation deleted');
@@ -77,6 +79,14 @@ const Automations: React.FC = () => {
         {isLoading ? (
           <Card>
             <SkeletonList count={4} />
+          </Card>
+        ) : isError ? (
+          <Card>
+            <EmptyState
+              icon={Zap}
+              title="Unable to load automations"
+              description="Check your connection and try again."
+            />
           </Card>
         ) : automations.length === 0 ? (
           <Card>
@@ -305,7 +315,8 @@ const Automations: React.FC = () => {
               ? `Are you sure you want to delete "${deleteTarget.name}"? This action cannot be undone.`
               : ''
           }
-          confirmLabel="Delete"
+          confirmLabel={removeAutomation.isPending ? 'Deleting…' : 'Delete'}
+          confirmDisabled={removeAutomation.isPending}
           variant="danger"
         />
       </div>

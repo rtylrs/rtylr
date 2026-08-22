@@ -27,6 +27,12 @@ interface BackendAutomationRequest {
   isActive: boolean;
 }
 
+export interface AutomationMutationResponse {
+  automationId?: number;
+  automation_id?: number;
+  message?: string;
+}
+
 export function triggerTypeFor(value?: string): string {
   const map: Record<string, string> = {
     'New customer': 'customer_signup',
@@ -37,6 +43,8 @@ export function triggerTypeFor(value?: string): string {
     'Post visit': 'order_created',
     'Tier upgrade': 'loyalty_tier_up',
     'Tier downgrade': 'loyalty_tier_down',
+    'Tag added': 'tag_added',
+    'Points threshold': 'points_threshold',
   };
   return map[value ?? ''] ?? value ?? 'customer_signup';
 }
@@ -52,7 +60,7 @@ export function actionTypeFor(value: unknown): unknown {
   return map[value] ?? value;
 }
 
-function toBackendRequest(data: Partial<Automation>): BackendAutomationRequest {
+export function toBackendRequest(data: Partial<Automation>): BackendAutomationRequest {
   const actions = (
     Array.isArray(data.actions)
       ? data.actions
@@ -79,6 +87,13 @@ function toBackendRequest(data: Partial<Automation>): BackendAutomationRequest {
   };
 }
 
+export function mergeAutomationData(
+  current: Automation | undefined,
+  data: Partial<Automation>
+): Partial<Automation> {
+  return { ...current, ...data };
+}
+
 export const useListAutomations = (): UseQueryResult<Automation[]> =>
   useQuery<Automation[]>({
     queryKey: ['crm-automations'],
@@ -88,28 +103,45 @@ export const useListAutomations = (): UseQueryResult<Automation[]> =>
     },
   });
 
-export const useGetAutomation = (id: number | undefined): UseQueryResult<Automation> =>
-  useQuery<Automation>({
+export const useGetAutomation = (id: number | undefined): UseQueryResult<Automation> => {
+  const qc = useQueryClient();
+  return useQuery<Automation>({
     queryKey: ['crm-automation', id],
     queryFn: async (): Promise<Automation> => {
-      const res = await unwrap(safe.get<unknown>(`/crm/automations/${id}`));
-      const envelope = (res ?? {}) as { automation?: unknown };
-      return automationSchema.parse(envelope.automation ?? res);
+      if (id == null || id <= 0) throw new Error('Invalid automation id');
+      const cached = qc
+        .getQueryData<Automation[]>(['crm-automations'])
+        ?.find((automation) => automation.id === id);
+      if (cached) return cached;
+
+      // The automations API exposes list/create/update/delete routes, but no
+      // dedicated GET /{id} route. Reuse the list endpoint for deep links.
+      const res = await unwrap(safe.get<unknown>('/crm/automations'));
+      const automations = z.array(automationSchema).parse(unwrapList(res, 'automations'));
+      const automation = automations.find((item) => item.id === id);
+      if (!automation) throw new Error('Automation not found');
+      return automation;
     },
-    enabled: !!id,
+    enabled: id != null && Number.isInteger(id) && id > 0,
   });
+};
 
 export const useCreateAutomation = (): UseMutationResult<
-  Automation,
+  AutomationMutationResponse,
   unknown,
   Partial<Automation>
 > => {
   const qc = useQueryClient();
   const { t } = useTranslation();
-  return useMutation<Automation, unknown, Partial<Automation>>({
-    mutationFn: async (data: Partial<Automation>): Promise<Automation> => {
-      const res = await unwrap(safe.post<Automation>('/crm/automations', toBackendRequest(data)));
-      return res as Automation;
+  return useMutation<AutomationMutationResponse, unknown, Partial<Automation>>({
+    mutationFn: async (data: Partial<Automation>): Promise<AutomationMutationResponse> => {
+      const res = await unwrap(safe.post<unknown>('/crm/automations', toBackendRequest(data)));
+      const raw = res && typeof res === 'object' ? (res as Record<string, unknown>) : {};
+      const automationId = Number(raw.automationId ?? raw.automation_id);
+      return {
+        automationId: Number.isFinite(automationId) && automationId > 0 ? automationId : undefined,
+        message: typeof raw.message === 'string' ? raw.message : undefined,
+      };
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-automations'] });
@@ -122,24 +154,25 @@ export const useCreateAutomation = (): UseMutationResult<
 };
 
 export const useUpdateAutomation = (): UseMutationResult<
-  Automation,
+  AutomationMutationResponse,
   unknown,
   UpdateAutomationPayload
 > => {
   const qc = useQueryClient();
   const { t } = useTranslation();
-  return useMutation<Automation, unknown, UpdateAutomationPayload>({
-    mutationFn: async (payload: UpdateAutomationPayload): Promise<Automation> => {
-      const cached = qc
-        .getQueryData<Automation[]>(['crm-automations'])
-        ?.find((item) => item.id === payload.id);
+  return useMutation<AutomationMutationResponse, unknown, UpdateAutomationPayload>({
+    mutationFn: async (payload: UpdateAutomationPayload): Promise<AutomationMutationResponse> => {
+      const cached =
+        qc.getQueryData<Automation>(['crm-automation', payload.id]) ??
+        qc.getQueryData<Automation[]>(['crm-automations'])?.find((item) => item.id === payload.id);
       const res = await unwrap(
-        safe.put<Automation>(
+        safe.put<unknown>(
           `/crm/automations/${payload.id}`,
-          toBackendRequest({ ...cached, ...payload.data })
+          toBackendRequest(mergeAutomationData(cached, payload.data))
         )
       );
-      return res as Automation;
+      const raw = res && typeof res === 'object' ? (res as Record<string, unknown>) : {};
+      return { message: typeof raw.message === 'string' ? raw.message : undefined };
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-automations'] });

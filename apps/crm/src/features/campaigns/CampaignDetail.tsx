@@ -1,16 +1,9 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useParams, useNavigate } from '@tanstack/react-router';
-import {
-  ArrowLeft,
-  Send,
-  MousePointerClick,
-  MailOpen,
-  UserMinus,
-  DollarSign,
-  Mail,
-} from 'lucide-react';
+import { ArrowLeft, Mail } from 'lucide-react';
 import { useGetCampaign, useCampaignStats } from '../../shared/hooks/queries/useCampaigns';
+import { CAMPAIGN_STATUS_LABELS, isCampaignStatus } from '../../shared/schemas/campaigns';
 import { Breadcrumbs, Card, SkeletonList, EmptyState } from '../../shared/components/ui';
 import { CampaignStatsCard } from '../../shared/components/crm';
 
@@ -30,6 +23,11 @@ const CampaignDetail: React.FC = () => {
   } = useCampaignStats(campaignId);
   const campaign = fetched;
   const stats = fetchedStats;
+  const normalizedStatus = campaign?.status.toLowerCase() ?? '';
+  const campaignIsActive = normalizedStatus === 'active';
+  const campaignStatusLabel = isCampaignStatus(normalizedStatus)
+    ? CAMPAIGN_STATUS_LABELS[normalizedStatus]
+    : campaign?.status;
 
   const pct = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 100) : 0);
 
@@ -108,12 +106,11 @@ const CampaignDetail: React.FC = () => {
                 borderRadius: '9999px',
                 fontSize: '11px',
                 fontWeight: 600,
-                background:
-                  campaign.status === 'Active' ? 'rgba(16,185,129,0.12)' : 'rgba(148,163,184,0.12)',
-                color: campaign.status === 'Active' ? '#10b981' : '#94a3b8',
+                background: campaignIsActive ? 'rgba(16,185,129,0.12)' : 'rgba(148,163,184,0.12)',
+                color: campaignIsActive ? '#10b981' : '#94a3b8',
               }}
             >
-              {campaign.status}
+              {campaignStatusLabel}
             </span>
           </div>
         </Card>
@@ -272,6 +269,11 @@ const CampaignDetail: React.FC = () => {
               </div>
             </Card>
           </>
+        )}
+        {statsLoading && (
+          <Card>
+            <SkeletonList count={3} />
+          </Card>
         )}
         {!stats && !statsLoading && (
           <Card>

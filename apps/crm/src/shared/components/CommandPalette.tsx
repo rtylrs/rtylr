@@ -35,7 +35,6 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
   const [query, setQuery] = useState('');
   const [cursor, setCursor] = useState(0);
   const { data: fetchedCustomers } = useListCustomers({ limit: 50, offset: 0 });
-  const customers = fetchedCustomers ?? [];
 
   useEffect(() => {
     if (!open) setQuery('');
@@ -43,6 +42,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
   }, [open]);
 
   const items = useMemo<CommandItem[]>(() => {
+    const customers = fetchedCustomers ?? [];
     const base: CommandItem[] = [
       {
         id: 'nav-dash',
@@ -180,7 +180,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
       group: 'Customers',
     }));
     return [...base, ...customerItems];
-  }, [navigate, customers]);
+  }, [navigate, fetchedCustomers]);
 
   const filtered = useMemo(() => {
     if (!query) return items;

@@ -3,7 +3,7 @@ import { cn, Avatar } from '@voxire/ui';
 import TrialBanner from '../shared/components/TrialBanner';
 import { useLocation, useRouterState, Link, Outlet } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { getAvatarUrl } from '@voxire/config';
+import { cdnImageUrl, getAvatarUrl } from '@voxire/config';
 import { signOut, useUserStore } from '@voxire/auth';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useQuery } from '@tanstack/react-query';
@@ -110,7 +110,8 @@ function getPageTitle(pathname: string): string {
 type Theme = 'light' | 'dark' | 'system';
 
 function getStoredTheme(): Theme {
-  return (localStorage.getItem('crm-theme') as Theme) || 'dark';
+  const saved = localStorage.getItem('crm-theme');
+  return saved === 'light' || saved === 'dark' || saved === 'system' ? saved : 'dark';
 }
 
 function applyTheme(theme: Theme) {
@@ -427,7 +428,7 @@ const DefaultLayout: React.FC = () => {
               }}
             >
               <Avatar
-                src={getAvatarUrl(userEmail || userName)}
+                src={cdnImageUrl(getAvatarUrl(userEmail || userName))}
                 alt={userName}
                 size="sm"
                 className="h-6 w-6"

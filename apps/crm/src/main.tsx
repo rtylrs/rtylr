@@ -22,14 +22,15 @@ const queryClient = new QueryClient({
 });
 
 // Apply persisted theme before first render to prevent flash
-const saved = localStorage.getItem('crm-theme') || 'dark';
+const saved = localStorage.getItem('crm-theme');
+const theme = saved === 'light' || saved === 'dark' || saved === 'system' ? saved : 'dark';
 document.documentElement.setAttribute(
   'data-theme',
-  saved === 'system'
+  theme === 'system'
     ? window.matchMedia('(prefers-color-scheme: dark)').matches
       ? 'dark'
       : 'light'
-    : saved
+    : theme
 );
 
 bootObservability({ app: 'crm' });

@@ -27,6 +27,16 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
       toast.error('Company name is required');
       return;
     }
+    const mrrPotential = form.mrrPotential ? Number(form.mrrPotential) : 0;
+    const assignedTo = form.assignedTo ? Number(form.assignedTo) : undefined;
+    if (!Number.isFinite(mrrPotential) || mrrPotential < 0) {
+      toast.error('MRR potential must be zero or greater');
+      return;
+    }
+    if (assignedTo !== undefined && (!Number.isInteger(assignedTo) || assignedTo < 1)) {
+      toast.error('Assigned rep must be a positive whole-number user ID');
+      return;
+    }
     createLead.mutate(
       {
         company: form.company,
@@ -34,8 +44,8 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
         size: form.size,
         source: form.source,
         stage: form.stage,
-        mrrPotential: Number(form.mrrPotential) || 0,
-        assignedTo: form.assignedTo ? Number(form.assignedTo) : undefined,
+        mrrPotential,
+        assignedTo,
         notes: form.notes,
       },
       {
@@ -57,6 +67,12 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
     );
   };
 
+  const mrrPotential = form.mrrPotential ? Number(form.mrrPotential) : 0;
+  const assignedTo = form.assignedTo ? Number(form.assignedTo) : undefined;
+  const mrrValid = Number.isFinite(mrrPotential) && mrrPotential >= 0;
+  const assignedToValid =
+    assignedTo === undefined || (Number.isInteger(assignedTo) && assignedTo > 0);
+
   return (
     <Modal
       open={open}
@@ -71,7 +87,7 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
           <Button
             variant="primary"
             onClick={handleSubmit}
-            disabled={createLead.isPending || !form.company.trim()}
+            disabled={createLead.isPending || !form.company.trim() || !mrrValid || !assignedToValid}
           >
             {createLead.isPending ? 'Creating...' : 'Create lead'}
           </Button>

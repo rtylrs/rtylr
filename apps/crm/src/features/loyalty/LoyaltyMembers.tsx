@@ -3,15 +3,9 @@ import { HelmetContainer } from '@voxire/components';
 import { Search } from 'lucide-react';
 import { useLoyaltyMembers } from '../../shared/hooks/queries/useLoyalty';
 import type { LoyaltyMember } from '../../shared/hooks/queries/useLoyalty';
-import {
-  Button,
-  PageHeader,
-  Card,
-  Input,
-  EmptyState,
-  SkeletonList,
-} from '../../shared/components/ui';
+import { Button, PageHeader, Card, EmptyState, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge, PointsBadge } from '../../shared/components/crm';
+import { getCustomerTier } from '../../shared/lib/tiers';
 import { Users } from 'lucide-react';
 
 const LoyaltyMembers: React.FC = () => {
@@ -131,7 +125,7 @@ const LoyaltyMembers: React.FC = () => {
                       {m.visits} visits • last active {m.lastActive}
                     </div>
                   </div>
-                  <TierBadge tier={m.tier as any} />
+                  <TierBadge tier={getCustomerTier(m.points, m.tier)} />
                   <PointsBadge points={m.points} trend="up" />
                 </div>
               ))}
@@ -144,6 +138,15 @@ const LoyaltyMembers: React.FC = () => {
                   >
                     {isFetching ? 'Loading…' : 'Load more members'}
                   </Button>
+                </div>
+              )}
+              {isError && members.length > 0 && (
+                <div
+                  role="alert"
+                  style={{ padding: '10px 16px', color: 'var(--hub-text-muted)', fontSize: '12px' }}
+                >
+                  Unable to load more members. The rows shown may be incomplete; refresh and try
+                  again.
                 </div>
               )}
             </div>

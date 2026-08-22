@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import {
   Star,
@@ -170,7 +170,8 @@ export const TagChip: React.FC<{
   label: string;
   onRemove?: () => void;
   color?: string;
-}> = ({ label, onRemove, color = ACCENT }) => (
+  disabled?: boolean;
+}> = ({ label, onRemove, color = ACCENT, disabled = false }) => (
   <span
     style={{
       display: 'inline-flex',
@@ -188,11 +189,13 @@ export const TagChip: React.FC<{
     {label}
     {onRemove && (
       <button
+        type="button"
+        disabled={disabled}
         onClick={onRemove}
         style={{
           background: 'transparent',
           border: 'none',
-          cursor: 'pointer',
+          cursor: disabled ? 'not-allowed' : 'pointer',
           color: 'currentColor',
           display: 'inline-flex',
           padding: 0,
@@ -209,9 +212,13 @@ export const TagChip: React.FC<{
 export const NotesPanel: React.FC<{
   notes: string;
   onSave: (notes: string) => void;
-}> = ({ notes, onSave }) => {
+  saving?: boolean;
+}> = ({ notes, onSave, saving = false }) => {
   const [value, setValue] = useState(notes);
   const [editing, setEditing] = useState(false);
+  useEffect(() => {
+    if (!editing) setValue(notes);
+  }, [editing, notes]);
   return (
     <div
       style={{
@@ -292,12 +299,13 @@ export const NotesPanel: React.FC<{
             <Button
               variant="primary"
               style={{ padding: '6px 12px' }}
+              disabled={saving}
               onClick={() => {
                 onSave(value);
                 setEditing(false);
               }}
             >
-              Save
+              {saving ? 'Saving…' : 'Save'}
             </Button>
           </div>
         </>
@@ -667,7 +675,8 @@ export const CampaignStatsCard: React.FC<{
 export const LoyaltyPointsInput: React.FC<{
   onAward: (points: number, reason: string) => void;
   onDeduct: (points: number, reason: string) => void;
-}> = ({ onAward, onDeduct }) => {
+  pending?: boolean;
+}> = ({ onAward, onDeduct, pending = false }) => {
   const [points, setPoints] = useState(0);
   const [reason, setReason] = useState('');
   return (
@@ -708,9 +717,9 @@ export const LoyaltyPointsInput: React.FC<{
       <div style={{ display: 'flex', gap: '6px' }}>
         <Button
           variant="primary"
-          disabled={points <= 0}
+          disabled={pending || points <= 0 || !Number.isInteger(points)}
           onClick={() => {
-            if (points > 0) {
+            if (!pending && points > 0 && Number.isInteger(points)) {
               onAward(points, reason);
               setPoints(0);
               setReason('');
@@ -722,9 +731,9 @@ export const LoyaltyPointsInput: React.FC<{
         </Button>
         <Button
           variant="outline"
-          disabled={points <= 0}
+          disabled={pending || points <= 0 || !Number.isInteger(points)}
           onClick={() => {
-            if (points > 0) {
+            if (!pending && points > 0 && Number.isInteger(points)) {
               onDeduct(points, reason);
               setPoints(0);
               setReason('');

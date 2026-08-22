@@ -27,6 +27,7 @@ export const segmentSchema = z.object({
   rules: z.array(z.string()).default([]),
   trend: z.string().default(''),
   trendUp: z.boolean().default(false),
+  matchAll: z.boolean().default(true),
 });
 
 export type Segment = z.infer<typeof segmentSchema>;

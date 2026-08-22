@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+const finiteNumber = z.preprocess((value) => {
+  if (value === null || value === undefined || value === '') return value;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : value;
+}, z.number());
+
 export const automationNodeSchema = z.object({
   id: z.string(),
   type: z.string(),
@@ -14,8 +20,8 @@ const legacyAutomationSchema = z.object({
   description: z.string(),
   trigger: z.string(),
   status: z.enum(['active', 'paused', 'draft']).catch('draft'),
-  enrolled: z.number(),
-  completed: z.number(),
+  enrolled: finiteNumber,
+  completed: finiteNumber,
   createdAt: z.string(),
   nodes: z.array(automationNodeSchema).optional(),
 });
@@ -29,7 +35,7 @@ const backendAutomationSchema = z.object({
   actions: z.union([z.array(z.unknown()), z.string()]).optional(),
   isActive: z.boolean().default(false),
   lastRunAt: z.string().nullable().optional(),
-  runCount: z.number().catch(0),
+  runCount: finiteNumber.catch(0),
   createdAt: z.string(),
   updatedAt: z.string().optional(),
 });

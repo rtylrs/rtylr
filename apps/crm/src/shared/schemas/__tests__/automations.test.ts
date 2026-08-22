@@ -31,6 +31,19 @@ describe('automationSchema', () => {
     expect(result.id).toBe(7);
   });
 
+  it('coerces backend run counts transported as strings', () => {
+    const result = automationSchema.parse({
+      id: '8',
+      name: 'Welcome',
+      triggerType: 'customer_signup',
+      isActive: true,
+      runCount: '12',
+      createdAt: '2026-08-21',
+    });
+    expect(result.enrolled).toBe(12);
+    expect(result.status).toBe('active');
+  });
+
   it('falls back to draft for an unknown status', () => {
     const result = automationSchema.parse({ ...baseAutomation, status: 'unknown' });
     expect(result.status).toBe('draft');

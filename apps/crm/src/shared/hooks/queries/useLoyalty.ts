@@ -44,7 +44,25 @@ interface AwardRedeemPayload {
   reason?: string;
 }
 
-function toUpdateLoyaltyConfigRequest(config: Partial<LoyaltyConfig>): Record<string, unknown> {
+const DEFAULT_LOYALTY_CONFIG: LoyaltyConfig = {
+  programEnabled: true,
+  pointsPerDollar: 1,
+  pointsExpiry: 365,
+  redemptionRate: 0.01,
+  minRedemptionPoints: 0,
+  bronzeMin: 0,
+  silverMin: 500,
+  goldMin: 1500,
+  platinumMin: 5000,
+  bronzeDiscountPct: 0,
+  silverDiscountPct: 5,
+  goldDiscountPct: 10,
+  platinumDiscountPct: 15,
+};
+
+export function toUpdateLoyaltyConfigRequest(
+  config: Partial<LoyaltyConfig>
+): Record<string, unknown> {
   return {
     isEnabled: config.programEnabled ?? false,
     pointsPerCurrencyUnit: config.pointsPerDollar ?? 1,
@@ -61,12 +79,14 @@ function toUpdateLoyaltyConfigRequest(config: Partial<LoyaltyConfig>): Record<st
   };
 }
 
-function toLoyaltyTierRequest(tier: Partial<LoyaltyTier>): Record<string, unknown> {
+export function toLoyaltyTierRequest(tier: Partial<LoyaltyTier>): Record<string, unknown> {
   return {
     name: tier.name ?? '',
     minPoints: tier.threshold ?? 0,
     discountPct: tier.discountPct ?? tier.multiplier ?? 0,
-    perks: JSON.stringify(tier.perks ?? []),
+    // The legacy endpoint decodes perks as json.RawMessage. Send the array as
+    // JSON so it is stored as an array rather than as a quoted JSON string.
+    perks: tier.perks ?? [],
     sortOrder: tier.sortOrder ?? 0,
   };
 }
@@ -114,17 +134,23 @@ export const useLoyaltyRewards = (): UseQueryResult<LoyaltyReward[]> =>
 
 export const useLoyaltyTransactions = (customerId?: number): UseQueryResult<LoyaltyTransaction[]> =>
   useQuery<LoyaltyTransaction[]>({
-    queryKey: ['crm-loyalty-transactions', customerId],
+    queryKey: ['crm-loyalty-transactions', customerId ?? 'all'],
     queryFn: async (): Promise<LoyaltyTransaction[]> => {
-      if (!customerId) return [];
+      const hasCustomerFilter = typeof customerId === 'number' && customerId > 0;
       const res = await unwrap(
         safe.get<unknown>('/crm/loyalty/transactions', {
-          params: { customer_id: customerId, page: 1, page_size: 100 },
+          params: {
+            ...(hasCustomerFilter ? { customer_id: customerId } : {}),
+            page: 1,
+            page_size: 100,
+          },
         })
       );
       return z.array(loyaltyTransactionSchema).parse(unwrapList(res, 'transactions'));
     },
-    enabled: typeof customerId === 'number' && customerId > 0,
+    enabled:
+      customerId === undefined ||
+      (typeof customerId === 'number' && Number.isInteger(customerId) && customerId > 0),
   });
 
 // ── Mutations ────────────────────────────────────────────────────────────────
@@ -139,9 +165,10 @@ export const useUpdateLoyaltyConfig = (): UseMutationResult<
   return useMutation<LoyaltyConfig, unknown, Partial<LoyaltyConfig>>({
     mutationFn: async (config: Partial<LoyaltyConfig>): Promise<LoyaltyConfig> => {
       const current = qc.getQueryData<LoyaltyConfig>(['crm-loyalty-config']) ?? {};
-      const request = toUpdateLoyaltyConfigRequest({ ...current, ...config });
+      const merged = { ...DEFAULT_LOYALTY_CONFIG, ...current, ...config };
+      const request = toUpdateLoyaltyConfigRequest(merged);
       await unwrap(safe.put('/crm/loyalty/config', request));
-      return loyaltyConfigSchema.parse({ ...current, ...config });
+      return loyaltyConfigSchema.parse(merged);
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-loyalty-config'] });
@@ -161,9 +188,9 @@ export const useUpsertTier = (): UseMutationResult<unknown, unknown, UpsertTierP
       const current = qc
         .getQueryData<LoyaltyTier[]>(['crm-loyalty-tiers'])
         ?.find((tier) => tier.id === payload.id);
-      const request = { id: payload.id, ...toLoyaltyTierRequest({ ...current, ...payload.data }) };
+      const request = toLoyaltyTierRequest({ ...current, ...payload.data });
       return payload.id
-        ? unwrap(safe.put('/crm/loyalty/tiers', request))
+        ? unwrap(safe.put('/crm/loyalty/tiers', { id: payload.id, ...request }))
         : unwrap(safe.post('/crm/loyalty/tiers', request));
     },
     onSuccess: (): void => {
@@ -214,6 +241,7 @@ export const useAwardPoints = (): UseMutationResult<unknown, unknown, AwardRedee
       void qc.invalidateQueries({ queryKey: ['crm-loyalty-transactions'] });
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
       void qc.invalidateQueries({ queryKey: ['crm-customer', variables.customerId] });
+      void qc.invalidateQueries({ queryKey: ['crm-customer', variables.customerId, 'full'] });
       toast.success(t('crm.loyalty.pointsAwarded'));
     },
     onError: (): void => {
@@ -239,6 +267,7 @@ export const useRedeemPoints = (): UseMutationResult<unknown, unknown, AwardRede
       void qc.invalidateQueries({ queryKey: ['crm-loyalty-transactions'] });
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
       void qc.invalidateQueries({ queryKey: ['crm-customer', variables.customerId] });
+      void qc.invalidateQueries({ queryKey: ['crm-customer', variables.customerId, 'full'] });
       toast.success(t('crm.loyalty.pointsRedeemed'));
     },
     onError: (): void => {

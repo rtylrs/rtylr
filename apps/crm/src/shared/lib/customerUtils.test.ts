@@ -65,6 +65,15 @@ describe('daysSinceLastVisit', () => {
     const c = makeCustomer({ lastVisitAt: '2024-04-30' });
     expect(daysSinceLastVisit(c, now)).toBe(10);
   });
+
+  it('treats a missing or malformed visit date as infinitely old', () => {
+    expect(daysSinceLastVisit(makeCustomer({ lastVisitAt: '' }), new Date('2024-05-10'))).toBe(
+      Infinity
+    );
+    expect(
+      daysSinceLastVisit(makeCustomer({ lastVisitAt: 'not-a-date' }), new Date('2024-05-10'))
+    ).toBe(Infinity);
+  });
 });
 
 describe('isAtRisk', () => {

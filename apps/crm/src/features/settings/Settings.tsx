@@ -4,7 +4,15 @@ import { toast } from 'sonner';
 import { Save, Users, Settings2, UserPlus, UserMinus } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCrmSettings, useUpdateCrmSettings } from '../../shared/hooks/queries/useCrmSettings';
-import { PageHeader, Card, Input, Select, Button, ACCENT } from '../../shared/components/ui';
+import {
+  PageHeader,
+  Card,
+  Input,
+  Select,
+  Button,
+  ACCENT,
+  ConfirmModal,
+} from '../../shared/components/ui';
 import type { Settings } from '../../shared/schemas/settings';
 import {
   useCrmTeam,
@@ -33,10 +41,10 @@ const TABS: TabDef[] = [
 // ── General Tab ───────────────────────────────────────────────────────────────
 
 const GeneralTab: React.FC = () => {
-  const { data: fetched } = useCrmSettings();
+  const { data: fetched, isLoading, isError } = useCrmSettings();
   const update = useUpdateCrmSettings();
   const defaultSettings: Settings = {
-    defaultConsent: true,
+    defaultConsent: false,
     timezone: 'America/Los_Angeles',
     fromEmail: '',
     fromName: '',
@@ -51,7 +59,10 @@ const GeneralTab: React.FC = () => {
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]): void =>
     setForm((f) => ({ ...f, [k]: v }));
 
+  const settingsUnavailable = isLoading || isError;
+
   const handleSave = (): void => {
+    if (update.isPending || settingsUnavailable) return;
     update.mutate(form, {
       onSuccess: () => toast.success('Settings saved'),
       onError: () => toast.error('Failed to save settings'),
@@ -61,11 +72,21 @@ const GeneralTab: React.FC = () => {
   return (
     <div style={{ maxWidth: '680px' }}>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-        <Button variant="primary" onClick={handleSave}>
+        <Button
+          variant="primary"
+          onClick={handleSave}
+          disabled={update.isPending || settingsUnavailable}
+        >
           <Save size={13} />
-          Save changes
+          {update.isPending ? 'Saving…' : 'Save changes'}
         </Button>
       </div>
+
+      {isError && (
+        <p style={{ color: '#ef4444', fontSize: '12px', margin: '0 0 16px' }}>
+          Unable to load your current settings. Refresh before saving changes.
+        </p>
+      )}
 
       <Card style={{ marginBottom: '16px' }}>
         <h4
@@ -177,7 +198,7 @@ const GeneralTab: React.FC = () => {
 // ── Team Tab ──────────────────────────────────────────────────────────────────
 
 const TeamTab: React.FC = () => {
-  const { data: members = [], isLoading } = useCrmTeam();
+  const { data: members = [], isLoading, isError } = useCrmTeam();
   const invite = useCrmInviteMember();
   const deactivate = useCrmDeactivateMember();
   const { data: sub } = useCrmSubscription();
@@ -185,8 +206,10 @@ const TeamTab: React.FC = () => {
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [showInvite, setShowInvite] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<{ id: string; label: string } | null>(null);
 
   const handleInvite = (): void => {
+    if (invite.isPending) return;
     if (!email.trim() || !fullName.trim()) {
       toast.error('Email and full name are required');
       return;
@@ -335,6 +358,12 @@ const TeamTab: React.FC = () => {
             />
           ))}
         </div>
+      ) : isError ? (
+        <div style={{ padding: '32px 0', textAlign: 'center', color: '#ef4444' }}>
+          <p style={{ fontSize: 13, margin: 0 }}>
+            Unable to load team members. Refresh and try again.
+          </p>
+        </div>
       ) : members.length === 0 ? (
         <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--hub-text-muted)' }}>
           <Users size={24} style={{ margin: '0 auto 8px', opacity: 0.4, display: 'block' }} />
@@ -414,8 +443,15 @@ const TeamTab: React.FC = () => {
                 type="button"
                 aria-label={`Remove ${m.fullName || m.email}`}
                 onClick={() => {
-                  deactivate.mutate(m.id ?? '');
+                  const memberId = m.id;
+                  if (memberId) {
+                    setRemoveTarget({
+                      id: memberId,
+                      label: m.fullName || m.email || 'this member',
+                    });
+                  }
                 }}
+                disabled={!m.id || deactivate.isPending}
                 style={{
                   height: 28,
                   width: 28,
@@ -426,8 +462,9 @@ const TeamTab: React.FC = () => {
                   border: 'none',
                   background: 'transparent',
                   color: 'var(--hub-text-muted)',
-                  cursor: 'pointer',
+                  cursor: !m.id || deactivate.isPending ? 'not-allowed' : 'pointer',
                   flexShrink: 0,
+                  opacity: !m.id || deactivate.isPending ? 0.5 : 1,
                 }}
               >
                 <UserMinus size={13} />
@@ -436,6 +473,23 @@ const TeamTab: React.FC = () => {
           ))}
         </Card>
       )}
+
+      <ConfirmModal
+        open={removeTarget !== null}
+        onClose={() => setRemoveTarget(null)}
+        onConfirm={() => {
+          if (removeTarget && !deactivate.isPending) deactivate.mutate(removeTarget.id);
+        }}
+        title="Remove team member?"
+        description={
+          removeTarget
+            ? `Remove ${removeTarget.label} from CRM access? They will no longer be able to use this workspace.`
+            : undefined
+        }
+        confirmLabel={deactivate.isPending ? 'Removing…' : 'Remove'}
+        confirmDisabled={deactivate.isPending}
+        variant="danger"
+      />
     </div>
   );
 };

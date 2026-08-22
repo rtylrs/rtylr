@@ -18,7 +18,9 @@ export function centsToDisplay(cents: number): string {
 
 export function trialDaysLeft(trialEndsAt: string | null): number {
   if (!trialEndsAt) return 0;
-  return Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86_400_000));
+  const end = new Date(trialEndsAt).getTime();
+  if (!Number.isFinite(end)) return 0;
+  return Math.max(0, Math.ceil((end - Date.now()) / 86_400_000));
 }
 
 export interface SeatProration {
@@ -58,6 +60,7 @@ export function computeSeatProration(pricePerSeatCents: number): SeatProration {
 export function formatPeriodRange(start: string, end: string | null): string {
   const s = new Date(start);
   const e = end ? new Date(end) : new Date();
+  if (!Number.isFinite(s.getTime()) || !Number.isFinite(e.getTime())) return '';
   const months = [
     'Jan',
     'Feb',

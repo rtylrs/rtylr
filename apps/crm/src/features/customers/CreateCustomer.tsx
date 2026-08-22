@@ -4,6 +4,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Check, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useCreateCustomer } from '../../shared/hooks/queries/useCustomers';
+import { useCrmSettings } from '../../shared/hooks/queries/useCrmSettings';
 import { Breadcrumbs, Button, Card, Input, PageHeader } from '../../shared/components/ui';
 
 interface FormData {
@@ -26,28 +27,46 @@ const steps = [
 const CreateCustomer: React.FC = () => {
   const navigate = useNavigate();
   const create = useCreateCustomer();
+  const { data: settings } = useCrmSettings();
   const [step, setStep] = useState(0);
+  const [consentTouched, setConsentTouched] = useState(false);
+  const [consentInitialized, setConsentInitialized] = useState(false);
   const [data, setData] = useState<FormData>({
     name: '',
     email: '',
     phone: '',
     birthday: '',
     address: '',
-    consentEmail: true,
+    consentEmail: false,
     consentSms: false,
     consentMarketing: false,
   });
 
+  React.useEffect(() => {
+    if (!settings || consentInitialized || consentTouched) return;
+    setData((current) => ({
+      ...current,
+      consentEmail: settings.defaultConsent,
+      consentSms: settings.defaultConsent,
+      consentMarketing: settings.defaultConsent,
+    }));
+    setConsentInitialized(true);
+  }, [consentInitialized, consentTouched, settings]);
+
   const set = <K extends keyof FormData>(k: K, v: FormData[K]) =>
     setData((d) => ({ ...d, [k]: v }));
 
+  const emailValid = !data.email.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim());
+  const contactValid = (data.email.trim().length > 0 || data.phone.trim().length > 0) && emailValid;
+
   const canNext = () => {
     if (step === 0) return data.name.trim().length > 0;
-    if (step === 1) return data.email.trim().length > 0 || data.phone.trim().length > 0;
+    if (step === 1) return contactValid;
     return true;
   };
 
   const handleSubmit = () => {
+    if (create.isPending || !data.name.trim() || !contactValid) return;
     create.mutate(
       {
         name: data.name,
@@ -168,6 +187,11 @@ const CreateCustomer: React.FC = () => {
                 onChange={(e) => set('phone', e.target.value)}
                 placeholder="+1 555-000-0000"
               />
+              {!emailValid && (
+                <p style={{ margin: '-6px 0 0', fontSize: '11px', color: '#ef4444' }}>
+                  Enter a valid email address or clear the field.
+                </p>
+              )}
             </div>
           )}
           {step === 2 && (
@@ -205,7 +229,10 @@ const CreateCustomer: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={data[c.key]}
-                    onChange={(e) => set(c.key, e.target.checked)}
+                    onChange={(e) => {
+                      setConsentTouched(true);
+                      set(c.key, e.target.checked);
+                    }}
                     style={{ accentColor: '#3b82f6', width: '16px', height: '16px' }}
                   />
                   <div>
@@ -223,7 +250,6 @@ const CreateCustomer: React.FC = () => {
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
           <Button
             variant="outline"
-            disabled={step === 0}
             onClick={() => (step > 0 ? setStep(step - 1) : navigate({ to: '/customers' }))}
           >
             <ArrowLeft size={13} />

@@ -24,8 +24,18 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   });
 
   const handleSubmit = (): void => {
+    if (upsert.isPending) return;
     if (!form.name.trim()) {
       toast.error('Reward name is required');
+      return;
+    }
+    if (
+      !Number.isInteger(form.pointsCost) ||
+      form.pointsCost < 0 ||
+      !Number.isInteger(form.stock) ||
+      form.stock < 0
+    ) {
+      toast.error('Points cost and stock must be whole numbers of zero or more');
       return;
     }
     upsert.mutate(
@@ -125,7 +135,7 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </label>
             <input
               type="number"
-              min={1}
+              min={0}
               value={form.pointsCost}
               onChange={(e) => setForm((f) => ({ ...f, pointsCost: Number(e.target.value) }))}
               style={inputStyle}
@@ -158,7 +168,14 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           <Button
             variant="primary"
             onClick={handleSubmit}
-            disabled={upsert.isPending || !form.name.trim()}
+            disabled={
+              upsert.isPending ||
+              !form.name.trim() ||
+              !Number.isInteger(form.pointsCost) ||
+              form.pointsCost < 0 ||
+              !Number.isInteger(form.stock) ||
+              form.stock < 0
+            }
           >
             {upsert.isPending ? 'Saving…' : 'Create reward'}
           </Button>
@@ -169,7 +186,7 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 };
 
 const LoyaltyRewards: React.FC = () => {
-  const { data: fetched, isLoading } = useLoyaltyRewards();
+  const { data: fetched, isLoading, isError } = useLoyaltyRewards();
   const rewards = fetched ?? [];
   const [showAdd, setShowAdd] = useState(false);
 
@@ -193,6 +210,14 @@ const LoyaltyRewards: React.FC = () => {
         {isLoading ? (
           <Card>
             <SkeletonList count={4} />
+          </Card>
+        ) : isError ? (
+          <Card>
+            <EmptyState
+              icon={Gift}
+              title="Unable to load rewards"
+              description="Refresh and try again."
+            />
           </Card>
         ) : rewards.length === 0 ? (
           <Card>

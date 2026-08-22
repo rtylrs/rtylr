@@ -9,14 +9,14 @@ import {
 import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import { AppGuard } from '@voxire/auth';
 import { ErrorBoundary } from '@voxire/ui';
-import { unwrap, createOneKitClient } from '@voxire/api';
+import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
 import { AppServiceClient } from '@voxire/voxie/hub/app/v1/client';
 import type { Addon } from '@voxire/voxie/hub/app/v1/types';
+import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
 import { FullScreenLoader } from '@voxire/components';
 import { z } from 'zod';
 import { ShortcutsProvider } from './shared/components/ShortcutsProvider';
-import { safe } from './shared/lib/api';
 import DefaultLayout from './layouts/DefaultLayout';
 
 const Dashboard = React.lazy(() => import('./features/dashboard/Dashboard'));
@@ -55,9 +55,9 @@ const rootRoute = createRootRoute({
     <ErrorBoundary>
       <AppGuard
         appId="crm"
-        fetchUser={(): Promise<Record<string, unknown>> =>
-          unwrap(safe.get<Record<string, unknown>>('/hub/user/v1/users/me'))
-        }
+        fetchUser={async (): Promise<Record<string, unknown>> => ({
+          ...(await userClient.getMe({})),
+        })}
       >
         <AppFlagGuard flag={FLAG_KEYS.APP_CRM}>
           <ShortcutsProvider>
@@ -192,7 +192,7 @@ const automationsNewRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: '/automations/new',
   validateSearch: z.object({
-    id: z.number().int().positive().optional().catch(undefined),
+    id: z.coerce.number().int().positive().optional().catch(undefined),
   }),
   component: () => <>{lazy(<AutomationBuilder />)}</>,
 });
@@ -217,22 +217,40 @@ const settingsRoute = createRoute({
 });
 
 const appClient = createOneKitClient(AppServiceClient, 'crm');
+const userClient = createOneKitClient(UserServiceClient, 'crm');
 
 function SalesAddonGuard({ children }: { children: React.ReactNode }): React.JSX.Element {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['crm-addons'],
     queryFn: async () => {
-      try {
-        const res = await appClient.listAddons({});
-        return res.addons ?? [];
-      } catch {
-        return [];
-      }
+      const res = await appClient.listAddons({});
+      return res.addons ?? [];
     },
     staleTime: 5 * 60 * 1000,
   });
 
   if (isLoading) return <FullScreenLoader />;
+
+  if (isError) {
+    return (
+      <div
+        role="alert"
+        style={{
+          maxWidth: '560px',
+          margin: '80px auto',
+          padding: '24px',
+          borderRadius: '12px',
+          border: '1px solid rgba(239,68,68,0.25)',
+          background: 'rgba(239,68,68,0.08)',
+          color: 'var(--hub-text-muted)',
+          fontSize: '13px',
+          textAlign: 'center',
+        }}
+      >
+        Unable to verify the Sales Pipeline add-on right now. Refresh and try again.
+      </div>
+    );
+  }
 
   const isEnabled = (data ?? []).some((a: Addon) => a.id === 'sales_pipeline' && a.isEnabled);
   if (!isEnabled) {

@@ -3,10 +3,10 @@ import { ResultAsync } from 'neverthrow';
 
 vi.mock('../lib/api', () => ({
   safe: {
-    get: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: [] }), () => ({}) as any)),
-    post: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
-    put: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
-    delete: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}) as any)),
+    get: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: [] }), () => ({}))),
+    post: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}))),
+    put: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}))),
+    delete: vi.fn(() => ResultAsync.fromPromise(Promise.resolve({ data: {} }), () => ({}))),
   },
 }));
 
@@ -35,6 +35,13 @@ describe('crmApi', () => {
     expect(safe.get).toHaveBeenCalledWith('/crm/customers', { params });
   });
 
+  it('getCustomers translates legacy limit and offset to backend pagination', () => {
+    crmApi.getCustomers({ search: 'John', limit: 25, offset: 50 });
+    expect(safe.get).toHaveBeenCalledWith('/crm/customers', {
+      params: { search: 'John', page: 3, pageSize: 25 },
+    });
+  });
+
   it('getCustomerDetail calls GET /crm/customers/detail with id param', () => {
     crmApi.getCustomerDetail(5);
     expect(safe.get).toHaveBeenCalledWith('/crm/customers/detail', { params: { id: 5 } });
@@ -42,7 +49,9 @@ describe('crmApi', () => {
 
   it('getCustomerTimeline calls GET /crm/customers/timeline', () => {
     crmApi.getCustomerTimeline(5);
-    expect(safe.get).toHaveBeenCalledWith('/crm/customers/timeline', { params: { id: 5 } });
+    expect(safe.get).toHaveBeenCalledWith('/crm/customers/timeline', {
+      params: { customerId: 5 },
+    });
   });
 
   it('createCustomer calls POST /crm/customers', () => {
@@ -91,6 +100,15 @@ describe('crmApi', () => {
     });
   });
 
+  it('importCustomers forwards the optional dedupe flag', () => {
+    const customers = [{ name: 'A' }];
+    crmApi.importCustomers(customers, false);
+    expect(safe.post).toHaveBeenCalledWith('/crm/customers/import', {
+      customers,
+      dedupe: false,
+    });
+  });
+
   it('mergeCustomers calls POST /crm/customers/merge', () => {
     crmApi.mergeCustomers(1, 2);
     expect(safe.post).toHaveBeenCalledWith('/crm/customers/merge', {
@@ -101,7 +119,9 @@ describe('crmApi', () => {
 
   it('exportCustomerData calls GET /crm/customers/export', () => {
     crmApi.exportCustomerData(5);
-    expect(safe.get).toHaveBeenCalledWith('/crm/customers/export', { params: { id: 5 } });
+    expect(safe.get).toHaveBeenCalledWith('/crm/customers/export', {
+      params: { customerId: 5 },
+    });
   });
 
   // Loyalty
@@ -119,7 +139,7 @@ describe('crmApi', () => {
     expect(safe.post).toHaveBeenCalledWith('/crm/loyalty/redeem', {
       customerId: 1,
       points: 50,
-      reason: undefined,
+      description: undefined,
     });
   });
 
@@ -131,12 +151,34 @@ describe('crmApi', () => {
   it('updateLoyaltyConfig calls PUT /crm/loyalty/config', () => {
     const config = { pointsPerDollar: 2 };
     crmApi.updateLoyaltyConfig(config);
-    expect(safe.put).toHaveBeenCalledWith('/crm/loyalty/config', config);
+    expect(safe.put).toHaveBeenCalledWith('/crm/loyalty/config', {
+      isEnabled: false,
+      pointsPerCurrencyUnit: 2,
+      currencyPerPoint: 0.01,
+      bronzeMin: 0,
+      silverMin: 500,
+      goldMin: 1500,
+      platinumMin: 5000,
+      bronzeDiscountPct: 0,
+      silverDiscountPct: 5,
+      goldDiscountPct: 10,
+      platinumDiscountPct: 15,
+      pointsExpiryDays: 365,
+    });
   });
 
   it('getLoyaltyMembers calls GET /crm/loyalty/members', () => {
     crmApi.getLoyaltyMembers();
-    expect(safe.get).toHaveBeenCalledWith('/crm/loyalty/members');
+    expect(safe.get).toHaveBeenCalledWith('/crm/loyalty/members', {
+      params: { limit: 100, offset: 0 },
+    });
+  });
+
+  it('getLoyaltyTransactions requests the first backend page', () => {
+    crmApi.getLoyaltyTransactions();
+    expect(safe.get).toHaveBeenCalledWith('/crm/loyalty/transactions', {
+      params: { page: 1, pageSize: 100 },
+    });
   });
 
   it('updateLoyaltyTier calls PUT /crm/loyalty/tiers', () => {
@@ -161,7 +203,7 @@ describe('crmApi', () => {
     expect(safe.post).toHaveBeenCalledWith('/crm/segments', {
       name: 'VIPs',
       description: undefined,
-      filters: { rules: [] },
+      rules: [],
     });
   });
 
@@ -206,26 +248,26 @@ describe('crmApi', () => {
   });
 
   // Templates
-  it('getTemplates calls GET /crm/templates', () => {
+  it('getTemplates calls GET /crm/template/v1/templates', () => {
     crmApi.getTemplates();
-    expect(safe.get).toHaveBeenCalledWith('/crm/templates');
+    expect(safe.get).toHaveBeenCalledWith('/crm/template/v1/templates');
   });
 
   // Feedback
-  it('getFeedback calls GET /crm/feedback', () => {
+  it('getFeedback calls GET /crm/feedback/v1/feedback', () => {
     crmApi.getFeedback();
-    expect(safe.get).toHaveBeenCalledWith('/crm/feedback');
+    expect(safe.get).toHaveBeenCalledWith('/crm/feedback/v1/feedback');
   });
 
   // Settings
-  it('getSettings calls GET /crm/settings', () => {
+  it('getSettings calls GET /crm/settings/v1/settings', () => {
     crmApi.getSettings();
-    expect(safe.get).toHaveBeenCalledWith('/crm/settings');
+    expect(safe.get).toHaveBeenCalledWith('/crm/settings/v1/settings');
   });
 
-  it('updateSettings calls PUT /crm/settings', () => {
+  it('updateSettings calls PUT /crm/settings/v1/settings', () => {
     const data = { fromEmail: 'hi@test.com' };
     crmApi.updateSettings(data);
-    expect(safe.put).toHaveBeenCalledWith('/crm/settings', data);
+    expect(safe.put).toHaveBeenCalledWith('/crm/settings/v1/settings', data);
   });
 });

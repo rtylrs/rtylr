@@ -16,7 +16,7 @@ const finiteNumber = z.preprocess((value) => {
  * The backend does NOT compute openRate / clickRate / revenue — derive those
  * client-side from sentCount / openCount when a display needs them.
  */
-export const campaignSchema = z.object({
+const campaignWireSchema = z.object({
   id: finiteNumber,
   ownerId: finiteNumber.optional(),
   name: z.string(),
@@ -33,6 +33,19 @@ export const campaignSchema = z.object({
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });
+
+/** Accept both the current generated campaign names and the legacy UI names. */
+export const campaignSchema = z.preprocess((value) => {
+  if (!value || typeof value !== 'object') return value;
+  const raw = value as Record<string, unknown>;
+  return {
+    ...raw,
+    type: raw.type ?? raw.channel ?? '',
+    audienceSegmentId: raw.audienceSegmentId ?? raw.segmentId ?? null,
+    body: raw.body ?? raw.content,
+    openCount: raw.openCount ?? raw.openedCount,
+  };
+}, campaignWireSchema);
 
 const legacyCampaignStatsSchema = z.object({
   id: finiteNumber,

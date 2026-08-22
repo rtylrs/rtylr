@@ -105,7 +105,7 @@ const Leads: React.FC = () => {
   const deleteTarget = deleteId !== null ? leads.find((l) => l.id === deleteId) : null;
 
   const handleDelete = (): void => {
-    if (deleteId === null) return;
+    if (deleteId === null || deleteLead.isPending) return;
     deleteLead.mutate(deleteId, {
       onSuccess: () => {
         toast.success('Lead deleted');
@@ -381,17 +381,19 @@ const Leads: React.FC = () => {
                           <button
                             aria-label="Delete lead"
                             onClick={() => setDeleteId(lead.id)}
+                            disabled={deleteLead.isPending}
                             style={{
                               height: '28px',
                               width: '28px',
                               borderRadius: '6px',
                               background: 'transparent',
                               border: '1px solid var(--hub-border)',
-                              cursor: 'pointer',
                               color: '#ef4444',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
+                              cursor: deleteLead.isPending ? 'not-allowed' : 'pointer',
+                              opacity: deleteLead.isPending ? 0.5 : 1,
                             }}
                           >
                             <Trash2 size={13} />
@@ -403,6 +405,14 @@ const Leads: React.FC = () => {
                 </AnimatePresence>
               </tbody>
             </table>
+          )}
+          {isError && leads.length > 0 && (
+            <div
+              role="alert"
+              style={{ padding: '10px 16px', color: 'var(--hub-text-muted)', fontSize: '12px' }}
+            >
+              Unable to load more leads. The rows shown may be incomplete; refresh and try again.
+            </div>
           )}
           {hasMore && filtered.length > 0 && (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}>
@@ -429,7 +439,8 @@ const Leads: React.FC = () => {
               ? `Delete "${deleteTarget.companyName ?? deleteTarget.company ?? 'this lead'}"? This will also remove all associated touchpoints and contacts.`
               : 'Are you sure?'
           }
-          confirmLabel="Delete"
+          confirmLabel={deleteLead.isPending ? 'Deleting…' : 'Delete'}
+          confirmDisabled={deleteLead.isPending}
           variant="danger"
         />
       </div>

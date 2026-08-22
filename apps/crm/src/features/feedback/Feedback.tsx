@@ -5,7 +5,7 @@ import { useListFeedback } from '../../shared/hooks/queries/useFeedback';
 import { PageHeader, Card, EmptyState, SkeletonList } from '../../shared/components/ui';
 
 const Feedback: React.FC = () => {
-  const { data: fetched, isLoading } = useListFeedback();
+  const { data: fetched, isLoading, isError } = useListFeedback();
   const feedback = fetched ?? [];
 
   const npsResponses = feedback.filter((f) => f.type === 'nps');
@@ -133,6 +133,12 @@ const Feedback: React.FC = () => {
             <div style={{ padding: '16px' }}>
               <SkeletonList count={5} />
             </div>
+          ) : isError ? (
+            <EmptyState
+              icon={MessageSquare}
+              title="Unable to load feedback"
+              description="Check your connection and try again."
+            />
           ) : feedback.length === 0 ? (
             <EmptyState
               icon={MessageSquare}

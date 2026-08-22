@@ -26,7 +26,7 @@ describe('segmentSchema', () => {
   });
 
   it('defaults rules to empty array when missing', () => {
-    const { rules, ...rest } = baseSegment;
+    const { rules: _rules, ...rest } = baseSegment;
     const result = segmentSchema.parse(rest);
     expect(result.rules).toEqual([]);
   });

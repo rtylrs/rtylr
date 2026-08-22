@@ -12,8 +12,9 @@ export function hasSmsConsent(customer: Customer): boolean {
 
 /** Returns the number of days since the customer's last visit. */
 export function daysSinceLastVisit(customer: Customer, now = new Date()): number {
-  const last = new Date(customer.lastVisit);
-  const diff = now.getTime() - last.getTime();
+  const lastTimestamp = new Date(customer.lastVisit).getTime();
+  if (!customer.lastVisit.trim() || !Number.isFinite(lastTimestamp)) return Infinity;
+  const diff = now.getTime() - lastTimestamp;
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 

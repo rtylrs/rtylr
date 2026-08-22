@@ -62,9 +62,21 @@ function filtersToRules(filters: string): string[] {
   return [];
 }
 
-function rulesToFilters(rules: string[] | undefined, existing?: string): string {
+function matchAllFromFilters(filters: string): boolean {
+  try {
+    const parsed: unknown = JSON.parse(filters);
+    if (parsed && typeof parsed === 'object' && 'matchAll' in parsed) {
+      return (parsed as { matchAll?: unknown }).matchAll !== false;
+    }
+  } catch {
+    /* fall through */
+  }
+  return true;
+}
+
+function rulesToFilters(rules: string[] | undefined, existing?: string, matchAll = true): string {
   if (!rules) return existing ?? '{}';
-  return JSON.stringify({ rules });
+  return JSON.stringify({ rules, matchAll });
 }
 
 export const useListSegments = (): UseQueryResult<Segment[]> =>
@@ -75,7 +87,11 @@ export const useListSegments = (): UseQueryResult<Segment[]> =>
       return z.array(segmentSchema).parse(
         (res.segments ?? []).map((s) => {
           const segment = fromApiSegment(s);
-          return { ...segment, rules: filtersToRules(segment.filters) };
+          return {
+            ...segment,
+            rules: filtersToRules(segment.filters),
+            matchAll: matchAllFromFilters(segment.filters),
+          };
         })
       );
     },
@@ -88,23 +104,46 @@ export const useGetSegment = (id: string | undefined): UseQueryResult<Segment> =
       const res = await segmentClient.getSegmentDetail({ id: id ?? '' });
       if (!res.segment) throw new Error('Segment not found');
       const segment = fromApiSegment(res.segment);
-      return { ...segment, rules: filtersToRules(segment.filters) };
+      return {
+        ...segment,
+        rules: filtersToRules(segment.filters),
+        matchAll: matchAllFromFilters(segment.filters),
+      };
     },
-    enabled: !!id,
+    enabled: id != null && Number.isInteger(Number(id)) && Number(id) > 0,
   });
 
 export const useSegmentCustomers = (id: string | undefined): UseQueryResult<Customer[]> =>
   useQuery<Customer[]>({
     queryKey: ['crm-segment', id, 'customers'],
     queryFn: async (): Promise<Customer[]> => {
-      const res = await segmentClient.getSegmentCustomers({
-        segmentId: id ?? '',
-        page: String(1),
-        pageSize: String(50),
-      });
-      return z.array(customerSchema).parse((res.customers ?? []).map(fromApiSegmentCustomer));
+      const customers: Customer[] = [];
+      const pageSize = 100;
+      const maxPages = 100;
+
+      for (let page = 1; page <= maxPages; page += 1) {
+        const res = await segmentClient.getSegmentCustomers({
+          segmentId: id ?? '',
+          page: String(page),
+          pageSize: String(pageSize),
+        });
+        const pageCustomers = z
+          .array(customerSchema)
+          .parse((res.customers ?? []).map(fromApiSegmentCustomer));
+        customers.push(...pageCustomers);
+
+        const total = Number(res.total);
+        if (
+          pageCustomers.length === 0 ||
+          (Number.isFinite(total) ? customers.length >= total : pageCustomers.length < pageSize)
+        ) {
+          break;
+        }
+      }
+
+      return customers;
     },
-    enabled: !!id,
+    enabled: id != null && Number.isInteger(Number(id)) && Number(id) > 0,
   });
 
 export const useCreateSegment = (): UseMutationResult<Segment, unknown, Partial<Segment>> => {
@@ -114,14 +153,14 @@ export const useCreateSegment = (): UseMutationResult<Segment, unknown, Partial<
     mutationFn: async (data: Partial<Segment>): Promise<Segment> => {
       const res = await segmentClient.createSegment({
         name: data.name ?? '',
-        description: data.description ?? '',
-        filters: rulesToFilters(data.rules, data.filters),
+        description: data.description?.trim() || data.name?.trim() || 'Customer segment',
+        filters: rulesToFilters(data.rules, data.filters, data.matchAll),
       });
       return segmentSchema.parse({
         id: res.segmentId,
         name: data.name ?? '',
-        description: data.description ?? '',
-        filters: rulesToFilters(data.rules, data.filters),
+        description: data.description?.trim() || data.name?.trim() || 'Customer segment',
+        filters: rulesToFilters(data.rules, data.filters, data.matchAll),
         customerCount: 0,
         color: data.color,
         rules: data.rules,
@@ -148,15 +187,17 @@ export const useUpdateSegment = (): UseMutationResult<Segment, unknown, UpdateSe
         id: payload.id,
         body: {
           name: payload.data.name ?? '',
-          description: payload.data.description ?? '',
-          filters: rulesToFilters(payload.data.rules, payload.data.filters),
+          description:
+            payload.data.description?.trim() || payload.data.name?.trim() || 'Customer segment',
+          filters: rulesToFilters(payload.data.rules, payload.data.filters, payload.data.matchAll),
         },
       });
       return segmentSchema.parse({
         id: payload.id,
         name: payload.data.name ?? '',
-        description: payload.data.description ?? '',
-        filters: rulesToFilters(payload.data.rules, payload.data.filters),
+        description:
+          payload.data.description?.trim() || payload.data.name?.trim() || 'Customer segment',
+        filters: rulesToFilters(payload.data.rules, payload.data.filters, payload.data.matchAll),
         customerCount: payload.data.customerCount ?? 0,
         color: payload.data.color,
         rules: payload.data.rules,

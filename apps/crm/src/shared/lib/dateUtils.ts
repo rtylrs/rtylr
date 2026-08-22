@@ -14,6 +14,7 @@ export function isThisMonth(dateStr: string): boolean {
 /** Returns a human-readable relative label: "Today", "Yesterday", or formatted date. */
 export function relativeDate(dateStr: string): string {
   const date = new Date(dateStr);
+  if (!Number.isFinite(date.getTime())) return '';
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));

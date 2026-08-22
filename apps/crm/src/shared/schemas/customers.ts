@@ -45,9 +45,12 @@ const customerWireSchema = z.object({
   // Legacy / client-only fields the backend does not currently emit.
   consent: z
     .object({
-      email: z.boolean(),
-      sms: z.boolean(),
-      marketing: z.boolean(),
+      // Older records and partial consent maps may omit channels. Missing
+      // consent is treated as false so an incomplete payload never becomes an
+      // accidental opt-in in campaign previews.
+      email: z.boolean().default(false),
+      sms: z.boolean().default(false),
+      marketing: z.boolean().default(false),
     })
     .optional(),
   referredBy: finiteNumber.nullable().optional(),

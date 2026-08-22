@@ -20,12 +20,12 @@ const templateClient = createOneKitClient(TemplateServiceClient, 'crm');
 // and has no category/thumbnail fields (UI-only concepts, don't persist).
 function fromApiTemplate(t: ApiTemplate): Template {
   return templateSchema.parse({
-    id: t.id,
-    name: t.name,
+    id: t.id ?? '',
+    name: t.name ?? '',
     channel: t.type,
     subject: t.subject,
-    body: t.body,
-    updatedAt: t.updatedAt,
+    body: t.body ?? '',
+    updatedAt: t.updatedAt ?? t.createdAt ?? '',
   });
 }
 
@@ -80,24 +80,28 @@ export const useUpdateTemplate = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<Template, unknown, { id: string; data: Partial<Template> }>({
     mutationFn: async (payload): Promise<Template> => {
+      const current = qc
+        .getQueryData<Template[]>(['crm-templates'])
+        ?.find((template) => template.id === payload.id);
+      const merged = { ...current, ...payload.data };
       await templateClient.updateTemplate({
         id: payload.id,
         body: {
-          name: payload.data.name ?? '',
-          type: payload.data.channel ?? 'email',
-          subject: payload.data.subject ?? '',
-          body: payload.data.body ?? '',
+          name: merged.name ?? '',
+          type: merged.channel ?? 'email',
+          subject: merged.subject ?? '',
+          body: merged.body ?? '',
           isActive: true,
         },
       });
       return templateSchema.parse({
         id: payload.id,
-        name: payload.data.name ?? '',
-        channel: payload.data.channel ?? 'email',
-        category: payload.data.category,
-        subject: payload.data.subject,
-        body: payload.data.body ?? '',
-        thumbnail: payload.data.thumbnail,
+        name: merged.name ?? '',
+        channel: merged.channel ?? 'email',
+        category: merged.category,
+        subject: merged.subject,
+        body: merged.body ?? '',
+        thumbnail: merged.thumbnail,
         updatedAt: new Date().toISOString(),
       });
     },

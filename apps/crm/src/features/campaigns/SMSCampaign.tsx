@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -10,7 +10,7 @@ import {
   useUpdateCampaignStatus,
 } from '../../shared/hooks/queries/useCampaigns';
 import { useListSegments } from '../../shared/hooks/queries/useSegments';
-import { useListCustomers } from '../../shared/hooks/queries/useCustomers';
+import { useListAllCustomers } from '../../shared/hooks/queries/useCustomers';
 import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../shared/components/ui';
 import { CustomerAvatar, SMSComposer } from '../../shared/components/crm';
 
@@ -21,20 +21,29 @@ const SMSCampaign: React.FC = () => {
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const searchParams = new URLSearchParams(searchStr);
   const campaignId = Number(searchParams.get('id') || 0) || undefined;
+  const requestedSegmentId = searchParams.get('segment') || '';
   const isEditing = !!campaignId;
 
   const create = useCreateCampaign();
   const update = useUpdateCampaign();
   const updateStatus = useUpdateCampaignStatus();
   const { data: existingCampaign } = useGetCampaign(campaignId);
-  const { data: fetchedSegments } = useListSegments();
-  const { data: fetchedCustomers } = useListCustomers({ limit: 200, offset: 0 });
-  const segments = fetchedSegments ?? [];
+  const {
+    data: fetchedSegments,
+    isLoading: segmentsLoading,
+    isError: segmentsError,
+  } = useListSegments();
+  const {
+    data: fetchedCustomers,
+    isLoading: customersLoading,
+    isError: customersError,
+  } = useListAllCustomers();
+  const segments = useMemo(() => fetchedSegments ?? [], [fetchedSegments]);
   const customers = fetchedCustomers ?? [];
 
-  const [name, setName] = useState('');
-  const [segmentId, setSegmentId] = useState<string>('');
-  const [body, setBody] = useState(DEFAULT_SMS_BODY);
+  const [name, setName] = useState(searchParams.get('name') || '');
+  const [segmentId, setSegmentId] = useState<string>(requestedSegmentId);
+  const [body, setBody] = useState(searchParams.get('body') || DEFAULT_SMS_BODY);
   const pending = create.isPending || update.isPending || updateStatus.isPending;
 
   useEffect(() => {
@@ -51,7 +60,29 @@ const SMSCampaign: React.FC = () => {
     }
   }, [existingCampaign, isEditing, segmentId, segments]);
 
+  const segment = segments.find((item) => String(item.id) === segmentId);
+  const audienceUnavailable =
+    segmentsLoading || segmentsError || !segment || segment.customerCount <= 0;
+
   const handleSave = (send: boolean): void => {
+    if (send) {
+      if (segmentsLoading) {
+        toast.error('Audience data is still loading');
+        return;
+      }
+      if (segmentsError) {
+        toast.error('Cannot verify the campaign audience right now');
+        return;
+      }
+      if (!segment) {
+        toast.error('Select a valid audience segment');
+        return;
+      }
+      if (segment.customerCount <= 0) {
+        toast.error('The selected audience has no eligible recipients');
+        return;
+      }
+    }
     const payload = {
       name,
       type: 'sms',
@@ -94,7 +125,6 @@ const SMSCampaign: React.FC = () => {
     create.mutate(payload, callbacks);
   };
 
-  const segment = segments.find((item) => item.id === segmentId);
   const previewRecipients = customers.filter((customer) => customer.consent?.sms).slice(0, 5);
 
   return (
@@ -116,7 +146,7 @@ const SMSCampaign: React.FC = () => {
               <Button
                 variant="outline"
                 onClick={() => handleSave(false)}
-                disabled={pending || !name.trim()}
+                disabled={pending || !name.trim() || !body.trim()}
               >
                 <Save size={13} />
                 {pending ? 'Saving…' : 'Save draft'}
@@ -124,7 +154,7 @@ const SMSCampaign: React.FC = () => {
               <Button
                 variant="primary"
                 onClick={() => handleSave(true)}
-                disabled={pending || !name.trim() || !body.trim()}
+                disabled={pending || !name.trim() || !body.trim() || audienceUnavailable}
               >
                 <Send size={13} />
                 {pending ? 'Activating…' : 'Save & activate'}
@@ -159,38 +189,54 @@ const SMSCampaign: React.FC = () => {
                 Recipient preview
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {previewRecipients.map((customer) => (
-                  <div
-                    key={customer.id}
-                    style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
-                  >
-                    <CustomerAvatar
-                      initials={customer.initials}
-                      points={customer.loyaltyPoints}
-                      size={28}
-                    />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '13px', color: 'var(--hub-text)', fontWeight: 500 }}>
-                        {customer.name}
-                      </div>
-                      <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                        {customer.phone}
-                      </div>
-                    </div>
-                    <span
-                      style={{
-                        padding: '2px 8px',
-                        borderRadius: '9999px',
-                        fontSize: '10px',
-                        background: 'rgba(16,185,129,0.12)',
-                        color: '#10b981',
-                        fontWeight: 600,
-                      }}
+                {customersLoading ? (
+                  <p style={{ fontSize: '12px', color: 'var(--hub-text-muted)', margin: 0 }}>
+                    Loading recipient preview…
+                  </p>
+                ) : customersError ? (
+                  <p style={{ fontSize: '12px', color: '#ef4444', margin: 0 }}>
+                    Recipient data is unavailable. Refresh to preview opted-in customers.
+                  </p>
+                ) : previewRecipients.length === 0 ? (
+                  <p style={{ fontSize: '12px', color: 'var(--hub-text-muted)', margin: 0 }}>
+                    No opted-in SMS recipients are available in the loaded customer data.
+                  </p>
+                ) : (
+                  previewRecipients.map((customer) => (
+                    <div
+                      key={customer.id}
+                      style={{ display: 'flex', alignItems: 'center', gap: '10px' }}
                     >
-                      opted in
-                    </span>
-                  </div>
-                ))}
+                      <CustomerAvatar
+                        initials={customer.initials}
+                        points={customer.loyaltyPoints}
+                        size={28}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div
+                          style={{ fontSize: '13px', color: 'var(--hub-text)', fontWeight: 500 }}
+                        >
+                          {customer.name}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                          {customer.phone}
+                        </div>
+                      </div>
+                      <span
+                        style={{
+                          padding: '2px 8px',
+                          borderRadius: '9999px',
+                          fontSize: '10px',
+                          background: 'rgba(16,185,129,0.12)',
+                          color: '#10b981',
+                          fontWeight: 600,
+                        }}
+                      >
+                        opted in
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             </Card>
           </div>
@@ -209,13 +255,38 @@ const SMSCampaign: React.FC = () => {
               >
                 Audience
               </h4>
-              <Select value={segmentId} onChange={(event) => setSegmentId(event.target.value)}>
+              <Select
+                value={segmentId}
+                onChange={(event) => setSegmentId(event.target.value)}
+                disabled={pending || segmentsLoading}
+              >
+                {segments.length === 0 && <option value="">No segments available</option>}
                 {segments.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.name} ({item.customerCount})
                   </option>
                 ))}
               </Select>
+              {segmentsLoading && (
+                <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)', margin: '8px 0 0' }}>
+                  Loading audience data…
+                </p>
+              )}
+              {segmentsError && (
+                <p style={{ fontSize: '11px', color: '#ef4444', margin: '8px 0 0' }}>
+                  Audience data is unavailable. Activation is disabled.
+                </p>
+              )}
+              {!segmentsLoading && !segmentsError && !segment && (
+                <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)', margin: '8px 0 0' }}>
+                  Select an audience segment before activating.
+                </p>
+              )}
+              {!segmentsLoading && !segmentsError && segment && segment.customerCount <= 0 && (
+                <p style={{ fontSize: '11px', color: '#f59e0b', margin: '8px 0 0' }}>
+                  This segment has no eligible recipients.
+                </p>
+              )}
               {segment && (
                 <div
                   style={{

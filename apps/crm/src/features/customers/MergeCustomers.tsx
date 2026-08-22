@@ -3,8 +3,15 @@ import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { Users, ArrowRight } from 'lucide-react';
-import { useListCustomers, useMergeCustomers } from '../../shared/hooks/queries/useCustomers';
-import { Breadcrumbs, Button, Card, PageHeader } from '../../shared/components/ui';
+import { useListAllCustomers, useMergeCustomers } from '../../shared/hooks/queries/useCustomers';
+import {
+  Breadcrumbs,
+  Button,
+  Card,
+  ConfirmModal,
+  PageHeader,
+  SkeletonList,
+} from '../../shared/components/ui';
 import { SearchableCustomerSelect, CustomerAvatar, TierBadge } from '../../shared/components/crm';
 import { getCustomerTier } from '../../shared/lib/tiers';
 
@@ -12,23 +19,32 @@ const MergeCustomers: React.FC = () => {
   const navigate = useNavigate();
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const merge = useMergeCustomers();
-  const { data: fetched } = useListCustomers({ limit: 200, offset: 0 });
+  const { data: fetched, isLoading, isError } = useListAllCustomers();
   const customers = fetched ?? [];
 
   const [primaryId, setPrimaryId] = useState<number | null>(
     Number(new URLSearchParams(searchStr).get('primary')) || null
   );
   const [secondaryId, setSecondaryId] = useState<number | null>(null);
+  const [confirmMerge, setConfirmMerge] = useState(false);
 
   const primary = customers.find((c) => c.id === primaryId);
   const secondary = customers.find((c) => c.id === secondaryId);
 
   const handleMerge = () => {
-    if (!primaryId || !secondaryId) return;
+    if (!primaryId || !secondaryId || !primary || !secondary) {
+      toast.error('Select two valid customers to merge');
+      return;
+    }
     if (primaryId === secondaryId) {
       toast.error('Cannot merge a customer with themselves');
       return;
     }
+    setConfirmMerge(true);
+  };
+
+  const confirmMergeCustomers = (): void => {
+    if (!primaryId || !secondaryId || merge.isPending) return;
     merge.mutate(
       { primaryId, secondaryId },
       {
@@ -42,6 +58,22 @@ const MergeCustomers: React.FC = () => {
       }
     );
   };
+
+  if (isLoading) {
+    return (
+      <div style={{ maxWidth: '680px' }}>
+        <SkeletonList count={4} />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div style={{ maxWidth: '680px', padding: '40px 0', color: 'var(--hub-text-muted)' }}>
+        Unable to load customers for merging. Please refresh and try again.
+      </div>
+    );
+  }
 
   const renderPreview = () => {
     if (!primary || !secondary) return null;
@@ -199,12 +231,27 @@ const MergeCustomers: React.FC = () => {
           </Button>
           <Button
             variant="primary"
-            disabled={!primaryId || !secondaryId || merge.isPending}
+            disabled={!primary || !secondary || merge.isPending}
             onClick={handleMerge}
           >
             <Users size={13} /> {merge.isPending ? 'Merging…' : 'Merge customers'}
           </Button>
         </div>
+
+        <ConfirmModal
+          open={confirmMerge}
+          onClose={() => setConfirmMerge(false)}
+          onConfirm={confirmMergeCustomers}
+          title="Merge customers?"
+          description={
+            primary && secondary
+              ? `${secondary.name} will be merged into ${primary.name}. This action cannot be undone.`
+              : 'This action cannot be undone.'
+          }
+          confirmLabel={merge.isPending ? 'Merging…' : 'Merge customers'}
+          confirmDisabled={merge.isPending}
+          variant="danger"
+        />
       </div>
     </>
   );

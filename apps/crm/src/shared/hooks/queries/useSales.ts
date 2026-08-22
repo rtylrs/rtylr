@@ -1,4 +1,4 @@
-import { unwrap } from '@voxire/api';
+import { toOptionalFiniteNumber, unwrap } from '@voxire/api';
 import {
   useMutation,
   useQuery,
@@ -9,13 +9,16 @@ import {
 import { toast } from 'sonner';
 import { safe } from '../../lib/api';
 import { unwrapList } from '../../lib/unwrapList';
-import { toLeadMutationPayload } from '../../services/crmApi';
+import { toLeadMutationPayload, toTouchpointMutationPayload } from '../../services/crmApi';
 import type {
   PipelineColumn,
   Lead,
   Touchpoint,
   SalesContact,
   Contract,
+  LeadStage,
+  TouchpointType,
+  TouchpointOutcome,
   CreateLeadRequest,
   UpdateLeadRequest,
   CreateTouchpointRequest,
@@ -23,6 +26,7 @@ import type {
   UpdateContactRequest,
   CreateContractRequest,
   UpdateContractRequest,
+  ContractPlan,
 } from '../../services/crmApi';
 
 // ── Re-exports ────────────────────────────────────────────────────
@@ -39,6 +43,197 @@ export type {
   ContractPlan,
 } from '../../services/crmApi';
 
+const CONTRACT_PLANS: readonly ContractPlan[] = ['free', 'pro', 'scale'];
+const LEAD_STAGES: readonly LeadStage[] = [
+  'cold',
+  'contacted',
+  'demo_booked',
+  'demo_done',
+  'proposal_sent',
+  'contracted',
+  'lost',
+];
+const TOUCHPOINT_TYPES: readonly TouchpointType[] = ['phone', 'email', 'meeting'];
+const TOUCHPOINT_OUTCOMES: readonly TouchpointOutcome[] = [
+  'positive',
+  'neutral',
+  'negative',
+  'no_answer',
+];
+
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+}
+
+function finiteNumber(value: unknown, fallback = 0): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function optionalNumber(value: unknown): number | undefined {
+  if (value === null || value === undefined || value === '') return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+export function normalizeLead(value: unknown): Lead {
+  const raw = asRecord(value);
+  const company = String(raw.company ?? raw.companyName ?? raw.company_name ?? '');
+  const companyName = String(raw.companyName ?? raw.company_name ?? raw.company ?? '');
+  const stageValue = String(raw.stage ?? 'cold');
+  const dealValue = optionalNumber(raw.dealValue ?? raw.deal_value);
+  const mrrPotential = optionalNumber(raw.mrrPotential ?? raw.mrr_potential ?? dealValue);
+  const assignedTo = raw.assignedTo ?? raw.assigned_to;
+
+  return {
+    id: finiteNumber(raw.id),
+    company,
+    companyName,
+    industry: String(raw.industry ?? ''),
+    size: String(raw.size ?? ''),
+    source: String(raw.source ?? ''),
+    stage: LEAD_STAGES.includes(stageValue as LeadStage) ? (stageValue as LeadStage) : 'cold',
+    mrrPotential,
+    dealValue,
+    assignedTo: assignedTo == null ? null : optionalNumber(assignedTo),
+    notes: String(raw.notes ?? ''),
+    createdAt: String(raw.createdAt ?? raw.created_at ?? ''),
+    updatedAt: String(raw.updatedAt ?? raw.updated_at ?? ''),
+  };
+}
+
+export function normalizeTouchpoint(value: unknown): Touchpoint {
+  const raw = asRecord(value);
+  const type = String(raw.type ?? 'phone');
+  const outcome = String(raw.outcome ?? 'neutral');
+  const contactId = raw.contactId ?? raw.contact_id;
+  const nextFollowUp = raw.nextFollowUp ?? raw.next_follow_up;
+  const repName = raw.repName ?? raw.rep_name ?? raw.createdBy ?? raw.created_by;
+  return {
+    id: finiteNumber(raw.id),
+    leadId: finiteNumber(raw.leadId ?? raw.lead_id),
+    type: TOUCHPOINT_TYPES.includes(type as TouchpointType) ? (type as TouchpointType) : 'phone',
+    outcome: TOUCHPOINT_OUTCOMES.includes(outcome as TouchpointOutcome)
+      ? (outcome as TouchpointOutcome)
+      : 'neutral',
+    notes: String(raw.notes ?? ''),
+    repName: repName == null ? '' : String(repName),
+    contactId: contactId == null ? null : (optionalNumber(contactId) ?? null),
+    nextFollowUp: nextFollowUp == null ? null : String(nextFollowUp),
+    createdAt: String(raw.createdAt ?? raw.created_at ?? ''),
+  };
+}
+
+export function normalizeSalesContact(value: unknown): SalesContact {
+  const raw = asRecord(value);
+  return {
+    id: finiteNumber(raw.id),
+    leadId: finiteNumber(raw.leadId ?? raw.lead_id),
+    name: String(raw.name ?? ''),
+    role: String(raw.role ?? ''),
+    phone: String(raw.phone ?? ''),
+    email: String(raw.email ?? ''),
+    createdAt: String(raw.createdAt ?? raw.created_at ?? ''),
+  };
+}
+
+export function normalizeContract(value: unknown): Contract {
+  const raw = (value ?? {}) as Record<string, unknown>;
+  const rawPlan = String(raw.plan ?? 'pro');
+  const plan: ContractPlan = CONTRACT_PLANS.includes(rawPlan as ContractPlan)
+    ? (rawPlan as ContractPlan)
+    : 'pro';
+  const closedBy = raw.closedBy ?? raw.closed_by;
+
+  return {
+    id: finiteNumber(raw.id),
+    leadId: finiteNumber(raw.leadId ?? raw.lead_id),
+    company: String(raw.company ?? raw.companyName ?? raw.company_name ?? ''),
+    plan,
+    mrr: finiteNumber(raw.mrr),
+    seats: finiteNumber(raw.seats),
+    signedAt: String(raw.signedAt ?? raw.signed_at ?? ''),
+    signedBy: String(raw.signedBy ?? raw.signedByName ?? raw.signed_by_name ?? ''),
+    closedBy: closedBy == null ? '' : String(closedBy),
+    notes: String(raw.notes ?? ''),
+    createdAt: String(raw.createdAt ?? raw.created_at ?? ''),
+  };
+}
+
+export function mergeContactUpdate(
+  current: SalesContact | undefined,
+  data: UpdateContactRequest
+): UpdateContactRequest {
+  return {
+    name: data.name ?? current?.name ?? '',
+    role: data.role ?? current?.role ?? '',
+    phone: data.phone ?? current?.phone ?? '',
+    email: data.email ?? current?.email ?? '',
+  };
+}
+
+export function mergeContractUpdate(
+  current: Contract | undefined,
+  data: UpdateContractRequest
+): UpdateContractRequest {
+  return {
+    plan: data.plan ?? current?.plan,
+    mrr: data.mrr ?? current?.mrr,
+    seats: data.seats ?? current?.seats,
+    signedAt: data.signedAt ?? (current?.signedAt || undefined),
+    signedBy: data.signedBy ?? current?.signedBy,
+    closedBy: data.closedBy ?? current?.closedBy,
+    notes: data.notes ?? current?.notes,
+  };
+}
+
+export function toContractMutationPayload(
+  data: CreateContractRequest | UpdateContractRequest
+): Record<string, unknown> {
+  return {
+    ...('leadId' in data ? { leadId: data.leadId } : {}),
+    plan: data.plan,
+    mrr: data.mrr,
+    seats: data.seats,
+    signedAt: data.signedAt || undefined,
+    signedByName: data.signedBy,
+    closedBy: toOptionalFiniteNumber(data.closedBy),
+    notes: data.notes ?? '',
+  };
+}
+
+const SALES_PAGE_SIZE = 100;
+
+export function normalizeSalesPageSize(value: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed)
+    ? Math.max(1, Math.min(Math.floor(parsed), SALES_PAGE_SIZE))
+    : SALES_PAGE_SIZE;
+}
+
+function normalizeSalesOffset(value: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0;
+}
+
+async function fetchLeadsPage(
+  limit: number,
+  offset: number
+): Promise<{ leads: Lead[]; total?: number }> {
+  const res = await unwrap(
+    safe.get<unknown>('/crm/sales/leads', {
+      params: {
+        limit: normalizeSalesPageSize(limit),
+        offset: normalizeSalesOffset(offset),
+      },
+    })
+  );
+  const leads = unwrapList<unknown>(res, 'leads').map(normalizeLead);
+  const rawTotal = asRecord(res).total;
+  const total = Number(rawTotal);
+  return { leads, total: Number.isFinite(total) ? total : undefined };
+}
+
 // ── Pipeline ──────────────────────────────────────────────────────
 
 export const usePipeline = (): UseQueryResult<PipelineColumn[]> =>
@@ -46,7 +241,11 @@ export const usePipeline = (): UseQueryResult<PipelineColumn[]> =>
     queryKey: ['crm-sales-pipeline'],
     queryFn: async (): Promise<PipelineColumn[]> => {
       const res = await unwrap(safe.get<unknown>('/crm/sales/pipeline'));
-      return unwrapList<PipelineColumn>(res, 'pipeline', 'columns');
+      return unwrapList<Record<string, unknown>>(res, 'pipeline', 'columns').map((column) => ({
+        stage: String(column.stage ?? 'cold') as PipelineColumn['stage'],
+        leadCount: finiteNumber(column.leadCount ?? column.lead_count),
+        totalMrr: finiteNumber(column.totalMrr ?? column.total_mrr),
+      }));
     },
   });
 
@@ -55,11 +254,31 @@ export const usePipeline = (): UseQueryResult<PipelineColumn[]> =>
 export const useLeads = (limit = 100, offset = 0): UseQueryResult<Lead[]> =>
   useQuery<Lead[]>({
     queryKey: ['crm-sales-leads', { limit, offset }],
+    queryFn: async (): Promise<Lead[]> => (await fetchLeadsPage(limit, offset)).leads,
+  });
+
+/** Loads every lead page for the sales pipeline board. */
+export const useListAllLeads = (): UseQueryResult<Lead[]> =>
+  useQuery<Lead[]>({
+    queryKey: ['crm-sales-leads-all'],
     queryFn: async (): Promise<Lead[]> => {
-      const res = await unwrap(
-        safe.get<unknown>('/crm/sales/leads', { params: { limit, offset } })
-      );
-      return unwrapList<Lead>(res, 'leads');
+      const leads: Lead[] = [];
+      let offset = 0;
+      const maxPages = 100;
+
+      for (let page = 0; page < maxPages; page += 1) {
+        const result = await fetchLeadsPage(SALES_PAGE_SIZE, offset);
+        leads.push(...result.leads);
+        if (
+          result.leads.length < SALES_PAGE_SIZE ||
+          (result.total !== undefined && leads.length >= result.total)
+        ) {
+          break;
+        }
+        offset += SALES_PAGE_SIZE;
+      }
+
+      return leads;
     },
   });
 
@@ -68,21 +287,23 @@ export const useLead = (id: number | undefined): UseQueryResult<Lead> =>
     queryKey: ['crm-sales-lead', id],
     queryFn: async (): Promise<Lead> => {
       const res = await unwrap(safe.get<unknown>(`/crm/sales/leads/${id}`));
-      const envelope = (res ?? {}) as { lead?: Lead };
-      return (envelope.lead ?? res) as Lead;
+      const envelope = asRecord(res);
+      return normalizeLead(envelope.lead ?? res);
     },
-    enabled: !!id,
+    enabled: id != null && Number.isInteger(id) && id > 0,
   });
 
 export const useCreateLead = (): UseMutationResult<Lead, unknown, CreateLeadRequest> => {
   const qc = useQueryClient();
   return useMutation<Lead, unknown, CreateLeadRequest>({
     mutationFn: async (data: CreateLeadRequest): Promise<Lead> => {
-      const res = await unwrap(safe.post<Lead>('/crm/sales/leads', toLeadMutationPayload(data)));
-      return res as Lead;
+      const res = await unwrap(safe.post<unknown>('/crm/sales/leads', toLeadMutationPayload(data)));
+      const envelope = asRecord(res);
+      return normalizeLead(envelope.lead ?? res);
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-leads'] });
+      void qc.invalidateQueries({ queryKey: ['crm-sales-leads-all'] });
       void qc.invalidateQueries({ queryKey: ['crm-sales-pipeline'] });
       toast.success('Lead created');
     },
@@ -101,13 +322,40 @@ export const useUpdateLead = (): UseMutationResult<Lead, unknown, UpdateLeadPayl
   const qc = useQueryClient();
   return useMutation<Lead, unknown, UpdateLeadPayload>({
     mutationFn: async (payload: UpdateLeadPayload): Promise<Lead> => {
+      const cached =
+        qc.getQueryData<Lead>(['crm-sales-lead', payload.id]) ??
+        qc
+          .getQueriesData<Lead[]>({ queryKey: ['crm-sales-leads'] })
+          .flatMap(([, rows]) => rows ?? [])
+          .find((lead) => lead.id === payload.id);
+      const companyName =
+        payload.data.companyName ??
+        payload.data.company ??
+        cached?.companyName ??
+        cached?.company ??
+        '';
+      const merged: UpdateLeadRequest = {
+        company: companyName,
+        companyName,
+        industry: payload.data.industry ?? cached?.industry,
+        size: payload.data.size ?? cached?.size,
+        source: payload.data.source ?? cached?.source,
+        stage: payload.data.stage ?? cached?.stage,
+        mrrPotential: payload.data.mrrPotential ?? cached?.mrrPotential ?? cached?.dealValue,
+        assignedTo:
+          payload.data.assignedTo ??
+          (typeof cached?.assignedTo === 'number' ? cached.assignedTo : undefined),
+        notes: payload.data.notes ?? cached?.notes,
+      };
       const res = await unwrap(
-        safe.put<Lead>(`/crm/sales/leads/${payload.id}`, toLeadMutationPayload(payload.data))
+        safe.put<unknown>(`/crm/sales/leads/${payload.id}`, toLeadMutationPayload(merged))
       );
-      return res as Lead;
+      const envelope = asRecord(res);
+      return normalizeLead(envelope.lead ?? res);
     },
     onSuccess: (_data: Lead, variables: UpdateLeadPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-leads'] });
+      void qc.invalidateQueries({ queryKey: ['crm-sales-leads-all'] });
       void qc.invalidateQueries({ queryKey: ['crm-sales-lead', variables.id] });
       void qc.invalidateQueries({ queryKey: ['crm-sales-pipeline'] });
       toast.success('Lead updated');
@@ -124,6 +372,7 @@ export const useDeleteLead = (): UseMutationResult<unknown, unknown, number> => 
     mutationFn: (id: number): Promise<unknown> => unwrap(safe.delete(`/crm/sales/leads/${id}`)),
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-leads'] });
+      void qc.invalidateQueries({ queryKey: ['crm-sales-leads-all'] });
       void qc.invalidateQueries({ queryKey: ['crm-sales-pipeline'] });
       toast.success('Lead deleted');
     },
@@ -140,9 +389,9 @@ export const useLeadTouchpoints = (leadId: number | undefined): UseQueryResult<T
     queryKey: ['crm-sales-touchpoints', leadId],
     queryFn: async (): Promise<Touchpoint[]> => {
       const res = await unwrap(safe.get<unknown>(`/crm/sales/leads/${leadId}/touchpoints`));
-      return unwrapList<Touchpoint>(res, 'touchpoints');
+      return unwrapList<unknown>(res, 'touchpoints').map(normalizeTouchpoint);
     },
-    enabled: !!leadId,
+    enabled: leadId != null && Number.isInteger(leadId) && leadId > 0,
   });
 
 export const useCreateTouchpoint = (): UseMutationResult<
@@ -153,8 +402,11 @@ export const useCreateTouchpoint = (): UseMutationResult<
   const qc = useQueryClient();
   return useMutation<Touchpoint, unknown, CreateTouchpointRequest>({
     mutationFn: async (data: CreateTouchpointRequest): Promise<Touchpoint> => {
-      const res = await unwrap(safe.post<Touchpoint>('/crm/sales/touchpoints', data));
-      return res as Touchpoint;
+      const res = await unwrap(
+        safe.post<unknown>('/crm/sales/touchpoints', toTouchpointMutationPayload(data))
+      );
+      const envelope = asRecord(res);
+      return normalizeTouchpoint(envelope.touchpoint ?? res);
     },
     onSuccess: (_data: Touchpoint, variables: CreateTouchpointRequest): void => {
       void qc.invalidateQueries({
@@ -195,11 +447,16 @@ export const useContacts = (
     queryFn: async (): Promise<SalesContact[]> => {
       const res = await unwrap(
         safe.get<unknown>('/crm/sales/contacts', {
-          params: { ...(leadId ? { lead_id: leadId } : {}), limit, offset },
+          params: {
+            ...(leadId != null && leadId > 0 ? { lead_id: leadId } : {}),
+            limit,
+            offset,
+          },
         })
       );
-      return unwrapList<SalesContact>(res, 'contacts');
+      return unwrapList<unknown>(res, 'contacts').map(normalizeSalesContact);
     },
+    enabled: leadId === undefined || (Number.isInteger(leadId) && leadId > 0),
   });
 
 export const useCreateContact = (): UseMutationResult<
@@ -210,10 +467,11 @@ export const useCreateContact = (): UseMutationResult<
   const qc = useQueryClient();
   return useMutation<SalesContact, unknown, CreateContactRequest>({
     mutationFn: async (data: CreateContactRequest): Promise<SalesContact> => {
-      const res = await unwrap(safe.post<SalesContact>('/crm/sales/contacts', data));
-      return res as SalesContact;
+      const res = await unwrap(safe.post<unknown>('/crm/sales/contacts', data));
+      const envelope = asRecord(res);
+      return normalizeSalesContact(envelope.contact ?? res);
     },
-    onSuccess: (_data: SalesContact, variables: CreateContactRequest): void => {
+    onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contacts'] });
       toast.success('Contact added');
     },
@@ -237,12 +495,16 @@ export const useUpdateContact = (): UseMutationResult<
   const qc = useQueryClient();
   return useMutation<SalesContact, unknown, UpdateContactPayload>({
     mutationFn: async (payload: UpdateContactPayload): Promise<SalesContact> => {
-      const res = await unwrap(
-        safe.put<SalesContact>(`/crm/sales/contacts/${payload.id}`, payload.data)
-      );
-      return res as SalesContact;
+      const cached = qc
+        .getQueriesData<SalesContact[]>({ queryKey: ['crm-sales-contacts'] })
+        .flatMap(([, rows]) => rows ?? [])
+        .find((contact) => contact.id === payload.id);
+      const merged = mergeContactUpdate(cached, payload.data);
+      const res = await unwrap(safe.put<unknown>(`/crm/sales/contacts/${payload.id}`, merged));
+      const envelope = asRecord(res);
+      return normalizeSalesContact(envelope.contact ?? res);
     },
-    onSuccess: (_data: SalesContact, variables: UpdateContactPayload): void => {
+    onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contacts'] });
       toast.success('Contact updated');
     },
@@ -262,7 +524,7 @@ export const useDeleteContact = (): UseMutationResult<unknown, unknown, DeleteCo
   return useMutation<unknown, unknown, DeleteContactPayload>({
     mutationFn: (payload: DeleteContactPayload): Promise<unknown> =>
       unwrap(safe.delete(`/crm/sales/contacts/${payload.id}`)),
-    onSuccess: (_data: unknown, variables: DeleteContactPayload): void => {
+    onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contacts'] });
       toast.success('Contact removed');
     },
@@ -277,11 +539,47 @@ export const useDeleteContact = (): UseMutationResult<unknown, unknown, DeleteCo
 export const useContracts = (limit = 100, offset = 0): UseQueryResult<Contract[]> =>
   useQuery<Contract[]>({
     queryKey: ['crm-sales-contracts', { limit, offset }],
+    queryFn: async (): Promise<Contract[]> => (await fetchContractsPage(limit, offset)).contracts,
+  });
+
+async function fetchContractsPage(
+  limit: number,
+  offset: number
+): Promise<{ contracts: Contract[]; total?: number }> {
+  const pageLimit = normalizeSalesPageSize(limit);
+  const pageOffset = normalizeSalesOffset(offset);
+  const res = await unwrap(
+    safe.get<unknown>('/crm/sales/contracts', {
+      params: { limit: pageLimit, offset: pageOffset },
+    })
+  );
+  const contracts = unwrapList<Record<string, unknown>>(res, 'contracts').map(normalizeContract);
+  const total = Number(asRecord(res).total);
+  return { contracts, total: Number.isFinite(total) ? total : undefined };
+}
+
+/** Loads all contracts for detail lookups that must not stop at the first page. */
+export const useListAllContracts = (): UseQueryResult<Contract[]> =>
+  useQuery<Contract[]>({
+    queryKey: ['crm-sales-contracts-all'],
     queryFn: async (): Promise<Contract[]> => {
-      const res = await unwrap(
-        safe.get<unknown>('/crm/sales/contracts', { params: { limit, offset } })
-      );
-      return unwrapList<Contract>(res, 'contracts');
+      const contracts: Contract[] = [];
+      let offset = 0;
+      const maxPages = 100;
+
+      for (let page = 0; page < maxPages; page += 1) {
+        const result = await fetchContractsPage(SALES_PAGE_SIZE, offset);
+        contracts.push(...result.contracts);
+        if (
+          result.contracts.length < SALES_PAGE_SIZE ||
+          (result.total !== undefined && contracts.length >= result.total)
+        ) {
+          break;
+        }
+        offset += SALES_PAGE_SIZE;
+      }
+
+      return contracts;
     },
   });
 
@@ -289,11 +587,11 @@ export const useContract = (id: number | undefined): UseQueryResult<Contract> =>
   useQuery<Contract>({
     queryKey: ['crm-sales-contract', id],
     queryFn: async (): Promise<Contract> => {
-      const res = await unwrap(safe.get<Contract>(`/crm/sales/contracts/${id}`));
-      const envelope = (res ?? {}) as { contract?: Contract };
-      return (envelope.contract ?? res) as Contract;
+      const res = await unwrap(safe.get<unknown>(`/crm/sales/contracts/${id}`));
+      const envelope = (res ?? {}) as { contract?: unknown };
+      return normalizeContract(envelope.contract ?? res);
     },
-    enabled: !!id,
+    enabled: id != null && Number.isInteger(id) && id > 0,
   });
 
 export const useCreateContract = (): UseMutationResult<
@@ -304,11 +602,15 @@ export const useCreateContract = (): UseMutationResult<
   const qc = useQueryClient();
   return useMutation<Contract, unknown, CreateContractRequest>({
     mutationFn: async (data: CreateContractRequest): Promise<Contract> => {
-      const res = await unwrap(safe.post<Contract>('/crm/sales/contracts', data));
-      return res as Contract;
+      const res = await unwrap(
+        safe.post<unknown>('/crm/sales/contracts', toContractMutationPayload(data))
+      );
+      const envelope = (res ?? {}) as { contract?: unknown };
+      return normalizeContract(envelope.contract ?? res);
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contracts'] });
+      void qc.invalidateQueries({ queryKey: ['crm-sales-contracts-all'] });
       void qc.invalidateQueries({ queryKey: ['crm-sales-leads'] });
       toast.success('Contract created');
     },
@@ -331,13 +633,22 @@ export const useUpdateContract = (): UseMutationResult<
   const qc = useQueryClient();
   return useMutation<Contract, unknown, UpdateContractPayload>({
     mutationFn: async (payload: UpdateContractPayload): Promise<Contract> => {
+      const cached =
+        qc.getQueryData<Contract>(['crm-sales-contract', payload.id]) ??
+        qc
+          .getQueriesData<Contract[]>({ queryKey: ['crm-sales-contracts'] })
+          .flatMap(([, rows]) => rows ?? [])
+          .find((contract) => contract.id === payload.id);
+      const merged = mergeContractUpdate(cached, payload.data);
       const res = await unwrap(
-        safe.put<Contract>(`/crm/sales/contracts/${payload.id}`, payload.data)
+        safe.put<unknown>(`/crm/sales/contracts/${payload.id}`, toContractMutationPayload(merged))
       );
-      return res as Contract;
+      const envelope = (res ?? {}) as { contract?: unknown };
+      return normalizeContract(envelope.contract ?? res);
     },
     onSuccess: (_data: Contract, variables: UpdateContractPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-sales-contracts'] });
+      void qc.invalidateQueries({ queryKey: ['crm-sales-contracts-all'] });
       void qc.invalidateQueries({ queryKey: ['crm-sales-contract', variables.id] });
       toast.success('Contract updated');
     },

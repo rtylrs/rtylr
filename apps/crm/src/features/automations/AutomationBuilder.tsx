@@ -64,8 +64,8 @@ const AutomationBuilder: React.FC = () => {
     setNodes((n) => [
       ...n,
       {
-        id: 'n' + (n.length + 1),
-        type: (a as any).type || 'action',
+        id: `n${Date.now()}-${n.length}`,
+        type: 'action',
         label: a.label,
         description: a.description,
       },
@@ -78,12 +78,13 @@ const AutomationBuilder: React.FC = () => {
   };
 
   const handleSave = () => {
+    const trimmedName = name.trim();
+    if (!trimmedName) return;
     const payload = {
-      name,
+      name: trimmedName,
       trigger: nodes[0]?.label,
       nodes: nodes.map((node) => ({ ...node, x: 0, y: 0 })),
-      isActive: false,
-      status: 'paused' as const,
+      ...(isEditing ? {} : { isActive: false, status: 'paused' as const }),
     };
     const callbacks = {
       onSuccess: () => {
@@ -118,7 +119,7 @@ const AutomationBuilder: React.FC = () => {
             <Button
               variant="primary"
               onClick={handleSave}
-              disabled={!name || create.isPending || update.isPending}
+              disabled={!name.trim() || create.isPending || update.isPending}
             >
               <Save size={13} />
               {create.isPending || update.isPending ? 'Saving…' : 'Save'}

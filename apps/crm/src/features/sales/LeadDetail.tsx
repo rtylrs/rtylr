@@ -6,7 +6,6 @@ import {
   Phone,
   Mail,
   Users,
-  FileText,
   Plus,
   Trash2,
   Edit2,
@@ -26,7 +25,7 @@ import {
   useContacts,
   useCreateContact,
   useDeleteContact,
-  useContracts,
+  useListAllContracts,
   useCreateContract,
 } from '../../shared/hooks/queries/useSales';
 import type {
@@ -77,7 +76,9 @@ const OUTCOME_ICONS: Record<TouchpointOutcome, React.ReactNode> = {
 
 function formatDate(iso: string): string {
   if (!iso) return '-';
-  return new Date(iso).toLocaleDateString('en-US', {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -89,10 +90,10 @@ const LeadDetail: React.FC = () => {
   const leadId = id ? Number(id) : undefined;
   const navigate = useNavigate();
 
-  const { data: lead, isLoading: leadLoading } = useLead(leadId);
-  const { data: touchpoints } = useLeadTouchpoints(leadId);
-  const { data: contacts } = useContacts(leadId);
-  const { data: allContracts } = useContracts();
+  const { data: lead, isLoading: leadLoading, isError: leadError } = useLead(leadId);
+  const { data: touchpoints, isError: touchpointsError } = useLeadTouchpoints(leadId);
+  const { data: contacts, isError: contactsError } = useContacts(leadId);
+  const { data: allContracts, isError: contractsError } = useListAllContracts();
   const updateLead = useUpdateLead();
   const deleteLead = useDeleteLead();
   const createTouchpoint = useCreateTouchpoint();
@@ -108,7 +109,7 @@ const LeadDetail: React.FC = () => {
 
   // Stage change
   const handleStageChange = (stage: LeadStage): void => {
-    if (!leadId) return;
+    if (!leadId || updateLead.isPending) return;
     updateLead.mutate(
       { id: leadId, data: { stage } },
       { onError: () => toast.error('Failed to update stage') }
@@ -118,7 +119,7 @@ const LeadDetail: React.FC = () => {
   // Delete lead
   const [confirmDeleteLead, setConfirmDeleteLead] = useState(false);
   const handleDeleteLead = (): void => {
-    if (!leadId) return;
+    if (!leadId || deleteLead.isPending) return;
     deleteLead.mutate(leadId, {
       onSuccess: () => navigate({ to: '/sales/leads' }),
       onError: () => toast.error('Failed to delete lead'),
@@ -208,13 +209,23 @@ const LeadDetail: React.FC = () => {
   });
 
   const submitContract = (): void => {
-    if (!leadId || !contractForm.signedAt || !contractForm.signedBy) return;
+    if (!leadId) return;
+    if (!contractForm.signedAt || !contractForm.signedBy.trim()) {
+      toast.error('Signed date and signer are required');
+      return;
+    }
+    const mrr = Number(contractForm.mrr);
+    const seats = Number(contractForm.seats);
+    if (!Number.isFinite(mrr) || mrr < 0 || !Number.isInteger(seats) || seats < 1) {
+      toast.error('Enter a valid MRR and a whole number of at least one seat');
+      return;
+    }
     createContract.mutate(
       {
         leadId,
         plan: contractForm.plan,
-        mrr: Number(contractForm.mrr),
-        seats: Number(contractForm.seats),
+        mrr,
+        seats,
         signedAt: contractForm.signedAt,
         signedBy: contractForm.signedBy,
         closedBy: contractForm.closedBy,
@@ -229,6 +240,17 @@ const LeadDetail: React.FC = () => {
     );
   };
 
+  const contractMrr = Number(contractForm.mrr);
+  const contractSeats = Number(contractForm.seats);
+  const contractFormValid =
+    Boolean(leadId) &&
+    Boolean(contractForm.signedAt) &&
+    Boolean(contractForm.signedBy.trim()) &&
+    Number.isFinite(contractMrr) &&
+    contractMrr >= 0 &&
+    Number.isInteger(contractSeats) &&
+    contractSeats >= 1;
+
   if (leadLoading) {
     return (
       <div style={{ padding: '24px' }}>
@@ -240,7 +262,7 @@ const LeadDetail: React.FC = () => {
   if (!lead) {
     return (
       <div style={{ padding: '24px', color: 'var(--hub-text-muted)', fontSize: '14px' }}>
-        Lead not found.
+        {leadError ? 'Unable to load this lead. Please refresh and try again.' : 'Lead not found.'}
       </div>
     );
   }
@@ -268,16 +290,20 @@ const LeadDetail: React.FC = () => {
           </button>
           <div style={{ flex: 1 }}>
             <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
-              {lead.company}
+              {lead.companyName ?? lead.company ?? '—'}
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
               {lead.industry} · {lead.source}
             </p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Button variant="outline" onClick={() => setConfirmDeleteLead(true)}>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDeleteLead(true)}
+              disabled={deleteLead.isPending}
+            >
               <Trash2 size={13} />
-              Delete
+              {deleteLead.isPending ? 'Deleting...' : 'Delete'}
             </Button>
           </div>
         </div>
@@ -396,7 +422,21 @@ const LeadDetail: React.FC = () => {
 
             {/* Timeline */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {sortedTouchpoints.length === 0 && (
+              {touchpointsError ? (
+                <div
+                  style={{
+                    padding: '24px',
+                    textAlign: 'center',
+                    color: 'var(--hub-text-muted)',
+                    fontSize: '13px',
+                    background: 'var(--hub-card)',
+                    border: '1px solid var(--hub-border)',
+                    borderRadius: '10px',
+                  }}
+                >
+                  Unable to load touchpoints. Please refresh and try again.
+                </div>
+              ) : sortedTouchpoints.length === 0 ? (
                 <div
                   style={{
                     padding: '32px',
@@ -410,9 +450,9 @@ const LeadDetail: React.FC = () => {
                 >
                   No touchpoints yet. Log the first one.
                 </div>
-              )}
+              ) : null}
               {sortedTouchpoints.map((tp) => {
-                const outcomeStyle = OUTCOME_COLORS[tp.outcome];
+                const outcomeStyle = OUTCOME_COLORS[tp.outcome] ?? OUTCOME_COLORS.neutral;
                 return (
                   <Card key={tp.id}>
                     <div style={{ display: 'flex', gap: '12px' }}>
@@ -429,7 +469,7 @@ const LeadDetail: React.FC = () => {
                           flexShrink: 0,
                         }}
                       >
-                        {TOUCHPOINT_TYPE_ICONS[tp.type]}
+                        {TOUCHPOINT_TYPE_ICONS[tp.type] ?? <Phone size={14} />}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div
@@ -453,15 +493,17 @@ const LeadDetail: React.FC = () => {
                               color: outcomeStyle.color,
                             }}
                           >
-                            {OUTCOME_ICONS[tp.outcome]}
+                            {OUTCOME_ICONS[tp.outcome] ?? OUTCOME_ICONS.neutral}
                             {tp.outcome.replace('_', ' ')}
                           </span>
                           <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
                             {formatDate(tp.createdAt)}
                           </span>
-                          <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
-                            · {tp.repName}
-                          </span>
+                          {tp.repName && (
+                            <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
+                              · {tp.repName}
+                            </span>
+                          )}
                         </div>
                         <p
                           style={{
@@ -487,15 +529,19 @@ const LeadDetail: React.FC = () => {
                       </div>
                       <button
                         aria-label="Delete touchpoint"
-                        onClick={() => setDeleteTpId(tp.id)}
+                        onClick={() => {
+                          if (!deleteTouchpoint.isPending) setDeleteTpId(tp.id);
+                        }}
+                        disabled={deleteTouchpoint.isPending}
                         style={{
                           background: 'transparent',
                           border: 'none',
-                          cursor: 'pointer',
+                          cursor: deleteTouchpoint.isPending ? 'not-allowed' : 'pointer',
                           color: 'var(--hub-text-dim)',
                           padding: '4px',
                           display: 'flex',
                           alignItems: 'center',
+                          opacity: deleteTouchpoint.isPending ? 0.5 : 1,
                         }}
                       >
                         <Trash2 size={12} />
@@ -555,6 +601,7 @@ const LeadDetail: React.FC = () => {
                   <select
                     value={lead.stage}
                     onChange={(e) => handleStageChange(e.target.value as LeadStage)}
+                    disabled={updateLead.isPending}
                     style={{
                       width: '100%',
                       height: '34px',
@@ -596,10 +643,14 @@ const LeadDetail: React.FC = () => {
                 <button
                   aria-label="Add contact"
                   onClick={() => setContactOpen((v) => !v)}
+                  disabled={createContact.isPending || deleteContact.isPending}
                   style={{
                     background: 'transparent',
                     border: '1px solid var(--hub-border)',
-                    cursor: 'pointer',
+                    cursor:
+                      createContact.isPending || deleteContact.isPending
+                        ? 'not-allowed'
+                        : 'pointer',
                     color: 'var(--hub-text-muted)',
                     borderRadius: '6px',
                     padding: '3px 8px',
@@ -669,98 +720,107 @@ const LeadDetail: React.FC = () => {
                 )}
               </AnimatePresence>
 
-              {(contacts ?? []).length === 0 && !contactOpen && (
+              {contactsError ? (
+                <p style={{ fontSize: '12px', color: 'var(--hub-text-muted)' }}>
+                  Unable to load contacts. Please refresh and try again.
+                </p>
+              ) : (contacts ?? []).length === 0 && !contactOpen ? (
                 <p style={{ fontSize: '12px', color: 'var(--hub-text-dim)' }}>No contacts yet.</p>
-              )}
-              {(contacts ?? []).map((c) => (
-                <div
-                  key={c.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '10px',
-                    paddingBottom: '10px',
-                    borderBottom: '1px solid var(--hub-border)',
-                    marginBottom: '10px',
-                  }}
-                >
+              ) : null}
+              {!contactsError &&
+                (contacts ?? []).map((c) => (
                   <div
+                    key={c.id}
                     style={{
-                      width: '28px',
-                      height: '28px',
-                      borderRadius: '6px',
-                      background: 'rgba(59,130,246,0.12)',
-                      color: 'var(--hub-accent, #3b82f6)',
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '10px',
-                      fontWeight: 700,
-                      flexShrink: 0,
+                      alignItems: 'flex-start',
+                      gap: '10px',
+                      paddingBottom: '10px',
+                      borderBottom: '1px solid var(--hub-border)',
+                      marginBottom: '10px',
                     }}
                   >
-                    {c.name[0]?.toUpperCase() ?? '?'}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p
+                    <div
                       style={{
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        color: 'var(--hub-text)',
-                        margin: 0,
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '6px',
+                        background: 'rgba(59,130,246,0.12)',
+                        color: 'var(--hub-accent, #3b82f6)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        flexShrink: 0,
                       }}
                     >
-                      {c.name}
-                    </p>
-                    <p
-                      style={{
-                        fontSize: '11px',
-                        color: 'var(--hub-text-muted)',
-                        margin: '1px 0 0',
-                      }}
-                    >
-                      {c.role}
-                    </p>
-                    {c.phone && (
+                      {c.name[0]?.toUpperCase() ?? '?'}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <p
                         style={{
-                          fontSize: '11px',
-                          color: 'var(--hub-text-dim)',
-                          margin: '2px 0 0',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          color: 'var(--hub-text)',
+                          margin: 0,
                         }}
                       >
-                        {c.phone}
+                        {c.name}
                       </p>
-                    )}
-                    {c.email && (
                       <p
                         style={{
                           fontSize: '11px',
-                          color: 'var(--hub-text-dim)',
+                          color: 'var(--hub-text-muted)',
                           margin: '1px 0 0',
                         }}
                       >
-                        {c.email}
+                        {c.role}
                       </p>
-                    )}
+                      {c.phone && (
+                        <p
+                          style={{
+                            fontSize: '11px',
+                            color: 'var(--hub-text-dim)',
+                            margin: '2px 0 0',
+                          }}
+                        >
+                          {c.phone}
+                        </p>
+                      )}
+                      {c.email && (
+                        <p
+                          style={{
+                            fontSize: '11px',
+                            color: 'var(--hub-text-dim)',
+                            margin: '1px 0 0',
+                          }}
+                        >
+                          {c.email}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      aria-label="Delete contact"
+                      onClick={() => {
+                        if (!deleteContact.isPending) setDeleteContactId(c.id);
+                      }}
+                      disabled={deleteContact.isPending}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: deleteContact.isPending ? 'not-allowed' : 'pointer',
+                        color: 'var(--hub-text-dim)',
+                        padding: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        opacity: deleteContact.isPending ? 0.5 : 1,
+                      }}
+                    >
+                      <Trash2 size={11} />
+                    </button>
                   </div>
-                  <button
-                    aria-label="Delete contact"
-                    onClick={() => setDeleteContactId(c.id)}
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: 'var(--hub-text-dim)',
-                      padding: '4px',
-                      display: 'flex',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Trash2 size={11} />
-                  </button>
-                </div>
-              ))}
+                ))}
             </Card>
 
             {/* Contract */}
@@ -778,7 +838,7 @@ const LeadDetail: React.FC = () => {
                 >
                   Contract
                 </p>
-                {!contract && (
+                {!contract && !contractsError && (
                   <button
                     aria-label="Add contract"
                     onClick={() => setContractOpen((v) => !v)}
@@ -801,7 +861,11 @@ const LeadDetail: React.FC = () => {
                 )}
               </div>
 
-              {contract ? (
+              {contractsError ? (
+                <p style={{ fontSize: '12px', color: 'var(--hub-text-muted)' }}>
+                  Unable to load the contract. Please refresh and try again.
+                </p>
+              ) : contract ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span
@@ -895,7 +959,8 @@ const LeadDetail: React.FC = () => {
                           placeholder="John Smith"
                         />
                         <Input
-                          label="Closed By (rep)"
+                          label="Closed By (user ID, optional)"
+                          type="number"
                           value={contractForm.closedBy}
                           onChange={(e) =>
                             setContractForm((f) => ({ ...f, closedBy: e.target.value }))
@@ -917,7 +982,7 @@ const LeadDetail: React.FC = () => {
                           <Button
                             variant="primary"
                             onClick={submitContract}
-                            disabled={createContract.isPending}
+                            disabled={createContract.isPending || !contractFormValid}
                             style={{ padding: '6px 12px', fontSize: '12px' }}
                           >
                             {createContract.isPending ? 'Saving...' : 'Save'}
@@ -938,8 +1003,9 @@ const LeadDetail: React.FC = () => {
           onClose={() => setConfirmDeleteLead(false)}
           onConfirm={handleDeleteLead}
           title="Delete lead"
-          description={`Permanently delete "${lead.company}" and all associated data?`}
-          confirmLabel="Delete"
+          description={`Permanently delete "${lead.companyName ?? lead.company ?? 'this lead'}" and all associated data?`}
+          confirmLabel={deleteLead.isPending ? 'Deleting...' : 'Delete'}
+          confirmDisabled={deleteLead.isPending}
           variant="danger"
         />
 
@@ -948,12 +1014,15 @@ const LeadDetail: React.FC = () => {
           open={deleteTpId !== null}
           onClose={() => setDeleteTpId(null)}
           onConfirm={() => {
-            if (deleteTpId !== null) deleteTouchpoint.mutate(deleteTpId);
+            if (deleteTpId !== null && !deleteTouchpoint.isPending) {
+              deleteTouchpoint.mutate(deleteTpId);
+            }
             setDeleteTpId(null);
           }}
           title="Delete touchpoint"
           description="Remove this touchpoint from the timeline?"
-          confirmLabel="Delete"
+          confirmLabel={deleteTouchpoint.isPending ? 'Deleting...' : 'Delete'}
+          confirmDisabled={deleteTouchpoint.isPending}
           variant="danger"
         />
 
@@ -962,14 +1031,15 @@ const LeadDetail: React.FC = () => {
           open={deleteContactId !== null}
           onClose={() => setDeleteContactId(null)}
           onConfirm={() => {
-            if (deleteContactId !== null && leadId !== undefined) {
+            if (deleteContactId !== null && leadId !== undefined && !deleteContact.isPending) {
               deleteContact.mutate({ id: deleteContactId, leadId });
             }
             setDeleteContactId(null);
           }}
           title="Remove contact"
           description="Remove this contact from the lead?"
-          confirmLabel="Remove"
+          confirmLabel={deleteContact.isPending ? 'Removing...' : 'Remove'}
+          confirmDisabled={deleteContact.isPending}
           variant="danger"
         />
       </div>

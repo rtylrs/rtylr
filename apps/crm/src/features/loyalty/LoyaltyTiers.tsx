@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { Award, Check, Pencil, X } from 'lucide-react';
 import { useLoyaltyTiers, useUpsertTier } from '../../shared/hooks/queries/useLoyalty';
 import { type LoyaltyTier } from '../../shared/schemas/loyalty';
-import { PageHeader, Card, SkeletonList } from '../../shared/components/ui';
+import { PageHeader, Card, EmptyState, SkeletonList } from '../../shared/components/ui';
 
 interface TierEditFormProps {
   tier: LoyaltyTier;
@@ -18,6 +18,17 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
   const [multiplier, setMultiplier] = useState(tier.multiplier);
 
   const handleSave = (): void => {
+    if (upsert.isPending) return;
+    if (
+      !Number.isInteger(threshold) ||
+      threshold < 0 ||
+      !Number.isFinite(multiplier) ||
+      multiplier < 0 ||
+      multiplier > 100
+    ) {
+      toast.error('Threshold must be a whole number and discount must be between 0% and 100%');
+      return;
+    }
     const sorted = [...allTiers].sort((a, b) => a.threshold - b.threshold);
     const currentIndex = sorted.findIndex((t) => t.id === tier.id);
     const lowerTier = currentIndex > 0 ? sorted[currentIndex - 1] : null;
@@ -133,7 +144,14 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
         </button>
         <button
           onClick={handleSave}
-          disabled={upsert.isPending}
+          disabled={
+            upsert.isPending ||
+            !Number.isInteger(threshold) ||
+            threshold < 0 ||
+            !Number.isFinite(multiplier) ||
+            multiplier < 0 ||
+            multiplier > 100
+          }
           style={{
             padding: '5px 12px',
             borderRadius: '6px',
@@ -154,8 +172,8 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
 };
 
 const LoyaltyTiers: React.FC = () => {
-  const { data: fetched, isLoading } = useLoyaltyTiers();
-  const tiers = (fetched ?? []).sort((a, b) => a.threshold - b.threshold);
+  const { data: fetched, isLoading, isError } = useLoyaltyTiers();
+  const tiers = [...(fetched ?? [])].sort((a, b) => a.threshold - b.threshold);
   const [editingId, setEditingId] = useState<number | null>(null);
 
   return (
@@ -167,6 +185,22 @@ const LoyaltyTiers: React.FC = () => {
         {isLoading ? (
           <Card>
             <SkeletonList count={4} />
+          </Card>
+        ) : isError ? (
+          <Card>
+            <EmptyState
+              icon={Award}
+              title="Unable to load loyalty tiers"
+              description="Refresh and try again."
+            />
+          </Card>
+        ) : tiers.length === 0 ? (
+          <Card>
+            <EmptyState
+              icon={Award}
+              title="No loyalty tiers"
+              description="Configure tiers to start rewarding customers."
+            />
           </Card>
         ) : (
           <div

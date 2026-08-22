@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -19,19 +19,24 @@ const EmailCampaign: React.FC = () => {
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const searchParams = new URLSearchParams(searchStr);
   const campaignId = Number(searchParams.get('id') || 0) || undefined;
+  const requestedSegmentId = searchParams.get('segment') || '';
   const isEditing = !!campaignId;
 
   const create = useCreateCampaign();
   const update = useUpdateCampaign();
   const updateStatus = useUpdateCampaignStatus();
   const { data: existingCampaign } = useGetCampaign(campaignId);
-  const { data: fetchedSegments } = useListSegments();
+  const {
+    data: fetchedSegments,
+    isLoading: segmentsLoading,
+    isError: segmentsError,
+  } = useListSegments();
   const { data: fetchedTemplates } = useTemplates();
-  const segments = fetchedSegments ?? [];
+  const segments = useMemo(() => fetchedSegments ?? [], [fetchedSegments]);
   const templates = (fetchedTemplates ?? []).filter((template) => template.channel === 'email');
 
   const [name, setName] = useState(searchParams.get('name') || '');
-  const [segmentId, setSegmentId] = useState<string>('');
+  const [segmentId, setSegmentId] = useState<string>(requestedSegmentId);
   const [subject, setSubject] = useState(searchParams.get('subject') || '');
   const [body, setBody] = useState(searchParams.get('body') || '');
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -52,6 +57,10 @@ const EmailCampaign: React.FC = () => {
     }
   }, [existingCampaign, isEditing, segmentId, segments]);
 
+  const segment = segments.find((item) => String(item.id) === segmentId);
+  const audienceUnavailable =
+    segmentsLoading || segmentsError || !segment || segment.customerCount <= 0;
+
   const applyTemplate = (templateId: string): void => {
     const template = templates.find((item) => item.id === templateId);
     if (!template) return;
@@ -61,6 +70,24 @@ const EmailCampaign: React.FC = () => {
   };
 
   const handleSave = (send: boolean): void => {
+    if (send) {
+      if (segmentsLoading) {
+        toast.error('Audience data is still loading');
+        return;
+      }
+      if (segmentsError) {
+        toast.error('Cannot verify the campaign audience right now');
+        return;
+      }
+      if (!segment) {
+        toast.error('Select a valid audience segment');
+        return;
+      }
+      if (segment.customerCount <= 0) {
+        toast.error('The selected audience has no eligible recipients');
+        return;
+      }
+    }
     const payload = {
       name,
       type: 'email',
@@ -104,8 +131,6 @@ const EmailCampaign: React.FC = () => {
     create.mutate(payload, callbacks);
   };
 
-  const segment = segments.find((item) => item.id === segmentId);
-
   return (
     <>
       <HelmetContainer
@@ -129,7 +154,7 @@ const EmailCampaign: React.FC = () => {
               <Button
                 variant="outline"
                 onClick={() => handleSave(false)}
-                disabled={pending || !name.trim()}
+                disabled={pending || !name.trim() || !body.trim()}
               >
                 <Save size={13} />
                 {pending ? 'Saving…' : 'Save draft'}
@@ -137,7 +162,9 @@ const EmailCampaign: React.FC = () => {
               <Button
                 variant="primary"
                 onClick={() => handleSave(true)}
-                disabled={pending || !name.trim() || !subject.trim()}
+                disabled={
+                  pending || !name.trim() || !subject.trim() || !body.trim() || audienceUnavailable
+                }
               >
                 <Send size={13} />
                 {pending ? 'Activating…' : 'Save & activate'}
@@ -200,13 +227,38 @@ const EmailCampaign: React.FC = () => {
               >
                 Audience
               </h4>
-              <Select value={segmentId} onChange={(event) => setSegmentId(event.target.value)}>
+              <Select
+                value={segmentId}
+                onChange={(event) => setSegmentId(event.target.value)}
+                disabled={pending || segmentsLoading}
+              >
+                {segments.length === 0 && <option value="">No segments available</option>}
                 {segments.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.name} ({item.customerCount})
                   </option>
                 ))}
               </Select>
+              {segmentsLoading && (
+                <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)', margin: '8px 0 0' }}>
+                  Loading audience data…
+                </p>
+              )}
+              {segmentsError && (
+                <p style={{ fontSize: '11px', color: '#ef4444', margin: '8px 0 0' }}>
+                  Audience data is unavailable. Activation is disabled.
+                </p>
+              )}
+              {!segmentsLoading && !segmentsError && !segment && (
+                <p style={{ fontSize: '11px', color: 'var(--hub-text-muted)', margin: '8px 0 0' }}>
+                  Select an audience segment before activating.
+                </p>
+              )}
+              {!segmentsLoading && !segmentsError && segment && segment.customerCount <= 0 && (
+                <p style={{ fontSize: '11px', color: '#f59e0b', margin: '8px 0 0' }}>
+                  This segment has no eligible recipients.
+                </p>
+              )}
               {segment && (
                 <div
                   style={{

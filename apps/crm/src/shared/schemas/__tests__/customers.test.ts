@@ -59,6 +59,11 @@ describe('customerSchema', () => {
     expect(result.birthday).toBe('1990-06-15');
     expect(result.notes).toBe('Prefers oat milk');
   });
+
+  it('fills missing channels in partial consent maps with opt-out defaults', () => {
+    const result = customerSchema.parse({ ...baseCustomer, consent: { sms: true } });
+    expect(result.consent).toEqual({ email: false, sms: true, marketing: false });
+  });
 });
 
 describe('timelineEntrySchema', () => {

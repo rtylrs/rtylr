@@ -24,6 +24,8 @@ export interface ListCustomersParams {
   tag?: string;
 }
 
+export type CustomerListFilters = Pick<ListCustomersParams, 'search' | 'tier' | 'tag'>;
+
 type CustomerInput = Partial<Customer>;
 
 export interface UpdateCustomerPayload {
@@ -66,7 +68,16 @@ interface CustomerWireInput {
   consent?: Customer['consent'];
 }
 
-function splitName(input: CustomerInput): { firstName: string; lastName: string } {
+type CustomerCreateWireInput = Omit<CustomerWireInput, 'loyaltyTier' | 'isActive'>;
+
+function splitName(
+  input: CustomerInput,
+  preferCombinedName = false
+): { firstName: string; lastName: string } {
+  if (preferCombinedName && String(input.name ?? '').trim()) {
+    const parts = String(input.name).trim().split(/\s+/).filter(Boolean);
+    return { firstName: parts.shift() ?? '', lastName: parts.join(' ') };
+  }
   const firstName = String(input.firstName ?? '').trim();
   const lastName = String(input.lastName ?? '').trim();
   if (firstName) return { firstName, lastName };
@@ -77,8 +88,11 @@ function splitName(input: CustomerInput): { firstName: string; lastName: string 
   return { firstName: parts.shift() ?? '', lastName: lastName || parts.join(' ') };
 }
 
-function toCustomerWireInput(input: CustomerInput): CustomerWireInput {
-  const { firstName, lastName } = splitName(input);
+export function toCustomerWireInput(
+  input: CustomerInput,
+  preferCombinedName = false
+): CustomerWireInput {
+  const { firstName, lastName } = splitName(input, preferCombinedName);
   return {
     firstName,
     lastName,
@@ -97,6 +111,24 @@ function toCustomerWireInput(input: CustomerInput): CustomerWireInput {
   };
 }
 
+export function toCustomerCreateWireInput(input: CustomerInput): CustomerCreateWireInput {
+  const wire = toCustomerWireInput(input);
+  return {
+    firstName: wire.firstName,
+    lastName: wire.lastName,
+    email: wire.email,
+    phone: wire.phone,
+    dateOfBirth: wire.dateOfBirth,
+    gender: wire.gender,
+    address: wire.address,
+    city: wire.city,
+    country: wire.country,
+    tags: wire.tags,
+    notes: wire.notes,
+    consent: wire.consent,
+  };
+}
+
 function normalizeCustomerResponse(value: unknown): Customer {
   const envelope = (value ?? {}) as { customer?: unknown };
   return customerSchema.parse(envelope.customer ?? value);
@@ -109,21 +141,82 @@ export interface CustomerTimelinePage {
 
 // ── Queries ──────────────────────────────────────────────────────────────────
 
+const CUSTOMER_PAGE_SIZE = 100;
+
+export function normalizeCustomerPageSize(value: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed)
+    ? Math.max(1, Math.min(Math.floor(parsed), CUSTOMER_PAGE_SIZE))
+    : CUSTOMER_PAGE_SIZE;
+}
+
+function normalizeCustomerOffset(value: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0;
+}
+
+async function fetchCustomerPage(
+  filters: CustomerListFilters,
+  page: number,
+  pageSize: number
+): Promise<{ customers: Customer[]; total?: number }> {
+  const res = await unwrap(
+    safe.get<unknown>('/crm/customers', {
+      params: {
+        page,
+        page_size: pageSize,
+        search: filters.search,
+        tier: filters.tier,
+        tag: filters.tag,
+      },
+    })
+  );
+  const customers = z.array(customerSchema).parse(unwrapList(res, 'customers'));
+  const rawTotal =
+    res && typeof res === 'object' && !Array.isArray(res)
+      ? (res as Record<string, unknown>).total
+      : undefined;
+  const total = Number(rawTotal);
+  return { customers, total: Number.isFinite(total) ? total : undefined };
+}
+
 export const useListCustomers = (params: ListCustomersParams): UseQueryResult<Customer[]> =>
   useQuery<Customer[]>({
     queryKey: ['crm-customers', 'filter', params],
     queryFn: async (): Promise<Customer[]> => {
-      const limit = Math.max(1, Math.min(params.limit, 100));
-      const page = Math.floor(Math.max(0, params.offset) / limit) + 1;
-      const requestParams = {
-        page,
-        page_size: limit,
-        search: params.search,
-        tier: params.tier,
-        tag: params.tag,
-      };
-      const res = await unwrap(safe.get<unknown>('/crm/customers', { params: requestParams }));
-      return z.array(customerSchema).parse(unwrapList(res, 'customers'));
+      const limit = normalizeCustomerPageSize(params.limit);
+      const page = Math.floor(normalizeCustomerOffset(params.offset) / limit) + 1;
+      const result = await fetchCustomerPage(params, page, limit);
+      return result.customers;
+    },
+  });
+
+/** Loads all customer pages for dashboards, campaign previews, and merge pickers. */
+export const useListAllCustomers = (
+  filters: CustomerListFilters = {},
+  options: { enabled?: boolean } = {}
+): UseQueryResult<Customer[]> =>
+  useQuery<Customer[]>({
+    queryKey: ['crm-customers', 'all', filters],
+    enabled: options.enabled ?? true,
+    queryFn: async (): Promise<Customer[]> => {
+      const customers: Customer[] = [];
+      let page = 1;
+      const maxPages = 100;
+
+      for (let pageIndex = 0; pageIndex < maxPages; pageIndex += 1) {
+        const result = await fetchCustomerPage(filters, page, CUSTOMER_PAGE_SIZE);
+        customers.push(...result.customers);
+        if (
+          result.customers.length < CUSTOMER_PAGE_SIZE ||
+          (result.total !== undefined && customers.length >= result.total)
+        ) {
+          break;
+        }
+        page += 1;
+      }
+
+      return customers;
     },
   });
 
@@ -134,7 +227,7 @@ export const useGetCustomer = (id: number | undefined): UseQueryResult<Customer>
       const res = await unwrap(safe.get<unknown>('/crm/customers/detail', { params: { id } }));
       return normalizeCustomerResponse(res);
     },
-    enabled: !!id,
+    enabled: id != null && Number.isInteger(id) && id > 0,
   });
 
 export const useGetCustomerFull = (id: number | undefined): UseQueryResult<CustomerFullPayload> =>
@@ -157,7 +250,7 @@ export const useGetCustomerFull = (id: number | undefined): UseQueryResult<Custo
         visitHistory: envelope.recentVisits ?? envelope.recent_visits ?? [],
       };
     },
-    enabled: !!id,
+    enabled: id != null && Number.isInteger(id) && id > 0,
   });
 
 export const useCustomerTimeline = (
@@ -190,7 +283,7 @@ export const useCustomerTimeline = (
         nextCursor: res.nextCursor ?? res.next_cursor,
       };
     },
-    enabled: !!id,
+    enabled: id != null && Number.isInteger(id) && id > 0,
   });
 
 // ── Mutations ────────────────────────────────────────────────────────────────
@@ -205,7 +298,7 @@ export const useCreateCustomer = (): UseMutationResult<
   return useMutation<CustomerMutationResponse, unknown, CustomerInput>({
     mutationFn: async (data: CustomerInput): Promise<CustomerMutationResponse> => {
       const res = await unwrap(
-        safe.post<CustomerMutationResponse>('/crm/customers', toCustomerWireInput(data))
+        safe.post<CustomerMutationResponse>('/crm/customers', toCustomerCreateWireInput(data))
       );
       return res as CustomerMutationResponse;
     },
@@ -239,7 +332,10 @@ export const useUpdateCustomer = (): UseMutationResult<
         .flatMap(([, rows]) => rows ?? [])
         .find((customer) => customer.id === payload.id);
       const cached = cachedFromDetails ?? cachedFromLists;
-      const merged = toCustomerWireInput({ ...cached, ...payload.data });
+      const merged = toCustomerWireInput(
+        { ...cached, ...payload.data },
+        Object.prototype.hasOwnProperty.call(payload.data, 'name')
+      );
       const res = await unwrap(
         safe.put<CustomerMutationResponse>('/crm/customers', { id: payload.id, ...merged })
       );
@@ -289,7 +385,7 @@ export const useMergeCustomers = (): UseMutationResult<unknown, unknown, MergeCu
 };
 
 interface ImportCustomerRowsPayload {
-  customers: Record<string, string>[];
+  customers: Record<string, unknown>[];
   dedupe: boolean;
 }
 

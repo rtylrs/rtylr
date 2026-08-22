@@ -44,7 +44,12 @@ const CustomerProfile: React.FC = () => {
   const customerId = Number(id);
   const { data: fetched, isLoading, isError } = useGetCustomerFull(customerId);
   const [timelineCursor, setTimelineCursor] = useState<string>();
-  const { data: fetchedTimeline } = useCustomerTimeline(customerId, timelineCursor);
+  const {
+    data: fetchedTimeline,
+    isLoading: timelineLoading,
+    isFetching: timelineFetching,
+    isError: timelineError,
+  } = useCustomerTimeline(customerId, timelineCursor);
   const [timelineEntries, setTimelineEntries] = useState<
     NonNullable<typeof fetchedTimeline>['entries']
   >([]);
@@ -61,7 +66,13 @@ const CustomerProfile: React.FC = () => {
   useEffect(() => {
     if (!fetchedTimeline) return;
     setTimelineEntries((entries) =>
-      timelineCursor ? [...entries, ...fetchedTimeline.entries] : fetchedTimeline.entries
+      timelineCursor
+        ? Array.from(
+            new Map(
+              [...entries, ...fetchedTimeline.entries].map((entry) => [entry.id, entry])
+            ).values()
+          )
+        : fetchedTimeline.entries
     );
   }, [fetchedTimeline, timelineCursor]);
   useEffect(() => {
@@ -109,6 +120,10 @@ const CustomerProfile: React.FC = () => {
       return;
     }
     const tagName = newTag.trim();
+    if (tags.some((tag) => tag.toLowerCase() === tagName.toLowerCase())) {
+      toast.error(`Tag "${tagName}" already exists`);
+      return;
+    }
     const updated = [...tags, tagName];
     update.mutate(
       { id: customer.id, data: { tags: updated } },
@@ -170,6 +185,7 @@ const CustomerProfile: React.FC = () => {
   };
 
   const handleDelete = () => {
+    if (remove.isPending) return;
     remove.mutate(customer.id, {
       onSuccess: () => {
         toast.success('Customer deleted');
@@ -370,7 +386,12 @@ const CustomerProfile: React.FC = () => {
               </div>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
                 {tags.map((t) => (
-                  <TagChip key={t} label={t} onRemove={() => handleRemoveTag(t)} />
+                  <TagChip
+                    key={t}
+                    label={t}
+                    onRemove={() => handleRemoveTag(t)}
+                    disabled={update.isPending}
+                  />
                 ))}
                 {tags.length === 0 && (
                   <span style={{ fontSize: '12px', color: 'var(--hub-text-dim)' }}>
@@ -396,7 +417,12 @@ const CustomerProfile: React.FC = () => {
                     outline: 'none',
                   }}
                 />
-                <Button variant="primary" onClick={handleAddTag} style={{ padding: '6px 12px' }}>
+                <Button
+                  variant="primary"
+                  onClick={handleAddTag}
+                  disabled={update.isPending || !newTag.trim()}
+                  style={{ padding: '6px 12px' }}
+                >
                   Add
                 </Button>
               </div>
@@ -417,17 +443,33 @@ const CustomerProfile: React.FC = () => {
                 Timeline
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                {timeline.map((t) => (
-                  <TimelineEntryRow key={t.id} entry={t} />
-                ))}
+                {timelineLoading && timeline.length === 0 ? (
+                  <SkeletonList count={3} />
+                ) : timelineError && timeline.length === 0 ? (
+                  <p style={{ fontSize: '12px', color: 'var(--hub-text-muted)', margin: 0 }}>
+                    Unable to load the customer timeline. Please refresh and try again.
+                  </p>
+                ) : timeline.length === 0 ? (
+                  <p style={{ fontSize: '12px', color: 'var(--hub-text-dim)', margin: 0 }}>
+                    No timeline activity yet.
+                  </p>
+                ) : (
+                  timeline.map((t) => <TimelineEntryRow key={t.id} entry={t} />)
+                )}
+                {timelineError && timeline.length > 0 && (
+                  <p style={{ fontSize: '12px', color: 'var(--hub-text-muted)', margin: 0 }}>
+                    Unable to load more timeline activity.
+                  </p>
+                )}
               </div>
               {fetchedTimeline?.nextCursor && (
                 <Button
                   variant="outline"
                   onClick={() => setTimelineCursor(fetchedTimeline.nextCursor)}
+                  disabled={timelineFetching}
                   style={{ marginTop: '14px' }}
                 >
-                  Load more
+                  {timelineFetching ? 'Loading…' : 'Load more'}
                 </Button>
               )}
             </Card>
@@ -489,10 +531,18 @@ const CustomerProfile: React.FC = () => {
             </Card>
 
             {loyaltyConfig?.programEnabled && (
-              <LoyaltyPointsInput onAward={handleAward} onDeduct={handleDeduct} />
+              <LoyaltyPointsInput
+                onAward={handleAward}
+                onDeduct={handleDeduct}
+                pending={award.isPending || redeem.isPending}
+              />
             )}
             <ConsentBanner consent={consent} />
-            <NotesPanel notes={customer.notes || ''} onSave={handleNotesSave} />
+            <NotesPanel
+              notes={customer.notes || ''}
+              onSave={handleNotesSave}
+              saving={update.isPending}
+            />
           </div>
         </div>
 
@@ -502,7 +552,8 @@ const CustomerProfile: React.FC = () => {
           onConfirm={handleDelete}
           title="Delete customer?"
           description={`Are you sure you want to delete ${customer.name}? This action cannot be undone.`}
-          confirmLabel="Delete"
+          confirmLabel={remove.isPending ? 'Deleting…' : 'Delete'}
+          confirmDisabled={remove.isPending}
           variant="danger"
         />
       </div>

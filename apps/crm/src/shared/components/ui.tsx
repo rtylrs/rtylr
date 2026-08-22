@@ -295,6 +295,7 @@ export const ConfirmModal: React.FC<{
   title: string;
   description?: string;
   confirmLabel?: string;
+  confirmDisabled?: boolean;
   variant?: 'primary' | 'danger';
 }> = ({
   open,
@@ -303,6 +304,7 @@ export const ConfirmModal: React.FC<{
   title,
   description,
   confirmLabel = 'Confirm',
+  confirmDisabled = false,
   variant = 'primary',
 }) => (
   <Modal
@@ -317,6 +319,7 @@ export const ConfirmModal: React.FC<{
         </Button>
         <Button
           variant={variant}
+          disabled={confirmDisabled}
           onClick={() => {
             onConfirm();
             onClose();

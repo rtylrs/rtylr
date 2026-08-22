@@ -42,6 +42,23 @@ describe('campaignSchema', () => {
     const result = campaignSchema.parse({ ...baseCampaign, id: '42' });
     expect(result.id).toBe(42);
   });
+
+  it('normalizes generated API field names used by campaign responses', () => {
+    const result = campaignSchema.parse({
+      id: '7',
+      name: 'SMS sale',
+      channel: 'sms',
+      status: 'draft',
+      segmentId: '4',
+      content: 'Save today',
+      sentCount: '20',
+      openedCount: '8',
+    });
+    expect(result.type).toBe('sms');
+    expect(result.audienceSegmentId).toBe(4);
+    expect(result.body).toBe('Save today');
+    expect(result.openCount).toBe(8);
+  });
 });
 
 describe('calculateOpenRate', () => {

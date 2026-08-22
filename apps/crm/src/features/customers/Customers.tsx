@@ -14,7 +14,11 @@ import {
   Users as UsersIcon,
   Tag as TagIcon,
 } from 'lucide-react';
-import { useListCustomers, useUpdateCustomer } from '../../shared/hooks/queries/useCustomers';
+import {
+  useListAllCustomers,
+  useListCustomers,
+  useUpdateCustomer,
+} from '../../shared/hooks/queries/useCustomers';
 import { useLoyaltyConfig } from '../../shared/hooks/queries/useLoyalty';
 import { type Customer } from '../../shared/schemas/customers';
 import { getCustomerTier, thresholdsFromConfig, Tier, tierColor } from '../../shared/lib/tiers';
@@ -25,8 +29,42 @@ const ACCENT = '#3b82f6';
 
 const tierFilters: Array<Tier | 'All'> = ['All', 'Platinum', 'Gold', 'Silver', 'Bronze'];
 
-function ExpandedDetail({ customer, onView }: { customer: Customer; onView: () => void }) {
-  const tier = getCustomerTier(customer.loyaltyPoints, customer.loyaltyTier);
+function downloadCustomersCsv(rowsToExport: Customer[], thresholds: Record<Tier, number>): void {
+  const rows = [
+    ['Name', 'Email', 'Phone', 'Spent', 'Visits', 'Points', 'Tier'],
+    ...rowsToExport.map((c) => [
+      c.name,
+      c.email,
+      c.phone,
+      String(c.totalSpent),
+      String(c.visits),
+      String(c.loyaltyPoints),
+      getCustomerTier(c.loyaltyPoints, c.loyaltyTier, thresholds),
+    ]),
+  ];
+  const csv = rows
+    .map((r) => r.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'customers.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast.success('CSV exported');
+}
+
+function ExpandedDetail({
+  customer,
+  onView,
+  thresholds,
+}: {
+  customer: Customer;
+  onView: () => void;
+  thresholds: Record<Tier, number>;
+}) {
+  const tier = getCustomerTier(customer.loyaltyPoints, customer.loyaltyTier, thresholds);
   return (
     <motion.tr
       initial={{ opacity: 0 }}
@@ -34,7 +72,7 @@ function ExpandedDetail({ customer, onView }: { customer: Customer; onView: () =
       exit={{ opacity: 0 }}
       transition={{ duration: 0.15 }}
     >
-      <td colSpan={9} style={{ padding: 0 }}>
+      <td colSpan={10} style={{ padding: 0 }}>
         <div
           style={{
             padding: '20px 24px',
@@ -100,6 +138,8 @@ const Customers: React.FC = () => {
   const pageSize = 100;
   const [offset, setOffset] = useState(0);
   const [loadedCustomers, setLoadedCustomers] = useState<Customer[]>([]);
+  const [bulkUpdating, setBulkUpdating] = useState(false);
+  const [exportRequested, setExportRequested] = useState(false);
 
   const {
     data: fetchedCustomers,
@@ -110,10 +150,20 @@ const Customers: React.FC = () => {
     limit: pageSize,
     offset,
     search: search.trim() || undefined,
+    tier: tierFilter === 'All' ? undefined : tierFilter.toLowerCase(),
   });
   const update = useUpdateCustomer();
   const { data: loyaltyConfig } = useLoyaltyConfig();
   const thresholds = thresholdsFromConfig(loyaltyConfig);
+  const exportFilters = {
+    search: search.trim() || undefined,
+    tier: tierFilter === 'All' ? undefined : tierFilter.toLowerCase(),
+  };
+  const {
+    data: exportCustomers,
+    isFetching: exportFetching,
+    isError: exportError,
+  } = useListAllCustomers(exportFilters, { enabled: exportRequested });
 
   useEffect(() => {
     if (!fetchedCustomers) return;
@@ -124,6 +174,16 @@ const Customers: React.FC = () => {
       return Array.from(byId.values());
     });
   }, [fetchedCustomers, offset]);
+
+  useEffect(() => {
+    if (!exportRequested || exportFetching) return;
+    if (exportError) {
+      toast.error('Unable to export customers. Please try again.');
+    } else if (exportCustomers) {
+      downloadCustomersCsv(exportCustomers, thresholds);
+    }
+    setExportRequested(false);
+  }, [exportCustomers, exportError, exportFetching, exportRequested, thresholds]);
 
   const customers = loadedCustomers;
   const hasMore = fetchedCustomers?.length === pageSize;
@@ -158,7 +218,8 @@ const Customers: React.FC = () => {
     setSelected(next);
   };
 
-  const applyBulkTag = () => {
+  const applyBulkTag = async (): Promise<void> => {
+    if (bulkUpdating) return;
     const tagName = bulkTag.trim();
     if (!tagName || selected.size === 0) return;
     const ids = Array.from(selected).filter((id) => {
@@ -171,59 +232,27 @@ const Customers: React.FC = () => {
       setSelected(new Set());
       return;
     }
-    let remaining = ids.length;
-    let failed = 0;
-    ids.forEach((id) => {
-      const c = customers.find((x) => x.id === id);
-      if (!c) return;
-      const tags = [...(c.tags || []), tagName];
-      update.mutate(
-        { id, data: { tags } },
-        {
-          onError: () => {
-            failed += 1;
-          },
-          onSettled: () => {
-            remaining -= 1;
-            if (remaining === 0) {
-              if (failed === 0) {
-                toast.success(`Tagged ${ids.length} customers with "${tagName}"`);
-              } else {
-                toast.error(`Failed to tag ${failed} of ${ids.length} customers`);
-              }
-              setBulkTag('');
-              setSelected(new Set());
-            }
-          },
-        }
-      );
-    });
+    setBulkUpdating(true);
+    const results = await Promise.allSettled(
+      ids.map((id) => {
+        const customer = customers.find((x) => x.id === id);
+        if (!customer) return Promise.reject(new Error('Customer is no longer loaded'));
+        return update.mutateAsync({ id, data: { tags: [...(customer.tags || []), tagName] } });
+      })
+    );
+    const failed = results.filter((result) => result.status === 'rejected').length;
+    if (failed === 0) {
+      toast.success(`Tagged ${ids.length} customers with "${tagName}"`);
+    } else {
+      toast.error(`Failed to tag ${failed} of ${ids.length} customers`);
+    }
+    setBulkTag('');
+    setSelected(new Set());
+    setBulkUpdating(false);
   };
 
-  const exportCsv = () => {
-    const rows = [
-      ['Name', 'Email', 'Phone', 'Spent', 'Visits', 'Points', 'Tier'],
-      ...filtered.map((c) => [
-        c.name,
-        c.email,
-        c.phone,
-        String(c.totalSpent),
-        String(c.visits),
-        String(c.loyaltyPoints),
-        getCustomerTier(c.loyaltyPoints, c.loyaltyTier, thresholds),
-      ]),
-    ];
-    const csv = rows
-      .map((r) => r.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'customers.csv';
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success('CSV exported');
+  const exportCsv = (): void => {
+    if (!exportFetching) setExportRequested(true);
   };
 
   return (
@@ -239,8 +268,8 @@ const Customers: React.FC = () => {
                 <Upload size={13} />
                 Import
               </Button>
-              <Button variant="outline" onClick={exportCsv}>
-                Export CSV
+              <Button variant="outline" onClick={exportCsv} disabled={exportRequested}>
+                {exportRequested ? 'Exporting…' : 'Export CSV'}
               </Button>
               <Button variant="primary" onClick={() => navigate({ to: '/customers/new' })}>
                 <Plus size={13} />
@@ -275,6 +304,7 @@ const Customers: React.FC = () => {
                 setOffset(0);
                 setLoadedCustomers([]);
                 setSelected(new Set());
+                setExpandedId(null);
               }}
               placeholder="Search customers..."
               style={{
@@ -300,7 +330,13 @@ const Customers: React.FC = () => {
             {tierFilters.map((t) => (
               <button
                 key={t}
-                onClick={() => setTierFilter(t)}
+                onClick={() => {
+                  setTierFilter(t);
+                  setOffset(0);
+                  setLoadedCustomers([]);
+                  setSelected(new Set());
+                  setExpandedId(null);
+                }}
                 style={{
                   padding: '4px 12px',
                   borderRadius: '6px',
@@ -346,7 +382,10 @@ const Customers: React.FC = () => {
                 value={bulkTag}
                 onChange={(e) => setBulkTag(e.target.value)}
                 placeholder="Add tag..."
-                onKeyDown={(e) => e.key === 'Enter' && applyBulkTag()}
+                disabled={bulkUpdating}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') void applyBulkTag();
+                }}
                 style={{
                   height: '30px',
                   padding: '0 10px',
@@ -359,10 +398,19 @@ const Customers: React.FC = () => {
                   width: '160px',
                 }}
               />
-              <Button variant="primary" onClick={applyBulkTag} style={{ padding: '6px 12px' }}>
-                Apply
+              <Button
+                variant="primary"
+                onClick={() => void applyBulkTag()}
+                disabled={bulkUpdating}
+                style={{ padding: '6px 12px' }}
+              >
+                {bulkUpdating ? 'Applying…' : 'Apply'}
               </Button>
-              <Button variant="ghost" onClick={() => setSelected(new Set())}>
+              <Button
+                variant="ghost"
+                onClick={() => setSelected(new Set())}
+                disabled={bulkUpdating}
+              >
                 Clear
               </Button>
             </div>
@@ -603,6 +651,7 @@ const Customers: React.FC = () => {
                               <ExpandedDetail
                                 customer={c}
                                 onView={() => navigate({ to: `/customers/${c.id}` })}
+                                thresholds={thresholds}
                               />
                             )}
                           </AnimatePresence>
@@ -621,6 +670,15 @@ const Customers: React.FC = () => {
                   >
                     {isFetching ? 'Loading…' : 'Load more customers'}
                   </Button>
+                </div>
+              )}
+              {isError && customers.length > 0 && (
+                <div
+                  role="alert"
+                  style={{ padding: '10px 16px', color: 'var(--hub-text-muted)', fontSize: '12px' }}
+                >
+                  Unable to load more customers. The rows shown may be incomplete; refresh and try
+                  again.
                 </div>
               )}
             </>

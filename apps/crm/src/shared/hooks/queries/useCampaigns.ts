@@ -1,7 +1,4 @@
-import { unwrap } from '@voxire/api';
-import type { CreateCampaignRequest } from '@voxire/voxie/crm/campaign/v1/types';
-import type { UpdateCampaignRequest } from '@voxire/voxie/crm/campaign/v1/types';
-import type { UpdateCampaignStatusRequest } from '@voxire/voxie/crm/campaign/v1/types';
+import { getOneKitErrorMessage, unwrap } from '@voxire/api';
 import {
   useMutation,
   useQuery,
@@ -11,7 +8,6 @@ import {
 } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { z } from 'zod';
 import { safe } from '../../lib/api';
 import { unwrapList } from '../../lib/unwrapList';
 import { campaignSchema, campaignStatsSchema } from '../../schemas/campaigns';
@@ -22,9 +18,26 @@ interface UpdateCampaignPayload {
   data: Partial<Campaign>;
 }
 
+interface CampaignFormData extends Partial<Campaign> {
+  channel?: string;
+  content?: string;
+  description?: string;
+  segmentId?: number | string | null;
+  scheduledFor?: string;
+}
+
 interface CampaignStatusPayload {
   id: number;
   status: string;
+}
+
+interface CampaignRequest {
+  name: string;
+  type: string;
+  audienceSegmentId?: number;
+  subject: string;
+  body: string;
+  scheduledAt?: string;
 }
 
 export interface CampaignMutationResponse {
@@ -33,12 +46,63 @@ export interface CampaignMutationResponse {
   message?: string;
 }
 
+function normalizeScheduledAt(value: string | undefined): string | undefined {
+  const trimmed = value?.trim();
+  if (!trimmed) return undefined;
+  const date = new Date(trimmed);
+  if (!Number.isFinite(date.getTime())) return undefined;
+  return date.toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
+
+export function toCampaignRequest(data: CampaignFormData): CampaignRequest {
+  const name = data.name?.trim() ?? '';
+  const subject = data.subject?.trim() || name;
+  const segmentId = data.audienceSegmentId ?? data.segmentId;
+  const parsedSegmentId = Number(segmentId);
+  return {
+    name,
+    type: data.type ?? data.channel ?? 'email',
+    audienceSegmentId:
+      Number.isInteger(parsedSegmentId) && parsedSegmentId > 0 ? parsedSegmentId : undefined,
+    subject,
+    body: data.body ?? data.content ?? '',
+    scheduledAt: normalizeScheduledAt(data.scheduledAt ?? data.scheduledFor),
+  };
+}
+
+function fromCampaignPayload(campaign: unknown): Campaign {
+  return campaignSchema.parse(campaign);
+}
+
+function responseRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+}
+
+function campaignIdFromResponse(value: unknown): number | undefined {
+  const raw = responseRecord(value);
+  const candidate = raw.campaignId ?? raw.campaign_id;
+  const id = Number(candidate);
+  return Number.isFinite(id) && id > 0 ? id : undefined;
+}
+
+function messageFromResponse(value: unknown): string | undefined {
+  const message = responseRecord(value).message;
+  return typeof message === 'string' ? message : undefined;
+}
+
 export const useListCampaigns = (limit = 100, offset = 0): UseQueryResult<Campaign[]> =>
   useQuery<Campaign[]>({
     queryKey: ['crm-campaigns', { limit, offset }],
     queryFn: async (): Promise<Campaign[]> => {
-      const res = await unwrap(safe.get<unknown>('/crm/campaigns', { params: { limit, offset } }));
-      return z.array(campaignSchema).parse(unwrapList(res, 'campaigns'));
+      const res = await unwrap(
+        safe.get<unknown>('/crm/campaigns', {
+          params: {
+            limit: Math.max(1, Math.floor(limit)),
+            offset: Math.max(0, Math.floor(offset)),
+          },
+        })
+      );
+      return unwrapList<unknown>(res, 'campaigns').map(fromCampaignPayload);
     },
   });
 
@@ -46,24 +110,26 @@ export const useGetCampaign = (id: number | undefined): UseQueryResult<Campaign>
   useQuery<Campaign>({
     queryKey: ['crm-campaign', id],
     queryFn: async (): Promise<Campaign> => {
+      if (id == null || id <= 0) throw new Error('Invalid campaign id');
       const res = await unwrap(safe.get<unknown>(`/crm/campaigns/${id}`));
-      const envelope = (res ?? {}) as { campaign?: unknown };
-      return campaignSchema.parse(envelope.campaign ?? res);
+      const campaign = responseRecord(res).campaign ?? res;
+      return fromCampaignPayload(campaign);
     },
-    enabled: !!id,
+    enabled: id != null && Number.isInteger(id) && id > 0,
   });
 
 export const useCampaignStats = (id: number | undefined): UseQueryResult<CampaignStats> =>
   useQuery<CampaignStats>({
     queryKey: ['crm-campaign', id, 'stats'],
     queryFn: async (): Promise<CampaignStats> => {
+      if (id == null || id <= 0) throw new Error('Invalid campaign id');
       const res = await unwrap(
-        safe.get<unknown>('/crm/campaigns/stats', { params: { campaign_id: id } })
+        safe.get<unknown>('/crm/campaigns/stats', { params: { campaignId: id } })
       );
-      const envelope = (res ?? {}) as { stats?: unknown };
-      return campaignStatsSchema.parse(envelope.stats ?? res);
+      const stats = responseRecord(res).stats ?? res;
+      return campaignStatsSchema.parse(stats);
     },
-    enabled: !!id,
+    enabled: id != null && Number.isInteger(id) && id > 0,
   });
 
 export const useCreateCampaign = (): UseMutationResult<
@@ -75,18 +141,15 @@ export const useCreateCampaign = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<CampaignMutationResponse, unknown, Partial<Campaign>>({
     mutationFn: async (data: Partial<Campaign>): Promise<CampaignMutationResponse> => {
-      const res = (await unwrap(
-        safe.post<unknown>('/crm/campaigns', data as CreateCampaignRequest)
-      )) as { campaignId?: number; campaign_id?: number; message?: string };
-      const campaignId = res.campaignId ?? res.campaign_id;
-      return { campaignId, campaign_id: campaignId, message: res.message };
+      const res = await unwrap(safe.post<unknown>('/crm/campaigns', toCampaignRequest(data)));
+      return { campaignId: campaignIdFromResponse(res), message: messageFromResponse(res) };
     },
     onSuccess: (): void => {
       void qc.invalidateQueries({ queryKey: ['crm-campaigns'] });
       toast.success(t('crm.campaigns.created'));
     },
-    onError: (): void => {
-      toast.error(t('errors.generic'));
+    onError: (error): void => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 };
@@ -100,21 +163,22 @@ export const useUpdateCampaign = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<CampaignMutationResponse, unknown, UpdateCampaignPayload>({
     mutationFn: async (payload: UpdateCampaignPayload): Promise<CampaignMutationResponse> => {
+      const cached = qc.getQueryData<Campaign>(['crm-campaign', payload.id]);
       const res = await unwrap(
-        safe.put<CampaignMutationResponse>(`/crm/campaigns/${payload.id}`, {
-          id: String(payload.id),
-          ...payload.data,
-        } as UpdateCampaignRequest)
+        safe.put<unknown>(
+          `/crm/campaigns/${payload.id}`,
+          toCampaignRequest({ ...cached, ...payload.data })
+        )
       );
-      return res as CampaignMutationResponse;
+      return { message: messageFromResponse(res) };
     },
     onSuccess: (_data: CampaignMutationResponse, variables: UpdateCampaignPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-campaigns'] });
       void qc.invalidateQueries({ queryKey: ['crm-campaign', variables.id] });
       toast.success(t('crm.campaigns.updated'));
     },
-    onError: (): void => {
-      toast.error(t('errors.generic'));
+    onError: (error): void => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 };
@@ -128,8 +192,8 @@ export const useDeleteCampaign = (): UseMutationResult<unknown, unknown, number>
       void qc.invalidateQueries({ queryKey: ['crm-campaigns'] });
       toast.success(t('crm.campaigns.deleted'));
     },
-    onError: (): void => {
-      toast.error(t('errors.generic'));
+    onError: (error): void => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 };
@@ -142,21 +206,15 @@ export const useUpdateCampaignStatus = (): UseMutationResult<
   const qc = useQueryClient();
   const { t } = useTranslation();
   return useMutation<unknown, unknown, CampaignStatusPayload>({
-    mutationFn: (payload: CampaignStatusPayload): Promise<unknown> => {
-      return unwrap(
-        safe.put(`/crm/campaigns/${payload.id}/status`, {
-          id: String(payload.id),
-          status: payload.status,
-        } as UpdateCampaignStatusRequest)
-      );
-    },
+    mutationFn: (payload: CampaignStatusPayload): Promise<unknown> =>
+      unwrap(safe.put(`/crm/campaigns/${payload.id}/status`, { status: payload.status })),
     onSuccess: (_data: unknown, variables: CampaignStatusPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-campaigns'] });
       void qc.invalidateQueries({ queryKey: ['crm-campaign', variables.id] });
       toast.success(t('crm.campaigns.statusUpdated'));
     },
-    onError: (): void => {
-      toast.error(t('errors.generic'));
+    onError: (error): void => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
     },
   });
 };

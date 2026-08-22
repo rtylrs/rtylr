@@ -8,7 +8,7 @@ import { PageHeader, Card, Button, EmptyState, SkeletonList } from '../../shared
 
 const Templates: React.FC = () => {
   const navigate = useNavigate();
-  const { data: fetched, isLoading } = useTemplates();
+  const { data: fetched, isLoading, isError } = useTemplates();
   const createMut = useCreateTemplate();
   const templates = fetched ?? [];
 
@@ -54,7 +54,9 @@ const Templates: React.FC = () => {
         )}&body=${encodeURIComponent(t.body)}`,
       });
     } else {
-      navigate({ to: '/campaigns/sms' });
+      navigate({
+        to: `/campaigns/sms?name=${encodeURIComponent(t.name)}&body=${encodeURIComponent(t.body)}`,
+      });
     }
   };
 
@@ -107,6 +109,14 @@ const Templates: React.FC = () => {
         {isLoading ? (
           <Card>
             <SkeletonList count={4} />
+          </Card>
+        ) : isError ? (
+          <Card>
+            <EmptyState
+              icon={FileText}
+              title="Unable to load templates"
+              description="Check your connection and try again."
+            />
           </Card>
         ) : filtered.length === 0 ? (
           <Card>

@@ -1,10 +1,17 @@
 import { z } from 'zod';
 
+const finiteNumber = z.preprocess((value) => {
+  if (value === null || value === undefined || value === '') return value;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : value;
+}, z.number());
+
 const legacyLoyaltyConfigSchema = z.object({
   programEnabled: z.boolean(),
   pointsPerDollar: z.number(),
   pointsExpiry: z.number(),
   redemptionRate: z.number(),
+  minRedemptionPoints: finiteNumber.optional(),
 });
 
 const backendLoyaltyConfigSchema = z.object({
@@ -12,20 +19,34 @@ const backendLoyaltyConfigSchema = z.object({
   isEnabled: z.boolean(),
   pointsPerCurrencyUnit: z.number(),
   currencyPerPoint: z.number(),
-  bronzeMin: z.number().catch(0),
-  silverMin: z.number().catch(500),
-  goldMin: z.number().catch(1500),
-  platinumMin: z.number().catch(5000),
-  bronzeDiscountPct: z.number().catch(0),
-  silverDiscountPct: z.number().catch(5),
-  goldDiscountPct: z.number().catch(10),
-  platinumDiscountPct: z.number().catch(15),
-  pointsExpiryDays: z.number().catch(365),
+  bronzeMin: finiteNumber.catch(0),
+  silverMin: finiteNumber.catch(500),
+  goldMin: finiteNumber.catch(1500),
+  platinumMin: finiteNumber.catch(5000),
+  bronzeDiscountPct: finiteNumber.catch(0),
+  silverDiscountPct: finiteNumber.catch(5),
+  goldDiscountPct: finiteNumber.catch(10),
+  platinumDiscountPct: finiteNumber.catch(15),
+  pointsExpiryDays: finiteNumber.catch(365),
+  updatedAt: z.string().optional(),
+});
+
+// The mounted legacy loyalty config handlers use this smaller wire shape.
+// Keep it separate from the newer generated-style shape above so the CRM can
+// read the actual service response without inventing tier or expiry fields.
+const rawLoyaltyConfigSchema = z.object({
+  id: z.union([z.string(), z.number()]).transform(Number).optional(),
+  ownerId: z.union([z.string(), z.number()]).transform(Number).optional(),
+  pointsPerDollar: finiteNumber,
+  minRedemptionPoints: finiteNumber,
+  pointsValue: finiteNumber,
+  isActive: z.boolean(),
+  createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });
 
 export const loyaltyConfigSchema = z
-  .union([legacyLoyaltyConfigSchema, backendLoyaltyConfigSchema])
+  .union([legacyLoyaltyConfigSchema, backendLoyaltyConfigSchema, rawLoyaltyConfigSchema])
   .transform((value) => {
     if ('isEnabled' in value) {
       return {
@@ -44,6 +65,16 @@ export const loyaltyConfigSchema = z
         updatedAt: value.updatedAt,
       };
     }
+    if ('isActive' in value) {
+      return {
+        programEnabled: value.isActive,
+        pointsPerDollar: value.pointsPerDollar,
+        pointsExpiry: 365,
+        redemptionRate: value.pointsValue,
+        minRedemptionPoints: value.minRedemptionPoints,
+        updatedAt: value.updatedAt,
+      };
+    }
     return value;
   });
 
@@ -57,10 +88,10 @@ const legacyLoyaltyTransactionSchema = z.object({
 const backendLoyaltyTransactionSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(Number),
   customerId: z.union([z.string(), z.number()]).transform(Number),
-  type: z.enum(['earn', 'redeem', 'adjust', 'expire', 'award']),
-  points: z.number().catch(0),
-  balanceBefore: z.number().catch(0),
-  balanceAfter: z.number().catch(0),
+  type: z.enum(['earn', 'redeem', 'upgrade', 'adjust', 'expire', 'award']),
+  points: finiteNumber.catch(0),
+  balanceBefore: finiteNumber.catch(0),
+  balanceAfter: finiteNumber.catch(0),
   description: z.string().nullable().optional(),
   createdAt: z.string(),
 });
@@ -88,9 +119,9 @@ export const loyaltyMemberSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(Number),
   name: z.string(),
   initials: z.string(),
-  points: z.number(),
+  points: finiteNumber,
   tier: z.string(),
-  visits: z.number(),
+  visits: finiteNumber,
   joinedAt: z.string(),
   lastActive: z.string(),
 });
@@ -99,7 +130,7 @@ export const loyaltyRewardSchema = z.object({
   id: z.union([z.string(), z.number()]).transform(Number),
   name: z.string(),
   description: z.string().catch(''),
-  pointsCost: z.number().catch(0),
+  pointsCost: finiteNumber.catch(0),
   category: z.string().catch('general'),
   stock: z
     .union([z.number(), z.string(), z.null(), z.undefined()])
@@ -119,16 +150,16 @@ const legacyLoyaltyTierSchema = z.object({
   tierId: z.union([z.string(), z.number()]).transform(Number).optional(),
   tier_id: z.union([z.string(), z.number()]).transform(Number).optional(),
   name: z.string(),
-  threshold: z.number().optional(),
-  minPoints: z.number().optional(),
-  min_points: z.number().optional(),
-  multiplier: z.number().optional(),
-  discountPct: z.number().optional(),
-  discount_pct: z.number().optional(),
+  threshold: finiteNumber.optional(),
+  minPoints: finiteNumber.optional(),
+  min_points: finiteNumber.optional(),
+  multiplier: finiteNumber.optional(),
+  discountPct: finiteNumber.optional(),
+  discount_pct: finiteNumber.optional(),
   perks: z.union([z.string(), z.array(z.string())]).optional(),
   color: z.string().optional(),
-  sortOrder: z.number().optional(),
-  sort_order: z.number().optional(),
+  sortOrder: finiteNumber.optional(),
+  sort_order: finiteNumber.optional(),
 });
 
 const backendLoyaltyTierSchema = z.object({
@@ -136,13 +167,13 @@ const backendLoyaltyTierSchema = z.object({
   tierId: z.union([z.string(), z.number()]).transform(Number).optional(),
   tier_id: z.union([z.string(), z.number()]).transform(Number).optional(),
   name: z.string(),
-  minPoints: z.number().optional(),
-  min_points: z.number().optional(),
-  discountPct: z.number().optional(),
-  discount_pct: z.number().optional(),
+  minPoints: finiteNumber.optional(),
+  min_points: finiteNumber.optional(),
+  discountPct: finiteNumber.optional(),
+  discount_pct: finiteNumber.optional(),
   perks: z.union([z.string(), z.array(z.string())]).optional(),
-  sortOrder: z.number().optional(),
-  sort_order: z.number().optional(),
+  sortOrder: finiteNumber.optional(),
+  sort_order: finiteNumber.optional(),
 });
 
 export interface LoyaltyTier {
@@ -213,6 +244,7 @@ export interface LoyaltyConfig {
   pointsPerDollar: number;
   pointsExpiry: number;
   redemptionRate: number;
+  minRedemptionPoints?: number;
   bronzeMin?: number;
   silverMin?: number;
   goldMin?: number;

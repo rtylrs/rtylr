@@ -100,4 +100,8 @@ describe('relativeDate', () => {
     expect(result).toContain('2020');
     expect(result).toContain('Jan');
   });
+
+  it('returns an empty label for malformed dates', () => {
+    expect(relativeDate('not-a-date')).toBe('');
+  });
 });

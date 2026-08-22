@@ -4,13 +4,9 @@ import { createOneKitClient } from '@voxire/api';
 import { X, Clock, Zap } from 'lucide-react';
 import { SubscriptionServiceClient } from '@voxire/voxie/hub/subscription/v1/client';
 import { resolveAppUrl } from '@voxire/config';
+import { trialDaysLeft } from '../hooks/queries/useCrmSubscription';
 
 const subscriptionClient = createOneKitClient(SubscriptionServiceClient, 'crm');
-
-function daysLeft(trialEndsAt: string | null): number {
-  if (!trialEndsAt) return 0;
-  return Math.max(0, Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86_400_000));
-}
 
 const DISMISSED_KEY = 'trial_banner_dismissed_date';
 
@@ -27,7 +23,7 @@ const TrialBanner: React.FC = (): React.JSX.Element | null => {
 
   if (!data || data.status !== 'trial' || dismissed) return null;
 
-  const days = daysLeft(data.trialEndsAt ?? null);
+  const days = trialDaysLeft(data.trialEndsAt ?? null);
   if (days > 7) return null;
 
   const dismiss = (): void => {

@@ -3,7 +3,7 @@ import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { Plus, TrendingUp } from 'lucide-react';
 import { motion } from 'motion/react';
-import { usePipeline, useLeads } from '../../shared/hooks/queries/useSales';
+import { usePipeline, useListAllLeads } from '../../shared/hooks/queries/useSales';
 import type { Lead, LeadStage } from '../../shared/hooks/queries/useSales';
 import { Button, PageHeader, SkeletonList } from '../../shared/components/ui';
 import CreateLeadModal from './components/CreateLeadModal';
@@ -137,11 +137,12 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => (
 
 const Pipeline: React.FC = () => {
   const navigate = useNavigate();
-  const { data: pipelineCols, isLoading: pipelineLoading } = usePipeline();
-  const { data: leads, isLoading: leadsLoading } = useLeads();
+  const { data: pipelineCols, isLoading: pipelineLoading, isError: pipelineError } = usePipeline();
+  const { data: leads, isLoading: leadsLoading, isError: leadsError } = useListAllLeads();
   const [createOpen, setCreateOpen] = useState(false);
 
   const isLoading = pipelineLoading || leadsLoading;
+  const isError = pipelineError || leadsError;
 
   const leadsByStage = useMemo((): Record<LeadStage, Lead[]> => {
     const all = leads ?? [];
@@ -188,6 +189,20 @@ const Pipeline: React.FC = () => {
         {isLoading ? (
           <div style={{ padding: '16px' }}>
             <SkeletonList count={4} />
+          </div>
+        ) : isError ? (
+          <div
+            role="alert"
+            style={{
+              padding: '32px',
+              borderRadius: '12px',
+              border: '1px solid rgba(239,68,68,0.25)',
+              background: 'rgba(239,68,68,0.08)',
+              color: 'var(--hub-text-muted)',
+              fontSize: '13px',
+            }}
+          >
+            Unable to load the sales pipeline. Refresh and try again.
           </div>
         ) : (
           <div
