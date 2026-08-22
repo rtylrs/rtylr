@@ -7,7 +7,9 @@ export function isValidEmail(value: string): boolean {
 }
 
 export function isValidPhone(value: string): boolean {
-  return /^\+?[\d\s\-().]{7,20}$/.test(value.trim());
+  const trimmed = value.trim();
+  const digits = trimmed.match(/\d/g)?.length ?? 0;
+  return digits >= 7 && digits <= 15 && /^\+?[\d\s\-().]{7,20}$/.test(trimmed);
 }
 
 export function isNonEmpty(value: string): boolean {

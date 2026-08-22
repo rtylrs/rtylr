@@ -38,6 +38,13 @@ describe('isValidPhone', () => {
   it('rejects an empty string', () => {
     expect(isValidPhone('')).toBe(false);
   });
+  it('rejects punctuation without enough digits', () => {
+    expect(isValidPhone('---.( )')).toBe(false);
+    expect(isValidPhone('+1 (555) 12')).toBe(false);
+  });
+  it('accepts a seven-digit local number', () => {
+    expect(isValidPhone('555-1234')).toBe(true);
+  });
 });
 
 describe('isNonEmpty', () => {

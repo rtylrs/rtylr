@@ -5,6 +5,7 @@ import { Check, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useCreateCustomer } from '../../shared/hooks/queries/useCustomers';
 import { useCrmSettings } from '../../shared/hooks/queries/useCrmSettings';
 import { Breadcrumbs, Button, Card, Input, PageHeader } from '../../shared/components/ui';
+import { isValidEmail, isValidPhone } from '../../shared/lib/validators';
 
 interface FormData {
   name: string;
@@ -55,8 +56,10 @@ const CreateCustomer: React.FC = () => {
   const set = <K extends keyof FormData>(k: K, v: FormData[K]) =>
     setData((d) => ({ ...d, [k]: v }));
 
-  const emailValid = !data.email.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim());
-  const contactValid = (data.email.trim().length > 0 || data.phone.trim().length > 0) && emailValid;
+  const emailValid = !data.email.trim() || isValidEmail(data.email);
+  const phoneValid = !data.phone.trim() || isValidPhone(data.phone);
+  const contactValid =
+    (data.email.trim().length > 0 || data.phone.trim().length > 0) && emailValid && phoneValid;
 
   const canNext = () => {
     if (step === 0) return data.name.trim().length > 0;
@@ -189,6 +192,11 @@ const CreateCustomer: React.FC = () => {
               {!emailValid && (
                 <p style={{ margin: '-6px 0 0', fontSize: '11px', color: '#ef4444' }}>
                   Enter a valid email address or clear the field.
+                </p>
+              )}
+              {!phoneValid && (
+                <p style={{ margin: '-6px 0 0', fontSize: '11px', color: '#ef4444' }}>
+                  Enter a valid phone number or clear the field.
                 </p>
               )}
             </div>
