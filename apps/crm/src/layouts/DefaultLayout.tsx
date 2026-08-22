@@ -193,6 +193,7 @@ const DefaultLayout: React.FC = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   useEscapeKey(userMenuOpen, () => setUserMenuOpen(false));
+  useEscapeKey(sidebarOpen, () => setSidebarOpen(false));
 
   useEffect(() => {
     if (!userMenuOpen) return;

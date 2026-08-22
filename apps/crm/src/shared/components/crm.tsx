@@ -924,6 +924,7 @@ export const SearchableCustomerSelect: React.FC<{
 }> = ({ customers, value, onChange, placeholder = 'Select customer...', ariaLabel }) => {
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const listboxId = React.useId();
   const selected = customers.find((c) => c.id === value);
@@ -935,6 +936,7 @@ export const SearchableCustomerSelect: React.FC<{
   const close = React.useCallback(() => {
     setOpen(false);
     setSearch('');
+    setActiveIndex(0);
   }, []);
   useEscapeKey(open, close);
   useEffect(() => {
@@ -954,7 +956,15 @@ export const SearchableCustomerSelect: React.FC<{
         aria-expanded={open}
         aria-haspopup="listbox"
         aria-controls={listboxId}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          if (open) {
+            close();
+            return;
+          }
+          const selectedIndex = customers.findIndex((customer) => customer.id === value);
+          setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0);
+          setOpen(true);
+        }}
         style={{
           width: '100%',
           height: '36px',
@@ -993,15 +1003,35 @@ export const SearchableCustomerSelect: React.FC<{
             display: 'flex',
             flexDirection: 'column',
           }}
-          id={listboxId}
-          role="listbox"
-          aria-label={`${ariaLabel ?? placeholder} options`}
         >
           <input
             autoFocus
             aria-label="Search customers"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={open}
+            aria-controls={listboxId}
+            aria-activedescendant={
+              filtered[activeIndex] ? `${listboxId}-option-${filtered[activeIndex].id}` : undefined
+            }
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setActiveIndex(0);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'ArrowDown' && filtered.length > 0) {
+                event.preventDefault();
+                setActiveIndex((current) => (current + 1) % filtered.length);
+              } else if (event.key === 'ArrowUp' && filtered.length > 0) {
+                event.preventDefault();
+                setActiveIndex((current) => (current - 1 + filtered.length) % filtered.length);
+              } else if (event.key === 'Enter' && filtered[activeIndex]) {
+                event.preventDefault();
+                onChange(filtered[activeIndex].id);
+                close();
+              }
+            }}
             placeholder="Search..."
             style={{
               padding: '10px 12px',
@@ -1013,7 +1043,12 @@ export const SearchableCustomerSelect: React.FC<{
               outline: 'none',
             }}
           />
-          <div style={{ overflowY: 'auto', flex: 1, maxHeight: '240px' }}>
+          <div
+            id={listboxId}
+            role="listbox"
+            aria-label={`${ariaLabel ?? placeholder} options`}
+            style={{ overflowY: 'auto', flex: 1, maxHeight: '240px' }}
+          >
             {filtered.length === 0 && (
               <div
                 style={{
@@ -1026,12 +1061,14 @@ export const SearchableCustomerSelect: React.FC<{
                 No results
               </div>
             )}
-            {filtered.map((c) => (
+            {filtered.map((c, index) => (
               <button
                 type="button"
                 role="option"
                 aria-selected={c.id === value}
+                id={`${listboxId}-option-${c.id}`}
                 key={c.id}
+                onMouseEnter={() => setActiveIndex(index)}
                 onClick={() => {
                   onChange(c.id);
                   close();
@@ -1042,18 +1079,12 @@ export const SearchableCustomerSelect: React.FC<{
                   gap: '8px',
                   width: '100%',
                   padding: '8px 12px',
-                  background: 'transparent',
+                  background: index === activeIndex ? 'var(--hub-hover)' : 'transparent',
                   border: 'none',
                   cursor: 'pointer',
                   color: 'var(--hub-text)',
                   fontSize: '13px',
                   textAlign: 'left',
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = 'transparent';
                 }}
               >
                 <CustomerAvatar initials={c.initials} points={c.loyaltyPoints} size={26} />

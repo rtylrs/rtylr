@@ -690,6 +690,7 @@ const Campaigns: React.FC = () => {
           open={confirmDeleteId !== null}
           onClose={() => setConfirmDeleteId(null)}
           onConfirm={() => confirmDeleteId !== null && handleDelete(confirmDeleteId)}
+          closeOnConfirm={false}
           title="Delete campaign?"
           description={
             deleteTarget

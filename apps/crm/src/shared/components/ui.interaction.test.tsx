@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
-import { describe, expect, it } from 'vitest';
-import { Modal } from './ui';
+import { describe, expect, it, vi } from 'vitest';
+import { ConfirmModal, Modal } from './ui';
 
 describe('Modal focus behavior', () => {
   it('keeps focus in a controlled field when the parent rerenders', async () => {
@@ -85,5 +85,29 @@ describe('Modal focus behavior', () => {
     expect(close).toHaveFocus();
     await user.tab({ shift: true });
     expect(save).toHaveFocus();
+  });
+
+  it('can keep an async confirmation open until the mutation succeeds', async () => {
+    const user = userEvent.setup();
+    const onConfirm = vi.fn();
+
+    const Harness: React.FC = () => {
+      const [open, setOpen] = useState(true);
+      return (
+        <ConfirmModal
+          open={open}
+          onClose={() => setOpen(false)}
+          onConfirm={onConfirm}
+          closeOnConfirm={false}
+          title="Delete customer"
+        />
+      );
+    };
+
+    render(<Harness />);
+    await user.click(screen.getByRole('button', { name: 'Confirm' }));
+
+    expect(onConfirm).toHaveBeenCalledOnce();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });

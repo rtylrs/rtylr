@@ -449,6 +449,7 @@ const Leads: React.FC = () => {
           open={deleteId !== null}
           onClose={() => setDeleteId(null)}
           onConfirm={handleDelete}
+          closeOnConfirm={false}
           title="Delete lead"
           description={
             deleteTarget

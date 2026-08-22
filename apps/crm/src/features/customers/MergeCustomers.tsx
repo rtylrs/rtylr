@@ -62,6 +62,7 @@ const MergeCustomers: React.FC = () => {
       { primaryId, secondaryId },
       {
         onSuccess: () => {
+          setConfirmMerge(false);
           navigate({ to: '/customers' });
         },
       }
@@ -250,6 +251,7 @@ const MergeCustomers: React.FC = () => {
           open={confirmMerge}
           onClose={() => setConfirmMerge(false)}
           onConfirm={confirmMergeCustomers}
+          closeOnConfirm={false}
           title="Merge customers?"
           description={
             primary && secondary

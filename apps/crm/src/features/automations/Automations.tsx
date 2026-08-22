@@ -320,6 +320,7 @@ const Automations: React.FC = () => {
           open={confirmDeleteId !== null}
           onClose={() => setConfirmDeleteId(null)}
           onConfirm={() => confirmDeleteId !== null && handleDelete(confirmDeleteId)}
+          closeOnConfirm={false}
           title="Delete automation?"
           description={
             deleteTarget

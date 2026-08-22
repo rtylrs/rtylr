@@ -210,11 +210,16 @@ const TeamTab: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [showInvite, setShowInvite] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<{ id: string; label: string } | null>(null);
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
   const handleInvite = (): void => {
     if (invite.isPending) return;
     if (!email.trim() || !fullName.trim()) {
       toast.error('Email and full name are required');
+      return;
+    }
+    if (!emailValid) {
+      toast.error('Enter a valid email address');
       return;
     }
     invite.mutate(
@@ -280,6 +285,9 @@ const TeamTab: React.FC = () => {
                 placeholder="Jane Smith"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleInvite();
+                }}
                 style={inputStyle}
               />
             </div>
@@ -308,6 +316,11 @@ const TeamTab: React.FC = () => {
                 }}
                 style={inputStyle}
               />
+              {email.trim() && !emailValid && (
+                <p role="alert" style={{ fontSize: 11, color: '#ef4444', margin: '4px 0 0' }}>
+                  Enter a valid email address.
+                </p>
+              )}
             </div>
           </div>
           {sub &&
@@ -332,7 +345,7 @@ const TeamTab: React.FC = () => {
           <div style={{ display: 'flex', gap: 8 }}>
             <Button
               variant="primary"
-              disabled={!email.trim() || !fullName.trim() || invite.isPending}
+              disabled={!email.trim() || !emailValid || !fullName.trim() || invite.isPending}
               onClick={handleInvite}
             >
               <UserPlus size={13} />
@@ -485,8 +498,13 @@ const TeamTab: React.FC = () => {
         open={removeTarget !== null}
         onClose={() => setRemoveTarget(null)}
         onConfirm={() => {
-          if (removeTarget && !deactivate.isPending) deactivate.mutate(removeTarget.id);
+          if (removeTarget && !deactivate.isPending) {
+            deactivate.mutate(removeTarget.id, {
+              onSuccess: () => setRemoveTarget(null),
+            });
+          }
         }}
+        closeOnConfirm={false}
         title="Remove team member?"
         description={
           removeTarget

@@ -999,6 +999,7 @@ const LeadDetail: React.FC = () => {
           open={confirmDeleteLead}
           onClose={() => setConfirmDeleteLead(false)}
           onConfirm={handleDeleteLead}
+          closeOnConfirm={false}
           title="Delete lead"
           description={`Permanently delete "${lead.companyName ?? lead.company ?? 'this lead'}" and all associated data?`}
           confirmLabel={deleteLead.isPending ? 'Deleting...' : 'Delete'}
@@ -1012,10 +1013,12 @@ const LeadDetail: React.FC = () => {
           onClose={() => setDeleteTpId(null)}
           onConfirm={() => {
             if (deleteTpId !== null && !deleteTouchpoint.isPending) {
-              deleteTouchpoint.mutate(deleteTpId);
+              deleteTouchpoint.mutate(deleteTpId, {
+                onSuccess: () => setDeleteTpId(null),
+              });
             }
-            setDeleteTpId(null);
           }}
+          closeOnConfirm={false}
           title="Delete touchpoint"
           description="Remove this touchpoint from the timeline?"
           confirmLabel={deleteTouchpoint.isPending ? 'Deleting...' : 'Delete'}
@@ -1029,10 +1032,13 @@ const LeadDetail: React.FC = () => {
           onClose={() => setDeleteContactId(null)}
           onConfirm={() => {
             if (deleteContactId !== null && leadId !== undefined && !deleteContact.isPending) {
-              deleteContact.mutate({ id: deleteContactId, leadId });
+              deleteContact.mutate(
+                { id: deleteContactId, leadId },
+                { onSuccess: () => setDeleteContactId(null) }
+              );
             }
-            setDeleteContactId(null);
           }}
+          closeOnConfirm={false}
           title="Remove contact"
           description="Remove this contact from the lead?"
           confirmLabel={deleteContact.isPending ? 'Removing...' : 'Remove'}

@@ -190,6 +190,7 @@ const CustomerProfile: React.FC = () => {
     if (remove.isPending) return;
     remove.mutate(customer.id, {
       onSuccess: () => {
+        setConfirmDelete(false);
         navigate({ to: '/customers' });
       },
     });
@@ -557,6 +558,7 @@ const CustomerProfile: React.FC = () => {
           open={confirmDelete}
           onClose={() => setConfirmDelete(false)}
           onConfirm={handleDelete}
+          closeOnConfirm={false}
           title="Delete customer?"
           description={`Are you sure you want to delete ${customer.name}? This action cannot be undone.`}
           confirmLabel={remove.isPending ? 'Deleting…' : 'Delete'}

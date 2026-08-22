@@ -564,9 +564,6 @@ const Segments: React.FC = () => {
       onSuccess: () => {
         setConfirmDeleteId(null);
       },
-      onError: () => {
-        setConfirmDeleteId(null);
-      },
     });
   };
 
@@ -658,6 +655,7 @@ const Segments: React.FC = () => {
           open={confirmDeleteId !== null}
           onClose={() => setConfirmDeleteId(null)}
           onConfirm={() => confirmDeleteId !== null && handleDelete(confirmDeleteId)}
+          closeOnConfirm={false}
           title="Delete segment?"
           description={
             deleteTarget
