@@ -12,8 +12,6 @@ import {
   Settings,
   LogOut,
   Sun,
-  Moon,
-  Monitor,
   Circle,
   ListTodo,
   Calendar,
@@ -52,6 +50,7 @@ import CommandBar from '../shared/components/CommandBar';
 import QuickCreate from '../shared/components/QuickCreate';
 import BulkEditBar from '../shared/components/BulkEditBar';
 import GateNotice from '../shared/components/GateNotice';
+import ModeCards from '../shared/components/ModeCards';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useWorkspaces } from '../features/workspace-dashboard/useWorkspaces';
 import { useProjects, useCreateProject } from '../features/projects/useProjects';
@@ -265,7 +264,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // the provider re-derives from the individual fields, so a render that changes
   // nothing does not re-write a token.
   const appearance = useAppearanceStore();
-  const { mode, setMode } = appearance;
+  const { mode } = appearance;
   const {
     workspaces,
     projects,
@@ -1209,34 +1208,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       >
                         {t('flow.shell.appearance')}
                       </p>
-                      <div className="flex gap-1">
-                        {(
-                          [
-                            { value: 'light', icon: Sun, label: t('flow.shell.light') },
-                            { value: 'dark', icon: Moon, label: t('flow.shell.dark') },
-                            { value: 'system', icon: Monitor, label: t('flow.shell.system') },
-                          ] as const
-                        ).map(({ value, icon: Icon, label }) => (
-                          <button
-                            type="button"
-                            key={value}
-                            onClick={() => setMode(value)}
-                            className="flex-1 flex flex-col items-center gap-1 py-2 rounded-md text-[10px] font-medium transition-colors"
-                            style={{
-                              background:
-                                mode === value ? 'var(--accent-muted)' : 'var(--flow-hover)',
-                              color: mode === value ? 'var(--accent)' : 'var(--flow-text-muted)',
-                              border:
-                                mode === value
-                                  ? '1px solid var(--accent-border)'
-                                  : '1px solid transparent',
-                            }}
-                          >
-                            <Icon size={12} />
-                            {label}
-                          </button>
-                        ))}
-                      </div>
+                      <ModeCards variant="compact" />
                     </div>
                     <div
                       style={{
