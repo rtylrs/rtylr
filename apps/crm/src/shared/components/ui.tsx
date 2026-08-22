@@ -33,10 +33,12 @@ export const PageHeader: React.FC<{
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
+      flexWrap: 'wrap',
+      gap: '12px',
       marginBottom: '20px',
     }}
   >
-    <div>
+    <div style={{ minWidth: 0 }}>
       <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
         {title}
       </h2>
@@ -46,7 +48,11 @@ export const PageHeader: React.FC<{
         </p>
       )}
     </div>
-    {actions && <div style={{ display: 'flex', gap: '8px' }}>{actions}</div>}
+    {actions && (
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+        {actions}
+      </div>
+    )}
   </div>
 );
 

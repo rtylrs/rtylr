@@ -139,6 +139,25 @@
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
 }
 
+.crm-entity-header {
+  flex-wrap: wrap;
+}
+
+.crm-entity-header__content {
+  min-width: 0;
+}
+
+.crm-entity-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.crm-profile-actions {
+  margin-left: auto;
+}
+
 .crm-form-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -197,6 +216,12 @@
 
   .crm-merge-layout__arrow {
     transform: rotate(90deg);
+  }
+
+  .crm-profile-actions {
+    width: 100%;
+    flex-direction: row !important;
+    flex-wrap: wrap;
   }
 
   .crm-customer-preview-grid {

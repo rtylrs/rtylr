@@ -265,7 +265,7 @@ const LeadDetail: React.FC = () => {
       <HelmetContainer title="Lead detail · rtylr" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px' }}>
         {/* Back + header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           <button
             type="button"
             aria-label="Back to leads"
@@ -282,7 +282,7 @@ const LeadDetail: React.FC = () => {
           >
             <ArrowLeft size={16} />
           </button>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
               {lead.companyName ?? lead.company ?? '—'}
             </h2>
@@ -290,7 +290,7 @@ const LeadDetail: React.FC = () => {
               {lead.industry} · {lead.source}
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
             <Button
               variant="outline"
               onClick={() => setConfirmDeleteLead(true)}

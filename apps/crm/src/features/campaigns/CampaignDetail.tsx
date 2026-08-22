@@ -76,7 +76,10 @@ const CampaignDetail: React.FC = () => {
         </button>
 
         <Card style={{ marginBottom: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div
+            className="crm-entity-header"
+            style={{ display: 'flex', alignItems: 'center', gap: '14px' }}
+          >
             <div
               style={{
                 width: '48px',
@@ -91,7 +94,7 @@ const CampaignDetail: React.FC = () => {
             >
               <Mail size={20} />
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="crm-entity-header__content" style={{ flex: 1 }}>
               <h2
                 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}
               >

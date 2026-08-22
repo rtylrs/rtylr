@@ -504,7 +504,15 @@ const Campaigns: React.FC = () => {
       <HelmetContainer title="Campaigns · rtylr" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1280px' }}>
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+          }}
+        >
           <div>
             <h2 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--hub-text)', margin: 0 }}>
               Campaigns
@@ -513,7 +521,7 @@ const Campaigns: React.FC = () => {
               {campaigns.filter((c) => c.status === 'Active').length} active campaigns
             </p>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <button
               type="button"
               onClick={() => navigate({ to: '/campaigns/sms' })}

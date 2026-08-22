@@ -250,10 +250,11 @@ const CustomerProfile: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '18px',
+            flexWrap: 'wrap',
           }}
         >
           <CustomerAvatar initials={customer.initials} points={customer.loyaltyPoints} size={72} />
-          <div style={{ flex: 1 }}>
+          <div className="crm-entity-header__content" style={{ flex: 1 }}>
             <h2
               style={{
                 fontSize: '22px',
@@ -294,7 +295,10 @@ const CustomerProfile: React.FC = () => {
               <PointsBadge points={customer.loyaltyPoints} trend="up" />
             </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div
+            className="crm-profile-actions"
+            style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}
+          >
             <Button variant="outline" onClick={handleExport} disabled={exportData.isPending}>
               <Download size={13} />
               {exportData.isPending ? 'Exporting…' : 'Export GDPR'}
