@@ -129,3 +129,48 @@ A smaller observation that any cross-domain consumer runs into immediately:
 therefore cannot have one pagination helper. This is not worth a migration on
 its own, but it is worth knowing before anyone proposes shape 4 (a shared query
 hook in `packages/`) for a paginated cross-domain list.
+
+## Round two: the fifth bucket, already existing on the backend
+
+The brief predicted this bucket would be larger than anyone thinks. It is.
+Measured against onion at `ab6ff7ff` and voxie `847a34c8` (both one day after
+round one shipped), seven capabilities are complete or nearly complete behind
+the API surface with no consumer seeing them. Ranked by how much work remains
+to turn each into something a customer can touch:
+
+| #   | Capability                                                            | Backend state                                                                                                     | Contract | Frontend | Remaining work                                    |
+| --- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | -------- | -------- | --------------------------------------------------- |
+| 1   | Project labour cost (`HR->FLOW-01`)                                   | Live platform port: SQL joins hours to rates inside HR; Flow's service holds it with a noop fallback (`main.go:466`) | none     | none     | One RPC on Flow's project surface plus a panel     |
+| 2   | Payroll export to journal (`HR->FIN-01`)                              | Complete: route, idempotent claim, Finance-owned poster port, tenant account mapping                                | none     | none     | One button in HR plus an optional posted marker    |
+| 3   | Delivery dashboards for Insights (flow-deep-dive O5-O7)               | Implemented over a narrow FlowReader port (`setting_service.go:116-165`)                                            | exists   | none     | Hooks and screens in apps/insights                 |
+| 4   | Billable-hours export (`export-billable`)                             | Live since before round one; uncalled                                                                              | none     | none     | Decide adopt-or-delete (round one recommended delete once filters landed) |
+| 5   | Time-entry range/project/billability filters (#855)                   | Landed upstream after round one: voxie #46, onion #783                                                             | done     | partial  | Consume the new filters in Finance's unbilled view |
+| 6   | Work-schedule reads (flow-deep-dive #868)                            | Fixed end to end: `listWorkSchedules` served and consumed                                                          | done     | done     | Nothing                                           |
+| 7   | Inventory valuation (`ERP->FIN-02`)                                   | Implemented server-side (`inventory_service.go:57`)                                                                 | exists   | none     | The single balance-sheet read                     |
+
+Two structural causes, both verifiable:
+
+1. **Contract lag.** The labour-cost port and the payroll export have no `.onk`
+   definition at all, so `pnpm contracts:audit-requests` cannot see them and no
+   frontend generator can bind to them. Backend capability outruns contracts
+   because contracts are a separate repo with a separate review loop.
+2. **No consumer in the same change.** The codebase's own history
+   (`hr_category_id`, `export-billable`) shows capability without a consumer in
+   the same PR stays unconsumed. Items 1 and 2 above are the newest instances.
+
+### Backend column for the round-one gap tables
+
+Every round-one row was re-verified against handlers and SQL rather than the
+`.onk` alone; verdicts live in `15-round-one-verification.md`. Rows whose
+bucket changed:
+
+- FLOW->FIN-01: moves from **needs a contract field** to **available today**
+  (filters landed upstream). A new storage prerequisite replaces it: nothing
+  writes `billable_invoice_id`, so "unbilled" cannot change value yet
+  (`14-layer-reconciliation.md` A2).
+- HR->FLOW-01 / HR->INS-01: move from **needs a query or endpoint** to the
+  fifth bucket above.
+- HR->FIN-01: stays **available today**, but shrinks: even the action endpoint
+  exists.
+
+All other rows confirmed unchanged at every layer.
