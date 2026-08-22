@@ -748,7 +748,7 @@ export const AppearanceSection = (): React.JSX.Element => {
             type="color"
             value={appliedAccent}
             onChange={(e) => commitAccent(normalizeHex(e.target.value))}
-            className="flow-focus h-11 w-11 shrink-0 cursor-pointer bg-transparent p-0.5"
+            className="flow-focus h-[44px] w-[44px] shrink-0 cursor-pointer bg-transparent p-0.5"
             style={{ border: '1px solid var(--flow-border)', borderRadius: 'var(--flow-r)' }}
           />
         </div>
