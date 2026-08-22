@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/payroll/internal/domain"
@@ -60,9 +61,9 @@ func (r *Repository) CreatePayrollRecord(ctx context.Context, businessID, staffI
 		PeriodLabel:   periodLabel,
 		RegularHours:  sql.NullString{String: fmt.Sprintf("%g", regularHours), Valid: true},
 		OvertimeHours: sql.NullString{String: fmt.Sprintf("%g", overtimeHours), Valid: true},
-		BasePay:       fmt.Sprintf("%g", basePay),
-		OvertimePay:   sql.NullString{String: fmt.Sprintf("%g", overtimePay), Valid: true},
-		NetPay:        fmt.Sprintf("%g", netPay),
+		BasePay:       fmt.Sprintf("%.2f", basePay),
+		OvertimePay:   sql.NullString{String: fmt.Sprintf("%.2f", overtimePay), Valid: true},
+		NetPay:        fmt.Sprintf("%.2f", netPay),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create payroll record", logger.Error(err))
@@ -210,6 +211,26 @@ func (r *Repository) GetStaffPayRatesByIDs(ctx context.Context, businessID int64
 		out[row.ID] = rates
 	}
 	return out, nil
+}
+
+// GetDefaultOvertimeMultiplier reads the tenant's configured overtime
+// multiplier. found is false when hr_overtime has no configuration for the
+// business; callers decide what fallback applies.
+func (r *Repository) GetDefaultOvertimeMultiplier(ctx context.Context, businessID int64) (float64, bool, error) {
+	raw, err := r.queries.GetOvertimeConfigForLegacyPayroll(ctx, businessID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, false, nil
+		}
+		return 0, false, err
+	}
+
+	multiplier, parseErr := strconv.ParseFloat(strings.TrimSpace(raw), 64)
+	if parseErr != nil {
+		logger.Ctx(ctx).Error("Failed to parse overtime multiplier", logger.Error(parseErr))
+		return 0, false, parseErr
+	}
+	return multiplier, true, nil
 }
 
 func payrollRecordFromRow(row sqlc.HrPayrollRecord) domain.PayrollRecord {

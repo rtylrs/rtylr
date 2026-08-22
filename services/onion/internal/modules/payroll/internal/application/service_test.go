@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"errors"
+	"math"
 	"testing"
 	"time"
 
@@ -10,16 +11,20 @@ import (
 )
 
 type mockRepo struct {
-	listResult []domain.PayrollRecord
-	shifts     []domain.ShiftSummary
-	rates      domain.StaffPayRates
-	createID   int64
-	listErr    error
-	shiftErr   error
-	ratesErr   error
-	createErr  error
-	markErr    error
-	createGot  struct {
+	listResult    []domain.PayrollRecord
+	shifts        []domain.ShiftSummary
+	rates         domain.StaffPayRates
+	otMultiplier  float64
+	otConfigured  bool
+	otErr         error
+	createID      int64
+	listErr       error
+	shiftErr      error
+	ratesErr      error
+	createErr     error
+	markErr       error
+	multiplierAsk int64
+	createGot     struct {
 		regular, overtime, base, ot, net float64
 	}
 }
@@ -47,6 +52,11 @@ func (m *mockRepo) GetStaffPayRatesByIDs(_ context.Context, _ int64, staffIDs []
 		out[id] = m.rates
 	}
 	return out, nil
+}
+
+func (m *mockRepo) GetDefaultOvertimeMultiplier(_ context.Context, _ int64) (float64, bool, error) {
+	m.multiplierAsk++
+	return m.otMultiplier, m.otConfigured, m.otErr
 }
 
 func (m *mockRepo) CreatePayrollRecord(_ context.Context, _, _ int64, _, _ time.Time, _ string, regular, overtime, base, ot, net float64) (int64, error) {
@@ -224,5 +234,98 @@ func TestListPayrollRecords_ReturnsRecords(t *testing.T) {
 	}
 	if len(got) != 2 {
 		t.Errorf("expected 2 records, got %d", len(got))
+	}
+}
+
+func TestRunPayroll_JanuarySalaryProrationIsInclusive(t *testing.T) {
+	// $36,500 annual salary over all of January pays 31 days at $100, not
+	// the 30 days an exclusive date subtraction produced (#758).
+	m := &mockRepo{
+		shifts: []domain.ShiftSummary{{StaffID: 1}},
+		rates:  domain.StaffPayRates{Salary: 36500},
+	}
+	s := &Service{repo: m}
+	if _, err := s.RunPayroll(context.Background(), 1, domain.PayrollRunInput{
+		PeriodStart: "2026-01-01",
+		PeriodEnd:   "2026-01-31",
+	}); err != nil {
+		t.Fatalf("RunPayroll: %v", err)
+	}
+	if m.createGot.base != 3100.00 {
+		t.Errorf("base = %f, want 3100.00", m.createGot.base)
+	}
+}
+
+func TestRunPayroll_LeapYearFebruaryProration(t *testing.T) {
+	m := &mockRepo{
+		shifts: []domain.ShiftSummary{{StaffID: 1}},
+		rates:  domain.StaffPayRates{Salary: 36600},
+	}
+	s := &Service{repo: m}
+	if _, err := s.RunPayroll(context.Background(), 1, domain.PayrollRunInput{
+		PeriodStart: "2024-02-01",
+		PeriodEnd:   "2024-02-29",
+	}); err != nil {
+		t.Fatalf("RunPayroll: %v", err)
+	}
+	want := math.Round(36600*29/366*100) / 100
+	if m.createGot.base != want {
+		t.Errorf("base = %f, want %f", m.createGot.base, want)
+	}
+}
+
+func TestRunPayroll_OvertimeUsesConfiguredMultiplier(t *testing.T) {
+	tests := []struct {
+		name            string
+		overtimeRate    float64
+		multiplier      float64
+		configured      bool
+		wantOvertimePay float64
+	}{
+		{name: "explicit staff rate wins", overtimeRate: 30, multiplier: 2.0, configured: true, wantOvertimePay: 300},
+		{name: "configured multiplier applies", overtimeRate: 0, multiplier: 2.0, configured: true, wantOvertimePay: 400},
+		{name: "legacy default without config", overtimeRate: 0, multiplier: 0, configured: false, wantOvertimePay: 300},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := &mockRepo{
+				shifts:       []domain.ShiftSummary{{StaffID: 1, TotalHours: 10, TotalOvertimeHours: 10}},
+				rates:        domain.StaffPayRates{HourlyRate: 20, OvertimeRate: tt.overtimeRate},
+				otMultiplier: tt.multiplier,
+				otConfigured: tt.configured,
+			}
+			s := &Service{repo: m}
+			if _, err := s.RunPayroll(context.Background(), 1, domain.PayrollRunInput{
+				PeriodStart: "2026-04-01",
+				PeriodEnd:   "2026-04-30",
+			}); err != nil {
+				t.Fatalf("RunPayroll: %v", err)
+			}
+			if m.createGot.ot != tt.wantOvertimePay {
+				t.Errorf("overtime pay = %f, want %f", m.createGot.ot, tt.wantOvertimePay)
+			}
+		})
+	}
+}
+
+func TestRunPayroll_RoundsMoneyToCents(t *testing.T) {
+	// 7.5h x $33.333 = 249.9975 must persist as 250.00, not truncate.
+	m := &mockRepo{
+		shifts:       []domain.ShiftSummary{{StaffID: 1, TotalHours: 7.5}},
+		rates:        domain.StaffPayRates{HourlyRate: 33.333},
+		otConfigured: true,
+	}
+	s := &Service{repo: m}
+	if _, err := s.RunPayroll(context.Background(), 1, domain.PayrollRunInput{
+		PeriodStart: "2026-04-01",
+		PeriodEnd:   "2026-04-30",
+	}); err != nil {
+		t.Fatalf("RunPayroll: %v", err)
+	}
+	if m.createGot.base != 250.00 {
+		t.Errorf("base = %f, want 250.00", m.createGot.base)
+	}
+	if m.createGot.net != 250.00 {
+		t.Errorf("net = %f, want 250.00", m.createGot.net)
 	}
 }

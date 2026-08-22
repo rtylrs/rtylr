@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/payroll/internal/domain"
@@ -29,6 +30,7 @@ type repository interface {
 	GetCompletedShiftsForPeriod(ctx context.Context, businessID int64, start, end time.Time) ([]domain.ShiftSummary, error)
 	GetStaffPayRates(ctx context.Context, businessID, staffID int64) (domain.StaffPayRates, error)
 	GetStaffPayRatesByIDs(ctx context.Context, businessID int64, staffIDs []int64) (map[int64]domain.StaffPayRates, error)
+	GetDefaultOvertimeMultiplier(ctx context.Context, businessID int64) (float64, bool, error)
 	CreatePayrollRecord(ctx context.Context, businessID, staffID int64, periodStart, periodEnd time.Time, periodLabel string, regularHours, overtimeHours, basePay, overtimePay, netPay float64) (int64, error)
 	MarkPayrollPaid(ctx context.Context, businessID, payrollID int64) error
 }
@@ -80,6 +82,16 @@ func (s *Service) RunPayroll(ctx context.Context, businessID int64, input domain
 		return 0, err
 	}
 
+	// The overtime multiplier is tenant configuration owned by hr_overtime;
+	// resolve it once per run instead of trusting a hardcoded default.
+	overtimeMultiplier, configured, err := s.repo.GetDefaultOvertimeMultiplier(ctx, businessID)
+	if err != nil {
+		return 0, err
+	}
+	if !configured {
+		overtimeMultiplier = 1.5
+	}
+
 	for _, summary := range summaries {
 		rates, ok := ratesByStaff[summary.StaffID]
 		if !ok {
@@ -95,20 +107,17 @@ func (s *Service) RunPayroll(ctx context.Context, businessID int64, input domain
 		var basePay, overtimePay float64
 
 		if rates.HourlyRate > 0 {
-			basePay = regularHours * rates.HourlyRate
+			basePay = roundToCents(regularHours * rates.HourlyRate)
 			overtimeRate := rates.OvertimeRate
 			if overtimeRate == 0 {
-				overtimeRate = rates.HourlyRate * 1.5
+				overtimeRate = rates.HourlyRate * overtimeMultiplier
 			}
-			overtimePay = summary.TotalOvertimeHours * overtimeRate
+			overtimePay = roundToCents(summary.TotalOvertimeHours * overtimeRate)
 		} else if rates.Salary > 0 {
-			totalDays := periodEnd.Sub(periodStart).Hours() / 24
-			if totalDays > 0 {
-				basePay = (rates.Salary / 365) * totalDays
-			}
+			basePay = roundToCents(calculateBasePay(rates.Salary, periodStart, periodEnd))
 		}
 
-		netPay := basePay + overtimePay
+		netPay := roundToCents(basePay + overtimePay)
 
 		_, createErr := s.repo.CreatePayrollRecord(ctx, businessID, summary.StaffID, periodStart, periodEnd,
 			input.PeriodLabel, regularHours, summary.TotalOvertimeHours, basePay, overtimePay, netPay)
@@ -137,6 +146,45 @@ func (s *Service) MarkPayrollPaid(ctx context.Context, businessID, payrollID int
 // FloatToCents converts standard float amount to integer cents.
 func FloatToCents(amount float64) int64 {
 	return int64(amount * 100)
+}
+
+// roundToCents rounds a money amount to whole cents once, at the last point
+// before persistence, so accumulated float error cannot leak into DECIMAL
+// columns.
+func roundToCents(amount float64) float64 {
+	return math.Round(amount*100) / 100
+}
+
+// calculateBasePay prorates an annual salary over an inclusive calendar date
+// range. Each month segment contributes salary x segmentDays / daysInYear,
+// so a complete January pays 31 days (not the 30 an exclusive subtraction
+// yields) and a complete leap year sums to exactly one salary.
+func calculateBasePay(annualSalary float64, startDate, endDate time.Time) float64 {
+	if annualSalary <= 0 || endDate.Before(startDate) {
+		return 0
+	}
+
+	var basePay float64
+	for current := startDate; !current.After(endDate); {
+		monthEnd := time.Date(current.Year(), current.Month()+1, 0, 0, 0, 0, 0, time.UTC)
+		segmentEnd := monthEnd
+		if endDate.Before(segmentEnd) {
+			segmentEnd = endDate
+		}
+
+		inclusiveDays := float64(int(segmentEnd.Sub(current)/(24*time.Hour)) + 1)
+		basePay += annualSalary * inclusiveDays / float64(daysInYear(current.Year()))
+		current = segmentEnd.AddDate(0, 0, 1)
+	}
+
+	return basePay
+}
+
+func daysInYear(year int) int {
+	if year%4 == 0 && (year%100 != 0 || year%400 == 0) {
+		return 366
+	}
+	return 365
 }
 
 // CentsToFloat converts integer cents to standard float amount.

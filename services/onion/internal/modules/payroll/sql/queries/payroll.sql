@@ -41,3 +41,8 @@ LIMIT 200;
 SELECT id, salary, hourly_rate, overtime_rate
 FROM hr_staff
 WHERE business_id = ? AND id IN (sqlc.slice('staff_ids'));
+
+-- name: GetOvertimeConfigForLegacyPayroll :one
+SELECT default_multiplier
+FROM hr_overtime_config
+WHERE business_id = ?;
