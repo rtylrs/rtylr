@@ -2,9 +2,11 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
+	"github.com/voxire/onion/internal/modules/invoices/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
@@ -47,6 +49,12 @@ func (h *DeleteInvoiceHandler) Serve(ctx context.Context, req *DeleteInvoiceRequ
 	}
 
 	if err := h.FinanceService.DeleteInvoice(ctx, businessID, req.ID); err != nil {
+		if errors.Is(err, domain.ErrInvoiceNotFound) {
+			return DeleteInvoiceResponse{}, onekiterrors.New(http.StatusNotFound, "Invoice not found")
+		}
+		if errors.Is(err, domain.ErrInvoiceNotDeletable) {
+			return DeleteInvoiceResponse{}, onekiterrors.New(http.StatusConflict, "Only draft invoices can be deleted")
+		}
 		return DeleteInvoiceResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to delete invoice")
 	}
 

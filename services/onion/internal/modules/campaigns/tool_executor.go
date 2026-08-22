@@ -114,7 +114,6 @@ func (m *Module) executeGetCampaignTool(ctx context.Context, input map[string]an
 	}, nil
 }
 
-
 // campaignToolBusinessID resolves the caller's business scope. Campaign data
 // is keyed by business_id — scoping by user id leaks other tenants' campaigns
 // whenever users.id collides with businesses.id.

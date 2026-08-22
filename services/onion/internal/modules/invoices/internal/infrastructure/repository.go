@@ -388,7 +388,17 @@ func (r *Repository) UpdateInvoicePaymentTotals(ctx context.Context, businessID,
 }
 
 func (r *Repository) DeleteInvoice(ctx context.Context, businessID, invoiceID int64) error {
-	err := r.queries.DeleteInvoice(ctx, sqlc.DeleteInvoiceParams{
+	// DeleteInvoice is :exec and additionally filters status='draft': without
+	// a pre-check, deleting a sent/paid/void/nonexistent invoice would report
+	// success while changing nothing.
+	inv, err := r.GetInvoiceByID(ctx, businessID, invoiceID)
+	if err != nil {
+		return err
+	}
+	if inv.Status != "draft" {
+		return domain.ErrInvoiceNotDeletable
+	}
+	err = r.queries.DeleteInvoice(ctx, sqlc.DeleteInvoiceParams{
 		ID:         invoiceID,
 		BusinessID: businessID,
 	})

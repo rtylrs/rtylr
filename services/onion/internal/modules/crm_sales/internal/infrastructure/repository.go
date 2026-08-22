@@ -3,9 +3,9 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"strings"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"

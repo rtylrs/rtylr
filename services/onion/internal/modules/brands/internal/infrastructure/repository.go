@@ -23,6 +23,19 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
+// BrandExistsInBusiness reports whether the row exists within the business. The write queries
+// in this module are :exec and cannot report a zero-row match, so writes
+// pre-check existence to avoid silent success on wrong/foreign ids.
+func (r *Repository) BrandExistsInBusiness(ctx context.Context, businessID, id int64) bool {
+	var exists bool
+	if err := r.pool.QueryRowContext(ctx,
+		"SELECT EXISTS(SELECT 1 FROM erp_brands WHERE id = ? AND business_id = ?)",
+		id, businessID,
+	).Scan(&exists); err != nil {
+		return false
+	}
+	return exists
+}
 func (r *Repository) ListBrands(ctx context.Context, businessID int64) ([]domain.Brand, error) {
 	rows, err := r.queries.ListBrands(ctx, businessID)
 	if err != nil {
@@ -154,6 +167,9 @@ func (r *Repository) CreateBrand(ctx context.Context, businessID int64, input do
 }
 
 func (r *Repository) UpdateBrand(ctx context.Context, businessID, id int64, input domain.BrandInput) error {
+	if !r.BrandExistsInBusiness(ctx, businessID, id) {
+		return domain.ErrBrandNotFound
+	}
 	err := r.queries.UpdateBrand(ctx, sqlc.UpdateBrandParams{
 		Name:        input.Name,
 		LogoUrl:     nullString(input.LogoURL),
@@ -171,6 +187,9 @@ func (r *Repository) UpdateBrand(ctx context.Context, businessID, id int64, inpu
 }
 
 func (r *Repository) DeleteBrand(ctx context.Context, businessID, id int64) error {
+	if !r.BrandExistsInBusiness(ctx, businessID, id) {
+		return domain.ErrBrandNotFound
+	}
 	err := r.queries.DeleteBrand(ctx, sqlc.DeleteBrandParams{
 		BusinessID: businessID,
 		ID:         id,
