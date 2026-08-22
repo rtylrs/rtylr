@@ -99,7 +99,12 @@ function applyTheme(theme: Theme) {
 
 const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
   const location = useLocation();
-  const isActive = path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
+  const isActive =
+    path === '/'
+      ? location.pathname === '/'
+      : path === '/sales'
+        ? location.pathname === '/sales'
+        : location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   return (
     <Link
