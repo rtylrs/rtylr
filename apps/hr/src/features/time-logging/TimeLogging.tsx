@@ -217,7 +217,8 @@ const TimeLogging = (): React.JSX.Element => {
                           {formatDuration(entry.durationMinutes ?? 0)}
                         </span>
                         {entry.status === 'draft' && (
-                          <button type="button"
+                          <button
+                            type="button"
                             onClick={() => deleteEntry.mutate(Number(entry.id ?? 0))}
                             style={{
                               display: 'flex',
@@ -247,7 +248,8 @@ const TimeLogging = (): React.JSX.Element => {
         )}
 
         {/* Floating add button */}
-        <button type="button"
+        <button
+          type="button"
           onClick={handleNewEntry}
           style={{
             position: 'fixed',

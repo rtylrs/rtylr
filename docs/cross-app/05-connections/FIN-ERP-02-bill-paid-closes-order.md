@@ -167,4 +167,4 @@ webhooks exist; wsbus carries UI realtime topics only. The in-process port
 pattern used by financejournal/financeaccounts is the codebase's working
 precedent for exactly this direction of notification.
 
-*Round two (2026-08-22): confirmed; substrate evidence updated.*
+_Round two (2026-08-22): confirmed; substrate evidence updated._

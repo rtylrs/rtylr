@@ -472,7 +472,8 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
               <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
                 Groups
               </p>
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => navigate({ to: '/team/groups' })}
                 className="text-xs"
                 style={{ color: '#4583C4' }}
@@ -509,7 +510,8 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                     }}
                   >
                     <span>{g.name}</span>
-                    <button type="button"
+                    <button
+                      type="button"
                       aria-label={`Remove from ${g.name}`}
                       onClick={() => removeFromGroup.mutate({ groupId: g.id, userId: member.id })}
                       className="hover:opacity-70 transition-opacity"

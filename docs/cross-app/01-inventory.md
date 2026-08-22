@@ -169,12 +169,12 @@ safe) recognized, OneKit client declarations resolved scope-wide after the
 centralization into shared/lib, template-literal paths folded to route shapes,
 and constant folding applied to previously dynamic paths.
 
-| Artifact            | Round one | Round two | Change                                                            |
-| ------------------- | --------- | --------- | ------------------------------------------------------------------- |
-| Request call sites  | 743       | 682       | menu migrated to oneKit (-28 axios), dynamic paths folded, pos +63   |
+| Artifact            | Round one | Round two | Change                                                                |
+| ------------------- | --------- | --------- | --------------------------------------------------------------------- |
+| Request call sites  | 743       | 682       | menu migrated to oneKit (-28 axios), dynamic paths folded, pos +63    |
 | Idioms              | 4         | 3         | raw axios eliminated from apps (515 onekit / 160 safeFetch / 7 fetch) |
-| Unresolved dynamics | 13        | 1         | recruit presigned upload remains (object storage, not the API)      |
-| onekit NO-RPC       | several   | 0         | RPC metadata join fixed for prefixed client names                   |
+| Unresolved dynamics | 13        | 1         | recruit presigned upload remains (object storage, not the API)        |
+| onekit NO-RPC       | several   | 0         | RPC metadata join fixed for prefixed client names                     |
 
 Per-app request counts (round two): hr 150, flow 101, finance 93, dash 89,
 pos 63, erp 58, crm 54, insights 30, recruit 24, auth 14, menu 5, plus

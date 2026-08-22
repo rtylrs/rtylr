@@ -28,9 +28,7 @@ const CashFlow: React.FC = () => {
       <PageHeader
         title={t('cashFlow.title')}
         breadcrumbs={[{ label: t('cashFlow.reports') }, { label: t('cashFlow.title') }]}
-        actions={
-          <PeriodSelector period={period} onPeriodChange={setPeriod} />
-        }
+        actions={<PeriodSelector period={period} onPeriodChange={setPeriod} />}
       />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>

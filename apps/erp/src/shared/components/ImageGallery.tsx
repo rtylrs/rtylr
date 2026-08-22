@@ -26,7 +26,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name = 'Product' })
   return (
     <>
       <div className="space-y-2">
-        <button type="button"
+        <button
+          type="button"
           onClick={() => setLightbox(true)}
           className="w-full h-64 rounded-xl overflow-hidden"
           style={{ border: '1px solid var(--hub-border)' }}
@@ -40,7 +41,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name = 'Product' })
             {images.map((img, i) => {
               const imageUrl = cdnImageUrl(img);
               return (
-                <button type="button"
+                <button
+                  type="button"
                   key={i}
                   onClick={() => setSelected(i)}
                   className="w-16 h-16 rounded-lg overflow-hidden shrink-0"
@@ -64,7 +66,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, name = 'Product' })
           style={{ background: 'var(--hub-overlay-opaque)' }}
           onClick={() => setLightbox(false)}
         >
-          <button type="button"
+          <button
+            type="button"
             className="absolute top-4 right-4 h-8 w-8 rounded-full flex items-center justify-center"
             style={{ background: 'var(--hub-highlight)', color: 'var(--hub-text)' }}
           >

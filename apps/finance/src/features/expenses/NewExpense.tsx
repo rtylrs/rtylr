@@ -137,14 +137,16 @@ const NewExpense: React.FC = () => {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button type="button"
+        <button
+          type="button"
           style={ghostBtn}
           onClick={() => navigate({ to: '/expenses' })}
           disabled={createExpense.isPending}
         >
           <ArrowLeft size={13} /> Cancel
         </button>
-        <button type="button"
+        <button
+          type="button"
           style={{ ...primaryBtn, opacity: createExpense.isPending ? 0.6 : 1 }}
           onClick={handleSave}
           disabled={createExpense.isPending}

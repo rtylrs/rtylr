@@ -23,7 +23,10 @@ function ProjectCard({ project }: { project: Project }) {
         <div className="flex items-center gap-2 min-w-0">
           <span
             className="h-8 w-8 rounded-lg flex items-center justify-center text-sm shrink-0"
-            style={{ background: `${project.color ?? '#64C5B9'}20`, color: project.color ?? '#64C5B9' }}
+            style={{
+              background: `${project.color ?? '#64C5B9'}20`,
+              color: project.color ?? '#64C5B9',
+            }}
             aria-hidden
           >
             {project.icon || '📋'}
@@ -50,7 +53,10 @@ function ProjectCard({ project }: { project: Project }) {
           )}
         </div>
       </div>
-      <div className="mt-3 flex items-center gap-3 text-xs" style={{ color: 'var(--flow-text-muted)' }}>
+      <div
+        className="mt-3 flex items-center gap-3 text-xs"
+        style={{ color: 'var(--flow-text-muted)' }}
+      >
         <span>{project.taskCount ?? 0} tasks</span>
         <span>{project.completedCount ?? 0} done</span>
         <span>{project.memberCount ?? 0} members</span>
@@ -112,7 +118,11 @@ export const AllProjects: React.FC = () => {
               value={status}
               onChange={(e) => setStatus(e.target.value)}
               className="h-9 px-2 rounded-lg border text-sm"
-              style={{ borderColor: 'var(--flow-border)', background: 'var(--flow-surface)', color: 'var(--flow-text)' }}
+              style={{
+                borderColor: 'var(--flow-border)',
+                background: 'var(--flow-surface)',
+                color: 'var(--flow-text)',
+              }}
               aria-label={t('flow.allProjects.filterStatus')}
             >
               {STATUS_FILTERS.map((s) => (
@@ -126,7 +136,11 @@ export const AllProjects: React.FC = () => {
               value={visibility}
               onChange={(e) => setVisibility(e.target.value)}
               className="h-9 px-2 rounded-lg border text-sm"
-              style={{ borderColor: 'var(--flow-border)', background: 'var(--flow-surface)', color: 'var(--flow-text)' }}
+              style={{
+                borderColor: 'var(--flow-border)',
+                background: 'var(--flow-surface)',
+                color: 'var(--flow-text)',
+              }}
               aria-label={t('flow.allProjects.filterVisibility')}
             >
               {VISIBILITY_FILTERS.map((v) => (
@@ -152,9 +166,7 @@ export const AllProjects: React.FC = () => {
         ) : projects.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="font-semibold text-sm mb-1" style={{ color: 'var(--flow-text)' }}>
-              {hasFilters
-                ? t('flow.allProjects.noResults')
-                : t('flow.allProjects.emptyTitle')}
+              {hasFilters ? t('flow.allProjects.noResults') : t('flow.allProjects.emptyTitle')}
             </p>
             <p className="text-xs opacity-60 mb-4" style={{ color: 'var(--flow-text-muted)' }}>
               {hasFilters

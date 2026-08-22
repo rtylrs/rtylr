@@ -261,18 +261,18 @@ the packages pointer bump between contract and consumers.
 
 ### Wave 1 (ten items, capped)
 
-| #   | Item                                        | Repositories in order                                          | Landing notes                                                                    |
-| --- | ------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| 1   | HR->HUB-01 termination revocation           | onion (reconciliation job first, then revocation at status change); rtylr dash (exposure report panel) | Reconciliation read is the test oracle; watch both hr_staff and hr_employees status columns |
-| 2   | ERP->FIN-01 supplier identity               | voxie (drafted: bill supplier relax); packages bump; onion validator; rtylr finance picker | Fixes a live defect; ships before anything else touches bills                        |
-| 3   | HR->FIN-01 payroll export button            | rtylr hr only                                                    | Backend complete (`POST /hr/payroll/runs/{id}/export`); optional posted-marker later |
-| 4   | Labour-cost RPC exposure                    | onion (workspaces RPC over the live port); rtylr flow (project cost panel) | Contract drafted on the voxie branch (`flow.project.v1`); serves HR->INS-01 too      |
-| 5   | ERP->FIN-02 valuation on balance sheet      | rtylr finance                                                   | One read                                                                            |
-| 6   | ERP->FIN-03 received-not-billed             | rtylr finance                                                   | One filtered read                                                                   |
-| 7   | FLOW->FIN-01 unbilled hours                 | rtylr finance (consume landed filters); onion (mark-hours-invoiced via an hr_time-owned port); rtylr invoices hook | Without the marker write the unbilled number never moves                             |
-| 8   | HR->FLOW-02 leave gate                      | voxie (drafted: leave range); packages bump; onion; rtylr flow warning | Partial coverage caveat until HR->HR-01 lands                                       |
-| 9   | CRM->FIN-02 invoice customer link           | voxie (drafted); packages bump; onion column + validator + snapshot logic; rtylr finance form | Start immediately: cost grows with every invoice issued                              |
-| 10  | Insights delivery adoption                  | rtylr insights (hooks + screens)                                | Handlers implemented server-side; zero frontend callers today                        |
+| #   | Item                                   | Repositories in order                                                                                              | Landing notes                                                                               |
+| --- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| 1   | HR->HUB-01 termination revocation      | onion (reconciliation job first, then revocation at status change); rtylr dash (exposure report panel)             | Reconciliation read is the test oracle; watch both hr_staff and hr_employees status columns |
+| 2   | ERP->FIN-01 supplier identity          | voxie (drafted: bill supplier relax); packages bump; onion validator; rtylr finance picker                         | Fixes a live defect; ships before anything else touches bills                               |
+| 3   | HR->FIN-01 payroll export button       | rtylr hr only                                                                                                      | Backend complete (`POST /hr/payroll/runs/{id}/export`); optional posted-marker later        |
+| 4   | Labour-cost RPC exposure               | onion (workspaces RPC over the live port); rtylr flow (project cost panel)                                         | Contract drafted on the voxie branch (`flow.project.v1`); serves HR->INS-01 too             |
+| 5   | ERP->FIN-02 valuation on balance sheet | rtylr finance                                                                                                      | One read                                                                                    |
+| 6   | ERP->FIN-03 received-not-billed        | rtylr finance                                                                                                      | One filtered read                                                                           |
+| 7   | FLOW->FIN-01 unbilled hours            | rtylr finance (consume landed filters); onion (mark-hours-invoiced via an hr_time-owned port); rtylr invoices hook | Without the marker write the unbilled number never moves                                    |
+| 8   | HR->FLOW-02 leave gate                 | voxie (drafted: leave range); packages bump; onion; rtylr flow warning                                             | Partial coverage caveat until HR->HR-01 lands                                               |
+| 9   | CRM->FIN-02 invoice customer link      | voxie (drafted); packages bump; onion column + validator + snapshot logic; rtylr finance form                      | Start immediately: cost grows with every invoice issued                                     |
+| 10  | Insights delivery adoption             | rtylr insights (hooks + screens)                                                                                   | Handlers implemented server-side; zero frontend callers today                               |
 
 New domain edges added by wave 1: five (erp->finance, hr->hub, hr->flow,
 flow->finance, support->crm deferred to wave 2), fewer than proposals, because
@@ -296,11 +296,11 @@ watchlist), so hub-side flows are stakeholders in the migration.
 
 ## Platform prerequisites surfaced by round two
 
-| Finding                                             | Repo  | Why it gates proposals                                                        |
-| ---------------------------------------------------- | ----- | ------------------------------------------------------------------------------- |
-| Webhook registration has no delivery engine          | onion | Blocks any shape-B4/3 design that assumes tenant outbound events exist         |
-| `memory` module queries show no tenant predicate     | onion | Unverified isolation on an AI-surface module; must be resolved before any echo/memory integration |
-| `store_orders` and `customer_sync` both write crm_customers | onion | Customer invariants split across writers; consolidate before IDENTITY-01 |
+| Finding                                                     | Repo  | Why it gates proposals                                                                            |
+| ----------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------------- |
+| Webhook registration has no delivery engine                 | onion | Blocks any shape-B4/3 design that assumes tenant outbound events exist                            |
+| `memory` module queries show no tenant predicate            | onion | Unverified isolation on an AI-surface module; must be resolved before any echo/memory integration |
+| `store_orders` and `customer_sync` both write crm_customers | onion | Customer invariants split across writers; consolidate before IDENTITY-01                          |
 
 ## The single highest leverage change
 

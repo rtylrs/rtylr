@@ -195,7 +195,8 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
               const Icon = r.icon;
               const active = i === activeIdx;
               return (
-                <button type="button"
+                <button
+                  type="button"
                   key={`${r.type}-${r.label}-${i}`}
                   onClick={() => {
                     nav({ to: r.to });

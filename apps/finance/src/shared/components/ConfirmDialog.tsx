@@ -32,7 +32,8 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         <button type="button" style={ghostBtn} onClick={onClose}>
           Cancel
         </button>
-        <button type="button"
+        <button
+          type="button"
           style={{
             ...primaryBtn,
             background: destructive ? 'var(--finance-danger)' : primaryBtn.background,

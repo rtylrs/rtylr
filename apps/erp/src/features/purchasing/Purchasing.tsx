@@ -229,7 +229,8 @@ const Purchasing: React.FC = () => {
             getData={getAllExportable}
             filename="purchase-orders.csv"
           />
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
@@ -248,7 +249,8 @@ const Purchasing: React.FC = () => {
             const Icon = sc.icon;
             const active = filter === status;
             return (
-              <button type="button"
+              <button
+                type="button"
                 key={status}
                 onClick={() => {
                   setFilter(active ? 'All' : status);
@@ -354,7 +356,8 @@ const Purchasing: React.FC = () => {
                     </span>
                     <div className="flex items-center gap-1">
                       {status === 'Sent' && canApprovePO && (
-                        <button type="button"
+                        <button
+                          type="button"
                           onClick={() => handleApprove(order.id ?? '')}
                           className="text-[10px] font-semibold px-2 py-1 rounded-md"
                           style={{
@@ -366,7 +369,8 @@ const Purchasing: React.FC = () => {
                         </button>
                       )}
                       {status === 'Draft' && (
-                        <button type="button"
+                        <button
+                          type="button"
                           onClick={() => handleSend(order.id ?? '')}
                           className="text-[10px] font-semibold px-2 py-1 rounded-md"
                           style={{
@@ -546,14 +550,16 @@ const Purchasing: React.FC = () => {
               + Add item
             </button>
             <div className="flex gap-2 justify-end">
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setShowCreate(false)}
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
                 Cancel
               </button>
-              <button type="button"
+              <button
+                type="button"
                 onClick={handleCreatePO}
                 disabled={createMut.isPending || !newSupplierId || !newPoNumber.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"

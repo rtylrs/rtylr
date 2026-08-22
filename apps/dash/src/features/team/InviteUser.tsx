@@ -421,7 +421,8 @@ const InviteUser: React.FC = (): React.JSX.Element => {
           style={{ borderBottom: '1px solid var(--dash-border)' }}
         >
           {(['single', 'bulk'] as const).map((t) => (
-            <button type="button"
+            <button
+              type="button"
               key={t}
               onClick={() => setTab(t)}
               className="px-4 py-2 text-sm font-medium capitalize transition-colors"

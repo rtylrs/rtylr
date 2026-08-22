@@ -156,4 +156,4 @@ degradation pattern that the party concept will generalise.
 Confirmed: support_customers remain their own table; no statement in the
 support_customers query set references CRM tables.
 
-*Round two (2026-08-22): confirmed unchanged.*
+_Round two (2026-08-22): confirmed unchanged._

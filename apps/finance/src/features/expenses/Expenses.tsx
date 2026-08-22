@@ -149,7 +149,8 @@ const Expenses: React.FC = () => {
             Monthly total: <strong style={{ color: 'var(--hub-text)' }}>{fmt(grandTotal)}</strong>
           </p>
         </div>
-        <button type="button"
+        <button
+          type="button"
           onClick={() => navigate({ to: '/expenses/new' })}
           style={{
             display: 'flex',
@@ -327,7 +328,8 @@ const Expenses: React.FC = () => {
             Page {page}
           </p>
           <div className="flex items-center gap-2">
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
@@ -335,7 +337,8 @@ const Expenses: React.FC = () => {
             >
               Prev
             </button>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setPage((p) => p + 1)}
               disabled={!hasMore}
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"

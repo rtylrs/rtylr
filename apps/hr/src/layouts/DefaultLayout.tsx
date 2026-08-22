@@ -366,7 +366,8 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
 
   return (
     <div style={{ position: 'relative' }}>
-      <button type="button"
+      <button
+        type="button"
         onClick={() => setOpen((o) => !o)}
         style={{
           display: 'flex',
@@ -474,7 +475,8 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
                 { value: 'dark' as Theme, icon: Moon, i18nKey: 'layout.theme.dark' },
                 { value: 'system' as Theme, icon: Monitor, i18nKey: 'layout.theme.system' },
               ].map(({ value, icon: Icon, i18nKey }) => (
-                <button type="button"
+                <button
+                  type="button"
                   key={value}
                   onClick={() => setTheme(value)}
                   style={{
@@ -501,7 +503,8 @@ function UserMenu({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => v
             <hr
               style={{ border: 'none', borderTop: '1px solid var(--hr-border)', margin: '4px 0' }}
             />
-            <button type="button"
+            <button
+              type="button"
               onClick={() => {
                 signOutFromHR();
               }}
@@ -738,7 +741,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 key={section.i18nKey}
                 style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 4 }}
               >
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => toggleSection(section.i18nKey)}
                   style={{
                     display: 'flex',
@@ -861,7 +865,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
             {isMobile && (
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setMobileNavOpen((open) => !open)}
                 style={{
                   height: 36,
@@ -896,7 +901,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
             </h1>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => {
                 window.dispatchEvent(new CustomEvent('hr:open-palette'));
               }}
@@ -939,7 +945,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 </kbd>
               )}
             </button>
-            <button type="button"
+            <button
+              type="button"
               style={{
                 height: isMobile ? '36px' : '28px',
                 width: isMobile ? '36px' : '28px',

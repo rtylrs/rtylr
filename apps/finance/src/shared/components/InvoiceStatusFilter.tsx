@@ -25,7 +25,8 @@ const InvoiceStatusFilter: React.FC<InvoiceStatusFilterProps> = ({ value, onChan
     }}
   >
     {TABS.map((tab) => (
-      <button type="button"
+      <button
+        type="button"
         key={tab}
         onClick={() => onChange(tab)}
         style={{

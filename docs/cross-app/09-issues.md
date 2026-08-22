@@ -11,8 +11,8 @@ cost" is missing, so nothing was filed without them.
 
 ## onion
 
-| Issue                                              | What it covers                                                                                   | Severity |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------- | -------- |
+| Issue                                                | What it covers                                                                                     | Severity |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------- | -------- |
 | [#785](https://github.com/tryrtylr/onion/issues/785) | Termination revokes nothing: reconciliation job then status-driven revocation (HR->HUB-01 backend) | critical |
 | [#786](https://github.com/tryrtylr/onion/issues/786) | Expose the live labour-cost port through a Flow projects RPC                                       | high     |
 | [#791](https://github.com/tryrtylr/onion/issues/791) | Mark time entries invoiced: invoices need a port to write `billable_invoice_id`                    | high     |
@@ -23,15 +23,15 @@ cost" is missing, so nothing was filed without them.
 
 ## voxie
 
-| Issue                                              | Draft carried on branch `docs/cross-app-round2`                        |
-| -------------------------------------------------- | ------------------------------------------------------------------------ |
-| [#47](https://github.com/tryrtylr/voxie/issues/47)   | Leave request date range and pagination                                  |
-| [#48](https://github.com/tryrtylr/voxie/issues/48)   | Invoice customer_id with snapshot semantics                              |
-| [#49](https://github.com/tryrtylr/voxie/issues/49)   | Menu item product link and unit_cost                                     |
-| [#50](https://github.com/tryrtylr/voxie/issues/50)   | Bill supplier relax + purchase_order_id (round-one drafts 5 and 6 combined) |
-| [#51](https://github.com/tryrtylr/voxie/issues/51)   | Support customer CRM reference                                           |
-| [#52](https://github.com/tryrtylr/voxie/issues/52)   | Bind labour-cost aggregate to flow.project.v1 (revised draft 8a)         |
-| [#53](https://github.com/tryrtylr/voxie/issues/53)   | Per-product margin rows on existing margins response (narrowed draft 8b) |
+| Issue                                              | Draft carried on branch `docs/cross-app-round2`                             |
+| -------------------------------------------------- | --------------------------------------------------------------------------- |
+| [#47](https://github.com/tryrtylr/voxie/issues/47) | Leave request date range and pagination                                     |
+| [#48](https://github.com/tryrtylr/voxie/issues/48) | Invoice customer_id with snapshot semantics                                 |
+| [#49](https://github.com/tryrtylr/voxie/issues/49) | Menu item product link and unit_cost                                        |
+| [#50](https://github.com/tryrtylr/voxie/issues/50) | Bill supplier relax + purchase_order_id (round-one drafts 5 and 6 combined) |
+| [#51](https://github.com/tryrtylr/voxie/issues/51) | Support customer CRM reference                                              |
+| [#52](https://github.com/tryrtylr/voxie/issues/52) | Bind labour-cost aggregate to flow.project.v1 (revised draft 8a)            |
+| [#53](https://github.com/tryrtylr/voxie/issues/53) | Per-product margin rows on existing margins response (narrowed draft 8b)    |
 
 The drafted `.onk` itself is committed on voxie's `docs/cross-app-round2`
 branch (eight commits, `gen/` untouched); the PR from that branch is linked in
@@ -55,7 +55,7 @@ the cross-repo links section of this document set's README.
 Open issues were listed before filing anything:
 
 - **onion** had 46 open issues (#722 to #779 range plus older). Checked against
-  every planned filing: #755 covers Paddle *inbound* webhook security, not the
+  every planned filing: #755 covers Paddle _inbound_ webhook security, not the
   absent outbound delivery engine; #762 covers token revocation on auth events,
   not employment-driven entitlement revocation; #753 touches stock_ledger
   business_id zeros, not memory tenancy. No duplicates found.
@@ -67,15 +67,15 @@ Open issues were listed before filing anything:
 
 ## Skipped candidates and why not filed
 
-| Candidate                                                     | Why skipped                                                                     |
-| ------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Insights delivery dashboards adoption                          | Covered by existing rtylr#870; commented rather than duplicated                     |
-| Payroll export UI                                             | Scope belongs to existing rtylr#854; backend-complete status added as comment       |
-| Unbilled view consuming landed filters                         | Scope of rtylr#836; storage half split out to onion#791                             |
-| Flow project cost panel                                        | Scope of rtylr#837; backend halves filed in onion                                   |
-| POS-side consumption of menu-item product link                 | Consumer surface lives in the pos repo; noted in voxie#49 body                      |
-| `business_id DEFAULT 0` platform cleanup                       | Already filed by the flow deep dive as rtylr#871                                    |
-| `/hr/staff/detail` dead route                                  | Already filed as rtylr#875                                                          |
+| Candidate                                      | Why skipped                                                                   |
+| ---------------------------------------------- | ----------------------------------------------------------------------------- |
+| Insights delivery dashboards adoption          | Covered by existing rtylr#870; commented rather than duplicated               |
+| Payroll export UI                              | Scope belongs to existing rtylr#854; backend-complete status added as comment |
+| Unbilled view consuming landed filters         | Scope of rtylr#836; storage half split out to onion#791                       |
+| Flow project cost panel                        | Scope of rtylr#837; backend halves filed in onion                             |
+| POS-side consumption of menu-item product link | Consumer surface lives in the pos repo; noted in voxie#49 body                |
+| `business_id DEFAULT 0` platform cleanup       | Already filed by the flow deep dive as rtylr#871                              |
+| `/hr/staff/detail` dead route                  | Already filed as rtylr#875                                                    |
 
 ## Labels created this round
 

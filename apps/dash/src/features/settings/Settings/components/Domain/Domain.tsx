@@ -34,8 +34,7 @@ const DOMAIN_REGEX = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA
 const Domain: React.FC = () => {
   const user = useUserStore((s) => s.user);
   const websiteData = useConfigStore((s) => s.websiteData) as
-    | { slug?: string; domain?: string; customDomain?: string }
-    | undefined;
+    { slug?: string; domain?: string; customDomain?: string } | undefined;
   const updateBusiness = useUpdateBusiness();
   const fallbackSlug =
     user?.businessName

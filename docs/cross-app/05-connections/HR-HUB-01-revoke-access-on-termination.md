@@ -218,5 +218,5 @@ to entitlements at hire time. At termination time the coupling disappears:
 terminates the hr_staff row, and no module anywhere reads a terminated status to
 revoke `user_app_permissions` or edit any apps array.
 
-*Round two (2026-08-22): backend re-verified, claim confirmed; provisioning-side
-cross-schema write added as supporting evidence.*
+_Round two (2026-08-22): backend re-verified, claim confirmed; provisioning-side
+cross-schema write added as supporting evidence._

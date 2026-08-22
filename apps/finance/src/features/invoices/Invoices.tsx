@@ -135,7 +135,7 @@ const Invoices: React.FC = () => {
           markInvoiced.mutate({ entryIds: picked.map((e) => e.id), invoiceId: inv.id });
           setPickedHours(new Set());
         },
-      },
+      }
     );
   };
 
@@ -162,16 +162,28 @@ const Invoices: React.FC = () => {
                 <Send size={13} /> Send {selected.size}
               </button>
             )}
-            <button type="button" style={ghostBtn} onClick={() => exportQuickbooksInvoices(exportPayload)}>
+            <button
+              type="button"
+              style={ghostBtn}
+              onClick={() => exportQuickbooksInvoices(exportPayload)}
+            >
               <FileSpreadsheet size={13} /> QuickBooks
             </button>
-            <button type="button" style={ghostBtn} onClick={() => exportXeroInvoices(exportPayload)}>
+            <button
+              type="button"
+              style={ghostBtn}
+              onClick={() => exportXeroInvoices(exportPayload)}
+            >
               <Download size={13} /> Xero
             </button>
             <Link to="/invoices/recurring" style={{ ...ghostBtn, textDecoration: 'none' }}>
               Recurring
             </Link>
-            <button type="button" style={primaryBtn} onClick={() => navigate({ to: '/invoices/new' })}>
+            <button
+              type="button"
+              style={primaryBtn}
+              onClick={() => navigate({ to: '/invoices/new' })}
+            >
               <Plus size={15} /> New Invoice
             </button>
           </>
@@ -394,7 +406,8 @@ const Invoices: React.FC = () => {
                       </Link>
                       <DownloadPdfButton invoiceId={inv.id} label="PDF" />
                       {inv.status === 'Draft' && (
-                        <button type="button"
+                        <button
+                          type="button"
                           style={{
                             ...ghostBtn,
                             padding: '4px 10px',
@@ -408,7 +421,8 @@ const Invoices: React.FC = () => {
                         </button>
                       )}
                       {(inv.status === 'Sent' || inv.status === 'Overdue') && (
-                        <button type="button"
+                        <button
+                          type="button"
                           style={{
                             ...ghostBtn,
                             padding: '4px 10px',
@@ -438,7 +452,8 @@ const Invoices: React.FC = () => {
             Page {page}
           </p>
           <div className="flex items-center gap-2">
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
@@ -446,7 +461,8 @@ const Invoices: React.FC = () => {
             >
               Prev
             </button>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setPage((p) => p + 1)}
               disabled={!hasMore}
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors disabled:opacity-30"

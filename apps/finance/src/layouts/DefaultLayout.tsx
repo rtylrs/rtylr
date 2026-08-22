@@ -402,7 +402,8 @@ const DefaultLayout: React.FC = () => {
           </div>
 
           <div style={{ padding: '6px 8px' }}>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setSearchOpen(true)}
               style={{
                 display: 'flex',
@@ -477,7 +478,8 @@ const DefaultLayout: React.FC = () => {
             </Link>
             <CaretButton className="w-full justify-start mb-1" />
             <div className="relative">
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setShowUserMenu((v) => !v)}
                 className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150"
                 style={{ background: 'transparent' }}
@@ -548,7 +550,8 @@ const DefaultLayout: React.FC = () => {
                           { value: 'system' as Theme, icon: Monitor, label: 'System' },
                         ] as const
                       ).map(({ value, icon: Icon, label }) => (
-                        <button type="button"
+                        <button
+                          type="button"
                           key={value}
                           onClick={() => handleTheme(value)}
                           className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"
@@ -610,7 +613,8 @@ const DefaultLayout: React.FC = () => {
                 {pageTitle}
               </h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => setSearchOpen(true)}
                   style={{
                     height: 28,
@@ -627,7 +631,8 @@ const DefaultLayout: React.FC = () => {
                 >
                   <SearchIcon size={14} />
                 </button>
-                <button type="button"
+                <button
+                  type="button"
                   onClick={undefined}
                   aria-label="Notifications"
                   style={{

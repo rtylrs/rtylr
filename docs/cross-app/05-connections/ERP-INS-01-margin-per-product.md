@@ -172,4 +172,4 @@ among readers). An Insights-owned margin aggregate therefore needs no new
 cross-domain mechanism, only a query in its existing query set. Draft 8b stands
 as written.
 
-*Round two (2026-08-22): confirmed; build cost reduced.*
+_Round two (2026-08-22): confirmed; build cost reduced._

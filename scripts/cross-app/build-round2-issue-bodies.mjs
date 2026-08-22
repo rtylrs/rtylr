@@ -10,7 +10,8 @@ const issues = [
   // ---------------- onion ----------------
   {
     repo: 'onion',
-    title: 'Terminating an employee revokes nothing: add reconciliation job and status-driven revocation',
+    title:
+      'Terminating an employee revokes nothing: add reconciliation job and status-driven revocation',
     labels: ['audit:cross-app-round2-2026-08-22', 'area:hr_core', 'type:gap', 'severity:critical'],
     benefit:
       'The day after this ships, ending someones employment removes their app access automatically instead of leaving their login and every app entitlement active until a human remembers.',
@@ -45,7 +46,13 @@ const issues = [
   {
     repo: 'onion',
     title: 'Nothing marks time entries invoiced: give invoices a port to write billable_invoice_id',
-    labels: ['audit:cross-app-round2-2026-08-22', 'area:invoices', 'area:hr_time', 'type:gap', 'severity:high'],
+    labels: [
+      'audit:cross-app-round2-2026-08-22',
+      'area:invoices',
+      'area:hr_time',
+      'type:gap',
+      'severity:high',
+    ],
     benefit:
       'Once hours are billed, they stop appearing as unbilled, so Finance can trust the number instead of re-checking old invoices.',
     why: 'Single source of truth (3) and gating correctness (6). The unbilled-billable query filters `AND billable_invoice_id IS NULL` (`internal/modules/hr_time/sql/queries/time_entries.sql:52`) and the column exists (`schemas/hr_time/schema.sql:22`), but a repo-wide sweep finds no writer at any layer: the predicate is permanently true and the unbilled number can never decrease. Round one proposed the filters (landed as voxie#46/onion#783); this is the half neither pass saw. Pairing invoices -> hr_time rather than a generic export keeps ownership: hr_time owns its table, invoices call an explicit interface.',
@@ -90,13 +97,18 @@ const issues = [
       'Either document the isolation invariant (session/user-keyed only) with a citation and add a test asserting cross-user unreadability, or add business_id scoping mirroring the v8 tables convention (NOT NULL DEFAULT-free) plus backfill. Either way record the disposition here and in docs/sqlc-query-ownership.md style notes.',
     coupling:
       'Intra-module hardening; no cross-domain edge. Owner: memory module maintainers. Index impact: adding business_id would want a leading composite; defer decision to fix path.',
-    links:
-      'Coverage note: docs/cross-app/13-backend-inventory.md tenancy section.',
+    links: 'Coverage note: docs/cross-app/13-backend-inventory.md tenancy section.',
   },
   {
     repo: 'onion',
-    title: 'Three writers maintain crm_customers outside the customers module: consolidate through customer_sync',
-    labels: ['audit:cross-app-round2-08-22'.replace('08','2026-08'), 'area:customers', 'type:gap', 'severity:medium'],
+    title:
+      'Three writers maintain crm_customers outside the customers module: consolidate through customer_sync',
+    labels: [
+      'audit:cross-app-round2-08-22'.replace('08', '2026-08'),
+      'area:customers',
+      'type:gap',
+      'severity:medium',
+    ],
     benefit:
       'Customer records behave the same no matter which surface created or updated them, so renames and merges stop splitting history.',
     why: 'Single source of truth (3). backend_tables.csv shows crm_customers written by customers, store_orders and platform/customer_sync, and read by eight modules. The sanctioned seam for external writers is customer_sync (POS/storefront upserts with contact matching, `platform/customer_sync/customer_sync.go:18`); store_orders bypasses it with a direct write. Two independent writer paths means validation, name-splitting and visit-count rules drift apart. Consolidation belongs in onion where the writes live.',
@@ -136,75 +148,102 @@ const issues = [
     benefit: 'Callers can ask who is on approved leave between two dates in one paginated request.',
     why: 'Serves HR->FLOW-02 (leave gates assignment). ListLeaveRequestsRequest filters by employee_id and status only; overlap questions require unbounded client-side filtering. Cross-links: rtylr#856 (misfiled round-one contract issue), rtylr#838 (consumer feature).',
     roi: '| Item | Value |\n| --- | --- |\n| Affected tenants | Flow+HR tenants |\n| Manual work today | PMs consult leave calendar manually |\n| Modelled monthly value | ~1.5h avoided rework (modelled) |\n| Build cost | contract 0.25d; backend 0.5d; frontend part of #838 |\n| Payback | < 1 month after landing |\n| Confidence | Inferred from code |',
-    exists: 'Drafted on branch docs/cross-app-round2, api/hr/leave/v1/models.onk: from_date/to_date @nullable queries with documented overlap semantics; limit/offset added matching hr house style.',
-    build: 'Land contract here; onion serves (paired issue); packages pointer bump; rtylr consumes. Order: voxie, packages, onion, rtylr.',
-    coupling: 'No new domain edge; refines existing hr->flow read. Filters optional: absent means include-all, preserving current callers.',
+    exists:
+      'Drafted on branch docs/cross-app-round2, api/hr/leave/v1/models.onk: from_date/to_date @nullable queries with documented overlap semantics; limit/offset added matching hr house style.',
+    build:
+      'Land contract here; onion serves (paired issue); packages pointer bump; rtylr consumes. Order: voxie, packages, onion, rtylr.',
+    coupling:
+      'No new domain edge; refines existing hr->flow read. Filters optional: absent means include-all, preserving current callers.',
   },
   {
     repo: 'voxie',
     title: 'Contract: give finance invoices a nullable CRM customer_id with snapshot semantics',
     labels: ['audit:cross-app-round2-2026-08-22', 'area:finance', 'type:gap', 'severity:high'],
-    benefit: 'Revenue per customer becomes answerable: each invoice knows which customer it was issued to.',
+    benefit:
+      'Revenue per customer becomes answerable: each invoice knows which customer it was issued to.',
     why: 'Identity resolution (8), single source of truth (3). Invoices store four free-text client_* strings only; nothing joins them to crm_customers, so a renamed or re-typed customer splits revenue history irrecoverably. Highest-leverage change product-wide (roadmap). Cross-links: rtylr#857, rtylr#840 (consumer), roadmap docs/cross-app/08-roadmap.md.',
     roi: '| Item | Value |\n| --- | --- |\n| Affected tenants | every finance tenant |\n| Manual work today | spreadsheet matching of invoice clients to customers |\n| Modelled monthly value | 6h/mo reporting prep (reference tenant); enables credit decisions (#841) |\n| Build cost | contract 0.25d; onion column+validator+snapshot 2d; form picker 1.5d |\n| Payback | ~1 month |\n| Confidence | Inferred from code; value modelled |\n| Cost of not doing it | unmatched history accrues daily and no migration can repair it later |',
-    exists: 'Drafted on branch: InvoiceDetail.customer_id, CreateInvoiceRequest.customer_id (client_name/client_email relaxed to conditional), ListInvoicesRequest.customer_id filter; snapshot-preservation documented on each field.',
-    build: 'Voxie first (this PR); onion adds nullable column, same-business validation, server-side client_* snapshot when customer_id supplied; rtylr finance form gains customer picker. Never regenerate gen/ in the drafting PR.',
-    coupling: 'New declared edge crm -> finance (identity flows one way; balances return later via FIN->CRM-01). Owner: finance owns invoice, crm owns customer. Nullable: tenants without CRM behave identically.',
+    exists:
+      'Drafted on branch: InvoiceDetail.customer_id, CreateInvoiceRequest.customer_id (client_name/client_email relaxed to conditional), ListInvoicesRequest.customer_id filter; snapshot-preservation documented on each field.',
+    build:
+      'Voxie first (this PR); onion adds nullable column, same-business validation, server-side client_* snapshot when customer_id supplied; rtylr finance form gains customer picker. Never regenerate gen/ in the drafting PR.',
+    coupling:
+      'New declared edge crm -> finance (identity flows one way; balances return later via FIN->CRM-01). Owner: finance owns invoice, crm owns customer. Nullable: tenants without CRM behave identically.',
   },
   {
     repo: 'voxie',
     title: 'Contract: link pos menu items to erp products with unit_cost snapshot',
     labels: ['audit:cross-app-round2-2026-08-22', 'area:pos', 'type:gap', 'severity:high'],
-    benefit: 'Menu items know what they cost, making per-item margin computable for the first time.',
+    benefit:
+      'Menu items know what they cost, making per-item margin computable for the first time.',
     why: 'Derivation (1), single source of truth (3). MenuItem has stock and sale_price but no product reference and no cost; ERP holds both. Two stock numbers for one physical thing can disagree undetectably today. Cross-links: rtylr#858, rtylr#843.',
     roi: '| Item | Value |\n| --- | --- |\n| Affected tenants | retail/restaurant tenants running ERP+POS |\n| Manual work today | margin computed offline from supplier sheets |\n| Modelled monthly value | pricing decisions enabled; shrinkage visible (unquantified) |\n| Build cost | contract 0.25d; onion link+validation 1d; pos UI 2d (other repo) |\n| Payback | 2 months (retail segment) |\n| Confidence | Inferred from code |',
-    exists: 'Drafted on branch: MenuItem.product_id @nullable, MenuItem.unit_cost @nullable with authoritative-value documentation. ERP->INS-01 margin work builds on this.',
-    build: 'Voxie; then onion menu module validates same-business product link and snapshots unit_cost on read; pos repo consumes. Stock-authority unification stays a separate ERP/POS decision, deliberately out of this draft.',
-    coupling: 'Declared edge erp -> pos. Nullable: non-stocked items unaffected. Server must reject foreign-business product ids.',
+    exists:
+      'Drafted on branch: MenuItem.product_id @nullable, MenuItem.unit_cost @nullable with authoritative-value documentation. ERP->INS-01 margin work builds on this.',
+    build:
+      'Voxie; then onion menu module validates same-business product link and snapshots unit_cost on read; pos repo consumes. Stock-authority unification stays a separate ERP/POS decision, deliberately out of this draft.',
+    coupling:
+      'Declared edge erp -> pos. Nullable: non-stocked items unaffected. Server must reject foreign-business product ids.',
   },
   {
     repo: 'voxie',
-    title: 'Contract: make bill supplier_id nullable, require supplier_name snapshot, add purchase_order_id',
+    title:
+      'Contract: make bill supplier_id nullable, require supplier_name snapshot, add purchase_order_id',
     labels: ['audit:cross-app-round2-2026-08-22', 'area:finance', 'type:gap', 'severity:high'],
-    benefit: 'Bills record real suppliers instead of fabricated ids, and can reference the purchase orders they settle.',
+    benefit:
+      'Bills record real suppliers instead of fabricated ids, and can reference the purchase orders they settle.',
     why: 'Correctness (6), double-entry elimination (2). supplier_id is @required @gt(0) yet the backend never joins erp_suppliers and the frontend slugifies typed names into the field (ERP->FIN-01). purchase_order_id enables settlement closing (FIN->ERP-02). Serves drafts 5+6 combined into one coherent bill change. Cross-links: rtylr#860, rtylr#859, rtylr#835, rtylr#851.',
     roi: '| Item | Value |\n| --- | --- |\n| Affected tenants | every finance tenant |\n| Manual work today | vendor names retyped per bill; PO matching manual |\n| Modelled monthly value | 3h/mo AP clerk time (reference tenant); duplicate-payment risk reduced |\n| Build cost | contract 0.25d; onion 1.5d; finance UI 2d |\n| Payback | < 1 month |\n| Confidence | Inferred from code |\n| Cost of not doing it | fabricated foreign keys accumulate; payables reporting unreliable |',
-    exists: 'Drafted on branch: Bill.supplier_id int64? @nullable; supplier_name string @required (snapshot); Bill.purchase_order_id + CreateBillRequest fields; ListBillsRequest.supplier_id/purchase_order_id filters.',
-    build: 'Voxie; onion relaxes validator, stores snapshot, verifies foreign ids same-business; finance ships supplier picker (wave-1 item 2) before PO-settlement UI.',
-    coupling: 'Declared edges erp -> finance (identity) and finance -> erp (settlement reference, read by erp). Fact graph stays acyclic: settlement reference does not consume derived data.',
+    exists:
+      'Drafted on branch: Bill.supplier_id int64? @nullable; supplier_name string @required (snapshot); Bill.purchase_order_id + CreateBillRequest fields; ListBillsRequest.supplier_id/purchase_order_id filters.',
+    build:
+      'Voxie; onion relaxes validator, stores snapshot, verifies foreign ids same-business; finance ships supplier picker (wave-1 item 2) before PO-settlement UI.',
+    coupling:
+      'Declared edges erp -> finance (identity) and finance -> erp (settlement reference, read by erp). Fact graph stays acyclic: settlement reference does not consume derived data.',
   },
   {
     repo: 'voxie',
     title: 'Contract: reference the CRM customer from support customer',
     labels: ['audit:cross-app-round2-2026-08-22', 'area:support', 'type:gap', 'severity:medium'],
-    benefit: 'Support history attaches to real customers, so account views show ticket health without email guesswork.',
+    benefit:
+      'Support history attaches to real customers, so account views show ticket health without email guesswork.',
     why: 'Identity resolution (8), context in place (5). support_customers is an unrelated table joining to crm_customers only by loose email strings. Explicit nullable reference with confident-match-or-human-confirm semantics beats automatic merging. Cross-links: rtylr#861, rtylr#842.',
     roi: '| Item | Value |\n| --- | --- |\n| Affected tenants | support users; operator surface still absent in rtylr |\n| Manual work today | agents search CRM by email |\n| Modelled monthly value | low today; rises when a support app ships |\n| Build cost | contract 0.1d; onion column+match UX 1d |\n| Payback | contingent on support surface shipping |\n| Confidence | Modelled from assumption |',
-    exists: 'Drafted on branch: Customer.customer_id int64? @nullable with match-policy doc comment.',
-    build: 'Voxie; onion adds column + set-on-confident-match logic; consumer lands with SUP->CRM-01. Keep email matching as suggestion, never auto-write.',
+    exists:
+      'Drafted on branch: Customer.customer_id int64? @nullable with match-policy doc comment.',
+    build:
+      'Voxie; onion adds column + set-on-confident-match logic; consumer lands with SUP->CRM-01. Keep email matching as suggestion, never auto-write.',
     coupling: 'Declared edge support -> crm. Nullable preserves current behaviour entirely.',
   },
   {
     repo: 'voxie',
     title: 'Contract: bind the live project labour-cost aggregate to flow.project.v1',
     labels: ['audit:cross-app-round2-2026-08-22', 'area:flow', 'type:gap', 'severity:high'],
-    benefit: 'Flow projects can display what their labour has cost, computed server-side without exposing any pay rate.',
+    benefit:
+      'Flow projects can display what their labour has cost, computed server-side without exposing any pay rate.',
     why: 'Derivation (1), rollup (7). The aggregate exists end-to-end behind the labourcost port (#743) but no RPC binds it, so no consumer can reach it. Contract follows the live implementation field-for-field (billable-only scope, uncosted coverage counts) rather than inventing a parallel shape. Cross-links: rtylr#862 (partially superseded), rtylr#837, onion paired exposure issue.',
     roi: '| Item | Value |\n| --- | --- |\n| Affected tenants | Flow+HR services tenants |\n| Manual work today | spreadsheet cost tracking per project |\n| Modelled monthly value | 4h/mo PM time; earlier overrun detection |\n| Build cost | contract 0.25d; onion RPC 1d; flow panel 2d |\n| Payback | ~1 month |\n| Confidence | Inferred from code |',
-    exists: 'Drafted on branch: GetProjectLabourCost RPC on ProjectService (@get /projects/{id}/labour-cost); ProjectLabourCost message mirrors port fields with partial-labelling doc comments. HR->INS-01 may consume the same RPC.',
-    build: 'Voxie; onion binds RPC in workspaces API over the port (permission-gated, tenant-resolved); rtylr renders with partial labels when uncosted_minutes > 0.',
-    coupling: 'Edge flow -> hr already exists via port; contract formalises it. Aggregate-only output preserves salary boundary (staff contract precedent).',
+    exists:
+      'Drafted on branch: GetProjectLabourCost RPC on ProjectService (@get /projects/{id}/labour-cost); ProjectLabourCost message mirrors port fields with partial-labelling doc comments. HR->INS-01 may consume the same RPC.',
+    build:
+      'Voxie; onion binds RPC in workspaces API over the port (permission-gated, tenant-resolved); rtylr renders with partial labels when uncosted_minutes > 0.',
+    coupling:
+      'Edge flow -> hr already exists via port; contract formalises it. Aggregate-only output preserves salary boundary (staff contract precedent).',
   },
   {
     repo: 'voxie',
     title: 'Contract: add per-product margin rows to the existing insights margins response',
     labels: ['audit:cross-app-round2-2026-08-22', 'area:insights', 'type:gap', 'severity:medium'],
-    benefit: 'Margin per product becomes visible next to the existing margin distribution, without pulling the ERP catalogue.',
+    benefit:
+      'Margin per product becomes visible next to the existing margin distribution, without pulling the ERP catalogue.',
     why: 'Rollup (7), derivation (1). getProductMargins exists and is implemented but returns distribution buckets only; ERP->INS-01 needs per-product rows carrying cost. Narrow additive extension beats round-ones standalone ProductMargin proposal since Insights already reads erp_products server-side. Cross-links: rtylr#853 (superseded in part), rtylr#853 consumer.',
     roi: '| Item | Value |\n| --- | --- |\n| Affected tenants | ERP+Insights tenants |\n| Manual work today | export join between sales report and price list |\n| Modelled monthly value | 2h/mo analyst time (retail reference) |\n| Build cost | contract 0.1d; onion query 0.75d; chart 1d |\n| Payback | ~2 months (retail segment) |\n| Confidence | Inferred from code |',
-    exists: 'Drafted on branch: ProductMargin message (cost_minor_units nullable when no cost on record) plus products field on GetProductMarginsResponse.',
-    build: 'Voxie; onion extends GetMarginDistribution path with per-product query (own query group, register entry); dash/insights charts consume.',
-    coupling: 'Edge erp -> insights already flows via raw table reads (undeclared today); this contract declares the projection formally. Nullable cost distinguishes unknown from zero.',
+    exists:
+      'Drafted on branch: ProductMargin message (cost_minor_units nullable when no cost on record) plus products field on GetProductMarginsResponse.',
+    build:
+      'Voxie; onion extends GetMarginDistribution path with per-product query (own query group, register entry); dash/insights charts consume.',
+    coupling:
+      'Edge erp -> insights already flows via raw table reads (undeclared today); this contract declares the projection formally. Nullable cost distinguishes unknown from zero.',
   },
 ];
 
@@ -247,7 +286,13 @@ for (const iss of issues) {
     '',
     `Labelled ${iss.labels.join(', ')}.`,
   ].join('\n');
-  const file = join(OUT, `${iss.repo}-${iss.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 48)}.md`);
+  const file = join(
+    OUT,
+    `${iss.repo}-${iss.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .slice(0, 48)}.md`
+  );
   writeFileSync(file, body);
   manifest.push({ repo: iss.repo, title: iss.title, labels: iss.labels, file });
 }

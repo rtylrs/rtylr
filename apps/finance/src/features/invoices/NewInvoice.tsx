@@ -9,7 +9,10 @@ import type { CreateInvoiceRequest } from '@voxire/voxie/finance/invoices/v1/typ
 import PageHeader from '../../shared/components/PageHeader';
 import ClientSelect, { Client } from '../../shared/components/ClientSelect';
 import LineItemRow, { LineItem } from '../../shared/components/LineItemRow';
-import { useSignedContracts, type SignedContract } from '../../shared/hooks/queries/useSignedContracts';
+import {
+  useSignedContracts,
+  type SignedContract,
+} from '../../shared/hooks/queries/useSignedContracts';
 import TaxBreakdown from '../../shared/components/TaxBreakdown';
 import InvoicePreview from '../../shared/components/InvoicePreview';
 import { useTranslation } from 'react-i18next';
@@ -119,7 +122,7 @@ const NewInvoice: React.FC = () => {
     setNotes(
       `Prefilled from signed CRM contract #${contract.id}` +
         (contract.signedAt ? ` (signed ${contract.signedAt})` : '') +
-        `\n${settings.invoiceNotes}`,
+        `\n${settings.invoiceNotes}`
     );
   };
 
@@ -216,7 +219,8 @@ const NewInvoice: React.FC = () => {
       <div style={{ ...cardStyle, padding: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
         {STEPS.map((s, i) => (
           <React.Fragment key={s}>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setStep(i)}
               style={{
                 display: 'flex',
@@ -434,7 +438,8 @@ const NewInvoice: React.FC = () => {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <button type="button"
+        <button
+          type="button"
           style={ghostBtn}
           onClick={() => (step === 0 ? navigate({ to: '/invoices' }) : setStep(step - 1))}
         >
@@ -442,19 +447,26 @@ const NewInvoice: React.FC = () => {
         </button>
         <div style={{ display: 'flex', gap: 8 }}>
           {step < STEPS.length - 1 ? (
-            <button type="button" style={primaryBtn} disabled={!canProceed()} onClick={() => setStep(step + 1)}>
+            <button
+              type="button"
+              style={primaryBtn}
+              disabled={!canProceed()}
+              onClick={() => setStep(step + 1)}
+            >
               Next <ChevronRight size={13} />
             </button>
           ) : (
             <>
-              <button type="button"
+              <button
+                type="button"
                 style={{ ...ghostBtn, opacity: createInvoice.isPending ? 0.6 : 1 }}
                 onClick={() => handleSave('Draft')}
                 disabled={createInvoice.isPending}
               >
                 <Save size={13} /> {createInvoice.isPending ? 'Saving...' : 'Save as Draft'}
               </button>
-              <button type="button"
+              <button
+                type="button"
                 style={{ ...primaryBtn, opacity: createInvoice.isPending ? 0.6 : 1 }}
                 onClick={() => handleSave('Sent')}
                 disabled={createInvoice.isPending}

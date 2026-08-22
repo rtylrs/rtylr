@@ -149,7 +149,8 @@ const TaxReport: React.FC = () => {
                       {p.dueDate}
                     </td>
                     <td style={{ padding: '12px 16px' }}>
-                      <button type="button"
+                      <button
+                        type="button"
                         style={{ ...ghostBtn, padding: '4px 10px' }}
                         disabled
                         onClick={undefined}

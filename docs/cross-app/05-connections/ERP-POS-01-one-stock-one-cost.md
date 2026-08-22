@@ -204,4 +204,4 @@ touch it, `backend_tables.csv`), so the join target is heavily contended and
 the eventual stock-authority migration should be planned with that readership
 in mind.
 
-*Round two (2026-08-22): confirmed; shared-table pressure documented.*
+_Round two (2026-08-22): confirmed; shared-table pressure documented._

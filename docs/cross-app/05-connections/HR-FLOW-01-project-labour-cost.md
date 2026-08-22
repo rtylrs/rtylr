@@ -221,4 +221,4 @@ takes no date range; coverage arrives as `uncosted_minutes` +
 contributor-count equivalent. The permission posture matches the draft's
 intent: rates never cross the boundary, only aggregates.
 
-*Round two (2026-08-22): corrected-by-progress; draft 8a superseded in part.*
+_Round two (2026-08-22): corrected-by-progress; draft 8a superseded in part._

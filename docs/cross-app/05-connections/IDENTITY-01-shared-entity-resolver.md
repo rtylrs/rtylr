@@ -214,4 +214,4 @@ matching, not identity resolution
 (`internal/platform/customer_sync/customer_sync.go:47`), consistent with round one's
 reading. Nothing since round one changes the picture.
 
-*Round two (2026-08-22): confirmed unchanged.*
+_Round two (2026-08-22): confirmed unchanged._

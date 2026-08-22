@@ -221,13 +221,7 @@ export interface Settings {
 // ── Sales Pipeline Types ─────────────────────────────────────────
 
 export type LeadStage =
-  | 'cold'
-  | 'contacted'
-  | 'demo_booked'
-  | 'demo_done'
-  | 'proposal_sent'
-  | 'contracted'
-  | 'lost';
+  'cold' | 'contacted' | 'demo_booked' | 'demo_done' | 'proposal_sent' | 'contracted' | 'lost';
 
 export type TouchpointType = 'phone' | 'email' | 'meeting';
 export type TouchpointOutcome = 'positive' | 'neutral' | 'negative' | 'no_answer';

@@ -199,7 +199,8 @@ const SidebarSection: React.FC<{
 
   return (
     <div className="pt-1">
-      <button type="button"
+      <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
           'flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition-colors duration-150',
@@ -470,7 +471,10 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
 
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <button type="button" className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]">
+                <button
+                  type="button"
+                  className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]"
+                >
                   <Avatar
                     src={getAvatarUrl(userEmail || userName)}
                     alt={userName || 'User'}
@@ -519,7 +523,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                         { value: 'system', icon: Monitor, label: 'System' },
                       ] as const
                     ).map(({ value, icon: Icon, label }) => (
-                      <button type="button"
+                      <button
+                        type="button"
                         key={value}
                         onClick={() => setTheme(value)}
                         className="flex-1 flex flex-col items-center gap-1 py-2 rounded-lg text-[10px] font-medium transition-colors"
@@ -574,7 +579,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
               }}
             >
               <div className="flex items-center gap-2">
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => setMobileSidebarOpen((v) => !v)}
                   className="md:hidden h-7 w-7 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--dash-hover)]"
                   style={{ color: 'var(--dash-text-muted)' }}
@@ -607,7 +613,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                 )}
               </div>
               <div className="flex items-center gap-1">
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => setCommandPaletteOpen(true)}
                   className="flex items-center gap-2 px-2.5 h-7 rounded-lg transition-colors duration-150 hover:bg-[var(--dash-hover)]"
                   style={{
@@ -632,7 +639,8 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({ children }) => {
                   </kbd>
                 </button>
                 <CaretButton className="dash-caret-button" data-tour="caret" />
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => navigate({ to: '/notifications' })}
                   className="relative h-7 w-7 rounded-lg flex items-center justify-center transition-colors duration-150 hover:bg-[var(--dash-hover)]"
                   style={{ color: 'var(--dash-text-muted)' }}

@@ -24,7 +24,8 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({ period, onPeriodChange 
         }}
       >
         {options.map((p) => (
-          <button type="button"
+          <button
+            type="button"
             key={p}
             onClick={() => onPeriodChange(p)}
             style={{

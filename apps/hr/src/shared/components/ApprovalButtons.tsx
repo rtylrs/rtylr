@@ -32,7 +32,8 @@ const ApprovalButtons: React.FC<Props> = ({
           style={{ minHeight: 60 }}
         />
         <div style={{ display: 'flex', gap: 4 }}>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => {
               onApprove(note);
               setNote('');
@@ -56,7 +57,8 @@ const ApprovalButtons: React.FC<Props> = ({
           >
             <Check size={12} /> {t('common.approve', { defaultValue: 'Approve' })}
           </button>
-          <button type="button"
+          <button
+            type="button"
             onClick={() => {
               onReject(note);
               setNote('');
@@ -87,7 +89,8 @@ const ApprovalButtons: React.FC<Props> = ({
 
   return (
     <div style={{ display: 'flex', gap: 4 }}>
-      <button type="button"
+      <button
+        type="button"
         onClick={() => (allowNote ? setOpen(true) : onApprove())}
         style={{
           padding: pad,
@@ -105,7 +108,8 @@ const ApprovalButtons: React.FC<Props> = ({
       >
         <Check size={12} /> {t('common.approve', { defaultValue: 'Approve' })}
       </button>
-      <button type="button"
+      <button
+        type="button"
         onClick={() => (allowNote ? setOpen(true) : onReject())}
         style={{
           padding: pad,

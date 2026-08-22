@@ -280,7 +280,8 @@ function QrCode() {
                 </p>
               )}
             </div>
-            <button type="button"
+            <button
+              type="button"
               className="px-4 py-2 bg-accent text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
               onClick={handleDownload}
             >

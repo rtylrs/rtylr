@@ -184,4 +184,4 @@ Confirmed: careers serves 23 legacy chi routes with no contract domain
 (`backend_handlers.csv`, careers rows); `EmployeeService.createEmployee` exists
 as cited. Round one's numbers survive precise re-measurement.
 
-*Round two (2026-08-22): confirmed unchanged.*
+_Round two (2026-08-22): confirmed unchanged._

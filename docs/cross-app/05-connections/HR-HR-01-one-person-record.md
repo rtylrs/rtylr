@@ -24,7 +24,7 @@ that can disagree.
 **Single source of truth, violated inside a single domain.** HR stores a person
 twice, in two tables, each with its own pay fields.
 
-|                 | `internal/modules/hr_staff`                                                                                                    | `internal/modules/hr_employees`                                                                       |
+|                 | `internal/modules/hr_staff`                                                                                   | `internal/modules/hr_employees`                                                      |
 | --------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | Declared as     | `hr.Staff` (`packages/voxie/api/hr/staff/v1/models.onk:4`)                                                    | `hr.EmployeePayload` (`packages/voxie/api/hr/employee/v1/models.onk:4`)              |
 | Schema          | `~/Development/onion/internal/platform/database/schemas/hr/schema.sql:15`                                     | `~/Development/onion/internal/platform/database/schemas/hr_core/schema.sql`          |
@@ -48,10 +48,10 @@ This is not a dormant duplication. Different HR features key on different ids:
 
 And there are **two leave systems**, not one:
 
-|             | `internal/modules/hr_time_off_requests`                                                                                                                           | `internal/modules/hr_leave_requests`                                                             |
+|             | `internal/modules/hr_time_off_requests`                                                                                                          | `internal/modules/hr_leave_requests`                                            |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
 | Keys on     | `staff_id`                                                                                                                                       | `employee_id`                                                                   |
-| Leave types | **hardcoded ENUM** `('vacation','sick','personal','unpaid','other')` (`~/Development/onion/internal/platform/database/schemas/hr/schema.sql:56`) | configurable rows, `internal/modules/hr_leave_types`                                             |
+| Leave types | **hardcoded ENUM** `('vacation','sick','personal','unpaid','other')` (`~/Development/onion/internal/platform/database/schemas/hr/schema.sql:56`) | configurable rows, `internal/modules/hr_leave_types`                            |
 | Contract    | `hr.time_off.v1` (`TimeOffService`, 2 RPCs)                                                                                                      | `hr.leave.v1` (`LeaveService`, 8 RPCs, with balances and approval levels)       |
 | Schema      | `~/Development/onion/internal/platform/database/schemas/hr/schema.sql:51`                                                                        | `~/Development/onion/internal/platform/database/schemas/hr_leave/schema.sql:20` |
 
@@ -73,23 +73,23 @@ records; confirming it needs production data, which this audit does not touch.
 
 ## ROI
 
-| Field                  | Value                                                                                                                                                                                                                                                                                                            |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Affected tenants       | every HR tenant.                                                                                                                                                                                                                                                                                                 |
-| Manual work today      | none visible, which is what makes it dangerous: the duplication is invisible until two screens disagree.                                                                                                                                                                                                         |
+| Field                  | Value                                                                                                                                                                                                                                                                                                                                              |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Affected tenants       | every HR tenant.                                                                                                                                                                                                                                                                                                                                   |
+| Manual work today      | none visible, which is what makes it dangerous: the duplication is invisible until two screens disagree.                                                                                                                                                                                                                                           |
 | Modelled monthly value | **Errors avoided, not time saved.** If a tenant maintains `internal/modules/hr_staff.hourly_rate` while payroll reads `internal/modules/hr_employees.hourly_rate`, payroll pays the wrong amount and nothing flags it. For the reference tenant, 40 people paid monthly, a single stale rate is one wrong payslip per month until someone notices. |
-|                        | Value is therefore "correct payroll", which does not reduce to minutes. The countable part is the reconciliation nobody currently does.                                                                                                                                                                          |
-| Build cost             | backend **6 to 10 days**: decide the canonical record, migrate, redirect the older leave system or retire it, keep both contracts serving during the transition. Frontend 2 days to follow the surviving ids. Maintenance goes **down** afterwards.                                                              |
-| Payback                | not expressible as a payback period. This is debt removal that unblocks four proposals worth more than it costs.                                                                                                                                                                                                 |
-| Confidence             | **Inferred from code** for every structural claim: both schemas, both contracts, both leave tables and the nullable bridge were read directly. **Modelled from assumption** that divergence occurs in practice.                                                                                                  |
-| Cost of not doing it   | Two answers to what someone is paid, with payroll reading one of them. Two answers to whether someone is on leave. Any leave-gating or labour-costing feature built on top inherits the ambiguity and produces confidently wrong numbers, which is worse than producing none. Four proposals stay degraded.      |
+|                        | Value is therefore "correct payroll", which does not reduce to minutes. The countable part is the reconciliation nobody currently does.                                                                                                                                                                                                            |
+| Build cost             | backend **6 to 10 days**: decide the canonical record, migrate, redirect the older leave system or retire it, keep both contracts serving during the transition. Frontend 2 days to follow the surviving ids. Maintenance goes **down** afterwards.                                                                                                |
+| Payback                | not expressible as a payback period. This is debt removal that unblocks four proposals worth more than it costs.                                                                                                                                                                                                                                   |
+| Confidence             | **Inferred from code** for every structural claim: both schemas, both contracts, both leave tables and the nullable bridge were read directly. **Modelled from assumption** that divergence occurs in practice.                                                                                                                                    |
+| Cost of not doing it   | Two answers to what someone is paid, with payroll reading one of them. Two answers to whether someone is on leave. Any leave-gating or labour-costing feature built on top inherits the ambiguity and produces confidently wrong numbers, which is worse than producing none. Four proposals stay degraded.                                        |
 
 ## The data
 
 Nothing moves between apps. What changes is which row is authoritative.
 
-| Decision           | Options                                                                                                                     |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| Decision           | Options                                                                                                                                      |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | Canonical person   | `internal/modules/hr_employees` is the stronger candidate: payroll, leave balances, Flow work days and time entries all key on `employee_id` |
 | Canonical pay rate | whichever record survives; payroll already reads `internal/modules/hr_employees.hourly_rate`                                                 |
 | Canonical leave    | `internal/modules/hr_leave_requests`, because it keys on `employee_id`, has configurable types, balances and approval levels                 |
@@ -213,4 +213,4 @@ invite flow INSERTs into `internal/modules/hr_employees` cross-schema
 provisioning co-owns the employee table. The migration plan must treat team as
 a stakeholder module, not just the HR modules.
 
-*Round two (2026-08-22): confirmed; scope widened to include team provisioning.*
+_Round two (2026-08-22): confirmed; scope widened to include team provisioning._

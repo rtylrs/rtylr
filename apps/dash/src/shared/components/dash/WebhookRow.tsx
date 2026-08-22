@@ -59,7 +59,8 @@ export const WebhookRow: React.FC<WebhookRowProps> = ({ webhook, onDelete }) => 
           Last delivery {formatRelative(webhook.lastDelivery)} · {webhook.secretPreview}
         </p>
       </div>
-      <button type="button"
+      <button
+        type="button"
         className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors hover:bg-red-500/10 shrink-0"
         style={{ color: 'var(--status-cancelled)' }}
         onClick={() => onDelete?.(webhook.id)}

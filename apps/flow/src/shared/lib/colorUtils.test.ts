@@ -95,4 +95,3 @@ describe('paletteColor', () => {
     expect(paletteColor(0)).toBe(paletteColor(PROJECT_COLORS.length));
   });
 });
-

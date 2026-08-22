@@ -151,4 +151,4 @@ Confirmed: `ListBillsRequest` accepts page and page_size only
 verification: until ERP->FIN-01 lands, filtering bills by supplier would filter
 on fabricated ids, exactly as the dossier warns.
 
-*Round two (2026-08-22): confirmed unchanged.*
+_Round two (2026-08-22): confirmed unchanged._

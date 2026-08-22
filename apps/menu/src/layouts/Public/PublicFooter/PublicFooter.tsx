@@ -123,7 +123,8 @@ const Footer: React.FC = () => {
               sponsorship, or affiliation with Rtylr.
             </p>
           </div>
-          <button type="button"
+          <button
+            type="button"
             className="text-xs text-white/30 hover:text-white/50 transition-colors"
             aria-label={`Current version: ${appVersion}`}
           >

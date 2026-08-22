@@ -64,7 +64,8 @@ export const TaskContextMenu: React.FC<{
 
   return createPortal(
     <div ref={ref} style={menuStyle} role="menu">
-      <button type="button"
+      <button
+        type="button"
         style={itemStyle}
         onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--flow-hover)')}
         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
@@ -76,7 +77,8 @@ export const TaskContextMenu: React.FC<{
         <ExternalLink size={12} style={{ color: 'var(--flow-text-muted)', flexShrink: 0 }} />
         Open task
       </button>
-      <button type="button"
+      <button
+        type="button"
         style={itemStyle}
         onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--flow-hover)')}
         onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
@@ -90,7 +92,8 @@ export const TaskContextMenu: React.FC<{
         Copy link
       </button>
       <div style={{ height: 1, background: 'var(--flow-border)', margin: '4px 0' }} />
-      <button type="button"
+      <button
+        type="button"
         style={{
           ...itemStyle,
           color: canRemove ? '#ef4444' : 'var(--flow-text-dim)',

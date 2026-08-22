@@ -25,8 +25,7 @@ type TeamMember = { id: string; name: string; email: string; role: string };
 
 const teamData = vi.hoisted(() => ({
   data: { members: [] as TeamMember[], hasMore: false } as
-    | { members: TeamMember[]; hasMore: boolean }
-    | undefined,
+    { members: TeamMember[]; hasMore: boolean } | undefined,
   isLoading: false,
 }));
 

@@ -171,4 +171,4 @@ Confirmed unchanged: `ListLeaveRequestsRequest` filters by employee id and
 status only; no date range, no pagination fields
 (`packages/voxie/api/hr/leave/v1/models.onk`).
 
-*Round two (2026-08-22): confirmed unchanged.*
+_Round two (2026-08-22): confirmed unchanged._

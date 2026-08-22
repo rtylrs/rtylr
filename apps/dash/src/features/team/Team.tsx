@@ -240,7 +240,8 @@ const Team: React.FC = (): React.JSX.Element => {
                     </span>
                   </div>
                 </div>
-                <button type="button"
+                <button
+                  type="button"
                   disabled={approveAccessRequest.isPending}
                   onClick={() =>
                     approveAccessRequest.mutate({ id: req.id, userId: req.userId, app: req.app })
@@ -283,7 +284,8 @@ const Team: React.FC = (): React.JSX.Element => {
               { id: 'staff', label: 'Staff' },
               { id: 'viewer', label: 'Viewer' },
             ].map((r) => (
-              <button type="button"
+              <button
+                type="button"
                 key={r.id}
                 onClick={() => {
                   setRoleFilter(r.id);
@@ -465,7 +467,8 @@ const Team: React.FC = (): React.JSX.Element => {
 
                         {/* Actions */}
                         <div className="col-span-1 flex justify-end relative">
-                          <button type="button"
+                          <button
+                            type="button"
                             aria-label="Member actions"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -486,7 +489,8 @@ const Team: React.FC = (): React.JSX.Element => {
                               }}
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <button type="button"
+                              <button
+                                type="button"
                                 className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
                                 style={{ color: 'var(--dash-text-muted)' }}
                                 onClick={() => {
@@ -504,7 +508,8 @@ const Team: React.FC = (): React.JSX.Element => {
                               >
                                 <Mail size={12} /> Send email
                               </a>
-                              <button type="button"
+                              <button
+                                type="button"
                                 className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
                                 style={{ color: 'var(--dash-text-muted)' }}
                                 onClick={() => {
@@ -519,7 +524,8 @@ const Team: React.FC = (): React.JSX.Element => {
                                 style={{ borderTop: '1px solid var(--dash-border)' }}
                               />
                               {m.role?.toLowerCase() !== 'owner' && (
-                                <button type="button"
+                                <button
+                                  type="button"
                                   className="flex items-center gap-2 w-full px-3 py-2 text-xs font-medium text-left hover:bg-[var(--dash-hover)]"
                                   style={{ color: '#ef4444' }}
                                   onClick={() => {
@@ -553,7 +559,8 @@ const Team: React.FC = (): React.JSX.Element => {
                         )}
                   </p>
                   <div className="flex items-center gap-1">
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={() => setPage(Math.max(0, page - 1))}
                       disabled={page === 0}
                       className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
@@ -561,7 +568,8 @@ const Team: React.FC = (): React.JSX.Element => {
                     >
                       Prev
                     </button>
-                    <button type="button"
+                    <button
+                      type="button"
                       onClick={() => setPage(page + 1)}
                       disabled={page >= totalPages - 1}
                       className="px-2.5 py-1 rounded-md text-xs font-medium transition-colors disabled:opacity-30"
@@ -589,7 +597,8 @@ const Team: React.FC = (): React.JSX.Element => {
               {selected.size} selected
             </span>
             <div className="w-px h-4" style={{ background: 'var(--dash-border)' }} />
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setShowAddToGroupModal(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
               style={{
@@ -600,7 +609,8 @@ const Team: React.FC = (): React.JSX.Element => {
             >
               <FolderOpen size={12} /> Add to group
             </button>
-            <button type="button"
+            <button
+              type="button"
               onClick={() => setBulkConfirmDeactivate(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
               style={{
@@ -611,7 +621,8 @@ const Team: React.FC = (): React.JSX.Element => {
             >
               <UserX size={12} /> Deactivate
             </button>
-            <button type="button"
+            <button
+              type="button"
               aria-label="Clear selection"
               onClick={clearSelection}
               className="h-6 w-6 rounded-md flex items-center justify-center hover:bg-[var(--dash-hover)] transition-colors"
@@ -659,7 +670,8 @@ const Team: React.FC = (): React.JSX.Element => {
                 </select>
               </div>
               <div className="flex items-center justify-end gap-2 pt-2">
-                <button type="button"
+                <button
+                  type="button"
                   onClick={() => {
                     setShowAddToGroupModal(false);
                     setSelectedGroupId('');

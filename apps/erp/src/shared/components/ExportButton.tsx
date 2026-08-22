@@ -60,7 +60,8 @@ const ExportButton: React.FC<ExportButtonProps> = ({
   };
 
   return (
-    <button type="button"
+    <button
+      type="button"
       onClick={handleExport}
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
       style={{

@@ -75,7 +75,8 @@ const Warehouses: React.FC = () => {
         title={t('warehouses.title')}
         description={t('warehouses.count', { count: warehouses.length })}
         actions={
-          <button type="button"
+          <button
+            type="button"
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold"
             style={{ background: AMBER, color: 'var(--erp-accent-foreground)' }}
@@ -146,7 +147,8 @@ const Warehouses: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  <button type="button"
+                  <button
+                    type="button"
                     aria-label={t('warehouses.delete')}
                     onClick={() => setConfirmDeleteId(w.id ?? null)}
                     className="h-7 w-7 rounded-lg flex items-center justify-center"
@@ -259,14 +261,16 @@ const Warehouses: React.FC = () => {
               style={inputStyle}
             />
             <div className="flex gap-2 justify-end">
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setShowCreate(false)}
                 className="px-3 py-2 rounded-lg text-xs"
                 style={{ background: 'var(--hub-hover)', color: 'var(--hub-text-muted)' }}
               >
                 {t('common.cancel')}
               </button>
-              <button type="button"
+              <button
+                type="button"
                 onClick={handleCreate}
                 disabled={createMut.isPending || !newName.trim()}
                 className="px-3 py-2 rounded-lg text-xs font-semibold disabled:opacity-40"

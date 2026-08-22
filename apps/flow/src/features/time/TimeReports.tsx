@@ -41,7 +41,7 @@ const TimeReports = (): React.JSX.Element => {
   }, [today, weekStart]);
 
   const members: { id: string; userId: string; name: string; role?: string }[] = []; // TODO: switch to useFlowTeam
-	const membersLoading = false;
+  const membersLoading = false;
   const { data, isLoading, isError } = useWorkDaysForWorkspace(activeWorkspaceId, from, to);
 
   const totalsByUserId = useMemo(() => {

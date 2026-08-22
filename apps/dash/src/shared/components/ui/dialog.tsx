@@ -74,7 +74,8 @@ const DialogContent: React.FC<DialogContentProps> = ({ children, className }) =>
         )}
         style={{ background: 'var(--dash-card)', border: '1px solid var(--dash-border)' }}
       >
-        <button type="button"
+        <button
+          type="button"
           aria-label="Close dialog"
           className="absolute right-4 top-4 rounded-lg p-1 text-gray-400 hover:text-gray-600 hover:bg-black/5 transition-colors"
           onClick={() => setOpen(false)}
