@@ -274,6 +274,24 @@ func RegisterBillServiceServer(first any, rest ...any) error {
 	mux := o.mux
 	mux.Handle("GET /finance/bill/v1/bills", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListBillsRequest)
+		if values := r.URL.Query()["supplier_id"]; len(values) > 0 {
+			value := values[0]
+			parsedSupplierId, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter supplier_id: "+err.Error())
+				return
+			}
+			req.SupplierId = &parsedSupplierId
+		}
+		if values := r.URL.Query()["purchase_order_id"]; len(values) > 0 {
+			value := values[0]
+			parsedPurchaseOrderId, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter purchase_order_id: "+err.Error())
+				return
+			}
+			req.PurchaseOrderId = &parsedPurchaseOrderId
+		}
 		if values := r.URL.Query()["page"]; len(values) > 0 {
 			value := values[0]
 			parsedPage, err := parseInt64(value)

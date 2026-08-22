@@ -206,6 +206,10 @@ return violations;
 export interface ListLeaveRequestsRequest {
 employeeId?: string;
 status?: string;
+fromDate?: string;
+toDate?: string;
+limit?: number;
+offset?: number;
 }
 
 export function decodeListLeaveRequestsRequest(v: any): ListLeaveRequestsRequest {
@@ -213,6 +217,10 @@ if (v === null || v === undefined) return v;
 return {
 employeeId: v.employee_id,
 status: v.status,
+fromDate: v.from_date,
+toDate: v.to_date,
+limit: v.limit,
+offset: v.offset,
 };
 }
 
@@ -220,6 +228,10 @@ export function encodeListLeaveRequestsRequest(v: ListLeaveRequestsRequest): Rec
 const out: Record<string, unknown> = {};
 if (v.employeeId !== undefined) { out.employee_id = v.employeeId; }
 if (v.status !== undefined) { out.status = v.status; }
+if (v.fromDate !== undefined) { out.from_date = v.fromDate; }
+if (v.toDate !== undefined) { out.to_date = v.toDate; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
@@ -227,6 +239,10 @@ export function validateListLeaveRequestsRequest(v: ListLeaveRequestsRequest): s
 const violations: string[] = [];
 if (v.employeeId !== undefined && v.employeeId !== null && !(typeof v.employeeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.employeeId))) violations.push("employee_id has invalid type");
 if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.fromDate !== undefined && v.fromDate !== null && !(typeof v.fromDate === "string")) violations.push("from_date has invalid type");
+if (v.toDate !== undefined && v.toDate !== null && !(typeof v.toDate === "string")) violations.push("to_date has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isInteger(v.limit) && v.limit >= -2147483648 && v.limit <= 2147483647)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isInteger(v.offset) && v.offset >= -2147483648 && v.offset <= 2147483647)) violations.push("offset has invalid type");
 return violations;
 }
 

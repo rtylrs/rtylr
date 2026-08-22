@@ -16,6 +16,8 @@ barcode?: string;
 description?: string;
 taxRate?: number;
 stock?: number;
+productId?: string;
+unitCost?: number;
 }
 
 export function decodeMenuItem(v: any): MenuItem {
@@ -36,6 +38,8 @@ barcode: v.barcode,
 description: v.description,
 taxRate: v.tax_rate,
 stock: v.stock,
+productId: v.product_id,
+unitCost: v.unit_cost,
 };
 }
 
@@ -56,6 +60,8 @@ if (v.barcode !== undefined) { out.barcode = v.barcode; }
 if (v.description !== undefined) { out.description = v.description; }
 if (v.taxRate !== undefined) { out.tax_rate = v.taxRate; }
 if (v.stock !== undefined) { out.stock = v.stock; }
+if (v.productId !== undefined) { out.product_id = v.productId; }
+if (v.unitCost !== undefined) { out.unit_cost = v.unitCost; }
 return out;
 }
 
@@ -76,6 +82,8 @@ if (v.barcode !== undefined && v.barcode !== null && !(typeof v.barcode === "str
 if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (v.taxRate !== undefined && v.taxRate !== null && !(typeof v.taxRate === "number" && Number.isFinite(v.taxRate))) violations.push("tax_rate has invalid type");
 if (v.stock !== undefined && v.stock !== null && !(typeof v.stock === "number" && Number.isFinite(v.stock))) violations.push("stock has invalid type");
+if (v.productId !== undefined && v.productId !== null && !(typeof v.productId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.productId))) violations.push("product_id has invalid type");
+if (v.unitCost !== undefined && v.unitCost !== null && !(typeof v.unitCost === "number" && Number.isFinite(v.unitCost))) violations.push("unit_cost has invalid type");
 return violations;
 }
 

@@ -55,6 +55,12 @@ func (c *BillServiceClient) ListBills(ctx context.Context, req *ListBillsRequest
 	}
 	path := "/finance/bill/v1/bills"
 	query := url.Values{}
+	if req.SupplierId != nil {
+		query.Set("supplier_id", strconv.FormatInt(int64(*req.SupplierId), 10))
+	}
+	if req.PurchaseOrderId != nil {
+		query.Set("purchase_order_id", strconv.FormatInt(int64(*req.PurchaseOrderId), 10))
+	}
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))
 	query.Set("page_size", strconv.FormatInt(int64(req.PageSize), 10))
 	if len(query) > 0 {

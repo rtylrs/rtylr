@@ -551,3 +551,41 @@ func (m *MoveProjectResponse) Validate() error {
 	}
 	return nil
 }
+
+func (m *ProjectLabourCost) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetProjectLabourCostRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *GetProjectLabourCostResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Cost != nil {
+		if err := m.Cost.Validate(); err != nil {
+			violations = append(violations, "cost: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}

@@ -4,6 +4,8 @@ export interface Bill {
 id?: string;
 ownerId?: string;
 supplierId?: string;
+supplierName: string;
+purchaseOrderId?: string;
 amount?: number;
 currency?: string;
 dueDate?: string;
@@ -19,6 +21,8 @@ return {
 id: v.id,
 ownerId: v.owner_id,
 supplierId: v.supplier_id,
+supplierName: v.supplier_name,
+purchaseOrderId: v.purchase_order_id,
 amount: v.amount,
 currency: v.currency,
 dueDate: v.due_date,
@@ -34,6 +38,8 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
 if (v.supplierId !== undefined) { out.supplier_id = v.supplierId; }
+if (v.supplierName !== undefined) { out.supplier_name = v.supplierName; }
+if (v.purchaseOrderId !== undefined) { out.purchase_order_id = v.purchaseOrderId; }
 if (v.amount !== undefined) { out.amount = v.amount; }
 if (v.currency !== undefined) { out.currency = v.currency; }
 if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
@@ -49,6 +55,9 @@ const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
 if (v.supplierId !== undefined && v.supplierId !== null && !(typeof v.supplierId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.supplierId))) violations.push("supplier_id has invalid type");
+if (v.supplierName !== undefined && v.supplierName !== null && !(typeof v.supplierName === "string")) violations.push("supplier_name has invalid type");
+if (!(v.supplierName !== undefined && v.supplierName !== null) || v.supplierName === "") violations.push("supplier_name is required");
+if (v.purchaseOrderId !== undefined && v.purchaseOrderId !== null && !(typeof v.purchaseOrderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.purchaseOrderId))) violations.push("purchase_order_id has invalid type");
 if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
 if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
 if (v.dueDate !== undefined && v.dueDate !== null && !(typeof v.dueDate === "string")) violations.push("due_date has invalid type");
@@ -60,7 +69,9 @@ return violations;
 }
 
 export interface CreateBillRequest {
-supplierId: string;
+supplierId?: string;
+supplierName: string;
+purchaseOrderId?: string;
 amount?: number;
 currency: string;
 dueDate: string;
@@ -72,6 +83,8 @@ export function decodeCreateBillRequest(v: any): CreateBillRequest {
 if (v === null || v === undefined) return v;
 return {
 supplierId: v.supplier_id,
+supplierName: v.supplier_name,
+purchaseOrderId: v.purchase_order_id,
 amount: v.amount,
 currency: v.currency,
 dueDate: v.due_date,
@@ -83,6 +96,8 @@ description: v.description,
 export function encodeCreateBillRequest(v: CreateBillRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.supplierId !== undefined) { out.supplier_id = v.supplierId; }
+if (v.supplierName !== undefined) { out.supplier_name = v.supplierName; }
+if (v.purchaseOrderId !== undefined) { out.purchase_order_id = v.purchaseOrderId; }
 if (v.amount !== undefined) { out.amount = v.amount; }
 if (v.currency !== undefined) { out.currency = v.currency; }
 if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
@@ -94,8 +109,9 @@ return out;
 export function validateCreateBillRequest(v: CreateBillRequest): string[] {
 const violations: string[] = [];
 if (v.supplierId !== undefined && v.supplierId !== null && !(typeof v.supplierId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.supplierId))) violations.push("supplier_id has invalid type");
-if (!(v.supplierId !== undefined && v.supplierId !== null)) violations.push("supplier_id is required");
-if (v.supplierId !== undefined && v.supplierId !== null && !(Number(v.supplierId) > 0)) violations.push("supplier_id violates @gt");
+if (v.supplierName !== undefined && v.supplierName !== null && !(typeof v.supplierName === "string")) violations.push("supplier_name has invalid type");
+if (!(v.supplierName !== undefined && v.supplierName !== null) || v.supplierName === "") violations.push("supplier_name is required");
+if (v.purchaseOrderId !== undefined && v.purchaseOrderId !== null && !(typeof v.purchaseOrderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.purchaseOrderId))) violations.push("purchase_order_id has invalid type");
 if (v.amount !== undefined && v.amount !== null && !(typeof v.amount === "number" && Number.isFinite(v.amount))) violations.push("amount has invalid type");
 if (v.amount !== undefined && v.amount !== null && !(Number(v.amount) >= 0)) violations.push("amount violates @gte");
 if (v.currency !== undefined && v.currency !== null && !(typeof v.currency === "string")) violations.push("currency has invalid type");
@@ -234,6 +250,8 @@ return violations;
 }
 
 export interface ListBillsRequest {
+supplierId?: string;
+purchaseOrderId?: string;
 page?: number;
 pageSize?: number;
 }
@@ -241,6 +259,8 @@ pageSize?: number;
 export function decodeListBillsRequest(v: any): ListBillsRequest {
 if (v === null || v === undefined) return v;
 return {
+supplierId: v.supplier_id,
+purchaseOrderId: v.purchase_order_id,
 page: v.page,
 pageSize: v.page_size,
 };
@@ -248,6 +268,8 @@ pageSize: v.page_size,
 
 export function encodeListBillsRequest(v: ListBillsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
+if (v.supplierId !== undefined) { out.supplier_id = v.supplierId; }
+if (v.purchaseOrderId !== undefined) { out.purchase_order_id = v.purchaseOrderId; }
 if (v.page !== undefined) { out.page = v.page; }
 if (v.pageSize !== undefined) { out.page_size = v.pageSize; }
 return out;
@@ -255,6 +277,8 @@ return out;
 
 export function validateListBillsRequest(v: ListBillsRequest): string[] {
 const violations: string[] = [];
+if (v.supplierId !== undefined && v.supplierId !== null && !(typeof v.supplierId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.supplierId))) violations.push("supplier_id has invalid type");
+if (v.purchaseOrderId !== undefined && v.purchaseOrderId !== null && !(typeof v.purchaseOrderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.purchaseOrderId))) violations.push("purchase_order_id has invalid type");
 if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");
 if (v.pageSize !== undefined && v.pageSize !== null && !(typeof v.pageSize === "number" && Number.isSafeInteger(v.pageSize) && v.pageSize >= Number.MIN_SAFE_INTEGER && v.pageSize <= Number.MAX_SAFE_INTEGER)) violations.push("page_size has invalid type");
 return violations;

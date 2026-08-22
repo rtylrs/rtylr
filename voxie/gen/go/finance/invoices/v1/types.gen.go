@@ -253,6 +253,7 @@ func (x *InvoiceSummary) GetCreatedAt() string {
 type InvoiceDetail struct {
 	Id             int64          `json:"id,omitempty"`
 	OwnerId        int64          `json:"owner_id,omitempty"`
+	CustomerId     *int64         `json:"customer_id,omitempty"`
 	InvoiceNumber  string         `json:"invoice_number,omitempty"`
 	ClientName     string         `json:"client_name,omitempty"`
 	ClientEmail    string         `json:"client_email,omitempty"`
@@ -283,11 +284,16 @@ func (m *InvoiceDetail) MarshalJSON() ([]byte, error) {
 	type alias InvoiceDetail
 	aux := struct {
 		*alias
-		Id      string `json:"id,omitempty"`
-		OwnerId string `json:"owner_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		OwnerId    string  `json:"owner_id,omitempty"`
+		CustomerId *string `json:"customer_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
+	if m.CustomerId != nil {
+		encodedCustomerId := strconv.FormatInt(*m.CustomerId, 10)
+		aux.CustomerId = &encodedCustomerId
+	}
 	return json.Marshal(aux)
 }
 
@@ -295,8 +301,9 @@ func (m *InvoiceDetail) UnmarshalJSON(data []byte) error {
 	type alias InvoiceDetail
 	aux := struct {
 		*alias
-		Id      string `json:"id,omitempty"`
-		OwnerId string `json:"owner_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		OwnerId    string  `json:"owner_id,omitempty"`
+		CustomerId *string `json:"customer_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -315,6 +322,13 @@ func (m *InvoiceDetail) UnmarshalJSON(data []byte) error {
 		}
 		m.OwnerId = v
 	}
+	if aux.CustomerId != nil {
+		v, err := strconv.ParseInt(*aux.CustomerId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CustomerId = &v
+	}
 	return nil
 }
 
@@ -332,6 +346,18 @@ func (x *InvoiceDetail) GetOwnerId() int64 {
 		return zero
 	}
 	return x.OwnerId
+}
+
+func (x *InvoiceDetail) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.CustomerId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CustomerId
 }
 
 func (x *InvoiceDetail) GetInvoiceNumber() string {
@@ -740,6 +766,7 @@ type CreateInvoiceRequest struct {
 	ClientEmail   string         `json:"client_email,omitempty"`
 	ClientAddress string         `json:"client_address,omitempty"`
 	ClientTaxId   string         `json:"client_tax_id,omitempty"`
+	CustomerId    *int64         `json:"customer_id,omitempty"`
 	IssueDate     string         `json:"issue_date,omitempty"`
 	DueDate       string         `json:"due_date,omitempty"`
 	Currency      string         `json:"currency,omitempty"`
@@ -749,6 +776,38 @@ type CreateInvoiceRequest struct {
 	Notes         string         `json:"notes,omitempty"`
 	Terms         string         `json:"terms,omitempty"`
 	Items         []*InvoiceItem `json:"items,omitempty"`
+}
+
+func (m *CreateInvoiceRequest) MarshalJSON() ([]byte, error) {
+	type alias CreateInvoiceRequest
+	aux := struct {
+		*alias
+		CustomerId *string `json:"customer_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.CustomerId != nil {
+		encodedCustomerId := strconv.FormatInt(*m.CustomerId, 10)
+		aux.CustomerId = &encodedCustomerId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *CreateInvoiceRequest) UnmarshalJSON(data []byte) error {
+	type alias CreateInvoiceRequest
+	aux := struct {
+		*alias
+		CustomerId *string `json:"customer_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.CustomerId != nil {
+		v, err := strconv.ParseInt(*aux.CustomerId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CustomerId = &v
+	}
+	return nil
 }
 
 func (x *CreateInvoiceRequest) GetClientName() string {
@@ -781,6 +840,18 @@ func (x *CreateInvoiceRequest) GetClientTaxId() string {
 		return zero
 	}
 	return x.ClientTaxId
+}
+
+func (x *CreateInvoiceRequest) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.CustomerId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CustomerId
 }
 
 func (x *CreateInvoiceRequest) GetIssueDate() string {
@@ -983,12 +1054,45 @@ func (x *GetInvoiceResponse) GetPayments() []*Payment {
 }
 
 type ListInvoicesRequest struct {
-	Status   string `json:"status,omitempty"`
-	Search   string `json:"search,omitempty"`
-	DateFrom string `json:"date_from,omitempty"`
-	DateTo   string `json:"date_to,omitempty"`
-	Page     int64  `json:"page,omitempty"`
-	PageSize int64  `json:"page_size,omitempty"`
+	Status     string `json:"status,omitempty"`
+	Search     string `json:"search,omitempty"`
+	CustomerId *int64 `json:"customer_id,omitempty"`
+	DateFrom   string `json:"date_from,omitempty"`
+	DateTo     string `json:"date_to,omitempty"`
+	Page       int64  `json:"page,omitempty"`
+	PageSize   int64  `json:"page_size,omitempty"`
+}
+
+func (m *ListInvoicesRequest) MarshalJSON() ([]byte, error) {
+	type alias ListInvoicesRequest
+	aux := struct {
+		*alias
+		CustomerId *string `json:"customer_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if m.CustomerId != nil {
+		encodedCustomerId := strconv.FormatInt(*m.CustomerId, 10)
+		aux.CustomerId = &encodedCustomerId
+	}
+	return json.Marshal(aux)
+}
+
+func (m *ListInvoicesRequest) UnmarshalJSON(data []byte) error {
+	type alias ListInvoicesRequest
+	aux := struct {
+		*alias
+		CustomerId *string `json:"customer_id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.CustomerId != nil {
+		v, err := strconv.ParseInt(*aux.CustomerId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CustomerId = &v
+	}
+	return nil
 }
 
 func (x *ListInvoicesRequest) GetStatus() string {
@@ -1005,6 +1109,18 @@ func (x *ListInvoicesRequest) GetSearch() string {
 		return zero
 	}
 	return x.Search
+}
+
+func (x *ListInvoicesRequest) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.CustomerId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CustomerId
 }
 
 func (x *ListInvoicesRequest) GetDateFrom() string {

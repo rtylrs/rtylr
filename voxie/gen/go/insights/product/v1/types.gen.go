@@ -331,8 +331,113 @@ func (x *GetCategoryPerformanceResponse) GetCategories() []*CategorySales {
 type GetProductMarginsRequest struct {
 }
 
+type ProductMargin struct {
+	ProductId         int64   `json:"product_id,omitempty"`
+	Name              string  `json:"name,omitempty"`
+	UnitsSold         float64 `json:"units_sold,omitempty"`
+	RevenueMinorUnits int64   `json:"revenue_minor_units,omitempty"`
+	CostMinorUnits    *int64  `json:"cost_minor_units,omitempty"`
+}
+
+func (m *ProductMargin) MarshalJSON() ([]byte, error) {
+	type alias ProductMargin
+	aux := struct {
+		*alias
+		ProductId         string  `json:"product_id,omitempty"`
+		RevenueMinorUnits string  `json:"revenue_minor_units,omitempty"`
+		CostMinorUnits    *string `json:"cost_minor_units,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.ProductId = strconv.FormatInt(m.ProductId, 10)
+	aux.RevenueMinorUnits = strconv.FormatInt(m.RevenueMinorUnits, 10)
+	if m.CostMinorUnits != nil {
+		encodedCostMinorUnits := strconv.FormatInt(*m.CostMinorUnits, 10)
+		aux.CostMinorUnits = &encodedCostMinorUnits
+	}
+	return json.Marshal(aux)
+}
+
+func (m *ProductMargin) UnmarshalJSON(data []byte) error {
+	type alias ProductMargin
+	aux := struct {
+		*alias
+		ProductId         string  `json:"product_id,omitempty"`
+		RevenueMinorUnits string  `json:"revenue_minor_units,omitempty"`
+		CostMinorUnits    *string `json:"cost_minor_units,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.ProductId != "" {
+		v, err := strconv.ParseInt(aux.ProductId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ProductId = v
+	}
+	if aux.RevenueMinorUnits != "" {
+		v, err := strconv.ParseInt(aux.RevenueMinorUnits, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.RevenueMinorUnits = v
+	}
+	if aux.CostMinorUnits != nil {
+		v, err := strconv.ParseInt(*aux.CostMinorUnits, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CostMinorUnits = &v
+	}
+	return nil
+}
+
+func (x *ProductMargin) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProductId
+}
+
+func (x *ProductMargin) GetName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Name
+}
+
+func (x *ProductMargin) GetUnitsSold() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	return x.UnitsSold
+}
+
+func (x *ProductMargin) GetRevenueMinorUnits() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.RevenueMinorUnits
+}
+
+func (x *ProductMargin) GetCostMinorUnits() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.CostMinorUnits == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CostMinorUnits
+}
+
 type GetProductMarginsResponse struct {
-	Buckets []*MarginBucket `json:"buckets,omitempty"`
+	Buckets  []*MarginBucket  `json:"buckets,omitempty"`
+	Products []*ProductMargin `json:"products,omitempty"`
 }
 
 func (x *GetProductMarginsResponse) GetBuckets() []*MarginBucket {
@@ -341,6 +446,14 @@ func (x *GetProductMarginsResponse) GetBuckets() []*MarginBucket {
 		return zero
 	}
 	return x.Buckets
+}
+
+func (x *GetProductMarginsResponse) GetProducts() []*ProductMargin {
+	if x == nil {
+		var zero []*ProductMargin
+		return zero
+	}
+	return x.Products
 }
 
 type GetProductPerformanceRequest struct {

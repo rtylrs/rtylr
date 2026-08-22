@@ -249,6 +249,7 @@ type ProjectServiceServer interface {
 	InviteProjectMember(ctx context.Context, req *InviteProjectMemberRequest) (*InviteProjectMemberResponse, error)
 	TransferProjectOwnership(ctx context.Context, req *TransferProjectOwnershipRequest) (*TransferProjectOwnershipResponse, error)
 	MoveProject(ctx context.Context, req *MoveProjectRequest) (*MoveProjectResponse, error)
+	GetProjectLabourCost(ctx context.Context, req *GetProjectLabourCostRequest) (*GetProjectLabourCostResponse, error)
 }
 
 func RegisterProjectServiceServer(first any, rest ...any) error {
@@ -756,5 +757,27 @@ func RegisterProjectServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "ProjectService", Method: "moveProject", HTTPMethod: "PUT", Route: "/flow/project/v1/projects/move", AuthSchemes: nil}))
+	mux.Handle("GET /flow/project/v1/projects/{id}/labour-cost", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(GetProjectLabourCostRequest)
+		parsedId, err := parseInt64(r.PathValue("id"))
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid path parameter id: "+err.Error())
+			return
+		}
+		req.Id = parsedId
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.GetProjectLabourCost(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "ProjectService", Method: "getProjectLabourCost", HTTPMethod: "GET", Route: "/flow/project/v1/projects/{id}/labour-cost", AuthSchemes: nil}))
 	return nil
 }

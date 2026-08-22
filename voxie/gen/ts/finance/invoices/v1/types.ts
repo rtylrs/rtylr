@@ -121,6 +121,7 @@ return violations;
 export interface InvoiceDetail {
 id?: string;
 ownerId?: string;
+customerId?: string;
 invoiceNumber?: string;
 clientName?: string;
 clientEmail?: string;
@@ -152,6 +153,7 @@ if (v === null || v === undefined) return v;
 return {
 id: v.id,
 ownerId: v.owner_id,
+customerId: v.customer_id,
 invoiceNumber: v.invoice_number,
 clientName: v.client_name,
 clientEmail: v.client_email,
@@ -183,6 +185,7 @@ export function encodeInvoiceDetail(v: InvoiceDetail): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
+if (v.customerId !== undefined) { out.customer_id = v.customerId; }
 if (v.invoiceNumber !== undefined) { out.invoice_number = v.invoiceNumber; }
 if (v.clientName !== undefined) { out.client_name = v.clientName; }
 if (v.clientEmail !== undefined) { out.client_email = v.clientEmail; }
@@ -214,6 +217,7 @@ export function validateInvoiceDetail(v: InvoiceDetail): string[] {
 const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
 if (v.invoiceNumber !== undefined && v.invoiceNumber !== null && !(typeof v.invoiceNumber === "string")) violations.push("invoice_number has invalid type");
 if (v.clientName !== undefined && v.clientName !== null && !(typeof v.clientName === "string")) violations.push("client_name has invalid type");
 if (v.clientEmail !== undefined && v.clientEmail !== null && !(typeof v.clientEmail === "string")) violations.push("client_email has invalid type");
@@ -341,10 +345,11 @@ return violations;
 }
 
 export interface CreateInvoiceRequest {
-clientName: string;
-clientEmail: string;
+clientName?: string;
+clientEmail?: string;
 clientAddress?: string;
 clientTaxId?: string;
+customerId?: string;
 issueDate: string;
 dueDate: string;
 currency: string;
@@ -363,6 +368,7 @@ clientName: v.client_name,
 clientEmail: v.client_email,
 clientAddress: v.client_address,
 clientTaxId: v.client_tax_id,
+customerId: v.customer_id,
 issueDate: v.issue_date,
 dueDate: v.due_date,
 currency: v.currency,
@@ -381,6 +387,7 @@ if (v.clientName !== undefined) { out.client_name = v.clientName; }
 if (v.clientEmail !== undefined) { out.client_email = v.clientEmail; }
 if (v.clientAddress !== undefined) { out.client_address = v.clientAddress; }
 if (v.clientTaxId !== undefined) { out.client_tax_id = v.clientTaxId; }
+if (v.customerId !== undefined) { out.customer_id = v.customerId; }
 if (v.issueDate !== undefined) { out.issue_date = v.issueDate; }
 if (v.dueDate !== undefined) { out.due_date = v.dueDate; }
 if (v.currency !== undefined) { out.currency = v.currency; }
@@ -396,12 +403,11 @@ return out;
 export function validateCreateInvoiceRequest(v: CreateInvoiceRequest): string[] {
 const violations: string[] = [];
 if (v.clientName !== undefined && v.clientName !== null && !(typeof v.clientName === "string")) violations.push("client_name has invalid type");
-if (!(v.clientName !== undefined && v.clientName !== null) || v.clientName === "") violations.push("client_name is required");
 if (v.clientEmail !== undefined && v.clientEmail !== null && !(typeof v.clientEmail === "string")) violations.push("client_email has invalid type");
-if (!(v.clientEmail !== undefined && v.clientEmail !== null) || v.clientEmail === "") violations.push("client_email is required");
 if (v.clientEmail !== undefined && v.clientEmail !== null && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.clientEmail)) violations.push("client_email must be a valid email");
 if (v.clientAddress !== undefined && v.clientAddress !== null && !(typeof v.clientAddress === "string")) violations.push("client_address has invalid type");
 if (v.clientTaxId !== undefined && v.clientTaxId !== null && !(typeof v.clientTaxId === "string")) violations.push("client_tax_id has invalid type");
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
 if (v.issueDate !== undefined && v.issueDate !== null && !(typeof v.issueDate === "string")) violations.push("issue_date has invalid type");
 if (!(v.issueDate !== undefined && v.issueDate !== null) || v.issueDate === "") violations.push("issue_date is required");
 if (v.dueDate !== undefined && v.dueDate !== null && !(typeof v.dueDate === "string")) violations.push("due_date has invalid type");
@@ -551,6 +557,7 @@ return violations;
 export interface ListInvoicesRequest {
 status?: string;
 search?: string;
+customerId?: string;
 dateFrom?: string;
 dateTo?: string;
 page?: number;
@@ -562,6 +569,7 @@ if (v === null || v === undefined) return v;
 return {
 status: v.status,
 search: v.search,
+customerId: v.customer_id,
 dateFrom: v.date_from,
 dateTo: v.date_to,
 page: v.page,
@@ -573,6 +581,7 @@ export function encodeListInvoicesRequest(v: ListInvoicesRequest): Record<string
 const out: Record<string, unknown> = {};
 if (v.status !== undefined) { out.status = v.status; }
 if (v.search !== undefined) { out.search = v.search; }
+if (v.customerId !== undefined) { out.customer_id = v.customerId; }
 if (v.dateFrom !== undefined) { out.date_from = v.dateFrom; }
 if (v.dateTo !== undefined) { out.date_to = v.dateTo; }
 if (v.page !== undefined) { out.page = v.page; }
@@ -584,6 +593,7 @@ export function validateListInvoicesRequest(v: ListInvoicesRequest): string[] {
 const violations: string[] = [];
 if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
 if (v.search !== undefined && v.search !== null && !(typeof v.search === "string")) violations.push("search has invalid type");
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
 if (v.dateFrom !== undefined && v.dateFrom !== null && !(typeof v.dateFrom === "string")) violations.push("date_from has invalid type");
 if (v.dateTo !== undefined && v.dateTo !== null && !(typeof v.dateTo === "string")) violations.push("date_to has invalid type");
 if (v.page !== undefined && v.page !== null && !(typeof v.page === "number" && Number.isSafeInteger(v.page) && v.page >= Number.MIN_SAFE_INTEGER && v.page <= Number.MAX_SAFE_INTEGER)) violations.push("page has invalid type");

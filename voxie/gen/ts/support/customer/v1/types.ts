@@ -6,6 +6,7 @@ businessId?: string;
 name?: string;
 email?: string;
 phone?: string;
+customerId?: string;
 totalTickets?: number;
 lastTicketAt?: string;
 createdAt?: string;
@@ -19,6 +20,7 @@ businessId: v.business_id,
 name: v.name,
 email: v.email,
 phone: v.phone,
+customerId: v.customer_id,
 totalTickets: v.total_tickets,
 lastTicketAt: v.last_ticket_at,
 createdAt: v.created_at,
@@ -32,6 +34,7 @@ if (v.businessId !== undefined) { out.business_id = v.businessId; }
 if (v.name !== undefined) { out.name = v.name; }
 if (v.email !== undefined) { out.email = v.email; }
 if (v.phone !== undefined) { out.phone = v.phone; }
+if (v.customerId !== undefined) { out.customer_id = v.customerId; }
 if (v.totalTickets !== undefined) { out.total_tickets = v.totalTickets; }
 if (v.lastTicketAt !== undefined) { out.last_ticket_at = v.lastTicketAt; }
 if (v.createdAt !== undefined) { out.created_at = v.createdAt; }
@@ -45,6 +48,7 @@ if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
 if (v.phone !== undefined && v.phone !== null && !(typeof v.phone === "string")) violations.push("phone has invalid type");
+if (v.customerId !== undefined && v.customerId !== null && !(typeof v.customerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.customerId))) violations.push("customer_id has invalid type");
 if (v.totalTickets !== undefined && v.totalTickets !== null && !(typeof v.totalTickets === "number" && Number.isInteger(v.totalTickets) && v.totalTickets >= -2147483648 && v.totalTickets <= 2147483647)) violations.push("total_tickets has invalid type");
 if (v.lastTicketAt !== undefined && v.lastTicketAt !== null && !(typeof v.lastTicketAt === "string")) violations.push("last_ticket_at has invalid type");
 if (v.createdAt !== undefined && v.createdAt !== null && !(typeof v.createdAt === "string")) violations.push("created_at has invalid type");

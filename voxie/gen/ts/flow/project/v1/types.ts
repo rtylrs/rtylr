@@ -1193,3 +1193,89 @@ if (v.message !== undefined && v.message !== null && !(typeof v.message === "str
 return violations;
 }
 
+export interface ProjectLabourCost {
+projectId?: string;
+costMinorUnits?: string;
+costedMinutes?: string;
+uncostedMinutes?: string;
+uncostedEmployeeCount?: number;
+}
+
+export function decodeProjectLabourCost(v: any): ProjectLabourCost {
+if (v === null || v === undefined) return v;
+return {
+projectId: v.project_id,
+costMinorUnits: v.cost_minor_units,
+costedMinutes: v.costed_minutes,
+uncostedMinutes: v.uncosted_minutes,
+uncostedEmployeeCount: v.uncosted_employee_count,
+};
+}
+
+export function encodeProjectLabourCost(v: ProjectLabourCost): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.projectId !== undefined) { out.project_id = v.projectId; }
+if (v.costMinorUnits !== undefined) { out.cost_minor_units = v.costMinorUnits; }
+if (v.costedMinutes !== undefined) { out.costed_minutes = v.costedMinutes; }
+if (v.uncostedMinutes !== undefined) { out.uncosted_minutes = v.uncostedMinutes; }
+if (v.uncostedEmployeeCount !== undefined) { out.uncosted_employee_count = v.uncostedEmployeeCount; }
+return out;
+}
+
+export function validateProjectLabourCost(v: ProjectLabourCost): string[] {
+const violations: string[] = [];
+if (v.projectId !== undefined && v.projectId !== null && !(typeof v.projectId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.projectId))) violations.push("project_id has invalid type");
+if (v.costMinorUnits !== undefined && v.costMinorUnits !== null && !(typeof v.costMinorUnits === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.costMinorUnits))) violations.push("cost_minor_units has invalid type");
+if (v.costedMinutes !== undefined && v.costedMinutes !== null && !(typeof v.costedMinutes === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.costedMinutes))) violations.push("costed_minutes has invalid type");
+if (v.uncostedMinutes !== undefined && v.uncostedMinutes !== null && !(typeof v.uncostedMinutes === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.uncostedMinutes))) violations.push("uncosted_minutes has invalid type");
+if (v.uncostedEmployeeCount !== undefined && v.uncostedEmployeeCount !== null && !(typeof v.uncostedEmployeeCount === "number" && Number.isInteger(v.uncostedEmployeeCount) && v.uncostedEmployeeCount >= -2147483648 && v.uncostedEmployeeCount <= 2147483647)) violations.push("uncosted_employee_count has invalid type");
+return violations;
+}
+
+export interface GetProjectLabourCostRequest {
+id?: string;
+}
+
+export function decodeGetProjectLabourCostRequest(v: any): GetProjectLabourCostRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+};
+}
+
+export function encodeGetProjectLabourCostRequest(v: GetProjectLabourCostRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+return out;
+}
+
+export function validateGetProjectLabourCostRequest(v: GetProjectLabourCostRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+return violations;
+}
+
+export interface GetProjectLabourCostResponse {
+cost?: ProjectLabourCost;
+}
+
+export function decodeGetProjectLabourCostResponse(v: any): GetProjectLabourCostResponse {
+if (v === null || v === undefined) return v;
+return {
+cost: (v.cost !== undefined ? decodeProjectLabourCost(v.cost) : v.cost),
+};
+}
+
+export function encodeGetProjectLabourCostResponse(v: GetProjectLabourCostResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.cost !== undefined) { out.cost = encodeProjectLabourCost(v.cost); }
+return out;
+}
+
+export function validateGetProjectLabourCostResponse(v: GetProjectLabourCostResponse): string[] {
+const violations: string[] = [];
+if (v.cost !== undefined && v.cost !== null && !(typeof v.cost === "object" && v.cost !== null && !Array.isArray(v.cost))) violations.push("cost has invalid type");
+if (v.cost !== undefined && v.cost !== null) violations.push(...validateProjectLabourCost(v.cost).map((message) => "cost: " + message));
+return violations;
+}
+

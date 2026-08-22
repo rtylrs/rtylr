@@ -57,6 +57,9 @@ func (c *InvoicesServiceClient) ListInvoices(ctx context.Context, req *ListInvoi
 	query := url.Values{}
 	query.Set("status", req.Status)
 	query.Set("search", req.Search)
+	if req.CustomerId != nil {
+		query.Set("customer_id", strconv.FormatInt(int64(*req.CustomerId), 10))
+	}
 	query.Set("date_from", req.DateFrom)
 	query.Set("date_to", req.DateTo)
 	query.Set("page", strconv.FormatInt(int64(req.Page), 10))

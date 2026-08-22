@@ -575,6 +575,10 @@ func (x *LeaveBalancePayload) GetUpdatedAt() int64 {
 type ListLeaveRequestsRequest struct {
 	EmployeeId *int64  `json:"employee_id,omitempty"`
 	Status     *string `json:"status,omitempty"`
+	FromDate   *string `json:"from_date,omitempty"`
+	ToDate     *string `json:"to_date,omitempty"`
+	Limit      int32   `json:"limit,omitempty"`
+	Offset     int32   `json:"offset,omitempty"`
 }
 
 func (m *ListLeaveRequestsRequest) MarshalJSON() ([]byte, error) {
@@ -631,6 +635,46 @@ func (x *ListLeaveRequestsRequest) GetStatus() string {
 		return zero
 	}
 	return *x.Status
+}
+
+func (x *ListLeaveRequestsRequest) GetFromDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.FromDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.FromDate
+}
+
+func (x *ListLeaveRequestsRequest) GetToDate() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	if x.ToDate == nil {
+		var zero string
+		return zero
+	}
+	return *x.ToDate
+}
+
+func (x *ListLeaveRequestsRequest) GetLimit() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListLeaveRequestsRequest) GetOffset() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.Offset
 }
 
 type ListLeaveRequestsResponse struct {

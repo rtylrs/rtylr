@@ -74,12 +74,6 @@ func (m *CreateInvoiceRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.ClientName == "" {
-		violations = append(violations, "client_name is required")
-	}
-	if m.ClientEmail == "" {
-		violations = append(violations, "client_email is required")
-	}
 	if m.ClientEmail != "" && !emailPattern.MatchString(m.ClientEmail) {
 		violations = append(violations, "client_email must be a valid email")
 	}
