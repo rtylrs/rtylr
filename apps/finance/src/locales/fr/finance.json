@@ -16,7 +16,9 @@
     "recordPayment": "Enregistrer le paiement",
     "recording": "Enregistrement...",
     "recordFailed": "Échec de l'enregistrement du paiement",
-    "createFailed": "Échec de l'enregistrement de la facture"
+    "createFailed": "Échec de l'enregistrement de la facture",
+    "prefillFromContract": "Préremplir depuis un contrat signé",
+    "chooseContract": "Choisir un contrat signé…"
   },
   "expenses": {
     "submit": "Soumettre",
@@ -50,5 +52,16 @@
       "inventoryHint": "Valeur de stock en direct depuis l'ERP ; affichée seulement si l'ERP est activé pour cette entreprise.",
       "inventoryUnavailable": "ERP non connecté"
     }
+  },
+  "fallbackClient": "",
+  "unbilled": {
+    "region": "Temps facturable non facturé",
+    "title": "Temps facturable non facturé",
+    "hint": "Temps approuvé facturable des RH sans facture. Sélectionnez des entrées puis créez une facture ; les heures seront marquées facturées automatiquement.",
+    "billSelected": "Facturer la sélection ({count})",
+    "working": "En cours…",
+    "markedDone": "Boucle terminée : {marked} heures marquées facturées, {skipped} ignorées.",
+    "billToPlaceholder": "Facturer à (nom du client)",
+    "fallbackClient": "Heures facturables"
   }
 }

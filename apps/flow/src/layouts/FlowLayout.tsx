@@ -54,6 +54,7 @@ import ModeToggle from '../shared/components/ModeToggle';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useProjects, useCreateProject } from '../features/projects/useProjects';
 import { useMyTasksProject } from '../features/tasks/useMyTasksProject';
+import { RecycleBinSection } from '../features/projects-v2/RecycleBinSection';
 import { isApiWorkspaceId, PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
 import type { Member, Workspace } from '../shared/stores/flowStore';
 import { isTaskMine } from '../shared/lib/currentUser';
@@ -286,30 +287,14 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // IMPORTANT: use React Query data directly for display, never wait for the
   // Zustand store to hydrate, because the store is populated via useEffect which
   // fires *after* render, causing a flash of "No workspace".
-  const apiWorkspaces: { id: string; name: string; color: string }[] = [];
+  const apiWorkspaces = EMPTY_WORKSPACES;
   const workspacesLoading = false;
   const { data: businessName } = useFlowBusinessName();
 
-  const PERSONAL_FALLBACK: Workspace = {
-    id: PERSONAL_WORKSPACE_ID,
-    name: t('flow.shell.personal'),
-    color: ACCENT_DEFAULT,
-  };
-
-  // Effective workspace list: prefer live API data, fall back to store, guarantee Personal.
-  // Always map through apiWorkspaceToWorkspace so IDs are strings - URL params are strings
-  // and === comparisons would silently fail against numeric API IDs.
-  const liveWorkspaces = useMemo<Workspace[]>(() => {
-    const list =
-      apiWorkspaces && apiWorkspaces.length > 0
-        ? apiWorkspaces.map(apiWorkspaceToWorkspace)
-        : workspaces;
-    if (list.length === 0) return workspacesLoading ? [] : [PERSONAL_FALLBACK];
-    return list;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiWorkspaces, workspaces, workspacesLoading]);
-
-  const currentWorkspaceId = workspaceId || activeWorkspaceId || liveWorkspaces[0]?.id || '';
+  // Workspace layer removed: these are stable constants so downstream
+  // references compile without cascading re-renders.
+  const currentWorkspaceId = '';
+  const liveWorkspaces: Workspace[] = [];
 
   // Creating a project posts workspace_id, so it needs a resolved numeric id -
   // not the Personal sentinel this layout paints with before workspaces load.
@@ -477,20 +462,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   useKeyboardShortcuts();
 
-  const activeWorkspace =
-    liveWorkspaces.find((w) => w.id === currentWorkspaceId) ||
-    (currentWorkspaceId && currentWorkspaceId !== PERSONAL_WORKSPACE_ID
-      ? {
-          id: currentWorkspaceId,
-          name:
-            businessName ||
-            user?.businessName ||
-            authUser?.businessName ||
-            t('flow.shell.workspace'),
-          color: ACCENT_DEFAULT,
-        }
-      : liveWorkspaces[0]) ||
-    (workspacesLoading ? { id: '', name: '', color: '#6b7280' } : PERSONAL_FALLBACK);
+  const activeWorkspace = {
+    id: '',
+    name: businessName || user?.businessName || authUser?.businessName || t('flow.shell.workspace'),
+    color: ACCENT_DEFAULT,
+  };
 
   // Hide the auto-provisioned personal project - it's the backend's bucket for
   // the dedicated "My Tasks" page (top nav) and, like Asana, must not surface in
@@ -1218,7 +1194,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       }}
                     />
                     <Link
-                      to="/profile"
+                      to="/u/$userId"
+                      params={{ userId: user?.id ?? '' }}
                       onClick={() => setUserMenuOpen(false)}
                       className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-start transition-colors hover:bg-[var(--flow-hover)]"
                       style={{ color: 'var(--flow-text)' }}
@@ -1464,3 +1441,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 };
 
 export default FlowLayout;
+
+// Module-level constant: same reference every render, prevents the
+// useMemo → useEffect → setState → re-render infinite loop.
+const EMPTY_WORKSPACES: { id: string; name: string; color: string }[] = [];

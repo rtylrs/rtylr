@@ -10,6 +10,12 @@ import { EmptyState } from '@voxire/ui';
 import { Invoice } from '../../shared/services/financeApi';
 import { useInvoices, useUpdateInvoiceStatus } from './useInvoices';
 import PageHeader from '../../shared/components/PageHeader';
+import { useSettings } from '../../shared/lib/settings';
+import { useCreateInvoice } from './useInvoices';
+import {
+  useUnbilledBillableEntries,
+  useMarkEntriesInvoiced,
+} from '../../shared/hooks/queries/useUnbilledBillableEntries';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import InvoiceStatusFilter, {
@@ -38,6 +44,17 @@ const Invoices: React.FC = () => {
   const [sendTarget, setSendTarget] = useState<Invoice | null>(null);
   const [page, setPage] = useState(1);
   const { data, isLoading: loading } = useInvoices({ page });
+  // The billable loop's Finance half (#836): pick approved billable HR time,
+  // raise one invoice for it, and the loop stamps those hours invoiced so the
+  // list stops offering them. Hidden when HR is absent or unreachable.
+  const rangeFrom = new Date(Date.now() - 90 * 864e5).toISOString().slice(0, 10);
+  const rangeTo = new Date().toISOString().slice(0, 10);
+  const { data: unbilled } = useUnbilledBillableEntries(rangeFrom, rangeTo);
+  const [pickedHours, setPickedHours] = useState<Set<string>>(new Set());
+  const markInvoiced = useMarkEntriesInvoiced();
+  const baseCurrency = useSettings((st) => st.currency);
+  const createInvoice = useCreateInvoice();
+  const [billToName, setBillToName] = useState('');
   const updateStatus = useUpdateInvoiceStatus();
   const navigate = useNavigate();
   const invoices: Invoice[] = data?.invoices ?? [];
@@ -82,6 +99,45 @@ const Invoices: React.FC = () => {
     dueDate: i.dueDate,
     status: i.status,
   }));
+
+  const toggleHour = (id: string): void =>
+    setPickedHours((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  // One invoice for the picked hours, then the loop stamps them invoiced.
+  // Pricing stays manual on purpose: rates never leave HR (#836's RBAC rule),
+  // so the draft opens with the hours described and the amounts blank.
+  const billSelectedHours = (): void => {
+    const picked = (unbilled ?? []).filter((e) => pickedHours.has(e.id));
+    const client = billToName.trim();
+    if (!picked.length || !client) return;
+    createInvoice.mutate(
+      {
+        clientName: client,
+        clientEmail: '',
+        issueDate: rangeTo,
+        dueDate: rangeTo,
+        currency: baseCurrency ?? 'USD',
+        discountType: 'fixed',
+        items: picked.map((e, i) => ({
+          description: `${e.date ?? ''} ${e.description ?? ''}`.trim() || `Time entry ${e.id}`,
+          quantity: Math.round(((e.durationMinutes ?? 0) / 60) * 100) / 100,
+          unit: 'hour',
+          sortOrder: String(i),
+        })),
+      },
+      {
+        onSuccess: (inv) => {
+          markInvoiced.mutate({ entryIds: picked.map((e) => e.id), invoiceId: inv.id });
+          setPickedHours(new Set());
+        },
+      },
+    );
+  };
 
   return (
     <motion.div
@@ -133,6 +189,98 @@ const Invoices: React.FC = () => {
           </>
         }
       />
+
+      {unbilled && unbilled.length > 0 && (
+        <div
+          role="region"
+          aria-label={t('unbilled.region')}
+          style={{
+            ...cardStyle,
+            padding: 16,
+            border: '1px solid var(--finance-info)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--hub-text)' }}>
+              {t('unbilled.title')} ({unbilled.length})
+            </div>
+            <button
+              type="button"
+              style={{ ...ghostBtn, padding: '5px 12px' }}
+              disabled={
+                !pickedHours.size ||
+                !billToName.trim() ||
+                createInvoice.isPending ||
+                markInvoiced.isPending
+              }
+              onClick={billSelectedHours}
+            >
+              {createInvoice.isPending || markInvoiced.isPending
+                ? t('unbilled.working')
+                : t('unbilled.billSelected', { count: pickedHours.size })}
+            </button>
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)', marginTop: 2 }}>
+            {t('unbilled.hint')}
+          </div>
+          <input
+            type="text"
+            value={billToName}
+            onChange={(e) => setBillToName(e.target.value)}
+            placeholder={t('unbilled.billToPlaceholder')}
+            aria-label={t('unbilled.billToPlaceholder')}
+            style={{
+              marginTop: 10,
+              padding: '7px 10px',
+              borderRadius: 8,
+              border: '1px solid var(--hub-border)',
+              background: 'var(--hub-surface)',
+              color: 'var(--hub-text)',
+              fontSize: 16,
+              maxWidth: 320,
+            }}
+          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10 }}>
+            {unbilled.slice(0, 8).map((e) => (
+              <label
+                key={e.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  fontSize: 12,
+                  color: 'var(--hub-text)',
+                  cursor: 'pointer',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={pickedHours.has(e.id)}
+                  onChange={() => toggleHour(e.id)}
+                  style={{ width: 16, height: 16, accentColor: ACCENT }}
+                />
+                <span>{e.date}</span>
+                <span
+                  style={{
+                    flex: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {e.description || e.projectId}
+                </span>
+                <span>{Math.round(((e.durationMinutes ?? 0) / 60) * 100) / 100} h</span>
+              </label>
+            ))}
+            {unbilled.length > 8 && (
+              <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>
+                +{unbilled.length - 8}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <InvoiceStatusFilter value={activeTab} onChange={setActiveTab} counts={counts} />
 

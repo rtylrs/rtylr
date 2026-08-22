@@ -226,70 +226,16 @@ describe('FlowLayout account menu', () => {
   });
 });
 
-describe('FlowLayout workspace switcher', () => {
-  beforeEach(() => {
-    mocks.navigate.mockClear();
-    mocks.location = { pathname: '/inbox' };
-  });
-
-  const renderLayout = () =>
-    render(
-      <FlowLayout>
-        <div>content</div>
-      </FlowLayout>
-    );
-
-  // Trigger and the (single, fallback "Personal") workspace list item share
-  // the same accessible name once the menu is open, so open/closed state is
-  // asserted by count (1 = trigger only, 2 = trigger + list item) rather than
-  // by presence/absence of unique text.
-  const getWorkspaceButtons = () =>
-    screen.getAllByRole('button', { name: /flow\.shell\.personal/i });
-
-  it('opens on trigger click and lists workspaces', () => {
-    renderLayout();
-
-    expect(getWorkspaceButtons()).toHaveLength(1);
-
-    fireEvent.click(getWorkspaceButtons()[0]);
-
-    expect(getWorkspaceButtons()).toHaveLength(2);
-  });
-
-  it('closes on Escape', () => {
-    renderLayout();
-
-    fireEvent.click(getWorkspaceButtons()[0]);
-    expect(getWorkspaceButtons()).toHaveLength(2);
-
-    fireEvent.keyDown(document, { key: 'Escape' });
-
-    expect(getWorkspaceButtons()).toHaveLength(1);
-  });
-
-  it('closes when clicking outside the menu', () => {
-    renderLayout();
-
-    fireEvent.click(getWorkspaceButtons()[0]);
-    expect(getWorkspaceButtons()).toHaveLength(2);
-
-    fireEvent.mouseDown(document.body);
-
-    expect(getWorkspaceButtons()).toHaveLength(1);
-  });
-
-  it('stays open when clicking inside the menu', () => {
-    renderLayout();
-
-    fireEvent.click(getWorkspaceButtons()[0]);
-    const items = getWorkspaceButtons();
-    expect(items).toHaveLength(2);
-
-    fireEvent.mouseDown(items[1]);
-
-    expect(getWorkspaceButtons()).toHaveLength(2);
-  });
-});
+// The 'FlowLayout workspace switcher' suite is deliberately gone.
+//
+// This PR removes workspace state from the layout: activeWorkspace is now a
+// literal built from the business name, and there is no switcher to open, no
+// list to enumerate and nothing to close. The four tests here asserted a control
+// that no longer renders, so they were removed with it rather than left to fail
+// or skipped as if the feature were coming back.
+//
+// If a workspace switcher returns, the assertions are recoverable from git
+// history at this commit's parent.
 
 describe('FlowLayout appearance wiring', () => {
   const renderLayout = () =>
@@ -299,12 +245,10 @@ describe('FlowLayout appearance wiring', () => {
       </FlowLayout>
     );
 
-  // A colour that is deliberately NOT ACCENT_DEFAULT. This test exists because
-  // an earlier version of it could not fail: the fallback workspace's colour IS
-  // ACCENT_DEFAULT, so with no workspace in the store the correct wiring and a
-  // hardcoded ACCENT_DEFAULT produce the same value. Replacing the expression
-  // with a constant broke nothing across 1305 tests. A distinct colour is what
-  // makes the assertion able to discriminate.
+  // A colour that is deliberately NOT ACCENT_DEFAULT, so the assertions below
+  // can tell a live value from a constant. That mattered when the layout read a
+  // real workspace: the fallback workspace's colour IS ACCENT_DEFAULT, so an
+  // earlier version of this suite passed with the wiring replaced by a constant.
   const DISTINCT = '#a3d84b';
 
   beforeEach(() => {
@@ -312,18 +256,33 @@ describe('FlowLayout appearance wiring', () => {
     useFlowStore.getState().setWorkspaces([]);
   });
 
-  it('hands the appearance provider the active workspace colour', () => {
+  // This suite changed shape with the workspace removal, and the change is a
+  // product decision worth reading rather than a test repair.
+  //
+  // The layout used to pass the active workspace's colour, which is what made
+  // `accent: null` mean "follow the workspace" in the appearance panel. It now
+  // builds activeWorkspace as a literal with `color: ACCENT_DEFAULT`, so the
+  // accent the provider receives is constant.
+  //
+  // The consequence for the appearance feature: the user-accent-overrides-
+  // workspace rule still holds, but its other half is gone. `accent: null` now
+  // resolves to the brand teal rather than to anything workspace-derived. The
+  // panel's reset control still works and the derivation is unaffected. Nothing
+  // is broken; one half of a documented behaviour is simply no longer reachable.
+  //
+  // Asserting the constant rather than deleting the suite, so a future change
+  // that reintroduces a real per-workspace accent has to come back here and say
+  // so deliberately.
+  it('hands the appearance provider a constant accent now that workspaces are gone', () => {
     useFlowStore.getState().setWorkspaces([{ id: 'ws-9', name: 'Studio', color: DISTINCT }]);
     useFlowStore.getState().setActiveWorkspace('ws-9');
     renderLayout();
-    expect(providerProps.workspaceAccent).toBe(DISTINCT);
+    expect(providerProps.workspaceAccent).not.toBe(DISTINCT);
+    expect(providerProps.workspaceAccent).toBeTruthy();
   });
 
-  it('falls back to the brand accent when no workspace has a colour', () => {
+  it('still supplies the provider an accent at all', () => {
     renderLayout();
-    // The personal fallback carries ACCENT_DEFAULT, so this pins the shape of
-    // the fallback rather than a specific brand value.
     expect(providerProps.workspaceAccent).toBeTruthy();
-    expect(providerProps.workspaceAccent).not.toBe(DISTINCT);
   });
 });

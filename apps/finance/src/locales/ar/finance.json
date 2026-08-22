@@ -16,7 +16,9 @@
     "recordPayment": "تسجيل الدفع",
     "recording": "جارٍ التسجيل...",
     "recordFailed": "تعذّر تسجيل الدفع",
-    "createFailed": "تعذّر حفظ الفاتورة"
+    "createFailed": "تعذّر حفظ الفاتورة",
+    "prefillFromContract": "تعبئة من عقد موقّع",
+    "chooseContract": "اختر عقداً موقّعاً…"
   },
   "expenses": {
     "submit": "إرسال",
@@ -50,5 +52,16 @@
       "inventoryHint": "قيمة المخزون الحية من نظام ERP؛ تظهر فقط عند تفعيل ERP لهذا النشاط.",
       "inventoryUnavailable": "ERP غير متصل"
     }
+  },
+  "fallbackClient": "",
+  "unbilled": {
+    "region": "وقت قابل للفوترة غير مفوتر",
+    "title": "وقت قابل للفوترة غير مفوتر",
+    "hint": "وقت معتمد قابل للفوترة من الموارد البشرية دون فاتورة بعد. اختر الإدخالات ثم أنشئ فاتورة واحدة؛ سيُعلَّم الوقت كمفوتر تلقائياً.",
+    "billSelected": "فوترة المحدد ({count})",
+    "working": "جارٍ العمل…",
+    "markedDone": "اكتملت الدورة: تم تعليم {marked} كمنفوترة، وتجاوز {skipped}.",
+    "billToPlaceholder": "الفاتورة إلى (اسم العميل)",
+    "fallbackClient": "ساعات قابلة للفوترة"
   }
 }

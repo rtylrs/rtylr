@@ -163,12 +163,30 @@ const taskDetailRoute = createRoute({
   component: () => withLayout(<TaskDetail />),
 });
 
+const AllProjects = React.lazy(() => import('./features/projects-v2/AllProjects'));
+const Profile = React.lazy(() => import('./features/profile-v2/Profile'));
+
 // "My tasks" shows every task assigned to the user across all workspaces and
 // projects (it is not workspace-scoped): a single cross-project board.
 const myIssuesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/my-issues',
   component: () => withLayout(<MyIssues />),
+});
+
+const allProjectsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/projects',
+  component: () => withLayout(<AllProjects />),
+});
+
+const profileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/u/$userId',
+  component: () => {
+    const { userId } = profileRoute.useParams();
+    return withLayout(<Profile userId={userId} />);
+  },
 });
 
 const todayRoute = createRoute({
@@ -250,11 +268,6 @@ const myDayRoute = createRoute({
   component: () => withLayout(<MyDay />),
 });
 
-const profileRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/profile',
-  component: () => withLayout(<ProfileScreen />),
-});
 
 const leaveRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -312,6 +325,7 @@ const routeTree = rootRoute.addChildren([
   projectSettingsRoute,
   taskDetailRoute,
   myIssuesRoute,
+  allProjectsRoute,
   todayRoute,
   timelineRoute,
   calendarRoute,

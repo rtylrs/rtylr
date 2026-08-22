@@ -511,24 +511,10 @@
     }
   },
   "profile": {
-    "heading": "الملف الشخصي",
-    "hrDetails": "بيانات الموارد البشرية",
-    "noRecordTitle": "لا يوجد سجل موارد بشرية مرتبط بعد",
-    "noRecordDescription": "حسابك غير مرتبط بسجل موظف في الموارد البشرية بعد. اطلب من أحد المدراء ربطه.",
-    "noRecordCta": "تحديث",
-    "role": "الدور",
-    "department": "القسم",
-    "employmentType": "نوع التوظيف",
-    "status": "الحالة",
-    "startDate": "تاريخ البدء",
-    "email": "البريد الإلكتروني",
-    "phone": "الهاتف",
-    "address": "العنوان",
-    "emergencyContact": "جهة الاتصال في حالات الطوارئ",
-    "bio": "نبذة",
-    "activity": "نشاط Flow",
-    "hoursLoggedThisWeek": "{{hours}} مسجّلة هذا الأسبوع",
-    "viewMyDay": "عرض يومي"
+    "back": "رجوع",
+    "notFound": "لم يتم العثور على الملف الشخصي.",
+    "publicProjects": "المشاريع العامة",
+    "noPublicProjects": "لا توجد مشاريع عامة."
   },
   "board": {
     "pageTitle": "اللوحة · rtylr",
@@ -777,5 +763,27 @@
   },
   "bulkEdit": {
     "clearSelectionLabel": "إلغاء التحديد"
+  },
+  "allProjects": {
+    "title": "جميع المشاريع",
+    "search": "البحث في المشاريع…",
+    "filterStatus": "تصفية حسب الحالة",
+    "filterVisibility": "تصفية حسب الرؤية",
+    "allStatuses": "كل الحالات",
+    "allVisibilities": "كل أنواع الرؤية",
+    "noResults": "لا توجد مشاريع تطابق عوامل التصفية.",
+    "tryClearing": "حاول مسح البحث أو عوامل التصفية.",
+    "emptyTitle": "لا توجد مشاريع بعد",
+    "emptyDescription": "أنشئ مشروعك الأول للبدء.",
+    "createFirst": "إنشاء مشروع"
+  },
+  "bin": {
+    "title": "سلة المحذوفات",
+    "archived": "مؤرشف",
+    "restore": "استعادة {name}",
+    "restored": "تم استعادة المشروع",
+    "purged": "تم حذف المشروع نهائيًا",
+    "purgeConfirm": "سيؤدي هذا إلى حذف {name} وكل ما بداخله نهائيًا. لا يمكن التراجع عن هذا الإجراء.",
+    "retention": "تبقى المشاريع في السلة لمدة {days} يومًا قبل الحذف التلقائي."
   }
 }

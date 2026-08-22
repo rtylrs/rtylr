@@ -9,8 +9,10 @@ import type { CreateInvoiceRequest } from '@voxire/voxie/finance/invoices/v1/typ
 import PageHeader from '../../shared/components/PageHeader';
 import ClientSelect, { Client } from '../../shared/components/ClientSelect';
 import LineItemRow, { LineItem } from '../../shared/components/LineItemRow';
+import { useSignedContracts, type SignedContract } from '../../shared/hooks/queries/useSignedContracts';
 import TaxBreakdown from '../../shared/components/TaxBreakdown';
 import InvoicePreview from '../../shared/components/InvoicePreview';
+import { useTranslation } from 'react-i18next';
 import { useCreateInvoice, useInvoiceDetail, useUpdateInvoiceStatus } from './useInvoices';
 import {
   cardStyle,
@@ -30,6 +32,7 @@ const newInvoiceRoute = getRouteApi('/layout/invoices/new');
 const STEPS = ['Client', 'Items', 'Tax & Notes', 'Preview'] as const;
 
 const NewInvoice: React.FC = () => {
+  const { t } = useTranslation('finance');
   const navigate = useNavigate();
   const { clone, client: clientId } = newInvoiceRoute.useSearch();
   const settings = useSettings();
@@ -47,6 +50,9 @@ const NewInvoice: React.FC = () => {
   ]);
   const [notes, setNotes] = useState(settings.invoiceNotes);
   const [discount, setDiscount] = useState(0);
+  // CRM->FIN-01 (#839): signed contracts offered as one-click prefills.
+  const { data: signedContracts } = useSignedContracts();
+  const [prefilledContractId, setPrefilledContractId] = useState('');
   const createInvoice = useCreateInvoice();
   const updateInvoiceStatus = useUpdateInvoiceStatus();
   const { data: sourceInvoice } = useInvoiceDetail(clone);
@@ -97,6 +103,25 @@ const NewInvoice: React.FC = () => {
         taxRate: settings.defaultTaxRate,
       },
     ]);
+
+  const prefillFromContract = (contract: SignedContract): void => {
+    const seats = contract.seats ?? 0;
+    const mrr = Number(contract.mrr ?? 0);
+    setItems([
+      {
+        id: 'c1',
+        description: `${contract.plan ?? 'Subscription'} — ${seats} seat${seats === 1 ? '' : 's'}`,
+        quantity: 1,
+        unitPrice: mrr,
+        taxRate: settings.defaultTaxRate,
+      },
+    ]);
+    setNotes(
+      `Prefilled from signed CRM contract #${contract.id}` +
+        (contract.signedAt ? ` (signed ${contract.signedAt})` : '') +
+        `\n${settings.invoiceNotes}`,
+    );
+  };
 
   const updateItem = (i: number, item: LineItem) =>
     setItems((prev) => prev.map((it, idx) => (idx === i ? item : it)));
@@ -277,6 +302,52 @@ const NewInvoice: React.FC = () => {
 
           {step === 1 && (
             <div>
+              {signedContracts && signedContracts.length > 0 && (
+                <div
+                  style={{
+                    ...cardStyle,
+                    padding: 12,
+                    marginBottom: 14,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <label
+                    htmlFor="contract-prefill"
+                    style={{ fontSize: 12, color: 'var(--hub-text-muted)', fontWeight: 500 }}
+                  >
+                    {t('invoices.prefillFromContract')}
+                  </label>
+                  <select
+                    id="contract-prefill"
+                    value={prefilledContractId}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setPrefilledContractId(id);
+                      const c = signedContracts.find((x) => x.id === id);
+                      if (c) prefillFromContract(c);
+                    }}
+                    style={{
+                      padding: '7px 10px',
+                      borderRadius: 8,
+                      border: '1px solid var(--hub-border)',
+                      background: 'var(--hub-surface)',
+                      color: 'var(--hub-text)',
+                      fontSize: 16,
+                      minWidth: 220,
+                    }}
+                  >
+                    <option value="">{t('invoices.chooseContract')}</option>
+                    {signedContracts.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {`${c.plan ?? 'Contract'} — ${c.mrr ?? '0'}/mo${c.signedAt ? ` (${c.signedAt})` : ''}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>

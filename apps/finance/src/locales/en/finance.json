@@ -16,7 +16,9 @@
     "recordPayment": "Record Payment",
     "recording": "Recording...",
     "recordFailed": "Failed to record payment",
-    "createFailed": "Failed to save invoice"
+    "createFailed": "Failed to save invoice",
+    "prefillFromContract": "Prefill from signed contract",
+    "chooseContract": "Choose a signed contract…"
   },
   "expenses": {
     "submit": "Submit",
@@ -50,5 +52,15 @@
     "inventory": "Inventory",
     "inventoryHint": "Live stock value from ERP; shown only when ERP is enabled for this business.",
     "inventoryUnavailable": "ERP not connected"
+  },
+  "unbilled": {
+    "region": "Unbilled billable time",
+    "title": "Unbilled billable time",
+    "hint": "Approved billable HR time with no invoice yet. Pick entries, then create one invoice; the hours are stamped invoiced automatically.",
+    "billSelected": "Bill selected ({count})",
+    "working": "Working…",
+    "markedDone": "Invoice loop closed: {marked} hours stamped invoiced, {skipped} skipped.",
+    "fallbackClient": "",
+    "billToPlaceholder": "Bill to (client name)"
   }
 }
