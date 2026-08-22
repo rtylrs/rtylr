@@ -50,8 +50,8 @@ func paramsKey(p domain.ReportParams) string {
 	if p.EmployeeID != nil {
 		emp = *p.EmployeeID
 	}
-	return fmt.Sprintf("f=%d|t=%d|loc=%d|dep=%d|emp=%d",
-		p.DateFrom.Unix(), p.DateTo.Unix(), loc, dep, emp)
+	return fmt.Sprintf("actor=%d|f=%d|t=%d|loc=%d|dep=%d|emp=%d",
+		p.ActorID, p.DateFrom.Unix(), p.DateTo.Unix(), loc, dep, emp)
 }
 
 func (s *Service) GenerateReport(ctx context.Context, businessID int64, reportType string, params domain.ReportParams) ([]map[string]interface{}, error) {
