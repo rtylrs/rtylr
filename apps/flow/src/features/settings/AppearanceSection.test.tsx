@@ -356,12 +356,20 @@ describe('Appearance panel text size gate', () => {
     renderPanel();
     const large = screen.getByRole('button', { name: 'flow.settings.appearance.textSize.l' });
 
-    expect(large).toBeDisabled();
+    // aria-disabled, not native disabled, and the distinction is the point: a
+    // natively disabled button leaves the tab order, which makes the
+    // aria-describedby below unannounceable and hides the reason from exactly
+    // the users who most need it. Asserting reachability, not just inertness.
+    expect(large).toHaveAttribute('aria-disabled', 'true');
+    expect(large).not.toBeDisabled();
+    expect(large.tabIndex).toBeGreaterThanOrEqual(0);
     expect(large).toHaveAttribute('aria-describedby', 'appearance-text-size-gate');
     expect(screen.getByText('flow.settings.appearance.textSizeGate')).toBeInTheDocument();
 
     fireEvent.click(large);
     fireEvent.pointerEnter(large);
+    fireEvent.keyDown(large, { key: 'Enter' });
+    fireEvent.keyDown(large, { key: ' ' });
     expect(setters.setTextSize).not.toHaveBeenCalled();
     // The audition is wired off too, so the pane never previews a value the
     // user has no way of selecting.
