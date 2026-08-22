@@ -4,12 +4,14 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/go-chi/chi/v5"
-
 	"github.com/voxire/onion/internal/modules/flow_insights/internal/application"
-	"github.com/voxire/onion/internal/modules/flow_insights/internal/routes"
 )
 
+// FlowInsights is a data provider, not an HTTP surface. Its legacy chi routes
+// were shadowed duplicates of the onekit flow.insights.v1 service that
+// workspaces serves with pagination, and they are gone (#683). The module
+// stays because insights.dashboard.v1 and echo consume the three readers
+// below rather than growing their own cross-schema queries.
 type Module struct {
 	service *application.Service
 }
@@ -18,14 +20,6 @@ func NewModule(ctx context.Context, db *sql.DB) *Module {
 	return &Module{
 		service: application.NewService(ctx, db),
 	}
-}
-
-func (m *Module) RegisterRoutes(ctx context.Context, router *chi.Mux, _ ...interface{}) {
-	routes.RegisterRoutes(ctx, router, m.service)
-}
-
-func (m *Module) GetAnonymousRoutes() []string {
-	return []string{}
 }
 
 // The three readers below exist so another module can ask Flow for its own
