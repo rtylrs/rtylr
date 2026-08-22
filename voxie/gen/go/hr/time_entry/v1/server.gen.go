@@ -238,6 +238,7 @@ type TimeEntryServiceServer interface {
 	ListTimesheets(ctx context.Context, req *ListTimesheetsRequest) (*ListTimesheetsResponse, error)
 	SubmitTimesheet(ctx context.Context, req *SubmitTimesheetRequest) (*SubmitTimesheetResponse, error)
 	ApproveTimesheet(ctx context.Context, req *ApproveTimesheetRequest) (*ApproveTimesheetResponse, error)
+	MarkTimeEntriesInvoiced(ctx context.Context, req *MarkTimeEntriesInvoicedRequest) (*MarkTimeEntriesInvoicedResponse, error)
 }
 
 func RegisterTimeEntryServiceServer(first any, rest ...any) error {
@@ -458,5 +459,28 @@ func RegisterTimeEntryServiceServer(first any, rest ...any) error {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
 	}), RequestMetadata{Service: "TimeEntryService", Method: "approveTimesheet", HTTPMethod: "PATCH", Route: "/hr/time-entry/v1/timesheets/{id}/approve", AuthSchemes: nil}))
+	mux.Handle("PATCH /hr/time-entry/v1/time-entries/mark-invoiced", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		req := new(MarkTimeEntriesInvoicedRequest)
+		if r.Body != nil {
+			r.Body = http.MaxBytesReader(w, r.Body, 8<<20)
+			if err := json.NewDecoder(r.Body).Decode(&req.Body); err != nil && !errors.Is(err, io.EOF) {
+				writeJSONError(w, http.StatusBadRequest, "invalid request body")
+				return
+			}
+		}
+		if v, ok := any(req).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
+		resp, err := srv.MarkTimeEntriesInvoiced(r.Context(), req)
+		if err != nil {
+			writeHandlerError(w, err)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(resp)
+	}), RequestMetadata{Service: "TimeEntryService", Method: "markTimeEntriesInvoiced", HTTPMethod: "PATCH", Route: "/hr/time-entry/v1/time-entries/mark-invoiced", AuthSchemes: nil}))
 	return nil
 }

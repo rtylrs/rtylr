@@ -535,3 +535,89 @@ if (v.success !== undefined && v.success !== null && !(typeof v.success === "boo
 return violations;
 }
 
+export interface MarkTimeEntriesInvoicedRequest {
+id?: string;
+body?: MarkTimeEntriesInvoicedBody;
+}
+
+export function decodeMarkTimeEntriesInvoicedRequest(v: any): MarkTimeEntriesInvoicedRequest {
+if (v === null || v === undefined) return v;
+return {
+id: v.id,
+body: (v.body !== undefined ? decodeMarkTimeEntriesInvoicedBody(v.body) : v.body),
+};
+}
+
+export function encodeMarkTimeEntriesInvoicedRequest(v: MarkTimeEntriesInvoicedRequest): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.id !== undefined) { out.id = v.id; }
+if (v.body !== undefined) { out.body = encodeMarkTimeEntriesInvoicedBody(v.body); }
+return out;
+}
+
+export function validateMarkTimeEntriesInvoicedRequest(v: MarkTimeEntriesInvoicedRequest): string[] {
+const violations: string[] = [];
+if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
+if (v.body !== undefined && v.body !== null && !(typeof v.body === "object" && v.body !== null && !Array.isArray(v.body))) violations.push("body has invalid type");
+if (v.body !== undefined && v.body !== null) violations.push(...validateMarkTimeEntriesInvoicedBody(v.body).map((message) => "body: " + message));
+return violations;
+}
+
+export interface MarkTimeEntriesInvoicedBody {
+entryIds: (string)[];
+invoiceId: string;
+}
+
+export function decodeMarkTimeEntriesInvoicedBody(v: any): MarkTimeEntriesInvoicedBody {
+if (v === null || v === undefined) return v;
+return {
+entryIds: v.entry_ids,
+invoiceId: v.invoice_id,
+};
+}
+
+export function encodeMarkTimeEntriesInvoicedBody(v: MarkTimeEntriesInvoicedBody): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.entryIds !== undefined) { out.entry_ids = v.entryIds; }
+if (v.invoiceId !== undefined) { out.invoice_id = v.invoiceId; }
+return out;
+}
+
+export function validateMarkTimeEntriesInvoicedBody(v: MarkTimeEntriesInvoicedBody): string[] {
+const violations: string[] = [];
+if (v.entryIds !== undefined && v.entryIds !== null && !(Array.isArray(v.entryIds) && (v.entryIds).every((item: any) => typeof item === "string" && /^-?(0|[1-9][0-9]*)$/.test(item)))) violations.push("entry_ids has invalid type");
+if (!(v.entryIds !== undefined && v.entryIds !== null)) violations.push("entry_ids is required");
+if (v.entryIds !== undefined && v.entryIds !== null && v.entryIds.length < 1) violations.push("entry_ids must contain at least 1 items");
+if (v.invoiceId !== undefined && v.invoiceId !== null && !(typeof v.invoiceId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.invoiceId))) violations.push("invoice_id has invalid type");
+if (!(v.invoiceId !== undefined && v.invoiceId !== null)) violations.push("invoice_id is required");
+if (v.invoiceId !== undefined && v.invoiceId !== null && !(Number(v.invoiceId) > 0)) violations.push("invoice_id violates @gt");
+return violations;
+}
+
+export interface MarkTimeEntriesInvoicedResponse {
+markedCount?: number;
+skippedCount?: number;
+}
+
+export function decodeMarkTimeEntriesInvoicedResponse(v: any): MarkTimeEntriesInvoicedResponse {
+if (v === null || v === undefined) return v;
+return {
+markedCount: v.marked_count,
+skippedCount: v.skipped_count,
+};
+}
+
+export function encodeMarkTimeEntriesInvoicedResponse(v: MarkTimeEntriesInvoicedResponse): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.markedCount !== undefined) { out.marked_count = v.markedCount; }
+if (v.skippedCount !== undefined) { out.skipped_count = v.skippedCount; }
+return out;
+}
+
+export function validateMarkTimeEntriesInvoicedResponse(v: MarkTimeEntriesInvoicedResponse): string[] {
+const violations: string[] = [];
+if (v.markedCount !== undefined && v.markedCount !== null && !(typeof v.markedCount === "number" && Number.isInteger(v.markedCount) && v.markedCount >= -2147483648 && v.markedCount <= 2147483647)) violations.push("marked_count has invalid type");
+if (v.skippedCount !== undefined && v.skippedCount !== null && !(typeof v.skippedCount === "number" && Number.isInteger(v.skippedCount) && v.skippedCount >= -2147483648 && v.skippedCount <= 2147483647)) violations.push("skipped_count has invalid type");
+return violations;
+}
+
