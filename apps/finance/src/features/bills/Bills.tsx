@@ -12,6 +12,7 @@ import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useBills } from './useBills';
 import { useCreateBill, useUpdateBill } from '../../shared/hooks/queries/useBills';
+import { useErpReceivedPurchaseOrders } from '../../shared/hooks/queries/useErpReceivedPurchaseOrders';
 import { useSettings } from '../../shared/lib/settings';
 import {
   cardStyle,
@@ -149,6 +150,9 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
 const Bills: React.FC = () => {
   const { t } = useTranslation();
   const { data = [], isLoading } = useBills();
+  // ERP->FIN-03: received purchase orders are a payables commitment Finance
+  // cannot see today. Hidden entirely when ERP is absent; never zero-filled.
+  const { data: receivedPos } = useErpReceivedPurchaseOrders();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showCreate, setShowCreate] = useState(false);
 
@@ -217,6 +221,48 @@ const Bills: React.FC = () => {
       />
 
       <NewBillModal open={showCreate} onClose={() => setShowCreate(false)} />
+
+      {receivedPos && receivedPos.length > 0 && (
+        <div
+          style={{
+            ...cardStyle,
+            padding: 16,
+            border: '1px solid var(--finance-info)',
+          }}
+          role="region"
+          aria-label={t('bills.receivedFromErp')}
+        >
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--hub-text)' }}>
+            {t('bills.receivedFromErp')} ({receivedPos.length})
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--hub-text-muted)', marginTop: 2 }}>
+            {t('bills.receivedFromErpHint')}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 10 }}>
+            {receivedPos.slice(0, 5).map((po) => (
+              <div
+                key={po.id}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: 12,
+                  color: 'var(--hub-text)',
+                }}
+              >
+                <span>{po.poNumber || po.id}</span>
+                <span style={{ fontWeight: 600 }}>
+                  <MoneyDisplay amount={po.total} />
+                </span>
+              </div>
+            ))}
+            {receivedPos.length > 5 && (
+              <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>
+                +{receivedPos.length - 5}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {isLoading ? (
         <div style={{ ...cardStyle, padding: 20 }}>

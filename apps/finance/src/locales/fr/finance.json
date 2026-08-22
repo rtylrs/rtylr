@@ -41,5 +41,9 @@
     "totalOutflow": "Sorties totales",
     "netCashFlow": "Flux de trésorerie net",
     "reports": "Rapports"
+  },
+  "bills": {
+    "receivedFromErp": "Reçues de l’ERP, en attente de factures",
+    "receivedFromErpHint": "Le stock est arrivé pour ces bons de commande. Établissez les factures pour les refléter dans les comptes fournisseurs."
   }
 }

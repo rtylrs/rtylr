@@ -41,5 +41,9 @@
     "totalOutflow": "Total outflow",
     "netCashFlow": "Net cash flow",
     "reports": "Reports"
+  },
+  "bills": {
+    "receivedFromErp": "Received from ERP, awaiting bills",
+    "receivedFromErpHint": "Stock has arrived against these purchase orders. Raise the bills so accounts payable reflects it."
   }
 }
