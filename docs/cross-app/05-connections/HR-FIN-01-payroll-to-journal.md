@@ -171,14 +171,14 @@ accounting incident.
 
 The backend half now exists end to end, built the day after this dossier was
 filed. `POST /hr/payroll/runs/{id}/export`
-(`export_payroll_handler.go:18`) calls `ExportPayrollToFinance`
+(`internal/modules/hr_payroll/internal/routes/handlers/export_payroll_handler.go:18`) calls `ExportPayrollToFinance`
 (`internal/modules/hr_payroll/internal/application/service.go:375`), which takes
 an idempotent claim (`ClaimPayrollRunForExport`, released on failure), converts
 internally-stored cents at the boundary with an explicit comment, and posts
 through the Finance-owned `financejournal.PayrollJournalPoster` port
 (`internal/modules/journal/module.go:32,40`), wired at `cmd/api/main.go:499`.
 Tenant account selection comes from the `financeaccounts` port
-(`main.go:498`), which answers the dossier's configurability worry directly:
+(`cmd/api/main.go:498`), which answers the dossier's configurability worry directly:
 RTYLR never chooses accounts, the tenant does, and posting fails loudly when
 mapping is absent (`1fb0e4f1`, "require configured payroll accounts").
 

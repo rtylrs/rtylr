@@ -89,7 +89,7 @@ sameness is reversible, merging is not.
   and the POS contract documents the resulting name collision as a hazard
   (`packages/voxie/api/pos/customer/v1/models.onk:3`).
 - Three real foreign keys inside the hub/hr cluster
-  (`hr_employees.user_id`, `hr_staff.user_id`, `hr_staff.employee_id`).
+  (`internal/modules/hr_employees.user_id`, `internal/modules/hr_staff.user_id`, `internal/modules/hr_staff.employee_id`).
 - **No merge, link, or matching mechanism anywhere.** Searched for identity,
   linking and merge concepts across the backend modules; the only cross-record
   resolution found is the query above.
@@ -115,7 +115,7 @@ and POS reading those rows cross-schema works
 A domain deferring to another domain's record instead of copying it is already
 proven here.
 
-**The warning:** `hr_category_id` is a cross-domain reference that was declared
+**The warning:** `internal/modules/hr_category_id` is a cross-domain reference that was declared
 and never consumed (`02-entity-graph.md`). A `party_id` column added to eight
 tables with no consumer would be that mistake eight times over. **Hence the
 sequencing below: no `party_id` lands before something reads it.**
@@ -211,7 +211,7 @@ Confirmed: exactly one identity-resolution query exists product-wide
 (`internal/modules/hr_core/sql/queries/employees.sql:47`, hub user to hr
 employee). POS-to-CRM contact matching in customer_sync remains contact-based
 matching, not identity resolution
-(`platform/customer_sync/customer_sync.go:47`), consistent with round one's
+(`internal/platform/customer_sync/customer_sync.go:47`), consistent with round one's
 reading. Nothing since round one changes the picture.
 
 *Round two (2026-08-22): confirmed unchanged.*

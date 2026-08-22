@@ -156,7 +156,7 @@ hypothetical, since `HR->FIN-01` already puts payroll on Finance's screens.
 
 ## Backend section (round two)
 
-Confirmed: `quantity_received` (`models.onk:8`) and `received_at` (`:24`)
+Confirmed: `quantity_received` (`packages/voxie/api/erp/purchase_order/v1/models.onk:8`) and `received_at` (`packages/voxie/api/erp/purchase_order/v1/models.onk:24`)
 are on the purchase order contract as cited. No change since round one.
 
 *Round two (2026-08-22): confirmed unchanged.*

@@ -4,7 +4,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const OUT = join(process.cwd(), 'docs', 'cross-app', 'round2-issue-bodies');
+const OUT = join(process.cwd(), 'scripts', 'cross-app', 'round2-issue-bodies');
 
 const issues = [
   // ---------------- onion ----------------

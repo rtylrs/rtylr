@@ -37,7 +37,7 @@ query-ownership register.
   enabled it), the projection returns an empty set; the screen renders its
   empty state. Never zero-fill.
 
-Precedent: Insights reading `erp_products`, `finance_invoices`, `hr_shifts`
+Precedent: Insights reading `erp_products`, `finance_invoices`, `internal/modules/hr_shifts`
 directly today (`backend_tables.csv`). ERP->INS-01's cheapest form is exactly
 this shape.
 
@@ -50,13 +50,13 @@ wired in `cmd/api/main.go`.
 
 - **Where the code goes**: `internal/platform/<concern>/contract.go`
   (interface + value types only); implementation inside the owning module;
-  wiring in `main.go` next to the three existing examples:
+  wiring in `cmd/api/main.go` next to the three existing examples:
   - `SetLabourCostProvider(hrPayrollModule.LabourCostProvider())`
-    (`main.go:466`)
+    (`cmd/api/main.go:466`)
   - `journalModule.SetPayrollAccountProvider(accountsModule.PayrollAccountProvider())`
-    (`main.go:498`)
+    (`cmd/api/main.go:498`)
   - `hrPayrollModule.SetFinancePoster(journalModule.PayrollPoster())`
-    (`main.go:499`)
+    (`cmd/api/main.go:499`)
 - **Check before creating**: labourcost was declared-only for weeks before #743
   filled it. Prefer filling an existing dead or narrow port over adding a new
   package; prefer extending a port's result type over a second port for the
@@ -71,7 +71,7 @@ wired in `cmd/api/main.go`.
   documents what may not leak (labourcost's contract comment is the model:
   "Implementations must not expose employee rates").
 - **Failure mode**: noop/fallback implementations exist at the consumer for
-  degraded tenancy (`workspaces/internal/application/service.go:127` noopLabourCostProvider);
+  degraded tenancy (`internal/modules/workspaces/internal/application/service.go:127` noopLabourCostProvider);
   consumers must handle the fallback honestly rather than rendering zeros.
 
 ## Shape B3. An application-facing provider interface between two modules
@@ -80,9 +80,9 @@ One module calls another's behaviour, not its SQL. This is shape B2 with a
 single consumer; use it before promoting anything to platform scope.
 
 - Precedent: insights receives flow_insights' module as a narrow `FlowReader`
-  interface at construction (`insights/module.go:39`, wired `main.go:464`);
+  interface at construction (`internal/modules/insights/module.go:39`, wired `cmd/api/main.go:464`);
   webhooks exposes itself to api_keys through hubdeveloper's provider port
-  (`main.go:732`).
+  (`cmd/api/main.go:732`).
 - Everything else matches B2: explicit interface, owner implements, main wires,
   tenant id passes through parameters.
 
@@ -116,7 +116,7 @@ So a round-two trigger proposal names one of:
 Whatever the choice: payload carries `business_id`; consumers re-check
 authorization; delivery is idempotent (the payroll claim/release pattern is the
 in-repo model: claim before acting, release on failure,
-`service.go:377-409`); a dropped event must be recoverable by the
+`internal/modules/hr_payroll/internal/application/service.go:377-409`); a dropped event must be recoverable by the
 reconciliation read.
 
 ## Shape B5. A foreign key and a migration

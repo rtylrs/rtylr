@@ -316,6 +316,6 @@ with an immediate consumer is the cheapest counter-example to ship.
 Round one's rejection (customer 360 joined on email) stands. The new one this
 run: **syncing the vendored `packages/voxie` copy wholesale from voxie main**
 to "fix" contract lag. At least one path there carries a deliberate local
-change a blanket sync would silently revert (documented in packages/CLAUDE.md);
+change a blanket sync would silently revert (documented in the packages repo CLAUDE.md);
 this audit hit the temptation itself while drafting contracts. Sync narrowly,
 one domain at a time, after checking local drift.

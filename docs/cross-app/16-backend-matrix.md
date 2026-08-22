@@ -16,7 +16,7 @@ seam), `backend_events.csv` (the async backbone).
 | -------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | Shared table (two modules' SQL on one) | 24 domain pairs share at least one table; 76 of 296 tables are multi-module   | Mostly **undeclared**: no registry records them                   |
 | Module imports module                  | 19 edges (see below)                                                         | Declared only in the sense that Go forces it; policy says avoid    |
-| Platform package (`internal/platform`) | 41 packages; the universal ones carry every module                            | **Declared**: this is onion's sanctioned seam                      |
+| Platform package (`internal/modules/internal/platform`) | 41 packages; the universal ones carry every module                            | **Declared**: this is onion's sanctioned seam                      |
 | Event / job / webhook                  | wsbus: UI realtime only. Jobs: 6, all intra-module maintenance. Webhooks: registration with no delivery | Declared where it exists; the integration vocabulary is absent     |
 
 ## Shared-table crossings by domain pair
@@ -39,7 +39,7 @@ Aggregating `backend_tables.csv` to contract-domain granularity:
 | 12 further pairs     | 1 each        | mostly `businesses` or `users` reach-through                                                                    |
 
 Classification. **Declared** (sanctioned by a written register or port):
-flow<->hr on `hr_time_entries` (onion CLAUDE.md documents ownership;
+flow<->hr on `internal/modules/hr_time_entries` (onion CLAUDE.md documents ownership;
 sqlc-query-ownership.md covers the team/user employee provisioning);
 stock_core's ledger writes for pos_stock_movements
 (`docs/sqlc-query-ownership.md:34`). Everything else in this table is
@@ -54,14 +54,14 @@ inventory.
   attendance, equipment, overtime, setup, performance, workspaces). HR's core
   person record is the product's de facto identity anchor for staff-side data.
 - **workspaces imports hr_core and hr_leave** directly (presence join,
-  work-day writes): declared by constructor injection at `main.go`.
-- **insights imports flow_insights** (`main.go:464` passes the module as a
+  work-day writes): declared by constructor injection at `cmd/api/main.go`.
+- **insights imports flow_insights** (`cmd/api/main.go:464` passes the module as a
   `FlowReader`): a clean, narrow provider shape.
 - **customers imports campaigns and segments**, pos_orders imports
   pos_settings, hr_setup imports hr_core, business imports user, config
   imports custom_domains, voxhire imports careers.
 - **echo imports nothing directly but receives 54 module references as
-  ToolExecutor interfaces** at construction (`main.go:547`): the AI assistant
+  ToolExecutor interfaces** at construction (`cmd/api/main.go:547`): the AI assistant
   is a universal consumer through a sanctioned interface, one tool surface per
   module (`internal/modules/*/tool_executor.go`, 61 files).
 - **Platform-to-module imports: zero.** The policy boundary holds everywhere.
@@ -108,7 +108,7 @@ obscurity:
 1. **`erp_products` (14 modules).** POS menu, storefront products and Insights
    all bind to it with no contract-level reference. ERP->POS-01 formalizes the
    smallest piece of this.
-2. **`team` writes `hr_employees` on invite** (`team.sql:192-201`). Hub seat
+2. **`team` writes `internal/modules/hr_employees` on invite** (`internal/modules/team/sql/queries/team.sql:192-201`). Hub seat
    provisioning creates HR records; nothing symmetric exists on termination
    (HR->HUB-01).
 3. **`store_orders` writes `crm_customers`** directly alongside

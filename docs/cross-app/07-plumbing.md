@@ -25,7 +25,7 @@ The brief asks for degrade behaviour to be checked against `AppFlagGuard` and
 `APP_CONFIG`. Neither is the per-tenant licence, and one of them is not a gate
 at all: **`APP_CONFIG.allowedRoles` is never consulted.** Repo-wide, the only
 `allowedRoles` references outside its own declaration are inside an unused
-helper module (`apps/auth/src/shared/lib/permission.ts:13`). This was already
+helper module (`the permission helper (file deleted in the #795 close-out)`). This was already
 found and filed as issue #795, and confirmed independently here.
 
 So for "does this tenant have ERP" the signal is **hub**, and for "may this

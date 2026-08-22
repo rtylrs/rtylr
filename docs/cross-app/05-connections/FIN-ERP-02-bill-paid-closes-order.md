@@ -92,7 +92,7 @@ considered first. The argument for the event is ownership: Finance should not
 know ERP's status vocabulary. **Whichever mechanism is chosen, choose the same
 one for both proposals**, rather than introducing two event styles.
 
-The cautionary precedent is `hr_category_id`: do not add
+The cautionary precedent is `internal/modules/hr_category_id`: do not add
 `purchase_order_id` before the consumer exists, or it becomes another declared
 link nobody reads (`02-entity-graph.md`).
 

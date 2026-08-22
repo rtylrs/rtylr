@@ -92,7 +92,7 @@ route, on the grounds that it "takes no parameters, returns the whole
 business, and allocates a batch id as a side effect of a GET". Two of those
 three are wrong:
 
-- **It is a POST**, not a GET. `routes.go:49` registers it through
+- **It is a POST**, not a GET. `internal/platform/server/http/register.go:83` registers it through
   `RegisterPOSTWithValidation`, which calls `router.Post`. A mutation behind
   a POST is the correct verb, not a defect.
 - **It is bounded.** `ListApprovedBillableEntries` carries `LIMIT 500` and a

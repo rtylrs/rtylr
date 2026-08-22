@@ -2,7 +2,7 @@
 
 - **Class:** CAN
 - **Necessity:** High value
-- **Producer:** hr (`hr_employees.hourly_rate` plus `hr.time_entry.v1`)
+- **Producer:** hr (`internal/modules/hr_employees.hourly_rate` plus `hr.time_entry.v1`)
 - **Consumer:** flow (project pages), and Insights via the same endpoint
 - **Why (taxonomy):** 1 derivation, 7 rollup and reporting
 - **Shape:** 2, a backend aggregate endpoint owned by HR
@@ -32,7 +32,7 @@ basePay = hoursWorked * hourlyRateDollars
 
 `~/Development/onion/internal/modules/hr_payroll/internal/application/service.go:221`
 
-but it uses `hr_timesheets.total_minutes`
+but it uses `internal/modules/hr_timesheets.total_minutes`
 (`~/Development/onion/internal/modules/hr_payroll/internal/application/service.go:186`),
 which is supplied by the client rather than aggregated from time entries
 (`~/Development/onion/internal/modules/hr_time/internal/infrastructure/repository.go:215`).
@@ -87,7 +87,7 @@ cost(project, period) = sum over entries e in project, period of
 employee's rate today is not the rate they were on last quarter. The honest
 first version uses the current rate and labels the figure as valued at current
 rates, because there is no rate history table to read
-(`hr_employees.hourly_rate` is a single current value). Claiming historical
+(`internal/modules/hr_employees.hourly_rate` is a single current value). Claiming historical
 accuracy would be a fabrication. See the risks section.
 
 ## What exists today
@@ -177,7 +177,7 @@ endpoint afterwards (`HR->INS-01`).
   its timezone, since work days carry their own
   (`packages/voxie/api/flow/time/v1/models.onk:48`).
 - **Identity.** Depends on `employee_id` being the right person, which is
-  `HR->HR-01`'s problem. If a tenant maintains rates on `hr_staff` instead, this
+  `HR->HR-01`'s problem. If a tenant maintains rates on `internal/modules/hr_staff` instead, this
   endpoint reads a stale rate. **State that dependency in the issue.**
 - **Overtime.** `overtime_rate` exists and this formula ignores it. A first
   version costing all hours at base rate understates overtime-heavy projects;
@@ -201,10 +201,10 @@ The aggregate this dossier asked for exists as a live platform port, built in
 - Contract: `internal/platform/labourcost/contract.go` defines `ProjectCost`
   (cost cents, costed and uncosted minutes, uncosted employee count) and
   `LabourCostProvider`.
-- Implementation: HR-owned SQL joins `hr_time_entries` to
-  `hr_employees.hourly_rate` inside hr_payroll
+- Implementation: HR-owned SQL joins `internal/modules/hr_time_entries` to
+  `internal/modules/hr_employees.hourly_rate` inside hr_payroll
   (`internal/modules/hr_payroll/sql/queries/labour_cost.sql`; repository at
-  `infrastructure/repository.go:450`).
+  `internal/modules/hr_payroll/internal/infrastructure/repository.go:450`).
 - Consumption: workspaces holds it via `SetLabourCostProvider`
   (`internal/modules/workspaces/internal/application/service.go:113,121`) with
   a noop fallback, wired at `cmd/api/main.go:466`.

@@ -20,7 +20,7 @@ about the other, so a manager can commit a person's time to a week they are
 already away for, and only find out when the work is late.
 
 The producer data is in good shape, in the newer of HR's two leave systems:
-`hr_leave_requests` carries `employee_id`, `start_date`, `end_date` and `status`
+`internal/modules/hr_leave_requests` carries `employee_id`, `start_date`, `end_date` and `status`
 (`~/Development/onion/internal/platform/database/schemas/hr_leave/schema.sql:24`),
 and `LeaveService.listLeaveRequests` serves it
 (`packages/voxie/api/hr/leave/v1/service.onk:6`). Leave types are configurable
@@ -29,7 +29,7 @@ and a restaurant name their leave differently.
 
 **Critically, this system keys on `employee_id`**, the same id Flow work days
 use (`packages/voxie/api/flow/time/v1/models.onk:38`). The older
-`hr_time_off_requests` keys on `staff_id` and hardcodes its types
+`internal/modules/hr_time_off_requests` keys on `staff_id` and hardcodes its types
 (`~/Development/onion/internal/platform/database/schemas/hr/schema.sql:56`).
 **Use `hr.leave.v1`.** Choosing the other one would require crossing HR's
 nullable person bridge (`HR->HR-01`).
@@ -97,11 +97,11 @@ warning.
 
 Flow reading HR is established practice, and the audit found the existing
 instances (11 requests). One of them is a warning: Flow calls
-`GET /hr/staff/detail` (`apps/flow/src/features/profile/useProfile.ts:48`) and
+`GET /hr/staff/detail` (the profile call site (rewritten upstream)) and
 **no onion module registers that route**, so it is a cross-domain read to a
 non-existent endpoint. Flow's own schema file comments that the endpoint is ad
 hoc and outside `hr.staff.v1`
-(`apps/flow/src/shared/schemas/profile.ts:4`). This proposal must go through the
+(`the removed schema file`). This proposal must go through the
 contracted `hr.leave.v1`, not repeat that pattern.
 
 ## How to build it

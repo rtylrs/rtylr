@@ -52,13 +52,13 @@ wrongly. Ranked by how many distinct modules touch them:
 | 15      | `businesses`         | shared             | business, console, user (+12 readers)       |
 | 14      | `erp_products`       | erp                | pos_menu, store_products, platform/stock_core (+10 readers incl. insights) |
 | 12      | `users`              | shared             | console, security, team, user               |
-| 10      | `hr_employees`       | hr_core            | staff, team, user (+5 readers incl. workspaces) |
+| 10      | `internal/modules/hr_employees`       | hr_core            | staff, team, user (+5 readers incl. workspaces) |
 | 8       | `crm_customers`      | crm                | customers, platform/customer_sync, store_orders (+4 readers) |
 | 7       | `user_app_permissions` | shared           | team                                        |
 | 6       | `pos_orders`         | pos                | pos_kds, pos_day_summary, pos_receipts write items/refs |
 | 6       | `finance_invoices`   | finance            | quotes, tax                                 |
 | 6       | `finance_expenses`   | finance            | invoices                                    |
-| 5       | `subscriptions` / `plans` / `hr_shifts` / `erp_categories` | shared/hr_shifts/erp | console, subscriptions, team / staff / categories |
+| 5       | `subscriptions` / `plans` / `internal/modules/hr_shifts` / `erp_categories` | shared/hr_shifts/erp | console, subscriptions, team / staff / categories |
 
 Reading of the top rows:
 
@@ -67,9 +67,9 @@ Reading of the top rows:
   write it. This is the ERP->POS-01 coupling already flowing through storage,
   invisible to every contract.
 - **`crm_customers`: 8 modules**, including writes from outside the customers
-  module: `store_orders` writes it directly, and `platform/customer_sync`
+  module: `store_orders` writes it directly, and `internal/platform/customer_sync`
   upserts it for POS (`~/Development/onion/internal/platform/customer_sync/customer_sync.go:18`).
-- **`team` and `user` write `hr_employees`.** Seat provisioning creates the HR
+- **`team` and `user` write `internal/modules/hr_employees`.** Seat provisioning creates the HR
   employee row (`docs/sqlc-query-ownership.md` "Ensure employee for user"
   group). HR's person record is therefore already co-owned by hub-side
   modules, which raises the cost of `HR->HR-01` beyond an intra-HR migration.
@@ -77,7 +77,7 @@ Reading of the top rows:
   finance_invoices, pos_orders, hr_* and erp_products all appear in its query
   files. Insights is a cross-domain reader by construction; that is its job,
   but it means margin-style aggregates need no new mechanism, only queries.
-- **`stock_ledger` is written by both `platform/stock_core` and
+- **`stock_ledger` is written by both `internal/platform/stock_core` and
   `pos_stock_movements`** under the sanctioned stock_core seam, matching the
   ownership register's "Inventory transaction with reference" row
   (`docs/sqlc-query-ownership.md:34`).
@@ -93,21 +93,21 @@ All 41 packages inventoried in `platform_packages.csv`. The three states:
   module and is wired in `cmd/api/main.go`. This is the shape the brief called
   "a seam declared and never filled" about labourcost; that verdict is now
   wrong:
-  - `platform/labourcost`: contract only, but `hr_payroll` implements
+  - `internal/platform/labourcost`: contract only, but `internal/modules/hr_payroll` implements
     `LabourCostProvider`
     (`internal/modules/hr_payroll/internal/application/service.go:53`) and
     workspaces consumes it via `SetLabourCostProvider`
     (`internal/modules/workspaces/internal/application/service.go:113`),
     wired at `cmd/api/main.go:466`. Landed 2026-08-22 in #743, one day after
     round one closed.
-  - `platform/financejournal`: implemented by the journal module
+  - `internal/platform/financejournal`: implemented by the journal module
     (`internal/modules/journal/module.go:32`), consumed by hr_payroll via
     `SetFinancePoster` (`cmd/api/main.go:499`). Payroll export to the journal
     is a working server-side path: `POST /hr/payroll/runs/{id}/export`.
-  - `platform/financeaccounts`: implemented by accounts, consumed by journal
+  - `internal/platform/financeaccounts`: implemented by accounts, consumed by journal
     (`cmd/api/main.go:498`).
 - **dead-or-internal-only** (2):
-  - `platform/runmode`: zero importers anywhere. `docs/platform-patterns.md:5`
+  - `internal/platform/runmode`: zero importers anywhere. `docs/platform-patterns.md:5`
     recommends it for new runmodes; no code follows that advice. Doc drift,
     logged in 10-doc-drift.md.
   - `models`: one importer; effectively vestigial.
@@ -132,7 +132,7 @@ Two further observations from the same file:
 
 The webhooks module is CRUD over tenant webhook registrations
 (`internal/modules/webhooks/internal/application/service.go:46-100`), exposed
-to dash through `platform/hubdeveloper`'s provider port
+to dash through `internal/platform/hubdeveloper`'s provider port
 (`cmd/api/main.go:732`). A repo-wide search for code that POSTs to a stored
 webhook URL finds exactly one outbound POST site: Paddle's client
 (`internal/platform/paddle/client.go`), which calls Paddle's API, not tenant
@@ -163,7 +163,7 @@ from SQL alone. Flagged for the backend owners rather than resolved here.
 ## Migrations and the schema-to-contract mapping
 
 157 schema files across 35 directories (`migrations.csv`). Schema directory
-names do not match contract domain names one to one (`hr_core` schema serves
+names do not match contract domain names one to one (`internal/modules/hr_core` schema serves
 the `hr` contract; `book` schema serves `booking`; `shared` holds cross-domain
 tables like `users` and `businesses`; `rtylr`, `voxire` and `recruit` have no
 contract domain at all, which matches round one's finding that Recruit is
@@ -197,5 +197,5 @@ Stated plainly:
 4. **Jobs registered outside the `registry.Register(jobs.Job{...})` pattern**
    would be missed. `grep RegisterScheduledJobs` shows six modules using the
    pattern and the worker boot path auto-registers exactly those.
-5. **gRPC surface** (`platform/server/grpc`) was not swept: the AGENTS.md
+5. **gRPC surface** (`internal/platform/server/grpc`) was not swept: the AGENTS.md
    describes it as secondary and no frontend client references it.

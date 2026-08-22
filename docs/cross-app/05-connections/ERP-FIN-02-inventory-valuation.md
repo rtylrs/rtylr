@@ -152,7 +152,7 @@ foreign domains. Today it needs one.
 Strengthened: `GetValuation` is implemented server-side beyond the contract,
 through the full stack
 (`internal/modules/inventory/internal/api/inventory_service.go:57`,
-`application/service.go:82`). This dossier needs exactly what it said: one read
+`internal/modules/inventory/internal/application/service.go:82`). This dossier needs exactly what it said: one read
 from the balance-sheet screen.
 
 *Round two (2026-08-22): confirmed; backend implementation verified.*

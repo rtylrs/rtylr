@@ -24,7 +24,7 @@ that can disagree.
 **Single source of truth, violated inside a single domain.** HR stores a person
 twice, in two tables, each with its own pay fields.
 
-|                 | `hr_staff`                                                                                                    | `hr_employees`                                                                       |
+|                 | `internal/modules/hr_staff`                                                                                                    | `internal/modules/hr_employees`                                                                       |
 | --------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | Declared as     | `hr.Staff` (`packages/voxie/api/hr/staff/v1/models.onk:4`)                                                    | `hr.EmployeePayload` (`packages/voxie/api/hr/employee/v1/models.onk:4`)              |
 | Schema          | `~/Development/onion/internal/platform/database/schemas/hr/schema.sql:15`                                     | `~/Development/onion/internal/platform/database/schemas/hr_core/schema.sql`          |
@@ -48,10 +48,10 @@ This is not a dormant duplication. Different HR features key on different ids:
 
 And there are **two leave systems**, not one:
 
-|             | `hr_time_off_requests`                                                                                                                           | `hr_leave_requests`                                                             |
+|             | `internal/modules/hr_time_off_requests`                                                                                                                           | `internal/modules/hr_leave_requests`                                                             |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
 | Keys on     | `staff_id`                                                                                                                                       | `employee_id`                                                                   |
-| Leave types | **hardcoded ENUM** `('vacation','sick','personal','unpaid','other')` (`~/Development/onion/internal/platform/database/schemas/hr/schema.sql:56`) | configurable rows, `hr_leave_types`                                             |
+| Leave types | **hardcoded ENUM** `('vacation','sick','personal','unpaid','other')` (`~/Development/onion/internal/platform/database/schemas/hr/schema.sql:56`) | configurable rows, `internal/modules/hr_leave_types`                                             |
 | Contract    | `hr.time_off.v1` (`TimeOffService`, 2 RPCs)                                                                                                      | `hr.leave.v1` (`LeaveService`, 8 RPCs, with balances and approval levels)       |
 | Schema      | `~/Development/onion/internal/platform/database/schemas/hr/schema.sql:51`                                                                        | `~/Development/onion/internal/platform/database/schemas/hr_leave/schema.sql:20` |
 
@@ -77,7 +77,7 @@ records; confirming it needs production data, which this audit does not touch.
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Affected tenants       | every HR tenant.                                                                                                                                                                                                                                                                                                 |
 | Manual work today      | none visible, which is what makes it dangerous: the duplication is invisible until two screens disagree.                                                                                                                                                                                                         |
-| Modelled monthly value | **Errors avoided, not time saved.** If a tenant maintains `hr_staff.hourly_rate` while payroll reads `hr_employees.hourly_rate`, payroll pays the wrong amount and nothing flags it. For the reference tenant, 40 people paid monthly, a single stale rate is one wrong payslip per month until someone notices. |
+| Modelled monthly value | **Errors avoided, not time saved.** If a tenant maintains `internal/modules/hr_staff.hourly_rate` while payroll reads `internal/modules/hr_employees.hourly_rate`, payroll pays the wrong amount and nothing flags it. For the reference tenant, 40 people paid monthly, a single stale rate is one wrong payslip per month until someone notices. |
 |                        | Value is therefore "correct payroll", which does not reduce to minutes. The countable part is the reconciliation nobody currently does.                                                                                                                                                                          |
 | Build cost             | backend **6 to 10 days**: decide the canonical record, migrate, redirect the older leave system or retire it, keep both contracts serving during the transition. Frontend 2 days to follow the surviving ids. Maintenance goes **down** afterwards.                                                              |
 | Payback                | not expressible as a payback period. This is debt removal that unblocks four proposals worth more than it costs.                                                                                                                                                                                                 |
@@ -90,9 +90,9 @@ Nothing moves between apps. What changes is which row is authoritative.
 
 | Decision           | Options                                                                                                                     |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| Canonical person   | `hr_employees` is the stronger candidate: payroll, leave balances, Flow work days and time entries all key on `employee_id` |
-| Canonical pay rate | whichever record survives; payroll already reads `hr_employees.hourly_rate`                                                 |
-| Canonical leave    | `hr_leave_requests`, because it keys on `employee_id`, has configurable types, balances and approval levels                 |
+| Canonical person   | `internal/modules/hr_employees` is the stronger candidate: payroll, leave balances, Flow work days and time entries all key on `employee_id` |
+| Canonical pay rate | whichever record survives; payroll already reads `internal/modules/hr_employees.hourly_rate`                                                 |
+| Canonical leave    | `internal/modules/hr_leave_requests`, because it keys on `employee_id`, has configurable types, balances and approval levels                 |
 
 **This dossier does not make those decisions.** They are data-ownership calls
 for the HR owners, with a migration behind each. The audit's contribution is
@@ -104,7 +104,7 @@ are waiting on them.
 - Both tables, both contracts, both leave systems, as tabulated above.
 - One working resolver, hub user to hr employee
   (`~/Development/onion/internal/modules/hr_core/sql/queries/employees.sql:47`).
-- The `staff` module reads both `hr_staff` and `hr_employees`, so the backend
+- The `staff` module reads both `internal/modules/hr_staff` and `internal/modules/hr_employees`, so the backend
   already has the join in one place.
 - `hr.time_off.v1` documents its own vestigial state: a message says "Not
   currently wired to any RPC in service.proto - kept for parity with the source
@@ -128,8 +128,8 @@ the team already recognises parts of that contract are vestigial and said so in
 the contract rather than deleting it. That is the honest instinct this proposal
 extends: finish the sentence.
 
-The counter-precedent is `hr_category_id` (`02-entity-graph.md`): a link left
-unconsumed. `hr_staff.employee_id` is the same species, a nullable bridge that
+The counter-precedent is `internal/modules/hr_category_id` (`02-entity-graph.md`): a link left
+unconsumed. `internal/modules/hr_staff.employee_id` is the same species, a nullable bridge that
 nothing enforces.
 
 ## How to build it
@@ -149,7 +149,7 @@ Sequence:
    will get of the current damage.
 2. Pick the canonical record. Keep both contracts serving, with the
    non-canonical one reading through to the canonical row.
-3. Migrate leave: `hr_time_off_requests` rows mapped onto `hr_leave_requests`
+3. Migrate leave: `internal/modules/hr_time_off_requests` rows mapped onto `internal/modules/hr_leave_requests`
    with their enum values becoming configured leave types.
 4. Only then retire the duplicate columns.
 
@@ -186,7 +186,7 @@ place and hides it better.
   a cross-tenant leak.
 - **Historical rate changes.** Payroll entries already written reference rates
   as they were. The migration must not retro-price historical payroll: existing
-  `hr_payroll_entries` are immutable records.
+  `internal/modules/hr_payroll_entries` are immutable records.
 - **Rounding and currency.** Payroll works in integer cents internally
   (`~/Development/onion/internal/modules/hr_payroll/internal/application/service.go:236`)
   while the contracts expose `float64`. A migration that round-trips rates
@@ -205,10 +205,10 @@ place and hides it better.
 
 ## Backend section (round two)
 
-Confirmed unchanged at the storage layer: `hr.schema.sql:29-30` and
-`hr_core/schema.sql:90-91` both carry salary and hourly_rate (plus overtime),
-bridged by nullable `hr_staff.employee_id`. One scope-widening fact: team's
-invite flow INSERTs into `hr_employees` cross-schema
+Confirmed unchanged at the storage layer: `internal/platform/database/schemas/hr/schema.sql:29-30` and
+`internal/platform/database/schemas/hr_core/schema.sql:90-91` both carry salary and hourly_rate (plus overtime),
+bridged by nullable `internal/modules/hr_staff.employee_id`. One scope-widening fact: team's
+invite flow INSERTs into `internal/modules/hr_employees` cross-schema
 (`internal/modules/team/sql/queries/team.sql:194`), so hub-side seat
 provisioning co-owns the employee table. The migration plan must treat team as
 a stakeholder module, not just the HR modules.

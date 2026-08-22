@@ -99,8 +99,8 @@ is missing.
 
 The precedent to avoid: Flow calls `/hr/staff/detail`, an ad hoc REST endpoint
 outside the contract, which no onion module serves
-(`apps/flow/src/features/profile/useProfile.ts:48`, and Flow's own schema file
-says so at `apps/flow/src/shared/schemas/profile.ts:4`). A cross-domain read to
+(the profile call site (rewritten upstream), and Flow's own schema file
+says so at `the deleted ad hoc schema file (removed with the dead call, #875 fix)`). A cross-domain read to
 an uncontracted path is how that happened. **Finance must not read
 `/crm/sales/contracts` directly**, however tempting, because a legacy path has
 no owner, no type safety and no guarantee it survives.

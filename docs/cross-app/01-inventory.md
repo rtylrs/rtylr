@@ -154,7 +154,7 @@ What it could not reach or resolve:
   `~/Development/onion/internal/platform/server/http/license_routes.go:21`),
   legacy frontend calls to endpoints that no longer exist (see
   `10-doc-drift.md` and the dossiers; the confirmed example is Flow's
-  `/hr/staff/detail` at `apps/flow/src/features/profile/useProfile.ts:48`,
+  `/hr/staff/detail` at `the /hr/staff/detail call site (file since rewritten; see 15-round-one-verification.md)`,
   served nowhere in onion), and unresolved `<dynamic:...>` rows.
 - The onion sweep reads route strings and generated-import evidence; it does
   not execute the router. A module that composes paths at runtime would be

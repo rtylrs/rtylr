@@ -112,7 +112,7 @@ The good precedent is `pos.Order.customer_id`
 So "a domain outside CRM referencing a CRM customer by id" is already an
 established, functioning pattern in this product. This proposal extends a
 pattern rather than inventing one, which materially raises the odds it gets
-consumed, unlike `hr_category_id`.
+consumed, unlike `internal/modules/hr_category_id`.
 
 The bad precedent is `finance.Bill.supplier_id`, a required FK to a domain
 Finance never reads, which the UI satisfies by fabrication
