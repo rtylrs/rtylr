@@ -222,9 +222,10 @@ const Customers: React.FC = () => {
     if (bulkUpdating) return;
     const tagName = bulkTag.trim();
     if (!tagName || selected.size === 0) return;
+    const normalizedTagName = tagName.toLowerCase();
     const ids = Array.from(selected).filter((id) => {
       const c = customers.find((x) => x.id === id);
-      return c && !(c.tags || []).includes(tagName);
+      return c && !(c.tags || []).some((tag) => tag.toLowerCase() === normalizedTagName);
     });
     if (ids.length === 0) {
       toast.success(`All selected already tagged "${tagName}"`);
