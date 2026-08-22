@@ -9,6 +9,7 @@ import { InvitationsServiceClient } from '@voxire/voxie/hub/team/invitations/v1/
 import { AuthServiceClient } from '@voxire/voxie/common/auth/v1/client';
 import type { InviteAcceptRequest } from '@voxire/voxie/common/auth/v1/types';
 import type { AppId } from '@voxire/types';
+import { isStrongPassword } from '../../shared/lib/validation';
 
 const invitationsClient = createOneKitClient(InvitationsServiceClient, 'auth');
 const authClient = createOneKitClient(AuthServiceClient, 'auth');
@@ -48,8 +49,10 @@ const InviteAccept: React.FC = () => {
   }, [token]);
 
   const handleSubmit = async () => {
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+    if (!isStrongPassword(password)) {
+      setError(
+        'Password must be at least 8 characters and include uppercase, lowercase, and numbers'
+      );
       return;
     }
     if (password !== confirmPassword) {
