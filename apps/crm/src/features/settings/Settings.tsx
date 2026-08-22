@@ -61,6 +61,8 @@ const GeneralTab: React.FC = () => {
     setForm((f) => ({ ...f, [k]: v }));
 
   const settingsUnavailable = isLoading || isError;
+  const fromEmailValid =
+    !form.fromEmail.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.fromEmail.trim());
   const timezoneOptions =
     form.timezone && !TIMEZONES.some((timezone) => timezone.value === form.timezone)
       ? [{ value: form.timezone, label: `Current (${form.timezone})` }, ...TIMEZONES]
@@ -68,6 +70,10 @@ const GeneralTab: React.FC = () => {
 
   const handleSave = (): void => {
     if (update.isPending || settingsUnavailable) return;
+    if (!fromEmailValid) {
+      toast.error('Enter a valid sender email address');
+      return;
+    }
     update.mutate(form);
   };
 
@@ -77,7 +83,7 @@ const GeneralTab: React.FC = () => {
         <Button
           variant="primary"
           onClick={handleSave}
-          disabled={update.isPending || settingsUnavailable}
+          disabled={update.isPending || settingsUnavailable || !fromEmailValid}
         >
           <Save size={13} />
           {update.isPending ? 'Saving…' : 'Save changes'}
@@ -137,12 +143,20 @@ const GeneralTab: React.FC = () => {
           Messaging
         </h4>
         <div className="crm-form-grid" style={{ display: 'grid', gap: '12px' }}>
-          <Input
-            label="From email"
-            type="email"
-            value={form.fromEmail}
-            onChange={(e) => set('fromEmail', e.target.value)}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <Input
+              label="From email"
+              type="email"
+              value={form.fromEmail}
+              aria-invalid={!fromEmailValid}
+              onChange={(e) => set('fromEmail', e.target.value)}
+            />
+            {!fromEmailValid && (
+              <p role="alert" style={{ margin: 0, fontSize: '11px', color: '#ef4444' }}>
+                Enter a valid sender email address.
+              </p>
+            )}
+          </div>
           <Input
             label="From name"
             value={form.fromName}
