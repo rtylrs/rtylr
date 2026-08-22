@@ -26,7 +26,7 @@ const TeamView = (): React.JSX.Element => {
   const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
 
   const members: { id: string; userId: string; name: string; role?: string }[] = []; // TODO: switch to useFlowTeam
-	const membersLoading = false;
+  const membersLoading = false;
   const { data, isLoading, isError } = useWorkDaysForWorkspace(activeWorkspaceId, date, date);
 
   const dayByUserId = useMemo(() => {

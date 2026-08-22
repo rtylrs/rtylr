@@ -104,8 +104,8 @@ export function useMostRestrictiveProjectRole(projectIds: string[]): FlowProject
  * write would have succeeded had the button not been disabled.
  */
 function useCurrentWorkspaceRole(): string | undefined {
-	// Workspace layer removed; project roles are the only permission source.
-	return undefined;
+  // Workspace layer removed; project roles are the only permission source.
+  return undefined;
 }
 
 /**

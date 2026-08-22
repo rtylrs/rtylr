@@ -296,15 +296,12 @@ const settingsRoute = createRoute({
 const catchAllRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '*',
-  component: () => (
-    <Navigate to="/my-issues" replace />
-  ),
+  component: () => <Navigate to="/my-issues" replace />,
 });
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  
-  
+
   projectBoardRoute,
   projectBoardExplicitRoute,
   projectListRoute,
