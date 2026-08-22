@@ -301,7 +301,7 @@ func buildReplicaDSN() string {
 	password := os.Getenv(envAIPassword)
 
 	return fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=UTC&charset=utf8mb4&collation=utf8mb4_unicode_ci&timeout=%s&readTimeout=%s&writeTimeout=%s&interpolateParams=true",
+		"%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=UTC&time_zone=%%27UTC%%27&charset=utf8mb4&collation=utf8mb4_unicode_ci&timeout=%s&readTimeout=%s&writeTimeout=%s&interpolateParams=true",
 		user, password, host, port, dbname,
 		dsnConnectTimeout, dsnReadTimeout, dsnWriteTimeout,
 	)
@@ -315,7 +315,7 @@ func buildLocalDSN() string {
 	password := getEnvOrDefault("DB_PASSWORD", DefaultDBPassword)
 
 	return fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=UTC&multiStatements=true&charset=utf8mb4&collation=utf8mb4_unicode_ci&timeout=%s&readTimeout=%s&writeTimeout=%s&interpolateParams=true",
+		"%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=UTC&time_zone=%%27UTC%%27&multiStatements=true&charset=utf8mb4&collation=utf8mb4_unicode_ci&timeout=%s&readTimeout=%s&writeTimeout=%s&interpolateParams=true",
 		user, password, host, port, dbname,
 		dsnConnectTimeout, dsnReadTimeout, dsnWriteTimeout,
 	)
@@ -323,15 +323,20 @@ func buildLocalDSN() string {
 
 func normalizeDSN(dsn string) string {
 	if !strings.Contains(dsn, "://") {
-		if strings.Contains(dsn, "parseTime=") {
+		if strings.Contains(dsn, "?") {
+			if !strings.Contains(dsn, "time_zone=") {
+				dsn += "&time_zone=%27UTC%27"
+			}
+			if !strings.Contains(dsn, "parseTime=") {
+				dsn += "&parseTime=true"
+			}
+			if !strings.Contains(dsn, "loc=") {
+				dsn += "&loc=UTC"
+			}
 			return dsn
 		}
 
-		if strings.Contains(dsn, "?") {
-			return dsn + "&parseTime=true&loc=UTC"
-		}
-
-		return dsn + "?parseTime=true&loc=UTC"
+		return dsn + "?parseTime=true&loc=UTC&time_zone=%27UTC%27"
 	}
 
 	parsed, err := url.Parse(dsn)
@@ -365,6 +370,9 @@ func normalizeDSN(dsn string) string {
 	}
 	if query.Get("interpolateParams") == "" {
 		query.Set("interpolateParams", "true")
+	}
+	if query.Get("time_zone") == "" {
+		query.Set("time_zone", "'UTC'")
 	}
 
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?%s", user, password, host, dbname, query.Encode())
