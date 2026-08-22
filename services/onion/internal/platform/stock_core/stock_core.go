@@ -55,6 +55,7 @@ const (
 // Movement describes one signed stock change at a single location.
 type Movement struct {
 	OwnerID       int64
+	BusinessID    int64 // denormalized tenant id; defaults to OwnerID for legacy callers
 	LocationID    int64
 	ProductID     int64
 	EntryType     EntryType
@@ -70,6 +71,13 @@ type Movement struct {
 }
 
 func fmtQty(v float64) string { return strconv.FormatFloat(v, 'f', -1, 64) }
+
+func movementBusinessID(m Movement) int64 {
+	if m.BusinessID != 0 {
+		return m.BusinessID
+	}
+	return m.OwnerID
+}
 
 func parseQty(ctx context.Context, s string) (float64, error) {
 	if s == "" {
@@ -102,7 +110,10 @@ func DefaultLocationID(ctx context.Context, tx DBTX, ownerID int64) (int64, erro
 	}
 
 	// Insert-or-ignore on the unique key, then re-read (handles a concurrent creator).
-	if err := q.InsertDefaultWarehouseLocation(ctx, ownerID); err != nil {
+	if err := q.InsertDefaultWarehouseLocation(ctx, stocksqlc.InsertDefaultWarehouseLocationParams{
+		OwnerID:    ownerID,
+		BusinessID: ownerID,
+	}); err != nil {
 		return 0, fmt.Errorf("stock_core: create default location: %w", err)
 	}
 	id, err = q.GetDefaultWarehouseLocationID(ctx, ownerID)
@@ -149,8 +160,9 @@ func POSBranchLocationID(ctx context.Context, tx DBTX, ownerID, posLocationID in
 	}
 
 	if err = q.InsertPOSBranchLocation(ctx, stocksqlc.InsertPOSBranchLocationParams{
-		OwnerID:  ownerID,
-		SourceID: posLocationID,
+		OwnerID:    ownerID,
+		BusinessID: ownerID,
+		SourceID:   posLocationID,
 	}); err != nil {
 		return 0, fmt.Errorf("stock_core: create pos branch location: %w", err)
 	}
@@ -199,8 +211,9 @@ func WarehouseLocationID(ctx context.Context, tx DBTX, ownerID, warehouseID int6
 	}
 
 	if err = q.InsertWarehouseLocation(ctx, stocksqlc.InsertWarehouseLocationParams{
-		OwnerID: ownerID,
-		ID:      warehouseID,
+		OwnerID:    ownerID,
+		BusinessID: ownerID,
+		ID:         warehouseID,
 	}); err != nil {
 		return 0, fmt.Errorf("stock_core: create warehouse location: %w", err)
 	}
@@ -226,6 +239,7 @@ func ApplyMovementTx(ctx context.Context, tx DBTX, m Movement) (before, after fl
 	// Ensure the level row exists so FOR UPDATE has something to lock.
 	if err = q.EnsureStockLevelRow(ctx, stocksqlc.EnsureStockLevelRowParams{
 		OwnerID:    m.OwnerID,
+		BusinessID: movementBusinessID(m),
 		LocationID: m.LocationID,
 		ProductID:  m.ProductID,
 	}); err != nil {
@@ -275,6 +289,7 @@ func applyKnown(ctx context.Context, q *stocksqlc.Queries, m Movement, before, a
 	}
 	if err := q.InsertStockLedgerEntry(ctx, stocksqlc.InsertStockLedgerEntryParams{
 		OwnerID:        m.OwnerID,
+		BusinessID:     movementBusinessID(m),
 		LocationID:     m.LocationID,
 		ProductID:      m.ProductID,
 		EntryType:      stocksqlc.StockLedgerEntryType(m.EntryType),
@@ -321,6 +336,7 @@ func SetLevelTx(ctx context.Context, tx DBTX, m Movement, target float64) (befor
 
 	if err = q.EnsureStockLevelRow(ctx, stocksqlc.EnsureStockLevelRowParams{
 		OwnerID:    m.OwnerID,
+		BusinessID: movementBusinessID(m),
 		LocationID: m.LocationID,
 		ProductID:  m.ProductID,
 	}); err != nil {

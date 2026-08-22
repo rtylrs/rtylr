@@ -5,7 +5,7 @@ SELECT id FROM stock_locations
 
 -- name: InsertDefaultWarehouseLocation :exec
 INSERT INTO stock_locations (owner_id, business_id, kind, source_table, source_id, name, is_default, is_active)
- VALUES (?, 0, 'warehouse', 'native', 0, 'Default Warehouse', TRUE, TRUE)
+ VALUES (?, ?, 'warehouse', 'native', 0, 'Default Warehouse', TRUE, TRUE)
  ON DUPLICATE KEY UPDATE id = id;
 
 -- name: GetPOSLocationOwnerID :one
@@ -17,7 +17,7 @@ SELECT id FROM stock_locations
 
 -- name: InsertPOSBranchLocation :exec
 INSERT INTO stock_locations (owner_id, business_id, kind, source_table, source_id, name, is_default, is_active)
- VALUES (?, 0, 'pos_branch', 'pos_locations', ?, 'POS Branch', FALSE, TRUE)
+ VALUES (?, ?, 'pos_branch', 'pos_locations', ?, 'POS Branch', FALSE, TRUE)
  ON DUPLICATE KEY UPDATE source_id = VALUES(source_id);
 
 -- name: GetWarehouseOwnerID :one
@@ -29,12 +29,12 @@ SELECT id FROM stock_locations
 
 -- name: InsertWarehouseLocation :exec
 INSERT INTO stock_locations (owner_id, business_id, kind, source_table, source_id, name, is_default, is_active)
- SELECT ?, 0, 'warehouse', 'erp_warehouses', w.id, w.name, FALSE, w.is_active FROM erp_warehouses w WHERE w.id = ?
+ SELECT ?, ?, 'warehouse', 'erp_warehouses', w.id, w.name, FALSE, w.is_active FROM erp_warehouses w WHERE w.id = ?
  ON DUPLICATE KEY UPDATE source_id = VALUES(source_id);
 
 -- name: EnsureStockLevelRow :exec
-INSERT INTO stock_levels (owner_id, location_id, product_id, on_hand)
- VALUES (?, ?, ?, 0) ON DUPLICATE KEY UPDATE on_hand = on_hand;
+INSERT INTO stock_levels (owner_id, business_id, location_id, product_id, on_hand)
+ VALUES (?, ?, ?, ?, 0) ON DUPLICATE KEY UPDATE on_hand = on_hand;
 
 -- name: LockStockLevelOnHand :one
 SELECT on_hand FROM stock_levels
@@ -46,9 +46,9 @@ UPDATE stock_levels SET on_hand = ?
 
 -- name: InsertStockLedgerEntry :exec
 INSERT INTO stock_ledger
- (owner_id, location_id, product_id, entry_type, quantity_change, quantity_before, quantity_after,
+ (owner_id, business_id, location_id, product_id, entry_type, quantity_change, quantity_before, quantity_after,
   reference_id, reference_type, transfer_group, channel, note, employee_id, created_by)
- VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: SyncProductStockScalar :exec
 UPDATE erp_products SET stock_quantity = stock_quantity + ?
