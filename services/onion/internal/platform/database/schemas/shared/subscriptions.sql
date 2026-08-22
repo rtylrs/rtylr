@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
     id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     owner_id BIGINT NOT NULL UNIQUE,
     plan_id BIGINT NOT NULL,
-    status ENUM('active','trial','cancelled','expired') DEFAULT 'trial',
+    status ENUM('active','trial','past_due','cancelled','expired') DEFAULT 'trial',
     seat_count INT NOT NULL DEFAULT 1,
     trial_ends_at TIMESTAMP NULL,
     next_billing_date DATE NULL,
