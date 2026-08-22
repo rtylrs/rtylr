@@ -300,6 +300,7 @@ const Customers: React.FC = () => {
           >
             <Search size={14} style={{ color: 'var(--hub-text-muted)', flexShrink: 0 }} />
             <input
+              aria-label="Search customers"
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -382,6 +383,7 @@ const Customers: React.FC = () => {
             <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginLeft: 'auto' }}>
               <TagIcon size={12} style={{ color: 'var(--hub-text-muted)' }} />
               <input
+                aria-label="Add tag to selected customers"
                 value={bulkTag}
                 onChange={(e) => setBulkTag(e.target.value)}
                 placeholder="Add tag..."
@@ -469,6 +471,9 @@ const Customers: React.FC = () => {
                   <tr style={{ borderBottom: '1px solid var(--hub-border)' }}>
                     <th style={{ padding: '11px 12px 11px 16px', width: '28px' }}>
                       <input
+                        aria-label={
+                          allSelected ? 'Deselect all customers' : 'Select all customers'
+                        }
                         type="checkbox"
                         checked={allSelected}
                         onChange={toggleAll}
@@ -545,6 +550,7 @@ const Customers: React.FC = () => {
                               onClick={(e) => e.stopPropagation()}
                             >
                               <input
+                                aria-label={`${isSelected ? 'Deselect' : 'Select'} ${c.name}`}
                                 type="checkbox"
                                 checked={isSelected}
                                 onChange={() => toggleOne(c.id)}

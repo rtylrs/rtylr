@@ -455,6 +455,7 @@ const Contracts: React.FC = () => {
                 Lead
               </p>
               <select
+                aria-label="Lead"
                 value={form.leadId}
                 onChange={(e) => setForm((f) => ({ ...f, leadId: e.target.value }))}
                 disabled={leadsLoading || leadsError}

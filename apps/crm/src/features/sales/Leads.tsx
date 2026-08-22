@@ -146,6 +146,7 @@ const Leads: React.FC = () => {
           >
             <Search size={14} style={{ color: 'var(--hub-text-muted)', flexShrink: 0 }} />
             <input
+              aria-label="Search leads by company"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by company..."
@@ -162,6 +163,7 @@ const Leads: React.FC = () => {
 
           {/* Stage filter */}
           <select
+            aria-label="Filter leads by stage"
             value={stageFilter}
             onChange={(e) => setStageFilter(e.target.value as LeadStage | 'all')}
             style={{
@@ -185,6 +187,7 @@ const Leads: React.FC = () => {
 
           {/* Source filter */}
           <select
+            aria-label="Filter leads by source"
             value={sourceFilter}
             onChange={(e) => setSourceFilter(e.target.value)}
             style={{

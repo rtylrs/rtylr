@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { FileText, Mail, MessageSquare, Plus, Copy } from 'lucide-react';
 import { useTemplates, useCreateTemplate } from '../../shared/hooks/queries/useTemplates';
 import { PageHeader, Card, Button, EmptyState, SkeletonList } from '../../shared/components/ui';
+import { useEscapeKey } from '../../shared/lib/keyboard';
 
 const Templates: React.FC = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const Templates: React.FC = () => {
   const [newSubject, setNewSubject] = useState('');
   const [newBody, setNewBody] = useState('');
   const [newCategory, setNewCategory] = useState('general');
+  useEscapeKey(showCreate, () => setShowCreate(false));
 
   const handleCreate = async (): Promise<void> => {
     if (!newName.trim() || !newBody.trim()) {
@@ -266,6 +268,9 @@ const Templates: React.FC = () => {
                 borderRadius: '16px',
                 padding: '24px',
                 width: '420px',
+                maxWidth: 'calc(100vw - 32px)',
+                maxHeight: 'calc(100vh - 32px)',
+                overflowY: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '12px',
@@ -277,6 +282,7 @@ const Templates: React.FC = () => {
                 New Template
               </h3>
               <input
+                aria-label="Template name"
                 placeholder="Template name"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
@@ -291,6 +297,7 @@ const Templates: React.FC = () => {
                 }}
               />
               <select
+                aria-label="Template channel"
                 value={newChannel}
                 onChange={(e) => setNewChannel(e.target.value as 'email' | 'sms')}
                 style={{
@@ -307,6 +314,7 @@ const Templates: React.FC = () => {
                 <option value="sms">SMS</option>
               </select>
               <input
+                aria-label="Template category"
                 placeholder="Category (e.g. promo, welcome)"
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
@@ -322,6 +330,7 @@ const Templates: React.FC = () => {
               />
               {newChannel === 'email' && (
                 <input
+                  aria-label="Template subject"
                   placeholder="Subject line"
                   value={newSubject}
                   onChange={(e) => setNewSubject(e.target.value)}
@@ -337,6 +346,7 @@ const Templates: React.FC = () => {
                 />
               )}
               <textarea
+                aria-label="Template body"
                 placeholder="Body content"
                 value={newBody}
                 onChange={(e) => setNewBody(e.target.value)}

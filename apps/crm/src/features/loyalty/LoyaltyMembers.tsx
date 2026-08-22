@@ -49,6 +49,7 @@ const LoyaltyMembers: React.FC = () => {
           >
             <Search size={14} style={{ color: 'var(--hub-text-muted)' }} />
             <input
+              aria-label="Search loyalty members"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search members..."

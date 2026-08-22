@@ -398,6 +398,7 @@ const CustomerProfile: React.FC = () => {
               </div>
               <div style={{ display: 'flex', gap: '6px' }}>
                 <input
+                  aria-label="Add customer tag"
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyDown={(e) => {

@@ -273,6 +273,7 @@ export const NotesPanel: React.FC<{
       {editing ? (
         <>
           <textarea
+            aria-label="Customer notes"
             value={value}
             onChange={(e) => setValue(e.target.value)}
             rows={4}
@@ -969,6 +970,7 @@ export const SearchableCustomerSelect: React.FC<{
         >
           <input
             autoFocus
+            aria-label="Search customers"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search..."

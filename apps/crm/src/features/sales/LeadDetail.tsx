@@ -592,6 +592,7 @@ const LeadDetail: React.FC = () => {
                     Stage
                   </p>
                   <select
+                    aria-label="Lead stage"
                     value={lead.stage}
                     onChange={(e) => handleStageChange(e.target.value as LeadStage)}
                     disabled={updateLead.isPending}

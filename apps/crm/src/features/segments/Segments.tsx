@@ -20,6 +20,7 @@ import {
   useCreateSegment,
 } from '../../shared/hooks/queries/useSegments';
 import { Card, ConfirmModal, EmptyState, SkeletonList } from '../../shared/components/ui';
+import { useEscapeKey } from '../../shared/lib/keyboard';
 
 const ACCENT = '#3b82f6';
 
@@ -79,6 +80,7 @@ function RuleBuilder({
     { id: 1, field: 'Total Spend', operator: '>', value: '$500' },
   ]);
   const [segmentName, setSegmentName] = useState('');
+  useEscapeKey(true, onClose);
 
   const addRule = () => {
     setRules((prev) => [
@@ -191,6 +193,7 @@ function RuleBuilder({
             Segment Name
           </label>
           <input
+            aria-label="Segment name"
             value={segmentName}
             onChange={(e) => setSegmentName(e.target.value)}
             placeholder="e.g. High-Value Silver Members"
@@ -242,6 +245,7 @@ function RuleBuilder({
                 )}
                 {i === 0 && <div style={{ width: '28px', flexShrink: 0 }} />}
                 <select
+                  aria-label={`Rule ${i + 1} field`}
                   style={selectStyle}
                   value={rule.field}
                   onChange={(e) => updateRule(rule.id, 'field', e.target.value)}
@@ -251,6 +255,7 @@ function RuleBuilder({
                   ))}
                 </select>
                 <select
+                  aria-label={`Rule ${i + 1} operator`}
                   style={selectStyle}
                   value={rule.operator}
                   onChange={(e) => updateRule(rule.id, 'operator', e.target.value)}
@@ -260,6 +265,7 @@ function RuleBuilder({
                   ))}
                 </select>
                 <select
+                  aria-label={`Rule ${i + 1} value`}
                   style={selectStyle}
                   value={rule.value}
                   onChange={(e) => updateRule(rule.id, 'value', e.target.value)}

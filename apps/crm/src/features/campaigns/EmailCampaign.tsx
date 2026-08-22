@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
 import { toast } from 'sonner';
-import { Eye, Save, Send } from 'lucide-react';
+import { Eye, Save, Send, X } from 'lucide-react';
 import {
   useCreateCampaign,
   useGetCampaign,
@@ -13,6 +13,7 @@ import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import { useTemplates } from '../../shared/hooks/queries/useTemplates';
 import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../shared/components/ui';
 import { EmailEditor } from '../../shared/components/crm';
+import { useEscapeKey } from '../../shared/lib/keyboard';
 
 const EmailCampaign: React.FC = () => {
   const navigate = useNavigate();
@@ -41,6 +42,7 @@ const EmailCampaign: React.FC = () => {
   const [body, setBody] = useState(searchParams.get('body') || '');
   const [previewOpen, setPreviewOpen] = useState(false);
   const pending = create.isPending || update.isPending || updateStatus.isPending;
+  useEscapeKey(previewOpen, () => setPreviewOpen(false));
 
   useEffect(() => {
     if (isEditing) return;
@@ -348,7 +350,33 @@ const EmailCampaign: React.FC = () => {
               <div style={{ fontSize: '11px', color: '#666', marginBottom: '8px' }}>
                 From: hello@rtylr.com
               </div>
-              <h2 style={{ fontSize: '18px', margin: '0 0 16px' }}>{subject || '(no subject)'}</h2>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: '12px',
+                }}
+              >
+                <h2 style={{ fontSize: '18px', margin: '0 0 16px' }}>
+                  {subject || '(no subject)'}
+                </h2>
+                <button
+                  type="button"
+                  aria-label="Close email preview"
+                  onClick={() => setPreviewOpen(false)}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    color: '#666',
+                    cursor: 'pointer',
+                    padding: '2px',
+                    lineHeight: 1,
+                  }}
+                >
+                  <X size={18} />
+                </button>
+              </div>
               <div style={{ fontSize: '14px', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
                 {body || '(empty)'}
               </div>

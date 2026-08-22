@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Gift, Package, Plus, X } from 'lucide-react';
 import { useLoyaltyRewards, useUpsertReward } from '../../shared/hooks/queries/useLoyalty';
 import { PageHeader, Card, EmptyState, Button, SkeletonList } from '../../shared/components/ui';
+import { useEscapeKey } from '../../shared/lib/keyboard';
 
 interface RewardForm {
   name: string;
@@ -15,6 +16,7 @@ interface RewardForm {
 
 const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const upsert = useUpsertReward();
+  useEscapeKey(true, onClose);
   const [form, setForm] = useState<RewardForm>({
     name: '',
     description: '',
@@ -83,6 +85,9 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           borderRadius: '16px',
           padding: '24px',
           width: '420px',
+          maxWidth: 'calc(100vw - 32px)',
+          maxHeight: 'calc(100vh - 32px)',
+          overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
@@ -107,18 +112,21 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </button>
         </div>
         <input
+          aria-label="Reward name"
           placeholder="Reward name"
           value={form.name}
           onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           style={inputStyle}
         />
         <input
+          aria-label="Reward description"
           placeholder="Description"
           value={form.description}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
           style={inputStyle}
         />
         <input
+          aria-label="Reward category"
           placeholder="Category (e.g. discount, freebie)"
           value={form.category}
           onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
@@ -137,6 +145,7 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               Points cost
             </label>
             <input
+              aria-label="Points cost"
               type="number"
               min={0}
               value={form.pointsCost}
@@ -156,6 +165,7 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               Stock
             </label>
             <input
+              aria-label="Stock"
               type="number"
               min={0}
               value={form.stock}

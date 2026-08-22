@@ -60,6 +60,7 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
     >
       <div>
         <label
+          htmlFor={`tier-threshold-${tier.id}`}
           style={{
             display: 'block',
             fontSize: '10px',
@@ -73,6 +74,7 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
           Threshold (points)
         </label>
         <input
+          id={`tier-threshold-${tier.id}`}
           type="number"
           value={threshold}
           min={0}
@@ -93,6 +95,7 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
       </div>
       <div>
         <label
+          htmlFor={`tier-multiplier-${tier.id}`}
           style={{
             display: 'block',
             fontSize: '10px',
@@ -106,6 +109,7 @@ const TierEditForm: React.FC<TierEditFormProps> = ({ tier, allTiers, onClose }) 
           Discount (%)
         </label>
         <input
+          id={`tier-multiplier-${tier.id}`}
           type="number"
           value={multiplier}
           min={0}
