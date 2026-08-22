@@ -10,6 +10,8 @@ var (
 	ErrGiftCardInactive    = errors.New("gift card is inactive")
 	ErrGiftCardExpired     = errors.New("gift card has expired")
 	ErrInsufficientBalance = errors.New("insufficient gift card balance")
+	ErrInvalidTender       = errors.New("gift card tender reference is invalid")
+	ErrInvalidOrder        = errors.New("gift card order reference is invalid")
 )
 
 type GiftCard struct {
@@ -29,6 +31,7 @@ type GiftCard struct {
 }
 
 type GiftCardInput struct {
+	PaidOrderID   int64   `json:"paid_order_id"`
 	Code          string  `json:"code"`
 	InitialAmount float64 `json:"initial_amount"`
 	CustomerName  string  `json:"customer_name"`
@@ -37,8 +40,9 @@ type GiftCardInput struct {
 }
 
 type RedeemInput struct {
-	Code   string  `json:"code"`
-	Amount float64 `json:"amount"`
+	OrderID int64   `json:"order_id"`
+	Code    string  `json:"code"`
+	Amount  float64 `json:"amount"`
 }
 
 // FloatToCents converts standard float amount to integer cents.

@@ -19,10 +19,9 @@ const (
 
 type repository interface {
 	List(ctx context.Context, businessID int64) ([]domain.GiftCard, error)
-	Create(ctx context.Context, businessID int64, input domain.GiftCardInput) (int64, error)
 	CreateForOwner(ctx context.Context, businessID, ownerID int64, input domain.GiftCardInput) (int64, error)
 	GetByCode(ctx context.Context, businessID int64, code string) (*domain.GiftCard, error)
-	Redeem(ctx context.Context, businessID int64, input domain.RedeemInput) (*domain.GiftCard, error)
+	RedeemForOrder(ctx context.Context, businessID, actorID int64, input domain.RedeemInput) (*domain.GiftCard, error)
 }
 
 type Service struct {
@@ -49,18 +48,6 @@ func (s *Service) List(ctx context.Context, businessID int64) ([]domain.GiftCard
 	)
 }
 
-func (s *Service) Create(ctx context.Context, businessID int64, input domain.GiftCardInput) (int64, error) {
-	if err := domain.ValidateGiftCardInput(input); err != nil {
-		return 0, err
-	}
-	id, err := s.repo.Create(ctx, businessID, input)
-	if err != nil {
-		return 0, err
-	}
-	invalidatePosGiftCardsScope(ctx, businessID)
-	return id, nil
-}
-
 func (s *Service) CreateForOwner(ctx context.Context, businessID, ownerID int64, input domain.GiftCardInput) (int64, error) {
 	if err := domain.ValidateGiftCardInput(input); err != nil {
 		return 0, err
@@ -83,11 +70,11 @@ func (s *Service) GetByCode(ctx context.Context, businessID int64, code string) 
 	)
 }
 
-func (s *Service) Redeem(ctx context.Context, businessID int64, input domain.RedeemInput) (*domain.GiftCard, error) {
+func (s *Service) RedeemForOrder(ctx context.Context, businessID, actorID int64, input domain.RedeemInput) (*domain.GiftCard, error) {
 	if err := domain.ValidateRedeemInput(input); err != nil {
 		return nil, err
 	}
-	card, err := s.repo.Redeem(ctx, businessID, input)
+	card, err := s.repo.RedeemForOrder(ctx, businessID, actorID, input)
 	if err != nil {
 		return nil, err
 	}

@@ -99,7 +99,7 @@ func TestCreateGiftCard_InsertsRow(t *testing.T) {
 		CustomerName:  "Test Customer",
 		CustomerEmail: "test@example.com",
 	}
-	id, err := repo.Create(ctx, testutil.OwnerID, input)
+	id, err := repo.CreateForOwner(ctx, testutil.BusinessID, testutil.OwnerID, input)
 	if err != nil {
 		t.Fatalf("Create error: %v", err)
 	}
@@ -128,7 +128,7 @@ func TestGetByCode_ReturnsCard(t *testing.T) {
 		Code:          "INTTEST-002",
 		InitialAmount: 100.00,
 	}
-	id, err := repo.Create(ctx, testutil.OwnerID, input)
+	id, err := repo.CreateForOwner(ctx, testutil.BusinessID, testutil.OwnerID, input)
 	if err != nil {
 		t.Fatalf("Create error: %v", err)
 	}
@@ -168,7 +168,7 @@ func TestRedeem_ReducesBalance(t *testing.T) {
 		Code:          "INTTEST-003",
 		InitialAmount: 75.00,
 	}
-	id, err := repo.Create(ctx, testutil.OwnerID, input)
+	id, err := repo.CreateForOwner(ctx, testutil.BusinessID, testutil.OwnerID, input)
 	if err != nil {
 		t.Fatalf("Create error: %v", err)
 	}
@@ -176,7 +176,7 @@ func TestRedeem_ReducesBalance(t *testing.T) {
 		db.ExecContext(ctx, "DELETE FROM pos_gift_cards WHERE id = ?", id)
 	})
 
-	updated, err := repo.Redeem(ctx, testutil.OwnerID, domain.RedeemInput{
+	updated, err := repo.RedeemForOrder(ctx, testutil.BusinessID, testutil.OwnerID, domain.RedeemInput{
 		Code:   "INTTEST-003",
 		Amount: 25.00,
 	})
@@ -198,7 +198,7 @@ func TestRedeem_InsufficientBalanceErrors(t *testing.T) {
 		Code:          "INTTEST-004",
 		InitialAmount: 10.00,
 	}
-	id, err := repo.Create(ctx, testutil.OwnerID, input)
+	id, err := repo.CreateForOwner(ctx, testutil.BusinessID, testutil.OwnerID, input)
 	if err != nil {
 		t.Fatalf("Create error: %v", err)
 	}
@@ -206,7 +206,7 @@ func TestRedeem_InsufficientBalanceErrors(t *testing.T) {
 		db.ExecContext(ctx, "DELETE FROM pos_gift_cards WHERE id = ?", id)
 	})
 
-	_, err = repo.Redeem(ctx, testutil.OwnerID, domain.RedeemInput{
+	_, err = repo.RedeemForOrder(ctx, testutil.BusinessID, testutil.OwnerID, domain.RedeemInput{
 		Code:   "INTTEST-004",
 		Amount: 999.00,
 	})
@@ -243,7 +243,7 @@ func TestCreateGiftCard_WithExpiry_Persisted(t *testing.T) {
 		InitialAmount: 20.00,
 		ExpiresAt:     "2030-12-31",
 	}
-	id, err := repo.Create(ctx, testutil.OwnerID, input)
+	id, err := repo.CreateForOwner(ctx, testutil.BusinessID, testutil.OwnerID, input)
 	if err != nil {
 		t.Fatalf("Create error: %v", err)
 	}
@@ -269,7 +269,7 @@ func TestListGiftCards_InitialAmountEqualsCurrentBalance_ForNew(t *testing.T) {
 		Code:          "INTTEST-006",
 		InitialAmount: 60.00,
 	}
-	id, err := repo.Create(ctx, testutil.OwnerID, input)
+	id, err := repo.CreateForOwner(ctx, testutil.BusinessID, testutil.OwnerID, input)
 	if err != nil {
 		t.Fatalf("Create error: %v", err)
 	}
