@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -15,6 +16,7 @@ import (
 	"github.com/voxire/onion/internal/modules/invoices/internal/infrastructure/persistence/sqlc"
 	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/searchutil"
 )
 
@@ -513,27 +515,33 @@ func (r *Repository) RecordPayment(ctx context.Context, businessID int64, input 
 	}
 	p.ID = paymentID
 
-	newAmountPaid := inv.AmountPaid + p.Amount
-	newAmountDue := inv.Total - newAmountPaid
-	if newAmountDue < 0 {
-		newAmountDue = 0
+	// Accumulate and compare in integer cents: float64 residue from parsed
+	// DECIMAL strings could otherwise leave newAmountDue at +2.4e-15 and keep
+	// a fully paid invoice in "partial" forever (or flip one early).
+	paymentCents := paymentAmountToCents(p.Amount)
+	totalCents := nullDecimalToCents(row.Total)
+	paidCents := nullDecimalToCents(row.AmountPaid)
+	newPaidCents := paidCents + paymentCents
+	newDueCents := totalCents - newPaidCents
+	if newDueCents < 0 {
+		newDueCents = 0
 	}
 	newStatus := "partial"
 	var paidDate *time.Time
-	if newAmountDue <= 0 {
+	if newDueCents <= 0 {
 		newStatus = "paid"
 		paidDateValue := p.PaymentDate
 		paidDate = &paidDateValue
 	}
 	if paidDate != nil {
 		err = qtx.UpdateInvoicePaymentTotalsWithPaidDate(ctx, sqlc.UpdateInvoicePaymentTotalsWithPaidDateParams{
-			AmountPaid: sqlNullString(fmtFloat(newAmountPaid)), AmountDue: sqlNullString(fmtFloat(newAmountDue)),
+			AmountPaid: sqlNullString(newPaidCents.String()), AmountDue: sqlNullString(newDueCents.String()),
 			Status:   sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(newStatus), Valid: true},
 			PaidDate: sql.NullTime{Time: *paidDate, Valid: true}, ID: input.InvoiceID, BusinessID: businessID,
 		})
 	} else {
 		err = qtx.UpdateInvoicePaymentTotals(ctx, sqlc.UpdateInvoicePaymentTotalsParams{
-			AmountPaid: sqlNullString(fmtFloat(newAmountPaid)), AmountDue: sqlNullString(fmtFloat(newAmountDue)),
+			AmountPaid: sqlNullString(newPaidCents.String()), AmountDue: sqlNullString(newDueCents.String()),
 			Status: sqlc.NullFinanceInvoicesStatus{FinanceInvoicesStatus: sqlc.FinanceInvoicesStatus(newStatus), Valid: true}, ID: input.InvoiceID, BusinessID: businessID,
 		})
 	}
@@ -1116,6 +1124,30 @@ func sqlNullInt64(i int64) sql.NullInt64 {
 
 func fmtFloat(f float64) string {
 	return strconv.FormatFloat(f, 'f', 2, 64)
+}
+
+// paymentAmountToCents rounds an API-supplied payment amount to whole cents.
+func paymentAmountToCents(amount float64) money.Amount {
+	return money.Amount(int64(math.Round(amount * 100)))
+}
+
+// nullDecimalToCents parses a DECIMAL column read back as a nullable string
+// into integer cents via the shared money parser, so no float64 rounding
+// error is introduced on the way out of the database. Unparseable values
+// degrade to zero with a warning rather than failing the payment write.
+func nullDecimalToCents(value sql.NullString) money.Amount {
+	if !value.Valid || strings.TrimSpace(value.String) == "" {
+		return 0
+	}
+	cents, err := money.FromString(value.String)
+	if err != nil {
+		logger.Global().Warn("failed to parse invoice decimal value",
+			logger.String("value", value.String),
+			logger.Error(err),
+		)
+		return 0
+	}
+	return cents
 }
 
 func parseFloat(s string) float64 {
