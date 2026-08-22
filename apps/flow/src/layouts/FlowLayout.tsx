@@ -50,7 +50,7 @@ import CommandBar from '../shared/components/CommandBar';
 import QuickCreate from '../shared/components/QuickCreate';
 import BulkEditBar from '../shared/components/BulkEditBar';
 import GateNotice from '../shared/components/GateNotice';
-import ModeCards from '../shared/components/ModeCards';
+import ModeToggle from '../shared/components/ModeToggle';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useWorkspaces } from '../features/workspace-dashboard/useWorkspaces';
 import { useProjects, useCreateProject } from '../features/projects/useProjects';
@@ -1208,7 +1208,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       >
                         {t('flow.shell.appearance')}
                       </p>
-                      <ModeCards variant="compact" />
+                      <ModeToggle />
                     </div>
                     <div
                       style={{
