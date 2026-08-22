@@ -22,7 +22,8 @@ const ErrorState: React.FC<ErrorStateProps> = ({ message, onRetry }) => {
         {message || defaultMessage}
       </p>
       {onRetry && (
-        <button type="button"
+        <button
+          type="button"
           onClick={onRetry}
           className="text-xs px-4 py-2 min-h-[44px] rounded-lg font-medium"
           style={{ background: 'var(--hub-hover)', color: 'var(--hub-text)' }}
