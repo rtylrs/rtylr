@@ -215,6 +215,13 @@ func (p *Params) Defaults() {
 // maxPixelArea bounds the output width*height to limit per-request memory.
 const maxPixelArea int64 = 24_000_000
 
+const (
+	maxTransformDimension = 8000
+	maxTransformScale     = 4.0
+	maxBlurStrength       = 2000.0
+	maxMedianWindow       = 31
+)
+
 // allowedOutputFormat reports whether fmt is an encoder the CDN serves.
 func allowedOutputFormat(format string) bool {
 	switch strings.ToLower(format) {
@@ -258,6 +265,9 @@ func (p *Params) Validate() error {
 		if p.Quality < 1 || p.Quality > 100 {
 			return fmt.Errorf("quality must be between 1 and 100")
 		}
+		if err := validateTransformationChain(p.Chain); err != nil {
+			return err
+		}
 		if !allowedOutputFormat(p.Format) {
 			return fmt.Errorf("unsupported format: %s", p.Format)
 		}
@@ -277,6 +287,65 @@ func (p *Params) Validate() error {
 	}
 	if !allowedFitMode(p.Fit) {
 		return fmt.Errorf("unsupported fit mode: %s", p.Fit)
+	}
+	return nil
+}
+
+func validateTransformationChain(chain string) error {
+	maxWidth, maxHeight := 0, 0
+	for _, step := range strings.Split(chain, "/") {
+		for _, token := range strings.Split(step, ",") {
+			parts := strings.SplitN(token, "_", 2)
+			if len(parts) != 2 {
+				continue
+			}
+			key, value := strings.ToLower(parts[0]), parts[1]
+			switch key {
+			case "w", "h":
+				n, err := strconv.Atoi(value)
+				if err != nil || n < 0 || n > maxTransformDimension {
+					return fmt.Errorf("chain %s must be between 0 and %d", key, maxTransformDimension)
+				}
+				if key == "w" && n > maxWidth {
+					maxWidth = n
+				}
+				if key == "h" && n > maxHeight {
+					maxHeight = n
+				}
+			case "z":
+				n, err := strconv.ParseFloat(value, 64)
+				if err != nil || n <= 0 || n > maxTransformScale {
+					return fmt.Errorf("chain scale must be greater than 0 and at most %.0fx", maxTransformScale)
+				}
+			case "e":
+				effectParts := strings.SplitN(value, ":", 2)
+				if len(effectParts) != 2 {
+					continue
+				}
+				effect := strings.ToLower(effectParts[0])
+				switch effect {
+				case "blur":
+					n, err := strconv.ParseFloat(effectParts[1], 64)
+					if err != nil {
+						return fmt.Errorf("invalid %s effect value", effect)
+					}
+					if n < 0 || n > maxBlurStrength {
+						return fmt.Errorf("blur strength must be between 0 and %.0f", maxBlurStrength)
+					}
+				case "median", "oil_paint":
+					n, err := strconv.ParseFloat(effectParts[1], 64)
+					if err != nil {
+						return fmt.Errorf("invalid %s effect value", effect)
+					}
+					if n < 0 || n > maxMedianWindow {
+						return fmt.Errorf("%s window must be between 0 and %d", effect, maxMedianWindow)
+					}
+				}
+			}
+		}
+	}
+	if maxWidth > 0 && maxHeight > 0 && int64(maxWidth)*int64(maxHeight) > maxPixelArea {
+		return fmt.Errorf("chain dimensions exceed the %d pixel limit", maxPixelArea)
 	}
 	return nil
 }

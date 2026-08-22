@@ -363,7 +363,7 @@ func LoadAndValidate() (*AppConfig, error) {
 		// upload service (UPLOAD_URL); hosted falls back to CDN_BASE_URL / the
 		// cdn.voxire.com default (applied below).
 		CDNBaseURL:         envFirst("UPLOAD_URL", "CDN_BASE_URL"),
-		CDNMaxUploadBytes:  int64(envIntOrDefault("CDN_MAX_UPLOAD_MB", 100)) * 1024 * 1024,
+		CDNMaxUploadBytes:  int64(positiveEnvIntOrDefault("CDN_MAX_UPLOAD_MB", 100)) * 1024 * 1024,
 		CDNMediaEnginePath: envOrDefault("MEDIA_ENGINE_PATH", "./media-engine/build/media-engine"),
 		CDNAPIKey:          os.Getenv("CDN_API_KEY"),
 
@@ -450,6 +450,14 @@ func envIntOrDefault(key string, fallback int) int {
 	}
 	n, err := strconv.Atoi(v)
 	if err != nil {
+		return fallback
+	}
+	return n
+}
+
+func positiveEnvIntOrDefault(key string, fallback int) int {
+	n := envIntOrDefault(key, fallback)
+	if n <= 0 {
 		return fallback
 	}
 	return n

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 	"time"
@@ -114,8 +115,12 @@ func TestEngineFrameEncoding(t *testing.T) {
 
 func TestRunTransformedSingleShotFallback(t *testing.T) {
 	// A real single-shot-capable engine: /bin/true succeeds as any command.
-	c := &CDN{mediaEngine: "/bin/true"}
-	c.engine = newEnginePool("/bin/true", 1)
+	truePath, err := exec.LookPath("true")
+	if err != nil {
+		t.Skip("true executable is unavailable")
+	}
+	c := &CDN{mediaEngine: truePath}
+	c.engine = newEnginePool(truePath, 1)
 	if err := c.runTransformed(context.Background(), []string{"anything"}); err != nil {
 		t.Fatalf("single-shot fallback failed: %v", err)
 	}

@@ -143,6 +143,14 @@ func TestLocalNudeModerator_InvalidImageErrors(t *testing.T) {
 	}
 }
 
+func TestLocalNudeModerator_RejectsOversizedDimensionsBeforeDecode(t *testing.T) {
+	data := []byte("\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR" +
+		"\xff\xff\xff\xff\x00\x00\x00\x02\x08\x06\x00\x00\x00")
+	if _, _, err := (&localNudeModerator{}).Check(context.Background(), "image/png", data); err == nil {
+		t.Fatal("expected oversized image dimensions to be rejected")
+	}
+}
+
 func TestNewModeratorFromConfig(t *testing.T) {
 	if m, _ := NewModeratorFromConfig(nil); m != nil {
 		t.Fatal("nil config should disable moderation")

@@ -100,7 +100,7 @@ func (h *ResumeUploadURLHandler) Serve(ctx context.Context, req *ResumeUploadURL
 	key := fmt.Sprintf("resumes/%d/%d/%s-%s", custom.OwnerID, career.ID, uuid.NewString(), safeName)
 
 	const expiresIn = 15 * time.Minute
-	uploadURL, err := client.PresignUpload(ctx, key, req.ContentType, expiresIn)
+	uploadURL, err := client.PresignUpload(ctx, key, req.ContentType, storage.MaxResumeBytes, expiresIn)
 	if err != nil {
 		return ResumeUploadURLResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to generate upload URL")
 	}

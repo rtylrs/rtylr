@@ -2,6 +2,7 @@ package cdn
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -160,8 +161,32 @@ func (c *CDN) runImageAnalysis(r *http.Request, storageKey, metric string) ([]by
 			args = append(args, "--y", y)
 		}
 	}
+
+	if c.engineSem != nil {
+		select {
+		case c.engineSem <- struct{}{}:
+			defer func() { <-c.engineSem }()
+		case <-r.Context().Done():
+			return nil, r.Context().Err()
+		}
+	}
+	execCtx, cancel := context.WithTimeout(r.Context(), engineTimeout)
+	defer cancel()
+
+	if c.engine != nil {
+		if conn, release, acquireErr := c.engine.acquire(execCtx); acquireErr == nil {
+			out, runErr := conn.run(execCtx, args)
+			release()
+			if runErr == nil {
+				return bytes.TrimSpace([]byte(out)), nil
+			}
+		} else if execCtx.Err() != nil {
+			return nil, execCtx.Err()
+		}
+	}
+
 	// #nosec G204 -- mediaEngine is a configured binary path; args are fixed metric names and temp paths.
-	cmd := exec.CommandContext(r.Context(), c.mediaEngine, args...)
+	cmd := exec.CommandContext(execCtx, c.mediaEngine, args...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, fmt.Errorf("media-engine analyze failed: %w\noutput: %s", err, out)

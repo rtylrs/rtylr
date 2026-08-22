@@ -162,7 +162,7 @@ func (c *CDN) serveFile(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Last-Modified", meta.CreatedAt.UTC().Format(http.TimeFormat))
 	}
 	w.Header().Set("Content-Type", meta.MIMEType)
-	w.Header().Set("Cache-Control", immutableCacheControl)
+	w.Header().Set("Cache-Control", deliveryCacheControl(r))
 	w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=%q", sanitizeFilename(meta.OriginalFilename)))
 	if meta.Size > 0 {
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", meta.Size))

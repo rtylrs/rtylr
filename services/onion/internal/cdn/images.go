@@ -203,7 +203,7 @@ func (c *CDN) serveTransformed(w http.ResponseWriter, r *http.Request) {
 	etag := quoteETag(p.CacheKey(meta.FileUUID))
 	w.Header().Set("ETag", etag)
 	w.Header().Set("Content-Type", mimeForFormat(p.Format))
-	w.Header().Set("Cache-Control", immutableCacheControl)
+	w.Header().Set("Cache-Control", deliveryCacheControl(r))
 	setImageVariantHeaders(w, p, parsed.varyAccept, "cdn-file-"+meta.FileUUID, parsed.surrogateKey)
 	if etagMatches(r.Header.Get("If-None-Match"), etag) {
 		w.WriteHeader(http.StatusNotModified)

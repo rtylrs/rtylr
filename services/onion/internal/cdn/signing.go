@@ -150,6 +150,8 @@ func (c *CDN) validateSignedDelivery(w http.ResponseWriter, r *http.Request) boo
 	sig := strings.TrimSpace(query.Get("sig"))
 	expires := strings.TrimSpace(query.Get("expires"))
 	if sig == "" && expires == "" {
+		// Public delivery remains supported; signing is an optional cache and
+		// expiry control for assets that need it.
 		return true
 	}
 	if sig == "" || expires == "" {
@@ -176,6 +178,13 @@ func (c *CDN) validateSignedDelivery(w http.ResponseWriter, r *http.Request) boo
 		return false
 	}
 	return true
+}
+
+func deliveryCacheControl(r *http.Request) string {
+	if strings.TrimSpace(r.URL.Query().Get("sig")) != "" || strings.TrimSpace(r.URL.Query().Get("expires")) != "" {
+		return "private, no-store"
+	}
+	return immutableCacheControl
 }
 
 func (c *CDN) signingSecret() string {
