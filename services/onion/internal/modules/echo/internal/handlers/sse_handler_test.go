@@ -170,7 +170,7 @@ func TestStreamTokensToClientRecordsPartialFailedUsage(t *testing.T) {
 		cacheWritePlan{Mode: string(ModeAsk), PromptChars: 40, StartedAt: time.Now()},
 		nil,
 		"prompt",
-		0,
+		nil,
 	)
 
 	select {
@@ -216,6 +216,32 @@ func TestStreamRendererExtractsSplitThinkingMarker(t *testing.T) {
 type recordingQuotaService struct {
 	recorded chan int
 	reserved int64
+}
+
+func TestQuotaReservationSettlesOnceIncludingEarlyRelease(t *testing.T) {
+	quota := &recordingQuotaService{recorded: make(chan int, 1)}
+	handler := &GenerateTextStreamHandler{QuotaService: quota}
+	reservation := &quotaReservation{
+		handler: handler, ctx: context.Background(), businessID: 1, userID: 2,
+		reservedTokens: 4000,
+	}
+
+	reservation.settle(0)
+	reservation.settle(100)
+
+	select {
+	case got := <-quota.recorded:
+		if got != -4000 {
+			t.Fatalf("settlement delta = %d, want -4000", got)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("reservation was not settled")
+	}
+	select {
+	case got := <-quota.recorded:
+		t.Fatalf("reservation settled twice with delta %d", got)
+	case <-time.After(50 * time.Millisecond):
+	}
 }
 
 func (s *recordingQuotaService) ReserveQuota(_ context.Context, _, _ int64) (bool, string, int64, int64, int64, int64) {

@@ -31,6 +31,27 @@ type QuotaService interface {
 	ReconcileUsage(ctx context.Context, businessID, userID, actualTokens, reservedTokens int64)
 }
 
+// quotaReservation settles exactly once, including early exits where no
+// provider call occurs. A reservation must not become a permanent debit just
+// because setup, cache lookup, or stream startup returned early.
+type quotaReservation struct {
+	once           sync.Once
+	handler        *GenerateTextStreamHandler
+	ctx            context.Context
+	businessID     int64
+	userID         int64
+	reservedTokens int64
+}
+
+func (q *quotaReservation) settle(actualTokens int64) {
+	if q == nil {
+		return
+	}
+	q.once.Do(func() {
+		q.handler.recordUsage(q.ctx, q.businessID, q.userID, actualTokens, q.reservedTokens)
+	})
+}
+
 const (
 	caretSmokeCheckReply = "Caret is working. What would you like help with?"
 )
@@ -174,16 +195,20 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 	if authUserID > 0 {
 		req.UserID = authUserID
 	}
-	var reservedTokens int64
+	var reservation *quotaReservation
 	if h.QuotaService != nil {
 		allowed, plan, allowance, used, remaining, reserved := h.QuotaService.ReserveQuota(ctx, businessID, authUserID)
-		reservedTokens = reserved
 		if !allowed {
 			log.Info("AI request blocked by quota",
 				logger.Any("owner_business_id", businessID), logger.String("plan", plan))
 			h.writeQuotaExceeded(ctx, w, plan, allowance, used, remaining)
 			return
 		}
+		reservation = &quotaReservation{
+			handler: h, ctx: ctx, businessID: businessID, userID: authUserID,
+			reservedTokens: reserved,
+		}
+		defer reservation.settle(0)
 	}
 
 	requestNow := time.Now()
@@ -308,7 +333,7 @@ func (h *GenerateTextStreamHandler) ServeHTTP(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	h.streamTokensToClient(ctx, w, tokenChan, clientGone, req, businessID, authUserID, cachePlan, liveGrounding, enhancedPrompt, reservedTokens)
+	h.streamTokensToClient(ctx, w, tokenChan, clientGone, req, businessID, authUserID, cachePlan, liveGrounding, enhancedPrompt, reservation)
 }
 
 func isCaretSmokeCheck(prompt string) bool {
@@ -363,7 +388,7 @@ func (h *GenerateTextStreamHandler) writeQuotaExceeded(ctx context.Context, w ht
 // from the request context (which is canceled when the SSE handler returns) but
 // time-bounded.
 func (h *GenerateTextStreamHandler) recordUsage(ctx context.Context, businessID, userID, tokens, reservedTokens int64) {
-	if h.QuotaService == nil || tokens <= 0 {
+	if h.QuotaService == nil || (tokens <= 0 && reservedTokens <= 0) {
 		return
 	}
 	go func() {
@@ -640,7 +665,14 @@ func waitCachedReplay(ctx context.Context, clientGone chan bool, delay time.Dura
 	}
 }
 
-func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, req *GenerateTextStreamRequest, businessID, userID int64, cachePlan cacheWritePlan, grounding *analystGroundingResult, basePrompt string, reservedTokens int64) {
+func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, req *GenerateTextStreamRequest, businessID, userID int64, cachePlan cacheWritePlan, grounding *analystGroundingResult, basePrompt string, reservation *quotaReservation) {
+	settleUsage := func(actualTokens int64) {
+		if reservation != nil {
+			reservation.settle(actualTokens)
+			return
+		}
+		h.recordUsage(ctx, businessID, userID, actualTokens, 0)
+	}
 	var fullResponse strings.Builder
 	messageID := newAssistantMessageID()
 	if err := h.writeStreamPrelude(w, req.SessionID, messageID); err != nil {
@@ -675,7 +707,7 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 				// client interruption. They do not reliably report usage on failed
 				// streams, so meter the observed partial attempt conservatively.
 				totalTokens += estimateTokens(currentPromptChars) + estimateTokens(partialResponseChars)
-				h.recordUsage(ctx, businessID, userID, int64(totalTokens), reservedTokens)
+				settleUsage(int64(totalTokens))
 			}
 			return
 		}
@@ -706,7 +738,7 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 			if fullResponse.Len() > 0 {
 				go h.storeAIResponseDetached(context.WithoutCancel(ctx), req.SessionID, int(req.UserID), fullResponse.String())
 			}
-			h.recordUsage(ctx, businessID, userID, int64(totalTokens), reservedTokens)
+			settleUsage(int64(totalTokens))
 			h.writeExactCacheEntry(ctx, finalToken, fullResponse.String(), totalTokens, cachePlan, businessID, userID)
 			return
 		}
@@ -722,7 +754,7 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 			if fullResponse.Len() > 0 {
 				go h.storeAIResponseDetached(context.WithoutCancel(ctx), req.SessionID, int(req.UserID), fullResponse.String())
 			}
-			h.recordUsage(ctx, businessID, userID, int64(totalTokens), reservedTokens)
+			settleUsage(int64(totalTokens))
 			return
 		}
 		tokenChan = nextTokenChan

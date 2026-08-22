@@ -10,16 +10,20 @@ import (
 // it supplies request-scoped quota accounting to the application grounding
 // service. Query planning and evidence assembly remain in application.
 func (h *GenerateTextStreamHandler) analystGroundingWithContext(ctx context.Context, question string, businessID, userID int64, systemContext string) (*analystGroundingResult, bool) {
-	var reserved int64
+	var reservation *quotaReservation
 	if h.QuotaService != nil {
 		allowed, _, _, _, _, r := h.QuotaService.ReserveQuota(ctx, businessID, userID)
 		if !allowed {
 			return nil, false
 		}
-		reserved = r
+		reservation = &quotaReservation{
+			handler: h, ctx: ctx, businessID: businessID, userID: userID,
+			reservedTokens: r,
+		}
+		defer reservation.settle(0)
 	}
 	result, ok := echoapp.GroundAnalytics(ctx, h.AiService, h.AnalystService, question, businessID, userID, systemContext, func(tokens int) {
-		h.recordUsage(ctx, businessID, userID, int64(tokens), reserved)
+		reservation.settle(int64(tokens))
 	})
 	return result, ok
 }
