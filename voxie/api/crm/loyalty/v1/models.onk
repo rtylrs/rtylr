@@ -29,7 +29,7 @@ message LoyaltyTransaction {
   balance_before: int64
   balance_after: int64
   description: string
-  reference_id: int64? @nullable
+  reference_id: int64?
   reference_type: string
   created_at: string
 }
@@ -51,7 +51,7 @@ message AwardPointsRequest {
   customer_id: int64 @required @gt(0)
   points: int64 @required @gt(0)
   description: string @required
-  reference_id: int64? @nullable
+  reference_id: int64?
   reference_type: string @required
 }
 
@@ -102,7 +102,7 @@ message RedeemPointsRequest {
   customer_id: int64 @required @gt(0)
   points: int64 @required @gt(0)
   description: string @required
-  reference_id: int64? @nullable
+  reference_id: int64?
   reference_type: string @required
 }
 

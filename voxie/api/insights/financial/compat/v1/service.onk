@@ -1,0 +1,8 @@
+package insights.financial.compat.v1
+
+/// Compatibility contract for the existing cash-flow time-series route.
+service CompatibilityService {
+  base_path: "/insights/financial"
+
+  getCashFlow(GetCashFlowRequest) -> GetCashFlowResponse @get("/cash-flow")
+}

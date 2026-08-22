@@ -10,11 +10,11 @@ message Campaign {
   channel: string
   /// Current lifecycle state.
   status: string
-  segment_id: int64? @nullable
+  segment_id: int64?
   subject: string
   content: string
-  scheduled_at: string? @nullable
-  sent_at: string? @nullable
+  scheduled_at: string?
+  sent_at: string?
   audience_count: int64
   sent_count: int64
   delivered_count: int64
@@ -40,7 +40,7 @@ message CreateCampaignRequest {
   name: string @required
   description: string @required
   channel: string @required
-  segment_id: int64? @nullable
+  segment_id: int64?
   subject: string @required
   content: string @required
   scheduled_at: string @required
@@ -88,7 +88,7 @@ message UpdateCampaignBody {
   name: string @required
   description: string @required
   channel: string @required
-  segment_id: int64? @nullable
+  segment_id: int64?
   subject: string @required
   content: string @required
   scheduled_at: string @required
