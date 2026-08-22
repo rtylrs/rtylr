@@ -83,7 +83,9 @@
     "moveFailed": "Échec du déplacement du projet",
     "moved": "Projet déplacé",
     "selectWorkspace": "Sélectionnez un espace de travail",
-    "deleted": "Projet supprimé"
+    "deleted": "Projet supprimé",
+    "restoreFailed": "Échec de la restauration du projet",
+    "purgeFailed": "Échec de la suppression définitive du projet"
   },
   "milestone": {
     "createFailed": "Échec de la création du jalon",
