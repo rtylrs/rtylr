@@ -44,7 +44,6 @@ import { useMemberCapacityHours } from '../shared/hooks/queries/useMemberCapacit
 import { signOut, useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useUserStore } from '../shared/stores/userStore';
 import { useTranslation } from 'react-i18next';
-import { useThemeStore } from '../shared/stores/themeStore';
 import { useAppearanceStore } from '../shared/stores/appearanceStore';
 import { ACCENT_DEFAULT } from '../shared/lib/colorUtils';
 import { useFlowStore } from '../shared/stores/flowStore';
@@ -261,12 +260,12 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
       businessName: authUser.businessName,
     });
   }, [authUser, setUser]);
-  const { theme, setTheme } = useThemeStore();
   // The provider takes the whole preference set, so this reads the store
   // unselected. Zustand hands back the same object until something is set, and
   // the provider re-derives from the individual fields, so a render that changes
   // nothing does not re-write a token.
   const appearance = useAppearanceStore();
+  const { mode, setMode } = appearance;
   const {
     workspaces,
     projects,
@@ -596,8 +595,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const modKey = isMac ? '⌘' : 'Ctrl';
 
   const logoSrc =
-    theme === 'dark' ||
-    (theme === 'system' &&
+    mode === 'dark' ||
+    (mode === 'system' &&
       typeof window !== 'undefined' &&
       window.matchMedia('(prefers-color-scheme: dark)').matches)
       ? '/logo.png'
@@ -1221,14 +1220,14 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                           <button
                             type="button"
                             key={value}
-                            onClick={() => setTheme(value)}
+                            onClick={() => setMode(value)}
                             className="flex-1 flex flex-col items-center gap-1 py-2 rounded-md text-[10px] font-medium transition-colors"
                             style={{
                               background:
-                                theme === value ? 'var(--accent-muted)' : 'var(--flow-hover)',
-                              color: theme === value ? 'var(--accent)' : 'var(--flow-text-muted)',
+                                mode === value ? 'var(--accent-muted)' : 'var(--flow-hover)',
+                              color: mode === value ? 'var(--accent)' : 'var(--flow-text-muted)',
                               border:
-                                theme === value
+                                mode === value
                                   ? '1px solid var(--accent-border)'
                                   : '1px solid transparent',
                             }}
