@@ -439,7 +439,23 @@
       "deleteConfirmSuffix": " ? Elle sera retirée de toutes les tâches auxquelles elle est associée."
     },
     "chooseColorLabel": "Choisir la couleur {{color}}",
-    "deleteLabelLabel": "Supprimer l'étiquette"
+    "deleteLabelLabel": "Supprimer l'étiquette",
+    "bin": {
+      "section": "Corbeille",
+      "description": "Projets archivés de toute l'entreprise. Restaurez-en un, ou supprimez définitivement ce dont vous n'avez plus besoin.",
+      "emptyTitle": "La corbeille est vide",
+      "emptyDescription": "Les projets archivés apparaissent ici jusqu'à leur suppression définitive.",
+      "refreshCta": "Actualiser",
+      "selectAll": "Tout sélectionner ({{count}})",
+      "purgeSelected": "Supprimer {{count}} définitivement",
+      "selectProject": "Sélectionner {{name}}",
+      "purgesOn": "Supprimé le {{date}}",
+      "truncated": "{{shown}} sur {{total}} affichés. Restaurez ou supprimez-en pour voir le reste.",
+      "purgeTitle": "Suppression définitive",
+      "purgeConfirm": "Cette action supprime définitivement {{count}} projet(s) et tout leur contenu. Elle est irréversible.",
+      "purgeKeyword": "supprimer",
+      "retentionNote": "Les projets sont supprimés automatiquement à la fin de leur période de conservation."
+    }
   },
   "presence": {
     "heading": "Qui est présent aujourd'hui",
