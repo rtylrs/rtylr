@@ -728,7 +728,11 @@
     "refreshMembersCta": "Actualiser",
     "moveGateReason": "Seuls les administrateurs du projet peuvent déplacer ce projet vers un autre espace de travail.",
     "transferGateReason": "Seuls les administrateurs du projet peuvent transférer la propriété de ce projet.",
-    "deleteGateReason": "Seuls les administrateurs du projet peuvent supprimer ce projet."
+    "deleteGateReason": "Seuls les administrateurs du projet peuvent supprimer ce projet.",
+    "visibility": "Visibilité",
+    "visibilitySaved": "Visibilité mise à jour",
+    "visibilityGateReason": "Seul un administrateur du projet peut changer la visibilité.",
+    "visibilityPersonalGate": "Votre projet Mes tâches est toujours privé."
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection"
@@ -757,5 +761,11 @@
     "purge": "Supprimer définitivement {{name}}",
     "purgeTitle": "Suppression définitive",
     "purgeCta": "Supprimer définitivement"
+  },
+  "visibility": {
+    "private": "Privé",
+    "public": "Public",
+    "archived": "Archivé",
+    "publicHint": "Le mode public expose le nom, la couleur, le statut et les dates du projet sur les profils des membres, pour les collègues de l'entreprise. Il ne donne jamais accès à ses tâches."
   }
 }
