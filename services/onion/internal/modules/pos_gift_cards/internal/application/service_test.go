@@ -25,6 +25,10 @@ func (m *mockRepo) Create(_ context.Context, _ int64, _ domain.GiftCardInput) (i
 	return m.createID, m.createErr
 }
 
+func (m *mockRepo) CreateForOwner(_ context.Context, _ int64, _ int64, _ domain.GiftCardInput) (int64, error) {
+	return m.createID, m.createErr
+}
+
 func (m *mockRepo) GetByCode(_ context.Context, _ int64, _ string) (*domain.GiftCard, error) {
 	return m.card, m.getErr
 }
