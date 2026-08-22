@@ -131,22 +131,22 @@ func (a *LoyaltyAPI) EarnPoints(ctx context.Context, req *posloyaltyv1.EarnPoint
 		return nil, err
 	}
 
-	if req.GetCustomerId() == 0 || req.GetPoints() <= 0 {
-		return nil, onekiterrors.New(http.StatusBadRequest, "customerId and positive points are required")
+	if req.GetCustomerId() == 0 || req.GetOrderId() == 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "customer_id and order_id are required")
 	}
 
-	var orderID *int64
-	if v := req.GetOrderId(); v != 0 {
-		orderID = &v
-	}
+	orderID := req.GetOrderId()
 
 	id, earnErr := a.Service.EarnPoints(ctx, domain.EarnPointsInput{
 		BusinessID: businessID,
 		CustomerID: req.GetCustomerId(),
-		OrderID:    orderID,
-		Points:     req.GetPoints(),
+		OrderID:    &orderID,
+		Points:     req.GetPoints(), // validated for wire compatibility; service derives the award
 	})
 	if earnErr != nil {
+		if errors.Is(earnErr, domain.ErrOrderRequired) || errors.Is(earnErr, domain.ErrOrderNotPaid) || errors.Is(earnErr, domain.ErrOrderAlreadyEarned) {
+			return nil, onekiterrors.New(http.StatusConflict, earnErr.Error())
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to earn points")
 	}
 	return &posloyaltyv1.EarnPointsResponse{TransactionId: id, Message: "Points earned successfully"}, nil
@@ -168,6 +168,12 @@ func (a *LoyaltyAPI) RedeemPoints(ctx context.Context, req *posloyaltyv1.RedeemP
 		Points:     req.GetPoints(),
 	})
 	if redeemErr != nil {
+		if errors.Is(redeemErr, domain.ErrLoyaltyNotEnabled) {
+			return nil, onekiterrors.New(http.StatusConflict, "Loyalty program is disabled")
+		}
+		if errors.Is(redeemErr, domain.ErrMinRedeemNotReached) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Minimum redeem points not reached")
+		}
 		if errors.Is(redeemErr, domain.ErrInsufficientPoints) {
 			return nil, onekiterrors.New(http.StatusBadRequest, "Insufficient loyalty points")
 		}
