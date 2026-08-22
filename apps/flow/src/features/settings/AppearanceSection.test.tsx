@@ -292,6 +292,23 @@ describe('Appearance panel audition', () => {
     for (const spy of everySetter()) expect(spy).not.toHaveBeenCalled();
   });
 
+  // There is deliberately NO unit test here for "travelling between two cards
+  // does not revert the preview", even though that is a real fixed defect.
+  //
+  // It cannot be tested at this level. fireEvent.pointerLeave on a card is
+  // routed to the grid's handler by React's enter/leave simulation, so the test
+  // environment cannot tell a per-card clear from a per-grid one. A test written
+  // for it passed with the defect deliberately reintroduced, which makes it
+  // worse than no test: it reports a guard that does not exist.
+  //
+  // Proven by probe rather than assumed. Removing the grid's onPointerLeave
+  // fails the next test down. Restoring the card's onPointerLeave fails nothing.
+  //
+  // The evidence for the fix is a browser measurement: sampling one pixel at a
+  // time across the 8px gap between two palette cards showed the applied
+  // palette for eight pixels of travel. If you are changing this, verify it the
+  // same way; the suite will not stop you.
+
   it('snaps back to the applied palette when the pointer leaves', () => {
     renderPanel();
     const card = paletteCard('ink');
