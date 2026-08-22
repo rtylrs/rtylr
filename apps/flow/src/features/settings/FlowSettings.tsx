@@ -703,7 +703,7 @@ export const AppearanceSection = (): React.JSX.Element => {
                 onPointerLeave={clearAudition}
                 onFocus={() => setAudition({ accent: swatch.hex })}
                 onBlur={clearAudition}
-                className="flow-focus h-11 w-full"
+                className="flow-focus h-[44px] w-full"
                 style={{
                   // The one place a literal colour is right: a swatch that does
                   // not paint its own colour is not a preview of anything. The
