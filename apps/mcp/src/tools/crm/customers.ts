@@ -34,7 +34,7 @@ export const getCustomer: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/crm/customers/${input.customer_id}`);
+      const res = await api.get(`/crm/customers/${encodeURIComponent(String(input.customer_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -82,7 +82,7 @@ export const updateCustomer: Tool = {
   handler: async (input, api) => {
     try {
       const { customer_id, ...body } = input;
-      const res = await api.put(`/crm/customers/${customer_id}`, body);
+      const res = await api.put(`/crm/customers/${encodeURIComponent(String(customer_id))}`, body);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -102,7 +102,7 @@ export const deleteCustomer: Tool = {
   },
   handler: async (input, api) => {
     try {
-      await api.delete(`/crm/customers/${input.customer_id}`);
+      await api.delete(`/crm/customers/${encodeURIComponent(String(input.customer_id))}`);
       return ok({ deleted: true, customer_id: input.customer_id });
     } catch (e) {
       return apiErr(e);

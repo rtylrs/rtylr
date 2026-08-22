@@ -10,6 +10,7 @@ Once connected, your AI assistant can:
 - **CRM** — look up customers, view campaigns, check loyalty tiers
 - **Finance** — list invoices and expenses, generate P&L reports, create invoices
 - **ERP** — browse inventory, look up products and suppliers, view purchase orders
+- **POS** — list orders and menu items, manage sessions, check gift cards
 
 ## Prerequisites
 
@@ -91,17 +92,22 @@ To sign out and re-authorize, delete `~/.rtylr-mcp/config.json`.
 | `erp_list_suppliers` | List suppliers |
 | `erp_list_purchase_orders` | List purchase orders |
 | `erp_inventory_report` | Current stock levels |
+| `pos_list_orders` | List POS orders |
+| `pos_create_order` | Create a new order |
+| `pos_list_menu_items` | List menu items |
+| `pos_open_session` / `pos_close_session` | Manage register sessions |
+| `pos_get_gift_card` / `pos_redeem_gift_card` | Gift card balance and redemption |
 
 ## Configuration
 
 | Environment variable | Default | Description |
 |---------------------|---------|-------------|
-| `RTYLR_API_URL` | `https://api.voxire.dev` | Override the API base URL (for self-hosted or dev) |
+| `RTYLR_API_URL` | `https://api.voxire.com` | Override the API base URL (for self-hosted or dev) |
 
 ## Development
 
 ```bash
-git clone https://github.com/voxire/rtylr-mcp
+git clone https://github.com/tryrtylr/rtylr-mcp
 cd rtylr-mcp
 npm install
 npm run dev
@@ -115,4 +121,4 @@ RTYLR_API_URL=http://localhost:9999 npm run dev
 
 ## License
 
-MIT — built by [Voxire](https://voxire.com)
+[PolyForm Strict 1.0.0](https://polyformproject.org/licenses/strict/1.0.0) — built by [Voxire](https://voxire.com)

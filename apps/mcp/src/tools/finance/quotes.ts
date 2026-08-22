@@ -64,7 +64,7 @@ export const updateQuote: Tool = {
   handler: async (input, api) => {
     try {
       const { quote_id, ...body } = input;
-      const res = await api.put(`/finance/quotes/${quote_id}`, body);
+      const res = await api.put(`/finance/quotes/${encodeURIComponent(String(quote_id))}`, body);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -84,7 +84,7 @@ export const deleteQuote: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.delete(`/finance/quotes/${input.quote_id}`);
+      const res = await api.delete(`/finance/quotes/${encodeURIComponent(String(input.quote_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -104,7 +104,7 @@ export const convertQuote: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.post(`/finance/quotes/${input.quote_id}/convert`, {});
+      const res = await api.post(`/finance/quotes/${encodeURIComponent(String(input.quote_id))}/convert`, {});
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

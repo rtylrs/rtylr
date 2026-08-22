@@ -9,7 +9,7 @@ export const authStatus: Tool = {
   handler: async (_input, api) => {
     const cfg = loadConfig();
     if (!cfg?.access_token) {
-      return err('Not authenticated. Run `rtylr-mcp login` to authenticate.');
+      return err('Not authenticated. The next tool call will open your browser to authorize access.');
     }
     try {
       const res = await api.get('/oauth/me');

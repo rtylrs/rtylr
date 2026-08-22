@@ -25,7 +25,7 @@ export async function getAccessToken(): Promise<string> {
     // Try to refresh.
     if (cfg.refresh_token) {
       try {
-        return await refreshToken(cfg.refresh_token);
+        return await refreshAccessToken(cfg.refresh_token);
       } catch {
         // Fall through to full auth flow.
       }
@@ -35,16 +35,37 @@ export async function getAccessToken(): Promise<string> {
   return runPKCEFlow();
 }
 
-async function refreshToken(refreshToken: string): Promise<string> {
-  const res = await axios.post<TokenResponse>(`${API_BASE}/oauth/token`, {
-    grant_type: 'refresh_token',
-    client_id: OAUTH_CLIENT_ID,
-    refresh_token: refreshToken,
-  });
+const OAUTH_TIMEOUT_MS = 30_000;
 
+// Single-flight: concurrent callers share one in-flight refresh so we never
+// burn a rotated refresh token by racing two refresh requests.
+let refreshInFlight: Promise<string> | null = null;
+
+export function refreshAccessToken(refreshToken: string): Promise<string> {
+  if (!refreshInFlight) {
+    refreshInFlight = doRefreshToken(refreshToken).finally(() => {
+      refreshInFlight = null;
+    });
+  }
+  return refreshInFlight;
+}
+
+async function doRefreshToken(refreshToken: string): Promise<string> {
+  const res = await axios.post<TokenResponse>(
+    `${API_BASE}/oauth/token`,
+    {
+      grant_type: 'refresh_token',
+      client_id: OAUTH_CLIENT_ID,
+      refresh_token: refreshToken,
+    },
+    { timeout: OAUTH_TIMEOUT_MS },
+  );
+
+  // Some authorization servers omit refresh_token on refresh grants — keep the
+  // existing one instead of overwriting it with undefined.
   const cfg: StoredConfig = {
     access_token: res.data.access_token,
-    refresh_token: res.data.refresh_token,
+    refresh_token: res.data.refresh_token ?? refreshToken,
     expires_at: Date.now() + res.data.expires_in * 1000,
   };
   saveConfig(cfg);
@@ -64,7 +85,6 @@ async function runPKCEFlow(): Promise<string> {
 
   const codeVerifier = base64url(randomBytes(64));
   const codeChallenge = base64url(createHash('sha256').update(codeVerifier).digest());
-
   const state = base64url(randomBytes(16));
 
   const authorizeURL = new URL(`${API_BASE}/oauth/authorize`);
@@ -81,13 +101,17 @@ async function runPKCEFlow(): Promise<string> {
     await open(authorizeURL.toString());
   });
 
-  const res = await axios.post<TokenResponse>(`${API_BASE}/oauth/token`, {
-    grant_type: 'authorization_code',
-    client_id: OAUTH_CLIENT_ID,
-    code,
-    code_verifier: codeVerifier,
-    redirect_uri: redirectURI,
-  });
+  const res = await axios.post<TokenResponse>(
+    `${API_BASE}/oauth/token`,
+    {
+      grant_type: 'authorization_code',
+      client_id: OAUTH_CLIENT_ID,
+      code,
+      code_verifier: codeVerifier,
+      redirect_uri: redirectURI,
+    },
+    { timeout: OAUTH_TIMEOUT_MS },
+  );
 
   const cfg: StoredConfig = {
     access_token: res.data.access_token,
@@ -101,8 +125,28 @@ async function runPKCEFlow(): Promise<string> {
 
 function waitForCallback(port: number, expectedState: string, onReady: () => Promise<void>): Promise<string> {
   return new Promise((resolve, reject) => {
+    let settled = false;
+    let timeoutId: NodeJS.Timeout | undefined;
+
+    const settle = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutId);
+      server.close();
+      fn();
+    };
+
     const server = createServer((req, res) => {
       const url = new URL(req.url ?? '/', `http://127.0.0.1:${port}`);
+
+      // Ignore unrelated requests (e.g. browsers fetching /favicon.ico)
+      // instead of aborting the flow.
+      if (url.pathname !== '/callback') {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('Not found');
+        return;
+      }
+
       const code = url.searchParams.get('code');
       const state = url.searchParams.get('state');
       const error = url.searchParams.get('error');
@@ -111,67 +155,62 @@ function waitForCallback(port: number, expectedState: string, onReady: () => Pro
       if (error) {
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end(callbackHTML('Authorization denied. You can close this window.', false));
-        server.close();
-        reject(new Error(`OAuth error: ${error}`));
+        settle(() => reject(new Error(`OAuth error: ${error}`)));
         return;
       }
 
       if (!code) {
         res.writeHead(400, { 'Content-Type': 'text/html' });
         res.end(callbackHTML('Missing authorization code.', false));
-        server.close();
-        reject(new Error('Missing code in callback'));
+        settle(() => reject(new Error('Missing code in callback')));
         return;
       }
 
       if (state !== expectedState) {
         res.writeHead(400, { 'Content-Type': 'text/html' });
         res.end(callbackHTML('State mismatch — possible CSRF.', false));
-        server.close();
-        reject(new Error('State mismatch'));
+        settle(() => reject(new Error('State mismatch')));
         return;
       }
 
       // RFC 9207: Validate issuer parameter if present
       if (iss) {
-        let isValid = iss === 'rtylr';
-        if (!isValid) {
-          try {
-            const expectedIss = new URL(API_BASE).origin;
-            const actualIss = new URL(iss).origin;
-            isValid = expectedIss === actualIss;
-          } catch {
-            isValid = false;
-          }
+        let isValid = false;
+        try {
+          const expectedIss = new URL(API_BASE).origin;
+          const actualIss = new URL(iss).origin;
+          isValid = expectedIss === actualIss;
+        } catch {
+          isValid = false;
         }
         if (!isValid) {
           res.writeHead(400, { 'Content-Type': 'text/html' });
           res.end(callbackHTML('Issuer mismatch — potential authorization mix-up attack.', false));
-          server.close();
-          reject(new Error(`RFC 9207 issuer mismatch: got ${iss}`));
+          settle(() => reject(new Error(`RFC 9207 issuer mismatch: got ${iss}`)));
           return;
         }
       }
 
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(callbackHTML('Authorization complete. You can close this window.', true));
-      server.close();
-      resolve(code);
+      settle(() => resolve(code));
+    });
+
+    server.on('error', (err) => {
+      settle(() => reject(err));
     });
 
     server.listen(port, '127.0.0.1', async () => {
       try {
         await onReady();
       } catch (err) {
-        server.close();
-        reject(err);
+        settle(() => reject(err instanceof Error ? err : new Error(String(err))));
       }
     });
 
     // Timeout after 5 minutes.
-    setTimeout(() => {
-      server.close();
-      reject(new Error('Authorization timed out'));
+    timeoutId = setTimeout(() => {
+      settle(() => reject(new Error('Authorization timed out')));
     }, 5 * 60 * 1000);
   });
 }
@@ -193,7 +232,7 @@ function findFreePort(): Promise<number> {
 }
 
 function base64url(buf: Buffer): string {
-  return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  return buf.toString('base64url');
 }
 
 function callbackHTML(message: string, success: boolean): string {

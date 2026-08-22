@@ -37,7 +37,7 @@ export const getProduct: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`${productsBase}/${input.product_id}`);
+      const res = await api.get(`${productsBase}/${encodeURIComponent(String(input.product_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -57,7 +57,7 @@ export const getProductByBarcode: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`${productsBase}/barcode/${input.barcode}`);
+      const res = await api.get(`${productsBase}/barcode/${encodeURIComponent(String(input.barcode))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -109,7 +109,7 @@ export const updateProduct: Tool = {
   handler: async (input, api) => {
     try {
       const { product_id, ...body } = input;
-      const res = await api.put(`${productsBase}/${product_id}`, { body });
+      const res = await api.put(`${productsBase}/${encodeURIComponent(String(product_id))}`, body);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -129,7 +129,7 @@ export const deleteProduct: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.delete(`${productsBase}/${input.product_id}`);
+      const res = await api.delete(`${productsBase}/${encodeURIComponent(String(input.product_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

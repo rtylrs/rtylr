@@ -36,7 +36,7 @@ export const getCampaign: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/crm/campaigns/${input.campaign_id}`);
+      const res = await api.get(`/crm/campaigns/${encodeURIComponent(String(input.campaign_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -86,7 +86,7 @@ export const updateCampaign: Tool = {
   handler: async (input, api) => {
     try {
       const { campaign_id, ...body } = input;
-      const res = await api.put(`/crm/campaigns/${campaign_id}`, body);
+      const res = await api.put(`/crm/campaigns/${encodeURIComponent(String(campaign_id))}`, body);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

@@ -28,8 +28,8 @@ export const toggleAutomation: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.put(`/crm/automations/${input.automation_id}`, {
-        enabled: input.enabled === 'true' || input.enabled === true,
+      const res = await api.put(`/crm/automations/${encodeURIComponent(String(input.automation_id))}`, {
+        enabled: String(input.enabled) === 'true',
       });
       return ok(res.data);
     } catch (e) {

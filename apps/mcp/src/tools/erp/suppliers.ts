@@ -66,7 +66,7 @@ export const updateSupplier: Tool = {
   handler: async (input, api) => {
     try {
       const { supplier_id, ...body } = input;
-      const res = await api.put(`${SUPPLIER_BASE}/${supplier_id}`, { body });
+      const res = await api.put(`${SUPPLIER_BASE}/${encodeURIComponent(String(supplier_id))}`, body);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -86,7 +86,7 @@ export const deleteSupplier: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.delete(`${SUPPLIER_BASE}/${input.supplier_id}`);
+      const res = await api.delete(`${SUPPLIER_BASE}/${encodeURIComponent(String(input.supplier_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

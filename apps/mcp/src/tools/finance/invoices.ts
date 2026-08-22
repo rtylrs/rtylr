@@ -36,7 +36,7 @@ export const getInvoice: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/finance/invoices/${input.invoice_id}`);
+      const res = await api.get(`/finance/invoices/${encodeURIComponent(String(input.invoice_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -84,7 +84,7 @@ export const updateInvoice: Tool = {
   handler: async (input, api) => {
     try {
       const { invoice_id, ...body } = input;
-      const res = await api.put(`/finance/invoices/${invoice_id}`, body);
+      const res = await api.put(`/finance/invoices/${encodeURIComponent(String(invoice_id))}`, body);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -104,7 +104,7 @@ export const deleteInvoice: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.delete(`/finance/invoices/${input.invoice_id}`);
+      const res = await api.delete(`/finance/invoices/${encodeURIComponent(String(input.invoice_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

@@ -1,5 +1,5 @@
 import type { Tool } from '../types.js';
-import { ok, apiErr, qs } from '../types.js';
+import { ok, apiErr, err, qs } from '../types.js';
 
 export const listOrders: Tool = {
   name: 'pos_list_orders',
@@ -34,7 +34,7 @@ export const getOrder: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/pos/orders/${input.order_id}`);
+      const res = await api.get(`/pos/orders/${encodeURIComponent(String(input.order_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -61,7 +61,7 @@ export const createOrder: Tool = {
         try {
           body.items = JSON.parse(items as string);
         } catch {
-          body.items = items;
+          return err('Invalid items: must be a JSON array of [{menu_item_id, quantity, modifiers?}]');
         }
       }
       const res = await api.post('/pos/orders', body);
@@ -90,7 +90,7 @@ export const updateOrderStatus: Tool = {
   handler: async (input, api) => {
     try {
       const { order_id, status } = input;
-      const res = await api.put(`/pos/orders/${order_id}/status`, { status });
+      const res = await api.put(`/pos/orders/${encodeURIComponent(String(order_id))}/status`, { status });
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -110,7 +110,7 @@ export const voidOrder: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.post(`/pos/orders/${input.order_id}/void`);
+      const res = await api.post(`/pos/orders/${encodeURIComponent(String(input.order_id))}/void`, {});
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

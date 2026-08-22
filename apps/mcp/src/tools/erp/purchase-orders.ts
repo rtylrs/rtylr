@@ -1,5 +1,5 @@
 import type { Tool } from '../types.js';
-import { ok, apiErr, qs } from '../types.js';
+import { ok, apiErr, err, qs } from '../types.js';
 
 const PO_BASE = '/api/erp/purchase-order/v1/purchase-orders';
 const STATUS_ENUM = ['draft', 'sent', 'approved', 'partial', 'received', 'cancelled'];
@@ -38,7 +38,7 @@ export const getPurchaseOrder: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`${PO_BASE}/${input.po_id}`);
+      const res = await api.get(`${PO_BASE}/${encodeURIComponent(String(input.po_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -63,7 +63,11 @@ export const createPurchaseOrder: Tool = {
     try {
       const body: Record<string, unknown> = { ...input };
       if (typeof input.items === 'string') {
-        try { body.items = JSON.parse(input.items as string); } catch { body.items = []; }
+        try {
+          body.items = JSON.parse(input.items as string);
+        } catch {
+          return err('Invalid items: must be a JSON array of {product_id, quantity, unit_price}');
+        }
       }
       const res = await api.post(PO_BASE, body);
       return ok(res.data);
@@ -85,7 +89,7 @@ export const approvePurchaseOrder: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.post(`${PO_BASE}/${input.po_id}/approve`, {});
+      const res = await api.post(`${PO_BASE}/${encodeURIComponent(String(input.po_id))}/approve`, {});
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

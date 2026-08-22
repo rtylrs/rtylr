@@ -60,7 +60,7 @@ export const deleteExpense: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.delete(`/finance/expenses/${input.expense_id}`);
+      const res = await api.delete(`/finance/expenses/${encodeURIComponent(String(input.expense_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

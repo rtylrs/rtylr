@@ -57,7 +57,9 @@ export function jsonSchemaToZodShape(inputSchema: {
 
     if (prop.enum && prop.enum.length > 0) {
       schema = z.enum(prop.enum as [string, ...string[]]);
-    } else if (prop.type === 'number' || prop.type === 'integer') {
+    } else if (prop.type === 'integer') {
+      schema = z.number().int();
+    } else if (prop.type === 'number') {
       schema = z.number();
     } else if (prop.type === 'boolean') {
       schema = z.boolean();

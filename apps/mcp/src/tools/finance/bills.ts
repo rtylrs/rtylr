@@ -36,7 +36,7 @@ export const getBill: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/finance/bills/${input.bill_id}`);
+      const res = await api.get(`/finance/bills/${encodeURIComponent(String(input.bill_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -84,7 +84,7 @@ export const updateBill: Tool = {
   handler: async (input, api) => {
     try {
       const { bill_id, ...body } = input;
-      const res = await api.put(`/finance/bills/${bill_id}`, body);
+      const res = await api.put(`/finance/bills/${encodeURIComponent(String(bill_id))}`, body);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -104,7 +104,7 @@ export const deleteBill: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.delete(`/finance/bills/${input.bill_id}`);
+      const res = await api.delete(`/finance/bills/${encodeURIComponent(String(input.bill_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
