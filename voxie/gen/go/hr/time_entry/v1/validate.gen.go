@@ -194,3 +194,50 @@ func (m *ApproveTimesheetResponse) Validate() error {
 	}
 	return nil
 }
+
+func (m *MarkTimeEntriesInvoicedRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if m.Body != nil {
+		if err := m.Body.Validate(); err != nil {
+			violations = append(violations, "body: "+err.Error())
+		}
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *MarkTimeEntriesInvoicedBody) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(m.EntryIds) == 0 {
+		violations = append(violations, "entry_ids is required")
+	}
+	if len(m.EntryIds) < 1 {
+		violations = append(violations, "entry_ids must have at least 1 items")
+	}
+	if m.InvoiceId <= 0 {
+		violations = append(violations, "invoice_id must be greater than 0")
+	}
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
+func (m *MarkTimeEntriesInvoicedResponse) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
