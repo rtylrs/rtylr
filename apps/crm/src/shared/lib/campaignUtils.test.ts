@@ -60,9 +60,9 @@ describe('normalizeCampaignChannel', () => {
     expect(normalizeCampaignChannel('PUSH')).toBe('push');
   });
 
-  it('uses email as the safe fallback for missing or unknown values', () => {
-    expect(normalizeCampaignChannel(undefined)).toBe('email');
-    expect(normalizeCampaignChannel('in_app')).toBe('email');
+  it('keeps missing and unknown values explicit', () => {
+    expect(normalizeCampaignChannel(undefined)).toBe('unknown');
+    expect(normalizeCampaignChannel('in_app')).toBe('unknown');
   });
 });
 

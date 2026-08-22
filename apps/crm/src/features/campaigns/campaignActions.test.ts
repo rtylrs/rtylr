@@ -6,6 +6,10 @@ describe('canEditCampaign', () => {
     expect(canEditCampaign({ channel: 'Push', status: 'Draft' })).toBe(false);
   });
 
+  it('does not route unknown channels through an email or SMS editor', () => {
+    expect(canEditCampaign({ channel: 'Unknown', status: 'Draft' })).toBe(false);
+  });
+
   it('allows editable email and SMS drafts', () => {
     expect(canEditCampaign({ channel: 'Email', status: 'Draft' })).toBe(true);
     expect(canEditCampaign({ channel: 'SMS', status: 'Paused' })).toBe(true);

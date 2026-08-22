@@ -1,4 +1,4 @@
-type CampaignChannel = 'Email' | 'SMS' | 'Push';
+type CampaignChannel = 'Email' | 'SMS' | 'Push' | 'Unknown';
 type CampaignStatus =
   | 'Draft'
   | 'Scheduled'
@@ -20,7 +20,7 @@ export function canEditCampaign(
   campaign: Pick<CampaignActionState, 'channel' | 'status'>
 ): boolean {
   return (
-    campaign.channel !== 'Push' &&
+    ['Email', 'SMS'].includes(campaign.channel) &&
     ['Draft', 'Scheduled', 'Active', 'Paused'].includes(campaign.status)
   );
 }

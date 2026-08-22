@@ -1,7 +1,7 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useParams, useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, Bell, Mail, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Bell, Circle, Mail, MessageSquare } from 'lucide-react';
 import { useGetCampaign, useCampaignStats } from '../../shared/hooks/queries/useCampaigns';
 import { CAMPAIGN_STATUS_LABELS, isCampaignStatus } from '../../shared/schemas/campaigns';
 import { Breadcrumbs, Card, SkeletonList, EmptyState } from '../../shared/components/ui';
@@ -25,8 +25,22 @@ const CampaignDetail: React.FC = () => {
   const campaign = fetched;
   const stats = fetchedStats;
   const channel = normalizeCampaignChannel(campaign?.type);
-  const ChannelIcon = channel === 'sms' ? MessageSquare : channel === 'push' ? Bell : Mail;
-  const channelLabel = channel === 'sms' ? 'SMS' : channel === 'push' ? 'Push' : 'Email';
+  const ChannelIcon =
+    channel === 'sms'
+      ? MessageSquare
+      : channel === 'push'
+        ? Bell
+        : channel === 'unknown'
+          ? Circle
+          : Mail;
+  const channelLabel =
+    channel === 'sms'
+      ? 'SMS'
+      : channel === 'push'
+        ? 'Push'
+        : channel === 'unknown'
+          ? 'Unknown'
+          : 'Email';
   const normalizedStatus = campaign?.status.toLowerCase() ?? '';
   const campaignIsActive = normalizedStatus === 'active';
   const campaignStatusLabel = isCampaignStatus(normalizedStatus)

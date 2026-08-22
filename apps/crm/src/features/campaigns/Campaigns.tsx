@@ -41,7 +41,7 @@ type CampaignStatus =
   | 'Sent'
   | 'Cancelled'
   | 'Unknown';
-type Channel = 'Email' | 'SMS' | 'Push';
+type Channel = 'Email' | 'SMS' | 'Push' | 'Unknown';
 
 interface Campaign {
   id: number;
@@ -79,6 +79,7 @@ const STATUS_TO_DISPLAY: Record<string, CampaignStatus> = {
 
 /** Projects a backend campaign payload onto the local display shape. */
 function toDisplayCampaign(c: CampaignPayload, audienceBySegment: Map<number, number>): Campaign {
+  const normalizedChannel = normalizeCampaignChannel(c.type);
   const segmentAudience =
     c.audienceSegmentId !== null && c.audienceSegmentId !== undefined
       ? audienceBySegment.get(c.audienceSegmentId)
@@ -87,8 +88,8 @@ function toDisplayCampaign(c: CampaignPayload, audienceBySegment: Map<number, nu
     id: c.id,
     name: c.name,
     description: c.subject ?? '',
-    channel: ({ email: 'Email', sms: 'SMS', push: 'Push' } as const)[
-      normalizeCampaignChannel(c.type)
+    channel: ({ email: 'Email', sms: 'SMS', push: 'Push', unknown: 'Unknown' } as const)[
+      normalizedChannel
     ],
     status: STATUS_TO_DISPLAY[c.status.trim().toLowerCase()] ?? 'Unknown',
     audienceSegmentId: c.audienceSegmentId,
@@ -116,12 +117,14 @@ const channelIcon: Record<Channel, React.ComponentType<{ size?: number; color?: 
   Email: Mail,
   SMS: MessageSquare,
   Push: Bell,
+  Unknown: Bell,
 };
 
 const channelColor: Record<Channel, string> = {
   Email: ACCENT,
   SMS: '#10b981',
   Push: '#8b5cf6',
+  Unknown: '#94a3b8',
 };
 
 const statusFilters: Array<'All' | CampaignStatus> = [
