@@ -65,3 +65,4 @@ apps/*/.next
 # AI agent config: local to each machine, never committed
 .opencode/
 opencode.jsonc
+dummy-non-existing-folder/

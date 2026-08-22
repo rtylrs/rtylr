@@ -1,5 +1,12 @@
 export type AuditAction =
-  'created' | 'updated' | 'deleted' | 'exported' | 'imported' | 'sent' | 'paused' | 'resumed';
+  | 'created'
+  | 'updated'
+  | 'deleted'
+  | 'exported'
+  | 'imported'
+  | 'sent'
+  | 'paused'
+  | 'resumed';
 
 export interface AuditEntry {
   id: number;

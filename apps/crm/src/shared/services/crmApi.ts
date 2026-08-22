@@ -221,7 +221,13 @@ export interface Settings {
 // ── Sales Pipeline Types ─────────────────────────────────────────
 
 export type LeadStage =
-  'cold' | 'contacted' | 'demo_booked' | 'demo_done' | 'proposal_sent' | 'contracted' | 'lost';
+  | 'cold'
+  | 'contacted'
+  | 'demo_booked'
+  | 'demo_done'
+  | 'proposal_sent'
+  | 'contracted'
+  | 'lost';
 
 export type TouchpointType = 'phone' | 'email' | 'meeting';
 export type TouchpointOutcome = 'positive' | 'neutral' | 'negative' | 'no_answer';
@@ -408,21 +414,25 @@ function toSegmentMutationPayload(data: Partial<Segment>): SegmentMutationPayloa
 
 interface CampaignMutationPayload {
   name?: string;
-  type?: string;
-  audienceSegmentId?: number;
+  description?: string;
+  channel?: string;
+  segmentId?: string;
   subject?: string;
-  body?: string;
+  content?: string;
   scheduledAt?: string;
 }
 
-function toCampaignMutationPayload(data: Partial<Campaign>): CampaignMutationPayload {
+function toCampaignMutationPayload(
+  data: Partial<Campaign> & Record<string, unknown>
+): CampaignMutationPayload {
   return {
     name: data.name,
-    type: data.channel,
-    audienceSegmentId: data.segmentId,
-    subject: data.subject,
-    body: data.body,
-    scheduledAt: data.scheduledFor,
+    description: data.description ?? data.subject ?? data.name ?? '',
+    channel: data.channel ?? 'email',
+    segmentId: data.audienceSegmentId != null ? String(data.audienceSegmentId) : undefined,
+    subject: data.subject ?? data.name ?? '',
+    content: data.body ?? '',
+    scheduledAt: new Date().toISOString(),
   };
 }
 
@@ -679,14 +689,24 @@ export const crmApi = {
   awardPoints: (customerId: number, points: number, reason?: string) =>
     compatResult<unknown>(() =>
       crmCompatibilityClient.awardPoints(
-        flat({ customerId, points, description: reason, referenceType: 'manual' })
+        flat({
+          customerId: String(customerId),
+          points: String(points),
+          description: reason && reason.trim() !== '' ? reason : 'Manual adjustment',
+          referenceType: 'manual',
+        })
       )
     ),
 
   redeemPoints: (customerId: number, points: number, reason?: string) =>
     compatResult<unknown>(() =>
       crmCompatibilityClient.redeemPoints(
-        flat({ customerId, points, description: reason, referenceType: 'manual' })
+        flat({
+          customerId: String(customerId),
+          points: String(points),
+          description: reason && reason.trim() !== '' ? reason : 'Manual adjustment',
+          referenceType: 'manual',
+        })
       )
     ),
 
@@ -694,9 +714,7 @@ export const crmApi = {
     compatResult<LoyaltyConfig>(() => crmCompatibilityClient.getLoyaltyConfig({})),
 
   updateLoyaltyConfig: (config: Partial<LoyaltyConfig>) =>
-    compatResult<LoyaltyConfig>(() =>
-      crmCompatibilityClient.updateLoyaltyConfig(flat(toLoyaltyConfigPayload(config)))
-    ),
+    compatResult<LoyaltyConfig>(() => crmCompatibilityClient.updateLoyaltyConfig(flat(config))),
 
   getLoyaltyTransactions: (customerId?: number, page?: number, pageSize?: number) =>
     compatResult<LoyaltyTransaction[]>(() =>

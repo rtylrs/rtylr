@@ -49,25 +49,25 @@ function toUpdateLoyaltyConfigRequest(config: Partial<LoyaltyConfig>): Record<st
     isEnabled: config.programEnabled ?? false,
     pointsPerCurrencyUnit: config.pointsPerDollar ?? 1,
     currencyPerPoint: config.redemptionRate ?? 0.01,
-    bronzeMin: config.bronzeMin ?? 0,
-    silverMin: config.silverMin ?? 500,
-    goldMin: config.goldMin ?? 1500,
-    platinumMin: config.platinumMin ?? 5000,
+    bronzeMin: String(config.bronzeMin ?? 0),
+    silverMin: String(config.silverMin ?? 500),
+    goldMin: String(config.goldMin ?? 1500),
+    platinumMin: String(config.platinumMin ?? 5000),
     bronzeDiscountPct: config.bronzeDiscountPct ?? 0,
     silverDiscountPct: config.silverDiscountPct ?? 5,
     goldDiscountPct: config.goldDiscountPct ?? 10,
     platinumDiscountPct: config.platinumDiscountPct ?? 15,
-    pointsExpiryDays: config.pointsExpiry ?? 365,
+    pointsExpiryDays: String(config.pointsExpiry ?? 365),
   };
 }
 
 function toLoyaltyTierRequest(tier: Partial<LoyaltyTier>): Record<string, unknown> {
   return {
     name: tier.name ?? '',
-    minPoints: tier.threshold ?? 0,
-    discountPct: tier.discountPct ?? tier.multiplier ?? 0,
+    minPoints: String(Math.max(1, tier.threshold ?? 1)),
+    discountPct: Math.max(1, tier.discountPct ?? tier.multiplier ?? 1),
     perks: JSON.stringify(tier.perks ?? []),
-    sortOrder: tier.sortOrder ?? 0,
+    sortOrder: String(Math.max(1, tier.sortOrder ?? 1)),
   };
 }
 

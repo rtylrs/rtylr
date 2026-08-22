@@ -1,7 +1,12 @@
 // Offer management helpers for the recruit admin panel.
 
 export type OfferStatus =
-  'draft' | 'pending_approval' | 'sent' | 'accepted' | 'declined' | 'expired';
+  | 'draft'
+  | 'pending_approval'
+  | 'sent'
+  | 'accepted'
+  | 'declined'
+  | 'expired';
 
 export interface Offer {
   id: string;

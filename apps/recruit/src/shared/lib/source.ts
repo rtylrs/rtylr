@@ -1,7 +1,13 @@
 // Candidate source tracking helpers for the recruit admin panel.
 
 export type CandidateSource =
-  'job_board' | 'referral' | 'linkedin' | 'agency' | 'direct' | 'campus' | 'other';
+  | 'job_board'
+  | 'referral'
+  | 'linkedin'
+  | 'agency'
+  | 'direct'
+  | 'campus'
+  | 'other';
 
 export interface SourceMetric {
   source: CandidateSource;
