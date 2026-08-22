@@ -88,8 +88,10 @@ func (a *SessionAPI) OpenSession(ctx context.Context, req *possessionv1.OpenSess
 	}
 
 	locationID := req.GetLocationId()
-	staffID := req.GetStaffId()
 	device := authPkg.DeviceCtx(ctx)
+	// The drawer belongs to the authenticated operator; never trust a client
+	// supplied staff_id to open a session as another cashier.
+	staffID := device.User.UserID
 	id, openErr := a.Service.Open(ctx, domain.OpenSessionInput{
 		OwnerID:      device.User.UserID,
 		BusinessID:   businessID,
