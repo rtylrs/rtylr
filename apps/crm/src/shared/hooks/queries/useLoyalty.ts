@@ -87,7 +87,10 @@ export function toLoyaltyTierRequest(tier: Partial<LoyaltyTier>): Record<string,
   return {
     name: tier.name ?? '',
     minPoints: tier.threshold ?? 0,
-    discountPct: tier.discountPct ?? tier.multiplier ?? 0,
+    // `multiplier` is the CRM editor's canonical field; `discountPct` is the
+    // backend/legacy alias. Prefer the editor value when both are present so
+    // an update cannot resurrect a stale cached discount.
+    discountPct: tier.multiplier ?? tier.discountPct ?? 0,
     // The legacy endpoint decodes perks as json.RawMessage. Send the array as
     // JSON so it is stored as an array rather than as a quoted JSON string.
     perks: tier.perks ?? [],

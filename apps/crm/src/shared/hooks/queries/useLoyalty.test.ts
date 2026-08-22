@@ -24,6 +24,17 @@ describe('loyalty mutation wire mappings', () => {
     });
   });
 
+  it('prefers the edited multiplier when both discount aliases are present', () => {
+    expect(
+      toLoyaltyTierRequest({
+        name: 'Gold',
+        threshold: 1500,
+        multiplier: 12,
+        discountPct: 10,
+      }).discountPct
+    ).toBe(12);
+  });
+
   it('fills the complete loyalty config when only one setting changes', () => {
     expect(toUpdateLoyaltyConfigRequest({ programEnabled: false })).toMatchObject({
       isEnabled: false,

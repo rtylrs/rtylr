@@ -10,8 +10,8 @@ export const tierColor: Record<Tier, string> = {
 export const tierThresholds: Record<Tier, number> = {
   Bronze: 0,
   Silver: 500,
-  Gold: 1000,
-  Platinum: 2500,
+  Gold: 1500,
+  Platinum: 5000,
 };
 
 export interface TierThresholdConfig {

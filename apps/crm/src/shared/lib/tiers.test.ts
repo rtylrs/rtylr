@@ -31,21 +31,22 @@ describe('getTier', () => {
     expect(getTier(999)).toBe('Silver');
   });
 
-  it('returns Gold at exactly 1000 points', () => {
-    expect(getTier(1000)).toBe('Gold');
+  it('returns Silver below the Gold threshold', () => {
+    expect(getTier(1499)).toBe('Silver');
+  });
+
+  it('returns Gold at exactly 1500 points', () => {
+    expect(getTier(1500)).toBe('Gold');
   });
 
   it('returns Gold for points between Gold and Platinum thresholds', () => {
-    expect(getTier(1001)).toBe('Gold');
-    expect(getTier(2499)).toBe('Gold');
+    expect(getTier(1501)).toBe('Gold');
+    expect(getTier(4999)).toBe('Gold');
   });
 
-  it('returns Platinum at exactly 2500 points', () => {
-    expect(getTier(2500)).toBe('Platinum');
-  });
-
-  it('returns Platinum for points above 2500', () => {
-    expect(getTier(2501)).toBe('Platinum');
+  it('returns Platinum at exactly 5000 points and above', () => {
+    expect(getTier(5000)).toBe('Platinum');
+    expect(getTier(5001)).toBe('Platinum');
     expect(getTier(9999)).toBe('Platinum');
   });
 });
@@ -94,21 +95,21 @@ describe('pointsToNextTier', () => {
   });
 
   it('returns 0 when already exactly at the Silver threshold', () => {
-    // At 500 points the customer IS Silver, so next is Gold (1000 pts).
-    expect(pointsToNextTier(500)).toBe(500);
+    // At 500 points the customer IS Silver, so next is Gold (1500 pts).
+    expect(pointsToNextTier(500)).toBe(1000);
   });
 
   it('returns the gap to Gold from a Silver member', () => {
-    expect(pointsToNextTier(750)).toBe(250);
+    expect(pointsToNextTier(750)).toBe(750);
   });
 
   it('returns the gap to Platinum from a Gold member', () => {
-    expect(pointsToNextTier(1000)).toBe(1500);
-    expect(pointsToNextTier(1500)).toBe(1000);
+    expect(pointsToNextTier(1500)).toBe(3500);
+    expect(pointsToNextTier(3000)).toBe(2000);
   });
 
   it('returns null for Platinum members (already max tier)', () => {
-    expect(pointsToNextTier(2500)).toBeNull();
+    expect(pointsToNextTier(5000)).toBeNull();
     expect(pointsToNextTier(9999)).toBeNull();
   });
 });
