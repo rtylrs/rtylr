@@ -700,5 +700,18 @@
   },
   "bulkEdit": {
     "clearSelectionLabel": "Clear selection"
+  },
+  "allProjects": {
+    "title": "All Projects",
+    "search": "Search projects…",
+    "filterStatus": "Filter by status",
+    "filterVisibility": "Filter by visibility",
+    "allStatuses": "All statuses",
+    "allVisibilities": "All visibilities",
+    "noResults": "No projects match your filters.",
+    "tryClearing": "Try clearing your search or filters.",
+    "emptyTitle": "No projects yet",
+    "emptyDescription": "Create your first project to get started.",
+    "createFirst": "Create project"
   }
 }
