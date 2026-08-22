@@ -63,15 +63,25 @@ function SegmentedControl<T extends string>({
           <button
             key={option.value}
             type="button"
-            disabled={disabled}
+            // aria-disabled rather than the native `disabled`, deliberately.
+            // Native disabled removes the button from the tab order, and the
+            // whole point of a gated control here is that the user learns WHY it
+            // is gated. With it removed, a keyboard or screen reader user got
+            // neither the control nor the explanation, because the
+            // aria-describedby below can never be announced for an element that
+            // cannot be reached. Reachable and inert beats absent.
+            aria-disabled={disabled || undefined}
             aria-pressed={selected}
             aria-describedby={describedBy}
-            onClick={() => onChange(option.value)}
+            onClick={disabled ? undefined : () => onChange(option.value)}
             onPointerEnter={disabled ? undefined : () => onAudition?.(option.value)}
             onPointerLeave={disabled ? undefined : () => onAudition?.(null)}
             onFocus={disabled ? undefined : () => onAudition?.(option.value)}
             onBlur={disabled ? undefined : () => onAudition?.(null)}
-            className="flow-focus inline-flex min-h-[44px] items-center justify-center px-3 text-center text-[13px] font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+            className={cn(
+              'flow-focus inline-flex min-h-[44px] items-center justify-center px-3 text-center text-[13px] font-medium transition-colors',
+              disabled && 'cursor-not-allowed opacity-60'
+            )}
             style={{
               background: selected ? 'var(--accent-muted)' : 'var(--flow-card)',
               border: `1px solid ${selected ? 'var(--accent-border)' : 'var(--flow-border)'}`,
