@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { ChevronRight, Plus, ArrowLeft, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { getOneKitErrorMessage } from '@voxire/api';
+import { useTranslation } from 'react-i18next';
 import type { CreateInvoiceRequest } from '@voxire/voxie/finance/invoices/v1/types';
 import PageHeader from '../../shared/components/PageHeader';
 import ClientSelect, { Client } from '../../shared/components/ClientSelect';
@@ -20,6 +21,7 @@ import {
   labelStyle,
   ACCENT,
 } from '../../shared/lib/tokens';
+import { computeTaxBreakdown, roundMoney } from '../../shared/lib/tax';
 import { useSettings } from '../../shared/lib/settings';
 import { unwrap } from '@voxire/api';
 import { listCrmCustomers } from '../../shared/lib/clients';
@@ -29,19 +31,22 @@ const newInvoiceRoute = getRouteApi('/layout/invoices/new');
 
 const STEPS = ['Client', 'Items', 'Tax & Notes', 'Preview'] as const;
 
+// Mirrors finance.invoices.v1 validateCreateInvoiceRequest for client_email.
+const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
 const NewInvoice: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { clone, client: clientId } = newInvoiceRoute.useSearch();
   const settings = useSettings();
   const [step, setStep] = useState(0);
+  // Stepper clicks may only reach steps already unlocked by a validated Next.
+  const [maxStepReached, setMaxStepReached] = useState(0);
   const [client, setClient] = useState<Client | null>(null);
   const today = new Date().toISOString().slice(0, 10);
   const due = new Date(Date.now() + 30 * 86_400_000).toISOString().slice(0, 10);
   const [issuedDate, setIssuedDate] = useState(today);
   const [dueDate, setDueDate] = useState(due);
-  const [invoiceNumber, setInvoiceNumber] = useState(
-    `${settings.invoicePrefix}-${String(Date.now()).slice(-6)}`
-  );
   const [items, setItems] = useState<LineItem[]>([
     { id: 'l1', description: '', quantity: 1, unitPrice: 0, taxRate: settings.defaultTaxRate },
   ]);
@@ -60,7 +65,6 @@ const NewInvoice: React.FC = () => {
       });
       setIssuedDate(sourceInvoice.issuedDate ?? today);
       setDueDate(sourceInvoice.dueDate ?? due);
-      setInvoiceNumber(sourceInvoice.number ?? sourceInvoice.id);
       setItems(
         (sourceInvoice.items ?? []).map((item, index) => ({
           id: `clone-${index}`,
@@ -103,31 +107,59 @@ const NewInvoice: React.FC = () => {
 
   const removeItem = (i: number) => setItems((prev) => prev.filter((_, idx) => idx !== i));
 
+  const clientEmailValid = !!client?.email && EMAIL_PATTERN.test(client.email);
+
+  const itemsValid =
+    items.length > 0 &&
+    items.every((it) => it.description && it.unitPrice > 0 && (it.quantity ?? 1) > 0);
+
   const canProceed = () => {
-    if (step === 0) return !!client;
-    if (step === 1)
-      return (
-        items.length > 0 &&
-        items.every((it) => it.description && it.unitPrice > 0 && (it.quantity ?? 1) > 0)
-      );
+    if (step === 0) return !!client && clientEmailValid;
+    if (step === 1) return itemsValid;
     return true;
   };
 
+  const goToStep = (target: number): void => {
+    if (target <= maxStepReached) setStep(target);
+  };
+
+  const advance = (): void => {
+    if (!canProceed()) return;
+    setMaxStepReached((prev) => Math.max(prev, step + 1));
+    setStep(step + 1);
+  };
+
+  // Full pre-flight re-check used by both save handlers - reaching the final
+  // step through stepper clicks alone must never enable a guaranteed-throw save.
   const handleSave = (status: 'Draft' | 'Sent'): void => {
-    if (!client) {
-      toast.error('Select a client first');
+    if (!client || !clientEmailValid) {
+      setStep(0);
+      toast.error(client ? t('invoices.clientEmailInvalid') : t('invoices.clientRequired'));
       return;
     }
-    const mappedItems = items.map((it, idx) => ({
-      description: it.description,
-      quantity: it.quantity,
-      unit: 'item',
-      unitPrice: it.unitPrice,
-      taxRate: it.taxRate,
-      discountPct: 0,
-      sortOrder: String(idx),
-      total: it.quantity * it.unitPrice,
-    }));
+    if (!itemsValid) {
+      setStep(1);
+      toast.error(t('invoices.itemsRequired'));
+      return;
+    }
+    // The payload line total must match what LineItemRow displays:
+    // quantity * unitPrice plus per-line tax via computeTaxBreakdown.
+    const mappedItems = items.map((it, idx) => {
+      const breakdown = computeTaxBreakdown({
+        subtotal: roundMoney(it.quantity * it.unitPrice),
+        taxRate: it.taxRate,
+      });
+      return {
+        description: it.description,
+        quantity: it.quantity,
+        unit: 'item',
+        unitPrice: it.unitPrice,
+        taxRate: it.taxRate,
+        discountPct: 0,
+        sortOrder: String(idx),
+        total: roundMoney(breakdown.total),
+      };
+    });
     const payload: CreateInvoiceRequest = {
       clientName: client.name,
       clientEmail: client.email ?? '',
@@ -145,6 +177,9 @@ const NewInvoice: React.FC = () => {
     };
     createInvoice.mutate(payload, {
       onSuccess: (created) => {
+        // The invoice number is assigned by the backend; cite the returned
+        // value, not any locally invented one.
+        const numberLabel = created?.number ?? created?.id;
         // Create always persists a Draft. For "Save & Send", transition it to
         // Sent so the toast isn't lying about what happened.
         if (status === 'Sent' && created?.id) {
@@ -152,14 +187,14 @@ const NewInvoice: React.FC = () => {
             { id: created.id, status: 'Sent' },
             {
               onSuccess: () => {
-                toast.success(`Invoice ${invoiceNumber} sent`);
+                toast.success(t('invoices.sentSuccess', { number: numberLabel }));
                 navigate({ to: '/invoices' });
               },
               onError: (error) => {
                 toast.error(
                   getOneKitErrorMessage(
                     error,
-                    `Invoice ${invoiceNumber} saved as draft — couldn't mark it sent`
+                    t('invoices.sendAfterDraftFailed', { number: numberLabel })
                   )
                 );
                 navigate({ to: '/invoices' });
@@ -168,10 +203,10 @@ const NewInvoice: React.FC = () => {
           );
           return;
         }
-        toast.success(`Invoice ${invoiceNumber} saved as Draft`);
+        toast.success(t('invoices.draftSaved', { number: numberLabel }));
         navigate({ to: '/invoices' });
       },
-      onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to save invoice')),
+      onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
     });
   };
 
@@ -193,7 +228,9 @@ const NewInvoice: React.FC = () => {
           <React.Fragment key={s}>
             <button
               type="button"
-              onClick={() => setStep(i)}
+              onClick={() => goToStep(i)}
+              disabled={i > maxStepReached}
+              aria-label={`${t('invoices.goToStep')} ${i + 1}: ${s}`}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -201,7 +238,8 @@ const NewInvoice: React.FC = () => {
                 padding: '6px 12px',
                 borderRadius: 7,
                 border: 'none',
-                cursor: 'pointer',
+                cursor: i > maxStepReached ? 'not-allowed' : 'pointer',
+                opacity: i > maxStepReached ? 0.5 : 1,
                 background: step === i ? ACCENT : 'transparent',
                 color:
                   step === i ? 'var(--finance-white)' : step > i ? ACCENT : 'var(--hub-text-muted)',
@@ -243,15 +281,33 @@ const NewInvoice: React.FC = () => {
                 <div style={{ marginTop: 6 }}>
                   <ClientSelect value={client} onChange={setClient} />
                 </div>
+                {!clientEmailValid && (
+                  <span
+                    role="alert"
+                    style={{
+                      display: 'block',
+                      marginTop: 6,
+                      fontSize: 11,
+                      color: 'var(--finance-danger)',
+                    }}
+                  >
+                    {client ? t('invoices.clientEmailMissing') : t('invoices.clientRequired')}
+                  </span>
+                )}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
                 <div>
-                  <label style={labelStyle}>Invoice #</label>
-                  <input
-                    value={invoiceNumber}
-                    onChange={(e) => setInvoiceNumber(e.target.value)}
-                    style={{ ...inputStyle, marginTop: 6 }}
-                  />
+                  <label style={labelStyle}>{t('invoices.numberLabel')}</label>
+                  <span
+                    style={{
+                      display: 'block',
+                      ...inputStyle,
+                      marginTop: 6,
+                      color: 'var(--hub-text-dim)',
+                    }}
+                  >
+                    {t('invoices.autoAssigned')}
+                  </span>
                 </div>
                 <div>
                   <label style={labelStyle}>Issued</label>
@@ -352,7 +408,7 @@ const NewInvoice: React.FC = () => {
 
         {step === 3 && (
           <InvoicePreview
-            invoiceNumber={invoiceNumber}
+            invoiceNumber={t('invoices.numberPending')}
             client={client}
             issuedDate={issuedDate}
             dueDate={dueDate}
@@ -367,37 +423,39 @@ const NewInvoice: React.FC = () => {
         <button
           type="button"
           style={ghostBtn}
-          onClick={() => (step === 0 ? navigate({ to: '/invoices' }) : setStep(step - 1))}
+          onClick={() => (step === 0 ? navigate({ to: '/invoices' }) : goToStep(step - 1))}
         >
           <ArrowLeft size={13} /> {step === 0 ? 'Cancel' : 'Back'}
         </button>
         <div style={{ display: 'flex', gap: 8 }}>
           {step < STEPS.length - 1 ? (
-            <button
-              type="button"
-              style={primaryBtn}
-              disabled={!canProceed()}
-              onClick={() => setStep(step + 1)}
-            >
+            <button type="button" style={primaryBtn} disabled={!canProceed()} onClick={advance}>
               Next <ChevronRight size={13} />
             </button>
           ) : (
             <>
               <button
                 type="button"
-                style={{ ...ghostBtn, opacity: createInvoice.isPending ? 0.6 : 1 }}
+                style={{
+                  ...ghostBtn,
+                  opacity: createInvoice.isPending || !clientEmailValid || !itemsValid ? 0.6 : 1,
+                }}
                 onClick={() => handleSave('Draft')}
-                disabled={createInvoice.isPending}
+                disabled={createInvoice.isPending || !clientEmailValid || !itemsValid}
               >
-                <Save size={13} /> {createInvoice.isPending ? 'Saving...' : 'Save as Draft'}
+                <Save size={13} />{' '}
+                {createInvoice.isPending ? t('common.saving') : t('invoices.saveDraft')}
               </button>
               <button
                 type="button"
-                style={{ ...primaryBtn, opacity: createInvoice.isPending ? 0.6 : 1 }}
+                style={{
+                  ...primaryBtn,
+                  opacity: createInvoice.isPending || !clientEmailValid || !itemsValid ? 0.6 : 1,
+                }}
                 onClick={() => handleSave('Sent')}
-                disabled={createInvoice.isPending}
+                disabled={createInvoice.isPending || !clientEmailValid || !itemsValid}
               >
-                {createInvoice.isPending ? 'Saving...' : 'Save & Send'}
+                {createInvoice.isPending ? t('common.saving') : t('invoices.saveAndSend')}
               </button>
             </>
           )}

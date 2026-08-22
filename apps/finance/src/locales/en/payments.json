@@ -1,0 +1,24 @@
+{
+  "title": "Record payment for {{id}}",
+  "amount": "Amount",
+  "method": "Method",
+  "date": "Date",
+  "reference": "Reference",
+  "referencePlaceholder": "Transaction ID or receipt number",
+  "record": "Record Payment",
+  "recording": "Recording…",
+  "recorded": "Recorded {{amount}} payment",
+  "recordFailed": "Failed to record payment",
+  "amountPositive": "Amount must be greater than zero",
+  "dateReferenceRequired": "Payment date and reference are required",
+  "currencyUnknown": "Invoice currency is unknown — the payment cannot be recorded reliably",
+  "currencyUnknownHint": "The invoice currency isn't known, so recording a payment is disabled.",
+  "balanceDue": "Balance due: {{amount}}",
+  "exceedsBalance": "Payment exceeds the outstanding balance",
+  "exceedsBalanceHint": "The outstanding balance is {{amount}} — enter an amount equal to or below it.",
+  "methods": {
+    "cash": "Cash",
+    "card": "Card",
+    "bank_transfer": "Bank Transfer"
+  }
+}

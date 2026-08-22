@@ -107,6 +107,9 @@ export interface Expense {
   expenseDate: string;
   status: string;
   notes?: string | null;
+  paymentMethod?: string | null;
+  isTaxDeductible?: boolean | null;
+  taxAmount?: number | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 }

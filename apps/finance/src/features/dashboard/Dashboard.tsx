@@ -19,6 +19,14 @@ import { formatMoney, type Currency } from '../../shared/lib/money';
 
 const fmt = (n: number, currency = 'USD') => formatMoney(n, currency as Currency, 0);
 
+// Derive the trend direction from the actual delta string ("+4.2%" / "-1.8%").
+// Returns null when there is no movement or no data so no arrow is rendered.
+const trendFromChange = (change: string): boolean | null => {
+  const value = Number.parseFloat(change);
+  if (Number.isNaN(value) || value === 0) return null;
+  return value > 0;
+};
+
 // ── Components ───────────────────────────────────────────────────
 const cardStyle: React.CSSProperties = {
   background: 'var(--hub-card)',
@@ -196,7 +204,7 @@ const Dashboard: React.FC = () => {
       label: 'Total Revenue (MTD)',
       value: loading ? '…' : fmt(revenueMtd),
       change: dashData?.totalRevenueMtdChange ?? '+0%',
-      up: true,
+      up: trendFromChange(dashData?.totalRevenueMtdChange ?? '+0%'),
       icon: DollarSign,
       color: 'var(--finance-accent)',
     },
@@ -204,7 +212,7 @@ const Dashboard: React.FC = () => {
       label: 'Total Expenses (MTD)',
       value: loading ? '…' : fmt(expensesMtd),
       change: dashData?.totalExpensesMtdChange ?? '+0%',
-      up: false,
+      up: trendFromChange(dashData?.totalExpensesMtdChange ?? '+0%'),
       icon: TrendingDown,
       color: 'var(--finance-danger)',
     },
@@ -212,7 +220,7 @@ const Dashboard: React.FC = () => {
       label: 'Net Profit (MTD)',
       value: loading ? '…' : fmt(netProfitMtd),
       change: dashData?.netProfitChange ?? '+0%',
-      up: true,
+      up: trendFromChange(dashData?.netProfitChange ?? '+0%'),
       icon: TrendingUp,
       color: 'var(--finance-accent)',
     },

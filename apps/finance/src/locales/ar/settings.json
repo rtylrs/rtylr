@@ -3,5 +3,8 @@
   "teamEmptyDescription": "قم بدعوة أشخاص لمنحهم الوصول إلى Finance.",
   "teamEmptyCta": "دعوة عضو",
   "resetConfirmTitle": "إعادة تعيين الإعدادات",
-  "resetConfirmMessage": "سيؤدي هذا إلى استعادة الإعدادات الافتراضية وتجاهل تغييراتك."
+  "resetConfirmMessage": "سيؤدي هذا إلى استعادة الإعدادات الافتراضية وتجاهل تغييراتك.",
+  "removeMemberAria": "إزالة {{name}}",
+  "removeMemberConfirmTitle": "إزالة عضو من الفريق",
+  "removeMemberConfirmMessage": "سيفقد {{name}} الوصول إلى Finance فورًا. يمكنك دعوته مرة أخرى لاحقًا."
 }

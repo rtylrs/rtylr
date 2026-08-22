@@ -3,7 +3,8 @@ import { HelmetContainer } from '@voxire/components';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import { Plus, Paperclip, Check } from 'lucide-react';
-import { safeRatio, toFiniteNumber } from '@voxire/api';
+import { safeRatio } from '@voxire/api';
+import { useTranslation } from 'react-i18next';
 import { Expense } from '../../shared/services/financeApi';
 import { useExpenses, useExpenseCategories } from './useExpenses';
 
@@ -115,6 +116,7 @@ const CategoryBar: React.FC<{ expenses: Expense[]; categoryName: CategoryNameLoo
 };
 
 const Expenses: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const { data, isLoading: loading } = useExpenses({ page });
@@ -283,7 +285,7 @@ const Expenses: React.FC = () => {
                         color: 'var(--finance-accent)',
                       }}
                     >
-                      <Check size={12} /> Yes
+                      <Check size={12} /> {t('expenses.receiptAttached')}
                     </span>
                   ) : (
                     <span
@@ -295,7 +297,7 @@ const Expenses: React.FC = () => {
                         color: 'var(--hub-text-dim)',
                       }}
                     >
-                      <Paperclip size={12} /> Upload
+                      <Paperclip size={12} /> {t('expenses.receiptNone')}
                     </span>
                   )}
                 </td>

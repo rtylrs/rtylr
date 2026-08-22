@@ -9,5 +9,20 @@
   "name": "الاسم",
   "type": "النوع",
   "balance": "الرصيد",
-  "codeOptional": "رمز الحساب (اختياري)"
+  "codeOptional": "رمز الحساب (اختياري)",
+  "updated": "تم تحديث الحساب",
+  "deleted": "تم حذف الحساب",
+  "editTitle": "تعديل الحساب",
+  "editAria": "تعديل {{name}}",
+  "deleteAria": "حذف {{name}}",
+  "deactivateAria": "إلغاء تنشيط {{name}}",
+  "reactivateAria": "إعادة تنشيط {{name}}",
+  "deactivateTitle": "إلغاء تنشيط الحساب",
+  "reactivateTitle": "إعادة تنشيط الحساب",
+  "deactivateMessage": "هل أنت متأكد من إلغاء تنشيط \"{{name}}\"؟ سيبقى في القائمة لكنه سيظهر كغير نشط.",
+  "reactivateMessage": "هل أنت متأكد من إعادة تنشيط \"{{name}}\"؟",
+  "deleteConfirmTitle": "حذف الحساب",
+  "deleteConfirmMessage": "هل أنت متأكد من حذف \"{{name}}\"؟ لا يمكن التراجع عن هذا الإجراء.",
+  "inactive": "غير نشط",
+  "typeRequired": "لا يوجد نوع مسجل لهذا الحساب ولا يمكن تحديثه"
 }

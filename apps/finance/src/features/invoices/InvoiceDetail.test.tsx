@@ -42,9 +42,13 @@ vi.mock('motion/react', () => ({
 
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
+}));
+
 vi.mock('./useInvoices', () => ({
   useInvoiceDetail: () => ({ data: invoice, isLoading: false }),
-  useDeleteInvoice: () => ({ mutate: vi.fn(), isPending: false }),
+  useUpdateInvoiceStatus: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
 vi.mock('../../shared/components/PageHeader', () => ({

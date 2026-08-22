@@ -6,6 +6,10 @@
   "create": "Create Bill",
   "vendor": "Vendor",
   "vendorPlaceholder": "Supplier or vendor name",
+  "supplierId": "Supplier ID",
+  "supplierIdPlaceholder": "e.g. 42",
+  "supplierIdHint": "Bills are recorded against a numeric supplier ID. A supplier directory isn't available in Finance yet - enter the ID of an existing supplier from ERP.",
+  "supplierIdInvalid": "Supplier ID must be a positive whole number",
   "amount": "Amount",
   "dueDate": "Due Date",
   "description": "Description",
@@ -21,5 +25,14 @@
   "due": "Due",
   "status": "Status",
   "schedulingSoon": "Bill scheduling coming soon",
-  "schedule": "Schedule"
+  "schedule": "Schedule",
+  "paySelected": "Pay selected ({{count}})",
+  "payConfirmTitle": "Mark {{count}} bill(s) as paid?",
+  "payConfirmMessage": "This sends a paid-status update for {{count}} selected bill(s). Bills that fail are kept selected.",
+  "confirmPaid": "Mark paid",
+  "paying": "Paying…",
+  "markedPaid": "Marked {{count}} bill(s) paid",
+  "bulkPartial": "{{succeeded}} bill(s) marked paid, {{failed}} failed",
+  "bulkFailed": "Couldn't mark any of the {{count}} selected bill(s) as paid",
+  "selectBill": "Select bill {{id}}"
 }

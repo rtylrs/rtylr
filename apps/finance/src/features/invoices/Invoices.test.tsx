@@ -28,6 +28,10 @@ vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => navigateMock,
 }));
 
+vi.mock('@tanstack/react-query', () => ({
+  useQueryClient: () => ({ invalidateQueries: vi.fn().mockResolvedValue(undefined) }),
+}));
+
 vi.mock('motion/react', () => ({
   motion: {
     div: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
@@ -61,6 +65,8 @@ vi.mock('../../shared/components/DownloadPdfButton', () => ({
   default: () => <button type="button">PDF</button>,
 }));
 vi.mock('../../shared/components/SendInvoiceModal', () => ({ default: () => null }));
+vi.mock('../../shared/components/RecordPaymentModal', () => ({ default: () => null }));
+vi.mock('../../shared/components/ConfirmDialog', () => ({ default: () => null }));
 vi.mock('../../shared/lib/exports', () => ({
   exportQuickbooksInvoices: vi.fn(),
   exportXeroInvoices: vi.fn(),

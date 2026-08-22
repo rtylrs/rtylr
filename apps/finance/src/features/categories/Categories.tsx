@@ -32,11 +32,9 @@ const Categories: React.FC = () => {
 
   const [name, setName] = useState('');
   const [color, setColor] = useState(DEFAULT_CATEGORY_COLOR);
-  const [budget, setBudget] = useState<string>('');
 
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState(DEFAULT_CATEGORY_COLOR);
-  const [editBudget, setEditBudget] = useState<string>('');
 
   const handleCreate = (): void => {
     const trimmedName = name.trim();
@@ -46,14 +44,12 @@ const Categories: React.FC = () => {
       {
         name: trimmedName,
         color,
-        budget: budget ? parseFloat(budget) : undefined,
       },
       {
         onSuccess: () => {
           setShowCreate(false);
           setName('');
           setColor(DEFAULT_CATEGORY_COLOR);
-          setBudget('');
         },
       }
     );
@@ -63,7 +59,6 @@ const Categories: React.FC = () => {
     setEditingCategory(c);
     setEditName(c.name);
     setEditColor(c.color || DEFAULT_CATEGORY_COLOR);
-    setEditBudget(c.budget ? String(c.budget) : '');
   };
 
   const handleUpdate = (): void => {
@@ -71,13 +66,14 @@ const Categories: React.FC = () => {
     const trimmed = editName.trim();
     if (!trimmed) return;
 
+    // Preserve the loaded icon so an ordinary rename never resets it.
     updateCategory.mutate(
       {
         id: editingCategory.id,
         data: {
           name: trimmed,
           color: editColor,
-          budget: editBudget ? parseFloat(editBudget) : 0,
+          icon: editingCategory.icon || 'tag',
         },
       },
       {
@@ -270,21 +266,6 @@ const Categories: React.FC = () => {
             />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={labelStyle} htmlFor="expense-category-budget">
-              Monthly Budget (Optional)
-            </label>
-            <input
-              id="expense-category-budget"
-              type="number"
-              min="0"
-              step="1"
-              value={budget}
-              onChange={(event) => setBudget(event.target.value)}
-              placeholder="e.g. 500"
-              style={inputStyle}
-            />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={labelStyle} htmlFor="expense-category-color">
               Color
             </label>
@@ -337,21 +318,6 @@ const Categories: React.FC = () => {
               value={editName}
               onChange={(event) => setEditName(event.target.value)}
               placeholder="e.g. Travel"
-              style={inputStyle}
-            />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={labelStyle} htmlFor="edit-category-budget">
-              Monthly Budget
-            </label>
-            <input
-              id="edit-category-budget"
-              type="number"
-              min="0"
-              step="1"
-              value={editBudget}
-              onChange={(event) => setEditBudget(event.target.value)}
-              placeholder="e.g. 500"
               style={inputStyle}
             />
           </div>

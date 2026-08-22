@@ -4,13 +4,19 @@ import { motion } from 'motion/react';
 import { Link2, CheckCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { getOneKitErrorMessage, unwrap } from '@voxire/api';
+import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
+import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { useBankTransactions } from '../../shared/hooks/useBankAccounts';
 import { useListInvoices } from '../../shared/hooks/queries/useInvoices';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
 import { financeApi } from '../../shared/services/financeApi';
 import { findExactMatches } from './reconcileHelper';
+
+/** Exact-match only: amounts within one cent count, anything looser does not. */
+const EXACT_MATCH_TOLERANCE = 0.01;
 
 interface Candidate {
   id: string;
@@ -19,8 +25,12 @@ interface Candidate {
 }
 
 const Reconcile: React.FC = () => {
+  const { t } = useTranslation('reconcile');
+  const queryClient = useQueryClient();
   const { data: transactions = [] } = useBankTransactions();
-  const { data: invoicesResp } = useListInvoices({ page: 1, pageSize: 200, status: 'sent' });
+  // App-canonical invoice status casing ('Sent'); neither the generated nor the
+  // compat contract constrains the filter's casing, so the canonical wins.
+  const { data: invoicesResp } = useListInvoices({ page: 1, pageSize: 200, status: 'Sent' });
   const candidates: Candidate[] = (invoicesResp?.invoices ?? []).map((inv) => ({
     id: String(inv.id),
     label: `${inv.invoiceNumber} - ${inv.clientName}`,
@@ -28,42 +38,61 @@ const Reconcile: React.FC = () => {
   }));
   const [matches, setMatches] = useState<Record<string, string>>({});
 
-  const unmatched = transactions.filter((t) => !t.matched && !matches[t.id ?? '']);
+  const unmatched = transactions.filter((tx) => !tx.matched && !matches[tx.id ?? '']);
 
   const [autoMatching, setAutoMatching] = useState(false);
+  const [showAutoMatchConfirm, setShowAutoMatchConfirm] = useState(false);
+
+  const invalidateMatchData = (): Promise<unknown>[] => [
+    queryClient.invalidateQueries({ queryKey: ['bank-tx'] }),
+    queryClient.invalidateQueries({ queryKey: ['invoices'] }),
+  ];
 
   const match = async (txId: string, candidateId: string): Promise<void> => {
     try {
       await unwrap(financeApi.matchReconcile(txId, candidateId));
       setMatches((prev) => ({ ...prev, [txId]: candidateId }));
-      toast.success(`Matched transaction to ${candidateId}`);
+      await Promise.all(invalidateMatchData());
+      toast.success(t('matched', { candidate: candidateId }));
     } catch (error) {
-      toast.error(getOneKitErrorMessage(error, 'Failed to match transaction'));
+      toast.error(getOneKitErrorMessage(error, t('matchFailed')));
     }
   };
 
-  const handleAutoMatch = async (): Promise<void> => {
+  // Applies local matches per successful item and reports partial outcomes:
+  // earlier successes live on the server even when a later call fails.
+  const runAutoMatch = async (): Promise<void> => {
     setAutoMatching(true);
     try {
+      const usedCandidateIds = new Set(Object.values(matches));
       const exactMatches = findExactMatches(
-        unmatched.map((t) => ({
-          id: t.id ?? '',
-          description: t.description ?? '',
-          amount: t.amount ?? 0,
+        unmatched.map((tx) => ({
+          id: tx.id ?? '',
+          description: tx.description ?? '',
+          amount: tx.amount ?? 0,
         })),
-        candidates
+        candidates,
+        usedCandidateIds
       );
+      let linked = 0;
+      let failed = 0;
       for (const item of exactMatches) {
-        await unwrap(financeApi.matchReconcile(item.transactionId, item.candidate.id));
+        try {
+          await unwrap(financeApi.matchReconcile(item.transactionId, item.candidate.id));
+          setMatches((prev) => ({ ...prev, [item.transactionId]: item.candidate.id }));
+          linked += 1;
+        } catch {
+          failed += 1;
+        }
       }
-      setMatches((prev) => {
-        const next = { ...prev };
-        for (const item of exactMatches) next[item.transactionId] = item.candidate.id;
-        return next;
-      });
-      toast.success('Auto-match completed');
-    } catch (error) {
-      toast.error(getOneKitErrorMessage(error, 'Auto-match failed'));
+      if (linked > 0) void Promise.all(invalidateMatchData());
+      if (linked === 0 && failed === 0) {
+        toast.info(t('noExactMatches'));
+      } else if (failed > 0) {
+        toast.warning(t('autoMatchPartial', { linked, failed }));
+      } else {
+        toast.success(t('autoMatchDone', { linked }));
+      }
     } finally {
       setAutoMatching(false);
     }
@@ -78,22 +107,22 @@ const Reconcile: React.FC = () => {
       <HelmetContainer title="Reconciliation · rtylr" />
       <PageHeader
         title="Reconciliation"
-        subtitle={`${unmatched.length} transactions awaiting match`}
+        subtitle={t('awaitingMatch', { count: unmatched.length })}
         actions={
           <button
             type="button"
             style={primaryBtn}
-            onClick={handleAutoMatch}
+            onClick={() => setShowAutoMatchConfirm(true)}
             disabled={autoMatching}
           >
-            <CheckCheck size={13} /> {autoMatching ? 'Matching…' : 'Auto-match all'}
+            <CheckCheck size={13} /> {autoMatching ? t('matching') : t('autoMatch')}
           </button>
         }
       />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {unmatched.map((t) => (
-          <div key={t.id} style={{ ...cardStyle, padding: 16 }}>
+        {unmatched.map((tx) => (
+          <div key={tx.id} style={{ ...cardStyle, padding: 16 }}>
             <div
               style={{
                 display: 'flex',
@@ -104,35 +133,36 @@ const Reconcile: React.FC = () => {
             >
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--hub-text)' }}>
-                  {t.description}
+                  {tx.description}
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>
-                  {t.date} <>&middot;</> {t.category}
+                  {tx.date} <>&middot;</> {tx.category}
                 </div>
               </div>
               <div
                 style={{
                   fontSize: 16,
                   fontWeight: 700,
-                  color: (t.amount ?? 0) >= 0 ? ACCENT : 'var(--hub-text)',
+                  color: (tx.amount ?? 0) >= 0 ? ACCENT : 'var(--hub-text)',
                 }}
               >
-                <MoneyDisplay amount={t.amount ?? 0} signed />
+                <MoneyDisplay amount={tx.amount ?? 0} signed />
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {candidates
                 .filter(
                   (c) =>
-                    Math.abs(c.amount) === Math.abs(t.amount ?? 0) ||
-                    Math.abs(Math.abs(c.amount) - Math.abs(t.amount ?? 0)) < 500
+                    !matches[tx.id ?? ''] &&
+                    Object.values(matches).indexOf(c.id) === -1 &&
+                    Math.abs(Math.abs(c.amount) - Math.abs(tx.amount ?? 0)) <= EXACT_MATCH_TOLERANCE
                 )
                 .map((c) => (
                   <button
                     type="button"
                     key={c.id}
                     style={{ ...ghostBtn, padding: '6px 12px' }}
-                    onClick={() => match(t.id ?? '', c.id)}
+                    onClick={() => match(tx.id ?? '', c.id)}
                   >
                     <Link2 size={12} /> {c.label}
                   </button>
@@ -150,10 +180,19 @@ const Reconcile: React.FC = () => {
               fontSize: 13,
             }}
           >
-            All transactions reconciled.
+            {t('emptyTitle')}
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={showAutoMatchConfirm}
+        onClose={() => setShowAutoMatchConfirm(false)}
+        onConfirm={() => void runAutoMatch()}
+        title={t('autoMatch')}
+        message={t('autoMatchConfirmMessage', { count: unmatched.length })}
+        confirmLabel={t('autoMatch')}
+      />
     </motion.div>
   );
 };

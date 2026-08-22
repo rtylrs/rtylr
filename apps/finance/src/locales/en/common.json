@@ -18,5 +18,6 @@
   "currency": "Currency",
   "saving": "Saving…",
   "creating": "Creating…",
-  "refresh": "Refresh"
+  "refresh": "Refresh",
+  "searchPlaceholder": "Search pages and clients"
 }

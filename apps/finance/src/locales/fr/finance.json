@@ -30,8 +30,11 @@
     "updateFailed": "Impossible de mettre à jour l'abonnement"
   },
   "pl": {
-    "exportAria": "Exporter le compte de résultat en CSV"
+    "exportAria": "Exporter le compte de résultat en CSV",
+    "closeFiscalYearComingSoon": "Clôturer l'exercice — bientôt disponible",
+    "closeFiscalYearHint": "Le verrouillage de l'exercice n'est pas encore pris en charge par l'API de reporting."
   },
+  "balanceSheetDateDisabledTitle": "La datation « en date du » n'est pas encore prise en charge par l'API de reporting.",
   "tax": {
     "exportAria": "Exporter le résumé fiscal pour le comptable"
   },

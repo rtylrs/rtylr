@@ -10,6 +10,7 @@ import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
+import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { useBills } from './useBills';
 import { useCreateBill, useUpdateBill } from '../../shared/hooks/queries/useBills';
 import { useSettings } from '../../shared/lib/settings';
@@ -31,10 +32,16 @@ const STATUS_STYLE: Record<string, React.CSSProperties> = {
 
 interface NewBillForm {
   vendor: string;
+  supplierId: string;
   amount: number;
   dueDate: string;
   description: string;
 }
+
+// finance.bill.v1 requires supplier_id to be a numeric id (@gt(0)); there is
+// no supplier-directory client in gen/ts/finance to resolve names to ids, so
+// the id must come from the user.
+const isValidSupplierId = (value: string): boolean => /^[1-9][0-9]*$/.test(value.trim());
 
 const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   const { t } = useTranslation();
@@ -42,28 +49,32 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
   const createBill = useCreateBill();
   const [form, setForm] = useState<NewBillForm>({
     vendor: '',
+    supplierId: '',
     amount: 0,
     dueDate: new Date().toISOString().slice(0, 10),
     description: '',
   });
+
+  const supplierIdValid = isValidSupplierId(form.supplierId);
+  const canSubmit =
+    !!form.vendor.trim() && form.amount > 0 && supplierIdValid && !createBill.isPending;
 
   const handleSubmit = (): void => {
     if (!form.vendor.trim()) {
       toast.error(t('bills.vendorRequired'));
       return;
     }
+    if (!supplierIdValid) {
+      toast.error(t('bills.supplierIdInvalid'));
+      return;
+    }
     if (form.amount <= 0) {
       toast.error(t('bills.amountPositive'));
       return;
     }
-    const derivedSupplierId =
-      form.vendor
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9]/g, '-') || '1';
     createBill.mutate(
       {
-        supplierId: derivedSupplierId,
+        supplierId: form.supplierId.trim(),
         amount: form.amount,
         currency: baseCurrency ?? 'USD',
         dueDate: form.dueDate,
@@ -75,6 +86,7 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
           onClose();
           setForm({
             vendor: '',
+            supplierId: '',
             amount: 0,
             dueDate: new Date().toISOString().slice(0, 10),
             description: '',
@@ -97,9 +109,9 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
           </button>
           <button
             type="button"
-            style={{ ...primaryBtn, opacity: createBill.isPending ? 0.6 : 1 }}
+            style={{ ...primaryBtn, opacity: createBill.isPending || !canSubmit ? 0.6 : 1 }}
             onClick={handleSubmit}
-            disabled={createBill.isPending}
+            disabled={!canSubmit}
           >
             <CheckCircle size={13} />
             {createBill.isPending ? t('common.saving') : t('bills.create')}
@@ -116,6 +128,40 @@ const NewBillModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, 
             placeholder={t('bills.vendorPlaceholder')}
             style={inputStyle}
           />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <label style={labelStyle} htmlFor="new-bill-supplier-id">
+            {t('bills.supplierId')}
+          </label>
+          <input
+            id="new-bill-supplier-id"
+            inputMode="numeric"
+            value={form.supplierId}
+            onChange={(e) => setForm((f) => ({ ...f, supplierId: e.target.value }))}
+            placeholder={t('bills.supplierIdPlaceholder')}
+            style={{
+              ...inputStyle,
+              borderColor:
+                form.supplierId !== '' && !supplierIdValid
+                  ? 'var(--finance-danger)'
+                  : inputStyle.borderColor,
+            }}
+            aria-label={t('bills.supplierId')}
+            aria-invalid={form.supplierId !== '' && !supplierIdValid}
+          />
+          <span
+            style={{
+              fontSize: 11,
+              color:
+                form.supplierId !== '' && !supplierIdValid
+                  ? 'var(--finance-danger)'
+                  : 'var(--hub-text-dim)',
+            }}
+          >
+            {form.supplierId !== '' && !supplierIdValid
+              ? t('bills.supplierIdInvalid')
+              : t('bills.supplierIdHint')}
+          </span>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <label style={labelStyle}>{t('bills.amount')}</label>
@@ -165,27 +211,60 @@ const Bills: React.FC = () => {
     });
 
   const updateBill = useUpdateBill();
-  const payAll = (): void => {
+  const [showPayConfirm, setShowPayConfirm] = useState(false);
+  const [paying, setPaying] = useState(false);
+
+  const payAll = async (): Promise<void> => {
     const ids = Array.from(selected);
-    ids.forEach((id) => {
-      const b = data.find((x) => x.id === id);
-      updateBill.mutate({
-        id,
-        body: {
-          supplierId: typeof b?.supplier === 'string' ? b.supplier : '',
-          amount: typeof b?.amount === 'number' ? b.amount : undefined,
-          currency: typeof b?.currency === 'string' ? b.currency : 'USD',
-          dueDate: typeof b?.dueDate === 'string' ? b.dueDate : '',
-          status: 'paid',
-          description:
-            typeof (b as Record<string, unknown>)?.description === 'string'
-              ? String((b as Record<string, unknown>).description)
-              : '',
-        },
-      });
-    });
-    toast.success(t('bills.markedPaid', { count: ids.length }));
-    setSelected(new Set());
+    setPaying(true);
+    const results = await Promise.allSettled(
+      ids.map(async (id) => {
+        const b = data.find((x) => x.id === id);
+        const supplierId = typeof b?.supplier === 'string' ? b.supplier : '';
+        const dueDate = typeof b?.dueDate === 'string' ? b.dueDate : '';
+        const currency = typeof b?.currency === 'string' && b.currency ? b.currency : 'USD';
+        const rawDescription =
+          typeof (b as Record<string, unknown>)?.description === 'string'
+            ? String((b as Record<string, unknown>).description).trim()
+            : '';
+        // updateBill requires a non-empty description; fall back to the vendor
+        // name the list view already carries for this purpose.
+        const description =
+          rawDescription || (typeof b?.vendor === 'string' ? b.vendor.trim() : '') || id;
+        if (!/^[1-9][0-9]*$/.test(supplierId) || !dueDate) {
+          throw new Error(`Bill ${id} is missing required fields`);
+        }
+        await updateBill.mutateAsync({
+          id,
+          body: {
+            supplierId,
+            amount: typeof b?.amount === 'number' ? b.amount : undefined,
+            currency,
+            dueDate,
+            status: 'paid',
+            description,
+          },
+        });
+      })
+    );
+    setPaying(false);
+    setShowPayConfirm(false);
+
+    const succeededIds = ids.filter((_, i) => results[i].status === 'fulfilled');
+    const failedCount = ids.length - succeededIds.length;
+
+    if (succeededIds.length > 0 && failedCount === 0) {
+      toast.success(t('bills.markedPaid', { count: succeededIds.length }));
+    } else if (succeededIds.length > 0) {
+      toast.error(t('bills.bulkPartial', { succeeded: succeededIds.length, failed: failedCount }));
+    } else {
+      toast.error(t('bills.bulkFailed', { count: ids.length }));
+    }
+
+    if (succeededIds.length > 0) {
+      const succeededSet = new Set(succeededIds);
+      setSelected((prev) => new Set([...prev].filter((id) => !succeededSet.has(id))));
+    }
   };
 
   return (
@@ -206,8 +285,13 @@ const Bills: React.FC = () => {
         actions={
           <>
             {selected.size > 0 && (
-              <button type="button" style={primaryBtn} onClick={payAll}>
-                <CheckCircle size={13} /> Pay selected ({selected.size})
+              <button
+                type="button"
+                style={primaryBtn}
+                onClick={() => setShowPayConfirm(true)}
+                disabled={paying}
+              >
+                <CheckCircle size={13} /> {t('bills.paySelected', { count: selected.size })}
               </button>
             )}
             <button
@@ -223,6 +307,16 @@ const Bills: React.FC = () => {
       />
 
       <NewBillModal open={showCreate} onClose={() => setShowCreate(false)} />
+
+      <ConfirmDialog
+        open={showPayConfirm}
+        onClose={() => setShowPayConfirm(false)}
+        onConfirm={() => void payAll()}
+        title={t('bills.payConfirmTitle', { count: selected.size })}
+        message={t('bills.payConfirmMessage', { count: selected.size })}
+        confirmLabel={paying ? t('bills.paying') : t('bills.confirmPaid')}
+        pending={paying}
+      />
 
       {isLoading ? (
         <div style={{ ...cardStyle, padding: 20 }}>
@@ -279,6 +373,7 @@ const Bills: React.FC = () => {
                       checked={selected.has(b.id)}
                       onChange={() => toggle(b.id)}
                       disabled={b.status === 'paid'}
+                      aria-label={t('bills.selectBill', { id: b.id })}
                       style={{ accentColor: ACCENT }}
                     />
                   </td>

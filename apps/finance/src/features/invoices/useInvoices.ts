@@ -121,7 +121,10 @@ export function useCreateInvoice() {
       if (!res.invoice) throw new Error('Invoice created but not returned');
       return fromApiDetail(res.invoice);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
+    onSuccess: (created) => {
+      qc.invalidateQueries({ queryKey: ['invoices'] });
+      if (created?.id) qc.invalidateQueries({ queryKey: ['invoice', created.id] });
+    },
     onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
@@ -141,7 +144,10 @@ export function useUpdateInvoice() {
       if (!res.invoice) throw new Error('Invoice updated but not returned');
       return fromApiDetail(res.invoice);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['invoices'] });
+      qc.invalidateQueries({ queryKey: ['invoice', variables.id] });
+    },
     onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
@@ -151,7 +157,10 @@ export function useDeleteInvoice() {
   const { t } = useTranslation();
   return useMutation({
     mutationFn: (id: string) => invoicesClient.deleteInvoice({ id }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
+    onSuccess: (_data, id) => {
+      qc.invalidateQueries({ queryKey: ['invoices'] });
+      qc.removeQueries({ queryKey: ['invoice', id] });
+    },
     onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
@@ -170,7 +179,10 @@ export function useUpdateInvoiceStatus() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string; status: Invoice['status'] }) =>
       invoicesClient.updateInvoiceStatus({ id, body: { status: STATUS_TO_API[status] } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['invoices'] }),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ['invoices'] });
+      qc.invalidateQueries({ queryKey: ['invoice', variables.id] });
+    },
     onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
 }
@@ -209,4 +221,44 @@ export function useRecordPayment() {
     },
     onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
+}
+
+export interface BulkSendResult {
+  succeeded: string[];
+  failed: string[];
+}
+
+// Bulk send loops sendInvoice per id and aggregates per-id outcomes; callers
+// toast an honest summary and clear only the succeeded selections.
+export async function sendInvoicesByIds(ids: string[]): Promise<BulkSendResult> {
+  const results = await Promise.allSettled(ids.map((id) => invoicesClient.sendInvoice({ id })));
+  return {
+    succeeded: ids.filter((_, i) => results[i].status === 'fulfilled'),
+    failed: ids.filter((_, i) => results[i].status === 'rejected'),
+  };
+}
+
+export interface InvoiceExportResult {
+  invoices: InvoiceSummary[];
+  pagesFetched: number;
+  truncated: boolean;
+}
+
+export const MAX_EXPORT_PAGES = 20;
+
+// CSV exports must cover every invoice, not just the current page. Pages are
+// looped until hasMore is false or MAX_EXPORT_PAGES is hit (truncated: true so
+// the caller can flag the partial export).
+export async function fetchAllInvoicesForExport(pageSize = 100): Promise<InvoiceExportResult> {
+  const invoices: InvoiceSummary[] = [];
+  let pagesFetched = 0;
+  let truncated = false;
+  while (pagesFetched < MAX_EXPORT_PAGES) {
+    pagesFetched += 1;
+    const res = await invoicesClient.listInvoices({ page: pagesFetched, pageSize });
+    for (const inv of res.invoices ?? []) invoices.push(inv);
+    if (!res.hasMore) return { invoices, pagesFetched, truncated: false };
+  }
+  truncated = true;
+  return { invoices, pagesFetched, truncated };
 }

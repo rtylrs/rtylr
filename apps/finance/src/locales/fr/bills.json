@@ -6,6 +6,10 @@
   "create": "Créer la facture",
   "vendor": "Fournisseur",
   "vendorPlaceholder": "Nom du fournisseur ou vendeur",
+  "supplierId": "ID fournisseur",
+  "supplierIdPlaceholder": "ex. 42",
+  "supplierIdHint": "Les factures sont rattachées à un ID fournisseur numérique. Aucun annuaire fournisseurs n'est encore disponible dans Finance - saisissez l'ID d'un fournisseur existant depuis ERP.",
+  "supplierIdInvalid": "L'ID fournisseur doit être un nombre entier positif",
   "amount": "Montant",
   "dueDate": "Date d'échéance",
   "description": "Description",
@@ -21,5 +25,14 @@
   "due": "Échéance",
   "status": "Statut",
   "schedulingSoon": "La planification de la facture arrive bientôt",
-  "schedule": "Planifier"
+  "schedule": "Planifier",
+  "paySelected": "Payer la sélection ({{count}})",
+  "payConfirmTitle": "Marquer {{count}} facture(s) comme payée(s) ?",
+  "payConfirmMessage": "Une mise à jour « payée » sera envoyée pour {{count}} facture(s) sélectionnée(s). Les factures en échec restent sélectionnées.",
+  "confirmPaid": "Marquer payée",
+  "paying": "Paiement…",
+  "markedPaid": "{{count}} facture(s) marquée(s) comme payée(s)",
+  "bulkPartial": "{{succeeded}} facture(s) marquée(s) payée(s), {{failed}} en échec",
+  "bulkFailed": "Impossible de marquer l'une des {{count}} facture(s) sélectionnée(s) comme payée",
+  "selectBill": "Sélectionner la facture {{id}}"
 }

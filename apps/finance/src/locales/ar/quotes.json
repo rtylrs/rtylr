@@ -1,7 +1,10 @@
 {
-  "created": "Quote created",
-  "markedAccepted": "Marked {{id}} as accepted",
-  "emptyTitle": "لا توجد عروض أسعار حتى الآن",
-  "emptyDescription": "أرسل عروض أسعار للعملاء وحوّلها إلى فواتير عند الموافقة عليها.",
+  "created": "تم إنشاء عرض السعر",
+  "converted": "تم تحويل عرض السعر إلى فاتورة",
+  "markedAccepted": "تم تعليم {{id}} كمقبول",
+  "clientRequired": "اسم العميل مطلوب",
+  "amountPositive": "يجب أن يكون المبلغ أكبر من صفر",
+  "emptyTitle": "لا توجد عروض أسعار بعد",
+  "emptyDescription": "أرسل التقديرات للعملاء وحوّلها إلى فواتير عند القبول.",
   "emptyCta": "عرض سعر جديد"
 }

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { Link, useNavigate } from '@tanstack/react-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion } from 'motion/react';
 import { Plus, Send, CheckCircle, Eye, FileText, Download, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'sonner';
@@ -8,7 +9,13 @@ import { getOneKitErrorMessage } from '@voxire/api';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@voxire/ui';
 import { Invoice } from '../../shared/services/financeApi';
-import { useInvoices, useUpdateInvoiceStatus } from './useInvoices';
+import {
+  useInvoices,
+  useUpdateInvoiceStatus,
+  sendInvoicesByIds,
+  fetchAllInvoicesForExport,
+  MAX_EXPORT_PAGES,
+} from './useInvoices';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import { SkeletonRow } from '../../shared/components/Skeleton';
@@ -17,12 +24,16 @@ import InvoiceStatusFilter, {
 } from '../../shared/components/InvoiceStatusFilter';
 import DownloadPdfButton from '../../shared/components/DownloadPdfButton';
 import SendInvoiceModal from '../../shared/components/SendInvoiceModal';
-import { exportQuickbooksInvoices, exportXeroInvoices } from '../../shared/lib/exports';
+import RecordPaymentModal from '../../shared/components/RecordPaymentModal';
+import ConfirmDialog from '../../shared/components/ConfirmDialog';
+import {
+  exportQuickbooksInvoices,
+  exportXeroInvoices,
+  InvoiceExportOptions,
+} from '../../shared/lib/exports';
 import { cardStyle, ghostBtn, primaryBtn, ACCENT } from '../../shared/lib/tokens';
 
-type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue' | 'Cancelled';
-
-const statusStyle: Record<InvoiceStatus, React.CSSProperties> = {
+const statusStyle: Record<Invoice['status'], React.CSSProperties> = {
   Draft: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
   Sent: { background: 'var(--finance-info-soft)', color: 'var(--finance-info)' },
   Paid: { background: 'var(--finance-accent-soft)', color: 'var(--finance-accent)' },
@@ -32,10 +43,14 @@ const statusStyle: Record<InvoiceStatus, React.CSSProperties> = {
 
 const Invoices: React.FC = () => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<InvoiceFilterValue>('All');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showBulkSend, setShowBulkSend] = useState(false);
+  const [bulkSending, setBulkSending] = useState(false);
   const [sendTarget, setSendTarget] = useState<Invoice | null>(null);
+  const [payTarget, setPayTarget] = useState<Invoice | null>(null);
+  const [exporting, setExporting] = useState(false);
   const [page, setPage] = useState(1);
   const { data, isLoading: loading } = useInvoices({ page });
   const updateStatus = useUpdateInvoiceStatus();
@@ -43,13 +58,21 @@ const Invoices: React.FC = () => {
   const invoices: Invoice[] = data?.invoices ?? [];
   const hasMore = data?.hasMore ?? false;
 
-  const markPaid = (inv: Invoice): void => {
+  // H-1: the row "Paid" action records an actual payment through the
+  // RecordPaymentModal flow; only after the payment settles does the invoice
+  // status flip to Paid (payment recording already invalidates ['invoice', id]).
+  const handlePaymentRecorded = (): void => {
+    if (!payTarget) return;
+    const target = payTarget;
+    setPayTarget(null);
     updateStatus.mutate(
-      { id: inv.id, status: 'Paid' },
+      { id: target.id, status: 'Paid' },
       {
-        onSuccess: () => toast.success(t('invoices.markedPaid', { id: inv.id })),
+        onSuccess: () => toast.success(t('invoices.markedPaid', { id: target.id })),
         onError: (error) =>
-          toast.error(getOneKitErrorMessage(error, t('invoices.markPaidFailed', { id: inv.id }))),
+          toast.error(
+            getOneKitErrorMessage(error, t('invoices.markPaidFailed', { id: target.id }))
+          ),
       }
     );
   };
@@ -60,6 +83,7 @@ const Invoices: React.FC = () => {
     Sent: invoices.filter((i) => i.status === 'Sent').length,
     Paid: invoices.filter((i) => i.status === 'Paid').length,
     Overdue: invoices.filter((i) => i.status === 'Overdue').length,
+    Cancelled: invoices.filter((i) => i.status === 'Cancelled').length,
   };
 
   const filtered =
@@ -74,14 +98,63 @@ const Invoices: React.FC = () => {
       return next;
     });
 
-  const exportPayload = (activeTab === 'All' ? invoices : filtered).map((i) => ({
-    id: i.id,
-    client: i.client,
-    amount: i.amount,
-    issuedDate: i.issuedDate,
-    dueDate: i.dueDate,
-    status: i.status,
-  }));
+  const runBulkSend = async (): Promise<void> => {
+    const ids = Array.from(selected);
+    setBulkSending(true);
+    try {
+      const result = await sendInvoicesByIds(ids);
+      if (result.succeeded.length > 0 && result.failed.length === 0) {
+        toast.success(t('invoices.bulkSent', { count: result.succeeded.length }));
+      } else if (result.succeeded.length > 0) {
+        toast.error(
+          t('invoices.bulkPartial', {
+            succeeded: result.succeeded.length,
+            failed: result.failed.length,
+          })
+        );
+      } else {
+        toast.error(t('invoices.bulkSendFailed', { count: ids.length }));
+      }
+      if (result.succeeded.length > 0) {
+        const succeededSet = new Set(result.succeeded);
+        setSelected((prev) => new Set([...prev].filter((id) => !succeededSet.has(id))));
+        await queryClient.invalidateQueries({ queryKey: ['invoices'] });
+        for (const id of result.succeeded) {
+          await queryClient.invalidateQueries({ queryKey: ['invoice', id] });
+        }
+      }
+    } finally {
+      setBulkSending(false);
+      setShowBulkSend(false);
+    }
+  };
+
+  const runExport = async (format: 'quickbooks' | 'xero'): Promise<void> => {
+    setExporting(true);
+    try {
+      const result = await fetchAllInvoicesForExport();
+      const payload = result.invoices.map((i) => ({
+        id: i.id ?? '',
+        client: i.clientName ?? '',
+        amount: i.total ?? 0,
+        issuedDate: i.issueDate ?? '',
+        dueDate: i.dueDate ?? '',
+        status: i.status ?? '',
+      }));
+      const options: InvoiceExportOptions = result.truncated
+        ? { truncatedPages: result.pagesFetched }
+        : {};
+      if (format === 'quickbooks') exportQuickbooksInvoices(payload, options);
+      else exportXeroInvoices(payload, options);
+      if (result.truncated) {
+        toast.info(t('invoices.exportCapped', { pages: MAX_EXPORT_PAGES, count: payload.length }));
+      }
+    } catch (error) {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <motion.div
@@ -103,20 +176,22 @@ const Invoices: React.FC = () => {
           <>
             {selected.size > 0 && (
               <button type="button" style={ghostBtn} onClick={() => setShowBulkSend(true)}>
-                <Send size={13} /> Send {selected.size}
+                <Send size={13} /> {t('invoices.sendSelected', { count: selected.size })}
               </button>
             )}
             <button
               type="button"
               style={ghostBtn}
-              onClick={() => exportQuickbooksInvoices(exportPayload)}
+              onClick={() => void runExport('quickbooks')}
+              disabled={exporting}
             >
               <FileSpreadsheet size={13} /> QuickBooks
             </button>
             <button
               type="button"
               style={ghostBtn}
-              onClick={() => exportXeroInvoices(exportPayload)}
+              onClick={() => void runExport('xero')}
+              disabled={exporting}
             >
               <Download size={13} /> Xero
             </button>
@@ -134,7 +209,12 @@ const Invoices: React.FC = () => {
         }
       />
 
-      <InvoiceStatusFilter value={activeTab} onChange={setActiveTab} counts={counts} />
+      {/* Badge counts come from one page only - hide them while more pages exist. */}
+      <InvoiceStatusFilter
+        value={activeTab}
+        onChange={setActiveTab}
+        counts={hasMore ? undefined : counts}
+      />
 
       {loading ? (
         <div style={{ ...cardStyle, padding: 20 }}>
@@ -190,6 +270,7 @@ const Invoices: React.FC = () => {
                       type="checkbox"
                       checked={selected.has(inv.id)}
                       onChange={() => toggle(inv.id)}
+                      aria-label={t('invoices.selectInvoice', { id: inv.number ?? inv.id })}
                       style={{ accentColor: ACCENT }}
                     />
                   </td>
@@ -206,7 +287,7 @@ const Invoices: React.FC = () => {
                       }}
                     >
                       <FileText size={13} style={{ color: 'var(--hub-text-dim)' }} />
-                      {inv.id}
+                      {inv.number ?? inv.id}
                     </Link>
                   </td>
                   <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--hub-text)' }}>
@@ -267,7 +348,7 @@ const Invoices: React.FC = () => {
                             borderColor: 'var(--finance-info-border)',
                           }}
                           onClick={() => setSendTarget(inv)}
-                          aria-label={`Send invoice ${inv.id}`}
+                          aria-label={`${t('invoices.sendAria')} ${inv.number ?? inv.id}`}
                         >
                           <Send size={12} /> Send
                         </button>
@@ -280,13 +361,11 @@ const Invoices: React.FC = () => {
                             padding: '4px 10px',
                             color: 'var(--finance-accent)',
                             borderColor: 'var(--finance-accent-border)',
-                            opacity: updateStatus.isPending ? 0.6 : 1,
                           }}
-                          onClick={() => markPaid(inv)}
-                          disabled={updateStatus.isPending}
-                          aria-label={`Mark invoice ${inv.id} paid`}
+                          onClick={() => setPayTarget(inv)}
+                          aria-label={`${t('invoices.recordPaymentAria')} ${inv.number ?? inv.id}`}
                         >
-                          <CheckCircle size={12} /> {updateStatus.isPending ? '...' : 'Paid'}
+                          <CheckCircle size={12} /> Paid
                         </button>
                       )}
                     </div>
@@ -326,16 +405,29 @@ const Invoices: React.FC = () => {
         </div>
       )}
 
-      <SendInvoiceModal
+      <ConfirmDialog
         open={showBulkSend}
         onClose={() => setShowBulkSend(false)}
-        invoiceId={`bulk (${selected.size})`}
-        onSent={() => setSelected(new Set())}
+        onConfirm={() => void runBulkSend()}
+        title={t('invoices.bulkSendTitle', { count: selected.size })}
+        message={t('invoices.bulkSendMessage', { count: selected.size })}
+        confirmLabel={bulkSending ? t('invoices.sending') : t('invoices.confirmSend')}
+        pending={bulkSending}
       />
+
       <SendInvoiceModal
         open={sendTarget !== null}
         onClose={() => setSendTarget(null)}
         invoiceId={sendTarget?.id ?? ''}
+      />
+
+      <RecordPaymentModal
+        open={payTarget !== null}
+        onClose={() => setPayTarget(null)}
+        invoiceId={payTarget?.id ?? ''}
+        amount={(payTarget?.amount ?? 0) - (payTarget?.paid ?? 0)}
+        currency={payTarget?.currency}
+        onRecorded={handlePaymentRecorded}
       />
     </motion.div>
   );

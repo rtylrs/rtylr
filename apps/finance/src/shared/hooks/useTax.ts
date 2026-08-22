@@ -9,6 +9,22 @@ import { taxConfigSchema, taxReportSchema, plReportSchema } from '../schemas/tax
 
 const reportClient = createOneKitClient(ReportServiceClient, 'finance');
 
+/** Maps the short period token used by ProfitLoss.tsx to a report anchor date. */
+function periodToAnchor(period: string): { period: string; date: string } {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+
+  if (period === 'last_month') {
+    return { period: 'month', date: new Date(y, m - 1, 15).toISOString().slice(0, 10) };
+  }
+  if (period === 'quarter' || period === 'year') {
+    return { period, date: now.toISOString().slice(0, 10) };
+  }
+  // default: 'month'
+  return { period: 'month', date: now.toISOString().slice(0, 10) };
+}
+
 export function useTaxConfig() {
   return useQuery({
     queryKey: ['tax-config'],
@@ -23,7 +39,9 @@ export function useTaxReport() {
   return useQuery({
     queryKey: ['tax-report'],
     queryFn: async () => {
-      const res = await reportClient.getTaxReport({ period: 'month', date: '' });
+      // GetTaxReportRequest.date is a required field; an empty string throws
+      // inside the generated client before any network call is made.
+      const res = await reportClient.getTaxReport(periodToAnchor('month'));
       return taxReportSchema.parse(res) as TaxReport;
     },
   });
@@ -46,22 +64,6 @@ export function useCreateTaxConfig() {
     },
     onError: (error) => toast.error(getOneKitErrorMessage(error, t('errors.generic'))),
   });
-}
-
-/** Maps the short period token used by ProfitLoss.tsx to a report anchor date. */
-function periodToAnchor(period: string): { period: string; date: string } {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = now.getMonth();
-
-  if (period === 'last_month') {
-    return { period: 'month', date: new Date(y, m - 1, 15).toISOString().slice(0, 10) };
-  }
-  if (period === 'quarter' || period === 'year') {
-    return { period, date: now.toISOString().slice(0, 10) };
-  }
-  // default: 'month'
-  return { period: 'month', date: now.toISOString().slice(0, 10) };
 }
 
 /** Use this hook in ProfitLoss.tsx. Accepts a short period token (month/last_month/quarter/year). */

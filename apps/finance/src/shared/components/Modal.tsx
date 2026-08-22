@@ -9,13 +9,28 @@ interface ModalProps {
   children: React.ReactNode;
   width?: number;
   footer?: React.ReactNode;
+  blockClose?: boolean;
 }
 
-const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 480, footer }) => {
+const Modal: React.FC<ModalProps> = ({
+  open,
+  onClose,
+  title,
+  children,
+  width = 480,
+  footer,
+  blockClose = false,
+}) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
+  const blockCloseRef = useRef(blockClose);
   const titleId = useId();
   onCloseRef.current = onClose;
+  blockCloseRef.current = blockClose;
+
+  const requestClose = React.useCallback((): void => {
+    if (!blockCloseRef.current) onCloseRef.current();
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -33,7 +48,7 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 4
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        onCloseRef.current();
+        requestClose();
         return;
       }
 
@@ -65,7 +80,7 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 4
       document.removeEventListener('keydown', handleKeyDown);
       if (previouslyFocused?.isConnected) previouslyFocused.focus();
     };
-  }, [open]);
+  }, [open, requestClose]);
 
   if (!open) return null;
   return (
@@ -80,7 +95,7 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 4
         justifyContent: 'center',
         backdropFilter: 'blur(4px)',
       }}
-      onClick={onClose}
+      onClick={requestClose}
     >
       <motion.div
         ref={dialogRef}
@@ -121,11 +136,12 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, width = 4
           <button
             type="button"
             aria-label="Close dialog"
-            onClick={onClose}
+            onClick={requestClose}
+            disabled={blockClose}
             style={{
               background: 'none',
               border: 'none',
-              cursor: 'pointer',
+              cursor: blockClose ? 'not-allowed' : 'pointer',
               color: 'var(--hub-text-muted)',
               padding: 4,
             }}

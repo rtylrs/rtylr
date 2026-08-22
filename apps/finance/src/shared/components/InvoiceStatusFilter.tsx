@@ -1,7 +1,7 @@
 import React from 'react';
 import { ACCENT } from '../lib/tokens';
 
-export type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue';
+export type InvoiceStatus = 'Draft' | 'Sent' | 'Paid' | 'Overdue' | 'Cancelled';
 export type InvoiceFilterValue = InvoiceStatus | 'All';
 
 interface InvoiceStatusFilterProps {
@@ -10,7 +10,7 @@ interface InvoiceStatusFilterProps {
   counts?: Partial<Record<InvoiceFilterValue, number>>;
 }
 
-const TABS: InvoiceFilterValue[] = ['All', 'Draft', 'Sent', 'Paid', 'Overdue'];
+const TABS: InvoiceFilterValue[] = ['All', 'Draft', 'Sent', 'Paid', 'Overdue', 'Cancelled'];
 
 const InvoiceStatusFilter: React.FC<InvoiceStatusFilterProps> = ({ value, onChange, counts }) => (
   <div

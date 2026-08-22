@@ -6,5 +6,8 @@
   "rejected": "Expense rejected",
   "receiptUpdated": "Receipt updated",
   "rejectConfirmTitle": "Reject expense",
-  "rejectConfirmMessage": "Are you sure you want to reject this expense?"
+  "rejectConfirmMessage": "Are you sure you want to reject this expense?",
+  "notes": "Notes",
+  "receiptAttached": "Attached",
+  "receiptNone": "—"
 }

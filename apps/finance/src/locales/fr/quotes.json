@@ -1,6 +1,9 @@
 {
-  "created": "Quote created",
-  "markedAccepted": "Marked {{id}} as accepted",
+  "created": "Devis créé",
+  "converted": "Devis converti en facture",
+  "markedAccepted": "{{id}} marqué comme accepté",
+  "clientRequired": "Le nom du client est obligatoire",
+  "amountPositive": "Le montant doit être supérieur à zéro",
   "emptyTitle": "Aucun devis pour le moment",
   "emptyDescription": "Envoyez des devis à vos clients et convertissez-les en factures une fois acceptés.",
   "emptyCta": "Nouveau devis"

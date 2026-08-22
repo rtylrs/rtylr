@@ -1,0 +1,24 @@
+{
+  "title": "تسجيل دفعة للفاتورة {{id}}",
+  "amount": "المبلغ",
+  "method": "طريقة الدفع",
+  "date": "التاريخ",
+  "reference": "المرجع",
+  "referencePlaceholder": "رقم العملية أو الإيصال",
+  "record": "تسجيل الدفعة",
+  "recording": "جارٍ التسجيل…",
+  "recorded": "تم تسجيل دفعة بمقدار {{amount}}",
+  "recordFailed": "تعذّر تسجيل الدفعة",
+  "amountPositive": "يجب أن يكون المبلغ أكبر من صفر",
+  "dateReferenceRequired": "تاريخ الدفع والمرجع مطلوبان",
+  "currencyUnknown": "عملة الفاتورة غير معروفة — لا يمكن تسجيل الدفعة بموثوقية",
+  "currencyUnknownHint": "عملة الفاتورة غير معروفة، لذا تم تعطيل تسجيل الدفعة.",
+  "balanceDue": "الرصيد المستحق: {{amount}}",
+  "exceedsBalance": "تجاوز الدفعة الرصيد المستحق",
+  "exceedsBalanceHint": "الرصيد المستحق هو {{amount}} — أدخل مبلغاً يساويه أو أقل منه.",
+  "methods": {
+    "cash": "نقداً",
+    "card": "بطاقة",
+    "bank_transfer": "تحويل بنكي"
+  }
+}

@@ -32,6 +32,7 @@ import {
   useFinanceInviteMember,
   useFinanceDeactivateMember,
 } from '../../shared/hooks/queries/useFinanceTeam';
+import type { FinanceTeamMember } from '../../shared/hooks/queries/useFinanceTeam';
 import {
   useFinanceSubscription,
   centsToDisplay,
@@ -292,6 +293,7 @@ const TeamTab: React.FC = () => {
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [showInvite, setShowInvite] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<FinanceTeamMember | null>(null);
 
   const handleInvite = (): void => {
     if (!canInviteMember) return;
@@ -502,14 +504,8 @@ const TeamTab: React.FC = () => {
               {canRemoveMember && (
                 <button
                   type="button"
-                  aria-label={`Remove ${m.name}`}
-                  onClick={() => {
-                    deactivate.mutate(m.id, {
-                      onSuccess: () => toast.success(`${m.name} removed`),
-                      onError: (error) =>
-                        toast.error(getOneKitErrorMessage(error, `Failed to remove ${m.name}`)),
-                    });
-                  }}
+                  aria-label={t('settings.removeMemberAria', { name: m.name })}
+                  onClick={() => setMemberToRemove(m)}
                   style={{
                     height: 28,
                     width: 28,
@@ -531,6 +527,19 @@ const TeamTab: React.FC = () => {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={memberToRemove !== null}
+        onClose={() => setMemberToRemove(null)}
+        onConfirm={() => {
+          if (memberToRemove) deactivate.mutate(memberToRemove.id);
+          setMemberToRemove(null);
+        }}
+        title={t('settings.removeMemberConfirmTitle')}
+        message={t('settings.removeMemberConfirmMessage', { name: memberToRemove?.name ?? '' })}
+        confirmLabel={t('common.confirm')}
+        destructive
+      />
     </div>
   );
 };

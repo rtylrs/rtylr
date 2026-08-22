@@ -34,6 +34,10 @@ function fromApiExpense(e: ApiExpense): Expense {
     receiptUrl: e.receiptUrl,
     expenseDate: e.expenseDate ?? '',
     status: e.status ?? '',
+    notes: e.notes,
+    paymentMethod: e.paymentMethod,
+    isTaxDeductible: e.isTaxDeductible ?? null,
+    taxAmount: e.taxAmount != null ? toFiniteNumber(e.taxAmount) : null,
     createdAt: e.createdAt,
     updatedAt: e.updatedAt,
   };
@@ -48,13 +52,12 @@ export function useExpenses(params: UseExpensesParams = {}) {
   return useQuery<ExpenseListResult>({
     queryKey: ['expenses', 'filter', { page, pageSize }],
     queryFn: async (): Promise<ExpenseListResult> => {
-      const res = await expensesClient.listExpenses({});
-      const all = (res.expenses ?? []).map(fromApiExpense);
-      const start = (page - 1) * pageSize;
-      const pageItems = all.slice(start, start + pageSize);
+      // finance.expenses.v1.ListExpenses supports page/page_size natively -
+      // paginate on the server instead of fetching an unbounded list.
+      const res = await expensesClient.listExpenses({ page, pageSize });
       return {
-        expenses: pageItems,
-        hasMore: start + pageSize < all.length,
+        expenses: (res.expenses ?? []).map(fromApiExpense),
+        hasMore: res.hasMore ?? false,
         page,
         pageSize,
       };
@@ -147,6 +150,12 @@ export function useUpdateExpenseReceipt() {
           vendor: expense.vendor ?? '',
           receiptUrl,
           expenseDate: expense.expenseDate,
+          // UpdateExpenseBody is a full-body PUT: forward the stored optional
+          // fields so replacing the receipt does not wipe them.
+          notes: expense.notes ?? undefined,
+          paymentMethod: expense.paymentMethod ?? undefined,
+          isTaxDeductible: expense.isTaxDeductible ?? undefined,
+          taxAmount: expense.taxAmount ?? undefined,
         },
       });
       return { message: res.message ?? '' };

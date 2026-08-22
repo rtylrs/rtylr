@@ -21,6 +21,10 @@ export function useExpenseById(id: string | undefined) {
         receiptUrl: res.expense.receiptUrl,
         expenseDate: res.expense.expenseDate ?? '',
         status: res.expense.status ?? '',
+        notes: res.expense.notes,
+        paymentMethod: res.expense.paymentMethod,
+        isTaxDeductible: res.expense.isTaxDeductible ?? null,
+        taxAmount: res.expense.taxAmount != null ? toFiniteNumber(res.expense.taxAmount) : null,
         createdAt: res.expense.createdAt,
         updatedAt: res.expense.updatedAt,
       };

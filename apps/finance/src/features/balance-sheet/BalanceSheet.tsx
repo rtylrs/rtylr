@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import AccountTypeBadge, { type AccountType } from '../../shared/components/AccountTypeBadge';
@@ -66,8 +67,8 @@ const Section: React.FC<{
 };
 
 const BalanceSheet: React.FC = () => {
-  const [asOfDate, setAsOfDate] = useState(new Date().toISOString().slice(0, 10));
-  const { data, isLoading } = useBalanceSheet(asOfDate);
+  const { t } = useTranslation();
+  const { data, isLoading } = useBalanceSheet();
 
   if (isLoading || !data) {
     return (
@@ -96,7 +97,6 @@ const BalanceSheet: React.FC = () => {
       <HelmetContainer title="Balance sheet · rtylr" />
       <PageHeader
         title="Balance Sheet"
-        subtitle={`As of ${asOfDate}`}
         breadcrumbs={[{ label: 'Reports' }, { label: 'Balance Sheet' }]}
         actions={
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -105,16 +105,19 @@ const BalanceSheet: React.FC = () => {
             </label>
             <input
               type="date"
-              value={asOfDate}
+              disabled
+              value={new Date().toISOString().slice(0, 10)}
               max={new Date().toISOString().slice(0, 10)}
-              onChange={(e) => setAsOfDate(e.target.value)}
+              title={t('finance.balanceSheetDateDisabledTitle')}
               style={{
                 padding: '5px 10px',
                 borderRadius: 8,
                 border: '1px solid var(--hub-border)',
                 background: 'var(--hub-surface)',
-                color: 'var(--hub-text)',
+                color: 'var(--hub-text-muted)',
                 fontSize: 12,
+                cursor: 'not-allowed',
+                opacity: 0.6,
               }}
             />
           </div>

@@ -140,18 +140,33 @@ const ExpenseDetail: React.FC = () => {
               <MoneyDisplay amount={expense.amount} />
             </Field>
             <Field label="Vendor" value={expense.vendor ?? undefined} />
-            <div
-              style={{
-                marginTop: 10,
-                padding: 12,
-                background: 'var(--hub-hover)',
-                borderRadius: 8,
-                fontSize: 12,
-                color: 'var(--hub-text-muted)',
-              }}
-            >
-              {expense.notes}
-            </div>
+            {expense.notes ? (
+              <div
+                style={{
+                  marginTop: 10,
+                  padding: 12,
+                  background: 'var(--hub-hover)',
+                  borderRadius: 8,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 11,
+                    color: 'var(--hub-text-dim)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    marginBottom: 6,
+                  }}
+                >
+                  {t('expenses.notes')}
+                </div>
+                <div
+                  style={{ fontSize: 12, color: 'var(--hub-text-muted)', whiteSpace: 'pre-wrap' }}
+                >
+                  {expense.notes}
+                </div>
+              </div>
+            ) : null}
           </div>
         </div>
         <div style={{ ...cardStyle, padding: 20 }}>

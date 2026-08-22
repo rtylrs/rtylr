@@ -4,7 +4,18 @@ import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ExpenseDetail from './ExpenseDetail';
 
-const expense = {
+const expense: {
+  id: string;
+  categoryId: null;
+  description: string;
+  amount: number;
+  currency: string;
+  vendor: string;
+  receiptUrl: string | null;
+  expenseDate: string;
+  status: string;
+  notes: string | null;
+} = {
   id: 'EXP-1',
   categoryId: null,
   description: 'Office supplies',
@@ -87,5 +98,21 @@ describe('ExpenseDetail approval actions', () => {
 
     expect(screen.getByText('Approve')).toBeInTheDocument();
     expect(screen.getByText('Reject')).toBeInTheDocument();
+  });
+});
+
+describe('ExpenseDetail notes read-path', () => {
+  it('hides the notes block when the expense has no notes', () => {
+    render(<ExpenseDetail />);
+
+    expect(screen.queryByText('expenses.notes')).not.toBeInTheDocument();
+  });
+
+  it('renders persisted notes under a Notes label', () => {
+    expense.notes = 'Client dinner for Q3 planning';
+    render(<ExpenseDetail />);
+
+    expect(screen.getByText('expenses.notes')).toBeInTheDocument();
+    expect(screen.getByText('Client dinner for Q3 planning')).toBeInTheDocument();
   });
 });

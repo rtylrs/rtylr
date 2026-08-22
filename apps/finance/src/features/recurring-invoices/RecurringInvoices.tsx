@@ -69,8 +69,8 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
           onClose();
           setForm(emptyForm());
         },
-        onError: (error) =>
-          toast.error(getOneKitErrorMessage(error, 'Failed to create recurring invoice')),
+        // Errors are toasted once at the hook layer.
+        onError: () => {},
       }
     );
   };

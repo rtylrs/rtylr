@@ -1,0 +1,24 @@
+{
+  "title": "Enregistrer un paiement pour {{id}}",
+  "amount": "Montant",
+  "method": "Mode de paiement",
+  "date": "Date",
+  "reference": "Référence",
+  "referencePlaceholder": "ID de transaction ou numéro de reçu",
+  "record": "Enregistrer le paiement",
+  "recording": "Enregistrement…",
+  "recorded": "Paiement de {{amount}} enregistré",
+  "recordFailed": "Échec de l'enregistrement du paiement",
+  "amountPositive": "Le montant doit être supérieur à zéro",
+  "dateReferenceRequired": "La date et la référence du paiement sont obligatoires",
+  "currencyUnknown": "Devise de la facture inconnue — le paiement ne peut pas être enregistré de manière fiable",
+  "currencyUnknownHint": "La devise de la facture n'est pas connue ; l'enregistrement d'un paiement est désactivé.",
+  "balanceDue": "Solde dû : {{amount}}",
+  "exceedsBalance": "Le paiement dépasse le solde restant dû",
+  "exceedsBalanceHint": "Le solde restant dû est de {{amount}} — saisissez un montant égal ou inférieur.",
+  "methods": {
+    "cash": "Espèces",
+    "card": "Carte",
+    "bank_transfer": "Virement bancaire"
+  }
+}

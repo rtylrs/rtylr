@@ -1,4 +1,13 @@
 {
   "emptyTitle": "All transactions reconciled",
-  "emptyDescription": "New transactions will show up here for matching as they come in."
+  "emptyDescription": "New transactions will show up here for matching as they come in.",
+  "autoMatch": "Auto-match all",
+  "matching": "Matching…",
+  "autoMatchConfirmMessage": "Link {{count}} unmatched transaction(s) to invoices with the exact same amount? Each match is saved immediately.",
+  "noExactMatches": "No exact matches found",
+  "autoMatchDone": "Linked {{linked}} transaction(s)",
+  "autoMatchPartial": "Linked {{linked}} transaction(s); {{failed}} failed. Failed ones are still unmatched.",
+  "matched": "Matched transaction to {{candidate}}",
+  "matchFailed": "Failed to match transaction",
+  "awaitingMatch": "{{count}} transactions awaiting match"
 }

@@ -2,12 +2,19 @@ import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useUserStore } from '@voxire/auth';
 import { motion } from 'motion/react';
-import { Download, Settings, CheckCircle, Clock, AlertTriangle, Landmark } from 'lucide-react';
+import {
+  Download,
+  Settings,
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  Landmark,
+  Plus,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { getOneKitErrorMessage } from '@voxire/api';
 import { EmptyState } from '@voxire/ui';
-import { TaxPeriod } from '../../shared/services/financeApi';
+import { TaxPeriod, TaxConfig } from '../../shared/services/financeApi';
 import { useTaxReport, useTaxConfig, useCreateTaxConfig } from '../../shared/hooks/useTax';
 import { exportTaxSummaryCsv } from '../../shared/lib/exports';
 import { canFinancePermission } from '../../shared/lib/financePermissions';
@@ -46,7 +53,7 @@ const cardStyle: React.CSSProperties = {
 };
 
 // ── Tax rate config ───────────────────────────────────────────
-interface TaxConfig {
+interface EditableRate {
   name: string;
   rate: number;
 }
@@ -59,16 +66,58 @@ const Tax: React.FC = () => {
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canManageTax = canFinancePermission(role, 'finance:tax');
 
-  // Derive editable rates from real data; fall back to empty list while loading
+  // Server rows are the source of truth and render read-only: the generated
+  // report client exposes only listTaxConfig/createTaxConfig - there is no
+  // update or delete RPC, so an existing rate cannot be edited from here
+  // without silently creating a duplicate config.
   const serverRates: TaxConfig[] = (taxConfigData ?? []).map((c) => ({
+    id: c.id,
     name: c.name,
     rate: c.rate,
   }));
-  const [rates, setRates] = useState<TaxConfig[] | null>(null);
-  // Sync server rates into local state once loaded (only on first load)
-  const editableRates: TaxConfig[] = rates ?? serverRates;
+  // Local state holds ONLY unsaved new rows, never copies of server data, so
+  // it cannot go stale and shadow fresh results after ['tax-config'] refetches.
+  const [pendingRates, setPendingRates] = useState<EditableRate[]>([]);
+
+  const addPendingRate = (): void => {
+    setPendingRates((prev) => [...prev, { name: '', rate: 0 }]);
+  };
+
+  const updatePendingRate = (index: number, patch: Partial<EditableRate>): void => {
+    setPendingRates((prev) => prev.map((r, i) => (i === index ? { ...r, ...patch } : r)));
+  };
+
+  const removePendingRate = (index: number): void => {
+    setPendingRates((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const { data: taxReport } = useTaxReport();
+
+  const handleSaveRates = async (): Promise<void> => {
+    if (pendingRates.length === 0) return;
+    const invalid = pendingRates.find((r) => !r.name.trim() || isNaN(r.rate) || r.rate < 0);
+    if (invalid) {
+      toast.error(t('tax.ratesInvalid'));
+      return;
+    }
+    let created = 0;
+    try {
+      for (const r of pendingRates) {
+        await saveRates.mutateAsync({ name: r.name.trim(), rate: r.rate });
+        created += 1;
+      }
+    } catch {
+      // Earlier creates already live on the server; report the partial outcome
+      // honestly and keep only the rows that were not saved.
+      const failed = pendingRates.length - created;
+      toast.warning(t('tax.ratesPartial', { created, failed }));
+      setPendingRates((prev) => prev.slice(created));
+      return;
+    }
+    // Drop the saved rows so the panel reflects fresh ['tax-config'] data.
+    setPendingRates([]);
+    toast.success(t('tax.ratesSaved', { count: created }));
+  };
 
   const taxCollected = taxReport?.taxCollected ?? 0;
   const taxOwed = taxReport?.taxOwed ?? 0;
@@ -260,28 +309,56 @@ const Tax: React.FC = () => {
           >
             Tax Rate Configuration
           </h3>
-          {editableRates.length === 0 && (
+          {serverRates.length === 0 && (
             <EmptyState
               size="compact"
               icon={Landmark}
               title={t('tax.ratesEmptyTitle')}
               description={t('tax.ratesEmptyDescription')}
-              action={{
-                label: t('tax.ratesEmptyCta'),
-                onClick: () => setRates([...editableRates, { name: '', rate: 0 }]),
-              }}
+              action={{ label: t('tax.ratesEmptyCta'), onClick: addPendingRate }}
             />
           )}
+          {serverRates.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
+              {serverRates.map((r) => (
+                <div
+                  key={r.id ?? r.name}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                    padding: '7px 12px',
+                    borderRadius: 7,
+                    border: '1px solid var(--hub-border)',
+                    background: 'var(--hub-hover)',
+                  }}
+                >
+                  <span style={{ fontSize: 13, color: 'var(--hub-text)' }}>{r.name}</span>
+                  <span
+                    style={{
+                      fontSize: 13,
+                      color: 'var(--hub-text-muted)',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    {r.rate}%
+                  </span>
+                </div>
+              ))}
+              <p style={{ margin: 0, fontSize: 11, color: 'var(--hub-text-dim)' }}>
+                {t('tax.ratesEditUnsupported')}
+              </p>
+            </div>
+          )}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {editableRates.map((r, i) => (
+            {pendingRates.map((r, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <input
                   value={r.name}
-                  onChange={(e) => {
-                    const next = [...editableRates];
-                    next[i] = { ...next[i], name: e.target.value };
-                    setRates(next);
-                  }}
+                  onChange={(e) => updatePendingRate(i, { name: e.target.value })}
+                  aria-label={t('tax.rateNameLabel')}
+                  placeholder={t('tax.rateNameLabel')}
                   style={{
                     flex: 1,
                     padding: '7px 12px',
@@ -289,7 +366,7 @@ const Tax: React.FC = () => {
                     border: '1px solid var(--hub-border)',
                     background: 'var(--hub-input-bg)',
                     color: 'var(--hub-text)',
-                    fontSize: 13,
+                    fontSize: 16,
                     outline: 'none',
                   }}
                 />
@@ -298,13 +375,12 @@ const Tax: React.FC = () => {
                     type="number"
                     value={r.rate}
                     step={0.5}
+                    min={0}
                     onChange={(e) => {
                       const parsed = parseFloat(e.target.value);
-                      if (isNaN(parsed)) return;
-                      const next = [...editableRates];
-                      next[i] = { ...next[i], rate: parsed };
-                      setRates(next);
+                      updatePendingRate(i, { rate: isNaN(parsed) ? 0 : parsed });
                     }}
+                    aria-label={t('tax.rateValueLabel')}
                     style={{
                       width: 72,
                       padding: '7px 12px',
@@ -312,19 +388,49 @@ const Tax: React.FC = () => {
                       border: '1px solid var(--hub-border)',
                       background: 'var(--hub-input-bg)',
                       color: 'var(--hub-text)',
-                      fontSize: 13,
+                      fontSize: 16,
                       outline: 'none',
                       textAlign: 'end',
                     }}
                   />
                   <span style={{ fontSize: 13, color: 'var(--hub-text-muted)' }}>%</span>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => removePendingRate(i)}
+                  className="p-1 rounded hover:bg-red-500/10 text-white/60 hover:text-red-400 transition"
+                  title={t('tax.removeRate')}
+                  aria-label={t('tax.removeRate')}
+                >
+                  ✕
+                </button>
               </div>
             ))}
           </div>
           <button
             type="button"
-            disabled={saveRates.isPending}
+            onClick={addPendingRate}
+            style={{
+              marginTop: 12,
+              alignSelf: 'flex-start',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '6px 12px',
+              borderRadius: 7,
+              border: '1px dashed var(--hub-border)',
+              background: 'transparent',
+              color: ACCENT,
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            <Plus size={13} /> {t('tax.addRate')}
+          </button>
+          <button
+            type="button"
+            disabled={saveRates.isPending || pendingRates.length === 0}
             style={{
               marginTop: 14,
               padding: '7px 16px',
@@ -334,27 +440,12 @@ const Tax: React.FC = () => {
               border: 'none',
               fontSize: 13,
               fontWeight: 600,
-              cursor: saveRates.isPending ? 'not-allowed' : 'pointer',
-              opacity: saveRates.isPending ? 0.6 : 1,
+              cursor: saveRates.isPending || pendingRates.length === 0 ? 'not-allowed' : 'pointer',
+              opacity: saveRates.isPending || pendingRates.length === 0 ? 0.6 : 1,
             }}
-            onClick={async () => {
-              const invalid = editableRates.find((r) => isNaN(r.rate) || r.rate < 0);
-              if (invalid) {
-                toast.error('Tax rates must be valid non-negative numbers');
-                return;
-              }
-              try {
-                for (const r of editableRates) {
-                  await saveRates.mutateAsync(r);
-                }
-                toast.success('Tax rates saved');
-                setShowConfig(false);
-              } catch (error) {
-                toast.error(getOneKitErrorMessage(error, 'Failed to save tax rates'));
-              }
-            }}
+            onClick={() => void handleSaveRates()}
           >
-            {saveRates.isPending ? 'Saving…' : 'Save Rates'}
+            {saveRates.isPending ? t('common.saving') : t('tax.saveRates')}
           </button>
         </motion.div>
       )}

@@ -18,5 +18,6 @@
   "currency": "Devise",
   "saving": "Enregistrement…",
   "creating": "Création…",
-  "refresh": "Actualiser"
+  "refresh": "Actualiser",
+  "searchPlaceholder": "Rechercher des pages et des clients"
 }

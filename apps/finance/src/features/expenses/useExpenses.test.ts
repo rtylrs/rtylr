@@ -48,13 +48,13 @@ describe('useExpenses', () => {
     mockClient.listExpenses.mockResolvedValue({ expenses: [] });
     const { result } = renderHook(() => useExpenses(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(mockClient.listExpenses).toHaveBeenCalledWith({});
+    expect(mockClient.listExpenses).toHaveBeenCalledWith({ page: 1, pageSize: 25 });
     expect(result.current.data?.expenses).toEqual([]);
   });
 
-  it('paginates client-side over the full result set', async () => {
+  it('pages server-side with page/pageSize and trusts the server hasMore flag', async () => {
     mockClient.listExpenses.mockResolvedValue({
-      expenses: Array.from({ length: 55 }, (_, i) => ({
+      expenses: Array.from({ length: 2 }, (_, i) => ({
         id: `${i}`,
         categoryId: null,
         description: '',
@@ -67,12 +67,16 @@ describe('useExpenses', () => {
         createdAt: '',
         updatedAt: '',
       })),
+      page: 3,
+      pageSize: 2,
+      hasMore: true,
     });
-    const { result } = renderHook(() => useExpenses({ page: 1, pageSize: 50 }), {
+    const { result } = renderHook(() => useExpenses({ page: 3, pageSize: 2 }), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.expenses).toHaveLength(50);
+    expect(mockClient.listExpenses).toHaveBeenCalledWith({ page: 3, pageSize: 2 });
+    expect(result.current.data?.expenses).toHaveLength(2);
     expect(result.current.data?.hasMore).toBe(true);
   });
 
@@ -150,6 +154,10 @@ describe('useUpdateExpenseReceipt', () => {
           vendor: 'Acme',
           expenseDate: '2026-08-01',
           status: 'pending',
+          notes: 'Team lunch',
+          paymentMethod: 'card',
+          isTaxDeductible: true,
+          taxAmount: 3.5,
         },
       })
     );
@@ -161,6 +169,41 @@ describe('useUpdateExpenseReceipt', () => {
           description: 'Office supplies',
           vendor: 'Acme',
           expenseDate: '2026-08-01',
+        }),
+      })
+    );
+  });
+
+  it('forwards stored optional fields so a receipt swap does not wipe them', async () => {
+    mockClient.updateExpense.mockResolvedValue({ message: 'ok' });
+    const { result } = renderHook(() => useUpdateExpenseReceipt(), { wrapper: createWrapper() });
+    await act(() =>
+      result.current.mutateAsync({
+        id: 'exp-1',
+        receiptUrl: 'https://cdn.example.com/receipt.png',
+        expense: {
+          id: 'exp-1',
+          description: 'Office supplies',
+          amount: 42,
+          currency: 'USD',
+          vendor: 'Acme',
+          expenseDate: '2026-08-01',
+          status: 'pending',
+          notes: 'Team lunch',
+          paymentMethod: 'card',
+          isTaxDeductible: true,
+          taxAmount: 3.5,
+        },
+      })
+    );
+    expect(mockClient.updateExpense).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'exp-1',
+        body: expect.objectContaining({
+          notes: 'Team lunch',
+          paymentMethod: 'card',
+          isTaxDeductible: true,
+          taxAmount: 3.5,
         }),
       })
     );

@@ -30,8 +30,11 @@
     "updateFailed": "تعذّر تحديث الاشتراك"
   },
   "pl": {
-    "exportAria": "تصدير الأرباح والخسائر بصيغة CSV"
+    "exportAria": "تصدير الأرباح والخسائر بصيغة CSV",
+    "closeFiscalYearComingSoon": "إغلاق السنة المالية — قريبًا",
+    "closeFiscalYearHint": "قفل السنة المالية غير مدعوم من واجهة برمجة التقارير بعد."
   },
+  "balanceSheetDateDisabledTitle": "تحديد التاريخ المرجعي غير مدعوم من واجهة برمجة التقارير بعد.",
   "tax": {
     "exportAria": "تصدير ملخص الضريبة للمحاسب"
   },

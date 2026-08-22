@@ -85,6 +85,7 @@ const LineItemRow: React.FC<LineItemRowProps> = ({ item, onChange, onRemove, dis
           type="button"
           onClick={onRemove}
           disabled={disabled}
+          aria-label="Remove line"
           style={{
             background: 'none',
             border: 'none',

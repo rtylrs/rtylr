@@ -36,7 +36,9 @@ export function useCreateAccount() {
     }) =>
       accountClient.createAccount({
         name: data.name,
-        code: data.code ?? '',
+        // code is optional on the contract - omit it entirely rather than
+        // sending an empty string that would overwrite nothing meaningfully.
+        ...(data.code ? { code: data.code } : {}),
         type: data.type,
         currency: data.currency,
         balance: data.balance,
@@ -45,6 +47,53 @@ export function useCreateAccount() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['chart-of-accounts'] });
       toast.success(t('accounts.created'));
+    },
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
+    },
+  });
+}
+
+// UpdateAccountBody requires name and type; every other field is optional and
+// means "leave unchanged" when omitted, so callers send exactly what changes.
+export function useUpdateAccount() {
+  const qc = useQueryClient();
+  const { t } = useTranslation();
+  return useMutation({
+    mutationFn: (data: {
+      id: string;
+      name: string;
+      type: string;
+      code?: string;
+      isActive?: boolean;
+    }) =>
+      accountClient.updateAccount({
+        id: data.id,
+        body: {
+          name: data.name,
+          type: data.type,
+          ...(data.code !== undefined ? { code: data.code } : {}),
+          ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+        },
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['chart-of-accounts'] });
+      toast.success(t('accounts.updated'));
+    },
+    onError: (error) => {
+      toast.error(getOneKitErrorMessage(error, t('errors.generic')));
+    },
+  });
+}
+
+export function useDeleteAccount() {
+  const qc = useQueryClient();
+  const { t } = useTranslation();
+  return useMutation({
+    mutationFn: (id: string) => accountClient.deleteAccount({ id }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['chart-of-accounts'] });
+      toast.success(t('accounts.deleted'));
     },
     onError: (error) => {
       toast.error(getOneKitErrorMessage(error, t('errors.generic')));
@@ -62,6 +111,7 @@ export interface JournalResult {
   hasMore: boolean;
   page: number;
   pageSize: number;
+  total?: number;
 }
 
 export function useJournal(params: UseJournalParams = {}) {
@@ -81,6 +131,8 @@ export function useJournal(params: UseJournalParams = {}) {
         (res.entries ?? []).map((e) => ({
           id: e.id,
           date: e.date,
+          // JournalEntry has no separate memo field; description is the memo.
+          memo: e.description,
           description: e.description,
           lines: (e.lines ?? []).map((l) => ({
             account: l.accountName,
@@ -90,12 +142,13 @@ export function useJournal(params: UseJournalParams = {}) {
           })),
         }))
       );
-      const total = res.pagination?.total ?? entries.length;
+      const total = res.pagination?.total;
       return {
         entries,
-        hasMore: page * pageSize < total,
+        hasMore: page * pageSize < (total ?? entries.length),
         page,
         pageSize,
+        total,
       };
     },
   });
@@ -109,7 +162,7 @@ export function useCreateJournalEntry() {
       date: string;
       description: string;
       lines: Array<{
-        accountId: number;
+        accountId: string;
         accountName: string;
         debit: number;
         credit: number;
@@ -120,7 +173,7 @@ export function useCreateJournalEntry() {
         date: data.date,
         description: data.description,
         lines: data.lines.map((l) => ({
-          accountId: String(l.accountId),
+          accountId: l.accountId,
           accountName: l.accountName,
           debit: l.debit,
           credit: l.credit,

@@ -3,7 +3,6 @@ import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { Plus, ArrowRight, CheckCircle, FileSignature } from 'lucide-react';
 import { toast } from 'sonner';
-import { getOneKitErrorMessage } from '@voxire/api';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@voxire/ui';
 import PageHeader from '../../shared/components/PageHeader';
@@ -14,7 +13,6 @@ import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useQuotes, useCreateQuote, useConvertQuote, useUpdateQuoteStatus } from './useQuotes';
 import { formatDate } from '../../shared/lib/date';
 import { cardStyle, ghostBtn, primaryBtn, inputStyle, labelStyle } from '../../shared/lib/tokens';
-import { useSettings } from '../../shared/lib/settings';
 
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
   Draft: { background: 'var(--finance-neutral-soft)', color: 'var(--finance-text-dim)' },
@@ -27,52 +25,44 @@ const STATUS_STYLE: Record<string, React.CSSProperties> = {
 interface NewQuoteForm {
   client: string;
   amount: number;
-  issuedDate: string;
   expiresAt: string;
   description: string;
 }
 
+const emptyForm = (): NewQuoteForm => ({
+  client: '',
+  amount: 0,
+  expiresAt: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+  description: '',
+});
+
 const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+  const { t } = useTranslation();
   const createQuote = useCreateQuote();
-  const currency = useSettings((s) => s.currency);
-  const [form, setForm] = useState<NewQuoteForm>({
-    client: '',
-    amount: 0,
-    issuedDate: new Date().toISOString().slice(0, 10),
-    expiresAt: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
-    description: '',
-  });
+  const [form, setForm] = useState<NewQuoteForm>(emptyForm);
 
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     if (!form.client.trim()) {
-      toast.error('Client name is required');
+      toast.error(t('quotes.clientRequired'));
       return;
     }
     if (form.amount <= 0) {
-      toast.error('Amount must be greater than zero');
+      toast.error(t('quotes.amountPositive'));
       return;
     }
     createQuote.mutate(
       {
         client: form.client,
         amount: form.amount,
-        currency,
-        issuedDate: form.issuedDate,
         expiresAt: form.expiresAt,
         description: form.description || undefined,
       },
       {
         onSuccess: () => {
-          toast.success('Quote created');
+          // Success feedback comes from the hook layer; just reset + close.
           onClose();
-          setForm({
-            client: '',
-            amount: 0,
-            issuedDate: new Date().toISOString().slice(0, 10),
-            expiresAt: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
-            description: '',
-          });
+          setForm(emptyForm());
         },
       }
     );
@@ -118,25 +108,14 @@ const NewQuoteModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open,
             onChange={(v) => setForm((f) => ({ ...f, amount: v }))}
           />
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={labelStyle}>Issue Date</label>
-            <input
-              type="date"
-              value={form.issuedDate}
-              onChange={(e) => setForm((f) => ({ ...f, issuedDate: e.target.value }))}
-              style={inputStyle}
-            />
-          </div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={labelStyle}>Expires</label>
-            <input
-              type="date"
-              value={form.expiresAt}
-              onChange={(e) => setForm((f) => ({ ...f, expiresAt: e.target.value }))}
-              style={inputStyle}
-            />
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <label style={labelStyle}>Expires</label>
+          <input
+            type="date"
+            value={form.expiresAt}
+            onChange={(e) => setForm((f) => ({ ...f, expiresAt: e.target.value }))}
+            style={inputStyle}
+          />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <label style={labelStyle}>Description</label>
@@ -164,10 +143,8 @@ const Quotes: React.FC = () => {
   const [showCreate, setShowCreate] = useState(false);
 
   const handleConvert = (id: string): void => {
-    convertQuote.mutate(id, {
-      onSuccess: () => toast.success('Quote converted to invoice'),
-      onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to convert quote')),
-    });
+    // Created/converted feedback is toasted once at the hook layer.
+    convertQuote.mutate(id);
   };
 
   const handleMarkAccepted = (id: string): void => {
@@ -318,13 +295,7 @@ const Quotes: React.FC = () => {
                         <CheckCircle size={12} /> Mark Accepted
                       </button>
                     ) : (
-                      <button
-                        type="button"
-                        style={{ ...ghostBtn, padding: '4px 10px' }}
-                        aria-label={`View quote ${q.id}`}
-                      >
-                        View
-                      </button>
+                      <span style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>-</span>
                     )}
                   </td>
                 </tr>

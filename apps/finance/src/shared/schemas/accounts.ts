@@ -32,6 +32,10 @@ export const chartOfAccountSchema = z
     code: z.string().optional().nullable(),
     type: z.string().optional().nullable(),
     balance: z.number().optional().nullable(),
+    // Both exist on finance.account.v1.Account and are needed for the
+    // deactivate/reactivate toggle.
+    currency: z.string().optional().nullable(),
+    isActive: z.boolean().optional().nullable(),
   })
   .passthrough();
 

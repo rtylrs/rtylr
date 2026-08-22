@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
 import { TrendingUp, TrendingDown, Download, Lock } from 'lucide-react';
-import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { usePLByPeriod } from '../../shared/hooks/useTax';
-import PaymentReminderPanel from '../../shared/components/PaymentReminderPanel';
-import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { exportProfitLossCsv } from '../../shared/lib/exports';
 
 import { useSettings } from '../../shared/lib/settings';
@@ -124,8 +122,8 @@ const PERIOD_PARAMS: Record<Period, string> = {
 };
 
 const ProfitLoss: React.FC = () => {
+  const { t } = useTranslation();
   const [period, setPeriod] = useState<Period>('This Month');
-  const [showClose, setShowClose] = useState(false);
   const currency = useSettings((s) => s.currency);
   const { data: plData } = usePLByPeriod(PERIOD_PARAMS[period]);
 
@@ -224,7 +222,9 @@ const ProfitLoss: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={() => setShowClose(true)}
+            disabled
+            title={t('finance.pl.closeFiscalYearHint')}
+            aria-label={t('finance.pl.closeFiscalYearComingSoon')}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -235,12 +235,13 @@ const ProfitLoss: React.FC = () => {
               background: 'color-mix(in srgb, var(--finance-warning) 8%, transparent)',
               color: 'var(--finance-warning)',
               fontSize: 13,
-              cursor: 'pointer',
+              cursor: 'not-allowed',
               fontWeight: 600,
+              opacity: 0.6,
             }}
           >
             <Lock size={13} />
-            Close Fiscal Year
+            {t('finance.pl.closeFiscalYearComingSoon')}
           </button>
         </div>
       </div>
@@ -461,36 +462,23 @@ const ProfitLoss: React.FC = () => {
         />
       </div>
 
-      {/* By-category + reminders */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-        <div style={{ ...cardStyle, padding: 20 }}>
-          <div
-            style={{
-              fontSize: 11,
-              color: 'var(--hub-text-dim)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              marginBottom: 12,
-            }}
-          >
-            Expenses by Category
-          </div>
-          <p style={{ fontSize: 13, color: 'var(--hub-text-muted)', margin: 0 }}>
-            Category breakdown not available yet.
-          </p>
+      {/* By-category */}
+      <div style={{ ...cardStyle, padding: 20 }}>
+        <div
+          style={{
+            fontSize: 11,
+            color: 'var(--hub-text-dim)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            marginBottom: 12,
+          }}
+        >
+          Expenses by Category
         </div>
-        <PaymentReminderPanel />
+        <p style={{ fontSize: 13, color: 'var(--hub-text-muted)', margin: 0 }}>
+          Category breakdown not available yet.
+        </p>
       </div>
-
-      <ConfirmDialog
-        open={showClose}
-        onClose={() => setShowClose(false)}
-        onConfirm={() => toast.info('Fiscal year period locking is coming soon')}
-        title="Close fiscal year"
-        message="This will lock all entries for the current fiscal year. Adjustments will require a new period. Continue?"
-        confirmLabel="Close year"
-        destructive
-      />
     </motion.div>
   );
 };

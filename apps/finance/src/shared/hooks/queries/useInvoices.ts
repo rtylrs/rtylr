@@ -62,8 +62,9 @@ export const useSendInvoice = () => {
       const res = await invoicesClient.sendInvoice({ id: data.invoiceId });
       return { message: res.message ?? '' };
     },
-    onSuccess: (_data: SendInvoiceResponse) => {
+    onSuccess: (_data: SendInvoiceResponse, variables: SendInvoiceRequest) => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      queryClient.invalidateQueries({ queryKey: ['invoice', variables.invoiceId] });
       toast.success(t('invoices.sent'));
     },
     onError: (error) => {

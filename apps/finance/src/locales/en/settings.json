@@ -3,5 +3,8 @@
   "teamEmptyDescription": "Invite people to give them access to Finance.",
   "teamEmptyCta": "Invite member",
   "resetConfirmTitle": "Reset settings",
-  "resetConfirmMessage": "This will restore default settings and discard your changes."
+  "resetConfirmMessage": "This will restore default settings and discard your changes.",
+  "removeMemberAria": "Remove {{name}}",
+  "removeMemberConfirmTitle": "Remove team member",
+  "removeMemberConfirmMessage": "{{name}} will immediately lose access to Finance. You can invite them again later."
 }

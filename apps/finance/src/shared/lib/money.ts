@@ -26,13 +26,13 @@ export const CURRENCY_OPTIONS: Currency[] = [
   'CNY',
 ];
 
-export function getCurrencySymbol(c: Currency): string {
-  return CURRENCY_SYMBOL[c] ?? c;
+export function getCurrencySymbol(c: string): string {
+  return CURRENCY_SYMBOL[c as Currency] ?? c;
 }
 
 export function formatMoney(
   value: number | string | null | undefined,
-  currency: Currency = 'USD',
+  currency: string = 'USD',
   fractionDigits = 2
 ): string {
   const n = typeof value === 'string' ? parseFloat(value) : (value ?? 0);

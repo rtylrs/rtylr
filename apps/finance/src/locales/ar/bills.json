@@ -6,6 +6,10 @@
   "create": "إنشاء فاتورة",
   "vendor": "المورد",
   "vendorPlaceholder": "اسم المورد أو البائع",
+  "supplierId": "معرّف المورد",
+  "supplierIdPlaceholder": "مثال: 42",
+  "supplierIdHint": "تُسجَّل الفواتير مقابل معرّف مورد رقمي. لا يتوفر دليل موردين في قسم المالية بعد - أدخل معرّف مورد موجود من ERP.",
+  "supplierIdInvalid": "يجب أن يكون معرّف المورد رقماً صحيحاً موجباً",
   "amount": "المبلغ",
   "dueDate": "تاريخ الاستحقاق",
   "description": "الوصف",
@@ -21,5 +25,14 @@
   "due": "الاستحقاق",
   "status": "الحالة",
   "schedulingSoon": "جدولة الفاتورة قريبةً",
-  "schedule": "جدولة"
+  "schedule": "جدولة",
+  "paySelected": "دفع المحددة ({{count}})",
+  "payConfirmTitle": "تعليم {{count}} فاتورة كمدفوعة؟",
+  "payConfirmMessage": "سيتم إرسال تحديث بحالة «مدفوعة» لـ {{count}} من الفواتير المحددة. الفواتير التي تفشل تبقى محددة.",
+  "confirmPaid": "تعليم كمدفوعة",
+  "paying": "جارٍ الدفع…",
+  "markedPaid": "تم تعليم {{count}} فاتورة كمدفوعة",
+  "bulkPartial": "تم تعليم {{succeeded}} فاتورة، وفشلت {{failed}}",
+  "bulkFailed": "تعذّر تعليم أي من الفواتير {{count}} المحددة كمدفوعة",
+  "selectBill": "تحديد الفاتورة {{id}}"
 }

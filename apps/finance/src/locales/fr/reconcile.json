@@ -1,4 +1,13 @@
 {
   "emptyTitle": "Toutes les transactions sont rapprochées",
-  "emptyDescription": "Les nouvelles transactions apparaîtront ici pour être rapprochées à leur arrivée."
+  "emptyDescription": "Les nouvelles transactions apparaîtront ici pour être rapprochées à leur arrivée.",
+  "autoMatch": "Rapprochement automatique",
+  "matching": "Rapprochement…",
+  "autoMatchConfirmMessage": "Lier {{count}} transaction(s) non rapprochée(s) aux factures du même montant exact ? Chaque lien est enregistré immédiatement.",
+  "noExactMatches": "Aucune correspondance exacte trouvée",
+  "autoMatchDone": "{{linked}} transaction(s) liée(s)",
+  "autoMatchPartial": "{{linked}} transaction(s) liée(s) ; {{failed}} en échec. Les échecs restent non rapprochées.",
+  "matched": "Transaction rapprochée avec {{candidate}}",
+  "matchFailed": "Échec du rapprochement de la transaction",
+  "awaitingMatch": "{{count}} transaction(s) en attente de rapprochement"
 }

@@ -1,6 +1,9 @@
 {
   "created": "Quote created",
+  "converted": "Quote converted to invoice",
   "markedAccepted": "Marked {{id}} as accepted",
+  "clientRequired": "Client name is required",
+  "amountPositive": "Amount must be greater than zero",
   "emptyTitle": "No quotes yet",
   "emptyDescription": "Send estimates to clients and convert them to invoices when accepted.",
   "emptyCta": "New Quote"

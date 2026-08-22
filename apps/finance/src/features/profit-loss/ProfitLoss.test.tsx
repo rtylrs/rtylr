@@ -1,13 +1,15 @@
 // @vitest-environment happy-dom
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import ProfitLoss from './ProfitLoss';
 
-const toastInfo = vi.hoisted(() => vi.fn());
-
 vi.mock('@voxire/components', () => ({
   HelmetContainer: () => null,
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key }),
 }));
 
 vi.mock('motion/react', () => ({
@@ -26,29 +28,8 @@ vi.mock('lucide-react', () => {
   };
 });
 
-vi.mock('sonner', () => ({ toast: { info: toastInfo } }));
-
 vi.mock('../../shared/hooks/useTax', () => ({
   usePLByPeriod: () => ({ data: null }),
-}));
-
-vi.mock('../../shared/components/PaymentReminderPanel', () => ({ default: () => null }));
-
-vi.mock('../../shared/components/ConfirmDialog', () => ({
-  default: ({
-    open,
-    onConfirm,
-    confirmLabel,
-  }: {
-    open: boolean;
-    onConfirm: () => void;
-    confirmLabel: string;
-  }) =>
-    open ? (
-      <button type="button" onClick={onConfirm}>
-        {confirmLabel}
-      </button>
-    ) : null,
 }));
 
 vi.mock('../../shared/lib/exports', () => ({
@@ -56,12 +37,22 @@ vi.mock('../../shared/lib/exports', () => ({
 }));
 
 describe('ProfitLoss close fiscal year', () => {
-  it('uses the documented read-only toast copy after confirmation', () => {
+  it('renders an honestly disabled close-fiscal-year button with no destructive dialog', () => {
     render(<ProfitLoss />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Close Fiscal Year' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Close year' }));
+    const button = screen.getByRole('button', {
+      name: 'finance.pl.closeFiscalYearComingSoon',
+    });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute('title', 'finance.pl.closeFiscalYearHint');
 
-    expect(toastInfo).toHaveBeenCalledWith('Fiscal year period locking is coming soon');
+    // No interactive confirm affordance may exist for the unimplemented action.
+    expect(screen.queryByRole('button', { name: 'Close year' })).not.toBeInTheDocument();
+  });
+
+  it('does not render a payment reminders panel', () => {
+    render(<ProfitLoss />);
+
+    expect(screen.queryByText('Payment Reminders')).not.toBeInTheDocument();
   });
 });

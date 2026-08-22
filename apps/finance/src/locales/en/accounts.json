@@ -9,5 +9,20 @@
   "name": "Name",
   "type": "Type",
   "balance": "Balance",
-  "codeOptional": "Account code (optional)"
+  "codeOptional": "Account code (optional)",
+  "updated": "Account updated",
+  "deleted": "Account deleted",
+  "editTitle": "Edit Account",
+  "editAria": "Edit {{name}}",
+  "deleteAria": "Delete {{name}}",
+  "deactivateAria": "Deactivate {{name}}",
+  "reactivateAria": "Reactivate {{name}}",
+  "deactivateTitle": "Deactivate Account",
+  "reactivateTitle": "Reactivate Account",
+  "deactivateMessage": "Are you sure you want to deactivate \"{{name}}\"? It will stay in the list but appear inactive.",
+  "reactivateMessage": "Are you sure you want to reactivate \"{{name}}\"?",
+  "deleteConfirmTitle": "Delete Account",
+  "deleteConfirmMessage": "Are you sure you want to delete \"{{name}}\"? This cannot be undone.",
+  "inactive": "Inactive",
+  "typeRequired": "This account has no type on record and cannot be updated"
 }

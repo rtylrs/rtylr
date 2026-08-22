@@ -11,6 +11,7 @@ const mockInvoicesClient = vi.hoisted(() => ({
   updateInvoice: vi.fn(),
   deleteInvoice: vi.fn(),
   updateInvoiceStatus: vi.fn(),
+  sendInvoice: vi.fn(),
 }));
 
 const mockPaymentsClient = vi.hoisted(() => ({
@@ -31,6 +32,9 @@ import {
   useDeleteInvoice,
   useUpdateInvoiceStatus,
   useRecordPayment,
+  sendInvoicesByIds,
+  fetchAllInvoicesForExport,
+  MAX_EXPORT_PAGES,
 } from './useInvoices';
 
 const createWrapper = () => {
@@ -202,5 +206,76 @@ describe('useRecordPayment', () => {
     expect(mockPaymentsClient.recordPayment).toHaveBeenCalledWith(
       expect.objectContaining({ invoiceId: '42', amount: 250 })
     );
+  });
+
+  it('invalidates the detail key alongside the list', async () => {
+    mockPaymentsClient.recordPayment.mockResolvedValue({ message: 'ok' });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(QueryClientProvider, { client: queryClient }, children);
+    const { result } = renderHook(() => useRecordPayment(), { wrapper });
+    await act(() =>
+      result.current.mutateAsync({
+        id: '7',
+        amount: 10,
+        currency: 'USD',
+        paymentDate: '2026-06-01',
+        reference: 'R',
+      })
+    );
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['invoice', '7'] });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['invoices'] });
+  });
+});
+
+describe('sendInvoicesByIds', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('aggregates per-id outcomes across settled sends', async () => {
+    mockInvoicesClient.sendInvoice.mockImplementation(({ id }: { id: string }) =>
+      id === '2' ? Promise.reject(new Error('nope')) : Promise.resolve({ message: 'ok' })
+    );
+    const result = await sendInvoicesByIds(['1', '2', '3']);
+    expect(result.succeeded).toEqual(['1', '3']);
+    expect(result.failed).toEqual(['2']);
+    expect(mockInvoicesClient.sendInvoice).toHaveBeenCalledTimes(3);
+  });
+
+  it('reports every id as failed when all sends reject', async () => {
+    mockInvoicesClient.sendInvoice.mockRejectedValue(new Error('down'));
+    const result = await sendInvoicesByIds(['1', '2']);
+    expect(result.succeeded).toEqual([]);
+    expect(result.failed).toEqual(['1', '2']);
+  });
+});
+
+describe('fetchAllInvoicesForExport', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('loops pages until hasMore is false', async () => {
+    mockInvoicesClient.listInvoices
+      .mockResolvedValueOnce({ invoices: [{ id: '1' }], hasMore: true })
+      .mockResolvedValueOnce({ invoices: [{ id: '2' }], hasMore: false });
+    const res = await fetchAllInvoicesForExport();
+    expect(res.truncated).toBe(false);
+    expect(res.pagesFetched).toBe(2);
+    expect(res.invoices.map((i) => i.id)).toEqual(['1', '2']);
+    expect(mockInvoicesClient.listInvoices).toHaveBeenNthCalledWith(1, {
+      page: 1,
+      pageSize: 100,
+    });
+  });
+
+  it('flags truncation when the page cap is reached', async () => {
+    mockInvoicesClient.listInvoices.mockResolvedValue({ invoices: [], hasMore: true });
+    const res = await fetchAllInvoicesForExport();
+    expect(res.truncated).toBe(true);
+    expect(res.pagesFetched).toBe(MAX_EXPORT_PAGES);
+    expect(mockInvoicesClient.listInvoices).toHaveBeenCalledTimes(MAX_EXPORT_PAGES);
   });
 });

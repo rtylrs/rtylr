@@ -125,8 +125,6 @@ describe('useCreateQuote', () => {
       result.current.mutateAsync({
         client: 'Alpha',
         amount: 100,
-        currency: 'USD',
-        issuedDate: '2026-06-01',
         expiresAt: '2026-07-01',
       })
     );

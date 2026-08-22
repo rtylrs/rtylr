@@ -59,11 +59,12 @@ export function useQuotes(params: UseQuotesParams = {}) {
   });
 }
 
+// finance.quote.v1.CreateQuoteRequest has no currency or issue-date field
+// (currency defaults server-side, issued timestamp is the record's createdAt),
+// so those inputs are intentionally absent here.
 interface CreateQuotePayload {
   client: string;
   amount: number;
-  currency: string;
-  issuedDate: string;
   expiresAt: string;
   description?: string;
 }
@@ -95,7 +96,7 @@ export function useCreateQuote() {
       }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['quotes'] });
-      toast.success('Quote created');
+      toast.success(t('quotes.created'));
     },
     onError: (error) => {
       toast.error(getOneKitErrorMessage(error, t('errors.generic')));
@@ -126,7 +127,7 @@ export function useConvertQuote() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['quotes'] });
       void qc.invalidateQueries({ queryKey: ['invoices'] });
-      toast.success('Quote converted to invoice');
+      toast.success(t('quotes.converted'));
     },
     onError: (error) => {
       toast.error(getOneKitErrorMessage(error, t('errors.generic')));

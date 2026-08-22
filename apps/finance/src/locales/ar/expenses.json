@@ -6,5 +6,8 @@
   "rejected": "تم رفض المصروف",
   "receiptUpdated": "تم تحديث الإيصال",
   "rejectConfirmTitle": "رفض المصروف",
-  "rejectConfirmMessage": "هل أنت متأكد أنك تريد رفض هذا المصروف؟"
+  "rejectConfirmMessage": "هل أنت متأكد أنك تريد رفض هذا المصروف؟",
+  "notes": "ملاحظات",
+  "receiptAttached": "مرفق",
+  "receiptNone": "—"
 }

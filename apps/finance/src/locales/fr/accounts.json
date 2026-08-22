@@ -9,5 +9,20 @@
   "name": "Nom",
   "type": "Type",
   "balance": "Solde",
-  "codeOptional": "Code du compte (facultatif)"
+  "codeOptional": "Code du compte (facultatif)",
+  "updated": "Compte mis à jour",
+  "deleted": "Compte supprimé",
+  "editTitle": "Modifier le compte",
+  "editAria": "Modifier {{name}}",
+  "deleteAria": "Supprimer {{name}}",
+  "deactivateAria": "Désactiver {{name}}",
+  "reactivateAria": "Réactiver {{name}}",
+  "deactivateTitle": "Désactiver le compte",
+  "reactivateTitle": "Réactiver le compte",
+  "deactivateMessage": "Voulez-vous vraiment désactiver « {{name}} » ? Il restera dans la liste mais apparaîtra inactif.",
+  "reactivateMessage": "Voulez-vous vraiment réactiver « {{name}} » ?",
+  "deleteConfirmTitle": "Supprimer le compte",
+  "deleteConfirmMessage": "Voulez-vous vraiment supprimer « {{name}} » ? Cette action est irréversible.",
+  "inactive": "Inactif",
+  "typeRequired": "Ce compte n'a pas de type enregistré et ne peut pas être mis à jour"
 }

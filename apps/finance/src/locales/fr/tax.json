@@ -4,5 +4,14 @@
   "reportEmptyDescription": "Les périodes fiscales apparaîtront ici une fois que les factures génèreront une activité fiscale.",
   "ratesEmptyTitle": "Aucun taux de taxe configuré",
   "ratesEmptyDescription": "Ajoutez un taux de taxe pour commencer à calculer la taxe sur les factures et devis.",
-  "ratesEmptyCta": "Ajouter un taux de taxe"
+  "ratesEmptyCta": "Ajouter un taux de taxe",
+  "ratesEditUnsupported": "Les taux existants ne peuvent pas être modifiés ni supprimés pour le moment - seuls les nouveaux taux peuvent être ajoutés.",
+  "addRate": "Ajouter un taux",
+  "removeRate": "Supprimer le taux",
+  "rateNameLabel": "Nom du taux",
+  "rateValueLabel": "Pourcentage du taux",
+  "ratesInvalid": "Les nouveaux taux nécessitent un nom et un nombre valide non négatif",
+  "ratesSaved": "{{count}} taux de taxe ajouté(s)",
+  "ratesPartial": "{{created}} taux enregistré(s), {{failed}} en échec. Les lignes non enregistrées sont conservées ci-dessous.",
+  "saveRates": "Enregistrer les nouveaux taux"
 }

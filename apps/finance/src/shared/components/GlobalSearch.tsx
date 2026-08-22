@@ -13,6 +13,7 @@ import Modal from './Modal';
 import { inputStyle, ACCENT } from '../lib/tokens';
 import type { Client } from './ClientSelect';
 import { unwrap } from '@voxire/api';
+import { useTranslation } from 'react-i18next';
 import { listCrmCustomers } from '../lib/clients';
 import { parseClientsResponse } from '../schemas/clients';
 
@@ -83,6 +84,7 @@ interface GlobalSearchProps {
 }
 
 const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [index, setIndex] = useState(0);
   const [clients, setClients] = useState<Client[]>([]);
@@ -162,7 +164,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ open, onClose }) => {
             setQuery(e.target.value);
             setIndex(0);
           }}
-          placeholder="Search invoices, expenses, clients, pages..."
+          placeholder={t('common.searchPlaceholder')}
           style={{ ...inputStyle, background: 'transparent', border: 'none', padding: 0 }}
         />
       </div>

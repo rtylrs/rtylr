@@ -6,5 +6,8 @@
   "rejected": "Dépense rejetée",
   "receiptUpdated": "Reçu mis à jour",
   "rejectConfirmTitle": "Rejeter la dépense",
-  "rejectConfirmMessage": "Êtes-vous sûr de vouloir rejeter cette dépense ?"
+  "rejectConfirmMessage": "Êtes-vous sûr de vouloir rejeter cette dépense ?",
+  "notes": "Notes",
+  "receiptAttached": "Joint",
+  "receiptNone": "—"
 }

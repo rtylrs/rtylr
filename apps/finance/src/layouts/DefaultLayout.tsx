@@ -15,7 +15,6 @@ import {
   Receipt,
   TrendingUp,
   Calculator,
-  Bell,
   ChevronRight,
   Sun,
   Moon,
@@ -630,25 +629,6 @@ const DefaultLayout: React.FC = () => {
                   }}
                 >
                   <SearchIcon size={14} />
-                </button>
-                <button
-                  type="button"
-                  onClick={undefined}
-                  aria-label="Notifications"
-                  style={{
-                    height: 28,
-                    width: 28,
-                    borderRadius: 8,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: 'var(--hub-text-muted)',
-                  }}
-                >
-                  <Bell size={14} />
                 </button>
                 <CaretButton />
               </div>

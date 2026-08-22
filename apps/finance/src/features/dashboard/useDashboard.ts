@@ -6,7 +6,9 @@ import { dashboardStatsSchema } from '../../shared/schemas/dashboard';
 
 export function useFinanceDashboard() {
   return useQuery({
-    queryKey: ['finance-dashboard'],
+    // Distinct from shared/hooks/queries/useFinanceDashboard.ts, which caches
+    // the raw GetFinanceDashboardResponse under ['finance-dashboard'].
+    queryKey: ['finance-dashboard-v2'],
     queryFn: async (): Promise<DashboardStats> => {
       const res = await unwrap(oneKitResult(() => financeDashboardClient.getFinanceDashboard({})));
       return dashboardStatsSchema.parse(res) as DashboardStats;

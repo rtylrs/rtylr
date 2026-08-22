@@ -4,5 +4,14 @@
   "reportEmptyDescription": "Tax periods will appear here once invoices start generating tax activity.",
   "ratesEmptyTitle": "No tax rates configured yet",
   "ratesEmptyDescription": "Add a tax rate to start calculating tax on invoices and quotes.",
-  "ratesEmptyCta": "Add tax rate"
+  "ratesEmptyCta": "Add tax rate",
+  "ratesEditUnsupported": "Existing rates can't be edited or removed yet - only new rates can be added.",
+  "addRate": "Add rate",
+  "removeRate": "Remove rate",
+  "rateNameLabel": "Rate name",
+  "rateValueLabel": "Rate percentage",
+  "ratesInvalid": "New rates need a name and a valid non-negative number",
+  "ratesSaved": "{{count}} tax rate(s) added",
+  "ratesPartial": "{{created}} rate(s) saved, {{failed}} failed. Unsaved rows are kept below.",
+  "saveRates": "Save New Rates"
 }

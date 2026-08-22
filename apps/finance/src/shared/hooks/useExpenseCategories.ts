@@ -19,6 +19,10 @@ export function useExpenseCategories() {
         id: toFiniteNumber(c.id),
         name: c.name ?? '',
         color: c.color ?? '',
+        // ExpenseCategoryDetail carries icon on the wire; map it through so
+        // edits can preserve it instead of resetting it. The generated voxie
+        // type does not expose icon yet, hence the record lookup.
+        icon: ((c as unknown as Record<string, unknown>).icon as string | undefined) ?? '',
       }));
     },
   });
@@ -29,7 +33,9 @@ export function useCreateExpenseCategory() {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (data: { name: string; color: string; icon?: string; budget?: number }) => {
+    // ExpenseCategoryDetail has no budget field - collecting one here would
+    // silently drop it. icon is required by the contract, hence the fallback.
+    mutationFn: async (data: { name: string; color: string; icon?: string }) => {
       const response = await reportClient.createExpenseCategoryDetail({
         name: data.name,
         color: data.color,
@@ -56,16 +62,12 @@ export function useUpdateExpenseCategory() {
       data,
     }: {
       id: number;
-      data: { name: string; color: string; budget?: number; icon?: string };
+      data: { name: string; color: string; icon?: string };
     }) => {
-      return unwrap(
-        financeApi.updateExpenseCategory(id, {
-          name: data.name,
-          color: data.color,
-          budget: data.budget,
-          icon: data.icon ?? 'tag',
-        })
-      );
+      // Send icon only when supplied - never overwrite it with a default.
+      const body: Partial<ExpenseCategory> = { name: data.name, color: data.color };
+      if (data.icon) body.icon = data.icon;
+      return unwrap(financeApi.updateExpenseCategory(id, body));
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['expense-categories'] });

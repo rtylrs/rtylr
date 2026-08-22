@@ -10,6 +10,17 @@ export interface InvoiceExport {
   status: string;
 }
 
+export interface InvoiceExportOptions {
+  // When an export was capped at N pages, the filename is suffixed so the
+  // partial coverage is visible instead of silently looking complete.
+  truncatedPages?: number;
+}
+
+function exportFilename(base: string, options: InvoiceExportOptions): string {
+  const suffix = options.truncatedPages !== undefined ? `_page1-${options.truncatedPages}` : '';
+  return `${base}${suffix}.csv`;
+}
+
 function downloadCsv(filename: string, rows: string[][]) {
   const csv = rows
     .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
@@ -26,7 +37,10 @@ function downloadCsv(filename: string, rows: string[][]) {
   toast.success(`Downloaded ${filename}`);
 }
 
-export function exportQuickbooksInvoices(invoices: InvoiceExport[]) {
+export function exportQuickbooksInvoices(
+  invoices: InvoiceExport[],
+  options: InvoiceExportOptions = {}
+) {
   // QuickBooks IIF-style CSV (simplified).
   const header = ['InvoiceNo', 'Customer', 'InvoiceDate', 'DueDate', 'Amount', 'Memo', 'Class'];
   const rows = [
@@ -41,7 +55,7 @@ export function exportQuickbooksInvoices(invoices: InvoiceExport[]) {
       'Finance',
     ]),
   ];
-  downloadCsv('quickbooks_invoices.csv', rows);
+  downloadCsv(exportFilename('quickbooks_invoices', options), rows);
 }
 
 export interface PLExportRow {
@@ -85,7 +99,7 @@ export function exportTaxSummaryCsv(rows: TaxExportRow[]): void {
   downloadCsv('tax_summary.csv', data);
 }
 
-export function exportXeroInvoices(invoices: InvoiceExport[]) {
+export function exportXeroInvoices(invoices: InvoiceExport[], options: InvoiceExportOptions = {}) {
   // Xero invoice template CSV header (simplified).
   const header = [
     '*ContactName',
@@ -112,5 +126,5 @@ export function exportXeroInvoices(invoices: InvoiceExport[]) {
       'Tax on Sales',
     ]),
   ];
-  downloadCsv('xero_invoices.csv', rows);
+  downloadCsv(exportFilename('xero_invoices', options), rows);
 }

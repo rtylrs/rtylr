@@ -8,7 +8,8 @@ import { motion } from 'motion/react';
 import { Send, Copy, XCircle, CreditCard, Printer } from 'lucide-react';
 import { toast } from 'sonner';
 import { getOneKitErrorMessage } from '@voxire/api';
-import { useInvoiceDetail, useDeleteInvoice } from './useInvoices';
+import { useTranslation } from 'react-i18next';
+import { useInvoiceDetail, useUpdateInvoiceStatus } from './useInvoices';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import PaymentBadge from '../../shared/components/PaymentBadge';
@@ -24,8 +25,9 @@ import { canFinancePermission } from '../../shared/lib/financePermissions';
 const InvoiceDetail: React.FC = () => {
   const { id } = routeApi.useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { data: invoice, isLoading } = useInvoiceDetail(id);
-  const deleteInvoice = useDeleteInvoice();
+  const updateStatus = useUpdateInvoiceStatus();
   const [showSend, setShowSend] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [showVoid, setShowVoid] = useState(false);
@@ -77,10 +79,7 @@ const InvoiceDetail: React.FC = () => {
             <button
               type="button"
               style={ghostBtn}
-              onClick={() => {
-                navigate({ to: `/invoices/new?clone=${invoice.id}` });
-                toast.success('Cloning invoice');
-              }}
+              onClick={() => navigate({ to: '/invoices/new', search: { clone: invoice.id } })}
             >
               <Copy size={13} /> Clone
             </button>
@@ -243,20 +242,26 @@ const InvoiceDetail: React.FC = () => {
         open={showVoid}
         onClose={() => setShowVoid(false)}
         onConfirm={() =>
-          deleteInvoice.mutate(invoice.id, {
-            onSuccess: () => {
-              toast.success(`Invoice ${invoice.id} voided`);
-              setShowVoid(false);
-              navigate({ to: '/invoices' });
-            },
-            onError: (error) =>
-              toast.error(getOneKitErrorMessage(error, `Failed to void invoice ${invoice.id}`)),
-          })
+          updateStatus.mutate(
+            { id: invoice.id, status: 'Cancelled' },
+            {
+              onSuccess: () => {
+                toast.success(t('invoices.cancelledSuccess', { id: invoice.id }));
+                setShowVoid(false);
+                navigate({ to: '/invoices' });
+              },
+              onError: (error) =>
+                toast.error(
+                  getOneKitErrorMessage(error, t('invoices.cancelFailed', { id: invoice.id }))
+                ),
+            }
+          )
         }
-        title="Void invoice"
-        message={`Are you sure you want to void ${invoice.id}? This cannot be undone.`}
-        confirmLabel={deleteInvoice.isPending ? 'Voiding...' : 'Void'}
+        title={t('invoices.voidTitle')}
+        message={t('invoices.voidConfirmMessage', { id: invoice.id })}
+        confirmLabel={updateStatus.isPending ? t('invoices.cancelling') : t('invoices.voidConfirm')}
         destructive
+        pending={updateStatus.isPending}
       />
     </motion.div>
   );

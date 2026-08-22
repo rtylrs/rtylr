@@ -30,8 +30,11 @@
     "updateFailed": "Failed to update subscription"
   },
   "pl": {
-    "exportAria": "Export profit and loss as CSV"
+    "exportAria": "Export profit and loss as CSV",
+    "closeFiscalYearComingSoon": "Close fiscal year — coming soon",
+    "closeFiscalYearHint": "Fiscal year locking isn't supported by the reporting API yet."
   },
+  "balanceSheetDateDisabledTitle": "As-of dating isn't supported by the reporting API yet.",
   "tax": {
     "exportAria": "Export tax summary for accountant"
   },
