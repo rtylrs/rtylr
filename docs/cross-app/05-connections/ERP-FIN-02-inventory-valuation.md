@@ -146,3 +146,13 @@ foreign domains. Today it needs one.
 | Backend             | 0 days as scoped. Add an as-at parameter if the dated version is wanted, which would be a larger ERP change. |
 | Frontend            | 1 day: read, render, label the valuation moment and currency                                                 |
 | Ongoing maintenance | ~0.25 days per year                                                                                          |
+
+## Backend section (round two)
+
+Strengthened: `GetValuation` is implemented server-side beyond the contract,
+through the full stack
+(`internal/modules/inventory/internal/api/inventory_service.go:57`,
+`application/service.go:82`). This dossier needs exactly what it said: one read
+from the balance-sheet screen.
+
+*Round two (2026-08-22): confirmed; backend implementation verified.*

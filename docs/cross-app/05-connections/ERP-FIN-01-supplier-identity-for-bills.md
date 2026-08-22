@@ -187,3 +187,13 @@ a supplier that does not exist yet.
 | Backend             | 1 day: relax `supplier_id` to nullable, add `supplier_name`, adjust the validator, write the orphaned-id report |
 | Frontend            | 1.5 days: supplier picker on the bill form, supplier column on the list, remove the slugify                     |
 | Ongoing maintenance | ~0.25 days per year. One read, stable shape.                                                                    |
+
+## Backend section (round two)
+
+Verified: every statement in `internal/modules/bills/sql/queries/bills.sql`
+touches only `finance_bills`; none references `erp_suppliers`.
+`CreateBillRequest.supplier_id` remains `@required @gt(0)`
+(`packages/voxie/api/finance/bill/v1/models.onk:29`). The frontend fabrication
+risk described above is therefore still live end to end.
+
+*Round two (2026-08-22): confirmed unchanged.*

@@ -204,3 +204,14 @@ propose one.
 | Backend             | 15 to 25 days across the sequence above, of which the party concept and the first consumer are perhaps 8                  |
 | Frontend            | 5 days: the combined customer view, the matching and confirmation surface                                                 |
 | Ongoing maintenance | ~2 days per year, plus a standing review obligation: every new domain that stores a person must reference a party instead |
+
+## Backend section (round two)
+
+Confirmed: exactly one identity-resolution query exists product-wide
+(`internal/modules/hr_core/sql/queries/employees.sql:47`, hub user to hr
+employee). POS-to-CRM contact matching in customer_sync remains contact-based
+matching, not identity resolution
+(`platform/customer_sync/customer_sync.go:47`), consistent with round one's
+reading. Nothing since round one changes the picture.
+
+*Round two (2026-08-22): confirmed unchanged.*

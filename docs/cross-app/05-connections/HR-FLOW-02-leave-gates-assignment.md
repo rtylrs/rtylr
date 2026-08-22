@@ -164,3 +164,11 @@ risk below about leave _type_.
 | Backend             | 1 day: date-range filter with overlap semantics, pagination, and a projection that omits leave type if the type must be withheld |
 | Frontend            | 2 days: assignment warning, availability in cycle planning                                                                       |
 | Ongoing maintenance | ~0.5 days per year                                                                                                               |
+
+## Backend section (round two)
+
+Confirmed unchanged: `ListLeaveRequestsRequest` filters by employee id and
+status only; no date range, no pagination fields
+(`packages/voxie/api/hr/leave/v1/models.onk`).
+
+*Round two (2026-08-22): confirmed unchanged.*

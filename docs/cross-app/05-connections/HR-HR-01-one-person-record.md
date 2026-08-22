@@ -202,3 +202,15 @@ place and hides it better.
 | Backend             | 6 to 10 days: divergence report, canonical decision, dual-serving period, leave migration including enum-to-rows, retirement of duplicate columns |
 | Frontend            | 2 days: follow surviving ids, remove references to the retired leave surface                                                                      |
 | Ongoing maintenance | **negative.** This is the only item in the audit that reduces long-run maintenance rather than adding to it.                                      |
+
+## Backend section (round two)
+
+Confirmed unchanged at the storage layer: `hr.schema.sql:29-30` and
+`hr_core/schema.sql:90-91` both carry salary and hourly_rate (plus overtime),
+bridged by nullable `hr_staff.employee_id`. One scope-widening fact: team's
+invite flow INSERTs into `hr_employees` cross-schema
+(`internal/modules/team/sql/queries/team.sql:194`), so hub-side seat
+provisioning co-owns the employee table. The migration plan must treat team as
+a stakeholder module, not just the HR modules.
+
+*Round two (2026-08-22): confirmed; scope widened to include team provisioning.*

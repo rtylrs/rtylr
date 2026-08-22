@@ -150,3 +150,10 @@ degradation pattern that the party concept will generalise.
 | Backend             | 1 to 2 days depending on whether the `customer_id` reference is included     |
 | Frontend            | 1 day: panel with counts, last-contact date, and hidden-by-default behaviour |
 | Ongoing maintenance | ~0.25 days per year                                                          |
+
+## Backend section (round two)
+
+Confirmed: support_customers remain their own table; no statement in the
+support_customers query set references CRM tables.
+
+*Round two (2026-08-22): confirmed unchanged.*

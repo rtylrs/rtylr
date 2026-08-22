@@ -192,3 +192,33 @@ endpoint afterwards (`HR->INS-01`).
 | Backend             | 4 days: new capability, aggregate query, coverage and contributor counting, role gating, minor-units arithmetic |
 | Frontend            | 2 days: Flow project cost panel with partial-coverage and current-rates labelling                               |
 | Ongoing maintenance | ~0.5 days per year, higher if overtime and rate history are added later                                         |
+
+## Backend section (round two)
+
+The aggregate this dossier asked for exists as a live platform port, built in
+#743 the day after round one closed:
+
+- Contract: `internal/platform/labourcost/contract.go` defines `ProjectCost`
+  (cost cents, costed and uncosted minutes, uncosted employee count) and
+  `LabourCostProvider`.
+- Implementation: HR-owned SQL joins `hr_time_entries` to
+  `hr_employees.hourly_rate` inside hr_payroll
+  (`internal/modules/hr_payroll/sql/queries/labour_cost.sql`; repository at
+  `infrastructure/repository.go:450`).
+- Consumption: workspaces holds it via `SetLabourCostProvider`
+  (`internal/modules/workspaces/internal/application/service.go:113,121`) with
+  a noop fallback, wired at `cmd/api/main.go:466`.
+
+Not exposed over any RPC; zero frontend callers. Remaining work is one RPC on
+Flow's project surface plus the UI, not a new capability.
+
+Deltas versus draft 8a in 06-proposed-contracts.md, which must be revised to
+bind this port rather than propose a parallel shape: the real SQL filters
+`is_billable = TRUE` only (non-billable minutes are excluded entirely rather
+than reported separately); it answers one project per call (no batch ids); it
+takes no date range; coverage arrives as `uncosted_minutes` +
+`uncosted_employee_count` rather than `rate_coverage`; and there is no
+contributor-count equivalent. The permission posture matches the draft's
+intent: rates never cross the boundary, only aggregates.
+
+*Round two (2026-08-22): corrected-by-progress; draft 8a superseded in part.*

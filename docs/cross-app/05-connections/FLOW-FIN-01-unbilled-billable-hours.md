@@ -193,3 +193,25 @@ build the screen against the unpaginated endpoint.
 | Backend             | 1 day: add `from_date`, `to_date`, `project_id`, `is_billable`, `status`, `limit`, `offset` to `ListTimeEntriesRequest`, and honour them |
 | Frontend            | 2 days: unbilled-time view grouped by project, period picker, the honest "not automatically reconciled" statement                        |
 | Ongoing maintenance | ~0.5 days per year. Slightly higher than a plain read because the aggregation logic lives in the client.                                 |
+
+## Backend section (round two)
+
+Two developments, one closing the gap and one widening it.
+
+Closing: the missing filters landed upstream the day after round one filed.
+voxie #46 added `from_date`, `to_date`, `project_id`, `is_billable`, `status`,
+`limit` and `offset` to `ListTimeEntriesRequest` (`api/hr/time_entry/v1/models.onk`),
+onion #783 served them, packages #66 and rtylr #917 bumped the pointer through.
+The landed contract mirrors round-one draft 1 nearly verbatim. The gap bucket
+moves from "needs a contract field" to frontend work.
+
+Widening: `hr_time_entries.billable_invoice_id`
+(`schemas/hr_time/schema.sql:22`) is read by the unbilled filter
+(`time_entries.sql:52`: `AND billable_invoice_id IS NULL`) and written by
+nothing anywhere in the repo. "Unbilled" is currently true of every row forever;
+recording that an hour got invoiced exists at no layer. Any implementation of
+this dossier must include the invoice-side marker write or the unbilled number
+never moves.
+
+*Round two (2026-08-22): corrected-by-progress upstream plus a new storage gap
+recorded in 14-layer-reconciliation.md A1/A2.*

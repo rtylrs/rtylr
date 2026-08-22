@@ -154,3 +154,17 @@ never live-but-unread for long.
 | Backend             | 3 days: nullable `purchase_order_id`, emission, ERP consumer, idempotency, partial-settlement decision |
 | Frontend            | 0.5 days: order picker on the bill form                                                                |
 | Ongoing maintenance | ~0.5 days per year. Higher than a read: events carry delivery, ordering and retry concerns.            |
+
+## Backend section (round two)
+
+Confirmed: Bill carries no purchase order reference; ERP owns
+`updatePurchaseOrderStatus` as assumed
+(`packages/voxie/api/erp/purchase_order/v1/service.onk`). Webhook context from
+the events sweep strengthens the dossier's shape choice: the webhooks module is
+registration-only CRUD with no delivery engine anywhere in the repo
+(`backend_events.csv`), so an event-shaped implementation cannot assume tenant
+webhooks exist; wsbus carries UI realtime topics only. The in-process port
+pattern used by financejournal/financeaccounts is the codebase's working
+precedent for exactly this direction of notification.
+
+*Round two (2026-08-22): confirmed; substrate evidence updated.*

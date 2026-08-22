@@ -205,3 +205,18 @@ Order of work, and it matters:
 | Backend             | 3 days: reconciliation query, hub revocation, emission from both person tables, multi-business scoping tests                                              |
 | Frontend            | 0.5 days: the reconciliation list in dash, plus confirmation copy on termination stating what will be revoked                                             |
 | Ongoing maintenance | ~0.25 days per year. Low: one event, one consumer, no schema. Rises if future apps take their own dependency on the event rather than on hub entitlement. |
+
+## Backend section (round two)
+
+Verified against onion at `ab6ff7ff`. The claim stands and one fact strengthens
+it: seat provisioning already writes across the boundary in the opposite
+direction. Team's invite flow INSERTs an `hr_employees` row cross-schema
+(`internal/modules/team/sql/queries/team.sql:192-201`), so employment is coupled
+to entitlements at hire time. At termination time the coupling disappears:
+`employee_handlers.go:425-427` sets `Status: "terminated"` via
+`UpdateEmployeeForWriter`, `internal/modules/staff/sql/queries/staff.sql:26`
+terminates the hr_staff row, and no module anywhere reads a terminated status to
+revoke `user_app_permissions` or edit any apps array.
+
+*Round two (2026-08-22): backend re-verified, claim confirmed; provisioning-side
+cross-schema write added as supporting evidence.*

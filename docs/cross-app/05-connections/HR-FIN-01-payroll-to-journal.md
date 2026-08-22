@@ -166,3 +166,28 @@ accounting incident.
 | Backend             | 0 to 1 day: nothing needed for the core; 1 day for a posted marker on the payroll run  |
 | Frontend            | 2 days: proposed-entry screen, account mapping selection, balance check before posting |
 | Ongoing maintenance | ~0.25 days per year                                                                    |
+
+## Backend section (round two)
+
+The backend half now exists end to end, built the day after this dossier was
+filed. `POST /hr/payroll/runs/{id}/export`
+(`export_payroll_handler.go:18`) calls `ExportPayrollToFinance`
+(`internal/modules/hr_payroll/internal/application/service.go:375`), which takes
+an idempotent claim (`ClaimPayrollRunForExport`, released on failure), converts
+internally-stored cents at the boundary with an explicit comment, and posts
+through the Finance-owned `financejournal.PayrollJournalPoster` port
+(`internal/modules/journal/module.go:32,40`), wired at `cmd/api/main.go:499`.
+Tenant account selection comes from the `financeaccounts` port
+(`main.go:498`), which answers the dossier's configurability worry directly:
+RTYLR never chooses accounts, the tenant does, and posting fails loudly when
+mapping is absent (`1fb0e4f1`, "require configured payroll accounts").
+
+The design question the dossier raised ("why not automatic") was resolved
+differently than assumed: invocation lives in HR behind a Finance-owned port
+rather than as a Finance-hosted action, and ownership boundaries hold because
+the journal contract and account config both stay Finance's.
+
+Remaining work is the UI button plus optionally a posted-marker on the run.
+No frontend caller exists today (verified in rtylr and pos).
+
+*Round two (2026-08-22): corrected-by-progress; effort drops to S-frontend.*

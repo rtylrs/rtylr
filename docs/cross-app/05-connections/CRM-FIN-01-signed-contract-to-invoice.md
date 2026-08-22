@@ -167,3 +167,13 @@ forbid.
 | Backend             | 3 days: minimal `crm.sales.v1` contract with a resolved customer, the invoice-raised marker, tenant scoping |
 | Frontend            | 1.5 days: prefill path on invoice create, converted-state on the CRM contract row                           |
 | Ongoing maintenance | ~0.5 days per year, plus keeping the new contract in step with the legacy sales routes until those retire   |
+
+## Backend section (round two)
+
+Verified against voxie `847a34c8` and onion `ab6ff7ff`. Unchanged: voxie's api
+tree carries no `crm/sales/` directory; the crm_sales module serves 17 legacy
+chi routes (`backend_handlers.csv`, crm_sales); the CRM app hand-writes its
+lead/contact/contract payload types at
+`apps/crm/src/shared/hooks/queries/useSales.ts:106,245,272,347`.
+
+*Round two (2026-08-22): confirmed unchanged.*

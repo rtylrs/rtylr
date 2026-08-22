@@ -194,3 +194,14 @@ Sequence, and step 3 is the one that gets skipped if it is not written down:
 | Backend             | 2 days: nullable `product_id`, `unit_cost` projection with role-based omission, tenant validation, divergence report  |
 | Frontend            | 1 day in this repo (ERP-side reporting and linking). The POS terminal experience is out of repo.                      |
 | Ongoing maintenance | ~0.5 days per year, plus the deferred stock-authority migration which is unestimated and should be tracked separately |
+
+## Backend section (round two)
+
+Confirmed unchanged: MenuItem still declares neither a product reference nor a
+cost field. Storage-layer context this round adds: `erp_products` is the most
+shared business table in the product after `businesses` itself (14 modules
+touch it, `backend_tables.csv`), so the join target is heavily contended and
+the eventual stock-authority migration should be planned with that readership
+in mind.
+
+*Round two (2026-08-22): confirmed; shared-table pressure documented.*
