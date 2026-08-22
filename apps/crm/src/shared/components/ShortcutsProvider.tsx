@@ -22,12 +22,16 @@ export const ShortcutsProvider: React.FC<React.PropsWithChildren> = ({ children 
       return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
     };
     const handler = (e: KeyboardEvent) => {
-      // cmd+k / ctrl+k opens palette (always works)
+      const hasOpenDialog = Boolean(document.querySelector('[role="dialog"][aria-modal="true"]'));
+
+      // cmd+k / ctrl+k opens the palette unless another dialog owns the interaction.
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        if (!paletteOpen && hasOpenDialog) return;
         e.preventDefault();
         setPaletteOpen((o) => !o);
         return;
       }
+      if (hasOpenDialog) return;
       if (isTyping()) return;
       if (e.key === '/') {
         e.preventDefault();
@@ -52,7 +56,7 @@ export const ShortcutsProvider: React.FC<React.PropsWithChildren> = ({ children 
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [navigate]);
+  }, [navigate, paletteOpen]);
 
   return (
     <ShortcutsContext.Provider value={{ openPalette: () => setPaletteOpen(true) }}>
