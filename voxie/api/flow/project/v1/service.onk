@@ -32,4 +32,11 @@ service ProjectService {
   transferProjectOwnership(TransferProjectOwnershipRequest) -> TransferProjectOwnershipResponse @put("/projects/transfer")
 
   moveProject(MoveProjectRequest) -> MoveProjectResponse @put("/projects/move")
+
+  /// Returns the live labour-cost aggregate for one project. Money is
+  /// computed server-side by HR from pay rates that never cross this
+  /// boundary: only aggregate cents and coverage counts are returned, so a
+  /// caller who may see a project's cost does not thereby gain sight of any
+  /// individual's pay.
+  getProjectLabourCost(GetProjectLabourCostRequest) -> GetProjectLabourCostResponse @get("/projects/{id}/labour-cost")
 }
