@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS finance_invoices (
     INDEX idx_finance_invoices_business_created (business_id, created_at),
     INDEX idx_finance_invoices_business_status_created (business_id, status, created_at),
     INDEX idx_finance_invoices_business_status_reporting_date (business_id, status, reporting_date),
+    UNIQUE KEY uq_finance_invoices_business_number (business_id, invoice_number),
     FULLTEXT INDEX idx_finance_invoices_search (invoice_number, client_name, client_email)
 );
 
