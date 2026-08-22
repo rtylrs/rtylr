@@ -194,6 +194,37 @@
   --color-flow-active: var(--flow-active);
 }
 
+/* ── Corner radius re-pointed at the appearance control ──────────────
+ * Same mechanism as the --color-* block above, applied to shape. Tailwind v4
+ * compiles .rounded-lg to `border-radius: var(--radius-lg)`, and the shared
+ * preset declares those tokens in a plain @theme block rather than an inline
+ * one, so they are ordinary custom properties on :root and this unlayered rule
+ * outranks them. That moves 170 of Flow's 335 addressable radius declarations
+ * without editing a single component.
+ *
+ * The ratios reproduce the preset exactly at the `soft` step, which is today's
+ * app: 4 / 8 / 12 / 16 / 20. Scaling the family rather than flattening it is
+ * deliberate, so the size relationship between a chip and a modal survives the
+ * control.
+ *
+ * The fallback is load-bearing, not defensive. --flow-r is written by
+ * AppearanceProvider, and initAppearance is deliberately allowed to fail
+ * silently, so an unresolvable var() here would make every declaration in the
+ * block invalid and square every corner in the app.
+ *
+ * --radius-sm is 4px at `soft` rather than the preset's 6px, so the pending
+ * rename of the 162 bare `rounded` uses to `rounded-sm` preserves their current
+ * appearance: v4's bare `rounded` is a literal 0.25rem from its
+ * `@theme default inline` block and is the one radius form a runtime token
+ * cannot reach. */
+:root {
+  --radius-sm: calc(var(--flow-r, 8px) * 0.5);
+  --radius-md: var(--flow-r, 8px);
+  --radius-lg: calc(var(--flow-r, 8px) * 1.5);
+  --radius-xl: calc(var(--flow-r, 8px) * 2);
+  --radius-2xl: calc(var(--flow-r, 8px) * 2.5);
+}
+
 @layer base {
   *,
   *::before,
