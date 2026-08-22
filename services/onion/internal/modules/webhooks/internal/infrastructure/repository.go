@@ -12,14 +12,15 @@ import (
 
 type Repository struct {
 	queries *sqlc.Queries
+	db      *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		queries: sqlc.New(db),
+		db:      db,
 	}
 }
-
 
 // WebhookExistsInBusiness reports whether the row exists within the business. The write queries
 // in this module are :exec and cannot report a zero-row match, so writes
@@ -34,6 +35,7 @@ func (r *Repository) WebhookExistsInBusiness(ctx context.Context, businessID, id
 	}
 	return exists
 }
+
 func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Webhook, error) {
 	rows, err := r.queries.ListWebhooks(ctx, businessID)
 	if err != nil {
@@ -72,7 +74,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, url,
 
 func (r *Repository) Delete(ctx context.Context, businessID, webhookID int64) error {
 	if !r.WebhookExistsInBusiness(ctx, businessID, webhookID) {
-		return ErrWebhookNotFound
+		return domain.ErrWebhookNotFound
 	}
 	err := r.queries.DeleteWebhook(ctx, sqlc.DeleteWebhookParams{
 		ID:         webhookID,
