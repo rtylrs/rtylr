@@ -8,11 +8,13 @@ import (
 )
 
 var (
-	ErrLeadNotFound       = errors.New("lead not found")
-	ErrContactNotFound    = errors.New("contact not found")
-	ErrTouchpointNotFound = errors.New("touchpoint not found")
-	ErrContractNotFound   = errors.New("contract not found")
-	ErrInvalidLeadStage   = errors.New("invalid lead stage")
+	ErrLeadNotFound          = errors.New("lead not found")
+	ErrContactNotFound       = errors.New("contact not found")
+	ErrTouchpointNotFound    = errors.New("touchpoint not found")
+	ErrContractNotFound      = errors.New("contract not found")
+	ErrInvalidLeadStage      = errors.New("invalid lead stage")
+	ErrInvalidLeadTransition = errors.New("invalid lead stage transition")
+	ErrInvalidLeadAssignee   = errors.New("invalid lead assignee")
 )
 
 type LeadStage string
@@ -40,42 +42,71 @@ func (s LeadStage) IsValid() bool {
 	}
 }
 
+// CanTransitionTo enforces a forward-only pipeline and immutable terminal
+// stages. A lead may be marked lost from any active stage, but cannot be
+// resurrected or moved backwards after it is contracted or lost.
+func (s LeadStage) CanTransitionTo(next LeadStage) bool {
+	if !s.IsValid() || !next.IsValid() {
+		return false
+	}
+	if s == next {
+		return true
+	}
+	if s == LeadStageContracted || s == LeadStageLost {
+		return false
+	}
+	if next == LeadStageLost {
+		return true
+	}
+	stages := AllStages()
+	var currentIndex, nextIndex int
+	for i, stage := range stages {
+		if stage == s {
+			currentIndex = i
+		}
+		if stage == next {
+			nextIndex = i
+		}
+	}
+	return nextIndex >= currentIndex
+}
+
 type Lead struct {
-	ID           int64     `json:"id"`
-	OwnerID      int64     `json:"owner_id"`
-	BusinessID   int64     `json:"business_id"`
-	CompanyName  string    `json:"company_name"`
-	Industry     string    `json:"industry"`
-	Size         string    `json:"size"`
-	Source       string    `json:"source"`
-	Stage        LeadStage `json:"stage"`
-	AssignedTo   *int64    `json:"assigned_to"`
-	MRRPotential *money.Amount  `json:"mrr_potential"`
-	Notes        string    `json:"notes"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           int64         `json:"id"`
+	OwnerID      int64         `json:"owner_id"`
+	BusinessID   int64         `json:"business_id"`
+	CompanyName  string        `json:"company_name"`
+	Industry     string        `json:"industry"`
+	Size         string        `json:"size"`
+	Source       string        `json:"source"`
+	Stage        LeadStage     `json:"stage"`
+	AssignedTo   *int64        `json:"assigned_to"`
+	MRRPotential *money.Amount `json:"mrr_potential"`
+	Notes        string        `json:"notes"`
+	CreatedAt    time.Time     `json:"created_at"`
+	UpdatedAt    time.Time     `json:"updated_at"`
 }
 
 type CreateLeadRequest struct {
-	CompanyName  string    `json:"company_name"`
-	Industry     string    `json:"industry"`
-	Size         string    `json:"size"`
-	Source       string    `json:"source"`
-	Stage        LeadStage `json:"stage"`
-	AssignedTo   *int64    `json:"assigned_to"`
-	MRRPotential *money.Amount  `json:"mrr_potential"`
-	Notes        string    `json:"notes"`
+	CompanyName  string        `json:"company_name"`
+	Industry     string        `json:"industry"`
+	Size         string        `json:"size"`
+	Source       string        `json:"source"`
+	Stage        LeadStage     `json:"stage"`
+	AssignedTo   *int64        `json:"assigned_to"`
+	MRRPotential *money.Amount `json:"mrr_potential"`
+	Notes        string        `json:"notes"`
 }
 
 type UpdateLeadRequest struct {
-	CompanyName  string    `json:"company_name"`
-	Industry     string    `json:"industry"`
-	Size         string    `json:"size"`
-	Source       string    `json:"source"`
-	Stage        LeadStage `json:"stage"`
-	AssignedTo   *int64    `json:"assigned_to"`
-	MRRPotential *money.Amount  `json:"mrr_potential"`
-	Notes        string    `json:"notes"`
+	CompanyName  string        `json:"company_name"`
+	Industry     string        `json:"industry"`
+	Size         string        `json:"size"`
+	Source       string        `json:"source"`
+	Stage        LeadStage     `json:"stage"`
+	AssignedTo   *int64        `json:"assigned_to"`
+	MRRPotential *money.Amount `json:"mrr_potential"`
+	Notes        string        `json:"notes"`
 }
 
 type Contact struct {
@@ -140,45 +171,45 @@ type CreateTouchpointRequest struct {
 }
 
 type Contract struct {
-	ID           int64     `json:"id"`
-	OwnerID      int64     `json:"owner_id"`
-	BusinessID   int64     `json:"business_id"`
-	LeadID       int64     `json:"lead_id"`
-	Plan         string    `json:"plan"`
-	MRR          money.Amount   `json:"mrr"`
-	Seats        int       `json:"seats"`
-	SignedAt     *string   `json:"signed_at"`
-	SignedByName string    `json:"signed_by_name"`
-	ClosedBy     *int64    `json:"closed_by"`
-	Notes        string    `json:"notes"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           int64        `json:"id"`
+	OwnerID      int64        `json:"owner_id"`
+	BusinessID   int64        `json:"business_id"`
+	LeadID       int64        `json:"lead_id"`
+	Plan         string       `json:"plan"`
+	MRR          money.Amount `json:"mrr"`
+	Seats        int          `json:"seats"`
+	SignedAt     *string      `json:"signed_at"`
+	SignedByName string       `json:"signed_by_name"`
+	ClosedBy     *int64       `json:"closed_by"`
+	Notes        string       `json:"notes"`
+	CreatedAt    time.Time    `json:"created_at"`
+	UpdatedAt    time.Time    `json:"updated_at"`
 }
 
 type CreateContractRequest struct {
-	LeadID       int64   `json:"lead_id"`
-	Plan         string  `json:"plan"`
+	LeadID       int64        `json:"lead_id"`
+	Plan         string       `json:"plan"`
 	MRR          money.Amount `json:"mrr"`
-	Seats        int     `json:"seats"`
-	SignedAt     *string `json:"signed_at"`
-	SignedByName string  `json:"signed_by_name"`
-	ClosedBy     *int64  `json:"closed_by"`
-	Notes        string  `json:"notes"`
+	Seats        int          `json:"seats"`
+	SignedAt     *string      `json:"signed_at"`
+	SignedByName string       `json:"signed_by_name"`
+	ClosedBy     *int64       `json:"closed_by"`
+	Notes        string       `json:"notes"`
 }
 
 type UpdateContractRequest struct {
-	Plan         string  `json:"plan"`
+	Plan         string       `json:"plan"`
 	MRR          money.Amount `json:"mrr"`
-	Seats        int     `json:"seats"`
-	SignedAt     *string `json:"signed_at"`
-	SignedByName string  `json:"signed_by_name"`
-	ClosedBy     *int64  `json:"closed_by"`
-	Notes        string  `json:"notes"`
+	Seats        int          `json:"seats"`
+	SignedAt     *string      `json:"signed_at"`
+	SignedByName string       `json:"signed_by_name"`
+	ClosedBy     *int64       `json:"closed_by"`
+	Notes        string       `json:"notes"`
 }
 
 type PipelineSummary struct {
-	Stage    string  `json:"stage"`
-	Count    int     `json:"count"`
+	Stage    string       `json:"stage"`
+	Count    int          `json:"count"`
 	TotalMRR money.Amount `json:"total_mrr"`
 }
 

@@ -6,11 +6,23 @@ import (
 )
 
 var (
-	ErrEmptyCampaignName    = errors.New("campaign name is required")
-	ErrEmptyCampaignType    = errors.New("campaign type is required")
-	ErrInvalidCampaignID    = errors.New("campaign id is required")
-	ErrInvalidCampaignOwner = errors.New("owner_id is required")
+	ErrEmptyCampaignName     = errors.New("campaign name is required")
+	ErrEmptyCampaignType     = errors.New("campaign type is required")
+	ErrInvalidCampaignID     = errors.New("campaign id is required")
+	ErrInvalidCampaignOwner  = errors.New("owner_id is required")
+	ErrInvalidCampaignStatus = errors.New("invalid campaign status")
 )
+
+// ValidateCampaignStatus rejects values that are not supported by the
+// crm_campaigns status enum.
+func ValidateCampaignStatus(status string) error {
+	switch status {
+	case StatusDraft, StatusScheduled, StatusSent, StatusActive, StatusPaused, StatusCompleted, StatusCancelled:
+		return nil
+	default:
+		return ErrInvalidCampaignStatus
+	}
+}
 
 // ValidateCampaignInput checks that required fields are present on campaign creation.
 func ValidateCampaignInput(input CampaignInput) error {
