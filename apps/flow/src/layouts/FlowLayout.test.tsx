@@ -76,6 +76,10 @@ vi.mock('@voxire/config', () => ({
 
 vi.mock('@voxire/ui', () => ({
   Avatar: ({ alt }: { alt: string }) => <span role="img" aria-label={alt} />,
+  // The real provider writes custom properties to documentElement, which this
+  // test has no opinion about. Rendering the children keeps the shell intact
+  // without asserting on tokens that belong to the package's own suite.
+  AppearanceProvider: ({ children }: React.PropsWithChildren) => <>{children}</>,
 }));
 
 vi.mock('@voxire/caret', () => ({

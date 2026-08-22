@@ -37,7 +37,7 @@ import {
   Radar,
 } from 'lucide-react';
 import { useFeatureFlag, FLAG_KEYS, getAvatarUrl } from '@voxire/config';
-import { Avatar } from '@voxire/ui';
+import { AppearanceProvider, Avatar } from '@voxire/ui';
 import { buildCaretRouteContext, CaretPanel, CaretButton, useCaretStore } from '@voxire/caret';
 import { useClickOutside, useForesightLinks } from '@voxire/utils';
 import { useMemberCapacityHours } from '../shared/hooks/queries/useMemberCapacity';
@@ -45,6 +45,7 @@ import { signOut, useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useUserStore } from '../shared/stores/userStore';
 import { useTranslation } from 'react-i18next';
 import { useThemeStore } from '../shared/stores/themeStore';
+import { useAppearanceStore } from '../shared/stores/appearanceStore';
 import { accentTints, ACCENT_DEFAULT, type ResolvedTheme } from '../shared/lib/colorUtils';
 import { useFlowStore } from '../shared/stores/flowStore';
 import { cn } from '../shared/lib/utils';
@@ -261,6 +262,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     });
   }, [authUser, setUser]);
   const { theme, setTheme } = useThemeStore();
+  // The provider takes the whole preference set, so this reads the store
+  // unselected. Zustand hands back the same object until something is set, and
+  // the provider re-derives from the individual fields, so a render that changes
+  // nothing does not re-write a token.
+  const appearance = useAppearanceStore();
   const {
     workspaces,
     projects,
@@ -615,7 +621,16 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
       : '/logo-dark.png';
 
   return (
-    <>
+    // The single writer of the appearance tokens, mounted here rather than in
+    // main.tsx because the workspace accent it falls back to is resolved here,
+    // from the route params and the workspaces query. Its effect targets
+    // documentElement, so the position in the tree governs when it writes and
+    // never what it reaches; initAppearance in main.tsx covers the window
+    // before this mounts.
+    <AppearanceProvider
+      prefs={appearance}
+      workspaceAccent={activeWorkspace.color || ACCENT_DEFAULT}
+    >
       <div
         className="flex h-[100dvh] min-h-0 flex-col overflow-hidden lg:flex-row"
         style={{ background: 'var(--flow-bg)' }}
@@ -1490,7 +1505,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
         <QuickCreate />
         <BulkEditBar />
       </div>
-    </>
+    </AppearanceProvider>
   );
 };
 
