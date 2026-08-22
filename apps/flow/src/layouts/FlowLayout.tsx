@@ -53,7 +53,6 @@ import QuickCreate from '../shared/components/QuickCreate';
 import BulkEditBar from '../shared/components/BulkEditBar';
 import GateNotice from '../shared/components/GateNotice';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
-import { useWorkspaces } from '../features/workspace-dashboard/useWorkspaces';
 import { useProjects, useCreateProject } from '../features/projects/useProjects';
 import { useMyTasksProject } from '../features/tasks/useMyTasksProject';
 import { isApiWorkspaceId, PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
@@ -283,7 +282,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // IMPORTANT: use React Query data directly for display, never wait for the
   // Zustand store to hydrate, because the store is populated via useEffect which
   // fires *after* render, causing a flash of "No workspace".
-  const { data: apiWorkspaces, isLoading: workspacesLoading } = useWorkspaces();
+  const apiWorkspaces: { id: string; name: string; color: string }[] = [];
+  const workspacesLoading = false;
   const { data: businessName } = useFlowBusinessName();
 
   const PERSONAL_FALLBACK: Workspace = {

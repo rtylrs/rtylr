@@ -443,73 +443,10 @@ export const flowApi = {
     flowResult<DashboardStats>(() =>
       dashboardClient.getFlowDashboard({ workspaceId: workspaceId ?? '' })
     ),
-  // -- Workspaces ---------------------------------------------------------
-
-  getWorkspaces: () =>
-    flowResult<{ workspaces: ApiWorkspace[] }>(() => workspaceClient.listWorkspaces({})),
+  // -- Business ---------------------------------------------------------
 
   getMyBusinesses: () =>
     flowResult<{ businesses: ApiBusinessSummary[] }>(() => businessClient.listMyBusinesses({})),
-
-  createWorkspace: (data: { name: string; color: string; description?: string; icon?: string }) =>
-    flowResult<{ workspace: ApiWorkspace }>(() =>
-      workspaceClient.createWorkspace({
-        name: data.name,
-        description: data.description ?? '-',
-        icon: data.icon ?? 'folder',
-        color: data.color,
-      })
-    ),
-
-  updateWorkspace: (
-    id: string,
-    data: Partial<{ name: string; color: string; description: string; icon: string }>
-  ) =>
-    flowResult<{ message: string }>(() =>
-      workspaceClient.updateWorkspace({
-        id,
-        body: {
-          name: data.name ?? '-',
-          description: data.description ?? '-',
-          icon: data.icon ?? 'folder',
-          color: data.color ?? '#6366f1',
-        },
-      })
-    ),
-
-  deleteWorkspace: (id: string) =>
-    flowResult<{ message: string }>(() => workspaceClient.deleteWorkspace({ id })),
-
-  getWorkspaceMembers: (workspaceId: string) =>
-    flowResult<{ members: ApiWorkspaceMember[] }>(() =>
-      workspaceClient.listWorkspaceMembers({ workspaceId })
-    ),
-
-  addWorkspaceMember: (data: { workspace_id: number; user_id: number; role?: string }) =>
-    flowResult(() =>
-      workspaceClient.addWorkspaceMember({
-        workspaceId: String(data.workspace_id),
-        userId: String(data.user_id),
-        role: data.role ?? 'member',
-      })
-    ),
-
-  removeWorkspaceMember: (data: { workspace_id: number; user_id: number }) =>
-    flowResult(() =>
-      workspaceClient.removeWorkspaceMember({
-        workspaceId: String(data.workspace_id),
-        userId: String(data.user_id),
-      })
-    ),
-
-  updateWorkspaceMemberRole: (data: { workspace_id: number; user_id: number; role: string }) =>
-    flowResult(() =>
-      workspaceClient.updateWorkspaceMemberRole({
-        workspaceId: String(data.workspace_id),
-        userId: String(data.user_id),
-        role: data.role,
-      })
-    ),
 
   // -- Projects -----------------------------------------------------------
 
