@@ -98,12 +98,28 @@
  * allowance never applies in Flow - the type floor is 10px. */
 :root,
 :root[data-theme='dark'] {
-  /* --accent is a fill. This is the same teal used as text or icon stroke,
-   * which light mode has to darken while the fill stays put. */
+  /* --accent-fg and --flow-on-accent are derived per accent by
+   * AppearanceProvider, which writes them inline on documentElement and so
+   * outranks these two declarations whenever it has run. They stay as
+   * pre-hydration fallbacks rather than being deleted, because initAppearance
+   * is deliberately allowed to fail silently: localStorage throws in Safari
+   * private mode, and a half-written entry fails to parse. With no fallback,
+   * every consumer of --accent-fg (chip text, the approved status tone, the
+   * at-capacity bar) would resolve to an invalid value and drop its
+   * declaration. The values below are the brand teal pair, which is exactly
+   * right in that case, because an unwritten --accent falls back to the brand
+   * teal on line 14 too.
+   *
+   * --accent is a fill. --accent-fg is the same teal used as text or icon
+   * stroke, which light mode has to darken while the fill stays put. */
   --accent-fg: #64c5b9;
-  /* Text on any accent fill. Near-black in both modes: white on #64c5b9
-   * measures 2.05:1 and fails AA at every size. */
+  /* Text on any accent fill. Near-black for the teal: white on #64c5b9 measures
+   * 2.05:1 and fails AA at every size. The provider measures both against the
+   * accent in play rather than assuming, because near-black on a dark custom
+   * hex measures as low as 1.30:1. */
   --flow-on-accent: #0a0a0a;
+  /* Not written by the provider, so a non-teal accent still focuses teal. A
+   * pre-existing cohesion defect, not an accessibility one: 9.4:1 on --flow-bg. */
   --flow-focus-ring: rgba(100, 197, 185, 0.9);
 
   /* Only the -fg variants exist on purpose. A separate fill token would need a
@@ -139,6 +155,8 @@
  * where it is declared, so a light-mode capacity bar would otherwise paint
  * the dark tone (#d9a066 instead of #8f5f14). */
 :root[data-theme='light'] {
+  /* The light half of the same pre-hydration fallback pair. Kept for the reason
+   * given in the dark block above. */
   --accent-fg: #1f7d72;
   --flow-on-accent: #0a0a0a;
   --flow-focus-ring: rgba(31, 125, 114, 0.9);
