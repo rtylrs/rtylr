@@ -360,8 +360,10 @@ export const AppearanceSection = (): React.JSX.Element => {
   } = useAppearanceStore();
 
   const prefersDark = useSystemDark();
-  const { activeWorkspaceId } = useFlowStore();
-  const { data: workspaces = [] } = useWorkspaces();
+  // Read from the store rather than a query hook: the workspaces API was stubbed
+  // out when Flow moved to the v2 contracts, so the store is the only remaining
+  // source and it is what FlowLayout resolves the same colour from.
+  const { activeWorkspaceId, workspaces } = useFlowStore();
 
   // The accent the derivation falls back to while `accent` is null, which is
   // what "a personal accent overrides the workspace one" means in practice.
@@ -1248,7 +1250,6 @@ export const TeamSection: React.FC = () => {
 // ── Section content map ───────────────────────────────────────────────────────
 
 const SECTION_CONTENT: Record<string, React.FC> = {
-  
   team: TeamSection,
   notifications: NotificationsSection,
   appearance: AppearanceSection,
