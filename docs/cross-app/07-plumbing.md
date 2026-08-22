@@ -432,3 +432,19 @@ Repeated here because it is the part that gets skipped:
 4. How the cache goes stale, and who invalidates what.
 5. The direction of the new dependency, and its named owner.
 6. Whether the screen now reads more than two foreign domains.
+
+## Round-two addition
+
+The backend halves of these shapes are now specified in
+`17-backend-plumbing.md`, grounded in the platform ports and event substrates
+that actually exist after the round-two sweep. Two corrections to the facts
+this page states:
+
+1. Shape 3's "check what exists first" list said the backend has webhooks and
+   notifications modules. The webhooks module is registration CRUD only: no
+   code anywhere delivers an event to a registered webhook URL
+   (`16-backend-matrix.md`, async backbone). Treat tenant webhooks as absent.
+2. The realtime channel note stands, but wsbus on the backend carries only UI
+   topics; it is not a domain-event bus. A trigger-shaped proposal chooses
+   between an in-process port call (financejournal precedent) and a
+   reconciliation job (`17-backend-plumbing.md` shape B4).
