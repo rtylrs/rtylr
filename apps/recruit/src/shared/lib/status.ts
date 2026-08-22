@@ -1,7 +1,13 @@
 // Application status helpers for the recruit admin panel.
 
 export type ApplicationStatus =
-  'new' | 'reviewing' | 'interview' | 'offer' | 'hired' | 'rejected' | 'withdrawn';
+  | 'new'
+  | 'reviewing'
+  | 'interview'
+  | 'offer'
+  | 'hired'
+  | 'rejected'
+  | 'withdrawn';
 
 const STATUS_ORDER: ApplicationStatus[] = [
   'new',

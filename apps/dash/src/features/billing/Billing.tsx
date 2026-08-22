@@ -179,7 +179,7 @@ const AppPill: React.FC<{ appId: string }> = ({ appId }) => {
   if (!url) return pill;
 
   return (
-    <a href={url as string} target="_blank" rel="noreferrer noopener">
+    <a href={url as string} target="_blank" rel="noopener noreferrer" rel="noreferrer noopener">
       {pill}
     </a>
   );

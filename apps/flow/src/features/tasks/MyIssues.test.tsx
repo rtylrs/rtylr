@@ -27,7 +27,8 @@ vi.mock('./useTasks', () => ({
 
 const myTasksProjectData = vi.hoisted(() => ({
   data: { projectId: '9', workspaceId: '3' } as
-    { projectId: string; workspaceId: string } | undefined,
+    | { projectId: string; workspaceId: string }
+    | undefined,
 }));
 vi.mock('./useMyTasksProject', () => ({
   useMyTasksProject: () => myTasksProjectData,
