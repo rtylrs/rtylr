@@ -24,6 +24,7 @@ import { type Customer } from '../../shared/schemas/customers';
 import { getCustomerTier, thresholdsFromConfig, Tier, tierColor } from '../../shared/lib/tiers';
 import { Button, EmptyState, PageHeader, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge, TagChip } from '../../shared/components/crm';
+import { activateOnKeyboard } from '../../shared/lib/keyboard';
 
 const ACCENT = '#3b82f6';
 
@@ -519,6 +520,14 @@ const Customers: React.FC = () => {
                               background:
                                 isExpanded || isSelected ? 'rgba(59,130,246,0.04)' : 'transparent',
                             }}
+                            onClick={() => setExpandedId(isExpanded ? null : c.id)}
+                            tabIndex={0}
+                            aria-expanded={isExpanded}
+                            onKeyDown={(event) =>
+                              activateOnKeyboard(event, () =>
+                                setExpandedId(isExpanded ? null : c.id)
+                              )
+                            }
                             onMouseEnter={(e) => {
                               if (!isExpanded)
                                 (e.currentTarget as HTMLElement).style.background =
@@ -542,10 +551,7 @@ const Customers: React.FC = () => {
                                 style={{ accentColor: ACCENT, cursor: 'pointer' }}
                               />
                             </td>
-                            <td
-                              style={{ padding: '12px 16px' }}
-                              onClick={() => setExpandedId(isExpanded ? null : c.id)}
-                            >
+                            <td style={{ padding: '12px 16px' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <CustomerAvatar
                                   initials={c.initials}
@@ -637,10 +643,7 @@ const Customers: React.FC = () => {
                             >
                               {c.lastVisit}
                             </td>
-                            <td
-                              style={{ padding: '12px 16px', textAlign: 'right' }}
-                              onClick={() => setExpandedId(isExpanded ? null : c.id)}
-                            >
+                            <td style={{ padding: '12px 16px', textAlign: 'right' }}>
                               {isExpanded ? (
                                 <ChevronUp size={14} style={{ color: ACCENT }} />
                               ) : (
