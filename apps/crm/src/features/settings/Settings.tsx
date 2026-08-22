@@ -523,6 +523,15 @@ const TeamTab: React.FC = () => {
 
 const SettingsScreen: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>('general');
+  const tabRefs = React.useRef<Record<TabId, HTMLButtonElement | null>>({
+    general: null,
+    team: null,
+  });
+
+  const focusTab = (tabId: TabId): void => {
+    setActiveTab(tabId);
+    tabRefs.current[tabId]?.focus();
+  };
 
   return (
     <>
@@ -546,9 +555,31 @@ const SettingsScreen: React.FC = () => {
               <button
                 key={tab.id}
                 type="button"
+                id={`crm-settings-tab-${tab.id}`}
                 role="tab"
                 aria-selected={isActive}
-                onClick={() => setActiveTab(tab.id)}
+                aria-controls="crm-settings-panel"
+                tabIndex={isActive ? 0 : -1}
+                ref={(element) => {
+                  tabRefs.current[tab.id] = element;
+                }}
+                onClick={() => focusTab(tab.id)}
+                onKeyDown={(event) => {
+                  const currentIndex = TABS.findIndex((item) => item.id === tab.id);
+                  const nextIndex =
+                    event.key === 'ArrowRight' || event.key === 'ArrowDown'
+                      ? (currentIndex + 1) % TABS.length
+                      : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+                        ? (currentIndex - 1 + TABS.length) % TABS.length
+                        : event.key === 'Home'
+                          ? 0
+                          : event.key === 'End'
+                            ? TABS.length - 1
+                            : -1;
+                  if (nextIndex < 0) return;
+                  event.preventDefault();
+                  focusTab(TABS[nextIndex].id);
+                }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -576,8 +607,9 @@ const SettingsScreen: React.FC = () => {
 
         <motion.div
           key={activeTab}
+          id="crm-settings-panel"
           role="tabpanel"
-          aria-label={TABS.find((tab) => tab.id === activeTab)?.label}
+          aria-labelledby={`crm-settings-tab-${activeTab}`}
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.15 }}

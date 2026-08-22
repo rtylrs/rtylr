@@ -206,7 +206,15 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
 
   useEffect(() => {
     if (!open) return;
+    setCursor((current) =>
+      filtered.length === 0 ? 0 : Math.min(Math.max(current, 0), filtered.length - 1)
+    );
+  }, [filtered.length, open]);
+
+  useEffect(() => {
+    if (!open) return;
     const handler = (e: KeyboardEvent) => {
+      if (filtered.length === 0) return;
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         setCursor((c) => Math.min(c + 1, filtered.length - 1));
