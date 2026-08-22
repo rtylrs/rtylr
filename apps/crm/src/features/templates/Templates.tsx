@@ -257,6 +257,9 @@ const Templates: React.FC = () => {
             }}
           >
             <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="New template"
               style={{
                 background: 'var(--hub-card)',
                 border: '1px solid var(--hub-border)',

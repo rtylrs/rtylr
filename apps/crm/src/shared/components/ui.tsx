@@ -208,6 +208,7 @@ export const Modal: React.FC<{
   footer?: React.ReactNode;
   size?: 'sm' | 'md' | 'lg';
 }> = ({ open, onClose, title, children, footer, size = 'md' }) => {
+  const titleId = React.useId();
   if (!open) return null;
   const widths = { sm: '380px', md: '520px', lg: '720px' };
   return (
@@ -228,6 +229,9 @@ export const Modal: React.FC<{
         initial={{ opacity: 0, scale: 0.96, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         style={{
           width: '100%',
           maxWidth: widths[size],
@@ -250,7 +254,10 @@ export const Modal: React.FC<{
             borderBottom: '1px solid var(--hub-border)',
           }}
         >
-          <h3 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}>
+          <h3
+            id={titleId}
+            style={{ fontSize: '14px', fontWeight: 600, color: 'var(--hub-text)', margin: 0 }}
+          >
             {title}
           </h3>
           <button

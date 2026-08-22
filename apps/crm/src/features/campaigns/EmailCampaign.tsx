@@ -323,6 +323,9 @@ const EmailCampaign: React.FC = () => {
           >
             <div
               onClick={(event) => event.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Email preview"
               style={{
                 width: '100%',
                 maxWidth: '560px',

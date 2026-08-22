@@ -252,6 +252,9 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -10 }}
             onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Command palette"
             style={{
               width: '100%',
               maxWidth: '560px',
@@ -277,6 +280,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
               <Search size={16} style={{ color: 'var(--hub-text-muted)' }} />
               <input
                 autoFocus
+                aria-label="Search command palette"
                 value={query}
                 onChange={(e) => {
                   setQuery(e.target.value);

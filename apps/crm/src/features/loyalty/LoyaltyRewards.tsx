@@ -74,6 +74,9 @@ const AddRewardModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="New reward"
         style={{
           background: 'var(--hub-card)',
           border: '1px solid var(--hub-border)',

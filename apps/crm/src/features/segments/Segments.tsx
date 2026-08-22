@@ -135,6 +135,9 @@ function RuleBuilder({
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Segment Builder"
         style={{
           background: 'var(--hub-surface)',
           border: '1px solid var(--hub-border)',
