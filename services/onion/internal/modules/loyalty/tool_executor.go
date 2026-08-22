@@ -223,7 +223,6 @@ func parseLoyaltyToolPageLimit(input map[string]any, maxLimit int64) (int64, int
 	return page, limit, nil
 }
 
-
 // loyaltyToolBusinessID resolves the caller's business scope; loyalty reads
 // keyed by user id would leak cross-tenant balances on id collisions.
 func loyaltyToolBusinessID(ctx context.Context) (int64, error) {

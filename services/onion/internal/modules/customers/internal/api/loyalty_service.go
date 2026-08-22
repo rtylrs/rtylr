@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"math"
 	"net/http"
 	"strings"
 
@@ -133,6 +134,14 @@ func (a *LoyaltyAPI) UpdateLoyaltyConfig(ctx context.Context, req *crmloyaltyv1.
 		req.GetGoldDiscountPct() < 0, req.GetPlatinumDiscountPct() < 0:
 		return nil, onekiterrors.New(http.StatusBadRequest, "Loyalty config values must not be negative")
 	}
+	// Thresholds/expiry are stored as INT32: reject values that would wrap
+	// the int64->int32 cast instead of awarding tiers to everyone.
+	for _, v := range []int64{req.GetBronzeMin(), req.GetSilverMin(), req.GetGoldMin(),
+		req.GetPlatinumMin(), req.GetPointsExpiryDays()} {
+		if v < 0 || v > math.MaxInt32 {
+			return nil, onekiterrors.New(http.StatusBadRequest, "Threshold out of range")
+		}
+	}
 
 	input := domain.LoyaltyConfigInput{
 		OwnerID:               ownerID,
@@ -190,6 +199,12 @@ func (a *LoyaltyAPI) CreateLoyaltyTier(ctx context.Context, req *crmloyaltyv1.Cr
 	perks := []byte(req.GetPerks())
 	if len(perks) == 0 {
 		perks = []byte("[]")
+	}
+	if mp := req.GetMinPoints(); mp <= 0 || mp > math.MaxInt32 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "minPoints must be positive")
+	}
+	if so := req.GetSortOrder(); so <= 0 || so > math.MaxInt32 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "sortOrder must be positive")
 	}
 
 	id, svcErr := a.Service.CreateLoyaltyTier(ctx, domain.LoyaltyTierInput{

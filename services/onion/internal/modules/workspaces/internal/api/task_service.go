@@ -104,6 +104,7 @@ func (a *TaskAPI) CreateTask(ctx context.Context, req *flowtaskv1.CreateTaskRequ
 	}
 
 	projectID := req.GetProjectId()
+	personalTask := projectID == 0
 	if projectID == 0 {
 		myTasksID, _, ensureErr := a.Service.EnsureMyTasksProject(ctx, authUser.UserID, businessID, workspaceID)
 		if ensureErr != nil || myTasksID == 0 {
@@ -125,6 +126,11 @@ func (a *TaskAPI) CreateTask(ctx context.Context, req *flowtaskv1.CreateTaskRequ
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid start_date")
 	}
 
+	assigneeID := req.AssigneeId
+	if personalTask && assigneeID == nil {
+		assigneeID = &authUser.UserID
+	}
+
 	input := domain.TaskInput{
 		ProjectID:      projectID,
 		WorkspaceID:    workspaceID,
@@ -134,7 +140,7 @@ func (a *TaskAPI) CreateTask(ctx context.Context, req *flowtaskv1.CreateTaskRequ
 		Title:          req.GetTitle(),
 		Description:    req.GetDescription(),
 		Priority:       req.GetPriority(),
-		AssigneeID:     req.AssigneeId,
+		AssigneeID:     assigneeID,
 		ReporterID:     authUser.UserID,
 		DueDate:        dueDate,
 		StartDate:      startDate,

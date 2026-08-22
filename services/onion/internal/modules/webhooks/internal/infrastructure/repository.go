@@ -20,6 +20,20 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
+
+// WebhookExistsInBusiness reports whether the row exists within the business. The write queries
+// in this module are :exec and cannot report a zero-row match, so writes
+// pre-check existence to avoid silent success on wrong/foreign ids.
+func (r *Repository) WebhookExistsInBusiness(ctx context.Context, businessID, id int64) bool {
+	var exists bool
+	if err := r.db.QueryRowContext(ctx,
+		"SELECT EXISTS(SELECT 1 FROM hub_webhooks WHERE id = ? AND business_id = ?)",
+		id, businessID,
+	).Scan(&exists); err != nil {
+		return false
+	}
+	return exists
+}
 func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Webhook, error) {
 	rows, err := r.queries.ListWebhooks(ctx, businessID)
 	if err != nil {
@@ -57,6 +71,9 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, url,
 }
 
 func (r *Repository) Delete(ctx context.Context, businessID, webhookID int64) error {
+	if !r.WebhookExistsInBusiness(ctx, businessID, webhookID) {
+		return ErrWebhookNotFound
+	}
 	err := r.queries.DeleteWebhook(ctx, sqlc.DeleteWebhookParams{
 		ID:         webhookID,
 		BusinessID: businessID,
