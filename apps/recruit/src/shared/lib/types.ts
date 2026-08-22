@@ -29,12 +29,7 @@ export type TemplateId = 'minimal' | 'editorial' | 'bold';
 // Empty string means "use the template default"; anything else must be
 // a known pairing or the frontend ignores it.
 export type FontPairingId =
-  | ''
-  | 'jakarta-fraunces'
-  | 'space-grotesk-inter'
-  | 'playfair-inter'
-  | 'dmserif-dmsans'
-  | 'default';
+  '' | 'jakarta-fraunces' | 'space-grotesk-inter' | 'playfair-inter' | 'dmserif-dmsans' | 'default';
 
 export interface Customization {
   id: number;
@@ -72,14 +67,7 @@ export interface Customization {
 // fall through to a plain-text renderer so older clients still show
 // something reasonable if a new kind is shipped before they update.
 export type SectionKind =
-  | 'perks'
-  | 'culture'
-  | 'testimonial'
-  | 'video'
-  | 'faq'
-  | 'values'
-  | 'cta'
-  | string;
+  'perks' | 'culture' | 'testimonial' | 'video' | 'faq' | 'values' | 'cta' | string;
 
 export interface Section {
   id: number;
@@ -119,12 +107,7 @@ export interface ValueItem {
 // this, and allowing arbitrary strings on the client would turn into
 // silent "nothing renders" bugs.
 export type FormFieldKind =
-  | 'short_text'
-  | 'long_text'
-  | 'single_select'
-  | 'multi_select'
-  | 'url'
-  | 'boolean';
+  'short_text' | 'long_text' | 'single_select' | 'multi_select' | 'url' | 'boolean';
 
 export interface FormField {
   id: number;

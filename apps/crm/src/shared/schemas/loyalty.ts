@@ -232,10 +232,7 @@ export type LoyaltyReward = z.infer<typeof loyaltyRewardSchema>;
 
 export const LOYALTY_TRANSACTION_TYPES = ['earn', 'redeem', 'upgrade'] as const;
 export type LoyaltyTransactionType =
-  | (typeof LOYALTY_TRANSACTION_TYPES)[number]
-  | 'adjust'
-  | 'expire'
-  | 'award';
+  (typeof LOYALTY_TRANSACTION_TYPES)[number] | 'adjust' | 'expire' | 'award';
 
 // -- Helpers ------------------------------------------------------------------
 
