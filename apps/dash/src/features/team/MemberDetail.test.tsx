@@ -155,6 +155,32 @@ describe('MemberDetail: app-access empty state (permission-gated)', () => {
   });
 });
 
+describe('MemberDetail: last-license save gate', () => {
+  it('disables Save and shows a deactivation hint while no app license is selected', () => {
+    memberState.data = makeMember({ apps: ['erp'] });
+    render(<MemberDetail />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Edit/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'ERP' }));
+
+    expect(screen.getByText('team.memberDetail.licenseRequiredHint')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Save/ })).toBeDisabled();
+  });
+
+  it('re-enables Save and hides the hint once at least one app license is selected', () => {
+    memberState.data = makeMember({ apps: [] });
+    render(<MemberDetail />);
+
+    fireEvent.click(screen.getByRole('button', { name: /Edit/ }));
+    expect(screen.getByRole('button', { name: /Save/ })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'ERP' }));
+
+    expect(screen.queryByText('team.memberDetail.licenseRequiredHint')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Save/ })).toBeEnabled();
+  });
+});
+
 describe('MemberDetail: groups empty state', () => {
   it('shows the illustration, title and an add-to-group call-to-action when the member is in no groups', () => {
     groupsState.data = [];

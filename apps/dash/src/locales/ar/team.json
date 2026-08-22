@@ -71,11 +71,13 @@
     "assignApp": "تعيين تطبيق",
     "notInGroupTitle": "غير موجود في أي مجموعة",
     "notInGroupDescription": "أضف هذا العضو إلى مجموعة لتجميع صلاحيات وصوله إلى التطبيقات.",
-    "addToGroup": "إضافة إلى مجموعة"
+    "addToGroup": "إضافة إلى مجموعة",
+    "licenseRequiredHint": "يجب أن يحتفظ العضو بترخيص تطبيق واحد على الأقل. لإزالة جميع صلاحيات الوصول، قم بإلغاء تنشيط هذا العضو بدلاً من ذلك."
   },
   "inviteUser": {
     "noPosLocationsTitle": "لا توجد مواقع نقاط بيع بعد",
     "noPosLocationsDescription": "أنشئ مواقع في تطبيق نقاط البيع أولاً، ثم عيّن هذا العضو إليها.",
-    "removePosAccess": "إزالة صلاحية نقاط البيع"
+    "removePosAccess": "إزالة صلاحية نقاط البيع",
+    "selectAtLeastOneApp": "اختر تطبيقاً واحداً على الأقل"
   }
 }

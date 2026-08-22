@@ -93,7 +93,6 @@ const InviteUser: React.FC = (): React.JSX.Element => {
   const [authMethod, setAuthMethod] = useState<'invite' | 'manual'>('invite');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [singleGroupId, setSingleGroupId] = useState<string>('');
 
   // Bulk tab state
   const [bulkEmailsRaw, setBulkEmailsRaw] = useState('');
@@ -183,7 +182,6 @@ const InviteUser: React.FC = (): React.JSX.Element => {
         role,
         apps: selectedApps,
         ...(authMethod === 'manual' ? { password } : {}),
-        ...(singleGroupId ? { groupId: Number(singleGroupId) } : {}),
       });
       if (posSelectedSingle) {
         const userId = Number(res.userId || 0);
@@ -584,6 +582,12 @@ const InviteUser: React.FC = (): React.JSX.Element => {
               </div>
               {renderAppSelector(selectedApps, toggleApp)}
 
+              {selectedApps.length === 0 && (
+                <p className="text-[11px]" style={{ color: 'var(--dash-text-muted)' }}>
+                  {t('team.inviteUser.selectAtLeastOneApp')}
+                </p>
+              )}
+
               {posSelectedSingle &&
                 renderLocationSelector(selectedLocations, toggleLocation, role, () =>
                   toggleApp('pos')
@@ -624,9 +628,6 @@ const InviteUser: React.FC = (): React.JSX.Element => {
                 })()}
             </div>
 
-            {/* Group */}
-            {renderGroupSelector(singleGroupId, setSingleGroupId)}
-
             {/* Actions */}
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
@@ -639,7 +640,9 @@ const InviteUser: React.FC = (): React.JSX.Element => {
               </button>
               <button
                 type="submit"
-                disabled={invite.isPending || !email.trim() || !name.trim()}
+                disabled={
+                  invite.isPending || !email.trim() || !name.trim() || selectedApps.length === 0
+                }
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-40"
                 style={{ background: '#4583C4', color: '#fff' }}
               >
@@ -717,6 +720,12 @@ const InviteUser: React.FC = (): React.JSX.Element => {
               </div>
               {renderAppSelector(bulkApps, toggleBulkApp)}
 
+              {bulkApps.length === 0 && (
+                <p className="text-[11px]" style={{ color: 'var(--dash-text-muted)' }}>
+                  {t('team.inviteUser.selectAtLeastOneApp')}
+                </p>
+              )}
+
               {posSelectedBulk &&
                 renderLocationSelector(bulkLocations, toggleBulkLocation, bulkRole, () =>
                   toggleBulkApp('pos')
@@ -738,7 +747,9 @@ const InviteUser: React.FC = (): React.JSX.Element => {
               </button>
               <button
                 type="button"
-                disabled={bulkInvite.isPending || parsedEmails.length === 0}
+                disabled={
+                  bulkInvite.isPending || parsedEmails.length === 0 || bulkApps.length === 0
+                }
                 onClick={submitBulk}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-40"
                 style={{ background: '#4583C4', color: '#fff' }}

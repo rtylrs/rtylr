@@ -271,7 +271,10 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                     <X size={14} />
                     Cancel
                   </Button>
-                  <Button onClick={saveMember} disabled={updateMember.isPending}>
+                  <Button
+                    onClick={saveMember}
+                    disabled={updateMember.isPending || appsDraft.length === 0}
+                  >
                     <Save size={14} />
                     Save
                   </Button>
@@ -343,6 +346,12 @@ const MemberDetail: React.FC = (): React.JSX.Element => {
                 );
               })}
             </div>
+
+            {appsDraft.length === 0 && (
+              <p className="mt-3 text-[11px]" style={{ color: 'var(--dash-text-muted)' }}>
+                {t('team.memberDetail.licenseRequiredHint')}
+              </p>
+            )}
 
             {posSelected && (
               <div className="mt-4 space-y-2">

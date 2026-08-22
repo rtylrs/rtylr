@@ -71,11 +71,13 @@
     "assignApp": "Assigner une application",
     "notInGroupTitle": "N'appartient à aucun groupe",
     "notInGroupDescription": "Ajoutez ce membre à un groupe pour regrouper ses accès aux applications.",
-    "addToGroup": "Ajouter au groupe"
+    "addToGroup": "Ajouter au groupe",
+    "licenseRequiredHint": "Un membre doit conserver au moins une licence d'application. Pour retirer tous les accès, désactivez plutôt ce membre."
   },
   "inviteUser": {
     "noPosLocationsTitle": "Aucun emplacement POS pour l'instant",
     "noPosLocationsDescription": "Créez d'abord des emplacements dans l'application POS, puis assignez-y ce membre.",
-    "removePosAccess": "Retirer l'accès POS"
+    "removePosAccess": "Retirer l'accès POS",
+    "selectAtLeastOneApp": "Sélectionnez au moins une application"
   }
 }

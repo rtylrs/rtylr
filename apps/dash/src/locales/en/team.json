@@ -71,11 +71,13 @@
     "assignApp": "Assign app",
     "notInGroupTitle": "Not in any group",
     "notInGroupDescription": "Add this member to a group to bundle their app access.",
-    "addToGroup": "Add to group"
+    "addToGroup": "Add to group",
+    "licenseRequiredHint": "A member must keep at least one app license. To remove all access, deactivate this member instead."
   },
   "inviteUser": {
     "noPosLocationsTitle": "No POS locations yet",
     "noPosLocationsDescription": "Create locations in the POS app first, then assign this member to them.",
-    "removePosAccess": "Remove POS access"
+    "removePosAccess": "Remove POS access",
+    "selectAtLeastOneApp": "Select at least one app"
   }
 }
