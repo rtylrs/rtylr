@@ -454,24 +454,10 @@
     }
   },
   "profile": {
-    "heading": "Profile",
-    "hrDetails": "HR details",
-    "noRecordTitle": "No HR record linked yet",
-    "noRecordDescription": "Your account isn't linked to a staff record in HR yet. Ask an admin to link it.",
-    "noRecordCta": "Refresh",
-    "role": "Role",
-    "department": "Department",
-    "employmentType": "Employment type",
-    "status": "Status",
-    "startDate": "Started",
-    "email": "Email",
-    "phone": "Phone",
-    "address": "Address",
-    "emergencyContact": "Emergency contact",
-    "bio": "About",
-    "activity": "Flow activity",
-    "hoursLoggedThisWeek": "{{hours}} logged this week",
-    "viewMyDay": "View My day"
+    "back": "Back",
+    "notFound": "Profile not found.",
+    "publicProjects": "Public projects",
+    "noPublicProjects": "No public projects."
   },
   "board": {
     "pageTitle": "Board · rtylr",
@@ -713,5 +699,14 @@
     "emptyTitle": "No projects yet",
     "emptyDescription": "Create your first project to get started.",
     "createFirst": "Create project"
+  },
+  "bin": {
+    "title": "Recycle bin",
+    "archived": "archived",
+    "restore": "Restore {name}",
+    "restored": "Project restored",
+    "purged": "Project permanently deleted",
+    "purgeConfirm": "This permanently deletes {name} and everything inside it. This cannot be undone.",
+    "retention": "Projects stay in the bin for {days} days before automatic deletion."
   }
 }
