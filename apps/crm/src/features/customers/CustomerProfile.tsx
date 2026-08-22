@@ -189,11 +189,7 @@ const CustomerProfile: React.FC = () => {
     if (remove.isPending) return;
     remove.mutate(customer.id, {
       onSuccess: () => {
-        toast.success('Customer deleted');
         navigate({ to: '/customers' });
-      },
-      onError: () => {
-        toast.error('Failed to delete customer');
       },
     });
   };
@@ -201,7 +197,6 @@ const CustomerProfile: React.FC = () => {
   const handleExport = () => {
     exportData.mutate(customer.id, {
       onSuccess: (data) => {
-        toast.success('Customer data exported');
         if (data) {
           const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
           const url = URL.createObjectURL(blob);
@@ -214,7 +209,6 @@ const CustomerProfile: React.FC = () => {
           URL.revokeObjectURL(url);
         }
       },
-      onError: () => toast.error('Failed to export customer data'),
     });
   };
 

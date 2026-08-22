@@ -152,7 +152,7 @@ const Customers: React.FC = () => {
     search: search.trim() || undefined,
     tier: tierFilter === 'All' ? undefined : tierFilter.toLowerCase(),
   });
-  const update = useUpdateCustomer();
+  const update = useUpdateCustomer({ notify: false });
   const { data: loyaltyConfig } = useLoyaltyConfig();
   const thresholds = thresholdsFromConfig(loyaltyConfig);
   const exportFilters = {

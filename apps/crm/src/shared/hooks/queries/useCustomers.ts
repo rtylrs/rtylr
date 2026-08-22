@@ -51,6 +51,10 @@ interface CustomerMutationResponse {
   message?: string;
 }
 
+interface CustomerMutationOptions {
+  notify?: boolean;
+}
+
 interface CustomerWireInput {
   firstName: string;
   lastName: string;
@@ -312,7 +316,9 @@ export const useCreateCustomer = (): UseMutationResult<
   });
 };
 
-export const useUpdateCustomer = (): UseMutationResult<
+export const useUpdateCustomer = ({
+  notify = true,
+}: CustomerMutationOptions = {}): UseMutationResult<
   CustomerMutationResponse,
   unknown,
   UpdateCustomerPayload
@@ -344,10 +350,10 @@ export const useUpdateCustomer = (): UseMutationResult<
     onSuccess: (_data: CustomerMutationResponse, variables: UpdateCustomerPayload): void => {
       void qc.invalidateQueries({ queryKey: ['crm-customers'] });
       void qc.invalidateQueries({ queryKey: ['crm-customer', variables.id] });
-      toast.success(t('crm.customers.updated'));
+      if (notify) toast.success(t('crm.customers.updated'));
     },
     onError: (): void => {
-      toast.error(t('errors.generic'));
+      if (notify) toast.error(t('errors.generic'));
     },
   });
 };
