@@ -74,21 +74,21 @@ message CreateWorkScheduleResponse {
 
 message UpdateWorkScheduleBody {
   /// New name; absent to keep current.
-  name: string? @nullable
+  name: string?
   /// New working days; if provided, replaces all existing days.
   working_days: string[] @min_items(1)
   /// New start time; absent to keep current.
-  start_time: string? @nullable
+  start_time: string?
   /// New end time; absent to keep current.
-  end_time: string? @nullable
+  end_time: string?
   /// New break duration in minutes; absent to keep current.
-  break_minutes: int32? @nullable
+  break_minutes: int32?
   /// New contracted hours per week; absent to keep current.
-  contracted_hours_per_week: float64? @nullable
+  contracted_hours_per_week: float64?
   /// New daily OT threshold; absent to keep current.
-  daily_ot_threshold_minutes: int32? @nullable
+  daily_ot_threshold_minutes: int32?
   /// New weekly OT threshold; absent to keep current.
-  weekly_ot_threshold_minutes: int32? @nullable
+  weekly_ot_threshold_minutes: int32?
 }
 
 message UpdateWorkScheduleRequest {

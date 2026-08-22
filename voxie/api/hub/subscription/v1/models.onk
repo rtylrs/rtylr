@@ -12,9 +12,9 @@ message Subscription {
   included_seat_limit: int32
   included_seat_count: int32
   billable_seat_count: int32
-  grant_expires_at: string? @nullable
-  trial_ends_at: string? @nullable
-  next_billing_date: string? @nullable
+  grant_expires_at: string?
+  trial_ends_at: string?
+  next_billing_date: string?
   paddle_subscription_id: string
 }
 
@@ -27,8 +27,8 @@ message Plan {
   annual_price_per_seat_cents: int32
   trial_days: int32
   tagline: string
-  max_seats: int32? @nullable
-  max_locations: int32? @nullable
+  max_seats: int32?
+  max_locations: int32?
   ai_credits_per_month: int32
   features: string[]
   tier_order: int32
@@ -39,7 +39,7 @@ message Plan {
 
 message BillingLineItem {
   period_start: string
-  period_end: string? @nullable
+  period_end: string?
   seat_count: int32
   included_seat_limit: int32
   included_seat_count: int32
@@ -50,7 +50,7 @@ message BillingLineItem {
   type: string
   description: string
   is_granted: bool
-  grant_expires_at: string? @nullable
+  grant_expires_at: string?
   addon_id: string
   quantity: int32
   unit_price_cents: int32
@@ -58,7 +58,7 @@ message BillingLineItem {
 
 message BillingDetail {
   billing_month: string
-  next_billing_date: string? @nullable
+  next_billing_date: string?
   line_items: BillingLineItem[]
   total_cents: int32
   plan_name: string
@@ -70,8 +70,8 @@ message BillingDetail {
   seat_discount_cents: int32
   status: string
   is_granted: bool
-  grant_expires_at: string? @nullable
-  trial_ends_at: string? @nullable
+  grant_expires_at: string?
+  trial_ends_at: string?
   paddle_subscription_id: string
 }
 

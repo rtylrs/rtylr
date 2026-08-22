@@ -11,7 +11,7 @@ message LocationPayload {
   /// Full street address of the location.
   address: string
   /// IANA timezone identifier (e.g. "America/New_York"); absent if using tenant default.
-  timezone: string? @nullable
+  timezone: string?
   /// Whether this location is currently active and assignable.
   is_active: bool
   /// Unix timestamp when this location was created.
@@ -40,9 +40,9 @@ message CreateLocationRequest {
   /// Full street address of the location.
   address: string
   /// IANA timezone identifier; absent to use tenant default.
-  timezone: string? @nullable
+  timezone: string?
   /// Optional URL-safe slug; auto-generated from name if absent.
-  slug: string? @nullable
+  slug: string?
 }
 
 message CreateLocationResponse {
@@ -53,15 +53,15 @@ message CreateLocationResponse {
 /// UpdateLocationBody carries updatable location fields bound from the HTTP payload.
 message UpdateLocationBody {
   /// New name; absent to keep current.
-  name: string? @nullable
+  name: string?
   /// New address; absent to keep current.
-  address: string? @nullable
+  address: string?
   /// New timezone; absent to keep current.
-  timezone: string? @nullable
+  timezone: string?
   /// New active status; absent to keep current.
-  is_active: bool? @nullable
+  is_active: bool?
   /// New slug; absent to keep current.
-  slug: string? @nullable
+  slug: string?
 }
 
 message UpdateLocationRequest {

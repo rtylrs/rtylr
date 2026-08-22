@@ -17,7 +17,7 @@ message DashboardTask {
   /// priority is the priority value for this contract.
   priority: string
   /// due_date is the due date value for this contract.
-  due_date: string? @nullable
+  due_date: string?
   /// project_name is the denormalised project display name.
   project_name: string
   /// project_color is the project color hex for inline badges.

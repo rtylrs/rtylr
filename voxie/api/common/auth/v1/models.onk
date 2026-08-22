@@ -8,9 +8,9 @@ message RegisterRequest {
   /// name is the name value for this contract.
   name: string @required
   /// business_name is the optional business name to create for the user.
-  business_name: string? @nullable
+  business_name: string?
   /// plan_slug optionally selects the subscription plan to assign after registration.
-  plan_slug: string? @nullable
+  plan_slug: string?
 }
 
 message RegisterResponse {
@@ -50,7 +50,7 @@ message LoginResponse {
 
 message GoogleAuthRequest {
   /// business_name is the optional business name to create for the user.
-  business_name: string? @nullable
+  business_name: string?
   /// code is the OAuth authorization code returned by the provider callback.
   code: string @required
 }

@@ -1,0 +1,45 @@
+package finance.compat.v1
+
+message EmptyRequest {}
+
+message JsonResponse {
+  data: json @unwrap
+}
+
+message PageRequest {
+  id: string? @query("id")
+  page: int32? @query("page")
+  page_size: int32? @query("page_size")
+  limit: int32? @query("limit")
+  offset: int32? @query("offset")
+  status: string? @query("status")
+  category: string? @query("category")
+  start: string? @query("start")
+  end: string? @query("end")
+}
+
+message IdQueryRequest {
+  id: string? @query("id")
+}
+
+message ReportRequest {
+  period: string? @query("period")
+  date: string? @query("date")
+}
+
+message BodyRequest {
+  body: json
+}
+
+message PathRequest {
+  id: string
+}
+
+message PathBodyRequest {
+  id: string
+  body: json
+}
+
+message BankFeedRequest {
+  account_id: string? @query("account_id")
+}

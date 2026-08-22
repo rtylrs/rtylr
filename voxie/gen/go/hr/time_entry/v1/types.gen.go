@@ -1154,3 +1154,140 @@ func (x *ApproveTimesheetResponse) GetSuccess() bool {
 	}
 	return x.Success
 }
+
+type MarkTimeEntriesInvoicedRequest struct {
+	Id   int64                        `json:"id,omitempty"`
+	Body *MarkTimeEntriesInvoicedBody `json:"body,omitempty"`
+}
+
+func (m *MarkTimeEntriesInvoicedRequest) MarshalJSON() ([]byte, error) {
+	type alias MarkTimeEntriesInvoicedRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	return json.Marshal(aux)
+}
+
+func (m *MarkTimeEntriesInvoicedRequest) UnmarshalJSON(data []byte) error {
+	type alias MarkTimeEntriesInvoicedRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	return nil
+}
+
+func (x *MarkTimeEntriesInvoicedRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+func (x *MarkTimeEntriesInvoicedRequest) GetBody() *MarkTimeEntriesInvoicedBody {
+	if x == nil {
+		var zero *MarkTimeEntriesInvoicedBody
+		return zero
+	}
+	return x.Body
+}
+
+type MarkTimeEntriesInvoicedBody struct {
+	EntryIds  []int64 `json:"entry_ids,omitempty"`
+	InvoiceId int64   `json:"invoice_id,omitempty"`
+}
+
+func (m *MarkTimeEntriesInvoicedBody) MarshalJSON() ([]byte, error) {
+	type alias MarkTimeEntriesInvoicedBody
+	aux := struct {
+		*alias
+		InvoiceId string   `json:"invoice_id,omitempty"`
+		EntryIds  []string `json:"entry_ids,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.InvoiceId = strconv.FormatInt(m.InvoiceId, 10)
+	aux.EntryIds = make([]string, len(m.EntryIds))
+	for i, v := range m.EntryIds {
+		aux.EntryIds[i] = strconv.FormatInt(v, 10)
+	}
+	return json.Marshal(aux)
+}
+
+func (m *MarkTimeEntriesInvoicedBody) UnmarshalJSON(data []byte) error {
+	type alias MarkTimeEntriesInvoicedBody
+	aux := struct {
+		*alias
+		InvoiceId string   `json:"invoice_id,omitempty"`
+		EntryIds  []string `json:"entry_ids,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.InvoiceId != "" {
+		v, err := strconv.ParseInt(aux.InvoiceId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.InvoiceId = v
+	}
+	if aux.EntryIds != nil {
+		m.EntryIds = make([]int64, len(aux.EntryIds))
+		for i, s := range aux.EntryIds {
+			v, err := strconv.ParseInt(s, 10, 64)
+			if err != nil {
+				return err
+			}
+			m.EntryIds[i] = v
+		}
+	}
+	return nil
+}
+
+func (x *MarkTimeEntriesInvoicedBody) GetEntryIds() []int64 {
+	if x == nil {
+		var zero []int64
+		return zero
+	}
+	return x.EntryIds
+}
+
+func (x *MarkTimeEntriesInvoicedBody) GetInvoiceId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.InvoiceId
+}
+
+type MarkTimeEntriesInvoicedResponse struct {
+	MarkedCount  int32 `json:"marked_count,omitempty"`
+	SkippedCount int32 `json:"skipped_count,omitempty"`
+}
+
+func (x *MarkTimeEntriesInvoicedResponse) GetMarkedCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.MarkedCount
+}
+
+func (x *MarkTimeEntriesInvoicedResponse) GetSkippedCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.SkippedCount
+}

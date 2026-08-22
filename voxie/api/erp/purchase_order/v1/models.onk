@@ -20,8 +20,8 @@ message PurchaseOrder {
   subtotal: float64
   tax_amount: float64
   total: float64
-  expected_delivery: string? @nullable
-  received_at: string? @nullable
+  expected_delivery: string?
+  received_at: string?
   notes: string
   created_by: int64
   /// When the record was created.

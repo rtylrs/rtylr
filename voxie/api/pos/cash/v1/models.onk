@@ -5,13 +5,13 @@ message CashMovement {
   id: int64
   business_id: int64
   branch_id: int64
-  terminal_id: int64? @nullable
+  terminal_id: int64?
   session_id: int64
   employee_id: int64
   type: string
   amount: float64
-  reason: string? @nullable
-  approved_by: int64? @nullable
+  reason: string?
+  approved_by: int64?
   /// created_at is when the record was created.
   created_at: string
 }

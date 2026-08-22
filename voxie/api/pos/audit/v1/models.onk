@@ -5,13 +5,13 @@ message AuditLog {
   id: int64
   business_id: int64
   branch_id: int64
-  terminal_id: int64? @nullable
+  terminal_id: int64?
   employee_id: int64
   action: string
   entity_type: string
-  entity_id: int64? @nullable
-  details: string? @nullable
-  ip_address: string? @nullable
+  entity_id: int64?
+  details: string?
+  ip_address: string?
   /// created_at is when the record was created.
   created_at: string
 }

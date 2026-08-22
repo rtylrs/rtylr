@@ -13,7 +13,7 @@ message RecurringInvoice {
   /// The next generation date.
   next_invoice_date: string
   /// When recurring generation should stop; absent when open-ended.
-  end_date: string? @nullable
+  end_date: string?
   is_active: bool
   /// When the record was created.
   created_at: string
@@ -27,9 +27,9 @@ message CreateRecurringInvoiceRequest {
   /// The next generation date, formatted as YYYY-MM-DD.
   next_invoice_date: string @required @pattern("^\\d{4}-\\d{2}-\\d{2}$")
   /// When recurring generation should stop; absent when open-ended.
-  end_date: string? @nullable
+  end_date: string?
   /// Whether the recurring invoice should start active.
-  is_active: bool? @nullable
+  is_active: bool?
 }
 
 message CreateRecurringInvoiceResponse {
@@ -82,15 +82,15 @@ message ResumeRecurringInvoiceResponse {
 
 message UpdateRecurringInvoiceBody {
   /// The invoice used as the recurring invoice template.
-  template_invoice_id: int64? @nullable
+  template_invoice_id: int64?
   /// How often the recurring invoice should be generated.
   frequency: string @required
   /// The next generation date, formatted as YYYY-MM-DD.
   next_invoice_date: string @required @pattern("^\\d{4}-\\d{2}-\\d{2}$")
   /// When recurring generation should stop; absent when open-ended.
-  end_date: string? @nullable
+  end_date: string?
   /// Whether the recurring invoice is active.
-  is_active: bool? @nullable
+  is_active: bool?
 }
 
 message UpdateRecurringInvoiceRequest {

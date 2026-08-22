@@ -9,7 +9,7 @@ message Segment {
   /// JSON filter definition for this segment.
   filters: string
   customer_count: int64
-  last_calculated_at: string? @nullable
+  last_calculated_at: string?
   created_at: string
   updated_at: string
 }

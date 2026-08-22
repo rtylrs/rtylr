@@ -8,7 +8,7 @@ message Customer {
   last_name: string
   email: string
   phone: string
-  date_of_birth: string? @nullable
+  date_of_birth: string?
   gender: string
   address: string
   city: string
@@ -16,7 +16,7 @@ message Customer {
   loyalty_points: int64
   total_spent: float64
   visit_count: int64
-  last_visit_at: string? @nullable
+  last_visit_at: string?
   loyalty_tier: string
   tags: string[]
   notes: string
@@ -96,7 +96,7 @@ message UpdateCustomerBody {
   tags: string[]
   notes: string
   consent: map[string, bool]
-  is_active: bool? @nullable
+  is_active: bool?
 }
 
 message UpdateCustomerRequest {

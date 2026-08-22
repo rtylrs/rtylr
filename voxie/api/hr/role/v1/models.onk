@@ -48,7 +48,7 @@ message CreateRoleResponse {
 
 message UpdateRoleBody {
   /// New name; absent to keep current.
-  name: string? @nullable
+  name: string?
   /// New permission set; if provided, replaces all existing permissions.
   permissions: PermissionPayload[] @min_items(1)
 }

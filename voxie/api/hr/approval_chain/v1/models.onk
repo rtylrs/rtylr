@@ -13,13 +13,13 @@ message ApprovalChainLevelPayload {
   /// Type of approver (direct_manager | dept_head | hr_admin | role | specific_person).
   approver_type: string
   /// Role that can approve at this level; absent unless approver_type is role.
-  approver_role_id: int64? @nullable
+  approver_role_id: int64?
   /// Specific employee who approves; absent unless approver_type is specific_person.
-  approver_employee_id: int64? @nullable
+  approver_employee_id: int64?
   /// Minimum value that triggers this level; absent if no lower bound.
-  threshold_min_value: float64? @nullable
+  threshold_min_value: float64?
   /// Maximum value that triggers this level; absent if no upper bound.
-  threshold_max_value: float64? @nullable
+  threshold_max_value: float64?
   /// Days before the level times out and the timeout_action fires.
   timeout_days: int32
   /// What happens on timeout (escalate | auto_approve | do_nothing).

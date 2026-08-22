@@ -13,7 +13,7 @@ message EmployeePayload {
   /// Work location the employee reports to.
   location_id: int64
   /// Direct manager; absent if top-level.
-  manager_id: int64? @nullable
+  manager_id: int64?
   /// Employment arrangement (full_time | part_time | freelancer).
   contract_type: string
   /// Current employment status (active | probation | inactive | terminated).
@@ -21,17 +21,17 @@ message EmployeePayload {
   /// Date the employee was hired (ISO-8601 format).
   hire_date: string
   /// End of probation period; absent if no probation (ISO-8601 format).
-  probation_end_date: string? @nullable
+  probation_end_date: string?
   /// Date employment was terminated; absent if still employed (ISO-8601 format).
-  termination_date: string? @nullable
+  termination_date: string?
   /// Pay rate per hour for hourly employees; absent if salaried only.
-  hourly_rate: float64? @nullable
+  hourly_rate: float64?
   /// Monthly gross salary; absent if hourly only.
-  monthly_salary: float64? @nullable
+  monthly_salary: float64?
   /// ISO-4217 currency code for compensation (e.g. "USD").
   currency: string
   /// Assigned work schedule; absent if using department default.
-  work_schedule_id: int64? @nullable
+  work_schedule_id: int64?
   /// How the employee account was created (hr_created | invite_link).
   account_creation_mode: string
   /// Employee's job title or position name.
@@ -106,11 +106,11 @@ message AcceptInviteResponse {
 
 message ListEmployeesRequest {
   /// Filter by department; absent to include all departments.
-  department_id: int64? @query("department_id") @nullable
+  department_id: int64? @query("department_id")
   /// Filter by location; absent to include all locations.
-  location_id: int64? @query("location_id") @nullable
+  location_id: int64? @query("location_id")
   /// Filter by employment status; absent to include all statuses.
-  status: string? @query("status") @nullable
+  status: string? @query("status")
   /// Maximum number of records to return.
   limit: int32 @query("limit")
   /// Number of records to skip for pagination.

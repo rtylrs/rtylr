@@ -1,0 +1,33 @@
+package recruit.compat.v1
+
+/// Typed compatibility surface for the deployed Recruit routes.
+service CompatibilityService {
+  base_path: "/recruit"
+
+  listCareers(EmptyRequest) -> JsonResponse @get("/careers")
+  createCareer(BodyRequest) -> JsonResponse @post("/careers") @body("body")
+  updateCareer(BodyRequest) -> JsonResponse @put("/careers") @body("body")
+  deleteCareer(IdQueryRequest) -> JsonResponse @delete("/careers")
+
+  getCustomization(EmptyRequest) -> JsonResponse @get("/customization")
+  updateCustomization(BodyRequest) -> JsonResponse @put("/customization") @body("body")
+  listSubmissions(QueryRequest) -> JsonResponse @get("/submissions")
+  updateSubmissionStatus(BodyRequest) -> JsonResponse @put("/submissions/status") @body("body")
+  getResumeURL(QueryRequest) -> JsonResponse @get("/submissions/resume-url")
+
+  listSections(EmptyRequest) -> JsonResponse @get("/sections")
+  createSection(BodyRequest) -> JsonResponse @post("/sections") @body("body")
+  updateSection(BodyRequest) -> JsonResponse @put("/sections") @body("body")
+  deleteSection(IdQueryRequest) -> JsonResponse @delete("/sections")
+  reorderSections(BodyRequest) -> JsonResponse @put("/sections/reorder") @body("body")
+
+  listFormFields(QueryRequest) -> JsonResponse @get("/form-fields")
+  createFormField(BodyRequest) -> JsonResponse @post("/form-fields") @body("body")
+  updateFormField(BodyRequest) -> JsonResponse @put("/form-fields") @body("body")
+  deleteFormField(IdQueryRequest) -> JsonResponse @delete("/form-fields")
+
+  listPublicCareers(QueryRequest) -> JsonResponse @get("/public/careers")
+  getPublicCareer(QueryRequest) -> JsonResponse @get("/public/career")
+  submitApplication(BodyRequest) -> JsonResponse @post("/public/apply") @body("body")
+  requestResumeUploadURL(BodyRequest) -> JsonResponse @post("/public/resume-upload-url") @body("body")
+}
