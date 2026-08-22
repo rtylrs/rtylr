@@ -148,6 +148,8 @@ type Repository interface {
 	OpenPeriod(ctx context.Context, subscriptionID, ownerID int64, seatCount, pricePerSeatCents int, periodStart, billingMonth time.Time) error
 	UpdateSeatCount(ctx context.Context, ownerID int64, seatCount int) error
 	GetBillingHistory(ctx context.Context, ownerID int64, limit int) ([]BillingHistoryMonth, error)
-	UpdatePaddleSubscription(ctx context.Context, ownerID int64, paddleSubID, paddleCustID, status string) error
+	UpdatePaddleSubscription(ctx context.Context, ownerID int64, paddleSubID, paddleCustID, status string) (bool, error)
+	RecordPaddleEvent(ctx context.Context, eventID, paddleSubID string, occurredAt time.Time) (bool, error)
+	LastPaddleEventAt(ctx context.Context, paddleSubID string) (time.Time, bool, error)
 	GetOwnerIDByPaddleSubscription(ctx context.Context, paddleSubID string) (int64, error)
 }

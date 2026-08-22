@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/infrastructure"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/logger"
 	paddlePkg "github.com/voxire/onion/internal/platform/paddle"
 )
 
@@ -394,9 +395,32 @@ func (s *Service) CreateCheckout(ctx context.Context, ownerID int64, planSlug, o
 }
 
 // HandlePaddleWebhook processes a verified Paddle webhook event.
-// It updates the subscription record based on the event type.
-func (s *Service) HandlePaddleWebhook(ctx context.Context, _ paddlePkg.WebhookEvent, data paddlePkg.SubscriptionData) error {
-	// Map Paddle subscription ID → owner ID
+//
+// Delivery is at-least-once and possibly out of order, so the handler first
+// dedupes on event_id and rejects events older than the newest already
+// applied for the subscription; a stale retried "active" must never undo a
+// later cancellation (#755). Unknown statuses leave the row untouched rather
+// than silently re-activating it.
+func (s *Service) HandlePaddleWebhook(ctx context.Context, event paddlePkg.WebhookEvent, data paddlePkg.SubscriptionData) error {
+	isNew, err := s.repo.RecordPaddleEvent(ctx, event.EventID, data.ID, event.OccurredAt)
+	if err != nil {
+		return fmt.Errorf("record paddle event %s: %w", event.EventID, err)
+	}
+	if !isNew {
+		logger.Ctx(ctx).Info("duplicate paddle webhook ignored",
+			logger.String("event_id", event.EventID),
+			logger.String("event_type", event.EventType))
+		return nil
+	}
+
+	if last, exists, lerr := s.repo.LastPaddleEventAt(ctx, data.ID); lerr == nil && exists && event.OccurredAt.Before(last) {
+		logger.Ctx(ctx).Warn("out-of-order paddle webhook ignored",
+			logger.String("event_id", event.EventID),
+			logger.Any("occurred_at", event.OccurredAt),
+			logger.Any("last_applied", last))
+		return nil
+	}
+
 	ownerID, err := s.repo.GetOwnerIDByPaddleSubscription(ctx, data.ID)
 	if err != nil {
 		// Subscription might not exist yet (first webhook before our DB is updated)
@@ -410,20 +434,43 @@ func (s *Service) HandlePaddleWebhook(ctx context.Context, _ paddlePkg.WebhookEv
 		}
 	}
 
-	// Map Paddle status to our status
-	status := "active"
-	switch data.Status {
-	case "canceled":
-		status = "cancelled"
-	case "paused":
-		status = "cancelled"
-	case "trialing":
-		status = "trial"
+	status, ok := mapPaddleStatus(data.Status)
+	if !ok {
+		logger.Ctx(ctx).Warn("unknown paddle subscription status ignored",
+			logger.String("status", data.Status),
+			logger.String("event_id", event.EventID))
+		return nil
 	}
 
-	if err := s.repo.UpdatePaddleSubscription(ctx, ownerID, data.ID, data.CustomerID, status); err != nil {
+	updated, err := s.repo.UpdatePaddleSubscription(ctx, ownerID, data.ID, data.CustomerID, status)
+	if err != nil {
 		return err
+	}
+	if !updated {
+		// Row not there yet — fail so Paddle retries after normal signup flow
+		// creates it, instead of silently leaving a paying customer locked out.
+		return fmt.Errorf("no subscription row for owner %d yet; retry after local creation", ownerID)
 	}
 	invalidateSubscriptionScope(ctx, ownerID)
 	return nil
+}
+
+// mapPaddleStatus translates Paddle subscription states. The second return is
+// false for unrecognized statuses, which callers must not map to a default.
+func mapPaddleStatus(paddleStatus string) (string, bool) {
+	switch paddleStatus {
+	case "active":
+		return "active", true
+	case "trialing":
+		return "trial", true
+	case "past_due":
+		// Dunning: keep the state visible instead of granting full access.
+		return "past_due", true
+	case "canceled", "paused":
+		return "cancelled", true
+	case "expired":
+		return "expired", true
+	default:
+		return "", false
+	}
 }

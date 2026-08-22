@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
 	"strconv"
 	"time"
@@ -572,8 +573,11 @@ func decimalStringToCents(value string) int {
 
 // ── Paddle ─────────────────────────────────────────────────────────────────────
 
-func (r *Repository) UpdatePaddleSubscription(ctx context.Context, ownerID int64, paddleSubID, paddleCustID, status string) error {
-	return r.queries.UpdatePaddleSubscription(ctx, sqlc.UpdatePaddleSubscriptionParams{
+// UpdatePaddleSubscription reports whether a row matched: the first webhook
+// for an account can arrive before the lazily-created subscription row does,
+// and a silently-dropped update leaves a paying customer on free access (#755).
+func (r *Repository) UpdatePaddleSubscription(ctx context.Context, ownerID int64, paddleSubID, paddleCustID, status string) (bool, error) {
+	res, err := r.queries.UpdatePaddleSubscription(ctx, sqlc.UpdatePaddleSubscriptionParams{
 		PaddleSubscriptionID: sql.NullString{String: paddleSubID, Valid: paddleSubID != ""},
 		PaddleCustomerID:     sql.NullString{String: paddleCustID, Valid: paddleCustID != ""},
 		Status: sqlc.NullSubscriptionsStatus{
@@ -582,6 +586,67 @@ func (r *Repository) UpdatePaddleSubscription(ctx context.Context, ownerID int64
 		},
 		OwnerID: ownerID,
 	})
+	if err != nil {
+		return false, err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	return n > 0, nil
+}
+
+// RecordPaddleEvent inserts the event id into the dedupe ledger and reports
+// whether it was new. Duplicate deliveries return false so handlers can ack
+// without re-applying a transition.
+func (r *Repository) RecordPaddleEvent(ctx context.Context, eventID, paddleSubID string, occurredAt time.Time) (bool, error) {
+	res, err := r.queries.InsertPaddleEventIfNew(ctx, sqlc.InsertPaddleEventIfNewParams{
+		EventID:              eventID,
+		PaddleSubscriptionID: paddleSubID,
+		OccurredAt:           occurredAt,
+	})
+	if err != nil {
+		return false, err
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	return n > 0, nil
+}
+
+// LastPaddleEventAt returns the newest event time already applied for the
+// subscription, for out-of-order delivery rejection. The MAX() aggregate is
+// scanned as interface{} by sqlc; the driver yields time.Time under
+// parseTime DSNs, with string/[]byte fallbacks for other configurations.
+func (r *Repository) LastPaddleEventAt(ctx context.Context, paddleSubID string) (time.Time, bool, error) {
+	raw, err := r.queries.MaxPaddleEventOccurredAt(ctx, paddleSubID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return time.Time{}, false, nil
+		}
+		return time.Time{}, false, err
+	}
+	switch v := raw.(type) {
+	case nil:
+		return time.Time{}, false, nil
+	case time.Time:
+		return v, true, nil
+	case []byte:
+		parsed, perr := time.Parse("2006-01-02 15:04:05", string(v))
+		if perr != nil {
+			return time.Time{}, false, perr
+		}
+		return parsed, true, nil
+	case string:
+		parsed, perr := time.Parse("2006-01-02 15:04:05", v)
+		if perr != nil {
+			return time.Time{}, false, perr
+		}
+		return parsed, true, nil
+	default:
+		return time.Time{}, false, fmt.Errorf("unexpected paddle event timestamp type %T", raw)
+	}
 }
 
 func (r *Repository) GetOwnerIDByPaddleSubscription(ctx context.Context, paddleSubID string) (int64, error) {
