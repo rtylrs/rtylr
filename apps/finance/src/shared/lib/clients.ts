@@ -174,8 +174,7 @@ export const financeCompatibilityClient = {
   // actually registers as literal handlers, which is verifiable:
   // /finance/expense-categories, /finance/quotes/{id} and /finance/bank-feeds
   // are all in onion's route table.
-  //
-  // triggerRecurringInvoice is the exception and is called out below.
+
   updateExpenseCategory: (req: { id: string; body?: unknown }) =>
     unwrap(safe.put<unknown>('/finance/expense-categories', { id: req.id, ...(req.body ?? {}) })),
 
@@ -190,13 +189,6 @@ export const financeCompatibilityClient = {
   listBankFeeds: (req?: Record<string, unknown>) =>
     unwrap(safe.get<unknown>('/finance/bank-feeds', { params: req ?? {} })),
 
-  // No route serves this. onion has no /finance/recurring-invoices/.../trigger
-  // handler and recurring_invoice/v1 declares only pause and resume, so this
-  // call 404s. Kept rather than deleted because removing it means deciding what
-  // the button should become, which is a UI change and not this fix's job.
-  // Tracked in #910.
-  triggerRecurringInvoice: (req: { id: string }) =>
-    unwrap(safe.post<unknown>(`/finance/recurring-invoices/${req.id}/trigger`, {})),
 };
 
 export const listCrmCustomers = () => oneKitResult(() => crmCustomerClient.listCustomers({}));
