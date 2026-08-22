@@ -660,13 +660,17 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	//   user:<id>        → caller must be that user
 	//   owner:<id>       → caller must own or belong to that owner account
 	//   business:<id>    → caller must belong to that business
-//   workspace:<id>   → caller must belong to the workspace
+	//   workspace:<id>   → caller must belong to the workspace
 	//   project:<id>     → caller must be a project or workspace member
 	//   task:<id>        → caller must be able to access the task's project
 	//
 	// Unknown topic schemes are denied by default.
 	workspacesSvc := modules.Workspaces.Service()
 	teamSvc := modules.Team.Service()
+	// Employment-driven access revocation (#834): when hr_core terminates an
+	// employee, team (the entitlement owner) drops that user's permission rows
+	// for the business. team's daily reconciliation job is the durability net.
+	modules.HRCore.SetTerminationRevoker(teamSvc)
 	hubResolver := team.NewHubProfileResolver(modules.Team.Service())
 	wsbus.SetDefault(ctx, wsbus.New(func(ctx context.Context, userID int64, topic string) bool {
 		scope, id, ok := wsbus.ParseTopic(topic)
