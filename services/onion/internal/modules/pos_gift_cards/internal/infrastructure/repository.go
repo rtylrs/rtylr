@@ -59,6 +59,14 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.GiftC
 }
 
 func (r *Repository) Create(ctx context.Context, businessID int64, input domain.GiftCardInput) (int64, error) {
+	return r.create(ctx, businessID, 0, input)
+}
+
+func (r *Repository) CreateForOwner(ctx context.Context, businessID, ownerID int64, input domain.GiftCardInput) (int64, error) {
+	return r.create(ctx, businessID, ownerID, input)
+}
+
+func (r *Repository) create(ctx context.Context, businessID, ownerID int64, input domain.GiftCardInput) (int64, error) {
 	var expiresAt sql.NullTime
 	if input.ExpiresAt != "" {
 		t, err := time.Parse("2006-01-02", input.ExpiresAt)
@@ -86,7 +94,7 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 	}
 
 	result, err := r.queries.WithTx(tx).CreateGiftCard(ctx, sqlc.CreateGiftCardParams{
-		OwnerID:        0,
+		OwnerID:        ownerID,
 		BusinessID:     businessID,
 		CustomerID:     nullableInt64Value(customerID),
 		Code:           input.Code,

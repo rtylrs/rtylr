@@ -20,6 +20,7 @@ const (
 type repository interface {
 	List(ctx context.Context, businessID int64) ([]domain.GiftCard, error)
 	Create(ctx context.Context, businessID int64, input domain.GiftCardInput) (int64, error)
+	CreateForOwner(ctx context.Context, businessID, ownerID int64, input domain.GiftCardInput) (int64, error)
 	GetByCode(ctx context.Context, businessID int64, code string) (*domain.GiftCard, error)
 	Redeem(ctx context.Context, businessID int64, input domain.RedeemInput) (*domain.GiftCard, error)
 }
@@ -53,6 +54,18 @@ func (s *Service) Create(ctx context.Context, businessID int64, input domain.Gif
 		return 0, err
 	}
 	id, err := s.repo.Create(ctx, businessID, input)
+	if err != nil {
+		return 0, err
+	}
+	invalidatePosGiftCardsScope(ctx, businessID)
+	return id, nil
+}
+
+func (s *Service) CreateForOwner(ctx context.Context, businessID, ownerID int64, input domain.GiftCardInput) (int64, error) {
+	if err := domain.ValidateGiftCardInput(input); err != nil {
+		return 0, err
+	}
+	id, err := s.repo.CreateForOwner(ctx, businessID, ownerID, input)
 	if err != nil {
 		return 0, err
 	}
