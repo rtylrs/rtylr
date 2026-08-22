@@ -25,7 +25,6 @@ import {
   type Campaign as CampaignPayload,
 } from '../../shared/schemas/campaigns';
 import { ConfirmModal } from '../../shared/components/ui';
-import { activateOnKeyboard } from '../../shared/lib/keyboard';
 
 const ACCENT = '#3b82f6';
 
@@ -194,9 +193,6 @@ function CampaignCard({
       exit={{ opacity: 0, scale: 0.97 }}
       transition={{ delay: index * 0.05, duration: 0.2 }}
       onClick={onClick}
-      role={onClick ? 'button' : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (event) => activateOnKeyboard(event, onClick) : undefined}
       style={{
         background: 'var(--hub-card)',
         border: '1px solid var(--hub-border)',
@@ -305,6 +301,27 @@ function CampaignCard({
           Updated {campaign.updatedAt}
         </span>
         <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
+          {onClick && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClick();
+              }}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '7px',
+                fontSize: '12px',
+                fontWeight: 500,
+                background: 'transparent',
+                color: 'var(--hub-text-muted)',
+                border: '1px solid var(--hub-border)',
+                cursor: 'pointer',
+              }}
+            >
+              View details
+            </button>
+          )}
           {campaign.status === 'Draft' && (
             <button
               type="button"

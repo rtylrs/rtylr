@@ -15,7 +15,6 @@ import {
   SkeletonList,
   ConfirmModal,
 } from '../../shared/components/ui';
-import { activateOnKeyboard } from '../../shared/lib/keyboard';
 
 const Automations: React.FC = () => {
   const navigate = useNavigate();
@@ -105,13 +104,6 @@ const Automations: React.FC = () => {
                 <div
                   key={a.id}
                   onClick={() => navigate({ to: '/automations/new', search: { id: a.id } })}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(event) =>
-                    activateOnKeyboard(event, () =>
-                      navigate({ to: '/automations/new', search: { id: a.id } })
-                    )
-                  }
                   style={{
                     background: 'var(--hub-card)',
                     border: '1px solid var(--hub-border)',
@@ -296,6 +288,27 @@ const Automations: React.FC = () => {
                       </div>
                       <div style={{ color: 'var(--hub-text)', fontWeight: 600 }}>{a.completed}</div>
                     </div>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'auto' }}>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate({ to: '/automations/new', search: { id: a.id } });
+                      }}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '7px',
+                        border: '1px solid var(--hub-border)',
+                        background: 'transparent',
+                        color: 'var(--hub-text-muted)',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Edit automation
+                    </button>
                   </div>
                 </div>
               );
