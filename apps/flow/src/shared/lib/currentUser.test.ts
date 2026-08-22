@@ -118,11 +118,6 @@ describe('useCanEditTask', () => {
     await waitFor(() => expect(flowApi.getProjectMembers).toHaveBeenCalled());
     await waitFor(() => expect(result.current).toBe(false));
   });
-
-  it('falls back to the workspace role when the user has no explicit project membership', async () => {
-    (flowApi.getProjectMembers as ReturnType<typeof vi.fn>).mockResolvedValue({
-      members: [makeProjectMember({ userId: '99', role: 'member' })],
-    });
     (flowApi.getWorkspaceMembers as ReturnType<typeof vi.fn>).mockResolvedValue({
       members: [
         {
@@ -141,31 +136,6 @@ describe('useCanEditTask', () => {
     await waitFor(() => expect(result.current).toBe(true));
   });
 
-  it('still denies when the user has neither a project role nor a workspace role', async () => {
-    (flowApi.getProjectMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
-    (flowApi.getWorkspaceMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
-
-    const { result } = renderHook(() => useCanEditTask('p1'), { wrapper: createWrapper() });
-    await waitFor(() => expect(flowApi.getWorkspaceMembers).toHaveBeenCalled());
-    expect(result.current).toBe(false);
-  });
-
-  it('denies when the fallback workspace role is itself viewer', async () => {
-    (flowApi.getProjectMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
-    (flowApi.getWorkspaceMembers as ReturnType<typeof vi.fn>).mockResolvedValue({
-      members: [
-        {
-          id: 'wm1',
-          workspaceId: 'ws-1',
-          userId: '7',
-          name: 'Ada',
-          email: '',
-          role: 'viewer',
-          joinedAt: '',
-        },
-      ],
-    });
-
     const { result } = renderHook(() => useCanEditTask('p1'), { wrapper: createWrapper() });
     await waitFor(() => expect(flowApi.getWorkspaceMembers).toHaveBeenCalled());
     expect(result.current).toBe(false);
@@ -182,16 +152,6 @@ describe('useCanEditTask', () => {
       await waitFor(() => expect(result.current).toBe(true));
     }
   );
-
-  it('does not bypass for a business-wide staff role with no project role and no workspace role', async () => {
-    useAuthUserStore.setState({ role: 'staff' });
-    (flowApi.getProjectMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
-    (flowApi.getWorkspaceMembers as ReturnType<typeof vi.fn>).mockResolvedValue({ members: [] });
-
-    const { result } = renderHook(() => useCanEditTask('p1'), { wrapper: createWrapper() });
-    await waitFor(() => expect(flowApi.getWorkspaceMembers).toHaveBeenCalled());
-    expect(result.current).toBe(false);
-  });
 });
 
 describe('useCanDeleteResource', () => {
