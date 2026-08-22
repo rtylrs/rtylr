@@ -229,7 +229,7 @@ const SMSCampaign: React.FC = () => {
                           {customer.name}
                         </div>
                         <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                          {customer.phone}
+                          {customer.phone || '—'}
                         </div>
                       </div>
                       <span

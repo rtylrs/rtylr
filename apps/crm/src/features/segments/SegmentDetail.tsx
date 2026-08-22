@@ -227,7 +227,7 @@ const SegmentDetail: React.FC = () => {
                       {c.name}
                     </div>
                     <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
-                      {c.email}
+                      {c.email || '—'}
                     </div>
                   </div>
                   <TierBadge tier={getCustomerTier(c.loyaltyPoints, c.loyaltyTier)} />

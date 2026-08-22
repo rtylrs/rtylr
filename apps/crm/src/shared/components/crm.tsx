@@ -1100,7 +1100,9 @@ export const SearchableCustomerSelect: React.FC<{
                 <CustomerAvatar initials={c.initials} points={c.loyaltyPoints} size={26} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontWeight: 500 }}>{c.name}</div>
-                  <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>{c.email}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                    {c.email || '—'}
+                  </div>
                 </div>
               </button>
             ))}

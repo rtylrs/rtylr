@@ -91,11 +91,15 @@ function ExpandedDetail({
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
               <Mail size={12} style={{ color: ACCENT }} />
-              <span style={{ fontSize: '13px', color: 'var(--hub-text)' }}>{customer.email}</span>
+              <span style={{ fontSize: '13px', color: 'var(--hub-text)' }}>
+                {customer.email || '—'}
+              </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Phone size={12} style={{ color: ACCENT }} />
-              <span style={{ fontSize: '13px', color: 'var(--hub-text)' }}>{customer.phone}</span>
+              <span style={{ fontSize: '13px', color: 'var(--hub-text)' }}>
+                {customer.phone || '—'}
+              </span>
             </div>
           </div>
           <div>
