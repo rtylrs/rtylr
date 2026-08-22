@@ -166,6 +166,8 @@ const DefaultLayout: React.FC = () => {
   const [theme, setThemeState] = useState<Theme>(getStoredTheme);
   const sidebarRef = useRef<HTMLElement | null>(null);
   const userMenuRef = useRef<HTMLDivElement | null>(null);
+  const userMenuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const userMenuItemRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const crmUser = useUserStore((s) => s.user);
   const setAuthUser = useUserStore((s) => s.setUser);
   useEffect(() => {
@@ -199,6 +201,13 @@ const DefaultLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   useEscapeKey(userMenuOpen, () => setUserMenuOpen(false));
   useEscapeKey(sidebarOpen, () => setSidebarOpen(false));
+
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const menuButton = userMenuButtonRef.current;
+    userMenuItemRefs.current[0]?.focus();
+    return () => menuButton?.focus();
+  }, [userMenuOpen]);
 
   useEffect(() => {
     if (!userMenuOpen) return;
@@ -405,6 +414,7 @@ const DefaultLayout: React.FC = () => {
             <CaretButton className="w-full justify-start mb-1" />
             <button
               type="button"
+              ref={userMenuButtonRef}
               aria-label={`Open account menu for ${userName}`}
               aria-expanded={userMenuOpen}
               aria-haspopup="menu"
@@ -485,6 +495,26 @@ const DefaultLayout: React.FC = () => {
                     zIndex: 50,
                   }}
                   role="menu"
+                  aria-label="Account menu"
+                  onKeyDown={(event) => {
+                    const items = userMenuItemRefs.current.filter(
+                      (item): item is HTMLButtonElement => item !== null
+                    );
+                    const currentIndex = items.indexOf(document.activeElement as HTMLButtonElement);
+                    const nextIndex =
+                      event.key === 'ArrowDown' || event.key === 'ArrowRight'
+                        ? (currentIndex + 1 + items.length) % items.length
+                        : event.key === 'ArrowUp' || event.key === 'ArrowLeft'
+                          ? (currentIndex - 1 + items.length) % items.length
+                          : event.key === 'Home'
+                            ? 0
+                            : event.key === 'End'
+                              ? items.length - 1
+                              : -1;
+                    if (nextIndex < 0 || items.length === 0) return;
+                    event.preventDefault();
+                    items[nextIndex]?.focus();
+                  }}
                 >
                   <div style={{ marginBottom: '8px' }}>
                     <p
@@ -505,12 +535,15 @@ const DefaultLayout: React.FC = () => {
                         { value: 'light' as Theme, icon: Sun, label: 'Light' },
                         { value: 'dark' as Theme, icon: Moon, label: 'Dark' },
                         { value: 'system' as Theme, icon: Monitor, label: 'System' },
-                      ].map(({ value, icon: Icon, label }) => (
+                      ].map(({ value, icon: Icon, label }, index) => (
                         <button
                           type="button"
                           role="menuitemradio"
                           aria-checked={theme === value}
                           key={value}
+                          ref={(element) => {
+                            userMenuItemRefs.current[index] = element;
+                          }}
                           onClick={() => handleTheme(value)}
                           style={{
                             flex: 1,
@@ -542,6 +575,9 @@ const DefaultLayout: React.FC = () => {
                   <button
                     type="button"
                     role="menuitem"
+                    ref={(element) => {
+                      userMenuItemRefs.current[3] = element;
+                    }}
                     onClick={handleLogout}
                     style={{
                       display: 'flex',
