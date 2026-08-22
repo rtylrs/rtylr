@@ -76,6 +76,12 @@ const violations = validateListBillsRequest(req);
 if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
 let path = "/finance/bill/v1/bills";
 const query = new URLSearchParams();
+if (req.supplierId !== undefined) {
+query.set("supplier_id", String(req.supplierId));
+}
+if (req.purchaseOrderId !== undefined) {
+query.set("purchase_order_id", String(req.purchaseOrderId));
+}
 if (req.page !== undefined) {
 query.set("page", String(req.page));
 }

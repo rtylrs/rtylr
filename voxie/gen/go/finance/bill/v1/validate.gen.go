@@ -11,6 +11,9 @@ func (m *Bill) Validate() error {
 		return nil
 	}
 	var violations []string
+	if m.SupplierName == "" {
+		violations = append(violations, "supplier_name is required")
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -22,8 +25,8 @@ func (m *CreateBillRequest) Validate() error {
 		return nil
 	}
 	var violations []string
-	if m.SupplierId <= 0 {
-		violations = append(violations, "supplier_id must be greater than 0")
+	if m.SupplierName == "" {
+		violations = append(violations, "supplier_name is required")
 	}
 	if m.Amount < 0 {
 		violations = append(violations, "amount must be greater than or equal to 0")

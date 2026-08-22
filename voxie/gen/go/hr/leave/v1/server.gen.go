@@ -291,6 +291,34 @@ func RegisterLeaveServiceServer(first any, rest ...any) error {
 			statusVal := value
 			req.Status = &statusVal
 		}
+		if values := r.URL.Query()["from_date"]; len(values) > 0 {
+			value := values[0]
+			fromDateVal := value
+			req.FromDate = &fromDateVal
+		}
+		if values := r.URL.Query()["to_date"]; len(values) > 0 {
+			value := values[0]
+			toDateVal := value
+			req.ToDate = &toDateVal
+		}
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
+		}
+		if values := r.URL.Query()["offset"]; len(values) > 0 {
+			value := values[0]
+			parsedOffset, err := parseInt32(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter offset: "+err.Error())
+				return
+			}
+			req.Offset = parsedOffset
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())

@@ -284,6 +284,15 @@ func RegisterInvoicesServiceServer(first any, rest ...any) error {
 			value := values[0]
 			req.Search = value
 		}
+		if values := r.URL.Query()["customer_id"]; len(values) > 0 {
+			value := values[0]
+			parsedCustomerId, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter customer_id: "+err.Error())
+				return
+			}
+			req.CustomerId = &parsedCustomerId
+		}
 		if values := r.URL.Query()["date_from"]; len(values) > 0 {
 			value := values[0]
 			req.DateFrom = value

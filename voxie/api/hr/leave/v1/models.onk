@@ -89,6 +89,17 @@ message ListLeaveRequestsRequest {
   employee_id: int64? @query("employee_id")
   /// Filter by status; absent to include all statuses.
   status: string? @query("status")
+  /// Include requests overlapping this day or later (ISO-8601 date); absent
+  /// to leave the range open at the start. A request overlaps when it starts
+  /// on or before to_date and ends on or after from_date.
+  from_date: string? @query("from_date")
+  /// Include requests overlapping this day or earlier (ISO-8601 date); absent
+  /// to leave the range open at the end.
+  to_date: string? @query("to_date")
+  /// Maximum number of records to return.
+  limit: int32 @query("limit")
+  /// Number of records to skip for pagination.
+  offset: int32 @query("offset")
 }
 
 message ListLeaveRequestsResponse {

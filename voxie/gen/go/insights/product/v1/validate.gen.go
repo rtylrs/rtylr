@@ -115,6 +115,17 @@ func (m *GetProductMarginsRequest) Validate() error {
 	return nil
 }
 
+func (m *ProductMargin) Validate() error {
+	if m == nil {
+		return nil
+	}
+	var violations []string
+	if len(violations) > 0 {
+		return errors.New(strings.Join(violations, "; "))
+	}
+	return nil
+}
+
 func (m *GetProductMarginsResponse) Validate() error {
 	if m == nil {
 		return nil
@@ -123,6 +134,11 @@ func (m *GetProductMarginsResponse) Validate() error {
 	for _, value := range m.Buckets {
 		if err := value.Validate(); err != nil {
 			violations = append(violations, "buckets: "+err.Error())
+		}
+	}
+	for _, value := range m.Products {
+		if err := value.Validate(); err != nil {
+			violations = append(violations, "products: "+err.Error())
 		}
 	}
 	if len(violations) > 0 {

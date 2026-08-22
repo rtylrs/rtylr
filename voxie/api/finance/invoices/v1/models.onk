@@ -54,6 +54,12 @@ message InvoiceDetail {
   id: int64
   /// owner_id identifies the tenant that owns the resource.
   owner_id: int64
+  /// customer_id links to the CRM customer this invoice was issued to; absent
+  /// on invoices created before customers were linked, and on one-off invoices
+  /// for a party that is not a customer record. The client_* fields stay the
+  /// values printed on the document at issue time and are deliberately not
+  /// re-derived from the customer record.
+  customer_id: int64? @nullable
   /// invoice_number is the invoice number value for this contract.
   invoice_number: string
   /// client_name is the client name value for this contract.
@@ -144,13 +150,20 @@ message RecordPaymentResponsePayload {
 
 message CreateInvoiceRequest {
   /// client_name is the client name value for this contract.
-  client_name: string @required
+  client_name: string
   /// client_email is the client email value for this contract.
-  client_email: string @required @email
+  client_email: string @email
   /// client_address is the client address value for this contract.
   client_address: string
   /// client_tax_id is the client tax id value for this contract.
   client_tax_id: string
+  /// customer_id is the CRM customer to issue to. When supplied the server
+  /// snapshots that customer's name, email, address and tax id onto the
+  /// invoice and the client_* fields above may be omitted. When absent the
+  /// server requires client_name and client_email, which is the existing
+  /// behaviour. The server must verify the referenced customer belongs to
+  /// the caller's business before accepting the link.
+  customer_id: int64? @nullable
   /// issue_date is the issue date value for this contract.
   issue_date: string @required
   /// due_date is the due date value for this contract.
@@ -203,6 +216,9 @@ message ListInvoicesRequest {
   status: string @query("status")
   /// search filters by customer or invoice number.
   search: string @query("search")
+  /// customer_id filters by the linked CRM customer; absent to include
+  /// invoices for all customers and invoices with no customer link.
+  customer_id: int64? @query("customer_id") @nullable
   /// date_from is the inclusive start date filter.
   date_from: string @query("date_from")
   /// date_to is the inclusive end date filter.

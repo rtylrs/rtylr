@@ -61,6 +61,14 @@ func (c *LeaveServiceClient) ListLeaveRequests(ctx context.Context, req *ListLea
 	if req.Status != nil {
 		query.Set("status", *req.Status)
 	}
+	if req.FromDate != nil {
+		query.Set("from_date", *req.FromDate)
+	}
+	if req.ToDate != nil {
+		query.Set("to_date", *req.ToDate)
+	}
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("offset", strconv.FormatInt(int64(req.Offset), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

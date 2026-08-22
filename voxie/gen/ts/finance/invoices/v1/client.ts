@@ -82,6 +82,9 @@ query.set("status", String(req.status));
 if (req.search !== undefined) {
 query.set("search", String(req.search));
 }
+if (req.customerId !== undefined) {
+query.set("customer_id", String(req.customerId));
+}
 if (req.dateFrom !== undefined) {
 query.set("date_from", String(req.dateFrom));
 }

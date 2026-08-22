@@ -26,6 +26,15 @@ message MenuItem {
   tax_rate: float64
   /// Current tracked stock quantity for the menu item.
   stock: float64
+  /// product_id is the ERP product this item is sold from; absent for items
+  /// that are not stocked as a single product. When it is absent, cost and
+  /// ERP-side stock for this item are unknown rather than zero. The server
+  /// must verify the referenced product belongs to the caller's business.
+  product_id: int64? @nullable
+  /// unit_cost is the cost of one unit at the time of the read, copied from
+  /// the linked ERP product. Absent when product_id is absent. Reported for
+  /// display and margin only: the authoritative value is the ERP product's.
+  unit_cost: float64? @nullable
 }
 
 message CreateMenuItemRequest {

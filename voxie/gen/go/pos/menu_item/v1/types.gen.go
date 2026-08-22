@@ -7,34 +7,41 @@ import (
 )
 
 type MenuItem struct {
-	Id          int64   `json:"id,omitempty"`
-	OwnerId     int64   `json:"owner_id,omitempty"`
-	CategoryId  int64   `json:"category_id,omitempty"`
-	Name        string  `json:"name,omitempty"`
-	Sku         string  `json:"sku,omitempty"`
-	SalePrice   float64 `json:"sale_price,omitempty"`
-	IsActive    bool    `json:"is_active,omitempty"`
-	CreatedAt   string  `json:"created_at,omitempty"`
-	UpdatedAt   string  `json:"updated_at,omitempty"`
-	ImageUrl    string  `json:"image_url,omitempty"`
-	Category    string  `json:"category,omitempty"`
-	Barcode     string  `json:"barcode,omitempty"`
-	Description string  `json:"description,omitempty"`
-	TaxRate     float64 `json:"tax_rate,omitempty"`
-	Stock       float64 `json:"stock,omitempty"`
+	Id          int64    `json:"id,omitempty"`
+	OwnerId     int64    `json:"owner_id,omitempty"`
+	CategoryId  int64    `json:"category_id,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	Sku         string   `json:"sku,omitempty"`
+	SalePrice   float64  `json:"sale_price,omitempty"`
+	IsActive    bool     `json:"is_active,omitempty"`
+	CreatedAt   string   `json:"created_at,omitempty"`
+	UpdatedAt   string   `json:"updated_at,omitempty"`
+	ImageUrl    string   `json:"image_url,omitempty"`
+	Category    string   `json:"category,omitempty"`
+	Barcode     string   `json:"barcode,omitempty"`
+	Description string   `json:"description,omitempty"`
+	TaxRate     float64  `json:"tax_rate,omitempty"`
+	Stock       float64  `json:"stock,omitempty"`
+	ProductId   *int64   `json:"product_id,omitempty"`
+	UnitCost    *float64 `json:"unit_cost,omitempty"`
 }
 
 func (m *MenuItem) MarshalJSON() ([]byte, error) {
 	type alias MenuItem
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		OwnerId    string `json:"owner_id,omitempty"`
-		CategoryId string `json:"category_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		OwnerId    string  `json:"owner_id,omitempty"`
+		CategoryId string  `json:"category_id,omitempty"`
+		ProductId  *string `json:"product_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
 	aux.CategoryId = strconv.FormatInt(m.CategoryId, 10)
+	if m.ProductId != nil {
+		encodedProductId := strconv.FormatInt(*m.ProductId, 10)
+		aux.ProductId = &encodedProductId
+	}
 	return json.Marshal(aux)
 }
 
@@ -42,9 +49,10 @@ func (m *MenuItem) UnmarshalJSON(data []byte) error {
 	type alias MenuItem
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		OwnerId    string `json:"owner_id,omitempty"`
-		CategoryId string `json:"category_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		OwnerId    string  `json:"owner_id,omitempty"`
+		CategoryId string  `json:"category_id,omitempty"`
+		ProductId  *string `json:"product_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -69,6 +77,13 @@ func (m *MenuItem) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.CategoryId = v
+	}
+	if aux.ProductId != nil {
+		v, err := strconv.ParseInt(*aux.ProductId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ProductId = &v
 	}
 	return nil
 }
@@ -191,6 +206,30 @@ func (x *MenuItem) GetStock() float64 {
 		return zero
 	}
 	return x.Stock
+}
+
+func (x *MenuItem) GetProductId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.ProductId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.ProductId
+}
+
+func (x *MenuItem) GetUnitCost() float64 {
+	if x == nil {
+		var zero float64
+		return zero
+	}
+	if x.UnitCost == nil {
+		var zero float64
+		return zero
+	}
+	return *x.UnitCost
 }
 
 type CreateMenuItemRequest struct {

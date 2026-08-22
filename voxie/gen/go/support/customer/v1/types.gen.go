@@ -12,6 +12,7 @@ type Customer struct {
 	Name         string `json:"name,omitempty"`
 	Email        string `json:"email,omitempty"`
 	Phone        string `json:"phone,omitempty"`
+	CustomerId   *int64 `json:"customer_id,omitempty"`
 	TotalTickets int32  `json:"total_tickets,omitempty"`
 	LastTicketAt string `json:"last_ticket_at,omitempty"`
 	CreatedAt    string `json:"created_at,omitempty"`
@@ -21,11 +22,16 @@ func (m *Customer) MarshalJSON() ([]byte, error) {
 	type alias Customer
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		BusinessId string `json:"business_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		BusinessId string  `json:"business_id,omitempty"`
+		CustomerId *string `json:"customer_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.BusinessId = strconv.FormatInt(m.BusinessId, 10)
+	if m.CustomerId != nil {
+		encodedCustomerId := strconv.FormatInt(*m.CustomerId, 10)
+		aux.CustomerId = &encodedCustomerId
+	}
 	return json.Marshal(aux)
 }
 
@@ -33,8 +39,9 @@ func (m *Customer) UnmarshalJSON(data []byte) error {
 	type alias Customer
 	aux := struct {
 		*alias
-		Id         string `json:"id,omitempty"`
-		BusinessId string `json:"business_id,omitempty"`
+		Id         string  `json:"id,omitempty"`
+		BusinessId string  `json:"business_id,omitempty"`
+		CustomerId *string `json:"customer_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -52,6 +59,13 @@ func (m *Customer) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.BusinessId = v
+	}
+	if aux.CustomerId != nil {
+		v, err := strconv.ParseInt(*aux.CustomerId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CustomerId = &v
 	}
 	return nil
 }
@@ -94,6 +108,18 @@ func (x *Customer) GetPhone() string {
 		return zero
 	}
 	return x.Phone
+}
+
+func (x *Customer) GetCustomerId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.CustomerId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.CustomerId
 }
 
 func (x *Customer) GetTotalTickets() int32 {

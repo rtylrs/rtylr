@@ -245,20 +245,62 @@ const violations: string[] = [];
 return violations;
 }
 
+export interface ProductMargin {
+productId?: string;
+name?: string;
+unitsSold?: number;
+revenueMinorUnits?: string;
+costMinorUnits?: string;
+}
+
+export function decodeProductMargin(v: any): ProductMargin {
+if (v === null || v === undefined) return v;
+return {
+productId: v.product_id,
+name: v.name,
+unitsSold: v.units_sold,
+revenueMinorUnits: v.revenue_minor_units,
+costMinorUnits: v.cost_minor_units,
+};
+}
+
+export function encodeProductMargin(v: ProductMargin): Record<string, unknown> {
+const out: Record<string, unknown> = {};
+if (v.productId !== undefined) { out.product_id = v.productId; }
+if (v.name !== undefined) { out.name = v.name; }
+if (v.unitsSold !== undefined) { out.units_sold = v.unitsSold; }
+if (v.revenueMinorUnits !== undefined) { out.revenue_minor_units = v.revenueMinorUnits; }
+if (v.costMinorUnits !== undefined) { out.cost_minor_units = v.costMinorUnits; }
+return out;
+}
+
+export function validateProductMargin(v: ProductMargin): string[] {
+const violations: string[] = [];
+if (v.productId !== undefined && v.productId !== null && !(typeof v.productId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.productId))) violations.push("product_id has invalid type");
+if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
+if (v.unitsSold !== undefined && v.unitsSold !== null && !(typeof v.unitsSold === "number" && Number.isFinite(v.unitsSold))) violations.push("units_sold has invalid type");
+if (v.revenueMinorUnits !== undefined && v.revenueMinorUnits !== null && !(typeof v.revenueMinorUnits === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.revenueMinorUnits))) violations.push("revenue_minor_units has invalid type");
+if (v.costMinorUnits !== undefined && v.costMinorUnits !== null && !(typeof v.costMinorUnits === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.costMinorUnits))) violations.push("cost_minor_units has invalid type");
+return violations;
+}
+
 export interface GetProductMarginsResponse {
 buckets?: (MarginBucket)[];
+products?: (ProductMargin)[];
 }
 
 export function decodeGetProductMarginsResponse(v: any): GetProductMarginsResponse {
 if (v === null || v === undefined) return v;
 return {
 buckets: (v.buckets !== undefined ? (v.buckets as any[]).map(decodeMarginBucket) : v.buckets),
+products: (v.products !== undefined ? (v.products as any[]).map(decodeProductMargin) : v.products),
 };
 }
 
 export function encodeGetProductMarginsResponse(v: GetProductMarginsResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.buckets !== undefined) { out.buckets = (v.buckets as any[]).map(encodeMarginBucket); }
+if (v.products !== undefined) { out.products = (v.products as any[]).map(encodeProductMargin); }
 return out;
 }
 
@@ -266,6 +308,8 @@ export function validateGetProductMarginsResponse(v: GetProductMarginsResponse):
 const violations: string[] = [];
 if (v.buckets !== undefined && v.buckets !== null && !(Array.isArray(v.buckets) && (v.buckets).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("buckets has invalid type");
 if (v.buckets !== undefined && v.buckets !== null) for (const item of v.buckets) violations.push(...validateMarginBucket(item).map((message) => "buckets: " + message));
+if (v.products !== undefined && v.products !== null && !(Array.isArray(v.products) && (v.products).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("products has invalid type");
+if (v.products !== undefined && v.products !== null) for (const item of v.products) violations.push(...validateProductMargin(item).map((message) => "products: " + message));
 return violations;
 }
 
