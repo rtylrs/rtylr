@@ -2,6 +2,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import FlowLayout from './FlowLayout';
+import { useFlowStore } from '../shared/stores/flowStore';
 
 // FlowLayout mounts the whole app shell (sidebar, header, realtime wiring,
 // caret panel, command bar, etc.). This test only exercises the account menu
@@ -74,12 +75,26 @@ vi.mock('@voxire/config', () => ({
   resolveApiBase: () => 'https://api.test/',
 }));
 
+const providerProps = vi.hoisted(
+  () =>
+    ({ workspaceAccent: undefined }) as {
+      workspaceAccent: string | undefined;
+    }
+);
+
 vi.mock('@voxire/ui', () => ({
   Avatar: ({ alt }: { alt: string }) => <span role="img" aria-label={alt} />,
   // The real provider writes custom properties to documentElement, which this
-  // test has no opinion about. Rendering the children keeps the shell intact
-  // without asserting on tokens that belong to the package's own suite.
-  AppearanceProvider: ({ children }: React.PropsWithChildren) => <>{children}</>,
+  // test has no opinion about: the token values belong to the package's own
+  // suite. What does belong here is the one prop this layout is responsible for
+  // supplying, so the stub records it rather than discarding it.
+  AppearanceProvider: ({
+    children,
+    workspaceAccent,
+  }: React.PropsWithChildren<{ workspaceAccent?: string }>) => {
+    providerProps.workspaceAccent = workspaceAccent;
+    return <>{children}</>;
+  },
 }));
 
 vi.mock('@voxire/caret', () => ({
@@ -273,5 +288,42 @@ describe('FlowLayout workspace switcher', () => {
     fireEvent.mouseDown(items[1]);
 
     expect(getWorkspaceButtons()).toHaveLength(2);
+  });
+});
+
+describe('FlowLayout appearance wiring', () => {
+  const renderLayout = () =>
+    render(
+      <FlowLayout>
+        <div>content</div>
+      </FlowLayout>
+    );
+
+  // A colour that is deliberately NOT ACCENT_DEFAULT. This test exists because
+  // an earlier version of it could not fail: the fallback workspace's colour IS
+  // ACCENT_DEFAULT, so with no workspace in the store the correct wiring and a
+  // hardcoded ACCENT_DEFAULT produce the same value. Replacing the expression
+  // with a constant broke nothing across 1305 tests. A distinct colour is what
+  // makes the assertion able to discriminate.
+  const DISTINCT = '#a3d84b';
+
+  beforeEach(() => {
+    providerProps.workspaceAccent = undefined;
+    useFlowStore.getState().setWorkspaces([]);
+  });
+
+  it('hands the appearance provider the active workspace colour', () => {
+    useFlowStore.getState().setWorkspaces([{ id: 'ws-9', name: 'Studio', color: DISTINCT }]);
+    useFlowStore.getState().setActiveWorkspace('ws-9');
+    renderLayout();
+    expect(providerProps.workspaceAccent).toBe(DISTINCT);
+  });
+
+  it('falls back to the brand accent when no workspace has a colour', () => {
+    renderLayout();
+    // The personal fallback carries ACCENT_DEFAULT, so this pins the shape of
+    // the fallback rather than a specific brand value.
+    expect(providerProps.workspaceAccent).toBeTruthy();
+    expect(providerProps.workspaceAccent).not.toBe(DISTINCT);
   });
 });
