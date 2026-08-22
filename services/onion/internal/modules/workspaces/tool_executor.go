@@ -84,6 +84,7 @@ func (m *Module) executeListTasksTool(ctx context.Context, input map[string]any)
 	offset := (parsed.Page - 1) * parsed.Limit
 	tasks, total, err := m.service.ListTasks(ctx, domain.ListTasksFilter{
 		ProjectID:   parsed.ProjectID,
+		BusinessID:  businessID,
 		WorkspaceID: workspaceID,
 		Status:      parsed.Status,
 		AssigneeID:  parsed.AssigneeID,

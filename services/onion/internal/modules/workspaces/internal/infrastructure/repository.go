@@ -329,6 +329,9 @@ func taskListConditions(scopeCol string, scopeVal int64, filter domain.ListTasks
 		sq.Eq{scopeCol: scopeVal},
 		sq.Expr("t.parent_task_id IS NULL"),
 	}
+	if filter.BusinessID != 0 {
+		conds = append(conds, sq.Eq{"t.business_id": filter.BusinessID})
+	}
 	if filter.Status != "" {
 		conds = append(conds, sq.Eq{"t.status": filter.Status})
 	} else if filter.ActiveOnly {
