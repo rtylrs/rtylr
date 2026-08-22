@@ -195,10 +195,10 @@ export function toContractMutationPayload(
     plan: data.plan,
     mrr: data.mrr,
     seats: data.seats,
-    signedAt: data.signedAt || undefined,
-    signedByName: data.signedBy,
+    signedAt: data.signedAt?.trim() || undefined,
+    signedByName: data.signedBy?.trim(),
     closedBy: toOptionalFiniteNumber(data.closedBy),
-    notes: data.notes ?? '',
+    notes: data.notes?.trim() ?? '',
   };
 }
 

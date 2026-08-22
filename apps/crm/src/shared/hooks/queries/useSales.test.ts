@@ -8,6 +8,7 @@ import {
   toContractMutationPayload,
   normalizeSalesPageSize,
 } from './useSales';
+import { toLeadMutationPayload } from '../../services/crmApi';
 
 describe('sales pagination helpers', () => {
   it('clamps list pages to the backend limit', () => {
@@ -49,10 +50,10 @@ describe('sales contract wire mappings', () => {
         plan: 'pro',
         mrr: 1200,
         seats: 10,
-        signedAt: '2026-08-21',
-        signedBy: 'Jane Smith',
+        signedAt: ' 2026-08-21 ',
+        signedBy: ' Jane Smith ',
         closedBy: '17',
-        notes: 'Monthly plan',
+        notes: ' Monthly plan ',
       })
     ).toEqual({
       leadId: 12,
@@ -63,6 +64,27 @@ describe('sales contract wire mappings', () => {
       signedByName: 'Jane Smith',
       closedBy: 17,
       notes: 'Monthly plan',
+    });
+  });
+
+  it('trims lead fields before sending mutations', () => {
+    expect(
+      toLeadMutationPayload({
+        company: ' Acme Inc ',
+        industry: ' SaaS ',
+        size: ' 50-200 ',
+        source: ' Referral ',
+        notes: ' Important context ',
+      })
+    ).toEqual({
+      companyName: 'Acme Inc',
+      industry: 'SaaS',
+      size: '50-200',
+      source: 'Referral',
+      stage: undefined,
+      assignedTo: undefined,
+      mrrPotential: undefined,
+      notes: 'Important context',
     });
   });
 });

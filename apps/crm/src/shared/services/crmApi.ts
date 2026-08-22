@@ -337,14 +337,14 @@ interface LeadMutationPayload {
 export const toLeadMutationPayload = (
   data: CreateLeadRequest | UpdateLeadRequest
 ): LeadMutationPayload => ({
-  companyName: data.companyName ?? data.company ?? '',
-  industry: data.industry,
-  size: data.size,
-  source: data.source,
+  companyName: (data.companyName ?? data.company ?? '').trim(),
+  industry: data.industry?.trim(),
+  size: data.size?.trim(),
+  source: data.source?.trim(),
   stage: data.stage,
   assignedTo: data.assignedTo,
   mrrPotential: data.mrrPotential,
-  notes: data.notes,
+  notes: data.notes?.trim(),
 });
 
 interface CustomerMutationPayload {
@@ -558,9 +558,9 @@ export function toTouchpointMutationPayload(
     leadId: data.leadId,
     type: data.type,
     outcome: data.outcome,
-    notes: data.notes,
+    notes: data.notes.trim(),
     contactId: data.contactId,
-    nextFollowUp: data.nextFollowUp,
+    nextFollowUp: data.nextFollowUp?.trim() || null,
   };
 }
 
