@@ -46,7 +46,7 @@ import { useUserStore } from '../shared/stores/userStore';
 import { useTranslation } from 'react-i18next';
 import { useThemeStore } from '../shared/stores/themeStore';
 import { useAppearanceStore } from '../shared/stores/appearanceStore';
-import { accentTints, ACCENT_DEFAULT, type ResolvedTheme } from '../shared/lib/colorUtils';
+import { ACCENT_DEFAULT } from '../shared/lib/colorUtils';
 import { useFlowStore } from '../shared/stores/flowStore';
 import { cn } from '../shared/lib/utils';
 import CommandBar from '../shared/components/CommandBar';
@@ -494,23 +494,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
       : liveWorkspaces[0]) ||
     (workspacesLoading ? { id: '', name: '', color: '#6b7280' } : PERSONAL_FALLBACK);
 
-  // Sync --accent CSS vars to the active workspace color so every component
-  // in the tree can reference var(--accent) without prop-drilling.
-  //
-  // These land as inline styles on documentElement, which beats every stylesheet
-  // rule - so the per-mode alphas have to be applied here. A light-mode value for
-  // --accent-muted written in globals.css is silently overridden the moment this
-  // layout mounts, which is on every authenticated screen.
-  useEffect(() => {
-    const resolved: ResolvedTheme =
-      document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-    const root = document.documentElement;
-    for (const [name, value] of Object.entries(
-      accentTints(activeWorkspace.color || ACCENT_DEFAULT, resolved)
-    )) {
-      root.style.setProperty(name, value);
-    }
-  }, [activeWorkspace.color, theme]);
   // Hide the auto-provisioned personal project - it's the backend's bucket for
   // the dedicated "My Tasks" page (top nav) and, like Asana, must not surface in
   // the Projects list. The authoritative match is the id returned by
