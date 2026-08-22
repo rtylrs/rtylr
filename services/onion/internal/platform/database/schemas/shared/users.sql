@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     ban_reason TEXT NULL,
     banned_at TIMESTAMP NULL,
     auth_provider VARCHAR(16) NOT NULL DEFAULT 'password',
+    token_epoch BIGINT NOT NULL DEFAULT 0,
     two_factor_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     INDEX idx_users_business (business_id),
     INDEX idx_users_provider (auth_provider),
