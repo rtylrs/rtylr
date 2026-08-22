@@ -118,28 +118,6 @@ describe('useCanEditTask', () => {
     await waitFor(() => expect(flowApi.getProjectMembers).toHaveBeenCalled());
     await waitFor(() => expect(result.current).toBe(false));
   });
-    (flowApi.getWorkspaceMembers as ReturnType<typeof vi.fn>).mockResolvedValue({
-      members: [
-        {
-          id: 'wm1',
-          workspaceId: 'ws-1',
-          userId: '7',
-          name: 'Ada',
-          email: '',
-          role: 'admin',
-          joinedAt: '',
-        },
-      ],
-    });
-
-    const { result } = renderHook(() => useCanEditTask('p1'), { wrapper: createWrapper() });
-    await waitFor(() => expect(result.current).toBe(true));
-  });
-
-    const { result } = renderHook(() => useCanEditTask('p1'), { wrapper: createWrapper() });
-    await waitFor(() => expect(flowApi.getWorkspaceMembers).toHaveBeenCalled());
-    expect(result.current).toBe(false);
-  });
 
   it.each(['owner', 'admin', 'operator'] as const)(
     'grants edit for a business-wide %s with no project role and no workspace role',
