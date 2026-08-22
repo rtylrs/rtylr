@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
+import type { UpdateInvoiceBody } from '@voxire/voxie/finance/invoices/v1/types';
 
 const mockInvoicesClient = vi.hoisted(() => ({
   listInvoices: vi.fn(),
@@ -146,8 +147,18 @@ describe('useUpdateInvoice', () => {
   it('updates an invoice', async () => {
     mockInvoicesClient.updateInvoice.mockResolvedValue({ invoice: baseDetail });
     const { result } = renderHook(() => useUpdateInvoice(), { wrapper: createWrapper() });
-    const invoice = { clientName: 'Beta Corp', currency: 'USD' };
-    await act(() => result.current.mutateAsync({ id: '1', data: invoice as never }));
+    // A complete UpdateInvoiceBody rather than `as never`. The cast was hiding
+    // the fact that this mutation's parameter type did not match the client's
+    // body type, which is the defect this test sits next to.
+    const invoice: UpdateInvoiceBody = {
+      clientName: 'Beta Corp',
+      clientEmail: 'beta@example.com',
+      issueDate: '2026-01-01',
+      dueDate: '2026-01-31',
+      currency: 'USD',
+      discountType: 'none',
+    };
+    await act(() => result.current.mutateAsync({ id: '1', data: invoice }));
     expect(mockInvoicesClient.updateInvoice).toHaveBeenCalledWith({ id: '1', body: invoice });
   });
 });
