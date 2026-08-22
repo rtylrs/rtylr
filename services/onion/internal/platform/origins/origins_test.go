@@ -68,3 +68,37 @@ func TestAllowedPatternStringsUseWebSocketGlobSemantics(t *testing.T) {
 		})
 	}
 }
+
+func TestProductionBuildsExcludeLocalhostOrigins(t *testing.T) {
+	t.Setenv("APP_ENV", "production")
+
+	for _, origin := range []string{
+		"http://localhost:3000",
+		"http://localhost",
+		"http://127.0.0.1:5173",
+	} {
+		if IsAllowed(origin) {
+			t.Errorf("production must reject dev origin %q", origin)
+		}
+	}
+	for _, pattern := range AllowedPatternStrings() {
+		if strings.Contains(pattern, "localhost") || strings.Contains(pattern, "127.0.0.1") {
+			t.Errorf("production pattern list contains %q", pattern)
+		}
+	}
+
+	// Hosted origins keep working in production.
+	if !IsAllowed("https://dash.rtylr.com") {
+		t.Error("hosted origin rejected in production")
+	}
+}
+
+func TestWildcardsMatchExactlyOneSubdomainLabel(t *testing.T) {
+	if !IsAllowed("https://app.voxire.com") {
+		t.Error("single-label subdomain should match")
+	}
+	// A takeover chain two labels deep must not inherit apex trust (#777).
+	if IsAllowed("https://evil.attacker.voxire.com") {
+		t.Error("multi-label wildcard match allows nested takeover chains")
+	}
+}
