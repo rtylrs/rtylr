@@ -2,7 +2,12 @@ import { useQueries } from '@tanstack/react-query';
 import { useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useUserStore } from '../stores/userStore';
 import { useFlowStore } from '../stores/flowStore';
-import { canEditTask, canDelete, mostRestrictiveProjectRole } from './roleUtils';
+import {
+  canEditTask,
+  canDelete,
+  hasBusinessRoleBypass,
+  mostRestrictiveProjectRole,
+} from './roleUtils';
 import {
   projectMembersQueryOptions,
   useProjectMembers,
@@ -115,9 +120,8 @@ function useCurrentWorkspaceRole(): string | undefined {
  * withholding it here would only recreate the disabled-but-would-succeed
  * mismatch this codebase otherwise guards against, just in the other direction.
  */
-function useHasBusinessRoleBypass(): boolean {
-  const businessRole = useAuthUserStore((s) => s.role);
-  return businessRole === 'owner' || businessRole === 'admin' || businessRole === 'operator';
+export function useHasBusinessRoleBypass(): boolean {
+  return hasBusinessRoleBypass(useAuthUserStore((s) => s.role));
 }
 
 /** Whether the current user can edit task fields (title, status, assignee, etc) in a project. */
@@ -130,10 +134,22 @@ export function useCanEditTask(projectId?: string): boolean {
   return workspaceRole !== undefined && workspaceRole !== 'viewer';
 }
 
+/**
+ * Whether the current user may perform project-admin operations on a project.
+ *
+ * This is onion's `RequireProjectRole(..., FlowRoleAdmin)`: the gate behind
+ * deleting, archiving, restoring and flipping visibility alike. Named for the
+ * authority rather than one of its uses so the next admin-gated control does
+ * not grow a second copy of the same check.
+ */
+export function useCanAdministerProject(projectId?: string): boolean {
+  const bypass = useHasBusinessRoleBypass();
+  const role = useCurrentProjectRole(projectId);
+  if (bypass) return true;
+  return role !== undefined && canDelete(role);
+}
+
 /** Whether the current user can delete resources in a project (project admins only). */
 export function useCanDeleteResource(projectId?: string): boolean {
-  const hasBusinessRoleBypass = useHasBusinessRoleBypass();
-  const role = useCurrentProjectRole(projectId);
-  if (hasBusinessRoleBypass) return true;
-  return role !== undefined && canDelete(role);
+  return useCanAdministerProject(projectId);
 }

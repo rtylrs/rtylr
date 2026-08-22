@@ -71,6 +71,31 @@ export function mostRestrictiveProjectRole(roles: FlowProjectRole[]): FlowProjec
   );
 }
 
+/**
+ * Business-wide roles that bypass per-project membership entirely.
+ *
+ * Mirrors onion's `hubProfileBypasses`
+ * (internal/modules/workspaces/internal/application/service.go), which admits
+ * `IsOwner || role == "admin" || role == "operator"`. Note this is wider than
+ * `MANAGE_WORKSPACE_ROLES` in FlowSettings: an operator bypasses project
+ * membership on the server but is not treated as a workspace manager here.
+ *
+ * Takes the raw business role string rather than `Member['role']` on purpose.
+ * `toFlowMemberRole` collapses `operator` to `viewer`, so mapping first would
+ * drop exactly the role this predicate exists to admit.
+ */
+const BUSINESS_ROLE_BYPASS: readonly string[] = ['owner', 'admin', 'operator'];
+
+/**
+ * Whether a business-wide role bypasses per-project permission checks.
+ *
+ * Fails closed on null/undefined: an absent role is not evidence of authority.
+ * The server is the authority either way; this only decides what to render.
+ */
+export function hasBusinessRoleBypass(role: string | null | undefined): boolean {
+  return role !== null && role !== undefined && BUSINESS_ROLE_BYPASS.includes(role);
+}
+
 /** Returns true if the role can invite members. */
 export function canInviteMembers(role: Member['role']): boolean {
   return role === 'owner' || role === 'admin';
