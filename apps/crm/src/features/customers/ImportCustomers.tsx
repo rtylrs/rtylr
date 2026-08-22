@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -234,17 +234,43 @@ const ImportCustomers: React.FC = () => {
   const [mapping, setMapping] = useState<Partial<Record<ImportField, string>>>({});
   const [dedupe, setDedupe] = useState(true);
   const [fileName, setFileName] = useState('');
+  const [fileError, setFileError] = useState('');
+  const fileReadId = useRef(0);
+
+  const clearParsedFile = (): void => {
+    setHeaders([]);
+    setRows([]);
+    setMapping({});
+  };
 
   const handleFile = (f: File) => {
+    const currentReadId = fileReadId.current + 1;
+    fileReadId.current = currentReadId;
     setFileName(f.name);
+    setFileError('');
+    if (f.size === 0) {
+      clearParsedFile();
+      setFileError('The selected file is empty. Choose a CSV with headers and rows.');
+      return;
+    }
     const reader = new FileReader();
+    reader.onerror = () => {
+      if (currentReadId !== fileReadId.current) return;
+      clearParsedFile();
+      setFileError('Unable to read this file. Check the file and try again.');
+    };
     reader.onload = () => {
-      const text = reader.result as string;
+      if (currentReadId !== fileReadId.current) return;
+      if (typeof reader.result !== 'string') {
+        clearParsedFile();
+        setFileError('Unable to read this file. Check the file and try again.');
+        return;
+      }
+      const text = reader.result;
       const parsed = parseCsv(text);
       if (parsed.length === 0) {
-        setHeaders([]);
-        setRows([]);
-        setMapping({});
+        clearParsedFile();
+        setFileError('No CSV data was found. Choose a file with headers and rows.');
         return;
       }
       const hdr = parsed[0];
@@ -252,6 +278,9 @@ const ImportCustomers: React.FC = () => {
       setHeaders(hdr);
       setRows(body);
       setMapping(autoMapHeaders(hdr));
+      if (body.length === 0) {
+        setFileError('Add at least one data row below the header before importing.');
+      }
     };
     reader.readAsText(f);
   };
@@ -311,7 +340,11 @@ const ImportCustomers: React.FC = () => {
               type="file"
               accept=".csv"
               style={{ display: 'none' }}
-              onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+              onChange={(e) => {
+                const file = e.currentTarget.files?.[0];
+                if (file) handleFile(file);
+                e.currentTarget.value = '';
+              }}
             />
             <div
               style={{
@@ -334,6 +367,11 @@ const ImportCustomers: React.FC = () => {
               Click to browse. Your file should have headers in the first row.
             </div>
           </label>
+          {fileError && (
+            <p role="alert" style={{ margin: '12px 0 0', fontSize: '12px', color: '#ef4444' }}>
+              {fileError}
+            </p>
+          )}
         </Card>
 
         {headers.length > 0 && (
