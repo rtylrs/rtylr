@@ -23,6 +23,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
@@ -66,12 +67,34 @@ type serverMessage struct {
 
 // Hub is a running websocket broker. Construct with New, start the
 // background loop with Run, then attach the HTTP handler.
+// Authorization results are cached per (user, topic) so the hub's single
+// goroutine does not run a membership DB query per subscriber per broadcast
+// event (#765). Revocation therefore takes effect within defaultAuthTTL.
+const (
+	defaultAuthTTL          = 45 * time.Second
+	maxTopicsPerSubscribeOp = 64
+	maxTopicsPerClient      = 256
+	maxConnectionsPerUser   = 8
+	maxInboundOpsPerWindow  = 100
+	inboundRateLimitWindow  = time.Second
+)
+
+type authCacheEntry struct {
+	allowed bool
+	expires time.Time
+}
+
 type Hub struct {
-	auth AuthorizeFn
+	auth    AuthorizeFn
+	authTTL time.Duration
+
+	authMu    sync.RWMutex
+	authCache map[string]authCacheEntry
 
 	mu      sync.RWMutex
 	topics  map[string]map[*client]struct{} // topic -> set of clients
 	clients map[*client]struct{}
+	userCap map[int64]int
 
 	publish     chan Event
 	subscribe   chan subscription
@@ -90,6 +113,8 @@ type client struct {
 	conn   *websocket.Conn
 	send   chan []byte
 	topics map[string]struct{}
+	ops    int
+	window time.Time
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -99,8 +124,11 @@ type client struct {
 func New(auth AuthorizeFn) *Hub {
 	return &Hub{
 		auth:        auth,
+		authTTL:     defaultAuthTTL,
+		authCache:   make(map[string]authCacheEntry),
 		topics:      make(map[string]map[*client]struct{}),
 		clients:     make(map[*client]struct{}),
+		userCap:     make(map[int64]int),
 		publish:     make(chan Event, 256),
 		subscribe:   make(chan subscription, 64),
 		unsubscribe: make(chan subscription, 64),
@@ -109,24 +137,81 @@ func New(auth AuthorizeFn) *Hub {
 	}
 }
 
+// authorize consults the per-(user, topic) result cache before invoking the
+// production authorizer, which typically costs a MySQL membership query.
+// Both allow and deny results are cached for the TTL.
+func (h *Hub) authorize(ctx context.Context, userID int64, topic string) bool {
+	if h.auth == nil {
+		return true
+	}
+
+	key := strconv.FormatInt(userID, 10) + "|" + topic
+	now := time.Now()
+
+	h.authMu.RLock()
+	entry, ok := h.authCache[key]
+	h.authMu.RUnlock()
+	if ok && now.Before(entry.expires) {
+		return entry.allowed
+	}
+
+	allowed := h.auth(ctx, userID, topic)
+
+	h.authMu.Lock()
+	h.authCache[key] = authCacheEntry{allowed: allowed, expires: now.Add(h.authTTL)}
+	h.authMu.Unlock()
+
+	return allowed
+}
+
+// invalidateAuth drops any cached decision for (userID, topic) so the next
+// check re-consults the authorizer immediately.
+func (h *Hub) invalidateAuth(userID int64, topic string) {
+	key := strconv.FormatInt(userID, 10) + "|" + topic
+	h.authMu.Lock()
+	delete(h.authCache, key)
+	h.authMu.Unlock()
+}
+
+func (h *Hub) pruneAuthCache() {
+	now := time.Now()
+	h.authMu.Lock()
+	for key, entry := range h.authCache {
+		if now.After(entry.expires) {
+			delete(h.authCache, key)
+		}
+	}
+	h.authMu.Unlock()
+}
+
 // Run drives the hub's internal loop. Block until ctx is cancelled.
 // Call in a goroutine at server startup.
 func (h *Hub) Run(ctx context.Context) {
+	prune := time.NewTicker(time.Minute)
+	defer prune.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
 			h.shutdown()
 			return
 
+		case <-prune.C:
+			h.pruneAuthCache()
+
 		case c := <-h.register:
 			h.mu.Lock()
 			h.clients[c] = struct{}{}
+			h.userCap[c.userID]++
 			h.mu.Unlock()
 
 		case c := <-h.unregister:
 			h.mu.Lock()
 			if _, ok := h.clients[c]; ok {
 				delete(h.clients, c)
+				if h.userCap[c.userID] > 0 {
+					h.userCap[c.userID]--
+				}
 				for topic := range c.topics {
 					if set := h.topics[topic]; set != nil {
 						delete(set, c)
@@ -196,7 +281,7 @@ func (h *Hub) fanout(ctx context.Context, e Event) {
 	h.mu.RUnlock()
 
 	for _, c := range subscribers {
-		if h.auth != nil && !h.auth(ctx, c.userID, e.Topic) {
+		if !h.authorize(ctx, c.userID, e.Topic) {
 			h.removeSubscription(c, e.Topic)
 			continue
 		}
@@ -251,6 +336,16 @@ func (h *Hub) shutdown() {
 // resolved userID. We do NOT re-authenticate here; topic subscriptions
 // authorize against `userID` via the hub's AuthorizeFn.
 func (h *Hub) ServeWS(w http.ResponseWriter, r *http.Request, userID int64) {
+	h.mu.RLock()
+	open := h.userCap[userID]
+	h.mu.RUnlock()
+	if open >= maxConnectionsPerUser {
+		logger.Ctx(r.Context()).Warn("wsbus connection rejected: per-user cap",
+			logger.Any("user_id", userID), logger.Any("open", open))
+		http.Error(w, "too many connections", http.StatusTooManyRequests)
+		return
+	}
+
 	conn, err := websocket.Accept(w, r, &websocket.AcceptOptions{
 		OriginPatterns: origins.AllowedPatternStrings(),
 	})
@@ -269,7 +364,13 @@ func (h *Hub) ServeWS(w http.ResponseWriter, r *http.Request, userID int64) {
 		cancel: cancel,
 	}
 
-	h.register <- c
+	select {
+	case h.register <- c:
+	case <-r.Context().Done():
+		cancel()
+		_ = conn.Close(websocket.StatusNormalClosure, "")
+		return
+	}
 
 	// Two goroutines per connection: writer pumps c.send → socket,
 	// reader handles inbound subscribe/unsubscribe/ping.
@@ -277,7 +378,11 @@ func (h *Hub) ServeWS(w http.ResponseWriter, r *http.Request, userID int64) {
 	h.readLoop(c)
 
 	// readLoop returning means the client disconnected.
-	h.unregister <- c
+	select {
+	case h.unregister <- c:
+	case <-time.After(5 * time.Second):
+	}
+
 	_ = conn.Close(websocket.StatusNormalClosure, "")
 }
 
@@ -296,9 +401,20 @@ func (h *Hub) readLoop(c *client) {
 
 		switch msg.Op {
 		case "subscribe":
-			allowed := make([]string, 0, len(msg.Topics))
-			for _, topic := range msg.Topics {
-				if h.auth == nil || h.auth(c.ctx, c.userID, topic) {
+			if !allowInboundOp(c) {
+				h.sendErr(c, "rate limited")
+				continue
+			}
+			topics := msg.Topics
+			if len(topics) > maxTopicsPerSubscribeOp {
+				topics = topics[:maxTopicsPerSubscribeOp]
+			}
+			allowed := make([]string, 0, len(topics))
+			for _, topic := range topics {
+				if len(c.topics) >= maxTopicsPerClient {
+					break
+				}
+				if h.authorize(c.ctx, c.userID, topic) {
 					h.subscribe <- subscription{client: c, topic: topic}
 					allowed = append(allowed, topic)
 				}
@@ -315,6 +431,22 @@ func (h *Hub) readLoop(c *client) {
 			h.sendErr(c, "unknown op: "+msg.Op)
 		}
 	}
+}
+
+// allowInboundOp rate-limits inbound control frames per connection so a
+// single tab cannot drive unbounded authorization queries with oversized
+// subscribe batches.
+func allowInboundOp(c *client) bool {
+	now := time.Now()
+	if now.Sub(c.window) >= inboundRateLimitWindow {
+		c.window = now
+		c.ops = 0
+	}
+	if c.ops >= maxInboundOpsPerWindow {
+		return false
+	}
+	c.ops++
+	return true
 }
 
 func (h *Hub) writeLoop(c *client) {
