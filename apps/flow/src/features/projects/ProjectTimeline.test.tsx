@@ -64,8 +64,8 @@ describe('ProjectTimeline: no scheduled tasks', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'flow.projectTimeline.goToBoardCta' }));
     expect(navigateMock).toHaveBeenCalledWith({
-      to: '/w/$workspaceId/p/$projectId/board',
-      params: { workspaceId: 'w1', projectId: 'p1' },
+      to: '/p/$projectId/board',
+      params: { projectId: 'p1' },
     });
   });
 });

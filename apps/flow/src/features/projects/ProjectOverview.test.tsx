@@ -83,8 +83,8 @@ describe('ProjectOverview: no recent comments', () => {
     expect(screen.getByText('flow.projectOverview.noComments')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'flow.projectOverview.goToBoardCta' }));
     expect(navigateMock).toHaveBeenCalledWith({
-      to: '/w/$workspaceId/p/$projectId/board',
-      params: { workspaceId: 'w1', projectId: 'p1' },
+      to: '/p/$projectId/board',
+      params: { projectId: 'p1' },
     });
   });
 });
