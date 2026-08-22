@@ -7,6 +7,7 @@ import {
   openRate,
   sortByRecency,
   isScheduledInFuture,
+  normalizeCampaignChannel,
 } from './campaignUtils';
 import { campaignSchema, type Campaign } from '../schemas/campaigns';
 
@@ -50,6 +51,18 @@ describe('filterCampaignsByType', () => {
   it('returns only sms campaigns', () => {
     const result = filterCampaignsByType(campaigns, 'sms');
     expect(result).toHaveLength(1);
+  });
+});
+
+describe('normalizeCampaignChannel', () => {
+  it('normalizes casing and surrounding whitespace', () => {
+    expect(normalizeCampaignChannel(' SMS ')).toBe('sms');
+    expect(normalizeCampaignChannel('PUSH')).toBe('push');
+  });
+
+  it('uses email as the safe fallback for missing or unknown values', () => {
+    expect(normalizeCampaignChannel(undefined)).toBe('email');
+    expect(normalizeCampaignChannel('in_app')).toBe('email');
   });
 });
 

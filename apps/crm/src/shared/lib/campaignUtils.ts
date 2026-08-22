@@ -6,6 +6,14 @@ import type { Campaign } from '../schemas/campaigns';
 import { parseCrmDate } from './dateUtils';
 import { compareDatesDescending } from './sort';
 
+export type CampaignChannel = 'email' | 'sms' | 'push';
+
+/** Normalizes campaign channel values before they reach channel-specific UI. */
+export function normalizeCampaignChannel(value: string | null | undefined): CampaignChannel {
+  const normalized = value?.trim().toLowerCase();
+  return normalized === 'sms' || normalized === 'push' ? normalized : 'email';
+}
+
 /** Filter campaigns by status. */
 export function filterCampaignsByStatus(campaigns: Campaign[], status: string): Campaign[] {
   return campaigns.filter((c) => c.status === status);

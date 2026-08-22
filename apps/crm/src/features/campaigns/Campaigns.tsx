@@ -26,6 +26,7 @@ import {
 } from '../../shared/schemas/campaigns';
 import { ConfirmModal } from '../../shared/components/ui';
 import { activateOnKeyboard } from '../../shared/lib/keyboard';
+import { normalizeCampaignChannel } from '../../shared/lib/campaignUtils';
 import { formatDate } from '../../shared/lib/formatters';
 import { canEditCampaign, hasVerifiedCampaignAudience } from './campaignActions';
 
@@ -56,12 +57,6 @@ interface Campaign {
   updatedAt: string;
 }
 
-const TYPE_TO_CHANNEL: Record<string, Channel> = {
-  email: 'Email',
-  sms: 'SMS',
-  push: 'Push',
-};
-
 const STATUS_TO_DISPLAY: Record<string, CampaignStatus> = {
   draft: 'Draft',
   active: 'Active',
@@ -91,7 +86,9 @@ function toDisplayCampaign(c: CampaignPayload, audienceBySegment: Map<number, nu
     id: c.id,
     name: c.name,
     description: c.subject ?? '',
-    channel: TYPE_TO_CHANNEL[c.type] ?? 'Email',
+    channel: ({ email: 'Email', sms: 'SMS', push: 'Push' } as const)[
+      normalizeCampaignChannel(c.type)
+    ],
     status: STATUS_TO_DISPLAY[c.status] ?? 'Draft',
     audienceSegmentId: c.audienceSegmentId,
     audience: segmentAudience ?? c.audienceCount ?? c.sentCount,

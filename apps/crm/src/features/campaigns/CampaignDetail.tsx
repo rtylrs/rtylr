@@ -1,11 +1,12 @@
 import React from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useParams, useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, Mail } from 'lucide-react';
+import { ArrowLeft, Bell, Mail, MessageSquare } from 'lucide-react';
 import { useGetCampaign, useCampaignStats } from '../../shared/hooks/queries/useCampaigns';
 import { CAMPAIGN_STATUS_LABELS, isCampaignStatus } from '../../shared/schemas/campaigns';
 import { Breadcrumbs, Card, SkeletonList, EmptyState } from '../../shared/components/ui';
 import { CampaignStatsCard } from '../../shared/components/crm';
+import { normalizeCampaignChannel } from '../../shared/lib/campaignUtils';
 
 const CampaignDetail: React.FC = () => {
   const { id } = useParams({ strict: false });
@@ -23,6 +24,9 @@ const CampaignDetail: React.FC = () => {
   } = useCampaignStats(campaignId);
   const campaign = fetched;
   const stats = fetchedStats;
+  const channel = normalizeCampaignChannel(campaign?.type);
+  const ChannelIcon = channel === 'sms' ? MessageSquare : channel === 'push' ? Bell : Mail;
+  const channelLabel = channel === 'sms' ? 'SMS' : channel === 'push' ? 'Push' : 'Email';
   const normalizedStatus = campaign?.status.toLowerCase() ?? '';
   const campaignIsActive = normalizedStatus === 'active';
   const campaignStatusLabel = isCampaignStatus(normalizedStatus)
@@ -92,7 +96,7 @@ const CampaignDetail: React.FC = () => {
                 justifyContent: 'center',
               }}
             >
-              <Mail size={20} />
+              <ChannelIcon size={20} aria-hidden="true" />
             </div>
             <div className="crm-entity-header__content" style={{ flex: 1 }}>
               <h2
@@ -101,7 +105,8 @@ const CampaignDetail: React.FC = () => {
                 {campaign.name}
               </h2>
               <p style={{ fontSize: '12px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
-                {campaign.subject ?? ''}
+                {channelLabel}
+                {campaign.subject ? ` · ${campaign.subject}` : ''}
               </p>
             </div>
             <span
