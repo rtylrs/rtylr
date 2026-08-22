@@ -187,18 +187,6 @@ func TestUpsertTimesheet_AndGet(t *testing.T) {
 	}
 }
 
-func TestListApprovedBillableEntries_NoError(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
-	ctx := context.Background()
-
-	entries, err := repo.ListApprovedBillableEntries(ctx, testutil.OwnerID)
-	if err != nil {
-		t.Fatalf("ListApprovedBillableEntries: %v", err)
-	}
-	_ = entries
-}
-
 func TestGetTimesheetForPeriod_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

@@ -49,9 +49,4 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	serverHttp.RegisterPATCHWithValidation[handlers.MarkTimeEntriesInvoicedRequest, handlers.MarkTimeEntriesInvoicedResponse](
 		ctx, router, handlers.MarkTimeEntriesInvoicedRoutes(), &handlers.MarkTimeEntriesInvoicedHandler{Service: service},
 	)
-
-	// Billable export
-	serverHttp.RegisterPOSTWithValidation[handlers.ExportBillableRequest, handlers.ExportBillableResponse](
-		ctx, router, handlers.ExportBillableRoutes(), &handlers.ExportBillableHandler{Service: service},
-	)
 }

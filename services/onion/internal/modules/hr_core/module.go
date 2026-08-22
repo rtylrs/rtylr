@@ -233,3 +233,10 @@ func (m *Module) GetApprovalChain(ctx context.Context, ownerID int64, requestTyp
 		Levels:      levels,
 	}, nil
 }
+
+// SetTerminationRevoker connects employment termination to the entitlement
+// owner without importing it: the port lives in hr_core's application layer
+// and team's service satisfies it structurally (#834).
+func (m *Module) SetTerminationRevoker(r application.TerminationRevoker) {
+	m.service.SetTerminationRevoker(r)
+}
