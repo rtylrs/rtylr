@@ -44,6 +44,9 @@ func (a *GiftCardAPI) ListGiftCards(ctx context.Context, _ *posgiftcardv1.ListGi
 }
 
 func (a *GiftCardAPI) CreateGiftCard(ctx context.Context, req *posgiftcardv1.CreateGiftCardRequest) (*posgiftcardv1.CreateGiftCardResponse, error) {
+	if err := requireGiftCardManager(ctx); err != nil {
+		return nil, err
+	}
 	businessID, err := authenticatedGiftCardBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -60,7 +63,8 @@ func (a *GiftCardAPI) CreateGiftCard(ctx context.Context, req *posgiftcardv1.Cre
 		}
 	}
 
-	id, createErr := a.Service.Create(ctx, businessID, domain.GiftCardInput{
+	device := authPkg.DeviceCtx(ctx)
+	id, createErr := a.Service.CreateForOwner(ctx, businessID, device.User.UserID, domain.GiftCardInput{
 		Code:          req.GetCode(),
 		InitialAmount: req.GetInitialAmount(),
 		CustomerName:  req.GetCustomerName(),
@@ -96,6 +100,9 @@ func (a *GiftCardAPI) GetGiftCardByCode(ctx context.Context, req *posgiftcardv1.
 }
 
 func (a *GiftCardAPI) RedeemGiftCard(ctx context.Context, req *posgiftcardv1.RedeemGiftCardRequest) (*posgiftcardv1.RedeemGiftCardResponse, error) {
+	if err := requireGiftCardManager(ctx); err != nil {
+		return nil, err
+	}
 	businessID, err := authenticatedGiftCardBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -141,6 +148,14 @@ func authenticatedGiftCardBusinessID(ctx context.Context) (int64, error) {
 		return 0, onekiterrors.PermissionDenied()
 	}
 	return businessID, nil
+}
+
+func requireGiftCardManager(ctx context.Context) error {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || !authPkg.HasAnyRole(authUser, "owner", "admin", "console_admin", "pos_manager") {
+		return onekiterrors.PermissionDenied()
+	}
+	return nil
 }
 
 func toProtoGiftCard(gc domain.GiftCard) *posgiftcardv1.GiftCard {
