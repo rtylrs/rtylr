@@ -309,7 +309,7 @@ const CustomerProfile: React.FC = () => {
             </Button>
             <Button
               variant="outline"
-              onClick={() => navigate({ to: '/customers/merge?primary=' + customer.id })}
+              onClick={() => navigate({ to: '/customers/merge', search: { primary: customer.id } })}
             >
               <Users size={13} />
               Merge

@@ -49,15 +49,19 @@ const Templates: React.FC = () => {
     }
   };
 
-  const applyTemplate = (t: (typeof templates)[number]) => {
+  const applyTemplate = (t: (typeof templates)[number]): void => {
+    // Search params are validated by campaignEditorSearchSchema on the target
+    // routes; the SMS editor seeds subject the same way the email one does.
     if (t.channel === 'email') {
       navigate({
-        to: `/campaigns/email?name=${encodeURIComponent(t.name)}&subject=${encodeURIComponent(
-          t.subject || ''
-        )}&body=${encodeURIComponent(t.body)}`,
+        to: '/campaigns/email',
+        search: { name: t.name, subject: t.subject || '', body: t.body },
       });
     } else {
-      navigate({ to: '/campaigns/sms' });
+      navigate({
+        to: '/campaigns/sms',
+        search: { name: t.name, subject: t.subject || '', body: t.body },
+      });
     }
   };
 

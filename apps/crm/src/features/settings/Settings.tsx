@@ -56,10 +56,8 @@ const GeneralTab: React.FC = () => {
     setForm((f) => ({ ...f, [k]: v }));
 
   const handleSave = (): void => {
-    update.mutate(form, {
-      onSuccess: () => toast.success('Settings saved'),
-      onError: () => toast.error('Failed to save settings'),
-    });
+    // useUpdateCrmSettings already toasts success/error via i18n.
+    update.mutate(form);
   };
 
   return (

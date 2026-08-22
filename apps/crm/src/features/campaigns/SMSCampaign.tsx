@@ -38,6 +38,9 @@ const SMSCampaign: React.FC = () => {
 
   const [name, setName] = useState(search.name || '');
   const [segmentId, setSegmentId] = useState<string>(search.segment || '');
+  // ?subject= arrives when seeded from a template; SMS has no subject input,
+  // but the campaign contract requires one on the wire.
+  const [subject, setSubject] = useState(search.subject || '');
   const [body, setBody] = useState(search.body || DEFAULT_SMS_BODY);
   const pending = create.isPending || update.isPending || updateStatus.isPending;
 
@@ -47,6 +50,7 @@ const SMSCampaign: React.FC = () => {
       setSegmentId(
         existingCampaign.audienceSegmentId != null ? String(existingCampaign.audienceSegmentId) : ''
       );
+      setSubject(existingCampaign.subject ?? '');
       setBody(existingCampaign.body ?? '');
       return;
     }
@@ -62,6 +66,7 @@ const SMSCampaign: React.FC = () => {
     const payload = {
       name,
       type: 'sms',
+      subject,
       body,
       audienceSegmentId: segmentId ? Number(segmentId) : null,
     };

@@ -1,4 +1,5 @@
 import { fromOneKitJson, oneKitResult, toOneKitJson, toOptionalFiniteNumber } from '@voxire/api';
+import type { UpdateLoyaltyConfigRequest } from '@voxire/voxie/crm/loyalty/v1/types';
 import { crmCompatibilityClient, crmCustomerClient, crmSegmentClient } from '../lib/clients';
 
 // ── Types ────────────────────────────────────────────────────────
@@ -343,35 +344,29 @@ export const toLeadMutationPayload = (
   notes: data.notes,
 });
 
+/**
+ * Wire input for CreateCustomerRequest / UpdateCustomerBody
+ * (gen/ts crm/customer/v1/types.ts). The generated client validates camelCase
+ * props and encodes snake_case itself, so callers forward this shape as-is.
+ */
 interface CustomerMutationPayload {
   firstName: string;
-  lastName: string;
+  lastName?: string;
   email?: string;
   phone?: string;
   dateOfBirth?: string;
+  gender?: string;
+  address?: string;
+  city?: string;
+  country?: string;
   tags?: string[];
   notes?: string;
+  consent?: Record<string, boolean>;
 }
 
-function splitCustomerName(name?: string): { firstName: string; lastName: string } {
-  const parts = (name ?? '').trim().split(/\s+/).filter(Boolean);
-  return {
-    firstName: parts[0] ?? '',
-    lastName: parts.slice(1).join(' '),
-  };
-}
-
-function toCustomerMutationPayload(data: Partial<Customer>): CustomerMutationPayload {
-  const names = splitCustomerName(data.name);
-  return {
-    firstName: names.firstName,
-    lastName: names.lastName,
-    email: data.email,
-    phone: data.phone,
-    dateOfBirth: data.birthday,
-    tags: data.tags,
-    notes: data.notes,
-  };
+/** UpdateCustomerBody additionally carries isActive. */
+interface CustomerUpdateBody extends CustomerMutationPayload {
+  isActive?: boolean;
 }
 
 interface ImportCustomersPayload {
@@ -379,23 +374,11 @@ interface ImportCustomersPayload {
 }
 
 interface LoyaltyPointsPayload {
-  customerId: number;
-  points: number;
-  description?: string;
-}
-
-interface LoyaltyConfigPayload {
-  pointsPerDollar?: number;
-  pointsValue?: number;
-  isActive?: boolean;
-}
-
-function toLoyaltyConfigPayload(config: Partial<LoyaltyConfig>): LoyaltyConfigPayload {
-  return {
-    pointsPerDollar: config.pointsPerDollar,
-    pointsValue: config.redemptionRate,
-    isActive: config.programEnabled,
-  };
+  customerId: string;
+  points: string;
+  description: string;
+  referenceId?: string;
+  referenceType: string;
 }
 
 interface SegmentMutationPayload {
@@ -412,61 +395,71 @@ function toSegmentMutationPayload(data: Partial<Segment>): SegmentMutationPayloa
   };
 }
 
+/**
+ * Wire input mirroring CreateCampaignRequest / UpdateCampaignBody
+ * (gen/ts crm/campaign/v1/types.ts): camelCase, int64 segmentId as string.
+ */
 interface CampaignMutationPayload {
-  name?: string;
-  type?: string;
-  audienceSegmentId?: number;
-  subject?: string;
-  body?: string;
-  scheduledAt?: string;
+  name: string;
+  description: string;
+  channel: string;
+  segmentId?: string;
+  subject: string;
+  content: string;
+  scheduledAt: string;
 }
 
-function toCampaignMutationPayload(data: Partial<Campaign>): CampaignMutationPayload {
+/**
+ * Maps caller payloads onto the generated request shape. Legacy editor keys
+ * are accepted alongside the contract keys: type→channel, body→content,
+ * audienceSegmentId→segmentId, scheduledFor→scheduledAt. The int64 segment id
+ * travels as a string on the wire.
+ */
+function toCampaignMutationPayload(
+  data: Partial<Campaign> & {
+    /** Contract key accepted alongside the legacy `body`. */
+    content?: string;
+    /** Contract key accepted alongside the legacy `scheduledFor`. */
+    scheduledAt?: string;
+    /** Legacy caller key for channel ('email' | 'sms'). */
+    type?: string;
+    /** Legacy caller key for segmentId. */
+    audienceSegmentId?: number | null;
+  }
+): CampaignMutationPayload {
+  const rawSegmentId = data.segmentId ?? data.audienceSegmentId;
   return {
-    name: data.name,
-    type: data.channel,
-    audienceSegmentId: data.segmentId,
-    subject: data.subject,
-    body: data.body,
-    scheduledAt: data.scheduledFor,
+    name: data.name ?? '',
+    description: data.description ?? '',
+    channel: data.channel ?? data.type ?? '',
+    ...(rawSegmentId === undefined || rawSegmentId === null
+      ? {}
+      : { segmentId: String(rawSegmentId) }),
+    subject: data.subject ?? '',
+    content: data.content ?? data.body ?? '',
+    scheduledAt: data.scheduledAt ?? data.scheduledFor ?? '',
   };
 }
 
-interface AutomationMutationPayload {
-  name?: string;
+/**
+ * Canonical backend shape emitted by useAutomations' toBackendRequest
+ * (name, triggerType, triggerConfig, actions, isActive). Automations have no
+ * .onk contract yet — these calls go over REST through the safe client, whose
+ * interceptor performs the camelCase→snake_case conversion. Declared as a
+ * type alias (not an interface) so it satisfies the REST layer's
+ * Record<string, unknown> payload parameter via implicit index signature.
+ */
+type AutomationBackendRequest = {
+  name: string;
   triggerType?: string;
   triggerConfig?: Record<string, unknown>;
-  actions?: Array<{ id: string; type: string; label: string; x: number; y: number }>;
+  actions?: unknown[];
   isActive?: boolean;
-}
+};
 
-function toAutomationMutationPayload(data: Partial<Automation>): AutomationMutationPayload {
-  return {
-    name: data.name,
-    triggerType: data.trigger,
-    triggerConfig: {},
-    actions: data.nodes,
-    isActive: data.status === 'active',
-  };
-}
-
-interface SettingsMutationPayload {
-  defaultConsent?: boolean;
-  timezone?: string;
-  fromEmail?: string;
-  fromName?: string;
-  smsSenderId?: string;
-}
-
-function toSettingsMutationPayload(data: Partial<Settings>): SettingsMutationPayload {
-  return {
-    defaultConsent: data.defaultConsent,
-    timezone: data.timezone,
-    fromEmail: data.fromEmail,
-    fromName: data.fromName,
-    smsSenderId: data.smsSenderId,
-  };
-}
+// UpdateSettingsRequest (gen/ts crm/settings/v1/types.ts) declares its fields
+// directly; the generated client validates camelCase props and encodes
+// snake_case itself, so no local mapper is needed.
 
 export interface CreateTouchpointRequest {
   leadId: number;
@@ -599,6 +592,16 @@ function withId<B>(id: string | number, value: unknown): { id: string; body: B }
 }
 
 /**
+ * Same envelope as withId, but the body is forwarded untouched for generated
+ * clients that encode camelCase props to snake_case themselves. Running
+ * toOneKitJson over those bodies renames keys before validation and drops
+ * every field — the client would throw TypeError before any network traffic.
+ */
+function typedRequest<B>(id: string | number, body: B): { id: string; body: B } {
+  return { id: String(id), body };
+}
+
+/**
  * Coerce wire values into finite numbers. Money fields (mrr, mrr_potential,
  * total_mrr) are serialized by the backend's money.Amount as decimal strings
  * ("1500.00"); without this, arithmetic like reduce(sum + mrr) concatenates
@@ -652,15 +655,11 @@ export const crmApi = {
       })
     ),
 
-  createCustomer: (data: Partial<Customer>) =>
-    compatResult<Customer>(() =>
-      crmCompatibilityClient.createCustomer(flat(toCustomerMutationPayload(data)))
-    ),
+  createCustomer: (data: CustomerMutationPayload) =>
+    compatResult<Customer>(() => crmCompatibilityClient.createCustomer(data)),
 
-  updateCustomer: (id: number, data: Partial<Customer>) =>
-    compatResult<Customer>(() =>
-      crmCompatibilityClient.updateCustomer(withId(id, toCustomerMutationPayload(data)))
-    ),
+  updateCustomer: (id: number, data: CustomerUpdateBody) =>
+    compatResult<Customer>(() => crmCompatibilityClient.updateCustomer(typedRequest(id, data))),
 
   deleteCustomer: (id: number) =>
     oneKitResult(() => crmCustomerClient.deleteCustomer({ id: String(id) })),
@@ -684,27 +683,37 @@ export const crmApi = {
     ),
 
   // Loyalty
+  // AwardPointsRequest / RedeemPointsRequest (gen/ts crm/loyalty/v1/types.ts):
+  // customerId and points are int64 fields travelling as strings, description
+  // and referenceType are required. The generated client validates camelCase
+  // props before encoding.
   awardPoints: (customerId: number, points: number, reason?: string) =>
-    compatResult<unknown>(() =>
-      crmCompatibilityClient.awardPoints(
-        flat({ customerId, points, description: reason, referenceType: 'manual' })
-      )
-    ),
+    compatResult<unknown>(() => {
+      const payload: LoyaltyPointsPayload = {
+        customerId: String(customerId),
+        points: String(points),
+        description: reason?.trim() || 'Manual adjustment',
+        referenceType: 'manual',
+      };
+      return crmCompatibilityClient.awardPoints(payload);
+    }),
 
   redeemPoints: (customerId: number, points: number, reason?: string) =>
-    compatResult<unknown>(() =>
-      crmCompatibilityClient.redeemPoints(
-        flat({ customerId, points, description: reason, referenceType: 'manual' })
-      )
-    ),
+    compatResult<unknown>(() => {
+      const payload: LoyaltyPointsPayload = {
+        customerId: String(customerId),
+        points: String(points),
+        description: reason?.trim() || 'Manual adjustment',
+        referenceType: 'manual',
+      };
+      return crmCompatibilityClient.redeemPoints(payload);
+    }),
 
   getLoyaltyConfig: () =>
     compatResult<LoyaltyConfig>(() => crmCompatibilityClient.getLoyaltyConfig({})),
 
-  updateLoyaltyConfig: (config: Partial<LoyaltyConfig>) =>
-    compatResult<LoyaltyConfig>(() =>
-      crmCompatibilityClient.updateLoyaltyConfig(flat(toLoyaltyConfigPayload(config)))
-    ),
+  updateLoyaltyConfig: (config: UpdateLoyaltyConfigRequest) =>
+    compatResult<LoyaltyConfig>(() => crmCompatibilityClient.updateLoyaltyConfig(config)),
 
   getLoyaltyTransactions: (customerId?: number, limit?: number, offset?: number) =>
     compatResult<LoyaltyTransaction[]>(() =>
@@ -779,12 +788,12 @@ export const crmApi = {
 
   createCampaign: (data: Partial<Campaign>) =>
     compatResult<Campaign>(() =>
-      crmCompatibilityClient.createCampaign(flat(toCampaignMutationPayload(data)))
+      crmCompatibilityClient.createCampaign(toCampaignMutationPayload(data))
     ),
 
   updateCampaign: (id: number, data: Partial<Campaign>) =>
     compatResult<Campaign>(() =>
-      crmCompatibilityClient.updateCampaign(withId(id, toCampaignMutationPayload(data)))
+      crmCompatibilityClient.updateCampaign(typedRequest(id, toCampaignMutationPayload(data)))
     ),
 
   updateCampaignStatus: (id: number, status: string) =>
@@ -802,15 +811,11 @@ export const crmApi = {
   getAutomation: (id: number) =>
     compatResult<Automation>(() => crmCompatibilityClient.getAutomation({ id: String(id) })),
 
-  createAutomation: (data: Partial<Automation>) =>
-    compatResult<Automation>(() =>
-      crmCompatibilityClient.createAutomation(flat(toAutomationMutationPayload(data)))
-    ),
+  createAutomation: (data: AutomationBackendRequest) =>
+    compatResult<Automation>(() => crmCompatibilityClient.createAutomation(data)),
 
-  updateAutomation: (id: number, data: Partial<Automation>) =>
-    compatResult<Automation>(() =>
-      crmCompatibilityClient.updateAutomation(withId(id, toAutomationMutationPayload(data)))
-    ),
+  updateAutomation: (id: number, data: AutomationBackendRequest) =>
+    compatResult<Automation>(() => crmCompatibilityClient.updateAutomation(typedRequest(id, data))),
 
   deleteAutomation: (id: number) =>
     compatResult<unknown>(() => crmCompatibilityClient.deleteAutomation({ id: String(id) })),
@@ -831,7 +836,15 @@ export const crmApi = {
 
   updateSettings: (data: Partial<Settings>) =>
     compatResult<Settings>(() =>
-      crmCompatibilityClient.updateSettings(flat(toSettingsMutationPayload(data)))
+      // UpdateSettingsRequest declares its fields directly; the generated
+      // client validates camelCase props and encodes snake_case itself.
+      crmCompatibilityClient.updateSettings({
+        defaultConsent: data.defaultConsent,
+        timezone: data.timezone,
+        fromEmail: data.fromEmail,
+        fromName: data.fromName,
+        smsSenderId: data.smsSenderId,
+      })
     ),
 
   // Sales Pipeline

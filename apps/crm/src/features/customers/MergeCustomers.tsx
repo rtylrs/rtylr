@@ -1,47 +1,54 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
-import { useNavigate, useRouterState } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Users, ArrowRight } from 'lucide-react';
 import { useListCustomers, useMergeCustomers } from '../../shared/hooks/queries/useCustomers';
-import { Breadcrumbs, Button, Card, PageHeader } from '../../shared/components/ui';
+import { Breadcrumbs, Button, Card, ConfirmModal, PageHeader } from '../../shared/components/ui';
 import { SearchableCustomerSelect, CustomerAvatar, TierBadge } from '../../shared/components/crm';
 import { getCustomerTier } from '../../shared/lib/tiers';
 
 const MergeCustomers: React.FC = () => {
   const navigate = useNavigate();
-  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
+  const { t } = useTranslation();
+  // Validated by customerMergeSearchSchema on the route — no hand-parsing.
+  const search = useSearch({ from: '/layout/customers/merge' });
   const merge = useMergeCustomers();
   // Backend caps page size at 100 — the picker covers the first page.
   const { data: fetched } = useListCustomers({ limit: 100, offset: 0 });
   const customers = fetched ?? [];
 
-  const [primaryId, setPrimaryId] = useState<number | null>(
-    Number(new URLSearchParams(searchStr).get('primary')) || null
-  );
+  const [primaryId, setPrimaryId] = useState<number | null>(search.primary ?? null);
   const [secondaryId, setSecondaryId] = useState<number | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const primary = customers.find((c) => c.id === primaryId);
   const secondary = customers.find((c) => c.id === secondaryId);
 
-  const handleMerge = () => {
-    if (!primaryId || !secondaryId) return;
-    if (primaryId === secondaryId) {
-      toast.error('Cannot merge a customer with themselves');
-      return;
-    }
+  const requestMerge = (): void => {
+    if (!primaryId || !secondaryId || primaryId === secondaryId) return;
     merge.mutate(
       { primaryId, secondaryId },
       {
         onSuccess: () => {
-          toast.success('Customers merged');
+          toast.success(t('crm.customers.merged'));
           navigate({ to: '/customers' });
         },
         onError: () => {
-          toast.error('Failed to merge customers');
+          toast.error(t('crm.customers.mergeFailed'));
         },
       }
     );
+  };
+
+  const handleMergeClick = (): void => {
+    if (!primaryId || !secondaryId) return;
+    if (primaryId === secondaryId) {
+      toast.error(t('crm.customers.mergeSelfError'));
+      return;
+    }
+    setConfirmOpen(true);
   };
 
   const renderPreview = () => {
@@ -201,11 +208,27 @@ const MergeCustomers: React.FC = () => {
           <Button
             variant="primary"
             disabled={!primaryId || !secondaryId || merge.isPending}
-            onClick={handleMerge}
+            onClick={handleMergeClick}
           >
             <Users size={13} /> {merge.isPending ? 'Merging…' : 'Merge customers'}
           </Button>
         </div>
+
+        <ConfirmModal
+          open={confirmOpen}
+          onClose={() => setConfirmOpen(false)}
+          onConfirm={requestMerge}
+          title={t('crm.customers.mergeConfirmTitle')}
+          description={
+            primary && secondary
+              ? t('crm.customers.mergeConfirmDescription', {
+                  primary: primary.name,
+                  secondary: secondary.name,
+                })
+              : ''
+          }
+          confirmLabel={t('crm.customers.mergeConfirmAction')}
+        />
       </div>
     </>
   );

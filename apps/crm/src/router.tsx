@@ -100,9 +100,16 @@ const customersImportRoute = createRoute({
   component: () => <>{lazy(<ImportCustomers />)}</>,
 });
 
+// Merge deep-links carry ?primary= (the customer to keep), set from the
+// profile page. Validated so stale or hand-edited URLs degrade to defaults.
+const customerMergeSearchSchema = z.object({
+  primary: z.number().int().positive().optional().catch(undefined),
+});
+
 const customersMergeRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: '/customers/merge',
+  validateSearch: customerMergeSearchSchema,
   component: () => <>{lazy(<MergeCustomers />)}</>,
 });
 

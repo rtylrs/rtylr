@@ -330,6 +330,7 @@ function RuleBuilder({
           <button
             type="button"
             onClick={() => onSave(segmentName, rules)}
+            disabled={!segmentName.trim()}
             style={{
               padding: '8px 16px',
               borderRadius: '8px',
@@ -338,7 +339,8 @@ function RuleBuilder({
               background: ACCENT,
               color: '#fff',
               border: 'none',
-              cursor: 'pointer',
+              cursor: segmentName.trim() ? 'pointer' : 'not-allowed',
+              opacity: segmentName.trim() ? 1 : 0.5,
             }}
           >
             Create Segment
@@ -554,8 +556,10 @@ const Segments: React.FC = () => {
   };
 
   const handleCreate = (name: string, rules: Rule[]): void => {
+    // description is a required column on the backend segment record; the
+    // inline builder collects none, so persist an empty label.
     createSegment.mutate(
-      { name, rules: rules.map((r) => `${r.field} ${r.operator} ${r.value}`) },
+      { name, description: '', rules: rules.map((r) => `${r.field} ${r.operator} ${r.value}`) },
       {
         onSuccess: () => {
           toast.success('Segment created');

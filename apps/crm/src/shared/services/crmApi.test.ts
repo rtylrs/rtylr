@@ -55,27 +55,164 @@ describe('crmApi', () => {
     });
   });
 
-  it('converts compatibility request bodies to the backend wire shape', async () => {
-    crmApi.createCustomer({ name: 'Jane Doe', email: 'jane@test.com' });
+  it('forwards customer mutations in the camelCase contract shape untouched', async () => {
+    // The generated CreateCustomerRequest validates camelCase props itself;
+    // any snake_case conversion here would fail validation before network.
+    crmApi.createCustomer({
+      firstName: 'Jane',
+      lastName: 'Doe',
+      email: 'jane@test.com',
+      consent: { email: true },
+    });
+    crmApi.updateCustomer(7, { firstName: 'Jane', tags: ['vip'] });
+    await Promise.resolve();
+
+    expect(mockClients.compatibility.createCustomer).toHaveBeenCalledWith({
+      firstName: 'Jane',
+      lastName: 'Doe',
+      email: 'jane@test.com',
+      consent: { email: true },
+    });
+
+    // UpdateCustomerRequest is { id, body }: id binds the path segment, body
+    // stays camelCase for the generated encoder.
+    expect(mockClients.compatibility.updateCustomer).toHaveBeenCalledWith({
+      id: '7',
+      body: { firstName: 'Jane', tags: ['vip'] },
+    });
+  });
+
+  it('maps campaign editor payloads onto CreateCampaignRequest/UpdateCampaignRequest', async () => {
+    crmApi.createCampaign({
+      name: 'Spring promo',
+      type: 'email',
+      subject: 'Hello',
+      body: '<p>Hi</p>',
+      audienceSegmentId: 12,
+    } as unknown as Parameters<typeof crmApi.createCampaign>[0]);
+    crmApi.updateCampaign(9, {
+      name: 'SMS blast',
+      channel: 'sms',
+      content: 'Flash sale',
+      scheduledAt: '2026-09-01T10:00:00Z',
+    } as unknown as Parameters<typeof crmApi.updateCampaign>[1]);
+    await Promise.resolve();
+
+    // Legacy caller keys map onto the contract: type→channel, body→content,
+    // audienceSegmentId→segmentId (int64 travels as a string).
+    expect(mockClients.compatibility.createCampaign).toHaveBeenCalledWith({
+      name: 'Spring promo',
+      description: '',
+      channel: 'email',
+      segmentId: '12',
+      subject: 'Hello',
+      content: '<p>Hi</p>',
+      scheduledAt: '',
+    });
+
+    expect(mockClients.compatibility.updateCampaign).toHaveBeenCalledWith({
+      id: '9',
+      body: {
+        name: 'SMS blast',
+        description: '',
+        channel: 'sms',
+        subject: '',
+        content: 'Flash sale',
+        scheduledAt: '2026-09-01T10:00:00Z',
+      },
+    });
+  });
+
+  it('passes automation payloads straight through to the REST layer', async () => {
+    const request = {
+      name: 'Winback',
+      triggerType: 'inactivity',
+      triggerConfig: { days: 60 },
+      actions: [{ type: 'send_email' }],
+      isActive: true,
+    };
+    crmApi.createAutomation(request);
+    crmApi.updateAutomation(4, request);
+    await Promise.resolve();
+
+    // Automations have no contract yet; the safe client's interceptor owns
+    // key casing, so the hook's canonical object must reach it unmodified
+    // (the old mapper zeroed triggerType/actions and forced isActive).
+    expect(mockClients.compatibility.createAutomation).toHaveBeenCalledWith(request);
+    expect(mockClients.compatibility.updateAutomation).toHaveBeenCalledWith({
+      id: '4',
+      body: request,
+    });
+  });
+
+  it('sends loyalty points mutations with int64 fields as strings', async () => {
+    crmApi.awardPoints(5, 100);
+    crmApi.redeemPoints(6, 50, 'Reward redemption');
+    await Promise.resolve();
+
+    // AwardPointsRequest / RedeemPointsRequest require string customerId and
+    // points plus a non-empty description and referenceType.
+    expect(mockClients.compatibility.awardPoints).toHaveBeenCalledWith({
+      customerId: '5',
+      points: '100',
+      description: 'Manual adjustment',
+      referenceType: 'manual',
+    });
+    expect(mockClients.compatibility.redeemPoints).toHaveBeenCalledWith({
+      customerId: '6',
+      points: '50',
+      description: 'Reward redemption',
+      referenceType: 'manual',
+    });
+  });
+
+  it('forwards UpdateLoyaltyConfigRequest without remapping', async () => {
+    const request = {
+      isEnabled: true,
+      pointsPerCurrencyUnit: 2,
+      currencyPerPoint: 0.02,
+      bronzeMin: '1',
+      silverMin: '500',
+      goldMin: '1500',
+      platinumMin: '5000',
+      bronzeDiscountPct: 1,
+      silverDiscountPct: 5,
+      goldDiscountPct: 10,
+      platinumDiscountPct: 15,
+      pointsExpiryDays: '365',
+    };
+    crmApi.updateLoyaltyConfig(request);
+    await Promise.resolve();
+
+    // useLoyalty builds the canonical request; the old payload mapper renamed
+    // it into a shape the typed client rejects.
+    expect(mockClients.compatibility.updateLoyaltyConfig).toHaveBeenCalledWith(request);
+  });
+
+  it('sends UpdateSettingsRequest fields directly in camelCase', async () => {
+    crmApi.updateSettings({
+      defaultConsent: true,
+      timezone: 'UTC',
+      fromEmail: 'hello@rtylr.com',
+      fromName: 'rtylr',
+      smsSenderId: 'RTYLR',
+    });
+    await Promise.resolve();
+
+    expect(mockClients.compatibility.updateSettings).toHaveBeenCalledWith({
+      defaultConsent: true,
+      timezone: 'UTC',
+      fromEmail: 'hello@rtylr.com',
+      fromName: 'rtylr',
+      smsSenderId: 'RTYLR',
+    });
+  });
+
+  it('keeps path-bound status bodies intact', async () => {
     crmApi.updateCampaignStatus(7, 'active');
     await Promise.resolve();
 
-    // CreateCustomerRequest declares its fields directly. There is no `body`
-    // member to wrap them in, so the wrapper was an extra level the server
-    // never asked for.
-    expect(mockClients.compatibility.createCustomer).toHaveBeenCalledWith({
-      first_name: 'Jane',
-      last_name: 'Doe',
-      email: 'jane@test.com',
-      phone: undefined,
-      date_of_birth: undefined,
-      tags: undefined,
-      notes: undefined,
-    });
-
     // UpdateCampaignStatusRequest is { id, body }: id binds the path segment.
-    // It used to appear in both places, which is harmless but says the shape
-    // was not being read from the contract.
     expect(mockClients.compatibility.updateCampaignStatus).toHaveBeenCalledWith({
       id: '7',
       body: { status: 'active' },

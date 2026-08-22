@@ -500,7 +500,7 @@ const Campaigns: React.FC = () => {
       return;
     }
     const target = c.channel === 'SMS' ? '/campaigns/sms' : '/campaigns/email';
-    navigate({ to: `${target}?id=${c.id}` });
+    navigate({ to: target, search: { id: c.id } });
   };
 
   const handleDelete = (id: number): void => {

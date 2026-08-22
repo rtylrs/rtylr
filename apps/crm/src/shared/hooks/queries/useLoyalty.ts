@@ -9,6 +9,7 @@ import {
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
+import type { UpdateLoyaltyConfigRequest } from '@voxire/voxie/crm/loyalty/v1/types';
 import { crmApi } from '../../services/crmApi';
 import { unwrapList } from '../../lib/unwrapList';
 import {
@@ -44,20 +45,25 @@ interface AwardRedeemPayload {
   reason?: string;
 }
 
-function toUpdateLoyaltyConfigRequest(config: Partial<LoyaltyConfig>): Record<string, unknown> {
+function toUpdateLoyaltyConfigRequest(config: Partial<LoyaltyConfig>): UpdateLoyaltyConfigRequest {
+  // UpdateLoyaltyConfigRequest marks every numeric field @gt(0), so zero
+  // fallbacks would be rejected by the typed client before any network call;
+  // the int64 threshold/expiry fields travel as strings on the wire.
+  const positive = (value: number | undefined, fallback: number): number =>
+    value !== undefined && Number.isFinite(value) && value > 0 ? value : fallback;
   return {
     isEnabled: config.programEnabled ?? false,
-    pointsPerCurrencyUnit: config.pointsPerDollar ?? 1,
-    currencyPerPoint: config.redemptionRate ?? 0.01,
-    bronzeMin: config.bronzeMin ?? 0,
-    silverMin: config.silverMin ?? 500,
-    goldMin: config.goldMin ?? 1500,
-    platinumMin: config.platinumMin ?? 5000,
-    bronzeDiscountPct: config.bronzeDiscountPct ?? 0,
-    silverDiscountPct: config.silverDiscountPct ?? 5,
-    goldDiscountPct: config.goldDiscountPct ?? 10,
-    platinumDiscountPct: config.platinumDiscountPct ?? 15,
-    pointsExpiryDays: config.pointsExpiry ?? 365,
+    pointsPerCurrencyUnit: positive(config.pointsPerDollar, 1),
+    currencyPerPoint: positive(config.redemptionRate, 0.01),
+    bronzeMin: String(positive(config.bronzeMin, 1)),
+    silverMin: String(positive(config.silverMin, 500)),
+    goldMin: String(positive(config.goldMin, 1500)),
+    platinumMin: String(positive(config.platinumMin, 5000)),
+    bronzeDiscountPct: positive(config.bronzeDiscountPct, 1),
+    silverDiscountPct: positive(config.silverDiscountPct, 5),
+    goldDiscountPct: positive(config.goldDiscountPct, 10),
+    platinumDiscountPct: positive(config.platinumDiscountPct, 15),
+    pointsExpiryDays: String(positive(config.pointsExpiry, 365)),
   };
 }
 

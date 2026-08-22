@@ -70,14 +70,17 @@ export const useCreateCampaign = (): UseMutationResult<
   const { t } = useTranslation();
   return useMutation<CampaignMutationResponse, unknown, Partial<Campaign>>({
     mutationFn: async (data: Partial<Campaign>): Promise<CampaignMutationResponse> => {
+      // CreateCampaignResponse carries the id as an int64 JSON string
+      // (campaign_id); coerce once here so callers keep working with numbers.
       const res = (await unwrap(
         crmApi.createCampaign(data as unknown as Partial<import('../../services/crmApi').Campaign>)
       )) as {
-        campaignId?: number;
-        campaign_id?: number;
+        campaignId?: number | string;
+        campaign_id?: number | string;
         message?: string;
       };
-      const campaignId = res.campaignId ?? res.campaign_id;
+      const rawId = res.campaignId ?? res.campaign_id;
+      const campaignId = rawId === undefined || rawId === null ? undefined : Number(rawId);
       return { campaignId, campaign_id: campaignId, message: res.message };
     },
     onSuccess: (): void => {
