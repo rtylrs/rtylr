@@ -728,7 +728,11 @@
     "refreshMembersCta": "Refresh",
     "moveGateReason": "Only project admins can move this project to another workspace.",
     "transferGateReason": "Only project admins can transfer ownership of this project.",
-    "deleteGateReason": "Only project admins can delete this project."
+    "deleteGateReason": "Only project admins can delete this project.",
+    "visibility": "Visibility",
+    "visibilitySaved": "Visibility updated",
+    "visibilityGateReason": "Only a project admin can change visibility.",
+    "visibilityPersonalGate": "Your My Tasks project is always private."
   },
   "bulkEdit": {
     "clearSelectionLabel": "Clear selection"
@@ -757,5 +761,11 @@
     "purge": "Permanently delete {{name}}",
     "purgeTitle": "Delete permanently",
     "purgeCta": "Delete permanently"
+  },
+  "visibility": {
+    "private": "Private",
+    "public": "Public",
+    "archived": "Archived",
+    "publicHint": "Public exposes this project's name, colour, status and dates on member profiles to business colleagues. It never grants access to its tasks."
   }
 }
