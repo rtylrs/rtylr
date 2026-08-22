@@ -1,18 +1,31 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Archive, RotateCcw, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { useUserStore } from '@voxire/auth';
+import type { Project } from '@voxire/voxie/flow/project/v2/types';
+import ConfirmDialog from '../../shared/components/ConfirmDialog';
+import { canPurgeProject } from './canPurgeProject';
 import { useArchivedProjects } from './useAllProjects';
-import { useRestoreProject } from './useBin';
+import { useRestoreProject, usePurgeProject } from './useBin';
 
 export const RecycleBinSection: React.FC = () => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [pendingPurge, setPendingPurge] = useState<Project | null>(null);
   const restore = useRestoreProject();
+  const purge = usePurgeProject();
+  const userId = useUserStore((s) => s.userId);
+  const role = useUserStore((s) => s.role);
 
   const { data } = useArchivedProjects(1, 10);
   const projects = data?.projects ?? [];
 
   if (projects.length === 0) return null;
+
+  const confirmPurge = (): void => {
+    if (!pendingPurge?.id) return;
+    purge.mutate(pendingPurge.id, { onSettled: () => setPendingPurge(null) });
+  };
 
   return (
     <div className="mt-1" role="region" aria-label={t('flow.bin.title')}>
@@ -46,21 +59,52 @@ export const RecycleBinSection: React.FC = () => {
                 <Archive size={11} aria-hidden />
                 <span className="truncate">{p.name}</span>
               </span>
+              {/* The row is 28px tall by design, so each control keeps its
+                  compact box and grows only its hit area: after:-inset-2 adds
+                  8px on every side, giving the 44px touch target the row has no
+                  room to show. */}
               <button
                 type="button"
                 onClick={() => restore.mutate(p.id!)}
                 disabled={restore.isPending}
-                className="h-7 w-7 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-[var(--flow-hover)] transition-opacity"
+                className="relative h-7 w-7 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-[var(--flow-hover)] transition-opacity after:absolute after:-inset-2 after:content-['']"
                 style={{ color: 'var(--flow-text-muted)' }}
                 aria-label={t('flow.bin.restore', { name: p.name })}
                 title={t('flow.bin.restore', { name: p.name })}
               >
                 <RotateCcw size={12} aria-hidden />
               </button>
+              {canPurgeProject(p, userId, role) && (
+                <button
+                  type="button"
+                  onClick={() => setPendingPurge(p)}
+                  disabled={purge.isPending}
+                  className="relative h-7 w-7 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-[var(--flow-hover)] transition-opacity after:absolute after:-inset-2 after:content-['']"
+                  style={{ color: 'var(--flow-danger-fg)' }}
+                  aria-label={t('flow.bin.purge', { name: p.name })}
+                  title={t('flow.bin.purge', { name: p.name })}
+                >
+                  <Trash2 size={12} aria-hidden />
+                </button>
+              )}
             </li>
           ))}
         </ul>
       )}
+
+      <ConfirmDialog
+        open={pendingPurge !== null}
+        onOpenChange={(next) => {
+          if (!next) setPendingPurge(null);
+        }}
+        title={t('flow.bin.purgeTitle')}
+        description={t('flow.bin.purgeConfirm', { name: pendingPurge?.name ?? '' })}
+        requireText={pendingPurge?.name ?? undefined}
+        confirmLabel={t('flow.bin.purgeCta')}
+        cancelLabel={t('common.cancel')}
+        pending={purge.isPending}
+        onConfirm={confirmPurge}
+      />
     </div>
   );
 };
