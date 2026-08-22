@@ -27,20 +27,41 @@ function contentTypeFor(path) {
   return 'text/plain; charset=utf-8';
 }
 
-/** Files are keyed by asset path; anything else 404s like the real bucket. */
+/**
+ * Files are keyed by their real on-disk asset path (e.g. '/pricing/index.html').
+ * Replicates Cloudflare Pages' actual `html_handling: auto-trailing-slash`
+ * asset-server behavior: a literal `.html` request (including `.../index.html`)
+ * 308-redirects to its clean URL instead of serving the file — this applies
+ * even to requests made internally via env.ASSETS.fetch(), which is exactly
+ * what broke production (see apps/landing/cloudflare/_worker.js htmlCandidates).
+ * Anything unresolvable 404s like the real bucket.
+ */
 function makeEnv(files) {
   return {
     ASSETS: {
       async fetch(request) {
         const path = new URL(request.url).pathname;
-        const body = files.get(path);
-        if (body === undefined) {
-          return new Response('not found', { status: 404 });
+
+        if (/\.html?$/i.test(path)) {
+          if (!files.has(path)) return new Response('not found', { status: 404 });
+          const clean = /\/index\.html$/i.test(path)
+            ? path.slice(0, -'index.html'.length)
+            : path.replace(/\.html?$/i, '');
+          return new Response(null, { status: 308, headers: { Location: clean } });
         }
-        return new Response(body, {
-          status: 200,
-          headers: { 'Content-Type': contentTypeFor(path) },
-        });
+
+        if (path.endsWith('/')) {
+          const key = `${path}index.html`;
+          if (!files.has(key)) return new Response('not found', { status: 404 });
+          return new Response(files.get(key), { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+        }
+
+        if (!/\.[a-z0-9]+$/i.test(path) && files.has(`${path}/index.html`)) {
+          return new Response(null, { status: 308, headers: { Location: `${path}/` } });
+        }
+
+        if (!files.has(path)) return new Response('not found', { status: 404 });
+        return new Response(files.get(path), { status: 200, headers: { 'Content-Type': contentTypeFor(path) } });
       },
     },
   };
@@ -52,6 +73,7 @@ const BASE_ENV = new Map([
   ['/pricing/index.html', PRICING_HTML],
   ['/pricing/index.md', PRICING_MD],
   ['/404.html', NOT_FOUND_HTML],
+  ['/404/index.html', NOT_FOUND_HTML],
   ['/pages.json', PAGES_JSON],
   ['/version.json', VERSION_JSON],
 ]);
@@ -277,8 +299,14 @@ describe('routing', () => {
   });
 
   it('candidate helpers match the trailingSlash export layout', () => {
-    assert.deepEqual(htmlCandidates('/'), ['/index.html']);
-    assert.deepEqual(htmlCandidates('/pricing/'), ['/pricing/index.html', '/pricing.html']);
+    // Must be the clean directory URL, never a literal '.../index.html' or
+    // '<path>.html' — Cloudflare Pages 308-redirects those even for
+    // env.ASSETS.fetch() calls made from inside this worker, which always
+    // looks like a miss to isHtmlResponse() (expects status 200).
+    assert.deepEqual(htmlCandidates('/'), ['/']);
+    assert.deepEqual(htmlCandidates('/pricing/'), ['/pricing/']);
+    assert.deepEqual(htmlCandidates('/pricing'), ['/pricing/']);
+    assert.deepEqual(htmlCandidates('/pricing.html'), ['/pricing/']);
     assert.deepEqual(markdownCandidates('/'), ['/index.md']);
     assert.deepEqual(markdownCandidates('/pricing/'), ['/pricing/index.md', '/pricing.md']);
   });

@@ -133,18 +133,27 @@ export function negotiate(acceptHeader, producible) {
 }
 
 /**
- * Asset paths that may hold the HTML representation of a document URL.
- * Matches the `trailingSlash: true` export layout (every page is `<dir>/index.html`)
- * and tolerates explicit `/page.html` and extensionless requests.
+ * Asset path that may hold the HTML representation of a document URL.
+ * Matches the `trailingSlash: true` export layout (every page is `<dir>/index.html`).
+ *
+ * IMPORTANT: this must be the clean, trailing-slash directory URL — never a
+ * literal `.../index.html` or `<path>.html` path. Cloudflare Pages' asset
+ * server 308-redirects any literal `.html` request to its clean URL
+ * (html_handling: auto-trailing-slash), including requests made internally
+ * via env.ASSETS.fetch() from this worker. Probing a literal `.html` path
+ * therefore never returns 200 — it always looks like a miss.
  */
 export function htmlCandidates(pathname) {
   const path = normalizePath(pathname);
-  const clean = path === '/' ? '/' : path.replace(/\/+$/, '');
-  const candidates = [];
-  if (/\.html?$/.test(clean)) candidates.push(clean);
-  candidates.push(clean === '/' ? '/index.html' : `${clean}/index.html`);
-  if (clean !== '/') candidates.push(`${clean}.html`);
-  return [...new Set(candidates)];
+  // "index.html" strips to its parent directory (already trailing-slashed);
+  // any other ".html" basename strips to a same-named directory instead.
+  if (/(^|\/)index\.html?$/i.test(path)) {
+    return [path.replace(/index\.html?$/i, '')];
+  }
+  if (/\.html?$/i.test(path)) {
+    return [`${path.replace(/\.html?$/i, '')}/`];
+  }
+  return [path.endsWith('/') ? path : `${path}/`];
 }
 
 /** Asset paths that may hold the Markdown representation of a document URL. */
@@ -428,7 +437,9 @@ export default {
       return res;
     }
 
-    const styled = await fetchAsset(env, '/404.html', request);
+    // '/404/' (the clean directory URL), not the literal '/404.html' file —
+    // same 308-on-literal-.html redirect issue as htmlCandidates() above.
+    const styled = await fetchAsset(env, '/404/', request);
     if (styled && isHtmlResponse(styled)) {
       const res = new Response(styled.body, { status: 404, headers: styled.headers });
       varyOnNegotiation(res.headers);
