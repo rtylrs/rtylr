@@ -17,6 +17,11 @@ type Repository struct {
 	queries *sqlc.Queries
 }
 
+type dueSchedule struct {
+	id         int64
+	businessID int64
+}
+
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		queries: sqlc.New(db),
@@ -139,10 +144,6 @@ func (r *Repository) ProcessDue(ctx context.Context, now time.Time) ([]int64, er
 	}
 	defer rows.Close()
 
-	type dueSchedule struct {
-		id         int64
-		businessID int64
-	}
 	var due []dueSchedule
 	for rows.Next() {
 		var item dueSchedule
@@ -155,20 +156,34 @@ func (r *Repository) ProcessDue(ctx context.Context, now time.Time) ([]int64, er
 		return nil, err
 	}
 
+	return processDueSchedules(ctx, now, due, r.generateDue), nil
+}
+
+func processDueSchedules(
+	ctx context.Context,
+	now time.Time,
+	due []dueSchedule,
+	generate func(context.Context, int64, int64, time.Time) (bool, error),
+) []int64 {
 	businessIDs := make([]int64, 0, len(due))
 	for _, item := range due {
-		created, err := r.generateDue(ctx, item.id, item.businessID, now)
+		created, err := generate(ctx, item.id, item.businessID, now)
 		if errors.Is(err, sql.ErrNoRows) {
 			continue
 		}
 		if err != nil {
-			return nil, err
+			logger.Ctx(ctx).Error("Failed to process recurring invoice schedule",
+				logger.Int("schedule_id", int(item.id)),
+				logger.Int("business_id", int(item.businessID)),
+				logger.Error(err),
+			)
+			continue
 		}
 		if created {
 			businessIDs = append(businessIDs, item.businessID)
 		}
 	}
-	return businessIDs, nil
+	return businessIDs
 }
 
 type recurringTemplate struct {
