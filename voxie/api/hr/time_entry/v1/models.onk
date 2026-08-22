@@ -184,3 +184,34 @@ message ApproveTimesheetResponse {
   /// Whether the approval action was processed.
   success: bool
 }
+
+/// MarkTimeEntriesInvoicedRequest records that the listed approved billable
+/// entries are settled by one finance invoice. Idempotent per entry: an entry
+/// already carrying a billable_invoice_id is skipped, never overwritten.
+message MarkTimeEntriesInvoicedRequest {
+  /// ID kept for route symmetry with approveTimesheet; unused by the handler.
+  id: int64
+  /// body carries the batch fields bound from the HTTP payload.
+  body: MarkTimeEntriesInvoicedBody
+}
+
+/// MarkTimeEntriesInvoicedBody is the payload of markTimeEntriesInvoiced.
+message MarkTimeEntriesInvoicedBody {
+  /// entry_ids are the time entries this invoice bills. Every entry must
+  /// belong to the caller's business; foreign or missing ids are counted as
+  /// skipped rather than failing the batch.
+  entry_ids: int64[] @required @min_items(1)
+  /// invoice_id is the finance invoice that settles them.
+  invoice_id: int64 @required @gt(0)
+}
+
+/// MarkTimeEntriesInvoicedResponse reports how the batch landed, so a caller
+/// can tell "all marked" from "some were already invoiced" without a second
+/// read.
+message MarkTimeEntriesInvoicedResponse {
+  /// marked_count is how many entries now carry this invoice id.
+  marked_count: int32
+  /// skipped_count is how many of entry_ids were already invoiced, not
+  /// approved billable work, or belong to another business.
+  skipped_count: int32
+}

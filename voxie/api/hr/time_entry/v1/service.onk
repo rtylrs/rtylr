@@ -16,4 +16,8 @@ service TimeEntryService {
 
   /// Approves a submitted timesheet.
   approveTimesheet(ApproveTimesheetRequest) -> ApproveTimesheetResponse @patch("/timesheets/{id}/approve") @body("body")
+
+  /// Records that one finance invoice bills the listed time entries, so
+  /// unbilled-billable queries stop offering hours that have been invoiced.
+  markTimeEntriesInvoiced(MarkTimeEntriesInvoicedRequest) -> MarkTimeEntriesInvoicedResponse @patch("/time-entries/mark-invoiced") @body("body")
 }
