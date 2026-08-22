@@ -66,3 +66,17 @@ UNION
 SELECT DISTINCT business_id FROM hr_timesheets
 ORDER BY business_id ASC
 LIMIT 500;
+
+-- name: MarkEntryInvoiced :execrows
+-- The invoice-side half of the billable loop (#836/#791), applied per entry
+-- by the repository inside one transaction so the whole batch lands or none
+-- of it does. Idempotent (already-invoiced rows do not match), scoped to the
+-- caller's business, and restricted to approved billable work so a stray id
+-- can never stamp an unrelated row.
+UPDATE hr_time_entries
+SET billable_invoice_id = ?, updated_at = NOW()
+WHERE business_id = ?
+  AND id = ?
+  AND is_billable = TRUE
+  AND status = 'approved'
+  AND billable_invoice_id IS NULL;

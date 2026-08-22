@@ -45,4 +45,8 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 		ctx, router, handlers.RejectTimesheetRoutes(), &handlers.RejectTimesheetHandler{Service: service},
 	)
 
+	// Mark entries invoiced (the billable loop's invoice-side write, #836/#791)
+	serverHttp.RegisterPATCHWithValidation[handlers.MarkTimeEntriesInvoicedRequest, handlers.MarkTimeEntriesInvoicedResponse](
+		ctx, router, handlers.MarkTimeEntriesInvoicedRoutes(), &handlers.MarkTimeEntriesInvoicedHandler{Service: service},
+	)
 }

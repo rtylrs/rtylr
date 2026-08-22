@@ -295,3 +295,28 @@ func previousWeekRange(now time.Time) (string, string) {
 	previousSunday := previousMonday.AddDate(0, 0, 6)
 	return previousMonday.Format("2006-01-02"), previousSunday.Format("2006-01-02")
 }
+
+// --- Mark invoiced ---
+
+// MarkEntriesInvoicedResult reports one batch outcome.
+type MarkEntriesInvoicedResult struct {
+	MarkedCount  int32
+	SkippedCount int32
+}
+
+// MarkEntriesInvoiced records that one finance invoice settles the listed
+// approved billable entries (#836/#791). The repository runs the batch in one
+// transaction so either every eligible entry is stamped or nothing changes;
+// per-entry skips (already invoiced, foreign, ineligible) are counted rather
+// than fatal, and the response separates them so the caller knows when the
+// loop is only partially closed.
+func (s *Service) MarkEntriesInvoiced(ctx context.Context, businessID, invoiceID int64, entryIDs []int64) (MarkEntriesInvoicedResult, error) {
+	var result MarkEntriesInvoicedResult
+	marked, err := s.repo.MarkEntriesInvoiced(ctx, businessID, invoiceID, entryIDs)
+	if err != nil {
+		return result, err
+	}
+	result.MarkedCount = int32(marked)
+	result.SkippedCount = int32(len(entryIDs) - int(marked))
+	return result, nil
+}
