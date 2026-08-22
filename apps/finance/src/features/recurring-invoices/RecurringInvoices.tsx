@@ -85,7 +85,8 @@ const NewRecurringModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
           <button type="button" style={ghostBtn} onClick={onClose} disabled={create.isPending}>
             Cancel
           </button>
-          <button type="button"
+          <button
+            type="button"
             style={{ ...primaryBtn, opacity: create.isPending ? 0.6 : 1 }}
             onClick={handleSubmit}
             disabled={create.isPending}
@@ -176,7 +177,8 @@ const RecurringInvoices: React.FC = () => {
         subtitle={`${data.length} active subscriptions`}
         breadcrumbs={[{ label: 'Invoices', to: '/invoices' }, { label: 'Recurring' }]}
         actions={
-          <button type="button"
+          <button
+            type="button"
             style={primaryBtn}
             aria-label="New Recurring Invoice"
             onClick={() => setShowCreate(true)}
@@ -266,7 +268,8 @@ const RecurringInvoices: React.FC = () => {
                   </td>
                   <td style={{ padding: '12px 16px' }}>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <button type="button"
+                      <button
+                        type="button"
                         style={{
                           ...ghostBtn,
                           padding: '4px 10px',

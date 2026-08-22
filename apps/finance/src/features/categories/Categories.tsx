@@ -235,14 +235,16 @@ const Categories: React.FC = () => {
         title="New Expense Category"
         footer={
           <>
-            <button type="button"
+            <button
+              type="button"
               style={ghostBtn}
               onClick={() => setShowCreate(false)}
               disabled={createCategory.isPending}
             >
               Cancel
             </button>
-            <button type="button"
+            <button
+              type="button"
               style={{ ...primaryBtn, opacity: createCategory.isPending ? 0.6 : 1 }}
               onClick={handleCreate}
               disabled={createCategory.isPending || !name.trim()}
@@ -304,14 +306,16 @@ const Categories: React.FC = () => {
         title="Edit Expense Category"
         footer={
           <>
-            <button type="button"
+            <button
+              type="button"
               style={ghostBtn}
               onClick={() => setEditingCategory(null)}
               disabled={updateCategory.isPending}
             >
               Cancel
             </button>
-            <button type="button"
+            <button
+              type="button"
               style={{ ...primaryBtn, opacity: updateCategory.isPending ? 0.6 : 1 }}
               onClick={handleUpdate}
               disabled={updateCategory.isPending || !editName.trim()}

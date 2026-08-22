@@ -79,7 +79,8 @@ const ReceiptUpload: React.FC<ReceiptUploadProps> = ({ value, onChange }) => {
             alt="Receipt"
             style={{ maxHeight: 180, maxWidth: '100%', borderRadius: 8 }}
           />
-          <button type="button"
+          <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               onChange(null);

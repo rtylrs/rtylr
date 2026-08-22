@@ -74,7 +74,8 @@ const InvoiceDetail: React.FC = () => {
               <Printer size={13} /> Print
             </button>
             <DownloadPdfButton invoiceId={invoice.id} />
-            <button type="button"
+            <button
+              type="button"
               style={ghostBtn}
               onClick={() => {
                 navigate({ to: `/invoices/new?clone=${invoice.id}` });
@@ -94,7 +95,8 @@ const InvoiceDetail: React.FC = () => {
               </button>
             )}
             {canSendInvoice && invoice.status !== 'Paid' && (
-              <button type="button"
+              <button
+                type="button"
                 style={{
                   ...ghostBtn,
                   color: 'var(--finance-danger)',

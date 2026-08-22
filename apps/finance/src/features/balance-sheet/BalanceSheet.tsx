@@ -136,18 +136,21 @@ const BalanceSheet: React.FC = () => {
           gap: 16,
         }}
       >
-        <Section title="Assets" rows={
-          inventory
-            ? [
-                ...data.assets,
-                {
-                  label: t('balanceSheet.inventory'),
-                  amount: inventory.totalValue,
-                  type: 'asset',
-                },
-              ]
-            : data.assets
-        } />
+        <Section
+          title="Assets"
+          rows={
+            inventory
+              ? [
+                  ...data.assets,
+                  {
+                    label: t('balanceSheet.inventory'),
+                    amount: inventory.totalValue,
+                    type: 'asset',
+                  },
+                ]
+              : data.assets
+          }
+        />
         <Section title="Liabilities" rows={data.liabilities} />
         <Section title="Equity" rows={data.equity} />
       </div>

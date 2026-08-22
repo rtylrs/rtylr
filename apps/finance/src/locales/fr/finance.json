@@ -45,10 +45,10 @@
   "bills": {
     "receivedFromErp": "Reçues de l’ERP, en attente de factures",
     "receivedFromErpHint": "Le stock est arrivé pour ces bons de commande. Établissez les factures pour les refléter dans les comptes fournisseurs.",
-"balanceSheet": {
-    "inventory": "Stock",
-    "inventoryHint": "Valeur de stock en direct depuis l'ERP ; affichée seulement si l'ERP est activé pour cette entreprise.",
-    "inventoryUnavailable": "ERP non connecté"
+    "balanceSheet": {
+      "inventory": "Stock",
+      "inventoryHint": "Valeur de stock en direct depuis l'ERP ; affichée seulement si l'ERP est activé pour cette entreprise.",
+      "inventoryUnavailable": "ERP non connecté"
+    }
   }
-}
 }

@@ -188,7 +188,6 @@ export const financeCompatibilityClient = {
 
   listBankFeeds: (req?: Record<string, unknown>) =>
     unwrap(safe.get<unknown>('/finance/bank-feeds', { params: req ?? {} })),
-
 };
 
 export const listCrmCustomers = () => oneKitResult(() => crmCustomerClient.listCustomers({}));

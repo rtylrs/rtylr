@@ -119,7 +119,8 @@ const BankFeeds: React.FC = () => {
             {accounts.map((a) => {
               const Icon = iconFor[a.type ?? ''] ?? Building2;
               return (
-                <button type="button"
+                <button
+                  type="button"
                   key={a.id}
                   onClick={() => setSelected(selected === a.id ? undefined : a.id)}
                   style={{
@@ -271,14 +272,16 @@ const BankFeeds: React.FC = () => {
         title="Add Bank Account"
         footer={
           <>
-            <button type="button"
+            <button
+              type="button"
               style={ghostBtn}
               onClick={() => setShowConnect(false)}
               disabled={createAccount.isPending}
             >
               Cancel
             </button>
-            <button type="button"
+            <button
+              type="button"
               style={{ ...primaryBtn, opacity: createAccount.isPending ? 0.6 : 1 }}
               onClick={handleCreateAccount}
               disabled={
