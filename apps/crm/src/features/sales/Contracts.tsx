@@ -94,7 +94,8 @@ const Contracts: React.FC = () => {
   };
 
   const handleSubmit = (): void => {
-    if (!form.leadId || !form.signedAt || !form.signedBy) {
+    if (createContract.isPending) return;
+    if (!form.leadId || !form.signedAt || !form.signedBy.trim()) {
       toast.error('Lead, signed date, and signed by are required');
       return;
     }
