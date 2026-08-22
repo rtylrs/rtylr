@@ -130,7 +130,7 @@ const AutomationBuilder: React.FC = () => {
           style={{ maxWidth: '320px', marginBottom: '16px' }}
         />
 
-        <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '16px' }}>
+        <div className="crm-workflow-layout" style={{ display: 'grid', gap: '16px' }}>
           {/* Palette */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <Card>

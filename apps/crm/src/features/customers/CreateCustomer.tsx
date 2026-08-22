@@ -258,7 +258,7 @@ const CreateCustomer: React.FC = () => {
             <Button
               variant="primary"
               onClick={handleSubmit}
-              disabled={create.isPending || !data.name.trim()}
+              disabled={create.isPending || !data.name.trim() || !contactValid}
             >
               {create.isPending ? 'Creating…' : 'Create customer'}
             </Button>

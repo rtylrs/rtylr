@@ -138,12 +138,8 @@ const MergeCustomers: React.FC = () => {
 
         <Card>
           <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr auto 1fr',
-              gap: '12px',
-              alignItems: 'center',
-            }}
+            className="crm-merge-layout"
+            style={{ display: 'grid', gap: '12px', alignItems: 'center' }}
           >
             <div>
               <div
@@ -178,6 +174,7 @@ const MergeCustomers: React.FC = () => {
               )}
             </div>
             <div
+              className="crm-merge-layout__arrow"
               style={{ display: 'flex', justifyContent: 'center', color: 'var(--hub-text-muted)' }}
             >
               <ArrowRight size={18} />

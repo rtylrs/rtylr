@@ -327,12 +327,8 @@ const ImportCustomers: React.FC = () => {
                 {IMPORT_FIELD_KEYS.map((field) => (
                   <div
                     key={field}
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: '120px 1fr',
-                      gap: '12px',
-                      alignItems: 'center',
-                    }}
+                    className="crm-import-mapping"
+                    style={{ display: 'grid', gap: '12px', alignItems: 'center' }}
                   >
                     <div
                       style={{

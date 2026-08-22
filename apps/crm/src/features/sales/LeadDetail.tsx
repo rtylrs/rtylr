@@ -303,9 +303,7 @@ const LeadDetail: React.FC = () => {
         </div>
 
         {/* Two-column layout */}
-        <div
-          style={{ display: 'grid', gridTemplateColumns: '1fr minmax(280px, 360px)', gap: '20px' }}
-        >
+        <div className="crm-lead-detail-layout" style={{ display: 'grid', gap: '20px' }}>
           {/* Left: Touchpoint timeline */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
