@@ -261,12 +261,12 @@ function CampaignCard({
         {[
           {
             label: 'Audience',
-            value: campaign.audience ? campaign.audience.toLocaleString() : '-',
+            value: campaign.audience.toLocaleString(),
             icon: Users,
           },
           {
             label: 'Sent',
-            value: campaign.sent ? campaign.sent.toLocaleString() : '-',
+            value: campaign.sent.toLocaleString(),
             icon: Send,
           },
           { label: 'Open Rate', value: campaign.openRate, icon: Eye },
