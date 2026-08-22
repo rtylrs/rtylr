@@ -23,6 +23,7 @@ import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import type { DashboardStats } from '../../shared/schemas/dashboard';
 import { CustomerAvatar } from '../../shared/components/crm';
 import { activateOnKeyboard } from '../../shared/lib/keyboard';
+import { parseCrmDate } from '../../shared/lib/dateUtils';
 
 const ACCENT = '#3b82f6';
 
@@ -47,7 +48,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export function isAtRiskCustomer(lastVisit: string, thresholdDays = 30): boolean {
   const value = lastVisit.trim();
   if (!value) return true;
-  const timestamp = Date.parse(value);
+  const timestamp = parseCrmDate(value).getTime();
   if (Number.isFinite(timestamp)) {
     return Date.now() - timestamp >= Math.max(0, thresholdDays) * DAY_MS;
   }
