@@ -3,8 +3,11 @@ package application
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net/netip"
+	"strconv"
 	"strings"
 	"time"
 
@@ -459,6 +462,70 @@ type AccessTokenClaims struct {
 	PlanID         int64  `json:"plan_id,omitempty"`
 	TokenEpoch     int64  `json:"token_epoch,omitempty"`
 	jwt.RegisteredClaims
+}
+
+// UnmarshalJSON accepts both the current numeric claim representation and the
+// string-encoded representation issued by older platform clients. The JWT
+// signature and standard claims are still validated by jwt.ParseWithClaims;
+// this only preserves compatibility for the integer claim wire format.
+func (c *AccessTokenClaims) UnmarshalJSON(data []byte) error {
+	type alias AccessTokenClaims
+	aux := struct {
+		*alias
+		UserID         json.RawMessage `json:"user_id"`
+		BusinessID     json.RawMessage `json:"business_id"`
+		PlatformUserID json.RawMessage `json:"platform_user_id"`
+		PlanID         json.RawMessage `json:"plan_id"`
+	}{alias: (*alias)(c)}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	var err error
+	if len(aux.UserID) > 0 {
+		if c.UserID, err = parseAccessTokenInt64(aux.UserID, "user_id"); err != nil {
+			return err
+		}
+	}
+	if len(aux.BusinessID) > 0 {
+		if c.BusinessID, err = parseAccessTokenInt64(aux.BusinessID, "business_id"); err != nil {
+			return err
+		}
+	}
+	if len(aux.PlatformUserID) > 0 {
+		if c.PlatformUserID, err = parseAccessTokenInt64(aux.PlatformUserID, "platform_user_id"); err != nil {
+			return err
+		}
+	}
+	if len(aux.PlanID) > 0 {
+		if c.PlanID, err = parseAccessTokenInt64(aux.PlanID, "plan_id"); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func parseAccessTokenInt64(raw json.RawMessage, field string) (int64, error) {
+	if string(raw) == "null" {
+		return 0, nil
+	}
+
+	var numeric int64
+	if err := json.Unmarshal(raw, &numeric); err == nil {
+		return numeric, nil
+	}
+
+	var text string
+	if err := json.Unmarshal(raw, &text); err != nil {
+		return 0, fmt.Errorf("%s must be an integer or numeric string: %w", field, err)
+	}
+	parsed, err := strconv.ParseInt(text, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("%s must be an integer or numeric string: %w", field, err)
+	}
+	return parsed, nil
 }
 
 func (c *AccessTokenClaims) SetIssuer(issuer string) {

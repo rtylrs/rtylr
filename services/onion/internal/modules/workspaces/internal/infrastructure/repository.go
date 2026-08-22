@@ -1194,7 +1194,13 @@ func (r *Repository) listEnrichedTasks(ctx context.Context, builder sq.SelectBui
 	}
 	rows, err := r.pool.QueryContext(ctx, q, args...)
 	if err != nil {
-		logger.Ctx(ctx).Error("listEnrichedTasks failed", logger.Error(err))
+		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+			// Request cancellation is expected when a client navigates away or
+			// disconnects; it is not an application/database failure.
+			logger.Ctx(ctx).Debug("listEnrichedTasks canceled", logger.Error(err))
+		} else {
+			logger.Ctx(ctx).Error("listEnrichedTasks failed", logger.Error(err))
+		}
 		return nil, err
 	}
 	defer func() {
