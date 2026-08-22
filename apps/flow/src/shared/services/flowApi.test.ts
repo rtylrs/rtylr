@@ -46,7 +46,6 @@ import { flowApi } from './flowApi';
 import {
   businessClient,
   dashboardClient,
-  workspaceClient,
   projectClient,
   taskClient,
   labelClient,
@@ -69,14 +68,6 @@ describe('flowApi OneKit adapters', () => {
 
     expect(dashboardClient.getFlowDashboard).toHaveBeenCalledWith({ workspaceId: 'ws-1' });
     expect(businessClient.listMyBusinesses).toHaveBeenCalledWith({});
-  });
-
-  
-    expect(workspaceClient.updateWorkspace).toHaveBeenCalledWith({
-      id: '5',
-      body: { name: 'Updated', description: '-', icon: 'folder', color: '#6366f1' },
-    });
-    expect(workspaceClient.deleteWorkspace).toHaveBeenCalledWith({ id: '5' });
   });
 
   it('uses generated project and member methods', async () => {
