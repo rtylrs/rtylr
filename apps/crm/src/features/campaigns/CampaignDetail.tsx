@@ -157,14 +157,24 @@ const CampaignDetail: React.FC = () => {
               />
               <CampaignStatsCard
                 label="Unsubscribed"
-                value={stats.unsubscribed}
-                subValue={`${pct(stats.unsubscribed, stats.delivered)}%`}
+                value={
+                  stats.unsubscribed === undefined
+                    ? 'Unavailable'
+                    : stats.unsubscribed.toLocaleString()
+                }
+                subValue={
+                  stats.unsubscribed === undefined
+                    ? 'Data unavailable'
+                    : `${pct(stats.unsubscribed, stats.delivered)}%`
+                }
                 color="#ef4444"
               />
               <CampaignStatsCard
                 label="Revenue"
-                value={`$${stats.revenue.toLocaleString()}`}
-                subValue="from campaign"
+                value={
+                  stats.revenue === undefined ? 'Unavailable' : `$${stats.revenue.toLocaleString()}`
+                }
+                subValue={stats.revenue === undefined ? 'Data unavailable' : 'from campaign'}
                 color="#22c55e"
               />
             </div>

@@ -39,7 +39,8 @@ type CampaignStatus =
   | 'Paused'
   | 'Completed'
   | 'Sent'
-  | 'Cancelled';
+  | 'Cancelled'
+  | 'Unknown';
 type Channel = 'Email' | 'SMS' | 'Push';
 
 interface Campaign {
@@ -89,7 +90,7 @@ function toDisplayCampaign(c: CampaignPayload, audienceBySegment: Map<number, nu
     channel: ({ email: 'Email', sms: 'SMS', push: 'Push' } as const)[
       normalizeCampaignChannel(c.type)
     ],
-    status: STATUS_TO_DISPLAY[c.status] ?? 'Draft',
+    status: STATUS_TO_DISPLAY[c.status.trim().toLowerCase()] ?? 'Unknown',
     audienceSegmentId: c.audienceSegmentId,
     audience: segmentAudience ?? c.audienceCount ?? c.sentCount,
     sent: c.sentCount,
@@ -108,6 +109,7 @@ const statusColor: Record<CampaignStatus, { bg: string; text: string; dot: strin
   Completed: { bg: 'rgba(59,130,246,0.12)', text: ACCENT, dot: ACCENT },
   Sent: { bg: 'rgba(16,185,129,0.12)', text: '#10b981', dot: '#10b981' },
   Cancelled: { bg: 'rgba(239,68,68,0.12)', text: '#ef4444', dot: '#ef4444' },
+  Unknown: { bg: 'rgba(148,163,184,0.12)', text: '#94a3b8', dot: '#94a3b8' },
 };
 
 const channelIcon: Record<Channel, React.ComponentType<{ size?: number; color?: string }>> = {
@@ -391,7 +393,11 @@ function CampaignCard({
               cursor: 'pointer',
             }}
           >
-            {campaign.status === 'Completed' ? 'View Report' : 'Edit'}
+            {campaign.status === 'Completed' || campaign.status === 'Sent'
+              ? 'View Report'
+              : canEditCampaign(campaign)
+                ? 'Edit'
+                : 'View details'}
           </button>
           <button
             type="button"

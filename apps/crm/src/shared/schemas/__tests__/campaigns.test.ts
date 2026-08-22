@@ -88,6 +88,24 @@ describe('campaignStatsSchema', () => {
     const result = campaignStatsSchema.parse(stats);
     expect(result.timeline).toEqual([]);
   });
+
+  it('does not invent unsupported metrics for the canonical backend shape', () => {
+    const result = campaignStatsSchema.parse({
+      campaignId: '7',
+      audienceCount: '100',
+      sentCount: '90',
+      deliveredCount: '85',
+      openedCount: '30',
+      clickedCount: '8',
+      bouncedCount: '2',
+      failedCount: '3',
+    });
+
+    expect(result.sent).toBe(90);
+    expect(result.unsubscribed).toBeUndefined();
+    expect(result.revenue).toBeUndefined();
+    expect(result.timeline).toEqual([]);
+  });
 });
 
 describe('CAMPAIGN_STATUSES', () => {

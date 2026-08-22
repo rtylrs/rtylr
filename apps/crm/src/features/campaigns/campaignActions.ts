@@ -6,7 +6,8 @@ type CampaignStatus =
   | 'Paused'
   | 'Completed'
   | 'Sent'
-  | 'Cancelled';
+  | 'Cancelled'
+  | 'Unknown';
 
 interface CampaignActionState {
   channel: CampaignChannel;
@@ -19,7 +20,8 @@ export function canEditCampaign(
   campaign: Pick<CampaignActionState, 'channel' | 'status'>
 ): boolean {
   return (
-    campaign.channel !== 'Push' && !['Completed', 'Sent', 'Cancelled'].includes(campaign.status)
+    campaign.channel !== 'Push' &&
+    ['Draft', 'Scheduled', 'Active', 'Paused'].includes(campaign.status)
   );
 }
 

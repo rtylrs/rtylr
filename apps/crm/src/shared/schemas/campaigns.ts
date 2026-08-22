@@ -89,9 +89,12 @@ export const campaignStatsSchema = z
         delivered: stats.deliveredCount,
         opened: stats.openedCount,
         clicked: stats.clickedCount,
-        unsubscribed: 0,
+        // The canonical CRM stats response does not expose unsubscribe or
+        // revenue data. Keep these undefined so the UI cannot present a
+        // fabricated zero as a measured result.
+        unsubscribed: undefined,
         bounced: stats.bouncedCount,
-        revenue: 0,
+        revenue: undefined,
         timeline: [],
       };
     }

@@ -16,6 +16,10 @@ describe('canEditCampaign', () => {
     expect(canEditCampaign({ channel: 'SMS', status: 'Sent' })).toBe(false);
     expect(canEditCampaign({ channel: 'Email', status: 'Cancelled' })).toBe(false);
   });
+
+  it('keeps unknown campaign statuses read-only', () => {
+    expect(canEditCampaign({ channel: 'Email', status: 'Unknown' })).toBe(false);
+  });
 });
 
 describe('hasVerifiedCampaignAudience', () => {
