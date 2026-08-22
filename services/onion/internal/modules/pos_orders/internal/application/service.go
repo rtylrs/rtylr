@@ -2,11 +2,14 @@ package application
 
 import (
 	"context"
+	"crypto/subtle"
 	"database/sql"
 	"errors"
 	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure"
@@ -20,6 +23,8 @@ import (
 )
 
 const ordersCacheTTL = 30 * time.Second
+
+const publicOrderTokenTTL = 30 * 24 * time.Hour
 
 // ownerTopic builds the wsbus topic for an owner without the reflection and
 // format-parsing overhead of fmt.Sprintf; it runs on every order mutation.
@@ -580,33 +585,33 @@ type PublicOrderInput struct {
 	Items         []PublicOrderItemInput
 }
 
-func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input PublicOrderInput) (int64, string, error) {
+func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input PublicOrderInput) (int64, string, string, error) {
 	if ownerID == 0 {
-		return 0, "", errors.New("owner_id is required")
+		return 0, "", "", errors.New("owner_id is required")
 	}
 	if len(input.Items) == 0 {
-		return 0, "", errors.New("order must have at least one item")
+		return 0, "", "", errors.New("order must have at least one item")
 	}
 	for i, item := range input.Items {
 		if item.MenuItemID <= 0 {
-			return 0, "", fmt.Errorf("item[%d]: menu_item_id is required", i)
+			return 0, "", "", fmt.Errorf("item[%d]: menu_item_id is required", i)
 		}
 		if item.Quantity <= 0 {
-			return 0, "", fmt.Errorf("item[%d]: quantity must be positive", i)
+			return 0, "", "", fmt.Errorf("item[%d]: quantity must be positive", i)
 		}
 	}
 
 	enabled, err := s.repo.IsOnlineOrderingEnabled(ctx, ownerID)
 	if err != nil {
-		return 0, "", fmt.Errorf("check online ordering entitlement: %w", err)
+		return 0, "", "", fmt.Errorf("check online ordering entitlement: %w", err)
 	}
 	if !enabled {
-		return 0, "", errors.New("online ordering is not enabled")
+		return 0, "", "", errors.New("online ordering is not enabled")
 	}
 
 	orderNumber, err := s.repo.GenerateOrderNumber(ctx, ownerID)
 	if err != nil {
-		return 0, "", fmt.Errorf("generate order number: %w", err)
+		return 0, "", "", fmt.Errorf("generate order number: %w", err)
 	}
 
 	items := make([]domain.OrderItemInput, 0, len(input.Items))
@@ -614,26 +619,41 @@ func (s *Service) CreatePublicOrder(ctx context.Context, ownerID int64, input Pu
 		item, err := s.repo.GetPublicMenuItem(ctx, ownerID, it.MenuItemID)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
-				return 0, "", fmt.Errorf("item[%d]: menu item is not available", i)
+				return 0, "", "", fmt.Errorf("item[%d]: menu item is not available", i)
 			}
-			return 0, "", fmt.Errorf("load menu item: %w", err)
+			return 0, "", "", fmt.Errorf("load menu item: %w", err)
 		}
 		item.Quantity = it.Quantity
 		item.Notes = it.Notes
 		items = append(items, item)
 	}
 
-	orderID, err := s.repo.CreatePublicOrder(ctx, ownerID, orderNumber, input.CustomerName, input.CustomerEmail, input.CustomerPhone, input.Notes, items)
+	orderID, err := s.repo.CreatePublicOrder(ctx, ownerID, orderNumber, input.CustomerName, input.CustomerPhone, input.Notes, items)
 	if err != nil {
-		return 0, "", fmt.Errorf("create public order: %w", err)
+		return 0, "", "", fmt.Errorf("create public order: %w", err)
 	}
 
-	return orderID, orderNumber, nil
+	publicToken := uuid.NewString()
+	cacher.Of[string]().Put(ctx, publicOrderTokenCacheKey(ownerID, orderID), publicToken,
+		cacher.WithExpiry(ctx, publicOrderTokenTTL),
+	)
+
+	return orderID, orderNumber, publicToken, nil
 }
 
-func (s *Service) GetPublicOrderStatus(ctx context.Context, businessID, orderID int64) (string, string, error) {
+func (s *Service) GetPublicOrderStatus(ctx context.Context, businessID, orderID int64, publicToken string) (string, string, error) {
 	if businessID <= 0 {
 		return "", "", errors.New("business_id is required")
 	}
+
+	cachedToken, found := cacher.Of[string]().Get(ctx, publicOrderTokenCacheKey(businessID, orderID))
+	if !found || subtle.ConstantTimeCompare([]byte(cachedToken), []byte(publicToken)) != 1 {
+		return "", "", sql.ErrNoRows
+	}
+
 	return s.repo.GetPublicOrderStatus(ctx, businessID, orderID)
+}
+
+func publicOrderTokenCacheKey(businessID, orderID int64) string {
+	return fmt.Sprintf("pos:public-order-token:%d:%d", businessID, orderID)
 }

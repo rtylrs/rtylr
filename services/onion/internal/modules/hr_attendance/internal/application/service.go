@@ -120,7 +120,7 @@ func (s *Service) GenerateQRToken(ctx context.Context, ownerID, locationID int64
 	key := fmt.Sprintf("hr_attendance:%d:qr:%d", ownerID, locationID)
 
 	qrCache := cacher.Of[string]()
-	qrCache.Put(ctx, key, token, cacher.WithExpiry(ctx, 24*time.Hour))
+	qrCache.Put(ctx, key, token, cacher.WithExpiry(ctx, 5*time.Minute))
 
 	return token, nil
 }
@@ -129,7 +129,7 @@ func (s *Service) ValidateQRToken(ctx context.Context, ownerID, locationID int64
 	key := fmt.Sprintf("hr_attendance:%d:qr:%d", ownerID, locationID)
 
 	qrCache := cacher.Of[string]()
-	cached, found := qrCache.Get(ctx, key)
+	cached, found := qrCache.GetAndDelete(ctx, key)
 	if !found || cached != token {
 		return domain.ErrInvalidQRToken
 	}

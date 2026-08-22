@@ -14,7 +14,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure/persistence/sqlc"
-	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/searchutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
@@ -1542,7 +1541,7 @@ func (r *Repository) GetPublicMenuItem(ctx context.Context, businessID, menuItem
 	return item, nil
 }
 
-func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, orderNumber, customerName, customerEmail, customerPhone, notes string, items []domain.OrderItemInput) (int64, error) {
+func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, orderNumber, customerName, customerPhone, notes string, items []domain.OrderItemInput) (int64, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to begin public order transaction", logger.Error(err))
@@ -1562,24 +1561,12 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, or
 		subtotal += item.UnitPrice * item.Quantity
 	}
 
-	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
-		Name:       customerName,
-		Email:      customerEmail,
-		Phone:      customerPhone,
-		TotalSpent: subtotal,
-		CountVisit: true,
-	})
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to sync public order customer", logger.Error(err))
-		return 0, err
-	}
-
 	qtx := r.queries.WithTx(tx)
 	res, err := qtx.CreatePublicOrder(ctx, sqlc.CreatePublicOrderParams{
 		OwnerID:       businessID,
 		BusinessID:    businessID,
 		OrderNumber:   orderNumber,
-		CustomerID:    sql.NullInt64{Int64: customerID, Valid: customerID != 0},
+		CustomerID:    sql.NullInt64{},
 		CustomerName:  nullString(customerName),
 		CustomerPhone: nullString(customerPhone),
 		Subtotal:      sql.NullString{String: floatToDecimal(subtotal), Valid: true},
