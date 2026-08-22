@@ -106,7 +106,7 @@ func (h *ListAutomationsHandler) Serve(ctx context.Context, _ *ListAutomationsRe
 	}
 	res, cacheErr := cacher.Of[ListAutomationsResponse]().GetOrComputeSingle(
 		ctx,
-		cacheKeys.Scoped(automationsCacheScope, businessID, "list"),
+		cacheKeys.Scoped(automationsCacheScope, businessID, "list:http"),
 		func(ctx context.Context) (ListAutomationsResponse, error) {
 			return h.computeList(ctx, businessID)
 		},

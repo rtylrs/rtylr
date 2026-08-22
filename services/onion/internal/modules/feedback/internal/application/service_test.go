@@ -30,6 +30,8 @@ func (m *mockRepo) List(_ context.Context, ownerID int64, filters domain.ListFil
 	return m.listResult, m.listTotal, m.listErr
 }
 
+func (m *mockRepo) CustomerExistsInBusiness(_ context.Context, _, _ int64) bool { return true }
+
 func (m *mockRepo) Create(_ context.Context, _ domain.FeedbackInput) (int64, error) {
 	return m.createID, m.createErr
 }

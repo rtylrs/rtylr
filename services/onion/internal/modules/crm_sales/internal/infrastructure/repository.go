@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"strings"
 	"errors"
 	"fmt"
 	"time"
@@ -296,6 +297,13 @@ func (r *Repository) UpdateContact(ctx context.Context, id, businessID int64, re
 		return domain.Contact{}, err
 	}
 
+	// Name-only updates cannot match an existing customer (the sync lookup
+	// requires a non-empty email or phone) and would mint a junk
+	// crm_customers row per edit. Keep the existing linkage instead.
+	if strings.TrimSpace(req.Email) == "" && strings.TrimSpace(req.Phone) == "" {
+		return r.GetContact(ctx, id, businessID)
+	}
+
 	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  req.Name,
 		Email: req.Email,
@@ -565,17 +573,17 @@ func ownerIDFromContext(ctx context.Context, fallback int64) int64 {
 // the authenticated user, so this check is the final tenant-boundary guard at
 // the persistence layer.
 func ensureLeadInBusiness(ctx context.Context, tx *sql.Tx, businessID, leadID int64) error {
-	var exists bool
-	if err := tx.QueryRowContext(ctx,
-		"SELECT EXISTS(SELECT 1 FROM crm_leads WHERE id = ? AND business_id = ?)",
+	// Lock the lead row so a concurrent DeleteLead cannot interleave between
+	// this check and the child insert (child tables have no FKs).
+	var id int64
+	err := tx.QueryRowContext(ctx,
+		"SELECT id FROM crm_leads WHERE id = ? AND business_id = ? FOR UPDATE",
 		leadID, businessID,
-	).Scan(&exists); err != nil {
-		return err
-	}
-	if !exists {
+	).Scan(&id)
+	if errors.Is(err, sql.ErrNoRows) {
 		return domain.ErrLeadNotFound
 	}
-	return nil
+	return err
 }
 
 func ensureContactForLead(ctx context.Context, tx *sql.Tx, businessID, leadID, contactID int64) error {
