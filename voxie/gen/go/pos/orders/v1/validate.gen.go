@@ -176,6 +176,9 @@ func (m *GetPublicOrderStatusRequest) Validate() error {
 	if m.BusinessId <= 0 {
 		violations = append(violations, "business_id must be greater than 0")
 	}
+	if m.PublicToken == "" {
+		violations = append(violations, "public_token is required")
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}

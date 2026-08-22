@@ -396,6 +396,10 @@ func RegisterOrderServiceServer(first any, rest ...any) error {
 			}
 			req.BusinessId = parsedBusinessId
 		}
+		if values := r.URL.Query()["public_token"]; len(values) > 0 {
+			value := values[0]
+			req.PublicToken = value
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())

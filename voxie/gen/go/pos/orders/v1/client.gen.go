@@ -180,6 +180,7 @@ func (c *OrderServiceClient) GetPublicOrderStatus(ctx context.Context, req *GetP
 	path = strings.ReplaceAll(path, "{order_id}", url.PathEscape(fmt.Sprintf("%v", req.OrderId)))
 	query := url.Values{}
 	query.Set("business_id", strconv.FormatInt(int64(req.BusinessId), 10))
+	query.Set("public_token", req.PublicToken)
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

@@ -452,6 +452,7 @@ export interface CreatePublicOrderResponse {
 orderId?: string;
 orderNumber?: string;
 status?: string;
+publicToken?: string;
 }
 
 export function decodeCreatePublicOrderResponse(v: any): CreatePublicOrderResponse {
@@ -460,6 +461,7 @@ return {
 orderId: v.order_id,
 orderNumber: v.order_number,
 status: v.status,
+publicToken: v.public_token,
 };
 }
 
@@ -468,6 +470,7 @@ const out: Record<string, unknown> = {};
 if (v.orderId !== undefined) { out.order_id = v.orderId; }
 if (v.orderNumber !== undefined) { out.order_number = v.orderNumber; }
 if (v.status !== undefined) { out.status = v.status; }
+if (v.publicToken !== undefined) { out.public_token = v.publicToken; }
 return out;
 }
 
@@ -476,6 +479,7 @@ const violations: string[] = [];
 if (v.orderId !== undefined && v.orderId !== null && !(typeof v.orderId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.orderId))) violations.push("order_id has invalid type");
 if (v.orderNumber !== undefined && v.orderNumber !== null && !(typeof v.orderNumber === "string")) violations.push("order_number has invalid type");
 if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.publicToken !== undefined && v.publicToken !== null && !(typeof v.publicToken === "string")) violations.push("public_token has invalid type");
 return violations;
 }
 
@@ -531,6 +535,7 @@ return violations;
 export interface GetPublicOrderStatusRequest {
 orderId: string;
 businessId: string;
+publicToken: string;
 }
 
 export function decodeGetPublicOrderStatusRequest(v: any): GetPublicOrderStatusRequest {
@@ -538,6 +543,7 @@ if (v === null || v === undefined) return v;
 return {
 orderId: v.order_id,
 businessId: v.business_id,
+publicToken: v.public_token,
 };
 }
 
@@ -545,6 +551,7 @@ export function encodeGetPublicOrderStatusRequest(v: GetPublicOrderStatusRequest
 const out: Record<string, unknown> = {};
 if (v.orderId !== undefined) { out.order_id = v.orderId; }
 if (v.businessId !== undefined) { out.business_id = v.businessId; }
+if (v.publicToken !== undefined) { out.public_token = v.publicToken; }
 return out;
 }
 
@@ -556,6 +563,8 @@ if (v.orderId !== undefined && v.orderId !== null && !(Number(v.orderId) > 0)) v
 if (v.businessId !== undefined && v.businessId !== null && !(typeof v.businessId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.businessId))) violations.push("business_id has invalid type");
 if (!(v.businessId !== undefined && v.businessId !== null)) violations.push("business_id is required");
 if (v.businessId !== undefined && v.businessId !== null && !(Number(v.businessId) > 0)) violations.push("business_id violates @gt");
+if (v.publicToken !== undefined && v.publicToken !== null && !(typeof v.publicToken === "string")) violations.push("public_token has invalid type");
+if (!(v.publicToken !== undefined && v.publicToken !== null) || v.publicToken === "") violations.push("public_token is required");
 return violations;
 }
 

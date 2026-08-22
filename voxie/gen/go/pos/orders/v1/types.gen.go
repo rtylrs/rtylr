@@ -1030,6 +1030,7 @@ type CreatePublicOrderResponse struct {
 	OrderId     int64  `json:"order_id,omitempty"`
 	OrderNumber string `json:"order_number,omitempty"`
 	Status      string `json:"status,omitempty"`
+	PublicToken string `json:"public_token,omitempty"`
 }
 
 func (m *CreatePublicOrderResponse) MarshalJSON() ([]byte, error) {
@@ -1083,6 +1084,14 @@ func (x *CreatePublicOrderResponse) GetStatus() string {
 		return zero
 	}
 	return x.Status
+}
+
+func (x *CreatePublicOrderResponse) GetPublicToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PublicToken
 }
 
 type GetOrderDetailRequest struct {
@@ -1139,8 +1148,9 @@ func (x *GetOrderDetailResponse) GetOrder() *Order {
 }
 
 type GetPublicOrderStatusRequest struct {
-	OrderId    int64 `json:"order_id,omitempty"`
-	BusinessId int64 `json:"business_id,omitempty"`
+	OrderId     int64  `json:"order_id,omitempty"`
+	BusinessId  int64  `json:"business_id,omitempty"`
+	PublicToken string `json:"public_token,omitempty"`
 }
 
 func (m *GetPublicOrderStatusRequest) MarshalJSON() ([]byte, error) {
@@ -1196,6 +1206,14 @@ func (x *GetPublicOrderStatusRequest) GetBusinessId() int64 {
 		return zero
 	}
 	return x.BusinessId
+}
+
+func (x *GetPublicOrderStatusRequest) GetPublicToken() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.PublicToken
 }
 
 type GetPublicOrderStatusResponse struct {
