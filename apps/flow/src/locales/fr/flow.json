@@ -356,7 +356,53 @@
     },
     "appearance": {
       "subtitle": "Personnalisez l'apparence de Flow.",
-      "theme": "Thème"
+      "perDevice": "Ces réglages s'appliquent à cet appareil uniquement. Ils ne sont pas partagés avec votre équipe et ne suivent pas vers un autre navigateur.",
+      "groups": {
+        "mode": "Mode",
+        "palette": "Palette",
+        "accent": "Couleur d'accent",
+        "density": "Densité",
+        "textSize": "Taille du texte",
+        "corners": "Coins",
+        "motion": "Réduire les animations"
+      },
+      "motionHint": "Désactive les transitions et les animations dans tout Flow.",
+      "paletteDescriptions": {
+        "midnight": "Le réglage par défaut de Flow : presque noir, contraste maximal.",
+        "graphite": "Gris foncé plus chaud, plus doux sur les écrans lumineux.",
+        "ink": "Noir bleuté et froid pour les longues sessions du soir.",
+        "moss": "Sombre avec une nuance verte et peu d'éblouissement.",
+        "paper": "Le mode clair par défaut de Flow : cartes blanches sur gris doux.",
+        "linen": "Blanc cassé chaud, plus reposant sous une lampe.",
+        "mist": "Gris clair froid avec des cartes blanches nettes.",
+        "slate": "Gris clair plus profond, séparation des cartes plus marquée."
+      },
+      "accentHex": "Valeur hexadécimale",
+      "accentPicker": "Choisir une couleur d'accent personnalisée",
+      "accentInvalid": "Saisissez une couleur hexadécimale à six chiffres, par exemple #64c5b9.",
+      "accentWorkspace": "Suivre la couleur de l'espace de travail",
+      "density": {
+        "compact": "Compact",
+        "cozy": "Confortable",
+        "roomy": "Spacieux"
+      },
+      "textSize": {
+        "s": "Petit",
+        "m": "Par défaut",
+        "l": "Grand"
+      },
+      "textSizeGate": "Les tailles de texte de Flow sont écrites en pixels fixes : un multiplicateur de taille ne peut donc pas encore les atteindre.",
+      "corners": {
+        "sharp": "Vifs",
+        "soft": "Doux",
+        "round": "Arrondis"
+      },
+      "preview": {
+        "label": "Aperçu",
+        "taskTitle": "Rédiger la liste de contrôle du lancement",
+        "chip": "En cours",
+        "action": "Attribuer"
+      }
     },
     "shortcuts": {
       "subtitle": "Naviguez rapidement dans Flow sans toucher la souris.",
