@@ -249,3 +249,73 @@ Fewer edges than proposals in every wave except the structural one, which is the
 brief's own test for whether an audit is over-connecting. Ongoing maintenance
 across all 21 is roughly 7 developer days a year, and `HR->HR-01` is the one
 item that reduces it.
+
+## Round two: revised waves
+
+The backend moved under this roadmap within one day: three wave items lost
+their backend work entirely, and one storage prerequisite appeared
+(`billable_invoice_id` is never written). Waves below are re-cut against onion
+`ab6ff7ff`, voxie `847a34c8`, packages `5ece9b79`. Every item names its
+repositories in landing order: **contract, then backend, then frontend**, with
+the packages pointer bump between contract and consumers.
+
+### Wave 1 (ten items, capped)
+
+| #   | Item                                        | Repositories in order                                          | Landing notes                                                                    |
+| --- | ------------------------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| 1   | HR->HUB-01 termination revocation           | onion (reconciliation job first, then revocation at status change); rtylr dash (exposure report panel) | Reconciliation read is the test oracle; watch both hr_staff and hr_employees status columns |
+| 2   | ERP->FIN-01 supplier identity               | voxie (drafted: bill supplier relax); packages bump; onion validator; rtylr finance picker | Fixes a live defect; ships before anything else touches bills                        |
+| 3   | HR->FIN-01 payroll export button            | rtylr hr only                                                    | Backend complete (`POST /hr/payroll/runs/{id}/export`); optional posted-marker later |
+| 4   | Labour-cost RPC exposure                    | onion (workspaces RPC over the live port); rtylr flow (project cost panel) | Contract drafted on the voxie branch (`flow.project.v1`); serves HR->INS-01 too      |
+| 5   | ERP->FIN-02 valuation on balance sheet      | rtylr finance                                                   | One read                                                                            |
+| 6   | ERP->FIN-03 received-not-billed             | rtylr finance                                                   | One filtered read                                                                   |
+| 7   | FLOW->FIN-01 unbilled hours                 | rtylr finance (consume landed filters); onion (mark-hours-invoiced via an hr_time-owned port); rtylr invoices hook | Without the marker write the unbilled number never moves                             |
+| 8   | HR->FLOW-02 leave gate                      | voxie (drafted: leave range); packages bump; onion; rtylr flow warning | Partial coverage caveat until HR->HR-01 lands                                       |
+| 9   | CRM->FIN-02 invoice customer link           | voxie (drafted); packages bump; onion column + validator + snapshot logic; rtylr finance form | Start immediately: cost grows with every invoice issued                              |
+| 10  | Insights delivery adoption                  | rtylr insights (hooks + screens)                                | Handlers implemented server-side; zero frontend callers today                        |
+
+New domain edges added by wave 1: five (erp->finance, hr->hub, hr->flow,
+flow->finance, support->crm deferred to wave 2), fewer than proposals, because
+three items reuse edges round one already counted and two items expose existing
+backend seams rather than creating crossings.
+
+### Wave 2 (unchanged members, tightened dependencies)
+
+CRM->FIN-01 (blocked by item 9), FIN->ERP-01 (blocked by item 2), FIN->ERP-02
+(voxie draft ready; needs the settlement port decision from
+17-backend-plumbing.md B4), REC->HR-01 (minimal recruit contract first),
+SUP->CRM-01 (support customer reference draft ready), POS->CRM-01 (pos repo
+joins the consumer list now that it is cloned and swept).
+
+### Wave 3 and 4
+
+Unchanged from round one except: ERP->POS-01 gains a second consumer surface
+(pos repo, cloned this run), and IDENTITY-01 gains the team-module constraint:
+seat provisioning writes `hr_employees` directly (`16-backend-matrix.md`
+watchlist), so hub-side flows are stakeholders in the migration.
+
+## Platform prerequisites surfaced by round two
+
+| Finding                                             | Repo  | Why it gates proposals                                                        |
+| ---------------------------------------------------- | ----- | ------------------------------------------------------------------------------- |
+| Webhook registration has no delivery engine          | onion | Blocks any shape-B4/3 design that assumes tenant outbound events exist         |
+| `memory` module queries show no tenant predicate     | onion | Unverified isolation on an AI-surface module; must be resolved before any echo/memory integration |
+| `store_orders` and `customer_sync` both write crm_customers | onion | Customer invariants split across writers; consolidate before IDENTITY-01 |
+
+## The single highest leverage change
+
+Unchanged and reinforced: **CRM->FIN-02, the invoice's customer id**. Round
+two's storage-level check confirms the four free-text client fields are all
+there is (`14-layer-reconciliation.md`), every day of delay adds unmatched
+history, and the fifth-bucket discovery strengthens the pattern argument: the
+product's habit is building backend capability nobody consumes; a nullable FK
+with an immediate consumer is the cheapest counter-example to ship.
+
+## The most tempting bad idea (round two edition)
+
+Round one's rejection (customer 360 joined on email) stands. The new one this
+run: **syncing the vendored `packages/voxie` copy wholesale from voxie main**
+to "fix" contract lag. At least one path there carries a deliberate local
+change a blanket sync would silently revert (documented in packages/CLAUDE.md);
+this audit hit the temptation itself while drafting contracts. Sync narrowly,
+one domain at a time, after checking local drift.
