@@ -287,26 +287,10 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const workspacesLoading = false;
   const { data: businessName } = useFlowBusinessName();
 
-  const PERSONAL_FALLBACK: Workspace = {
-    id: PERSONAL_WORKSPACE_ID,
-    name: t('flow.shell.personal'),
-    color: ACCENT_DEFAULT,
-  };
-
-  // Effective workspace list: prefer live API data, fall back to store, guarantee Personal.
-  // Always map through apiWorkspaceToWorkspace so IDs are strings - URL params are strings
-  // and === comparisons would silently fail against numeric API IDs.
-  const liveWorkspaces = useMemo<Workspace[]>(() => {
-    const list =
-      apiWorkspaces && apiWorkspaces.length > 0
-        ? apiWorkspaces.map(apiWorkspaceToWorkspace)
-        : workspaces;
-    if (list.length === 0) return workspacesLoading ? [] : [PERSONAL_FALLBACK];
-    return list;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiWorkspaces, workspaces, workspacesLoading]);
-
-  const currentWorkspaceId = workspaceId || activeWorkspaceId || liveWorkspaces[0]?.id || '';
+  // Workspace layer removed: these are stable constants so downstream
+  // references compile without cascading re-renders.
+  const currentWorkspaceId = '';
+  const liveWorkspaces: Workspace[] = [];
 
   // Creating a project posts workspace_id, so it needs a resolved numeric id -
   // not the Personal sentinel this layout paints with before workspaces load.
@@ -474,20 +458,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
   useKeyboardShortcuts();
 
-  const activeWorkspace =
-    liveWorkspaces.find((w) => w.id === currentWorkspaceId) ||
-    (currentWorkspaceId && currentWorkspaceId !== PERSONAL_WORKSPACE_ID
-      ? {
-          id: currentWorkspaceId,
-          name:
-            businessName ||
-            user?.businessName ||
-            authUser?.businessName ||
-            t('flow.shell.workspace'),
-          color: ACCENT_DEFAULT,
-        }
-      : liveWorkspaces[0]) ||
-    (workspacesLoading ? { id: '', name: '', color: '#6b7280' } : PERSONAL_FALLBACK);
+  const activeWorkspace = {
+    id: '',
+    name: businessName || user?.businessName || authUser?.businessName || t('flow.shell.workspace'),
+    color: ACCENT_DEFAULT,
+  };
 
   // Sync --accent CSS vars to the active workspace color so every component
   // in the tree can reference var(--accent) without prop-drilling.
