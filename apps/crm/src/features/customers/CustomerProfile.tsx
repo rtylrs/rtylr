@@ -115,6 +115,7 @@ const CustomerProfile: React.FC = () => {
   const consent = customer.consent || { email: false, sms: false, marketing: false };
 
   const handleAddTag = () => {
+    if (update.isPending) return;
     if (!newTag.trim()) {
       toast.error('Tag name is required');
       return;
@@ -128,14 +129,17 @@ const CustomerProfile: React.FC = () => {
     update.mutate(
       { id: customer.id, data: { tags: updated } },
       {
-        onSuccess: () => toast.success(`Tag "${tagName}" added`),
+        onSuccess: () => {
+          setNewTag((current) => (current === tagName ? '' : current));
+          toast.success(`Tag "${tagName}" added`);
+        },
         onError: () => toast.error('Failed to add tag'),
       }
     );
-    setNewTag('');
   };
 
   const handleRemoveTag = (tag: string) => {
+    if (update.isPending) return;
     const updated = tags.filter((t) => t !== tag);
     update.mutate(
       { id: customer.id, data: { tags: updated } },
@@ -149,30 +153,34 @@ const CustomerProfile: React.FC = () => {
   const handleNotesSave = (notes: string): Promise<void> =>
     update.mutateAsync({ id: customer.id, data: { notes } }).then(() => undefined);
 
-  const handleAward = (points: number, reason: string) => {
+  const handleAward = (points: number, reason: string): void | Promise<void> => {
     if (!loyaltyConfig?.programEnabled) {
       toast.error('Loyalty program is currently disabled');
       return;
     }
-    award.mutate(
-      { customerId: customer.id, points, reason },
-      {
-        onSuccess: () => toast.success(`Awarded ${points} points`),
-        onError: () => toast.error('Failed to award points'),
+    return award.mutateAsync({ customerId: customer.id, points, reason }).then(
+      () => {
+        toast.success(`Awarded ${points} points`);
+      },
+      (error: unknown) => {
+        toast.error('Failed to award points');
+        throw error;
       }
     );
   };
 
-  const handleDeduct = (points: number, reason: string) => {
+  const handleDeduct = (points: number, reason: string): void | Promise<void> => {
     if (!loyaltyConfig?.programEnabled) {
       toast.error('Loyalty program is currently disabled');
       return;
     }
-    redeem.mutate(
-      { customerId: customer.id, points, reason },
-      {
-        onSuccess: () => toast.success(`Deducted ${points} points`),
-        onError: () => toast.error('Failed to deduct points'),
+    return redeem.mutateAsync({ customerId: customer.id, points, reason }).then(
+      () => {
+        toast.success(`Deducted ${points} points`);
+      },
+      (error: unknown) => {
+        toast.error('Failed to deduct points');
+        throw error;
       }
     );
   };
@@ -396,7 +404,12 @@ const CustomerProfile: React.FC = () => {
                 <input
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddTag();
+                    }
+                  }}
                   placeholder="Add tag..."
                   style={{
                     flex: 1,

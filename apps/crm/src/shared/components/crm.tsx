@@ -689,8 +689,8 @@ export const CampaignStatsCard: React.FC<{
 
 // ── 27. LoyaltyPointsInput ──────────────────────────────────────
 export const LoyaltyPointsInput: React.FC<{
-  onAward: (points: number, reason: string) => void;
-  onDeduct: (points: number, reason: string) => void;
+  onAward: (points: number, reason: string) => void | Promise<void>;
+  onDeduct: (points: number, reason: string) => void | Promise<void>;
   pending?: boolean;
 }> = ({ onAward, onDeduct, pending = false }) => {
   const [points, setPoints] = useState(0);
@@ -736,9 +736,17 @@ export const LoyaltyPointsInput: React.FC<{
           disabled={pending || points <= 0 || !Number.isInteger(points)}
           onClick={() => {
             if (!pending && points > 0 && Number.isInteger(points)) {
-              onAward(points, reason);
-              setPoints(0);
-              setReason('');
+              void Promise.resolve()
+                .then(() => onAward(points, reason))
+                .then(
+                  () => {
+                    setPoints(0);
+                    setReason('');
+                  },
+                  () => {
+                    // Keep the entered adjustment available for retry.
+                  }
+                );
             }
           }}
           style={{ flex: 1, justifyContent: 'center' }}
@@ -750,9 +758,17 @@ export const LoyaltyPointsInput: React.FC<{
           disabled={pending || points <= 0 || !Number.isInteger(points)}
           onClick={() => {
             if (!pending && points > 0 && Number.isInteger(points)) {
-              onDeduct(points, reason);
-              setPoints(0);
-              setReason('');
+              void Promise.resolve()
+                .then(() => onDeduct(points, reason))
+                .then(
+                  () => {
+                    setPoints(0);
+                    setReason('');
+                  },
+                  () => {
+                    // Keep the entered adjustment available for retry.
+                  }
+                );
             }
           }}
           style={{ flex: 1, justifyContent: 'center' }}
