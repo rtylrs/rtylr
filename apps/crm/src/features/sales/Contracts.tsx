@@ -27,6 +27,17 @@ const PLAN_COLORS: Record<ContractPlan, { bg: string; color: string }> = {
   scale: { bg: 'rgba(139,92,246,0.12)', color: '#8b5cf6' },
 };
 
+const createEmptyContractForm = () => ({
+  leadId: '',
+  plan: 'pro' as ContractPlan,
+  mrr: '',
+  seats: '',
+  signedAt: '',
+  signedBy: '',
+  closedBy: '',
+  notes: '',
+});
+
 function formatDate(iso: string): string {
   if (!iso) return '-';
   const date = new Date(iso);
@@ -79,16 +90,11 @@ const Contracts: React.FC = () => {
   const hasMore = fetchedContracts?.length === pageSize;
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
-  const [form, setForm] = useState({
-    leadId: '',
-    plan: 'pro' as ContractPlan,
-    mrr: '',
-    seats: '',
-    signedAt: '',
-    signedBy: '',
-    closedBy: '',
-    notes: '',
-  });
+  const [form, setForm] = useState(createEmptyContractForm);
+
+  useEffect(() => {
+    if (createOpen) setForm(createEmptyContractForm());
+  }, [createOpen]);
 
   const totalMrr = contracts.reduce((sum, c) => sum + c.mrr, 0);
 
@@ -122,16 +128,7 @@ const Contracts: React.FC = () => {
       {
         onSuccess: () => {
           setCreateOpen(false);
-          setForm({
-            leadId: '',
-            plan: 'pro',
-            mrr: '',
-            seats: '',
-            signedAt: '',
-            signedBy: '',
-            closedBy: '',
-            notes: '',
-          });
+          setForm(createEmptyContractForm());
         },
       }
     );

@@ -88,10 +88,17 @@ const SegmentDetail: React.FC = () => {
               <p style={{ fontSize: '12px', color: 'var(--hub-text-muted)', margin: '2px 0 0' }}>
                 {segment.description}
               </p>
-              <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
-                {segment.rules.map((r) => (
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '6px',
+                  marginTop: '8px',
+                }}
+              >
+                {segment.rules.map((r, ruleIndex) => (
                   <span
-                    key={r}
+                    key={`${r}-${ruleIndex}`}
                     style={{
                       padding: '2px 8px',
                       borderRadius: '9999px',

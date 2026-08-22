@@ -448,9 +448,9 @@ function SegmentCard({
 
       {/* Rules preview */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        {segment.rules.map((rule) => (
+        {segment.rules.map((rule, ruleIndex) => (
           <div
-            key={rule}
+            key={`${rule}-${ruleIndex}`}
             style={{
               display: 'flex',
               alignItems: 'center',

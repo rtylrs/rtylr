@@ -9,18 +9,24 @@ interface Props {
   onClose: () => void;
 }
 
+const createEmptyLeadForm = () => ({
+  company: '',
+  industry: '',
+  size: '',
+  source: '',
+  stage: 'cold' as LeadStage,
+  mrrPotential: '',
+  assignedTo: '',
+  notes: '',
+});
+
 const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
   const createLead = useCreateLead();
-  const [form, setForm] = useState({
-    company: '',
-    industry: '',
-    size: '',
-    source: '',
-    stage: 'cold' as LeadStage,
-    mrrPotential: '',
-    assignedTo: '',
-    notes: '',
-  });
+  const [form, setForm] = useState(createEmptyLeadForm);
+
+  React.useEffect(() => {
+    if (open) setForm(createEmptyLeadForm());
+  }, [open]);
 
   const handleSubmit = (): void => {
     if (!form.company.trim()) {
@@ -50,16 +56,7 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
       },
       {
         onSuccess: () => {
-          setForm({
-            company: '',
-            industry: '',
-            size: '',
-            source: '',
-            stage: 'cold',
-            mrrPotential: '',
-            assignedTo: '',
-            notes: '',
-          });
+          setForm(createEmptyLeadForm());
           onClose();
         },
       }

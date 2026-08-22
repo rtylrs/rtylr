@@ -212,6 +212,12 @@ const TeamTab: React.FC = () => {
   const [removeTarget, setRemoveTarget] = useState<{ id: string; label: string } | null>(null);
   const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
+  const closeInvite = (): void => {
+    setEmail('');
+    setFullName('');
+    setShowInvite(false);
+  };
+
   const handleInvite = (): void => {
     if (invite.isPending) return;
     if (!email.trim() || !fullName.trim()) {
@@ -351,7 +357,7 @@ const TeamTab: React.FC = () => {
               <UserPlus size={13} />
               {invite.isPending ? 'Sending…' : 'Send invite'}
             </Button>
-            <Button variant="ghost" onClick={() => setShowInvite(false)}>
+            <Button variant="ghost" onClick={closeInvite}>
               Cancel
             </Button>
           </div>
