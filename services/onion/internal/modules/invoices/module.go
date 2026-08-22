@@ -57,3 +57,10 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 func (m *Module) GetAnonymousRoutes() []string {
 	return []string{}
 }
+
+// SetCustomerSnapshotProvider connects invoice creation to the customers
+// module through the port invoices owns (#840). customers implements it; no
+// package imports the other.
+func (m *Module) SetCustomerSnapshotProvider(p application.CustomerSnapshotProvider) {
+	m.service.SetCustomerSnapshotProvider(p)
+}
