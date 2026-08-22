@@ -26,7 +26,8 @@ func invalidateHRCoreScope(ctx context.Context, ownerID int64) {
 }
 
 type Service struct {
-	repo *infrastructure.Repository
+	repo               *infrastructure.Repository
+	terminationRevoker TerminationRevoker
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
@@ -89,7 +90,15 @@ func (s *Service) CreateEmployee(ctx context.Context, ownerID int64, emp domain.
 
 func (s *Service) UpdateEmployee(ctx context.Context, ownerID int64, emp domain.EmployeeRecord) (*domain.EmployeeRecord, error) {
 	defer invalidateHRCoreScope(ctx, ownerID)
-	return s.repo.UpdateEmployee(ctx, ownerID, emp)
+	updated, err := s.repo.UpdateEmployee(ctx, ownerID, emp)
+	if err != nil {
+		return updated, err
+	}
+	// Employment ended: drop the user's app permissions for this business
+	// immediately. Failure here is logged, not fatal; team's daily
+	// reconciliation job is the durability guarantee (#834).
+	s.revokeOnTermination(ctx, ownerID, emp)
+	return updated, nil
 }
 
 // --- Invites ---
