@@ -61,6 +61,34 @@ function normalizeHeader(header: string): string {
     .replace(/[\s-]+/g, '_');
 }
 
+const DUPLICATE_COLUMN_PREFIX = '__crm_import_column__';
+
+/** Keeps duplicate CSV headers addressable without changing the mapping shape. */
+export function importColumnValue(headers: string[], index: number): string {
+  const header = headers[index] ?? '';
+  return headers.indexOf(header) === headers.lastIndexOf(header)
+    ? header
+    : `${DUPLICATE_COLUMN_PREFIX}${index}:${header}`;
+}
+
+function importColumnIndex(headers: string[], column: string): number {
+  if (column.startsWith(DUPLICATE_COLUMN_PREFIX)) {
+    const separatorIndex = column.indexOf(':', DUPLICATE_COLUMN_PREFIX.length);
+    const index = Number(column.slice(DUPLICATE_COLUMN_PREFIX.length, separatorIndex));
+    const header = column.slice(separatorIndex + 1);
+    if (
+      separatorIndex >= 0 &&
+      Number.isInteger(index) &&
+      index >= 0 &&
+      index < headers.length &&
+      headers[index] === header
+    ) {
+      return index;
+    }
+  }
+  return headers.indexOf(column);
+}
+
 function findHeaderIndex(
   headers: string[],
   aliases: string[],
@@ -92,7 +120,7 @@ export function autoMapHeaders(headers: string[]): Record<ImportField, string> {
         !usedIndices.has(headerIndex) && HEADER_ALIASES[field].includes(header)
     );
     if (index >= 0) {
-      mapped[field] = headers[index];
+      mapped[field] = importColumnValue(headers, index);
       usedIndices.add(index);
     }
   });
@@ -105,7 +133,7 @@ export function autoMapHeaders(headers: string[]): Record<ImportField, string> {
       usedIndices
     );
     if (index >= 0) {
-      mapped[field] = headers[index];
+      mapped[field] = importColumnValue(headers, index);
       usedIndices.add(index);
     }
   });
@@ -121,7 +149,7 @@ function mappedValue(
 ): string {
   const column = mapping[field];
   if (!column) return '';
-  const index = headers.indexOf(column);
+  const index = importColumnIndex(headers, column);
   return index >= 0 ? (row[index] ?? '').trim() : '';
 }
 
@@ -347,7 +375,7 @@ const ImportCustomers: React.FC = () => {
                     >
                       <option value="">Select column...</option>
                       {headers.map((h, index) => (
-                        <option key={`${h}-${index}`} value={h}>
+                        <option key={`${h}-${index}`} value={importColumnValue(headers, index)}>
                           {h}
                         </option>
                       ))}

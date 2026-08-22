@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   autoMapHeaders,
+  importColumnValue,
   parseCsv,
   toCustomerImportRow,
 } from '../../../../features/customers/ImportCustomers';
@@ -70,6 +71,19 @@ describe('useCustomers & customer helpers', () => {
       last_name: 'Lovelace',
       email: 'ada@example.com',
       phone: '',
+    });
+  });
+
+  it('imports the selected duplicate header column instead of the first match', () => {
+    const headers = ['Name', 'Email', 'Email'];
+    const mapping = { name: 'Name', email: importColumnValue(headers, 2) };
+
+    expect(
+      toCustomerImportRow(['Jane Doe', 'old@example.com', 'new@example.com'], headers, mapping)
+    ).toMatchObject({
+      first_name: 'Jane',
+      last_name: 'Doe',
+      email: 'new@example.com',
     });
   });
 
