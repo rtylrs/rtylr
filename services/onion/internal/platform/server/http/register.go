@@ -592,7 +592,8 @@ func WriteOneKitError(ctx context.Context, w http.ResponseWriter, err error) {
 	} else {
 		var oneKitErr *onekithttp.Error
 		if !stdErrors.As(err, &oneKitErr) {
-			oneKitErr = onekithttp.NewError(http.StatusInternalServerError, err.Error())
+			logger.Ctx(ctx).Error("Unhandled internal error", logger.Error(err))
+			oneKitErr = onekithttp.NewError(http.StatusInternalServerError, "Internal server error")
 		}
 		statusCode = oneKitErr.HTTPStatusCode()
 		response = oneKitErr

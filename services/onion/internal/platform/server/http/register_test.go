@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -200,6 +201,22 @@ func TestRegisterGETCanValidateResponseProtosWhenEnabled(t *testing.T) {
 
 	if rec.Code != http.StatusInternalServerError {
 		t.Fatalf("expected 500, got %d: %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestWriteOneKitErrorDoesNotExposeInternalError(t *testing.T) {
+	rec := httptest.NewRecorder()
+	WriteOneKitError(context.Background(), rec, errors.New("duplicate entry in users.email: secret@example.com"))
+
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("expected 500, got %d", rec.Code)
+	}
+	body := rec.Body.String()
+	if strings.Contains(body, "duplicate entry") || strings.Contains(body, "secret@example.com") {
+		t.Fatalf("response leaked internal error: %s", body)
+	}
+	if !strings.Contains(body, "Internal server error") {
+		t.Fatalf("response missing generic error message: %s", body)
 	}
 }
 
