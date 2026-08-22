@@ -594,14 +594,6 @@ export const flowApi = {
       })
     ),
 
-  moveProject: (data: { project_id: number; workspace_id: number }) =>
-    flowResult(() =>
-      projectClient.moveProject({
-        projectId: String(data.project_id),
-        workspaceId: String(data.workspace_id),
-      })
-    ),
-
   // -- Tasks --------------------------------------------------------------
 
   getTasks: (params: {

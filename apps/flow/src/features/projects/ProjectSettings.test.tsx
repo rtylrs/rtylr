@@ -14,7 +14,6 @@ vi.mock('sonner', () => ({
 
 const updateProjectMutate = vi.hoisted(() => vi.fn());
 const deleteProjectMutate = vi.hoisted(() => vi.fn());
-const moveProjectMutate = vi.hoisted(() => vi.fn());
 const removeMemberMutate = vi.hoisted(() => vi.fn());
 const updateRoleMutate = vi.hoisted(() => vi.fn());
 const transferOwnershipMutate = vi.hoisted(() => vi.fn());
@@ -38,7 +37,6 @@ vi.mock('@tanstack/react-router', () => ({
 vi.mock('./useProjects', () => ({
   useUpdateProject: () => ({ mutate: updateProjectMutate, isPending: false }),
   useDeleteProject: () => ({ mutate: deleteProjectMutate, isPending: false }),
-  useMoveProject: () => ({ mutate: moveProjectMutate, isPending: false }),
 }));
 
 vi.mock('./useProjectMembers', () => ({
@@ -207,7 +205,6 @@ describe('ProjectSettings role gating (#793)', () => {
     useFlowStore.setState({ projects: [], workspaces: [] });
     updateProjectMutate.mockClear();
     deleteProjectMutate.mockClear();
-    moveProjectMutate.mockClear();
     removeMemberMutate.mockClear();
     updateRoleMutate.mockClear();
     transferOwnershipMutate.mockClear();
@@ -381,7 +378,6 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
     updateProjectMutate.mockClear();
     removeMemberMutate.mockClear();
     updateRoleMutate.mockClear();
-    moveProjectMutate.mockClear();
     transferOwnershipMutate.mockClear();
     deleteProjectMutate.mockClear();
     (toast.error as ReturnType<typeof vi.fn>).mockClear();
@@ -411,31 +407,6 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
     act(() => options.onError?.(new Error('boom')));
 
     expect(toast.error).not.toHaveBeenCalled();
-  });
-
-  it('does not show a call-site toast when moving a project fails, but still resets the confirm state', () => {
-    const { container } = renderProjectSettings();
-    act(() => {
-      useFlowStore.setState({
-        workspaces: [
-          { id: 'w1', name: 'Workspace', color: '#000' },
-          { id: 'w2', name: 'Other workspace', color: '#111' },
-        ],
-      });
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Members' }));
-
-    const workspaceSelect = container.querySelectorAll('select')[1];
-    fireEvent.change(workspaceSelect, { target: { value: 'w2' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Move' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }));
-
-    const [, options] = moveProjectMutate.mock.calls[0];
-    act(() => options.onError?.(new Error('boom')));
-
-    expect(toast.error).not.toHaveBeenCalled();
-    expect(screen.queryByRole('button', { name: 'Confirm' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Move' })).toBeInTheDocument();
   });
 
   it('does not show a call-site toast when transferring ownership fails, but still resets the confirm state', () => {

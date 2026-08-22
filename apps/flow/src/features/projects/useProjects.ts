@@ -58,14 +58,3 @@ export function useDeleteProject() {
     onError: () => toast.error(t('toasts.project.deleteFailed')),
   });
 }
-
-export function useMoveProject() {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: { project_id: number; workspace_id: number }) =>
-      unwrap(flowApi.moveProject(data)).then(() => {}),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
-    onError: () => toast.error(t('toasts.project.moveFailed')),
-  });
-}

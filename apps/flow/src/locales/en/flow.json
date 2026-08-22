@@ -742,7 +742,6 @@
     "noMembersYet": "No members yet.",
     "addMemberCta": "Add member",
     "refreshMembersCta": "Refresh",
-    "moveGateReason": "Only project admins can move this project to another workspace.",
     "transferGateReason": "Only project admins can transfer ownership of this project.",
     "deleteGateReason": "Only project admins can delete this project.",
     "visibility": "Visibility",

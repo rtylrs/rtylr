@@ -773,7 +773,6 @@
     "noMembersYet": "لا يوجد أعضاء بعد.",
     "addMemberCta": "إضافة عضو",
     "refreshMembersCta": "تحديث",
-    "moveGateReason": "يمكن لمسؤولي المشروع فقط نقل هذا المشروع إلى مساحة عمل أخرى.",
     "transferGateReason": "يمكن لمسؤولي المشروع فقط نقل ملكية هذا المشروع.",
     "deleteGateReason": "يمكن لمسؤولي المشروع فقط حذف هذا المشروع.",
     "visibility": "الظهور",
