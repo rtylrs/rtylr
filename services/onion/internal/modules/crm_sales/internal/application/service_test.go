@@ -300,3 +300,19 @@ func TestUpdateContract_PropagatesError(t *testing.T) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
+
+func (m *mockRepo) ListSignedContracts(_ context.Context, _ int64, _, _ int32) ([]domain.Contract, error) {
+	return m.contracts, m.err
+}
+
+func (m *mockRepo) CountSignedContracts(_ context.Context, _ int64) (int64, error) {
+	return int64(len(m.contracts)), m.err
+}
+
+func (m *mockRepo) ListUnsignedContracts(_ context.Context, _ int64, _, _ int32) ([]domain.Contract, error) {
+	return m.contracts, m.err
+}
+
+func (m *mockRepo) CountUnsignedContracts(_ context.Context, _ int64) (int64, error) {
+	return int64(len(m.contracts)), m.err
+}

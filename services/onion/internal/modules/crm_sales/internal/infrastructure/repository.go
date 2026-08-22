@@ -766,6 +766,56 @@ func touchpointFromFields(
 	return tp
 }
 
+func (r *Repository) ListSignedContracts(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Contract, error) {
+	rows, err := r.queries.ListSignedContracts(ctx, sqlc.ListSignedContractsParams{
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list signed contracts", logger.Any("business_id", businessID), logger.Error(err))
+		return nil, err
+	}
+	out := make([]domain.Contract, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, contractFromFields(
+			row.ID, row.OwnerID, row.BusinessID, row.LeadID, row.Plan, row.Mrr,
+			int(row.Seats), row.SignedAt, row.SignedByName, row.ClosedBy, row.Notes,
+			row.CreatedAt, row.UpdatedAt,
+		))
+	}
+	return out, nil
+}
+
+func (r *Repository) CountSignedContracts(ctx context.Context, businessID int64) (int64, error) {
+	return r.queries.CountSignedContracts(ctx, businessID)
+}
+
+func (r *Repository) ListUnsignedContracts(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Contract, error) {
+	rows, err := r.queries.ListUnsignedContracts(ctx, sqlc.ListUnsignedContractsParams{
+		BusinessID: businessID,
+		Limit:      limit,
+		Offset:     offset,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list unsigned contracts", logger.Any("business_id", businessID), logger.Error(err))
+		return nil, err
+	}
+	out := make([]domain.Contract, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, contractFromFields(
+			row.ID, row.OwnerID, row.BusinessID, row.LeadID, row.Plan, row.Mrr,
+			int(row.Seats), row.SignedAt, row.SignedByName, row.ClosedBy, row.Notes,
+			row.CreatedAt, row.UpdatedAt,
+		))
+	}
+	return out, nil
+}
+
+func (r *Repository) CountUnsignedContracts(ctx context.Context, businessID int64) (int64, error) {
+	return r.queries.CountUnsignedContracts(ctx, businessID)
+}
+
 func contractFromRow(row sqlc.ListContractsRow) domain.Contract {
 	return contractFromFields(
 		row.ID, row.OwnerID, row.BusinessID, row.LeadID, row.Plan, row.Mrr,

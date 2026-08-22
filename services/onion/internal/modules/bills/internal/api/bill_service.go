@@ -59,12 +59,15 @@ func (a *BillAPI) CreateBill(ctx context.Context, req *financebillv1.CreateBillR
 		return nil, billStatusError(http.StatusBadRequest, "amount must be a valid monetary value")
 	}
 	input := domain.BillInput{
-		SupplierID:  req.GetSupplierId(),
-		Amount:      amount,
-		Currency:    req.GetCurrency(),
-		DueDate:     req.GetDueDate(),
-		Status:      req.GetStatus(),
-		Description: req.GetDescription(),
+		Amount:       amount,
+		Currency:     req.GetCurrency(),
+		DueDate:      req.GetDueDate(),
+		Status:       req.GetStatus(),
+		Description:  req.GetDescription(),
+		SupplierName: req.GetSupplierName(),
+	}
+	if req.SupplierId != nil {
+		input.SupplierID = *req.SupplierId
 	}
 	if validationErr := domain.ValidateBillInput(input); validationErr != nil {
 		return nil, billStatusError(http.StatusBadRequest, validationErr.Error())
@@ -90,12 +93,15 @@ func (a *BillAPI) UpdateBill(ctx context.Context, req *financebillv1.UpdateBillR
 		return nil, billStatusError(http.StatusBadRequest, "amount must be a valid monetary value")
 	}
 	input := domain.BillInput{
-		SupplierID:  body.GetSupplierId(),
-		Amount:      amount,
-		Currency:    body.GetCurrency(),
-		DueDate:     body.GetDueDate(),
-		Status:      body.GetStatus(),
-		Description: body.GetDescription(),
+		SupplierName: body.GetSupplierName(),
+		Amount:       amount,
+		Currency:     body.GetCurrency(),
+		DueDate:      body.GetDueDate(),
+		Status:       body.GetStatus(),
+		Description:  body.GetDescription(),
+	}
+	if body.SupplierId != nil {
+		input.SupplierID = *body.SupplierId
 	}
 	if validationErr := domain.ValidateBillInput(input); validationErr != nil {
 		return nil, billStatusError(http.StatusBadRequest, validationErr.Error())
@@ -144,17 +150,23 @@ func (a *BillAPI) DeleteBill(ctx context.Context, req *financebillv1.DeleteBillR
 }
 
 func newBillProto(bill domain.Bill) *financebillv1.Bill {
+	var supplierID *int64
+	if bill.SupplierID != 0 {
+		v := bill.SupplierID
+		supplierID = &v
+	}
 	return &financebillv1.Bill{
-		Id:          bill.ID,
-		OwnerId:     bill.OwnerID,
-		SupplierId:  bill.SupplierID,
-		Amount:      bill.Amount.Float64(),
-		Currency:    bill.Currency,
-		DueDate:     bill.DueDate.Format("2006-01-02"),
-		Status:      bill.Status,
-		Description: bill.Description,
-		CreatedAt:   bill.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt:   bill.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		Id:           bill.ID,
+		OwnerId:      bill.OwnerID,
+		SupplierId:   supplierID,
+		SupplierName: bill.SupplierName,
+		Amount:       bill.Amount.Float64(),
+		Currency:     bill.Currency,
+		DueDate:      bill.DueDate.Format("2006-01-02"),
+		Status:       bill.Status,
+		Description:  bill.Description,
+		CreatedAt:    bill.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt:    bill.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 }
 

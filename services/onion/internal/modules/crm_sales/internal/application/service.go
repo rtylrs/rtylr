@@ -31,6 +31,10 @@ type repository interface {
 	UpdateLead(ctx context.Context, id, businessID int64, req domain.UpdateLeadRequest) (domain.Lead, error)
 	DeleteLead(ctx context.Context, id, businessID int64) error
 	GetPipeline(ctx context.Context, businessID int64) ([]domain.PipelineSummary, error)
+	ListSignedContracts(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Contract, error)
+	CountSignedContracts(ctx context.Context, businessID int64) (int64, error)
+	ListUnsignedContracts(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Contract, error)
+	CountUnsignedContracts(ctx context.Context, businessID int64) (int64, error)
 
 	ListContacts(ctx context.Context, businessID int64, leadID *int64, limit, offset int32) ([]domain.Contact, error)
 	CountContacts(ctx context.Context, businessID int64, leadID *int64) (int64, error)
@@ -293,4 +297,51 @@ func (s *Service) UpdateContract(ctx context.Context, id, businessID int64, req 
 		invalidateCRMSalesScope(ctx, businessID)
 	}
 	return c, err
+}
+
+// ListSignedContracts returns the page of contracts whose signature is
+// complete. Backs crm.sales.v1's signed=true filter (#839): a caller asking
+// for billable contracts must not page through drafts, and the total must be
+// the filtered count rather than a full count trimmed afterwards.
+func (s *Service) ListSignedContracts(ctx context.Context, businessID int64, limit, offset int32) (domain.ContractPage, error) {
+	return s.listContractsBySignState(ctx, businessID, true, limit, offset)
+}
+
+// ListUnsignedContracts is the signed=false variant of the above.
+func (s *Service) ListUnsignedContracts(ctx context.Context, businessID int64, limit, offset int32) (domain.ContractPage, error) {
+	return s.listContractsBySignState(ctx, businessID, false, limit, offset)
+}
+
+func (s *Service) listContractsBySignState(ctx context.Context, businessID int64, signed bool, limit, offset int32) (domain.ContractPage, error) {
+	limit, offset = normalizePagination(limit, offset)
+	state := "unsigned"
+	if signed {
+		state = "signed"
+	}
+	key := cacheKeys.Scoped(crmSalesScope, businessID, fmt.Sprintf("contracts|%s|n=%d|o=%d", state, limit, offset))
+	return cacher.Of[domain.ContractPage]().GetOrComputeSingle(ctx, key,
+		func(ctx context.Context) (domain.ContractPage, error) {
+			var (
+				contracts []domain.Contract
+				total     int64
+				err       error
+			)
+			if signed {
+				contracts, err = s.repo.ListSignedContracts(ctx, businessID, limit, offset)
+				if err == nil {
+					total, err = s.repo.CountSignedContracts(ctx, businessID)
+				}
+			} else {
+				contracts, err = s.repo.ListUnsignedContracts(ctx, businessID, limit, offset)
+				if err == nil {
+					total, err = s.repo.CountUnsignedContracts(ctx, businessID)
+				}
+			}
+			if err != nil {
+				return domain.ContractPage{}, err
+			}
+			return domain.ContractPage{Contracts: contracts, Total: total, Limit: limit, Offset: offset}, nil
+		},
+		cacher.WithExpiry(ctx, crmSalesTTL),
+	)
 }
