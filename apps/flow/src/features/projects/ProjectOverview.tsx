@@ -234,8 +234,8 @@ const ProjectOverview: React.FC = () => {
                 label: t('flow.projectOverview.goToBoardCta'),
                 onClick: () =>
                   navigate({
-                    to: '/w/$workspaceId/p/$projectId/board',
-                    params: { workspaceId, projectId },
+                    to: '/p/$projectId/board',
+                    params: { projectId },
                   }),
               }}
               size="compact"

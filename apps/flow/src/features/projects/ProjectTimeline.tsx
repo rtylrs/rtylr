@@ -173,8 +173,8 @@ const ProjectTimeline: React.FC = () => {
                 label: t('flow.projectTimeline.goToBoardCta'),
                 onClick: () =>
                   navigate({
-                    to: '/w/$workspaceId/p/$projectId/board',
-                    params: { workspaceId, projectId },
+                    to: '/p/$projectId/board',
+                    params: { projectId },
                   }),
               }}
             />
