@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -59,6 +60,7 @@ type TransactionResponse struct {
 
 // WebhookEvent is the outer envelope of all Paddle webhook notifications.
 type WebhookEvent struct {
+	EventID    string          `json:"event_id"`
 	EventType  string          `json:"event_type"`
 	OccurredAt time.Time       `json:"occurred_at"`
 	Data       json.RawMessage `json:"data"`
@@ -275,11 +277,14 @@ const webhookSignatureTolerance = 5 * time.Minute
 func VerifyWebhookSignature(rawBody []byte, signatureHeader string) error {
 	secret := config.GetPaddleWebhookSecret()
 	if secret == "" {
-		if config.IsProduction() {
-			return errors.New("PADDLE_WEBHOOK_SECRET is required in production")
+		// Fail closed: both webhook routes are anonymous, so an empty secret
+		// would accept forged billing payloads. Set PADDLE_WEBHOOK_SECRET, or
+		// opt out explicitly for local work with PADDLE_ALLOW_INSECURE_WEBHOOKS
+		// (refused outside development).
+		if os.Getenv("PADDLE_ALLOW_INSECURE_WEBHOOKS") == "1" && !config.IsProduction() {
+			return nil
 		}
-		// No secret configured — skip verification in development.
-		return nil
+		return errors.New("PADDLE_WEBHOOK_SECRET is required to verify webhook signatures")
 	}
 
 	var ts, h1 string

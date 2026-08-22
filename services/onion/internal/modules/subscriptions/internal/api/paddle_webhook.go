@@ -62,6 +62,8 @@ func PaddleWebhookHTTPHandler(service *application.Service) http.HandlerFunc {
 				logger.String("subscription_id", data.ID),
 				logger.Error(handleErr),
 			)
+			http.Error(w, `{"error":"failed to process event"}`, http.StatusInternalServerError)
+			return
 		}
 
 		w.WriteHeader(http.StatusOK)

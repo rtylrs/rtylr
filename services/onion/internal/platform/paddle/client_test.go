@@ -55,15 +55,29 @@ func TestVerifyWebhookSignatureRequiresSecretInProduction(t *testing.T) {
 	}
 }
 
-func TestVerifyWebhookSignatureAllowsMissingSecretOutsideProduction(t *testing.T) {
+func TestVerifyWebhookSignatureAllowsExplicitInsecureOptOutOutsideProduction(t *testing.T) {
 	old := config.GlobalConfig
 	config.GlobalConfig = nil
 	t.Cleanup(func() { config.GlobalConfig = old })
 	t.Setenv("APP_ENV", "development")
 	t.Setenv("PADDLE_WEBHOOK_SECRET", "")
+	t.Setenv("PADDLE_ALLOW_INSECURE_WEBHOOKS", "1")
 
 	if err := VerifyWebhookSignature([]byte(`{}`), ""); err != nil {
-		t.Fatalf("expected missing dev secret to be allowed, got %v", err)
+		t.Fatalf("expected explicit local opt-out to be allowed, got %v", err)
+	}
+}
+
+func TestVerifyWebhookSignatureRefusesInsecureOptOutInProduction(t *testing.T) {
+	old := config.GlobalConfig
+	config.GlobalConfig = nil
+	t.Cleanup(func() { config.GlobalConfig = old })
+	t.Setenv("APP_ENV", "production")
+	t.Setenv("PADDLE_WEBHOOK_SECRET", "")
+	t.Setenv("PADDLE_ALLOW_INSECURE_WEBHOOKS", "1")
+
+	if err := VerifyWebhookSignature([]byte(`{}`), ""); err == nil {
+		t.Fatal("expected production to refuse insecure webhook opt-out")
 	}
 }
 
