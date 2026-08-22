@@ -9,6 +9,19 @@ if [[ -z "$recorded_packages" ]]; then
   exit 1
 fi
 
+# Confirm packages is its own repository BEFORE asking it for a HEAD.
+#
+# `git -C <dir> rev-parse HEAD` walks up to the enclosing repository when <dir>
+# is not one itself, so an empty or uninitialised packages/ makes the check below
+# report rtylr's own HEAD as the submodule's commit. That produced an error
+# telling the reader that packages was "checked out at" an rtylr commit sha, and
+# sent them hunting for a packages commit that does not exist. The remedy printed
+# was right; the sha was nonsense.
+if [[ "$(git -C "$repo_root/packages" rev-parse --show-toplevel 2>/dev/null)" != "$repo_root/packages" ]]; then
+  echo "::error::rtylr/packages is not a git repository (empty or uninitialised submodule). Run git submodule update --init --recursive." >&2
+  exit 1
+fi
+
 if ! actual_packages="$(git -C "$repo_root/packages" rev-parse --verify HEAD^{commit} 2>/dev/null)"; then
   echo "::error::rtylr/packages is not initialized at a commit. Run git submodule update --init --recursive." >&2
   exit 1
