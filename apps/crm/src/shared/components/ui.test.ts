@@ -9,3 +9,9 @@ describe('crm field spacing', () => {
     expect(source).toContain("gap: '6px'");
   });
 });
+
+describe('crm buttons', () => {
+  it('defaults reusable buttons to a non-submit type', () => {
+    expect(source).toContain("const { type = 'button', ...buttonProps } = props;");
+  });
+});

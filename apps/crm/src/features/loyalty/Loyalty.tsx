@@ -314,7 +314,7 @@ const Loyalty: React.FC = () => {
                 const Icon = TIER_ICON_MAP[tier.name] ?? Award;
                 return (
                   <motion.div
-                    key={tier.name}
+                    key={`${tier.id}-${tier.name}-${i}`}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.06, duration: 0.2 }}
@@ -395,8 +395,11 @@ const Loyalty: React.FC = () => {
                         gap: '4px',
                       }}
                     >
-                      {tier.perks.map((perk) => (
-                        <li key={perk} style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}>
+                      {tier.perks.map((perk, perkIndex) => (
+                        <li
+                          key={`${perk}-${perkIndex}`}
+                          style={{ fontSize: '11px', color: 'var(--hub-text-muted)' }}
+                        >
                           {perk}
                         </li>
                       ))}

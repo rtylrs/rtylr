@@ -14,15 +14,11 @@ const optionalFiniteNumber = z.preprocess((value) => {
 
 function formatSpend(value: number | string | undefined): string {
   if (value === undefined || value === null || value === '') return '$0';
-  if (typeof value === 'string' && value.trim().startsWith('$')) {
-    const numeric = Number(value.replace(/[$,\s]/g, ''));
-    if (!Number.isFinite(numeric)) return value.trim();
-    return '$' + numeric.toLocaleString('en-US', { maximumFractionDigits: 2 });
-  }
-  const numeric = Number(value);
+  const raw = String(value).trim();
+  const numeric = Number(raw.replace(/[$,\s]/g, ''));
   return Number.isFinite(numeric)
     ? '$' + numeric.toLocaleString('en-US', { maximumFractionDigits: 2 })
-    : String(value);
+    : raw;
 }
 
 function displayTier(value: string | undefined): string {

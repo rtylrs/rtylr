@@ -146,15 +146,8 @@ const CustomerProfile: React.FC = () => {
     );
   };
 
-  const handleNotesSave = (notes: string) => {
-    update.mutate(
-      { id: customer.id, data: { notes } },
-      {
-        onSuccess: () => toast.success('Notes saved'),
-        onError: () => toast.error('Failed to save notes'),
-      }
-    );
-  };
+  const handleNotesSave = (notes: string): Promise<void> =>
+    update.mutateAsync({ id: customer.id, data: { notes } }).then(() => undefined);
 
   const handleAward = (points: number, reason: string) => {
     if (!loyaltyConfig?.programEnabled) {

@@ -316,9 +316,9 @@ const LoyaltyTiers: React.FC = () => {
                     gap: '6px',
                   }}
                 >
-                  {t.perks.map((p) => (
+                  {t.perks.map((p, perkIndex) => (
                     <div
-                      key={p}
+                      key={`${p}-${perkIndex}`}
                       style={{
                         display: 'flex',
                         alignItems: 'flex-start',

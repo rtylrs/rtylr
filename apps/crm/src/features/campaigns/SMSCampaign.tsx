@@ -12,7 +12,7 @@ import {
 import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import { useListAllCustomers } from '../../shared/hooks/queries/useCustomers';
 import { Breadcrumbs, Button, Card, Input, PageHeader, Select } from '../../shared/components/ui';
-import { CustomerAvatar, SMSComposer } from '../../shared/components/crm';
+import { CustomerAvatar, SMSComposer, SMS_MAX_LENGTH } from '../../shared/components/crm';
 
 const DEFAULT_SMS_BODY = 'Flash sale today! {{first_name}}, enjoy 20% off. Reply STOP to opt out.';
 
@@ -63,8 +63,13 @@ const SMSCampaign: React.FC = () => {
   const segment = segments.find((item) => String(item.id) === segmentId);
   const audienceUnavailable =
     segmentsLoading || segmentsError || !segment || segment.customerCount <= 0;
+  const bodyTooLong = body.length > SMS_MAX_LENGTH;
 
   const handleSave = (send: boolean): void => {
+    if (bodyTooLong) {
+      toast.error(`SMS messages must be ${SMS_MAX_LENGTH} characters or fewer`);
+      return;
+    }
     if (send) {
       if (segmentsLoading) {
         toast.error('Audience data is still loading');
@@ -92,7 +97,6 @@ const SMSCampaign: React.FC = () => {
     const callbacks = {
       onSuccess: (result: { campaignId?: number; campaign_id?: number }) => {
         if (!send) {
-          toast.success('Draft saved');
           navigate({ to: '/campaigns' });
           return;
         }
@@ -105,15 +109,10 @@ const SMSCampaign: React.FC = () => {
           { id: campaignId ?? createdId!, status: 'active' },
           {
             onSuccess: () => {
-              toast.success('SMS campaign activated');
               navigate({ to: '/campaigns' });
             },
-            onError: () => toast.error('Campaign was saved but could not be activated'),
           }
         );
-      },
-      onError: () => {
-        toast.error(send ? 'Failed to save or activate SMS campaign' : 'Failed to save draft');
       },
     };
 
@@ -146,7 +145,7 @@ const SMSCampaign: React.FC = () => {
               <Button
                 variant="outline"
                 onClick={() => handleSave(false)}
-                disabled={pending || !name.trim() || !body.trim()}
+                disabled={pending || !name.trim() || !body.trim() || bodyTooLong}
               >
                 <Save size={13} />
                 {pending ? 'Saving…' : 'Save draft'}
@@ -154,7 +153,9 @@ const SMSCampaign: React.FC = () => {
               <Button
                 variant="primary"
                 onClick={() => handleSave(true)}
-                disabled={pending || !name.trim() || !body.trim() || audienceUnavailable}
+                disabled={
+                  pending || !name.trim() || !body.trim() || bodyTooLong || audienceUnavailable
+                }
               >
                 <Send size={13} />
                 {pending ? 'Activating…' : 'Save & activate'}

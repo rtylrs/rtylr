@@ -38,6 +38,15 @@ describe('topCustomerSchema', () => {
     expect(result.tier).toBe('Gold');
     expect(result.visits).toBeUndefined();
   });
+
+  it('formats numeric spend strings that include separators', () => {
+    const result = topCustomerSchema.parse({
+      name: 'Sam',
+      totalSpent: '1,200.50',
+    });
+
+    expect(result.spend).toBe('$1,200.5');
+  });
 });
 
 describe('recentCampaignSchema', () => {

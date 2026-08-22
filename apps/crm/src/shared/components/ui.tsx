@@ -79,8 +79,9 @@ export const Button: React.FC<
     },
     danger: { background: '#ef4444', color: '#fff' },
   };
+  const { type = 'button', ...buttonProps } = props;
   return (
-    <button {...props} style={{ ...base, ...variants[variant], ...style }}>
+    <button {...buttonProps} type={type} style={{ ...base, ...variants[variant], ...style }}>
       {children}
     </button>
   );
@@ -253,6 +254,7 @@ export const Modal: React.FC<{
             {title}
           </h3>
           <button
+            type="button"
             onClick={onClose}
             style={{
               background: 'transparent',

@@ -98,7 +98,6 @@ const EmailCampaign: React.FC = () => {
     const callbacks = {
       onSuccess: (result: { campaignId?: number; campaign_id?: number }) => {
         if (!send) {
-          toast.success('Draft saved');
           navigate({ to: '/campaigns' });
           return;
         }
@@ -111,15 +110,10 @@ const EmailCampaign: React.FC = () => {
           { id: campaignId ?? createdId!, status: 'active' },
           {
             onSuccess: () => {
-              toast.success('Campaign activated');
               navigate({ to: '/campaigns' });
             },
-            onError: () => toast.error('Campaign was saved but could not be activated'),
           }
         );
-      },
-      onError: () => {
-        toast.error(send ? 'Failed to save or activate campaign' : 'Failed to save draft');
       },
     };
 

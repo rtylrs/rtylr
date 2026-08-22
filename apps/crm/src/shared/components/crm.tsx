@@ -211,7 +211,7 @@ export const TagChip: React.FC<{
 // ── 21. NotesPanel ──────────────────────────────────────────────
 export const NotesPanel: React.FC<{
   notes: string;
-  onSave: (notes: string) => void;
+  onSave: (notes: string) => void | Promise<void>;
   saving?: boolean;
 }> = ({ notes, onSave, saving = false }) => {
   const [value, setValue] = useState(notes);
@@ -250,6 +250,7 @@ export const NotesPanel: React.FC<{
         </h4>
         {!editing && (
           <button
+            type="button"
             onClick={() => setEditing(true)}
             style={{
               background: 'transparent',
@@ -301,8 +302,14 @@ export const NotesPanel: React.FC<{
               style={{ padding: '6px 12px' }}
               disabled={saving}
               onClick={() => {
-                onSave(value);
-                setEditing(false);
+                void Promise.resolve()
+                  .then(() => onSave(value))
+                  .then(
+                    () => setEditing(false),
+                    () => {
+                      // Keep the draft visible so a failed save can be retried.
+                    }
+                  );
               }}
             >
               {saving ? 'Saving…' : 'Save'}
@@ -347,6 +354,7 @@ export const EmailEditor: React.FC<{
         </span>
         {['first_name', 'last_name', 'points', 'tier', 'business_name'].map((v) => (
           <button
+            type="button"
             key={v}
             onClick={() => insertVar(v)}
             style={{
@@ -400,11 +408,13 @@ export const EmailEditor: React.FC<{
 };
 
 // ── 23. SMSComposer ─────────────────────────────────────────────
+export const SMS_MAX_LENGTH = 160;
+
 export const SMSComposer: React.FC<{
   body: string;
   onChange: (b: string) => void;
 }> = ({ body, onChange }) => {
-  const remaining = 160 - body.length;
+  const remaining = SMS_MAX_LENGTH - body.length;
   const tooLong = remaining < 0;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -414,8 +424,12 @@ export const SMSComposer: React.FC<{
         </span>
         {['first_name', 'points', 'business_name'].map((v) => (
           <button
+            type="button"
             key={v}
-            onClick={() => onChange(body + ` {{${v}}}`)}
+            onClick={() => {
+              const nextBody = body + ` {{${v}}}`;
+              if (nextBody.length <= SMS_MAX_LENGTH) onChange(nextBody);
+            }}
             style={{
               padding: '2px 8px',
               borderRadius: '6px',
@@ -435,7 +449,7 @@ export const SMSComposer: React.FC<{
         value={body}
         onChange={(e) => onChange(e.target.value)}
         rows={5}
-        maxLength={320}
+        maxLength={SMS_MAX_LENGTH}
         placeholder="Your SMS message..."
         style={{
           padding: '12px',
@@ -458,7 +472,7 @@ export const SMSComposer: React.FC<{
             fontWeight: 600,
           }}
         >
-          {body.length}/160
+          {body.length}/{SMS_MAX_LENGTH}
         </span>
       </div>
     </div>
@@ -524,6 +538,7 @@ export const SegmentRuleRow: React.FC<{
       style={{ width: '140px' }}
     />
     <button
+      type="button"
       onClick={onRemove}
       style={{
         background: 'transparent',
@@ -586,6 +601,7 @@ export const AutomationNode: React.FC<{
         </span>
         {onRemove && (
           <button
+            type="button"
             onClick={onRemove}
             style={{
               marginLeft: 'auto',
@@ -960,6 +976,7 @@ export const SearchableCustomerSelect: React.FC<{
             )}
             {filtered.map((c) => (
               <button
+                type="button"
                 key={c.id}
                 onClick={() => {
                   onChange(c.id);

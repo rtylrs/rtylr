@@ -774,7 +774,7 @@ const Dashboard: React.FC = () => {
               ) : (
                 campaigns.map((c, i) => (
                   <div
-                    key={c.name}
+                    key={[c.name, i].join('-')}
                     style={{
                       padding: '14px 20px',
                       borderBottom:

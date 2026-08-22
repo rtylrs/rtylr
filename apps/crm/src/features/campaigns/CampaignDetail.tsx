@@ -180,13 +180,13 @@ const CampaignDetail: React.FC = () => {
               <div
                 style={{ display: 'flex', alignItems: 'flex-end', gap: '10px', height: '160px' }}
               >
-                {stats.timeline.map((t) => {
+                {stats.timeline.map((t, i) => {
                   const max = Math.max(1, ...stats.timeline.map((x) => x.opens));
                   const openH = (t.opens / max) * 130;
                   const clickH = (t.clicks / max) * 130;
                   return (
                     <div
-                      key={t.day}
+                      key={[t.day, i].join('-')}
                       style={{
                         flex: 1,
                         display: 'flex',
