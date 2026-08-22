@@ -3,6 +3,7 @@ package domain
 import "context"
 
 type Repository interface {
+	MarkEntriesInvoiced(ctx context.Context, businessID, invoiceID int64, entryIDs []int64) (int64, error)
 	CreateTimeEntry(ctx context.Context, businessID int64, entry TimeEntryRecord) (*TimeEntryRecord, error)
 	UpdateTimeEntry(ctx context.Context, businessID int64, entry TimeEntryRecord) (*TimeEntryRecord, error)
 	DeleteTimeEntry(ctx context.Context, businessID, entryID int64) error

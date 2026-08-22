@@ -589,3 +589,51 @@ func nullInt64(v int64) sql.NullInt64 {
 func nullString(v string) sql.NullString {
 	return sql.NullString{String: v, Valid: v != ""}
 }
+
+// MarkEntriesInvoiced stamps each listed entry with the settling invoice id
+// inside ONE transaction: the whole batch lands or none of it does, so a
+// retry after any failure cannot double-mark. Rows affected are summed so the
+// caller can report skipped ids (foreign, ineligible, or already invoiced do
+// not match the UPDATE).
+func (r *Repository) MarkEntriesInvoiced(ctx context.Context, businessID, invoiceID int64, entryIDs []int64) (marked int64, err error) {
+	if len(entryIDs) == 0 {
+		return 0, nil
+	}
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	committed := false
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			_ = tx.Rollback()
+			panic(recovered)
+		}
+		if !committed {
+			_ = tx.Rollback()
+		}
+	}()
+
+	qtx := r.queries.WithTx(tx)
+	for _, entryID := range entryIDs {
+		n, execErr := qtx.MarkEntryInvoiced(ctx, sqlc.MarkEntryInvoicedParams{
+			BillableInvoiceID: sql.NullInt64{Int64: invoiceID, Valid: true},
+			BusinessID:        businessID,
+			ID:                entryID,
+		})
+		if execErr != nil {
+			logger.Ctx(ctx).Error("failed marking time entry invoiced",
+				logger.Any("business_id", businessID),
+				logger.Any("invoice_id", invoiceID),
+				logger.Any("entry_id", entryID), logger.Error(execErr))
+			return 0, execErr
+		}
+		marked += n
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	committed = true
+	return marked, nil
+}
