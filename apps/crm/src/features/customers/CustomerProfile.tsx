@@ -279,11 +279,11 @@ const CustomerProfile: React.FC = () => {
             >
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Mail size={12} />
-                {customer.email}
+                {customer.email || '—'}
               </span>
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <Phone size={12} />
-                {customer.phone}
+                {customer.phone || '—'}
               </span>
               {customer.createdAt && (
                 <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>

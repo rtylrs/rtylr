@@ -588,7 +588,7 @@ const Customers: React.FC = () => {
                                   color: 'var(--hub-text-muted)',
                                 }}
                               >
-                                {c.email}
+                                {c.email || '—'}
                               </td>
                               <td
                                 style={{
@@ -597,7 +597,7 @@ const Customers: React.FC = () => {
                                   color: 'var(--hub-text-muted)',
                                 }}
                               >
-                                {c.phone}
+                                {c.phone || '—'}
                               </td>
                               <td
                                 style={{
