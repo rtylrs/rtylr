@@ -41,5 +41,10 @@
     "totalOutflow": "Total outflow",
     "netCashFlow": "Net cash flow",
     "reports": "Reports"
+  },
+  "balanceSheet": {
+    "inventory": "Inventory",
+    "inventoryHint": "Live stock value from ERP; shown only when ERP is enabled for this business.",
+    "inventoryUnavailable": "ERP not connected"
   }
 }

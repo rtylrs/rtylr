@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import PageHeader from '../../shared/components/PageHeader';
 import MoneyDisplay from '../../shared/components/MoneyDisplay';
 import AccountTypeBadge, { type AccountType } from '../../shared/components/AccountTypeBadge';
 import { SkeletonRow } from '../../shared/components/Skeleton';
 import { useBalanceSheet } from './useBalanceSheet';
+import { useErpInventoryValuation } from '../../shared/hooks/queries/useErpInventoryValuation';
 import { cardStyle, ACCENT } from '../../shared/lib/tokens';
 
 const Section: React.FC<{
@@ -66,8 +68,13 @@ const Section: React.FC<{
 };
 
 const BalanceSheet: React.FC = () => {
+  const { t } = useTranslation('finance');
   const [asOfDate, setAsOfDate] = useState(new Date().toISOString().slice(0, 10));
   const { data, isLoading } = useBalanceSheet(asOfDate);
+  // ERP->FIN-02: the Inventory line exists only when ERP answers. A tenant
+  // without ERP gets no section at all, never a zero: a balance sheet that
+  // silently reports 0 inventory misstates the business (#845).
+  const { data: inventory } = useErpInventoryValuation();
 
   if (isLoading || !data) {
     return (
@@ -83,7 +90,8 @@ const BalanceSheet: React.FC = () => {
     );
   }
 
-  const totalAssets = data.totalAssets ?? 0;
+  const erpInventory = inventory?.totalValue ?? 0;
+  const totalAssets = (data.totalAssets ?? 0) + erpInventory;
   const totalLiab = data.totalLiabilities ?? 0;
   const totalEquity = data.totalEquity ?? 0;
 
@@ -128,7 +136,18 @@ const BalanceSheet: React.FC = () => {
           gap: 16,
         }}
       >
-        <Section title="Assets" rows={data.assets} />
+        <Section title="Assets" rows={
+          inventory
+            ? [
+                ...data.assets,
+                {
+                  label: t('balanceSheet.inventory'),
+                  amount: inventory.totalValue,
+                  type: 'asset',
+                },
+              ]
+            : data.assets
+        } />
         <Section title="Liabilities" rows={data.liabilities} />
         <Section title="Equity" rows={data.equity} />
       </div>

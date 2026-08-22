@@ -41,5 +41,10 @@
     "totalOutflow": "Sorties totales",
     "netCashFlow": "Flux de trésorerie net",
     "reports": "Rapports"
+  },
+  "balanceSheet": {
+    "inventory": "Stock",
+    "inventoryHint": "Valeur de stock en direct depuis l'ERP ; affichée seulement si l'ERP est activé pour cette entreprise.",
+    "inventoryUnavailable": "ERP non connecté"
   }
 }
