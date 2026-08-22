@@ -30,17 +30,19 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 
 func (m *Module) GetAnonymousRoutes() []string { return []string{} }
 
-// Authorize / RecordUsage expose the quota checks to the echo module with
+// ReserveQuota / ReconcileUsage expose the quota gate to the echo module with
 // primitive signatures, so echo depends on a small local interface rather than
-// this module's internal types. Authorize fails open (allows) on error.
-func (m *Module) Authorize(ctx context.Context, businessID, userID int64) (allowed bool, planSlug string, allowanceTokens, usedTokens, remainingTokens int64) {
-	ok, st, err := m.service.Authorize(ctx, businessID, userID)
+// this module's internal types. ReserveQuota atomically debits an estimate
+// before the provider call; ReconcileUsage applies the actual-vs-estimate
+// delta afterwards (with retries inside the service).
+func (m *Module) ReserveQuota(ctx context.Context, businessID, userID int64) (allowed bool, planSlug string, allowanceTokens, usedTokens, remainingTokens, reservedTokens int64) {
+	ok, st, err := m.service.Reserve(ctx, businessID, userID)
 	if err != nil {
-		return true, "", 0, 0, 0
+		return ok, "", 0, 0, 0, 0
 	}
-	return ok, st.PlanSlug, st.AllowanceTokens, st.UsedTokens, st.RemainingTokens
+	return ok, st.PlanSlug, st.AllowanceTokens, st.UsedTokens, st.RemainingTokens, application.ReservationEstimateTokens
 }
 
-func (m *Module) RecordUsage(ctx context.Context, businessID, userID int64, tokens int) {
-	m.service.Record(ctx, businessID, userID, tokens)
+func (m *Module) ReconcileUsage(ctx context.Context, businessID, userID, actualTokens, reservedTokens int64) {
+	m.service.Reconcile(ctx, businessID, userID, actualTokens, reservedTokens)
 }
