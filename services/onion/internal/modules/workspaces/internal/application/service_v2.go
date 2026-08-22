@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -166,12 +167,15 @@ func (s *Service) EnsureAssigneeMembership(ctx context.Context, projectID, busin
 	if assigneeID == 0 {
 		return nil
 	}
-	if s.hubProfileBypasses(ctx, assigneeID, businessID) {
-		return nil
-	}
 	p, err := s.repo.GetProjectV2ByID(ctx, projectID, businessID)
 	if err != nil {
 		return err
+	}
+	if !s.repo.IsWorkspaceMember(ctx, assigneeID, p.WorkspaceID) {
+		return fmt.Errorf("assignee is not a workspace member")
+	}
+	if s.hubProfileBypasses(ctx, assigneeID, businessID) {
+		return nil
 	}
 	if p.CreatedBy == assigneeID || p.OwnerID == assigneeID {
 		return nil
