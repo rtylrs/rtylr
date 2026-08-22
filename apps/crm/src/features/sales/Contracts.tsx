@@ -276,7 +276,7 @@ const Contracts: React.FC = () => {
                             margin: '2px 0 0',
                           }}
                         >
-                          Closed by {c.closedBy || '—'} · Signed {formatDate(c.signedAt)}
+                          Closed by {c.closedBy || '—'} · Signed {formatDate(c.signedAt) || '-'}
                         </p>
                       </div>
                       <div
@@ -335,7 +335,7 @@ const Contracts: React.FC = () => {
                             <DetailItem label="Plan" value={c.plan} />
                             <DetailItem label="MRR" value={`$${c.mrr.toLocaleString()}/mo`} />
                             <DetailItem label="Seats" value={String(c.seats)} />
-                            <DetailItem label="Signed At" value={formatDate(c.signedAt)} />
+                            <DetailItem label="Signed At" value={formatDate(c.signedAt) || '-'} />
                             <DetailItem label="Signed By" value={c.signedBy} />
                             <DetailItem label="Closed By" value={c.closedBy} />
                             {c.notes && (

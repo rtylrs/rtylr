@@ -501,7 +501,7 @@ const LeadDetail: React.FC = () => {
                             {tp.outcome.replace('_', ' ')}
                           </span>
                           <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
-                            {formatDate(tp.createdAt)}
+                            {formatDate(tp.createdAt) || '-'}
                           </span>
                           {tp.repName && (
                             <span style={{ fontSize: '11px', color: 'var(--hub-text-dim)' }}>
@@ -527,7 +527,7 @@ const LeadDetail: React.FC = () => {
                               margin: '4px 0 0',
                             }}
                           >
-                            Follow up: {formatDate(tp.nextFollowUp)}
+                            Follow up: {formatDate(tp.nextFollowUp) || '-'}
                           </p>
                         )}
                       </div>
