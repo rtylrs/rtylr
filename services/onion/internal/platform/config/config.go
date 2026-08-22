@@ -188,6 +188,7 @@ type AppConfig struct {
 	LicenseSigningPrivateKey string
 	LicenseIssuer            string
 	LicenseGracePeriod       time.Duration
+	LicenseClockStateFile    string
 	// LicenseAuthorityURL is the hosted license authority a self-host backend
 	// validates RTYLR_LICENSE_KEY against. Defaults to the Voxire authority and
 	// is intentionally NOT a documented customer knob (override only for our own
@@ -373,13 +374,16 @@ func LoadAndValidate() (*AppConfig, error) {
 
 		// License runmode / self-hosting controls. Self-host customers set the
 		// documented RTYLR_LICENSE_KEY; LICENSE_KEY stays as an internal alias.
-		LicenseKey:               envFirst("RTYLR_LICENSE_KEY", "LICENSE_KEY"),
-		LicenseFile:              os.Getenv("LICENSE_FILE"),
-		LicensePublicKey:         os.Getenv("LICENSE_PUBLIC_KEY"),
+		LicenseKey:  envFirst("RTYLR_LICENSE_KEY", "LICENSE_KEY"),
+		LicenseFile: os.Getenv("LICENSE_FILE"),
+		// LicensePublicKey is retained for console compatibility. Verification
+		// uses the vendor key embedded in the released binary instead.
+		LicensePublicKey:         "",
 		LicenseSigningPrivateKey: os.Getenv("LICENSE_SIGNING_PRIVATE_KEY"),
 		LicenseIssuer:            envOrDefault("LICENSE_ISSUER", "voxire"),
 		LicenseGracePeriod:       envDurationOrDefault("LICENSE_GRACE_PERIOD", 7*24*time.Hour),
-		LicenseAuthorityURL:      envOrDefault("LICENSE_AUTHORITY_URL", DefaultLicenseAuthorityURL),
+		LicenseClockStateFile:    envOrDefault("LICENSE_CLOCK_STATE_FILE", "/var/lib/rtylr/license-clock.json"),
+		LicenseAuthorityURL:      DefaultLicenseAuthorityURL,
 
 		// Internal Auth
 		InternalToken: os.Getenv("INTERNAL_TOKEN"),

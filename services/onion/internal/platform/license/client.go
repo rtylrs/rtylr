@@ -21,6 +21,8 @@ const StatusUnreachable = "unreachable"
 // authority. Between checks the last result is served from cache.
 const refreshInterval = time.Hour
 
+const maxOfflineGrace = 24 * time.Hour
+
 // Client talks to the hosted license authority (license.voxire.com).
 type Client struct {
 	authorityURL string
@@ -84,30 +86,32 @@ type CachedValidator struct {
 	lastSuccess time.Time // last time the authority answered
 	lastCheck   time.Time
 	haveResult  bool
+	clock       *ClockGuard
 }
 
 func NewCachedValidator(cfg *platformconfig.AppConfig) *CachedValidator {
 	grace := gracePeriod(cfg)
 	if grace <= 0 {
-		grace = 7 * 24 * time.Hour
+		grace = 24 * time.Hour
+	}
+	if grace > maxOfflineGrace {
+		grace = maxOfflineGrace
 	}
 	key, _ := configuredKey(cfg)
 	authority := platformconfig.DefaultLicenseAuthorityURL
-	if cfg != nil && cfg.LicenseAuthorityURL != "" {
-		authority = cfg.LicenseAuthorityURL
-	}
 	return &CachedValidator{
 		cfg:    cfg,
 		client: NewClient(authority),
 		key:    strings.TrimSpace(key),
 		grace:  grace,
+		clock:  NewClockGuard(clockStateFile(cfg)),
 	}
 }
 
 // Current returns the effective license status, refreshing from the authority
 // at most once per refreshInterval. Hosted mode always returns a valid report.
 func (v *CachedValidator) Current(ctx context.Context) StatusReport {
-	now := time.Now().UTC()
+	now := v.now()
 	if !IsSelfHosted(v.cfg) {
 		return hostedReport(v.cfg, now)
 	}
@@ -123,13 +127,27 @@ func (v *CachedValidator) Current(ctx context.Context) StatusReport {
 
 // Refresh forces an authority re-check (e.g. at boot or on a schedule).
 func (v *CachedValidator) Refresh(ctx context.Context) StatusReport {
-	now := time.Now().UTC()
+	now := v.now()
 	if !IsSelfHosted(v.cfg) {
 		return hostedReport(v.cfg, now)
 	}
 	v.mu.Lock()
 	defer v.mu.Unlock()
 	return v.refreshLocked(ctx, now)
+}
+
+func clockStateFile(cfg *platformconfig.AppConfig) string {
+	if cfg != nil {
+		return cfg.LicenseClockStateFile
+	}
+	return "/var/lib/rtylr/license-clock.json"
+}
+
+func (v *CachedValidator) now() time.Time {
+	if v.clock != nil {
+		return v.clock.Now()
+	}
+	return time.Now().UTC()
 }
 
 func (v *CachedValidator) refreshLocked(ctx context.Context, now time.Time) StatusReport {

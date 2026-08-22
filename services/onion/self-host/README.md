@@ -24,7 +24,7 @@ Voxire sales/admin team and are not generated inside a customer install.
 
 - API: `http://localhost:9999`
 - Upload/CDN: `http://localhost:8081`
-- License: `http://localhost:8082`
+- License: internal-only container endpoint on port `8082`
 - Floci object storage: `http://localhost:4566`
 - MySQL: `localhost:3306`
 - Redis: `localhost:6379`
@@ -32,8 +32,9 @@ Voxire sales/admin team and are not generated inside a customer install.
 ## License status
 
 Hosted deployments default to `DEPLOYMENT_MODE=hosted` and do not require a
-license key. Self-hosted deployments should set `DEPLOYMENT_MODE=self_hosted`
-and provide `LICENSE_KEY` or `LICENSE_FILE` plus `LICENSE_PUBLIC_KEY`.
+license key. Self-hosted images must be built by the vendor with the vendor
+public key embedded in the binary, then receive only `LICENSE_KEY` or
+`LICENSE_FILE` at runtime. `LICENSE_PUBLIC_KEY` is intentionally unsupported.
 
 The license runmode exposes:
 

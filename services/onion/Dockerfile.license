@@ -32,11 +32,15 @@ RUN chmod +x scripts/*.sh && \
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_TIME=unknown
+ARG LICENSE_VENDOR_PUBLIC_KEY
+ARG DEPLOYMENT_MODE=self_hosted
 RUN CGO_ENABLED=0 GOOS=linux go build \
     -ldflags="-s -w \
       -X 'github.com/voxire/onion/internal/platform/server/http.Version=${VERSION}' \
       -X 'github.com/voxire/onion/internal/platform/server/http.Commit=${COMMIT}' \
-      -X 'github.com/voxire/onion/internal/platform/server/http.BuildTime=${BUILD_TIME}'" \
+      -X 'github.com/voxire/onion/internal/platform/server/http.BuildTime=${BUILD_TIME}' \
+      -X 'github.com/voxire/onion/internal/platform/license.VendorPublicKey=${LICENSE_VENDOR_PUBLIC_KEY}' \
+      -X 'github.com/voxire/onion/internal/platform/license.BuildDeploymentMode=${DEPLOYMENT_MODE}'" \
     -o /app/license ./cmd/license
 
 # Runtime stage

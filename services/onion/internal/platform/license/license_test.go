@@ -39,6 +39,16 @@ func TestSelfHostedMissingLicenseIsInvalid(t *testing.T) {
 	}
 }
 
+func TestSelfHostedModeDoesNotFollowRuntimeOverride(t *testing.T) {
+	previousBuildMode := BuildDeploymentMode
+	BuildDeploymentMode = ""
+	t.Cleanup(func() { BuildDeploymentMode = previousBuildMode })
+	t.Setenv("SELF_HOSTED", "true")
+	if IsSelfHosted(&platformconfig.AppConfig{DeploymentMode: ModeHosted}) {
+		t.Fatal("runtime SELF_HOSTED override must not change configured hosted mode")
+	}
+}
+
 func TestSignedLicenseVerifies(t *testing.T) {
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
@@ -55,9 +65,9 @@ func TestSignedLicenseVerifies(t *testing.T) {
 		ExpiresAt: time.Now().UTC().Add(24 * time.Hour),
 	})
 
+	setVendorPublicKeyForTest(t, pub)
 	report := VerifyKey(&platformconfig.AppConfig{
 		DeploymentMode:     ModeSelfHosted,
-		LicensePublicKey:   base64.RawURLEncoding.EncodeToString(pub),
 		LicenseIssuer:      "voxire",
 		LicenseGracePeriod: 14 * 24 * time.Hour,
 	}, token)
@@ -90,10 +100,10 @@ func TestGenerateSignedLicenseFromSeedVerifies(t *testing.T) {
 		t.Fatalf("generate signed key: %v", err)
 	}
 
+	setVendorPublicKeyForTest(t, pub)
 	report := VerifyKey(&platformconfig.AppConfig{
-		DeploymentMode:   ModeSelfHosted,
-		LicensePublicKey: base64.RawURLEncoding.EncodeToString(pub),
-		LicenseIssuer:    "voxire",
+		DeploymentMode: ModeSelfHosted,
+		LicenseIssuer:  "voxire",
 	}, token)
 
 	if !report.Valid {
@@ -121,10 +131,10 @@ func TestExpiredLicenseAfterGraceIsInvalid(t *testing.T) {
 		GraceUntil: time.Now().UTC().Add(-24 * time.Hour),
 	})
 
+	setVendorPublicKeyForTest(t, pub)
 	report := VerifyKey(&platformconfig.AppConfig{
-		DeploymentMode:   ModeSelfHosted,
-		LicensePublicKey: base64.RawURLEncoding.EncodeToString(pub),
-		LicenseIssuer:    "voxire",
+		DeploymentMode: ModeSelfHosted,
+		LicenseIssuer:  "voxire",
 	}, token)
 
 	if report.Valid {
@@ -148,4 +158,11 @@ func signLicense(t *testing.T, priv ed25519.PrivateKey, entitlement Entitlement)
 	signature := ed25519.Sign(priv, []byte(message))
 
 	return message + "." + base64.RawURLEncoding.EncodeToString(signature)
+}
+
+func setVendorPublicKeyForTest(t *testing.T, pub ed25519.PublicKey) {
+	t.Helper()
+	previous := VendorPublicKey
+	VendorPublicKey = base64.RawURLEncoding.EncodeToString(pub)
+	t.Cleanup(func() { VendorPublicKey = previous })
 }
