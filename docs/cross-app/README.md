@@ -73,6 +73,12 @@ Start with whichever question you have:
 | Where do the docs disagree with the code                           | [10-doc-drift.md](10-doc-drift.md)                   |
 | What was considered and deliberately not proposed                  | [11-rejected.md](11-rejected.md)                     |
 | What dependencies would this create, and is the graph acyclic      | [12-coupling.md](12-coupling.md)                     |
+| What repositories exist and which this audit covered               | [00-repos.md](00-repos.md)                           |
+| The backend swept as a system (round two)                          | [13-backend-inventory.md](13-backend-inventory.md)   |
+| Where schema, contract, handler and browser disagree (round two)   | [14-layer-reconciliation.md](14-layer-reconciliation.md) |
+| Round-one claims re-verified against Go and SQL (round two)        | [15-round-one-verification.md](15-round-one-verification.md) |
+| What already flows between backend modules today (round two)       | [16-backend-matrix.md](16-backend-matrix.md)         |
+| Backend plumbing shapes for cross-module work (round two)          | [17-backend-plumbing.md](17-backend-plumbing.md)     |
 | Which forks were taken during the audit                            | [DECISIONS.md](DECISIONS.md)                         |
 | What could not be finished                                         | [BLOCKED.md](BLOCKED.md)                             |
 | Flow specifically, in more depth than the matrix allows            | [flow-deep-dive.md](flow-deep-dive.md)               |
