@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
 import { Lock, Globe, ChevronLeft } from 'lucide-react';
-import { profileClient } from '../../lib/clients';
+import { profileClient } from '../../shared/lib/clients';
 
 interface ProfileProject {
   id?: string;

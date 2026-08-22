@@ -2,7 +2,7 @@ import { unwrap } from '@voxire/api';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { projectV2 } from '../../lib/clients';
+import { projectV2 } from '../../shared/lib/clients';
 
 export function useRestoreProject() {
   const qc = useQueryClient();
