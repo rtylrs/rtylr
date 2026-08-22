@@ -55,6 +55,7 @@ import GateNotice from '../shared/components/GateNotice';
 import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useProjects, useCreateProject } from '../features/projects/useProjects';
 import { useMyTasksProject } from '../features/tasks/useMyTasksProject';
+import { RecycleBinSection } from '../features/projects-v2/RecycleBinSection';
 import { isApiWorkspaceId, PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
 import type { Member, Workspace } from '../shared/stores/flowStore';
 import { isTaskMine } from '../shared/lib/currentUser';
@@ -1249,7 +1250,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                       }}
                     />
                     <Link
-                      to="/profile"
+                      to="/u/$userId"
+                      params={{ userId: user?.id ?? '' }}
                       onClick={() => setUserMenuOpen(false)}
                       className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-start transition-colors hover:bg-[var(--flow-hover)]"
                       style={{ color: 'var(--flow-text)' }}
