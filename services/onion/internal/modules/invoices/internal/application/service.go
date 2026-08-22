@@ -389,7 +389,8 @@ func (s *Service) SendInvoice(ctx context.Context, businessID, invoiceID int64) 
 			Amount:        fmt.Sprintf("%.2f %s", inv.Total, inv.Currency),
 			DueDate:       inv.DueDate.Format("2006-01-02"),
 		}); enqErr != nil {
-			logger.Ctx(ctx).Warn("failed to enqueue invoice email", logger.Error(enqErr))
+			logger.Ctx(ctx).Error("failed to enqueue invoice email", logger.Error(enqErr))
+			return enqErr
 		}
 	}
 

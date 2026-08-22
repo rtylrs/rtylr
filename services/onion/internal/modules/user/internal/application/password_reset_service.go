@@ -28,8 +28,8 @@ func resetCacheKey(token string) string {
 }
 
 // RequestPasswordReset generates a 1-hour reset token, stores it in Redis,
-// and emails a reset link. Always returns nil to avoid leaking whether the
-// address exists in the system.
+// and queues a reset link. Unknown addresses still return nil; queue failures
+// are returned so the caller can record the delivery failure.
 func (s *Service) RequestPasswordReset(ctx context.Context, emailAddr string) error {
 	emailAddr = strings.ToLower(strings.TrimSpace(emailAddr))
 
@@ -60,7 +60,8 @@ func (s *Service) RequestPasswordReset(ctx context.Context, emailAddr string) er
 			Subject:   "Reset your rtylr password",
 			ResetLink: resetLink,
 		}); emailErr != nil {
-			logger.Ctx(ctx).Warn("failed to enqueue password reset email", logger.Error(emailErr))
+			logger.Ctx(ctx).Error("failed to enqueue password reset email", logger.Error(emailErr))
+			return emailErr
 		}
 	}
 	return nil

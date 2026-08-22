@@ -149,7 +149,8 @@ func (s *Service) Register(ctx context.Context, data RegisterUserData) (int64, e
 			email.WithFrom("Mohamad at rtylr <mohamad@voxire.com>"),
 			email.WithReplyTo("mohamad@voxire.com"),
 		); qErr != nil {
-			logger.Ctx(ctx).Warn("failed to enqueue welcome email", logger.Error(qErr))
+			logger.Ctx(ctx).Error("failed to enqueue welcome email", logger.Error(qErr))
+			return 0, qErr
 		}
 	}
 
