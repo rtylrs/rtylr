@@ -116,6 +116,7 @@ func (a *SessionAPI) CloseSession(ctx context.Context, req *possessionv1.CloseSe
 		ID:           req.GetId(),
 		OwnerID:      device.User.UserID,
 		BusinessID:   businessID,
+		StaffID:      device.User.UserID,
 		ClosingFloat: req.GetClosingFloat(),
 	}); closeErr != nil {
 		if errors.Is(closeErr, domain.ErrSessionNotFound) {

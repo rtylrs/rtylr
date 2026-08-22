@@ -94,36 +94,72 @@ func (r *Repository) Get(ctx context.Context, businessID, id int64) (*domain.Ses
 }
 
 func (r *Repository) Open(ctx context.Context, input domain.OpenSessionInput) (int64, error) {
-	var locID sql.NullInt64
-	if input.LocationID != nil {
-		locID = sql.NullInt64{Int64: *input.LocationID, Valid: true}
-	}
-
 	var staffID int64
 	if input.StaffID != nil {
 		staffID = *input.StaffID
 	}
 
-	result, err := r.queries.OpenSession(ctx, sqlc.OpenSessionParams{
-		OwnerID:     input.OwnerID,
-		BusinessID:  input.BusinessID,
-		LocationID:  locID,
-		StaffID:     staffID,
-		OpeningCash: sql.NullString{String: floatToDecimal(input.OpeningFloat), Valid: true},
-	})
+	tx, err := r.pool.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	lockName := fmt.Sprintf("pos_session:%d:%d", input.BusinessID, staffID)
+	var acquired int
+	if err := tx.QueryRowContext(ctx, `SELECT GET_LOCK(?, 5)`, lockName).Scan(&acquired); err != nil {
+		return 0, err
+	}
+	if acquired != 1 {
+		return 0, fmt.Errorf("session is already being opened")
+	}
+	defer tx.ExecContext(ctx, `SELECT RELEASE_LOCK(?)`, lockName)
+
+	var exists int
+	if err := tx.QueryRowContext(ctx, `SELECT EXISTS(
+		SELECT 1 FROM pos_sessions WHERE business_id = ? AND staff_id = ? AND status = 'open')`, input.BusinessID, staffID).Scan(&exists); err != nil {
+		return 0, err
+	}
+	if exists == 1 {
+		return 0, fmt.Errorf("an open session already exists")
+	}
+
+	var locationID any
+	if input.LocationID != nil {
+		locationID = *input.LocationID
+	}
+	result, err := tx.ExecContext(ctx, `
+		INSERT INTO pos_sessions (owner_id, business_id, location_id, staff_id, opening_cash, status, opened_at)
+		VALUES (?, ?, ?, ?, ?, 'open', NOW())`, input.OwnerID, input.BusinessID, locationID, staffID, floatToDecimal(input.OpeningFloat))
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to open session", logger.Error(err))
 		return 0, err
 	}
-	return result.LastInsertId()
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 func (r *Repository) Close(ctx context.Context, input domain.CloseSessionInput) error {
-	result, err := r.queries.CloseSession(ctx, sqlc.CloseSessionParams{
-		ClosingCash: sql.NullString{String: floatToDecimal(input.ClosingFloat), Valid: true},
-		ID:          input.ID,
-		BusinessID:  input.BusinessID,
-	})
+	var result sql.Result
+	var err error
+	if input.StaffID != 0 {
+		result, err = r.pool.ExecContext(ctx, `
+			UPDATE pos_sessions SET closing_cash = ?, status = 'closed', closed_at = NOW()
+			WHERE id = ? AND business_id = ? AND staff_id = ? AND status = 'open'`,
+			floatToDecimal(input.ClosingFloat), input.ID, input.BusinessID, input.StaffID)
+	} else {
+		result, err = r.queries.CloseSession(ctx, sqlc.CloseSessionParams{
+			ClosingCash: sql.NullString{String: floatToDecimal(input.ClosingFloat), Valid: true},
+			ID:          input.ID,
+			BusinessID:  input.BusinessID,
+		})
+	}
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to close session", logger.Error(err))
 		return err
