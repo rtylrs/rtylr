@@ -35,12 +35,8 @@ const Feedback: React.FC = () => {
         />
 
         <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '12px',
-            marginBottom: '20px',
-          }}
+          className="crm-stats-grid"
+          style={{ display: 'grid', gap: '12px', marginBottom: '20px' }}
         >
           <Card>
             <div

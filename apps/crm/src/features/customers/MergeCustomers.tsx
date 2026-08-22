@@ -95,7 +95,7 @@ const MergeCustomers: React.FC = () => {
         >
           Merge preview
         </h4>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+        <div className="crm-card-grid" style={{ display: 'grid', gap: '12px' }}>
           {[
             { label: 'Total Spent', value: `$${merged.totalSpent.toLocaleString()}` },
             { label: 'Visits', value: merged.visits },

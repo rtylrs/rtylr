@@ -123,12 +123,8 @@ const SegmentDetail: React.FC = () => {
         </Card>
 
         <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '12px',
-            marginBottom: '20px',
-          }}
+          className="crm-card-grid"
+          style={{ display: 'grid', gap: '12px', marginBottom: '20px' }}
         >
           {[
             { label: 'Customers', value: segment.customerCount.toLocaleString() },

@@ -340,7 +340,7 @@ const LeadDetail: React.FC = () => {
                       >
                         Log touchpoint
                       </p>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div className="crm-form-grid" style={{ display: 'grid', gap: '10px' }}>
                         <Select
                           label="Type"
                           value={tpForm.type}
@@ -374,7 +374,7 @@ const LeadDetail: React.FC = () => {
                         onChange={(e) => setTpForm((f) => ({ ...f, notes: e.target.value }))}
                         placeholder="What happened on this touchpoint?"
                       />
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div className="crm-form-grid" style={{ display: 'grid', gap: '10px' }}>
                         <Input
                           label="Next Follow-up"
                           type="date"

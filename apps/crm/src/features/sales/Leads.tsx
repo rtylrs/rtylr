@@ -12,6 +12,7 @@ import {
   SkeletonList,
   ConfirmModal,
 } from '../../shared/components/ui';
+import { activateOnKeyboard } from '../../shared/lib/keyboard';
 import CreateLeadModal from './components/CreateLeadModal';
 
 const STAGE_LABELS: Record<LeadStage, string> = {
@@ -304,6 +305,10 @@ const Leads: React.FC = () => {
                         (e.currentTarget as HTMLElement).style.background = 'transparent';
                       }}
                       onClick={() => navigate({ to: `/sales/leads/${lead.id}` })}
+                      tabIndex={0}
+                      onKeyDown={(event) =>
+                        activateOnKeyboard(event, () => navigate({ to: `/sales/leads/${lead.id}` }))
+                      }
                     >
                       <td style={{ padding: '12px 16px' }}>
                         <p

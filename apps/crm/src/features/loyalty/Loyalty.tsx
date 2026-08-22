@@ -133,7 +133,7 @@ const Loyalty: React.FC = () => {
               Program Configuration
             </span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+          <div className="crm-card-grid" style={{ display: 'grid', gap: '20px' }}>
             <div>
               <label
                 style={{
@@ -312,7 +312,7 @@ const Loyalty: React.FC = () => {
               />
             </Card>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+            <div className="crm-stats-grid" style={{ display: 'grid', gap: '16px' }}>
               {tiers.map((tier, i) => {
                 const Icon = TIER_ICON_MAP[tier.name] ?? Award;
                 return (

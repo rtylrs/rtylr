@@ -22,6 +22,7 @@ import { useListAllCustomers } from '../../shared/hooks/queries/useCustomers';
 import { useListSegments } from '../../shared/hooks/queries/useSegments';
 import type { DashboardStats } from '../../shared/schemas/dashboard';
 import { CustomerAvatar } from '../../shared/components/crm';
+import { activateOnKeyboard } from '../../shared/lib/keyboard';
 
 const ACCENT = '#3b82f6';
 
@@ -237,7 +238,7 @@ const Dashboard: React.FC = () => {
       <HelmetContainer title="Dashboard · rtylr" />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '1280px' }}>
         {/* Stats grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+        <div className="crm-stats-grid" style={{ display: 'grid', gap: '16px' }}>
           {dashLoading ? (
             [0, 1, 2, 3].map((i) => (
               <div
@@ -275,7 +276,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Extended KPI widgets */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+        <div className="crm-stats-grid" style={{ display: 'grid', gap: '16px' }}>
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -450,6 +451,13 @@ const Dashboard: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
             onClick={() => topSegment && navigate({ to: `/segments/${topSegment.id}` })}
+            role={topSegment ? 'button' : undefined}
+            tabIndex={topSegment ? 0 : undefined}
+            onKeyDown={(event) => {
+              if (topSegment) {
+                activateOnKeyboard(event, () => navigate({ to: `/segments/${topSegment.id}` }));
+              }
+            }}
             style={{
               background: 'var(--hub-card)',
               border: '1px solid var(--hub-border)',
@@ -601,6 +609,11 @@ const Dashboard: React.FC = () => {
                 <div
                   key={c.id}
                   onClick={() => navigate({ to: `/customers/${c.id}` })}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(event) =>
+                    activateOnKeyboard(event, () => navigate({ to: `/customers/${c.id}` }))
+                  }
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -638,7 +651,7 @@ const Dashboard: React.FC = () => {
           </div>
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        <div className="crm-form-grid" style={{ display: 'grid', gap: '20px' }}>
           {/* Top customers */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}

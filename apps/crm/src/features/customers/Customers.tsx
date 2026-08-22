@@ -74,13 +74,13 @@ function ExpandedDetail({
     >
       <td colSpan={10} style={{ padding: 0 }}>
         <div
+          className="crm-customer-preview-grid"
           style={{
             padding: '20px 24px',
             background: 'rgba(59,130,246,0.04)',
             borderTop: '1px solid var(--hub-border)',
             borderBottom: '1px solid var(--hub-border)',
             display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr) auto',
             gap: '20px',
           }}
         >

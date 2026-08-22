@@ -119,12 +119,8 @@ const CampaignDetail: React.FC = () => {
         {stats && (
           <>
             <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(6, 1fr)',
-                gap: '12px',
-                marginBottom: '20px',
-              }}
+              className="crm-stats-grid--six"
+              style={{ display: 'grid', gap: '12px', marginBottom: '20px' }}
             >
               <CampaignStatsCard
                 label="Sent"

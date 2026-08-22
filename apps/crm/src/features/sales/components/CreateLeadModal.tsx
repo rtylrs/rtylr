@@ -100,7 +100,7 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
           onChange={(e) => setForm((f) => ({ ...f, company: e.target.value }))}
           placeholder="Acme Corp"
         />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+        <div className="crm-form-grid" style={{ display: 'grid', gap: '10px' }}>
           <Input
             label="Industry"
             value={form.industry}
@@ -114,7 +114,7 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
             placeholder="50-200"
           />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+        <div className="crm-form-grid" style={{ display: 'grid', gap: '10px' }}>
           <Input
             label="Source"
             value={form.source}
@@ -129,7 +129,7 @@ const CreateLeadModal: React.FC<Props> = ({ open, onClose }) => {
             placeholder="500"
           />
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+        <div className="crm-form-grid" style={{ display: 'grid', gap: '10px' }}>
           <Select
             label="Stage"
             value={form.stage}

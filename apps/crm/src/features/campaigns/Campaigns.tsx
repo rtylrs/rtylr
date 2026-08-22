@@ -250,7 +250,7 @@ function CampaignCard({
       </div>
 
       {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+      <div className="crm-stats-grid" style={{ display: 'grid', gap: '12px' }}>
         {[
           {
             label: 'Audience',

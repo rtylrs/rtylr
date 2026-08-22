@@ -167,16 +167,12 @@ const EmailCampaign: React.FC = () => {
           }
         />
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px' }}>
+        <div className="crm-two-column" style={{ display: 'grid', gap: '20px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <Card>
               <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '12px',
-                  marginBottom: '14px',
-                }}
+                className="crm-form-grid"
+                style={{ display: 'grid', gap: '12px', marginBottom: '14px' }}
               >
                 <Input
                   label="Campaign name"

@@ -19,6 +19,7 @@ import {
   Select,
   Textarea,
 } from '../../shared/components/ui';
+import { activateOnKeyboard } from '../../shared/lib/keyboard';
 
 const PLAN_COLORS: Record<ContractPlan, { bg: string; color: string }> = {
   free: { bg: 'rgba(107,114,128,0.12)', color: '#6b7280' },
@@ -252,6 +253,12 @@ const Contracts: React.FC = () => {
                         background: isExpanded ? 'rgba(59,130,246,0.03)' : 'transparent',
                       }}
                       onClick={() => setExpandedId(isExpanded ? null : c.id)}
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={isExpanded}
+                      onKeyDown={(event) =>
+                        activateOnKeyboard(event, () => setExpandedId(isExpanded ? null : c.id))
+                      }
                       onMouseEnter={(e) => {
                         if (!isExpanded)
                           (e.currentTarget as HTMLElement).style.background = 'var(--hub-hover)';
@@ -330,11 +337,11 @@ const Contracts: React.FC = () => {
                           }}
                         >
                           <div
+                            className="crm-card-grid"
                             style={{
                               padding: '16px 20px 20px',
                               background: 'rgba(59,130,246,0.03)',
                               display: 'grid',
-                              gridTemplateColumns: 'repeat(3, 1fr)',
                               gap: '16px',
                             }}
                           >
@@ -493,7 +500,7 @@ const Contracts: React.FC = () => {
               <option value="pro">Pro</option>
               <option value="scale">Scale</option>
             </Select>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div className="crm-form-grid" style={{ display: 'grid', gap: '10px' }}>
               <Input
                 label="MRR ($)"
                 type="number"
@@ -515,7 +522,7 @@ const Contracts: React.FC = () => {
               value={form.signedAt}
               onChange={(e) => setForm((f) => ({ ...f, signedAt: e.target.value }))}
             />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div className="crm-form-grid" style={{ display: 'grid', gap: '10px' }}>
               <Input
                 label="Signed By"
                 value={form.signedBy}

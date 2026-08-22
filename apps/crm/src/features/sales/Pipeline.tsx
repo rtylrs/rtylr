@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import { usePipeline, useListAllLeads } from '../../shared/hooks/queries/useSales';
 import type { Lead, LeadStage } from '../../shared/hooks/queries/useSales';
 import { Button, PageHeader, SkeletonList } from '../../shared/components/ui';
+import { activateOnKeyboard } from '../../shared/lib/keyboard';
 import CreateLeadModal from './components/CreateLeadModal';
 
 const STAGES: Array<{ key: LeadStage; label: string }> = [
@@ -49,6 +50,9 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => (
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -4 }}
     onClick={onClick}
+    role="button"
+    tabIndex={0}
+    onKeyDown={(event) => activateOnKeyboard(event, onClick)}
     style={{
       background: 'var(--hub-card)',
       border: '1px solid var(--hub-border)',

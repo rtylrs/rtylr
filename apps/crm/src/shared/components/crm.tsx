@@ -19,6 +19,7 @@ import {
   User,
 } from 'lucide-react';
 import { Tier, tierColor, getTier, getCustomerTier, pointsToNextTier } from '../lib/tiers';
+import { activateOnKeyboard } from '../lib/keyboard';
 import { ACCENT, Input, Select, Button } from './ui';
 import type { TimelineEntry, Customer } from '../services/crmApi';
 
@@ -34,6 +35,9 @@ export const CustomerAvatar: React.FC<{
   return (
     <div
       onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (event) => activateOnKeyboard(event, onClick) : undefined}
       style={{
         position: 'relative',
         width: `${size}px`,
@@ -853,9 +857,7 @@ export const CustomerQuickView: React.FC<{ customer: Customer }> = ({ customer }
           <TierBadge tier={tier} />
         </div>
       </div>
-      <div
-        style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '12px' }}
-      >
+      <div className="crm-form-grid" style={{ display: 'grid', gap: '10px', fontSize: '12px' }}>
         <div>
           <div
             style={{ color: 'var(--hub-text-dim)', fontSize: '10px', textTransform: 'uppercase' }}

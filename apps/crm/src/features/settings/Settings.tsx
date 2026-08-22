@@ -130,7 +130,7 @@ const GeneralTab: React.FC = () => {
         >
           Messaging
         </h4>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        <div className="crm-form-grid" style={{ display: 'grid', gap: '12px' }}>
           <Input
             label="From email"
             type="email"
@@ -253,9 +253,7 @@ const TeamTab: React.FC = () => {
           >
             Invite someone to CRM
           </h3>
-          <div
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}
-          >
+          <div className="crm-form-grid" style={{ display: 'grid', gap: 12, marginBottom: 12 }}>
             <div>
               <label
                 style={{

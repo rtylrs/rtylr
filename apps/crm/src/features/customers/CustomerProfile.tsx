@@ -318,11 +318,11 @@ const CustomerProfile: React.FC = () => {
           </div>
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px' }}>
+        <div className="crm-two-column" style={{ display: 'grid', gap: '20px' }}>
           {/* Left column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {/* Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+            <div className="crm-stats-grid" style={{ display: 'grid', gap: '12px' }}>
               {[
                 { label: 'Total Spent', value: `$${customer.totalSpent.toLocaleString()}` },
                 { label: 'Visits', value: customer.visits },

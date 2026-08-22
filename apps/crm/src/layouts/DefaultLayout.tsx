@@ -543,9 +543,9 @@ const DefaultLayout: React.FC = () => {
         </aside>
 
         {/* Main content + Caret AI inline column */}
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 min-w-0 overflow-hidden">
           {/* Main area */}
-          <div className="flex flex-col flex-1 overflow-hidden pt-11 md:pt-0">
+          <div className="flex min-w-0 flex-col flex-1 overflow-hidden pt-11 md:pt-0">
             {/* Topbar */}
             <header
               className="hidden md:flex"
@@ -640,6 +640,7 @@ const DefaultLayout: React.FC = () => {
                 transition={{ duration: 0.18, ease: 'easeOut' }}
                 style={{
                   flex: 1,
+                  minWidth: 0,
                   overflowY: 'auto',
                   padding: '24px',
                 }}

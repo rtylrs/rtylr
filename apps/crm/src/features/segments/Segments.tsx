@@ -612,7 +612,7 @@ const Segments: React.FC = () => {
             />
           </Card>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+          <div className="crm-card-grid" style={{ display: 'grid', gap: '16px' }}>
             {segments.map((segment, i) => (
               <SegmentCard
                 key={segment.id}
