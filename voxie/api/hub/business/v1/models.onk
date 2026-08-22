@@ -140,7 +140,7 @@ message UpdateBusinessRequest {
   website: string
   timezone: string @required
   currency: string @required
-  slug: string? @nullable
+  slug: string?
 }
 
 message UpdateBusinessResponse {

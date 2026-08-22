@@ -20,7 +20,7 @@ message GetMeResponse {
 message UpdateProfileRequest {
   name: string @required
   /// Reserved for future profile email changes.
-  email: string? @nullable @email
+  email: string? @email
 }
 
 message UpdateProfileResponse {
