@@ -1,4 +1,8 @@
-import type { Task as ContractTask } from '@voxire/voxie/flow/task/v1/types';
+// v2's FlowTask, not v1's Task. Only `archived` is read from it, and both
+// declare it as a plain bool, so this is the same type for this purpose - but it
+// removes the last flow v1 contract import, which is what step 5 needs before
+// the v1 .onk files can be retired.
+import type { FlowTask as ContractTask } from '@voxire/voxie/flow/task/v2/types';
 
 import { oneKitResult } from '@voxire/api';
 import {
