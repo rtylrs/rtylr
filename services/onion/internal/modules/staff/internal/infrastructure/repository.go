@@ -258,6 +258,10 @@ func staffFromGetRow(row sqlc.GetStaffByIDRow) domain.Staff {
 	if row.UserID.Valid {
 		s.UserID = row.UserID.Int64
 	}
+	if row.ManagerStaffID.Valid {
+		s.ManagerStaffID = row.ManagerStaffID.Int64
+	}
+
 	if row.DepartmentID.Valid {
 		s.DepartmentID = row.DepartmentID.Int64
 	}
@@ -349,10 +353,13 @@ func (r *Repository) CreateStaff(ctx context.Context, input domain.StaffInput) (
 	qtx := r.queries.WithTx(tx)
 
 	result, err := qtx.CreateStaff(ctx, sqlc.CreateStaffParams{
-		OwnerID:               input.OwnerID,
-		BusinessID:            input.BusinessID,
-		UserID:                sql.NullInt64{Int64: input.UserID, Valid: input.UserID != 0},
-		DepartmentID:          sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
+		OwnerID:      input.OwnerID,
+		BusinessID:   input.BusinessID,
+		UserID:       sql.NullInt64{Int64: input.UserID, Valid: input.UserID != 0},
+		DepartmentID: sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
+		// Zero means no direct reporting line, which is the common case, so it
+		// stores NULL rather than a manager with staff id 0.
+		ManagerStaffID:        sql.NullInt64{Int64: input.ManagerStaffID, Valid: input.ManagerStaffID != 0},
 		FirstName:             input.FirstName,
 		LastName:              input.LastName,
 		Email:                 input.Email,
@@ -426,7 +433,10 @@ func (r *Repository) UpdateStaff(ctx context.Context, businessID int64, input do
 	qtx := r.queries.WithTx(tx)
 
 	err = qtx.UpdateStaff(ctx, sqlc.UpdateStaffParams{
-		DepartmentID:          sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
+		DepartmentID: sql.NullInt64{Int64: input.DepartmentID, Valid: input.DepartmentID != 0},
+		// Zero means no direct reporting line, which is the common case, so it
+		// stores NULL rather than a manager with staff id 0.
+		ManagerStaffID:        sql.NullInt64{Int64: input.ManagerStaffID, Valid: input.ManagerStaffID != 0},
 		FirstName:             input.FirstName,
 		LastName:              input.LastName,
 		Email:                 input.Email,
@@ -803,9 +813,13 @@ func parseDecimal(s string) float64 {
 // Valid check here is belt-and-braces against a driver returning a zero id as
 // valid, which would grant visibility over user 0.
 func (r *Repository) ListManagedUserIDs(ctx context.Context, businessID, managerUserID int64) ([]int64, error) {
+	// The query unions two rule sources (department manager, direct reporting
+	// line), so the same manager and business fill both halves.
 	rows, err := r.queries.ListManagedUserIDs(ctx, sqlc.ListManagedUserIDsParams{
-		UserID:     sql.NullInt64{Int64: managerUserID, Valid: true},
-		BusinessID: businessID,
+		UserID:       sql.NullInt64{Int64: managerUserID, Valid: true},
+		BusinessID:   businessID,
+		UserID_2:     sql.NullInt64{Int64: managerUserID, Valid: true},
+		BusinessID_2: businessID,
 	})
 	if err != nil {
 		return nil, err

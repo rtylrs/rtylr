@@ -2134,18 +2134,19 @@ type FinanceBankAccount struct {
 }
 
 type FinanceBill struct {
-	ID           int64                  `db:"id" json:"id"`
-	OwnerID      int64                  `db:"owner_id" json:"owner_id"`
-	BusinessID   int64                  `db:"business_id" json:"business_id"`
-	SupplierID   sql.NullInt64          `db:"supplier_id" json:"supplier_id"`
-	SupplierName string                 `db:"supplier_name" json:"supplier_name"`
-	Amount       string                 `db:"amount" json:"amount"`
-	Currency     sql.NullString         `db:"currency" json:"currency"`
-	DueDate      time.Time              `db:"due_date" json:"due_date"`
-	Status       NullFinanceBillsStatus `db:"status" json:"status"`
-	Description  sql.NullString         `db:"description" json:"description"`
-	CreatedAt    sql.NullTime           `db:"created_at" json:"created_at"`
-	UpdatedAt    sql.NullTime           `db:"updated_at" json:"updated_at"`
+	ID              int64                  `db:"id" json:"id"`
+	OwnerID         int64                  `db:"owner_id" json:"owner_id"`
+	BusinessID      int64                  `db:"business_id" json:"business_id"`
+	SupplierID      sql.NullInt64          `db:"supplier_id" json:"supplier_id"`
+	SupplierName    string                 `db:"supplier_name" json:"supplier_name"`
+	PurchaseOrderID sql.NullInt64          `db:"purchase_order_id" json:"purchase_order_id"`
+	Amount          string                 `db:"amount" json:"amount"`
+	Currency        sql.NullString         `db:"currency" json:"currency"`
+	DueDate         time.Time              `db:"due_date" json:"due_date"`
+	Status          NullFinanceBillsStatus `db:"status" json:"status"`
+	Description     sql.NullString         `db:"description" json:"description"`
+	CreatedAt       sql.NullTime           `db:"created_at" json:"created_at"`
+	UpdatedAt       sql.NullTime           `db:"updated_at" json:"updated_at"`
 }
 
 type FinanceExpense struct {

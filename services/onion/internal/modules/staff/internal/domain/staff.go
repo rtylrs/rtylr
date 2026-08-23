@@ -14,6 +14,7 @@ type Staff struct {
 	BusinessID            int64     `json:"business_id"`
 	UserID                int64     `json:"user_id"`
 	DepartmentID          int64     `json:"department_id"`
+	ManagerStaffID        int64     `json:"manager_staff_id"`
 	DepartmentName        string    `json:"department_name"`
 	FirstName             string    `json:"first_name"`
 	LastName              string    `json:"last_name"`
@@ -152,6 +153,7 @@ type StaffInput struct {
 	BusinessID            int64   `json:"business_id"`
 	UserID                int64   `json:"user_id"`
 	DepartmentID          int64   `json:"department_id"`
+	ManagerStaffID        int64   `json:"manager_staff_id"`
 	FirstName             string  `json:"first_name"`
 	LastName              string  `json:"last_name"`
 	Email                 string  `json:"email"`
@@ -176,6 +178,7 @@ type StaffInput struct {
 type StaffUpdateInput struct {
 	ID                    int64   `json:"id"`
 	DepartmentID          int64   `json:"department_id"`
+	ManagerStaffID        int64   `json:"manager_staff_id"`
 	FirstName             string  `json:"first_name"`
 	LastName              string  `json:"last_name"`
 	Email                 string  `json:"email"`

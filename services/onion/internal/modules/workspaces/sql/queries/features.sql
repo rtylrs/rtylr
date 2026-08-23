@@ -65,19 +65,29 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 SELECT COUNT(*) FROM flow_views WHERE business_id = ? AND workspace_id = ?;
 
 -- name: ListViews :many
-SELECT id, workspace_id, name, icon, filters, group_by, sort_by, sort_dir, created_by, created_at
+-- A private view is visible only to whoever created it (S2). Everything else is
+-- shared business-wide, which is how every view behaved before the column
+-- existed, so an unset visibility keeps its old reach.
+--
+-- created_by is nullable, and a private view with a NULL creator would be
+-- reachable by nobody. That is the safe direction for a visibility filter: a
+-- view nobody can see is recoverable, a private view leaked to colleagues is
+-- not. CreateView always sets it.
+SELECT id, workspace_id, name, icon, filters, group_by, sort_by, sort_dir,
+       COALESCE(visibility, 'shared') AS visibility, created_by, created_at
 FROM flow_views
 WHERE business_id = ? AND workspace_id = ?
+  AND (COALESCE(visibility, 'shared') <> 'private' OR created_by = ?)
 ORDER BY created_at ASC
 LIMIT ? OFFSET ?;
 
 -- name: CreateView :execresult
-INSERT INTO flow_views (owner_id, business_id, workspace_id, name, icon, filters, group_by, sort_by, sort_dir, created_by)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO flow_views (owner_id, business_id, workspace_id, name, icon, filters, group_by, sort_by, sort_dir, visibility, created_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateView :execresult
 UPDATE flow_views
-SET name = ?, icon = ?, filters = ?, group_by = ?, sort_by = ?, sort_dir = ?
+SET name = ?, icon = ?, filters = ?, group_by = ?, sort_by = ?, sort_dir = ?, visibility = ?
 WHERE flow_views.id = ?
   AND flow_views.business_id = ?
   AND (

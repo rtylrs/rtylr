@@ -44,6 +44,18 @@ jobs:
       - name: Generate SQLC code
         run: ./scripts/generate_sqlc.sh
 
+      # Most sqlc output is gitignored, but a few models.go files are tracked.
+      # Those committed copies used to drift silently: generate runs before the
+      # tests, so a stale file was always overwritten before anything read it,
+      # and a fresh clone plus generate left an unexplained dirty tree. This
+      # only inspects tracked files, so newly generated ignored files are fine.
+      - name: Check tracked sqlc output is committed
+        run: |
+          if ! git diff --exit-code; then
+            echo "::error::Tracked sqlc output is stale. Run ./scripts/generate_sqlc.sh with sqlc v1.29.0 and commit the result."
+            exit 1
+          fi
+
       - name: Check SQL keyword casing
         run: ./scripts/check_sql_case.sh
 
