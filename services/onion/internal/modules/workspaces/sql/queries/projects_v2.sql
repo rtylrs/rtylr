@@ -190,3 +190,11 @@ WHERE p.business_id = ?
   AND p.archived_at IS NULL
 ORDER BY p.created_at DESC, p.id DESC
 LIMIT ?;
+
+-- name: GetProjectProxyFacts :one
+-- The four facts the dept-manager visibility proxy needs about a project,
+-- looked up by id alone. projectRoleFor resolves a role without knowing the
+-- business, and the proxy must not trust a business passed in from a caller.
+SELECT p.business_id, p.owner_id, p.created_by, p.is_personal
+FROM flow_projects p
+WHERE p.id = ?;

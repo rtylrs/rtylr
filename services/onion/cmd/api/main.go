@@ -733,6 +733,11 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	// RequireTaskRole/RequireWorkspaceRole consult this resolver first and
 	// admit them unconditionally before falling back to Flow's own roles.
 	modules.Workspaces.Service().SetHubProfileResolver(team.NewHubProfileResolver(modules.Team.Service()))
+	// Dept-manager visibility proxy (M3): Flow asks HR who reports to a caller
+	// and grants them member-equivalent access to those people's projects. Until
+	// this is wired the proxy is inert, so a worker or test without it sees
+	// exactly the pre-proxy behaviour.
+	modules.Workspaces.Service().SetOrgchartResolver(modules.Staff.OrgchartResolver())
 	modules.HRDashboard.WithStatsLoader(func(ctx context.Context, businessID int64) (hrdashboardstats.DashboardStats, error) {
 		totalStaff, onShiftToday, pendingTimeOff, payrollDraft, err := modules.Staff.LoadDashboardStats(ctx, businessID)
 		if err != nil {

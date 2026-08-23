@@ -31,7 +31,50 @@ func (s *Service) canSeeProject(ctx context.Context, p domain.Project, callerID,
 	if p.CreatedBy == callerID || p.OwnerID == callerID {
 		return true
 	}
-	return s.repo.IsProjectMember(ctx, callerID, p.ID)
+	if s.repo.IsProjectMember(ctx, callerID, p.ID) {
+		return true
+	}
+	return s.managesSomeoneOn(ctx, p, callerID, businessID)
+}
+
+// managesSomeoneOn reports whether the caller manages anyone involved in this
+// project, which is the dept-manager visibility proxy (M3).
+//
+// The My Tasks bucket is exempt no matter who manages its owner: Project's own
+// contract says is_personal is "exempt from manager-visibility policies unless
+// its owner explicitly shares it", so the check stops before the proxy.
+//
+// Involvement means created, owns, or is a member. Membership is probed one
+// report at a time rather than with an IN clause because a manager has few
+// reports and sqlc's slice expansion produces invalid SQL for an empty set in
+// MySQL. It does mean this is O(reports) queries on a cache miss, so it runs
+// last, after the cheap self checks have already returned.
+func (s *Service) managesSomeoneOn(ctx context.Context, p domain.Project, callerID, businessID int64) bool {
+	if p.IsPersonal {
+		return false
+	}
+	reports := s.managedUserIDs(ctx, callerID, businessID)
+
+	// Creator and owner are already in hand, so settle the common case without
+	// touching the database at all.
+	for _, reportID := range reports {
+		if p.CreatedBy == reportID || p.OwnerID == reportID {
+			return true
+		}
+	}
+
+	// Only then pay for membership lookups. A nil repo means the proxy cannot
+	// answer, and the rule throughout is that failing to resolve must decline to
+	// widen rather than widen blindly.
+	if s.repo == nil {
+		return false
+	}
+	for _, reportID := range reports {
+		if s.repo.IsProjectMember(ctx, reportID, p.ID) {
+			return true
+		}
+	}
+	return false
 }
 
 // GetProjectV2 returns one project if the caller may see it.

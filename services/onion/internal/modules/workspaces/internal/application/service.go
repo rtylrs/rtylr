@@ -15,6 +15,7 @@ import (
 	"github.com/voxire/onion/internal/platform/hubprofile"
 	"github.com/voxire/onion/internal/platform/labourcost"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/orgchart"
 	"github.com/voxire/onion/internal/platform/wsbus"
 )
 
@@ -98,6 +99,13 @@ type Service struct {
 	// RequireWorkspaceRole is simply skipped and those functions behave exactly
 	// as before.
 	hubProfiles hubprofile.Resolver
+
+	// orgchart resolves who reports to a caller, backing the dept-manager
+	// visibility proxy (M3). Optional in exactly the way hubProfiles is: nil
+	// until SetOrgchartResolver is called, in which case the proxy is skipped
+	// and visibility behaves as it did before it existed. A nil provider must
+	// never widen access, only fail to widen it.
+	orgchart orgchart.ManagerResolver
 }
 
 func NewService(_ context.Context, db *sql.DB) *Service {
@@ -135,6 +143,29 @@ func (noopLabourCostProvider) GetProjectLabourCost(_ context.Context, businessID
 // functions' docs for why the bypass exists.
 func (s *Service) SetHubProfileResolver(r hubprofile.Resolver) {
 	s.hubProfiles = r
+}
+
+// SetOrgchartResolver wires the reporting-line lookup behind the dept-manager
+// visibility proxy. Until it is called the proxy is inert.
+func (s *Service) SetOrgchartResolver(r orgchart.ManagerResolver) {
+	s.orgchart = r
+}
+
+// managedUserIDs returns the users reporting to the caller, or nil when the
+// proxy cannot apply.
+//
+// A resolver error is swallowed to nil rather than propagated. That is
+// deliberate: this widens visibility, so failing to resolve must degrade to the
+// caller's own projects, never to an error on a list they are entitled to see.
+func (s *Service) managedUserIDs(ctx context.Context, callerID, businessID int64) []int64 {
+	if s.orgchart == nil || callerID <= 0 || businessID <= 0 {
+		return nil
+	}
+	ids, err := s.orgchart.ManagedUserIDs(ctx, callerID, businessID)
+	if err != nil {
+		return nil
+	}
+	return ids
 }
 
 // ─────────────────────────────────────────────
@@ -300,7 +331,35 @@ func (s *Service) projectRoleFor(ctx context.Context, projectID, userID int64) s
 	if ownerID == userID {
 		return domain.FlowRoleAdmin
 	}
+	if role := s.managerProxyRoleFor(ctx, projectID, userID); role != "" {
+		return role
+	}
 	return s.workspaceRoleFor(ctx, workspaceID, userID)
+}
+
+// managerProxyRoleFor grants a department manager member-equivalent rights on a
+// project someone reporting to them is involved in (M3), or "" when the proxy
+// does not apply.
+//
+// Member and not admin: the manager can do what a member can, which is the
+// decided scope. Admin would let them archive or transfer ownership of a
+// project nobody added them to.
+//
+// This needs the project's business, which projectRoleFor does not carry, so it
+// reads it rather than taking it on trust. A project outside the caller's
+// business must not resolve through the proxy.
+func (s *Service) managerProxyRoleFor(ctx context.Context, projectID, userID int64) string {
+	if s.orgchart == nil {
+		return ""
+	}
+	p, err := s.repo.GetProjectProxyFacts(ctx, projectID)
+	if err != nil {
+		return ""
+	}
+	if s.managesSomeoneOn(ctx, p, userID, p.BusinessID) {
+		return domain.FlowRoleMember
+	}
+	return ""
 }
 
 // workspaceRoleFor resolves a caller's role on a workspace. The owner holds no

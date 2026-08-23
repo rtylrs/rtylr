@@ -1595,6 +1595,24 @@ func (r *Repository) GetProjectOwnerWorkspace(ctx context.Context, projectID int
 	return row.OwnerID, row.WorkspaceID, nil
 }
 
+// GetProjectProxyFacts returns the project facts the dept-manager visibility
+// proxy needs, by id alone. projectRoleFor has no business in hand, and the
+// proxy must resolve the project's real business rather than trust one supplied
+// by the caller.
+func (r *Repository) GetProjectProxyFacts(ctx context.Context, projectID int64) (domain.Project, error) {
+	row, err := r.queries.GetProjectProxyFacts(ctx, projectID)
+	if err != nil {
+		return domain.Project{}, err
+	}
+	return domain.Project{
+		ID:         projectID,
+		BusinessID: row.BusinessID,
+		OwnerID:    row.OwnerID,
+		CreatedBy:  row.CreatedBy,
+		IsPersonal: row.IsPersonal,
+	}, nil
+}
+
 // GetWorkspaceOwner returns a workspace's owner. A workspace owner has no
 // flow_workspace_members row of their own, so the roster read alone would miss
 // them.

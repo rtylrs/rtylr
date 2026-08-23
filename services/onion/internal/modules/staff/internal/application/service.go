@@ -102,3 +102,14 @@ func (s *Service) GetDashboardStats(ctx context.Context, businessID int64) (doma
 		return stats, nil
 	}, cacher.WithExpiry(ctx, dashboardCacheTTL))
 }
+
+// ListManagedUserIDs returns the user ids reporting to managerUserID. It backs
+// the orgchart provider Flow uses for the dept-manager visibility proxy, and
+// deliberately exposes ids only: no staff record, and nothing on it, crosses
+// the module boundary.
+func (s *Service) ListManagedUserIDs(ctx context.Context, businessID, managerUserID int64) ([]int64, error) {
+	if businessID <= 0 || managerUserID <= 0 {
+		return nil, nil
+	}
+	return s.repo.ListManagedUserIDs(ctx, businessID, managerUserID)
+}

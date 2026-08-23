@@ -794,3 +794,28 @@ func parseDecimal(s string) float64 {
 	}
 	return f
 }
+
+// ListManagedUserIDs returns the user ids reporting to managerUserID inside the
+// business. Managing nobody is the common case and returns an empty slice, not
+// an error.
+//
+// user_id is nullable on hr_staff, so the query already excludes NULLs; the
+// Valid check here is belt-and-braces against a driver returning a zero id as
+// valid, which would grant visibility over user 0.
+func (r *Repository) ListManagedUserIDs(ctx context.Context, businessID, managerUserID int64) ([]int64, error) {
+	rows, err := r.queries.ListManagedUserIDs(ctx, sqlc.ListManagedUserIDsParams{
+		UserID:     sql.NullInt64{Int64: managerUserID, Valid: true},
+		BusinessID: businessID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	ids := make([]int64, 0, len(rows))
+	for _, row := range rows {
+		if row.Valid && row.Int64 > 0 {
+			ids = append(ids, row.Int64)
+		}
+	}
+	return ids, nil
+}
