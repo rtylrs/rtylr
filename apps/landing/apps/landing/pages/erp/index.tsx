@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import {
   Package,
@@ -25,6 +26,7 @@ import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import { SplitWords } from '../../components/motion/SplitWords';
+import Lines from '../../components/text/Lines';
 import styles from './erp.module.scss';
 
 // Initial inventory, stock drains each time "Simulate Friday service" fires.
@@ -51,31 +53,16 @@ function statusFor(row: InventoryRow): 'critical' | 'low' | 'ok' {
   return 'ok';
 }
 
-const CAPABILITIES = [
-  {
-    icon: Boxes,
-    title: 'Every SKU, every variant',
-    copy: 'Track ingredients down to the gram. Recipe-linked depletion. Real-time counts as sales happen.',
-  },
-  {
-    icon: Truck,
-    title: 'Suppliers & purchase orders',
-    copy: 'Auto-reorder at threshold. Multi-supplier price comparison. Expected-arrival tracking per line item.',
-  },
-  {
-    icon: Warehouse,
-    title: 'Multi-location transfers',
-    copy: 'Move stock between sites with full audit trail. Location-level reporting. No spreadsheet reconciliation.',
-  },
-  {
-    icon: AlertTriangle,
-    title: 'Low-stock before it hurts',
-    copy: 'Smart thresholds based on historical velocity. Alerts route to the right person. Nothing runs out mid-service.',
-  },
-];
+const CAPABILITY_ICONS = [Boxes, Truck, Warehouse, AlertTriangle];
 
 const ERPPage = (): React.JSX.Element => {
   const faq = useFaq('erp');
+  const { t } = useTranslation();
+
+  const capabilities = t('erp.capabilities.items', { returnObjects: true }) as unknown as {
+    title: string;
+    copy: string;
+  }[];
   const router = useRouter();
   const [inventory, setInventory] = useState<InventoryRow[]>(INITIAL_INVENTORY);
   const [isSimulating, setIsSimulating] = useState(false);
@@ -132,15 +119,14 @@ const ERPPage = (): React.JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="ERP · Inventory that counts itself. | rtylr"
-          description="Real-time inventory, suppliers, and purchasing. Recipe-linked depletion. Multi-location transfers with full audit trail."
+          title={t('erp.meta.title')}
+          description={t('erp.meta.description')}
           canonical="https://rtylr.com/erp/"
           structuredData={productWithBreadcrumbs({
             name: 'ERP',
             path: '/erp/',
             subCategory: 'Inventory and Supply Chain Management',
-            description:
-              'Real-time inventory, suppliers, purchase orders, and warehouse management.',
+            description: t('erp.meta.schemaDescription'),
           })}
         />
 
@@ -154,18 +140,16 @@ const ERPPage = (): React.JSX.Element => {
               variants={staggerBlur}
             >
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
-                rtylr ERP · Inventory
+                {t('erp.hero.eyebrow')}
               </motion.span>
               <SplitWords
                 as="h1"
                 className={styles.heroTitle}
-                text={'Inventory that\ncounts itself.'}
+                text={t('erp.hero.title')}
                 delay={0.1}
               />
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Every margherita sold drops flour, mozzarella, and olive oil. Every PO approved
-                moves the warehouse count. Every low-stock alert fires before you actually run out.
-                Not after the Saturday rush notices.
+                {t('erp.hero.subtitle')}
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goRegister} className={styles.primaryBtn}>
@@ -215,8 +199,8 @@ const ERPPage = (): React.JSX.Element => {
                     type="button"
                     onClick={resetInventory}
                     className={styles.resetBtn}
-                    aria-label="Reset inventory"
-                    title="Reset"
+                    aria-label={t('erp.mock.resetLabel')}
+                    title={t('erp.mock.reset')}
                   >
                     <RotateCcw size={12} strokeWidth={2} />
                   </button>
@@ -307,12 +291,8 @@ const ERPPage = (): React.JSX.Element => {
             </motion.div>
           </section>
 
-          <DirectAnswer label="What is rtylr ERP?">
-            rtylr ERP is the inventory and supply chain app inside rtylr, for businesses holding stock
-            across one or more locations. It covers on-hand counts, suppliers, purchase orders, transfers
-            between sites, low-stock alerts and cost tracking. It reads sales from the POS as they happen,
-            so stock stays accurate without a nightly sync and a reorder can be drafted before anyone
-            notices an empty shelf.
+          <DirectAnswer label={t('erp.directAnswer.label')}>
+            {t('erp.directAnswer.body')}
           </DirectAnswer>
 
           {/* ── CAPABILITIES, alternating left/right layout ──────────────── */}
@@ -325,37 +305,36 @@ const ERPPage = (): React.JSX.Element => {
               variants={staggerBlur}
             >
               <motion.span className={styles.sectionEyebrow} variants={blurFadeIn}>
-                CAPABILITIES
+                {t('erp.capabilities.eyebrow')}
               </motion.span>
               <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-                What does rtylr ERP
-                <br />
-                cover, from the dock
-                <br />
-                to the P&amp;L?
+                <Lines text={t('erp.capabilities.title')} />
               </motion.h2>
             </motion.div>
 
             <div className={styles.capabilitiesList}>
-              {CAPABILITIES.map(({ icon: Icon, title, copy }, i) => (
-                <motion.div
-                  key={title}
-                  className={cn(styles.capabilityRow, i % 2 === 1 && styles.capabilityRowReverse)}
-                  initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, margin: '-80px' }}
-                  transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <div className={styles.capabilityNumber}>{String(i + 1).padStart(2, '0')}</div>
-                  <div className={styles.capabilityContent}>
-                    <div className={styles.capabilityIcon}>
-                      <Icon size={20} strokeWidth={1.8} />
+              {capabilities.map(({ title, copy }, i) => {
+                const Icon = CAPABILITY_ICONS[i];
+                return (
+                  <motion.div
+                    key={title}
+                    className={cn(styles.capabilityRow, i % 2 === 1 && styles.capabilityRowReverse)}
+                    initial={{ opacity: 0, x: i % 2 === 0 ? -20 : 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: '-80px' }}
+                    transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <div className={styles.capabilityNumber}>{String(i + 1).padStart(2, '0')}</div>
+                    <div className={styles.capabilityContent}>
+                      <div className={styles.capabilityIcon}>
+                        <Icon size={20} strokeWidth={1.8} />
+                      </div>
+                      <h3 className={styles.capabilityTitle}>{title}</h3>
+                      <p className={styles.capabilityCopy}>{copy}</p>
                     </div>
-                    <h3 className={styles.capabilityTitle}>{title}</h3>
-                    <p className={styles.capabilityCopy}>{copy}</p>
-                  </div>
-                </motion.div>
-              ))}
+                  </motion.div>
+                );
+              })}
             </div>
           </section>
 
@@ -368,15 +347,9 @@ const ERPPage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.div className={styles.depletionInner} variants={blurFadeIn}>
-              <span className={styles.sectionEyebrow}>LIVE RECIPE DEPLETION</span>
-              <h2 className={styles.depletionTitle}>
-                What happens to stock when a sale goes through?
-              </h2>
-              <p className={styles.depletionCopy}>
-                Every POS sale cascades through the recipe tree. Flour, yeast, mozzarella, basil,
-                olive oil, each depletes by exactly the gram. When anything crosses its reorder
-                threshold, a PO is drafted with your preferred supplier and routed for approval.
-              </p>
+              <span className={styles.sectionEyebrow}>{t('erp.depletion.eyebrow')}</span>
+              <h2 className={styles.depletionTitle}>{t('erp.depletion.title')}</h2>
+              <p className={styles.depletionCopy}>{t('erp.depletion.copy')}</p>
               <div className={styles.depletionFlow}>
                 <div className={styles.flowStep}>
                   <div className={styles.flowStepIcon}>
@@ -424,16 +397,14 @@ const ERPPage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.h2 className={styles.ctaTitle} variants={blurFadeIn}>
-              Close your inventory
-              <br />
-              books while you sleep.
+              <Lines text={t('erp.cta.title')} />
             </motion.h2>
             <motion.div className={styles.ctaButtons} variants={blurFadeIn}>
               <button type="button" onClick={goRegister} className={styles.primaryBtn}>
-                Get started
+                {t('common.cta.getStarted')}
               </button>
               <button type="button" onClick={goDemo} className={styles.outlineBtn}>
-                Book a demo
+                {t('common.cta.bookDemo')}
               </button>
             </motion.div>
           </motion.section>
