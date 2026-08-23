@@ -22,7 +22,6 @@ interface BoardSettingsPanelProps {
   open: boolean;
   onClose: () => void;
   projectId: string;
-  workspaceId: string;
   columns: ApiProjectColumn[];
   /** Project creator or admin. A viewer sees the panel read-only with the reason. */
   canManage: boolean;
@@ -45,7 +44,6 @@ const BoardSettingsPanel = ({
   open,
   onClose,
   projectId,
-  workspaceId,
   columns,
   canManage,
   groupBy,
@@ -99,7 +97,7 @@ const BoardSettingsPanel = ({
   const addColumn = (): void => {
     const name = newColumnName.trim();
     if (!name) return;
-    createColumn.mutate({ workspaceId, name, sortOrder: ordered.length });
+    createColumn.mutate({ name, sortOrder: ordered.length });
     setNewColumnName('');
   };
 

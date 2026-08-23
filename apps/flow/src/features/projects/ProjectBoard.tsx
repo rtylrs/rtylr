@@ -260,7 +260,6 @@ const ProjectBoard: React.FC = () => {
       return;
     }
     createColumn.mutate({
-      workspaceId: activeWorkspaceId || project.workspaceId,
       name,
       color: '#6b7280',
       sortOrder: columns.length,
@@ -315,7 +314,6 @@ const ProjectBoard: React.FC = () => {
         open={boardSettingsOpen}
         onClose={() => setBoardSettingsOpen(false)}
         projectId={projectId}
-        workspaceId={activeWorkspaceId || project.workspaceId}
         columns={columns}
         canManage={canManageBoard}
         groupBy={groupBy}
