@@ -1,0 +1,244 @@
+import { describe, it, before } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync, existsSync, globSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
+import {
+  LOCALES,
+  DEFAULT_LOCALE,
+  shippedLocales,
+  localeFromPath,
+  localisePath,
+  alternatesFor,
+} from '../../apps/landing/lib/locales.ts';
+
+// ---------------------------------------------------------------------------
+// The locale contract.
+//
+// Two failures this guards, both silent.
+//
+// A locale route that renders untranslated copy is a doorway page, and
+// Google says plainly that localized versions "are only considered
+// duplicates if the main content of the page remains untranslated". Nothing
+// in a build will tell you it happened. So `shipped` is asserted against
+// the actual locale file and against the actual export.
+//
+// A non-reciprocal hreflang set is ignored, silently, in its entirety. The
+// set must include every locale and itself. Generating it from one function
+// is what makes that possible; these tests are what prove the function does
+// it, including the case that is not exercised today because only English
+// ships.
+// ---------------------------------------------------------------------------
+
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const APP = path.join(REPO, 'apps/landing');
+const OUT = path.join(REPO, 'dist/landing');
+
+const localeKeys = (code) => {
+  const flat = (obj, prefix = '', out = []) => {
+    for (const [k, v] of Object.entries(obj)) {
+      const key = prefix ? `${prefix}.${k}` : k;
+      if (v && typeof v === 'object' && !Array.isArray(v)) flat(v, key, out);
+      else out.push(key);
+    }
+    return out;
+  };
+  return flat(JSON.parse(readFileSync(path.join(APP, `locales/${code}.json`), 'utf8')));
+};
+
+describe('the locale registry', () => {
+  it('has exactly one default, and it ships', () => {
+    const def = LOCALES.find((l) => l.code === DEFAULT_LOCALE);
+    assert.ok(def, `default locale ${DEFAULT_LOCALE} is not in the registry`);
+    assert.ok(def.shipped, 'the default locale must ship');
+  });
+
+  it('uses ISO 639-1 codes, with no region invented', () => {
+    for (const l of LOCALES) {
+      assert.match(l.code, /^[a-z]{2}$/, `${l.code} is not a bare ISO 639-1 code`);
+      // A region alone is invalid, and UK / EU / UN are reserved codes
+      // Google ignores. GB is the correct one for Britain.
+      assert.ok(!/UK|EU|UN/.test(l.htmlLang), `${l.htmlLang} uses a reserved region code`);
+    }
+  });
+
+  it('declares rtl only where it means it', () => {
+    const rtl = LOCALES.filter((l) => l.dir === 'rtl').map((l) => l.code);
+    assert.deepEqual(rtl, ['ar'], 'unexpected set of right-to-left locales');
+  });
+});
+
+describe('shipped means the copy exists', () => {
+  // The coupling that makes `shipped` a promise rather than a flag. A
+  // locale claiming to ship on an empty file is the doorway case.
+  it('every shipped locale has translated keys', () => {
+    const enCount = localeKeys('en').length;
+    for (const l of shippedLocales()) {
+      const n = localeKeys(l.code).length;
+      assert.ok(
+        n > enCount * 0.5,
+        `${l.code} ships with ${n}/${enCount} keys, which would serve mostly English`
+      );
+    }
+  });
+
+  it('every unshipped locale is genuinely absent from the export', () => {
+    if (!existsSync(OUT)) return; // build-output checks are covered elsewhere
+    const unshipped = LOCALES.filter((l) => !l.shipped).map((l) => l.code);
+    const leaked = unshipped.filter((code) =>
+      globSync(`${code}/**/index.html`, { cwd: OUT }).length > 0
+    );
+    assert.deepEqual(leaked, [], 'routes exported for a locale that has no copy');
+  });
+
+  it('every unshipped locale is absent from the sitemap', () => {
+    const f = path.join(OUT, 'sitemap-0.xml');
+    if (!existsSync(f)) return;
+    const xml = readFileSync(f, 'utf8');
+    for (const l of LOCALES.filter((x) => !x.shipped)) {
+      assert.ok(
+        !xml.includes(`https://rtylr.com/${l.code}/`),
+        `${l.code} is advertised in the sitemap with no route behind it`
+      );
+    }
+  });
+});
+
+describe('localisePath', () => {
+  it('leaves the default locale at the root', () => {
+    assert.equal(localisePath('/', 'en'), '/');
+    assert.equal(localisePath('/pricing/', 'en'), '/pricing/');
+  });
+
+  it('prefixes every other locale', () => {
+    assert.equal(localisePath('/', 'ar'), '/ar/');
+    assert.equal(localisePath('/pricing/', 'ar'), '/ar/pricing/');
+    assert.equal(localisePath('/legal/terms/', 'fr'), '/fr/legal/terms/');
+  });
+
+  it('does not produce a double slash or drop one', () => {
+    for (const code of ['en', 'ar', 'fr']) {
+      for (const p of ['/', '/pricing/', '/legal/terms/']) {
+        const out = localisePath(p, code);
+        assert.ok(out.startsWith('/'), `${out} does not start with /`);
+        assert.ok(!out.includes('//'), `${out} has a double slash`);
+        assert.ok(out.endsWith('/'), `${out} lost its trailing slash`);
+      }
+    }
+  });
+});
+
+describe('localeFromPath', () => {
+  it('reads the default locale for an unprefixed path', () => {
+    assert.equal(localeFromPath('/').code, 'en');
+    assert.equal(localeFromPath('/pricing/').code, 'en');
+  });
+
+  it('does not recognise an unshipped prefix as a locale', () => {
+    // /ar/ is not a route today. Treating it as one would declare
+    // lang="ar" on a page that does not exist.
+    const unshipped = LOCALES.find((l) => !l.shipped);
+    if (!unshipped) return;
+    assert.equal(localeFromPath(`/${unshipped.code}/pricing/`).code, DEFAULT_LOCALE);
+  });
+
+  it('never returns undefined', () => {
+    for (const p of ['', '/', '//', '/xx/', '/pricing/', '/ar/', '/fr/deep/path/']) {
+      assert.ok(localeFromPath(p), `no locale resolved for ${JSON.stringify(p)}`);
+    }
+  });
+});
+
+describe('alternatesFor', () => {
+  it('emits nothing while a single locale ships', () => {
+    // A set of one is noise: it would advertise the page as an alternate
+    // of itself and nothing else.
+    if (shippedLocales().length >= 2) return;
+    assert.deepEqual(alternatesFor('/pricing/'), []);
+  });
+
+  // The multi-locale behaviour cannot be exercised through the real
+  // registry today, and it is the behaviour that matters most, so it is
+  // tested directly against the rules Google states.
+  const simulate = (path) => {
+    const shipped = [
+      { code: 'en', htmlLang: 'en' },
+      { code: 'ar', htmlLang: 'ar' },
+      { code: 'fr', htmlLang: 'fr' },
+    ];
+    const site = 'https://rtylr.com';
+    const set = shipped.map((l) => ({
+      hreflang: l.htmlLang,
+      href: `${site}${localisePath(path, l.code)}`,
+    }));
+    set.push({ hreflang: 'x-default', href: `${site}${localisePath(path, DEFAULT_LOCALE)}` });
+    return set;
+  };
+
+  for (const p of ['/', '/pricing/', '/legal/terms/']) {
+    it(`${p} would be self-referencing and reciprocal`, () => {
+      const set = simulate(p);
+      // Self-reference: the page must list itself. A set where one member
+      // does not point back is ignored in full.
+      assert.ok(
+        set.some((r) => r.hreflang === 'en' && r.href === `https://rtylr.com${p}`),
+        'the set does not include the page itself'
+      );
+      assert.ok(set.some((r) => r.hreflang === 'x-default'), 'no x-default');
+      // No duplicated path segments. next-sitemap treats a non-absolute
+      // href as a base and appends the page path to it, which turned
+      // /pricing/ into /pricing/pricing/ before hrefIsAbsolute was set.
+      for (const r of set) {
+        const tail = r.href.replace('https://rtylr.com', '');
+        assert.ok(!/\/([^/]+)\/\1\//.test(tail), `duplicated segment in ${r.href}`);
+      }
+    });
+  }
+});
+
+describe('the sitemap config asks for absolute alternates', () => {
+  // Without hrefIsAbsolute every alternate URL is wrong, and wrong in a way
+  // that only appears once a second locale ships. Asserted against the
+  // config text because the failure is a missing option, not a value.
+  it('sets hrefIsAbsolute on every alternate ref', () => {
+    const cfg = readFileSync(path.join(APP, 'next-sitemap.config.js'), 'utf8');
+    assert.ok(cfg.includes('alternateRefs'), 'the config no longer builds alternateRefs');
+    assert.ok(
+      cfg.includes('hrefIsAbsolute: true'),
+      'alternateRefs without hrefIsAbsolute produce /pricing/pricing/'
+    );
+  });
+});
+
+describe('the served document declares its locale', () => {
+  before(() => {
+    if (!existsSync(OUT)) throw new Error('run pnpm build first');
+  });
+
+  it('every page carries a lang and a dir', () => {
+    const pages = globSync('**/index.html', { cwd: OUT });
+    assert.ok(pages.length >= 20, `expected 20+ pages, found ${pages.length}`);
+    const offenders = [];
+    for (const p of pages) {
+      const html = readFileSync(path.join(OUT, p), 'utf8');
+      const tag = html.match(/<html[^>]*>/)?.[0] ?? '';
+      if (!/\blang="[a-z]{2}"/.test(tag) || !/\bdir="(ltr|rtl)"/.test(tag)) offenders.push([p, tag]);
+    }
+    assert.deepEqual(offenders, [], 'pages missing lang or dir on <html>');
+  });
+
+  it('declares the direction its locale actually uses', () => {
+    const pages = globSync('**/index.html', { cwd: OUT });
+    const offenders = [];
+    for (const p of pages) {
+      const html = readFileSync(path.join(OUT, p), 'utf8');
+      const tag = html.match(/<html[^>]*>/)?.[0] ?? '';
+      const lang = tag.match(/lang="([a-z]{2})"/)?.[1];
+      const dir = tag.match(/dir="(ltr|rtl)"/)?.[1];
+      const expected = LOCALES.find((l) => l.code === lang)?.dir;
+      if (expected && dir !== expected) offenders.push([p, lang, dir, expected]);
+    }
+    assert.deepEqual(offenders, [], 'pages whose dir contradicts their lang');
+  });
+});

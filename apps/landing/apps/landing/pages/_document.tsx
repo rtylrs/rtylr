@@ -1,11 +1,35 @@
 import { Html, Head, Main, NextScript } from 'next/document';
+import type { DocumentContext, DocumentInitialProps } from 'next/document';
 
 import { CONSENT_MODE_BOOTSTRAP, GA_MEASUREMENT_ID } from '../lib/consentMode';
+import { localeFromPath, type Locale } from '../lib/locales';
 import { organizationSchema } from '../lib/structured-data';
 
-export default function Document() {
+interface DocProps extends DocumentInitialProps {
+  htmlLang: string;
+  dir: Locale['dir'];
+}
+
+/**
+ * lang and dir come from the route, not from a cookie or from storage.
+ *
+ * This used to be a hardcoded lang="en" with no dir at all. Deriving it
+ * here rather than in an effect matters because the value has to be in the
+ * markup the export produces: a screen reader, a browser choosing a font,
+ * and a hyphenation engine all read the attribute before any JavaScript
+ * runs, and an RTL page that paints LTR first visibly reflows.
+ *
+ * Reading the route rather than a stored preference is deliberate. A stored
+ * value disagrees with the URL the moment someone shares a link, and the
+ * URL is the thing that was requested.
+ *
+ * Worth being accurate about the payoff: Google states it does not use
+ * lang or hreflang to detect page language, so this is an accessibility
+ * and correctness fix, not a ranking one.
+ */
+export default function Document({ htmlLang, dir }: DocProps) {
   return (
-    <Html lang="en">
+    <Html lang={htmlLang} dir={dir}>
       <Head>
         <meta charSet="UTF-8" />
 
@@ -140,3 +164,12 @@ export default function Document() {
     </Html>
   );
 }
+
+Document.getInitialProps = async (ctx: DocumentContext): Promise<DocProps> => {
+  const initial = await ctx.defaultGetInitialProps(ctx);
+  // ctx.pathname is the route pattern; ctx.asPath is the resolved URL. For a
+  // static export the two agree except on dynamic routes, where asPath is
+  // the one carrying the locale segment.
+  const locale = localeFromPath(ctx.asPath ?? ctx.pathname ?? '/');
+  return { ...initial, htmlLang: locale.htmlLang, dir: locale.dir };
+};
