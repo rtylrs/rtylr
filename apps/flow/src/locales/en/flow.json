@@ -590,7 +590,11 @@
     "confirmRenameLabel": "Confirm rename",
     "cancelRenameLabel": "Cancel rename",
     "renameLabel": "Rename",
-    "deleteLabel": "Delete"
+    "deleteLabel": "Delete",
+    "makePrivateTooltip": "Make this view private",
+    "makeSharedTooltip": "Share this view with the business",
+    "makePrivateLabel": "Make view private",
+    "makeSharedLabel": "Share view"
   },
   "calendar": {
     "heading": "Calendar",

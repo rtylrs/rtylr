@@ -137,5 +137,12 @@
     "deselectTask": "إلغاء تحديد المهمة"
   },
   "saving": "جارٍ الحفظ…",
-  "saveChanges": "حفظ التغييرات"
+  "saveChanges": "حفظ التغييرات",
+  "toasts": {
+    "view": {
+      "madePrivate": "العرض خاص الآن",
+      "madeShared": "العرض مشترك الآن",
+      "visibilityFailed": "تعذر تغيير الظهور"
+    }
+  }
 }
