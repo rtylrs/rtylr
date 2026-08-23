@@ -770,7 +770,9 @@
     "tryClearing": "Try clearing your search or filters.",
     "emptyTitle": "No projects yet",
     "emptyDescription": "Create your first project to get started.",
-    "createFirst": "Create project"
+    "createFirst": "Create project",
+    "yourProjects": "Your projects",
+    "yourReports": "Your reports"
   },
   "bin": {
     "title": "Recycle bin",
