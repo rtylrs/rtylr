@@ -77,6 +77,38 @@ export function productSchema(opts: {
 }
 
 /**
+ * productPageSchema describes a physical product line, which is what
+ * /hardware/ is: registers, printers, scanners and drawers. It was
+ * emitting WebPage, which is true of any URL and says nothing.
+ *
+ * No `offers`, for the same reason nothing else has one: rtylr does not
+ * publish hardware prices on the page.
+ */
+export function productPageSchema(opts: {
+  name: string;
+  path: string;
+  description: string;
+}): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Product',
+        name: opts.name,
+        url: `${BASE}${opts.path}`,
+        description: opts.description,
+        brand: { '@type': 'Brand', name: 'rtylr' },
+        manufacturer: ORG,
+      },
+      breadcrumbList([
+        { label: 'rtylr', path: '/' },
+        { label: opts.name, path: opts.path },
+      ]),
+    ],
+  };
+}
+
+/**
  * organizationContact is the ContactPage + Organization block for the
  * /contact page. Gives Google an explicit signal that this page is
  * the canonical contact entry point, with phone / email / hours.
@@ -197,6 +229,136 @@ export function pricingPageSchema(opts: { faqs: FAQEntry[] }): Record<string, un
         { label: 'Pricing', path: '/pricing/' },
       ]),
       faqPageSchemaRaw(opts.faqs),
+    ],
+  };
+}
+
+/**
+ * itemListSchema is plain semantic markup for a page that is genuinely a
+ * list, which /integrations/ is.
+ *
+ * Expect no rich result from it. Google's Carousel requires ItemList be
+ * combined with Recipe, Course, Restaurant or Movie, and an integrations
+ * directory is none of those. It is here because it describes the page
+ * accurately for anything reading the graph, not because it earns a SERP
+ * feature. Do not let anyone sell it as one.
+ */
+export function itemListSchema(opts: {
+  name: string;
+  path: string;
+  description: string;
+  items: string[];
+}): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        name: opts.name,
+        url: `${BASE}${opts.path}`,
+        description: opts.description,
+        isPartOf: { '@type': 'WebSite', name: 'rtylr', url: BASE },
+        publisher: ORG,
+        mainEntity: {
+          '@type': 'ItemList',
+          numberOfItems: opts.items.length,
+          itemListElement: opts.items.map((name, idx) => ({
+            '@type': 'ListItem',
+            position: idx + 1,
+            name,
+          })),
+        },
+      },
+      breadcrumbList([
+        { label: 'rtylr', path: '/' },
+        { label: opts.name, path: opts.path },
+      ]),
+    ],
+  };
+}
+
+/**
+ * aboutPageSchema for /about/. AboutPage is the specific type for a page
+ * describing the organisation, and naming the Organization by @id points
+ * at the same node _document.tsx emits rather than restating it.
+ */
+export function aboutPageSchema(opts: { description: string }): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'AboutPage',
+        name: 'About rtylr',
+        url: `${BASE}/about/`,
+        description: opts.description,
+        mainEntity: { '@id': ORG_ID },
+        isPartOf: { '@type': 'WebSite', name: 'rtylr', url: BASE },
+      },
+      breadcrumbList([
+        { label: 'rtylr', path: '/' },
+        { label: 'About', path: '/about/' },
+      ]),
+    ],
+  };
+}
+
+/**
+ * contactPageSchema for /demo/, which is a contact form for a sales
+ * conversation and was declaring itself a generic WebPage.
+ */
+export function contactPageSchema(opts: {
+  name: string;
+  path: string;
+  description: string;
+}): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'ContactPage',
+        name: opts.name,
+        url: `${BASE}${opts.path}`,
+        description: opts.description,
+        mainEntity: { '@id': ORG_ID },
+        isPartOf: { '@type': 'WebSite', name: 'rtylr', url: BASE },
+      },
+      breadcrumbList([
+        { label: 'rtylr', path: '/' },
+        { label: opts.name, path: opts.path },
+      ]),
+    ],
+  };
+}
+
+/**
+ * blogIndexSchema for /blog/: a Blog whose posts are enumerated, so a
+ * consumer reading the graph can see what is on the page without
+ * parsing the markup.
+ */
+export function blogIndexSchema(opts: {
+  description: string;
+  posts: { title: string; slug: string; datePublished: string }[];
+}): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Blog',
+        name: 'rtylr blog',
+        url: `${BASE}/blog/`,
+        description: opts.description,
+        publisher: ORG,
+        blogPost: opts.posts.map((p) => ({
+          '@type': 'BlogPosting',
+          headline: p.title,
+          url: `${BASE}/blog/${p.slug}/`,
+          datePublished: p.datePublished,
+        })),
+      },
+      breadcrumbList([
+        { label: 'rtylr', path: '/' },
+        { label: 'Blog', path: '/blog/' },
+      ]),
     ],
   };
 }
