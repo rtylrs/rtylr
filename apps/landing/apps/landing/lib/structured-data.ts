@@ -51,6 +51,12 @@ export function breadcrumbList(items: BreadcrumbInput[]): Record<string, unknown
  * SoftwareApplication. Google surfaces these in rich-result carousels;
  * the per-app description + category lets each app rank for its own
  * queries instead of always deferring to the site-wide schema.
+ *
+ * No `offers`. A price is a fact, and rtylr does not publish one yet:
+ * these pages show no price at all, so asserting `price: '0'` on each
+ * of them was a claim about a paid product that no page backed up. It
+ * comes back when a real number ships on /pricing/, generated from the
+ * same data that page renders.
  */
 export function productSchema(opts: {
   name: string;
@@ -67,12 +73,6 @@ export function productSchema(opts: {
     applicationCategory: opts.category ?? 'BusinessApplication',
     operatingSystem: 'Web, iOS, Android',
     publisher: ORG,
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-      description: 'Free tier available',
-    },
   };
 }
 

@@ -49,7 +49,7 @@ describe('breadcrumbList', () => {
 });
 
 describe('productSchema', () => {
-  it('emits SoftwareApplication with free-tier offer defaults', () => {
+  it('emits SoftwareApplication without any offer', () => {
     const out = productSchema({
       name: 'POS',
       path: '/pos/',
@@ -58,9 +58,9 @@ describe('productSchema', () => {
     expect(out['@type']).toBe('SoftwareApplication');
     expect(out.applicationCategory).toBe('BusinessApplication');
     expect(out.url).toBe('https://rtylr.com/pos/');
-    const offers = out.offers as { '@type': string; price: string };
-    expect(offers['@type']).toBe('Offer');
-    expect(offers.price).toBe('0');
+    // No price is published anywhere on the site, so no module page may
+    // assert one. This used to emit `price: '0'` on all six.
+    expect(out.offers).toBeUndefined();
   });
 
   it('allows overriding applicationCategory', () => {
