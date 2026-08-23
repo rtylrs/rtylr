@@ -20,7 +20,20 @@ test.describe('Landing page', () => {
     await page.goto(`${LANDING_URL}/pricing`);
     // Heading is unique per page so it's a stable anchor - beats
     // scanning for "Free"/"Pro"/"Scale" which appear 11 times.
-    await expect(page.getByRole('heading', { name: /per seat, per day/i })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1, name: /all 7 apps/i })).toBeVisible();
+  });
+
+  test('pricing page states no price anywhere', async ({ page }) => {
+    await page.goto(`${LANDING_URL}/pricing`);
+    // rtylr has not published prices. Placeholder figures were live
+    // here, in the plan cards on the home page, and asserted to Google
+    // as an AggregateOffer. Nothing may reintroduce a currency amount
+    // until there is a real one, so assert the absence rather than the
+    // shape of what replaced it.
+    const body = (await page.locator('body').innerText()).replace(/\s+/g, ' ');
+    expect(body).not.toMatch(/[$€£]\s?\d/);
+    expect(body).not.toMatch(/\d+\s?(?:USD|EUR)/i);
+    expect(body).not.toMatch(/\/\s?seat\s?\/\s?month/i);
   });
 
   test('homepage has a canonical link to the root URL', async ({ page }) => {
@@ -32,23 +45,53 @@ test.describe('Landing page', () => {
     await expect(canonical).toHaveAttribute('href', /^https:\/\/rtylr\.com\/?$/);
   });
 
-  test('homepage emits SoftwareApplication JSON-LD', async ({ page }) => {
-    await page.goto(LANDING_URL);
-    const allJsonLd = await page.locator('script[type="application/ld+json"]').all();
-    expect(allJsonLd.length).toBeGreaterThan(0);
+  /** Collect every @type on the page, flattening any @graph. */
+  async function jsonLdTypes(page: import('@playwright/test').Page): Promise<string[]> {
+    const blocks = await page.locator('script[type="application/ld+json"]').all();
     const types: string[] = [];
-    for (const el of allJsonLd) {
+    for (const el of blocks) {
       const content = await el.textContent();
       if (!content) continue;
       const data = JSON.parse(content);
-      if (data['@type']) types.push(data['@type']);
-      if (Array.isArray(data['@graph'])) {
-        for (const node of data['@graph']) {
-          if (node['@type']) types.push(node['@type']);
-        }
+      for (const node of Array.isArray(data['@graph']) ? data['@graph'] : [data]) {
+        if (node['@type']) types.push(node['@type']);
       }
     }
+    return types;
+  }
+
+  test('homepage emits SoftwareApplication JSON-LD', async ({ page }) => {
+    await page.goto(LANDING_URL);
+    // This used to pass because _document put SoftwareApplication on
+    // every page. It now has to come from the home page's own schema.
+    const types = await jsonLdTypes(page);
     expect(types).toContain('SoftwareApplication');
+    expect(types).toContain('WebSite');
+    expect(types).toContain('Organization');
+  });
+
+  test('a legal page claims to be nothing but a page', async ({ page }) => {
+    await page.goto(`${LANDING_URL}/legal/privacy-policy`);
+    // The counterpart to the test above, and the reason it was moved:
+    // the privacy policy spent months telling Google it was a business
+    // application with a price of zero.
+    const types = await jsonLdTypes(page);
+    expect(types).toContain('WebPage');
+    expect(types).not.toContain('SoftwareApplication');
+    expect(types).not.toContain('Product');
+  });
+
+  test('no page asserts a price in its structured data', async ({ page }) => {
+    for (const path of ['', '/pricing', '/pos', '/legal/privacy-policy']) {
+      await page.goto(`${LANDING_URL}${path}`);
+      const blocks = await page.locator('script[type="application/ld+json"]').all();
+      for (const el of blocks) {
+        const content = (await el.textContent()) ?? '';
+        expect(content, `price asserted on ${path || '/'}`).not.toMatch(
+          /"(?:price|lowPrice|highPrice|priceCurrency)"/
+        );
+      }
+    }
   });
 
   test('robots.txt advertises the sitemap + AI-bot allowances', async ({ request }) => {
