@@ -17,6 +17,7 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { ERP_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
@@ -136,7 +137,6 @@ const ERPPage = (): JSX.Element => {
             name: 'ERP',
             path: '/erp/',
             subCategory: 'Inventory and Supply Chain Management',
-            faqs: ERP_FAQS,
             description:
               'Real-time inventory, suppliers, purchase orders, and warehouse management.',
           })}
@@ -400,6 +400,8 @@ const ERPPage = (): JSX.Element => {
               </div>
             </motion.div>
           </motion.section>
+
+          <FaqSection title="Questions about rtylr ERP" faqs={ERP_FAQS} />
 
           {/* ── CTA ──────────────────────────────────────────────────────── */}
           <motion.section

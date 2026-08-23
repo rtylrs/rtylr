@@ -14,6 +14,7 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { FINANCE_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
@@ -246,7 +247,6 @@ const FinancePage = (): JSX.Element => {
             name: 'Finance',
             path: '/finance/',
             subCategory: 'Accounting and Finance',
-            faqs: FINANCE_FAQS,
             description:
               'Invoices, expenses, tax, and a real P&L in real time. Accounting that keeps up with your business.',
           })}
@@ -533,6 +533,8 @@ const FinancePage = (): JSX.Element => {
               </div>
             </motion.div>
           </motion.section>
+
+          <FaqSection title="Questions about rtylr Finance" faqs={FINANCE_FAQS} />
 
           {/* ── CTA ───────────────────────────────────────────────────── */}
           <motion.section

@@ -14,6 +14,7 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { HR_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
@@ -139,7 +140,6 @@ const HRPage = (): JSX.Element => {
             name: 'HR',
             path: '/hr/',
             subCategory: 'Human Resources and Payroll',
-            faqs: HR_FAQS,
             description:
               'Scheduling, payroll, compliance, and time-off management for modern teams.',
           })}
@@ -325,6 +325,8 @@ const HRPage = (): JSX.Element => {
               </div>
             </motion.div>
           </motion.section>
+
+          <FaqSection title="Questions about rtylr HR" faqs={HR_FAQS} />
 
           {/* ── CTA ──────────────────────────────────────────────────────── */}
           <motion.section

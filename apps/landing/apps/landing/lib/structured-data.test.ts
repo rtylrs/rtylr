@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   breadcrumbList,
-  faqPageSchema,
   organizationContactSchema,
   organizationSchema,
   pricingPageSchema,
@@ -88,16 +87,25 @@ describe('productWithBreadcrumbs', () => {
     expect(graph[1]['@type']).toBe('BreadcrumbList');
   });
 
-  it('appends an FAQPage when faqs are supplied', () => {
+  it('never appends an FAQPage', () => {
+    // Google removed the FAQ rich result in May 2026 and the questions
+    // were never rendered on the page, so the markup described content
+    // that did not exist. The questions live in the page now.
+    const out = productWithBreadcrumbs({ name: 'Flow', path: '/flow/', description: 'd' });
+    const graph = out['@graph'] as Array<Record<string, unknown>>;
+    expect(graph).toHaveLength(2);
+    expect(JSON.stringify(out)).not.toContain('FAQPage');
+  });
+
+  it('carries the sub category through to the application node', () => {
     const out = productWithBreadcrumbs({
       name: 'Flow',
       path: '/flow/',
       description: 'd',
-      faqs: [{ question: 'q', answer: 'a' }],
+      subCategory: 'Project and Task Management',
     });
     const graph = out['@graph'] as Array<Record<string, unknown>>;
-    expect(graph).toHaveLength(3);
-    expect(graph[2]['@type']).toBe('FAQPage');
+    expect(graph[0].applicationSubCategory).toBe('Project and Task Management');
   });
 });
 
@@ -115,39 +123,23 @@ describe('organizationContactSchema', () => {
   });
 });
 
-describe('faqPageSchema', () => {
-  it('wraps questions in FAQPage Q&A shape', () => {
-    const out = faqPageSchema([{ question: 'Why?', answer: 'Because.' }]);
-    expect(out['@type']).toBe('FAQPage');
-    const mainEntity = out.mainEntity as Array<{
-      '@type': string;
-      name: string;
-      acceptedAnswer: { text: string };
-    }>;
-    expect(mainEntity[0]['@type']).toBe('Question');
-    expect(mainEntity[0].name).toBe('Why?');
-    expect(mainEntity[0].acceptedAnswer.text).toBe('Because.');
-  });
-});
-
 describe('pricingPageSchema', () => {
-  it('emits Product, breadcrumb and FAQ, and asserts no price', () => {
-    const out = pricingPageSchema({ faqs: [{ question: 'q', answer: 'a' }] });
+  it('emits Product and a breadcrumb, and nothing else', () => {
+    const out = pricingPageSchema();
     const graph = out['@graph'] as Array<Record<string, unknown>>;
-    expect(graph).toHaveLength(3);
-
+    expect(graph).toHaveLength(2);
     expect(graph[0]['@type']).toBe('Product');
     expect(graph[1]['@type']).toBe('BreadcrumbList');
-    expect(graph[2]['@type']).toBe('FAQPage');
   });
 
-  it('carries no Offer or AggregateOffer anywhere in the graph', () => {
+  it('carries no Offer, no AggregateOffer and no FAQPage', () => {
     // /pricing/ shows tier names and inclusions only. The moment a
     // price string appears in this schema again it is a claim the page
     // does not make, so assert its absence rather than its shape.
-    const serialised = JSON.stringify(pricingPageSchema({ faqs: [] }));
+    const serialised = JSON.stringify(pricingPageSchema());
     expect(serialised).not.toContain('Offer');
     expect(serialised).not.toContain('price');
+    expect(serialised).not.toContain('FAQPage');
   });
 });
 

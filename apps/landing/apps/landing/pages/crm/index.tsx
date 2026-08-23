@@ -6,6 +6,7 @@ import { Heart, Mail, Gift, Users, Star, Send, Target, ChevronRight, Plus } from
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { CRM_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
@@ -285,7 +286,6 @@ const CRMPage = (): JSX.Element => {
             name: 'CRM',
             path: '/crm/',
             subCategory: 'Customer Relationship Management',
-            faqs: CRM_FAQS,
             description:
               'Customer profiles, loyalty programs, and campaign tracking that connect to every other app.',
           })}
@@ -606,6 +606,8 @@ const CRMPage = (): JSX.Element => {
               </div>
             </motion.div>
           </motion.section>
+
+          <FaqSection title="Questions about rtylr CRM" faqs={CRM_FAQS} />
 
           {/* ── CTA ─────────────────────────────────────────────────────── */}
           <motion.section

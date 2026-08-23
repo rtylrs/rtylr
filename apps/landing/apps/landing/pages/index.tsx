@@ -2,6 +2,8 @@ import React from 'react';
 import AppLayout from '../components/Layout/AppLayout';
 import MainLayout from '../layouts/Main/MainLayout';
 import HelmetContainer from '../components/HelmetContainer';
+import FaqSection from '../components/FaqSection/FaqSection';
+import { GLOBAL_FAQS } from '../lib/faqs';
 import { webSiteSchema, organizationSchema, productSchema } from '../lib/structured-data';
 import HeroSection from '../components/home/HeroSection/HeroSection';
 import ProductsSection from '../components/home/ProductsSection/ProductsSection';
@@ -56,6 +58,11 @@ const WebsiteContent = (): JSX.Element => (
         <PricingSection />
         <TestimonialsSection />
         <IntegrationsSection />
+        <FaqSection
+          title="Questions about rtylr"
+          intro="The six things buyers ask first. Answers are on the page, not hidden behind markup."
+          faqs={GLOBAL_FAQS}
+        />
         <CTASection />
       </div>
     </MainLayout>

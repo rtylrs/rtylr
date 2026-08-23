@@ -6,6 +6,7 @@ import { Receipt, CreditCard, Split, Wifi, WifiOff } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { POS_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
@@ -67,7 +68,6 @@ const POSPage = (): JSX.Element => {
             name: 'POS',
             path: '/pos/',
             subCategory: 'Point of Sale',
-            faqs: POS_FAQS,
             description:
               'Full-service POS for restaurants and retail. Tickets, splits, tips, and a real offline mode.',
           })}
@@ -331,6 +331,8 @@ const POSPage = (): JSX.Element => {
               </p>
             </motion.div>
           </motion.section>
+
+          <FaqSection title="Questions about rtylr POS" faqs={POS_FAQS} />
 
           {/* ── CTA ──────────────────────────────────────────────────────── */}
           <motion.section

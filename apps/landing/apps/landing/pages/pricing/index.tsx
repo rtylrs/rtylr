@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { cn } from '../../lib/cn';
-import { motion, AnimatePresence } from 'motion/react';
+import React from 'react';
+import { motion } from 'motion/react';
 import { useRouter } from 'next/router';
-import { Check, Minus, ChevronDown } from 'lucide-react';
+import { Check, Minus } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
 import { pricingPageSchema } from '../../lib/structured-data';
+import FaqSection from '../../components/FaqSection/FaqSection';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -35,8 +35,10 @@ const PLAN_FEATURES: PlanFeature[] = [
   { name: 'SLA guarantee', free: false, pro: false, scale: true },
 ];
 
-// Every answer here is also emitted as JSON-LD, from this same array, so
-// the markup cannot drift from what the page shows.
+// These render on the page and are not marked up. There was an FAQPage
+// block built from this same array; it went out in Phase 1 because Google
+// removed the FAQ rich result in May 2026, and because the schema had
+// become the only place the answers existed in the served HTML.
 //
 // Two questions were removed and two rewritten when the placeholder
 // prices came out: "How does per-seat billing work?" described a billing
@@ -98,7 +100,6 @@ const FeatureCell = ({ value }: { value: boolean | string }): React.JSX.Element 
 
 const PricingPage = (): React.JSX.Element => {
   const router = useRouter();
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const handleCta = (action: Plan['ctaAction']): void => {
     if (action === 'contact') {
@@ -110,10 +111,6 @@ const PricingPage = (): React.JSX.Element => {
     navigateExternal(url);
   };
 
-  const toggleFaq = (index: number): void => {
-    setOpenFaq(openFaq === index ? null : index);
-  };
-
   return (
     <AppLayout>
       <MainLayout>
@@ -121,7 +118,7 @@ const PricingPage = (): React.JSX.Element => {
           title="Pricing | rtylr"
           description="rtylr plans and what each one includes: POS, ERP, HR, CRM, Finance and Flow on every tier. Start free with no card. Prices are not published yet, so talk to us for a quote."
           canonical="https://rtylr.com/pricing/"
-          structuredData={pricingPageSchema({ faqs: FAQ_ITEMS })}
+          structuredData={pricingPageSchema()}
         />
 
         <div className={styles.pricingPage}>
@@ -194,52 +191,16 @@ const PricingPage = (): React.JSX.Element => {
             </motion.div>
           </motion.section>
 
-          {/* FAQ */}
-          <motion.section
-            className={styles.faqSection}
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewportOnce}
-            variants={staggerBlur}
-          >
-            <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-              Frequently asked questions
-            </motion.h2>
-            <motion.div className={styles.faqList} variants={staggerBlur}>
-              {FAQ_ITEMS.map((item, index) => (
-                <motion.div
-                  key={index}
-                  className={cn(styles.faqItem, openFaq === index && styles.faqItemOpen)}
-                  variants={blurFadeIn}
-                >
-                  <button
-                    className={styles.faqQuestion}
-                    onClick={() => toggleFaq(index)}
-                    aria-expanded={openFaq === index}
-                  >
-                    <span>{item.question}</span>
-                    <ChevronDown
-                      size={18}
-                      className={cn(styles.faqChevron, openFaq === index && styles.faqChevronOpen)}
-                    />
-                  </button>
-                  <AnimatePresence>
-                    {openFaq === index && (
-                      <motion.div
-                        className={styles.faqAnswer}
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-                      >
-                        <p>{item.answer}</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.section>
+          {/*
+            The hand-rolled accordion this replaces mounted an answer only
+            while it was open, so the answers reached no crawler, no
+            markdown twin and no reader without JavaScript. The single copy
+            of that text in the served bytes was inside the FAQPage JSON-LD,
+            which is now gone, so the visible section is the delivery
+            mechanism. FaqSection uses <details>: every answer is in the
+            DOM, collapsed by CSS.
+          */}
+          <FaqSection title="Frequently asked questions" faqs={FAQ_ITEMS} />
 
           {/* Bottom CTA */}
           <motion.section

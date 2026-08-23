@@ -22,6 +22,7 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { FLOW_FAQS } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
@@ -386,7 +387,6 @@ const FlowPage = (): JSX.Element => {
             name: 'Flow',
             path: '/flow/',
             subCategory: 'Project and Task Management',
-            faqs: FLOW_FAQS,
             description:
               'Kanban boards, automations, and task management that stay connected to every other app.',
           })}
@@ -674,6 +674,8 @@ const FlowPage = (): JSX.Element => {
               </div>
             </motion.div>
           </motion.section>
+
+          <FaqSection title="Questions about rtylr Flow" faqs={FLOW_FAQS} />
 
           {/* ── CTA ──────────────────────────────────────────────────── */}
           <motion.section

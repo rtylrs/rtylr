@@ -149,21 +149,16 @@ export function productWithBreadcrumbs(opts: {
   description: string;
   category?: string;
   subCategory?: string;
-  faqs?: FAQEntry[];
 }): Record<string, unknown> {
-  const graph: Record<string, unknown>[] = [
-    productSchema(opts),
-    breadcrumbList([
-      { label: 'rtylr', path: '/' },
-      { label: opts.name, path: opts.path },
-    ]),
-  ];
-  if (opts.faqs && opts.faqs.length > 0) {
-    graph.push(faqPageSchemaRaw(opts.faqs));
-  }
   return {
     '@context': 'https://schema.org',
-    '@graph': graph,
+    '@graph': [
+      productSchema(opts),
+      breadcrumbList([
+        { label: 'rtylr', path: '/' },
+        { label: opts.name, path: opts.path },
+      ]),
+    ],
   };
 }
 
@@ -173,41 +168,7 @@ export interface FAQEntry {
 }
 
 /**
- * faqPageSchema wraps an FAQEntry[] in the outer @context so it can
- * be passed to HelmetContainer standalone. Use faqPageSchemaRaw when
- * composing into a @graph (it omits the outer @context to avoid
- * nesting warnings in Google's Rich Results tester).
- *
- * Why FAQ schema matters for AI SEO: ChatGPT / Perplexity / AI
- * Overviews all preferentially extract from FAQPage-marked sections
- * because the Q/A shape matches what users typed. Per Princeton's
- * GEO research, structured FAQ markup is one of the highest-ROI
- * optimizations you can make.
- */
-export function faqPageSchema(faqs: FAQEntry[]): Record<string, unknown> {
-  return {
-    '@context': 'https://schema.org',
-    ...faqPageSchemaRaw(faqs),
-  };
-}
-
-function faqPageSchemaRaw(faqs: FAQEntry[]): Record<string, unknown> {
-  return {
-    '@type': 'FAQPage',
-    mainEntity: faqs.map((f) => ({
-      '@type': 'Question',
-      name: f.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: f.answer,
-      },
-    })),
-  };
-}
-
-/**
- * pricingPageSchema describes /pricing/ as a Product, plus the visible
- * FAQ and a breadcrumb.
+ * pricingPageSchema describes /pricing/ as a Product plus a breadcrumb.
  *
  * There is deliberately no Offer and no AggregateOffer. It used to emit
  * both, built from placeholder numbers, which meant the page asserted a
@@ -219,8 +180,11 @@ function faqPageSchemaRaw(faqs: FAQEntry[]): Record<string, unknown> {
  * When real pricing ships, generate the Offer nodes from the same tier
  * data the page renders, in one pass, so the markup cannot drift from
  * the visible text.
+ *
+ * There is also no FAQPage: see the note on faqs.ts. The questions stay
+ * on the page, where a reader and an extractor can both find them.
  */
-export function pricingPageSchema(opts: { faqs: FAQEntry[] }): Record<string, unknown> {
+export function pricingPageSchema(): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -234,7 +198,6 @@ export function pricingPageSchema(opts: { faqs: FAQEntry[] }): Record<string, un
         { label: 'rtylr', path: '/' },
         { label: 'Pricing', path: '/pricing/' },
       ]),
-      faqPageSchemaRaw(opts.faqs),
     ],
   };
 }
