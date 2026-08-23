@@ -252,3 +252,53 @@ export function rgbaFromTriple(triple: string, alpha: number): string {
   const [r, g, b] = parts.length === 3 && parts.every(Number.isFinite) ? parts : [0, 0, 0];
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+/**
+ * The opaque colour an alpha fill actually resolves to over a given ground.
+ *
+ * Needed because a contrast ratio is only meaningful between two opaque
+ * colours. `--accent-muted` is `rgba(accent, 0.12..0.18)`, so the colour a
+ * reader's eye receives is the accent composited over whatever sits behind it,
+ * never the accent itself. Deriving text against the raw accent, or against the
+ * ground while ignoring the fill on top of it, both overstate the contrast.
+ */
+export function compositeOver(hex: string, alpha: number, ground: string): string {
+  const fg = hexToRgb(safeHex(hex, '#000000'));
+  const bg = hexToRgb(safeHex(ground, '#000000'));
+  const a = Math.min(1, Math.max(0, alpha));
+  const mix = (f: number, b: number): number => Math.round(a * f + (1 - a) * b);
+  return rgbToHex({ r: mix(fg.r, bg.r), g: mix(fg.g, bg.g), b: mix(fg.b, bg.b) });
+}
+
+/**
+ * A hue-preserving accent that clears the contrast target against EVERY ground
+ * it might be laid over, not just one.
+ *
+ * `deriveAccentFg` guarantees its result against the single surface it is given.
+ * That guarantee does not transfer: `--accent-fg` was derived against
+ * `palette.card` and then used on `--accent-muted`, where 40 of 56 light-mode
+ * palette/accent combinations measured below 4.5:1 (rtylr#970).
+ *
+ * Rather than pick the "right" ground and be wrong again the next time a
+ * consumer uses the token somewhere new, derive a candidate for each ground and
+ * keep whichever holds up worst-case across all of them.
+ */
+export function deriveAccentFgAcross(accent: string, grounds: readonly string[]): string {
+  const list = grounds.filter((g) => isValidHex(g));
+  if (list.length === 0) return deriveAccentFg(accent, NEAR_WHITE);
+
+  const worstCase = (candidate: string): number =>
+    Math.min(...list.map((g) => contrastRatio(candidate, g)));
+
+  let best = deriveAccentFg(accent, list[0]);
+  let bestScore = worstCase(best);
+  for (const ground of list.slice(1)) {
+    const candidate = deriveAccentFg(accent, ground);
+    const score = worstCase(candidate);
+    if (score > bestScore) {
+      best = candidate;
+      bestScore = score;
+    }
+  }
+  return best;
+}

@@ -48,7 +48,9 @@ export {
 
 export {
   contrastRatio,
+  compositeOver,
   deriveAccentFg,
+  deriveAccentFgAcross,
   deriveOnAccent,
   hexLuminance,
   isValidHex,
