@@ -25,6 +25,7 @@ import (
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 	flowtaskv2 "github.com/voxire/voxie/gen/go/flow/task/v2"
 	flowtimev1 "github.com/voxire/voxie/gen/go/flow/time/v1"
+	flowtimev2 "github.com/voxire/voxie/gen/go/flow/time/v2"
 	flowviewv1 "github.com/voxire/voxie/gen/go/flow/view/v1"
 	flowviewv2 "github.com/voxire/voxie/gen/go/flow/view/v2"
 	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
@@ -53,7 +54,5 @@ var (
 	_ flowsettingv1.SettingServiceServer           = (*SettingAPI)(nil)
 	_ flowtimev1.TimeServiceServer                 = (*WorkTimeAPI)(nil)
 
-	// flow.time.v2 is absent on purpose: module.go does not register it while
-	// WorkTimeAPIV2 implements only listTeamWorkDays. Restore this assertion
-	// together with the registration.
+	_ flowtimev2.TimeServiceServer = (*WorkTimeAPIV2)(nil)
 )

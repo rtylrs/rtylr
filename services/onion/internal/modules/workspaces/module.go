@@ -34,6 +34,7 @@ import (
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 	flowtaskv2 "github.com/voxire/voxie/gen/go/flow/task/v2"
 	flowtimev1 "github.com/voxire/voxie/gen/go/flow/time/v1"
+	flowtimev2 "github.com/voxire/voxie/gen/go/flow/time/v2"
 	flowviewv1 "github.com/voxire/voxie/gen/go/flow/view/v1"
 	flowviewv2 "github.com/voxire/voxie/gen/go/flow/view/v2"
 	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
@@ -176,18 +177,17 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	); err != nil {
 		panic(fmt.Errorf("register flow setting service: %w", err))
 	}
-	// flow.time.v2 is deliberately not registered. WorkTimeAPIV2 implements
-	// only listTeamWorkDays; the contract's other ten RPCs have no handler, so
-	// registering the service panics on OneKit's runtime interface assertion
-	// and takes the whole API down with it. No client calls flow.time.v2 yet
-	// (apps/flow declares the timeV2 client but has no call sites), so leaving
-	// it unserved costs nothing that registering it would not cost more.
-	// Re-register here once WorkTimeAPIV2 is complete.
 	if err := flowprofilev1.RegisterProfileServiceServer(
 		api.NewProfileAPI(m.service),
 		flowprofilev1.WithMux(mux),
 	); err != nil {
 		panic(fmt.Errorf("register flow profile service: %w", err))
+	}
+	if err := flowtimev2.RegisterTimeServiceServer(
+		api.NewWorkTimeAPIV2(m.service),
+		flowtimev2.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register flow time v2 service: %w", err))
 	}
 	if err := flowtimev1.RegisterTimeServiceServer(
 		api.NewWorkTimeAPI(m.service),
