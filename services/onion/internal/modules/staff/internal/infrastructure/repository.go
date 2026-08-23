@@ -803,9 +803,13 @@ func parseDecimal(s string) float64 {
 // Valid check here is belt-and-braces against a driver returning a zero id as
 // valid, which would grant visibility over user 0.
 func (r *Repository) ListManagedUserIDs(ctx context.Context, businessID, managerUserID int64) ([]int64, error) {
+	// The query unions two rule sources (department manager, direct reporting
+	// line), so the same manager and business fill both halves.
 	rows, err := r.queries.ListManagedUserIDs(ctx, sqlc.ListManagedUserIDsParams{
-		UserID:     sql.NullInt64{Int64: managerUserID, Valid: true},
-		BusinessID: businessID,
+		UserID:       sql.NullInt64{Int64: managerUserID, Valid: true},
+		BusinessID:   businessID,
+		UserID_2:     sql.NullInt64{Int64: managerUserID, Valid: true},
+		BusinessID_2: businessID,
 	})
 	if err != nil {
 		return nil, err
