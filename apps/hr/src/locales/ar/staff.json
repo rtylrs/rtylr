@@ -22,5 +22,16 @@
     "goToTraining": "الانتقال إلى التدريب",
     "noBenefits": "لا توجد اشتراكات مزايا نشطة.",
     "goToBenefits": "الانتقال إلى المزايا"
+  },
+  "reportingLines": {
+    "title": "خطوط التبعية",
+    "flowNotice": "تحديد مدير هنا يتيح له أيضًا رؤية مشاريع من يتبعونه في Flow.",
+    "empty": "لا يوجد أعضاء بعد.",
+    "none": "لا مدير",
+    "change": "تغيير",
+    "reportsTo": "يتبع {{name}}",
+    "saved": "تم تحديث خط التبعية",
+    "selectLabel": "اختر مديرًا لـ {{name}}",
+    "changeLabel": "تغيير من يتبعه {{name}}"
   }
 }
