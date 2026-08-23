@@ -12,7 +12,6 @@ require (
 	github.com/google/generative-ai-go v0.20.1
 	github.com/google/uuid v1.6.0
 	github.com/openai/openai-go/v2 v2.0.2
-	github.com/puzpuzpuz/xsync/v3 v3.5.1
 	github.com/redis/go-redis/v9 v9.17.0
 	golang.org/x/crypto v0.51.0
 	google.golang.org/api v0.273.1
