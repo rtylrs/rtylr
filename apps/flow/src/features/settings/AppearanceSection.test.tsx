@@ -244,21 +244,21 @@ describe('Appearance panel accent input', () => {
     expect(screen.getByText('flow.settings.appearance.accentInvalid')).toBeInTheDocument();
   });
 
-  it('resets to the workspace colour by writing null', () => {
+  it('resets to the brand default by writing null', () => {
     storeState.prefs.accent = '#f0805a';
     renderPanel();
     fireEvent.click(
-      screen.getByRole('button', { name: /flow\.settings\.appearance\.accentWorkspace/ })
+      screen.getByRole('button', { name: /flow\.settings\.appearance\.accentReset/ })
     );
     expect(setters.setAccent).toHaveBeenCalledWith(null);
   });
 
-  it('derives from the workspace colour while the accent is null', () => {
+  it('derives from the supplied fallback accent while the accent is null', () => {
     renderPanel();
     expect(previewToken('--accent')).toBe(WORKSPACE_ACCENT);
   });
 
-  it('lets a stored accent override the workspace colour', () => {
+  it('lets a stored accent override the supplied fallback', () => {
     storeState.prefs.accent = '#a3d84b';
     renderPanel();
     expect(previewToken('--accent')).toBe('#a3d84b');

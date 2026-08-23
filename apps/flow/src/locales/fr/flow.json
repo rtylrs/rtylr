@@ -380,7 +380,6 @@
       "accentHex": "Valeur hexadécimale",
       "accentPicker": "Choisir une couleur d'accent personnalisée",
       "accentInvalid": "Saisissez une couleur hexadécimale à six chiffres, par exemple #64c5b9.",
-      "accentWorkspace": "Suivre la couleur de l'espace de travail",
       "density": {
         "compact": "Compact",
         "cozy": "Confortable",
@@ -402,7 +401,8 @@
         "taskTitle": "Rédiger la liste de contrôle du lancement",
         "chip": "En cours",
         "action": "Attribuer"
-      }
+      },
+      "accentReset": "Rétablir la couleur par défaut"
     },
     "shortcuts": {
       "subtitle": "Naviguez rapidement dans Flow sans toucher la souris.",

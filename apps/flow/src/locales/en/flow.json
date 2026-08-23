@@ -380,7 +380,6 @@
       "accentHex": "Hex value",
       "accentPicker": "Pick a custom accent color",
       "accentInvalid": "Enter a six-digit hex color, for example #64c5b9.",
-      "accentWorkspace": "Follow the workspace color",
       "density": {
         "compact": "Compact",
         "cozy": "Cozy",
@@ -402,7 +401,8 @@
         "taskTitle": "Draft the launch checklist",
         "chip": "In progress",
         "action": "Assign"
-      }
+      },
+      "accentReset": "Reset to the brand default"
     },
     "shortcuts": {
       "subtitle": "Move fast through Flow without touching the mouse.",

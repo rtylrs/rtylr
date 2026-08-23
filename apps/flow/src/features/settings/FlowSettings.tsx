@@ -635,7 +635,7 @@ export const AppearanceSection = (): React.JSX.Element => {
             className="block h-4 w-4 shrink-0 rounded-full"
             style={{ background: workspaceAccent }}
           />
-          {t('flow.settings.appearance.accentWorkspace')}
+          {t('flow.settings.appearance.accentReset')}
         </button>
       </div>
 
