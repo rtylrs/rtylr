@@ -1,10 +1,5 @@
-export type BillingCycle = 'monthly' | 'annual';
-
 export interface Plan {
   name: string;
-  price: { monthly: string; annual: string };
-  priceSuffix: string;
-  priceNote: { monthly: string; annual: string };
   description: string;
   features: string[];
   ctaText: string;
@@ -12,41 +7,42 @@ export interface Plan {
   featured?: boolean;
 }
 
+/**
+ * Tier names and what each tier includes. No prices.
+ *
+ * There were prices here, and they were placeholders: $6.99 and $4.99
+ * per seat per month, a 20% annual discount, and transaction-fee caps
+ * in dollars. None of it was final, all of it rendered on the home page
+ * and on /pricing/, and the JSON-LD asserted it to Google as fact. A
+ * price a customer can read is a commitment. These were not.
+ *
+ * When real pricing exists it goes back in this file and nowhere else,
+ * and the /pricing/ Offer schema is generated from these same objects
+ * so the markup cannot disagree with the page.
+ */
 export const PLANS: Plan[] = [
   {
     name: 'Free',
-    price: { monthly: '$0', annual: '$0' },
-    priceSuffix: 'forever',
-    priceNote: {
-      monthly: 'No credit card required · cancel anytime',
-      annual: 'No credit card required · cancel anytime',
-    },
     description: 'Everything you need to run a single location.',
     features: [
       'Up to 10 team members',
       'All 7 apps included',
       '1 location',
-      '0% transaction fees under $10k/mo',
       '1,000 AI credits / month',
+      'No credit card required',
     ],
     ctaText: 'Start free',
     ctaAction: 'register',
   },
   {
     name: 'Pro',
-    price: { monthly: '$6.99', annual: '$4.99' },
-    priceSuffix: '/seat/month',
-    priceNote: {
-      monthly: '$4.99/seat billed annually · up to 30 seats',
-      annual: 'Billed annually · $59.88/seat/year',
-    },
     description: 'Growing teams scaling across multiple locations.',
     features: [
       'Up to 30 team members',
       'Up to 5 locations',
-      '0% transaction fees under $100k/mo',
-      '10,000 AI credits / month + 500 per seat',
-      'Priority email + chat support',
+      '10,000 AI credits / month, plus 500 per seat',
+      'AI assistant',
+      'Priority email and chat support',
     ],
     ctaText: 'Start with Pro',
     ctaAction: 'register-pro',
@@ -54,19 +50,13 @@ export const PLANS: Plan[] = [
   },
   {
     name: 'Scale',
-    price: { monthly: '$4.99', annual: '$2.99' },
-    priceSuffix: '/seat/month',
-    priceNote: {
-      monthly: '$2.99/seat billed annually · unlocks at 30+ active seats',
-      annual: '$2.99/seat billed annually · unlocks at 30+ active seats',
-    },
     description: 'Unlimited seats and every feature unlocked.',
     features: [
       'Unlimited team members',
       'Unlimited locations',
-      '0% transaction fees (no cap)',
-      '50,000 AI credits / month + 1,000 per seat',
-      'SSO, audit logs, dedicated success manager',
+      '50,000 AI credits / month, plus 1,000 per seat',
+      'SSO and audit logs',
+      'Dedicated success manager and SLA',
     ],
     ctaText: 'Talk to sales',
     ctaAction: 'contact',
