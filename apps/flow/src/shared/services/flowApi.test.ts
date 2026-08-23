@@ -25,6 +25,7 @@ const mockClients = vi.hoisted(() => {
     userClient: mockClient(),
     projectV2: mockClient(),
     taskV2: mockClient(),
+    labelV2: mockClient(),
   };
 });
 
@@ -44,6 +45,7 @@ vi.mock('../lib/clients', () => ({
   userClient: mockClients.userClient,
   projectV2: mockClients.projectV2,
   taskV2: mockClients.taskV2,
+  labelV2: mockClients.labelV2,
 }));
 
 import { flowApi } from './flowApi';
@@ -62,6 +64,7 @@ import {
   userClient,
   projectV2,
   taskV2,
+  labelV2,
 } from '../lib/clients';
 
 describe('flowApi OneKit adapters', () => {
@@ -160,8 +163,8 @@ describe('flowApi OneKit adapters', () => {
 
   it('uses generated label, planning, view, and insight clients', async () => {
     await Promise.all([
-      flowApi.listLabels('1'),
-      flowApi.createLabel({ workspace_id: '1', name: 'Bug', color: '#f00' }),
+      flowApi.listLabels(),
+      flowApi.createLabel({ name: 'Bug', color: '#f00' }),
       flowApi.setTaskLabels({ task_id: 9, label_ids: [2, 3] }),
       flowApi.getMilestones({ projectId: '7' }),
       flowApi.createCycle({ name: 'Sprint', workspaceId: '1' }),
@@ -171,13 +174,17 @@ describe('flowApi OneKit adapters', () => {
       flowApi.getRoadmap('1'),
     ]);
 
-    expect(labelClient.listLabels).toHaveBeenCalledWith({ workspaceId: '1' });
-    expect(labelClient.createLabel).toHaveBeenCalledWith({
-      workspaceId: '1',
-      name: 'Bug',
-      color: '#f00',
+    // Labels are one business-wide pool on v2, so no workspace is sent. v1's
+    // createLabel declared workspace_id @required @gt(0), which is why creating
+    // a label 400d once the workspace layer went away.
+    expect(labelV2.listLabels).toHaveBeenCalledWith({
+      page: 1,
+      limit: 200,
+      sortBy: '',
+      sortDir: '',
     });
-    expect(labelClient.setTaskLabels).toHaveBeenCalledWith({
+    expect(labelV2.createLabel).toHaveBeenCalledWith({ name: 'Bug', color: '#f00' });
+    expect(labelV2.setTaskLabels).toHaveBeenCalledWith({
       taskId: '9',
       labelIds: ['2', '3'],
     });

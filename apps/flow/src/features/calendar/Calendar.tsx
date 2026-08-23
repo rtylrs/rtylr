@@ -23,7 +23,7 @@ const Calendar: React.FC = () => {
   const tasks = apiTasks as ApiTask[];
   const navigate = useNavigate();
   const { activeWorkspaceId, projects } = useFlowStore();
-  const { data: labels = [] } = useLabels(activeWorkspaceId || undefined);
+  const { data: labels = [] } = useLabels();
   const createTask = useCreateTask();
   const [cursor, setCursor] = useState(() => new Date());
   const [createModal, setCreateModal] = useState<CreateModal | null>(null);

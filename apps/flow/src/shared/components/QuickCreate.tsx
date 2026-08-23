@@ -58,7 +58,7 @@ export const QuickCreate: React.FC = () => {
     useFlowStore();
   const user = useUserStore((s) => s.user);
   const createTaskMutation = useCreateTask();
-  const { data: labels = [] } = useLabels(activeWorkspaceId || undefined);
+  const { data: labels = [] } = useLabels();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');

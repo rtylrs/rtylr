@@ -154,7 +154,10 @@ describe('TaskDetail cross-workspace sync', () => {
     expect(useFlowStore.getState().activeWorkspaceId).toBe('ws-active');
   });
 
-  it("scopes the labels query to the task's own workspace, not the globally-active one", () => {
+  // Labels are one business-wide pool now, so there is nothing to scope the
+  // query by. This used to assert the opposite: that the query followed the
+  // task's own workspace rather than the active one.
+  it('asks for labels without scoping them to a workspace', () => {
     taskDetailData.data = {
       task: apiTask({ workspaceId: 'ws-9' }),
       subtasks: [],
@@ -164,8 +167,7 @@ describe('TaskDetail cross-workspace sync', () => {
 
     renderTaskDetail();
 
-    expect(useLabelsSpy).toHaveBeenCalledWith('ws-9');
-    expect(useLabelsSpy).not.toHaveBeenCalledWith('ws-active');
+    expect(useLabelsSpy).toHaveBeenCalledWith();
   });
 
   it("scopes the project lookup to the task's own workspace, not the globally-active one", () => {

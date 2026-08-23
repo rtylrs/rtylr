@@ -6,15 +6,11 @@ import { flowApi } from '../../shared/services/flowApi';
 import type { ApiLabel } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 
-export function useLabels(workspaceId?: string) {
+export function useLabels() {
   return useQuery<ApiLabel[]>({
-    queryKey: ['labels', workspaceId],
+    queryKey: ['labels'],
     queryFn: async () => {
-      if (workspaceId) {
-        const res = await unwrap(flowApi.listLabels(workspaceId));
-        return unwrapListResponse<ApiLabel>(res, 'labels');
-      }
-      const res = await unwrap(flowApi.getLabels());
+      const res = await unwrap(flowApi.listLabels());
       return unwrapListResponse<ApiLabel>(res, 'labels');
     },
   });
@@ -24,8 +20,7 @@ export function useCreateLabel() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { workspace_id: string; name: string; color: string }) =>
-      unwrap(flowApi.createLabel(data)),
+    mutationFn: (data: { name: string; color: string }) => unwrap(flowApi.createLabel(data)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['labels'] }),
     onError: () => toast.error(t('toasts.label.createFailed')),
   });
