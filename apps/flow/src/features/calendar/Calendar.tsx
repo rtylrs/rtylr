@@ -94,7 +94,6 @@ const Calendar: React.FC = () => {
     createTask.mutate(
       {
         projectId,
-        workspaceId: activeWorkspaceId,
         title: newTitle.trim(),
         dueDate: createModal!.date,
         labels: [newLabelId],

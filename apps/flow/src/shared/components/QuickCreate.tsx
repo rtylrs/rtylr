@@ -75,7 +75,7 @@ export const QuickCreate: React.FC = () => {
     if (quickCreateOpen) {
       setTitle('');
       setDescription('');
-      const first = projects.find((p) => p.workspaceId === activeWorkspaceId) || projects[0];
+      const first = projects[0];
       setProjectId(first?.id || '');
       setPriority('medium');
       setDueDate('');
@@ -115,7 +115,6 @@ export const QuickCreate: React.FC = () => {
       // access on the envelope would crash at runtime (TS catches it now).
       const res = await createTaskMutation.mutateAsync({
         title: title.trim(),
-        workspaceId: project.workspaceId,
         projectId,
         priority,
         description: description.trim() || undefined,
