@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import {
   Search,
@@ -23,104 +24,31 @@ import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import styles from './support.module.scss';
 
 // ── Searchable article index ───────────────────────────────────────────────
-const TOPICS = [
-  {
-    icon: Rocket,
-    title: 'Getting started',
-    description: 'Create your workspace, configure the first location, invite your team.',
-    articles: [
-      'Create your rtylr workspace',
-      'Add your first location',
-      'Invite team members and assign apps',
-      'Connect your POS hardware',
-    ],
-  },
-  {
-    icon: CreditCard,
-    title: 'Billing and subscriptions',
-    description: 'Plans, invoices, seat proration, upgrades, and cancellation.',
-    articles: [
-      'How per-seat proration is calculated',
-      'Upgrade from Free to Pro or Scale',
-      'Download invoices and billing history',
-      'Update your payment method',
-      'Cancel your subscription',
-    ],
-  },
-  {
-    icon: Users,
-    title: 'Team and permissions',
-    description: 'Roles, app access, seat management, and invites.',
-    articles: [
-      'Assign roles to team members',
-      'Give someone access to a specific app',
-      'Remove a member and what it means for billing',
-      'Set up SSO (Scale plan)',
-    ],
-  },
-  {
-    icon: Settings,
-    title: 'Configuration',
-    description: 'Set up each app for your business type and workflow.',
-    articles: [
-      'Configure POS for a restaurant',
-      'Configure POS for retail',
-      'Set up payroll policies in HR',
-      'Customize invoice templates in Finance',
-      'Build your first CRM segment',
-    ],
-  },
-  {
-    icon: Zap,
-    title: 'Integrations',
-    description: 'Payments, hardware, email, accounting, and API access.',
-    articles: [
-      'Connect Stripe for card processing',
-      'Connect Square Reader hardware',
-      'Export data to QuickBooks or Xero',
-      'Generate an API key',
-      'Webhook reference',
-    ],
-  },
-  {
-    icon: KeyRound,
-    title: 'Security and account',
-    description: 'Passwords, MFA, device sessions, audit logs.',
-    articles: [
-      'Enable multi-factor authentication',
-      'Reset your password',
-      'Review active sessions',
-      'Download audit logs',
-    ],
-  },
-];
+// Icons only. Titles, descriptions and article lists resolve from
+// support.topics, matched by position.
+const TOPIC_ICONS = [Rocket, CreditCard, Users, Settings, Zap, KeyRound];
 
-const CHANNELS = [
-  {
-    icon: MessageSquare,
-    title: 'Live chat',
-    detail: 'In-app, 9am–9pm EST, Mon–Fri',
-    href: null,
-    cta: 'Start a chat from your workspace',
-  },
-  {
-    icon: Mail,
-    title: 'Email support',
-    detail: 'We respond within 24h on weekdays',
-    href: 'mailto:support@voxire.com',
-    cta: 'support@voxire.com',
-  },
-  {
-    icon: Clock,
-    title: 'Status and uptime',
-    detail: 'Live incidents and scheduled maintenance',
-    href: 'https://status.rtylr.com',
-    cta: 'status.rtylr.com',
-    external: true,
-  },
+// Icon, href and target only. Title, detail and cta resolve from
+// support.channels, matched by position. One channel has no href: live
+// chat opens inside the workspace rather than at a URL.
+const CHANNEL_META: { icon: typeof Mail; href: string | null; external?: boolean }[] = [
+  { icon: MessageSquare, href: null },
+  { icon: Mail, href: 'mailto:support@voxire.com' },
+  { icon: Clock, href: 'https://status.rtylr.com', external: true },
 ];
 
 const SupportPage = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const topics = t('support.topics', { returnObjects: true }) as unknown as {
+    title: string;
+    description: string;
+    articles: string[];
+  }[];
+  const channels = t('support.channels', { returnObjects: true }) as unknown as {
+    title: string;
+    detail: string;
+    cta: string;
+  }[];
   const [query, setQuery] = useState('');
 
   // Flatten article list for client-side search
@@ -128,7 +56,7 @@ const SupportPage = (): React.JSX.Element => {
     const q = query.trim().toLowerCase();
     if (!q) return [];
     const hits: { topic: string; article: string }[] = [];
-    for (const topic of TOPICS) {
+    for (const topic of topics) {
       for (const article of topic.articles) {
         if (
           article.toLowerCase().includes(q) ||
@@ -140,14 +68,14 @@ const SupportPage = (): React.JSX.Element => {
       }
     }
     return hits.slice(0, 10);
-  }, [query]);
+  }, [query, topics]);
 
   return (
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Help Center · Guides, Billing & Support | rtylr"
-          description="Getting started, billing, team, configuration, integrations, security, everything you need to use rtylr."
+          title={t('support.meta.title')}
+          description={t('support.meta.description')}
           canonical="https://rtylr.com/support/"
           structuredData={webPageSchema({
             name: 'Help Center',
@@ -167,11 +95,11 @@ const SupportPage = (): React.JSX.Element => {
               variants={staggerBlur}
             >
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
-                HELP CENTER
-              </motion.span>
+              {t('support.hero.eyebrow')}
+            </motion.span>
               <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-                How can we help?
-              </motion.h1>
+              {t('support.hero.title')}
+            </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
                 Search our docs, or browse the topics below. Stuck? Email{' '}
                 <a href="mailto:support@voxire.com">support@voxire.com</a> and we&apos;ll get back
@@ -182,7 +110,7 @@ const SupportPage = (): React.JSX.Element => {
                 <Search size={16} strokeWidth={2} className={styles.searchIcon} />
                 <input
                   type="search"
-                  placeholder="Search articles, topics, or settings…"
+                  placeholder={t('support.hero.searchPlaceholder')}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   className={styles.searchInput}
@@ -231,7 +159,7 @@ const SupportPage = (): React.JSX.Element => {
               viewport={viewportOnce}
               variants={blurFadeIn}
             >
-              Browse by topic
+              {t('support.topicsTitle')}
             </motion.h2>
             <motion.div
               className={styles.topicsGrid}
@@ -240,15 +168,15 @@ const SupportPage = (): React.JSX.Element => {
               viewport={viewportOnce}
               variants={staggerBlur}
             >
-              {TOPICS.map(({ icon: Icon, title, description, articles }) => (
-                <motion.div key={title} className={styles.topicCard} variants={blurFadeIn}>
+              {TOPIC_ICONS.map((Icon, ti) => (
+                <motion.div key={topics[ti].title} className={styles.topicCard} variants={blurFadeIn}>
                   <div className={styles.topicIcon}>
                     <Icon size={20} strokeWidth={1.8} />
                   </div>
-                  <h3 className={styles.topicTitle}>{title}</h3>
-                  <p className={styles.topicDescription}>{description}</p>
+                  <h3 className={styles.topicTitle}>{topics[ti].title}</h3>
+                  <p className={styles.topicDescription}>{topics[ti].description}</p>
                   <ul className={styles.topicArticles}>
-                    {articles.slice(0, 4).map((article) => (
+                    {topics[ti].articles.slice(0, 4).map((article) => (
                       <li key={article}>{article}</li>
                     ))}
                   </ul>
@@ -266,15 +194,15 @@ const SupportPage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.div className={styles.channelsHeader} variants={blurFadeIn}>
-              <span className={styles.sectionEyebrow}>CAN&apos;T FIND IT?</span>
-              <h2 className={styles.sectionTitle}>Three ways to reach us.</h2>
+              <span className={styles.sectionEyebrow}>{t('support.channelsSection.eyebrow')}</span>
+              <h2 className={styles.sectionTitle}>{t('support.channelsSection.title')}</h2>
             </motion.div>
             <motion.div className={styles.channelsGrid} variants={blurFadeIn}>
-              {CHANNELS.map(({ icon: Icon, title, detail, href, cta, external }) => (
-                <div key={title} className={styles.channelCard}>
+              {CHANNEL_META.map(({ icon: Icon, href, external }, ci) => (
+                <div key={channels[ci].title} className={styles.channelCard}>
                   <Icon size={18} strokeWidth={1.8} className={styles.channelIcon} />
-                  <div className={styles.channelTitle}>{title}</div>
-                  <div className={styles.channelDetail}>{detail}</div>
+                  <div className={styles.channelTitle}>{channels[ci].title}</div>
+                  <div className={styles.channelDetail}>{channels[ci].detail}</div>
                   {href ? (
                     <a
                       href={href}
@@ -282,10 +210,10 @@ const SupportPage = (): React.JSX.Element => {
                       target={external ? '_blank' : undefined}
                       rel={external ? 'noopener noreferrer' : undefined}
                     >
-                      {cta} →
+                      {channels[ci].cta} →
                     </a>
                   ) : (
-                    <span className={styles.channelCta}>{cta}</span>
+                    <span className={styles.channelCta}>{channels[ci].cta}</span>
                   )}
                 </div>
               ))}
@@ -302,7 +230,7 @@ const SupportPage = (): React.JSX.Element => {
           >
             <motion.div className={styles.docsInner} variants={blurFadeIn}>
               <Book size={22} strokeWidth={1.8} className={styles.docsIcon} />
-              <h2 className={styles.docsTitle}>Looking for developer docs?</h2>
+              <h2 className={styles.docsTitle}>{t('support.docs.title')}</h2>
               <p className={styles.docsCopy}>
                 Full API reference, webhook events, and SDK usage, at{' '}
                 <a href="https://docs.rtylr.com" target="_blank" rel="noopener noreferrer">
@@ -311,8 +239,8 @@ const SupportPage = (): React.JSX.Element => {
                 . Public for everyone, no login required.
               </p>
               <Link href="/contact" className={styles.docsLinkBtn}>
-                Still need a human? Contact us →
-              </Link>
+              {t('support.docs.link')}
+            </Link>
             </motion.div>
           </motion.section>
         </div>

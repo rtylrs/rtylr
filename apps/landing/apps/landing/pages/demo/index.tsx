@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
@@ -22,6 +23,7 @@ interface FormData {
 }
 
 const DemoPage = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<FormData>({
     email: '',
     country: '',
@@ -47,24 +49,15 @@ const DemoPage = (): React.JSX.Element => {
       .sort((a, b) => a.title.localeCompare(b.title));
   }, []);
 
-  const reasonOptions = [
-    {
-      id: 'enterprise',
-      title: 'Explore Rtylr Enterprise',
-      value: 'Explore Rtylr Enterprise',
-    },
-    {
-      id: 'usecase',
-      title: 'Explore a Rtylr Use Case',
-      value: 'Explore a Rtylr Use Case',
-    },
-    { id: 'partnerships', title: 'Partnerships', value: 'Partnerships' },
-    {
-      id: 'services',
-      title: 'Professional Services',
-      value: 'Professional Services',
-    },
-  ];
+  // The id and value are submitted, so they stay in English: they are
+  // data. Only the visible title is translated.
+  const reasonTitles = t('demo.reasons', { returnObjects: true }) as unknown as string[];
+  const reasonOptions = ['enterprise', 'usecase', 'partnerships', 'services'].map((id, i) => ({
+    id,
+    title: reasonTitles[i],
+    value: id,
+  }));
+
 
   const companySizeOptions = [
     { id: '1-25', title: '1-25', value: '1-25' },
@@ -82,21 +75,21 @@ const DemoPage = (): React.JSX.Element => {
     const newErrors: Partial<FormData> = {};
 
     if (!formData.email) {
-      newErrors.email = 'Work email is required';
+      newErrors.email = t('demo.errors.emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = t('demo.errors.emailInvalid');
     }
 
     if (!formData.country) {
-      newErrors.country = 'Please select your location';
+      newErrors.country = t('demo.errors.country');
     }
 
     if (!formData.reason) {
-      newErrors.reason = 'Please select a reason for demo';
+      newErrors.reason = t('demo.errors.reason');
     }
 
     if (!formData.companySize) {
-      newErrors.companySize = 'Please select company size';
+      newErrors.companySize = t('demo.errors.size');
     }
 
     setErrors(newErrors);
@@ -125,14 +118,13 @@ const DemoPage = (): React.JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Book a demo | rtylr"
-          description="See rtylr running against real data. A live 30-minute walkthrough with someone who actually built it."
+          title={t('demo.meta.title')}
+          description={t('demo.meta.description')}
           canonical="https://rtylr.com/demo/"
           structuredData={contactPageSchema({
-            name: 'Book a Demo',
+            name: t('demo.meta.schemaName'),
             path: '/demo/',
-            description:
-              'See rtylr running against real data. A live 30-minute walkthrough with someone who actually built it.',
+            description: t('demo.meta.description'),
           })}
         />
         <div className={styles.demoPage}>
@@ -148,11 +140,9 @@ const DemoPage = (): React.JSX.Element => {
                 // Keeps the page branded and tells the user the exact
                 // next step so they're not left wondering.
                 <>
-                  <SplitWords as="h1" className={styles.title} text="One more step." delay={0.05} />
+                  <SplitWords as="h1" className={styles.title} text={t('demo.success.title')} delay={0.05} />
                   <p className={styles.subtitle}>
-                    We opened a pre-filled draft in your email app. Hit send and someone from the
-                    rtylr team will reach out within one business day to schedule the walkthrough.
-                    If nothing opened, email us directly at{' '}
+                    {t('demo.success.body')}{' '}
                     <strong>
                       <a href="mailto:sales@rtylr.com">sales@rtylr.com</a>
                     </strong>
@@ -161,19 +151,17 @@ const DemoPage = (): React.JSX.Element => {
                 </>
               ) : (
                 <>
-                  <SplitWords as="h1" className={styles.title} text="See rtylr on your data." delay={0.05} />
+                  <SplitWords as="h1" className={styles.title} text={t('demo.hero.title')} delay={0.05} />
                   <motion.p className={styles.subtitle} variants={blurFadeIn}>
-                    A 30-minute walkthrough with someone who actually built it. Bring your menu,
-                    your SKU list, your PDF of invoices, we&apos;ll show you what the switch would
-                    look like.
+                    {t('demo.hero.subtitle')}
                   </motion.p>
 
                   <motion.form onSubmit={handleSubmit} className={styles.form} variants={blurFadeIn}>
                     <div className={styles.formGroup}>
                       <Input
                         type="email"
-                        label="WORK EMAIL"
-                        placeholder="Your work email"
+                        label={t('demo.form.emailLabel')}
+                        placeholder={t('demo.form.emailPlaceholder')}
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         error={!!errors.email}
@@ -185,8 +173,8 @@ const DemoPage = (): React.JSX.Element => {
 
                     <div className={styles.formGroup}>
                       <Select
-                        label="WHERE ARE YOU LOCATED?"
-                        placeholder="Select your country"
+                        label={t('demo.form.countryLabel')}
+                        placeholder={t('demo.form.countryPlaceholder')}
                         options={countryOptions}
                         value={formData.country}
                         onChange={(value) => setFormData({ ...formData, country: value })}
@@ -199,8 +187,8 @@ const DemoPage = (): React.JSX.Element => {
 
                     <div className={styles.formGroup}>
                       <Select
-                        label="REASON FOR DEMO"
-                        placeholder="Select reason"
+                        label={t('demo.form.reasonLabel')}
+                        placeholder={t('demo.form.reasonPlaceholder')}
                         options={reasonOptions}
                         value={formData.reason}
                         onChange={(value) => setFormData({ ...formData, reason: value })}
@@ -213,8 +201,8 @@ const DemoPage = (): React.JSX.Element => {
 
                     <div className={styles.formGroup}>
                       <Select
-                        label="HOW MANY EMPLOYEES WORK AT YOUR COMPANY?"
-                        placeholder="Select company size"
+                        label={t('demo.form.sizeLabel')}
+                        placeholder={t('demo.form.sizePlaceholder')}
                         options={companySizeOptions}
                         value={formData.companySize}
                         onChange={(value) => setFormData({ ...formData, companySize: value })}

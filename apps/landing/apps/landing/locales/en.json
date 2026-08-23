@@ -1150,5 +1150,147 @@
       "title": "Want in?",
       "apply": "Start an application"
     }
+  },
+  "demo": {
+    "meta": {
+      "title": "Book a demo | rtylr",
+      "description": "See rtylr running against real data. A live 30-minute walkthrough with someone who actually built it.",
+      "schemaName": "Book a Demo"
+    },
+    "hero": {
+      "title": "See rtylr on your data.",
+      "subtitle": "A 30-minute walkthrough with someone who actually built it. Bring your menu, your SKU list, your PDF of invoices, we'll show you what the switch would look like."
+    },
+    "success": {
+      "title": "One more step.",
+      "body": "We opened a pre-filled draft in your email app. Hit send and someone from the rtylr team will reach out within one business day to schedule the walkthrough. If nothing opened, email us directly at"
+    },
+    "form": {
+      "emailLabel": "WORK EMAIL",
+      "emailPlaceholder": "Your work email",
+      "countryLabel": "WHERE ARE YOU LOCATED?",
+      "countryPlaceholder": "Select your country",
+      "reasonLabel": "REASON FOR DEMO",
+      "reasonPlaceholder": "Select reason",
+      "sizeLabel": "HOW MANY EMPLOYEES WORK AT YOUR COMPANY?",
+      "sizePlaceholder": "Select company size"
+    },
+    "reasons": [
+      "Explore Rtylr Enterprise",
+      "Explore a Rtylr Use Case",
+      "Partnerships",
+      "Professional Services"
+    ],
+    "errors": {
+      "emailRequired": "Work email is required",
+      "emailInvalid": "Please enter a valid email address",
+      "country": "Please select your location",
+      "reason": "Please select a reason for demo",
+      "size": "Please select company size"
+    }
+  },
+  "support": {
+    "meta": {
+      "title": "Help Center · Guides, Billing & Support | rtylr",
+      "description": "Getting started, billing, team, configuration, integrations, security, everything in one place."
+    },
+    "hero": {
+      "eyebrow": "HELP CENTER",
+      "title": "How can we help?",
+      "searchPlaceholder": "Search articles, topics, or settings…"
+    },
+    "topicsTitle": "Browse by topic",
+    "topics": [
+      {
+        "articles": [
+          "Create your rtylr workspace",
+          "Add your first location",
+          "Invite team members and assign apps",
+          "Connect your POS hardware"
+        ],
+        "title": "Getting started",
+        "description": "Create your workspace, configure the first location, invite your team."
+      },
+      {
+        "articles": [
+          "How per-seat proration is calculated",
+          "Upgrade from Free to Pro or Scale",
+          "Download invoices and billing history",
+          "Update your payment method",
+          "Cancel your subscription"
+        ],
+        "title": "Billing and subscriptions",
+        "description": "Plans, invoices, seat proration, upgrades, and cancellation."
+      },
+      {
+        "articles": [
+          "Assign roles to team members",
+          "Give someone access to a specific app",
+          "Remove a member and what it means for billing",
+          "Set up SSO (Scale plan)"
+        ],
+        "title": "Team and permissions",
+        "description": "Roles, app access, seat management, and invites."
+      },
+      {
+        "articles": [
+          "Configure POS for a restaurant",
+          "Configure POS for retail",
+          "Set up payroll policies in HR",
+          "Customize invoice templates in Finance",
+          "Build your first CRM segment"
+        ],
+        "title": "Configuration",
+        "description": "Set up each app for your business type and workflow."
+      },
+      {
+        "articles": [
+          "Connect Stripe for card processing",
+          "Connect Square Reader hardware",
+          "Export data to QuickBooks or Xero",
+          "Generate an API key",
+          "Webhook reference"
+        ],
+        "title": "Integrations",
+        "description": "Payments, hardware, email, accounting, and API access."
+      },
+      {
+        "articles": [
+          "Enable multi-factor authentication",
+          "Reset your password",
+          "Review active sessions",
+          "Download audit logs"
+        ],
+        "title": "Security and account",
+        "description": "Passwords, MFA, device sessions, audit logs."
+      }
+    ],
+    "channelsSection": {
+      "eyebrow": "CAN'T FIND IT?",
+      "title": "Three ways to reach us."
+    },
+    "channels": [
+      {
+        "title": "Live chat",
+        "detail": "In-app, 9am–9pm EST, Mon–Fri",
+        "cta": "Start a chat from your workspace"
+      },
+      {
+        "title": "Email support",
+        "detail": "We respond within 24h on weekdays",
+        "href": "mailto:support@voxire.com",
+        "cta": "support@voxire.com"
+      },
+      {
+        "title": "Status and uptime",
+        "detail": "Live incidents and scheduled maintenance",
+        "href": "https://status.rtylr.com",
+        "cta": "status.rtylr.com"
+      }
+    ],
+    "docs": {
+      "title": "Looking for developer docs?",
+      "link": "Still need a human? Contact us →"
+    }
   }
 }
