@@ -69,7 +69,7 @@ func toTimeLogV2(l domain.TimeLog) *flowtaskv2.TimeLog {
 	return &flowtaskv2.TimeLog{
 		Id: l.ID, TaskId: l.TaskID, UserId: l.UserID,
 		DurationMinutes: int64(l.DurationMinutes), Description: l.Description,
-		LoggedAt: l.LoggedAt.Format("2006-01-02T15:04:05Z"),
+		LoggedAt:  l.LoggedAt.Format("2006-01-02T15:04:05Z"),
 		CreatedAt: l.CreatedAt.Format("2006-01-02T15:04:05Z"),
 	}
 }
@@ -80,7 +80,12 @@ func subtasksToCompactV2(tasks []domain.Task) []*flowtaskv2.TaskPayloadCompact {
 		out = append(out, &flowtaskv2.TaskPayloadCompact{
 			Id: tk.ID, Title: tk.Title, Status: tk.Status,
 			Priority: tk.Priority,
-			DueDate:  func() string { if tk.DueDate != nil { return tk.DueDate.Format("2006-01-02") }; return "" }(),
+			DueDate: func() string {
+				if tk.DueDate != nil {
+					return tk.DueDate.Format("2006-01-02")
+				}
+				return ""
+			}(),
 			CreatedAt: tk.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		})
 	}
@@ -89,24 +94,24 @@ func subtasksToCompactV2(tasks []domain.Task) []*flowtaskv2.TaskPayloadCompact {
 
 func toTaskV2(t domain.Task) *flowtaskv2.FlowTask {
 	out := &flowtaskv2.FlowTask{
-		Id:                t.ID,
-		ProjectId:         t.ProjectID,
-		OwnerId:           t.OwnerID,
-		Title:             t.Title,
-		Description:       t.Description,
-		Status:            t.Status,
-		Priority:          t.Priority,
-		ReporterId:        t.ReporterID,
-		SortOrder:         int64(t.SortOrder),
-		Labels:            t.Labels,
-		CreatedAt:         t.CreatedAt.Format("2006-01-02T15:04:05Z"),
-		UpdatedAt:         t.UpdatedAt.Format("2006-01-02T15:04:05Z"),
-		Identifier:        t.Identifier,
-		ProjectName:       t.ProjectName,
-		ProjectColor:      t.ProjectColor,
-		AssigneeName:      t.AssigneeName,
-		AssigneeInitials:  t.AssigneeInitials,
-		SubtaskCount:      t.SubtaskCount,
+		Id:               t.ID,
+		ProjectId:        t.ProjectID,
+		OwnerId:          t.OwnerID,
+		Title:            t.Title,
+		Description:      t.Description,
+		Status:           t.Status,
+		Priority:         t.Priority,
+		ReporterId:       t.ReporterID,
+		SortOrder:        int64(t.SortOrder),
+		Labels:           t.Labels,
+		CreatedAt:        t.CreatedAt.Format("2006-01-02T15:04:05Z"),
+		UpdatedAt:        t.UpdatedAt.Format("2006-01-02T15:04:05Z"),
+		Identifier:       t.Identifier,
+		ProjectName:      t.ProjectName,
+		ProjectColor:     t.ProjectColor,
+		AssigneeName:     t.AssigneeName,
+		AssigneeInitials: t.AssigneeInitials,
+		SubtaskCount:     t.SubtaskCount,
 	}
 	if t.ParentTaskID != nil {
 		v := *t.ParentTaskID
@@ -169,11 +174,11 @@ func (a *TaskAPIV2) ListTasks(ctx context.Context, req *flowtaskv2.ListTasksRequ
 	}
 
 	filter := domain.ListTasksFilter{
-		ProjectID:  req.GetProjectId(),
-		Status:     req.GetStatus(),
-		Priority:   req.GetPriority(),
-		Limit:      int64(req.GetLimit()),
-		Offset:     0,
+		ProjectID: req.GetProjectId(),
+		Status:    req.GetStatus(),
+		Priority:  req.GetPriority(),
+		Limit:     int64(req.GetLimit()),
+		Offset:    0,
 	}
 	if req.GetAssigneeId() != 0 {
 		v := req.GetAssigneeId()

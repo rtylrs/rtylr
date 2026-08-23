@@ -121,8 +121,8 @@ func (s *Service) DeleteWorkDayLine(ctx context.Context, id, ownerID, businessID
 }
 
 // ListWorkTypes returns the workspace's classification tree.
-func (s *Service) ListWorkTypes(ctx context.Context, ownerID, businessID, workspaceID int64, includeArchived bool) ([]domain.WorkType, error) {
-	return s.repo.ListWorkTypes(ctx, ownerID, businessID, workspaceID, includeArchived)
+func (s *Service) ListWorkTypes(ctx context.Context, ownerID, businessID int64, includeArchived bool) ([]domain.WorkType, error) {
+	return s.repo.ListWorkTypes(ctx, ownerID, businessID, includeArchived)
 }
 
 // CreateWorkType adds a node, holding the tree to two levels.
