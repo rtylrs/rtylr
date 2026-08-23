@@ -4,7 +4,6 @@ import { oneKitResult } from '@voxire/api';
 import {
   businessClient,
   projectClient,
-  taskClient,
   notificationClient,
   settingClient,
   userClient,
@@ -554,42 +553,32 @@ export const flowApi = {
 
   // -- Tasks --------------------------------------------------------------
 
-  getTasks: (params: {
-    projectId?: string;
-    workspaceId?: string;
-    status?: ApiTask['status'];
-    assigneeId?: string;
-    activeOnly?: boolean;
-    compact?: boolean;
-  }) => {
-    const q: Record<string, string> = {};
-    if (params.projectId) q.project_id = params.projectId;
-    if (params.workspaceId) q.workspace_id = params.workspaceId;
-    if (params.status) q.status = params.status;
-    if (params.assigneeId) q.assignee_id = params.assigneeId;
-    if (params.activeOnly) q.active_only = 'true';
-    if (params.compact) q.compact = 'true';
-    return flowResult<{ tasks: ApiTask[] }>(() =>
-      taskClient.listTasks({
-        projectId: q.project_id,
-        workspaceId: q.workspace_id,
-        status: q.status,
-        assigneeId: q.assignee_id,
+  // v2 lists business-wide with project_id, status and assignee_id as optional
+  // filters. activeOnly and compact were only ever collected into a local
+  // object and dropped before the request; neither exists on either contract,
+  // so they are gone rather than silently ignored.
+  getTasks: (params: { projectId?: string; status?: ApiTask['status']; assigneeId?: string }) =>
+    flowResult<{ tasks: ApiTask[] }>(() =>
+      taskV2.listTasks({
+        projectId: params.projectId,
+        status: params.status ?? '',
+        assigneeId: params.assigneeId,
       })
-    );
-  },
+    ),
 
-  getMyTasks: () => flowResult<{ tasks: ApiTask[] }>(() => taskClient.getMyTasks({})),
+  getMyTasks: () => flowResult<{ tasks: ApiTask[] }>(() => taskV2.getMyTasks({})),
 
   // Get-or-create the caller's personal "My Tasks" project board and return its
   // ids. Backs the My Tasks landing — we redirect to its project board.
   getMyTasksProject: () =>
-    flowResult<{ projectId: string; workspaceId: string }>(() => taskClient.getMyTasksProject({})),
+    flowResult<{ projectId: string; workspaceId: string }>(() => taskV2.getMyTasksProject({})),
 
-  searchTasks: (q: string, workspaceId: string) =>
-    flowResult<{ tasks: ApiTask[] }>(() => taskClient.searchTasks({ q, workspaceId })),
+  searchTasks: (q: string) =>
+    flowResult<{ tasks: ApiTask[] }>(() =>
+      taskV2.searchTasks({ q, page: 1, limit: 50, sortBy: '', sortDir: '' })
+    ),
 
-  getTaskDetail: (id: string) => flowResult<ApiTaskDetail>(() => taskClient.getTaskDetail({ id })),
+  getTaskDetail: (id: string) => flowResult<ApiTaskDetail>(() => taskV2.getTaskDetail({ id })),
 
   // Backend: project_id is optional. When omitted, the handler resolves the
   // caller's auto-provisioned "Inbox" project in the target workspace
@@ -636,7 +625,7 @@ export const flowApi = {
   // Never collapse it to a truthiness check - flowApi.test pins both directions.
   updateTask: (id: string, data: Partial<ApiTask>) =>
     flowResult<{ message: string }>(() =>
-      taskClient.updateTask({
+      taskV2.updateTask({
         id,
         body: {
           title: data.title ?? '-',
@@ -657,56 +646,50 @@ export const flowApi = {
       })
     ),
 
-  deleteTask: (id: string) => flowResult<{ message: string }>(() => taskClient.deleteTask({ id })),
+  deleteTask: (id: string) => flowResult<{ message: string }>(() => taskV2.deleteTask({ id })),
 
   updateTaskStatus: (id: string, status: ApiTask['status']) =>
-    flowResult<{ message: string }>(() => taskClient.updateTaskStatus({ id, body: { status } })),
+    flowResult<{ message: string }>(() => taskV2.updateTaskStatus({ id, body: { status } })),
 
   addComment: (data: { taskId: string; content: string }) =>
     flowResult<{ comment: ApiTaskComment }>(() =>
-      taskClient.addComment({ taskId: data.taskId, content: data.content })
+      taskV2.addComment({ taskId: data.taskId, content: data.content })
     ),
 
   deleteComment: (id: string) =>
-    flowResult<{ message: string }>(() => taskClient.deleteComment({ id })),
+    flowResult<{ message: string }>(() => taskV2.deleteComment({ id })),
 
   // -- Task Activity ------------------------------------------------------
 
   getTaskActivity: (taskId: string) =>
-    flowResult<{ activity: ApiTaskActivity[] }>(() => taskClient.getTaskActivity({ taskId })),
+    flowResult<{ activity: ApiTaskActivity[] }>(() => taskV2.getTaskActivity({ taskId })),
 
   getSubtasks: (id: string) =>
-    flowResult<{ subtasks: ApiSubtask[] }>(() => taskClient.getSubtasks({ taskId: id })),
+    flowResult<{ subtasks: ApiSubtask[] }>(() => taskV2.getSubtasks({ taskId: id })),
 
   // Backend returns { task_id, message } - not the created subtask itself.
   // Caller must refetch subtasks to see it appear.
-  createSubtask: (
-    taskId: string,
-    data: { title: string; assigneeId?: string; projectId?: string; workspaceId?: string }
-  ) =>
+  // A subtask inherits its parent's placement, so v2 asks only for the parent
+  // and a title. v1 required project_id AND workspace_id, both @gt(0), and this
+  // call site sent "0" for each: creating a subtask 400d on every attempt.
+  createSubtask: (taskId: string, data: { title: string; assigneeId?: string }) =>
     flowResult<{ task_id: number; message: string }>(() =>
-      taskClient.createSubtask({
+      taskV2.createSubtask({
         parentTaskId: String(Number(taskId)),
-        projectId: String(Number(data.projectId ?? 0)),
-        workspaceId: String(Number(data.workspaceId ?? 0)),
         title: data.title,
-        description: '-',
-        priority: 'medium',
-        dueDate: '-',
-        startDate: '-',
         assigneeId: data.assigneeId ? String(Number(data.assigneeId)) : undefined,
       })
     ),
 
   getAttachments: (id: string) =>
-    flowResult<{ attachments: ApiAttachment[] }>(() => taskClient.getAttachments({ taskId: id })),
+    flowResult<{ attachments: ApiAttachment[] }>(() => taskV2.getAttachments({ taskId: id })),
 
   addAttachment: (
     taskId: string,
     data: { name: string; size: number; mime?: string; url?: string }
   ) =>
     flowResult<{ attachment_id: number; message: string }>(() =>
-      taskClient.createAttachment({
+      taskV2.createAttachment({
         taskId,
         name: data.name,
         size: String(data.size),
@@ -715,16 +698,16 @@ export const flowApi = {
     ),
 
   removeAttachment: (taskId: string, attachmentId: string) =>
-    flowResult<{ message: string }>(() => taskClient.deleteAttachment({ id: attachmentId })),
+    flowResult<{ message: string }>(() => taskV2.deleteAttachment({ id: attachmentId })),
 
   // -- Time Logs ----------------------------------------------------------
 
   getTimeLogs: (taskId: string) =>
-    flowResult<{ timeLogs: ApiTimeLog[] }>(() => taskClient.getTimeLogs({ taskId })),
+    flowResult<{ timeLogs: ApiTimeLog[] }>(() => taskV2.getTimeLogs({ taskId })),
 
   logTime: (data: { task_id: number; duration_minutes: number; description?: string }) =>
     flowResult<{ time_log_id: number; message: string }>(() =>
-      taskClient.createTimeLog({
+      taskV2.createTimeLog({
         taskId: String(data.task_id),
         durationMinutes: String(data.duration_minutes),
         description: data.description ?? '-',
@@ -732,7 +715,7 @@ export const flowApi = {
     ),
 
   deleteTimeLog: (id: number) =>
-    flowResult<{ message: string }>(() => taskClient.deleteTimeLog({ id: String(id) })),
+    flowResult<{ message: string }>(() => taskV2.deleteTimeLog({ id: String(id) })),
 
   // -- Labels -------------------------------------------------------------
 
