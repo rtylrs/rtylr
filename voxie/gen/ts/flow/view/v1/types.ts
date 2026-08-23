@@ -5,6 +5,7 @@ export interface View {
 id?: string;
 name?: string;
 icon?: string;
+visibility?: string;
 filters?: string;
 groupBy?: string;
 sortBy?: string;
@@ -17,6 +18,7 @@ return {
 id: v.id,
 name: v.name,
 icon: v.icon,
+visibility: v.visibility,
 filters: v.filters,
 groupBy: v.group_by,
 sortBy: v.sort_by,
@@ -29,6 +31,7 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.name !== undefined) { out.name = v.name; }
 if (v.icon !== undefined) { out.icon = v.icon; }
+if (v.visibility !== undefined) { out.visibility = v.visibility; }
 if (v.filters !== undefined) { out.filters = v.filters; }
 if (v.groupBy !== undefined) { out.group_by = v.groupBy; }
 if (v.sortBy !== undefined) { out.sort_by = v.sortBy; }
@@ -41,6 +44,7 @@ const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
+if (v.visibility !== undefined && v.visibility !== null && !(typeof v.visibility === "string")) violations.push("visibility has invalid type");
 if (v.filters !== undefined && v.filters !== null && !(typeof v.filters === "string")) violations.push("filters has invalid type");
 if (v.groupBy !== undefined && v.groupBy !== null && !(typeof v.groupBy === "string")) violations.push("group_by has invalid type");
 if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
@@ -120,6 +124,7 @@ export interface CreateViewRequest {
 workspaceId?: string;
 name: string;
 icon?: string;
+visibility?: string;
 filters?: string;
 groupBy?: string;
 sortBy?: string;
@@ -132,6 +137,7 @@ return {
 workspaceId: v.workspace_id,
 name: v.name,
 icon: v.icon,
+visibility: v.visibility,
 filters: v.filters,
 groupBy: v.group_by,
 sortBy: v.sort_by,
@@ -144,6 +150,7 @@ const out: Record<string, unknown> = {};
 if (v.workspaceId !== undefined) { out.workspace_id = v.workspaceId; }
 if (v.name !== undefined) { out.name = v.name; }
 if (v.icon !== undefined) { out.icon = v.icon; }
+if (v.visibility !== undefined) { out.visibility = v.visibility; }
 if (v.filters !== undefined) { out.filters = v.filters; }
 if (v.groupBy !== undefined) { out.group_by = v.groupBy; }
 if (v.sortBy !== undefined) { out.sort_by = v.sortBy; }
@@ -157,6 +164,7 @@ if (v.workspaceId !== undefined && v.workspaceId !== null && !(typeof v.workspac
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
 if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
+if (v.visibility !== undefined && v.visibility !== null && !(typeof v.visibility === "string")) violations.push("visibility has invalid type");
 if (v.filters !== undefined && v.filters !== null && !(typeof v.filters === "string")) violations.push("filters has invalid type");
 if (v.groupBy !== undefined && v.groupBy !== null && !(typeof v.groupBy === "string")) violations.push("group_by has invalid type");
 if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
@@ -192,6 +200,7 @@ export interface UpdateViewRequest {
 id?: string;
 name?: string;
 icon?: string;
+visibility?: string;
 filters?: string;
 groupBy?: string;
 sortBy?: string;
@@ -204,6 +213,7 @@ return {
 id: v.id,
 name: v.name,
 icon: v.icon,
+visibility: v.visibility,
 filters: v.filters,
 groupBy: v.group_by,
 sortBy: v.sort_by,
@@ -216,6 +226,7 @@ const out: Record<string, unknown> = {};
 if (v.id !== undefined) { out.id = v.id; }
 if (v.name !== undefined) { out.name = v.name; }
 if (v.icon !== undefined) { out.icon = v.icon; }
+if (v.visibility !== undefined) { out.visibility = v.visibility; }
 if (v.filters !== undefined) { out.filters = v.filters; }
 if (v.groupBy !== undefined) { out.group_by = v.groupBy; }
 if (v.sortBy !== undefined) { out.sort_by = v.sortBy; }
@@ -228,6 +239,7 @@ const violations: string[] = [];
 if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.id))) violations.push("id has invalid type");
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (v.icon !== undefined && v.icon !== null && !(typeof v.icon === "string")) violations.push("icon has invalid type");
+if (v.visibility !== undefined && v.visibility !== null && !(typeof v.visibility === "string")) violations.push("visibility has invalid type");
 if (v.filters !== undefined && v.filters !== null && !(typeof v.filters === "string")) violations.push("filters has invalid type");
 if (v.groupBy !== undefined && v.groupBy !== null && !(typeof v.groupBy === "string")) violations.push("group_by has invalid type");
 if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");

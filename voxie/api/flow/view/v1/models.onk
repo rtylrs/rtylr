@@ -4,6 +4,11 @@ message View {
   id: int64
   name: string
   icon: string
+  /// visibility is "shared" (every colleague in the business can use this view)
+  /// or "private" (only its creator). Empty on create means "shared", which is
+  /// how every view behaved before this field existed, so an older client keeps
+  /// its current behaviour rather than silently making views private.
+  visibility: string
   /// JSON-encoded filter criteria for this saved view.
   filters: string
   group_by: string
@@ -32,6 +37,11 @@ message CreateViewRequest {
   workspace_id: string
   name: string @required
   icon: string
+  /// visibility is "shared" (every colleague in the business can use this view)
+  /// or "private" (only its creator). Empty on create means "shared", which is
+  /// how every view behaved before this field existed, so an older client keeps
+  /// its current behaviour rather than silently making views private.
+  visibility: string
   /// JSON-encoded filter criteria for this saved view.
   filters: string
   group_by: string
@@ -47,6 +57,11 @@ message UpdateViewRequest {
   id: int64
   name: string
   icon: string
+  /// visibility is "shared" (every colleague in the business can use this view)
+  /// or "private" (only its creator). Empty on create means "shared", which is
+  /// how every view behaved before this field existed, so an older client keeps
+  /// its current behaviour rather than silently making views private.
+  visibility: string
   /// JSON-encoded filter criteria for this saved view.
   filters: string
   group_by: string
