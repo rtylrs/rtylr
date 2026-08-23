@@ -200,6 +200,13 @@ export interface SavedView {
   id: string;
   name: string;
   icon: string;
+  /**
+   * 'shared' means every colleague in the business can use this view; 'private'
+   * means only its creator. Optional because the server omits it on older
+   * responses, and an absent value means shared - which is how every view
+   * behaved before the field existed.
+   */
+  visibility?: 'shared' | 'private';
   filters: {
     status?: Task['status'][];
     priority?: Task['priority'][];
