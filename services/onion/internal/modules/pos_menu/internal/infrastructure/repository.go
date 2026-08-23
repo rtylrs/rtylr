@@ -42,6 +42,7 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.MenuI
 			BusinessID: row.BusinessID,
 			Name:       row.Name,
 			SalePrice:  decimalToFloat(row.SalePrice),
+			CostPrice:  decimalToFloat(row.CostPrice),
 			TaxRate:    decimalToFloat(row.TaxRate),
 			Stock:      stockToFloat(row.StockQuantity),
 			IsActive:   row.IsActive.Valid && row.IsActive.Bool,

@@ -148,8 +148,12 @@ func toProtoMenuItem(item domain.MenuItem) *posmenuitemv1.MenuItem {
 		updatedAt = item.UpdatedAt.Format("2006-01-02T15:04:05Z")
 	}
 
+	productId := item.ID
+	unitCost := item.CostPrice
 	return &posmenuitemv1.MenuItem{
 		Id:          item.ID,
+		ProductId:   &productId,
+		UnitCost:    &unitCost,
 		OwnerId:     item.OwnerID,
 		CategoryId:  item.CategoryID,
 		Name:        item.Name,

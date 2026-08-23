@@ -12,6 +12,7 @@ type MenuItem struct {
 	SKU         string    `json:"sku"`
 	Barcode     string    `json:"barcode"`
 	SalePrice   float64   `json:"sale_price"`
+	CostPrice   float64   `json:"cost_price"`
 	TaxRate     float64   `json:"tax_rate"`
 	Description string    `json:"description"`
 	ImageURL    string    `json:"image_url"`
