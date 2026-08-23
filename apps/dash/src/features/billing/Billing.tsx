@@ -161,7 +161,10 @@ const AppPill: React.FC<{ appId: string }> = ({ appId }) => {
   const id = appId as AppId;
   const config = APP_CONFIG[id];
   const name = config?.name ?? appId;
-  const url = APP_URLS[id];
+  // APP_URLS is typed Record<AppId, string>, but `id` is an `as AppId` cast on
+  // an arbitrary string, so an unknown app id lands here with no entry.
+  // Annotated honestly so the guard below is doing something.
+  const url: string | undefined = APP_URLS[id];
 
   const pill = (
     <span
@@ -179,7 +182,7 @@ const AppPill: React.FC<{ appId: string }> = ({ appId }) => {
   if (!url) return pill;
 
   return (
-    <a href={url as string} target="_blank" rel="noopener noreferrer" rel="noreferrer noopener">
+    <a href={url} target="_blank" rel="noopener noreferrer">
       {pill}
     </a>
   );
