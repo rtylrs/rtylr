@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS support_customers (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(320),
     phone VARCHAR(50),
+    customer_id BIGINT NULL,
     total_tickets INT DEFAULT 0,
     last_ticket_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
