@@ -22,7 +22,11 @@ import { getCookie, setCookie, getDefaultCookieDomain } from '../lib/cookies';
 i18next.use(initReactI18next).init({
   resources,
   lng: getCookie('language') || 'en',
-  fallbackLng: 'fr',
+  // en, not fr. This was 'fr', which meant any key missing from the
+  // active locale resolved to French: on an English page, for an
+  // English visitor. en.json is the source of truth and the only
+  // complete locale, so it is the only safe fallback.
+  fallbackLng: 'en',
   compatibilityJSON: 'v3',
   interpolation: {
     escapeValue: false,
