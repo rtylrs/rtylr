@@ -580,6 +580,17 @@ export const AppearanceSection = (): React.JSX.Element => {
             <input
               id="appearance-accent-hex"
               type="text"
+              // dir="ltr" because the value is a hex literal, not prose.
+              //
+              // Without it the field inherits the document direction, and under
+              // RTL the leading '#' is a neutral character that resolves to the
+              // visual right: "#f56d8f" renders as "f56d8f#". Confirmed in the
+              // browser with dir=rtl on the document before this was added.
+              //
+              // The surrounding labels and descriptions are deliberately left to
+              // inherit, since those are prose and should follow the reader's
+              // direction. Only the value is pinned.
+              dir="ltr"
               spellCheck={false}
               autoComplete="off"
               value={hexValue}
