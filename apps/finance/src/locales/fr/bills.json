@@ -21,5 +21,9 @@
   "due": "Échéance",
   "status": "Statut",
   "schedulingSoon": "La planification de la facture arrive bientôt",
-  "schedule": "Planifier"
+  "schedule": "Planifier",
+  "paySelected": "Payer la sélection ({{count}})",
+  "markedPaid": "{{count}} marquée(s) comme payée(s)",
+  "markPaidFailed": "Impossible de marquer {{count}} comme payée(s)",
+  "markPaidPartial": "{{paid}} marquée(s) comme payée(s), {{failed}} en échec"
 }

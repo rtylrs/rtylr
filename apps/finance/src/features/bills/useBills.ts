@@ -19,6 +19,12 @@ export function useBills() {
           id: b.id,
           supplier: b.supplierId,
           vendor: b.description,
+          // Carried so mark-as-paid can send the record back unchanged apart
+          // from status. Without these the update path had to substitute
+          // empty strings for @required fields.
+          supplierName: b.supplierName,
+          currency: b.currency,
+          description: b.description,
           amount: b.amount,
           status: b.status,
           dueDate: b.dueDate,

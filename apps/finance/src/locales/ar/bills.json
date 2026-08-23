@@ -21,5 +21,9 @@
   "due": "الاستحقاق",
   "status": "الحالة",
   "schedulingSoon": "جدولة الفاتورة قريبةً",
-  "schedule": "جدولة"
+  "schedule": "جدولة",
+  "paySelected": "دفع المحدد ({{count}})",
+  "markedPaid": "تم تعليم {{count}} كمدفوعة",
+  "markPaidFailed": "تعذّر تعليم {{count}} كمدفوعة",
+  "markPaidPartial": "تم تعليم {{paid}} كمدفوعة، وفشل {{failed}}"
 }

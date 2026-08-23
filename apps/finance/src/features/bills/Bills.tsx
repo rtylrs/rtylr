@@ -12,6 +12,7 @@ import Modal from '../../shared/components/Modal';
 import CurrencyInput from '../../shared/components/CurrencyInput';
 import { useBills } from './useBills';
 import { useCreateBill, useUpdateBill } from '../../shared/hooks/queries/useBills';
+import type { UpdateBillBody } from '@voxire/voxie/finance/bill/v1/types';
 import { useErpReceivedPurchaseOrders } from '../../shared/hooks/queries/useErpReceivedPurchaseOrders';
 import { useSettings } from '../../shared/lib/settings';
 import {
@@ -176,27 +177,69 @@ const Bills: React.FC = () => {
     });
 
   const updateBill = useUpdateBill();
-  const payAll = (): void => {
+
+  /**
+   * A positive int64 as the wire carries it. Anything else means "no supplier",
+   * and the contract is explicit that a caller must not invent one: an empty
+   * string fails the int64 pattern before the request leaves the browser.
+   */
+  const supplierIdOrNone = (value: unknown): string | undefined =>
+    typeof value === 'string' && /^[1-9][0-9]*$/.test(value) ? value : undefined;
+
+  /**
+   * The stored record, with status moved to paid and nothing else changed.
+   *
+   * UpdateBillBody marks currency, dueDate, status and description @required,
+   * so every one of them has to be sent on every update. Sending a substitute
+   * for a value we failed to read back does not satisfy the contract, it
+   * overwrites the record: description is where this app keeps the vendor name.
+   */
+  const paidBody = (b: (typeof data)[number]): UpdateBillBody => {
+    const supplierId = supplierIdOrNone(b.supplier);
+    return {
+      ...(supplierId ? { supplierId } : {}),
+      ...(typeof b.amount === 'number' ? { amount: b.amount } : {}),
+      currency: b.currency ?? '',
+      dueDate: b.dueDate ?? '',
+      status: 'paid',
+      description: b.description ?? '',
+    };
+  };
+
+  const payAll = async (): Promise<void> => {
     const ids = Array.from(selected);
-    ids.forEach((id) => {
-      const b = data.find((x) => x.id === id);
-      updateBill.mutate({
-        id,
-        body: {
-          supplierId: typeof b?.supplier === 'string' ? b.supplier : '',
-          amount: typeof b?.amount === 'number' ? b.amount : undefined,
-          currency: typeof b?.currency === 'string' ? b.currency : 'USD',
-          dueDate: typeof b?.dueDate === 'string' ? b.dueDate : '',
-          status: 'paid',
-          description:
-            typeof (b as Record<string, unknown>)?.description === 'string'
-              ? String((b as Record<string, unknown>).description)
-              : '',
-        },
-      });
+    const results = await Promise.all(
+      ids.map(async (id) => {
+        const b = data.find((x) => x.id === id);
+        if (!b) return { id, ok: false };
+        try {
+          await updateBill.mutateAsync({ id, body: paidBody(b) });
+          return { id, ok: true };
+        } catch {
+          // useUpdateBill already surfaces the per-item reason.
+          return { id, ok: false };
+        }
+      })
+    );
+
+    const paid = results.filter((r) => r.ok).map((r) => r.id);
+    const failed = results.length - paid.length;
+
+    // Only the rows that actually moved leave the selection, so a retry does
+    // not require re-picking the ones that failed.
+    setSelected((prev) => {
+      const next = new Set(prev);
+      paid.forEach((id) => next.delete(id));
+      return next;
     });
-    toast.success(t('bills.markedPaid', { count: ids.length }));
-    setSelected(new Set());
+
+    if (failed === 0) {
+      toast.success(t('bills.markedPaid', { count: paid.length }));
+    } else if (paid.length === 0) {
+      toast.error(t('bills.markPaidFailed', { count: failed }));
+    } else {
+      toast.error(t('bills.markPaidPartial', { paid: paid.length, failed }));
+    }
   };
 
   return (
@@ -217,14 +260,14 @@ const Bills: React.FC = () => {
         actions={
           <>
             {selected.size > 0 && (
-              <button type="button" style={primaryBtn} onClick={payAll}>
-                <CheckCircle size={13} /> Pay selected ({selected.size})
+              <button type="button" style={primaryBtn} onClick={() => void payAll()}>
+                <CheckCircle size={13} /> {t('bills.paySelected', { count: selected.size })}
               </button>
             )}
             <button
               type="button"
               style={ghostBtn}
-              aria-label="New Bill"
+              aria-label={t('bills.new')}
               onClick={() => setShowCreate(true)}
             >
               <Plus size={13} /> {t('bills.new')}
