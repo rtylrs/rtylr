@@ -10,7 +10,19 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: true,
+  // Files run in parallel, tests within a file run in order.
+  //
+  // fullyParallel: true put every test in its own worker, which on a
+  // 10-core machine means five Chromium contexts at once. The consent spec
+  // then failed non-deterministically with `Tearing down "context" exceeded
+  // the test timeout`: not an assertion failure, resource starvation during
+  // teardown. Same spec, same build, --workers=1: 6 passed in 6.7 seconds.
+  // Five workers: one to three passed with 60-second timeouts.
+  //
+  // Serialising within a file is also the honest semantics for the consent
+  // tests, which all drive one shared global (window.dataLayer) through
+  // cookies and clicks. Three spec files still parallelise.
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
