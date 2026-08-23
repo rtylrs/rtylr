@@ -108,15 +108,16 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 	}
 
 	res, err := r.queries.CreateBill(ctx, sqlc.CreateBillParams{
-		OwnerID:      businessID,
-		BusinessID:   businessID,
-		SupplierID:   sql.NullInt64{Int64: input.SupplierID, Valid: input.SupplierID != 0},
-		SupplierName: input.SupplierName,
-		Amount:      formatAmount(input.Amount),
-		Currency:    nullableString(currency),
-		DueDate:     dueDate,
-		Status:      sqlc.NullFinanceBillsStatus{FinanceBillsStatus: sqlc.FinanceBillsStatus(status), Valid: true},
-		Description: nullableString(input.Description),
+		OwnerID:         businessID,
+		BusinessID:      businessID,
+		SupplierID:      sql.NullInt64{Int64: input.SupplierID, Valid: input.SupplierID != 0},
+		SupplierName:    input.SupplierName,
+		PurchaseOrderID: nullableInt64FromInput(input.PurchaseOrderID),
+		Amount:          formatAmount(input.Amount),
+		Currency:        nullableString(currency),
+		DueDate:         dueDate,
+		Status:          sqlc.NullFinanceBillsStatus{FinanceBillsStatus: sqlc.FinanceBillsStatus(status), Valid: true},
+		Description:     nullableString(input.Description),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create bill", logger.Error(err))
@@ -134,15 +135,16 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 	}
 
 	err = r.queries.UpdateBill(ctx, sqlc.UpdateBillParams{
-		SupplierID:   sql.NullInt64{Int64: input.SupplierID, Valid: input.SupplierID != 0},
-		SupplierName: input.SupplierName,
-		Amount:      formatAmount(input.Amount),
-		Currency:    nullableString(input.Currency),
-		DueDate:     dueDate,
-		Status:      sqlc.NullFinanceBillsStatus{FinanceBillsStatus: sqlc.FinanceBillsStatus(input.Status), Valid: input.Status != ""},
-		Description: nullableString(input.Description),
-		ID:          id,
-		BusinessID:  businessID,
+		SupplierID:      sql.NullInt64{Int64: input.SupplierID, Valid: input.SupplierID != 0},
+		SupplierName:    input.SupplierName,
+		PurchaseOrderID: nullableInt64FromInput(input.PurchaseOrderID),
+		Amount:          formatAmount(input.Amount),
+		Currency:        nullableString(input.Currency),
+		DueDate:         dueDate,
+		Status:          sqlc.NullFinanceBillsStatus{FinanceBillsStatus: sqlc.FinanceBillsStatus(input.Status), Valid: input.Status != ""},
+		Description:     nullableString(input.Description),
+		ID:              id,
+		BusinessID:      businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update bill", logger.Error(err))
@@ -189,17 +191,19 @@ func (r *Repository) CountByStatus(ctx context.Context, businessID int64) (map[s
 
 func billFromSqlc(row sqlc.FinanceBill) domain.Bill {
 	return domain.Bill{
-		ID:          row.ID,
-		OwnerID:     row.OwnerID,
-		BusinessID:  row.BusinessID,
-		SupplierID:  toInt64(row.SupplierID),
-		Amount:      parseFloat(row.Amount),
-		Currency:    nullStr(row.Currency),
-		DueDate:     row.DueDate,
-		Status:      string(row.Status.FinanceBillsStatus),
-		Description: nullStr(row.Description),
-		CreatedAt:   nullTime(row.CreatedAt),
-		UpdatedAt:   nullTime(row.UpdatedAt),
+		ID:              row.ID,
+		OwnerID:         row.OwnerID,
+		BusinessID:      row.BusinessID,
+		SupplierID:      toInt64(row.SupplierID),
+		SupplierName:    row.SupplierName,
+		PurchaseOrderID: nullableInt64(row.PurchaseOrderID),
+		Amount:          parseFloat(row.Amount),
+		Currency:        nullStr(row.Currency),
+		DueDate:         row.DueDate,
+		Status:          string(row.Status.FinanceBillsStatus),
+		Description:     nullStr(row.Description),
+		CreatedAt:       nullTime(row.CreatedAt),
+		UpdatedAt:       nullTime(row.UpdatedAt),
 	}
 }
 
@@ -273,4 +277,44 @@ func parseFloatAny(v any) money.Amount {
 	default:
 		return parseFloat(fmt.Sprintf("%v", val))
 	}
+}
+
+func nullableInt64(v sql.NullInt64) *int64 {
+	if !v.Valid {
+		return nil
+	}
+	out := v.Int64
+	return &out
+}
+
+func nullableInt64FromInput(v *int64) sql.NullInt64 {
+	if v == nil {
+		return sql.NullInt64{}
+	}
+	return sql.NullInt64{Int64: *v, Valid: true}
+}
+
+// ListByPurchaseOrder pages every bill referencing one ERP order.
+func (r *Repository) ListByPurchaseOrder(ctx context.Context, businessID, purchaseOrderID int64) ([]domain.Bill, error) {
+	rows, err := r.queries.ListBillsByPurchaseOrder(ctx, sqlc.ListBillsByPurchaseOrderParams{
+		BusinessID:      businessID,
+		PurchaseOrderID: sql.NullInt64{Int64: purchaseOrderID, Valid: true},
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to list bills by purchase order", logger.Any("business_id", businessID), logger.Any("purchase_order_id", purchaseOrderID), logger.Error(err))
+		return nil, err
+	}
+	out := make([]domain.Bill, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, billFromSqlc(row))
+	}
+	return out, nil
+}
+
+// CountByPurchaseOrder reports how many bills reference one ERP order.
+func (r *Repository) CountByPurchaseOrder(ctx context.Context, businessID, purchaseOrderID int64) (int64, error) {
+	return r.queries.CountBillsByPurchaseOrder(ctx, sqlc.CountBillsByPurchaseOrderParams{
+		BusinessID:      businessID,
+		PurchaseOrderID: sql.NullInt64{Int64: purchaseOrderID, Valid: true},
+	})
 }
