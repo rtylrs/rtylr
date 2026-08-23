@@ -209,7 +209,7 @@ func TestWorkspaces_ListViews_PaginationAndTotal(t *testing.T) {
 		}(viewID))
 	}
 
-	page1, total1, err := repo.ListViews(ctx, testutil.BusinessID, wsID, 2, 0)
+	page1, total1, err := repo.ListViews(ctx, testutil.BusinessID, wsID, testutil.OwnerID, 2, 0)
 	if err != nil {
 		t.Fatalf("ListViews page1: %v", err)
 	}
@@ -220,7 +220,7 @@ func TestWorkspaces_ListViews_PaginationAndTotal(t *testing.T) {
 		t.Fatalf("expected 2 views on page1, got %d", len(page1))
 	}
 
-	page2, total2, err := repo.ListViews(ctx, testutil.BusinessID, wsID, 2, 2)
+	page2, total2, err := repo.ListViews(ctx, testutil.BusinessID, wsID, testutil.OwnerID, 2, 2)
 	if err != nil {
 		t.Fatalf("ListViews page2: %v", err)
 	}
@@ -238,7 +238,7 @@ func TestWorkspaces_ListViews_PaginationAndTotal(t *testing.T) {
 		}
 	}
 
-	page3, total3, err := repo.ListViews(ctx, testutil.BusinessID, wsID, 2, 4)
+	page3, total3, err := repo.ListViews(ctx, testutil.BusinessID, wsID, testutil.OwnerID, 2, 4)
 	if err != nil {
 		t.Fatalf("ListViews page3: %v", err)
 	}
