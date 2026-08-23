@@ -572,3 +572,68 @@ func TestListDistinctOwnerIDs_NoError(t *testing.T) {
 	}
 	_ = ids
 }
+
+// Range semantics per voxie#47: a request is included when it starts on/before
+// ToDate and ends on/after FromDate, so multi-day leave crossing either
+// boundary is never missed (rtylr#838's warning depends on that).
+func TestListLeaveRequests_DateRangeOverlap(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	name := fmt.Sprintf("Range overlap %d", time.Now().UnixNano())
+
+	lt, err := repo.CreateLeaveType(ctx, testutil.OwnerID, domain.LeaveTypeRecord{
+		Name:             name,
+		RequiresApproval: false,
+		IsActive:         true,
+	})
+	if err != nil {
+		t.Fatalf("CreateLeaveType: %v", err)
+	}
+	var requestIDs []int64
+	t.Cleanup(func() {
+		for _, requestID := range requestIDs {
+			_, _ = db.ExecContext(ctx, "DELETE FROM hr_leave_requests WHERE id = ?", requestID)
+		}
+		_, _ = db.ExecContext(ctx, "DELETE FROM hr_leave_types WHERE id = ?", lt.ID)
+	})
+
+	for _, request := range []domain.LeaveRequestRecord{
+		{EmployeeID: 4101, LeaveTypeID: lt.ID, StartDate: "2035-04-01", EndDate: "2035-04-10", TotalDays: 10, Status: domain.LeaveStatusApproved}, // spans the window
+		{EmployeeID: 4101, LeaveTypeID: lt.ID, StartDate: "2035-05-01", EndDate: "2035-05-02", TotalDays: 2, Status: domain.LeaveStatusApproved},  // after it
+		{EmployeeID: 4101, LeaveTypeID: lt.ID, StartDate: "2035-03-01", EndDate: "2035-03-02", TotalDays: 2, Status: domain.LeaveStatusApproved},  // before it
+	} {
+		created, createErr := repo.CreateLeaveRequest(ctx, testutil.OwnerID, request)
+		if createErr != nil {
+			t.Fatalf("CreateLeaveRequest: %v", createErr)
+		}
+		requestIDs = append(requestIDs, created.ID)
+	}
+
+	from, to := "2035-04-05", "2035-04-06"
+	requests, total, err := repo.ListLeaveRequests(ctx, testutil.OwnerID, domain.ListLeaveRequestsParams{
+		EmployeeID: 4101,
+		Status:     domain.LeaveStatusApproved,
+		FromDate:   &from,
+		ToDate:     &to,
+		Limit:      100,
+	})
+	if err != nil {
+		t.Fatalf("ListLeaveRequests with range: %v", err)
+	}
+	if total != 1 || len(requests) != 1 || requests[0].StartDate != "2035-04-01" {
+		t.Fatalf("expected exactly the spanning request, got total=%d len=%d", total, len(requests))
+	}
+
+	all, totalAll, err := repo.ListLeaveRequests(ctx, testutil.OwnerID, domain.ListLeaveRequestsParams{
+		EmployeeID: 4101,
+		Status:     domain.LeaveStatusApproved,
+		Limit:      100,
+	})
+	if err != nil {
+		t.Fatalf("ListLeaveRequests without range: %v", err)
+	}
+	if totalAll != 3 || len(all) != 3 {
+		t.Fatalf("open-ended range should return all three, got total=%d len=%d", totalAll, len(all))
+	}
+}
