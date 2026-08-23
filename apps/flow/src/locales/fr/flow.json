@@ -447,12 +447,12 @@
       "emptyDescription": "Les projets archivés apparaissent ici jusqu'à leur suppression définitive.",
       "refreshCta": "Actualiser",
       "selectAll": "Tout sélectionner ({{count}})",
-      "purgeSelected": "Supprimer {{count}} définitivement",
+      "purgeSelected": "Supprimer définitivement ({{count}})",
       "selectProject": "Sélectionner {{name}}",
-      "purgesOn": "Supprimé le {{date}}",
+      "purgesOn": "Suppression le {{date}}",
       "truncated": "{{shown}} sur {{total}} affichés. Restaurez ou supprimez-en pour voir le reste.",
       "purgeTitle": "Suppression définitive",
-      "purgeConfirm": "Cette action supprime définitivement {{count}} projet(s) et tout leur contenu. Elle est irréversible.",
+      "purgeConfirm": "Cette action supprime définitivement les projets sélectionnés ({{count}}) et tout leur contenu. Elle est irréversible.",
       "purgeKeyword": "supprimer",
       "retentionNote": "Les projets sont supprimés automatiquement à la fin de leur période de conservation."
     }

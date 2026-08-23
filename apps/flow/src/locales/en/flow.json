@@ -452,7 +452,7 @@
       "purgesOn": "Deletes {{date}}",
       "truncated": "Showing {{shown}} of {{total}}. Restore or delete some to see the rest.",
       "purgeTitle": "Delete permanently",
-      "purgeConfirm": "This permanently deletes {{count}} project(s) and everything inside them. This cannot be undone.",
+      "purgeConfirm": "This permanently deletes the selected projects ({{count}}) and everything inside them. This cannot be undone.",
       "purgeKeyword": "delete",
       "retentionNote": "Projects are deleted automatically once their retention period ends."
     }
