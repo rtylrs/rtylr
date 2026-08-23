@@ -12,7 +12,6 @@ const mockClients = vi.hoisted(() => {
   return {
     businessClient: mockClient(),
     projectClient: mockClient(),
-    taskClient: mockClient(),
     labelClient: mockClient(),
     milestoneV2: mockClient(),
     cycleV2: mockClient(),
@@ -30,7 +29,6 @@ const mockClients = vi.hoisted(() => {
 vi.mock('../lib/clients', () => ({
   businessClient: mockClients.businessClient,
   projectClient: mockClients.projectClient,
-  taskClient: mockClients.taskClient,
   labelClient: mockClients.labelClient,
   milestoneV2: mockClients.milestoneV2,
   cycleV2: mockClients.cycleV2,
@@ -48,7 +46,6 @@ import { flowApi } from './flowApi';
 import {
   businessClient,
   projectClient,
-  taskClient,
   labelClient,
   milestoneV2,
   cycleV2,
@@ -126,16 +123,15 @@ describe('flowApi OneKit adapters', () => {
 
   it('keeps task boundary conversions at the generated client edge', async () => {
     await Promise.all([
-      flowApi.getTasks({ projectId: '7', workspaceId: '1', status: 'todo' }),
+      flowApi.getTasks({ projectId: '7', status: 'todo' }),
       flowApi.createTask({ projectId: '7', title: 'Task' }),
       flowApi.updateTask('9', { archived: false, status: 'done' }),
       flowApi.updateTaskStatus('9', 'done'),
       flowApi.deleteTask('9'),
     ]);
 
-    expect(taskClient.listTasks).toHaveBeenCalledWith({
+    expect(taskV2.listTasks).toHaveBeenCalledWith({
       projectId: '7',
-      workspaceId: '1',
       status: 'todo',
       assigneeId: undefined,
     });
@@ -151,8 +147,8 @@ describe('flowApi OneKit adapters', () => {
       estimatedHours: undefined,
       labels: undefined,
     });
-    expect(taskClient.updateTaskStatus).toHaveBeenCalledWith({ id: '9', body: { status: 'done' } });
-    expect(taskClient.deleteTask).toHaveBeenCalledWith({ id: '9' });
+    expect(taskV2.updateTaskStatus).toHaveBeenCalledWith({ id: '9', body: { status: 'done' } });
+    expect(taskV2.deleteTask).toHaveBeenCalledWith({ id: '9' });
   });
 
   it('uses generated label, planning, view, and insight clients', async () => {

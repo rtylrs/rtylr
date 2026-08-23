@@ -40,8 +40,7 @@ interface CommandItem {
 export const CommandBar: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { commandBarOpen, setCommandBarOpen, setQuickCreateOpen, activeWorkspaceId } =
-    useFlowStore();
+  const { commandBarOpen, setCommandBarOpen, setQuickCreateOpen } = useFlowStore();
   const { data: apiTasks = [] } = useTasks({});
   const { data: apiProjects = [] } = useProjects();
   const tasks = apiTasks.map(apiTaskToTask);
@@ -57,12 +56,12 @@ export const CommandBar: React.FC = () => {
   }, [query]);
 
   const { data: searchResults } = useQuery({
-    queryKey: ['task-search', debouncedQuery, activeWorkspaceId],
-    queryFn: () =>
-      unwrap(flowApi.searchTasks(debouncedQuery, activeWorkspaceId || '')).then(
-        (r) => r.tasks ?? []
-      ),
-    enabled: debouncedQuery.trim().length >= 3 && !!activeWorkspaceId,
+    queryKey: ['task-search', debouncedQuery],
+    queryFn: () => unwrap(flowApi.searchTasks(debouncedQuery)).then((r) => r.tasks ?? []),
+    // Search is business-wide now. This also required a non-empty workspace id,
+    // which has not existed since that layer was stubbed out, so the command
+    // bar's task search never ran at all.
+    enabled: debouncedQuery.trim().length >= 3,
   });
 
   useEffect(() => {

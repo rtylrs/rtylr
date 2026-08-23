@@ -2,7 +2,6 @@ import { createOneKitClient } from '@voxire/api';
 import { BusinessServiceClient } from '@voxire/voxie/hub/business/v1/client';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
 import { ProjectServiceClient } from '@voxire/voxie/flow/project/v1/client';
-import { TaskServiceClient } from '@voxire/voxie/flow/task/v1/client';
 import { NotificationServiceClient } from '@voxire/voxie/flow/notification/v1/client';
 import { SettingServiceClient } from '@voxire/voxie/flow/setting/v1/client';
 // v2: business-scoped contracts (workspace removal)
@@ -20,7 +19,6 @@ import { ProfileServiceClient as ProfileClient } from '@voxire/voxie/flow/profil
 export const businessClient = createOneKitClient(BusinessServiceClient, 'flow');
 export const userClient = createOneKitClient(UserServiceClient, 'flow');
 export const projectClient = createOneKitClient(ProjectServiceClient, 'flow');
-export const taskClient = createOneKitClient(TaskServiceClient, 'flow');
 export const notificationClient = createOneKitClient(NotificationServiceClient, 'flow');
 export const settingClient = createOneKitClient(SettingServiceClient, 'flow');
 
