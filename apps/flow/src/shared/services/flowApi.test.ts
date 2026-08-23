@@ -206,11 +206,24 @@ describe('flowApi OneKit adapters', () => {
       endDate: undefined,
     });
     expect(viewV2.listViews).toHaveBeenCalledWith({ page: 1, limit: 200 });
+
     // Insights, team workload and the roadmap are business-wide on v2 and take
     // no parameters at all.
     expect(insightsV2.getInsights).toHaveBeenCalledWith({});
     expect(insightsV2.getTeamWorkload).toHaveBeenCalledWith({});
     expect(insightsV2.getRoadmap).toHaveBeenCalledWith({});
+  });
+
+  // This is the seam that was broken and untested. The S2 backend chain landed on
+  // flow/view/v1 while this client is v2, so `visibility` was dropped at the wire
+  // and the toggle did nothing. The test one layer up passed the whole time,
+  // because it mocks flowApi itself and never checks what flowApi sends onward.
+  it('sends visibility through to the v2 view client', async () => {
+    await flowApi.updateView('7', { name: 'Mine', visibility: 'private' });
+
+    expect(viewV2.updateView).toHaveBeenCalledWith(
+      expect.objectContaining({ id: '7', name: 'Mine', visibility: 'private' })
+    );
   });
 
   it('encodes saved-view filters to the wire JSON string and decodes them back', async () => {

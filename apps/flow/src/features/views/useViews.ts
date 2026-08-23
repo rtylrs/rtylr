@@ -34,8 +34,18 @@ export function useCreateView() {
 export function useUpdateView() {
   const qc = useQueryClient();
   return useMutation({
+    // The v2 update is a REPLACEMENT: onion#906 made the handler honour every
+    // field it receives, and an unsent field arrives as "". So a partial patch
+    // would blank whatever it omitted - renaming a view would wipe its filters.
+    //
+    // Merge the patch over the cached view and send the whole thing. The list
+    // query is the same data the caller is looking at, so it is the right
+    // baseline; if it is somehow absent we send the patch alone rather than
+    // inventing values.
     mutationFn: ({ id, data }: { id: string; data: Partial<SavedView> }): Promise<void> => {
-      return unwrap(flowApi.updateView(id, data as Partial<ApiView>)).then(() => {});
+      const cached = qc.getQueryData<SavedView[]>(['views'])?.find((v) => v.id === id);
+      const merged: Partial<SavedView> = cached ? { ...cached, ...data } : data;
+      return unwrap(flowApi.updateView(id, merged as Partial<ApiView>)).then(() => {});
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['views'] }),
     onError: () => toast.error(t('errors.generic')),

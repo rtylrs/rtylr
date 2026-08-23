@@ -186,6 +186,7 @@ export interface ApiView {
   groupBy?: string;
   sortBy?: string;
   sortDir?: string;
+  visibility?: 'shared' | 'private';
 }
 
 export interface ApiInsights {
@@ -856,6 +857,7 @@ export const flowApi = {
         groupBy: data.groupBy,
         sortBy: data.sortBy,
         sortDir: data.sortDir,
+        visibility: data.visibility,
       })
     ),
 

@@ -141,6 +141,48 @@ describe('useUpdateView', () => {
     expect(spy).toHaveBeenCalledWith({ queryKey: ['views'] });
   });
 
+  // The v2 update is a REPLACEMENT: onion#906 made the handler honour every field
+  // it receives, and an unsent field arrives as "". So a patch has to be merged
+  // over the cached view before it goes out, or renaming a view blanks its
+  // filters, icon and sort.
+  it('merges a patch over the cached view so the update does not blank fields', async () => {
+    (flowApi.updateView as any).mockResolvedValue({});
+    const { wrapper, client } = createWrapper();
+    client.setQueryData(
+      ['views'],
+      [{ id: 'v-1', name: 'Old', icon: 'flame', filters: { status: ['todo'] }, sortBy: 'priority' }]
+    );
+    const { result } = renderHook(() => useUpdateView(), { wrapper });
+
+    await act(() => result.current.mutateAsync({ id: 'v-1', data: { name: 'Renamed' } }));
+
+    expect(flowApi.updateView).toHaveBeenCalledWith('v-1', {
+      id: 'v-1',
+      name: 'Renamed',
+      icon: 'flame',
+      filters: { status: ['todo'] },
+      sortBy: 'priority',
+    });
+  });
+
+  // The toggle's field has to reach the wire. It was previously dropped: the
+  // backend chain had landed on flow/view/v1 while the client is on v2.
+  it('carries visibility through to the update call', async () => {
+    (flowApi.updateView as any).mockResolvedValue({});
+    const { wrapper, client } = createWrapper();
+    client.setQueryData(['views'], [{ id: 'v-1', name: 'Mine', icon: 'eye' }]);
+    const { result } = renderHook(() => useUpdateView(), { wrapper });
+
+    await act(() => result.current.mutateAsync({ id: 'v-1', data: { visibility: 'private' } }));
+
+    expect(flowApi.updateView).toHaveBeenCalledWith('v-1', {
+      id: 'v-1',
+      name: 'Mine',
+      icon: 'eye',
+      visibility: 'private',
+    });
+  });
+
   it('shows an error toast and does not invalidate when the update call fails', async () => {
     (flowApi.updateView as any).mockRejectedValue(new Error('boom'));
     const { wrapper, client } = createWrapper();
