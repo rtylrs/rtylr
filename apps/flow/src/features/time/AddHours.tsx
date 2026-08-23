@@ -744,10 +744,13 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
               <span
                 aria-hidden="true"
                 className="mt-1.5 h-[10px] w-[10px] shrink-0 rounded-full"
-                style={{ background: 'var(--accent-fg)' }}
+                style={{ background: 'var(--accent-on-muted)' }}
               />
               <div className="min-w-0 flex-1">
-                <p className="text-[12px] font-semibold" style={{ color: 'var(--accent-fg)' }}>
+                <p
+                  className="text-[12px] font-semibold"
+                  style={{ color: 'var(--accent-on-muted)' }}
+                >
                   {t('flow.time.add.successTitle', {
                     duration: formatDurationClock(successInfo.durationMinutes),
                     target: successInfo.target || '-',
