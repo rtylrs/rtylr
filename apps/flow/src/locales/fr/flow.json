@@ -770,7 +770,9 @@
     "tryClearing": "Essayez de vider votre recherche ou vos filtres.",
     "emptyTitle": "Aucun projet pour le moment",
     "emptyDescription": "Créez votre premier projet pour commencer.",
-    "createFirst": "Créer un projet"
+    "createFirst": "Créer un projet",
+    "yourProjects": "Vos projets",
+    "yourReports": "Vos équipes"
   },
   "bin": {
     "title": "Corbeille",

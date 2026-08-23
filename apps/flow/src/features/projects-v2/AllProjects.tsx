@@ -96,6 +96,13 @@ export const AllProjects: React.FC = () => {
 
   const hasFilters = q !== '' || status !== '' || visibility !== '';
 
+  // visible_via_report is a per-caller projection from the server: true only
+  // when the caller sees the project because they manage someone on it. With no
+  // reports every project falls in the first bucket and the grouped layout is
+  // never rendered, so nothing changes for the common case.
+  const ownProjects = projects.filter((p) => !p.visibleViaReport);
+  const reportProjects = projects.filter((p) => p.visibleViaReport);
+
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6">
@@ -196,6 +203,41 @@ export const AllProjects: React.FC = () => {
               </button>
             )}
           </div>
+        ) : reportProjects.length > 0 ? (
+          // P9: projects visible only because the caller manages someone on them
+          // are grouped separately. Mixed into one list they would read as the
+          // caller's own work, which is the thing visible_via_report exists to
+          // prevent.
+          <>
+            {ownProjects.length > 0 && (
+              <section className="mb-6">
+                <h2
+                  className="mb-2 text-[11px] font-semibold uppercase tracking-wider"
+                  style={{ color: 'var(--flow-text-muted)' }}
+                >
+                  {t('flow.allProjects.yourProjects')}
+                </h2>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {ownProjects.map((p) => (
+                    <ProjectCard key={p.id} project={p} />
+                  ))}
+                </div>
+              </section>
+            )}
+            <section>
+              <h2
+                className="mb-2 text-[11px] font-semibold uppercase tracking-wider"
+                style={{ color: 'var(--flow-text-muted)' }}
+              >
+                {t('flow.allProjects.yourReports')}
+              </h2>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {reportProjects.map((p) => (
+                  <ProjectCard key={p.id} project={p} />
+                ))}
+              </div>
+            </section>
+          </>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {projects.map((p) => (

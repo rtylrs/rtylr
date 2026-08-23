@@ -801,7 +801,9 @@
     "tryClearing": "حاول مسح البحث أو عوامل التصفية.",
     "emptyTitle": "لا توجد مشاريع بعد",
     "emptyDescription": "أنشئ مشروعك الأول للبدء.",
-    "createFirst": "إنشاء مشروع"
+    "createFirst": "إنشاء مشروع",
+    "yourProjects": "مشاريعك",
+    "yourReports": "مشاريع فريقك"
   },
   "bin": {
     "title": "سلة المحذوفات",
