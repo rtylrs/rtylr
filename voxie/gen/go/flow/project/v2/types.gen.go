@@ -8,26 +8,27 @@ import (
 )
 
 type Project struct {
-	Id             int64   `json:"id,omitempty"`
-	OwnerId        int64   `json:"owner_id,omitempty"`
-	Name           string  `json:"name,omitempty"`
-	Description    string  `json:"description,omitempty"`
-	Icon           string  `json:"icon,omitempty"`
-	Color          string  `json:"color,omitempty"`
-	Status         string  `json:"status,omitempty"`
-	Visibility     string  `json:"visibility,omitempty"`
-	IsPersonal     bool    `json:"is_personal,omitempty"`
-	StartDate      string  `json:"start_date,omitempty"`
-	DueDate        string  `json:"due_date,omitempty"`
-	CreatedBy      int64   `json:"created_by,omitempty"`
-	CreatedAt      string  `json:"created_at,omitempty"`
-	UpdatedAt      string  `json:"updated_at,omitempty"`
-	TaskCount      int32   `json:"task_count,omitempty"`
-	CompletedCount int32   `json:"completed_count,omitempty"`
-	MemberCount    int32   `json:"member_count,omitempty"`
-	Code           string  `json:"code,omitempty"`
-	ArchivedAt     *string `json:"archived_at,omitempty"`
-	PurgeAt        *string `json:"purge_at,omitempty"`
+	Id               int64   `json:"id,omitempty"`
+	OwnerId          int64   `json:"owner_id,omitempty"`
+	Name             string  `json:"name,omitempty"`
+	Description      string  `json:"description,omitempty"`
+	Icon             string  `json:"icon,omitempty"`
+	Color            string  `json:"color,omitempty"`
+	Status           string  `json:"status,omitempty"`
+	Visibility       string  `json:"visibility,omitempty"`
+	IsPersonal       bool    `json:"is_personal,omitempty"`
+	StartDate        string  `json:"start_date,omitempty"`
+	DueDate          string  `json:"due_date,omitempty"`
+	CreatedBy        int64   `json:"created_by,omitempty"`
+	CreatedAt        string  `json:"created_at,omitempty"`
+	UpdatedAt        string  `json:"updated_at,omitempty"`
+	TaskCount        int32   `json:"task_count,omitempty"`
+	CompletedCount   int32   `json:"completed_count,omitempty"`
+	MemberCount      int32   `json:"member_count,omitempty"`
+	Code             string  `json:"code,omitempty"`
+	ArchivedAt       *string `json:"archived_at,omitempty"`
+	PurgeAt          *string `json:"purge_at,omitempty"`
+	VisibleViaReport bool    `json:"visible_via_report,omitempty"`
 }
 
 func (m *Project) MarshalJSON() ([]byte, error) {
@@ -245,6 +246,14 @@ func (x *Project) GetPurgeAt() string {
 		return zero
 	}
 	return *x.PurgeAt
+}
+
+func (x *Project) GetVisibleViaReport() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.VisibleViaReport
 }
 
 type ProjectColumn struct {

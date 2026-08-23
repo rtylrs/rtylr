@@ -22,6 +22,7 @@ memberCount?: number;
 code?: string;
 archivedAt?: string;
 purgeAt?: string;
+visibleViaReport?: boolean;
 }
 
 export function decodeProject(v: any): Project {
@@ -47,6 +48,7 @@ memberCount: v.member_count,
 code: v.code,
 archivedAt: v.archived_at,
 purgeAt: v.purge_at,
+visibleViaReport: v.visible_via_report,
 };
 }
 
@@ -72,6 +74,7 @@ if (v.memberCount !== undefined) { out.member_count = v.memberCount; }
 if (v.code !== undefined) { out.code = v.code; }
 if (v.archivedAt !== undefined) { out.archived_at = v.archivedAt; }
 if (v.purgeAt !== undefined) { out.purge_at = v.purgeAt; }
+if (v.visibleViaReport !== undefined) { out.visible_via_report = v.visibleViaReport; }
 return out;
 }
 
@@ -97,6 +100,7 @@ if (v.memberCount !== undefined && v.memberCount !== null && !(typeof v.memberCo
 if (v.code !== undefined && v.code !== null && !(typeof v.code === "string")) violations.push("code has invalid type");
 if (v.archivedAt !== undefined && v.archivedAt !== null && !(typeof v.archivedAt === "string")) violations.push("archived_at has invalid type");
 if (v.purgeAt !== undefined && v.purgeAt !== null && !(typeof v.purgeAt === "string")) violations.push("purge_at has invalid type");
+if (v.visibleViaReport !== undefined && v.visibleViaReport !== null && !(typeof v.visibleViaReport === "boolean")) violations.push("visible_via_report has invalid type");
 return violations;
 }
 

@@ -53,6 +53,15 @@ message Project {
   /// everything inside it. Stamped at archive time from the business's
   /// retention setting; later retention changes affect future archives only.
   purge_at: string?
+  /// visible_via_report is true when the caller can see this project ONLY
+  /// because they manage someone involved in it (the dept-manager proxy), and
+  /// not because they created it, own it, or are a member.
+  ///
+  /// It exists so a client can group these separately without asking per
+  /// project why each one is visible. It is a per-caller projection, not a
+  /// property of the project: the same project is false for its own members and
+  /// true for their manager. Never persist it.
+  visible_via_report: bool
 }
 
 message ProjectColumn {
