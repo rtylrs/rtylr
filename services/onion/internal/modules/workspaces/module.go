@@ -17,25 +17,24 @@ import (
 	serverHttp "github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/tenant"
 	flowcyclev1 "github.com/voxire/voxie/gen/go/flow/cycle/v1"
+	flowcyclev2 "github.com/voxire/voxie/gen/go/flow/cycle/v2"
 	flowdashboardv1 "github.com/voxire/voxie/gen/go/flow/dashboard/v1"
+	flowdashboardv2 "github.com/voxire/voxie/gen/go/flow/dashboard/v2"
 	flowinsightsv1 "github.com/voxire/voxie/gen/go/flow/insights/v1"
+	flowinsightsv2 "github.com/voxire/voxie/gen/go/flow/insights/v2"
 	flowlabelv1 "github.com/voxire/voxie/gen/go/flow/label/v1"
+	flowlabelv2 "github.com/voxire/voxie/gen/go/flow/label/v2"
 	flowmilestonev1 "github.com/voxire/voxie/gen/go/flow/milestone/v1"
+	flowmilestonev2 "github.com/voxire/voxie/gen/go/flow/milestone/v2"
 	flownotificationv1 "github.com/voxire/voxie/gen/go/flow/notification/v1"
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 	flowprojectv2 "github.com/voxire/voxie/gen/go/flow/project/v2"
 	flowsettingv1 "github.com/voxire/voxie/gen/go/flow/setting/v1"
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 	flowtaskv2 "github.com/voxire/voxie/gen/go/flow/task/v2"
-flowcyclev2 "github.com/voxire/voxie/gen/go/flow/cycle/v2"
-	flowdashboardv2 "github.com/voxire/voxie/gen/go/flow/dashboard/v2"
-	flowinsightsv2 "github.com/voxire/voxie/gen/go/flow/insights/v2"
-	flowlabelv2 "github.com/voxire/voxie/gen/go/flow/label/v2"
-	flowmilestonev2 "github.com/voxire/voxie/gen/go/flow/milestone/v2"
-	flowviewv2 "github.com/voxire/voxie/gen/go/flow/view/v2"
 	flowtimev1 "github.com/voxire/voxie/gen/go/flow/time/v1"
-	flowtimev2 "github.com/voxire/voxie/gen/go/flow/time/v2"
 	flowviewv1 "github.com/voxire/voxie/gen/go/flow/view/v1"
+	flowviewv2 "github.com/voxire/voxie/gen/go/flow/view/v2"
 	flowworkspacev1 "github.com/voxire/voxie/gen/go/flow/workspace/v1"
 )
 
@@ -176,12 +175,13 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	); err != nil {
 		panic(fmt.Errorf("register flow setting service: %w", err))
 	}
-	if err := flowtimev2.RegisterTimeServiceServer(
-		api.NewWorkTimeAPIV2(m.service),
-		flowtimev2.WithMux(mux),
-	); err != nil {
-		panic(fmt.Errorf("register flow time v2: %w", err))
-	}
+	// flow.time.v2 is deliberately not registered. WorkTimeAPIV2 implements
+	// only listTeamWorkDays; the contract's other ten RPCs have no handler, so
+	// registering the service panics on OneKit's runtime interface assertion
+	// and takes the whole API down with it. No client calls flow.time.v2 yet
+	// (apps/flow declares the timeV2 client but has no call sites), so leaving
+	// it unserved costs nothing that registering it would not cost more.
+	// Re-register here once WorkTimeAPIV2 is complete.
 	if err := flowtimev1.RegisterTimeServiceServer(
 		api.NewWorkTimeAPI(m.service),
 		flowtimev1.WithMux(mux),
