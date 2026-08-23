@@ -34,7 +34,15 @@
 
 import { describe, it, expect } from 'vitest';
 import { appearanceTokens } from './appearanceTokens';
-import { contrastRatio, hexToHsl, isValidHex, NEAR_BLACK, NEAR_WHITE, rgbToHsl } from './colorMath';
+import {
+  compositeOver,
+  contrastRatio,
+  hexToHsl,
+  isValidHex,
+  NEAR_BLACK,
+  NEAR_WHITE,
+  rgbToHsl,
+} from './colorMath';
 import { ACCENT_DEFAULT, ACCENT_SWATCHES, PALETTES, STRESS_ACCENTS } from './palettes';
 import { CONTRAST_FLOOR } from './types';
 import type { AppearancePrefs, PalettePreset } from './types';
@@ -433,6 +441,7 @@ describe('purity', () => {
         '--accent-fg',
         '--accent-focus',
         '--accent-muted',
+        '--accent-on-muted',
         '--flow-bg',
         '--flow-border',
         '--flow-card',
@@ -449,5 +458,79 @@ describe('purity', () => {
         '--flow-u',
       ].sort()
     );
+  });
+});
+
+/**
+ * rtylr#970. --accent-fg was derived against palette.card and then used as text
+ * on the --accent-muted tint, where 40 of 56 light-mode combinations measured
+ * below 4.5:1. The guarantee did not transfer because the background was not the
+ * one it was derived for.
+ *
+ * This sweeps every palette against every accent, including the stress hexes a
+ * free-form picker allows, and checks the tint composited over all three grounds
+ * it can sit on. Light mode is the half that fails, so a dark-only check would
+ * have reported this feature as clean.
+ */
+describe('--accent-on-muted holds up on the tint, not just the card', () => {
+  const MUTED_ALPHA: Record<'dark' | 'light', number> = { dark: 0.12, light: 0.18 };
+  const accents = [
+    ...ACCENT_SWATCHES.map((a) => ({ id: a.id, hex: a.hex })),
+    ...STRESS_ACCENTS.map((hex, i) => ({ id: `stress-${i}`, hex })),
+  ];
+
+  const cases = PALETTES.flatMap((palette) => accents.map((accent) => ({ palette, accent })));
+
+  it('sweeps a meaningful number of combinations', () => {
+    // Without this a bad fixture makes every assertion below vacuous.
+    expect(cases.length).toBeGreaterThanOrEqual(100);
+    expect(STRESS_ACCENTS.length).toBeGreaterThan(0);
+  });
+
+  it.each(cases)(
+    'clears 4.5:1 on every ground: $palette.id / $accent.id',
+    ({ palette, accent }) => {
+      const tokens = appearanceTokens(
+        {
+          mode: palette.mode,
+          palette: palette.id,
+          accent: accent.hex,
+          density: 'cozy',
+          textSize: 'm',
+          corners: 'soft',
+          reduceMotion: false,
+        },
+        { resolvedMode: palette.mode, workspaceAccent: accent.hex }
+      );
+
+      for (const ground of [palette.bg, palette.surface, palette.card]) {
+        const tint = compositeOver(accent.hex, MUTED_ALPHA[palette.mode], ground);
+        expect(
+          contrastRatio(tokens['--accent-on-muted'], tint),
+          `${palette.id}/${accent.id} on a tint over ${ground}`
+        ).toBeGreaterThanOrEqual(CONTRAST_FLOOR);
+      }
+    }
+  );
+
+  it('is not simply --accent-fg under another name', () => {
+    // If the two tokens were identical the sweep above would be re-testing
+    // --accent-fg and would have failed, but assert the distinction directly so
+    // a future refactor that aliases them fails here with a clear reason.
+    const light = PALETTES.find((p) => p.mode === 'light');
+    expect(light).toBeTruthy();
+    const tokens = appearanceTokens(
+      {
+        mode: 'light',
+        palette: light!.id,
+        accent: '#e71046',
+        density: 'cozy',
+        textSize: 'm',
+        corners: 'soft',
+        reduceMotion: false,
+      },
+      { resolvedMode: 'light', workspaceAccent: '#e71046' }
+    );
+    expect(tokens['--accent-on-muted']).not.toBe(tokens['--accent-fg']);
   });
 });
