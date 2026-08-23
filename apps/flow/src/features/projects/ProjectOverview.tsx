@@ -19,7 +19,6 @@ import { AvatarStack } from '../../shared/components/AssigneeAvatar';
 import { formatDate } from '../../shared/lib/utils';
 import { displayDescription } from '../../shared/lib/stringUtils';
 import ProjectViewTabs from './ProjectViewTabs';
-import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 
 const HEALTH: Record<string, { color: string; label: string }> = {
@@ -31,7 +30,7 @@ const HEALTH: Record<string, { color: string; label: string }> = {
 const ProjectOverview: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
+  const { projectId = '' } = useParams({ strict: false });
   useProjectRealtime(projectId);
 
   const { data, isLoading } = useProjectOverview(projectId);

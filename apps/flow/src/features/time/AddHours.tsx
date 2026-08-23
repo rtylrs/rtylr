@@ -10,7 +10,6 @@ import {
   formatEntryTimestamp,
 } from '../../shared/lib/dateUtils';
 import { formatWorkEntryTarget } from '../../shared/lib/timeEntryLabel';
-import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
 import { useProjects } from '../projects/useProjects';
 import { useTasks } from '../tasks/useTasks';
@@ -93,7 +92,6 @@ function rememberLastUsedLocation(location: Location): void {
 const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
   const { t, i18n } = useTranslation();
   const search = routeApi.useSearch();
-  const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
   const dailyTargetMinutes = useTimeSettingsStore((s) => s.dailyTargetMinutes);
 
   const { data } = useWorkDay(date);

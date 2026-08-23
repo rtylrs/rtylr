@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Link } from '@tanstack/react-router';
-import { Map as MapIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useRoadmap } from './useRoadmap';

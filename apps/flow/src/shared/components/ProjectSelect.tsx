@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Circle, ChevronDown } from 'lucide-react';
-import { Project, useFlowStore } from '../stores/flowStore';
+import { useFlowStore } from '../stores/flowStore';
 
 interface ProjectSelectProps {
   value?: string;

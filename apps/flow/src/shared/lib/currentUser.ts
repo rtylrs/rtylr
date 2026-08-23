@@ -1,7 +1,6 @@
 import { useQueries } from '@tanstack/react-query';
 import { useUserStore as useAuthUserStore } from '@voxire/auth';
 import { useUserStore } from '../stores/userStore';
-import { useFlowStore } from '../stores/flowStore';
 import {
   canEditTask,
   canDelete,

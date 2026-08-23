@@ -166,7 +166,7 @@ const ProjectBoard: React.FC = () => {
   const { t } = useTranslation();
   const { workspaceId = PERSONAL_WORKSPACE_ID, projectId = '' } = useParams({ strict: false });
 
-  const { selectedTaskIds, toggleSelectTask, activeWorkspaceId } = useFlowStore();
+  const { selectedTaskIds, toggleSelectTask } = useFlowStore();
   const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
   const moveTask = useMoveTaskToColumn();
   const canEdit = useCanEditTask(projectId);

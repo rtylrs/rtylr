@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { uploadAsset } from '@voxire/api';
-import { Paperclip, Upload, FileText, Image as ImageIcon, X } from 'lucide-react';
+import { Upload, FileText, Image as ImageIcon, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Attachment } from '../stores/flowStore';
 

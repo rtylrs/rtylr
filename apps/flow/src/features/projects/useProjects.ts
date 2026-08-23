@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiProject, ProjectUpdate } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
-import { isApiWorkspaceId } from '../../shared/lib/personalWorkspace';
 
 export function useProjects() {
   return useQuery<ApiProject[]>({
