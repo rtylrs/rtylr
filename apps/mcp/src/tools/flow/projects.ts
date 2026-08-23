@@ -33,7 +33,7 @@ export const getProject: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/flow/projects/${input.project_id}`);
+      const res = await api.get(`/flow/projects/${encodeURIComponent(String(input.project_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -80,7 +80,7 @@ export const updateProject: Tool = {
   handler: async (input, api) => {
     try {
       const { project_id, ...body } = input;
-      const res = await api.put(`/flow/projects/${project_id}`, body);
+      const res = await api.put(`/flow/projects/${encodeURIComponent(String(project_id))}`, body);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -100,7 +100,7 @@ export const deleteProject: Tool = {
   },
   handler: async (input, api) => {
     try {
-      await api.delete(`/flow/projects/${input.project_id}`);
+      await api.delete(`/flow/projects/${encodeURIComponent(String(input.project_id))}`);
       return ok({ deleted: true, project_id: input.project_id });
     } catch (e) {
       return apiErr(e);

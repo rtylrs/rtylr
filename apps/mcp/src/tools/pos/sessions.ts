@@ -35,7 +35,7 @@ export const getSession: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/pos/sessions/${input.session_id}`);
+      const res = await api.get(`/pos/sessions/${encodeURIComponent(String(input.session_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -78,7 +78,7 @@ export const closeSession: Tool = {
   handler: async (input, api) => {
     try {
       const { session_id, ...body } = input;
-      const res = await api.post(`/pos/sessions/${session_id}/close`, body);
+      const res = await api.post(`/pos/sessions/${encodeURIComponent(String(session_id))}/close`, body);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

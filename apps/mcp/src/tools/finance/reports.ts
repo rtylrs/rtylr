@@ -123,7 +123,7 @@ export const postJournalEntry: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.post(`/finance/journal/${input.entry_id}/post`, {});
+      const res = await api.post(`/finance/journal/${encodeURIComponent(String(input.entry_id))}/post`, {});
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

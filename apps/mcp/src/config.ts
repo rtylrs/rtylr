@@ -1,6 +1,6 @@
 import { homedir } from 'os';
 import { join } from 'path';
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'fs';
 
 export const API_BASE = process.env.RTYLR_API_URL ?? 'https://api.voxire.com';
 export const OAUTH_CLIENT_ID = 'rtylr-mcp';
@@ -19,7 +19,11 @@ export function loadConfig(): StoredConfig | null {
   try {
     if (!existsSync(CONFIG_FILE)) return null;
     const raw = readFileSync(CONFIG_FILE, 'utf8');
-    return JSON.parse(raw) as StoredConfig;
+    const parsed = JSON.parse(raw) as Partial<StoredConfig> | null;
+    if (!parsed || typeof parsed !== 'object' || typeof parsed.access_token !== 'string') {
+      return null;
+    }
+    return parsed as StoredConfig;
   } catch {
     return null;
   }
@@ -35,7 +39,7 @@ export function saveConfig(config: StoredConfig): void {
 export function clearConfig(): void {
   try {
     if (existsSync(CONFIG_FILE)) {
-      writeFileSync(CONFIG_FILE, '{}');
+      rmSync(CONFIG_FILE, { force: true });
     }
   } catch {
     // ignore

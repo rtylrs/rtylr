@@ -41,7 +41,7 @@ export const getTask: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/flow/tasks/${input.task_id}`);
+      const res = await api.get(`/flow/tasks/${encodeURIComponent(String(input.task_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -95,7 +95,7 @@ export const updateTask: Tool = {
   handler: async (input, api) => {
     try {
       const { task_id, ...body } = input;
-      const res = await api.put(`/flow/tasks/${task_id}`, body);
+      const res = await api.put(`/flow/tasks/${encodeURIComponent(String(task_id))}`, body);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -115,7 +115,7 @@ export const deleteTask: Tool = {
   },
   handler: async (input, api) => {
     try {
-      await api.delete(`/flow/tasks/${input.task_id}`);
+      await api.delete(`/flow/tasks/${encodeURIComponent(String(input.task_id))}`);
       return ok({ deleted: true, task_id: input.task_id });
     } catch (e) {
       return apiErr(e);
@@ -136,7 +136,7 @@ export const updateTaskStatus: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.put(`/flow/tasks/${input.task_id}`, { status: input.status });
+      const res = await api.put(`/flow/tasks/${encodeURIComponent(String(input.task_id))}`, { status: input.status });
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

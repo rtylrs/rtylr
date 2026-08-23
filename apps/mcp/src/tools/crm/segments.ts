@@ -1,5 +1,5 @@
 import type { Tool } from '../types.js';
-import { ok, apiErr } from '../types.js';
+import { ok, apiErr, err } from '../types.js';
 
 export const listSegments: Tool = {
   name: 'crm_list_segments',
@@ -34,7 +34,7 @@ export const createSegment: Tool = {
         try {
           body.rules = JSON.parse(input.rules as string);
         } catch {
-          body.rules = [];
+          return err('Invalid rules: must be a JSON-encoded array of filter rules');
         }
       }
       const res = await api.post('/crm/segments', body);

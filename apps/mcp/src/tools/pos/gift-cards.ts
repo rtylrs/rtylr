@@ -13,7 +13,7 @@ export const getGiftCard: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/pos/gift-cards/${input.code}`);
+      const res = await api.get(`/pos/gift-cards/${encodeURIComponent(String(input.code))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -36,7 +36,7 @@ export const redeemGiftCard: Tool = {
   handler: async (input, api) => {
     try {
       const { code, ...body } = input;
-      const res = await api.post(`/pos/gift-cards/${code}/redeem`, body);
+      const res = await api.post(`/pos/gift-cards/${encodeURIComponent(String(code))}/redeem`, body);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

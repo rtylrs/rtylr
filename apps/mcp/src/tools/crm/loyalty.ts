@@ -1,5 +1,5 @@
 import type { Tool } from '../types.js';
-import { ok, apiErr } from '../types.js';
+import { ok, apiErr, qs } from '../types.js';
 
 export const listLoyaltyTiers: Tool = {
   name: 'crm_list_loyalty_tiers',
@@ -51,12 +51,7 @@ export const listLoyaltyMembers: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const params = new URLSearchParams();
-      if (input.tier_id) params.set('tier_id', String(input.tier_id));
-      if (input.limit) params.set('limit', String(input.limit));
-      if (input.offset) params.set('offset', String(input.offset));
-      const q = params.toString() ? `?${params.toString()}` : '';
-      const res = await api.get(`/crm/loyalty/members${q}`);
+      const res = await api.get(`/crm/loyalty/members${qs(input, ['tier_id', 'limit', 'offset'])}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -77,7 +72,7 @@ export const assignLoyaltyTier: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.post(`/crm/loyalty/members/${input.customer_id}/tier`, { tier_id: input.tier_id });
+      const res = await api.post(`/crm/loyalty/members/${encodeURIComponent(String(input.customer_id))}/tier`, { tier_id: input.tier_id });
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

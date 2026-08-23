@@ -35,7 +35,7 @@ export const getMenuItem: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/pos/menu-items/${input.item_id}`);
+      const res = await api.get(`/pos/menu-items/${encodeURIComponent(String(input.item_id))}`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -59,7 +59,8 @@ export const createMenuItem: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.post('/pos/menu-items', input);
+      const body = { ...input, available: String(input.available) === 'true' };
+      const res = await api.post('/pos/menu-items', body);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -83,8 +84,9 @@ export const updateMenuItem: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const { item_id, ...body } = input;
-      const res = await api.put(`/pos/menu-items/${item_id}`, body);
+      const { item_id, ...rest } = input;
+      const body = { ...rest, available: String(input.available) === 'true' };
+      const res = await api.put(`/pos/menu-items/${encodeURIComponent(String(item_id))}`, body);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -106,7 +108,9 @@ export const toggleMenuItemAvailability: Tool = {
   handler: async (input, api) => {
     try {
       const { item_id, available } = input;
-      const res = await api.put(`/pos/menu-items/${item_id}/availability`, { available });
+      const res = await api.put(`/pos/menu-items/${encodeURIComponent(String(item_id))}/availability`, {
+        available: String(available) === 'true',
+      });
       return ok(res.data);
     } catch (e) {
       return apiErr(e);

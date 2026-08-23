@@ -13,7 +13,7 @@ export const listComments: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.get(`/flow/tasks/${input.task_id}/comments`);
+      const res = await api.get(`/flow/tasks/${encodeURIComponent(String(input.task_id))}/comments`);
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
@@ -34,7 +34,7 @@ export const createComment: Tool = {
   },
   handler: async (input, api) => {
     try {
-      const res = await api.post(`/flow/tasks/${input.task_id}/comments`, { body: input.body });
+      const res = await api.post(`/flow/tasks/${encodeURIComponent(String(input.task_id))}/comments`, { body: input.body });
       return ok(res.data);
     } catch (e) {
       return apiErr(e);
