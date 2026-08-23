@@ -4,13 +4,12 @@ import { BarChart3 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { DatePicker, EmptyState } from '@voxire/ui';
 import { useNavigate } from '@tanstack/react-router';
-import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
 import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import GateNotice from '../../shared/components/GateNotice';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { startOfWeek, endOfWeek } from '../../shared/lib/dateUtils';
-import { todayLocalDate, useWorkDaysForWorkspace } from './useWorkDay';
+import { todayLocalDate, useTeamWorkDays } from './useWorkDay';
 
 interface PersonTotals {
   clockedMinutes: number;
@@ -34,7 +33,6 @@ const TimeReports = (): React.JSX.Element => {
   const trackAttendance = useTimeSettingsStore((s) => s.trackAttendance);
   const [from, setFrom] = useState(startOfWeek(today, weekStart));
   const [to, setTo] = useState(endOfWeek(today, weekStart));
-  const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
 
   useEffect(() => {
     setFrom(startOfWeek(today, weekStart));
@@ -47,7 +45,7 @@ const TimeReports = (): React.JSX.Element => {
   // id, which is what the work-day totals are keyed on.
   const { data: allMembers = [], isLoading: membersLoading } = useFlowTeam();
   const members = useMemo(() => allMembers.filter((m) => m.apps?.includes('flow')), [allMembers]);
-  const { data, isLoading, isError } = useWorkDaysForWorkspace(activeWorkspaceId, from, to);
+  const { data, isLoading, isError } = useTeamWorkDays(from, to);
 
   const totalsByUserId = useMemo(() => {
     const map = new Map<string, PersonTotals>();

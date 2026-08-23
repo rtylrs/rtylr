@@ -46,7 +46,7 @@ const workDaysState = vi.hoisted(() => ({
 
 vi.mock('./useWorkDay', () => ({
   todayLocalDate: () => '2026-08-16',
-  useWorkDaysForWorkspace: () => workDaysState.value,
+  useTeamWorkDays: () => workDaysState.value,
 }));
 
 import TimeReports from './TimeReports';

@@ -4,11 +4,10 @@ import { Users } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { DatePicker, EmptyState } from '@voxire/ui';
 import { useNavigate } from '@tanstack/react-router';
-import { useFlowStore } from '../../shared/stores/flowStore';
 import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import GateNotice from '../../shared/components/GateNotice';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
-import { todayLocalDate, useWorkDaysForWorkspace, type WorkDay } from './useWorkDay';
+import { todayLocalDate, useTeamWorkDays, type WorkDay } from './useWorkDay';
 
 const labelClass = 'mb-1 block text-[10px] font-semibold uppercase tracking-wider';
 
@@ -24,7 +23,6 @@ const TeamView = (): React.JSX.Element => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [date, setDate] = useState(todayLocalDate());
-  const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
 
   // The roster was a hardcoded empty array, so the empty state below was the
   // only branch this screen could ever render and the member table underneath
@@ -37,7 +35,7 @@ const TeamView = (): React.JSX.Element => {
   // workDays is keyed on.
   const { data: allMembers = [], isLoading: membersLoading } = useFlowTeam();
   const members = useMemo(() => allMembers.filter((m) => m.apps?.includes('flow')), [allMembers]);
-  const { data, isLoading, isError } = useWorkDaysForWorkspace(activeWorkspaceId, date, date);
+  const { data, isLoading, isError } = useTeamWorkDays(date, date);
 
   const dayByUserId = useMemo(() => {
     const map = new Map<string, WorkDay>();
