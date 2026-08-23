@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS flow_workspaces (
     icon VARCHAR(50) DEFAULT '🚀',
     color VARCHAR(20) DEFAULT '#4583C4',
     is_default BOOLEAN DEFAULT FALSE,
-    visibility ENUM('private','shared') NOT NULL DEFAULT 'shared',
     is_personal BOOLEAN DEFAULT FALSE,
     created_by BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -186,6 +185,7 @@ CREATE TABLE IF NOT EXISTS flow_views (
     sort_dir ENUM('asc','desc') DEFAULT 'asc',
     group_by VARCHAR(100) DEFAULT '',
     is_default BOOLEAN DEFAULT FALSE,
+    visibility ENUM('private','shared') NOT NULL DEFAULT 'shared',
     created_by BIGINT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
