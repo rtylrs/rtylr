@@ -5,7 +5,7 @@ import HelmetContainer from '../components/HelmetContainer';
 import DirectAnswer from '../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../components/FaqSection/FaqSection';
 import ProductTruthSection from '../components/home/ProductTruthSection/ProductTruthSection';
-import { GLOBAL_FAQS } from '../lib/faqs';
+import { useFaq } from '../lib/faqs';
 import { webSiteSchema, organizationSchema, productSchema } from '../lib/structured-data';
 import HeroSection from '../components/home/HeroSection/HeroSection';
 import ProductsSection from '../components/home/ProductsSection/ProductsSection';
@@ -49,41 +49,41 @@ const SEO_PROPS = {
   },
 };
 
-const WebsiteContent = (): JSX.Element => (
-  <AppLayout>
-    <MainLayout>
-      <div className={styles.Homepage}>
-        <HeroSection />
-        <DirectAnswer label="What is rtylr?">
-          rtylr is an all-in-one business operating system for small and mid-sized companies: point
-          of sale, ERP, HR, CRM, finance and project management on a single database. It is built
-          for restaurants, retail and services businesses running 2 to 200 staff, across one
-          location or twenty. The point is not that it is seven apps. It is that a sale moves stock,
-          revenue and loyalty without anyone exporting a file.
-        </DirectAnswer>
-        <ProductsSection />
-        <FeaturesSection />
-        <HowItWorksSection />
-        <PricingSection />
-        <TestimonialsSection />
-        {/* Verifiable claims, sitting directly after the quotes. See the
+const WebsiteContent = (): React.JSX.Element => {
+  const faq = useFaq('home');
+
+  return (
+    <AppLayout>
+      <MainLayout>
+        <div className={styles.Homepage}>
+          <HeroSection />
+          <DirectAnswer label="What is rtylr?">
+            rtylr is an all-in-one business operating system for small and mid-sized companies:
+            point of sale, ERP, HR, CRM, finance and project management on a single database. It is
+            built for restaurants, retail and services businesses running 2 to 200 staff, across one
+            location or twenty. The point is not that it is seven apps. It is that a sale moves
+            stock, revenue and loyalty without anyone exporting a file.
+          </DirectAnswer>
+          <ProductsSection />
+          <FeaturesSection />
+          <HowItWorksSection />
+          <PricingSection />
+          <TestimonialsSection />
+          {/* Verifiable claims, sitting directly after the quotes. See the
             component for what was cut from it and why. */}
-        <ProductTruthSection />
-        <IntegrationsSection />
-        <FaqSection
-          title="Questions about rtylr"
-          intro="The six things buyers ask first. Answers are on the page, not hidden behind markup."
-          faqs={GLOBAL_FAQS}
-        />
-        <CTASection />
-      </div>
-    </MainLayout>
-  </AppLayout>
-);
+          <ProductTruthSection />
+          <IntegrationsSection />
+          <FaqSection title={faq.title} intro={faq.intro} faqs={faq.items} />
+          <CTASection />
+        </div>
+      </MainLayout>
+    </AppLayout>
+  );
+};
 
 export { WebsiteContent };
 
-const HomePage = (): JSX.Element => {
+const HomePage = (): React.JSX.Element => {
   return (
     <>
       <HelmetContainer {...SEO_PROPS} />

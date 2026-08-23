@@ -17,7 +17,7 @@ import HelmetContainer from '../../components/HelmetContainer';
 import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
-import { HR_FAQS } from '../../lib/faqs';
+import { useFaq } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -98,7 +98,8 @@ const PILLARS = [
   },
 ];
 
-const HRPage = (): JSX.Element => {
+const HRPage = (): React.JSX.Element => {
+  const faq = useFaq('hr');
   const router = useRouter();
   const [staff, setStaff] = useState<StaffMember[]>(INITIAL_STAFF);
 
@@ -334,7 +335,7 @@ const HRPage = (): JSX.Element => {
             </motion.div>
           </motion.section>
 
-          <FaqSection title="Questions about rtylr HR" faqs={HR_FAQS} />
+          <FaqSection title={faq.title} faqs={faq.items} />
 
           {/* ── CTA ──────────────────────────────────────────────────────── */}
           <motion.section

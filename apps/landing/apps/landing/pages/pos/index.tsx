@@ -9,7 +9,7 @@ import HelmetContainer from '../../components/HelmetContainer';
 import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
-import { POS_FAQS } from '../../lib/faqs';
+import { useFaq } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -47,7 +47,8 @@ const FEATURES = [
   },
 ];
 
-const POSPage = (): JSX.Element => {
+const POSPage = (): React.JSX.Element => {
+  const faq = useFaq('pos');
   const router = useRouter();
 
   const goRegister = (): void => {
@@ -341,7 +342,7 @@ const POSPage = (): JSX.Element => {
             </motion.div>
           </motion.section>
 
-          <FaqSection title="Questions about rtylr POS" faqs={POS_FAQS} />
+          <FaqSection title={faq.title} faqs={faq.items} />
 
           {/* ── CTA ──────────────────────────────────────────────────────── */}
           <motion.section

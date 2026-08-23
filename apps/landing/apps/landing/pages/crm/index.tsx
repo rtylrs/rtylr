@@ -9,7 +9,7 @@ import HelmetContainer from '../../components/HelmetContainer';
 import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
-import { CRM_FAQS } from '../../lib/faqs';
+import { useFaq } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -247,7 +247,8 @@ const CAMPAIGNS = [
   },
 ];
 
-const CRMPage = (): JSX.Element => {
+const CRMPage = (): React.JSX.Element => {
+  const faq = useFaq('crm');
   const router = useRouter();
 
   // Segment-builder state, toggle attributes to watch the audience shrink/grow
@@ -616,7 +617,7 @@ const CRMPage = (): JSX.Element => {
             </motion.div>
           </motion.section>
 
-          <FaqSection title="Questions about rtylr CRM" faqs={CRM_FAQS} />
+          <FaqSection title={faq.title} faqs={faq.items} />
 
           {/* ── CTA ─────────────────────────────────────────────────────── */}
           <motion.section

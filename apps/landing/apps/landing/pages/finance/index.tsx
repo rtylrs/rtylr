@@ -17,7 +17,7 @@ import HelmetContainer from '../../components/HelmetContainer';
 import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
-import { FINANCE_FAQS } from '../../lib/faqs';
+import { useFaq } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -214,7 +214,8 @@ const fmt = (n: number): string => {
   return `${sign}$${Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 };
 
-const FinancePage = (): JSX.Element => {
+const FinancePage = (): React.JSX.Element => {
+  const faq = useFaq('finance');
   const router = useRouter();
   const [range, setRange] = useState<Range>('month');
   const data = PL_DATA[range];
@@ -543,7 +544,7 @@ const FinancePage = (): JSX.Element => {
             </motion.div>
           </motion.section>
 
-          <FaqSection title="Questions about rtylr Finance" faqs={FINANCE_FAQS} />
+          <FaqSection title={faq.title} faqs={faq.items} />
 
           {/* ── CTA ───────────────────────────────────────────────────── */}
           <motion.section

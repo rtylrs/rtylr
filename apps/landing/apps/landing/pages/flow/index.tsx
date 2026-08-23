@@ -25,7 +25,7 @@ import HelmetContainer from '../../components/HelmetContainer';
 import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
-import { FLOW_FAQS } from '../../lib/faqs';
+import { useFaq } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -320,7 +320,8 @@ const DragTaskCard = ({
 
 // ── Page ──────────────────────────────────────────────────────────────────
 
-const FlowPage = (): JSX.Element => {
+const FlowPage = (): React.JSX.Element => {
+  const faq = useFaq('flow');
   const router = useRouter();
   const [columns, setColumns] = useState<Column[]>(INITIAL_COLUMNS);
   const [ruleIdx, setRuleIdx] = useState(0);
@@ -684,7 +685,7 @@ const FlowPage = (): JSX.Element => {
             </motion.div>
           </motion.section>
 
-          <FaqSection title="Questions about rtylr Flow" faqs={FLOW_FAQS} />
+          <FaqSection title={faq.title} faqs={faq.items} />
 
           {/* ── CTA ──────────────────────────────────────────────────── */}
           <motion.section

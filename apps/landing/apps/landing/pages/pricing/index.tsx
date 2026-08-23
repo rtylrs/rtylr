@@ -9,6 +9,7 @@ import HelmetContainer from '../../components/HelmetContainer';
 import { pricingPageSchema } from '../../lib/structured-data';
 import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../../components/FaqSection/FaqSection';
+import { useFaq } from '../../lib/faqs';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -86,10 +87,7 @@ const PricingPage = (): React.JSX.Element => {
     included: t('pricing.compare.included'),
     notIncluded: t('pricing.compare.notIncluded'),
   };
-  const faqs = t('pricing.faqItems', { returnObjects: true }) as unknown as {
-    question: string;
-    answer: string;
-  }[];
+  const faq = useFaq('pricing');
 
   const handleCta = (action: Plan['ctaAction']): void => {
     if (action === 'contact') {
@@ -194,7 +192,7 @@ const PricingPage = (): React.JSX.Element => {
             mechanism. FaqSection uses <details>: every answer is in the
             DOM, collapsed by CSS.
           */}
-          <FaqSection title={t('pricing.faq.title')} faqs={faqs} />
+          <FaqSection title={faq.title} faqs={faq.items} />
 
           {/* Bottom CTA */}
           <motion.section

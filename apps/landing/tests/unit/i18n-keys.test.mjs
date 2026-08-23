@@ -49,7 +49,16 @@ const T_CALL = /\bt\(\s*(['"])([A-Za-z][\w.]*)\1/g;
 // exemption stays narrow.
 const T_TEMPLATE = /\bt\(\s*`([^`$]*)\$\{/g;
 
-const SOURCE_GLOBS = ['pages/**/*.tsx', 'components/**/*.tsx', 'layouts/**/*.tsx'];
+// lib and services are in here because t() is not confined to components:
+// lib/faqs.ts exports a useFaq hook that builds keys, and leaving lib out
+// made every FAQ key look orphaned.
+const SOURCE_GLOBS = [
+  'pages/**/*.tsx',
+  'components/**/*.tsx',
+  'layouts/**/*.tsx',
+  'lib/**/*.ts',
+  'services/**/*.ts',
+];
 
 let en;
 let used;
@@ -73,7 +82,9 @@ const placeholders = (s) =>
 before(() => {
   en = loadLocale('en');
 
-  const files = SOURCE_GLOBS.flatMap((g) => globSync(g, { cwd: APP })).sort();
+  const files = SOURCE_GLOBS.flatMap((g) => globSync(g, { cwd: APP }))
+    .filter((f) => !/\.(test|spec)\.tsx?$/.test(f))
+    .sort();
   // A zero here would make every assertion below vacuously pass.
   assert.ok(files.length > 40, `expected 40+ source files, found ${files.length}`);
 
