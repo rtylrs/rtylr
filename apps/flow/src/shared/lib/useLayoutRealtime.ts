@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { RealtimeEvent } from '@voxire/api';
 
 import { getCurrentUserId } from './currentUser';
-import { isApiWorkspaceId } from './personalWorkspace';
 import { useRealtime } from './realtime';
 
 /**
@@ -22,7 +21,7 @@ import { useRealtime } from './realtime';
  * this because none of the sidebar data is on screen there.
  */
 export function useLayoutRealtime(
-  workspaceId: string | undefined,
+  businessId: string | undefined,
   userId: string | undefined,
   enabled: boolean
 ): void {
@@ -41,6 +40,9 @@ export function useLayoutRealtime(
       }
       if (e.type.startsWith('project.')) {
         qc.invalidateQueries({ queryKey: ['projects'] });
+        // archived / restored / purged move a project between the list and the
+        // recycle bin, so the bin's own query has to refetch too.
+        qc.invalidateQueries({ queryKey: ['archived-projects'] });
       }
       if (e.type.startsWith('workspace.')) {
         qc.invalidateQueries({ queryKey: ['workspaces'] });
@@ -52,15 +54,17 @@ export function useLayoutRealtime(
 
   const topics = useMemo(() => {
     const t: string[] = [];
-    // Only subscribe to a resolved workspace id - "personal" is a client-only
-    // sentinel, not a valid server-side topic. Same predicate the workspace
-    // queries gate on, so there is one definition of "real workspace id".
-    if (isApiWorkspaceId(workspaceId)) {
-      t.push(`workspace:${workspaceId}`);
+    // business:<id>, not workspace:<id>. v2 fans every project lifecycle event
+    // (created, updated, archived, restored, purged) to the business topic via
+    // publishBusinessEvent, and nothing was listening there - so none of those
+    // events reached the sidebar. Subscribing to the workspace topic instead
+    // also kept a dying concept alive on the client.
+    if (businessId) {
+      t.push(`business:${businessId}`);
     }
     if (userId) t.push(`user:${userId}`);
     return t;
-  }, [workspaceId, userId]);
+  }, [businessId, userId]);
 
   useRealtime(enabled ? topics : [], onEvent);
 }

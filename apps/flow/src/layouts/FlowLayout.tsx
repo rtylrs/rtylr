@@ -73,7 +73,7 @@ import { useNotifications } from '../features/inbox/useNotifications';
 import { apiProjectToProject } from '../shared/lib/projectMapper';
 import { LicenseBanner } from '@voxire/components';
 import { licenseClient } from '../shared/lib/api';
-import { useFlowBusinessName } from '../shared/hooks/useFlowBusinessName';
+import { useFlowBusinessName, useFlowBusinessId } from '../shared/hooks/useFlowBusinessName';
 import { useLayoutRealtime } from '../shared/lib/useLayoutRealtime';
 import { useRealtimeReconnectRefetch, useRealtimeStatus } from '../shared/lib/realtime';
 import { routeNeedsRealtime } from '../shared/lib/realtimeRouteGate';
@@ -280,6 +280,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const unreadNotifications = apiNotifications.filter((n) => !n.read).length;
 
   const { data: businessName } = useFlowBusinessName();
+  const { data: realtimeBusinessId } = useFlowBusinessId();
 
   // The workspace layer is gone. Realtime and the Caret route context still
   // take a workspace argument, so this stays as one empty constant rather than
@@ -351,7 +352,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const userId = user?.id;
   const caretUserId = Number(userId) || 0;
   const shouldUseRealtime = routeNeedsRealtime(location.pathname);
-  useLayoutRealtime(currentWorkspaceId, userId, shouldUseRealtime);
+  useLayoutRealtime(realtimeBusinessId ?? undefined, userId, shouldUseRealtime);
   // Reconnect can happen regardless of which topics are currently active, so
   // this runs unconditionally rather than gated by shouldUseRealtime.
   useRealtimeReconnectRefetch();
