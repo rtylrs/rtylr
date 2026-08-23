@@ -796,5 +796,8 @@
   "projectStatus": {
     "active": "Actif",
     "completed": "Terminé"
+  },
+  "sidebar": {
+    "yourReports": "Vos équipes"
   }
 }

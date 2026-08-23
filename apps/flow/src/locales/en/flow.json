@@ -796,5 +796,8 @@
   "projectStatus": {
     "active": "Active",
     "completed": "Completed"
+  },
+  "sidebar": {
+    "yourReports": "Your reports"
   }
 }

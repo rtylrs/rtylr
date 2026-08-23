@@ -72,6 +72,13 @@ export interface Project {
   lead: string;
   archived?: boolean;
   icon?: string;
+  /**
+   * True when the caller sees this project only because they manage someone
+   * involved in it (the dept-manager proxy). A per-caller projection from the
+   * server, not a property of the project: the same project is false for its own
+   * members and true for their manager.
+   */
+  visibleViaReport?: boolean;
 }
 
 export interface Comment {

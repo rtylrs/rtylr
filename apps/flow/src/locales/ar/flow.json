@@ -827,5 +827,8 @@
   "projectStatus": {
     "active": "نشط",
     "completed": "مكتمل"
+  },
+  "sidebar": {
+    "yourReports": "مشاريع فريقك"
   }
 }

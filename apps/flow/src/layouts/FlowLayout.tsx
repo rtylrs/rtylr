@@ -457,6 +457,14 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   );
   const activeProject = sidebarProjects.find((project) => project.id === projectId);
 
+  // P9: a project visible only because the caller manages someone on it belongs
+  // under its own heading. Listed together with the caller's own it would read as
+  // their work, which is what visible_via_report exists to distinguish. With no
+  // reports every project falls in the first group and the sidebar is unchanged.
+  const ownSidebarProjects = sidebarProjects.filter((p) => !p.visibleViaReport);
+  const reportSidebarProjects = sidebarProjects.filter((p) => p.visibleViaReport);
+  const orderedSidebarProjects = [...ownSidebarProjects, ...reportSidebarProjects];
+
   const myIssuesCount = tasks.filter(
     (t) =>
       isTaskMine(t.assigneeId) && t.status !== 'done' && t.status !== 'cancelled' && !t.archived
@@ -969,44 +977,61 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         </div>
                         <SidebarCollapsible open={!isSidebarSectionCollapsed('projects')}>
                           <div className="flex flex-col gap-px pt-px">
-                            {sidebarProjects.map((project) => {
+                            {orderedSidebarProjects.map((project, index) => {
                               const boardPath = `/p/${project.id}`;
                               const isActive = projectId === project.id;
+                              // The heading is emitted before the first proxied
+                              // project rather than wrapping a second map, so the
+                              // row markup below stays in one place.
+                              const startsReports =
+                                reportSidebarProjects.length > 0 &&
+                                index === ownSidebarProjects.length;
                               return (
-                                <Link
-                                  key={project.id}
-                                  to={boardPath}
-                                  className={cn(
-                                    'relative flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[12px] transition-colors duration-150',
-                                    isActive ? '' : 'hover:bg-[var(--flow-hover)]'
+                                <React.Fragment key={project.id}>
+                                  {startsReports && (
+                                    <div
+                                      className="px-2 pb-px pt-2 text-[10px] font-semibold uppercase tracking-wider"
+                                      style={{ color: 'var(--flow-text-muted)' }}
+                                    >
+                                      {t('flow.sidebar.yourReports')}
+                                    </div>
                                   )}
-                                  style={{
-                                    color: isActive ? 'var(--flow-text)' : 'var(--flow-text-muted)',
-                                  }}
-                                >
-                                  {isActive && (
-                                    <motion.span
-                                      layoutId={`project-active-${project.id}`}
-                                      className="absolute inset-0 rounded-md"
-                                      style={{ background: 'var(--flow-active)' }}
-                                      transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-                                    />
-                                  )}
-                                  <Circle
-                                    size={8}
-                                    className="relative shrink-0 fill-current"
-                                    style={{ color: project.color }}
-                                  />
-                                  <span className="relative flex-1 truncate font-medium">
-                                    {project.name}
-                                  </span>
-                                  <span
-                                    className="relative text-[10px]"
-                                    style={{ color: 'var(--flow-text-dim)' }}
+                                  <Link
+                                    to={boardPath}
+                                    className={cn(
+                                      'relative flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[12px] transition-colors duration-150',
+                                      isActive ? '' : 'hover:bg-[var(--flow-hover)]'
+                                    )}
+                                    style={{
+                                      color: isActive
+                                        ? 'var(--flow-text)'
+                                        : 'var(--flow-text-muted)',
+                                    }}
                                   >
-                                    {project.taskCount - project.completedCount}
-                                  </span>
-                                </Link>
+                                    {isActive && (
+                                      <motion.span
+                                        layoutId={`project-active-${project.id}`}
+                                        className="absolute inset-0 rounded-md"
+                                        style={{ background: 'var(--flow-active)' }}
+                                        transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                                      />
+                                    )}
+                                    <Circle
+                                      size={8}
+                                      className="relative shrink-0 fill-current"
+                                      style={{ color: project.color }}
+                                    />
+                                    <span className="relative flex-1 truncate font-medium">
+                                      {project.name}
+                                    </span>
+                                    <span
+                                      className="relative text-[10px]"
+                                      style={{ color: 'var(--flow-text-dim)' }}
+                                    >
+                                      {project.taskCount - project.completedCount}
+                                    </span>
+                                  </Link>
+                                </React.Fragment>
                               );
                             })}
                           </div>
