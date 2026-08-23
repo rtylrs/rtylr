@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
@@ -14,46 +15,29 @@ import {
   slideInLeft,
   slideInRight,
 } from '../../lib/animations';
+import Lines from '../../components/text/Lines';
 import styles from './about.module.scss';
 
-const PRODUCT_CLUSTERS = [
-  {
-    label: 'Front of House',
-    apps: ['POS', 'CRM'],
-    description: 'Manage every customer touchpoint, point of sale, loyalty, campaigns, and beyond.',
-  },
-  {
-    label: 'Operations',
-    apps: ['ERP', 'Finance'],
-    description: 'Keep inventory, purchasing, invoices, and P&L tight across every location.',
-  },
-  {
-    label: 'People',
-    apps: ['HR', 'Flow', 'Insights'],
-    description: 'Staff scheduling, project management, and analytics all unified in one place.',
-  },
+// The app lists are product names, not copy. Label and description
+// resolve from about.clusters, matched by position.
+const CLUSTER_APPS: string[][] = [
+  ['POS', 'CRM'],
+  ['ERP', 'Finance'],
+  ['HR', 'Flow', 'Insights'],
 ];
 
-const VALUES = [
-  {
-    title: 'Everything in one place',
-    body: 'No more juggling seven tools. One login, one workspace, one source of truth for your business.',
-  },
-  {
-    title: 'Built for teams',
-    body: 'From a two-person shop to a 500-seat enterprise, rtylr scales to fit how your team actually works.',
-  },
-  {
-    title: 'AI-first by design',
-    body: 'Every app ships with an embedded AI assistant, not a bolt-on, but part of the core experience.',
-  },
-  {
-    title: 'Always available offline',
-    body: 'POS and critical workflows work without internet. Sync happens automatically when you reconnect.',
-  },
-];
+
 
 const AboutPage = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const clusters = t('about.clusters', { returnObjects: true }) as unknown as {
+    label: string;
+    description: string;
+  }[];
+  const values = t('about.values', { returnObjects: true }) as unknown as {
+    title: string;
+    body: string;
+  }[];
   const router = useRouter();
 
   const handleGetStarted = (): void => {
@@ -68,8 +52,8 @@ const AboutPage = (): React.JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="About rtylr · The All-in-One Business OS for Modern Teams"
-          description="We're building the operating system for commerce. One platform for POS, ERP, HR, CRM, Finance, Flow, and Insights."
+          title={t('about.meta.title')}
+          description={t('about.meta.description')}
           canonical="https://rtylr.com/about/"
           structuredData={aboutPageSchema({
             description:
@@ -88,12 +72,10 @@ const AboutPage = (): React.JSX.Element => {
             <div className={styles.heroInner}>
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
                 <span className={styles.eyebrowDot} />
-                ABOUT VOXIRE &amp; RTYLR
+                {t('about.hero.eyebrow')}
               </motion.span>
               <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-                An operating system
-                <br />
-                for real businesses.
+                <Lines text={t('about.hero.title')} />
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
                 Most small businesses run on six to eight disconnected apps. They export CSVs all
@@ -114,8 +96,8 @@ const AboutPage = (): React.JSX.Element => {
             <div className={styles.sectionContainer}>
               <div className={styles.missionGrid}>
                 <motion.div className={styles.missionLeft} variants={slideInLeft}>
-                  <span className={styles.sectionLabel}>OUR MISSION</span>
-                  <h2 className={styles.missionTitle}>Stop the CSV life.</h2>
+                  <span className={styles.sectionLabel}>{t('about.mission.eyebrow')}</span>
+                  <h2 className={styles.missionTitle}>{t('about.mission.title')}</h2>
                   <p className={styles.missionBody}>
                     Commerce software should work the way commerce does, one sale, one inventory
                     drop, one payroll line, one customer record. Not seven apps pretending they talk
@@ -137,10 +119,10 @@ const AboutPage = (): React.JSX.Element => {
           >
             <div className={styles.sectionContainer}>
               <motion.span className={styles.sectionLabel} variants={blurFadeIn}>
-                THE STORY
+                {t('about.story.eyebrow')}
               </motion.span>
               <motion.h2 className={styles.storyTitle} variants={blurFadeIn}>
-                We got tired of the duct tape.
+                {t('about.story.title')}
               </motion.h2>
               <motion.div className={styles.storyBody} variants={blurFadeIn}>
                 <p>
@@ -173,29 +155,29 @@ const AboutPage = (): React.JSX.Element => {
           >
             <div className={styles.sectionContainer}>
               <motion.span className={styles.sectionLabel} variants={blurFadeIn}>
-                The Platform
+                {t('about.platform.eyebrow')}
               </motion.span>
               <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-                Seven apps. One platform.
+                {t('about.platform.title')}
               </motion.h2>
               <div className={styles.productsGrid}>
-                {PRODUCT_CLUSTERS.map((cluster) => (
+                {CLUSTER_APPS.map((apps, ci) => (
                   <motion.div
-                    key={cluster.label}
+                    key={clusters[ci].label}
                     className={styles.productCard}
                     variants={blurFadeIn}
                   >
                     <div className={styles.productCardTop}>
-                      <h3 className={styles.productCardLabel}>{cluster.label}</h3>
+                      <h3 className={styles.productCardLabel}>{clusters[ci].label}</h3>
                       <div className={styles.productPills}>
-                        {cluster.apps.map((app) => (
+                        {apps.map((app) => (
                           <span key={app} className={styles.appPill}>
                             {app}
                           </span>
                         ))}
                       </div>
                     </div>
-                    <p className={styles.productCardDescription}>{cluster.description}</p>
+                    <p className={styles.productCardDescription}>{clusters[ci].description}</p>
                   </motion.div>
                 ))}
               </div>
@@ -215,10 +197,10 @@ const AboutPage = (): React.JSX.Element => {
                 Values
               </motion.span>
               <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-                What we stand for.
+                {t('about.valuesTitle')}
               </motion.h2>
               <div className={styles.valuesGrid}>
-                {VALUES.map((value) => (
+                {values.map((value) => (
                   <motion.div key={value.title} className={styles.valueCard} variants={blurFadeIn}>
                     <div className={styles.valueDot} aria-hidden="true" />
                     <h3 className={styles.valueTitle}>{value.title}</h3>
@@ -239,17 +221,17 @@ const AboutPage = (): React.JSX.Element => {
           >
             <div className={styles.sectionContainer}>
               <motion.div className={styles.ctaInner} variants={blurFadeIn}>
-                <h2 className={styles.ctaTitle}>Join the businesses already using rtylr.</h2>
+                <h2 className={styles.ctaTitle}>{t('about.cta.title')}</h2>
                 <p className={styles.ctaSubtitle}>
-                  Free forever for up to 5 members. No credit card required.
-                </p>
+                {t('about.cta.subtitle')}
+              </p>
                 <div className={styles.ctaButtons}>
                   <button className={styles.ctaPrimary} onClick={handleGetStarted}>
-                    Get started
-                  </button>
+                {t('common.cta.getStarted')}
+              </button>
                   <button className={styles.ctaSecondary} onClick={handleBookDemo}>
-                    Book a demo
-                  </button>
+                {t('common.cta.bookDemo')}
+              </button>
                 </div>
               </motion.div>
             </div>

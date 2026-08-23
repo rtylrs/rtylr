@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import {
   Scale,
@@ -20,80 +21,26 @@ import { productPageSchema } from '../../lib/structured-data';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import styles from './hardware.module.scss';
 
-interface HardwareItem {
-  name: string;
-  model: string;
-  description: string;
-  icon: LucideIcon;
-}
-
-const HARDWARE_ITEMS: HardwareItem[] = [
-  {
-    name: 'Digital Scale',
-    model: 'HS-117',
-    description:
-      'Precision weighing for ingredients and products. High-accuracy load cell with backlit LCD display.',
-    icon: Scale,
-  },
-  {
-    name: 'Cash Drawer',
-    model: 'CD-460',
-    description:
-      'Secure dual-bill, dual-coin POS cash drawer with heavy-duty steel construction and auto-open trigger.',
-    icon: Archive,
-  },
-  {
-    name: 'Thermal Receipt Printer',
-    model: 'HS-8250',
-    description:
-      '80mm high-speed receipt printing at 250mm/s. Supports USB, LAN, and Bluetooth connectivity.',
-    icon: Printer,
-  },
-  {
-    name: 'Barcode Scanner',
-    model: 'BS-200',
-    description:
-      '1D/2D omnidirectional USB scanner with 360° coverage. Reads damaged and low-contrast barcodes.',
-    icon: ScanLine,
-  },
-  {
-    name: 'Card Terminal',
-    model: 'CT-500',
-    description:
-      'Tap, chip & swipe EMV-certified payments. Supports NFC, Apple Pay, Google Pay, and Visa/MC.',
-    icon: CreditCard,
-  },
-  {
-    name: 'Kitchen Display System',
-    model: 'KDS-15',
-    description:
-      '15" wall-mount order display with real-time ticket management and multi-station routing.',
-    icon: Monitor,
-  },
-  {
-    name: 'Tablet Stand',
-    model: 'TS-360',
-    description:
-      'Adjustable 360° rotating tablet mount. Compatible with 7"–13" tablets. Weighted non-slip base.',
-    icon: Tablet,
-  },
-  {
-    name: 'Customer Display',
-    model: 'CD-Dual',
-    description:
-      'Dual-screen customer-facing display. Rear LCD shows order totals, promotions, and loyalty points.',
-    icon: MonitorSmartphone,
-  },
-  {
-    name: 'Label Printer',
-    model: 'LP-420',
-    description:
-      '4" thermal label printer for shelf tags, product labels, and expiry stickers. 203 dpi resolution.',
-    icon: Tag,
-  },
+// Model number and icon only. The name and description resolve from
+// hardware.items, matched by position. A SKU is not copy.
+const HARDWARE_SPECS: { model: string; icon: LucideIcon }[] = [
+  { model: 'HS-117', icon: Scale },
+  { model: 'CD-460', icon: Archive },
+  { model: 'HS-8250', icon: Printer },
+  { model: 'BS-200', icon: ScanLine },
+  { model: 'CT-500', icon: CreditCard },
+  { model: 'KDS-15', icon: Monitor },
+  { model: 'TS-360', icon: Tablet },
+  { model: 'CD-Dual', icon: MonitorSmartphone },
+  { model: 'LP-420', icon: Tag },
 ];
 
 const HardwarePage = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const items = t('hardware.items', { returnObjects: true }) as unknown as {
+    name: string;
+    description: string;
+  }[];
   const router = useRouter();
 
   const handleBookDemo = (): void => {
@@ -108,14 +55,13 @@ const HardwarePage = (): React.JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="POS Hardware · Terminals, Printers & Scanners | rtylr"
-          description="Tested and certified hardware ecosystem designed for rtylr POS. Every device is optimized out of the box."
+          title={t('hardware.meta.title')}
+          description={t('hardware.meta.description')}
           canonical="https://rtylr.com/hardware/"
           structuredData={productPageSchema({
             name: 'Hardware',
             path: '/hardware/',
-            description:
-              'Tested and certified hardware ecosystem designed for rtylr POS. Every device is optimized out of the box.',
+            description: t('hardware.meta.description'),
           })}
         />
 
@@ -130,14 +76,13 @@ const HardwarePage = (): React.JSX.Element => {
             <div className={styles.heroInner}>
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
                 <span className={styles.eyebrowDot} />
-                RTYLR HARDWARE
+                {t('hardware.hero.eyebrow')}
               </motion.span>
               <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-                Plug it in. Ring it up.
+                {t('hardware.hero.title')}
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Certified printers, card readers, scanners, and kiosks, paired with rtylr POS out of
-                the box. No drivers to install, no firmware to sideload, no configuration weekend.
+                {t('hardware.hero.subtitle')}
               </motion.p>
             </div>
           </motion.section>
@@ -155,14 +100,15 @@ const HardwarePage = (): React.JSX.Element => {
                   page jumped h1 to h3, which is the one heading rule this
                   repo gates on. */}
               <motion.h2 className={styles.gridTitle} variants={blurFadeIn}>
-                What you can plug in
+                {t('hardware.gridTitle')}
               </motion.h2>
               <div className={styles.hardwareGrid}>
-                {HARDWARE_ITEMS.map((item) => {
-                  const Icon = item.icon;
+                {HARDWARE_SPECS.map((spec, i) => {
+                  const Icon = spec.icon;
+                  const item = items[i];
                   return (
                     <motion.div
-                      key={item.model}
+                      key={spec.model}
                       className={styles.hardwareCard}
                       variants={blurFadeIn}
                     >
@@ -172,7 +118,7 @@ const HardwarePage = (): React.JSX.Element => {
                           <Icon size={24} strokeWidth={1.5} />
                         </div>
                         <div className={styles.cardMeta}>
-                          <span className={styles.cardModel}>{item.model}</span>
+                          <span className={styles.cardModel}>{spec.model}</span>
                           <h3 className={styles.cardName}>{item.name}</h3>
                         </div>
                         <p className={styles.cardDescription}>{item.description}</p>
@@ -193,10 +139,9 @@ const HardwarePage = (): React.JSX.Element => {
             variants={blurFadeIn}
           >
             <div className={styles.stripInner}>
-              <span className={styles.stripBadge}>Plug &amp; Play</span>
+              <span className={styles.stripBadge}>{t('hardware.strip.badge')}</span>
               <p className={styles.stripText}>
-                All hardware integrates with rtylr POS out of the box. Zero drivers, zero
-                configuration.
+                {t('hardware.strip.text')}
               </p>
             </div>
           </motion.section>
@@ -211,17 +156,16 @@ const HardwarePage = (): React.JSX.Element => {
           >
             <div className={styles.sectionContainer}>
               <motion.div className={styles.ctaInner} variants={blurFadeIn}>
-                <h2 className={styles.ctaTitle}>Get hardware for your business.</h2>
+                <h2 className={styles.ctaTitle}>{t('hardware.cta.title')}</h2>
                 <p className={styles.ctaSubtitle}>
-                  Our team will help you spec the right devices for your setup and ship everything
-                  pre-configured for your location.
+                  {t('hardware.cta.subtitle')}
                 </p>
                 <div className={styles.ctaButtons}>
                   <button className={styles.ctaPrimary} onClick={handleBookDemo}>
-                    Book a demo
+                    {t('common.cta.bookDemo')}
                   </button>
                   <button className={styles.ctaSecondary} onClick={handleContactSales}>
-                    Contact sales
+                    {t('hardware.cta.contactSales')}
                   </button>
                 </div>
               </motion.div>

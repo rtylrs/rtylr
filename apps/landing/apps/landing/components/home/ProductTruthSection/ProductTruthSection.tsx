@@ -38,48 +38,10 @@ interface Claim {
   check?: string;
 }
 
-const CLAIMS: Claim[] = [
-  {
-    title: 'One database, not seven integrations',
-    body: 'POS, ERP, CRM, HR, Finance and Flow read and write the same records. A sale depletes stock and lands in the ledger as it happens, because there is no second system to sync to.',
-  },
-  {
-    title: 'Every page is readable by a machine',
-    body: 'Ask any URL on this site for Markdown instead of HTML and you get Markdown, with the correct Vary header. No scraping, no rendering, no JavaScript.',
-    check: 'curl -H "Accept: text/markdown" https://rtylr.com/pos/',
-  },
-  {
-    title: 'The whole site is indexed as data',
-    body: 'A machine-readable index of all 23 pages, with titles and descriptions, generated at build time. It cannot drift from the site, because the site is what generates it.',
-    check: 'https://rtylr.com/pages.json',
-  },
-  {
-    title: 'All 7 apps on every plan',
-    body: 'No module upsells and no per-app licence. The plans differ by how many people and locations you run, not by which parts of the product you are allowed to open.',
-    check: 'https://rtylr.com/pricing/',
-  },
-  {
-    title: 'The Free plan needs no card',
-    body: 'Ten team members at one location, all 7 apps, no payment method and no trial clock. It is a plan, not a countdown.',
-    check: 'https://rtylr.com/pricing/',
-  },
-  {
-    title: 'An OpenAPI document, published',
-    body: 'This site publishes a spec for its own endpoints as OpenAPI 3.1. It covers the marketing site, not the product API, and it is linked here so nobody has to guess which.',
-    check: 'https://rtylr.com/openapi.json',
-  },
-];
-
-const LIMITS: string[] = [
-  'Prices are not published. The Free plan is free; Pro and Scale are quoted.',
-  'No integration is live yet. /integrations/ lists what is planned and marks every entry Coming soon.',
-  'Payroll filing is not ours. rtylr HR calculates pay and exports files for Gusto, ADP or Rippling to file.',
-  'Complex accounting still wants a ledger. Multi-entity consolidation and heavy audit trails are better served by QuickBooks or Xero, and rtylr Finance exports to both.',
-  'The apps are in English. Arabic and French are being written, not translated, and are not shipped yet.',
-];
-
 const ProductTruthSection = (): React.JSX.Element => {
   const { t } = useTranslation();
+  const claims = t('home.truth.claims', { returnObjects: true }) as unknown as Claim[];
+  const limits = t('home.truth.limits', { returnObjects: true }) as unknown as string[];
 
   return (
     <section className={styles.truthSection}>
@@ -91,7 +53,7 @@ const ProductTruthSection = (): React.JSX.Element => {
         </div>
 
         <div className={styles.grid}>
-          {CLAIMS.map((claim) => (
+          {claims.map((claim) => (
             <div key={claim.title} className={styles.claim}>
               <h3 className={styles.claimTitle}>{claim.title}</h3>
               <p className={styles.claimBody}>{claim.body}</p>
@@ -107,7 +69,7 @@ const ProductTruthSection = (): React.JSX.Element => {
         <div className={styles.limits}>
           <h3 className={styles.limitsTitle}>{t('home.truth.limitsTitle')}</h3>
           <ul className={styles.limitsList}>
-            {LIMITS.map((limit) => (
+            {limits.map((limit) => (
               <li key={limit} className={styles.limitsItem}>
                 {limit}
               </li>

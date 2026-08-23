@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import {
   Handshake,
@@ -18,82 +19,28 @@ import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import { webPageSchema } from '../../lib/structured-data';
+import Lines from '../../components/text/Lines';
 import styles from './partners.module.scss';
 
-const TRACKS = [
-  {
-    icon: Store,
-    name: 'Implementation Partners',
-    summary:
-      'Consultancies and agencies that set up rtylr for end customers, POS configuration, menu migration, HR onboarding.',
-    who: 'For ops consultancies, restaurant-tech specialists, and digital agencies.',
-    benefits: [
-      'Referral fees on first-year revenue',
-      'Co-selling with our account team',
-      'Dedicated partner portal with pre-sales collateral',
-      'rtylr Certified Implementer accreditation',
-    ],
-  },
-  {
-    icon: Puzzle,
-    name: 'Technology Partners',
-    summary:
-      'Software that integrates with rtylr, delivery marketplaces, payment processors, loyalty engines, BI tools.',
-    who: 'For SaaS companies adjacent to commerce, POS, HR, or finance.',
-    benefits: [
-      'Listed in the integrations directory',
-      'Co-marketing on launch',
-      'Joint webinars with our customers',
-      'Priority partner support channel',
-    ],
-  },
-  {
-    icon: GraduationCap,
-    name: 'Solution Partners',
-    summary:
-      'Training, enablement, and managed services built around rtylr, franchise rollouts, staff training, compliance audits.',
-    who: 'For training companies, franchise enablement teams, and vertical specialists.',
-    benefits: [
-      'Revenue share on multi-location deals',
-      'Rtylr Certified Trainer program',
-      'Early access to new apps and APIs',
-      'Feature placement in customer newsletters',
-    ],
-  },
-  {
-    icon: Handshake,
-    name: 'Hardware Partners',
-    summary:
-      'Printers, card readers, scanners, kiosk terminals, hardware that rtylr ships to the end customer.',
-    who: 'For hardware OEMs and authorized distributors.',
-    benefits: [
-      'Direct inclusion in the rtylr hardware catalog',
-      'Certification program for plug-and-play pairing',
-      'Joint customer fulfillment operations',
-      'SDK access for native driver integration',
-    ],
-  },
-];
+// Icons only. Every string resolves from partners.tracks, matched by
+// position; the track number is derived from that position.
+const TRACK_ICONS = [Store, Puzzle, GraduationCap, Handshake];
 
-const TIER_LEVELS = [
-  {
-    name: 'Registered',
-    desc: 'You\u2019re in the program. Directory listing, referral tracking, basic co-marketing assets.',
-    commitment: '0 closed deals',
-  },
-  {
-    name: 'Certified',
-    desc: 'You\u2019ve completed the product training and closed your first deals. Higher referral rates.',
-    commitment: '3+ closed deals',
-  },
-  {
-    name: 'Premier',
-    desc: 'Dedicated partner manager, pre-launch access, co-selling motions, feature on the home page.',
-    commitment: '15+ closed deals',
-  },
-];
+
 
 const PartnersPage = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const tracks = t('partners.tracks', { returnObjects: true }) as unknown as {
+    name: string;
+    summary: string;
+    who: string;
+    benefits: string[];
+  }[];
+  const tiers = t('partners.tiers', { returnObjects: true }) as unknown as {
+    name: string;
+    commitment: string;
+    desc: string;
+  }[];
   const router = useRouter();
 
   const goApply = (): void => {
@@ -104,8 +51,8 @@ const PartnersPage = (): React.JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Partner Program | rtylr"
-          description="Build with rtylr. Implementation partners, technology partners, solution partners, and hardware partners, terms, tiers, and how to apply."
+          title={t('partners.meta.title')}
+          description={t('partners.meta.description')}
           canonical="https://rtylr.com/partners/"
           structuredData={webPageSchema({
             name: 'Partner Program',
@@ -126,12 +73,10 @@ const PartnersPage = (): React.JSX.Element => {
             >
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
                 <Handshake size={13} strokeWidth={2} />
-                PARTNER PROGRAM
+                {t('partners.hero.eyebrow')}
               </motion.span>
               <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-                Build with rtylr.
-                <br />
-                <span className={styles.heroTitleSoft}>Grow with us.</span>
+                <Lines text={t('partners.hero.title')} />
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
                 Agencies that set it up. Software that plugs in. Hardware that ships with it.
@@ -140,11 +85,11 @@ const PartnersPage = (): React.JSX.Element => {
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goApply} className={styles.primaryBtn}>
-                  Apply to the program
-                </button>
+                {t('partners.hero.apply')}
+              </button>
                 <a href="mailto:partners@voxire.com" className={styles.outlineBtn}>
-                  Email partners@voxire.com
-                </a>
+                {t('partners.hero.email')}
+              </a>
               </motion.div>
             </motion.div>
           </section>
@@ -159,12 +104,10 @@ const PartnersPage = (): React.JSX.Element => {
               variants={staggerBlur}
             >
               <motion.span className={styles.sectionEyebrow} variants={blurFadeIn}>
-                FOUR TRACKS
+                {t('partners.tracksSection.eyebrow')}
               </motion.span>
               <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-                Pick the track
-                <br />
-                that fits you.
+                {t('partners.tracksSection.title')}
               </motion.h2>
             </motion.div>
 
@@ -175,21 +118,21 @@ const PartnersPage = (): React.JSX.Element => {
               viewport={viewportOnce}
               variants={staggerBlur}
             >
-              {TRACKS.map(({ icon: Icon, name, summary, who, benefits }, i) => (
-                <motion.div key={name} className={styles.track} variants={blurFadeIn}>
+              {TRACK_ICONS.map((Icon, i) => (
+                <motion.div key={tracks[i].name} className={styles.track} variants={blurFadeIn}>
                   <div className={styles.trackHeader}>
                     <span className={styles.trackNumber}>{String(i + 1).padStart(2, '0')}</span>
                     <div className={styles.trackIcon}>
                       <Icon size={18} strokeWidth={1.8} />
                     </div>
                     <div className={styles.trackTitles}>
-                      <h3 className={styles.trackName}>{name}</h3>
-                      <p className={styles.trackWho}>{who}</p>
+                      <h3 className={styles.trackName}>{tracks[i].name}</h3>
+                      <p className={styles.trackWho}>{tracks[i].who}</p>
                     </div>
                   </div>
-                  <p className={styles.trackSummary}>{summary}</p>
+                  <p className={styles.trackSummary}>{tracks[i].summary}</p>
                   <ul className={styles.trackBenefits}>
-                    {benefits.map((b) => (
+                    {tracks[i].benefits.map((b) => (
                       <li key={b}>
                         <BadgeCheck size={14} strokeWidth={2} />
                         <span>{b}</span>
@@ -210,11 +153,11 @@ const PartnersPage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.div className={styles.tiersHeader} variants={blurFadeIn}>
-              <span className={styles.sectionEyebrow}>HOW YOU LEVEL UP</span>
-              <h2 className={styles.sectionTitle}>Three tiers. Earned, not paid.</h2>
+              <span className={styles.sectionEyebrow}>{t('partners.tiersSection.eyebrow')}</span>
+              <h2 className={styles.sectionTitle}>{t('partners.tiersSection.title')}</h2>
             </motion.div>
             <motion.div className={styles.tiersGrid} variants={blurFadeIn}>
-              {TIER_LEVELS.map((tier, i) => (
+              {tiers.map((tier, i) => (
                 <div key={tier.name} className={styles.tierCard}>
                   <div className={styles.tierBadge}>{tier.name}</div>
                   <div className={styles.tierCommitment}>{tier.commitment}</div>
@@ -286,7 +229,7 @@ const PartnersPage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.h2 className={styles.ctaTitle} variants={blurFadeIn}>
-              Want in?
+              {t('partners.cta.title')}
             </motion.h2>
             <motion.p className={styles.ctaCopy} variants={blurFadeIn}>
               Applications are reviewed weekly. We&apos;ll respond within 5 business days with a
@@ -294,7 +237,7 @@ const PartnersPage = (): React.JSX.Element => {
             </motion.p>
             <motion.div className={styles.ctaButtons} variants={blurFadeIn}>
               <button type="button" onClick={goApply} className={styles.primaryBtn}>
-                Start an application
+                {t('partners.cta.apply')}
               </button>
               <a href="mailto:partners@voxire.com" className={styles.outlineBtn}>
                 partners@voxire.com

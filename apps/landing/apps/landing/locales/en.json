@@ -473,7 +473,45 @@
       "title": "What we can prove.",
       "description": "Six claims you can verify from a browser tab or a terminal, and five things rtylr does not do yet. Nothing here needs a sales call to confirm.",
       "limitsTitle": "What rtylr does not do yet",
-      "checkLabel": "Check it:"
+      "checkLabel": "Check it:",
+      "claims": [
+        {
+          "title": "One database, not seven integrations",
+          "body": "POS, ERP, CRM, HR, Finance and Flow read and write the same records. A sale depletes stock and lands in the ledger as it happens, because there is no second system to sync to."
+        },
+        {
+          "title": "Every page is readable by a machine",
+          "body": "Ask any URL on this site for Markdown instead of HTML and you get Markdown, with the correct Vary header. No scraping, no rendering, no JavaScript.",
+          "check": "curl -H \"Accept: text/markdown\" https://rtylr.com/pos/"
+        },
+        {
+          "title": "The whole site is indexed as data",
+          "body": "A machine-readable index of all 23 pages, with titles and descriptions, generated at build time. It cannot drift from the site, because the site is what generates it.",
+          "check": "https://rtylr.com/pages.json"
+        },
+        {
+          "title": "All 7 apps on every plan",
+          "body": "No module upsells and no per-app licence. The plans differ by how many people and locations you run, not by which parts of the product you are allowed to open.",
+          "check": "https://rtylr.com/pricing/"
+        },
+        {
+          "title": "The Free plan needs no card",
+          "body": "Ten team members at one location, all 7 apps, no payment method and no trial clock. It is a plan, not a countdown.",
+          "check": "https://rtylr.com/pricing/"
+        },
+        {
+          "title": "An OpenAPI document, published",
+          "body": "This site publishes a spec for its own endpoints as OpenAPI 3.1. It covers the marketing site, not the product API, and it is linked here so nobody has to guess which.",
+          "check": "https://rtylr.com/openapi.json"
+        }
+      ],
+      "limits": [
+        "Prices are not published. The Free plan is free; Pro and Scale are quoted.",
+        "No integration is live yet. /integrations/ lists what is planned and marks every entry Coming soon.",
+        "Payroll filing is not ours. rtylr HR calculates pay and exports files for Gusto, ADP or Rippling to file.",
+        "Complex accounting still wants a ledger. Multi-entity consolidation and heavy audit trails are better served by QuickBooks or Xero, and rtylr Finance exports to both.",
+        "The apps are in English. Arabic and French are being written, not translated, and are not shipped yet."
+      ]
     },
     "hero": {
       "announcePill": "BETA",
@@ -794,6 +832,323 @@
       "copy": "Full REST API covering every object in rtylr, menu items, orders, invoices, customers, shifts, tasks. Webhooks for every event. OAuth 2.0 for third-party apps. Rate-limited generously. Documented publicly.",
       "docs": "Read API docs",
       "contact": "Talk to an engineer"
+    }
+  },
+  "notFound": {
+    "meta": {
+      "title": "Page not found · rtylr",
+      "description": "The page you're looking for doesn't exist. Here's where you can go next."
+    },
+    "links": [
+      {
+        "label": "Homepage",
+        "description": "Back to the start."
+      },
+      {
+        "label": "Pricing",
+        "description": "See plans and per-seat pricing."
+      },
+      {
+        "label": "Products",
+        "description": "POS, ERP, HR, CRM, Finance, Flow."
+      },
+      {
+        "label": "Book a demo",
+        "description": "See rtylr running on your data."
+      },
+      {
+        "label": "Contact",
+        "description": "Talk to someone on our team."
+      }
+    ],
+    "eyebrow": "ERROR · 404",
+    "title": "This page\ndoesn't exist.",
+    "backHome": "Back to home",
+    "startFree": "Start free"
+  },
+  "about": {
+    "meta": {
+      "title": "About rtylr · The All-in-One Business OS for Modern Teams",
+      "description": "We're building the operating system for commerce. One platform for POS, ERP, HR, CRM, Finance, Flow, and Insights."
+    },
+    "clusters": [
+      {
+        "label": "Front of House",
+        "description": "Manage every customer touchpoint, point of sale, loyalty, campaigns, and beyond."
+      },
+      {
+        "label": "Operations",
+        "description": "Keep inventory, purchasing, invoices, and P&L tight across every location."
+      },
+      {
+        "label": "People",
+        "description": "Staff scheduling, project management, and analytics all unified in one place."
+      }
+    ],
+    "values": [
+      {
+        "title": "Everything in one place",
+        "body": "No more juggling seven tools. One login, one workspace, one source of truth for your business."
+      },
+      {
+        "title": "Built for teams",
+        "body": "From a two-person shop to a 500-seat enterprise, rtylr scales to fit how your team actually works."
+      },
+      {
+        "title": "AI-first by design",
+        "body": "Every app ships with an embedded AI assistant, not a bolt-on, but part of the core experience."
+      },
+      {
+        "title": "Always available offline",
+        "body": "POS and critical workflows work without internet. Sync happens automatically when you reconnect."
+      }
+    ],
+    "hero": {
+      "eyebrow": "ABOUT VOXIRE & RTYLR",
+      "title": "An operating system\nfor real businesses."
+    },
+    "mission": {
+      "eyebrow": "OUR MISSION",
+      "title": "Stop the CSV life."
+    },
+    "story": {
+      "eyebrow": "THE STORY",
+      "title": "We got tired of the duct tape."
+    },
+    "platform": {
+      "eyebrow": "The Platform",
+      "title": "Seven apps. One platform."
+    },
+    "valuesTitle": "What we stand for.",
+    "cta": {
+      "title": "Join the businesses already using rtylr.",
+      "subtitle": "Free forever for up to 10 members. No credit card required."
+    }
+  },
+  "trust": {
+    "meta": {
+      "title": "Trust Center | rtylr",
+      "description": "Security, privacy, compliance, uptime, and vendor transparency, everything customers need before they commit."
+    },
+    "pillars": [
+      {
+        "title": "Security program",
+        "copy": "Formal information-security program aligned with ISO 27001 and SOC 2. Reviewed quarterly."
+      },
+      {
+        "title": "Encryption",
+        "copy": "TLS 1.2+ in transit. AES-256 at rest. Separate backup regions. Secrets managed in a vault."
+      },
+      {
+        "title": "Access control",
+        "copy": "SSO + mandatory MFA for production. Least-privilege access, quarterly reviews."
+      },
+      {
+        "title": "Infrastructure",
+        "copy": "Cloudflare edge, Firebase / GCP managed services, multi-region backups with PITR."
+      },
+      {
+        "title": "24/7 monitoring",
+        "copy": "Continuous monitoring and alerting. Documented incident-response runbook. 72-hour breach notifications."
+      },
+      {
+        "title": "Vulnerability management",
+        "copy": "Dependencies scanned on every build. Annual third-party pen test. Critical CVEs patched within 7 days."
+      }
+    ],
+    "compliance": [
+      {
+        "label": "GDPR / UK GDPR",
+        "status": "Compliant"
+      },
+      {
+        "label": "CCPA / CPRA",
+        "status": "Compliant"
+      },
+      {
+        "label": "PCI DSS",
+        "status": "Via Paddle (Level 1)"
+      },
+      {
+        "label": "SOC 2 Type II",
+        "status": "In progress · Q4 2026"
+      },
+      {
+        "label": "ISO 27001",
+        "status": "Aligned, not yet certified"
+      },
+      {
+        "label": "HIPAA",
+        "status": "Not applicable"
+      }
+    ],
+    "hero": {
+      "eyebrow": "TRUST CENTER",
+      "title": "Run your business on something trustworthy.",
+      "securityDocs": "Security documentation",
+      "privacyPolicy": "Privacy policy"
+    },
+    "pillarsSection": {
+      "eyebrow": "HOW WE PROTECT YOUR DATA",
+      "title": "Six things we take\nseriously every day.",
+      "learnMore": "Learn more →"
+    },
+    "complianceSection": {
+      "eyebrow": "COMPLIANCE POSTURE",
+      "title": "Where we are.",
+      "copy": "We publish our compliance status transparently, certified, aligned, or in progress."
+    },
+    "residency": {
+      "title": "Where your data lives, and how you can take it with you."
+    },
+    "packet": {
+      "title": "Need our security packet, SIG, or DPA?"
+    }
+  },
+  "hardware": {
+    "meta": {
+      "title": "POS Hardware · Terminals, Printers & Scanners | rtylr",
+      "description": "Tested and certified hardware ecosystem designed for rtylr POS. Every device is optimized out of the box."
+    },
+    "items": [
+      {
+        "name": "Digital Scale",
+        "description": "Precision weighing for ingredients and products. High-accuracy load cell with backlit LCD display."
+      },
+      {
+        "name": "Cash Drawer",
+        "description": "Secure dual-bill, dual-coin POS cash drawer with heavy-duty steel construction and auto-open trigger."
+      },
+      {
+        "name": "Thermal Receipt Printer",
+        "description": "80mm high-speed receipt printing at 250mm/s. Supports USB, LAN, and Bluetooth connectivity."
+      },
+      {
+        "name": "Barcode Scanner",
+        "description": "1D/2D omnidirectional USB scanner with 360° coverage. Reads damaged and low-contrast barcodes."
+      },
+      {
+        "name": "Card Terminal",
+        "description": "Tap, chip & swipe EMV-certified payments. Supports NFC, Apple Pay, Google Pay, and Visa/MC."
+      },
+      {
+        "name": "Kitchen Display System",
+        "description": "15\" wall-mount order display with real-time ticket management and multi-station routing."
+      },
+      {
+        "name": "Tablet Stand",
+        "description": "Adjustable 360° rotating tablet mount. Compatible with 7\"–13\" tablets. Weighted non-slip base."
+      },
+      {
+        "name": "Customer Display",
+        "description": "Dual-screen customer-facing display. Rear LCD shows order totals, promotions, and loyalty points."
+      },
+      {
+        "name": "Label Printer",
+        "description": "4\" thermal label printer for shelf tags, product labels, and expiry stickers. 203 dpi resolution."
+      }
+    ],
+    "hero": {
+      "eyebrow": "RTYLR HARDWARE",
+      "title": "Plug it in. Ring it up.",
+      "subtitle": "Certified printers, card readers, scanners, and kiosks, paired with rtylr POS out of the box. No drivers to install, no firmware to sideload, no configuration weekend."
+    },
+    "gridTitle": "What you can plug in",
+    "strip": {
+      "badge": "Plug & Play",
+      "text": "All hardware integrates with rtylr POS out of the box. Zero drivers, zero configuration."
+    },
+    "cta": {
+      "title": "Get hardware for your business.",
+      "contactSales": "Contact sales",
+      "subtitle": "Our team will help you spec the right devices for your setup and ship everything pre-configured for your location."
+    }
+  },
+  "partners": {
+    "meta": {
+      "title": "Partner Program | rtylr",
+      "description": "Build with rtylr. Implementation partners, technology partners, solution partners, and hardware partners, terms, tiers, and how to apply."
+    },
+    "tracks": [
+      {
+        "benefits": [
+          "Referral fees on first-year revenue",
+          "Co-selling with our account team",
+          "Dedicated partner portal with pre-sales collateral",
+          "rtylr Certified Implementer accreditation"
+        ],
+        "name": "Implementation Partners",
+        "summary": "Consultancies and agencies that set up rtylr for end customers, POS configuration, menu migration, HR onboarding.",
+        "who": "For ops consultancies, restaurant-tech specialists, and digital agencies."
+      },
+      {
+        "benefits": [
+          "Listed in the integrations directory",
+          "Co-marketing on launch",
+          "Joint webinars with our customers",
+          "Priority partner support channel"
+        ],
+        "name": "Technology Partners",
+        "summary": "Software that integrates with rtylr, delivery marketplaces, payment processors, loyalty engines, BI tools.",
+        "who": "For SaaS companies adjacent to commerce, POS, HR, or finance."
+      },
+      {
+        "benefits": [
+          "Revenue share on multi-location deals",
+          "Rtylr Certified Trainer program",
+          "Early access to new apps and APIs",
+          "Feature placement in customer newsletters"
+        ],
+        "name": "Solution Partners",
+        "summary": "Training, enablement, and managed services built around rtylr, franchise rollouts, staff training, compliance audits.",
+        "who": "For training companies, franchise enablement teams, and vertical specialists."
+      },
+      {
+        "benefits": [
+          "Direct inclusion in the rtylr hardware catalog",
+          "Certification program for plug-and-play pairing",
+          "Joint customer fulfillment operations",
+          "SDK access for native driver integration"
+        ],
+        "name": "Hardware Partners",
+        "summary": "Printers, card readers, scanners, kiosk terminals, hardware that rtylr ships to the end customer.",
+        "who": "For hardware OEMs and authorized distributors."
+      }
+    ],
+    "tiers": [
+      {
+        "name": "Registered",
+        "desc": "You\\u2019re in the program. Directory listing, referral tracking, basic co-marketing assets.",
+        "commitment": "0 closed deals"
+      },
+      {
+        "name": "Certified",
+        "desc": "You\\u2019ve completed the product training and closed your first deals. Higher referral rates.",
+        "commitment": "3+ closed deals"
+      },
+      {
+        "name": "Premier",
+        "desc": "Dedicated partner manager, pre-launch access, co-selling motions, feature on the home page.",
+        "commitment": "15+ closed deals"
+      }
+    ],
+    "hero": {
+      "eyebrow": "PARTNER PROGRAM",
+      "title": "Build with rtylr.\nGrow with us.",
+      "apply": "Apply to the program",
+      "email": "Email partners@voxire.com"
+    },
+    "tracksSection": {
+      "eyebrow": "FOUR TRACKS",
+      "title": "Pick the track that fits you."
+    },
+    "tiersSection": {
+      "eyebrow": "HOW YOU LEVEL UP",
+      "title": "Three tiers. Earned, not paid."
+    },
+    "cta": {
+      "title": "Want in?",
+      "apply": "Start an application"
     }
   }
 }

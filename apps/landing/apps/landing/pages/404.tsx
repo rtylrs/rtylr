@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '../lib/cn';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { APP_URLS } from '@voxire/config';
@@ -12,19 +13,16 @@ import { blurFadeIn, staggerBlur } from '../lib/animations';
 import { SplitWords } from '../components/motion/SplitWords';
 import styles from './404.module.scss';
 
-const SUGGESTED_LINKS = [
-  { href: '/', label: 'Homepage', description: 'Back to the start.' },
-  { href: '/pricing', label: 'Pricing', description: 'See plans and per-seat pricing.' },
-  {
-    href: '/pos',
-    label: 'Products',
-    description: 'POS, ERP, HR, CRM, Finance, Flow.',
-  },
-  { href: '/demo', label: 'Book a demo', description: 'See rtylr running on your data.' },
-  { href: '/contact', label: 'Contact', description: 'Talk to someone on our team.' },
-];
+// href only. The label and description resolve from notFound.links,
+// matched by position.
+const SUGGESTED_HREFS = ['/', '/pricing', '/pos', '/demo', '/contact'];
 
 const NotFoundPage = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const links = t('notFound.links', { returnObjects: true }) as unknown as {
+    label: string;
+    description: string;
+  }[];
   const router = useRouter();
 
   const goHome = (): void => {
@@ -39,8 +37,8 @@ const NotFoundPage = (): React.JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Page not found · rtylr"
-          description="The page you're looking for doesn't exist. Here's where you can go next."
+          title={t('notFound.meta.title')}
+          description={t('notFound.meta.description')}
           robots="noindex, follow"
         />
 
@@ -58,13 +56,13 @@ const NotFoundPage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.span className={styles.eyebrow} variants={blurFadeIn}>
-              ERROR · 404
-            </motion.span>
+                {t('notFound.eyebrow')}
+              </motion.span>
 
             <SplitWords
               as="h1"
               className={styles.title}
-              text={"This page\ndoesn't exist."}
+              text={t('notFound.title')}
               delay={0.1}
             />
 
@@ -75,18 +73,18 @@ const NotFoundPage = (): React.JSX.Element => {
 
             <motion.div className={styles.buttons} variants={blurFadeIn}>
               <button type="button" onClick={goHome} className={styles.primaryBtn}>
-                Back to home
+                {t('notFound.backHome')}
               </button>
               <button type="button" onClick={goStartFree} className={styles.outlineBtn}>
-                Start free
+                {t('notFound.startFree')}
               </button>
             </motion.div>
 
             <motion.div className={styles.suggestionsGrid} variants={blurFadeIn}>
-              {SUGGESTED_LINKS.map((link) => (
-                <Link key={link.href} href={link.href} className={styles.suggestionCell}>
-                  <span className={styles.suggestionLabel}>{link.label}</span>
-                  <span className={styles.suggestionDesc}>{link.description}</span>
+              {SUGGESTED_HREFS.map((href, i) => (
+                <Link key={href} href={href} className={styles.suggestionCell}>
+                  <span className={styles.suggestionLabel}>{links[i].label}</span>
+                  <span className={styles.suggestionDesc}>{links[i].description}</span>
                   <span className={styles.suggestionArrow} aria-hidden="true">
                     →
                   </span>

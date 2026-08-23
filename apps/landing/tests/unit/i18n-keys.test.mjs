@@ -146,7 +146,13 @@ describe('translation keys', () => {
               x &&
               typeof x === 'object' &&
               !Array.isArray(x) &&
-              Object.values(x).every((y) => typeof y === 'string')
+              // A field inside one of those objects may itself be a list of
+              // strings: a partner track carries a benefits list.
+              Object.values(x).every(
+                (y) =>
+                  typeof y === 'string' ||
+                  (Array.isArray(y) && y.length > 0 && y.every((z) => typeof z === 'string'))
+              )
           )));
 
     const bad = Object.entries(en)
