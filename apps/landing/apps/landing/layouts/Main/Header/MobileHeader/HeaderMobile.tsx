@@ -108,10 +108,10 @@ const HeaderMobile: React.FC = () => {
           <Link
             href="/"
             className={styles['logo-container']}
-            aria-label="rtylr home"
+            aria-label={t('common.a11y.home')}
             onClick={closeMenu}
           >
-            <img src={ASSETS.logos.light} alt="rtylr" />
+            <img src={ASSETS.logos.light} alt={t('common.a11y.logoAlt')} />
           </Link>
 
           <div className={styles['mobile-header-actions']}>
@@ -127,7 +127,7 @@ const HeaderMobile: React.FC = () => {
             <button
               className={styles['mobile-menu-toggle']}
               onClick={toggleMenu}
-              aria-label="Toggle mobile menu"
+              aria-label={t('common.a11y.toggleMenu')}
             >
               {isMenuOpen ? <HiX /> : <HiMenu />}
             </button>
@@ -141,7 +141,7 @@ const HeaderMobile: React.FC = () => {
             className={styles['mobile-menu-overlay']}
             role="dialog"
             aria-modal="true"
-            aria-label="Navigation menu"
+            aria-label={t('common.a11y.navMenu')}
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10, transition: { duration: 0.18, ease: 'easeIn' } }}
@@ -151,15 +151,15 @@ const HeaderMobile: React.FC = () => {
             <Link
               href="/"
               className={styles['mobile-menu-logo']}
-              aria-label="rtylr home"
+              aria-label={t('common.a11y.home')}
               onClick={closeMenu}
             >
-              <img src={ASSETS.logos.light} alt="rtylr" />
+              <img src={ASSETS.logos.light} alt={t('common.a11y.logoAlt')} />
             </Link>
             <button
               className={styles['mobile-menu-close']}
               onClick={toggleMenu}
-              aria-label="Close menu"
+              aria-label={t('common.a11y.closeMenu')}
             >
               <HiX />
             </button>

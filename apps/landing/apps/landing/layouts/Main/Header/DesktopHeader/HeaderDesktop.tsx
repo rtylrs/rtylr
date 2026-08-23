@@ -212,8 +212,8 @@ const HeaderDesktop: React.FC = () => {
   return (
     <header className={headerClasses}>
       <div className={styles['header-left']}>
-        <Link href="/" className={styles['logo-container']} aria-label="rtylr home">
-          <img src={ASSETS.logos.light} alt="rtylr" />
+        <Link href="/" className={styles['logo-container']} aria-label={t('common.a11y.home')}>
+          <img src={ASSETS.logos.light} alt={t('common.a11y.logoAlt')} />
         </Link>
 
         <nav className={styles['nav-links']}>
