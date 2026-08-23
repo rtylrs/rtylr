@@ -489,8 +489,17 @@ func (a *ProjectAPIV2) DeleteProjectColumn(ctx context.Context, req *flowproject
 }
 
 func (a *ProjectAPIV2) MoveTaskToColumn(ctx context.Context, req *flowprojectv2.MoveTaskToColumnRequest) (*flowprojectv2.MoveTaskToColumnResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
+	businessID, authUser, err := resolveBusinessIDV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// This handler had no role check of its own and leaned entirely on the
+	// workspace guard inside the UPDATE. That guard cannot pass for a v2 task
+	// (workspace_id = 0), so the endpoint always failed; fixing the statement
+	// without adding a check here would have turned "always denied" into
+	// "never checked". RequireTaskRole resolves a v2 task through its project.
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetTaskId(), authUser.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 

@@ -40,14 +40,20 @@ UPDATE flow_tasks
 SET section_id = sqlc.narg('section_id'), updated_at = NOW()
 WHERE flow_tasks.id = ?
   AND (
-    EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_tasks.workspace_id AND w.owner_id = ?)
+    EXISTS (SELECT 1 FROM flow_project_members pm
+            WHERE pm.project_id = flow_tasks.project_id AND pm.user_id = ?)
+    OR EXISTS (SELECT 1 FROM flow_projects p
+               WHERE p.id = flow_tasks.project_id
+                 AND (p.owner_id = ? OR p.created_by = ?))
+    OR EXISTS (SELECT 1 FROM flow_workspaces w WHERE w.id = flow_tasks.workspace_id AND w.owner_id = ?)
     OR EXISTS (SELECT 1 FROM flow_workspace_members wm WHERE wm.workspace_id = flow_tasks.workspace_id AND wm.user_id = ?)
   )
   AND (
     sqlc.arg('column_id') = 0
     OR EXISTS (
       SELECT 1 FROM flow_project_columns c
-      WHERE c.id = sqlc.arg('column_id') AND c.workspace_id = flow_tasks.workspace_id
+      WHERE c.id = sqlc.arg('column_id')
+        AND (c.project_id = flow_tasks.project_id OR c.workspace_id = flow_tasks.workspace_id)
     )
   );
 

@@ -1041,10 +1041,15 @@ func (r *Repository) SetTaskLabels(ctx context.Context, taskID, actorID int64, l
 		return err
 	}
 	res, err := r.queries.SetTaskLabels(ctx, sqlc.SetTaskLabelsParams{
-		Labels:  labelsJSON,
-		ID:      taskID,
-		OwnerID: actorID,
-		UserID:  actorID,
+		Labels: labelsJSON,
+		ID:     taskID,
+		// The same actor fills every branch: project member, project owner,
+		// project creator, then the two legacy workspace branches.
+		UserID:    actorID,
+		OwnerID:   actorID,
+		CreatedBy: actorID,
+		OwnerID_2: actorID,
+		UserID_2:  actorID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("SetTaskLabels failed", logger.Error(err))
@@ -1717,8 +1722,13 @@ func (r *Repository) MoveTaskToColumn(ctx context.Context, taskID, columnID, act
 	res, err := r.queries.MoveTaskToColumn(ctx, sqlc.MoveTaskToColumnParams{
 		SectionID: sectionID,
 		ID:        taskID,
-		OwnerID:   actorID,
+		// One actor across every branch: project member, project owner, project
+		// creator, then the two legacy workspace branches.
 		UserID:    actorID,
+		OwnerID:   actorID,
+		CreatedBy: actorID,
+		OwnerID_2: actorID,
+		UserID_2:  actorID,
 		ColumnID:  columnID,
 	})
 	if err != nil {
