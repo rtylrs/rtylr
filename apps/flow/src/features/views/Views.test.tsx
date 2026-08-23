@@ -22,6 +22,7 @@ vi.mock('@tanstack/react-router', () => ({
 
 const viewsState = vi.hoisted(() => ({ data: [] as SavedView[] }));
 const createViewMutate = vi.hoisted(() => vi.fn());
+const updateViewMutate = vi.hoisted(() => vi.fn());
 const filteredTasksState = vi.hoisted(() => ({
   value: [] as Array<{ id: string; title: string }>,
 }));
@@ -29,7 +30,7 @@ const filteredTasksState = vi.hoisted(() => ({
 vi.mock('./useViews', () => ({
   useViews: () => viewsState,
   useCreateView: () => ({ mutate: createViewMutate, isPending: false }),
-  useUpdateView: () => ({ mutate: vi.fn(), isPending: false }),
+  useUpdateView: () => ({ mutate: updateViewMutate, isPending: false }),
   useDeleteView: () => ({ mutate: vi.fn(), isPending: false }),
   useFilteredTasks: () => filteredTasksState.value,
 }));
@@ -78,5 +79,54 @@ describe('Views: a view with no matching tasks', () => {
     const cta = screen.getByRole('button', { name: 'flow.shell.myTasks' });
     fireEvent.click(cta);
     expect(navigateMock).toHaveBeenCalledWith({ to: '/my-issues' });
+  });
+});
+
+describe('Views: per-view visibility (S2)', () => {
+  const view = (over: Partial<SavedView> = {}): SavedView =>
+    ({ id: '1', name: 'My view', icon: 'eye', filters: {}, ...over }) as SavedView;
+
+  // An absent visibility must read as SHARED. That is the column default and how
+  // every view behaved before the field existed, so treating it as private would
+  // put a lock on views the whole business can actually see.
+  it('treats a view with no visibility as shared', () => {
+    viewsState.data = [view()];
+
+    render(<Views />);
+
+    expect(screen.getByLabelText('flow.views.makePrivateLabel')).toBeInTheDocument();
+    expect(screen.queryByLabelText('flow.views.makeSharedLabel')).not.toBeInTheDocument();
+  });
+
+  it('offers to re-share a view that is already private', () => {
+    viewsState.data = [view({ visibility: 'private' })];
+
+    render(<Views />);
+
+    expect(screen.getByLabelText('flow.views.makeSharedLabel')).toBeInTheDocument();
+  });
+
+  it('sends private when toggling a shared view', () => {
+    viewsState.data = [view()];
+
+    render(<Views />);
+    fireEvent.click(screen.getByLabelText('flow.views.makePrivateLabel'));
+
+    expect(updateViewMutate).toHaveBeenCalledWith(
+      { id: '1', data: { visibility: 'private' } },
+      expect.anything()
+    );
+  });
+
+  it('sends shared when toggling a private view back', () => {
+    viewsState.data = [view({ visibility: 'private' })];
+
+    render(<Views />);
+    fireEvent.click(screen.getByLabelText('flow.views.makeSharedLabel'));
+
+    expect(updateViewMutate).toHaveBeenCalledWith(
+      { id: '1', data: { visibility: 'shared' } },
+      expect.anything()
+    );
   });
 });
