@@ -24,7 +24,7 @@ export function useCreateProject() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { workspaceId: string; name: string; color?: string }) => {
+    mutationFn: (data: { name: string; color?: string; visibility?: string }) => {
       return unwrap(flowApi.createProject(data));
     },
     // Invalidate by prefix - the caller's workspaceId may be the "personal"

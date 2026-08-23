@@ -810,6 +810,7 @@
     "purgeCta": "حذف نهائي"
   },
   "visibility": {
+    "label": "الظهور",
     "private": "خاص",
     "public": "عام",
     "archived": "مؤرشف",

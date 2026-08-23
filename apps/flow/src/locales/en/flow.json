@@ -779,6 +779,7 @@
     "purgeCta": "Delete permanently"
   },
   "visibility": {
+    "label": "Visibility",
     "private": "Private",
     "public": "Public",
     "archived": "Archived",

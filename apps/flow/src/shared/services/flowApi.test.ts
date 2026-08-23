@@ -23,6 +23,7 @@ const mockClients = vi.hoisted(() => {
     notificationClient: mockClient(),
     settingClient: mockClient(),
     userClient: mockClient(),
+    projectV2: mockClient(),
   };
 });
 
@@ -40,6 +41,7 @@ vi.mock('../lib/clients', () => ({
   notificationClient: mockClients.notificationClient,
   settingClient: mockClients.settingClient,
   userClient: mockClients.userClient,
+  projectV2: mockClients.projectV2,
 }));
 
 import { flowApi } from './flowApi';
@@ -56,6 +58,7 @@ import {
   notificationClient,
   settingClient,
   userClient,
+  projectV2,
 } from '../lib/clients';
 
 describe('flowApi OneKit adapters', () => {
@@ -73,19 +76,22 @@ describe('flowApi OneKit adapters', () => {
   it('uses generated project and member methods', async () => {
     await Promise.all([
       flowApi.getProjects('ws-1'),
-      flowApi.createProject({ workspaceId: '1', name: 'Project A' }),
+      flowApi.createProject({ name: 'Project A' }),
       flowApi.updateProject('7', { name: 'Renamed' }),
       flowApi.getProjectMembers('7'),
       flowApi.addProjectMember({ project_id: 7, user_id: 2, role: 'member' }),
     ]);
 
     expect(projectClient.listProjects).toHaveBeenCalledWith({ workspaceId: 'ws-1' });
-    expect(projectClient.createProject).toHaveBeenCalledWith({
-      workspaceId: '1',
+    // v2: no workspace id, and description keeps the '-' sentinel because
+    // CreateProjectRequest declares it @required and the generated validator
+    // rejects an empty string.
+    expect(projectV2.createProject).toHaveBeenCalledWith({
       name: 'Project A',
       description: '-',
       icon: 'folder',
       color: '#6366f1',
+      visibility: 'private',
       startDate: '',
       dueDate: '',
     });

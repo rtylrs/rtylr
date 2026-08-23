@@ -15,6 +15,7 @@ import {
   notificationClient,
   settingClient,
   userClient,
+  projectV2,
 } from '../lib/clients';
 
 // -- Types ----------------------------------------------------------------
@@ -494,29 +495,27 @@ export const flowApi = {
     flowResult<{ message: string }>(() => projectClient.moveTaskToColumn({ taskId, columnId })),
 
   createProject: (data: {
-    workspaceId: string;
     name: string;
     color?: string;
     description?: string;
     startDate?: string;
     dueDate?: string;
+    visibility?: string;
   }) =>
     flowResult<{ project: ApiProject }>(() =>
-      projectClient.createProject({
-        // int64 fields are wire-encoded as JSON strings, matching every other
-        // numeric id in this API - sending a bare number 400s with "cannot
-        // unmarshal number into Go struct field of type string".
-        //
-        // The `|| 0` fallback is NOT a "my personal workspace" sentinel, despite
-        // what this comment used to claim: CreateProjectRequest declares
-        // `workspace_id: int64 @required @gt(0)`, so "0" is rejected with
-        // "workspace_id must be greater than 0". Callers must gate on
-        // isApiWorkspaceId() before reaching this.
-        workspaceId: String(Number(data.workspaceId) || 0),
+      projectV2.createProject({
         name: data.name,
+        // CreateProjectRequest still declares description as @required, and the
+        // generated validator rejects "" for a required string, so an omitted
+        // description has to travel as the '-' sentinel the rest of this file
+        // uses. Sending '' 400s with "description is required".
         description: data.description ?? '-',
         icon: 'folder',
         color: data.color ?? '#6366f1',
+        // visibility is optional in the contract and empty already means
+        // private, but sending it explicitly keeps the default visible at the
+        // call site rather than implied by omission.
+        visibility: data.visibility ?? 'private',
         // An omitted date is an unset date. Never manufacture the Unix epoch,
         // which becomes a real project date once the backend persists it.
         startDate: data.startDate ?? '',

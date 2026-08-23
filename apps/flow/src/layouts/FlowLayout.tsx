@@ -357,7 +357,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const { data: teamMembers } = useFlowTeam();
   // Real contracted hours per member, replacing the hardcoded 40 (#868). Absent
   // for a member with no work schedule, which downstream renders as unknown.
-  const { data: capacityHours = {} } = useMemberCapacityHours();
+  const { data: capacityHours = EMPTY_CAPACITY } = useMemberCapacityHours();
   useEffect(() => {
     if (!teamMembers || teamMembers.length === 0) return;
     const mapped: Member[] = teamMembers
@@ -416,6 +416,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectDescription, setNewProjectDescription] = useState('');
   const [newProjectColor, setNewProjectColor] = useState('#64C5B9');
+  const [newProjectVisibility, setNewProjectVisibility] = useState<'private' | 'public'>('private');
 
   // Account menu (avatar/name trigger in the sidebar footer): closes on an
   // outside click and on Escape, scoped to this menu only - it must not
@@ -1297,7 +1298,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                           if (!canCreateProject) return;
                           createProject.mutate(
                             {
-                              workspaceId: currentWorkspaceId,
                               name: newProjectName.trim(),
                               color: newProjectColor,
                             },
@@ -1330,7 +1330,43 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                     }}
                   />
                 </div>
-                <div className="mt-5 flex flex-col gap-2">
+                {/* Visibility toggle */}
+                <div className="flex items-center justify-between mt-3">
+                  <label className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+                    {t('flow.visibility.label')}
+                  </label>
+                  <div
+                    className="flex gap-1"
+                    role="radiogroup"
+                    aria-label={t('flow.visibility.label')}
+                  >
+                    {(['private', 'public'] as const).map((vis) => (
+                      <button
+                        key={vis}
+                        type="button"
+                        role="radio"
+                        aria-checked={newProjectVisibility === vis}
+                        onClick={() => setNewProjectVisibility(vis)}
+                        className="px-3 h-8 rounded-lg text-[11px] font-semibold transition-colors"
+                        style={{
+                          background:
+                            newProjectVisibility === vis ? 'var(--accent)' : 'var(--flow-input-bg)',
+                          color:
+                            newProjectVisibility === vis ? '#0a0a0a' : 'var(--flow-text-muted)',
+                          border: '1px solid var(--flow-border)',
+                        }}
+                      >
+                        {t(`flow.visibility.${vis}`)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {newProjectVisibility === 'public' && (
+                  <p className="mt-1.5 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+                    {t('flow.visibility.publicHint')}
+                  </p>
+                )}
+                <div className="mt-4 flex flex-col gap-2">
                   <GateNotice
                     id="flow-new-project-gate"
                     reason={createProjectGateReason}
@@ -1355,7 +1391,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         if (!newProjectName.trim() || !canCreateProject) return;
                         createProject.mutate(
                           {
-                            workspaceId: currentWorkspaceId,
                             name: newProjectName.trim(),
                             color: newProjectColor,
                           },
@@ -1445,3 +1480,6 @@ export default FlowLayout;
 // Module-level constant: same reference every render, prevents the
 // useMemo → useEffect → setState → re-render infinite loop.
 const EMPTY_WORKSPACES: { id: string; name: string; color: string }[] = [];
+// Same reason: the capacity query has no data while /hr/work-schedule 403s,
+// so a `= {}` destructuring default would mint a new object every render.
+const EMPTY_CAPACITY: Record<string, number> = {};
