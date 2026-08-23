@@ -15,7 +15,7 @@ import (
 	"github.com/voxire/onion/internal/platform/tenant"
 	"github.com/voxire/onion/internal/platform/wsbus"
 	flowprojectv2 "github.com/voxire/voxie/gen/go/flow/project/v2"
-	)
+)
 
 // ProjectAPIV2 serves the workspace-free flow.project.v2 contracts. Tenancy
 // comes from the caller's auth context; there is no workspace id on the wire.
@@ -77,6 +77,9 @@ func toProjectV2(p domain.Project) *flowprojectv2.Project {
 		CompletedCount: p.CompletedCount,
 		MemberCount:    p.MemberCount,
 		Code:           p.Code,
+
+		// Per-caller projection: set by the application layer, not stored.
+		VisibleViaReport: p.VisibleViaReport,
 	}
 	if p.StartDate != nil {
 		out.StartDate = p.StartDate.Format("2006-01-02")
@@ -87,10 +90,12 @@ func toProjectV2(p domain.Project) *flowprojectv2.Project {
 	out.CreatedAt = p.CreatedAt.Format("2006-01-02T15:04:05Z")
 	out.UpdatedAt = p.UpdatedAt.Format("2006-01-02T15:04:05Z")
 	if p.ArchivedAt != nil {
-		s := p.ArchivedAt.Format("2006-01-02T15:04:05Z"); out.ArchivedAt = &s
+		s := p.ArchivedAt.Format("2006-01-02T15:04:05Z")
+		out.ArchivedAt = &s
 	}
 	if p.PurgeAt != nil {
-		d := p.PurgeAt.Format("2006-01-02T15:04:05Z"); out.PurgeAt = &d
+		d := p.PurgeAt.Format("2006-01-02T15:04:05Z")
+		out.PurgeAt = &d
 	}
 	return out
 }
@@ -347,7 +352,6 @@ func (a *ProjectAPIV2) PurgeProject(ctx context.Context, req *flowprojectv2.Purg
 	publishBusinessEvent("project.purged", businessID, req.GetId(), authUser.UserID)
 	return &flowprojectv2.PurgeProjectResponse{Message: "Project permanently deleted"}, nil
 }
-
 
 func toProjectColumnV2(c domain.ProjectColumn) *flowprojectv2.ProjectColumn {
 	return &flowprojectv2.ProjectColumn{

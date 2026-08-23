@@ -113,3 +113,17 @@ func TestManagesSomeoneOnDeniesAnUnrelatedProject(t *testing.T) {
 		t.Fatal("the proxy must not reach a project no report is involved in")
 	}
 }
+
+// No unit tests for markVisibleViaReport, deliberately.
+//
+// Service.repo is a concrete *infrastructure.Repository, so the membership
+// lookup it depends on cannot be stubbed. With a nil repo every path ends in
+// "not flagged", which makes any assertion here pass even with the logic
+// deleted: I wrote three such tests, mutation-probed them, watched all three
+// survive the logic being removed, and deleted them. A test that passes when the
+// feature is gone is worse than no test, because it reads as coverage.
+//
+// The flagging path is verified against the database in the PR that introduced
+// it. Making it unit-testable means extracting a membership seam the way
+// orgchart.ManagerResolver was extracted, which is worth doing when something
+// else needs it too.

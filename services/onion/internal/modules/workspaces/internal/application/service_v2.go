@@ -99,7 +99,46 @@ func (s *Service) ListProjectsV2(ctx context.Context, callerID, businessID int64
 	if !includeAll {
 		managed = s.managedUserIDs(ctx, callerID, businessID)
 	}
-	return s.repo.ListProjectsV2(ctx, businessID, callerID, includeAll, managed, status, visibility, q, limit, offset)
+	projects, total, err := s.repo.ListProjectsV2(ctx, businessID, callerID, includeAll, managed, status, visibility, q, limit, offset)
+	if err != nil {
+		return nil, 0, err
+	}
+	return s.markVisibleViaReport(ctx, projects, callerID, managed), total, nil
+}
+
+// markVisibleViaReport flags the projects this caller sees only through the
+// dept-manager proxy, so a client can group them (P9) without asking per project
+// why each one is visible.
+//
+// A project the caller created, owns, or is a member of is theirs, so the flag
+// stays false. Anything else in the result must have matched a managed branch,
+// because that is the only other way the list query admits a row. With no
+// reports the loop does not run, which is the common case and costs nothing.
+func (s *Service) markVisibleViaReport(ctx context.Context, projects []domain.Project, callerID int64, managed []int64) []domain.Project {
+	if len(managed) == 0 || len(projects) == 0 {
+		return projects
+	}
+	for i := range projects {
+		p := &projects[i]
+		// Creator and owner are already in hand, so a caller's own project is
+		// settled without a query. This check comes first deliberately: it is
+		// the one that must hold even when the membership lookup cannot run.
+		if p.CreatedBy == callerID || p.OwnerID == callerID {
+			continue
+		}
+		// Without a repo the membership question cannot be answered. Flagging
+		// optimistically would advertise a caller's own project as a report's,
+		// so leave it false and degrade to no grouping rather than wrong
+		// grouping.
+		if s.repo == nil {
+			continue
+		}
+		if s.repo.IsProjectMember(ctx, callerID, p.ID) {
+			continue
+		}
+		p.VisibleViaReport = true
+	}
+	return projects
 }
 
 // ListArchivedProjectsV2 lists the caller's visible recycle-bin entries,

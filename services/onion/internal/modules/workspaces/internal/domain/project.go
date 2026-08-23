@@ -38,6 +38,13 @@ type Project struct {
 	ArchivedAt *time.Time
 	PurgeAt    *time.Time
 
+	// VisibleViaReport is a PER-CALLER projection, not a stored property: true
+	// when this caller can see the project only because they manage someone
+	// involved in it. The same project is false for its own members and true for
+	// their manager, so it is computed per response and never written to the
+	// database. The repository leaves it zero; the application layer sets it.
+	VisibleViaReport bool
+
 	// Display projections populated by list/detail reads.
 	TaskCount      int32
 	CompletedCount int32
