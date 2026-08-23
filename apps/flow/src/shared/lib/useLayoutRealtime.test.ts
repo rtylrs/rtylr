@@ -25,14 +25,13 @@ vi.mock('./currentUser', () => ({
 import { useLayoutRealtime } from './useLayoutRealtime';
 import { getCurrentUserId } from './currentUser';
 
-function mount(
-  workspaceId: string | undefined = '1',
-  userId: string | undefined = '42',
-  enabled = true
-) {
+// businessId is NOT defaulted: a default parameter fires on an explicit
+// `undefined`, so a caller trying to assert the no-id case would silently get
+// the default back. That cost a confusing red test.
+function mount(businessId: string | undefined, userId: string | undefined = '42', enabled = true) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const spy = vi.spyOn(client, 'invalidateQueries');
-  renderHook(() => useLayoutRealtime(workspaceId, userId, enabled), {
+  renderHook(() => useLayoutRealtime(businessId, userId, enabled), {
     wrapper: ({ children }: { children: React.ReactNode }) =>
       React.createElement(QueryClientProvider, { client }, children),
   });
@@ -48,7 +47,7 @@ function keys(spy: InvalidateSpy): string[] {
 
 /** A teammate-authored event (actor 999 is not the current user, 42). */
 function event(overrides: Partial<RealtimeEvent> = {}): RealtimeEvent {
-  return { topic: 'workspace:1', type: 'project.created', actor_id: 999, ...overrides };
+  return { topic: 'business:1', type: 'project.created', actor_id: 999, ...overrides };
 }
 
 describe('useLayoutRealtime', () => {
@@ -59,15 +58,15 @@ describe('useLayoutRealtime', () => {
   });
 
   describe('subscription topics', () => {
-    it('subscribes to the workspace and the user topic', () => {
+    it('subscribes to the business and the user topic', () => {
       mount('1', '42');
-      expect(topics).toEqual(['workspace:1', 'user:42']);
+      expect(topics).toEqual(['business:1', 'user:42']);
     });
 
-    // 'personal' is a client-only sentinel so the layout can paint before the
-    // workspace fetch resolves - it is not a valid server-side topic.
-    it('does not subscribe to the personal workspace sentinel', () => {
-      mount('personal', '42');
+    // No workspace predicate any more: the topic is the business, so the only
+    // question is whether an id resolved at all.
+    it('does not subscribe without a resolved business id', () => {
+      mount(undefined, '42');
       expect(topics).toEqual(['user:42']);
     });
 
@@ -79,13 +78,18 @@ describe('useLayoutRealtime', () => {
 
   describe('invalidation fanout', () => {
     it('invalidates projects on a project event', () => {
-      const spy = mount();
+      const spy = mount('1');
       handler?.(event({ type: 'project.created' }));
-      expect(keys(spy)).toEqual([JSON.stringify(['projects'])]);
+      // archived-projects too: archive/restore/purge move a project between the
+      // list and the recycle bin, so the bin's query has to refetch as well.
+      expect(keys(spy)).toEqual([
+        JSON.stringify(['projects']),
+        JSON.stringify(['archived-projects']),
+      ]);
     });
 
     it('invalidates workspaces and members on a workspace event', () => {
-      const spy = mount();
+      const spy = mount('1');
       handler?.(event({ type: 'workspace.member_added' }));
       expect(keys(spy)).toEqual(
         expect.arrayContaining([
@@ -96,7 +100,7 @@ describe('useLayoutRealtime', () => {
     });
 
     it('invalidates notifications on a notification event', () => {
-      const spy = mount();
+      const spy = mount('1');
       handler?.(event({ topic: 'user:42', type: 'notification.created' }));
       expect(keys(spy)).toEqual([JSON.stringify(['notifications'])]);
     });
@@ -109,14 +113,14 @@ describe('useLayoutRealtime', () => {
     it.each(['project.created', 'workspace.member_added'])(
       'ignores %s when the current user is the actor',
       (type) => {
-        const spy = mount();
+        const spy = mount('1');
         handler?.(event({ type, actor_id: 42 }));
         expect(spy).not.toHaveBeenCalled();
       }
     );
 
     it('processes notification events even when the current user is the actor', () => {
-      const spy = mount();
+      const spy = mount('1');
       handler?.(event({ type: 'notification.created', actor_id: 42 }));
       expect(keys(spy)).toEqual([JSON.stringify(['notifications'])]);
     });
@@ -130,7 +134,7 @@ describe('useLayoutRealtime', () => {
     });
 
     it('still handles a teammate event when the actor is someone else', () => {
-      const spy = mount();
+      const spy = mount('1');
       handler?.(event({ actor_id: 999 }));
       expect(spy).toHaveBeenCalled();
     });
@@ -138,14 +142,14 @@ describe('useLayoutRealtime', () => {
     // Fail open: an event with no actor, or no known current user, must still
     // invalidate - dropping it would leave the sidebar stale forever.
     it('handles an event with no actor_id', () => {
-      const spy = mount();
+      const spy = mount('1');
       handler?.(event({ actor_id: undefined }));
       expect(spy).toHaveBeenCalled();
     });
 
     it('handles events when the current user is unknown', () => {
       vi.mocked(getCurrentUserId).mockReturnValue(null);
-      const spy = mount();
+      const spy = mount('1');
       handler?.(event({ actor_id: 42 }));
       expect(spy).toHaveBeenCalled();
     });

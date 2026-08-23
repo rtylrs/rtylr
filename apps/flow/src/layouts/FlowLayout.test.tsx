@@ -151,6 +151,7 @@ vi.mock('../features/inbox/useNotifications', () => ({
 }));
 vi.mock('../shared/hooks/useFlowBusinessName', () => ({
   useFlowBusinessName: () => ({ data: null }),
+  useFlowBusinessId: () => ({ data: '42' }),
 }));
 // FlowLayout reads real contracted hours per member (#868). Stubbed like every
 // other react-query hook here: unmocked it needs a QueryClientProvider, and an
