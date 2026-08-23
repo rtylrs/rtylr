@@ -40,6 +40,7 @@ import {
   ConsentBanner,
   LoyaltyPointsInput,
 } from '../../shared/components/crm';
+import { useSupportEngagement } from '../../shared/hooks/queries/useSupportEngagement';
 import { getCustomerTier, pointsToNextTier, thresholdsFromConfig } from '../../shared/lib/tiers';
 
 const CustomerProfile: React.FC = () => {
@@ -50,6 +51,7 @@ const CustomerProfile: React.FC = () => {
   const role = useUserStore((state) => state.user?.role ?? state.role);
   const canDeleteCustomer = canCrmPermission(role, 'crm:customers:manage');
   const customerId = Number(id);
+
   const { data: fetched, isLoading, isError } = useGetCustomerFull(customerId);
   const [timelineCursor, setTimelineCursor] = useState<string>();
   const { data: fetchedTimeline } = useCustomerTimeline(customerId, timelineCursor);
@@ -66,6 +68,9 @@ const CustomerProfile: React.FC = () => {
   const [newTag, setNewTag] = useState('');
 
   const customer = fetched;
+  // SUP->CRM-01 (#842): support engagement on the profile, hidden when
+  // support is absent or no match exists.
+  const { data: supportEngagement } = useSupportEngagement(customer?.email);
   useEffect(() => {
     if (!fetchedTimeline) return;
     setTimelineEntries((entries) => {
@@ -300,6 +305,22 @@ const CustomerProfile: React.FC = () => {
             <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
               <TierBadge tier={tier} size="md" />
               <PointsBadge points={customer.loyaltyPoints} trend="up" />
+              {supportEngagement && supportEngagement.totalTickets > 0 && (
+                <span
+                  style={{
+                    padding: '3px 10px',
+                    borderRadius: 12,
+                    background: 'var(--hub-hover)',
+                    color: 'var(--hub-text-muted)',
+                    fontSize: '12px',
+                  }}
+                >
+                  {supportEngagement.totalTickets}{' '}
+                  {supportEngagement.totalTickets === 1
+                    ? t('customers.supportTicket')
+                    : t('customers.supportTickets')}
+                </span>
+              )}
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
