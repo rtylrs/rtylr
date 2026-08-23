@@ -146,6 +146,9 @@ const PricingPage = (): React.JSX.Element => {
           {/* Plan cards */}
           <section className={styles.plansSection}>
             <div className={styles.plansContainer}>
+              {/* The plan names inside PricingCards are h3. Without an h2
+                  here the page jumped h1 to h3. */}
+              <h2 className={styles.plansTitle}>The three plans</h2>
               <PricingCards onCta={handleCta} />
             </div>
           </section>

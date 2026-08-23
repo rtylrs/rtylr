@@ -151,6 +151,12 @@ const HardwarePage = (): JSX.Element => {
             variants={staggerBlur}
           >
             <div className={styles.sectionContainer}>
+              {/* The device names below are h3. Without an h2 above them the
+                  page jumped h1 to h3, which is the one heading rule this
+                  repo gates on. */}
+              <motion.h2 className={styles.gridTitle} variants={blurFadeIn}>
+                What you can plug in
+              </motion.h2>
               <div className={styles.hardwareGrid}>
                 {HARDWARE_ITEMS.map((item) => {
                   const Icon = item.icon;

@@ -53,7 +53,9 @@ const TermsPage = (): JSX.Element => {
 
             <div className={styles.layout}>
               <nav className={styles.toc} aria-label="Section navigation">
-                <h4>On this page</h4>
+                {/* Label for the nav, not a section of the document: as an
+                    h4 it jumped straight from the h1. */}
+                <p className={styles.tocTitle}>On this page</p>
                 <ol>
                   {SECTIONS.map((s) => (
                     <li key={s.id}>

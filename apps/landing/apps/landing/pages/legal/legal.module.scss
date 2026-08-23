@@ -71,7 +71,10 @@
   overflow-y: auto;
   padding-right: 8px;
 
-  h4 {
+  // Was `h4`. The element became a <p> so the outline stops jumping from
+  // h1 to h4; the class keeps the styling attached to the right node
+  // rather than to whatever tag happens to be used.
+  .tocTitle {
     font-size: 0.7rem;
     font-weight: 600;
     letter-spacing: 1.2px;

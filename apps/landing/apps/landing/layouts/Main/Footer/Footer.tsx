@@ -108,7 +108,15 @@ const Footer: React.FC = () => {
                 className={styles['footer-section']}
                 variants={fadeInUp}
               >
-                <h3 className={styles['footer-section-title']}>{section.title}</h3>
+                {/*
+                  A <p>, not an <h3>. These are labels for groups of links,
+                  not sections of the document, and as headings they broke
+                  the outline on every page whose main content has no <h2>:
+                  /demo/ and /404/ went h1 straight to h3 purely because of
+                  the footer. The nav below already carries the accessible
+                  name via aria-label, so nothing is lost by demoting this.
+                */}
+                <p className={styles['footer-section-title']}>{section.title}</p>
                 <nav aria-label={`${section.title} navigation`}>
                   <ul className={styles['footer-links']}>
                     {section.links.map((link) => (
