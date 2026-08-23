@@ -1,134 +1,54 @@
 {
-  "Hero": {
-    "welcome": "Connect with customers using efficient, contactless QR Menus.",
-    "discover": "Explore the future of dining and drinking with our digital menu. Enjoy new flavors and interact easily with our sleek interface at our restaurant or bar. Experience the next level of dining.",
-    "searchPlaceholder": "Search for products...",
-    "Create Account": "Get Started for free",
-    "Learn More": "Learn More",
-    "My Account": "Dashboard"
+  "common": {
+    "nav": {
+      "features": "Features",
+      "pricing": "Pricing",
+      "resources": "Resources",
+      "company": "Company",
+      "signIn": "Sign In",
+      "signUp": "Sign Up"
+    },
+    "cta": {
+      "startFree": "Start for free",
+      "bookDemo": "Book a demo"
+    }
   },
-  "Ticker": {
-    "banner_text": "Their phone is your menu."
-  },
-  "Features": {
-    "Features-title": "Discover What Sets Us Apart",
-    "Feature1-title": "Visual Menu Showcase",
-    "Feature1-description": "Showcase your dishes with stunning visuals, enticing customers to explore your offerings.",
-    "Feature2-title": "Intuitive Menu Management",
-    "Feature2-description": "Comprehensive information about each menu item, including ingredients and potential allergens, to help customers make informed choices.",
-    "Feature3-title": "Multiple Language Support",
-    "Feature3-description": "Expand your reach with multilingual menu translations, attracting customers from around the world.",
-    "Feature4-title": "Customizable Orders",
-    "Feature4-description": "Tailor orders to meet your customers' preferences and dietary requirements, ensuring satisfaction with every meal.",
-    "Feature5-title": "Comprehensive Menu Insights",
-    "Feature5-description": "Gain detailed Insights into your menu, including ingredients and allergens, to make informed decisions",
-    "Feature6-title": "Loyalty Rewards Integration",
-    "Feature6-description": "Build customer loyalty and drive reoeat business with integrated loyalty rewards programs tailored to your restaurant."
-  },
-  "PricingSection": {
-    "title": "Plans",
-    "description": "All 7 apps come with every plan. What changes is how many people and locations you run. Prices are not published yet, so start on Free and talk to us when you need more.",
-
-    "tier_free_title": "Free",
-    "tier_free_description": "Everything you need to run a single location.",
-    "tier_free_note": "No credit card required",
-    "tier_free_item1": "Up to 10 team members",
-    "tier_free_item2": "All 7 apps included",
-    "tier_free_item3": "1 location",
-
-    "tier_pro_title": "Pro",
-    "tier_pro_description": "Growing teams scaling across multiple locations.",
-    "tier_pro_note": "Most popular",
-    "tier_pro_item1": "Up to 30 team members",
-    "tier_pro_item2": "Up to 5 locations",
-    "tier_pro_item3": "AI assistant and priority support",
-
-    "tier_scale_title": "Scale",
-    "tier_scale_description": "Unlimited seats and every feature unlocked.",
-    "tier_scale_note": "For teams past 30 active seats",
-    "tier_scale_item1": "Unlimited team members and locations",
-    "tier_scale_item2": "SSO and audit logs",
-    "tier_scale_item3": "Dedicated success manager and SLA",
-
-    "purchase_button": "Get Started",
-    "link": "Learn More"
-  },
-
-  "Demo": {
-    "title": "Demo of Our Online Menu",
-    "description": "Simply open your phone's camera and scan the QR code below to explore our digital menu!",
-    "button": "Get Started"
-  },
-  "QandA": {
-    "title": "Frequently asked questions.",
-    "Q1": "Q.What is VBitez?",
-    "Q2": "Q.What makes VBitez different from Restbits and Omega?",
-    "Q3": "Q.How does VBitez improve customer experience?",
-    "Q4": "Q.Can VBitez handle online ordering and menu management?",
-    "Q5": "Q.What unique features does VBitez offer?",
-    "A1": "VBitez is an innovative digital menu solution for restaurants, combining the best features of restbits and Omega to enhance customer experience and streamline restaurant operations",
-    "A2": "VBitez not only integrates the best features of both Restbits and Omega but also addresses their gaps. We offer advanced customization, seamless POS integration, and unique features designed to improve both user experience and restaurant workflows.",
-    "A3": "VBitez provides a visually appealing digital menu with images and descriptions, easy QR code access, and real-time updates, ensuring customers have the latest information and a delightful ordering experience.",
-    "A4": "Yes, VBitez offers comprehensive online ordering functionality along with easy menu management. Restaurants can quickly update their menus and manage orders efficiently.",
-    "A5": "VBitez introduces features such as detailed descriptions of menu items, including ingredients and allergens, filtering or searching the menu by category (e.g., vegetarian, gluten-free), menu translation into different languages, order customization options, bill splitting, feedback and review options, pre-ordering food, and integration with loyalty programs or rewards systems."
-  },
-
-  "Footer": {
-    "Company_Title": "Company",
-    "about_us": "About Us",
-    "contact_us": "Contact us",
-    "careers": "Careers (Jobs)",
-    "Blog": "Blog",
-
-    "Support_Title": "Support",
-    "FAQ": "FAQs",
-    "Pricing": "Pricing",
-    "feedback": "Feedback",
-    "Feature": "Feature Request",
-
-    "Legal_Title": "Legal",
-    "Privacy": "Privacy Policy",
-    "Terms": "Terms and Conditions",
-    "Acceptable": "Acceptable Use Policy",
-    "License": "End User License Agreement",
-    "Disclamer": "Disclamer",
-
-    "Contact_Title": "Contact",
-    "Email": "Email: support@rtylr.voxire.com",
-    "Phone": "Phone: +961 71 642 565",
-
-    "lower_footer": "Follow or Contact Us"
-  },
-
-  "ProductSection": {
-    "title": "Explore Products",
-    "buyNow": "Buy Now",
-    "viewMore": "View More"
-  },
-  "Settings": {
-    "title": "Settings",
-    "language": "Language",
-    "notifications": "Notifications",
-    "on": "On",
-    "off": "Off",
-    "exportData": "Export My Data",
-    "deleteAccount": "Delete My Account",
-    "confirmDeleteAccount": "Are you sure you want to delete your account? This action cannot be undone.",
-    "favicon": "Select a favicon",
-    "icon": "Select a Logo",
-    "name": "Name",
-    "slogan": "Slogan"
-  },
-  "Profile": {
-    "title": "Profile",
-    "name": "Name",
-    "email": "Email",
-    "notifications": "Notifications",
-    "language": "Language",
-    "address": "Address",
-    "paymentInfo": "Payment Information",
-    "edit": "Edit",
-    "save": "Save",
-    "cancel": "Cancel"
+  "footer": {
+    "group": {
+      "product": "PRODUCT",
+      "resources": "RESOURCES",
+      "developers": "DEVELOPERS",
+      "company": "COMPANY"
+    },
+    "link": {
+      "pos": "POS",
+      "erp": "ERP",
+      "hr": "HR",
+      "crm": "CRM",
+      "finance": "Finance",
+      "flow": "Flow",
+      "pricing": "Pricing",
+      "hardware": "Hardware",
+      "blog": "Blog",
+      "documentation": "Documentation",
+      "selfHost": "Self Host rtylr",
+      "integrations": "Integrations",
+      "helpCenter": "Help Center",
+      "status": "Status",
+      "about": "About",
+      "careers": "Careers",
+      "partners": "Partners",
+      "contact": "Contact"
+    },
+    "legal": {
+      "terms": "TERMS OF USE",
+      "privacy": "PRIVACY POLICY",
+      "security": "SECURITY",
+      "trust": "TRUST CENTER",
+      "cookies": "COOKIE PREFERENCES",
+      "parent": "A VOXIRE COMPANY"
+    },
+    "logoAlt": "rtylr",
+    "navLabel": "{{group}} navigation"
   }
 }
