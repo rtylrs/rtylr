@@ -385,6 +385,7 @@ const FlowPage = (): JSX.Element => {
           structuredData={productWithBreadcrumbs({
             name: 'Flow',
             path: '/flow/',
+            subCategory: 'Project and Task Management',
             faqs: FLOW_FAQS,
             description:
               'Kanban boards, automations, and task management that stay connected to every other app.',

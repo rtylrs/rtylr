@@ -66,6 +66,7 @@ const POSPage = (): JSX.Element => {
           structuredData={productWithBreadcrumbs({
             name: 'POS',
             path: '/pos/',
+            subCategory: 'Point of Sale',
             faqs: POS_FAQS,
             description:
               'Full-service POS for restaurants and retail. Tickets, splits, tips, and a real offline mode.',

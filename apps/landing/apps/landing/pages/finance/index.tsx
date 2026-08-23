@@ -245,6 +245,7 @@ const FinancePage = (): JSX.Element => {
           structuredData={productWithBreadcrumbs({
             name: 'Finance',
             path: '/finance/',
+            subCategory: 'Accounting and Finance',
             faqs: FINANCE_FAQS,
             description:
               'Invoices, expenses, tax, and a real P&L in real time. Accounting that keeps up with your business.',

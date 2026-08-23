@@ -138,6 +138,7 @@ const HRPage = (): JSX.Element => {
           structuredData={productWithBreadcrumbs({
             name: 'HR',
             path: '/hr/',
+            subCategory: 'Human Resources and Payroll',
             faqs: HR_FAQS,
             description:
               'Scheduling, payroll, compliance, and time-off management for modern teams.',

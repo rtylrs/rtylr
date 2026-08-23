@@ -63,6 +63,7 @@ export function productSchema(opts: {
   path: string;
   description: string;
   category?: string;
+  subCategory?: string;
 }): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
@@ -71,6 +72,10 @@ export function productSchema(opts: {
     url: `${BASE}${opts.path}`,
     description: opts.description,
     applicationCategory: opts.category ?? 'BusinessApplication',
+    // Every module used to declare the same applicationCategory, which
+    // told a consumer that /pos/ and /hr/ were the same kind of thing.
+    // The sub-category is what distinguishes them.
+    ...(opts.subCategory ? { applicationSubCategory: opts.subCategory } : {}),
     operatingSystem: 'Web, iOS, Android',
     publisher: ORG,
   };
@@ -143,6 +148,7 @@ export function productWithBreadcrumbs(opts: {
   path: string;
   description: string;
   category?: string;
+  subCategory?: string;
   faqs?: FAQEntry[];
 }): Record<string, unknown> {
   const graph: Record<string, unknown>[] = [

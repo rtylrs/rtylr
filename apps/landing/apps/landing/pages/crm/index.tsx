@@ -284,6 +284,7 @@ const CRMPage = (): JSX.Element => {
           structuredData={productWithBreadcrumbs({
             name: 'CRM',
             path: '/crm/',
+            subCategory: 'Customer Relationship Management',
             faqs: CRM_FAQS,
             description:
               'Customer profiles, loyalty programs, and campaign tracking that connect to every other app.',

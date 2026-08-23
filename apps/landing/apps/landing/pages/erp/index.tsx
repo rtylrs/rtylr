@@ -135,6 +135,7 @@ const ERPPage = (): JSX.Element => {
           structuredData={productWithBreadcrumbs({
             name: 'ERP',
             path: '/erp/',
+            subCategory: 'Inventory and Supply Chain Management',
             faqs: ERP_FAQS,
             description:
               'Real-time inventory, suppliers, purchase orders, and warehouse management.',
