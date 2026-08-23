@@ -36,11 +36,12 @@ const PricingSection = (): React.JSX.Element => {
           <SplitWords
             as="h2"
             className={styles.sectionTitle}
-            text={'Simple pricing.\nAll 7 apps, one price.'}
+            text={'One platform.\nEvery app included.'}
             trigger="view"
           />
           <p className={styles.sectionDescription}>
-            Start free. Upgrade when you need more. No per-location fees, no module upsells.
+            All 7 apps come with every plan. What changes is how many people and locations you run.
+            Start free with no card.
           </p>
         </motion.div>
 
