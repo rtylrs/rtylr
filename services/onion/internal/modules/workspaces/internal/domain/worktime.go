@@ -134,7 +134,6 @@ type WorkTypeInput struct {
 	ID           int64
 	OwnerID      int64
 	BusinessID   int64
-	WorkspaceID  int64
 	ParentID     int64
 	Name         string
 	Description  string

@@ -100,7 +100,7 @@ WHERE owner_id = ? AND business_id = ? AND work_day_id = ?;
 
 -- name: ListWorkTypes :many
 SELECT * FROM flow_work_types
-WHERE owner_id = ? AND business_id = ? AND workspace_id = ?
+WHERE owner_id = ? AND business_id = ?
   AND (archived = FALSE OR ? = TRUE)
 ORDER BY sort_order ASC, name ASC;
 
@@ -111,8 +111,8 @@ LIMIT 1;
 
 -- name: CreateWorkType :execresult
 INSERT INTO flow_work_types (
-    owner_id, business_id, workspace_id, parent_id, name, description, hr_category_id, sort_order
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    owner_id, business_id, parent_id, name, description, hr_category_id, sort_order
+) VALUES (?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateWorkType :execresult
 UPDATE flow_work_types

@@ -6,8 +6,8 @@ import (
 
 	"github.com/Masterminds/squirrel"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
-	searchutil "github.com/voxire/onion/internal/platform/searchutil"
 	"github.com/voxire/onion/internal/platform/logger"
+	searchutil "github.com/voxire/onion/internal/platform/searchutil"
 )
 
 // projectVisibilityExpr is the per-row gate that makes task listings honour

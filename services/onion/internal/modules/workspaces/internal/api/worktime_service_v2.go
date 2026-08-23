@@ -286,7 +286,7 @@ func (a *WorkTimeAPIV2) ListWorkTypes(ctx context.Context, req *flowtimev2.ListW
 		return nil, err
 	}
 
-	types, err := a.Service.ListWorkTypes(ctx, ownerID, businessID, businessID, req.GetIncludeArchived())
+	types, err := a.Service.ListWorkTypes(ctx, ownerID, businessID, req.GetIncludeArchived())
 	if err != nil {
 		return nil, mapServiceError(ctx, err)
 	}
@@ -307,7 +307,6 @@ func (a *WorkTimeAPIV2) CreateWorkType(ctx context.Context, req *flowtimev2.Crea
 	workType, err := a.Service.CreateWorkType(ctx, domain.WorkTypeInput{
 		OwnerID:      ownerID,
 		BusinessID:   businessID,
-		WorkspaceID:  businessID,
 		ParentID:     req.GetParentId(),
 		Name:         req.GetName(),
 		Description:  req.GetDescription(),
@@ -330,7 +329,6 @@ func (a *WorkTimeAPIV2) UpdateWorkType(ctx context.Context, req *flowtimev2.Upda
 		ID:           req.GetId(),
 		OwnerID:      ownerID,
 		BusinessID:   businessID,
-		WorkspaceID:  businessID,
 		ParentID:     req.GetParentId(),
 		Name:         req.GetName(),
 		Description:  req.GetDescription(),

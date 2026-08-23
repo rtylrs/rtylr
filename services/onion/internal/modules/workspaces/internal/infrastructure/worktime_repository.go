@@ -328,12 +328,11 @@ func (r *Repository) GetWorkDayByID(ctx context.Context, id, ownerID, businessID
 }
 
 // ListWorkTypes returns the workspace's classification tree.
-func (r *Repository) ListWorkTypes(ctx context.Context, ownerID, businessID, workspaceID int64, includeArchived bool) ([]domain.WorkType, error) {
+func (r *Repository) ListWorkTypes(ctx context.Context, ownerID, businessID int64, includeArchived bool) ([]domain.WorkType, error) {
 	rows, err := r.queries.ListWorkTypes(ctx, sqlc.ListWorkTypesParams{
-		OwnerID:     ownerID,
-		BusinessID:  businessID,
-		WorkspaceID: workspaceID,
-		Column4:     includeArchived,
+		OwnerID:    ownerID,
+		BusinessID: businessID,
+		Column3:    includeArchived,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListWorkTypes failed", logger.Error(err))
@@ -351,7 +350,6 @@ func (r *Repository) CreateWorkType(ctx context.Context, input domain.WorkTypeIn
 	res, err := r.queries.CreateWorkType(ctx, sqlc.CreateWorkTypeParams{
 		OwnerID:      input.OwnerID,
 		BusinessID:   input.BusinessID,
-		WorkspaceID:  input.WorkspaceID,
 		ParentID:     nullInt64(input.ParentID),
 		Name:         input.Name,
 		Description:  nullString(input.Description),
