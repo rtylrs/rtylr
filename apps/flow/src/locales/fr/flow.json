@@ -789,5 +789,9 @@
     "public": "Public",
     "archived": "Archivé",
     "publicHint": "Le mode public expose le nom, la couleur, le statut et les dates du projet sur les profils des membres, pour les collègues de l'entreprise. Il ne donne jamais accès à ses tâches."
+  },
+  "projectStatus": {
+    "active": "Actif",
+    "completed": "Terminé"
   }
 }
