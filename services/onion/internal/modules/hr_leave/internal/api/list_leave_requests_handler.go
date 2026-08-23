@@ -20,8 +20,11 @@ type ListLeaveRequestsHandler struct{ Service *application.Service }
 type ListLeaveRequestsRequest struct {
 	EmployeeID int64  `json:"employee_id"`
 	Status     string `json:"status"`
-	Limit      int32  `json:"limit"`
-	Offset     int32  `json:"offset"`
+	// FromDate/ToDate bound the overlap window (ISO-8601); nil is open-ended.
+	FromDate *string `json:"from_date"`
+	ToDate   *string `json:"to_date"`
+	Limit    int32   `json:"limit"`
+	Offset   int32   `json:"offset"`
 }
 
 type ListLeaveRequestsResponse struct {
@@ -58,6 +61,8 @@ func (h *ListLeaveRequestsHandler) Serve(ctx context.Context, req *ListLeaveRequ
 	requests, total, err := h.Service.ListLeaveRequests(ctx, device.User.UserID, device.User.UserID, domain.ListLeaveRequestsParams{
 		EmployeeID: req.EmployeeID,
 		Status:     req.Status,
+		FromDate:   req.FromDate,
+		ToDate:     req.ToDate,
 		Limit:      limit,
 		Offset:     req.Offset,
 	})

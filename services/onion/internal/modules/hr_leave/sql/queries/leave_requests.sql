@@ -1,10 +1,15 @@
 -- name: ListLeaveRequests :many
+-- Date range uses overlap semantics (crm.sales-style doc in voxie#47): a
+-- request is included when it starts on/before to_date and ends on/after
+-- from_date, so multi-day leave crossing the boundary is never missed.
 SELECT id, owner_id, business_id, employee_id, leave_type_id, start_date, end_date, total_days,
        notes, status, current_approval_level, rejection_reason, created_at, updated_at
 FROM hr_leave_requests
 WHERE business_id = ?
   AND (? = 0 OR employee_id = ?)
   AND (? = '' OR status = ?)
+  AND (sqlc.narg('from_date') IS NULL OR end_date >= sqlc.narg('from_date'))
+  AND (sqlc.narg('to_date') IS NULL OR start_date <= sqlc.narg('to_date'))
 ORDER BY created_at DESC
 LIMIT ? OFFSET ?;
 
@@ -13,7 +18,9 @@ SELECT COUNT(*) AS total
 FROM hr_leave_requests
 WHERE business_id = ?
   AND (? = 0 OR employee_id = ?)
-  AND (? = '' OR status = ?);
+  AND (? = '' OR status = ?)
+  AND (sqlc.narg('from_date') IS NULL OR end_date >= sqlc.narg('from_date'))
+  AND (sqlc.narg('to_date') IS NULL OR start_date <= sqlc.narg('to_date'));
 
 -- name: GetLeaveRequest :one
 SELECT id, owner_id, business_id, employee_id, leave_type_id, start_date, end_date, total_days,
