@@ -14,7 +14,15 @@
  * Design: docs/superpowers/specs/2026-08-22-flow-appearance-design.md (rtylr)
  */
 
-import { deriveAccentFg, deriveOnAccent, rgbaFromHex, rgbaFromTriple, safeHex } from './colorMath';
+import {
+  compositeOver,
+  deriveAccentFg,
+  deriveAccentFgAcross,
+  deriveOnAccent,
+  rgbaFromHex,
+  rgbaFromTriple,
+  safeHex,
+} from './colorMath';
 import { ACCENT_DEFAULT, resolvePalette } from './palettes';
 import type {
   AppearanceContext,
@@ -165,6 +173,22 @@ export function appearanceTokens(prefs: AppearancePrefs, ctx: AppearanceContext)
     // page background, because a chip label is on --flow-card.
     '--accent-fg': deriveAccentFg(accent, palette.card),
     '--flow-on-accent': deriveOnAccent(accent),
+    // Text on the --accent-muted tint, which is a different background from the
+    // card and therefore needs its own derivation. Reusing --accent-fg here put
+    // 40 of the 56 light-mode palette/accent combinations below 4.5:1
+    // (rtylr#970): a tint darkens the ground under already-dark text, and
+    // --accent-fg has no headroom to spend because its walk stops the moment it
+    // clears the target.
+    //
+    // Derived against the tint composited over all three grounds it can sit on
+    // rather than a chosen one. Picking the ground is what went wrong the first
+    // time, so this token does not depend on picking it right.
+    '--accent-on-muted': deriveAccentFgAcross(
+      accent,
+      [palette.bg, palette.surface, palette.card].map((ground) =>
+        compositeOver(accent, accentAlpha.muted, ground)
+      )
+    ),
     // The focus ring was the third hardcoded token, and it was missed twice:
     // once when --accent-fg and --flow-on-accent were derived, and again when a
     // browser check found a teal ring drawn around a coral-accented card. Same
