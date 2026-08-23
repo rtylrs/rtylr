@@ -42,6 +42,29 @@ const DEFAULT_TWITTER_CARD = 'summary_large_image';
 
 const DEFAULT_OG_IMAGE = `${OG_BASE}/og-default.png`;
 
+/**
+ * Map a canonical URL to its per-page OG image.
+ *
+ * Every page used to share og-default.png, which made a shared link to
+ * /pricing/ and a shared link to /legal/terms/ look identical in a Slack
+ * unfurl. The images are generated offline by
+ * scripts/generate-og-images.mjs and committed under public/og.
+ *
+ * Derived here rather than passed per page, because a per-page prop is a
+ * thing 24 pages have to remember and one will forget. The cost is that
+ * this slug logic is duplicated from the generator, so
+ * tests/unit/page-structure.test.mjs asserts every og:image a page
+ * declares actually exists as a file in the build output. Get that
+ * mapping wrong and a test fails rather than a share silently rendering
+ * a broken preview.
+ */
+function ogImageFor(canonicalUrl: string): string {
+  if (!canonicalUrl.startsWith(OG_BASE)) return DEFAULT_OG_IMAGE;
+  const segments = canonicalUrl.slice(OG_BASE.length).split('/').filter(Boolean);
+  const slug = segments.length > 0 ? segments.join('-') : 'home';
+  return `${OG_BASE}/og/${slug}.png`;
+}
+
 function HelmetContainer({
   title = 'rtylr · Your entire business, one platform.',
   description = '',
@@ -62,7 +85,6 @@ function HelmetContainer({
   canonical = '',
   structuredData,
 }: HelmetContainerProps) {
-  const effectiveImage = image || DEFAULT_OG_IMAGE;
   const effectiveOgType = ogType || DEFAULT_OG_TYPE;
   const effectiveOgLocale = ogLocale || DEFAULT_OG_LOCALE;
   const effectiveOgSiteName = ogSiteName || DEFAULT_OG_SITE_NAME;
@@ -72,6 +94,11 @@ function HelmetContainer({
   // canonical prop is the new name we're threading in; url is the
   // legacy name most pages already pass.
   const effectiveCanonical = canonical || url;
+  // An explicit `image` still wins, for a page that wants a bespoke card.
+  // Otherwise derive it from the canonical, and only fall back to the
+  // shared default when there is no canonical at all (404).
+  const effectiveImage =
+    image || (effectiveCanonical ? ogImageFor(effectiveCanonical) : DEFAULT_OG_IMAGE);
 
   return (
     <Head>

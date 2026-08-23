@@ -1,0 +1,98 @@
+{
+  "404": {
+    "route": "/404/",
+    "headline": "This page doesn't exist."
+  },
+  "home": {
+    "route": "/",
+    "headline": "Run your entire business. From a single platform."
+  },
+  "about": {
+    "route": "/about/",
+    "headline": "An operating system for real businesses."
+  },
+  "blog": {
+    "route": "/blog/",
+    "headline": "Playbooks for running the whole business."
+  },
+  "blog-all-in-one-business-software": {
+    "route": "/blog/all-in-one-business-software/",
+    "headline": "All-in-One Business Software: What It Is and When You Actually Need It"
+  },
+  "blog-pos-inventory-payroll-one-platform": {
+    "route": "/blog/pos-inventory-payroll-one-platform/",
+    "headline": "POS, Inventory, and Payroll on One Platform: What Actually Changes on the Floor"
+  },
+  "blog-restaurant-pos-system-guide": {
+    "route": "/blog/restaurant-pos-system-guide/",
+    "headline": "How to Choose a Restaurant POS System: A Saturday-Night Checklist"
+  },
+  "contact": {
+    "route": "/contact/",
+    "headline": "Reach out. We read it all."
+  },
+  "crm": {
+    "route": "/crm/",
+    "headline": "Every customer, remembered."
+  },
+  "demo": {
+    "route": "/demo/",
+    "headline": "See rtylr on your data."
+  },
+  "erp": {
+    "route": "/erp/",
+    "headline": "Inventory that counts itself."
+  },
+  "finance": {
+    "route": "/finance/",
+    "headline": "A real P&L, in real time."
+  },
+  "flow": {
+    "route": "/flow/",
+    "headline": "Work that moves. Operations that don't slip."
+  },
+  "hardware": {
+    "route": "/hardware/",
+    "headline": "Plug it in. Ring it up."
+  },
+  "hr": {
+    "route": "/hr/",
+    "headline": "Your team. Looked after."
+  },
+  "integrations": {
+    "route": "/integrations/",
+    "headline": "Plug in what you already use."
+  },
+  "legal-privacy-policy": {
+    "route": "/legal/privacy-policy/",
+    "headline": "Privacy Policy"
+  },
+  "legal-security": {
+    "route": "/legal/security/",
+    "headline": "Security at rtylr"
+  },
+  "legal-terms": {
+    "route": "/legal/terms/",
+    "headline": "Terms of Service"
+  },
+  "partners": {
+    "route": "/partners/",
+    "headline": "Build with rtylr. Grow with us."
+  },
+  "pos": {
+    "route": "/pos/",
+    "headline": "The register that keeps up."
+  },
+  "pricing": {
+    "route": "/pricing/",
+    "headline": "All 7 apps. Every plan."
+  },
+  "support": {
+    "route": "/support/",
+    "headline": "How can we help?"
+  },
+  "trust": {
+    "route": "/trust/",
+    "headline": "Run your business on something trustworthy."
+  }
+}
