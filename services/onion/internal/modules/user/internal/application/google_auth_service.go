@@ -62,6 +62,12 @@ func (s *Service) GoogleAuth(
 	if email == "" {
 		return nil, ErrGoogleTokenInvalid
 	}
+	// Never link or provision an account off an unverified email — a
+	// provider that allows unverified addresses would otherwise let an
+	// attacker take over the matching local account.
+	if !googleUser.EmailVerified {
+		return nil, ErrGoogleEmailUnverified
+	}
 
 	// Try to link by email first.
 	existing, findErr := s.repo.GetUserByEmail(ctx, email)

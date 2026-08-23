@@ -306,3 +306,35 @@ func (r *Repository) PurgeProjectCascade(ctx context.Context, id, businessID int
 	}
 	return urls, nil
 }
+
+// ListPublicProjectsByOwnerV2 returns the subject's public, non-archived
+// projects inside one business, metadata only.
+func (r *Repository) ListPublicProjectsByOwnerV2(
+	ctx context.Context,
+	businessID, ownerID int64,
+	limit int32,
+) ([]domain.ProfileProject, error) {
+	rows, err := r.queries.ListPublicProjectsByOwnerV2(ctx, sqlc.ListPublicProjectsByOwnerV2Params{
+		BusinessID: businessID,
+		CreatedBy:  ownerID,
+		Limit:      limit,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("ListPublicProjectsByOwnerV2 failed", logger.Error(err))
+		return nil, err
+	}
+	out := make([]domain.ProfileProject, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, domain.ProfileProject{
+			ID:             row.ID,
+			Name:           row.Name,
+			Icon:           row.Icon,
+			Color:          row.Color,
+			Description:    row.Description,
+			Status:         string(row.Status),
+			TaskCount:      int32(row.TaskCount),
+			CompletedCount: int32(row.CompletedCount),
+		})
+	}
+	return out, nil
+}

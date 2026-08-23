@@ -165,3 +165,36 @@ ORDER BY created_at DESC LIMIT ? OFFSET ?;
 -- name: CreateViewV2 :execresult
 INSERT INTO flow_views (business_id, name, icon, filters, group_by, sort_by, sort_dir, created_by)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+-- ListPublicProjectsByOwnerV2 backs the profile page. Deliberately narrower
+-- than ListProjectsV2: it returns metadata only, never task-level fields,
+-- because "public" means discoverable, not openable. Membership is not
+-- consulted at all - a public project shows on its owner's profile to every
+-- colleague in the business, and opening it still goes through the normal
+-- project gate.
+--
+-- name: ListPublicProjectsByOwnerV2 :many
+SELECT
+    p.id, p.name,
+    COALESCE(p.icon, '') AS icon,
+    COALESCE(p.color, '') AS color,
+    COALESCE(p.description, '') AS description,
+    COALESCE(p.status, 'active') AS status,
+    (SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id) AS task_count,
+    (SELECT COUNT(*) FROM flow_tasks t WHERE t.project_id = p.id AND t.status = 'done') AS completed_count
+FROM flow_projects p
+WHERE p.business_id = ?
+  AND p.created_by = ?
+  AND p.visibility = 'public'
+  AND p.is_personal = FALSE
+  AND p.archived_at IS NULL
+ORDER BY p.created_at DESC, p.id DESC
+LIMIT ?;
+
+-- name: GetProjectProxyFacts :one
+-- The four facts the dept-manager visibility proxy needs about a project,
+-- looked up by id alone. projectRoleFor resolves a role without knowing the
+-- business, and the proxy must not trust a business passed in from a caller.
+SELECT p.business_id, p.owner_id, p.created_by, p.is_personal
+FROM flow_projects p
+WHERE p.id = ?;

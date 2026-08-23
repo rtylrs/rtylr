@@ -286,12 +286,24 @@ func (r *Repository) AdvanceLeaveApprovalLevel(ctx context.Context, ownerID, req
 	return r.queries.AdvanceLeaveApprovalLevel(ctx, sqlc.AdvanceLeaveApprovalLevelParams{ID: requestID, BusinessID: ownerID})
 }
 
-func (r *Repository) RejectLeaveRequest(ctx context.Context, ownerID, requestID int64, reason string) error {
-	return r.queries.RejectLeaveRequest(ctx, sqlc.RejectLeaveRequestParams{
+// RejectLeaveRequest reports whether the request was actually still pending
+// at the moment of the write (the query's WHERE clause guards on it) - a
+// zero result means it was already approved, rejected, or canceled between
+// the read and this write, in which case pending days must not be adjusted.
+func (r *Repository) RejectLeaveRequest(ctx context.Context, ownerID, requestID int64, reason string) (bool, error) {
+	result, err := r.queries.RejectLeaveRequest(ctx, sqlc.RejectLeaveRequestParams{
 		RejectionReason: nullString(reason),
 		ID:              requestID,
 		BusinessID:      ownerID,
 	})
+	if err != nil {
+		return false, err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+	return rows > 0, nil
 }
 
 // CancelLeaveRequest reports whether the request was actually still pending

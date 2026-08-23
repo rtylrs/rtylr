@@ -47,3 +47,25 @@ UPDATE hr_shifts SET clock_out_at = NOW(), status = 'completed',
        hours_worked = TIMESTAMPDIFF(MINUTE, clock_in_at, NOW()) / 60.0, updated_at = NOW()
 WHERE business_id = ? AND staff_id = ? AND date = CURDATE() AND clock_in_at IS NOT NULL AND clock_out_at IS NULL
 ORDER BY start_time ASC LIMIT 1;
+
+-- name: ListManagedUserIDs :many
+-- Users reporting to a manager, for the Flow dept-manager visibility proxy (M3).
+-- The relationship lives on hr_departments.manager_staff_id, so this joins back
+-- to hr_staff to identify the manager by their USER id, which is what Flow has.
+--
+-- Direct departments only: hr_departments.parent_department_id exists, but a
+-- manager of a parent department does not inherit the children here. Making
+-- visibility transitive up an org tree is a larger decision than this proxy,
+-- and a recursive walk would silently widen access as the tree grows.
+--
+-- Terminated staff are excluded: they are no longer a report. Staff with no
+-- linked user account are excluded because they cannot be a Flow subject.
+SELECT DISTINCT s.user_id
+FROM hr_staff s
+JOIN hr_departments d ON d.id = s.department_id AND d.business_id = s.business_id
+JOIN hr_staff m ON m.id = d.manager_staff_id AND m.business_id = s.business_id
+WHERE m.user_id = ?
+  AND s.business_id = ?
+  AND s.user_id IS NOT NULL
+  AND s.user_id <> m.user_id
+  AND s.status <> 'terminated';

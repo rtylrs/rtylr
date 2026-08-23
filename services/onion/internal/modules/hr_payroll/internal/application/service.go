@@ -225,7 +225,13 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 		var basePay float64
 		switch emp.PayType {
 		case "hourly":
-			basePay = hoursWorked * hourlyRateDollars
+			// Overtime minutes are already inside hoursWorked; pay them at
+			// the multiplier only, not once more inside the base rate.
+			regularHours := hoursWorked - overtimeHours
+			if regularHours < 0 {
+				regularHours = 0
+			}
+			basePay = regularHours * hourlyRateDollars
 		case "monthly":
 			basePay = calculateMonthlyBasePay(monthlySalaryDollars, startDate, endDate)
 		default:

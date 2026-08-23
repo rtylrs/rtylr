@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -234,4 +235,48 @@ func (a *ProjectAPI) DeleteProject(ctx context.Context, req *flowprojectv1.Delet
 
 	publishProjectEvent("project.deleted", workspaceID, req.GetId(), authUser.UserID)
 	return &flowprojectv1.DeleteProjectResponse{Message: "Project archived successfully"}, nil
+}
+
+// GetProjectLabourCost serves the aggregate declared by flow.project.v1. The
+// figures come from the HR-owned labour-cost port (wired in cmd/api/main.go);
+// employee hourly rates never cross that boundary, only money and coverage
+// totals. UncostedMinutes stays separate from CostMinorUnits so billable time
+// belonging to an employee with no configured rate is visible as missing
+// coverage rather than silently counted as free work.
+//
+// Gated at admin: the workspace-replacement proposal's permission matrix does
+// not cover labour cost, and a project-level financial total is closer to the
+// billing surfaces than to ordinary project reads, so this fails closed.
+func (a *ProjectAPI) GetProjectLabourCost(ctx context.Context, req *flowprojectv1.GetProjectLabourCostRequest) (*flowprojectv1.GetProjectLabourCostResponse, error) {
+	businessID, authUser, err := a.resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	projectID := req.GetId()
+	if projectID == 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "id is required")
+	}
+	if roleErr := a.Service.RequireProjectRole(ctx, projectID, authUser.UserID, businessID, domain.FlowRoleAdmin); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	cost, costErr := a.Service.GetProjectLabourCost(ctx, businessID, projectID)
+	if costErr != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load project labour cost")
+	}
+
+	uncostedEmployees := cost.UncostedEmployeeCount
+	if uncostedEmployees > math.MaxInt32 {
+		uncostedEmployees = math.MaxInt32
+	}
+
+	return &flowprojectv1.GetProjectLabourCostResponse{
+		Cost: &flowprojectv1.ProjectLabourCost{
+			ProjectId:             cost.ProjectID,
+			CostMinorUnits:        cost.CostCents,
+			CostedMinutes:         cost.CostedMinutes,
+			UncostedMinutes:       cost.UncostedMinutes,
+			UncostedEmployeeCount: int32(uncostedEmployees),
+		},
+	}, nil
 }

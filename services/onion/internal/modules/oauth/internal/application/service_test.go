@@ -31,6 +31,7 @@ func (m *mockRepo) GetAuthCode(_ context.Context, _ string) (*domain.AuthCode, e
 	return m.authCode, m.err
 }
 func (m *mockRepo) MarkAuthCodeUsed(_ context.Context, _ string) error { return m.err }
+func (m *mockRepo) ConsumeAuthCode(_ context.Context, _ string) error  { return m.err }
 func (m *mockRepo) SaveToken(_ context.Context, _ *domain.Token) error { return m.err }
 func (m *mockRepo) GetTokenByRefresh(_ context.Context, _ string) (*domain.Token, error) {
 	return m.token, m.err
@@ -87,12 +88,30 @@ func TestValidateAuthRequest_ValidRedirectURIAndScope(t *testing.T) {
 		Scopes:       []string{"read", "write"},
 	}
 	s := newTestService(&mockRepo{client: client})
-	got, err := s.ValidateAuthRequest(context.Background(), "app1", "https://example.com/callback/extra", "read")
+	got, err := s.ValidateAuthRequest(context.Background(), "app1", "https://example.com/callback", "read")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if got.ID != "app1" {
 		t.Errorf("expected app1, got %s", got.ID)
+	}
+}
+
+func TestValidateAuthRequest_RejectsPrefixMatches(t *testing.T) {
+	client := &domain.Client{
+		ID:           "app1",
+		RedirectURIs: []string{"https://app.example.com/callback"},
+		Scopes:       []string{"read"},
+	}
+	s := newTestService(&mockRepo{client: client})
+	for _, uri := range []string{
+		"https://app.example.com.evil.com/callback",
+		"https://app.example.comcallback",
+		"https://app.example.com/callback/extra",
+	} {
+		if _, err := s.ValidateAuthRequest(context.Background(), "app1", uri, "read"); !errors.Is(err, domain.ErrInvalidRedirectURI) {
+			t.Errorf("expected ErrInvalidRedirectURI for %q, got %v", uri, err)
+		}
 	}
 }
 
@@ -116,7 +135,7 @@ func TestValidateAuthRequest_InvalidScopeReturnsError(t *testing.T) {
 		Scopes:       []string{"read"},
 	}
 	s := newTestService(&mockRepo{client: client})
-	_, err := s.ValidateAuthRequest(context.Background(), "app1", "https://example.com/path", "write")
+	_, err := s.ValidateAuthRequest(context.Background(), "app1", "https://example.com", "write")
 	if !errors.Is(err, domain.ErrInvalidScope) {
 		t.Errorf("expected ErrInvalidScope, got %v", err)
 	}

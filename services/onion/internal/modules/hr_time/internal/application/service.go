@@ -69,6 +69,33 @@ func (s *Service) UpdateTimeEntry(ctx context.Context, businessID int64, entry d
 	if entry.DurationMinutes <= 0 {
 		return nil, domain.ErrInvalidDuration
 	}
+
+	// A locked timesheet must freeze its entries: check both the period the
+	// entry currently lives in and the one a new date would move it into.
+	existing, err := s.repo.GetTimeEntry(ctx, businessID, entry.ID)
+	if err != nil {
+		return nil, err
+	}
+	if existing == nil {
+		return nil, domain.ErrTimeEntryNotFound
+	}
+	locked, err := s.periodLocked(ctx, businessID, existing.EmployeeID, existing.Date)
+	if err != nil {
+		return nil, err
+	}
+	if locked {
+		return nil, domain.ErrDateInLockedPeriod
+	}
+	if entry.Date != "" && entry.Date != existing.Date {
+		locked, err := s.periodLocked(ctx, businessID, existing.EmployeeID, entry.Date)
+		if err != nil {
+			return nil, err
+		}
+		if locked {
+			return nil, domain.ErrDateInLockedPeriod
+		}
+	}
+
 	rec, err := s.repo.UpdateTimeEntry(ctx, businessID, entry)
 	if err == nil {
 		invalidateHRTimeScope(ctx, businessID)
@@ -77,11 +104,38 @@ func (s *Service) UpdateTimeEntry(ctx context.Context, businessID int64, entry d
 }
 
 func (s *Service) DeleteTimeEntry(ctx context.Context, businessID, entryID int64) error {
+	existing, err := s.repo.GetTimeEntry(ctx, businessID, entryID)
+	if err != nil {
+		return err
+	}
+	if existing == nil {
+		return domain.ErrTimeEntryNotFound
+	}
+	locked, err := s.periodLocked(ctx, businessID, existing.EmployeeID, existing.Date)
+	if err != nil {
+		return err
+	}
+	if locked {
+		return domain.ErrDateInLockedPeriod
+	}
 	if err := s.repo.DeleteTimeEntry(ctx, businessID, entryID); err != nil {
 		return err
 	}
 	invalidateHRTimeScope(ctx, businessID)
 	return nil
+}
+
+// periodLocked reports whether the employee's timesheet covering the month
+// of date (format "2006-01-02") is locked.
+func (s *Service) periodLocked(ctx context.Context, businessID, employeeID int64, date string) (bool, error) {
+	if len(date) < 7 {
+		return false, nil
+	}
+	ts, err := s.repo.GetTimesheetForPeriod(ctx, businessID, employeeID, date[:7]+"-01")
+	if err != nil {
+		return false, err
+	}
+	return ts != nil && ts.Status == "locked", nil
 }
 
 func (s *Service) ListTimeEntries(ctx context.Context, businessID int64, params domain.ListTimeEntriesParams) ([]domain.TimeEntryRecord, int64, error) {

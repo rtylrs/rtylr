@@ -10,8 +10,9 @@ import (
 
 // GoogleUser is the normalized user info this service needs from any Google auth provider.
 type GoogleUser struct {
-	Email string
-	Name  string
+	Email         string
+	Name          string
+	EmailVerified bool
 }
 
 // WorkOSProvider handles Google OAuth via WorkOS User Management.
@@ -80,5 +81,5 @@ func (p *WorkOSProvider) AuthenticateWithCode(ctx context.Context, code string) 
 		return nil, err
 	}
 	name := strings.TrimSpace(resp.User.FirstName + " " + resp.User.LastName)
-	return &GoogleUser{Email: resp.User.Email, Name: name}, nil
+	return &GoogleUser{Email: resp.User.Email, Name: name, EmailVerified: resp.User.EmailVerified}, nil
 }

@@ -14,6 +14,9 @@ FROM oauth_auth_codes WHERE code = ?;
 -- name: MarkAuthCodeUsed :exec
 UPDATE oauth_auth_codes SET used = 1 WHERE code = ?;
 
+-- name: ConsumeAuthCode :execresult
+UPDATE oauth_auth_codes SET used = 1 WHERE code = ? AND used = 0;
+
 -- name: SaveToken :exec
 INSERT INTO oauth_tokens (access_token, refresh_token, client_id, user_id, scope, expires_at)
 VALUES (?, ?, ?, ?, ?, ?);

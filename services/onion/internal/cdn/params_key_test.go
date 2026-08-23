@@ -7,8 +7,10 @@ import (
 
 func TestParamsCacheKey_Deterministic(t *testing.T) {
 	p := Params{Width: 256, Height: 256, Fit: "cover", Format: "webp", Quality: 85}
-	if p.CacheKey("uuid-1") != p.CacheKey("uuid-1") {
-		t.Error("CacheKey is not deterministic")
+	first := p.CacheKey("uuid-1")
+	second := p.CacheKey("uuid-1")
+	if first != second {
+		t.Errorf("CacheKey is not deterministic: %q != %q", first, second)
 	}
 }
 

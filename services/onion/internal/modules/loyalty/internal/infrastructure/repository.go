@@ -144,6 +144,13 @@ func (r *Repository) CreateRedeemTransaction(ctx context.Context, input domain.R
 	return err
 }
 
+func (r *Repository) GetCustomerPointsBalance(ctx context.Context, businessID, customerID int64) (int64, error) {
+	return r.queries.GetCustomerPointsBalance(ctx, sqlc.GetCustomerPointsBalanceParams{
+		BusinessID: businessID,
+		CustomerID: customerID,
+	})
+}
+
 // parseLoyaltyDecimal parses a DECIMAL column stored as a string. A corrupt or
 // empty value logs at Warn and yields 0 rather than being silently discarded.
 func parseLoyaltyDecimal(ctx context.Context, s string) float64 {

@@ -101,7 +101,8 @@ func (r *Repository) UpdateCycle(ctx context.Context, input domain.UpdateCycleIn
 		parts = append(parts, "end_date = ?")
 		args = append(args, input.EndDate.Format("2006-01-02"))
 	}
-	args = append(args, input.ID, input.BusinessID, input.ActorID, input.ActorID)
+	// Trailing binds: id, then the two placeholders inside workspaceMemberPredicate.
+	args = append(args, input.ID, input.BusinessID, input.ActorID)
 
 	res, err := r.pool.ExecContext(ctx,
 		fmt.Sprintf("UPDATE flow_cycles SET %s WHERE id = ? AND %s", strings.Join(parts, ", "), workspaceMemberPredicate("flow_cycles")),
@@ -271,7 +272,8 @@ func (r *Repository) UpdateMilestone(ctx context.Context, input domain.UpdateMil
 		parts = append(parts, "due_date = ?")
 		args = append(args, input.DueDate.Format("2006-01-02"))
 	}
-	args = append(args, input.ID, input.BusinessID, input.ActorID, input.ActorID)
+	// Trailing binds: id, then the two placeholders inside workspaceMemberPredicate.
+	args = append(args, input.ID, input.BusinessID, input.ActorID)
 
 	res, err := r.pool.ExecContext(ctx,
 		fmt.Sprintf("UPDATE flow_milestones SET %s WHERE id = ? AND %s", strings.Join(parts, ", "), workspaceMemberPredicate("flow_milestones")),

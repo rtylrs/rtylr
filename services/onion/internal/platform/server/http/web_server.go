@@ -46,6 +46,11 @@ func Start(ctx context.Context, runMode ChiRunMode, port string) error {
 	// Counter-only middleware — /metrics itself skips it so a scrape
 	// doesn't inflate its own numbers.
 	r.Use(MetricsMiddleware)
+	// Reports any call to a Flow v1 route that the workspace-removal Phase 4
+	// deletes. RequestLoggerMiddleware only reports 4xx/5xx, so a successful v1
+	// call was previously invisible and the phase's "zero v1 traffic" gate could
+	// not be answered from logs. Delete with the v1 handlers.
+	r.Use(FlowV1UsageMiddleware)
 
 	runMode.Setup(ctx, r)
 

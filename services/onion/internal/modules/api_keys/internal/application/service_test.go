@@ -32,7 +32,9 @@ func TestGenerateAPIKey_ProducesUniquePrefixedKeys(t *testing.T) {
 }
 
 func TestHashKey_DeterministicAndDifferentForDifferentInput(t *testing.T) {
-	if hashKey("abc") != hashKey("abc") {
+	first := hashKey("abc")
+	second := hashKey("abc")
+	if first != second {
 		t.Fatal("hashKey should be deterministic for the same input")
 	}
 	if hashKey("abc") == hashKey("abd") {

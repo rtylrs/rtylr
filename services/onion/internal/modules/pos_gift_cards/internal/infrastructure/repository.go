@@ -156,6 +156,9 @@ func (r *Repository) RedeemForOrder(ctx context.Context, businessID, actorID int
 			_ = tx.Rollback()
 			panic(p)
 		}
+		if err != nil {
+			_ = tx.Rollback()
+		}
 	}()
 
 	orderRef, err := lockGiftCardOrder(ctx, tx, businessID, input.OrderID, input.Amount)
@@ -187,7 +190,9 @@ func (r *Repository) RedeemForOrder(ctx context.Context, businessID, actorID int
 		_ = tx.Rollback()
 		return nil, domain.ErrGiftCardInactive
 	}
-	if gc.ExpiresAt != nil && gc.ExpiresAt.Before(time.Now()) {
+	// Expiry is stored as midnight of the expiry date; a card is valid
+	// through that entire day, so compare against the end of it.
+	if gc.ExpiresAt != nil && !time.Now().Before(gc.ExpiresAt.AddDate(0, 0, 1)) {
 		_ = tx.Rollback()
 		return nil, domain.ErrGiftCardExpired
 	}
@@ -214,6 +219,7 @@ func (r *Repository) RedeemForOrder(ctx context.Context, businessID, actorID int
 			(gift_card_id, owner_id, business_id, type, order_ref, amount, balance_after, created_by)
 		VALUES (?, ?, ?, 'redeem', ?, ?, ?, ?)`,
 		gc.ID, gc.OwnerID, businessID, orderRef, floatToDecimal(input.Amount), floatToDecimal(newBalance), actorID); err != nil {
+		_ = tx.Rollback()
 		return nil, err
 	}
 	if err := tx.Commit(); err != nil {

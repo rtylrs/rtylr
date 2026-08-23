@@ -28,8 +28,8 @@ UPDATE pos_tables SET status = ? WHERE business_id = ? AND id = ?;
 -- name: DeletePosTable :exec
 DELETE FROM pos_tables WHERE business_id = ? AND id = ?;
 
--- name: SetTableOccupied :exec
-UPDATE pos_tables SET status = 'occupied', current_session_order_id = ? WHERE id = ?;
+-- name: SetTableOccupied :execresult
+UPDATE pos_tables SET status = 'occupied', current_session_order_id = ? WHERE business_id = ? AND id = ?;
 
 -- name: FreeTable :exec
 UPDATE pos_tables SET status = 'available', current_session_order_id = NULL WHERE id = ?;
@@ -126,6 +126,12 @@ WHERE business_id = ? AND id = ? AND payment_status <> 'paid';
 -- name: GetOrderForPayment :one
 SELECT total, table_id, type, payment_status FROM pos_orders WHERE business_id = ? AND id = ? FOR UPDATE;
 
+-- name: GetOrderForRefund :one
+SELECT total, payment_status FROM pos_orders WHERE business_id = ? AND id = ? FOR UPDATE;
+
+-- name: SumRefundsForOrder :one
+SELECT COALESCE(SUM(amount), 0) AS refunded FROM pos_refunds WHERE business_id = ? AND order_id = ?;
+
 -- name: CreateRefund :execresult
 INSERT INTO pos_refunds (owner_id, business_id, order_id, amount, reason, refunded_by)
 VALUES (?, ?, ?, ?, ?, ?);
@@ -177,6 +183,7 @@ UPDATE pos_orders SET status = 'cancelled' WHERE id = ? AND business_id = ?;
 
 -- name: GetOrderSubtotal :one
 SELECT o.id,
+       COALESCE(o.discount_amount, 0) AS existing_discount,
        COALESCE(SUM((i.unit_price * i.quantity) - COALESCE(i.discount_amount, 0)), 0) AS subtotal,
        COALESCE(SUM(((i.unit_price * i.quantity) - COALESCE(i.discount_amount, 0)) * COALESCE(i.tax_rate, 0) / 100), 0) AS tax_amount
 FROM pos_orders o

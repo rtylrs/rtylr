@@ -201,9 +201,16 @@ func (p *Pool) processOne(ctx context.Context) bool {
 			if delay < 1 {
 				delay = 1
 			}
+			// Count the attempt even on rate limits so a permanently
+			// throttled job still terminates after MaxAttempts.
+			newAttempts := int(job.Attempts) + 1
+			newStatus := sqlc.EmailJobsStatusPending
+			if newAttempts >= int(job.MaxAttempts) {
+				newStatus = sqlc.EmailJobsStatusFailed
+			}
 			if err := p.q.RescheduleJob(ctx, sqlc.RescheduleJobParams{
-				Status:    sqlc.EmailJobsStatusPending,
-				Attempts:  job.Attempts,
+				Status:    newStatus,
+				Attempts:  uint8(newAttempts),
 				LastError: sql.NullString{String: sendErr.Error(), Valid: true},
 				JobID:     sql.NullString{},
 				DATEADD:   delay,

@@ -246,8 +246,15 @@ func (s *Service) RejectLeave(ctx context.Context, ownerID, requestID, approverU
 		return err
 	}
 
-	if err := s.repo.RejectLeaveRequest(ctx, ownerID, requestID, reason); err != nil {
+	stillPending, err := s.repo.RejectLeaveRequest(ctx, ownerID, requestID, reason)
+	if err != nil {
 		return err
+	}
+	// The request was approved/rejected/canceled between the read and this
+	// write; its days no longer sit in the pending bucket, so touching the
+	// balance here would corrupt it.
+	if !stillPending {
+		return domain.ErrLeaveRequestNotPending
 	}
 
 	// Remove pending days

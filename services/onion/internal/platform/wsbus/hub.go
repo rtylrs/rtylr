@@ -184,6 +184,33 @@ func (h *Hub) pruneAuthCache() {
 	h.authMu.Unlock()
 }
 
+// pruneDeadClients reaps clients whose context is already cancelled but
+// whose unregister handoff never reached the hub (e.g. ServeWS timed out
+// waiting on the unregister channel). Without this, the per-user connection
+// slot and client registration would leak until restart.
+func (h *Hub) pruneDeadClients() {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	for c := range h.clients {
+		if c.ctx.Err() == nil {
+			continue
+		}
+		delete(h.clients, c)
+		if h.userCap[c.userID] > 0 {
+			h.userCap[c.userID]--
+		}
+		for topic := range c.topics {
+			if set := h.topics[topic]; set != nil {
+				delete(set, c)
+				if len(set) == 0 {
+					delete(h.topics, topic)
+				}
+			}
+		}
+		close(c.send)
+	}
+}
+
 // Run drives the hub's internal loop. Block until ctx is cancelled.
 // Call in a goroutine at server startup.
 func (h *Hub) Run(ctx context.Context) {
@@ -198,6 +225,7 @@ func (h *Hub) Run(ctx context.Context) {
 
 		case <-prune.C:
 			h.pruneAuthCache()
+			h.pruneDeadClients()
 
 		case c := <-h.register:
 			h.mu.Lock()
@@ -383,7 +411,10 @@ func (h *Hub) ServeWS(w http.ResponseWriter, r *http.Request, userID int64) {
 	go h.writeLoop(c)
 	h.readLoop(c)
 
-	// readLoop returning means the client disconnected.
+	// readLoop returning means the client disconnected. The unregister
+	// handoff is best-effort; on timeout the client's cancelled context
+	// marks it for pruneDeadClients so its slot and registration are
+	// reclaimed by the hub's periodic sweep.
 	select {
 	case h.unregister <- c:
 	case <-time.After(5 * time.Second):

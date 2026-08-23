@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -30,7 +31,50 @@ func (s *Service) canSeeProject(ctx context.Context, p domain.Project, callerID,
 	if p.CreatedBy == callerID || p.OwnerID == callerID {
 		return true
 	}
-	return s.repo.IsProjectMember(ctx, callerID, p.ID)
+	if s.repo.IsProjectMember(ctx, callerID, p.ID) {
+		return true
+	}
+	return s.managesSomeoneOn(ctx, p, callerID, businessID)
+}
+
+// managesSomeoneOn reports whether the caller manages anyone involved in this
+// project, which is the dept-manager visibility proxy (M3).
+//
+// The My Tasks bucket is exempt no matter who manages its owner: Project's own
+// contract says is_personal is "exempt from manager-visibility policies unless
+// its owner explicitly shares it", so the check stops before the proxy.
+//
+// Involvement means created, owns, or is a member. Membership is probed one
+// report at a time rather than with an IN clause because a manager has few
+// reports and sqlc's slice expansion produces invalid SQL for an empty set in
+// MySQL. It does mean this is O(reports) queries on a cache miss, so it runs
+// last, after the cheap self checks have already returned.
+func (s *Service) managesSomeoneOn(ctx context.Context, p domain.Project, callerID, businessID int64) bool {
+	if p.IsPersonal {
+		return false
+	}
+	reports := s.managedUserIDs(ctx, callerID, businessID)
+
+	// Creator and owner are already in hand, so settle the common case without
+	// touching the database at all.
+	for _, reportID := range reports {
+		if p.CreatedBy == reportID || p.OwnerID == reportID {
+			return true
+		}
+	}
+
+	// Only then pay for membership lookups. A nil repo means the proxy cannot
+	// answer, and the rule throughout is that failing to resolve must decline to
+	// widen rather than widen blindly.
+	if s.repo == nil {
+		return false
+	}
+	for _, reportID := range reports {
+		if s.repo.IsProjectMember(ctx, reportID, p.ID) {
+			return true
+		}
+	}
+	return false
 }
 
 // GetProjectV2 returns one project if the caller may see it.
@@ -171,8 +215,24 @@ func (s *Service) EnsureAssigneeMembership(ctx context.Context, projectID, busin
 	if err != nil {
 		return err
 	}
-	if !s.repo.IsWorkspaceMember(ctx, assigneeID, p.WorkspaceID) {
-		return fmt.Errorf("assignee is not a workspace member")
+	// The assignee has to be a colleague. This was a workspace-membership check,
+	// which a v2 project can never pass: its workspace_id is 0, so every
+	// assignment to someone other than yourself failed with "assignee is not a
+	// workspace member" and CreateTask propagated that as fatal. Since all
+	// project creation moved to v2, that was every new project.
+	//
+	// The hub profile resolver is the business-membership primitive: it looks the
+	// subject up inside the given business and reports ErrUserNotFound otherwise.
+	//
+	// Skipped rather than failed when the resolver is not wired, which happens in
+	// tests and some dev setups. GetProjectV2ByID above already scoped the project
+	// to the caller's business, so the worst case without this check is a member
+	// row for a user id outside the business, which does not make another
+	// tenant's data reachable.
+	if s.hubProfiles != nil {
+		if _, profileErr := s.hubProfiles.GetProfile(ctx, assigneeID, businessID); profileErr != nil {
+			return fmt.Errorf("assignee is not a member of this business")
+		}
 	}
 	if s.hubProfileBypasses(ctx, assigneeID, businessID) {
 		return nil
@@ -290,4 +350,70 @@ func (s *Service) CreateViewV2(ctx context.Context, businessID, createdBy int64,
 
 func (s *Service) UpdateViewV2(ctx context.Context, actorID, viewID int64) error {
 	return s.repo.UpdateView(ctx, domain.UpdateViewInput{ID: viewID, ActorID: actorID})
+}
+
+// profilePublicProjectCap bounds the profile card list. A profile is a summary,
+// not a paginated project browser, and All projects already exists for the
+// full list.
+const profilePublicProjectCap = 24
+
+// GetFlowProfile returns one business member's profile: identity from the
+// HR-owned hub profile, plus the public projects they created.
+//
+// Cross-business isolation comes from the resolver: it looks the subject up
+// inside the caller's business, so a subject who is not a colleague returns
+// ErrUserNotFound rather than a profile. There is deliberately no extra role
+// gate on top - a colleague's name, email and public projects are already
+// visible through the member roster and the project list.
+func (s *Service) GetFlowProfile(
+	ctx context.Context,
+	subjectID, businessID int64,
+) (domain.FlowProfile, error) {
+	if s.hubProfiles == nil {
+		return domain.FlowProfile{}, domain.ErrUnauthorized
+	}
+	hub, err := s.hubProfiles.GetProfile(ctx, subjectID, businessID)
+	if err != nil {
+		return domain.FlowProfile{}, err
+	}
+
+	projects, err := s.repo.ListPublicProjectsByOwnerV2(ctx, businessID, subjectID, profilePublicProjectCap)
+	if err != nil {
+		return domain.FlowProfile{}, err
+	}
+
+	return domain.FlowProfile{
+		UserID:   hub.ID,
+		Name:     hub.FullName,
+		Email:    hub.Email,
+		Initials: initialsOf(hub.FullName),
+		// The hub profile carries a business role, not a job title. It is the
+		// only title-shaped value that exists, so it fills the field until
+		// staff records grow a real one (fast-follow F-B).
+		RoleTitle:      hub.Role,
+		Bio:            "",
+		PublicProjects: projects,
+	}, nil
+}
+
+// initialsOf builds the two-letter monogram the contract asks for.
+//
+// Falls back to the first two letters of a single-word name, and to the empty
+// string for an empty name, so the caller never has to special-case it.
+func initialsOf(name string) string {
+	fields := strings.Fields(name)
+	switch len(fields) {
+	case 0:
+		return ""
+	case 1:
+		one := []rune(fields[0])
+		if len(one) == 1 {
+			return strings.ToUpper(string(one[0]))
+		}
+		return strings.ToUpper(string(one[0:2]))
+	default:
+		first := []rune(fields[0])
+		last := []rune(fields[len(fields)-1])
+		return strings.ToUpper(string(first[0]) + string(last[0]))
+	}
 }

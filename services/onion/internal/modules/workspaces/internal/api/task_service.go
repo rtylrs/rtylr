@@ -605,3 +605,42 @@ func (a *TaskAPI) GetMyTasksProject(ctx context.Context, _ *flowtaskv1.GetMyTask
 		WorkspaceId: workspaceID,
 	}, nil
 }
+
+// AddTaskDependency and RemoveTaskDependency mirror their v2 counterparts. The
+// v1 contract has declared both since voxie added task dependencies; without
+// them TaskAPI no longer satisfies flowtaskv1.TaskServiceServer and module.go
+// panics while registering the service.
+func (a *TaskAPI) AddTaskDependency(ctx context.Context, req *flowtaskv1.AddTaskDependencyRequest) (*flowtaskv1.AddTaskDependencyResponse, error) {
+	caller, businessID, err := a.resolveAuth(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetTaskId(), caller.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	body := req.GetBody()
+	if body == nil || body.GetDependsOnTaskId() == 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "depends_on_task_id is required")
+	}
+	if err := a.Service.AddTaskDependency(ctx, req.GetTaskId(), body.GetDependsOnTaskId()); err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to add dependency")
+	}
+	return &flowtaskv1.AddTaskDependencyResponse{Message: "Dependency added"}, nil
+}
+
+func (a *TaskAPI) RemoveTaskDependency(ctx context.Context, req *flowtaskv1.RemoveTaskDependencyRequest) (*flowtaskv1.RemoveTaskDependencyResponse, error) {
+	caller, businessID, err := a.resolveAuth(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetTaskId(), caller.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if req.GetDependsOnTaskId() == 0 {
+		return nil, onekiterrors.New(http.StatusBadRequest, "depends_on_task_id is required")
+	}
+	if err := a.Service.RemoveTaskDependency(ctx, req.GetTaskId(), req.GetDependsOnTaskId()); err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to remove dependency")
+	}
+	return &flowtaskv1.RemoveTaskDependencyResponse{Message: "Dependency removed"}, nil
+}

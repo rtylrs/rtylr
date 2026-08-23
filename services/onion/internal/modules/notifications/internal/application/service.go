@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/notifications/internal/domain"
@@ -48,7 +49,11 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func notificationsKey(businessID, userID int64, limit int32, cursorID *int64) string {
-	return cacheKeys.Scoped("notifications", businessID, fmt.Sprintf("user:%d|limit:%d|cursor:%v", userID, limit, cursorID))
+	cursor := ""
+	if cursorID != nil {
+		cursor = strconv.FormatInt(*cursorID, 10)
+	}
+	return cacheKeys.Scoped("notifications", businessID, fmt.Sprintf("user:%d|limit:%d|cursor:%s", userID, limit, cursor))
 }
 
 func invalidateNotificationsScope(ctx context.Context, businessID, userID int64) {

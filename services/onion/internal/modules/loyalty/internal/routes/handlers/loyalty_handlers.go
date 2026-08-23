@@ -178,7 +178,14 @@ func (h *RedeemPointsHandler) Serve(ctx context.Context, req *RedeemPointsReques
 		ReferenceType: req.ReferenceType,
 	})
 	if err != nil {
-		return RedeemPointsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to redeem points")
+		switch {
+		case errors.Is(err, domain.ErrInsufficientPoints):
+			return RedeemPointsResponse{}, onekiterrors.New(http.StatusConflict, "Insufficient loyalty points")
+		case errors.Is(err, domain.ErrInvalidLoyaltyConfig):
+			return RedeemPointsResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
+		default:
+			return RedeemPointsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to redeem points")
+		}
 	}
 	return RedeemPointsResponse{Message: "Points redeemed successfully"}, nil
 }

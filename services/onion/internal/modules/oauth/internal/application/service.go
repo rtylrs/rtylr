@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
+	"net/url"
 	"strings"
 	"time"
 
@@ -137,7 +138,8 @@ func (s *Service) ExchangeCode(ctx context.Context, clientID, code, codeVerifier
 		return "", "", 0, domain.ErrCodeVerifierFailed
 	}
 
-	if err := s.repo.MarkAuthCodeUsed(ctx, code); err != nil {
+	// Consume atomically so two concurrent exchanges cannot both mint tokens.
+	if err := s.repo.ConsumeAuthCode(ctx, code); err != nil {
 		return "", "", 0, err
 	}
 
@@ -239,13 +241,31 @@ func (s *Service) RevokeToken(ctx context.Context, refreshToken string) error {
 	return s.repo.RevokeToken(ctx, refreshToken)
 }
 
+// isAllowedRedirectURI requires an exact match (after normalization) so a
+// prefix like "https://app.example.com" cannot be satisfied by
+// "https://app.example.com.evil.com/cb".
 func isAllowedRedirectURI(allowed []string, requested string) bool {
 	for _, uri := range allowed {
-		if strings.HasPrefix(requested, uri) {
+		if uri == requested {
+			return true
+		}
+		if redirectURIsEqual(uri, requested) {
 			return true
 		}
 	}
 	return false
+}
+
+func redirectURIsEqual(a, b string) bool {
+	pa, errA := url.Parse(a)
+	pb, errB := url.Parse(b)
+	if errA != nil || errB != nil {
+		return false
+	}
+	return pa.Scheme == pb.Scheme &&
+		strings.EqualFold(pa.Host, pb.Host) &&
+		pa.Path == pb.Path &&
+		pa.RawQuery == pb.RawQuery
 }
 
 func isScopeAllowed(clientScopes []string, requested string) bool {

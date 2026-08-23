@@ -243,18 +243,6 @@ func loyaltyToolBusinessID(ctx context.Context) (int64, error) {
 	return 0, errors.New("cannot determine business context")
 }
 
-func loyaltyToolOwnerID(ctx context.Context) (int64, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User != nil && device.User.UserID > 0 {
-		return device.User.UserID, nil
-	}
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if ok && authUser != nil && authUser.UserID > 0 {
-		return authUser.UserID, nil
-	}
-	return 0, errors.New("authentication is required")
-}
-
 func loyaltyConfigToolPayload(config domain.LoyaltyConfig) map[string]any {
 	return map[string]any{
 		"id":                    config.ID,
