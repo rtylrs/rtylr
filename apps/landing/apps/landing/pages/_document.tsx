@@ -43,6 +43,49 @@ export default function Document() {
         <script dangerouslySetInnerHTML={{ __html: CONSENT_MODE_BOOTSTRAP }} />
         <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`} />
 
+        {/*
+          Google Preferred Sources library. Renders the button in the footer
+          (layouts/Main/Header is not it: see Footer.tsx). Script URL and the
+          div attribute both come from the Search Central docs read
+          2026-08-23; the attribute name is the entire contract, so neither
+          was guessed.
+
+          Two things about this are open, and are flagged rather than
+          decided quietly here.
+
+          1. Consent. This is a third-party Google script loading on every
+             page regardless of the visitor's cookie choice. It is a
+             functional control rather than analytics, and Google's docs say
+             nothing about consent, but this site takes a strict opt-in
+             stance and GA4 was wired to Consent Mode for exactly this
+             reason.
+
+          2. Cost. The library injects two cross-origin iframes, and they
+             hold the document's load event open. Measured against the
+             built site on 2026-08-23, /pos/, median of repeated runs:
+
+               without it   loadEventEnd  117ms,  DCL 116ms, FCP 80ms
+               with it      loadEventEnd  22-29s, DCL 107ms, FCP 68ms
+
+             First paint and DOMContentLoaded are untouched, so this is not
+             an LCP or INP problem, and nothing in this codebase listens for
+             `load` (checked). What it does affect is the browser's loading
+             indicator and any future code keyed on window.onload. It also
+             made the e2e suite go from 13s to 4 minutes until the fixture
+             started blocking off-origin requests.
+
+          Both point at the same remedy if either matters: load this
+          lazily, on consent or on the footer entering the viewport,
+          instead of in the head. That deviates from Google's documented
+          integration, which is why it was not done unilaterally.
+
+          No integrity hash: this is a mutable versioned library that Google
+          updates in place and publishes no SRI digest for, so pinning one
+          would break the button on their next release. Same situation as
+          gtag.js above.
+        */}
+        <script async src="https://news.google.com/swg/js/v1/publisher.js" />
+
         {/* PWA manifest - installable on iOS / Android */}
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#fafafa" />

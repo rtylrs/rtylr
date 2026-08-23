@@ -75,6 +75,16 @@
     }
   }
 
+  // Wrapper for Google's Preferred Sources button. The button itself is
+  // rendered and styled by Google's library, so this only reserves space
+  // and never targets the injected element: styling someone else's
+  // injected markup is a thing that breaks on their next release.
+  .preferred-source {
+    display: flex;
+    padding-top: 36px;
+    min-height: 44px;
+  }
+
   .footer-bottom {
     display: flex;
     justify-content: space-between;
