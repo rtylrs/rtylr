@@ -758,7 +758,10 @@
     "visibility": "Visibility",
     "visibilitySaved": "Visibility updated",
     "visibilityGateReason": "Only a project admin can change visibility.",
-    "visibilityPersonalGate": "Your My Tasks project is always private."
+    "visibilityPersonalGate": "Your My Tasks project is always private.",
+    "archiveNotice": "Archiving moves the project to the recycle bin. It stays restorable until retention expires.",
+    "archiveAction": "Archive",
+    "archiveConfirm": "Archive project"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Clear selection"

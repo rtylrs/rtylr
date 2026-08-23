@@ -139,6 +139,9 @@
       "madePrivate": "La vue est maintenant privée",
       "madeShared": "La vue est maintenant partagée",
       "visibilityFailed": "Impossible de changer la visibilité"
+    },
+    "project": {
+      "archiveFailed": "Impossible d'archiver le projet"
     }
   }
 }

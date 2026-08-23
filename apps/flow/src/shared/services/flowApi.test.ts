@@ -119,10 +119,8 @@ describe('flowApi OneKit adapters', () => {
       role: 'member',
     });
 
-    // And nothing reached v1 on this path any more.
-    expect(projectClient.updateProject).not.toHaveBeenCalled();
-    expect(projectClient.listProjectMembers).not.toHaveBeenCalled();
-    expect(projectClient.addProjectMember).not.toHaveBeenCalled();
+    // No v1 assertions here any more: projectClient no longer exists in this app,
+    // which is a stronger guarantee than asserting it went uncalled.
   });
 
   // deleteProject is gone: v2 has no such call, so project removal now archives

@@ -143,6 +143,9 @@
       "madePrivate": "العرض خاص الآن",
       "madeShared": "العرض مشترك الآن",
       "visibilityFailed": "تعذر تغيير الظهور"
+    },
+    "project": {
+      "archiveFailed": "تعذر أرشفة المشروع"
     }
   }
 }
