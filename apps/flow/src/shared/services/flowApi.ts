@@ -486,7 +486,7 @@ export const flowApi = {
     // omitted values omitted here prevents a partial caller from inventing
     // placeholders or sentinel dates.
     flowResult<{ message: string }>(() =>
-      projectClient.updateProject({
+      projectV2.updateProject({
         id,
         body: {
           name: data.name ?? '-',
@@ -500,17 +500,21 @@ export const flowApi = {
       })
     ),
 
+  // The last v1 project call, left deliberately. v2 has no deleteProject: it
+  // offers archiveProject, which moves the project to the recycle bin with a
+  // purge_at stamp rather than removing it. That is the intended end state, but
+  // swapping it here would silently turn a Delete button into an Archive one
+  // while its copy still says "Delete project", so it wants its own change
+  // together with the copy and the bin's own reachability.
   deleteProject: (id: string) =>
     flowResult<{ message: string }>(() => projectClient.deleteProject({ id })),
 
   getProjectMembers: (projectId: string) =>
-    flowResult<{ members: ApiProjectMember[] }>(() =>
-      projectClient.listProjectMembers({ projectId })
-    ),
+    flowResult<{ members: ApiProjectMember[] }>(() => projectV2.listProjectMembers({ projectId })),
 
   addProjectMember: (data: { project_id: number; user_id: number; role?: string }) =>
     flowResult(() =>
-      projectClient.addProjectMember({
+      projectV2.addProjectMember({
         projectId: String(data.project_id),
         userId: String(data.user_id),
         role: data.role ?? 'member',
@@ -519,7 +523,7 @@ export const flowApi = {
 
   inviteProjectMember: (data: { project_id: number; email: string; role: string }) =>
     flowResult(() =>
-      projectClient.inviteProjectMember({
+      projectV2.inviteProjectMember({
         projectId: String(data.project_id),
         email: data.email,
         role: data.role,
@@ -528,7 +532,7 @@ export const flowApi = {
 
   removeProjectMember: (data: { project_id: number; user_id: number }) =>
     flowResult(() =>
-      projectClient.removeProjectMember({
+      projectV2.removeProjectMember({
         projectId: String(data.project_id),
         userId: String(data.user_id),
       })
@@ -536,7 +540,7 @@ export const flowApi = {
 
   updateProjectMemberRole: (data: { project_id: number; user_id: number; role: string }) =>
     flowResult(() =>
-      projectClient.updateProjectMemberRole({
+      projectV2.updateProjectMemberRole({
         projectId: String(data.project_id),
         userId: String(data.user_id),
         role: data.role,
@@ -545,7 +549,7 @@ export const flowApi = {
 
   transferProjectOwnership: (data: { project_id: number; new_owner_id: number }) =>
     flowResult(() =>
-      projectClient.transferProjectOwnership({
+      projectV2.transferProjectOwnership({
         projectId: String(data.project_id),
         newOwnerId: String(data.new_owner_id),
       })
