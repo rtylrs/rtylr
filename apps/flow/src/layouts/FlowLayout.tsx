@@ -325,7 +325,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // Resolves the caller's auto-provisioned personal project so it can be hidden
   // from the Projects list (its tasks surface in the global "My tasks" view).
   const { data: myTasksProject } = useMyTasksProject();
-  const { data: apiProjects } = useProjects(currentWorkspaceId || undefined);
+  const { data: apiProjects } = useProjects();
 
   // Once real workspaces load, redirect away from the "personal" sentinel to the
   // actual first workspace ID so all downstream API calls use a real numeric ID.
@@ -477,15 +477,16 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // "Inbox"/📥 is the legacy name (migrated to My Tasks).
   const myTasksProjectId =
     myTasksProject?.projectId !== undefined ? String(myTasksProject.projectId) : undefined;
-  const workspaceProjects = projects.filter(
+  // Every project in the business, not one workspace's: the sidebar is the
+  // curated business list now (P8).
+  const sidebarProjects = projects.filter(
     (p) =>
-      p.workspaceId === currentWorkspaceId &&
       !p.archived &&
       p.id !== myTasksProjectId &&
       !(p.name === 'My Tasks' && p.icon === '✅') &&
       !(p.name === 'Inbox' && p.icon === '📥')
   );
-  const activeProject = workspaceProjects.find((project) => project.id === projectId);
+  const activeProject = sidebarProjects.find((project) => project.id === projectId);
 
   const myIssuesCount = tasks.filter(
     (t) =>
@@ -535,7 +536,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             ? { project_id: activeProject.id, project_name: activeProject.name }
             : {}),
         },
-        visibleRows: workspaceProjects.slice(0, 12).map((project) => ({
+        visibleRows: sidebarProjects.slice(0, 12).map((project) => ({
           id: project.id,
           name: project.name,
           open_tasks: Math.max(0, project.taskCount - project.completedCount),
@@ -556,7 +557,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
       search,
       myIssuesCount,
       todayFocusCount,
-      workspaceProjects,
+      sidebarProjects,
     ]
   );
 
@@ -1069,7 +1070,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         </div>
                         <SidebarCollapsible open={!isSidebarSectionCollapsed('projects')}>
                           <div className="flex flex-col gap-px pt-px">
-                            {workspaceProjects.map((project) => {
+                            {sidebarProjects.map((project) => {
                               const boardPath = `/w/${currentWorkspaceId}/p/${project.id}`;
                               const isActive = projectId === project.id;
                               return (
