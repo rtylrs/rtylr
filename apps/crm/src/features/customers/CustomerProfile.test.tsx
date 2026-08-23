@@ -50,6 +50,10 @@ vi.mock('../../shared/hooks/queries/useCustomers', () => ({
   useExportCustomers: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
+vi.mock('../../shared/hooks/queries/useSupportEngagement', () => ({
+  useSupportEngagement: vi.fn(() => ({ data: null })),
+}));
+
 vi.mock('../../shared/hooks/queries/useLoyalty', () => ({
   useAwardPoints: () => ({ mutate: vi.fn(), isPending: false }),
   useRedeemPoints: () => ({ mutate: vi.fn(), isPending: false }),

@@ -27,7 +27,9 @@
     "tagRemoved": "Tag \"{{tag}}\" removed",
     "tagFailed": "Failed to update tag",
     "notesSaved": "Notes saved",
-    "notesFailed": "Failed to save notes"
+    "notesFailed": "Failed to save notes",
+    "supportTicket": "تذكرة دعم",
+    "supportTickets": "تذاكر دعم"
   },
   "loyalty": {
     "configUpdated": "Loyalty config updated",
