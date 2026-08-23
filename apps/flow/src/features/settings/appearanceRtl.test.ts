@@ -94,6 +94,23 @@ describe('Appearance panel stays direction-agnostic', () => {
     expect(offenders, 'use text-start and text-end, which flip with direction').toEqual([]);
   });
 
+  it('pins the hex field to ltr, because its value is a literal not prose', () => {
+    const section = sources.find((x) => x.name.startsWith('FlowSettings.tsx'));
+    expect(section, 'AppearanceSection not found by the scan').toBeTruthy();
+
+    // Observed in a browser before this was added: with dir=rtl on the document
+    // the field inherited RTL, and the leading '#' is a neutral character that
+    // resolves to the visual right, so "#f56d8f" rendered as "f56d8f#".
+    //
+    // Only the value is pinned. The labels and descriptions around it are prose
+    // and must keep following the reader's direction.
+    const hexBlock = section!.body.slice(
+      section!.body.indexOf('id="appearance-accent-hex"'),
+      section!.body.indexOf('id="appearance-accent-hex"') + 500
+    );
+    expect(hexBlock).toMatch(/dir="ltr"/);
+  });
+
   it('moves the switch knob with a logical property', () => {
     const sw = sources.find((s) => s.name.endsWith('AppearanceSwitch.tsx'));
     expect(sw, 'AppearanceSwitch.tsx not found by the scan').toBeTruthy();
