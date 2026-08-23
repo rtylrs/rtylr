@@ -22,6 +22,84 @@ function toStaffMember(s: ApiStaff, departmentName: string): StaffMember {
   });
 }
 
+export interface StaffReportingLine {
+  id: number;
+  name: string;
+  managerStaffId: number;
+}
+
+// useStaffReportingLines returns raw staff ids alongside names, which the
+// reporting-line editor needs and toStaffMember deliberately drops (it shapes
+// rows for the list screen).
+export function useStaffReportingLines() {
+  return useQuery({
+    queryKey: ['staff', 'reporting-lines'],
+    queryFn: async (): Promise<StaffReportingLine[]> => {
+      const res = await staffClient.listStaff({ search: '', departmentId: '', status: '' });
+      return (res.staff ?? []).map((s) => ({
+        id: Number(s.id),
+        name: `${s.firstName} ${s.lastName}`.trim() || s.email || '',
+        managerStaffId: Number(s.managerStaffId ?? 0),
+      }));
+    },
+  });
+}
+
+// useSetStaffManager goes through the GENERATED client, not hrApi.updateStaff.
+// hrApi puts to /hr/staff with no id, while the contract declares
+// PUT /hr/staff/{id} with a body - which is why the legacy path 404s and why the
+// comment below says these hooks were never wired to a screen.
+export function useSetStaffManager() {
+  const qc = useQueryClient();
+  return useMutation({
+    // UpdateStaffBody is a REPLACEMENT, not a patch: every field is @required, so
+    // sending only the manager would blank the rest of the record. The screen
+    // fetches the staff member first and passes the whole thing back with the one
+    // field changed.
+    mutationFn: ({ staff, managerStaffId }: { staff: ApiStaff; managerStaffId: number }) =>
+      staffClient.updateStaff({
+        id: String(staff.id),
+        body: {
+          departmentId: String(staff.departmentId ?? 0),
+          managerStaffId: String(managerStaffId),
+          firstName: staff.firstName ?? '',
+          lastName: staff.lastName ?? '',
+          email: staff.email ?? '',
+          phone: staff.phone ?? '',
+          role: staff.role ?? '',
+          employmentType: staff.employmentType ?? '',
+          status: staff.status ?? '',
+          salary: staff.salary ?? 0,
+          hourlyRate: staff.hourlyRate ?? 0,
+          overtimeRate: staff.overtimeRate ?? 0,
+          endDate: staff.endDate ?? '',
+          address: staff.address ?? '',
+          emergencyContactName: staff.emergencyContactName ?? '',
+          emergencyContactPhone: staff.emergencyContactPhone ?? '',
+          apps: staff.apps ?? '',
+          notes: staff.notes ?? '',
+        },
+      }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['staff'] });
+    },
+    onError: (error) => toast.error(getOneKitErrorMessage(error, 'Failed to set the manager')),
+  });
+}
+
+// useStaffRecord fetches one staff member in full, which the replacement update
+// requires: without it a save would blank every field it did not send.
+export function useStaffRecord(id: number | null) {
+  return useQuery({
+    queryKey: ['staff', 'record', id],
+    queryFn: async (): Promise<ApiStaff> => {
+      const res = await staffClient.getStaff({ id: String(id) });
+      return res.staff as ApiStaff;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useStaff() {
   return useQuery({
     queryKey: ['staff'],
