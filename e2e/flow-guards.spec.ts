@@ -107,6 +107,10 @@ test.describe('Flow - Auth & Guard Verification', () => {
     await page.goto(`${FLOW_URL}/timeline`);
     await page.waitForLoadState('networkidle');
 
-    expect(page.url()).toContain('/w/personal');
+    // AppFlagGuard renders its fallback in place rather than navigating, so the
+    // URL is not the evidence. This used to pass on a workspace redirect that
+    // happened to fire alongside it, and that redirect is gone.
+    await expect(page.getByRole('status')).toBeVisible({ timeout: 10_000 });
+    expect(page.url()).toContain('/timeline');
   });
 });

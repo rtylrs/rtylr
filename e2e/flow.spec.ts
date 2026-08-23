@@ -328,13 +328,13 @@ test.describe('Flow - project list', () => {
     await primeAuthCookie(context);
   });
 
-  test('workspace dashboard shows two stubbed projects', async ({ page }) => {
+  test('all projects page shows two stubbed projects', async ({ page }) => {
     const alpha = fakeProject({ id: '1', name: 'Alpha Project' });
     const beta = fakeProject({ id: '2', name: 'Beta Project', color: '#f97316' });
 
     await installFlowStubs(page, { projects: [alpha, beta] });
 
-    await page.goto(`${FLOW_URL}/w/10`);
+    await page.goto(`${FLOW_URL}/projects`);
     await page.waitForLoadState('networkidle', { timeout: 30_000 });
 
     // Both project names must appear somewhere in the rendered output.
@@ -345,10 +345,10 @@ test.describe('Flow - project list', () => {
     await expect(page.getByText('Beta Project').first()).toBeAttached({ timeout: 10_000 });
   });
 
-  test('workspace dashboard shows empty state when no projects', async ({ page }) => {
+  test('all projects page shows empty state when no projects', async ({ page }) => {
     await installFlowStubs(page, { projects: [] });
-    await page.goto(`${FLOW_URL}/w/10`);
-    // Page should still mount and render the workspace name or a header.
+    await page.goto(`${FLOW_URL}/projects`);
+    // Page should still mount and render a header.
     await expect(page.locator('h1, h2').first()).toBeVisible({ timeout: 10_000 });
   });
 });
@@ -385,7 +385,7 @@ test.describe('Flow - task board', () => {
       tasks: [todoTask, inProgressTask, doneTask],
     });
 
-    await page.goto(`${FLOW_URL}/w/10/p/1`);
+    await page.goto(`${FLOW_URL}/p/1`);
     await page.waitForLoadState('networkidle', { timeout: 30_000 });
 
     // The project board should mount and display the project header.
@@ -409,7 +409,7 @@ test.describe('Flow - task board', () => {
     });
 
     await installFlowStubs(page, { projects: [project], tasks: [todoTask, doneTask] });
-    await page.goto(`${FLOW_URL}/w/10/p/1/list`);
+    await page.goto(`${FLOW_URL}/p/1/list`);
     await page.waitForLoadState('networkidle', { timeout: 30_000 });
 
     // The list view shows the project name in the header.

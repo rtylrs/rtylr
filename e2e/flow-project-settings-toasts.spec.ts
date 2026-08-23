@@ -137,7 +137,7 @@ async function installBaseStubs(
 }
 
 async function goToSettings(page: Page): Promise<void> {
-  await page.goto(`${FLOW_URL}/w/10/p/1/settings`);
+  await page.goto(`${FLOW_URL}/p/1/settings`);
   await page.waitForLoadState('networkidle', { timeout: 30_000 });
   await expect(page.getByRole('heading', { name: 'Settings' })).toBeVisible({ timeout: 15_000 });
 }

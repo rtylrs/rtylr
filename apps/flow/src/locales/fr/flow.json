@@ -563,7 +563,10 @@
       "assignee": "Responsable",
       "priority": "Priorité",
       "due": "Échéance"
-    }
+    },
+    "moveTask": "Déplacer {{title}} vers une autre colonne",
+    "moveTaskMenu": "Déplacer vers une colonne",
+    "moveNoTargets": "Ce tableau n'a pas encore d'autre colonne."
   },
   "views": {
     "heading": "Vues enregistrées",

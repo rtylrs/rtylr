@@ -563,7 +563,10 @@
       "assignee": "Assignee",
       "priority": "Priority",
       "due": "Due window"
-    }
+    },
+    "moveTask": "Move {{title}} to another column",
+    "moveTaskMenu": "Move to column",
+    "moveNoTargets": "This board has no other columns yet."
   },
   "views": {
     "heading": "Saved Views",
