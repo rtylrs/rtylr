@@ -16,7 +16,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
-import { useUpdateProject, useDeleteProject } from './useProjects';
+import { useUpdateProject, useArchiveProject } from './useProjects';
 import {
   useProjectMembers,
   useRemoveProjectMember,
@@ -68,7 +68,7 @@ const ProjectSettings: React.FC = () => {
   }, [project?.id]);
 
   const updateProject = useUpdateProject();
-  const deleteProject = useDeleteProject();
+  const archiveProject = useArchiveProject();
   const {
     data: members = [],
     isLoading: membersLoading,
@@ -563,14 +563,14 @@ const ProjectSettings: React.FC = () => {
                   Delete this project
                 </p>
                 <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-                  Once deleted, tasks are archived and cannot be restored.
+                  {t('flow.projectSettings.archiveNotice')}
                 </p>
               </div>
               <button
                 type="button"
                 className="px-3 py-1 rounded-sm text-[11px] font-semibold disabled:opacity-40"
                 style={{ background: '#ef4444', color: '#fff' }}
-                disabled={deleteProject.isPending || !canManageProject}
+                disabled={archiveProject.isPending || !canManageProject}
                 aria-describedby={canManageProject ? undefined : 'flow-project-delete-gate'}
                 onClick={() => {
                   if (!canManageProject) return;
@@ -578,7 +578,9 @@ const ProjectSettings: React.FC = () => {
                   setConfirmDelete(true);
                 }}
               >
-                {deleteProject.isPending ? 'Deleting...' : 'Delete'}
+                {archiveProject.isPending
+                  ? t('common.saving')
+                  : t('flow.projectSettings.archiveAction')}
               </button>
             </div>
           </div>
@@ -629,12 +631,12 @@ const ProjectSettings: React.FC = () => {
                 type="button"
                 disabled={
                   deleteTypedName.trim() !== (project?.name ?? '') ||
-                  deleteProject.isPending ||
+                  archiveProject.isPending ||
                   !canManageProject
                 }
                 onClick={() => {
                   if (!canManageProject) return;
-                  deleteProject.mutate(projectId, {
+                  archiveProject.mutate(projectId, {
                     onSuccess: () => {
                       toast.success(t('toasts.project.deleted'));
                       setConfirmDelete(false);
@@ -645,7 +647,9 @@ const ProjectSettings: React.FC = () => {
                 className="px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
                 style={{ background: '#ef4444', color: '#fff' }}
               >
-                {deleteProject.isPending ? 'Deleting…' : 'Delete project'}
+                {archiveProject.isPending
+                  ? t('common.saving')
+                  : t('flow.projectSettings.archiveConfirm')}
               </button>
             </div>
           </DialogContent>
