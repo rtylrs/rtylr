@@ -63,13 +63,6 @@ test.describe('Flow - Appearance panel', () => {
   test.beforeEach(async ({ context, page }) => {
     await primeAuthCookie(context);
 
-    await page.route(`${API_HOST}/hub/user/v1/users/me`, (route: Route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(FAKE_USER),
-      })
-    );
     // Everything else the settings shell touches, so nothing falls through to the
     // fixture's production guard and fails the test for the wrong reason.
     for (const pattern of [
@@ -97,6 +90,18 @@ test.describe('Flow - Appearance panel', () => {
         })
       );
     }
+
+    // Registered AFTER the catch-alls on purpose. Playwright gives precedence to
+    // the route registered LAST, so with this first the /hub/ catch-all below
+    // shadowed it, AppGuard received an empty envelope instead of a user, and the
+    // whole panel never rendered.
+    await page.route(`${API_HOST}/hub/user/v1/users/me`, (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(FAKE_USER),
+      })
+    );
 
     await page.goto(`${FLOW_URL}/settings?section=appearance`);
     await page.waitForLoadState('networkidle');
