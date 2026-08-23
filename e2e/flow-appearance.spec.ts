@@ -59,6 +59,32 @@ async function rootToken(page: import('@playwright/test').Page, name: string): P
   );
 }
 
+/**
+ * Wait for CSS transitions to finish before measuring colour.
+ *
+ * The option cards carry `transition-colors`, so for a moment after a mode
+ * switch their background is an interpolated value that belongs to no palette.
+ * axe measured one of those and reported 4.17:1 against `#f3f3f3`, a colour no
+ * palette defines. `deriveAccentFg` guarantees its result against
+ * `palette.card`, so any measurement against a value that is not a palette
+ * colour is measuring the transition, not the design.
+ *
+ * This passed before a merge purely on timing luck, which is the worst kind of
+ * green.
+ */
+async function settleTransitions(page: import('@playwright/test').Page): Promise<void> {
+  await page.evaluate(async () => {
+    const running = document
+      .getAnimations()
+      .filter((a) => a.playState === 'running')
+      .map((a) => a.finished.catch(() => undefined));
+    // Capped: a looping animation would never settle and must not hang the test.
+    await Promise.race([Promise.all(running), new Promise((resolve) => setTimeout(resolve, 1500))]);
+  });
+  // One frame for the committed values to be observable.
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => r(undefined))));
+}
+
 test.describe('Flow - Appearance panel', () => {
   test.beforeEach(async ({ context, page }) => {
     await primeAuthCookie(context);
@@ -242,6 +268,7 @@ test.describe('Flow - Appearance panel', () => {
           )
         )
         .not.toBe('');
+      await settleTransitions(page);
 
       // Scoped to main, which is the panel. The app shell around it carries two
       // pre-existing serious violations that this PR does not touch and must not
