@@ -131,37 +131,23 @@ describe('faqPageSchema', () => {
 });
 
 describe('pricingPageSchema', () => {
-  it('builds AggregateOffer with the full tier list + faqs', () => {
-    const out = pricingPageSchema({
-      tiers: [
-        { name: 'Free', price: '0', description: 'd' },
-        { name: 'Pro', price: '6.99', description: 'd' },
-        { name: 'Scale', price: 'Custom', description: 'd' },
-      ],
-      faqs: [{ question: 'q', answer: 'a' }],
-    });
+  it('emits Product, breadcrumb and FAQ, and asserts no price', () => {
+    const out = pricingPageSchema({ faqs: [{ question: 'q', answer: 'a' }] });
     const graph = out['@graph'] as Array<Record<string, unknown>>;
-    expect(graph).toHaveLength(2);
+    expect(graph).toHaveLength(3);
 
-    const product = graph[0] as {
-      offers: { '@type': string; offerCount: string; highPrice: string; offers: unknown[] };
-    };
-    expect(product.offers['@type']).toBe('AggregateOffer');
-    expect(product.offers.offerCount).toBe('3');
-    // Non-numeric prices ("Custom") must not poison highPrice.
-    expect(product.offers.highPrice).toBe('6.99');
-    expect(product.offers.offers).toHaveLength(3);
-
-    expect(graph[1]['@type']).toBe('FAQPage');
+    expect(graph[0]['@type']).toBe('Product');
+    expect(graph[1]['@type']).toBe('BreadcrumbList');
+    expect(graph[2]['@type']).toBe('FAQPage');
   });
 
-  it('leaves non-numeric tier prices as strings (e.g. Custom)', () => {
-    const out = pricingPageSchema({
-      tiers: [{ name: 'Enterprise', price: 'Custom', description: 'd' }],
-      faqs: [],
-    });
-    const product = out['@graph'] as Array<{ offers: { offers: Array<{ price: string }> } }>;
-    expect(product[0].offers.offers[0].price).toBe('Custom');
+  it('carries no Offer or AggregateOffer anywhere in the graph', () => {
+    // /pricing/ shows tier names and inclusions only. The moment a
+    // price string appears in this schema again it is a claim the page
+    // does not make, so assert its absence rather than its shape.
+    const serialised = JSON.stringify(pricingPageSchema({ faqs: [] }));
+    expect(serialised).not.toContain('Offer');
+    expect(serialised).not.toContain('price');
   });
 });
 

@@ -9,10 +9,10 @@ import HelmetContainer from '../../components/HelmetContainer';
 import { pricingPageSchema } from '../../lib/structured-data';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
-import { blurFadeIn, staggerBlur, viewportOnce, SPRING_SMOOTH } from '../../lib/animations';
+import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import { SplitWords } from '../../components/motion/SplitWords';
 import PricingCards from '../../components/pricing/PricingCards';
-import type { BillingCycle, Plan } from '../../components/pricing/pricingData';
+import type { Plan } from '../../components/pricing/pricingData';
 import styles from './pricing.module.scss';
 
 interface PlanFeature {
@@ -22,10 +22,12 @@ interface PlanFeature {
   scale: boolean | string;
 }
 
+// What each tier includes. "Seat-based billing" used to be a row here;
+// it went out with the prices, because it describes how rtylr charges
+// and rtylr does not publish that yet.
 const PLAN_FEATURES: PlanFeature[] = [
   { name: 'All 7 apps', free: true, pro: true, scale: true },
   { name: 'AI assistant', free: false, pro: true, scale: true },
-  { name: 'Seat-based billing', free: false, pro: true, scale: true },
   { name: 'Priority support', free: false, pro: true, scale: true },
   { name: 'SSO', free: false, pro: false, scale: true },
   { name: 'Audit logs', free: false, pro: false, scale: true },
@@ -33,36 +35,46 @@ const PLAN_FEATURES: PlanFeature[] = [
   { name: 'SLA guarantee', free: false, pro: false, scale: true },
 ];
 
+// Every answer here is also emitted as JSON-LD, from this same array, so
+// the markup cannot drift from what the page shows.
+//
+// Two questions were removed and two rewritten when the placeholder
+// prices came out: "How does per-seat billing work?" described a billing
+// model rtylr has not committed to, and the answers about annual
+// discounts and cheaper Scale seats were price claims with no price on
+// the page to back them. The first question below replaces them, because
+// a visitor who came here for a number deserves a straight answer about
+// why there isn't one.
 const FAQ_ITEMS = [
+  {
+    question: 'How much does rtylr cost?',
+    answer:
+      'rtylr has not published its prices yet. The Free plan is genuinely free and needs no card, so you can run a location on it today. For Pro or Scale, contact us and we will talk through your team size and locations. We would rather quote you honestly than put a number here we might change.',
+  },
   {
     question: 'Can I switch plans at any time?',
     answer:
-      'Yes. Upgrade mid-cycle and new features unlock instantly. Downgrade and the change applies at the end of the current period. Your data, team, and settings stay put.',
+      'Yes. Upgrade and the new features unlock instantly. Downgrade and the change applies at the end of the current period. Your data, team, and settings stay put.',
   },
   {
     question: 'Is there a free trial for Pro?',
     answer:
-      'Every new workspace starts with a 14-day Pro trial, no credit card required. At day 14 it reverts to the Free plan automatically unless you add a payment method.',
+      'Every new workspace starts with a 14-day Pro trial, and it needs no card. At day 14 it reverts to the Free plan automatically unless you tell us otherwise.',
   },
   {
     question: 'What happens when I hit 10 seats on Free?',
     answer:
-      "You're prompted to upgrade to Pro before adding seat 11. Nothing breaks. Your data, reports, and configurations all carry over.",
+      "You're prompted to move to Pro before adding seat 11. Nothing breaks. Your data, reports, and configurations all carry over.",
   },
   {
-    question: 'How does per-seat billing work?',
+    question: 'When does Scale apply?',
     answer:
-      "You pay only for the days each seat is active. Add a server mid-month, you're billed for those days. Remove them, the remaining days credit against your next invoice. No full-month minimums.",
-  },
-  {
-    question: 'When does Scale pricing kick in?',
-    answer:
-      'Scale is designed for teams of 30+ active seats. Once your workspace crosses that threshold for a billing period, Scale pricing applies automatically: cheaper per seat, more locations, SSO, and audit logs.',
+      'Scale is built for teams past 30 active seats. It removes the seat and location limits and adds SSO, audit logs, a dedicated success manager and an SLA.',
   },
   {
     question: 'Any contract or lock-in?',
     answer:
-      'None. Monthly plans cancel any time. Annual plans are billed upfront and save 20%, but you can still cancel. Unused days credit against your next bill.',
+      'None. You can cancel at any time, and your data is exportable while the account is open.',
   },
 ];
 
@@ -86,10 +98,7 @@ const FeatureCell = ({ value }: { value: boolean | string }): React.JSX.Element 
 
 const PricingPage = (): React.JSX.Element => {
   const router = useRouter();
-  const [billing, setBilling] = useState<BillingCycle>('monthly');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-  const proMonthly = 6.99;
 
   const handleCta = (action: Plan['ctaAction']): void => {
     if (action === 'contact') {
@@ -110,33 +119,9 @@ const PricingPage = (): React.JSX.Element => {
       <MainLayout>
         <HelmetContainer
           title="Pricing | rtylr"
-          description="Simple, transparent per-seat pricing for the all-in-one rtylr business platform — POS, ERP, HR, CRM, Finance & Flow. Free to start, no credit card required."
+          description="rtylr plans and what each one includes: POS, ERP, HR, CRM, Finance and Flow on every tier. Start free with no card. Prices are not published yet, so talk to us for a quote."
           canonical="https://rtylr.com/pricing/"
-          structuredData={pricingPageSchema({
-            tiers: [
-              {
-                name: 'Free',
-                price: '0',
-                description: 'All 7 apps, up to 10 seats. No credit card required.',
-                url: 'https://rtylr.com/pricing/',
-              },
-              {
-                name: 'Pro',
-                price: String(proMonthly),
-                description:
-                  'Per seat, per day, prorated. AI assistant, priority support, seat-based billing.',
-                url: 'https://rtylr.com/pricing/',
-              },
-              {
-                name: 'Scale',
-                price: 'Custom',
-                description:
-                  'For teams of 30+ active seats. SSO, audit logs, dedicated onboarding, SLA.',
-                url: 'https://rtylr.com/contact/',
-              },
-            ],
-            faqs: FAQ_ITEMS,
-          })}
+          structuredData={pricingPageSchema({ faqs: FAQ_ITEMS })}
         />
 
         <div className={styles.pricingPage}>
@@ -150,51 +135,21 @@ const PricingPage = (): React.JSX.Element => {
             <SplitWords
               as="h1"
               className={styles.heroTitle}
-              text={'Pay per seat, per day.\nNot per month.'}
+              text={'All 7 apps.\nEvery plan.'}
               delay={0.1}
             />
             <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-              All 7 apps on every plan. Daily proration: add a seat for 10 days, pay for 10 days. No
-              per-location fees, no module upsells.
+              POS, ERP, CRM, HR, Finance, Flow and hardware are included on every tier. What changes
+              between plans is scale: how many people, how many locations, and the controls a larger
+              team needs. Start on Free without a card. We have not published prices yet, so ask us
+              and we will quote your setup.
             </motion.p>
-
-            <motion.div className={styles.billingToggle} variants={blurFadeIn}>
-              <button
-                className={cn(styles.toggleOption, billing === 'monthly' && styles.toggleActive)}
-                onClick={() => setBilling('monthly')}
-              >
-                {billing === 'monthly' && (
-                  <motion.span
-                    layoutId="billingPill"
-                    className={styles.togglePill}
-                    transition={SPRING_SMOOTH}
-                  />
-                )}
-                <span className={styles.toggleLabel}>Monthly</span>
-              </button>
-              <button
-                className={cn(styles.toggleOption, billing === 'annual' && styles.toggleActive)}
-                onClick={() => setBilling('annual')}
-              >
-                {billing === 'annual' && (
-                  <motion.span
-                    layoutId="billingPill"
-                    className={styles.togglePill}
-                    transition={SPRING_SMOOTH}
-                  />
-                )}
-                <span className={styles.toggleLabel}>
-                  Annual
-                  <span className={styles.savingsBadge}>Save 20%</span>
-                </span>
-              </button>
-            </motion.div>
           </motion.section>
 
           {/* Plan cards */}
           <section className={styles.plansSection}>
             <div className={styles.plansContainer}>
-              <PricingCards billing={billing} onCta={handleCta} />
+              <PricingCards onCta={handleCta} />
             </div>
           </section>
 
@@ -295,10 +250,11 @@ const PricingPage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.h2 className={styles.bottomCtaTitle} variants={blurFadeIn}>
-              Start on Free. Pay only when you grow.
+              Start on Free. Move up when you outgrow it.
             </motion.h2>
             <motion.p className={styles.bottomCtaSubtitle} variants={blurFadeIn}>
-              10 seats and all 7 apps are yours from day one. No credit card until you need seat 11.
+              10 seats and all 7 apps are yours from day one, with no card. Book a demo if you would
+              rather see it running on your own numbers first.
             </motion.p>
             <motion.div className={styles.bottomCtaButtons} variants={blurFadeIn}>
               <button className={styles.ctaPrimary} onClick={() => handleCta('register')}>

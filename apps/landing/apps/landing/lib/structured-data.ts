@@ -168,30 +168,21 @@ function faqPageSchemaRaw(faqs: FAQEntry[]): Record<string, unknown> {
 }
 
 /**
- * pricingPageSchema bundles the product + an AggregateOffer
- * (listing each tier) + the visible FAQ into a single @graph.
- * Google's rich-results crawler uses AggregateOffer to render
- * price ranges in the SERP, and the FAQ feeds AI Overview snippets.
+ * pricingPageSchema describes /pricing/ as a Product, plus the visible
+ * FAQ and a breadcrumb.
  *
- * Prices arrive as strings in the plan's currency so we can express
- * "0" (Free) and "Custom" (Enterprise) through the same shape without
- * forcing callers to branch.
+ * There is deliberately no Offer and no AggregateOffer. It used to emit
+ * both, built from placeholder numbers, which meant the page asserted a
+ * `lowPrice` of 0 and a `highPrice` derived from figures that were never
+ * real. A price is a fact. rtylr does not publish one yet, and /pricing/
+ * now shows tier names and inclusions only, so there is nothing to
+ * express and nothing to get wrong.
+ *
+ * When real pricing ships, generate the Offer nodes from the same tier
+ * data the page renders, in one pass, so the markup cannot drift from
+ * the visible text.
  */
-interface PricingTier {
-  name: string;
-  price: string;
-  priceCurrency?: string;
-  description: string;
-  url?: string;
-}
-
-export function pricingPageSchema(opts: {
-  tiers: PricingTier[];
-  faqs: FAQEntry[];
-}): Record<string, unknown> {
-  const numericPrices = opts.tiers.map((t) => Number(t.price)).filter((n) => Number.isFinite(n));
-  const high = numericPrices.length > 0 ? Math.max(...numericPrices) : 0;
-
+export function pricingPageSchema(opts: { faqs: FAQEntry[] }): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -200,25 +191,11 @@ export function pricingPageSchema(opts: {
         name: 'rtylr',
         description: 'All-in-one business operating system',
         brand: { '@type': 'Brand', name: 'rtylr' },
-        offers: {
-          '@type': 'AggregateOffer',
-          priceCurrency: 'USD',
-          lowPrice: '0',
-          highPrice: String(high),
-          offerCount: String(opts.tiers.length),
-          offers: opts.tiers.map((t) => {
-            const num = Number(t.price);
-            return {
-              '@type': 'Offer',
-              name: t.name,
-              description: t.description,
-              price: Number.isFinite(num) ? String(num) : t.price,
-              priceCurrency: t.priceCurrency ?? 'USD',
-              ...(t.url ? { url: t.url } : {}),
-            };
-          }),
-        },
       },
+      breadcrumbList([
+        { label: 'rtylr', path: '/' },
+        { label: 'Pricing', path: '/pricing/' },
+      ]),
       faqPageSchemaRaw(opts.faqs),
     ],
   };
