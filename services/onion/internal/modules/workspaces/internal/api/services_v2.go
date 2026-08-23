@@ -274,12 +274,12 @@ type ViewAPIV2 struct{ Service *application.Service }
 func NewViewAPIV2(s *application.Service) *ViewAPIV2 { return &ViewAPIV2{Service: s} }
 
 func (a *ViewAPIV2) ListViews(ctx context.Context, req *flowviewv2.ListViewsRequest) (*flowviewv2.ListViewsResponse, error) {
-	_, businessID, err := resolveV2(ctx)
+	caller, businessID, err := resolveV2(ctx)
 	if err != nil {
 		return nil, err
 	}
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
-	views, total, err := a.Service.ListViewsV2(ctx, businessID, int64(limit), offset)
+	views, total, err := a.Service.ListViewsV2(ctx, businessID, caller.UserID, int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list views")
 	}
@@ -289,6 +289,7 @@ func (a *ViewAPIV2) ListViews(ctx context.Context, req *flowviewv2.ListViewsRequ
 		out = append(out, &flowviewv2.View{
 			Id: v.ID, Name: v.Name, Icon: v.Icon, Filters: string(filtersJSON),
 			GroupBy: v.GroupBy, SortBy: v.SortBy, SortDir: v.SortDir,
+			Visibility: v.Visibility,
 		})
 	}
 	return &flowviewv2.ListViewsResponse{Views: out, Pagination: buildPagination(page, limit, total, len(out))}, nil
@@ -299,7 +300,7 @@ func (a *ViewAPIV2) CreateView(ctx context.Context, req *flowviewv2.CreateViewRe
 	if err != nil {
 		return nil, err
 	}
-	v, err := a.Service.CreateViewV2(ctx, businessID, caller.UserID, req.GetName(), req.GetIcon(), req.GetFilters(), req.GetGroupBy(), req.GetSortBy(), req.GetSortDir())
+	v, err := a.Service.CreateViewV2(ctx, businessID, caller.UserID, req.GetName(), req.GetIcon(), req.GetFilters(), req.GetGroupBy(), req.GetSortBy(), req.GetSortDir(), req.GetVisibility())
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create view")
 	}
@@ -307,6 +308,7 @@ func (a *ViewAPIV2) CreateView(ctx context.Context, req *flowviewv2.CreateViewRe
 	return &flowviewv2.CreateViewResponse{View: &flowviewv2.View{
 		Id: v.ID, Name: v.Name, Icon: v.Icon, Filters: string(filtersOut),
 		GroupBy: v.GroupBy, SortBy: v.SortBy, SortDir: v.SortDir,
+		Visibility: v.Visibility,
 	}}, nil
 }
 
@@ -315,7 +317,11 @@ func (a *ViewAPIV2) UpdateView(ctx context.Context, req *flowviewv2.UpdateViewRe
 	if err != nil {
 		return nil, err
 	}
-	if err := a.Service.UpdateViewV2(ctx, caller.UserID, req.GetId()); err != nil {
+	if err := a.Service.UpdateViewV2(
+		ctx, caller.UserID, req.GetId(),
+		req.GetName(), req.GetIcon(), req.GetFilters(),
+		req.GetGroupBy(), req.GetSortBy(), req.GetSortDir(), req.GetVisibility(),
+	); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update view")
 	}
 	return &flowviewv2.UpdateViewResponse{}, nil

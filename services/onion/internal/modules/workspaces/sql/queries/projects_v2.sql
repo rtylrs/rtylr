@@ -187,13 +187,18 @@ SELECT id, business_id, name, COALESCE(icon,'') AS icon,
        COALESCE(filters,'{}') AS filters,
        COALESCE(group_by,'') AS group_by,
        COALESCE(sort_by,'') AS sort_by,
-       COALESCE(sort_dir,'asc') AS sort_dir
-FROM flow_views WHERE business_id = ?
+       COALESCE(sort_dir,'asc') AS sort_dir,
+       COALESCE(visibility,'shared') AS visibility
+FROM flow_views
+WHERE business_id = ?
+  -- A private view is visible only to its creator (S2). Everything else is
+  -- shared business-wide, which is how every view behaved before the column.
+  AND (COALESCE(visibility,'shared') <> 'private' OR created_by = ?)
 ORDER BY created_at DESC LIMIT ? OFFSET ?;
 
 -- name: CreateViewV2 :execresult
-INSERT INTO flow_views (business_id, name, icon, filters, group_by, sort_by, sort_dir, created_by)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO flow_views (business_id, name, icon, filters, group_by, sort_by, sort_dir, visibility, created_by)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- ListPublicProjectsByOwnerV2 backs the profile page. Deliberately narrower
 -- than ListProjectsV2: it returns metadata only, never task-level fields,

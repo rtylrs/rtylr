@@ -376,25 +376,45 @@ func (s *Service) CreateMilestoneV2(ctx context.Context, businessID, projectID i
 	return domain.Milestone{ID: id, ProjectID: projectID, Name: name, Status: "planning"}, nil
 }
 
-func (s *Service) ListViewsV2(ctx context.Context, businessID, limit, offset int64) ([]domain.View, int64, error) {
-	return s.repo.ListViewsV2(ctx, businessID, limit, offset)
+// callerID drives the private-view filter: a private view is visible only to
+// whoever created it.
+func (s *Service) ListViewsV2(ctx context.Context, businessID, callerID, limit, offset int64) ([]domain.View, int64, error) {
+	return s.repo.ListViewsV2(ctx, businessID, callerID, limit, offset)
 }
 
-func (s *Service) CreateViewV2(ctx context.Context, businessID, createdBy int64, name, icon, filtersJSON, groupBy, sortBy, sortDir string) (domain.View, error) {
+func (s *Service) CreateViewV2(ctx context.Context, businessID, createdBy int64, name, icon, filtersJSON, groupBy, sortBy, sortDir, visibility string) (domain.View, error) {
 	var filters map[string]interface{}
 	_ = json.Unmarshal([]byte(filtersJSON), &filters)
 	id, err := s.repo.CreateViewV2(ctx, domain.ViewInput{
 		BusinessID: businessID, Name: name, Icon: icon, Filters: filters,
 		GroupBy: groupBy, SortBy: sortBy, SortDir: sortDir, CreatedBy: createdBy,
+		Visibility: visibility,
 	})
 	if err != nil {
 		return domain.View{}, err
 	}
-	return domain.View{ID: id, Name: name, Icon: icon, Filters: filters, GroupBy: groupBy, SortBy: sortBy, SortDir: sortDir}, nil
+	return domain.View{ID: id, Name: name, Icon: icon, Filters: filters, GroupBy: groupBy, SortBy: sortBy, SortDir: sortDir, Visibility: visibility}, nil
 }
 
-func (s *Service) UpdateViewV2(ctx context.Context, actorID, viewID int64) error {
-	return s.repo.UpdateView(ctx, domain.UpdateViewInput{ID: viewID, ActorID: actorID})
+// UpdateViewV2 carries the whole view, because repo.UpdateView is a REPLACEMENT:
+// its statement sets name, icon, filters, group_by, sort_by, sort_dir and
+// visibility unconditionally. The previous signature took only the id, so every
+// v2 update wrote empty strings over all of them - renaming a view through v2
+// blanked it.
+func (s *Service) UpdateViewV2(ctx context.Context, actorID, viewID int64, name, icon, filtersJSON, groupBy, sortBy, sortDir, visibility string) error {
+	var filters map[string]interface{}
+	_ = json.Unmarshal([]byte(filtersJSON), &filters)
+	return s.repo.UpdateView(ctx, domain.UpdateViewInput{
+		ID:         viewID,
+		ActorID:    actorID,
+		Name:       name,
+		Icon:       icon,
+		Filters:    filters,
+		GroupBy:    groupBy,
+		SortBy:     sortBy,
+		SortDir:    sortDir,
+		Visibility: visibility,
+	})
 }
 
 // profilePublicProjectCap bounds the profile card list. A profile is a summary,

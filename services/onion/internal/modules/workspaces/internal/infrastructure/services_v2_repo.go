@@ -123,8 +123,16 @@ func (r *Repository) CreateMilestoneV2(ctx context.Context, input domain.Milesto
 	return res.LastInsertId()
 }
 
-func (r *Repository) ListViewsV2(ctx context.Context, businessID, limit, offset int64) ([]domain.View, int64, error) {
-	rows, err := r.queries.ListViewsV2(ctx, sqlc.ListViewsV2Params{BusinessID: businessID, Limit: int32(limit), Offset: int32(offset)})
+// callerID drives the private-view filter: a private view resolves only for
+// whoever created it. Valid: true unconditionally, because a NULL would compare
+// against created_by as NULL and hide every private view from its own creator.
+func (r *Repository) ListViewsV2(ctx context.Context, businessID, callerID, limit, offset int64) ([]domain.View, int64, error) {
+	rows, err := r.queries.ListViewsV2(ctx, sqlc.ListViewsV2Params{
+		BusinessID: businessID,
+		CreatedBy:  sql.NullInt64{Int64: callerID, Valid: true},
+		Limit:      int32(limit),
+		Offset:     int32(offset),
+	})
 	if err != nil {
 		return nil, 0, err
 	}
@@ -138,6 +146,7 @@ func (r *Repository) ListViewsV2(ctx context.Context, businessID, limit, offset 
 		views = append(views, domain.View{
 			ID: v.ID, Name: v.Name, Icon: v.Icon,
 			Filters: filters, GroupBy: v.GroupBy, SortBy: v.SortBy, SortDir: sortDir,
+			Visibility: string(v.Visibility),
 		})
 	}
 	return views, int64(len(rows)), nil
@@ -146,12 +155,16 @@ func (r *Repository) ListViewsV2(ctx context.Context, businessID, limit, offset 
 func (r *Repository) CreateViewV2(ctx context.Context, input domain.ViewInput) (int64, error) {
 	res, err := r.queries.CreateViewV2(ctx, sqlc.CreateViewV2Params{
 		BusinessID: input.BusinessID, Name: input.Name,
-		Icon:      sql.NullString{String: input.Icon, Valid: input.Icon != ""},
-		Filters:   filtersJSON(input.Filters),
-		GroupBy:   sql.NullString{String: input.GroupBy, Valid: input.GroupBy != ""},
-		SortBy:    sql.NullString{String: input.SortBy, Valid: input.SortBy != ""},
-		SortDir:   sqlc.NullFlowViewsSortDir{FlowViewsSortDir: sqlc.FlowViewsSortDir(input.SortDir), Valid: input.SortDir != ""},
-		CreatedBy: nullInt64Ptr(&input.CreatedBy),
+		Icon:    sql.NullString{String: input.Icon, Valid: input.Icon != ""},
+		Filters: filtersJSON(input.Filters),
+		GroupBy: sql.NullString{String: input.GroupBy, Valid: input.GroupBy != ""},
+		SortBy:  sql.NullString{String: input.SortBy, Valid: input.SortBy != ""},
+		SortDir: sqlc.NullFlowViewsSortDir{FlowViewsSortDir: sqlc.FlowViewsSortDir(input.SortDir), Valid: input.SortDir != ""},
+		// Empty normalises to shared, matching the column default. An empty string
+		// on the ENUM would be rejected, and defaulting to private would hide a
+		// view its creator expected to share.
+		Visibility: sqlc.FlowViewsVisibility(visibilityOrShared(input.Visibility)),
+		CreatedBy:  nullInt64Ptr(&input.CreatedBy),
 	})
 	if err != nil {
 		return 0, err
