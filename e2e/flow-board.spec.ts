@@ -167,6 +167,37 @@ test.describe('Flow - Project Board', () => {
     expect(new URL(page.url()).pathname).toBe('/p/1/list');
   });
 
+  // WCAG 2.2 AA 2.5.7 (B2): moving a card must not require a drag. This is the
+  // path a keyboard or single-pointer user takes, so it is the one that has to
+  // keep working.
+  test('a card can be moved between columns without dragging', async ({ page }) => {
+    let movePayload: string | null = null;
+    await page.route(
+      /localhost:9999\/flow\/project\/v2\/projects\/columns\/move/,
+      (route: Route) => {
+        movePayload = route.request().postData();
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ message: 'moved' }),
+        });
+      }
+    );
+
+    await page.goto(`${FLOW_URL}/p/1`);
+    await page.waitForLoadState('networkidle');
+
+    const moveButton = page.getByRole('button', { name: /Move .* to another column/i }).first();
+    await moveButton.click();
+
+    const menu = page.getByRole('menu');
+    await expect(menu).toBeVisible({ timeout: 10_000 });
+    await menu.getByRole('menuitem', { name: /Done/ }).click();
+
+    await expect.poll(() => movePayload, { timeout: 10_000 }).not.toBeNull();
+    expect(movePayload).toContain('col-3');
+  });
+
   test('kanban board renders columns and task cards', async ({ page }) => {
     await page.goto(`${FLOW_URL}/p/1`);
     await page.waitForLoadState('networkidle');

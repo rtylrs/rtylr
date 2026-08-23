@@ -4,7 +4,7 @@ import { useClickOutside } from '@voxire/utils';
 import { toast } from 'sonner';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, Plus, Settings2, Trash2 } from 'lucide-react';
+import { ChevronDown, GripVertical, Plus, Settings2, Trash2 } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import {
@@ -21,6 +21,13 @@ import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import TaskCard from '../../shared/components/TaskCard';
 import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import ProjectViewTabs from './ProjectViewTabs';
+import MoveToColumnMenu, { type MoveTarget } from './components/MoveToColumnMenu';
+import {
+  columnIdAtPoint,
+  exceedsDragThreshold,
+  resolveDropTarget,
+  type ColumnRect,
+} from './boardDrag';
 import { useCurrentProject } from './useCurrentProject';
 import { useCanEditTask, useCanDeleteResource } from '../../shared/lib/currentUser';
 import BoardSettingsPanel from './components/BoardSettingsPanel';
@@ -176,6 +183,7 @@ const ProjectBoard: React.FC = () => {
   const deleteColumn = useDeleteColumn(projectId);
 
   const [dragOver, setDragOver] = useState<string | null>(null); // column id
+  const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
   const [addingColumn, setAddingColumn] = useState(false);
   const [newColumnName, setNewColumnName] = useState('');
   const [groupBy, setGroupByState] = useState<GroupKey>('none');
@@ -208,6 +216,22 @@ const ProjectBoard: React.FC = () => {
   // would silently skip lanes and the swimlane grid misaligns.
   const laneIndex = useMemo(() => buildLaneIndex(tasks, groupBy), [tasks, groupBy]);
 
+  // Every column is a move destination for the non-drag path (B2).
+  const moveTargets: MoveTarget[] = useMemo(
+    () => columns.map((c) => ({ id: String(c.id), name: c.name })),
+    [columns]
+  );
+
+  const columnRefs = useRef(new Map<string, HTMLDivElement | null>());
+  const dragRef = useRef<{
+    taskId: string;
+    sourceColumnId: string | null;
+    startX: number;
+    startY: number;
+    rects: ColumnRect[];
+    active: boolean;
+  } | null>(null);
+
   if (projectLoading && !project) {
     return (
       <div className="p-6" style={{ color: 'var(--flow-text-muted)' }}>
@@ -239,18 +263,64 @@ const ProjectBoard: React.FC = () => {
     });
   }
 
-  const handleDragStart = (e: React.DragEvent, taskId: string) => {
-    e.dataTransfer.setData('text/plain', taskId);
-    e.dataTransfer.effectAllowed = 'move';
+  // Pointer-based card drag (B1). HTML5 drag-and-drop never fired on touch, so
+  // the board was mouse-only; pointer events cover mouse, touch and pen in one
+  // path.
+  //
+  // The gesture lives on a handle rather than the whole card. That keeps the
+  // card's own click free for opening the task, and it lets `touch-action: none`
+  // apply to the handle alone, so dragging anywhere else still scrolls the
+  // column on a touch screen.
+  const measureColumns = (): ColumnRect[] => {
+    const out: ColumnRect[] = [];
+    for (const [id, el] of columnRefs.current) {
+      if (!el) continue;
+      const r = el.getBoundingClientRect();
+      out.push({ id, left: r.left, right: r.right, top: r.top, bottom: r.bottom });
+    }
+    return out;
   };
 
-  const handleDrop = (e: React.DragEvent, colId: string) => {
-    e.preventDefault();
+  const handleDragPointerDown = (
+    e: React.PointerEvent,
+    taskId: string,
+    sourceColumnId: string
+  ): void => {
     if (!canEdit) return;
-    const taskId = e.dataTransfer.getData('text/plain');
-    if (!taskId) return;
-    moveTask.mutate({ taskId, columnId: colId });
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragRef.current = {
+      taskId,
+      sourceColumnId,
+      startX: e.clientX,
+      startY: e.clientY,
+      rects: measureColumns(),
+      active: false,
+    };
+  };
+
+  const handleDragPointerMove = (e: React.PointerEvent): void => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    if (!drag.active) {
+      if (!exceedsDragThreshold(e.clientX - drag.startX, e.clientY - drag.startY)) return;
+      drag.active = true;
+      setDraggingTaskId(drag.taskId);
+    }
+    setDragOver(columnIdAtPoint(drag.rects, e.clientX, e.clientY));
+  };
+
+  const endDrag = (e: React.PointerEvent): void => {
+    const drag = dragRef.current;
+    dragRef.current = null;
+    setDraggingTaskId(null);
     setDragOver(null);
+    if (!drag?.active) return;
+    const target = resolveDropTarget(
+      columnIdAtPoint(drag.rects, e.clientX, e.clientY),
+      drag.sourceColumnId
+    );
+    if (target !== null) moveTask.mutate({ taskId: drag.taskId, columnId: target });
   };
 
   const handleAddColumn = () => {
@@ -334,10 +404,13 @@ const ProjectBoard: React.FC = () => {
               isOver={dragOver === String(col.id)}
               selectedTaskIds={selectedTaskIds}
               canEdit={canEdit}
-              onDragOver={() => setDragOver(String(col.id))}
-              onDragLeave={() => setDragOver(null)}
-              onDrop={(e) => handleDrop(e, String(col.id))}
-              onDragStart={handleDragStart}
+              draggingTaskId={draggingTaskId}
+              moveTargets={moveTargets}
+              registerRef={(el) => columnRefs.current.set(String(col.id), el)}
+              onMoveTask={(taskId, columnId) => moveTask.mutate({ taskId, columnId })}
+              onDragPointerDown={handleDragPointerDown}
+              onDragPointerMove={handleDragPointerMove}
+              onDragPointerEnd={endDrag}
               onSelect={toggleSelectTask}
               onAddTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
               onRename={(name) =>
@@ -442,10 +515,13 @@ const KanbanColumn: React.FC<{
   isOver: boolean;
   selectedTaskIds: string[];
   canEdit: boolean;
-  onDragOver: () => void;
-  onDragLeave: () => void;
-  onDrop: (e: React.DragEvent) => void;
-  onDragStart: (e: React.DragEvent, id: string) => void;
+  draggingTaskId: string | null;
+  moveTargets: readonly MoveTarget[];
+  registerRef: (el: HTMLDivElement | null) => void;
+  onMoveTask: (taskId: string, columnId: string) => void;
+  onDragPointerDown: (e: React.PointerEvent, taskId: string, sourceColumnId: string) => void;
+  onDragPointerMove: (e: React.PointerEvent) => void;
+  onDragPointerEnd: (e: React.PointerEvent) => void;
   onSelect: (id: string) => void;
   onAddTask: () => void;
   onRename: (name: string) => void;
@@ -457,10 +533,13 @@ const KanbanColumn: React.FC<{
   isOver,
   selectedTaskIds,
   canEdit,
-  onDragOver,
-  onDragLeave,
-  onDrop,
-  onDragStart,
+  draggingTaskId,
+  moveTargets,
+  registerRef,
+  onMoveTask,
+  onDragPointerDown,
+  onDragPointerMove,
+  onDragPointerEnd,
   onSelect,
   onAddTask,
   onRename,
@@ -481,18 +560,43 @@ const KanbanColumn: React.FC<{
     setEditing(false);
   };
 
+  // Both card branches below render the same affordances; keeping them in one
+  // place stops the swimlane view from quietly losing the move menu.
+  const renderCardControls = (taskId: string, title: string): React.ReactNode => (
+    <>
+      {canEdit && (
+        <button
+          type="button"
+          aria-hidden
+          tabIndex={-1}
+          onPointerDown={(e) => onDragPointerDown(e, taskId, String(col.id))}
+          onPointerMove={onDragPointerMove}
+          onPointerUp={onDragPointerEnd}
+          onPointerCancel={onDragPointerEnd}
+          onClick={(e) => e.stopPropagation()}
+          className="flex h-6 w-6 cursor-grab items-center justify-center rounded-sm hover:bg-[var(--flow-hover)] active:cursor-grabbing"
+          style={{ color: 'var(--flow-text-dim)', touchAction: 'none' }}
+        >
+          <GripVertical size={12} />
+        </button>
+      )}
+      <MoveToColumnMenu
+        taskTitle={title}
+        targets={moveTargets}
+        currentColumnId={String(col.id)}
+        onMove={(columnId) => onMoveTask(taskId, columnId)}
+        disabled={!canEdit}
+      />
+    </>
+  );
+
   // Total count for the column header pill (stays accurate regardless
   // of group-by - it's the sum of tasks across all lanes).
   const colTaskCount = lanes.reduce((n, l) => n + l.tasks.length, 0);
 
   return (
     <div
-      onDragOver={(e) => {
-        e.preventDefault();
-        onDragOver();
-      }}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
+      ref={registerRef}
       className="flex w-[min(248px,calc(100vw-1.5rem))] min-w-[min(248px,calc(100vw-1.5rem))] flex-col rounded-md p-1.5 sm:w-[248px] sm:min-w-[248px]"
       style={{
         background: isOver ? `${col.color}12` : 'transparent',
@@ -571,8 +675,8 @@ const KanbanColumn: React.FC<{
               <TaskCard
                 key={task.id}
                 task={task}
-                draggable={canEdit}
-                onDragStart={(e) => onDragStart(e, task.id)}
+                controls={renderCardControls(task.id, task.title)}
+                dimmed={draggingTaskId === task.id}
                 selected={selectedTaskIds.includes(task.id)}
                 onSelect={() => onSelect(task.id)}
               />
@@ -610,8 +714,8 @@ const KanbanColumn: React.FC<{
                   <TaskCard
                     key={task.id}
                     task={task}
-                    draggable={canEdit}
-                    onDragStart={(e) => onDragStart(e, task.id)}
+                    controls={renderCardControls(task.id, task.title)}
+                    dimmed={draggingTaskId === task.id}
                     selected={selectedTaskIds.includes(task.id)}
                     onSelect={() => onSelect(task.id)}
                   />
