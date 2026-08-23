@@ -11,17 +11,20 @@ export function useBills() {
     queryKey: ['bills'],
     queryFn: async () => {
       const res = await billClient.listBills({});
-      // finance.bill.v1.Bill has no vendor name or category - only a
-      // supplier_id FK and a free-text description (which the create form
-      // already uses to carry the vendor name when the field is left blank).
+      // vendor is supplier_name, which the server resolves and the contract
+      // marks @required. The comment that used to sit here claimed the Bill
+      // message had no vendor name and that description carried it instead;
+      // that was true once and the mapping outlived it, so the column showed a
+      // free-text description where a vendor belonged.
+      //
+      // description stays separate rather than doubling as the vendor: it is
+      // @required on UpdateBillBody, so mark-as-paid sends it back, and
+      // conflating the two would write the vendor name into it.
       return z.array(billSchema).parse(
         (res.bills ?? []).map((b) => ({
           id: b.id,
           supplier: b.supplierId,
-          vendor: b.description,
-          // Carried so mark-as-paid can send the record back unchanged apart
-          // from status. Without these the update path had to substitute
-          // empty strings for @required fields.
+          vendor: b.supplierName,
           supplierName: b.supplierName,
           currency: b.currency,
           description: b.description,
