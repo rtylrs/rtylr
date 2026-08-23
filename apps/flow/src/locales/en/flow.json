@@ -671,7 +671,9 @@
     "dateRange": "{{start}} to {{end}}",
     "emptyTitle": "No cycles yet",
     "emptyDescription": "Start your first two-week sprint to track scope and progress.",
-    "createFirst": "Create first cycle"
+    "createFirst": "Create first cycle",
+    "project": "Project",
+    "noProjects": "No projects yet"
   },
   "myIssues": {
     "loading": "Loading…",

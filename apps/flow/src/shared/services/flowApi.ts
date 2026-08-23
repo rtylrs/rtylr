@@ -3,10 +3,8 @@ import type { Task as ContractTask } from '@voxire/voxie/flow/task/v1/types';
 import { oneKitResult } from '@voxire/api';
 import {
   businessClient,
-  workspaceClient,
   projectClient,
   taskClient,
-  cycleClient,
   notificationClient,
   settingClient,
   userClient,
@@ -16,6 +14,7 @@ import {
   viewV2,
   insightsV2,
   milestoneV2,
+  cycleV2,
 } from '../lib/clients';
 
 // -- Types ----------------------------------------------------------------
@@ -248,13 +247,6 @@ const toMilestoneUpdatePayload = (data: Partial<ApiMilestone>) => ({
   description: data.description,
   status: data.status,
   targetDate: data.targetDate,
-});
-
-const toCycleCreatePayload = (data: Partial<ApiCycle>) => ({
-  name: data.name,
-  workspaceId: data.workspaceId,
-  startDate: data.startDate,
-  endDate: data.endDate,
 });
 
 const toCycleUpdatePayload = (data: Partial<ApiCycle>) => ({
@@ -818,19 +810,27 @@ export const flowApi = {
 
   // -- Cycles -------------------------------------------------------------
 
-  getCycles: (workspaceId?: string) =>
-    flowResult<{ cycles: ApiCycle[] }>(() => cycleClient.listCycles({ workspaceId })),
+  // Cycles are project-scoped on v2: listCycles declares
+  // project_id @required @gt(0), so unlike the other domains there is no
+  // business-wide listing to fall back on and the caller must name a project.
+  getCycles: (projectId: string) =>
+    flowResult<{ cycles: ApiCycle[] }>(() =>
+      cycleV2.listCycles({ projectId, page: 1, limit: 200, sortBy: '', sortDir: '' })
+    ),
 
-  createCycle: (data: Partial<ApiCycle>) =>
+  createCycle: (data: Partial<ApiCycle> & { projectId: string }) =>
     flowResult<{ cycle: ApiCycle }>(() =>
-      cycleClient.createCycle(
-        toCycleCreatePayload(data) as Parameters<typeof cycleClient.createCycle>[0]
-      )
+      cycleV2.createCycle({
+        projectId: data.projectId,
+        name: data.name ?? '',
+        startDate: data.startDate,
+        endDate: data.endDate,
+      })
     ),
 
   updateCycle: (id: string, data: Partial<ApiCycle>) =>
     flowResult<{ message: string }>(() =>
-      cycleClient.updateCycle({ id, ...toCycleUpdatePayload(data) })
+      cycleV2.updateCycle({ id, ...toCycleUpdatePayload(data) })
     ),
 
   // -- Views --------------------------------------------------------------

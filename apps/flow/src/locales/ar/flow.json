@@ -698,7 +698,9 @@
     "dateRange": "{{start}} إلى {{end}}",
     "emptyTitle": "لا توجد دورات بعد",
     "emptyDescription": "ابدأ أول دورة تسليم مدتها أسبوعان لتتبع النطاق والتقدم.",
-    "createFirst": "إنشاء أول دورة"
+    "createFirst": "إنشاء أول دورة",
+    "project": "المشروع",
+    "noProjects": "لا توجد مشاريع بعد"
   },
   "myIssues": {
     "loading": "جارٍ التحميل…",

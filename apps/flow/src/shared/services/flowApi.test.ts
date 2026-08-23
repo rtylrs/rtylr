@@ -11,12 +11,11 @@ const mockClients = vi.hoisted(() => {
 
   return {
     businessClient: mockClient(),
-    workspaceClient: mockClient(),
     projectClient: mockClient(),
     taskClient: mockClient(),
     labelClient: mockClient(),
     milestoneV2: mockClient(),
-    cycleClient: mockClient(),
+    cycleV2: mockClient(),
     viewV2: mockClient(),
     insightsV2: mockClient(),
     notificationClient: mockClient(),
@@ -30,12 +29,11 @@ const mockClients = vi.hoisted(() => {
 
 vi.mock('../lib/clients', () => ({
   businessClient: mockClients.businessClient,
-  workspaceClient: mockClients.workspaceClient,
   projectClient: mockClients.projectClient,
   taskClient: mockClients.taskClient,
   labelClient: mockClients.labelClient,
   milestoneV2: mockClients.milestoneV2,
-  cycleClient: mockClients.cycleClient,
+  cycleV2: mockClients.cycleV2,
   viewV2: mockClients.viewV2,
   insightsV2: mockClients.insightsV2,
   notificationClient: mockClients.notificationClient,
@@ -53,7 +51,7 @@ import {
   taskClient,
   labelClient,
   milestoneV2,
-  cycleClient,
+  cycleV2,
   insightsV2,
   notificationClient,
   settingClient,
@@ -163,7 +161,7 @@ describe('flowApi OneKit adapters', () => {
       flowApi.createLabel({ name: 'Bug', color: '#f00' }),
       flowApi.setTaskLabels({ task_id: 9, label_ids: [2, 3] }),
       flowApi.getMilestones('7'),
-      flowApi.createCycle({ name: 'Sprint', workspaceId: '1' }),
+      flowApi.createCycle({ name: 'Sprint', projectId: '7' }),
       flowApi.getViews(),
       flowApi.getInsights(),
       flowApi.getTeamWorkload(),
@@ -192,9 +190,11 @@ describe('flowApi OneKit adapters', () => {
       sortBy: '',
       sortDir: '',
     });
-    expect(cycleClient.createCycle).toHaveBeenCalledWith({
+    // Cycles are project-scoped on v2: project_id is @required @gt(0), so there
+    // is no business-wide cycle list and no workspace on the wire.
+    expect(cycleV2.createCycle).toHaveBeenCalledWith({
+      projectId: '7',
       name: 'Sprint',
-      workspaceId: '1',
       startDate: undefined,
       endDate: undefined,
     });
