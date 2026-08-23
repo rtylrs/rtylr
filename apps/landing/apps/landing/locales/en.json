@@ -50,5 +50,183 @@
     },
     "logoAlt": "rtylr",
     "navLabel": "{{group}} navigation"
+  },
+  "contact": {
+    "meta": {
+      "title": "Contact | rtylr",
+      "description": "Get in touch with the rtylr team. We respond within 24 hours."
+    },
+    "hero": {
+      "title": "Reach out. We read it all.",
+      "subtitle": "Product question, sales inquiry, press request, feature ask, every message lands in front of a human. We reply within one business day, usually faster."
+    },
+    "channels": {
+      "title": "Contact channels",
+      "whatsapp": {
+        "label": "Chat with us",
+        "value": "WhatsApp +961 3 940 708",
+        "description": "Message us directly on WhatsApp."
+      },
+      "phone": {
+        "label": "Call us",
+        "value": "+961 3 940 708",
+        "description": "Monday to Friday, 9 am to 5 pm local time."
+      },
+      "email": {
+        "label": "Email us",
+        "value": "info@voxire.com",
+        "description": "We reply within 24 hours."
+      }
+    },
+    "hours": {
+      "label": "Business hours",
+      "days": "Monday to Friday",
+      "time": "9 am to 5 pm (GMT+3)"
+    },
+    "form": {
+      "title": "Send us a message",
+      "name": {
+        "label": "Name",
+        "placeholder": "Your full name"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "your@email.com"
+      },
+      "company": {
+        "label": "Company",
+        "placeholder": "Your company name"
+      },
+      "message": {
+        "label": "Message",
+        "placeholder": "Tell us how we can help…"
+      },
+      "required": "*",
+      "optional": "(optional)",
+      "submit": "Send message"
+    },
+    "errors": {
+      "nameRequired": "Name is required.",
+      "emailRequired": "Email is required.",
+      "emailInvalid": "Please enter a valid email address.",
+      "messageRequired": "Message is required."
+    },
+    "success": {
+      "title": "One more step.",
+      "body": "We opened a pre-filled draft in your email app. Hit send to get it to us and we will reply within 24 hours. If nothing opened, email us directly at",
+      "reset": "Send another message"
+    },
+    "strip": {
+      "text": "Need help getting started? Book a personalized demo."
+    }
+  },
+  "pricing": {
+    "meta": {
+      "title": "Pricing | rtylr",
+      "description": "rtylr plans and what each one includes: POS, ERP, HR, CRM, Finance and Flow on every tier. Start free with no card. Prices are not published yet, so talk to us for a quote."
+    },
+    "hero": {
+      "title": "All 7 apps.\nEvery plan.",
+      "subtitle": "No module upsells and no per-app licence. What changes between plans is scale."
+    },
+    "directAnswer": {
+      "label": "What do rtylr plans include?",
+      "body": "Every rtylr plan includes all seven apps: POS, ERP, CRM, HR, Finance, Flow and the hardware integrations. Plans differ by scale rather than by feature, so what changes is how many people and locations you run and the controls a larger team needs. Free covers 10 people at one location and needs no card. rtylr has not published prices for Pro and Scale yet, so those are quoted."
+    },
+    "plans": {
+      "title": "What is in each plan?",
+      "popular": "Most Popular",
+      "free": {
+        "name": "Free",
+        "description": "Everything you need to run a single location.",
+        "features": [
+          "Up to 10 team members",
+          "All 7 apps included",
+          "1 location",
+          "1,000 AI credits / month",
+          "No credit card required"
+        ],
+        "cta": "Start free"
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Growing teams scaling across multiple locations.",
+        "features": [
+          "Up to 30 team members",
+          "Up to 5 locations",
+          "10,000 AI credits / month, plus 500 per seat",
+          "AI assistant",
+          "Priority email and chat support"
+        ],
+        "cta": "Start with Pro"
+      },
+      "scale": {
+        "name": "Scale",
+        "description": "Unlimited seats and every feature unlocked.",
+        "features": [
+          "Unlimited team members",
+          "Unlimited locations",
+          "50,000 AI credits / month, plus 1,000 per seat",
+          "SSO and audit logs",
+          "Dedicated success manager and SLA"
+        ],
+        "cta": "Talk to sales"
+      }
+    },
+    "compare": {
+      "title": "What changes between plans?",
+      "feature": "Feature",
+      "included": "Included",
+      "notIncluded": "Not included",
+      "rows": [
+        "All 7 apps",
+        "AI assistant",
+        "Priority support",
+        "SSO",
+        "Audit logs",
+        "Dedicated onboarding",
+        "SLA guarantee"
+      ]
+    },
+    "faq": {
+      "title": "Questions about rtylr pricing"
+    },
+    "bottom": {
+      "title": "Start on Free. Move up when you outgrow it.",
+      "subtitle": "10 seats and all 7 apps are yours from day one, with no card. Book a demo if you would rather see it running on your own numbers first."
+    },
+    "faqItems": [
+      {
+        "question": "How much does rtylr cost?",
+        "answer": "rtylr has not published its prices yet. The Free plan is genuinely free and needs no card, so you can run a location on it today. For Pro or Scale, contact us and we will talk through your team size and locations. We would rather quote you honestly than put a number here we might change."
+      },
+      {
+        "question": "Can I switch plans at any time?",
+        "answer": "Yes. Upgrade and the new features unlock instantly. Downgrade and the change applies at the end of the current period. Your data, team, and settings stay put."
+      },
+      {
+        "question": "Is there a free trial for Pro?",
+        "answer": "Every new workspace starts with a 14-day Pro trial, and it needs no card. At day 14 it reverts to the Free plan automatically unless you tell us otherwise."
+      },
+      {
+        "question": "What happens when I hit 10 seats on Free?",
+        "answer": "You're prompted to move to Pro before adding seat 11. Nothing breaks. Your data, reports, and configurations all carry over."
+      },
+      {
+        "question": "When does Scale apply?",
+        "answer": "Scale is built for teams past 30 active seats. It removes the seat and location limits and adds SSO, audit logs, a dedicated success manager and an SLA."
+      },
+      {
+        "question": "Any contract or lock-in?",
+        "answer": "None. You can cancel at any time, and your data is exportable while the account is open."
+      }
+    ]
+  },
+  "home": {
+    "pricing": {
+      "badge": "Pricing",
+      "title": "One platform.\nEvery app included.",
+      "description": "All 7 apps come with every plan. What changes is how many people and locations you run. Start free with no card."
+    }
   }
 }

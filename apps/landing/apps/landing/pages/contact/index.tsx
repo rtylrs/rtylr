@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import { MessageCircle, Phone, Mail, ArrowRight, CheckCircle } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
@@ -30,44 +31,27 @@ interface ContactFormErrors {
 }
 
 const CONTACT_CHANNELS = [
-  {
-    icon: MessageCircle,
-    label: 'Chat with us',
-    value: 'WhatsApp +961 3 940 708',
-    href: 'https://wa.me/9613940708',
-    description: 'Message us directly on WhatsApp.',
-  },
-  {
-    icon: Phone,
-    label: 'Call us',
-    value: '+961 3 940 708',
-    href: 'tel:+9613940708',
-    description: 'Mon–Fri, 9 am–5 pm local time.',
-  },
-  {
-    icon: Mail,
-    label: 'Email us',
-    value: 'info@voxire.com',
-    href: 'mailto:info@voxire.com',
-    description: 'We reply within 24 hours.',
-  },
+  { icon: MessageCircle, id: 'whatsapp', href: 'https://wa.me/9613940708' },
+  { icon: Phone, id: 'phone', href: 'tel:+9613940708' },
+  { icon: Mail, id: 'email', href: 'mailto:info@voxire.com' },
 ];
 
 const ContactPage = (): JSX.Element => {
   const router = useRouter();
+  const { t } = useTranslation();
   const [form, setForm] = useState<ContactForm>({ name: '', email: '', company: '', message: '' });
   const [errors, setErrors] = useState<ContactFormErrors>({});
   const [submitted, setSubmitted] = useState(false);
 
   const validate = (): boolean => {
     const next: ContactFormErrors = {};
-    if (!form.name.trim()) next.name = 'Name is required.';
+    if (!form.name.trim()) next.name = t('contact.errors.nameRequired');
     if (!form.email.trim()) {
-      next.email = 'Email is required.';
+      next.email = t('contact.errors.emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      next.email = 'Please enter a valid email address.';
+      next.email = t('contact.errors.emailInvalid');
     }
-    if (!form.message.trim()) next.message = 'Message is required.';
+    if (!form.message.trim()) next.message = t('contact.errors.messageRequired');
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -101,8 +85,8 @@ const ContactPage = (): JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Contact | rtylr"
-          description="Get in touch with the rtylr team. We respond within 24 hours."
+          title={t('contact.meta.title')}
+          description={t('contact.meta.description')}
           canonical="https://rtylr.com/contact/"
           structuredData={organizationContactSchema()}
         />
@@ -116,11 +100,10 @@ const ContactPage = (): JSX.Element => {
             variants={staggerBlur}
           >
             <motion.h1 className={styles.headerTitle} variants={blurFadeIn}>
-              Reach out. We read it all.
+              {t('contact.hero.title')}
             </motion.h1>
             <motion.p className={styles.headerSubtitle} variants={blurFadeIn}>
-              Product question, sales inquiry, press request, feature ask, every message lands in
-              front of a human. We reply within one business day, usually faster.
+              {t('contact.hero.subtitle')}
             </motion.p>
           </motion.section>
 
@@ -135,26 +118,31 @@ const ContactPage = (): JSX.Element => {
                 viewport={viewportOnce}
                 variants={slideInLeft}
               >
-                <h2 className={styles.infoTitle}>Contact channels</h2>
+                <h2 className={styles.infoTitle}>{t('contact.channels.title')}</h2>
                 <div className={styles.channelsList}>
                   {CONTACT_CHANNELS.map((channel) => {
                     const Icon = channel.icon;
+                    const label = t(`contact.channels.${channel.id}.label`);
                     return (
                       <a
-                        key={channel.label}
+                        key={channel.id}
                         href={channel.href}
                         className={styles.channelCard}
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label={channel.label}
+                        aria-label={label}
                       >
                         <div className={styles.channelIconWrap}>
                           <Icon size={20} strokeWidth={1.75} />
                         </div>
                         <div className={styles.channelContent}>
-                          <span className={styles.channelLabel}>{channel.label}</span>
-                          <span className={styles.channelValue}>{channel.value}</span>
-                          <span className={styles.channelDescription}>{channel.description}</span>
+                          <span className={styles.channelLabel}>{label}</span>
+                          <span className={styles.channelValue}>
+                            {t(`contact.channels.${channel.id}.value`)}
+                          </span>
+                          <span className={styles.channelDescription}>
+                            {t(`contact.channels.${channel.id}.description`)}
+                          </span>
                         </div>
                       </a>
                     );
@@ -162,9 +150,9 @@ const ContactPage = (): JSX.Element => {
                 </div>
 
                 <div className={styles.hoursBlock}>
-                  <span className={styles.hoursLabel}>Business hours</span>
-                  <span className={styles.hoursValue}>Monday – Friday</span>
-                  <span className={styles.hoursValue}>9 am – 5 pm (GMT+3)</span>
+                  <span className={styles.hoursLabel}>{t('contact.hours.label')}</span>
+                  <span className={styles.hoursValue}>{t('contact.hours.days')}</span>
+                  <span className={styles.hoursValue}>{t('contact.hours.time')}</span>
                 </div>
               </motion.div>
 
@@ -179,10 +167,9 @@ const ContactPage = (): JSX.Element => {
                 {submitted ? (
                   <div className={styles.successState}>
                     <CheckCircle size={48} strokeWidth={1.5} className={styles.successIcon} />
-                    <h3 className={styles.successTitle}>One more step.</h3>
+                    <h3 className={styles.successTitle}>{t('contact.success.title')}</h3>
                     <p className={styles.successBody}>
-                      We opened a pre-filled draft in your email app — hit send to get it to us and
-                      we'll reply within 24 hours. If nothing opened, email us directly at{' '}
+                      {t('contact.success.body')}{' '}
                       <a href="mailto:info@voxire.com">info@voxire.com</a>.
                     </p>
                     <button
@@ -192,24 +179,25 @@ const ContactPage = (): JSX.Element => {
                         setForm({ name: '', email: '', company: '', message: '' });
                       }}
                     >
-                      Send another message
+                      {t('contact.success.reset')}
                     </button>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className={styles.form} noValidate>
-                    <h2 className={styles.formTitle}>Send us a message</h2>
+                    <h2 className={styles.formTitle}>{t('contact.form.title')}</h2>
 
                     <div className={styles.fieldRow}>
                       <div className={cn(styles.field, errors.name && styles.fieldError)}>
                         <label htmlFor="contact-name" className={styles.fieldLabel}>
-                          Name <span className={styles.required}>*</span>
+                          {t('contact.form.name.label')}{' '}
+                          <span className={styles.required}>{t('contact.form.required')}</span>
                         </label>
                         <input
                           id="contact-name"
                           name="name"
                           type="text"
                           className={styles.fieldInput}
-                          placeholder="Your full name"
+                          placeholder={t('contact.form.name.placeholder')}
                           value={form.name}
                           onChange={handleChange}
                           autoComplete="name"
@@ -225,14 +213,15 @@ const ContactPage = (): JSX.Element => {
 
                       <div className={cn(styles.field, errors.email && styles.fieldError)}>
                         <label htmlFor="contact-email" className={styles.fieldLabel}>
-                          Email <span className={styles.required}>*</span>
+                          {t('contact.form.email.label')}{' '}
+                          <span className={styles.required}>{t('contact.form.required')}</span>
                         </label>
                         <input
                           id="contact-email"
                           name="email"
                           type="email"
                           className={styles.fieldInput}
-                          placeholder="your@email.com"
+                          placeholder={t('contact.form.email.placeholder')}
                           value={form.email}
                           onChange={handleChange}
                           autoComplete="email"
@@ -249,14 +238,15 @@ const ContactPage = (): JSX.Element => {
 
                     <div className={styles.field}>
                       <label htmlFor="contact-company" className={styles.fieldLabel}>
-                        Company <span className={styles.optional}>(optional)</span>
+                        {t('contact.form.company.label')}{' '}
+                        <span className={styles.optional}>{t('contact.form.optional')}</span>
                       </label>
                       <input
                         id="contact-company"
                         name="company"
                         type="text"
                         className={styles.fieldInput}
-                        placeholder="Your company name"
+                        placeholder={t('contact.form.company.placeholder')}
                         value={form.company}
                         onChange={handleChange}
                         autoComplete="organization"
@@ -265,13 +255,14 @@ const ContactPage = (): JSX.Element => {
 
                     <div className={cn(styles.field, errors.message && styles.fieldError)}>
                       <label htmlFor="contact-message" className={styles.fieldLabel}>
-                        Message <span className={styles.required}>*</span>
+                        {t('contact.form.message.label')}{' '}
+                        <span className={styles.required}>{t('contact.form.required')}</span>
                       </label>
                       <textarea
                         id="contact-message"
                         name="message"
                         className={styles.fieldTextarea}
-                        placeholder="Tell us how we can help…"
+                        placeholder={t('contact.form.message.placeholder')}
                         rows={5}
                         value={form.message}
                         onChange={handleChange}
@@ -286,7 +277,7 @@ const ContactPage = (): JSX.Element => {
                     </div>
 
                     <button type="submit" className={styles.submitBtn}>
-                      Send message
+                      {t('contact.form.submit')}
                     </button>
                   </form>
                 )}
@@ -302,9 +293,9 @@ const ContactPage = (): JSX.Element => {
             viewport={viewportOnce}
             variants={blurFadeIn}
           >
-            <p className={styles.stripText}>Need help getting started? Book a personalized demo.</p>
+            <p className={styles.stripText}>{t('contact.strip.text')}</p>
             <button className={styles.stripBtn} onClick={handleDemoNavigation}>
-              Book a demo
+              {t('common.cta.bookDemo')}
               <ArrowRight size={16} strokeWidth={2} />
             </button>
           </motion.section>
