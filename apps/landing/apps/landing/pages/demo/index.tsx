@@ -21,7 +21,7 @@ interface FormData {
   companySize: string;
 }
 
-const DemoPage = (): JSX.Element => {
+const DemoPage = (): React.JSX.Element => {
   const [formData, setFormData] = useState<FormData>({
     email: '',
     country: '',

@@ -20,7 +20,7 @@ const SECTIONS = [
   { id: 'contact', label: 'Contact the DPO' },
 ];
 
-const PrivacyPage = (): JSX.Element => {
+const PrivacyPage = (): React.JSX.Element => {
   return (
     <AppLayout>
       <MainLayout>

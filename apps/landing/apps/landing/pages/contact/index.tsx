@@ -36,7 +36,7 @@ const CONTACT_CHANNELS = [
   { icon: Mail, id: 'email', href: 'mailto:info@voxire.com' },
 ];
 
-const ContactPage = (): JSX.Element => {
+const ContactPage = (): React.JSX.Element => {
   const router = useRouter();
   const { t } = useTranslation();
   const [form, setForm] = useState<ContactForm>({ name: '', email: '', company: '', message: '' });

@@ -19,7 +19,7 @@ const SECTIONS = [
   { id: 'contact', label: 'Contact Security' },
 ];
 
-const SecurityPage = (): JSX.Element => {
+const SecurityPage = (): React.JSX.Element => {
   return (
     <AppLayout>
       <MainLayout>

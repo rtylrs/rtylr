@@ -52,7 +52,7 @@ interface BlogPostPageProps {
   post: Post;
 }
 
-const BlogPostPage = ({ post }: BlogPostPageProps): JSX.Element => {
+const BlogPostPage = ({ post }: BlogPostPageProps): React.JSX.Element => {
   return (
     <AppLayout>
       <MainLayout>

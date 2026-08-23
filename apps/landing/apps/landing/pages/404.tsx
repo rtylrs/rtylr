@@ -24,7 +24,7 @@ const SUGGESTED_LINKS = [
   { href: '/contact', label: 'Contact', description: 'Talk to someone on our team.' },
 ];
 
-const NotFoundPage = (): JSX.Element => {
+const NotFoundPage = (): React.JSX.Element => {
   const router = useRouter();
 
   const goHome = (): void => {

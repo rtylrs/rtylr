@@ -4,7 +4,7 @@ import MainHero from './components/MainHero';
 import StatsSection from './components/StatsSection';
 import styles from './HeroSection.module.scss';
 
-const HeroSection = (): JSX.Element => {
+const HeroSection = (): React.JSX.Element => {
   const sectionRef = useRef<HTMLElement>(null);
 
   // Hero recedes as the next section scrolls over it - scales down,

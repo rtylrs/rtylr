@@ -27,7 +27,6 @@ i18next.use(initReactI18next).init({
   // English visitor. en.json is the source of truth and the only
   // complete locale, so it is the only safe fallback.
   fallbackLng: 'en',
-  compatibilityJSON: 'v3',
   interpolation: {
     escapeValue: false,
   },

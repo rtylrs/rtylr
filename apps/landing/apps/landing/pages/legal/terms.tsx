@@ -25,7 +25,7 @@ const SECTIONS = [
   { id: 'contact', label: 'Contact' },
 ];
 
-const TermsPage = (): JSX.Element => {
+const TermsPage = (): React.JSX.Element => {
   return (
     <AppLayout>
       <MainLayout>

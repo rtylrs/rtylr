@@ -53,7 +53,7 @@ const VALUES = [
   },
 ];
 
-const AboutPage = (): JSX.Element => {
+const AboutPage = (): React.JSX.Element => {
   const router = useRouter();
 
   const handleGetStarted = (): void => {

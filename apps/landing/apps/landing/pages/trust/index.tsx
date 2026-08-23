@@ -67,7 +67,7 @@ const COMPLIANCE = [
   { label: 'HIPAA', status: 'Not applicable', ready: false },
 ];
 
-const TrustPage = (): JSX.Element => {
+const TrustPage = (): React.JSX.Element => {
   return (
     <AppLayout>
       <MainLayout>

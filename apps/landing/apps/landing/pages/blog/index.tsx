@@ -10,7 +10,7 @@ import { blogIndexSchema } from '../../lib/structured-data';
 import { getAllPosts } from '../../lib/blog/posts';
 import styles from './blog.module.scss';
 
-const BlogPage = (): JSX.Element => {
+const BlogPage = (): React.JSX.Element => {
   const posts = getAllPosts();
   const [featured, ...rest] = posts;
 

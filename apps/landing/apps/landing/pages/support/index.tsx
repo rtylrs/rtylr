@@ -120,7 +120,7 @@ const CHANNELS = [
   },
 ];
 
-const SupportPage = (): JSX.Element => {
+const SupportPage = (): React.JSX.Element => {
   const [query, setQuery] = useState('');
 
   // Flatten article list for client-side search

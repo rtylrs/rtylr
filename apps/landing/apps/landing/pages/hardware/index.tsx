@@ -93,7 +93,7 @@ const HARDWARE_ITEMS: HardwareItem[] = [
   },
 ];
 
-const HardwarePage = (): JSX.Element => {
+const HardwarePage = (): React.JSX.Element => {
   const router = useRouter();
 
   const handleBookDemo = (): void => {

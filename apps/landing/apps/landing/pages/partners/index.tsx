@@ -93,7 +93,7 @@ const TIER_LEVELS = [
   },
 ];
 
-const PartnersPage = (): JSX.Element => {
+const PartnersPage = (): React.JSX.Element => {
   const router = useRouter();
 
   const goApply = (): void => {

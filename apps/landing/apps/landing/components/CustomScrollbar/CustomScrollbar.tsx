@@ -9,8 +9,8 @@ const CustomScrollbar: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const scrollTimeout = useRef<NodeJS.Timeout>();
-  const hoverTimeout = useRef<NodeJS.Timeout>();
+  const scrollTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
+  const hoverTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
     setIsClient(true);

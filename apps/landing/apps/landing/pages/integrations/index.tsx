@@ -187,7 +187,7 @@ const STATUS_LABEL: Record<Integration['status'], string> = {
   soon: 'Coming soon',
 };
 
-const IntegrationsPage = (): JSX.Element => {
+const IntegrationsPage = (): React.JSX.Element => {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<(typeof CATEGORIES)[number]['id']>('all');
