@@ -19,7 +19,6 @@ vi.mock('@voxire/api', () => ({
 
 import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from './useProjects';
 import { flowApi } from '../../shared/services/flowApi';
-import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 
 const createWrapper = () => {
   const client = new QueryClient({
@@ -34,36 +33,24 @@ describe('useProjects (remote mode)', () => {
     vi.clearAllMocks();
   });
 
-  it('fetches projects for a workspace', async () => {
+  // The list is business-scoped now, so there is no workspace to gate on and
+  // nothing to wait for before the query may run. The two "does not fetch"
+  // cases that used to live here guarded a workspace argument that no longer
+  // exists.
+  it('fetches the business projects without a workspace argument', async () => {
     const data = [{ id: 'p-1', name: 'Project Alpha' }];
     (flowApi.getProjects as any).mockResolvedValue(data);
-    const { result } = renderHook(() => useProjects('12'), {
+    const { result } = renderHook(() => useProjects(), {
       wrapper: createWrapper(),
     });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(data);
-    expect(flowApi.getProjects).toHaveBeenCalledWith('12');
-  });
-
-  it('does not fetch when workspaceId is undefined', () => {
-    const { result } = renderHook(() => useProjects(undefined), {
-      wrapper: createWrapper(),
-    });
-    expect(result.current.fetchStatus).toBe('idle');
-    expect(flowApi.getProjects).not.toHaveBeenCalled();
-  });
-
-  it('does not fetch while the workspace is the unresolved Personal sentinel', () => {
-    const { result } = renderHook(() => useProjects(PERSONAL_WORKSPACE_ID), {
-      wrapper: createWrapper(),
-    });
-    expect(result.current.fetchStatus).toBe('idle');
-    expect(flowApi.getProjects).not.toHaveBeenCalled();
+    expect(flowApi.getProjects).toHaveBeenCalledWith();
   });
 
   it('starts in loading state', () => {
     (flowApi.getProjects as any).mockReturnValue(new Promise(() => {}));
-    const { result } = renderHook(() => useProjects('12'), {
+    const { result } = renderHook(() => useProjects(), {
       wrapper: createWrapper(),
     });
     expect(result.current.isLoading).toBe(true);

@@ -7,7 +7,7 @@ export function useCurrentProject(workspaceId: string | undefined, projectId: st
   const storeProject = useFlowStore((s) =>
     projectId ? s.projects.find((p) => p.id === projectId) : undefined
   );
-  const { data: apiProjects = [], isLoading } = useProjects(workspaceId);
+  const { data: apiProjects = [], isLoading } = useProjects();
 
   const apiProject = useMemo(() => {
     if (!projectId) return undefined;

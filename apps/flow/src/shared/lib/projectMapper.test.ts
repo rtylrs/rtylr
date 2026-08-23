@@ -25,7 +25,6 @@ describe('apiProjectToProject', () => {
       })
     );
     expect(out.id).toBe('42');
-    expect(out.workspaceId).toBe('7');
   });
 
   it('falls back to the flow accent when color is missing', () => {

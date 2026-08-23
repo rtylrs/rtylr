@@ -143,7 +143,7 @@ const AddHours = ({ date, onDateChange }: AddHoursProps): React.JSX.Element => {
     if (phase === 'error' || phase === 'success') bannerRef.current?.focus();
   }, [phase]);
 
-  const { data: projects } = useProjects(activeWorkspaceId);
+  const { data: projects } = useProjects();
   const { data: tasks } = useTasks({ projectId: projectId || undefined });
 
   const upsertDay = useUpsertWorkDay({ silent: true });

@@ -7,16 +7,13 @@ import type { ApiProject, ProjectUpdate } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
 import { isApiWorkspaceId } from '../../shared/lib/personalWorkspace';
 
-export function useProjects(workspaceId: string | undefined) {
+export function useProjects() {
   return useQuery<ApiProject[]>({
-    queryKey: ['projects', workspaceId],
+    queryKey: ['projects'],
     queryFn: async () => {
-      const res = await unwrap(flowApi.getProjects(workspaceId!));
+      const res = await unwrap(flowApi.getProjects());
       return unwrapListResponse<ApiProject>(res, 'projects');
     },
-    // Not `!!workspaceId`: the Personal sentinel is a non-empty string, so bare
-    // truthiness fired this query with `workspace_id=personal` and always 400d.
-    enabled: isApiWorkspaceId(workspaceId),
   });
 }
 
@@ -56,16 +53,5 @@ export function useDeleteProject() {
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
     onError: () => toast.error(t('toasts.project.deleteFailed')),
-  });
-}
-
-export function useMoveProject() {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: { project_id: number; workspace_id: number }) =>
-      unwrap(flowApi.moveProject(data)).then(() => {}),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
-    onError: () => toast.error(t('toasts.project.moveFailed')),
   });
 }

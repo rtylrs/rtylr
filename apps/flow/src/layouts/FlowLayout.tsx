@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import TrialBanner from '../shared/components/TrialBanner';
-import { Link, useLocation, useNavigate, useParams, useRouterState } from '@tanstack/react-router';
+import { Link, useLocation, useParams, useRouterState } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Inbox,
@@ -27,7 +27,6 @@ import {
   ArrowDown,
   Menu,
   X,
-  Shield,
   Clock,
   UserCircle,
   CalendarOff,
@@ -55,8 +54,8 @@ import { useKeyboardShortcuts } from '../shared/hooks/useKeyboardShortcuts';
 import { useProjects, useCreateProject } from '../features/projects/useProjects';
 import { useMyTasksProject } from '../features/tasks/useMyTasksProject';
 import { RecycleBinSection } from '../features/projects-v2/RecycleBinSection';
-import { isApiWorkspaceId, PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
-import type { Member, Workspace } from '../shared/stores/flowStore';
+import { PERSONAL_WORKSPACE_ID } from '../shared/lib/personalWorkspace';
+import type { Member } from '../shared/stores/flowStore';
 import { isTaskMine } from '../shared/lib/currentUser';
 import {
   canCreateProject as canCreateProjectRole,
@@ -71,7 +70,7 @@ import {
 import { useLifePreferences } from '../shared/lib/lifePreferences';
 import { isDueToday, isQuietNow } from '../shared/lib/lifeRhythm';
 import { useNotifications } from '../features/inbox/useNotifications';
-import { apiProjectToProject, apiWorkspaceToWorkspace } from '../shared/lib/projectMapper';
+import { apiProjectToProject } from '../shared/lib/projectMapper';
 import { LicenseBanner } from '@voxire/components';
 import { licenseClient } from '../shared/lib/api';
 import { useFlowBusinessName } from '../shared/hooks/useFlowBusinessName';
@@ -238,7 +237,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const { t } = useTranslation();
   const location = useLocation();
   const search = useRouterState({ select: (s) => s.location.searchStr });
-  const navigate = useNavigate();
   const { workspaceId, projectId } = useParams({ strict: false });
   const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
 
@@ -266,11 +264,9 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const appearance = useAppearanceStore();
   const { mode } = appearance;
   const {
-    workspaces,
     projects,
     activeWorkspaceId,
     setActiveWorkspace,
-    setWorkspaces,
     setProjects,
     members,
     setMembers,
@@ -283,34 +279,25 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const { isOpen: caretOpen } = useCaretStore();
   const unreadNotifications = apiNotifications.filter((n) => !n.read).length;
 
-  // Fetch workspaces from API.
-  // IMPORTANT: use React Query data directly for display, never wait for the
-  // Zustand store to hydrate, because the store is populated via useEffect which
-  // fires *after* render, causing a flash of "No workspace".
-  const apiWorkspaces = EMPTY_WORKSPACES;
-  const workspacesLoading = false;
   const { data: businessName } = useFlowBusinessName();
 
-  // Workspace layer removed: these are stable constants so downstream
-  // references compile without cascading re-renders.
+  // The workspace layer is gone. Realtime and the Caret route context still
+  // take a workspace argument, so this stays as one empty constant rather than
+  // threading the removal through those signatures here.
   const currentWorkspaceId = '';
-  const liveWorkspaces: Workspace[] = [];
 
-  // Creating a project posts workspace_id, so it needs a resolved numeric id -
-  // not the Personal sentinel this layout paints with before workspaces load.
-  const workspaceReady = isApiWorkspaceId(currentWorkspaceId);
   // The business-wide role, read from the same `members` list the assignee
-  // picker uses. `canCreateProject` (roleUtils) is owner/admin/member only -
-  // a workspace viewer must not see project creation as available just
-  // because a workspace happens to be resolved.
+  // picker uses. `canCreateProject` (roleUtils) is owner/admin/member only, so
+  // a viewer must not see project creation as available.
+  //
+  // This used to require a resolved workspace id as well. Since the workspace
+  // layer was stubbed out, that id has been the empty string, so the gate was
+  // permanently closed and nobody could create a project at all. v2 creation
+  // posts no workspace, so role is the only real condition.
   const currentMemberRole = members.find((m) => String(m.id) === String(user?.id))?.role;
   const canCreateProject =
-    workspaceReady && currentMemberRole !== undefined && canCreateProjectRole(currentMemberRole);
-  const createProjectGateReason = !workspaceReady
-    ? t('flow.shell.createNeedsWorkspace')
-    : !canCreateProject
-      ? t('flow.shell.createNeedsRole')
-      : '';
+    currentMemberRole !== undefined && canCreateProjectRole(currentMemberRole);
+  const createProjectGateReason = canCreateProject ? '' : t('flow.shell.createNeedsRole');
 
   // Workspace-scoped routes are authoritative even when the workspace list
   // request is unavailable. Keep the shared store aligned so screens without
@@ -325,25 +312,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // Resolves the caller's auto-provisioned personal project so it can be hidden
   // from the Projects list (its tasks surface in the global "My tasks" view).
   const { data: myTasksProject } = useMyTasksProject();
-  const { data: apiProjects } = useProjects(currentWorkspaceId || undefined);
-
-  // Once real workspaces load, redirect away from the "personal" sentinel to the
-  // actual first workspace ID so all downstream API calls use a real numeric ID.
-  useEffect(() => {
-    if (workspaceId === PERSONAL_WORKSPACE_ID && apiWorkspaces && apiWorkspaces.length > 0) {
-      navigate({ to: `/w/${apiWorkspaces[0].id}` as string, replace: true });
-    }
-  }, [workspaceId, apiWorkspaces, navigate]);
-
-  // Hydrate the store so other consumers (tasks, etc.) see fresh data.
-  // IDs from the wire are numeric; the Zustand store keys them as strings
-  // (URL params and active-id comparisons are strings), so always route
-  // through the mapper - never `setWorkspaces(apiWorkspaces as any)`.
-  useEffect(() => {
-    if (apiWorkspaces && apiWorkspaces.length > 0) {
-      setWorkspaces(apiWorkspaces.map(apiWorkspaceToWorkspace));
-    }
-  }, [apiWorkspaces, setWorkspaces]);
+  const { data: apiProjects } = useProjects();
 
   useEffect(() => {
     if (apiProjects && apiProjects.length > 0) {
@@ -477,15 +446,16 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   // "Inbox"/📥 is the legacy name (migrated to My Tasks).
   const myTasksProjectId =
     myTasksProject?.projectId !== undefined ? String(myTasksProject.projectId) : undefined;
-  const workspaceProjects = projects.filter(
+  // Every project in the business, not one workspace's: the sidebar is the
+  // curated business list now (P8).
+  const sidebarProjects = projects.filter(
     (p) =>
-      p.workspaceId === currentWorkspaceId &&
       !p.archived &&
       p.id !== myTasksProjectId &&
       !(p.name === 'My Tasks' && p.icon === '✅') &&
       !(p.name === 'Inbox' && p.icon === '📥')
   );
-  const activeProject = workspaceProjects.find((project) => project.id === projectId);
+  const activeProject = sidebarProjects.find((project) => project.id === projectId);
 
   const myIssuesCount = tasks.filter(
     (t) =>
@@ -493,7 +463,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   ).length;
   const todayFocusCount = tasks.filter(
     (t) =>
-      t.workspaceId === currentWorkspaceId &&
       !t.archived &&
       t.status !== 'done' &&
       t.status !== 'cancelled' &&
@@ -530,12 +499,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
         page: flowPageTitle,
         businessName: activeWorkspace.name,
         selected: {
-          workspace_id: currentWorkspaceId,
           ...(activeProject
             ? { project_id: activeProject.id, project_name: activeProject.name }
             : {}),
         },
-        visibleRows: workspaceProjects.slice(0, 12).map((project) => ({
+        visibleRows: sidebarProjects.slice(0, 12).map((project) => ({
           id: project.id,
           name: project.name,
           open_tasks: Math.max(0, project.taskCount - project.completedCount),
@@ -556,7 +524,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
       search,
       myIssuesCount,
       todayFocusCount,
-      workspaceProjects,
+      sidebarProjects,
     ]
   );
 
@@ -680,10 +648,10 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
           {/* Workspace + search, shared inset, even vertical rhythm */}
           <div ref={workspaceSwitcherRef} className={cn('space-y-1.5 pt-1.5 pb-1.5 relative', sx)}>
-            <button
-              type="button"
-              onClick={() => setWorkspaceSwitcherOpen((o) => !o)}
-              className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors hover:bg-[var(--flow-hover)]"
+            {/* The business name, not a switcher. Workspaces are gone, so there
+                is nothing to switch between. */}
+            <div
+              className="w-full flex items-center gap-2 px-3 py-1.5 rounded-md"
               style={{ color: 'var(--flow-text-muted)' }}
             >
               <span
@@ -692,6 +660,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   background: `${activeWorkspace.color}22`,
                   color: activeWorkspace.color,
                 }}
+                aria-hidden
               >
                 {activeWorkspace.name.charAt(0)}
               </span>
@@ -701,67 +670,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               >
                 {activeWorkspace.name}
               </span>
-              <ChevronDown
-                size={13}
-                className={cn(
-                  'shrink-0 transition-transform',
-                  workspaceSwitcherOpen ? 'rotate-180' : ''
-                )}
-              />
-            </button>
-
-            <AnimatePresence>
-              {workspaceSwitcherOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -4, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -4, scale: 0.97 }}
-                  transition={{ duration: 0.12 }}
-                  className="absolute inset-x-0 z-50 mt-1 rounded-lg py-1 shadow-lg"
-                  style={{
-                    background: 'var(--flow-card)',
-                    border: '1px solid var(--flow-border)',
-                    boxShadow: 'var(--flow-shadow)',
-                  }}
-                >
-                  {liveWorkspaces.map((ws) => (
-                    <button
-                      type="button"
-                      key={ws.id}
-                      onClick={() => {
-                        setActiveWorkspace(ws.id);
-                        navigate({ to: `/w/${ws.id}` as string });
-                        setWorkspaceSwitcherOpen(false);
-                      }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-start transition-colors hover:bg-[var(--flow-hover)]"
-                      style={{
-                        color:
-                          ws.id === currentWorkspaceId
-                            ? 'var(--flow-text)'
-                            : 'var(--flow-text-muted)',
-                      }}
-                    >
-                      <span
-                        className="h-5 w-5 rounded-sm shrink-0 flex items-center justify-center text-[10px] font-bold"
-                        style={{
-                          background: `${ws.color}22`,
-                          color: ws.color,
-                        }}
-                      >
-                        {ws.name.charAt(0)}
-                      </span>
-                      {ws.name}
-                      {ws.id === currentWorkspaceId && (
-                        <span
-                          className="ms-auto h-1.5 w-1.5 rounded-full"
-                          style={{ background: 'var(--accent)' }}
-                        />
-                      )}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+            </div>
 
             <button
               type="button"
@@ -809,12 +718,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                     bottom (with the theme switcher and sign-out) - they are
                     account-scoped destinations, not work-item triage like
                     the entries around them. */}
-                <SidebarLink
-                  to={`/w/${currentWorkspaceId}`}
-                  icon={LayoutGrid}
-                  label={t('nav.dashboard')}
-                  exact
-                />
+                <SidebarLink to="/projects" icon={LayoutGrid} label={t('nav.projects')} exact />
                 <SidebarLink to="/triage" icon={Eye} label={t('flow.shell.triage')} />
                 {/* Backlog is now a column inside /my-issues - no
                     standalone sidebar entry. */}
@@ -929,11 +833,7 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                                 label={t('flow.shell.workload')}
                               />
                             )}
-                            <SidebarLink
-                              to={`/w/${currentWorkspaceId}/members`}
-                              icon={Shield}
-                              label={t('flow.shell.members')}
-                            />
+
                             {showPreviewRoutes && (
                               <SidebarLink
                                 to="/insights"
@@ -1069,8 +969,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                         </div>
                         <SidebarCollapsible open={!isSidebarSectionCollapsed('projects')}>
                           <div className="flex flex-col gap-px pt-px">
-                            {workspaceProjects.map((project) => {
-                              const boardPath = `/w/${currentWorkspaceId}/p/${project.id}`;
+                            {sidebarProjects.map((project) => {
+                              const boardPath = `/p/${project.id}`;
                               const isActive = projectId === project.id;
                               return (
                                 <Link
@@ -1116,6 +1016,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   </React.Fragment>
                 ))}
               </div>
+
+              {/* The bin renders itself away when empty, so it costs nothing
+                  here. It was imported but never mounted, which left the whole
+                  recycle bin unreachable from the UI. */}
+              <RecycleBinSection />
             </div>
           </div>
 
@@ -1477,9 +1382,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
 
 export default FlowLayout;
 
-// Module-level constant: same reference every render, prevents the
-// useMemo → useEffect → setState → re-render infinite loop.
-const EMPTY_WORKSPACES: { id: string; name: string; color: string }[] = [];
 // Same reason: the capacity query has no data while /hr/work-schedule 403s,
 // so a `= {}` destructuring default would mint a new object every render.
 const EMPTY_CAPACITY: Record<string, number> = {};

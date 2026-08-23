@@ -343,7 +343,7 @@ const TaskDetail: React.FC = () => {
               items={[
                 {
                   label: project?.name || task.projectName || t('flow.taskDetail.project'),
-                  to: `/w/${task.workspaceId}/p/${task.projectId}`,
+                  to: `/p/${task.projectId}`,
                 },
                 { label: task.identifier ?? task.id },
               ]}

@@ -111,49 +111,49 @@ const indexRoute = createRoute({
 
 const projectBoardRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/w/$workspaceId/p/$projectId',
+  path: '/p/$projectId',
   component: () => withLayout(<ProjectBoard />),
 });
 
 const projectBoardExplicitRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/w/$workspaceId/p/$projectId/board',
+  path: '/p/$projectId/board',
   component: () => withLayout(<ProjectBoard />),
 });
 
 const projectListRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/w/$workspaceId/p/$projectId/list',
+  path: '/p/$projectId/list',
   component: () => withLayout(<ProjectList />),
 });
 
 const projectOverviewRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/w/$workspaceId/p/$projectId/overview',
+  path: '/p/$projectId/overview',
   component: () => previewRoute(<ProjectOverview />),
 });
 
 const projectTimelineRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/w/$workspaceId/p/$projectId/timeline',
+  path: '/p/$projectId/timeline',
   component: () => previewRoute(<ProjectTimeline />),
 });
 
 const projectCalendarRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/w/$workspaceId/p/$projectId/calendar',
+  path: '/p/$projectId/calendar',
   component: () => withLayout(<ProjectCalendar />),
 });
 
 const projectDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/w/$workspaceId/p/$projectId/dashboard',
+  path: '/p/$projectId/dashboard',
   component: () => previewRoute(<ProjectDashboard />),
 });
 
 const projectSettingsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/w/$workspaceId/p/$projectId/settings',
+  path: '/p/$projectId/settings',
   component: () => withLayout(<ProjectSettings />),
 });
 
@@ -305,6 +305,52 @@ const settingsRoute = createRoute({
   component: () => withLayout(<FlowSettings />),
 });
 
+// The workspace segment is gone from every project URL, but links live in
+// bookmarks, notification emails and pasted messages. These two routes keep the
+// old shape working for one release: one for the bare project URL, one splat
+// for the sub-views. Delete both with the workspace tables in Phase 4.
+//
+// The tails are a literal map rather than an interpolated path because
+// `<Navigate to>` is typed against the route tree: a template string is not
+// assignable, and building one would have meant a cast that defeats the
+// checking that caught every stale link in this change.
+const LEGACY_TAIL_ROUTES = {
+  board: '/p/$projectId/board',
+  list: '/p/$projectId/list',
+  overview: '/p/$projectId/overview',
+  timeline: '/p/$projectId/timeline',
+  calendar: '/p/$projectId/calendar',
+  dashboard: '/p/$projectId/dashboard',
+  settings: '/p/$projectId/settings',
+} as const;
+
+function legacyTarget(
+  tail: string | undefined
+): (typeof LEGACY_TAIL_ROUTES)[keyof typeof LEGACY_TAIL_ROUTES] | '/p/$projectId' {
+  if (tail !== undefined && tail in LEGACY_TAIL_ROUTES) {
+    return LEGACY_TAIL_ROUTES[tail as keyof typeof LEGACY_TAIL_ROUTES];
+  }
+  return '/p/$projectId';
+}
+
+const legacyProjectRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/w/$workspaceId/p/$projectId',
+  component: function LegacyProject(): React.JSX.Element {
+    const { projectId } = legacyProjectRoute.useParams();
+    return <Navigate to="/p/$projectId" params={{ projectId }} replace />;
+  },
+});
+
+const legacyProjectSubRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/w/$workspaceId/p/$projectId/$',
+  component: function LegacyProjectSub(): React.JSX.Element {
+    const { projectId, _splat } = legacyProjectSubRoute.useParams();
+    return <Navigate to={legacyTarget(_splat)} params={{ projectId }} replace />;
+  },
+});
+
 const catchAllRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '*',
@@ -322,6 +368,8 @@ const routeTree = rootRoute.addChildren([
   projectCalendarRoute,
   projectDashboardRoute,
   projectSettingsRoute,
+  legacyProjectRoute,
+  legacyProjectSubRoute,
   taskDetailRoute,
   myIssuesRoute,
   allProjectsRoute,

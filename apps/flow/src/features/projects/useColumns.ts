@@ -23,11 +23,10 @@ export function useCreateColumn(projectId: string) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: { workspaceId: string; name: string; color?: string; sortOrder?: number }) =>
+    mutationFn: (data: { name: string; color?: string; sortOrder?: number }) =>
       unwrap(
         flowApi.createProjectColumn({
           project_id: projectId,
-          workspace_id: data.workspaceId,
           name: data.name,
           color: data.color,
           sort_order: data.sortOrder,

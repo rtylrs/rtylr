@@ -47,7 +47,7 @@ const MyDay = (): React.JSX.Element => {
   // For labelling each line with what it was actually for - the same
   // project/task data Add Hours already fetches for its own pickers.
   const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
-  const { data: projects } = useProjects(activeWorkspaceId);
+  const { data: projects } = useProjects();
   const { data: tasks } = useTasks({});
   const projectsById = useMemo(
     () => new Map((projects ?? []).map((project) => [project.id, project])),

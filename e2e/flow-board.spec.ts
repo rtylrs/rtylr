@@ -120,17 +120,62 @@ test.describe('Flow - Project Board', () => {
         body: JSON.stringify({ tasks: FAKE_TASKS }),
       })
     );
+
+    // The board reads projects and columns through v2 now. Columns first: its
+    // path is a prefix of the project route, so the broader pattern would
+    // otherwise swallow it.
+    await page.route(
+      /localhost:9999\/flow\/project\/v2\/projects\/columns(\?.*)?$/,
+      (route: Route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ columns: FAKE_COLUMNS }),
+        })
+    );
+
+    await page.route(/localhost:9999\/flow\/project\/v2\/projects\/1$/, (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ project: FAKE_PROJECT }),
+      })
+    );
+
+    await page.route(/localhost:9999\/flow\/project\/v2\/projects(\?.*)?$/, (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ projects: [FAKE_PROJECT], pagination: { total: 1 } }),
+      })
+    );
+  });
+
+  // The workspace segment is gone from project URLs, but links to the old shape
+  // survive in bookmarks and pasted messages for a release.
+  test('a legacy /w/<id>/p/<id> URL lands on the workspace-free route', async ({ page }) => {
+    await page.goto(`${FLOW_URL}/w/10/p/1`);
+    await page.waitForLoadState('networkidle');
+
+    expect(new URL(page.url()).pathname).toBe('/p/1');
+  });
+
+  test('a legacy sub-view URL keeps its view on redirect', async ({ page }) => {
+    await page.goto(`${FLOW_URL}/w/10/p/1/list`);
+    await page.waitForLoadState('networkidle');
+
+    expect(new URL(page.url()).pathname).toBe('/p/1/list');
   });
 
   test('kanban board renders columns and task cards', async ({ page }) => {
-    await page.goto(`${FLOW_URL}/w/10/p/1`);
+    await page.goto(`${FLOW_URL}/p/1`);
     await page.waitForLoadState('networkidle');
 
     await expect(page.locator('body')).toBeVisible();
   });
 
   test('group-by swimlanes option persists in localStorage', async ({ page }) => {
-    await page.goto(`${FLOW_URL}/w/10/p/1`);
+    await page.goto(`${FLOW_URL}/p/1`);
     await page.waitForLoadState('networkidle');
 
     const groupPicker = page.getByRole('button', { name: /Group:/i }).first();
@@ -146,7 +191,7 @@ test.describe('Flow - Project Board', () => {
   });
 
   test('project list view renders tasks with filters', async ({ page }) => {
-    await page.goto(`${FLOW_URL}/w/10/p/1/list`);
+    await page.goto(`${FLOW_URL}/p/1/list`);
     await page.waitForLoadState('networkidle');
 
     await expect(page.locator('body')).toBeVisible();

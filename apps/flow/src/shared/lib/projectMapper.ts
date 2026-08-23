@@ -16,7 +16,6 @@ export function apiProjectToProject(p: ApiProject): Project {
   const completedCount = p.completedCount ?? 0;
   return {
     id: String(p.id),
-    workspaceId: String(p.workspaceId),
     name: p.name,
     color: p.color || '#64C5B9',
     description: p.description,

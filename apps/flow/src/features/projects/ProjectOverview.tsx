@@ -68,7 +68,6 @@ const ProjectOverview: React.FC = () => {
       <HelmetContainer title={t('flow.projectOverview.pageTitle')} />
       <ProjectViewTabs
         project={project}
-        workspaceId={workspaceId}
         projectId={projectId}
         taskCount={stats.total}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
@@ -234,8 +233,8 @@ const ProjectOverview: React.FC = () => {
                 label: t('flow.projectOverview.goToBoardCta'),
                 onClick: () =>
                   navigate({
-                    to: '/w/$workspaceId/p/$projectId/board',
-                    params: { workspaceId, projectId },
+                    to: '/p/$projectId/board',
+                    params: { projectId },
                   }),
               }}
               size="compact"

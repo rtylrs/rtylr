@@ -16,7 +16,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
-import { useUpdateProject, useDeleteProject, useMoveProject } from './useProjects';
+import { useUpdateProject, useDeleteProject } from './useProjects';
 import {
   useProjectMembers,
   useRemoveProjectMember,
@@ -69,7 +69,6 @@ const ProjectSettings: React.FC = () => {
 
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
-  const moveProject = useMoveProject();
   const {
     data: members = [],
     isLoading: membersLoading,
@@ -89,8 +88,6 @@ const ProjectSettings: React.FC = () => {
   const canManageProject = useCanAdministerProject(projectId);
 
   const transferRef = useRef<HTMLSelectElement>(null);
-  const [targetWorkspaceId, setTargetWorkspaceId] = useState('');
-  const [confirmMove, setConfirmMove] = useState(false);
   const [confirmTransfer, setConfirmTransfer] = useState(false);
 
   const [showAddMember, setShowAddMember] = useState(false);
@@ -108,8 +105,6 @@ const ProjectSettings: React.FC = () => {
       </div>
     );
   }
-
-  const otherWorkspaces = workspaces.filter((w) => w.id !== (project?.workspaceId ?? workspaceId));
 
   if (!project) {
     return (
@@ -131,10 +126,7 @@ const ProjectSettings: React.FC = () => {
       <HelmetContainer title={t('flow.projectSettings.pageTitle')} />
       <div className="px-6 py-4 shrink-0" style={{ borderBottom: '1px solid var(--flow-border)' }}>
         <Breadcrumbs
-          items={[
-            { label: project.name, to: `/w/${project.workspaceId}/p/${project.id}/overview` },
-            { label: 'Settings' },
-          ]}
+          items={[{ label: project.name, to: `/p/${project.id}/overview` }, { label: 'Settings' }]}
         />
         <h1 className="text-[17px] font-bold mt-1" style={{ color: 'var(--flow-text)' }}>
           Settings
@@ -403,106 +395,6 @@ const ProjectSettings: React.FC = () => {
             )}
 
             <div className="pt-4 space-y-4" style={{ borderTop: '1px solid var(--flow-border)' }}>
-              {/* Move to workspace */}
-              {otherWorkspaces.length > 0 && (
-                <div>
-                  <p
-                    className="text-[11px] font-semibold mb-1"
-                    style={{ color: 'var(--flow-text-muted)' }}
-                  >
-                    Move to workspace
-                  </p>
-                  <p className="text-[11px] mb-2" style={{ color: 'var(--flow-text-dim)' }}>
-                    Move this project (and all its tasks) to a different workspace.
-                  </p>
-                  {!canManageProject && (
-                    <GateNotice
-                      className="mb-2"
-                      reason={t('flow.projectSettings.moveGateReason')}
-                    />
-                  )}
-                  <div className="flex gap-2">
-                    <select
-                      value={targetWorkspaceId}
-                      disabled={!canManageProject}
-                      onChange={(e) => {
-                        setTargetWorkspaceId(e.target.value);
-                        setConfirmMove(false);
-                      }}
-                      className="flex-1 rounded-sm px-2 py-1.5 text-[11px] outline-none disabled:opacity-60"
-                      style={{
-                        background: 'var(--flow-input-bg)',
-                        border: '1px solid var(--flow-border)',
-                        color: 'var(--flow-text)',
-                      }}
-                    >
-                      <option value="">Select workspace…</option>
-                      {otherWorkspaces.map((w) => (
-                        <option key={w.id} value={w.id}>
-                          {w.name}
-                        </option>
-                      ))}
-                    </select>
-                    {confirmMove ? (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (!canManageProject) return;
-                            moveProject.mutate(
-                              {
-                                project_id: Number(projectId),
-                                workspace_id: Number(targetWorkspaceId),
-                              },
-                              {
-                                onSuccess: () => {
-                                  toast.success(t('toasts.project.moved'));
-                                  navigate({ to: `/w/${targetWorkspaceId}` as string });
-                                },
-                                onError: () => setConfirmMove(false),
-                              }
-                            );
-                          }}
-                          disabled={moveProject.isPending || !canManageProject}
-                          className="px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
-                          style={{ background: '#ef4444', color: '#fff' }}
-                        >
-                          {moveProject.isPending ? 'Moving…' : 'Confirm'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setConfirmMove(false)}
-                          className="px-3 py-1.5 rounded-sm text-[11px]"
-                          style={{ color: 'var(--flow-text-muted)' }}
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!canManageProject) return;
-                          if (!targetWorkspaceId)
-                            return toast.error(t('toasts.project.selectWorkspace'));
-                          setConfirmMove(true);
-                        }}
-                        disabled={!canManageProject}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
-                        style={{ background: 'var(--flow-hover)', color: 'var(--flow-text)' }}
-                      >
-                        <ArrowRightLeft size={10} /> Move
-                      </button>
-                    )}
-                  </div>
-                  {confirmMove && (
-                    <p className="text-[11px] mt-1.5" style={{ color: '#f97316' }}>
-                      This will move the project and all its tasks. Click Confirm to proceed.
-                    </p>
-                  )}
-                </div>
-              )}
-
               {/* Transfer ownership */}
               <div>
                 <p
@@ -746,7 +638,7 @@ const ProjectSettings: React.FC = () => {
                     onSuccess: () => {
                       toast.success(t('toasts.project.deleted'));
                       setConfirmDelete(false);
-                      navigate({ to: `/w/${project!.workspaceId}` as string });
+                      navigate({ to: '/projects' });
                     },
                   });
                 }}

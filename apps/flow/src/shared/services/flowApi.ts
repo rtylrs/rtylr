@@ -16,6 +16,7 @@ import {
   settingClient,
   userClient,
   projectV2,
+  taskV2,
 } from '../lib/clients';
 
 // -- Types ----------------------------------------------------------------
@@ -67,7 +68,6 @@ export interface ApiBusinessSummary {
 
 export interface ApiProject {
   id: string;
-  workspaceId: string;
   name: string;
   color: string;
   description?: string;
@@ -230,7 +230,6 @@ export interface ApiRoadmap {
 
 const toTaskCreatePayload = (data: {
   projectId?: string;
-  workspaceId: string;
   title: string;
   description?: string;
   priority?: ApiTask['priority'];
@@ -243,7 +242,6 @@ const toTaskCreatePayload = (data: {
   // OneKit-generated contracts wire-encode int64 fields as JSON strings, even
   // the personal-workspace/project sentinel value 0 - never send a bare number.
   project_id: String(data.projectId ? Number(data.projectId) : 0),
-  workspace_id: String(Number(data.workspaceId) || 0),
   title: data.title,
   description: data.description ?? '-',
   priority: data.priority ?? 'medium',
@@ -451,27 +449,32 @@ export const flowApi = {
 
   // -- Projects -----------------------------------------------------------
 
-  getProjects: (workspaceId: string) =>
-    flowResult<{ projects: ApiProject[] }>(() => projectClient.listProjects({ workspaceId })),
+  // The sidebar's project list is business-scoped now. It has to be v2: a
+  // project created through v2 is stored with workspace_id 0, and v1's
+  // listProjects filters on `workspace_id = ?`, so a v1 list would never show a
+  // newly created project. limit is the page cap the sidebar renders.
+  getProjects: () =>
+    flowResult<{ projects: ApiProject[] }>(() =>
+      projectV2.listProjects({ status: '', visibility: '', q: '', page: 1, limit: 100 })
+    ),
 
   // -- Project Columns ----------------------------------------------------
 
   getProjectColumns: (projectId: string) =>
-    flowResult<{ columns: ApiProjectColumn[] }>(() =>
-      projectClient.listProjectColumns({ projectId })
-    ),
+    flowResult<{ columns: ApiProjectColumn[] }>(() => projectV2.listProjectColumns({ projectId })),
 
+  // Columns move to v2 because the v2 requests carry no workspace_id at all:
+  // the server derives it from the project rather than trusting a client echo,
+  // which is what let the board keep a workspace id in its hand.
   createProjectColumn: (data: {
     project_id: string;
-    workspace_id: string;
     name: string;
     color?: string;
     sort_order?: number;
   }) =>
     flowResult<{ column: ApiProjectColumn }>(() =>
-      projectClient.createProjectColumn({
+      projectV2.createProjectColumn({
         projectId: data.project_id,
-        workspaceId: data.workspace_id,
         name: data.name,
         color: data.color,
         sortOrder: data.sort_order,
@@ -480,7 +483,7 @@ export const flowApi = {
 
   updateProjectColumn: (data: { id: string; name: string; color?: string; sort_order?: number }) =>
     flowResult<{ message: string }>(() =>
-      projectClient.updateProjectColumn({
+      projectV2.updateProjectColumn({
         id: data.id,
         name: data.name,
         color: data.color,
@@ -489,10 +492,10 @@ export const flowApi = {
     ),
 
   deleteProjectColumn: (id: string) =>
-    flowResult<{ message: string }>(() => projectClient.deleteProjectColumn({ id })),
+    flowResult<{ message: string }>(() => projectV2.deleteProjectColumn({ id })),
 
   moveTaskToColumn: (taskId: string, columnId: string) =>
-    flowResult<{ message: string }>(() => projectClient.moveTaskToColumn({ taskId, columnId })),
+    flowResult<{ message: string }>(() => projectV2.moveTaskToColumn({ taskId, columnId })),
 
   createProject: (data: {
     name: string;
@@ -594,14 +597,6 @@ export const flowApi = {
       })
     ),
 
-  moveProject: (data: { project_id: number; workspace_id: number }) =>
-    flowResult(() =>
-      projectClient.moveProject({
-        projectId: String(data.project_id),
-        workspaceId: String(data.workspace_id),
-      })
-    ),
-
   // -- Tasks --------------------------------------------------------------
 
   getTasks: (params: {
@@ -645,9 +640,10 @@ export const flowApi = {
   // caller's auto-provisioned "Inbox" project in the target workspace
   // (task_handlers.go CreateTaskHandler.Serve). This powers quick-create from
   // My Tasks / the command bar where no project is selected.
+  // v2 create: no workspace_id, and title is the only required field, which is
+  // what lets quick-add post a task with nothing else filled in.
   createTask: (data: {
     projectId?: string;
-    workspaceId: string;
     title: string;
     description?: string;
     status?: ApiTask['status'];
@@ -660,9 +656,8 @@ export const flowApi = {
   }) =>
     flowResult<{ task: ApiTask }>(() => {
       const payload = toTaskCreatePayload(data);
-      return taskClient.createTask({
+      return taskV2.createTask({
         projectId: payload.project_id,
-        workspaceId: payload.workspace_id,
         title: payload.title,
         description: payload.description,
         priority: payload.priority,

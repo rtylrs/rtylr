@@ -315,7 +315,8 @@ const ProjectList: React.FC = () => {
           }}
         >
           <Link
-            to={`/w/${workspaceId}/p/${projectId}` as string}
+            to="/p/$projectId"
+            params={{ projectId }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors hover:bg-[var(--flow-hover)] no-underline"
             style={{ color: 'var(--flow-text-muted)' }}
           >

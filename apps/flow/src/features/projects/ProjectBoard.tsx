@@ -260,7 +260,6 @@ const ProjectBoard: React.FC = () => {
       return;
     }
     createColumn.mutate({
-      workspaceId: activeWorkspaceId || project.workspaceId,
       name,
       color: '#6b7280',
       sortOrder: columns.length,
@@ -274,7 +273,6 @@ const ProjectBoard: React.FC = () => {
       <div className="flex flex-col h-full">
         <ProjectViewTabs
           project={project}
-          workspaceId={workspaceId}
           projectId={projectId}
           taskCount={tasks.length}
           onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
@@ -293,7 +291,6 @@ const ProjectBoard: React.FC = () => {
       <HelmetContainer title={t('flow.board.pageTitle')} />
       <ProjectViewTabs
         project={project}
-        workspaceId={workspaceId}
         projectId={projectId}
         taskCount={tasks.length}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
@@ -317,7 +314,6 @@ const ProjectBoard: React.FC = () => {
         open={boardSettingsOpen}
         onClose={() => setBoardSettingsOpen(false)}
         projectId={projectId}
-        workspaceId={activeWorkspaceId || project.workspaceId}
         columns={columns}
         canManage={canManageBoard}
         groupBy={groupBy}

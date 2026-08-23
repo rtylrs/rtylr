@@ -27,7 +27,6 @@ function column(over: Partial<ApiProjectColumn> = {}): ApiProjectColumn {
   return {
     id: '1',
     projectId: 'p1',
-    workspaceId: 'w1',
     name: 'Backlog',
     color: '#6b7280',
     sortOrder: 0,
@@ -111,7 +110,6 @@ describe('BoardSettingsPanel: columns', () => {
     fireEvent.click(screen.getByRole('button', { name: 'flow.board.addColumn' }));
 
     expect(createColumn).toHaveBeenCalledWith({
-      workspaceId: 'w1',
       name: 'Blocked',
       sortOrder: 3,
     });

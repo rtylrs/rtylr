@@ -17,7 +17,7 @@ const Timeline: React.FC = () => {
   const { activeWorkspaceId } = useFlowStore();
   const storeProjects = useFlowStore((s) => s.projects);
   const storeMilestones = useFlowStore((s) => s.milestones);
-  const { data: apiProjects } = useProjects(activeWorkspaceId || undefined);
+  const { data: apiProjects } = useProjects();
   const { data: apiMilestones } = useMilestones();
   const projects = (apiProjects ?? storeProjects) as Project[];
   const milestones = (apiMilestones ?? storeMilestones) as Milestone[];

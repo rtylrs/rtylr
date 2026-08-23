@@ -8,7 +8,6 @@ import { EmptyState } from '@voxire/ui';
 import { useMyIssues } from './useMyIssues';
 import { useCreateTask } from './useTasks';
 import { useMyTasksProject } from './useMyTasksProject';
-import { useLabels } from './useLabels';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { getCurrentUserId } from '../../shared/lib/currentUser';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
@@ -157,15 +156,7 @@ const QuickAddRow: React.FC<QuickAddRowProps> = ({ inputRef }) => {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const createTask = useCreateTask();
-  const { activeWorkspaceId } = useFlowStore();
   const { data: myTasksProject } = useMyTasksProject();
-  const myTasksWorkspaceId = myTasksProject?.workspaceId
-    ? String(myTasksProject.workspaceId)
-    : activeWorkspaceId;
-  const { data: labels = [], isLoading: labelsLoading } = useLabels(
-    myTasksWorkspaceId || undefined
-  );
-  const hasNoLabels = !labelsLoading && labels.length === 0;
 
   const submit = (): void => {
     const trimmed = title.trim();
@@ -173,11 +164,7 @@ const QuickAddRow: React.FC<QuickAddRowProps> = ({ inputRef }) => {
       toast.error(t('toasts.task.titleRequired'));
       return;
     }
-    if (hasNoLabels) {
-      toast.error(t('flow.myIssues.quickAddNoLabelsReason'));
-      return;
-    }
-    if (!myTasksProject || labels.length === 0) {
+    if (!myTasksProject) {
       toast.error(t('errors.generic'));
       return;
     }
@@ -185,12 +172,10 @@ const QuickAddRow: React.FC<QuickAddRowProps> = ({ inputRef }) => {
     // collects new captures instead of jamming them into Todo.
     createTask.mutate(
       {
-        workspaceId: String(myTasksProject.workspaceId),
         projectId: String(myTasksProject.projectId),
         title: trimmed,
         status: 'backlog',
         assigneeId: getCurrentUserId() ?? undefined,
-        labels: [String(labels[0].id)],
       },
       { onSuccess: () => setTitle('') }
     );
@@ -221,8 +206,7 @@ const QuickAddRow: React.FC<QuickAddRowProps> = ({ inputRef }) => {
         <button
           type="button"
           onClick={submit}
-          disabled={createTask.isPending || hasNoLabels}
-          title={hasNoLabels ? t('flow.myIssues.quickAddNoLabelsReason') : undefined}
+          disabled={createTask.isPending}
           className="text-[11px] font-semibold px-2.5 py-1 rounded-sm transition-opacity hover:opacity-90 disabled:opacity-50"
           style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
         >

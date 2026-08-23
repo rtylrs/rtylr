@@ -66,7 +66,11 @@ beforeEach(() => {
 });
 
 describe('MyIssues QuickAddRow', () => {
-  it('blocks submit and shows an actionable toast when the workspace has no labels', () => {
+  // Decision M1/R13: quick-add takes a title and nothing else. It used to
+  // refuse to submit until the workspace had at least one label, then stamp the
+  // first one onto the task without saying so. Both are gone, and the v2
+  // contract makes title the only required field.
+  it('submits with only a title when no labels exist', () => {
     labelsData.data = [];
     render(<MyIssues />);
 
@@ -74,11 +78,11 @@ describe('MyIssues QuickAddRow', () => {
     fireEvent.change(input, { target: { value: 'Ship the thing' } });
     fireEvent.keyDown(input, { key: 'Enter' });
 
-    expect(createTaskMutate).not.toHaveBeenCalled();
-    expect(toast.error).toHaveBeenCalledWith('flow.myIssues.quickAddNoLabelsReason');
+    expect(createTaskMutate).toHaveBeenCalled();
+    expect(toast.error).not.toHaveBeenCalled();
   });
 
-  it('disables the Add button with an explanatory title when the workspace has no labels', () => {
+  it('leaves the Add button enabled when no labels exist', () => {
     labelsData.data = [];
     render(<MyIssues />);
 
@@ -87,8 +91,8 @@ describe('MyIssues QuickAddRow', () => {
     });
     const button = screen.getByRole('button', { name: 'flow.myIssues.quickAddButton' });
 
-    expect(button).toBeDisabled();
-    expect(button).toHaveAttribute('title', 'flow.myIssues.quickAddNoLabelsReason');
+    expect(button).toBeEnabled();
+    expect(button).not.toHaveAttribute('title');
   });
 
   it('leaves the Add button enabled while labels are still loading', () => {
@@ -104,7 +108,7 @@ describe('MyIssues QuickAddRow', () => {
     expect(button).not.toBeDisabled();
   });
 
-  it('sends the first available label id in the create payload', () => {
+  it('stamps no label and sends no workspace, even when labels exist', () => {
     labelsData.data = [
       { id: 42, name: 'Bug' },
       { id: 43, name: 'Feature' },
@@ -116,15 +120,10 @@ describe('MyIssues QuickAddRow', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'flow.myIssues.quickAddButton' }));
 
-    expect(createTaskMutate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        workspaceId: '3',
-        projectId: '9',
-        title: 'Ship the thing',
-        labels: ['42'],
-      }),
-      expect.anything()
-    );
+    const [payload] = createTaskMutate.mock.calls[0];
+    expect(payload).toMatchObject({ projectId: '9', title: 'Ship the thing' });
+    expect(payload).not.toHaveProperty('labels');
+    expect(payload).not.toHaveProperty('workspaceId');
     expect(toast.error).not.toHaveBeenCalled();
   });
 

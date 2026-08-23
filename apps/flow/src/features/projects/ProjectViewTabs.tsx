@@ -14,18 +14,28 @@ import { useFeatureFlag, FLAG_KEYS } from '@voxire/config';
 
 interface ProjectViewTabsProps {
   project: { name: string; color: string };
-  workspaceId: string;
   projectId: string;
   taskCount: number;
   onNewTask: () => void;
   rightSlot?: React.ReactNode;
 }
 
+type ProjectViewPath =
+  | '/p/$projectId'
+  | '/p/$projectId/overview'
+  | '/p/$projectId/list'
+  | '/p/$projectId/timeline'
+  | '/p/$projectId/calendar'
+  | '/p/$projectId/dashboard';
+
 interface ViewDef {
   key: string;
   label: string;
   icon: React.ComponentType<{ size?: number }>;
-  path: (wid: string, pid: string) => string;
+  // A literal from the route tree, not a builder: `<Link to>` is typed against
+  // the tree, so an interpolated path needs a cast, and the cast is what let
+  // every one of these links keep pointing at /w/... after the routes moved.
+  to: ProjectViewPath;
   match: (path: string) => boolean;
   // Route is wrapped in AppFlagGuard(APP_FLOW_PREVIEW_ROUTES) in router.tsx -
   // keep this in sync with which routes are gated there.
@@ -37,7 +47,7 @@ const VIEWS: ViewDef[] = [
     key: 'overview',
     label: 'Overview',
     icon: Activity,
-    path: (w, p) => `/w/${w}/p/${p}/overview`,
+    to: '/p/$projectId/overview',
     match: (p) => p.endsWith('/overview'),
     previewOnly: true,
   },
@@ -45,23 +55,23 @@ const VIEWS: ViewDef[] = [
     key: 'board',
     label: 'Board',
     icon: LayoutGrid,
-    path: (w, p) => `/w/${w}/p/${p}`,
+    to: '/p/$projectId',
     // The default project route is board - matches anything that isn't
     // explicitly another view.
-    match: (p) => /\/w\/[^/]+\/p\/[^/]+$/.test(p) || p.endsWith('/board'),
+    match: (p) => /^\/p\/[^/]+$/.test(p) || p.endsWith('/board'),
   },
   {
     key: 'list',
     label: 'List',
     icon: List,
-    path: (w, p) => `/w/${w}/p/${p}/list`,
+    to: '/p/$projectId/list',
     match: (p) => p.endsWith('/list'),
   },
   {
     key: 'timeline',
     label: 'Timeline',
     icon: GanttChart,
-    path: (w, p) => `/w/${w}/p/${p}/timeline`,
+    to: '/p/$projectId/timeline',
     match: (p) => p.endsWith('/timeline'),
     previewOnly: true,
   },
@@ -69,14 +79,14 @@ const VIEWS: ViewDef[] = [
     key: 'calendar',
     label: 'Calendar',
     icon: Calendar,
-    path: (w, p) => `/w/${w}/p/${p}/calendar`,
+    to: '/p/$projectId/calendar',
     match: (p) => p.endsWith('/calendar'),
   },
   {
     key: 'dashboard',
     label: 'Dashboard',
     icon: BarChart3,
-    path: (w, p) => `/w/${w}/p/${p}/dashboard`,
+    to: '/p/$projectId/dashboard',
     match: (p) => p.endsWith('/dashboard'),
     previewOnly: true,
   },
@@ -90,7 +100,6 @@ const VIEWS: ViewDef[] = [
  */
 const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
   project,
-  workspaceId,
   projectId,
   taskCount,
   onNewTask,
@@ -135,7 +144,8 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
             return (
               <Link
                 key={v.key}
-                to={v.path(workspaceId, projectId) as string}
+                to={v.to}
+                params={{ projectId }}
                 className={[
                   'flex items-center gap-1.5 px-2 py-1 rounded-sm text-[11px] font-medium transition-colors',
                   active ? '' : 'hover:bg-[var(--flow-hover)]',
@@ -154,7 +164,8 @@ const ProjectViewTabs: React.FC<ProjectViewTabsProps> = ({
         </div>
 
         <Link
-          to={`/w/${workspaceId}/p/${projectId}/settings` as string}
+          to="/p/$projectId/settings"
+          params={{ projectId }}
           className="h-7 w-7 rounded-sm flex items-center justify-center hover:bg-[var(--flow-hover)] transition-colors"
           style={{ color: 'var(--flow-text-dim)' }}
           aria-label="Project settings"

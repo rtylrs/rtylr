@@ -413,7 +413,6 @@
         "goToInbox": "Aller à la boîte de réception",
         "goToMyIssues": "Aller à Mes tâches",
         "goToToday": "Aller à Aujourd'hui (focus)",
-        "goToDashboard": "Aller au tableau de bord",
         "goToCalendar": "Aller au calendrier",
         "goToTimeline": "Aller à la chronologie",
         "goToRoadmap": "Aller à la feuille de route",
@@ -564,7 +563,10 @@
       "assignee": "Responsable",
       "priority": "Priorité",
       "due": "Échéance"
-    }
+    },
+    "moveTask": "Déplacer {{title}} vers une autre colonne",
+    "moveTaskMenu": "Déplacer vers une colonne",
+    "moveNoTargets": "Ce tableau n'a pas encore d'autre colonne."
   },
   "views": {
     "heading": "Vues enregistrées",
@@ -742,7 +744,6 @@
     "noMembersYet": "Aucun membre pour l'instant.",
     "addMemberCta": "Ajouter un membre",
     "refreshMembersCta": "Actualiser",
-    "moveGateReason": "Seuls les administrateurs du projet peuvent déplacer ce projet vers un autre espace de travail.",
     "transferGateReason": "Seuls les administrateurs du projet peuvent transférer la propriété de ce projet.",
     "deleteGateReason": "Seuls les administrateurs du projet peuvent supprimer ce projet.",
     "visibility": "Visibilité",

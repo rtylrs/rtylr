@@ -58,7 +58,6 @@ export interface Cycle {
 
 export interface Project {
   id: string;
-  workspaceId: string;
   name: string;
   color: string;
   taskCount: number;

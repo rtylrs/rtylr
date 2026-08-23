@@ -75,7 +75,6 @@ const ProjectTimeline: React.FC = () => {
       <HelmetContainer title={t('flow.projectTimeline.pageTitle')} />
       <ProjectViewTabs
         project={project}
-        workspaceId={workspaceId}
         projectId={projectId}
         taskCount={apiTasks.length}
         onNewTask={() => useFlowStore.getState().setQuickCreateOpen(true)}
@@ -173,8 +172,8 @@ const ProjectTimeline: React.FC = () => {
                 label: t('flow.projectTimeline.goToBoardCta'),
                 onClick: () =>
                   navigate({
-                    to: '/w/$workspaceId/p/$projectId/board',
-                    params: { workspaceId, projectId },
+                    to: '/p/$projectId/board',
+                    params: { projectId },
                   }),
               }}
             />

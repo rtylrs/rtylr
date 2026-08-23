@@ -43,7 +43,7 @@ export const CommandBar: React.FC = () => {
   const { commandBarOpen, setCommandBarOpen, setQuickCreateOpen, activeWorkspaceId } =
     useFlowStore();
   const { data: apiTasks = [] } = useTasks({});
-  const { data: apiProjects = [] } = useProjects(activeWorkspaceId || undefined);
+  const { data: apiProjects = [] } = useProjects();
   const tasks = apiTasks.map(apiTaskToTask);
   const projects = apiProjects;
   const [query, setQuery] = useState('');
@@ -92,10 +92,10 @@ export const CommandBar: React.FC = () => {
         hint: 'G M',
       },
       {
-        id: 'nav-dash',
-        label: t('flow.commandBar.workspaceDashboard'),
+        id: 'nav-projects',
+        label: t('flow.allProjects.title'),
         icon: LayoutGrid,
-        action: () => navigate({ to: `/w/${activeWorkspaceId}` as string }),
+        action: () => navigate({ to: '/projects' }),
         group: 'nav',
       },
       {
@@ -201,11 +201,11 @@ export const CommandBar: React.FC = () => {
       id: `proj-${p.id}`,
       label: p.name,
       icon: FolderKanban,
-      action: () => navigate({ to: `/w/${p.workspaceId}/p/${p.id}` as string }),
+      action: () => navigate({ to: '/p/$projectId', params: { projectId: p.id } }),
       group: 'project',
     }));
     return [...actionItems, ...navItems, ...projectItems, ...taskItems];
-  }, [tasks, projects, activeWorkspaceId, navigate, setQuickCreateOpen, query, searchResults, t]);
+  }, [tasks, projects, navigate, setQuickCreateOpen, query, searchResults, t]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return items;

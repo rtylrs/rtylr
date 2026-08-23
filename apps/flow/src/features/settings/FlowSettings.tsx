@@ -722,7 +722,6 @@ const ShortcutsSection: React.FC = () => {
     { keys: ['G', 'I'], desc: t('flow.settings.shortcuts.items.goToInbox') },
     { keys: ['G', 'M'], desc: t('flow.settings.shortcuts.items.goToMyIssues') },
     { keys: ['G', 'F'], desc: t('flow.settings.shortcuts.items.goToToday') },
-    { keys: ['G', 'D'], desc: t('flow.settings.shortcuts.items.goToDashboard') },
     { keys: ['G', 'C'], desc: t('flow.settings.shortcuts.items.goToCalendar') },
     // Timeline/Roadmap/Insights are gated behind the same preview-routes flag
     // as their sidebar links and routes (see FlowLayout.tsx, router.tsx) - the
