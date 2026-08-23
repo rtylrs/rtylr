@@ -12,6 +12,7 @@ import { DM_Sans } from 'next/font/google';
 
 import i18next from '../services/i18next';
 import { initFeatureVariant } from '../lib/featureVariant';
+import { watchConsentMode } from '../lib/consentMode';
 
 // Import global styles
 import '@voxire/components/styles';
@@ -56,6 +57,12 @@ function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
     void initFeatureVariant();
   }, []);
+
+  // Mirror the cookie banner's decision into Google Consent Mode. The
+  // deny-by-default half runs inline in _document's head; this half
+  // carries a decision made during this page view, so accepting the
+  // banner unblocks GA4 without a reload.
+  useEffect(() => watchConsentMode(), []);
 
   return (
     <QueryClientProvider client={queryClient}>

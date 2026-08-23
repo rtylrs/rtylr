@@ -1,5 +1,6 @@
 import { Html, Head, Main, NextScript } from 'next/document';
 
+import { CONSENT_MODE_BOOTSTRAP, GA_MEASUREMENT_ID } from '../lib/consentMode';
 import { organizationSchema } from '../lib/structured-data';
 
 export default function Document() {
@@ -23,16 +24,24 @@ export default function Document() {
           afterInteractive-equivalent behaviour comes from `async`. Do not
           convert this to next/script: the export needs it in the document
           head, and that is a rule voxire's CLAUDE.md records the hard way.
+
+          The bootstrap denies every storage type, then grants analytics
+          if the visitor has already accepted. lib/consentMode.ts holds
+          the snippet and the runtime half of the bridge; _app.tsx
+          subscribes to later changes.
+
+          What Consent Mode actually requires is that `consent default`
+          sit ahead of `config` in the dataLayer queue, and both are in
+          the one inline snippet below, so that holds by construction.
+          Do not rely on the JSX order of these two tags: Next hoists
+          the async gtag.js tag above the inline script in the exported
+          head. That is harmless, because the inline script is
+          synchronous and fills the queue during parse while the async
+          library is still fetching. tests/unit/consent-mode.test.mjs
+          asserts the queue order that matters.
         */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-6XKFL1Z8HE" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-6XKFL1Z8HE');`,
-          }}
-        />
+        <script dangerouslySetInnerHTML={{ __html: CONSENT_MODE_BOOTSTRAP }} />
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`} />
 
         {/* PWA manifest - installable on iOS / Android */}
         <link rel="manifest" href="/site.webmanifest" />
