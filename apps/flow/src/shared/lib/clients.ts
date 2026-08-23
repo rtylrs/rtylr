@@ -1,7 +1,6 @@
 import { createOneKitClient } from '@voxire/api';
 import { BusinessServiceClient } from '@voxire/voxie/hub/business/v1/client';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
-import { DashboardServiceClient } from '@voxire/voxie/flow/dashboard/v1/client';
 import { WorkspaceServiceClient } from '@voxire/voxie/flow/workspace/v1/client';
 import { ProjectServiceClient } from '@voxire/voxie/flow/project/v1/client';
 import { TaskServiceClient } from '@voxire/voxie/flow/task/v1/client';
@@ -22,7 +21,6 @@ import { ProfileServiceClient as ProfileClient } from '@voxire/voxie/flow/profil
 
 export const businessClient = createOneKitClient(BusinessServiceClient, 'flow');
 export const userClient = createOneKitClient(UserServiceClient, 'flow');
-export const dashboardClient = createOneKitClient(DashboardServiceClient, 'flow');
 export const workspaceClient = createOneKitClient(WorkspaceServiceClient, 'flow');
 export const projectClient = createOneKitClient(ProjectServiceClient, 'flow');
 export const taskClient = createOneKitClient(TaskServiceClient, 'flow');

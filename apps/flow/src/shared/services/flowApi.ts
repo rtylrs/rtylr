@@ -3,7 +3,6 @@ import type { Task as ContractTask } from '@voxire/voxie/flow/task/v1/types';
 import { oneKitResult } from '@voxire/api';
 import {
   businessClient,
-  dashboardClient,
   workspaceClient,
   projectClient,
   taskClient,
@@ -42,15 +41,6 @@ export interface ApiUserSettings {
   statusChanges: boolean;
   weeklyDigest: boolean;
   emailNotifications: boolean;
-}
-
-export interface DashboardStats {
-  openTasks: number;
-  inProgress: number;
-  completedThisWeek: number;
-  overdue: number;
-  myTasks: ApiTask[];
-  recentProjects: ApiProject[];
 }
 
 export interface ApiWorkspace {
@@ -417,12 +407,6 @@ function flowResult<T>(operation: () => Promise<unknown>) {
 }
 
 export const flowApi = {
-  getDashboard: (workspaceId?: string) =>
-    flowResult<DashboardStats>(() =>
-      dashboardClient.getFlowDashboard({ workspaceId: workspaceId ?? '' })
-    ),
-  // -- Business ---------------------------------------------------------
-
   getMyBusinesses: () =>
     flowResult<{ businesses: ApiBusinessSummary[] }>(() => businessClient.listMyBusinesses({})),
 
