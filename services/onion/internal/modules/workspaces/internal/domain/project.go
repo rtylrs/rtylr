@@ -113,3 +113,32 @@ type MoveProjectInput struct {
 	WorkspaceID int64
 	CallerID    int64
 }
+
+// FlowProfile is a business member's in-app profile: identity plus the projects
+// they chose to make discoverable.
+//
+// Bio has no column behind it yet, so it is always empty. It stays on the
+// struct because the contract declares it and dropping it would make the
+// mapping silently lossy the day storage lands.
+type FlowProfile struct {
+	UserID         int64
+	Name           string
+	Email          string
+	Initials       string
+	RoleTitle      string
+	Bio            string
+	PublicProjects []ProfileProject
+}
+
+// ProfileProject is the metadata card for one public project. It carries no
+// task-level fields on purpose: public means discoverable, not openable.
+type ProfileProject struct {
+	ID             int64
+	Name           string
+	Icon           string
+	Color          string
+	Description    string
+	Status         string
+	TaskCount      int32
+	CompletedCount int32
+}

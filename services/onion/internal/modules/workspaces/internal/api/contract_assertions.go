@@ -18,6 +18,7 @@ import (
 	flowmilestonev1 "github.com/voxire/voxie/gen/go/flow/milestone/v1"
 	flowmilestonev2 "github.com/voxire/voxie/gen/go/flow/milestone/v2"
 	flownotificationv1 "github.com/voxire/voxie/gen/go/flow/notification/v1"
+	flowprofilev1 "github.com/voxire/voxie/gen/go/flow/profile/v1"
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 	flowprojectv2 "github.com/voxire/voxie/gen/go/flow/project/v2"
 	flowsettingv1 "github.com/voxire/voxie/gen/go/flow/setting/v1"
@@ -48,6 +49,7 @@ var (
 	_ flowviewv1.ViewServiceServer                 = (*ViewAPI)(nil)
 	_ flowviewv2.ViewServiceServer                 = (*ViewAPIV2)(nil)
 	_ flownotificationv1.NotificationServiceServer = (*NotificationAPI)(nil)
+	_ flowprofilev1.ProfileServiceServer           = (*ProfileAPI)(nil)
 	_ flowsettingv1.SettingServiceServer           = (*SettingAPI)(nil)
 	_ flowtimev1.TimeServiceServer                 = (*WorkTimeAPI)(nil)
 

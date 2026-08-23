@@ -27,6 +27,7 @@ import (
 	flowmilestonev1 "github.com/voxire/voxie/gen/go/flow/milestone/v1"
 	flowmilestonev2 "github.com/voxire/voxie/gen/go/flow/milestone/v2"
 	flownotificationv1 "github.com/voxire/voxie/gen/go/flow/notification/v1"
+	flowprofilev1 "github.com/voxire/voxie/gen/go/flow/profile/v1"
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 	flowprojectv2 "github.com/voxire/voxie/gen/go/flow/project/v2"
 	flowsettingv1 "github.com/voxire/voxie/gen/go/flow/setting/v1"
@@ -182,6 +183,12 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	// (apps/flow declares the timeV2 client but has no call sites), so leaving
 	// it unserved costs nothing that registering it would not cost more.
 	// Re-register here once WorkTimeAPIV2 is complete.
+	if err := flowprofilev1.RegisterProfileServiceServer(
+		api.NewProfileAPI(m.service),
+		flowprofilev1.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register flow profile service: %w", err))
+	}
 	if err := flowtimev1.RegisterTimeServiceServer(
 		api.NewWorkTimeAPI(m.service),
 		flowtimev1.WithMux(mux),

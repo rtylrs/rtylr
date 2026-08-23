@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
@@ -290,4 +291,70 @@ func (s *Service) CreateViewV2(ctx context.Context, businessID, createdBy int64,
 
 func (s *Service) UpdateViewV2(ctx context.Context, actorID, viewID int64) error {
 	return s.repo.UpdateView(ctx, domain.UpdateViewInput{ID: viewID, ActorID: actorID})
+}
+
+// profilePublicProjectCap bounds the profile card list. A profile is a summary,
+// not a paginated project browser, and All projects already exists for the
+// full list.
+const profilePublicProjectCap = 24
+
+// GetFlowProfile returns one business member's profile: identity from the
+// HR-owned hub profile, plus the public projects they created.
+//
+// Cross-business isolation comes from the resolver: it looks the subject up
+// inside the caller's business, so a subject who is not a colleague returns
+// ErrUserNotFound rather than a profile. There is deliberately no extra role
+// gate on top - a colleague's name, email and public projects are already
+// visible through the member roster and the project list.
+func (s *Service) GetFlowProfile(
+	ctx context.Context,
+	subjectID, businessID int64,
+) (domain.FlowProfile, error) {
+	if s.hubProfiles == nil {
+		return domain.FlowProfile{}, domain.ErrUnauthorized
+	}
+	hub, err := s.hubProfiles.GetProfile(ctx, subjectID, businessID)
+	if err != nil {
+		return domain.FlowProfile{}, err
+	}
+
+	projects, err := s.repo.ListPublicProjectsByOwnerV2(ctx, businessID, subjectID, profilePublicProjectCap)
+	if err != nil {
+		return domain.FlowProfile{}, err
+	}
+
+	return domain.FlowProfile{
+		UserID:   hub.ID,
+		Name:     hub.FullName,
+		Email:    hub.Email,
+		Initials: initialsOf(hub.FullName),
+		// The hub profile carries a business role, not a job title. It is the
+		// only title-shaped value that exists, so it fills the field until
+		// staff records grow a real one (fast-follow F-B).
+		RoleTitle:      hub.Role,
+		Bio:            "",
+		PublicProjects: projects,
+	}, nil
+}
+
+// initialsOf builds the two-letter monogram the contract asks for.
+//
+// Falls back to the first two letters of a single-word name, and to the empty
+// string for an empty name, so the caller never has to special-case it.
+func initialsOf(name string) string {
+	fields := strings.Fields(name)
+	switch len(fields) {
+	case 0:
+		return ""
+	case 1:
+		one := []rune(fields[0])
+		if len(one) == 1 {
+			return strings.ToUpper(string(one[0]))
+		}
+		return strings.ToUpper(string(one[0:2]))
+	default:
+		first := []rune(fields[0])
+		last := []rune(fields[len(fields)-1])
+		return strings.ToUpper(string(first[0]) + string(last[0]))
+	}
 }
