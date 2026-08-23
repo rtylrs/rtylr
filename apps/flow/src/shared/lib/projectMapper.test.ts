@@ -144,3 +144,19 @@ describe('apiWorkspaceToWorkspace', () => {
     expect(out.color).toBe('#ff00aa');
   });
 });
+
+describe('apiProjectToProject visibleViaReport', () => {
+  // The sidebar and All Projects both group on this flag, so a mapper that
+  // dropped it would silently merge a report's projects into the caller's own.
+  it('carries the manager-proxy flag through', () => {
+    const out = apiProjectToProject(baseProject({ visibleViaReport: true }));
+    expect(out.visibleViaReport).toBe(true);
+  });
+
+  // The v1 shape has no such field, so an absent value must mean "the caller's
+  // own" rather than undefined leaking into a filter.
+  it('defaults to false when the server omits it', () => {
+    const out = apiProjectToProject(baseProject());
+    expect(out.visibleViaReport).toBe(false);
+  });
+});
