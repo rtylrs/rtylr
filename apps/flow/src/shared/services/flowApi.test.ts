@@ -11,7 +11,6 @@ const mockClients = vi.hoisted(() => {
 
   return {
     businessClient: mockClient(),
-    dashboardClient: mockClient(),
     workspaceClient: mockClient(),
     projectClient: mockClient(),
     taskClient: mockClient(),
@@ -31,7 +30,6 @@ const mockClients = vi.hoisted(() => {
 
 vi.mock('../lib/clients', () => ({
   businessClient: mockClients.businessClient,
-  dashboardClient: mockClients.dashboardClient,
   workspaceClient: mockClients.workspaceClient,
   projectClient: mockClients.projectClient,
   taskClient: mockClients.taskClient,
@@ -51,7 +49,6 @@ vi.mock('../lib/clients', () => ({
 import { flowApi } from './flowApi';
 import {
   businessClient,
-  dashboardClient,
   projectClient,
   taskClient,
   labelClient,
@@ -72,10 +69,9 @@ describe('flowApi OneKit adapters', () => {
     vi.clearAllMocks();
   });
 
-  it('uses the generated dashboard and business clients', async () => {
-    await Promise.all([flowApi.getDashboard('ws-1'), flowApi.getMyBusinesses()]);
+  it('uses the generated business client', async () => {
+    await flowApi.getMyBusinesses();
 
-    expect(dashboardClient.getFlowDashboard).toHaveBeenCalledWith({ workspaceId: 'ws-1' });
     expect(businessClient.listMyBusinesses).toHaveBeenCalledWith({});
   });
 
