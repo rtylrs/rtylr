@@ -9,6 +9,7 @@ filters?: string;
 groupBy?: string;
 sortBy?: string;
 sortDir?: string;
+visibility?: string;
 }
 
 export function decodeView(v: any): View {
@@ -21,6 +22,7 @@ filters: v.filters,
 groupBy: v.group_by,
 sortBy: v.sort_by,
 sortDir: v.sort_dir,
+visibility: v.visibility,
 };
 }
 
@@ -33,6 +35,7 @@ if (v.filters !== undefined) { out.filters = v.filters; }
 if (v.groupBy !== undefined) { out.group_by = v.groupBy; }
 if (v.sortBy !== undefined) { out.sort_by = v.sortBy; }
 if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
+if (v.visibility !== undefined) { out.visibility = v.visibility; }
 return out;
 }
 
@@ -45,6 +48,7 @@ if (v.filters !== undefined && v.filters !== null && !(typeof v.filters === "str
 if (v.groupBy !== undefined && v.groupBy !== null && !(typeof v.groupBy === "string")) violations.push("group_by has invalid type");
 if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
 if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
+if (v.visibility !== undefined && v.visibility !== null && !(typeof v.visibility === "string")) violations.push("visibility has invalid type");
 return violations;
 }
 
@@ -111,6 +115,7 @@ filters?: string;
 groupBy?: string;
 sortBy?: string;
 sortDir?: string;
+visibility?: string;
 }
 
 export function decodeCreateViewRequest(v: any): CreateViewRequest {
@@ -122,6 +127,7 @@ filters: v.filters,
 groupBy: v.group_by,
 sortBy: v.sort_by,
 sortDir: v.sort_dir,
+visibility: v.visibility,
 };
 }
 
@@ -133,6 +139,7 @@ if (v.filters !== undefined) { out.filters = v.filters; }
 if (v.groupBy !== undefined) { out.group_by = v.groupBy; }
 if (v.sortBy !== undefined) { out.sort_by = v.sortBy; }
 if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
+if (v.visibility !== undefined) { out.visibility = v.visibility; }
 return out;
 }
 
@@ -145,6 +152,7 @@ if (v.filters !== undefined && v.filters !== null && !(typeof v.filters === "str
 if (v.groupBy !== undefined && v.groupBy !== null && !(typeof v.groupBy === "string")) violations.push("group_by has invalid type");
 if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
 if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
+if (v.visibility !== undefined && v.visibility !== null && !(typeof v.visibility === "string")) violations.push("visibility has invalid type");
 return violations;
 }
 
@@ -180,6 +188,7 @@ filters?: string;
 groupBy?: string;
 sortBy?: string;
 sortDir?: string;
+visibility?: string;
 }
 
 export function decodeUpdateViewRequest(v: any): UpdateViewRequest {
@@ -192,6 +201,7 @@ filters: v.filters,
 groupBy: v.group_by,
 sortBy: v.sort_by,
 sortDir: v.sort_dir,
+visibility: v.visibility,
 };
 }
 
@@ -204,6 +214,7 @@ if (v.filters !== undefined) { out.filters = v.filters; }
 if (v.groupBy !== undefined) { out.group_by = v.groupBy; }
 if (v.sortBy !== undefined) { out.sort_by = v.sortBy; }
 if (v.sortDir !== undefined) { out.sort_dir = v.sortDir; }
+if (v.visibility !== undefined) { out.visibility = v.visibility; }
 return out;
 }
 
@@ -218,6 +229,7 @@ if (v.filters !== undefined && v.filters !== null && !(typeof v.filters === "str
 if (v.groupBy !== undefined && v.groupBy !== null && !(typeof v.groupBy === "string")) violations.push("group_by has invalid type");
 if (v.sortBy !== undefined && v.sortBy !== null && !(typeof v.sortBy === "string")) violations.push("sort_by has invalid type");
 if (v.sortDir !== undefined && v.sortDir !== null && !(typeof v.sortDir === "string")) violations.push("sort_dir has invalid type");
+if (v.visibility !== undefined && v.visibility !== null && !(typeof v.visibility === "string")) violations.push("visibility has invalid type");
 return violations;
 }
 

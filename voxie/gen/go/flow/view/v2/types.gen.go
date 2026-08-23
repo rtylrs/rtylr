@@ -8,13 +8,14 @@ import (
 )
 
 type View struct {
-	Id      int64  `json:"id,omitempty"`
-	Name    string `json:"name,omitempty"`
-	Icon    string `json:"icon,omitempty"`
-	Filters string `json:"filters,omitempty"`
-	GroupBy string `json:"group_by,omitempty"`
-	SortBy  string `json:"sort_by,omitempty"`
-	SortDir string `json:"sort_dir,omitempty"`
+	Id         int64  `json:"id,omitempty"`
+	Name       string `json:"name,omitempty"`
+	Icon       string `json:"icon,omitempty"`
+	Filters    string `json:"filters,omitempty"`
+	GroupBy    string `json:"group_by,omitempty"`
+	SortBy     string `json:"sort_by,omitempty"`
+	SortDir    string `json:"sort_dir,omitempty"`
+	Visibility string `json:"visibility,omitempty"`
 }
 
 func (m *View) MarshalJSON() ([]byte, error) {
@@ -102,6 +103,14 @@ func (x *View) GetSortDir() string {
 	return x.SortDir
 }
 
+func (x *View) GetVisibility() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Visibility
+}
+
 type ListViewsRequest struct {
 	Page  int32 `json:"page,omitempty"`
 	Limit int32 `json:"limit,omitempty"`
@@ -145,12 +154,13 @@ func (x *ListViewsResponse) GetPagination() *common_pagination_v1.PaginationResp
 }
 
 type CreateViewRequest struct {
-	Name    string `json:"name,omitempty"`
-	Icon    string `json:"icon,omitempty"`
-	Filters string `json:"filters,omitempty"`
-	GroupBy string `json:"group_by,omitempty"`
-	SortBy  string `json:"sort_by,omitempty"`
-	SortDir string `json:"sort_dir,omitempty"`
+	Name       string `json:"name,omitempty"`
+	Icon       string `json:"icon,omitempty"`
+	Filters    string `json:"filters,omitempty"`
+	GroupBy    string `json:"group_by,omitempty"`
+	SortBy     string `json:"sort_by,omitempty"`
+	SortDir    string `json:"sort_dir,omitempty"`
+	Visibility string `json:"visibility,omitempty"`
 }
 
 func (x *CreateViewRequest) GetName() string {
@@ -201,6 +211,14 @@ func (x *CreateViewRequest) GetSortDir() string {
 	return x.SortDir
 }
 
+func (x *CreateViewRequest) GetVisibility() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Visibility
+}
+
 type CreateViewResponse struct {
 	View *View `json:"view,omitempty"`
 }
@@ -214,13 +232,14 @@ func (x *CreateViewResponse) GetView() *View {
 }
 
 type UpdateViewRequest struct {
-	Id      int64  `json:"id,omitempty"`
-	Name    string `json:"name,omitempty"`
-	Icon    string `json:"icon,omitempty"`
-	Filters string `json:"filters,omitempty"`
-	GroupBy string `json:"group_by,omitempty"`
-	SortBy  string `json:"sort_by,omitempty"`
-	SortDir string `json:"sort_dir,omitempty"`
+	Id         int64  `json:"id,omitempty"`
+	Name       string `json:"name,omitempty"`
+	Icon       string `json:"icon,omitempty"`
+	Filters    string `json:"filters,omitempty"`
+	GroupBy    string `json:"group_by,omitempty"`
+	SortBy     string `json:"sort_by,omitempty"`
+	SortDir    string `json:"sort_dir,omitempty"`
+	Visibility string `json:"visibility,omitempty"`
 }
 
 func (m *UpdateViewRequest) MarshalJSON() ([]byte, error) {
@@ -306,6 +325,14 @@ func (x *UpdateViewRequest) GetSortDir() string {
 		return zero
 	}
 	return x.SortDir
+}
+
+func (x *UpdateViewRequest) GetVisibility() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.Visibility
 }
 
 type UpdateViewResponse struct {
