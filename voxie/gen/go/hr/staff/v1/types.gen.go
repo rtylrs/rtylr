@@ -11,6 +11,7 @@ type Staff struct {
 	OwnerId               int64   `json:"owner_id,omitempty"`
 	UserId                int64   `json:"user_id,omitempty"`
 	DepartmentId          int64   `json:"department_id,omitempty"`
+	ManagerStaffId        int64   `json:"manager_staff_id,omitempty"`
 	FirstName             string  `json:"first_name,omitempty"`
 	LastName              string  `json:"last_name,omitempty"`
 	Email                 string  `json:"email,omitempty"`
@@ -38,15 +39,17 @@ func (m *Staff) MarshalJSON() ([]byte, error) {
 	type alias Staff
 	aux := struct {
 		*alias
-		Id           string `json:"id,omitempty"`
-		OwnerId      string `json:"owner_id,omitempty"`
-		UserId       string `json:"user_id,omitempty"`
-		DepartmentId string `json:"department_id,omitempty"`
+		Id             string `json:"id,omitempty"`
+		OwnerId        string `json:"owner_id,omitempty"`
+		UserId         string `json:"user_id,omitempty"`
+		DepartmentId   string `json:"department_id,omitempty"`
+		ManagerStaffId string `json:"manager_staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.Id = strconv.FormatInt(m.Id, 10)
 	aux.OwnerId = strconv.FormatInt(m.OwnerId, 10)
 	aux.UserId = strconv.FormatInt(m.UserId, 10)
 	aux.DepartmentId = strconv.FormatInt(m.DepartmentId, 10)
+	aux.ManagerStaffId = strconv.FormatInt(m.ManagerStaffId, 10)
 	return json.Marshal(aux)
 }
 
@@ -54,10 +57,11 @@ func (m *Staff) UnmarshalJSON(data []byte) error {
 	type alias Staff
 	aux := struct {
 		*alias
-		Id           string `json:"id,omitempty"`
-		OwnerId      string `json:"owner_id,omitempty"`
-		UserId       string `json:"user_id,omitempty"`
-		DepartmentId string `json:"department_id,omitempty"`
+		Id             string `json:"id,omitempty"`
+		OwnerId        string `json:"owner_id,omitempty"`
+		UserId         string `json:"user_id,omitempty"`
+		DepartmentId   string `json:"department_id,omitempty"`
+		ManagerStaffId string `json:"manager_staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -89,6 +93,13 @@ func (m *Staff) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.DepartmentId = v
+	}
+	if aux.ManagerStaffId != "" {
+		v, err := strconv.ParseInt(aux.ManagerStaffId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ManagerStaffId = v
 	}
 	return nil
 }
@@ -123,6 +134,14 @@ func (x *Staff) GetDepartmentId() int64 {
 		return zero
 	}
 	return x.DepartmentId
+}
+
+func (x *Staff) GetManagerStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ManagerStaffId
 }
 
 func (x *Staff) GetFirstName() string {
@@ -338,6 +357,7 @@ func (x *ListStaffResponse) GetStaff() []*Staff {
 type CreateStaffRequest struct {
 	UserId                int64   `json:"user_id,omitempty"`
 	DepartmentId          int64   `json:"department_id,omitempty"`
+	ManagerStaffId        int64   `json:"manager_staff_id,omitempty"`
 	FirstName             string  `json:"first_name,omitempty"`
 	LastName              string  `json:"last_name,omitempty"`
 	Email                 string  `json:"email,omitempty"`
@@ -363,11 +383,13 @@ func (m *CreateStaffRequest) MarshalJSON() ([]byte, error) {
 	type alias CreateStaffRequest
 	aux := struct {
 		*alias
-		UserId       string `json:"user_id,omitempty"`
-		DepartmentId string `json:"department_id,omitempty"`
+		UserId         string `json:"user_id,omitempty"`
+		DepartmentId   string `json:"department_id,omitempty"`
+		ManagerStaffId string `json:"manager_staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.UserId = strconv.FormatInt(m.UserId, 10)
 	aux.DepartmentId = strconv.FormatInt(m.DepartmentId, 10)
+	aux.ManagerStaffId = strconv.FormatInt(m.ManagerStaffId, 10)
 	return json.Marshal(aux)
 }
 
@@ -375,8 +397,9 @@ func (m *CreateStaffRequest) UnmarshalJSON(data []byte) error {
 	type alias CreateStaffRequest
 	aux := struct {
 		*alias
-		UserId       string `json:"user_id,omitempty"`
-		DepartmentId string `json:"department_id,omitempty"`
+		UserId         string `json:"user_id,omitempty"`
+		DepartmentId   string `json:"department_id,omitempty"`
+		ManagerStaffId string `json:"manager_staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -395,6 +418,13 @@ func (m *CreateStaffRequest) UnmarshalJSON(data []byte) error {
 		}
 		m.DepartmentId = v
 	}
+	if aux.ManagerStaffId != "" {
+		v, err := strconv.ParseInt(aux.ManagerStaffId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ManagerStaffId = v
+	}
 	return nil
 }
 
@@ -412,6 +442,14 @@ func (x *CreateStaffRequest) GetDepartmentId() int64 {
 		return zero
 	}
 	return x.DepartmentId
+}
+
+func (x *CreateStaffRequest) GetManagerStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ManagerStaffId
 }
 
 func (x *CreateStaffRequest) GetFirstName() string {
@@ -662,6 +700,7 @@ func (x *GetStaffResponse) GetStaff() *Staff {
 
 type UpdateStaffBody struct {
 	DepartmentId          int64   `json:"department_id,omitempty"`
+	ManagerStaffId        int64   `json:"manager_staff_id,omitempty"`
 	FirstName             string  `json:"first_name,omitempty"`
 	LastName              string  `json:"last_name,omitempty"`
 	Email                 string  `json:"email,omitempty"`
@@ -686,9 +725,11 @@ func (m *UpdateStaffBody) MarshalJSON() ([]byte, error) {
 	type alias UpdateStaffBody
 	aux := struct {
 		*alias
-		DepartmentId string `json:"department_id,omitempty"`
+		DepartmentId   string `json:"department_id,omitempty"`
+		ManagerStaffId string `json:"manager_staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	aux.DepartmentId = strconv.FormatInt(m.DepartmentId, 10)
+	aux.ManagerStaffId = strconv.FormatInt(m.ManagerStaffId, 10)
 	return json.Marshal(aux)
 }
 
@@ -696,7 +737,8 @@ func (m *UpdateStaffBody) UnmarshalJSON(data []byte) error {
 	type alias UpdateStaffBody
 	aux := struct {
 		*alias
-		DepartmentId string `json:"department_id,omitempty"`
+		DepartmentId   string `json:"department_id,omitempty"`
+		ManagerStaffId string `json:"manager_staff_id,omitempty"`
 	}{alias: (*alias)(m)}
 	if err := json.Unmarshal(data, &aux); err != nil {
 		return err
@@ -708,6 +750,13 @@ func (m *UpdateStaffBody) UnmarshalJSON(data []byte) error {
 		}
 		m.DepartmentId = v
 	}
+	if aux.ManagerStaffId != "" {
+		v, err := strconv.ParseInt(aux.ManagerStaffId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ManagerStaffId = v
+	}
 	return nil
 }
 
@@ -717,6 +766,14 @@ func (x *UpdateStaffBody) GetDepartmentId() int64 {
 		return zero
 	}
 	return x.DepartmentId
+}
+
+func (x *UpdateStaffBody) GetManagerStaffId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ManagerStaffId
 }
 
 func (x *UpdateStaffBody) GetFirstName() string {

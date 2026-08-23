@@ -5,6 +5,7 @@ id?: string;
 ownerId?: string;
 userId?: string;
 departmentId?: string;
+managerStaffId?: string;
 firstName?: string;
 lastName?: string;
 email?: string;
@@ -35,6 +36,7 @@ id: v.id,
 ownerId: v.owner_id,
 userId: v.user_id,
 departmentId: v.department_id,
+managerStaffId: v.manager_staff_id,
 firstName: v.first_name,
 lastName: v.last_name,
 email: v.email,
@@ -65,6 +67,7 @@ if (v.id !== undefined) { out.id = v.id; }
 if (v.ownerId !== undefined) { out.owner_id = v.ownerId; }
 if (v.userId !== undefined) { out.user_id = v.userId; }
 if (v.departmentId !== undefined) { out.department_id = v.departmentId; }
+if (v.managerStaffId !== undefined) { out.manager_staff_id = v.managerStaffId; }
 if (v.firstName !== undefined) { out.first_name = v.firstName; }
 if (v.lastName !== undefined) { out.last_name = v.lastName; }
 if (v.email !== undefined) { out.email = v.email; }
@@ -95,6 +98,7 @@ if (v.id !== undefined && v.id !== null && !(typeof v.id === "string" && /^-?(0|
 if (v.ownerId !== undefined && v.ownerId !== null && !(typeof v.ownerId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.ownerId))) violations.push("owner_id has invalid type");
 if (v.userId !== undefined && v.userId !== null && !(typeof v.userId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.userId))) violations.push("user_id has invalid type");
 if (v.departmentId !== undefined && v.departmentId !== null && !(typeof v.departmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.departmentId))) violations.push("department_id has invalid type");
+if (v.managerStaffId !== undefined && v.managerStaffId !== null && !(typeof v.managerStaffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.managerStaffId))) violations.push("manager_staff_id has invalid type");
 if (v.firstName !== undefined && v.firstName !== null && !(typeof v.firstName === "string")) violations.push("first_name has invalid type");
 if (v.lastName !== undefined && v.lastName !== null && !(typeof v.lastName === "string")) violations.push("last_name has invalid type");
 if (v.email !== undefined && v.email !== null && !(typeof v.email === "string")) violations.push("email has invalid type");
@@ -177,6 +181,7 @@ return violations;
 export interface CreateStaffRequest {
 userId: string;
 departmentId: string;
+managerStaffId?: string;
 firstName: string;
 lastName: string;
 email: string;
@@ -203,6 +208,7 @@ if (v === null || v === undefined) return v;
 return {
 userId: v.user_id,
 departmentId: v.department_id,
+managerStaffId: v.manager_staff_id,
 firstName: v.first_name,
 lastName: v.last_name,
 email: v.email,
@@ -229,6 +235,7 @@ export function encodeCreateStaffRequest(v: CreateStaffRequest): Record<string, 
 const out: Record<string, unknown> = {};
 if (v.userId !== undefined) { out.user_id = v.userId; }
 if (v.departmentId !== undefined) { out.department_id = v.departmentId; }
+if (v.managerStaffId !== undefined) { out.manager_staff_id = v.managerStaffId; }
 if (v.firstName !== undefined) { out.first_name = v.firstName; }
 if (v.lastName !== undefined) { out.last_name = v.lastName; }
 if (v.email !== undefined) { out.email = v.email; }
@@ -259,6 +266,7 @@ if (v.userId !== undefined && v.userId !== null && !(Number(v.userId) > 0)) viol
 if (v.departmentId !== undefined && v.departmentId !== null && !(typeof v.departmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.departmentId))) violations.push("department_id has invalid type");
 if (!(v.departmentId !== undefined && v.departmentId !== null)) violations.push("department_id is required");
 if (v.departmentId !== undefined && v.departmentId !== null && !(Number(v.departmentId) > 0)) violations.push("department_id violates @gt");
+if (v.managerStaffId !== undefined && v.managerStaffId !== null && !(typeof v.managerStaffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.managerStaffId))) violations.push("manager_staff_id has invalid type");
 if (v.firstName !== undefined && v.firstName !== null && !(typeof v.firstName === "string")) violations.push("first_name has invalid type");
 if (!(v.firstName !== undefined && v.firstName !== null) || v.firstName === "") violations.push("first_name is required");
 if (v.lastName !== undefined && v.lastName !== null && !(typeof v.lastName === "string")) violations.push("last_name has invalid type");
@@ -370,6 +378,7 @@ return violations;
 
 export interface UpdateStaffBody {
 departmentId: string;
+managerStaffId?: string;
 firstName: string;
 lastName: string;
 email: string;
@@ -394,6 +403,7 @@ export function decodeUpdateStaffBody(v: any): UpdateStaffBody {
 if (v === null || v === undefined) return v;
 return {
 departmentId: v.department_id,
+managerStaffId: v.manager_staff_id,
 firstName: v.first_name,
 lastName: v.last_name,
 email: v.email,
@@ -418,6 +428,7 @@ bio: v.bio,
 export function encodeUpdateStaffBody(v: UpdateStaffBody): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.departmentId !== undefined) { out.department_id = v.departmentId; }
+if (v.managerStaffId !== undefined) { out.manager_staff_id = v.managerStaffId; }
 if (v.firstName !== undefined) { out.first_name = v.firstName; }
 if (v.lastName !== undefined) { out.last_name = v.lastName; }
 if (v.email !== undefined) { out.email = v.email; }
@@ -444,6 +455,7 @@ const violations: string[] = [];
 if (v.departmentId !== undefined && v.departmentId !== null && !(typeof v.departmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.departmentId))) violations.push("department_id has invalid type");
 if (!(v.departmentId !== undefined && v.departmentId !== null)) violations.push("department_id is required");
 if (v.departmentId !== undefined && v.departmentId !== null && !(Number(v.departmentId) > 0)) violations.push("department_id violates @gt");
+if (v.managerStaffId !== undefined && v.managerStaffId !== null && !(typeof v.managerStaffId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.managerStaffId))) violations.push("manager_staff_id has invalid type");
 if (v.firstName !== undefined && v.firstName !== null && !(typeof v.firstName === "string")) violations.push("first_name has invalid type");
 if (!(v.firstName !== undefined && v.firstName !== null) || v.firstName === "") violations.push("first_name is required");
 if (v.lastName !== undefined && v.lastName !== null && !(typeof v.lastName === "string")) violations.push("last_name has invalid type");

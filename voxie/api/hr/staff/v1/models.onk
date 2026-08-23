@@ -6,6 +6,13 @@ message Staff {
   owner_id: int64
   user_id: int64
   department_id: int64
+  /// manager_staff_id is this person's direct manager, as a STAFF id (not a
+  /// user id). Zero means no direct line, which is the common case: a
+  /// department manager is resolved separately from hr_departments.
+  ///
+  /// Flow's dept-manager visibility proxy unions this with the department
+  /// relationship, so setting it widens what that manager can see.
+  manager_staff_id: int64
   first_name: string
   last_name: string
   email: string
@@ -55,6 +62,9 @@ message ListStaffResponse {
 message CreateStaffRequest {
   user_id: int64 @required @gt(0)
   department_id: int64 @required @gt(0)
+  /// Optional, unlike department_id: most staff have no explicit manager, and
+  /// @required @gt(0) would force callers to invent one.
+  manager_staff_id: int64
   first_name: string @required
   last_name: string @required
   email: string @required @email
@@ -100,6 +110,8 @@ message GetStaffResponse {
 
 message UpdateStaffBody {
   department_id: int64 @required @gt(0)
+  /// Optional for the same reason as on create. Zero clears the reporting line.
+  manager_staff_id: int64
   first_name: string @required
   last_name: string @required
   email: string @required @email
