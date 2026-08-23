@@ -38,18 +38,6 @@ func toWorkspace(w domain.Workspace) *flowworkspacev1.Workspace {
 	}
 }
 
-func publishWorkspaceMemberEvent(eventType string, workspaceID, memberUserID, actorID int64) {
-	if workspaceID == 0 {
-		return
-	}
-	wsbus.Publish(wsbus.Event{
-		Topic:    fmt.Sprintf("workspace:%d", workspaceID),
-		Type:     eventType,
-		EntityID: memberUserID,
-		ActorID:  actorID,
-	})
-}
-
 func (a *WorkspaceAPI) resolveBusinessID(ctx context.Context) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
@@ -193,12 +181,6 @@ func (a *WorkspaceAPI) AddWorkspaceMember(ctx context.Context, req *flowworkspac
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to add workspace member")
 	}
 
-	publishWorkspaceMemberEvent(
-		"workspace.member_added",
-		req.GetWorkspaceId(),
-		req.GetUserId(),
-		authUser.UserID,
-	)
 	return &flowworkspacev1.AddWorkspaceMemberResponse{Message: "Member added successfully"}, nil
 }
 
@@ -224,12 +206,6 @@ func (a *WorkspaceAPI) RemoveWorkspaceMember(ctx context.Context, req *flowworks
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to remove workspace member")
 	}
 
-	publishWorkspaceMemberEvent(
-		"workspace.member_removed",
-		req.GetWorkspaceId(),
-		req.GetUserId(),
-		authUser.UserID,
-	)
 	wsbus.Publish(wsbus.Event{
 		Topic:    fmt.Sprintf("user:%d", req.GetUserId()),
 		Type:     "workspace.evicted",

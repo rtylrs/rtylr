@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -13,7 +12,6 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
-	"github.com/voxire/onion/internal/platform/wsbus"
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 )
 
@@ -50,18 +48,6 @@ func toProject(p domain.Project) *flowprojectv1.Project {
 		proj.DueDate = p.DueDate.Format("2006-01-02")
 	}
 	return proj
-}
-
-func publishProjectEvent(eventType string, workspaceID, projectID, actorID int64) {
-	if workspaceID == 0 {
-		return
-	}
-	wsbus.Publish(wsbus.Event{
-		Topic:    fmt.Sprintf("workspace:%d", workspaceID),
-		Type:     eventType,
-		EntityID: projectID,
-		ActorID:  actorID,
-	})
 }
 
 func parseProjectDate(raw string) (*time.Time, error) {
@@ -164,7 +150,6 @@ func (a *ProjectAPI) CreateProject(ctx context.Context, req *flowprojectv1.Creat
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create project")
 	}
 
-	publishProjectEvent("project.created", project.WorkspaceID, project.ID, authUser.UserID)
 	return &flowprojectv1.CreateProjectResponse{Project: toProject(project)}, nil
 }
 
@@ -209,12 +194,6 @@ func (a *ProjectAPI) UpdateProject(ctx context.Context, req *flowprojectv1.Updat
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update project")
 	}
 
-	publishProjectEvent(
-		"project.updated",
-		a.Service.GetProjectWorkspace(ctx, req.GetId()),
-		req.GetId(),
-		authUser.UserID,
-	)
 	return &flowprojectv1.UpdateProjectResponse{Message: "Project updated successfully"}, nil
 }
 
@@ -224,7 +203,6 @@ func (a *ProjectAPI) DeleteProject(ctx context.Context, req *flowprojectv1.Delet
 		return nil, err
 	}
 
-	workspaceID := a.Service.GetProjectWorkspace(ctx, req.GetId())
 	if err := a.Service.RequireProjectRole(ctx, req.GetId(), authUser.UserID, businessID, domain.FlowRoleAdmin); err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -233,7 +211,6 @@ func (a *ProjectAPI) DeleteProject(ctx context.Context, req *flowprojectv1.Delet
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete project")
 	}
 
-	publishProjectEvent("project.deleted", workspaceID, req.GetId(), authUser.UserID)
 	return &flowprojectv1.DeleteProjectResponse{Message: "Project archived successfully"}, nil
 }
 
