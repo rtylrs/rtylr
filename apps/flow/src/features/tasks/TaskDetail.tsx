@@ -45,6 +45,7 @@ import { useLabels, useSetTaskLabels } from './useLabels';
 import { useTaskActivity } from './useTaskActivity';
 import { useTaskRealtime } from '../../shared/lib/useTaskRealtime';
 import { useCurrentProject } from '../projects/useCurrentProject';
+import { useApprovedLeaveInRange } from '../../shared/hooks/queries/useApprovedLeaveInRange';
 import TimePanel from './components/TimePanel';
 import { useFlowStore, Attachment, Task } from '../../shared/stores/flowStore';
 import type { ApiTask, ApiTaskDetail, ApiTaskActivity } from '../../shared/services/flowApi';
@@ -159,6 +160,20 @@ const TaskDetail: React.FC = () => {
   // hooks, so they have to run on every render, and they need the task's project.
   const detail = taskData as ApiTaskDetail | undefined;
   const canEdit = useCanEditTask(detail?.task?.projectId);
+  // HR->FLOW-02 (#838): warn before assigning work into approved leave.
+  // Window is today through the task's due date (or two weeks out when
+  // undated). Hidden entirely when HR is absent or unreachable; assignment
+  // itself is never blocked. Ranges are shown without names because leave
+  // records key on HR employee ids — the hub-user mapping lands with #848.
+  const warningFrom = new Date().toISOString().slice(0, 10);
+  const warningTo =
+    detail?.task?.dueDate ||
+      new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10);
+  const { data: overlappingLeave } = useApprovedLeaveInRange(
+    warningFrom,
+    warningTo,
+    canEdit,
+  );
   const canRemove = useCanDeleteResource(detail?.task?.projectId);
   const updateTaskMut = useUpdateTask();
   const deleteTaskMut = useDeleteTask();
@@ -188,6 +203,7 @@ const TaskDetail: React.FC = () => {
     customFieldDefinitions,
     setActiveWorkspace,
   } = useFlowStore();
+
   const [labelPickerOpen, setLabelPickerOpen] = useState(false);
 
   useEffect(() => {
@@ -629,6 +645,28 @@ const TaskDetail: React.FC = () => {
             </select>
           </div>
         </DetailField>
+
+        {overlappingLeave && overlappingLeave.length > 0 && (
+          <div
+            role="status"
+            style={{
+              margin: '-6px 0 8px',
+              padding: '6px 10px',
+              borderRadius: 8,
+              background: 'var(--flow-warning-bg, rgba(234, 179, 8, 0.12))',
+              color: 'var(--flow-text)',
+              fontSize: 11,
+            }}
+          >
+            {t('flow.taskDetail.leaveOverlap', { count: overlappingLeave.length })}{' '}
+            <span style={{ color: 'var(--hub-text-dim)' }}>
+              {overlappingLeave
+                .slice(0, 3)
+                .map((l) => `${l.startDate ?? '?'} → ${l.endDate ?? '?'}`)
+                .join(', ')}
+            </span>
+          </div>
+        )}
 
         <DetailField icon={CalendarIcon} label={t('flow.taskDetail.dueDate')}>
           <DueDatePicker
