@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS hr_staff (
     user_id BIGINT,
     employee_id BIGINT DEFAULT NULL,
     department_id BIGINT,
+    manager_staff_id BIGINT NULL,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL,
