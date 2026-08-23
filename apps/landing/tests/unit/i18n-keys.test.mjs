@@ -39,10 +39,21 @@ const LOCALES = path.join(APP, 'locales');
 // t('a.b.c') and t("a.b.c"), including the form with interpolation options.
 const T_CALL = /\bt\(\s*(['"])([A-Za-z][\w.]*)\1/g;
 
+// t(`a.b.${id}.c`). A key built at runtime cannot be resolved statically,
+// so the literal text before the first interpolation is treated as a
+// prefix and everything under it counts as used.
+//
+// This is a deliberate hole in the orphan check and worth naming: adding
+// one dynamic call exempts a whole subtree from it. Keep the static prefix
+// as long as possible (`contact.channels.` rather than `contact.`) so the
+// exemption stays narrow.
+const T_TEMPLATE = /\bt\(\s*`([^`$]*)\$\{/g;
+
 const SOURCE_GLOBS = ['pages/**/*.tsx', 'components/**/*.tsx', 'layouts/**/*.tsx'];
 
 let en;
 let used;
+let usedPrefixes;
 
 /** Flatten {a:{b:'x'}} to {'a.b':'x'}. */
 function flatten(obj, prefix = '', out = {}) {
@@ -67,14 +78,24 @@ before(() => {
   assert.ok(files.length > 40, `expected 40+ source files, found ${files.length}`);
 
   used = new Map();
+  usedPrefixes = new Map();
   for (const rel of files) {
     const src = readFileSync(path.join(APP, rel), 'utf8');
     for (const m of src.matchAll(T_CALL)) {
       if (!used.has(m[2])) used.set(m[2], []);
       used.get(m[2]).push(rel);
     }
+    for (const m of src.matchAll(T_TEMPLATE)) {
+      if (!m[1]) continue;
+      if (!usedPrefixes.has(m[1])) usedPrefixes.set(m[1], []);
+      usedPrefixes.get(m[1]).push(rel);
+    }
   }
 });
+
+/** Used directly, or covered by a runtime-built key's static prefix. */
+const isUsed = (key) =>
+  used.has(key) || [...usedPrefixes.keys()].some((prefix) => key.startsWith(prefix));
 
 describe('translation keys', () => {
   it('every key a component asks for exists in en.json', () => {
@@ -85,13 +106,57 @@ describe('translation keys', () => {
   it('no key in en.json is unused', () => {
     // Not tidiness. An orphaned namespace is how a previous product's copy
     // survived in this file long enough to be half-translated.
-    const orphans = Object.keys(en).filter((k) => !used.has(k));
+    const orphans = Object.keys(en).filter((k) => !isUsed(k));
     assert.deepEqual(orphans, [], 'keys defined but asked for by nothing');
   });
 
-  it('en.json holds only strings', () => {
-    const bad = Object.entries(en).filter(([, v]) => typeof v !== 'string');
-    assert.deepEqual(bad, [], 'non-string leaves in the locale file');
+  it('every runtime-built key prefix matches something in en.json', () => {
+    const dead = [...usedPrefixes.entries()]
+      .filter(([prefix]) => !Object.keys(en).some((k) => k.startsWith(prefix)))
+      .map(([prefix, files]) => [prefix, files[0]]);
+    assert.deepEqual(dead, [], 't(`prefix.${...}`) calls that can never resolve');
+  });
+
+  it('every leaf in en.json is a legal shape', () => {
+    // Three shapes are allowed, and nothing else:
+    //   a string
+    //   an array of strings        (a feature list, a table's row labels)
+    //   an array of flat objects   (question and answer pairs)
+    // Lists are arrays rather than numbered keys on purpose: a translator
+    // translates a list, and reordering an array cannot silently reassign
+    // one tier's feature to another the way features.0 could.
+    const legal = (v) =>
+      typeof v === 'string' ||
+      (Array.isArray(v) &&
+        v.length > 0 &&
+        (v.every((x) => typeof x === 'string') ||
+          v.every(
+            (x) =>
+              x &&
+              typeof x === 'object' &&
+              !Array.isArray(x) &&
+              Object.values(x).every((y) => typeof y === 'string')
+          )));
+
+    const bad = Object.entries(en)
+      .filter(([, v]) => !legal(v))
+      .map(([k, v]) => [k, Array.isArray(v) ? 'mixed array' : typeof v]);
+    assert.deepEqual(bad, [], 'illegal leaf shapes in the locale file');
+  });
+
+  it('list leaves have the same length in every locale', () => {
+    // A truth table elsewhere in the code is matched to a label list by
+    // index (see PLAN_FEATURES). A translation that drops a row shifts
+    // every label after it onto the wrong row.
+    const mismatched = [];
+    for (const loc of ['ar', 'fr']) {
+      for (const [k, v] of Object.entries(loadLocale(loc))) {
+        if (Array.isArray(en[k]) && Array.isArray(v) && en[k].length !== v.length) {
+          mismatched.push([loc, k, en[k].length, v.length]);
+        }
+      }
+    }
+    assert.deepEqual(mismatched, [], 'a translated list changed length');
   });
 
   it('no locale invents keys en.json does not have', () => {

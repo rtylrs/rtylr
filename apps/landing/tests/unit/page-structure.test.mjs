@@ -210,7 +210,9 @@ describe('translated copy reaches the page', () => {
   // "footer.link.pos" in the middle of the footer. tests/unit/i18n-keys
   // catches the mismatch at the source; this catches anything that gets
   // past it and reaches the served HTML.
-  const KEY_SHAPE = /\b(?:common|footer)\.[a-z][\w.]*\b/i;
+  // Namespace list, not a generic dotted-word match: page copy legitimately
+  // contains things like "rtylr.com/pricing" and "info@voxire.com".
+  const KEY_SHAPE = /\b(?:common|footer|contact|pricing|home)\.[a-z]\w*\.[\w.]+\b/;
 
   it('no page renders a raw translation key', () => {
     const offenders = [];
