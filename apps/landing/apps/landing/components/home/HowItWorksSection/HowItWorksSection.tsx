@@ -55,7 +55,7 @@ const HowItWorksSection: React.FC = (): React.JSX.Element => {
           <SplitWords
             as="h2"
             className={styles.sectionTitle}
-            text={'From sign-up to live\nin four steps.'}
+            text={'How do you get\nfrom sign-up to live?'}
             trigger="view"
           />
         </motion.div>

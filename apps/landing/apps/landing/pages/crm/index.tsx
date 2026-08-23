@@ -413,9 +413,9 @@ const CRMPage = (): JSX.Element => {
                 LIVE SEGMENTS
               </motion.span>
               <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-                Every slice of your
+                How do you segment
                 <br />
-                customer base, one click away.
+                your customer base?
               </motion.h2>
               <motion.p className={styles.sectionCopy} variants={blurFadeIn}>
                 Build segments by visit velocity, lifetime spend, last-order date, tags, preferences
@@ -508,9 +508,9 @@ const CRMPage = (): JSX.Element => {
             <motion.div className={styles.builderHeader} variants={blurFadeIn}>
               <span className={styles.sectionEyebrow}>TRY IT, LIVE</span>
               <h2 className={styles.sectionTitle}>
-                Build a segment.
+                Do segments stay
                 <br />
-                Watch it update.
+                current on their own?
               </h2>
               <p className={styles.builderCopy}>
                 This is a real segment builder. Toggle any attribute and the matching audience

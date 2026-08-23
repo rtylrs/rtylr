@@ -414,9 +414,9 @@ const FinancePage = (): JSX.Element => {
                 LIVE, TRAILING 12 MONTHS
               </motion.span>
               <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-                Your business,
+                What can you see
                 <br />
-                charted live.
+                without a close?
               </motion.h2>
               <motion.p className={styles.chartCopy} variants={blurFadeIn}>
                 Toggle the metric to see revenue, costs, or net for every month of the last year.
@@ -523,9 +523,9 @@ const FinancePage = (): JSX.Element => {
           >
             <motion.div className={styles.accountantInner} variants={blurFadeIn}>
               <h2 className={styles.accountantTitle}>
-                Your accountant will love it.
+                What can you hand
                 <br />
-                <span className={styles.accountantTitleSoft}>Finally.</span>
+                <span className={styles.accountantTitleSoft}>your accountant?</span>
               </h2>
               <p className={styles.accountantCopy}>
                 One click to export the chart of accounts, journal entries, payroll detail, and

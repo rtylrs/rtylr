@@ -193,9 +193,9 @@ const POSPage = (): JSX.Element => {
                 WHAT IT DOES
               </motion.span>
               <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-                Four things every
+                What does a register
                 <br />
-                register should do.
+                have to get right?
               </motion.h2>
             </motion.div>
 
@@ -229,9 +229,9 @@ const POSPage = (): JSX.Element => {
             <motion.div className={styles.compareHeader} variants={blurFadeIn}>
               <span className={styles.sectionEyebrow}>VS THE OTHERS</span>
               <h2 className={styles.sectionTitle}>
-                What every other register
+                What do other registers
                 <br />
-                quietly charges for.
+                charge extra for?
               </h2>
             </motion.div>
 

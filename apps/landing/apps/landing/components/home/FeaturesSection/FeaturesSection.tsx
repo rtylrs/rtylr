@@ -136,9 +136,9 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
         <motion.div className={styles.header} variants={blurFadeIn}>
           <span className={styles.badge}>THE PLATFORM</span>
           <h2 className={styles.sectionTitle}>
-            Seven apps, one screen at a time.
+            What does each app do?
             <br />
-            <span className={styles.sectionTitleAccent}>See how each fits.</span>
+            <span className={styles.sectionTitleAccent}>One screen at a time.</span>
           </h2>
         </motion.div>
 

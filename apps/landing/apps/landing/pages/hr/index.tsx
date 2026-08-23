@@ -283,9 +283,9 @@ const HRPage = (): JSX.Element => {
                 SIX PILLARS
               </motion.span>
               <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-                The entire employee
+                What does rtylr HR
                 <br />
-                lifecycle, without the paperwork.
+                handle for a shift team?
               </motion.h2>
             </motion.div>
 

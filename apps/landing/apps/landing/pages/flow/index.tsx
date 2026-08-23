@@ -510,9 +510,9 @@ const FlowPage = (): JSX.Element => {
                 AUTOMATIONS · NO ZAPIER REQUIRED
               </motion.span>
               <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-                When this happens.
+                How do automations
                 <br />
-                Then that, automatically.
+                work in Flow?
               </motion.h2>
               <motion.p className={styles.automationCopy} variants={blurFadeIn}>
                 Every app in rtylr emits events. Every app listens. Click an example, or let it
@@ -663,9 +663,9 @@ const FlowPage = (): JSX.Element => {
             <motion.div className={styles.contextInner} variants={blurFadeIn}>
               <span className={styles.sectionEyebrow}>TASKS WITH CONTEXT</span>
               <h2 className={styles.contextTitle}>
-                A task that knows the invoice,
+                What does a task in Flow
                 <br />
-                the customer, and the shift.
+                already know about?
               </h2>
               <p className={styles.contextCopy}>
                 In rtylr Flow, tasks are first-class citizens linked to other objects in the

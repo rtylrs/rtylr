@@ -327,11 +327,11 @@ const ERPPage = (): JSX.Element => {
                 CAPABILITIES
               </motion.span>
               <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-                Everything from
+                What does rtylr ERP
                 <br />
-                the loading dock
+                cover, from the dock
                 <br />
-                to the P&amp;L.
+                to the P&amp;L?
               </motion.h2>
             </motion.div>
 
@@ -368,7 +368,9 @@ const ERPPage = (): JSX.Element => {
           >
             <motion.div className={styles.depletionInner} variants={blurFadeIn}>
               <span className={styles.sectionEyebrow}>LIVE RECIPE DEPLETION</span>
-              <h2 className={styles.depletionTitle}>Pizza sold. Flour dropped. Reorder drafted.</h2>
+              <h2 className={styles.depletionTitle}>
+                What happens to stock when a sale goes through?
+              </h2>
               <p className={styles.depletionCopy}>
                 Every POS sale cascades through the recipe tree. Flour, yeast, mozzarella, basil,
                 olive oil, each depletes by exactly the gram. When anything crosses its reorder
