@@ -114,7 +114,8 @@
     "noPriority": "Aucune priorité",
     "subtaskAddPlaceholder": "Ajouter une sous-tâche…",
     "subtaskCount": "{{done}} sur {{total}}",
-    "removeAttachmentLabel": "Supprimer la pièce jointe"
+    "removeAttachmentLabel": "Supprimer la pièce jointe",
+    "leaveOverlap": "{count} période(s) de congé approuvé chevauchent l'échéance"
   },
   "time": {
     "heading": "Temps",
