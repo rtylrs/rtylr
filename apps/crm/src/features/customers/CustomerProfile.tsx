@@ -41,6 +41,7 @@ import {
   LoyaltyPointsInput,
 } from '../../shared/components/crm';
 import { useSupportEngagement } from '../../shared/hooks/queries/useSupportEngagement';
+import { useCustomerOutstandingBalance } from '../../shared/hooks/queries/useCustomerOutstandingBalance';
 import { getCustomerTier, pointsToNextTier, thresholdsFromConfig } from '../../shared/lib/tiers';
 
 const CustomerProfile: React.FC = () => {
@@ -71,6 +72,10 @@ const CustomerProfile: React.FC = () => {
   // SUP->CRM-01 (#842): support engagement on the profile, hidden when
   // support is absent or no match exists.
   const { data: supportEngagement } = useSupportEngagement(customer?.email);
+  // FIN->CRM-01 (#841): outstanding balance on the profile, hidden when
+  // Finance is absent or unreachable.
+  const customerIdStr = customer?.id !== undefined ? String(customer.id) : undefined;
+  const { data: balance } = useCustomerOutstandingBalance(customerIdStr);
   useEffect(() => {
     if (!fetchedTimeline) return;
     setTimelineEntries((entries) => {
@@ -319,6 +324,20 @@ const CustomerProfile: React.FC = () => {
                   {supportEngagement.totalTickets === 1
                     ? t('customers.supportTicket')
                     : t('customers.supportTickets')}
+                </span>
+              )}
+              {balance && balance.totalOutstanding > 0 && (
+                <span
+                  style={{
+                    padding: '3px 10px',
+                    borderRadius: 12,
+                    background: 'var(--hub-hover)',
+                    color: 'var(--hub-text-muted)',
+                    fontSize: '12px',
+                  }}
+                >
+                  {balance.totalOutstanding.toFixed(2)}{' '}
+                  {t('customers.outstanding')}
                 </span>
               )}
             </div>

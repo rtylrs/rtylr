@@ -29,7 +29,8 @@
     "notesSaved": "Notes saved",
     "notesFailed": "Failed to save notes",
     "supportTicket": "support ticket",
-    "supportTickets": "support tickets"
+    "supportTickets": "support tickets",
+    "outstanding": "outstanding"
   },
   "loyalty": {
     "configUpdated": "Loyalty config updated",

@@ -29,7 +29,8 @@
     "notesSaved": "Notes saved",
     "notesFailed": "Failed to save notes",
     "supportTicket": "تذكرة دعم",
-    "supportTickets": "تذاكر دعم"
+    "supportTickets": "تذاكر دعم",
+    "outstanding": "مستحق"
   },
   "loyalty": {
     "configUpdated": "Loyalty config updated",
