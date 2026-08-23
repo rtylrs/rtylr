@@ -12,7 +12,9 @@
  *   2. `pages.json`:      machine-readable page index (url, title,
  *                          description) consumed by GET /api/v1/pages.
  *   3. `llms.txt`:        llmstxt.org-style index of the site for agents.
- *   4. `_worker.js`:      the Cloudflare Pages advanced-mode worker, copied
+ *   4. `llms-full.txt`:   every page's Markdown in one document, so an
+ *                         agent can read the whole site in one request.
+ *   5. `_worker.js`:      the Cloudflare Pages advanced-mode worker, copied
  *                          from cloudflare/_worker.js to the export root so
  *                          `wrangler pages deploy` picks it up.
  *
@@ -526,6 +528,7 @@ export function buildLlmsTxt(pages, generatedAt) {
     '',
     '## Machine-readable surfaces',
     '',
+    '- [Complete site text](https://rtylr.com/llms-full.txt): every page of this site as one Markdown document, if you would rather not fetch each URL.',
     '- [OpenAPI specification](https://rtylr.com/openapi.json): the site JSON API (GET /api/v1/status, GET /api/v1/pages).',
     '- [Site status API](https://rtylr.com/api/v1/status): liveness probe returning JSON.',
     '- [Page index API](https://rtylr.com/api/v1/pages): every public page as JSON.',
@@ -542,6 +545,45 @@ export function buildLlmsTxt(pages, generatedAt) {
     '',
   ];
   void generatedAt;
+  return lines.join('\n');
+}
+
+/**
+ * llms-full.txt: the whole site as one Markdown document.
+ *
+ * llms.txt is an index of links. An agent that wants the actual content
+ * has to fetch 23 URLs to get it, and some will not. This concatenates
+ * the Markdown already generated for every page into a single file, so
+ * one request returns everything.
+ *
+ * It is built from the same `markdown` field written to each index.md, so
+ * the two cannot disagree: there is one conversion, used twice.
+ *
+ * As with llms.txt, expect nothing from Google for this. Their June 2026
+ * changelog is explicit that these files neither help nor hurt ranking.
+ * It exists for the systems that do read them.
+ */
+export function buildLlmsFullTxt(pages, generatedAt) {
+  const sorted = [...pages].sort((a, b) => a.path.localeCompare(b.path));
+  const withBody = sorted.filter((page) => page.markdown);
+
+  const lines = [
+    '# rtylr, complete site text',
+    '',
+    `> Every page of https://rtylr.com as one Markdown document. ${withBody.length} pages.`,
+    `> Generated ${generatedAt} from the same conversion that produces each page's index.md.`,
+    '',
+    'Per-page Markdown is also available at each URL by sending',
+    '`Accept: text/markdown`, and the page index is at https://rtylr.com/pages.json.',
+    '',
+  ];
+
+  for (const page of withBody) {
+    lines.push('---', '', `# ${page.title || page.heading || page.path}`, '');
+    if (page.description) lines.push(`> ${page.description}`, '');
+    lines.push(`Source: ${SITE_URL}${page.path}`, '', page.markdown.trim(), '');
+  }
+
   return lines.join('\n');
 }
 
@@ -591,19 +633,26 @@ async function main() {
 
     const meta = extractPageMeta(html, fallbackPath);
     meta.path = normalizeGeneratedPath(meta.path || fallbackPath);
+
+    // One conversion, used twice: the per-page index.md and llms-full.txt
+    // are the same bytes, so they cannot drift into disagreeing about what
+    // a page says.
+    const markdown = htmlToMarkdown(html);
+    meta.markdown = markdown;
     pages.push(meta);
 
-    writeFileSync(join(dirname(file), 'index.md'), htmlToMarkdown(html));
+    writeFileSync(join(dirname(file), 'index.md'), markdown);
     markdownWritten++;
   }
 
   const generatedAt = new Date(startedAt).toISOString();
   writeFileSync(join(DIST_DIR, 'pages.json'), JSON.stringify(buildPagesIndex(pages, generatedAt), null, 2) + '\n');
   writeFileSync(join(DIST_DIR, 'llms.txt'), buildLlmsTxt(pages, generatedAt));
+  writeFileSync(join(DIST_DIR, 'llms-full.txt'), buildLlmsFullTxt(pages, generatedAt));
   copyFileSync(join(APP_DIR, 'cloudflare', '_worker.js'), join(DIST_DIR, '_worker.js'));
 
   console.log(
-    `[agent-artifacts] ${markdownWritten} markdown siblings, ${pages.length} indexed pages, llms.txt + pages.json + _worker.js written in ${Date.now() - startedAt}ms`
+    `[agent-artifacts] ${markdownWritten} markdown siblings, ${pages.length} indexed pages, llms.txt + llms-full.txt + pages.json + _worker.js written in ${Date.now() - startedAt}ms`
   );
 }
 
