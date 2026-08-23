@@ -5,6 +5,7 @@ import HelmetContainer from '../components/HelmetContainer';
 import DirectAnswer from '../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../components/FaqSection/FaqSection';
 import ProductTruthSection from '../components/home/ProductTruthSection/ProductTruthSection';
+import { useTranslation } from 'react-i18next';
 import { useFaq } from '../lib/faqs';
 import { webSiteSchema, organizationSchema, productSchema } from '../lib/structured-data';
 import HeroSection from '../components/home/HeroSection/HeroSection';
@@ -17,52 +18,52 @@ import IntegrationsSection from '../components/home/IntegrationsSection/Integrat
 import CTASection from '../components/home/CTASection/CTASection';
 import styles from './index.module.scss';
 
-const SEO_PROPS = {
-  title: 'rtylr · Your entire business, one platform.',
-  description:
-    'POS, ERP, HR, CRM, Finance & Flow. The all-in-one business OS built for modern teams of every size. Powered by AI.',
-  url: 'https://rtylr.com/',
-  ogType: 'website' as const,
-  ogLocale: 'en_US',
-  ogSiteName: 'Rtylr',
-  ogDescription:
-    'POS, ERP, HR, CRM, Finance & Flow. The all-in-one business OS built for modern teams of every size. Powered by AI.',
-  twitterCard: 'summary_large_image' as const,
-  keywords:
-    'POS, ERP, HR, CRM, Finance, Flow, business OS, inventory management, payroll, loyalty programs, invoicing, project management, restaurant software, retail software, AI',
-  // SoftwareApplication belongs here, on the page that describes the
-  // product. It used to arrive from _document.tsx, which put it on all
-  // 24 pages including the privacy policy; this page is the one place
-  // sitewide where it was actually true.
-  structuredData: {
-    '@context': 'https://schema.org',
-    '@graph': [
-      webSiteSchema(),
-      organizationSchema(),
-      productSchema({
-        name: 'rtylr',
-        path: '/',
-        description:
-          'One business platform covering POS, ERP, CRM, HR, Finance and Flow on a single data model, so a sale updates stock and the books without an export.',
-      }),
-    ],
-  },
-};
+/**
+ * Built inside the component, not at module scope: t() needs the hook. The
+ * non-copy half (url, ogType, ogLocale, twitterCard) stays static.
+ */
+function useSeoProps() {
+  const { t } = useTranslation();
+  return {
+    title: t('home.meta.title'),
+    description: t('home.meta.description'),
+    url: 'https://rtylr.com/',
+    ogType: 'website' as const,
+    ogLocale: 'en_US',
+    ogSiteName: t('home.meta.ogSiteName'),
+    ogDescription: t('home.meta.description'),
+    twitterCard: 'summary_large_image' as const,
+    keywords: t('home.meta.keywords'),
+    // SoftwareApplication belongs here, on the page that describes the
+    // product. It used to arrive from _document.tsx, which put it on all
+    // 24 pages including the privacy policy; this page is the one place
+    // sitewide where it was actually true.
+    structuredData: {
+      '@context': 'https://schema.org',
+      '@graph': [
+        webSiteSchema(),
+        organizationSchema(),
+        productSchema({
+          name: 'rtylr',
+          path: '/',
+          description: t('home.meta.schemaDescription'),
+        }),
+      ],
+    },
+  };
+}
 
 const WebsiteContent = (): React.JSX.Element => {
   const faq = useFaq('home');
+  const { t } = useTranslation();
 
   return (
     <AppLayout>
       <MainLayout>
         <div className={styles.Homepage}>
           <HeroSection />
-          <DirectAnswer label="What is rtylr?">
-            rtylr is an all-in-one business operating system for small and mid-sized companies:
-            point of sale, ERP, HR, CRM, finance and project management on a single database. It is
-            built for restaurants, retail and services businesses running 2 to 200 staff, across one
-            location or twenty. The point is not that it is seven apps. It is that a sale moves
-            stock, revenue and loyalty without anyone exporting a file.
+          <DirectAnswer label={t('home.directAnswer.label')}>
+            {t('home.directAnswer.body')}
           </DirectAnswer>
           <ProductsSection />
           <FeaturesSection />
@@ -84,9 +85,11 @@ const WebsiteContent = (): React.JSX.Element => {
 export { WebsiteContent };
 
 const HomePage = (): React.JSX.Element => {
+  const seo = useSeoProps();
+
   return (
     <>
-      <HelmetContainer {...SEO_PROPS} />
+      <HelmetContainer {...seo} />
       <WebsiteContent />
     </>
   );

@@ -1,15 +1,18 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { ShoppingCart, Package, Users, Heart, DollarSign, Workflow, BarChart2 } from 'lucide-react';
 import Link from 'next/link';
 import { blurFadeIn, blurFadeInSlow, staggerBlur, viewportOnce } from '../../../lib/animations';
 import { SplitWords } from '../../motion/SplitWords';
 import styles from './ProductsSection.module.scss';
 
+// Structure only. The card title and description live in the locale files
+// under home.products.cardsTop / cardsBottom, matched by position. The
+// label stays here: POS and ERP are product names, not copy, and
+// translating one would break the link to the page it points at.
 interface Product {
   label: string;
-  title: string;
-  description: string;
   href: string;
   Icon: React.ComponentType<{ size?: number; strokeWidth?: number }>;
 }
@@ -17,33 +20,21 @@ interface Product {
 const PRODUCTS_TOP: Product[] = [
   {
     label: 'POS',
-    title: 'Point of sale',
-    description:
-      'Tickets, tables, splits, tips, and every payment type. The register that keeps up with real service.',
     href: '/pos',
     Icon: ShoppingCart,
   },
   {
     label: 'ERP',
-    title: 'Inventory',
-    description:
-      'Recipe-linked depletion, supplier management, auto-reorder. Your shelves tell the database.',
     href: '/erp',
     Icon: Package,
   },
   {
     label: 'HR',
-    title: 'People & payroll',
-    description:
-      'Scheduling, clock-in, payroll, time off, compliance. The people side, without the paperwork.',
     href: '/hr',
     Icon: Users,
   },
   {
     label: 'CRM',
-    title: 'Customers & loyalty',
-    description:
-      'Profiles, segments, campaigns, and loyalty, fed live by every receipt your POS writes.',
     href: '/crm',
     Icon: Heart,
   },
@@ -52,25 +43,16 @@ const PRODUCTS_TOP: Product[] = [
 const PRODUCTS_BOTTOM: Product[] = [
   {
     label: 'Finance',
-    title: 'Books that close themselves',
-    description:
-      'Invoices, expenses, sales tax, and a live P&L. Every sale reconciles in real time.',
     href: '/finance',
     Icon: DollarSign,
   },
   {
     label: 'Flow',
-    title: 'Projects & tasks',
-    description:
-      'Kanban, automations, and tasks linked to the actual invoice, customer, or shift they belong to.',
     href: '/flow',
     Icon: Workflow,
   },
   {
     label: 'Insights',
-    title: 'Analytics across everything',
-    description:
-      'Revenue trends, customer cohorts, labor margin. Every number pulled live from every other app.',
     href: 'https://insights.rtylr.com',
     Icon: BarChart2,
   },
@@ -79,33 +61,50 @@ const PRODUCTS_BOTTOM: Product[] = [
 interface ProductCardProps {
   product: Product;
   index: number;
+  /** Resolved copy, passed in so the card does not need to know its index
+      into the locale array. */
+  title: string;
+  description: string;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
   product,
   index,
+  title,
+  description,
 }: ProductCardProps): React.JSX.Element => {
   const { Icon } = product;
+  const { t } = useTranslation();
   return (
     <motion.div className={styles.card} variants={blurFadeIn} custom={index}>
       <motion.div className={styles.iconWrap} whileHover={{ scale: 1.08, rotate: -3 }}>
         <Icon size={20} strokeWidth={1.6} />
       </motion.div>
       <p className={styles.cardLabel}>{product.label}</p>
-      <h3 className={styles.cardTitle}>{product.title}</h3>
-      <p className={styles.cardDescription}>{product.description}</p>
+      <h3 className={styles.cardTitle}>{title}</h3>
+      <p className={styles.cardDescription}>{description}</p>
       <Link
         href={product.href}
         className={styles.cardArrow}
-        aria-label={`Explore ${product.label}`}
+        aria-label={t('home.products.exploreLabel', { app: product.label })}
       >
-        Explore →
+        {t('home.products.explore')}
       </Link>
     </motion.div>
   );
 };
 
+interface Card {
+  title: string;
+  description: string;
+}
+
 const ProductsSection: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
+  const cardsTop = t('home.products.cardsTop', { returnObjects: true }) as unknown as Card[];
+  const cardsBottom = t('home.products.cardsBottom', {
+    returnObjects: true,
+  }) as unknown as Card[];
   return (
     <section className={styles.productsSection}>
       <div className={styles.container}>
@@ -118,17 +117,16 @@ const ProductsSection: React.FC = (): React.JSX.Element => {
           variants={blurFadeInSlow}
         >
           <motion.span className={styles.badge} variants={blurFadeIn}>
-            THE PLATFORM
+            {t('home.products.badge')}
           </motion.span>
           <SplitWords
             as="h2"
             className={styles.sectionTitle}
-            text={'Seven apps.\nOne database.'}
+            text={t('home.products.title')}
             trigger="view"
           />
           <motion.p className={styles.sectionSubtitle} variants={blurFadeIn}>
-            Not bundled. Not integrated. Built into the same platform from the first line of code,
-            so a sale in POS updates inventory, payroll, and the P&amp;L in the same breath.
+            {t('home.products.subtitle')}
           </motion.p>
         </motion.div>
 
@@ -141,7 +139,13 @@ const ProductsSection: React.FC = (): React.JSX.Element => {
           variants={staggerBlur}
         >
           {PRODUCTS_TOP.map((product, i) => (
-            <ProductCard key={product.label} product={product} index={i} />
+            <ProductCard
+              key={product.label}
+              product={product}
+              index={i}
+              title={cardsTop[i].title}
+              description={cardsTop[i].description}
+            />
           ))}
         </motion.div>
 
@@ -154,7 +158,13 @@ const ProductsSection: React.FC = (): React.JSX.Element => {
           variants={staggerBlur}
         >
           {PRODUCTS_BOTTOM.map((product, i) => (
-            <ProductCard key={product.label} product={product} index={i} />
+            <ProductCard
+              key={product.label}
+              product={product}
+              index={i}
+              title={cardsBottom[i].title}
+              description={cardsBottom[i].description}
+            />
           ))}
         </motion.div>
       </div>

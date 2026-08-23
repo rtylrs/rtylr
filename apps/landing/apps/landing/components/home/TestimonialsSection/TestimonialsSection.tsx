@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '../../../lib/cn';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { SplitWords } from '../../motion/SplitWords';
 import styles from './TestimonialsSection.module.scss';
 
@@ -62,6 +63,7 @@ const testimonials = [
 ];
 
 const TestimonialsSection: React.FC = () => {
+  const { t } = useTranslation();
   const duplicatedTestimonials = [...testimonials, ...testimonials];
 
   return (
@@ -70,7 +72,7 @@ const TestimonialsSection: React.FC = () => {
         <SplitWords
           as="h2"
           className={styles.sectionTitle}
-          text="What operators say about it."
+          text={t('home.testimonials.title')}
           trigger="view"
         />
         <motion.div

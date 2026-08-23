@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { cn } from '../../../../lib/cn';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight, Sparkles, Shuffle } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../../../lib/navigation';
@@ -9,6 +10,7 @@ import { SPRING_SNAPPY } from '../../../../lib/animations';
 import styles from '../HeroSection.module.scss';
 
 const MainHero: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const [prompt, setPrompt] = useState('');
 
   const goToRegister = (): void => {
@@ -48,9 +50,9 @@ const MainHero: React.FC = (): React.JSX.Element => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
       >
-        <span className={styles.announcePill}>BETA</span>
+        <span className={styles.announcePill}>{t('home.hero.announcePill')}</span>
         <span className={styles.announceText}>
-          Caret AI is in beta. Describe your business, watch it build
+          {t('home.hero.announceText')}
           <span className={styles.announceArrow} aria-hidden="true">
             ↗
           </span>
@@ -61,7 +63,7 @@ const MainHero: React.FC = (): React.JSX.Element => {
       <SplitWords
         as="h1"
         className={styles.heroTitle}
-        text={'Run your entire business.\nFrom a single platform.'}
+        text={t('home.hero.title')}
         delay={0.18}
       />
 
@@ -79,7 +81,7 @@ const MainHero: React.FC = (): React.JSX.Element => {
         <textarea
           id="hero-prompt"
           className={styles.aiCardTextarea}
-          placeholder="Describe your business. Caret AI drafts your POS, inventory, staff, and invoices"
+          placeholder={t('home.hero.promptPlaceholder')}
           rows={5}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
@@ -92,8 +94,8 @@ const MainHero: React.FC = (): React.JSX.Element => {
               type="button"
               onClick={goToRegister}
               className={cn(styles.aiCardIcon, styles.aiCardIconActive)}
-              aria-label="Caret AI"
-              title="Caret AI"
+              aria-label={t('home.hero.caretLabel')}
+              title={t('home.hero.caretLabel')}
             >
               <Sparkles size={14} strokeWidth={2} />
             </button>
@@ -101,8 +103,8 @@ const MainHero: React.FC = (): React.JSX.Element => {
               type="button"
               onClick={goToRegister}
               className={styles.aiCardIcon}
-              aria-label="More options"
-              title="More options"
+              aria-label={t('home.hero.moreOptions')}
+              title={t('home.hero.moreOptions')}
             >
               <Shuffle size={14} strokeWidth={2} />
             </button>
@@ -115,7 +117,7 @@ const MainHero: React.FC = (): React.JSX.Element => {
             whileTap={{ scale: 0.97 }}
             transition={SPRING_SNAPPY}
           >
-            <span>Start building</span>
+            <span>{t('home.hero.submit')}</span>
             <ArrowRight size={15} strokeWidth={2.2} aria-hidden="true" />
           </motion.button>
         </div>
@@ -128,9 +130,9 @@ const MainHero: React.FC = (): React.JSX.Element => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.85, duration: 0.7 }}
       >
-        Talk with an expert and{' '}
+        {t('home.hero.demoLinePrefix')}{' '}
         <a href="/demo" className={styles.demoLineAnchor}>
-          book a demo
+          {t('home.hero.demoLineLink')}
         </a>
       </motion.p>
     </div>

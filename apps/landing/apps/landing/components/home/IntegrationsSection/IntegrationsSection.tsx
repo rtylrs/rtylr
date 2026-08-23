@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { fadeInUp, staggerBlur, blurFadeIn, viewportOnce } from '../../../lib/animations';
 import { SplitWords } from '../../motion/SplitWords';
 import styles from './IntegrationsSection.module.scss';
@@ -86,6 +87,7 @@ const integrations: Integration[] = [
 ];
 
 const IntegrationsSection: React.FC = () => {
+  const { t } = useTranslation();
   return (
     <section className={styles.integrationsSection}>
       <div className={styles.container}>
@@ -96,16 +98,15 @@ const IntegrationsSection: React.FC = () => {
           viewport={viewportOnce}
           variants={fadeInUp}
         >
-          <span className={styles.badge}>INTEGRATIONS</span>
+          <span className={styles.badge}>{t('home.integrations.badge')}</span>
           <SplitWords
             as="h2"
             className={styles.sectionTitle}
-            text={'Plugs into everything\nyou already run on.'}
+            text={t('home.integrations.title')}
             trigger="view"
           />
           <p className={styles.sectionDescription}>
-            Stripe for payments. QuickBooks for your accountant. Slack for alerts. Connect in
-            minutes. No API keys to chase. No engineer required.
+            {t('home.integrations.description')}
           </p>
         </motion.div>
 
@@ -140,7 +141,7 @@ const IntegrationsSection: React.FC = () => {
           viewport={viewportOnce}
           variants={fadeInUp}
         >
-          Plus 20+ more in the full directory.
+          {t('home.integrations.footnote')}
         </motion.p>
       </div>
     </section>

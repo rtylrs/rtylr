@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import { APP_URLS } from '@voxire/config';
 import {
@@ -12,9 +13,11 @@ import {
 import { SplitWords } from '../../motion/SplitWords';
 import { navigateExternal } from '../../../lib/navigation';
 import CTAGraphic from './CTAGraphic';
+import Lines from '../../text/Lines';
 import styles from './CTASection.module.scss';
 
 const CTASection: React.FC = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const handleBookDemo = (): void => {
@@ -39,14 +42,12 @@ const CTASection: React.FC = (): React.JSX.Element => {
           <SplitWords
             as="h2"
             className={styles.ctaTitle}
-            text={"It's your turn\nto build."}
+            text={t('home.cta.title')}
             trigger="view"
           />
 
           <motion.p className={styles.ctaSubtitle} variants={blurFadeIn}>
-            Free for up to 10 members. No credit card.
-            <br />
-            Launch every department in an afternoon.
+            <Lines text={t('home.cta.subtitle')} />
           </motion.p>
 
           <motion.div className={styles.ctaButtons} variants={blurFadeIn}>
@@ -58,7 +59,7 @@ const CTASection: React.FC = (): React.JSX.Element => {
               whileTap={{ scale: 0.96 }}
               transition={SPRING_SNAPPY}
             >
-              Start for free
+              {t('common.cta.startFree')}
             </motion.button>
             <motion.button
               type="button"
@@ -68,7 +69,7 @@ const CTASection: React.FC = (): React.JSX.Element => {
               whileTap={{ scale: 0.96 }}
               transition={SPRING_SNAPPY}
             >
-              Book a demo
+              {t('common.cta.bookDemo')}
             </motion.button>
           </motion.div>
         </motion.div>

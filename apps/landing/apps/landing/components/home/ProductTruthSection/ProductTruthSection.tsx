@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import styles from './ProductTruthSection.module.scss';
 
@@ -35,7 +36,6 @@ interface Claim {
   body: string;
   /** How a reader verifies it. Rendered as copyable code. */
   check?: string;
-  checkLabel?: string;
 }
 
 const CLAIMS: Claim[] = [
@@ -46,31 +46,26 @@ const CLAIMS: Claim[] = [
   {
     title: 'Every page is readable by a machine',
     body: 'Ask any URL on this site for Markdown instead of HTML and you get Markdown, with the correct Vary header. No scraping, no rendering, no JavaScript.',
-    checkLabel: 'Check it:',
     check: 'curl -H "Accept: text/markdown" https://rtylr.com/pos/',
   },
   {
     title: 'The whole site is indexed as data',
     body: 'A machine-readable index of all 23 pages, with titles and descriptions, generated at build time. It cannot drift from the site, because the site is what generates it.',
-    checkLabel: 'Check it:',
     check: 'https://rtylr.com/pages.json',
   },
   {
     title: 'All 7 apps on every plan',
     body: 'No module upsells and no per-app licence. The plans differ by how many people and locations you run, not by which parts of the product you are allowed to open.',
-    checkLabel: 'Check it:',
     check: 'https://rtylr.com/pricing/',
   },
   {
     title: 'The Free plan needs no card',
     body: 'Ten team members at one location, all 7 apps, no payment method and no trial clock. It is a plan, not a countdown.',
-    checkLabel: 'Check it:',
     check: 'https://rtylr.com/pricing/',
   },
   {
     title: 'An OpenAPI document, published',
     body: 'This site publishes a spec for its own endpoints as OpenAPI 3.1. It covers the marketing site, not the product API, and it is linked here so nobody has to guess which.',
-    checkLabel: 'Check it:',
     check: 'https://rtylr.com/openapi.json',
   },
 ];
@@ -83,44 +78,45 @@ const LIMITS: string[] = [
   'The apps are in English. Arabic and French are being written, not translated, and are not shipped yet.',
 ];
 
-const ProductTruthSection = (): React.JSX.Element => (
-  <section className={styles.truthSection}>
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <span className={styles.badge}>Checkable</span>
-        <h2 className={styles.sectionTitle}>What we can prove.</h2>
-        <p className={styles.sectionDescription}>
-          Six claims you can verify from a browser tab or a terminal, and five things rtylr does not
-          do yet. Nothing here needs a sales call to confirm.
-        </p>
-      </div>
+const ProductTruthSection = (): React.JSX.Element => {
+  const { t } = useTranslation();
 
-      <div className={styles.grid}>
-        {CLAIMS.map((claim) => (
-          <div key={claim.title} className={styles.claim}>
-            <h3 className={styles.claimTitle}>{claim.title}</h3>
-            <p className={styles.claimBody}>{claim.body}</p>
-            {claim.check && (
-              <span className={styles.check}>
-                {claim.checkLabel} <code className={styles.checkCode}>{claim.check}</code>
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
+  return (
+    <section className={styles.truthSection}>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <span className={styles.badge}>{t('home.truth.badge')}</span>
+          <h2 className={styles.sectionTitle}>{t('home.truth.title')}</h2>
+          <p className={styles.sectionDescription}>{t('home.truth.description')}</p>
+        </div>
 
-      <div className={styles.limits}>
-        <h3 className={styles.limitsTitle}>What rtylr does not do yet</h3>
-        <ul className={styles.limitsList}>
-          {LIMITS.map((limit) => (
-            <li key={limit} className={styles.limitsItem}>
-              {limit}
-            </li>
+        <div className={styles.grid}>
+          {CLAIMS.map((claim) => (
+            <div key={claim.title} className={styles.claim}>
+              <h3 className={styles.claimTitle}>{claim.title}</h3>
+              <p className={styles.claimBody}>{claim.body}</p>
+              {claim.check && (
+                <span className={styles.check}>
+                  {t('home.truth.checkLabel')} <code className={styles.checkCode}>{claim.check}</code>
+                </span>
+              )}
+            </div>
           ))}
-        </ul>
+        </div>
+
+        <div className={styles.limits}>
+          <h3 className={styles.limitsTitle}>{t('home.truth.limitsTitle')}</h3>
+          <ul className={styles.limitsList}>
+            {LIMITS.map((limit) => (
+              <li key={limit} className={styles.limitsItem}>
+                {limit}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 export default ProductTruthSection;
