@@ -18,7 +18,7 @@ const mockClients = vi.hoisted(() => {
     labelClient: mockClient(),
     milestoneClient: mockClient(),
     cycleClient: mockClient(),
-    viewClient: mockClient(),
+    viewV2: mockClient(),
     insightsClient: mockClient(),
     notificationClient: mockClient(),
     settingClient: mockClient(),
@@ -38,7 +38,7 @@ vi.mock('../lib/clients', () => ({
   labelClient: mockClients.labelClient,
   milestoneClient: mockClients.milestoneClient,
   cycleClient: mockClients.cycleClient,
-  viewClient: mockClients.viewClient,
+  viewV2: mockClients.viewV2,
   insightsClient: mockClients.insightsClient,
   notificationClient: mockClients.notificationClient,
   settingClient: mockClients.settingClient,
@@ -57,7 +57,6 @@ import {
   labelClient,
   milestoneClient,
   cycleClient,
-  viewClient,
   insightsClient,
   notificationClient,
   settingClient,
@@ -65,6 +64,7 @@ import {
   projectV2,
   taskV2,
   labelV2,
+  viewV2,
 } from '../lib/clients';
 
 describe('flowApi OneKit adapters', () => {
@@ -198,26 +198,32 @@ describe('flowApi OneKit adapters', () => {
       startDate: undefined,
       endDate: undefined,
     });
-    expect(viewClient.listViews).toHaveBeenCalledWith({});
+    expect(viewV2.listViews).toHaveBeenCalledWith({ page: 1, limit: 200 });
     expect(insightsClient.getInsights).toHaveBeenCalledWith({ workspaceId: '1' });
     expect(insightsClient.getTeamWorkload).toHaveBeenCalledWith({ workspaceId: '1' });
     expect(insightsClient.getRoadmap).toHaveBeenCalledWith({ workspaceId: '1' });
   });
 
   it('encodes saved-view filters to the wire JSON string and decodes them back', async () => {
-    (viewClient.listViews as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+    (viewV2.listViews as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       views: [{ id: '1', name: 'Mine', icon: 'folder', filters: '{"status":"todo"}' }],
     });
 
-    const result = await flowApi.getViews('ws-1');
+    const result = await flowApi.getViews();
 
-    expect(viewClient.listViews).toHaveBeenCalledWith({ workspaceId: 'ws-1' });
     expect(result._unsafeUnwrap().views[0].filters).toEqual({ status: 'todo' });
 
-    await flowApi.createView({ workspaceId: 'ws-1', name: 'New', filters: { status: 'todo' } });
-    expect(viewClient.createView).toHaveBeenCalledWith(
-      expect.objectContaining({ filters: '{"status":"todo"}' })
-    );
+    await flowApi.createView({ name: 'New', filters: { status: 'todo' } });
+    // The wire carries filters as a JSON string; the object shape is app-side
+    // only. Also asserts no workspace rides along on v2.
+    expect(viewV2.createView).toHaveBeenCalledWith({
+      name: 'New',
+      icon: undefined,
+      filters: '{"status":"todo"}',
+      groupBy: undefined,
+      sortBy: undefined,
+      sortDir: undefined,
+    });
   });
 
   it('uses generated notification, settings, and profile clients', async () => {

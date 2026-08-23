@@ -9,7 +9,6 @@ import {
   taskClient,
   milestoneClient,
   cycleClient,
-  viewClient,
   insightsClient,
   notificationClient,
   settingClient,
@@ -17,6 +16,7 @@ import {
   projectV2,
   taskV2,
   labelV2,
+  viewV2,
 } from '../lib/clients';
 
 // -- Types ----------------------------------------------------------------
@@ -284,23 +284,13 @@ const toCycleUpdatePayload = (data: Partial<ApiCycle>) => ({
   endDate: data.endDate,
 });
 
-const toViewPayload = (data: Partial<ApiView> & { workspaceId?: string }) => ({
-  workspaceId: data.workspaceId,
+const toViewPayload = (data: Partial<ApiView>) => ({
   name: data.name,
   icon: data.icon,
   // The flow/view/v1 contract wire-encodes `filters` as a JSON string (the
   // .onk model documents it as "JSON-encoded filter criteria"; the generated
   // Go struct field is `Filters string`) - sending the raw object fails
   // json.Unmarshal server-side and 400s on every request.
-  filters: data.filters !== undefined ? JSON.stringify(data.filters) : undefined,
-  groupBy: data.groupBy,
-  sortBy: data.sortBy,
-  sortDir: data.sortDir,
-});
-
-const toViewUpdatePayload = (data: Partial<ApiView>) => ({
-  name: data.name,
-  icon: data.icon,
   filters: data.filters !== undefined ? JSON.stringify(data.filters) : undefined,
   groupBy: data.groupBy,
   sortBy: data.sortBy,
@@ -875,29 +865,39 @@ export const flowApi = {
 
   // -- Views --------------------------------------------------------------
 
-  getViews: (workspaceId?: string) =>
+  // Saved views stay business-shared per the ledger, so there is no workspace
+  // to scope the list by.
+  getViews: () =>
     flowResult<{ views: ApiView[] }>(async () => {
-      const res = await viewClient.listViews(workspaceId ? { workspaceId } : {});
+      const res = await viewV2.listViews({ page: 1, limit: 200 });
       return { views: ((res as { views?: ApiView[] }).views ?? []).map(decodeApiView) };
     }),
 
   createView: (data: Partial<ApiView>) =>
     flowResult<{ view: ApiView }>(async () => {
-      const res = (await viewClient.createView(
-        toViewPayload(data) as Parameters<typeof viewClient.createView>[0]
+      const res = (await viewV2.createView(
+        toViewPayload(data) as Parameters<typeof viewV2.createView>[0]
       )) as { view?: ApiView };
       return { view: res.view ? decodeApiView(res.view) : res.view };
     }),
 
   updateView: (id: string, data: Partial<ApiView>) =>
     flowResult<{ message: string }>(() =>
-      viewClient.updateView({
+      // Spelled out rather than spread behind a cast: the v2 request carries
+      // `id` itself, so spreading a casted payload over an explicit `id`
+      // silently overwrote it.
+      viewV2.updateView({
         id,
-        ...(toViewUpdatePayload(data) as Parameters<typeof viewClient.updateView>[0]),
+        name: data.name,
+        icon: data.icon,
+        filters: data.filters !== undefined ? JSON.stringify(data.filters) : undefined,
+        groupBy: data.groupBy,
+        sortBy: data.sortBy,
+        sortDir: data.sortDir,
       })
     ),
 
-  deleteView: (id: string) => flowResult(() => viewClient.deleteView({ id })),
+  deleteView: (id: string) => flowResult(() => viewV2.deleteView({ id })),
 
   // -- Insights -----------------------------------------------------------
 
