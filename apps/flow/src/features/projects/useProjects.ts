@@ -43,14 +43,20 @@ export function useUpdateProject() {
   });
 }
 
-export function useDeleteProject() {
+// Named for what it does. It archives: the project moves to the recycle bin and
+// stays restorable until purge_at. Calling it useDeleteProject while it archives
+// is how a Delete button ends up not deleting.
+export function useArchiveProject() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => {
-      return unwrap(flowApi.deleteProject(id));
+      return unwrap(flowApi.archiveProject(id));
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
-    onError: () => toast.error(t('toasts.project.deleteFailed')),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['projects'] });
+      void qc.invalidateQueries({ queryKey: ['archived-projects'] });
+    },
+    onError: () => toast.error(t('toasts.project.archiveFailed')),
   });
 }

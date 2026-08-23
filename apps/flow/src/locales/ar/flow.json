@@ -789,7 +789,10 @@
     "visibility": "الظهور",
     "visibilitySaved": "تم تحديث الظهور",
     "visibilityGateReason": "يمكن لمسؤول المشروع فقط تغيير الظهور.",
-    "visibilityPersonalGate": "مشروع «مهامي» خاص دائمًا."
+    "visibilityPersonalGate": "مشروع «مهامي» خاص دائمًا.",
+    "archiveNotice": "الأرشفة تنقل المشروع إلى سلة المحذوفات. يبقى قابلاً للاستعادة حتى انتهاء مدة الاحتفاظ.",
+    "archiveAction": "أرشفة",
+    "archiveConfirm": "أرشفة المشروع"
   },
   "bulkEdit": {
     "clearSelectionLabel": "إلغاء التحديد"

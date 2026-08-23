@@ -139,6 +139,9 @@
       "madePrivate": "View is now private",
       "madeShared": "View is now shared",
       "visibilityFailed": "Could not change visibility"
+    },
+    "project": {
+      "archiveFailed": "Could not archive the project"
     }
   }
 }

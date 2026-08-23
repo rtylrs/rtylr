@@ -758,7 +758,10 @@
     "visibility": "Visibilité",
     "visibilitySaved": "Visibilité mise à jour",
     "visibilityGateReason": "Seul un administrateur du projet peut changer la visibilité.",
-    "visibilityPersonalGate": "Votre projet Mes tâches est toujours privé."
+    "visibilityPersonalGate": "Votre projet Mes tâches est toujours privé.",
+    "archiveNotice": "L'archivage déplace le projet vers la corbeille. Il reste restaurable jusqu'à l'expiration de la rétention.",
+    "archiveAction": "Archiver",
+    "archiveConfirm": "Archiver le projet"
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection"

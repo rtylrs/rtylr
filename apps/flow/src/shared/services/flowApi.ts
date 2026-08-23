@@ -3,7 +3,6 @@ import type { Task as ContractTask } from '@voxire/voxie/flow/task/v1/types';
 import { oneKitResult } from '@voxire/api';
 import {
   businessClient,
-  projectClient,
   notificationClient,
   settingClient,
   userClient,
@@ -504,14 +503,12 @@ export const flowApi = {
       })
     ),
 
-  // The last v1 project call, left deliberately. v2 has no deleteProject: it
-  // offers archiveProject, which moves the project to the recycle bin with a
-  // purge_at stamp rather than removing it. That is the intended end state, but
-  // swapping it here would silently turn a Delete button into an Archive one
-  // while its copy still says "Delete project", so it wants its own change
-  // together with the copy and the bin's own reachability.
-  deleteProject: (id: string) =>
-    flowResult<{ message: string }>(() => projectClient.deleteProject({ id })),
+  // Archives rather than deletes: v2 has no deleteProject. archiveProject moves
+  // the project to the recycle bin with a purge_at stamp, so it stays restorable
+  // until retention expires. The UI copy says so - it used to promise the
+  // opposite ("cannot be restored").
+  archiveProject: (id: string) =>
+    flowResult<{ message: string }>(() => projectV2.archiveProject({ id })),
 
   getProjectMembers: (projectId: string) =>
     flowResult<{ members: ApiProjectMember[] }>(() => projectV2.listProjectMembers({ projectId })),

@@ -9,7 +9,7 @@ vi.mock('../../shared/services/flowApi', () => ({
     getProjects: vi.fn(),
     createProject: vi.fn(),
     updateProject: vi.fn(),
-    deleteProject: vi.fn(),
+    archiveProject: vi.fn(),
   },
 }));
 
@@ -17,7 +17,7 @@ vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((val) => val),
 }));
 
-import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from './useProjects';
+import { useProjects, useCreateProject, useUpdateProject, useArchiveProject } from './useProjects';
 import { flowApi } from '../../shared/services/flowApi';
 
 const createWrapper = () => {
@@ -88,17 +88,17 @@ describe('useUpdateProject', () => {
   });
 });
 
-describe('useDeleteProject', () => {
+describe('useArchiveProject', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('calls deleteProject with id', async () => {
-    (flowApi.deleteProject as any).mockResolvedValue({ ok: true });
-    const { result } = renderHook(() => useDeleteProject(), {
+  it('calls archiveProject with id', async () => {
+    (flowApi.archiveProject as any).mockResolvedValue({ ok: true });
+    const { result } = renderHook(() => useArchiveProject(), {
       wrapper: createWrapper(),
     });
     await act(() => result.current.mutateAsync('p-2'));
-    expect(flowApi.deleteProject).toHaveBeenCalledWith('p-2');
+    expect(flowApi.archiveProject).toHaveBeenCalledWith('p-2');
   });
 });
