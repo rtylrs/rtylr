@@ -140,7 +140,7 @@ export const AllProjects: React.FC = () => {
             >
               {STATUS_FILTERS.map((s) => (
                 <option key={s} value={s}>
-                  {s === '' ? t('flow.allProjects.allStatuses') : s}
+                  {s === '' ? t('flow.allProjects.allStatuses') : t(`flow.projectStatus.${s}`)}
                 </option>
               ))}
             </select>
