@@ -93,8 +93,9 @@ test.describe('Flow - Appearance panel', () => {
 
     // Registered AFTER the catch-alls on purpose. Playwright gives precedence to
     // the route registered LAST, so with this first the /hub/ catch-all below
-    // shadowed it, AppGuard received an empty envelope instead of a user, and the
-    // whole panel never rendered.
+    // shadowed it, AppGuard received an empty envelope instead of a user, and
+    // the whole panel never rendered. Every test in this file failed for that one
+    // reason, which is what an unexecuted spec hides.
     await page.route(`${API_HOST}/hub/user/v1/users/me`, (route: Route) =>
       route.fulfill({
         status: 200,
@@ -114,6 +115,16 @@ test.describe('Flow - Appearance panel', () => {
   // D2. The regression this guards is real and was measured: clearing the
   // audition per card showed the applied palette for about eight pixels of
   // travel across the grid gap.
+  //
+  // The first version of this test was VACUOUS. It hovered card 0, which is the
+  // card for the palette already applied, so the audition changed nothing and
+  // "unchanged while crossing the gap" was trivially true. It passed with the
+  // per-card clear deliberately reintroduced, which is the precise defect it
+  // exists to catch.
+  //
+  // Two things fix that and both are load-bearing: audition a card whose palette
+  // DIFFERS from the applied one, and assert the audition actually moved the
+  // token before asserting the gap preserves it.
   test('keeps auditioning while the pointer travels between two palette cards', async ({
     page,
   }) => {
@@ -122,24 +133,49 @@ test.describe('Flow - Appearance panel', () => {
     test.skip(count < 2, 'needs at least two palettes in the active mode');
 
     const applied = await paneToken(page, '--flow-bg');
+    expect(applied).not.toBe('');
 
-    await cards.nth(0).hover();
-    const first = await paneToken(page, '--flow-bg');
-    expect(first).not.toBe('');
+    // Find a card that genuinely changes the preview. Index is not assumed:
+    // which card matches the applied palette depends on the active mode.
+    let auditioned = -1;
+    let hoveredValue = '';
+    for (let i = 0; i < count; i++) {
+      await cards.nth(i).hover();
+      const v = await paneToken(page, '--flow-bg');
+      if (v !== applied && v !== '') {
+        auditioned = i;
+        hoveredValue = v;
+        break;
+      }
+    }
+    expect(
+      auditioned,
+      'no palette card changed the preview, so this test cannot observe an audition'
+    ).toBeGreaterThanOrEqual(0);
 
-    // Land in the gap between the two cards, which is unhovered space. This is
-    // the moment a per-card clear reverts and a per-grid clear does not.
-    const a = await cards.nth(0).boundingBox();
-    const b = await cards.nth(1).boundingBox();
+    // A neighbour to travel towards, preferring the one to the right.
+    const neighbour = auditioned + 1 < count ? auditioned + 1 : auditioned - 1;
+    const a = await cards.nth(auditioned).boundingBox();
+    const b = await cards.nth(neighbour).boundingBox();
     expect(a && b).toBeTruthy();
-    const gapX = a!.x + a!.width + Math.max(1, (b!.x - (a!.x + a!.width)) / 2);
-    await page.mouse.move(gapX, a!.y + a!.height / 2);
 
-    const inGap = await paneToken(page, '--flow-bg');
-    expect(inGap, 'the preview reverted while crossing the gap').toBe(first);
+    await cards.nth(auditioned).hover();
+    expect(await paneToken(page, '--flow-bg'), 'audition did not take effect').toBe(hoveredValue);
+
+    // Land in unhovered space between the two cards. This is the moment a
+    // per-card clear reverts and a per-grid clear does not.
+    const [left, right] = a!.x <= b!.x ? [a!, b!] : [b!, a!];
+    const gapStart = left.x + left.width;
+    const gapX = gapStart + Math.max(1, (right.x - gapStart) / 2);
+    await page.mouse.move(gapX, left.y + left.height / 2);
+
+    expect(
+      await paneToken(page, '--flow-bg'),
+      'the preview reverted while crossing the gap between two cards'
+    ).toBe(hoveredValue);
 
     // Leaving the grid entirely must revert.
-    await page.mouse.move(10, 10);
+    await page.mouse.move(5, 5);
     await expect.poll(async () => paneToken(page, '--flow-bg')).toBe(applied);
   });
 
@@ -185,18 +221,57 @@ test.describe('Flow - Appearance panel', () => {
   });
 
   // D3, part two.
-  test('has no axe violations', async ({ page }) => {
-    const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
-      .analyze();
-    const serious = results.violations.filter(
-      (v) => v.impact === 'serious' || v.impact === 'critical'
-    );
-    expect(
-      serious.map((v) => `${v.id}: ${v.help} (${v.nodes.length} nodes)`),
-      'serious or critical axe violations in the appearance panel'
-    ).toEqual([]);
-  });
+  //
+  // Runs in BOTH modes, and that is the whole point. Checked only in the default
+  // dark mode this test passed with the rtylr#970 fix reverted, because in dark
+  // --accent-on-muted resolves to the same value as --accent-fg and there was
+  // never a violation there. The defect existed only in light. A mode-specific
+  // bug needs a mode-parameterised test, or the assertion is decorative.
+  for (const mode of ['Light', 'Dark'] as const) {
+    test(`has no axe violations in ${mode.toLowerCase()} mode`, async ({ page }) => {
+      const modeCard = page
+        .getByRole('button')
+        .filter({ hasText: new RegExp(`^\\s*${mode}`) })
+        .first();
+      await expect(modeCard).toBeVisible();
+      await modeCard.click();
+      await expect
+        .poll(async () =>
+          page.evaluate(() =>
+            getComputedStyle(document.documentElement).getPropertyValue('--accent-fg').trim()
+          )
+        )
+        .not.toBe('');
+
+      // Scoped to main, which is the panel. The app shell around it carries two
+      // pre-existing serious violations that this PR does not touch and must not
+      // silently absorb, so they are named here rather than excluded quietly:
+      //
+      //   .hover:opacity-90 > .text-start.flex-1   the sidebar search label,
+      //                                            #585858 on #1d1d1d, 2.36:1
+      //   .font-mono                               the Cmd-K badge,
+      //                                            #656564 on #2f2f2f, 2.29:1 at 9px
+      //
+      // Both are --flow-text-dim, which cannot reach 4.5:1 in either mode and is
+      // used as a text colour in 127 places in Flow, and the 9px one also
+      // breaches the 10px type floor globals.css documents. Tracked on
+      // rtylr#970. They are identical in light and dark, which is the tell that
+      // they belong to the shell rather than to the appearance tokens.
+      const results = await new AxeBuilder({ page })
+        .include('main')
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+        .analyze();
+      const serious = results.violations.filter(
+        (v) => v.impact === 'serious' || v.impact === 'critical'
+      );
+      expect(
+        serious.flatMap((v) =>
+          v.nodes.map((n) => `${v.id} @ ${n.target.join(' ')}: ${n.any[0]?.message ?? ''}`)
+        ),
+        `serious or critical axe violations in the appearance panel (${mode} mode)`
+      ).toEqual([]);
+    });
+  }
 
   // The browser half of A3. appearanceRtl.test.ts guards the source; this checks
   // that the rendered result actually flips and does not overflow.
