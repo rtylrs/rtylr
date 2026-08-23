@@ -49,6 +49,28 @@ test.describe('Agentic artifacts', () => {
     expect(body).toContain('Accept: text/markdown');
   });
 
+  test('llms-full.txt serves every page body in one request', async ({ request }) => {
+    // llms.txt is an index of links: an agent still has to fetch 23 URLs to
+    // read the site. This is the whole thing in one response.
+    const res = await request.get(`${LANDING_URL}/llms-full.txt`);
+    expect(res.status()).toBe(200);
+    const body = await res.text();
+
+    // One "Source:" line per page, and it must agree with pages.json
+    // rather than with a number written here.
+    const indexed = (await (await request.get(`${LANDING_URL}/pages.json`)).json()) as {
+      count: number;
+    };
+    const sources = body.match(/^Source: https:\/\/rtylr\.com/gm) ?? [];
+    expect(sources.length).toBe(indexed.count);
+
+    // And it must carry real page text, not just headings. If the body
+    // conversion ever returns empty, the file would still look plausible.
+    expect(body).toContain('rtylr POS is the point-of-sale app inside rtylr');
+    expect(body).toContain('keeps a full local copy of the menu');
+    expect(body.length).toBeGreaterThan(50_000);
+  });
+
   test('every HTML page has a markdown sibling next to it', () => {
     const htmlFiles = walkHtml(DIST_DIR).filter(
       // The generator deliberately skips the 404 page(s): the edge worker
