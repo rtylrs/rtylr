@@ -13,20 +13,29 @@ interface TaskCardProps {
   task: Task;
   compact?: boolean;
   showProject?: boolean;
-  draggable?: boolean;
-  onDragStart?: (e: React.DragEvent) => void;
   selected?: boolean;
   onSelect?: () => void;
+  /**
+   * Board-only controls (drag handle, move menu) rendered in the header.
+   *
+   * The card used to carry `draggable` and an `onDragStart` that had to be cast
+   * through `unknown` to satisfy motion.div's own drag props. HTML5 drag never
+   * fired on touch anyway, so the board owns the gesture now and passes its
+   * affordances in here.
+   */
+  controls?: React.ReactNode;
+  /** True while this card is the one being dragged, so it reads as lifted. */
+  dimmed?: boolean;
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({
   task,
   compact,
   showProject,
-  draggable,
-  onDragStart,
   selected,
   onSelect,
+  controls,
+  dimmed,
 }) => {
   const navigate = useNavigate();
   const { labels, comments, attachments, subtasks, projects } = useFlowStore();
@@ -60,10 +69,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -8 }}
         transition={{ duration: 0.18 }}
-        draggable={draggable}
-        onDragStart={
-          onDragStart as unknown as React.ComponentProps<typeof motion.div>['onDragStart']
-        }
         onClick={(e) => {
           if (e.metaKey || e.ctrlKey) {
             onSelect?.();
@@ -74,6 +79,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         onContextMenu={handleContextMenu}
         className={cn('rounded-lg cursor-pointer group relative', compact ? 'p-2.5' : 'p-3.5')}
         style={{
+          opacity: dimmed ? 0.5 : undefined,
           background: 'var(--flow-card)',
           border: selected ? '1px solid #64C5B9' : '1px solid var(--flow-border)',
           boxShadow: selected ? '0 0 0 3px var(--accent-muted)' : '0 1px 3px rgba(0,0,0,0.15)',
@@ -91,6 +97,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               {task.identifier}
             </span>
           </div>
+          <div className="flex shrink-0 items-center gap-0.5">{controls}</div>
           {showProject && (project || task.projectName) && (
             <span
               className="min-w-0 max-w-[8rem] truncate rounded-sm px-1.5 py-0.5 text-[10px] font-semibold"
