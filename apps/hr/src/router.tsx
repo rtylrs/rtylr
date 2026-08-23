@@ -67,6 +67,7 @@ const PayrollConfigSettings = React.lazy(
 );
 const Departments = React.lazy(() => import('./features/departments/Departments'));
 const EmployeeProfile = React.lazy(() => import('./features/staff/EmployeeProfile'));
+const ReportingLines = React.lazy(() => import('./features/staff/ReportingLines'));
 const TimeOff = React.lazy(() => import('./features/time-off/TimeOff'));
 const TimeOffNew = React.lazy(() => import('./features/time-off/TimeOffNew'));
 const CalendarScreen = React.lazy(() => import('./features/calendar/Calendar'));
@@ -225,6 +226,20 @@ const staffRoute = createRoute({
         <Staff />
       </Suspense>,
       'hr:staff'
+    ),
+});
+
+// Gated on hr:staff:manage rather than hr:staff: setting a reporting line widens
+// what that manager can see in Flow, so it is an administrative act, not a read.
+const reportingLinesRoute = createRoute({
+  getParentRoute: () => hrConfigRoute,
+  path: '/staff/reporting-lines',
+  component: () =>
+    wrap(
+      <Suspense fallback={<PageLoader />}>
+        <ReportingLines />
+      </Suspense>,
+      'hr:staff:manage'
     ),
 });
 
@@ -742,6 +757,7 @@ const routeTree = rootRoute.addChildren([
     newEmployeeRoute,
     employeeDetailRoute,
     staffRoute,
+    reportingLinesRoute,
     staffProfileRoute,
     shiftsRoute,
     scheduleRoute,
