@@ -113,6 +113,11 @@
    * --accent is a fill. --accent-fg is the same teal used as text or icon
    * stroke, which light mode has to darken while the fill stays put. */
   --accent-fg: #64c5b9;
+  /* Text on the --accent-muted tint. A separate token because the tint is a
+     different background from the card, and reusing --accent-fg there put 40
+     of 56 light-mode combinations under 4.5:1 (rtylr#970). Dark happens to
+     match --accent-fg for this accent at 7.12:1; light does not. */
+  --accent-on-muted: #64c5b9;
   /* Text on any accent fill. Near-black for the teal: white on #64c5b9 measures
    * 2.05:1 and fails AA at every size. The provider measures both against the
    * accent in play rather than assuming, because near-black on a dark custom
@@ -158,6 +163,7 @@
   /* The light half of the same pre-hydration fallback pair. Kept for the reason
    * given in the dark block above. */
   --accent-fg: #1f7d72;
+  --accent-on-muted: #2b7269;
   --flow-on-accent: #0a0a0a;
   --flow-focus-ring: rgba(31, 125, 114, 0.9);
 
