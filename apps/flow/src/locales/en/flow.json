@@ -789,5 +789,9 @@
     "public": "Public",
     "archived": "Archived",
     "publicHint": "Public exposes this project's name, colour, status and dates on member profiles to business colleagues. It never grants access to its tasks."
+  },
+  "projectStatus": {
+    "active": "Active",
+    "completed": "Completed"
   }
 }
