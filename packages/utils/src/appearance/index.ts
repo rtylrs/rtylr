@@ -50,8 +50,10 @@ export {
   contrastRatio,
   deriveAccentFg,
   deriveOnAccent,
+  hexLuminance,
   isValidHex,
   normalizeHex,
+  relativeLuminance,
 } from './colorMath';
 
 export { appearanceTokens } from './appearanceTokens';
