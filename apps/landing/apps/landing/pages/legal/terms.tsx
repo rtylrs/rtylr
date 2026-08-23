@@ -1,3 +1,33 @@
+/*
+ * Not extracted to i18n, deliberately. Three reasons, and none of them is
+ * that it was too much work.
+ *
+ * 1. A translated contract is a legal act, not a copy task. This document
+ *    governs what customers may do and what rtylr is liable for. An Arabic
+ *    or French version is a separate binding text that needs legal review
+ *    in that jurisdiction, not the copy review the marketing pages get.
+ *    Producing one by extraction and translation would create a document
+ *    nobody with legal standing had read.
+ *
+ * 2. The prose is not extractable as plain strings. Across the three legal
+ *    pages there are 60 paragraphs, 59 list items, 32 inline <strong> spans,
+ *    16 inline links and 35 entity references, all interleaved with the
+ *    text. Moving that into JSON means either storing markup in the locale
+ *    file or rewriting every paragraph as a <Trans> component with
+ *    placeholders. Both are real architectural decisions with their own
+ *    escaping and review problems, and neither should be made as a side
+ *    effect of a translation sweep.
+ *
+ * 3. Legal pages are the lowest-value target for this work. The plan's
+ *    instruction is to lead with the pages that sell, and to ship five
+ *    fully translated pages rather than twenty-one half-translated ones.
+ *
+ * So the frame is not translated either: an Arabic page chrome around an
+ * English contract is exactly the half-translated page the plan warns
+ * about. When /ar/ and /fr/ ship, these routes either point at the English
+ * canonical or carry a properly produced translation. That is a decision
+ * for whoever owns the legal text.
+ */
 import React from 'react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
