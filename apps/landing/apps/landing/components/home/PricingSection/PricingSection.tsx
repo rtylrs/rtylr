@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../../lib/navigation';
@@ -11,6 +12,7 @@ import styles from './PricingSection.module.scss';
 
 const PricingSection = (): React.JSX.Element => {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handleCta = (action: Plan['ctaAction']): void => {
     if (action === 'contact') {
@@ -32,17 +34,14 @@ const PricingSection = (): React.JSX.Element => {
           viewport={viewportOnce}
           variants={blurFadeInSlow}
         >
-          <span className={styles.badge}>Pricing</span>
+          <span className={styles.badge}>{t('home.pricing.badge')}</span>
           <SplitWords
             as="h2"
             className={styles.sectionTitle}
-            text={'One platform.\nEvery app included.'}
+            text={t('home.pricing.title')}
             trigger="view"
           />
-          <p className={styles.sectionDescription}>
-            All 7 apps come with every plan. What changes is how many people and locations you run.
-            Start free with no card.
-          </p>
+          <p className={styles.sectionDescription}>{t('home.pricing.description')}</p>
         </motion.div>
 
         <PricingCards onCta={handleCta} />

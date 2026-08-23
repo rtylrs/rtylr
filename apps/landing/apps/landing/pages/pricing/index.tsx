@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import { Check, Minus } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
@@ -17,23 +18,26 @@ import type { Plan } from '../../components/pricing/pricingData';
 import styles from './pricing.module.scss';
 
 interface PlanFeature {
-  name: string;
   free: boolean | string;
   pro: boolean | string;
   scale: boolean | string;
 }
 
-// What each tier includes. "Seat-based billing" used to be a row here;
-// it went out with the prices, because it describes how rtylr charges
-// and rtylr does not publish that yet.
+// Which tier includes what. The row LABELS live in the locale files under
+// pricing.compare.rows and are matched to these by index, so the array here
+// and the array there must stay the same length and order. A truth table is
+// not copy, which is why it did not move.
+//
+// "Seat-based billing" used to be a row. It went out with the prices,
+// because it describes how rtylr charges and rtylr does not publish that.
 const PLAN_FEATURES: PlanFeature[] = [
-  { name: 'All 7 apps', free: true, pro: true, scale: true },
-  { name: 'AI assistant', free: false, pro: true, scale: true },
-  { name: 'Priority support', free: false, pro: true, scale: true },
-  { name: 'SSO', free: false, pro: false, scale: true },
-  { name: 'Audit logs', free: false, pro: false, scale: true },
-  { name: 'Dedicated onboarding', free: false, pro: false, scale: true },
-  { name: 'SLA guarantee', free: false, pro: false, scale: true },
+  { free: true, pro: true, scale: true },
+  { free: false, pro: true, scale: true },
+  { free: false, pro: true, scale: true },
+  { free: false, pro: false, scale: true },
+  { free: false, pro: false, scale: true },
+  { free: false, pro: false, scale: true },
+  { free: false, pro: false, scale: true },
 ];
 
 // These render on the page and are not marked up. There was an FAQPage
@@ -48,50 +52,24 @@ const PLAN_FEATURES: PlanFeature[] = [
 // the page to back them. The first question below replaces them, because
 // a visitor who came here for a number deserves a straight answer about
 // why there isn't one.
-const FAQ_ITEMS = [
-  {
-    question: 'How much does rtylr cost?',
-    answer:
-      'rtylr has not published its prices yet. The Free plan is genuinely free and needs no card, so you can run a location on it today. For Pro or Scale, contact us and we will talk through your team size and locations. We would rather quote you honestly than put a number here we might change.',
-  },
-  {
-    question: 'Can I switch plans at any time?',
-    answer:
-      'Yes. Upgrade and the new features unlock instantly. Downgrade and the change applies at the end of the current period. Your data, team, and settings stay put.',
-  },
-  {
-    question: 'Is there a free trial for Pro?',
-    answer:
-      'Every new workspace starts with a 14-day Pro trial, and it needs no card. At day 14 it reverts to the Free plan automatically unless you tell us otherwise.',
-  },
-  {
-    question: 'What happens when I hit 10 seats on Free?',
-    answer:
-      "You're prompted to move to Pro before adding seat 11. Nothing breaks. Your data, reports, and configurations all carry over.",
-  },
-  {
-    question: 'When does Scale apply?',
-    answer:
-      'Scale is built for teams past 30 active seats. It removes the seat and location limits and adds SSO, audit logs, a dedicated success manager and an SLA.',
-  },
-  {
-    question: 'Any contract or lock-in?',
-    answer:
-      'None. You can cancel at any time, and your data is exportable while the account is open.',
-  },
-];
-
-const FeatureCell = ({ value }: { value: boolean | string }): React.JSX.Element => {
+// aria-label is read aloud, so "Included" is copy like any other.
+const FeatureCell = ({
+  value,
+  labels,
+}: {
+  value: boolean | string;
+  labels: { included: string; notIncluded: string };
+}): React.JSX.Element => {
   if (value === true) {
     return (
-      <span className={styles.checkIcon} aria-label="Included">
+      <span className={styles.checkIcon} aria-label={labels.included}>
         <Check size={16} strokeWidth={2.5} />
       </span>
     );
   }
   if (value === false) {
     return (
-      <span className={styles.dashIcon} aria-label="Not included">
+      <span className={styles.dashIcon} aria-label={labels.notIncluded}>
         <Minus size={16} strokeWidth={2} />
       </span>
     );
@@ -101,6 +79,17 @@ const FeatureCell = ({ value }: { value: boolean | string }): React.JSX.Element 
 
 const PricingPage = (): React.JSX.Element => {
   const router = useRouter();
+  const { t } = useTranslation();
+
+  const compareRows = t('pricing.compare.rows', { returnObjects: true }) as unknown as string[];
+  const cellLabels = {
+    included: t('pricing.compare.included'),
+    notIncluded: t('pricing.compare.notIncluded'),
+  };
+  const faqs = t('pricing.faqItems', { returnObjects: true }) as unknown as {
+    question: string;
+    answer: string;
+  }[];
 
   const handleCta = (action: Plan['ctaAction']): void => {
     if (action === 'contact') {
@@ -116,8 +105,8 @@ const PricingPage = (): React.JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Pricing | rtylr"
-          description="rtylr plans and what each one includes: POS, ERP, HR, CRM, Finance and Flow on every tier. Start free with no card. Prices are not published yet, so talk to us for a quote."
+          title={t('pricing.meta.title')}
+          description={t('pricing.meta.description')}
           canonical="https://rtylr.com/pricing/"
           structuredData={pricingPageSchema()}
         />
@@ -133,20 +122,16 @@ const PricingPage = (): React.JSX.Element => {
             <SplitWords
               as="h1"
               className={styles.heroTitle}
-              text={'All 7 apps.\nEvery plan.'}
+              text={t('pricing.hero.title')}
               delay={0.1}
             />
             <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-              No module upsells and no per-app licence. What changes between plans is scale.
+              {t('pricing.hero.subtitle')}
             </motion.p>
           </motion.section>
 
-          <DirectAnswer label="What do rtylr plans include?">
-            Every rtylr plan includes all seven apps: POS, ERP, CRM, HR, Finance, Flow and the
-            hardware integrations. Plans differ by scale rather than by feature, so what changes is
-            how many people and locations you run and the controls a larger team needs. Free covers
-            10 people at one location and needs no card. rtylr has not published prices for Pro and
-            Scale yet, so those are quoted.
+          <DirectAnswer label={t('pricing.directAnswer.label')}>
+            {t('pricing.directAnswer.body')}
           </DirectAnswer>
 
           {/* Plan cards */}
@@ -154,7 +139,7 @@ const PricingPage = (): React.JSX.Element => {
             <div className={styles.plansContainer}>
               {/* The plan names inside PricingCards are h3. Without an h2
                   here the page jumped h1 to h3. */}
-              <h2 className={styles.plansTitle}>What is in each plan?</h2>
+              <h2 className={styles.plansTitle}>{t('pricing.plans.title')}</h2>
               <PricingCards onCta={handleCta} />
             </div>
           </section>
@@ -168,30 +153,30 @@ const PricingPage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-              What changes between plans?
+              {t('pricing.compare.title')}
             </motion.h2>
             <motion.div className={styles.tableWrapper} variants={blurFadeIn}>
               <table className={styles.comparisonTable}>
                 <thead>
                   <tr>
-                    <th className={styles.featureCol}>Feature</th>
-                    <th>Free</th>
-                    <th className={styles.proCol}>Pro</th>
-                    <th>Scale</th>
+                    <th className={styles.featureCol}>{t('pricing.compare.feature')}</th>
+                    <th>{t('pricing.plans.free.name')}</th>
+                    <th className={styles.proCol}>{t('pricing.plans.pro.name')}</th>
+                    <th>{t('pricing.plans.scale.name')}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {PLAN_FEATURES.map((feature) => (
-                    <tr key={feature.name}>
-                      <td className={styles.featureName}>{feature.name}</td>
+                  {PLAN_FEATURES.map((feature, i) => (
+                    <tr key={compareRows[i]}>
+                      <td className={styles.featureName}>{compareRows[i]}</td>
                       <td>
-                        <FeatureCell value={feature.free} />
+                        <FeatureCell value={feature.free} labels={cellLabels} />
                       </td>
                       <td className={styles.proCol}>
-                        <FeatureCell value={feature.pro} />
+                        <FeatureCell value={feature.pro} labels={cellLabels} />
                       </td>
                       <td>
-                        <FeatureCell value={feature.scale} />
+                        <FeatureCell value={feature.scale} labels={cellLabels} />
                       </td>
                     </tr>
                   ))}
@@ -209,7 +194,7 @@ const PricingPage = (): React.JSX.Element => {
             mechanism. FaqSection uses <details>: every answer is in the
             DOM, collapsed by CSS.
           */}
-          <FaqSection title="Questions about rtylr pricing" faqs={FAQ_ITEMS} />
+          <FaqSection title={t('pricing.faq.title')} faqs={faqs} />
 
           {/* Bottom CTA */}
           <motion.section
@@ -220,18 +205,17 @@ const PricingPage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.h2 className={styles.bottomCtaTitle} variants={blurFadeIn}>
-              Start on Free. Move up when you outgrow it.
+              {t('pricing.bottom.title')}
             </motion.h2>
             <motion.p className={styles.bottomCtaSubtitle} variants={blurFadeIn}>
-              10 seats and all 7 apps are yours from day one, with no card. Book a demo if you would
-              rather see it running on your own numbers first.
+              {t('pricing.bottom.subtitle')}
             </motion.p>
             <motion.div className={styles.bottomCtaButtons} variants={blurFadeIn}>
               <button className={styles.ctaPrimary} onClick={() => handleCta('register')}>
-                Start free
+                {t('pricing.plans.free.cta')}
               </button>
               <button className={styles.ctaSecondary} onClick={() => void router.push('/demo')}>
-                Book a demo
+                {t('common.cta.bookDemo')}
               </button>
             </motion.div>
           </motion.section>
