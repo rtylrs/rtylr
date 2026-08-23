@@ -66,11 +66,9 @@ export function useKeyboardShortcuts() {
           case 'm':
             navigate({ to: '/my-issues' });
             break;
-          case 'd':
-            // Was the workspace dashboard, which never had a route of its own.
-            // All projects is the reachability replacement for it.
-            navigate({ to: '/projects' });
-            break;
+          // X6: `g d` retires with the workspace dashboard it pointed at.
+          // All projects is reachable from the sidebar; inventing a new chord
+          // for it is not what the ledger asked for.
           case 'c':
             navigate({ to: '/calendar' });
             break;
