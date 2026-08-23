@@ -205,6 +205,34 @@ describe('Open Graph images', () => {
   });
 });
 
+describe('translated copy reaches the page', () => {
+  // i18next renders the key name when a key is missing, so a typo ships as
+  // "footer.link.pos" in the middle of the footer. tests/unit/i18n-keys
+  // catches the mismatch at the source; this catches anything that gets
+  // past it and reaches the served HTML.
+  const KEY_SHAPE = /\b(?:common|footer)\.[a-z][\w.]*\b/i;
+
+  it('no page renders a raw translation key', () => {
+    const offenders = [];
+    for (const p of pages) {
+      const visible = stripScripts(read(p)).replace(/<[^>]+>/g, ' ');
+      const hit = visible.match(KEY_SHAPE);
+      if (hit) offenders.push([p, hit[0]]);
+    }
+    assert.deepEqual(offenders, [], 'untranslated keys rendered as their own name');
+  });
+
+  it('the footer still renders its English labels', () => {
+    // The extraction moved 38 strings out of the markup. If the provider
+    // ever stops resolving, the page does not crash, it just loses its
+    // navigation text, which is the kind of thing a build log never shows.
+    const visible = stripScripts(read('pos/index.html'));
+    for (const label of ['PRODUCT', 'RESOURCES', 'DEVELOPERS', 'COMPANY', 'TERMS OF USE']) {
+      assert.ok(visible.includes(label), `footer lost "${label}"`);
+    }
+  });
+});
+
 describe('preferred sources button', () => {
   // The attribute name IS the contract: Google's library finds the host
   // element by it, and a typo renders nothing at all rather than erroring.
