@@ -9,7 +9,6 @@ import {
   taskClient,
   milestoneClient,
   cycleClient,
-  insightsClient,
   notificationClient,
   settingClient,
   userClient,
@@ -17,6 +16,7 @@ import {
   taskV2,
   labelV2,
   viewV2,
+  insightsV2,
 } from '../lib/clients';
 
 // -- Types ----------------------------------------------------------------
@@ -901,20 +901,18 @@ export const flowApi = {
 
   // -- Insights -----------------------------------------------------------
 
-  getInsights: (workspaceId?: string) =>
-    flowResult<ApiInsights>(() => insightsClient.getInsights({ workspaceId })),
+  // Insights, team workload and the roadmap are all business-wide on v2 and
+  // take no parameters at all.
+  getInsights: () => flowResult<ApiInsights>(() => insightsV2.getInsights({})),
 
   // -- Team workload ------------------------------------------------------
 
-  getTeamWorkload: (workspaceId?: string) =>
-    flowResult<{ members: ApiTeamWorkload[] }>(() =>
-      insightsClient.getTeamWorkload({ workspaceId })
-    ),
+  getTeamWorkload: () =>
+    flowResult<{ members: ApiTeamWorkload[] }>(() => insightsV2.getTeamWorkload({})),
 
   // -- Roadmap ------------------------------------------------------------
 
-  getRoadmap: (workspaceId?: string) =>
-    flowResult<{ projects: ApiRoadmap[] }>(() => insightsClient.getRoadmap({ workspaceId })),
+  getRoadmap: () => flowResult<{ projects: ApiRoadmap[] }>(() => insightsV2.getRoadmap({})),
 
   // -- Notifications ------------------------------------------------------
 

@@ -7,7 +7,6 @@ import { ProjectServiceClient } from '@voxire/voxie/flow/project/v1/client';
 import { TaskServiceClient } from '@voxire/voxie/flow/task/v1/client';
 import { MilestoneServiceClient } from '@voxire/voxie/flow/milestone/v1/client';
 import { CycleServiceClient } from '@voxire/voxie/flow/cycle/v1/client';
-import { InsightsServiceClient } from '@voxire/voxie/flow/insights/v1/client';
 import { NotificationServiceClient } from '@voxire/voxie/flow/notification/v1/client';
 import { SettingServiceClient } from '@voxire/voxie/flow/setting/v1/client';
 // v2: business-scoped contracts (workspace removal)
@@ -30,7 +29,6 @@ export const projectClient = createOneKitClient(ProjectServiceClient, 'flow');
 export const taskClient = createOneKitClient(TaskServiceClient, 'flow');
 export const milestoneClient = createOneKitClient(MilestoneServiceClient, 'flow');
 export const cycleClient = createOneKitClient(CycleServiceClient, 'flow');
-export const insightsClient = createOneKitClient(InsightsServiceClient, 'flow');
 export const notificationClient = createOneKitClient(NotificationServiceClient, 'flow');
 export const settingClient = createOneKitClient(SettingServiceClient, 'flow');
 
