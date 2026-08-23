@@ -1,0 +1,274 @@
+import { describe, it, before } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync, existsSync } from 'node:fs';
+import { globSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+
+// ---------------------------------------------------------------------------
+// Standing gates, asserted against the build output rather than the source.
+//
+// The distinction matters and has been got wrong twice on this project:
+// build-time artifacts do not exist in the source tree, and a source-tree
+// grep concluded "missing" both times. Everything here reads dist/landing.
+//
+// These are the gates the SEO plan lists as non-negotiable, plus the two
+// that were actually violated when they were first checked:
+//
+//   - exactly one <h1> per page, no skipped heading levels. Seven pages
+//     failed this. Two of them failed because of a shared footer whose
+//     column labels were <h3>, so /demo/ and /404/ went h1 -> h3 with
+//     nothing wrong on the pages themselves.
+//   - no price asserted in JSON-LD anywhere. rtylr publishes no prices.
+//   - no FAQPage. Google removed the rich result in May 2026, and the
+//     markup here had become the only copy of the answers in the served
+//     HTML, which made deleting it a content regression until the visible
+//     sections landed.
+//   - FAQ answers present in the visible HTML, not only in a script tag.
+// ---------------------------------------------------------------------------
+
+const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const OUT = path.join(REPO, 'dist/landing');
+
+const LD = /<script type="application\/ld\+json"[^>]*>(.*?)<\/script>/gs;
+const HEADING = /<h([1-6])[^>]*>/g;
+
+let pages = [];
+
+before(() => {
+  assert.ok(
+    existsSync(OUT),
+    `no build output at ${OUT}. Run \`pnpm build\` before \`pnpm test:unit\`.`
+  );
+  pages = globSync('**/index.html', { cwd: OUT }).sort();
+  // A silent zero here would make every test below vacuously pass, which
+  // is the exact "check that cannot fail" this project keeps hitting.
+  assert.ok(pages.length >= 20, `expected 20+ exported pages, found ${pages.length}`);
+});
+
+const read = (p) => readFileSync(path.join(OUT, p), 'utf8');
+const jsonLd = (html) => [...html.matchAll(LD)].map((m) => m[1]);
+const stripScripts = (html) => html.replace(/<script.*?<\/script>/gs, '');
+
+describe('heading structure', () => {
+  it('every page has exactly one h1', () => {
+    const offenders = pages
+      .map((p) => [p, [...read(p).matchAll(HEADING)].filter((m) => m[1] === '1').length])
+      .filter(([, n]) => n !== 1);
+    assert.deepEqual(offenders, [], 'pages whose h1 count is not 1');
+  });
+
+  it('no page skips a heading level', () => {
+    const offenders = [];
+    for (const p of pages) {
+      const levels = [...read(p).matchAll(HEADING)].map((m) => Number(m[1]));
+      const skips = levels
+        .slice(1)
+        .map((lvl, i) => [levels[i], lvl])
+        .filter(([prev, lvl]) => lvl > prev + 1);
+      if (skips.length) offenders.push([p, skips[0]]);
+    }
+    assert.deepEqual(offenders, [], 'pages that jump more than one heading level');
+  });
+});
+
+describe('structured data', () => {
+  it('every page emits at least one JSON-LD block', () => {
+    const missing = pages.filter((p) => jsonLd(read(p)).length === 0);
+    assert.deepEqual(missing, [], 'pages with no structured data');
+  });
+
+  it('every JSON-LD block parses', () => {
+    for (const p of pages) {
+      for (const block of jsonLd(read(p))) {
+        assert.doesNotThrow(() => JSON.parse(block), `invalid JSON-LD on ${p}`);
+      }
+    }
+  });
+
+  it('no page asserts a price', () => {
+    const offenders = [];
+    for (const p of pages) {
+      for (const block of jsonLd(read(p))) {
+        for (const key of ['"price"', '"lowPrice"', '"highPrice"', '"priceCurrency"', '"Offer"']) {
+          if (block.includes(key)) offenders.push([p, key]);
+        }
+      }
+    }
+    assert.deepEqual(offenders, [], 'rtylr publishes no prices, so none may be marked up');
+  });
+
+  it('no page emits FAQPage', () => {
+    const offenders = pages.filter((p) => jsonLd(read(p)).some((b) => b.includes('"FAQPage"')));
+    assert.deepEqual(offenders, [], 'the FAQ rich result was removed by Google in May 2026');
+  });
+
+  it('a legal page is not a software application', () => {
+    const types = jsonLd(read('legal/privacy-policy/index.html'))
+      .flatMap((b) => {
+        const d = JSON.parse(b);
+        return d['@graph'] ?? [d];
+      })
+      .map((n) => n['@type']);
+    assert.ok(types.includes('WebPage'));
+    assert.ok(!types.includes('SoftwareApplication'), 'privacy policy claimed to be an app');
+    assert.ok(!types.includes('Product'));
+  });
+
+  it('each module page declares its own applicationSubCategory', () => {
+    const seen = new Map();
+    for (const mod of ['pos', 'erp', 'crm', 'hr', 'finance', 'flow']) {
+      const sub = jsonLd(read(`${mod}/index.html`))
+        .flatMap((b) => {
+          const d = JSON.parse(b);
+          return d['@graph'] ?? [d];
+        })
+        .find((n) => n.applicationSubCategory)?.applicationSubCategory;
+      assert.ok(sub, `${mod} has no applicationSubCategory`);
+      seen.set(mod, sub);
+    }
+    // Distinct, or the sub-category conveys nothing: every one of these
+    // pages already shared an identical applicationCategory.
+    assert.equal(new Set(seen.values()).size, seen.size, `sub-categories collide: ${[...seen]}`);
+  });
+});
+
+describe('FAQ answers reach a crawler', () => {
+  // The point of removing FAQPage was that the questions were marked up
+  // and rendered nowhere. If an answer is only inside a script tag, the
+  // regression is back in the other direction.
+  const CASES = [
+    ['pricing/index.html', 'Upgrade and the new features unlock instantly'],
+    ['pos/index.html', 'keeps a full local copy of the menu'],
+    ['erp/index.html', 'stock transfers between locations'],
+    ['crm/index.html', 'loyalty points and campaign touchpoints'],
+    ['hr/index.html', 'tip pooling, minor work-hour limits'],
+    ['finance/index.html', 'balance sheet and cash flow reports'],
+    ['flow/index.html', 'boards, lists, timeline views, cycles'],
+    ['index.html', 'stops stitching a register, a spreadsheet'],
+  ];
+
+  for (const [page, needle] of CASES) {
+    it(`${page} carries its answer text outside any script tag`, () => {
+      assert.ok(
+        stripScripts(read(page)).includes(needle),
+        `answer text missing from the visible HTML of ${page}`
+      );
+    });
+  }
+});
+
+describe('Open Graph images', () => {
+  // HelmetContainer derives /og/<slug>.png from the canonical, and
+  // generate-og-images.mjs derives the same slug from the export path.
+  // Two copies of one rule, which is the shape that drifts. This asserts
+  // the declared image is a file that exists, so a mismatch fails here
+  // instead of rendering a broken unfurl on a shared link.
+  const ogOf = (html) => html.match(/<meta property="og:image" content="([^"]+)"/)?.[1];
+
+  it('every page declares an og:image', () => {
+    const missing = pages.filter((p) => !ogOf(read(p)));
+    assert.deepEqual(missing, [], 'pages with no og:image');
+  });
+
+  it("every declared og:image exists in the build output", () => {
+    const broken = [];
+    for (const p of pages) {
+      const url = ogOf(read(p));
+      const rel = url.replace('https://rtylr.com/', '');
+      if (!existsSync(path.join(OUT, rel))) broken.push([p, url]);
+    }
+    assert.deepEqual(broken, [], 'og:image URLs pointing at files that do not exist');
+  });
+
+  it('no two indexable pages share the same og:image', () => {
+    // The defect this replaces: one og-default.png on all 24 pages, so
+    // every shared link looked the same. 404 is allowed the default.
+    const byImage = new Map();
+    for (const p of pages.filter((x) => x !== '404/index.html')) {
+      const url = ogOf(read(p));
+      byImage.set(url, [...(byImage.get(url) ?? []), p]);
+    }
+    const shared = [...byImage].filter(([, ps]) => ps.length > 1);
+    assert.deepEqual(shared, [], 'pages sharing an OG image');
+  });
+
+  it('the og image dimensions match the declared width and height', () => {
+    // 1200x630 is asserted in the meta tags, so the PNGs must be that.
+    // Read the IHDR chunk rather than trusting the generator.
+    for (const p of pages) {
+      const rel = ogOf(read(p)).replace('https://rtylr.com/', '');
+      const buf = readFileSync(path.join(OUT, rel));
+      assert.equal(buf.readUInt32BE(16), 1200, `${rel} width`);
+      assert.equal(buf.readUInt32BE(20), 630, `${rel} height`);
+    }
+  });
+});
+
+describe('preferred sources button', () => {
+  // The attribute name IS the contract: Google's library finds the host
+  // element by it, and a typo renders nothing at all rather than erroring.
+  // So assert the exact string, not a fuzzy match.
+  //
+  // What this cannot check is that Google's library still renders into it,
+  // because that needs the network. Verified by hand on 2026-08-23: the
+  // library returned 200, fetched addpreferredsourcebuttoniframe, and
+  // injected a 60px child into the host div.
+  it('every page hosts the button with the documented attribute', () => {
+    const missing = pages.filter((p) => !read(p).includes('google-add-preferred-source-btn'));
+    assert.deepEqual(missing, [], 'pages missing the preferred sources host element');
+  });
+
+  it('every page loads the publisher library', () => {
+    const missing = pages.filter(
+      (p) => !read(p).includes('https://news.google.com/swg/js/v1/publisher.js')
+    );
+    assert.deepEqual(missing, [], 'pages where the button host has no library to render it');
+  });
+
+  it('hosts exactly one button per page', () => {
+    for (const p of pages) {
+      const n = read(p).split('google-add-preferred-source-btn').length - 1;
+      assert.equal(n, 1, `${p} has ${n} button hosts`);
+    }
+  });
+});
+
+describe('canonical URLs', () => {
+  // /404/ is the one page that should not claim a canonical, because it
+  // is not a page anyone should land on deliberately. It is excluded here
+  // and held to the stricter rule below instead.
+  const INDEXABLE = () => pages.filter((p) => p !== '404/index.html');
+
+  it('every indexable page declares a canonical on rtylr.com', () => {
+    const offenders = [];
+    for (const p of INDEXABLE()) {
+      const m = read(p).match(/<link rel="canonical" href="([^"]+)"/);
+      if (!m || !m[1].startsWith('https://rtylr.com')) offenders.push([p, m?.[1] ?? null]);
+    }
+    assert.deepEqual(offenders, [], 'pages with a missing or off-host canonical');
+  });
+
+  it('every canonical ends in a trailing slash, matching the served URL', () => {
+    // trailingSlash: true in next.config.js. A canonical without the
+    // slash points at a URL that redirects, which is a self-inflicted
+    // redirect on every page.
+    const offenders = [];
+    for (const p of INDEXABLE()) {
+      const href = read(p).match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+      if (href && !href.endsWith('/')) offenders.push([p, href]);
+    }
+    assert.deepEqual(offenders, [], 'canonicals that do not match the served trailing-slash URL');
+  });
+
+  it('404 is noindex and claims no canonical', () => {
+    const html = read('404/index.html');
+    assert.match(html, /<meta name="robots" content="noindex/);
+    assert.ok(!/<link rel="canonical"/.test(html), '404 should not claim to be canonical');
+  });
+
+  it('no indexable page carries a noindex', () => {
+    const offenders = INDEXABLE().filter((p) => /content="noindex/.test(read(p)));
+    assert.deepEqual(offenders, [], 'pages accidentally excluded from the index');
+  });
+});
