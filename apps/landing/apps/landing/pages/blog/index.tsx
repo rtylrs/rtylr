@@ -19,7 +19,7 @@ const BlogPage = (): JSX.Element => {
       <MainLayout>
         <HelmetContainer
           title="Blog · POS, inventory & operations playbooks | rtylr"
-          description="Operator playbooks on POS, inventory, payroll, and running an all-in-one business platform — concrete tactics for restaurants, retail, and grocery."
+          description="Operator playbooks on POS, inventory, payroll, and running an all-in-one business platform: concrete tactics for restaurants, retail, and grocery."
           canonical="https://rtylr.com/blog/"
           structuredData={blogIndexSchema({
             description:

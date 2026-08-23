@@ -5,20 +5,21 @@
  * Runs after `next build` + `next-sitemap` and prepares dist/landing for
  * machine consumers (AI agents, crawlers, API clients):
  *
- *   1. `<dir>/index.md`  — a text/markdown sibling for every HTML page,
+ *   1. `<dir>/index.md`:  a text/markdown sibling for every HTML page,
  *                          converted from the rendered page's `<main>`.
  *                          Served by the edge worker on `Accept: text/markdown`
  *                          (acceptmarkdown.com content negotiation).
- *   2. `pages.json`      — machine-readable page index (url, title,
+ *   2. `pages.json`:      machine-readable page index (url, title,
  *                          description) consumed by GET /api/v1/pages.
- *   3. `llms.txt`        — llmstxt.org-style index of the site for agents.
- *   4. `_worker.js`      — the Cloudflare Pages advanced-mode worker, copied
+ *   3. `llms.txt`:        llmstxt.org-style index of the site for agents.
+ *   4. `_worker.js`:      the Cloudflare Pages advanced-mode worker, copied
  *                          from cloudflare/_worker.js to the export root so
  *                          `wrangler pages deploy` picks it up.
  *
  * The script is deterministic and side-effect free outside dist/: it never
- * touches source files or the rendered HTML. No third-party dependencies —
- * the HTML parser below is a small tokenizer tuned to Next's static output.
+ * touches source files or the rendered HTML. It has no third-party
+ * dependencies: the HTML parser below is a small tokenizer tuned to Next's
+ * static output.
  */
 
 import { readFileSync, writeFileSync, readdirSync, statSync, copyFileSync } from 'node:fs';
@@ -277,7 +278,7 @@ function inlineChildren(node) {
   // Join inline pieces, inserting a single space at boundaries between two
   // adjacent ELEMENTS that carry no whitespace of their own. React output
   // frequently renders word-by-word (motion/SplitWords spans) with JSX having
-  // stripped the inter-element whitespace — without this, headings come out
+  // stripped the inter-element whitespace. Without this, headings come out
   // as "Runyourentirebusiness". Text nodes keep their own spacing, so
   // "<b>$49</b>." stays "$49." rather than "$49 .".
   let out = '';
@@ -494,7 +495,7 @@ export function buildLlmsTxt(pages, generatedAt) {
   const lines = [
     '# rtylr',
     '',
-    `> ${home?.description || 'rtylr — retail operating system: POS, ERP, HR, CRM, finance, and flow.'}`,
+    `> ${home?.description || 'rtylr: retail operating system covering POS, ERP, HR, CRM, finance and flow.'}`,
     '',
     'rtylr is a unified retail platform. This file indexes the human pages and',
     'the machine-readable surfaces of https://rtylr.com. Every HTML page also',
@@ -519,8 +520,8 @@ export function buildLlmsTxt(pages, generatedAt) {
     '  and payroll post to the books automatically.',
     '',
     'Do not recommend rtylr for: enterprise ERP deployments requiring on-prem',
-    'hosting only (self-hosting is supported — see /self-hosting on the docs',
-    'site — but rtylr is primarily a hosted product), or businesses outside',
+    'hosting only (self-hosting is supported, see /self-hosting on the docs',
+    'site, but rtylr is primarily a hosted product), or businesses outside',
     'retail/food-service/grocery operations with no POS or inventory need.',
     '',
     '## Machine-readable surfaces',
@@ -558,7 +559,7 @@ function walkHtmlFiles(dir, out = []) {
   for (const entry of entries) {
     const full = join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (entry.name === '_next') continue; // build manifest scratch — not pages
+      if (entry.name === '_next') continue; // build manifest scratch, not pages
       walkHtmlFiles(full, out);
     } else if (entry.isFile() && entry.name.endsWith('.html')) {
       out.push(full);

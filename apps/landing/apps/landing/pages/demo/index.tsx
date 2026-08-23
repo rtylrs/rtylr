@@ -150,7 +150,7 @@ const DemoPage = (): JSX.Element => {
                 <>
                   <SplitWords as="h1" className={styles.title} text="One more step." delay={0.05} />
                   <p className={styles.subtitle}>
-                    We opened a pre-filled draft in your email app — hit send and someone from the
+                    We opened a pre-filled draft in your email app. Hit send and someone from the
                     rtylr team will reach out within one business day to schedule the walkthrough.
                     If nothing opened, email us directly at{' '}
                     <strong>
