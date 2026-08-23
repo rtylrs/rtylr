@@ -2,7 +2,19 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { Eye, Plus, Flame, Timer, CheckCircle2, Pencil, Trash2, Check, X } from 'lucide-react';
+import {
+  Eye,
+  Plus,
+  Flame,
+  Timer,
+  CheckCircle2,
+  Pencil,
+  Trash2,
+  Check,
+  X,
+  Lock,
+  Users,
+} from 'lucide-react';
 import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
@@ -58,6 +70,26 @@ const Views: React.FC = () => {
           setEditingId(null);
         },
         onError: () => toast.error(t('toasts.view.renameFailed')),
+      }
+    );
+  };
+
+  // An absent visibility means shared: that is the column default and how every
+  // view behaved before the field existed, so an older response must not read as
+  // private.
+  const isPrivate = (v: SavedView): boolean => v.visibility === 'private';
+
+  const toggleVisibility = (v: SavedView, e: React.MouseEvent): void => {
+    e.stopPropagation();
+    const next = isPrivate(v) ? 'shared' : 'private';
+    updateView.mutate(
+      { id: v.id, data: { visibility: next } },
+      {
+        onSuccess: () =>
+          toast.success(
+            next === 'private' ? t('toasts.view.madePrivate') : t('toasts.view.madeShared')
+          ),
+        onError: () => toast.error(t('toasts.view.visibilityFailed')),
       }
     );
   };
@@ -171,6 +203,26 @@ const Views: React.FC = () => {
                       <span className="truncate">{v.name}</span>
                     </button>
                     <div className="flex items-center gap-0.5 pr-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        onClick={(e) => toggleVisibility(v, e)}
+                        disabled={updateView.isPending}
+                        className="h-5 w-5 flex items-center justify-center rounded-sm hover:bg-[var(--flow-hover)] disabled:opacity-50"
+                        style={{ color: 'var(--flow-text-dim)' }}
+                        title={
+                          isPrivate(v)
+                            ? t('flow.views.makeSharedTooltip')
+                            : t('flow.views.makePrivateTooltip')
+                        }
+                        aria-label={
+                          isPrivate(v)
+                            ? t('flow.views.makeSharedLabel')
+                            : t('flow.views.makePrivateLabel')
+                        }
+                        aria-pressed={isPrivate(v)}
+                      >
+                        {isPrivate(v) ? <Lock size={9} /> : <Users size={9} />}
+                      </button>
                       <button
                         type="button"
                         onClick={(e) => startEdit(v, e)}

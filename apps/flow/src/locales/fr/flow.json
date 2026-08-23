@@ -590,7 +590,11 @@
     "confirmRenameLabel": "Confirmer le renommage",
     "cancelRenameLabel": "Annuler le renommage",
     "renameLabel": "Renommer",
-    "deleteLabel": "Supprimer"
+    "deleteLabel": "Supprimer",
+    "makePrivateTooltip": "Rendre cette vue privée",
+    "makeSharedTooltip": "Partager cette vue avec l'entreprise",
+    "makePrivateLabel": "Rendre la vue privée",
+    "makeSharedLabel": "Partager la vue"
   },
   "calendar": {
     "heading": "Calendrier",

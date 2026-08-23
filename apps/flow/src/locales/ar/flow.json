@@ -605,7 +605,11 @@
     "confirmRenameLabel": "تأكيد إعادة التسمية",
     "cancelRenameLabel": "إلغاء إعادة التسمية",
     "renameLabel": "إعادة تسمية",
-    "deleteLabel": "حذف"
+    "deleteLabel": "حذف",
+    "makePrivateTooltip": "اجعل هذا العرض خاصًا",
+    "makeSharedTooltip": "شارك هذا العرض مع الشركة",
+    "makePrivateLabel": "اجعل العرض خاصًا",
+    "makeSharedLabel": "شارك العرض"
   },
   "calendar": {
     "heading": "التقويم",
