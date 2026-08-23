@@ -6,8 +6,6 @@ import Link from 'next/link';
 
 import { Button } from '@voxire/components';
 import { APP_URLS, ASSETS, resolveAuthUrl } from '@voxire/config';
-import { selectLanguage } from '../../../../services/i18next';
-import { getCookie } from '../../../../lib/cookies';
 import { navigateExternal } from '../../../../lib/navigation';
 import styles from './HeaderDesktop.module.scss';
 
@@ -81,8 +79,6 @@ const HeaderDesktop: React.FC = () => {
   const [featuresDropdown, setFeaturesDropdown] = useState(false);
   const [solutionsDropdown, setSolutionsDropdown] = useState(false);
   const [resourcesDropdown, setResourcesDropdown] = useState(false);
-  const [languageDropdown, setLanguageDropdown] = useState(false);
-  const [language, setLanguage] = useState<string>('en');
 
   useEffect(() => {
     let ticking = false;
@@ -106,13 +102,6 @@ const HeaderDesktop: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const storedLanguage = getCookie('language');
-    if (storedLanguage) {
-      setLanguage(storedLanguage);
-    }
-  }, []);
-
-  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
 
@@ -127,10 +116,6 @@ const HeaderDesktop: React.FC = () => {
       if (resourcesDropdown && !target.closest('.resources-dropdown-container')) {
         setResourcesDropdown(false);
       }
-
-      if (languageDropdown && !target.closest('.lang-dropdown-container')) {
-        setLanguageDropdown(false);
-      }
     };
 
     const handleEscape = (event: KeyboardEvent) => {
@@ -138,7 +123,6 @@ const HeaderDesktop: React.FC = () => {
         setFeaturesDropdown(false);
         setSolutionsDropdown(false);
         setResourcesDropdown(false);
-        setLanguageDropdown(false);
       }
     };
 
@@ -148,7 +132,7 @@ const HeaderDesktop: React.FC = () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [featuresDropdown, solutionsDropdown, resourcesDropdown, languageDropdown]);
+  }, [featuresDropdown, solutionsDropdown, resourcesDropdown]);
 
   const toggleFeaturesDropdown = useCallback(() => {
     setFeaturesDropdown((prev) => !prev);
@@ -166,16 +150,6 @@ const HeaderDesktop: React.FC = () => {
     setResourcesDropdown((prev) => !prev);
     setFeaturesDropdown(false);
     setSolutionsDropdown(false);
-  }, []);
-
-  const toggleLanguageDropdown = useCallback(() => {
-    setLanguageDropdown((prev) => !prev);
-  }, []);
-
-  const handleLanguageChange = useCallback((lang: string) => {
-    selectLanguage(lang);
-    setLanguage(lang);
-    setLanguageDropdown(false);
   }, []);
 
   const handleSignupClick = useCallback(() => {
@@ -368,21 +342,13 @@ const HeaderDesktop: React.FC = () => {
       </div>
 
       <div className={styles['header-right']}>
-        <div
-          className={cn(styles['language-selector-container'], 'lang-dropdown-container')}
-          style={{ display: 'none' }}
-        >
-          <span className={styles['language-selector']} onClick={toggleLanguageDropdown}>
-            {language === 'en' ? 'English' : language === 'ar' ? 'عربي' : 'Français'}
-          </span>
-          {languageDropdown && (
-            <div className={styles['languages-dropdown']}>
-              <span onClick={() => handleLanguageChange('en')}>English</span>
-              <span onClick={() => handleLanguageChange('ar')}>عربي</span>
-              <span onClick={() => handleLanguageChange('fr')}>Français</span>
-            </div>
-          )}
-        </div>
+        {/* No language switcher until Phase 2 wires i18n. It used to be
+            rendered here behind style={{ display: 'none' }}, which hid it
+            from a browser and from nobody else: the build's markdown twins
+            are extracted from the DOM text, so the word "English" appeared
+            under the H1 of 20 of the 23 pages we serve to AI agents. Git
+            has the markup for when the switcher can actually switch
+            something. */}
 
         <div className={styles['header-buttons']}>
           <Button onClick={handleLoginClick} variant="soft" width="140px" height="40px">

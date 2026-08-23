@@ -4,8 +4,6 @@ import { HiMenu, HiX, HiChevronDown, HiChevronRight } from 'react-icons/hi';
 import { AnimatePresence, motion } from 'motion/react';
 import { Button } from '@voxire/components';
 import { APP_URLS, ASSETS } from '@voxire/config';
-import { selectLanguage } from '../../../../services/i18next';
-import { getCookie } from '../../../../lib/cookies';
 import { navigateExternal } from '../../../../lib/navigation';
 import styles from './HeaderMobile.module.scss';
 
@@ -15,7 +13,6 @@ const HeaderMobile: React.FC = () => {
   const [featuresDropdown, setFeaturesDropdown] = useState(false);
   const [solutionsDropdown, setSolutionsDropdown] = useState(false);
   const [resourcesDropdown, setResourcesDropdown] = useState(false);
-  const [language, setLanguage] = useState<string>('en');
 
   useEffect(() => {
     let ticking = false;
@@ -36,13 +33,6 @@ const HeaderMobile: React.FC = () => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const storedLanguage = getCookie('language');
-    if (storedLanguage) {
-      setLanguage(storedLanguage);
-    }
   }, []);
 
   // Lock body scroll when menu is open
@@ -86,11 +76,6 @@ const HeaderMobile: React.FC = () => {
     setResourcesDropdown((prev) => !prev);
     setFeaturesDropdown(false);
     setSolutionsDropdown(false);
-  }, []);
-
-  const handleLanguageChange = useCallback((lang: string) => {
-    selectLanguage(lang);
-    setLanguage(lang);
   }, []);
 
   const handleLoginClick = useCallback(() => {
@@ -363,26 +348,9 @@ const HeaderMobile: React.FC = () => {
                 Sign Up
               </Button>
             </div>
-            <div className={styles['mobile-language-selector']} style={{ display: 'none' }}>
-              <span
-                onClick={() => handleLanguageChange('en')}
-                className={language === 'en' ? styles.active : ''}
-              >
-                English
-              </span>
-              <span
-                onClick={() => handleLanguageChange('ar')}
-                className={language === 'ar' ? styles.active : ''}
-              >
-                عربي
-              </span>
-              <span
-                onClick={() => handleLanguageChange('fr')}
-                className={language === 'fr' ? styles.active : ''}
-              >
-                Français
-              </span>
-            </div>
+            {/* No language switcher until Phase 2 wires i18n. See the
+                note in HeaderDesktop.tsx: display:none hid it from
+                browsers and not from the markdown twins. */}
           </div>
           </motion.div>
         )}
