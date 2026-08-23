@@ -21,5 +21,9 @@
   "due": "Due",
   "status": "Status",
   "schedulingSoon": "Bill scheduling coming soon",
-  "schedule": "Schedule"
+  "schedule": "Schedule",
+  "paySelected": "Pay selected ({{count}})",
+  "markedPaid": "{{count}} marked as paid",
+  "markPaidFailed": "Could not mark {{count}} as paid",
+  "markPaidPartial": "{{paid}} marked as paid, {{failed}} failed"
 }
