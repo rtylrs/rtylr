@@ -64,20 +64,14 @@ describe('useViews (remote mode)', () => {
     (useFlowStore as any).mockReturnValue({ activeWorkspaceId: 'ws-store' });
   });
 
-  it('falls back to the active workspace from the store when no workspaceId is given', async () => {
+  // Saved views are business-shared, so the list takes no scope at all. These
+  // two cases used to assert a store fallback and an explicit override.
+  it('asks for views without a workspace scope', async () => {
     (flowApi.getViews as any).mockResolvedValue({ views: [] });
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useViews(), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(flowApi.getViews).toHaveBeenCalledWith('ws-store');
-  });
-
-  it('uses an explicit workspaceId over the store value', async () => {
-    (flowApi.getViews as any).mockResolvedValue({ views: [] });
-    const { wrapper } = createWrapper();
-    const { result } = renderHook(() => useViews('ws-explicit'), { wrapper });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(flowApi.getViews).toHaveBeenCalledWith('ws-explicit');
+    expect(flowApi.getViews).toHaveBeenCalledWith();
   });
 
   it('unwraps the enveloped { views: [...] } shape', async () => {
@@ -105,28 +99,18 @@ describe('useCreateView', () => {
     (useFlowStore as any).mockReturnValue({ activeWorkspaceId: 'ws-store' });
   });
 
-  it('defaults workspaceId to the active workspace when the caller omits it', async () => {
+  // Creating a view no longer stamps a workspace on it, so the payload reaches
+  // the API exactly as the caller wrote it. The two cases this replaces covered
+  // the store default and an explicit override of it.
+  it('sends the payload through untouched and invalidates views', async () => {
     (flowApi.createView as any).mockResolvedValue({ id: 'v-new' });
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useCreateView(), { wrapper });
     const input = { name: 'New view', icon: 'star' };
     await act(() => result.current.mutateAsync(input));
-    expect(flowApi.createView).toHaveBeenCalledWith({ workspaceId: 'ws-store', ...input });
+    expect(flowApi.createView).toHaveBeenCalledWith(input);
     expect(spy).toHaveBeenCalledWith({ queryKey: ['views'] });
-  });
-
-  it('lets an explicit workspaceId on the payload override the active workspace default', async () => {
-    (flowApi.createView as any).mockResolvedValue({ id: 'v-new' });
-    const { wrapper } = createWrapper();
-    const { result } = renderHook(() => useCreateView(), { wrapper });
-    await act(() =>
-      result.current.mutateAsync({ workspaceId: 'ws-explicit', name: 'New view' } as any)
-    );
-    expect(flowApi.createView).toHaveBeenCalledWith({
-      workspaceId: 'ws-explicit',
-      name: 'New view',
-    });
   });
 
   it('shows an error toast and does not invalidate when the create call fails', async () => {
