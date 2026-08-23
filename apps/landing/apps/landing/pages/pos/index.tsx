@@ -244,10 +244,15 @@ const POSPage = (): JSX.Element => {
                       feature: 'Offline mode (full service, no internet)',
                       values: ['yes', 'no', 'partial', 'partial'],
                     },
-                    {
-                      feature: 'Per-location monthly fee',
-                      values: ['$0', '$69–165', '$0', '$89/register'],
-                    },
+                    // A "Per-location monthly fee" row used to sit here,
+                    // reading $0 for rtylr against $69 to $165 and
+                    // $89/register for two competitors. It came out with the
+                    // rest of the placeholder pricing: rtylr publishes no
+                    // price, so $0 was the same false claim being removed
+                    // everywhere else, and quoting a competitor's rate
+                    // undated and uncited is the one thing the comparison
+                    // rules here forbid outright. A priced comparison needs
+                    // their published pricing page, cited, with the date read.
                     {
                       feature: 'Payment processing locked in',
                       values: ['no', 'yes', 'yes', 'yes'],
