@@ -5,12 +5,16 @@ import { ASSETS, APP_URLS, resolveAuthUrl } from '@voxire/config';
 import { ManageConsentLink } from '@voxire/consent';
 import React from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { fadeInUp, staggerContainer, viewportOnce } from '../../../lib/animations';
 import { navigateExternal } from '../../../lib/navigation';
 import styles from './Footer.module.scss';
 
 const Footer: React.FC = () => {
   const router = useRouter();
+  // First t() call sites in this repo. The provider has been mounted in
+  // _app.tsx since the site launched and nothing consumed it.
+  const { t } = useTranslation();
   const isDemoPage = router.pathname === '/demo';
 
   const handleSignupClick = () => {
@@ -23,54 +27,58 @@ const Footer: React.FC = () => {
 
   const footerSections = [
     {
-      title: 'PRODUCT',
+      id: 'product',
+      title: t('footer.group.product'),
       links: [
-        { to: '/pos', label: 'POS' },
-        { to: '/erp', label: 'ERP' },
-        { to: '/hr', label: 'HR' },
-        { to: '/crm', label: 'CRM' },
-        { to: '/finance', label: 'Finance' },
-        { to: '/flow', label: 'Flow' },
-        { to: '/pricing', label: 'Pricing' },
-        { to: '/hardware', label: 'Hardware' },
+        { to: '/pos', label: t('footer.link.pos') },
+        { to: '/erp', label: t('footer.link.erp') },
+        { to: '/hr', label: t('footer.link.hr') },
+        { to: '/crm', label: t('footer.link.crm') },
+        { to: '/finance', label: t('footer.link.finance') },
+        { to: '/flow', label: t('footer.link.flow') },
+        { to: '/pricing', label: t('footer.link.pricing') },
+        { to: '/hardware', label: t('footer.link.hardware') },
       ],
     },
     {
-      title: 'RESOURCES',
+      id: 'resources',
+      title: t('footer.group.resources'),
       links: [
-        { to: '/blog', label: 'Blog' },
+        { to: '/blog', label: t('footer.link.blog') },
         {
           to: 'https://docs.rtylr.com',
-          label: 'Documentation',
+          label: t('footer.link.documentation'),
           external: true,
         },
         {
           to: 'https://docs.rtylr.com/self-hosting',
-          label: 'Self Host rtylr',
+          label: t('footer.link.selfHost'),
           external: true,
         },
-        { to: '/integrations', label: 'Integrations' },
-        { to: '/support', label: 'Help Center' },
+        { to: '/integrations', label: t('footer.link.integrations') },
+        { to: '/support', label: t('footer.link.helpCenter') },
       ],
     },
     {
-      title: 'DEVELOPERS',
+      id: 'developers',
+      title: t('footer.group.developers'),
       links: [
         {
           to: 'https://docs.rtylr.com',
-          label: 'Documentation',
+          label: t('footer.link.documentation'),
           external: true,
         },
-        { to: 'https://status.rtylr.com', label: 'Status', external: true },
+        { to: 'https://status.rtylr.com', label: t('footer.link.status'), external: true },
       ],
     },
     {
-      title: 'COMPANY',
+      id: 'company',
+      title: t('footer.group.company'),
       links: [
-        { to: '/about', label: 'About' },
-        { to: 'https://voxire.com/careers', label: 'Careers', external: true },
-        { to: '/partners', label: 'Partners' },
-        { to: '/contact', label: 'Contact' },
+        { to: '/about', label: t('footer.link.about') },
+        { to: 'https://voxire.com/careers', label: t('footer.link.careers'), external: true },
+        { to: '/partners', label: t('footer.link.partners') },
+        { to: '/contact', label: t('footer.link.contact') },
       ],
     },
   ];
@@ -94,7 +102,7 @@ const Footer: React.FC = () => {
           <motion.div className={styles['footer-logo-section']} variants={fadeInUp}>
             <img
               src={ASSETS.logos.light}
-              alt="Rtylr Logo"
+              alt={t('footer.logoAlt')}
               className={styles['footer-logo']}
               loading="lazy"
               decoding="async"
@@ -104,7 +112,7 @@ const Footer: React.FC = () => {
           <div className={styles['footer-nav']}>
             {footerSections.map((section) => (
               <motion.div
-                key={section.title}
+                key={section.id}
                 className={styles['footer-section']}
                 variants={fadeInUp}
               >
@@ -117,7 +125,7 @@ const Footer: React.FC = () => {
                   name via aria-label, so nothing is lost by demoting this.
                 */}
                 <p className={styles['footer-section-title']}>{section.title}</p>
-                <nav aria-label={`${section.title} navigation`}>
+                <nav aria-label={t('footer.navLabel', { group: section.title })}>
                   <ul className={styles['footer-links']}>
                     {section.links.map((link) => (
                       <li key={link.to}>
@@ -149,11 +157,11 @@ const Footer: React.FC = () => {
               variant="dark-outline"
               className={styles['cta-button']}
             >
-              Start for free
+              {t('common.cta.startFree')}
             </Button>
             {!isDemoPage && (
               <Button onClick={handleBookDemoClick} variant="soft" className={styles['cta-button']}>
-                Book a demo
+                {t('common.cta.bookDemo')}
               </Button>
             )}
           </motion.div>
@@ -183,19 +191,19 @@ const Footer: React.FC = () => {
         <motion.div className={styles['footer-bottom']} variants={fadeInUp}>
           <div className={styles['footer-legal']}>
             <Link href="/legal/terms" className={styles['legal-link']}>
-              TERMS OF USE
+              {t('footer.legal.terms')}
             </Link>
             <Link href="/legal/privacy-policy" className={styles['legal-link']}>
-              PRIVACY POLICY
+              {t('footer.legal.privacy')}
             </Link>
             <Link href="/legal/security" className={styles['legal-link']}>
-              SECURITY
+              {t('footer.legal.security')}
             </Link>
             <Link href="/trust" className={styles['legal-link']}>
-              TRUST CENTER
+              {t('footer.legal.trust')}
             </Link>
             <ManageConsentLink className={styles['legal-link']}>
-              COOKIE PREFERENCES
+              {t('footer.legal.cookies')}
             </ManageConsentLink>
             <a
               href="https://voxire.com"
@@ -203,7 +211,7 @@ const Footer: React.FC = () => {
               rel="noopener noreferrer"
               className={styles['legal-link']}
             >
-              A VOXIRE COMPANY
+              {t('footer.legal.parent')}
             </a>
           </div>
           <p className={styles.copyright}>© RTYLR {new Date().getFullYear()}</p>

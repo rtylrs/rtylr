@@ -2,12 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { HiMenu, HiX, HiChevronDown, HiChevronRight } from 'react-icons/hi';
 import { AnimatePresence, motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@voxire/components';
 import { APP_URLS, ASSETS } from '@voxire/config';
 import { navigateExternal } from '../../../../lib/navigation';
 import styles from './HeaderMobile.module.scss';
 
 const HeaderMobile: React.FC = () => {
+  const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [scrolled, setScrolled] = useState(false);
   const [featuresDropdown, setFeaturesDropdown] = useState(false);
@@ -120,7 +122,7 @@ const HeaderMobile: React.FC = () => {
               height="36px"
               className={styles['mobile-signup-button']}
             >
-              Sign Up
+              {t('common.nav.signUp')}
             </Button>
             <button
               className={styles['mobile-menu-toggle']}
@@ -342,10 +344,10 @@ const HeaderMobile: React.FC = () => {
           <div className={styles['mobile-menu-footer']}>
             <div className={styles['mobile-menu-buttons']}>
               <Button onClick={handleLoginClick} variant="dark-outline" width="100%" height="44px">
-                Sign In
+                {t('common.nav.signIn')}
               </Button>
               <Button onClick={handleSignupClick} variant="soft" width="100%" height="44px">
-                Sign Up
+                {t('common.nav.signUp')}
               </Button>
             </div>
             {/* No language switcher until Phase 2 wires i18n. See the

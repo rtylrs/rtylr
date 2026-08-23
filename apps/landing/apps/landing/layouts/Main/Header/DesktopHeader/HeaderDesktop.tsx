@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { cn } from '../../../../lib/cn';
 import { HiChevronDown } from 'react-icons/hi';
 import { AnimatePresence, motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
 
 import { Button } from '@voxire/components';
@@ -75,6 +76,7 @@ const DropdownPanel: React.FC<React.PropsWithChildren<{ open: boolean; className
 );
 
 const HeaderDesktop: React.FC = () => {
+  const { t } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
   const [featuresDropdown, setFeaturesDropdown] = useState(false);
   const [solutionsDropdown, setSolutionsDropdown] = useState(false);
@@ -223,7 +225,7 @@ const HeaderDesktop: React.FC = () => {
               aria-expanded={featuresDropdown}
               aria-haspopup="true"
             >
-              Features
+              {t('common.nav.features')}
               <HiChevronDown
                 className={styles['dropdown-icon']}
                 style={{
@@ -248,7 +250,7 @@ const HeaderDesktop: React.FC = () => {
           </div>
 
           <LinkWithColor to="/pricing" className={styles['nav-link']}>
-            Pricing
+            {t('common.nav.pricing')}
           </LinkWithColor>
 
           <div className={cn(styles['nav-item'], 'resources-dropdown-container')}>
@@ -259,7 +261,7 @@ const HeaderDesktop: React.FC = () => {
               aria-expanded={resourcesDropdown}
               aria-haspopup="true"
             >
-              Resources
+              {t('common.nav.resources')}
               <HiChevronDown
                 className={styles['dropdown-icon']}
                 style={{
@@ -303,7 +305,7 @@ const HeaderDesktop: React.FC = () => {
               aria-expanded={solutionsDropdown}
               aria-haspopup="true"
             >
-              Company
+              {t('common.nav.company')}
               <HiChevronDown
                 className={styles['dropdown-icon']}
                 style={{
@@ -352,10 +354,10 @@ const HeaderDesktop: React.FC = () => {
 
         <div className={styles['header-buttons']}>
           <Button onClick={handleLoginClick} variant="soft" width="140px" height="40px">
-            Sign In
+            {t('common.nav.signIn')}
           </Button>
           <Button onClick={handleSignupClick} variant="dark-outline" width="140px" height="40px">
-            Sign Up
+            {t('common.nav.signUp')}
           </Button>
         </div>
       </div>
