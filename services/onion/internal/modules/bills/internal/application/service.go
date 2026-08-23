@@ -37,6 +37,8 @@ type BillPage struct {
 type repository interface {
 	List(ctx context.Context, businessID int64) ([]domain.Bill, error)
 	ListPaginated(ctx context.Context, businessID int64, limit, offset int32) ([]domain.Bill, error)
+	ListByPurchaseOrder(ctx context.Context, businessID, purchaseOrderID int64) ([]domain.Bill, error)
+	CountByPurchaseOrder(ctx context.Context, businessID, purchaseOrderID int64) (int64, error)
 	Get(ctx context.Context, businessID, id int64) (domain.Bill, error)
 	Delete(ctx context.Context, businessID, id int64) error
 	Create(ctx context.Context, businessID int64, input domain.BillInput) (int64, error)
@@ -134,4 +136,11 @@ func (s *Service) Update(ctx context.Context, businessID, id int64, input domain
 	}
 	invalidateBillsScope(ctx, businessID)
 	return nil
+}
+
+// ListByPurchaseOrder returns every bill settling one ERP purchase order
+// (FIN->ERP-02's read surface). Served off the (business_id, purchase_order_id)
+// index added with the column.
+func (s *Service) ListByPurchaseOrder(ctx context.Context, businessID, purchaseOrderID int64) ([]domain.Bill, error) {
+	return s.repo.ListByPurchaseOrder(ctx, businessID, purchaseOrderID)
 }

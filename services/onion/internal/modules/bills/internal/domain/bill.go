@@ -11,18 +11,19 @@ import (
 var ErrBillNotFound = errors.New("bill not found")
 
 type Bill struct {
-	ID           int64        `json:"id"`
-	OwnerID      int64        `json:"owner_id"`
-	BusinessID   int64        `json:"business_id"`
-	SupplierID   int64        `json:"supplier_id"`
-	SupplierName string       `json:"supplier_name"`
-	Amount       money.Amount `json:"amount"`
-	Currency     string       `json:"currency"`
-	DueDate      time.Time    `json:"due_date"`
-	Status       string       `json:"status"`
-	Description  string       `json:"description"`
-	CreatedAt    time.Time    `json:"created_at"`
-	UpdatedAt    time.Time    `json:"updated_at"`
+	ID              int64        `json:"id"`
+	OwnerID         int64        `json:"owner_id"`
+	BusinessID      int64        `json:"business_id"`
+	SupplierID      int64        `json:"supplier_id"`
+	SupplierName    string       `json:"supplier_name"`
+	PurchaseOrderID *int64       `json:"purchase_order_id"`
+	Amount          money.Amount `json:"amount"`
+	Currency        string       `json:"currency"`
+	DueDate         time.Time    `json:"due_date"`
+	Status          string       `json:"status"`
+	Description     string       `json:"description"`
+	CreatedAt       time.Time    `json:"created_at"`
+	UpdatedAt       time.Time    `json:"updated_at"`
 }
 
 func (b *Bill) FromRow(row *sql.Rows) error {
@@ -58,13 +59,14 @@ func (b *Bill) FromRow(row *sql.Rows) error {
 }
 
 type BillInput struct {
-	SupplierID   int64        `json:"supplier_id"`
-	SupplierName string       `json:"supplier_name"`
-	Amount       money.Amount `json:"amount"`
-	Currency     string       `json:"currency"`
-	DueDate      string       `json:"due_date"`
-	Status       string       `json:"status"`
-	Description  string       `json:"description"`
+	SupplierID      int64        `json:"supplier_id"`
+	SupplierName    string       `json:"supplier_name"`
+	PurchaseOrderID *int64       `json:"purchase_order_id"`
+	Amount          money.Amount `json:"amount"`
+	Currency        string       `json:"currency"`
+	DueDate         string       `json:"due_date"`
+	Status          string       `json:"status"`
+	Description     string       `json:"description"`
 }
 
 // IsPaid reports whether the bill has been fully paid.

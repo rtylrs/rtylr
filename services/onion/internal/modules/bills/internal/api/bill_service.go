@@ -28,6 +28,19 @@ func (a *BillAPI) ListBills(ctx context.Context, req *financebillv1.ListBillsReq
 	if err != nil {
 		return nil, err
 	}
+	// FIN->ERP-02's read surface: filter to one order's settlement bills.
+	if req != nil && req.GetPurchaseOrderId() > 0 {
+		bills, poErr := a.Service.ListByPurchaseOrder(ctx, businessID, req.GetPurchaseOrderId())
+		if poErr != nil {
+			return nil, billStatusError(http.StatusInternalServerError, "Failed to list bills")
+		}
+		out := make([]*financebillv1.Bill, 0, len(bills))
+		for _, bill := range bills {
+			out = append(out, newBillProto(bill))
+		}
+		return &financebillv1.ListBillsResponse{Bills: out, Page: 1, PageSize: int64(len(out))}, nil
+	}
+
 	var page, pageSize int64
 	if req != nil {
 		page = req.GetPage()
@@ -69,6 +82,9 @@ func (a *BillAPI) CreateBill(ctx context.Context, req *financebillv1.CreateBillR
 	if req.SupplierId != nil {
 		input.SupplierID = *req.SupplierId
 	}
+	if req.PurchaseOrderId != nil {
+		input.PurchaseOrderID = req.PurchaseOrderId
+	}
 	if validationErr := domain.ValidateBillInput(input); validationErr != nil {
 		return nil, billStatusError(http.StatusBadRequest, validationErr.Error())
 	}
@@ -102,6 +118,9 @@ func (a *BillAPI) UpdateBill(ctx context.Context, req *financebillv1.UpdateBillR
 	}
 	if body.SupplierId != nil {
 		input.SupplierID = *body.SupplierId
+	}
+	if body.PurchaseOrderId != nil {
+		input.PurchaseOrderID = body.PurchaseOrderId
 	}
 	if validationErr := domain.ValidateBillInput(input); validationErr != nil {
 		return nil, billStatusError(http.StatusBadRequest, validationErr.Error())
@@ -156,17 +175,18 @@ func newBillProto(bill domain.Bill) *financebillv1.Bill {
 		supplierID = &v
 	}
 	return &financebillv1.Bill{
-		Id:           bill.ID,
-		OwnerId:      bill.OwnerID,
-		SupplierId:   supplierID,
-		SupplierName: bill.SupplierName,
-		Amount:       bill.Amount.Float64(),
-		Currency:     bill.Currency,
-		DueDate:      bill.DueDate.Format("2006-01-02"),
-		Status:       bill.Status,
-		Description:  bill.Description,
-		CreatedAt:    bill.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt:    bill.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		Id:              bill.ID,
+		OwnerId:         bill.OwnerID,
+		SupplierId:      supplierID,
+		SupplierName:    bill.SupplierName,
+		PurchaseOrderId: bill.PurchaseOrderID,
+		Amount:          bill.Amount.Float64(),
+		Currency:        bill.Currency,
+		DueDate:         bill.DueDate.Format("2006-01-02"),
+		Status:          bill.Status,
+		Description:     bill.Description,
+		CreatedAt:       bill.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt:       bill.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 }
 

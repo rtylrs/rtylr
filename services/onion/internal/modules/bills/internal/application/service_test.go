@@ -213,3 +213,11 @@ func TestGet_ReturnsFields(t *testing.T) {
 		t.Errorf("fields wrong: %+v", got)
 	}
 }
+
+func (m *mockRepo) ListByPurchaseOrder(_ context.Context, _, _ int64) ([]domain.Bill, error) {
+	return nil, nil
+}
+
+func (m *mockRepo) CountByPurchaseOrder(_ context.Context, _, _ int64) (int64, error) {
+	return 0, nil
+}
