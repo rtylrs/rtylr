@@ -7,7 +7,6 @@ import { DatePicker, EmptyState } from '@voxire/ui';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { addDays, formatWeekDayShort, startOfWeek } from '../../shared/lib/dateUtils';
 import { formatWorkEntryTarget } from '../../shared/lib/timeEntryLabel';
-import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
 import { useProjects } from '../projects/useProjects';
 import { useTasks } from '../tasks/useTasks';
@@ -46,7 +45,6 @@ const MyDay = (): React.JSX.Element => {
 
   // For labelling each line with what it was actually for - the same
   // project/task data Add Hours already fetches for its own pickers.
-  const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
   const { data: projects } = useProjects();
   const { data: tasks } = useTasks({});
   const projectsById = useMemo(

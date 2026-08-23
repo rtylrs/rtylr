@@ -6,12 +6,7 @@ import i18next from '../../shared/services/i18next';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiView } from '../../shared/services/flowApi';
 import { unwrapListResponse } from '../../shared/lib/unwrapListResponse';
-import {
-  useFlowStore,
-  PRIORITY_ORDER,
-  type SavedView,
-  type Task,
-} from '../../shared/stores/flowStore';
+import { PRIORITY_ORDER, type SavedView, type Task } from '../../shared/stores/flowStore';
 
 const t = (key: string): string => i18next.t(key) as string;
 

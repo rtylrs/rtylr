@@ -54,8 +54,7 @@ function FieldRow({
 export const QuickCreate: React.FC = () => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { quickCreateOpen, setQuickCreateOpen, projects, activeWorkspaceId, sections } =
-    useFlowStore();
+  const { quickCreateOpen, setQuickCreateOpen, projects, activeWorkspaceId } = useFlowStore();
   const user = useUserStore((s) => s.user);
   const createTaskMutation = useCreateTask();
   const { data: labels = [] } = useLabels();

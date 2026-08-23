@@ -46,7 +46,6 @@ import { flowApi } from './flowApi';
 import {
   businessClient,
   projectClient,
-  labelClient,
   milestoneV2,
   cycleV2,
   insightsV2,
