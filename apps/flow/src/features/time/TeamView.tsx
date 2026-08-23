@@ -5,6 +5,7 @@ import { HelmetContainer } from '@voxire/components';
 import { DatePicker, EmptyState } from '@voxire/ui';
 import { useNavigate } from '@tanstack/react-router';
 import { useFlowStore } from '../../shared/stores/flowStore';
+import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import GateNotice from '../../shared/components/GateNotice';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { todayLocalDate, useWorkDaysForWorkspace, type WorkDay } from './useWorkDay';
@@ -25,8 +26,17 @@ const TeamView = (): React.JSX.Element => {
   const [date, setDate] = useState(todayLocalDate());
   const activeWorkspaceId = useFlowStore((s) => s.activeWorkspaceId);
 
-  const members: { id: string; userId: string; name: string; role?: string }[] = []; // TODO: switch to useFlowTeam
-  const membersLoading = false;
+  // The roster was a hardcoded empty array, so the empty state below was the
+  // only branch this screen could ever render and the member table underneath
+  // it was unreachable. useFlowTeam already shipped, so the TODO it was waiting
+  // on was stale.
+  //
+  // It returns the whole business team; the people who can appear on a Flow
+  // time sheet are the ones with Flow access, which is the same split
+  // FlowSettings makes. A member's `id` is their user id, which is what
+  // workDays is keyed on.
+  const { data: allMembers = [], isLoading: membersLoading } = useFlowTeam();
+  const members = useMemo(() => allMembers.filter((m) => m.apps?.includes('flow')), [allMembers]);
   const { data, isLoading, isError } = useWorkDaysForWorkspace(activeWorkspaceId, date, date);
 
   const dayByUserId = useMemo(() => {
@@ -75,13 +85,15 @@ const TeamView = (): React.JSX.Element => {
             description={t('flow.time.teamEmptyDescription')}
             action={{
               label: t('flow.time.teamEmptyCta'),
-              onClick: () => {},
+              onClick: (): void => {
+                void navigate({ to: '/settings', search: { section: 'team' } });
+              },
             }}
           />
         ) : (
           <ul className="space-y-1.5">
             {(members ?? []).map((member) => {
-              const day = dayByUserId.get(member.userId);
+              const day = dayByUserId.get(member.id);
               return (
                 <li
                   key={member.id}

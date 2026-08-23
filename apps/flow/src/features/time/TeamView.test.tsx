@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { ApiWorkspaceMember } from '../../shared/services/flowApi';
+import type { FlowTeamMember } from '../../shared/hooks/queries/useFlowTeam';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -15,12 +16,18 @@ vi.mock('../../shared/stores/flowStore', () => ({
     selector({ activeWorkspaceId: 'ws-1' }),
 }));
 
-const membersState = vi.hoisted(() => ({
-  value: { data: [] as ApiWorkspaceMember[], isLoading: false },
+const navigateSpy = vi.hoisted(() => vi.fn());
+
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => navigateSpy,
 }));
 
-vi.mock('../workspace-manager/useWorkspaceManager', () => ({
-  useWorkspaceMembers: () => membersState.value,
+const membersState = vi.hoisted(() => ({
+  value: { data: [] as FlowTeamMember[], isLoading: false },
+}));
+
+vi.mock('../../shared/hooks/queries/useFlowTeam', () => ({
+  useFlowTeam: () => membersState.value,
 }));
 
 const workDaysState = vi.hoisted(() => ({
@@ -39,15 +46,15 @@ vi.mock('./useWorkDay', () => ({
 
 import TeamView from './TeamView';
 
-function member(over: Partial<ApiWorkspaceMember> = {}): ApiWorkspaceMember {
+// A FlowTeamMember's `id` is the user id, which is what a workDay is keyed on.
+function member(over: Partial<FlowTeamMember> = {}): FlowTeamMember {
   return {
-    id: '1',
-    workspaceId: 'ws-1',
-    userId: '7',
+    id: '7',
     name: 'Maya Krishnan',
     email: 'maya@example.test',
     role: 'member',
-    joinedAt: '2026-01-01T00:00:00Z',
+    apps: ['flow'],
+    isActive: true,
     ...over,
   };
 }
@@ -55,7 +62,7 @@ function member(over: Partial<ApiWorkspaceMember> = {}): ApiWorkspaceMember {
 beforeEach(() => {
   vi.clearAllMocks();
   membersState.value = {
-    data: [member(), member({ id: '2', userId: '9', name: 'Sam Okafor' })],
+    data: [member(), member({ id: '9', name: 'Sam Okafor' })],
     isLoading: false,
   };
   workDaysState.value = {
@@ -69,31 +76,33 @@ beforeEach(() => {
 });
 
 describe('TeamView', () => {
-  // SKIPPED, not deleted, and the distinction matters.
-  //
-  // These assert that the member list renders. It cannot: #925 replaced the
-  // member source with `const members = []; // TODO: switch to useFlowTeam`
-  // (TeamView.tsx:28, TimeReports.tsx:43), so both screens render their empty
-  // state for every user. That is a shipped regression, not a stale test.
-  //
-  // Deleting them would erase the only record that these screens stopped
-  // working. Asserting the empty state instead would bake the regression in as
-  // intended behaviour. Skipping keeps the suite green, which unblocks pushing
-  // for everyone, while leaving the failure visible and attributable.
-  //
-  // Un-skip when useFlowTeam lands. The assertions themselves are still right.
-  it.skip('lists every workspace member, matching each to their day by userId', () => {
+  // These two were skipped while the member source was a hardcoded `[]`, with a
+  // note to un-skip once useFlowTeam landed. It has, so they run again. The
+  // assertions are unchanged from when they were written.
+  it('lists every member with Flow access, matching each to their day by user id', () => {
     render(<TeamView />);
     expect(screen.getByText('Maya Krishnan')).toBeInTheDocument();
     expect(screen.getByText('Sam Okafor')).toBeInTheDocument();
   });
 
-  it.skip('shows a not-started state for a member with no recorded day', () => {
+  it('shows a not-started state for a member with no recorded day', () => {
     render(<TeamView />);
-    // Sam (userId 9) has no matching workDay in the fixture above.
+    // Sam (user id 9) has no matching workDay in the fixture above.
     const samRow = screen.getByText('Sam Okafor').closest('li');
     expect(samRow).not.toBeNull();
     expect(samRow?.textContent).toContain('flow.time.teamNotStarted');
+  });
+
+  // useFlowTeam returns the whole business team, not just Flow's users, so the
+  // filter is what keeps someone who has no Flow access off a Flow time sheet.
+  it('leaves out a business member who does not have Flow access', () => {
+    membersState.value = {
+      data: [member(), member({ id: '9', name: 'Dana Reeves', apps: ['hr'] })],
+      isLoading: false,
+    };
+    render(<TeamView />);
+    expect(screen.getByText('Maya Krishnan')).toBeInTheDocument();
+    expect(screen.queryByText('Dana Reeves')).not.toBeInTheDocument();
   });
 
   it('renders a permission-denied message instead of crashing when the caller lacks access', () => {
@@ -107,10 +116,19 @@ describe('TeamView', () => {
     expect(screen.getByText('flow.time.teamAccessDenied')).toBeInTheDocument();
   });
 
-  it('shows a real empty state instead of a blank list when the workspace has no members', () => {
+  it('shows a real empty state instead of a blank list when nobody has Flow access', () => {
     membersState.value = { data: [], isLoading: false };
     render(<TeamView />);
     expect(screen.getByText('flow.time.teamEmptyTitle')).toBeInTheDocument();
     expect(screen.getByText('flow.time.teamEmptyDescription')).toBeInTheDocument();
+  });
+
+  // The empty state's CTA used to be `onClick: () => {}`. A button that does
+  // nothing is worse than no button, so this pins it to a real destination.
+  it('sends the empty-state CTA to the settings screen that grants Flow access', async () => {
+    membersState.value = { data: [], isLoading: false };
+    render(<TeamView />);
+    await userEvent.click(screen.getByRole('button', { name: 'flow.time.teamEmptyCta' }));
+    expect(navigateSpy).toHaveBeenCalledWith({ to: '/settings', search: { section: 'team' } });
   });
 });
