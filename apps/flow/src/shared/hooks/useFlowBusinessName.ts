@@ -16,3 +16,22 @@ export function useFlowBusinessName() {
     staleTime: 30_000,
   });
 }
+
+/**
+ * The active business id, for the `business:<id>` realtime topic.
+ *
+ * Shares the businesses query with useFlowBusinessName rather than fetching
+ * again - same queryKey, different projection.
+ */
+export function useFlowBusinessId() {
+  return useQuery<string | null>({
+    queryKey: ['flow-business-name'],
+    queryFn: async () => {
+      const response = await unwrap(flowApi.getMyBusinesses());
+      const businesses = response.businesses ?? [];
+      const active = businesses.find((business) => business.isActive) ?? businesses[0];
+      return active ? String(active.id) : null;
+    },
+    staleTime: 30_000,
+  });
+}
