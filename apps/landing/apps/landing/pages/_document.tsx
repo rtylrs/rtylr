@@ -1,5 +1,7 @@
 import { Html, Head, Main, NextScript } from 'next/document';
 
+import { organizationSchema } from '../lib/structured-data';
+
 export default function Document() {
   return (
     <Html lang="en">
@@ -36,32 +38,21 @@ gtag('config', 'G-6XKFL1Z8HE');`,
         <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#fafafa" />
 
-        {/* Structured Data - Organization */}
+        {/*
+          Sitewide structured data is Organization and nothing else,
+          because Organization is the only thing that is true on every
+          page. This block used to emit a SoftwareApplication carrying
+          an Offer of `price: '0'`, which was two separate false
+          claims: /legal/privacy-policy/ is not a software application,
+          and no tier on /pricing/ is asserted to be free.
+
+          Anything product-shaped belongs on the page that renders the
+          product. See lib/structured-data.ts for the per-page builders
+          and the pages that call them.
+        */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'SoftwareApplication',
-              name: 'rtylr',
-              applicationCategory: 'BusinessApplication',
-              operatingSystem: 'Web, Windows, macOS, Linux',
-              description:
-                'All-in-one business operating system for SMBs. POS, ERP, HR, CRM, Finance, and more.',
-              url: 'https://rtylr.com',
-              offers: {
-                '@type': 'Offer',
-                price: '0',
-                priceCurrency: 'USD',
-                description: 'Free tier available',
-              },
-              publisher: {
-                '@type': 'Organization',
-                name: 'Voxire',
-                url: 'https://voxire.com',
-              },
-            }),
-          }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema()) }}
         />
         {/* Favicons */}
         <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico" />

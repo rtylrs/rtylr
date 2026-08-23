@@ -22,9 +22,10 @@ interface HelmetContainerProps {
   // delivered from. Emits both <link rel="canonical"> and og:url so
   // the social-preview URL and the search-indexed URL stay aligned.
   canonical?: string;
-  // JSON-LD structured data. Pass the object; we stringify. Extends
-  // the global SoftwareApplication schema in _document.tsx rather
-  // than replacing it.
+  // JSON-LD structured data. Pass the object; we stringify. Sits
+  // alongside the sitewide Organization block in _document.tsx, which
+  // is the only schema that is true on every page. Anything
+  // product-shaped belongs here, on the page that renders it.
   structuredData?: Record<string, unknown>;
 }
 

@@ -2,7 +2,7 @@ import React from 'react';
 import AppLayout from '../components/Layout/AppLayout';
 import MainLayout from '../layouts/Main/MainLayout';
 import HelmetContainer from '../components/HelmetContainer';
-import { webSiteSchema, organizationSchema } from '../lib/structured-data';
+import { webSiteSchema, organizationSchema, productSchema } from '../lib/structured-data';
 import HeroSection from '../components/home/HeroSection/HeroSection';
 import ProductsSection from '../components/home/ProductsSection/ProductsSection';
 import FeaturesSection from '../components/home/FeaturesSection/FeaturesSection';
@@ -26,9 +26,22 @@ const SEO_PROPS = {
   twitterCard: 'summary_large_image' as const,
   keywords:
     'POS, ERP, HR, CRM, Finance, Flow, business OS, inventory management, payroll, loyalty programs, invoicing, project management, restaurant software, retail software, AI',
+  // SoftwareApplication belongs here, on the page that describes the
+  // product. It used to arrive from _document.tsx, which put it on all
+  // 24 pages including the privacy policy; this page is the one place
+  // sitewide where it was actually true.
   structuredData: {
     '@context': 'https://schema.org',
-    '@graph': [webSiteSchema(), organizationSchema()],
+    '@graph': [
+      webSiteSchema(),
+      organizationSchema(),
+      productSchema({
+        name: 'rtylr',
+        path: '/',
+        description:
+          'One business platform covering POS, ERP, CRM, HR, Finance and Flow on a single data model, so a sale updates stock and the books without an export.',
+      }),
+    ],
   },
 };
 
