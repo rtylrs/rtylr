@@ -267,7 +267,7 @@ func RegisterProfileServiceServer(first any, rest ...any) error {
 		return fmt.Errorf("RegisterProfileServiceServer: mux is required")
 	}
 	mux := o.mux
-	mux.Handle("GET /flow/profile/v1/flow/profile/{user_id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mux.Handle("GET /flow/profile/v1/profile/{user_id}", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(GetProfileRequest)
 		parsedUserId, err := parseInt64(r.PathValue("user_id"))
 		if err != nil {
@@ -288,6 +288,6 @@ func RegisterProfileServiceServer(first any, rest ...any) error {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(resp)
-	}), RequestMetadata{Service: "ProfileService", Method: "getProfile", HTTPMethod: "GET", Route: "/flow/profile/v1/flow/profile/{user_id}", AuthSchemes: nil}))
+	}), RequestMetadata{Service: "ProfileService", Method: "getProfile", HTTPMethod: "GET", Route: "/flow/profile/v1/profile/{user_id}", AuthSchemes: nil}))
 	return nil
 }

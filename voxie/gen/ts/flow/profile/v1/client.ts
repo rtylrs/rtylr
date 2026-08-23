@@ -74,7 +74,7 @@ return doFetch(input, init);
 async getProfile(req: GetProfileRequest): Promise<GetProfileResponse> {
 const violations = validateGetProfileRequest(req);
 if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
-let path = "/flow/profile/v1/flow/profile/{user_id}";
+let path = "/flow/profile/v1/profile/{user_id}";
 path = path.replace("{user_id}", encodeURIComponent(String(req.userId)));
 const query = new URLSearchParams();
 const queryStr = query.toString();

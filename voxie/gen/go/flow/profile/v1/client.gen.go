@@ -51,7 +51,7 @@ func (c *ProfileServiceClient) GetProfile(ctx context.Context, req *GetProfileRe
 			return nil, fmt.Errorf("validate request: %w", err)
 		}
 	}
-	path := "/flow/profile/v1/flow/profile/{user_id}"
+	path := "/flow/profile/v1/profile/{user_id}"
 	path = strings.ReplaceAll(path, "{user_id}", url.PathEscape(fmt.Sprintf("%v", req.UserId)))
 	query := url.Values{}
 	if len(query) > 0 {
