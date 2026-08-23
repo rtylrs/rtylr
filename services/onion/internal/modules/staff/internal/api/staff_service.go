@@ -109,6 +109,7 @@ func (a *StaffAPI) CreateStaff(ctx context.Context, req *hrstaffv1.CreateStaffRe
 		BusinessID:            businessID,
 		UserID:                req.GetUserId(),
 		DepartmentID:          req.GetDepartmentId(),
+		ManagerStaffID:        req.GetManagerStaffId(),
 		FirstName:             req.GetFirstName(),
 		LastName:              req.GetLastName(),
 		Email:                 req.GetEmail(),
@@ -170,6 +171,7 @@ func (a *StaffAPI) UpdateStaff(ctx context.Context, req *hrstaffv1.UpdateStaffRe
 	updateErr := a.Service.UpdateStaff(ctx, businessID, domain.StaffUpdateInput{
 		ID:                    req.GetId(),
 		DepartmentID:          body.GetDepartmentId(),
+		ManagerStaffID:        body.GetManagerStaffId(),
 		FirstName:             body.GetFirstName(),
 		LastName:              body.GetLastName(),
 		Email:                 body.GetEmail(),
@@ -267,6 +269,7 @@ func newStaffPayload(staff domain.Staff, hasSensitiveDetailsPermission bool, cal
 		OwnerId:               staff.OwnerID,
 		UserId:                staff.UserID,
 		DepartmentId:          staff.DepartmentID,
+		ManagerStaffId:        staff.ManagerStaffID,
 		FirstName:             staff.FirstName,
 		LastName:              staff.LastName,
 		Email:                 staff.Email,

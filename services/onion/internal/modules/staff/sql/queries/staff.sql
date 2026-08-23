@@ -1,5 +1,5 @@
 -- name: GetStaffByID :one
-SELECT id, owner_id, business_id, user_id, department_id, first_name, last_name, email, phone,
+SELECT id, owner_id, business_id, user_id, department_id, manager_staff_id, first_name, last_name, email, phone,
        role, employment_type, status, salary, hourly_rate, overtime_rate,
        start_date, end_date, address, emergency_contact_name, emergency_contact_phone,
        apps, notes, photo_url, bio, created_at, updated_at
@@ -8,14 +8,14 @@ WHERE id = ? AND business_id = ?;
 
 -- name: CreateStaff :execresult
 INSERT INTO hr_staff
-(owner_id, business_id, user_id, department_id, first_name, last_name, email, phone, role,
+(owner_id, business_id, user_id, department_id, manager_staff_id, first_name, last_name, email, phone, role,
  employment_type, status, salary, hourly_rate, overtime_rate, start_date, end_date,
  address, emergency_contact_name, emergency_contact_phone, apps, notes, photo_url, bio)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateStaff :exec
 UPDATE hr_staff
-SET department_id = ?, first_name = ?, last_name = ?, email = ?, phone = ?,
+SET department_id = ?, manager_staff_id = ?, first_name = ?, last_name = ?, email = ?, phone = ?,
     role = ?, employment_type = ?, status = ?, salary = ?, hourly_rate = ?,
     overtime_rate = ?, end_date = ?, address = ?, emergency_contact_name = ?,
     emergency_contact_phone = ?, apps = ?, notes = ?, photo_url = ?, bio = ?,
