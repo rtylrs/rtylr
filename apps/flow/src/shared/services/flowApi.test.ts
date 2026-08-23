@@ -100,7 +100,10 @@ describe('flowApi OneKit adapters', () => {
       startDate: '',
       dueDate: '',
     });
-    expect(projectClient.updateProject).toHaveBeenCalledWith({
+    // The project sub-resources moved to v2 as well. They carry no workspace,
+    // so unlike listProjects they were not broken on v1; they were simply the
+    // last v1 flow calls in the write path.
+    expect(projectV2.updateProject).toHaveBeenCalledWith({
       id: '7',
       body: {
         name: 'Renamed',
@@ -112,12 +115,26 @@ describe('flowApi OneKit adapters', () => {
         dueDate: '',
       },
     });
-    expect(projectClient.listProjectMembers).toHaveBeenCalledWith({ projectId: '7' });
-    expect(projectClient.addProjectMember).toHaveBeenCalledWith({
+    expect(projectV2.listProjectMembers).toHaveBeenCalledWith({ projectId: '7' });
+    expect(projectV2.addProjectMember).toHaveBeenCalledWith({
       projectId: '7',
       userId: '2',
       role: 'member',
     });
+
+    // And nothing reached v1 on this path any more.
+    expect(projectClient.updateProject).not.toHaveBeenCalled();
+    expect(projectClient.listProjectMembers).not.toHaveBeenCalled();
+    expect(projectClient.addProjectMember).not.toHaveBeenCalled();
+  });
+
+  // deleteProject is the one call still on v1, because v2 offers archiveProject
+  // instead: a recycle-bin move, not a delete. Pinning it keeps that a decision
+  // someone makes rather than something that drifts.
+  it('still routes project deletion through v1 until archive replaces it', async () => {
+    await flowApi.deleteProject('7');
+
+    expect(projectClient.deleteProject).toHaveBeenCalledWith({ id: '7' });
   });
 
   it('keeps task boundary conversions at the generated client edge', async () => {
