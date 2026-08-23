@@ -175,7 +175,7 @@ const TaskDetail: React.FC = () => {
   const taskWorkspaceId = detail?.task?.workspaceId;
   const taskProjectId = detail?.task?.projectId;
   const { project: taskProject } = useCurrentProject(taskWorkspaceId, taskProjectId);
-  const { data: allLabels = [] } = useLabels(taskWorkspaceId);
+  const { data: allLabels = [] } = useLabels();
   const {
     members,
     cycles,

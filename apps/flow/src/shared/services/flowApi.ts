@@ -7,7 +7,6 @@ import {
   workspaceClient,
   projectClient,
   taskClient,
-  labelClient,
   milestoneClient,
   cycleClient,
   viewClient,
@@ -17,6 +16,7 @@ import {
   userClient,
   projectV2,
   taskV2,
+  labelV2,
 } from '../lib/clients';
 
 // -- Types ----------------------------------------------------------------
@@ -781,30 +781,32 @@ export const flowApi = {
 
   // -- Labels -------------------------------------------------------------
 
-  listLabels: (workspaceId: string) =>
-    flowResult<{ labels: ApiLabel[] }>(() => labelClient.listLabels({ workspaceId })),
+  // Labels are one business-wide pool now, so there is no workspace to scope
+  // them by and no second "deprecated" variant to keep around.
+  listLabels: () =>
+    flowResult<{ labels: ApiLabel[] }>(() =>
+      labelV2.listLabels({ page: 1, limit: 200, sortBy: '', sortDir: '' })
+    ),
 
   // workspace_id is already a string end-to-end from the workspace store (see
   // ApiWorkspace.id / activeWorkspaceId), so this passes it straight through -
   // no Number()/String() round trip. int64 fields are wire-encoded as JSON
   // strings, matching every other numeric id in this API; a bare number 400s
   // with "cannot unmarshal number into Go struct field of type string".
-  createLabel: (data: { workspace_id: string; name: string; color: string }) =>
+  // v1 declared workspace_id @required @gt(0), and the app has had no workspace
+  // id since the layer was removed, so creating a label 400d.
+  createLabel: (data: { name: string; color: string }) =>
     flowResult<{ label: ApiLabel }>(() =>
-      labelClient.createLabel({
-        workspaceId: data.workspace_id,
-        name: data.name,
-        color: data.color,
-      })
+      labelV2.createLabel({ name: data.name, color: data.color })
     ),
 
   updateLabel: (data: { id: number; name: string; color: string }) =>
     flowResult<{ message: string }>(() =>
-      labelClient.updateLabel({ id: String(data.id), name: data.name, color: data.color })
+      labelV2.updateLabel({ id: String(data.id), name: data.name, color: data.color })
     ),
 
   deleteLabel: (id: number) =>
-    flowResult<{ message: string }>(() => labelClient.deleteLabel({ id: String(id) })),
+    flowResult<{ message: string }>(() => labelV2.deleteLabel({ id: String(id) })),
 
   // task_id/label_ids stay numbers up through the hook and UI layer (TaskDetail
   // compares them against numeric ApiLabel.id values), so the string-on-the-wire
@@ -812,14 +814,11 @@ export const flowApi = {
   // convention as createLabel above.
   setTaskLabels: (data: { task_id: number; label_ids: number[] }) =>
     flowResult(() =>
-      labelClient.setTaskLabels({
+      labelV2.setTaskLabels({
         taskId: String(data.task_id),
         labelIds: data.label_ids.map((id) => String(id)),
       })
     ),
-
-  /** @deprecated use listLabels(workspaceId) */
-  getLabels: () => flowResult<{ labels: ApiLabel[] }>(() => labelClient.listLabels({})),
 
   // -- Milestones ---------------------------------------------------------
 

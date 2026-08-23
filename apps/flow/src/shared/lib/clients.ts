@@ -5,7 +5,6 @@ import { DashboardServiceClient } from '@voxire/voxie/flow/dashboard/v1/client';
 import { WorkspaceServiceClient } from '@voxire/voxie/flow/workspace/v1/client';
 import { ProjectServiceClient } from '@voxire/voxie/flow/project/v1/client';
 import { TaskServiceClient } from '@voxire/voxie/flow/task/v1/client';
-import { LabelServiceClient } from '@voxire/voxie/flow/label/v1/client';
 import { MilestoneServiceClient } from '@voxire/voxie/flow/milestone/v1/client';
 import { CycleServiceClient } from '@voxire/voxie/flow/cycle/v1/client';
 import { ViewServiceClient } from '@voxire/voxie/flow/view/v1/client';
@@ -30,7 +29,6 @@ export const dashboardClient = createOneKitClient(DashboardServiceClient, 'flow'
 export const workspaceClient = createOneKitClient(WorkspaceServiceClient, 'flow');
 export const projectClient = createOneKitClient(ProjectServiceClient, 'flow');
 export const taskClient = createOneKitClient(TaskServiceClient, 'flow');
-export const labelClient = createOneKitClient(LabelServiceClient, 'flow');
 export const milestoneClient = createOneKitClient(MilestoneServiceClient, 'flow');
 export const cycleClient = createOneKitClient(CycleServiceClient, 'flow');
 export const viewClient = createOneKitClient(ViewServiceClient, 'flow');

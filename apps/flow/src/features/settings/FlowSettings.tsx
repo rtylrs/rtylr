@@ -796,9 +796,7 @@ const LABEL_COLORS = [
 
 export const LabelsSection: React.FC = () => {
   const { t } = useTranslation();
-  const { activeWorkspaceId } = useFlowStore();
-  const workspaceId = activeWorkspaceId ?? '';
-  const { data: labels = [], isLoading } = useLabels(workspaceId || undefined);
+  const { data: labels = [], isLoading } = useLabels();
   const createLabel = useCreateLabel();
   const deleteLabel = useDeleteLabel();
 
@@ -817,12 +815,8 @@ export const LabelsSection: React.FC = () => {
       toast.error(t('errors.generic'));
       return;
     }
-    if (!workspaceId) {
-      toast.error(t('toasts.workspace.noActive'));
-      return;
-    }
     createLabel.mutate(
-      { workspace_id: workspaceId, name, color: newColor },
+      { name, color: newColor },
       {
         onSuccess: () => {
           setNewName('');
