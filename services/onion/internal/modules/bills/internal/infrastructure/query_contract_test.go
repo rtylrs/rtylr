@@ -12,7 +12,7 @@ func TestBillListQueriesUseStableOrdering(t *testing.T) {
 		t.Fatalf("read bill queries: %v", err)
 	}
 
-	if got := strings.Count(string(queryFile), "ORDER BY due_date ASC, id ASC"); got != 2 {
-		t.Fatalf("stable bill list ordering appears %d times, want 2", got)
+	if got := strings.Count(string(queryFile), "ORDER BY due_date ASC, id ASC"); got != 3 {
+		t.Fatalf("stable bill list ordering appears %d times, want 3", got)
 	}
 }
