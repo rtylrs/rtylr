@@ -50,27 +50,30 @@ describe('useCycles (remote mode)', () => {
     (useFlowStore as any).mockReturnValue({ activeWorkspaceId: 'ws-store' });
   });
 
-  it('falls back to the active workspace from the store when no workspaceId is given', async () => {
+  // Cycles are project-scoped on v2, so the id is the project's and there is no
+  // store fallback. These two used to cover a workspace fallback and an
+  // explicit override of it.
+  it("asks for the given project's cycles", async () => {
     (flowApi.getCycles as any).mockResolvedValue([{ id: 'c-1' }]);
     const { wrapper } = createWrapper();
-    const { result } = renderHook(() => useCycles(), { wrapper });
+    const { result } = renderHook(() => useCycles('p-1'), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(flowApi.getCycles).toHaveBeenCalledWith('ws-store');
+    expect(flowApi.getCycles).toHaveBeenCalledWith('p-1');
   });
 
-  it('uses an explicit workspaceId over the store value', async () => {
-    (flowApi.getCycles as any).mockResolvedValue([{ id: 'c-1' }]);
+  // v2 declares project_id @required @gt(0), so firing without one would 400.
+  it('does not fetch until a project is known', () => {
     const { wrapper } = createWrapper();
-    const { result } = renderHook(() => useCycles('ws-explicit'), { wrapper });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(flowApi.getCycles).toHaveBeenCalledWith('ws-explicit');
+    const { result } = renderHook(() => useCycles(undefined), { wrapper });
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(flowApi.getCycles).not.toHaveBeenCalled();
   });
 
   it('unwraps the enveloped { cycles: [...] } shape', async () => {
     const cycles = [{ id: 'c-2', name: 'Sprint 1' }];
     (flowApi.getCycles as any).mockResolvedValue({ cycles });
     const { wrapper } = createWrapper();
-    const { result } = renderHook(() => useCycles('ws-1'), { wrapper });
+    const { result } = renderHook(() => useCycles('p-1'), { wrapper });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual(cycles);
   });
@@ -82,25 +85,16 @@ describe('useCreateCycle', () => {
     (useFlowStore as any).mockReturnValue({ activeWorkspaceId: 'ws-store' });
   });
 
-  it('defaults workspaceId to the active workspace when the caller omits it', async () => {
+  // Creating a cycle carries the project through untouched; nothing is stamped
+  // on from a store any more.
+  it('sends the payload through untouched and invalidates cycles', async () => {
     (flowApi.createCycle as any).mockResolvedValue({ id: 'c-new' });
     const { wrapper, client } = createWrapper();
     const spy = vi.spyOn(client, 'invalidateQueries');
     const { result } = renderHook(() => useCreateCycle(), { wrapper });
-    await act(() => result.current.mutateAsync({ name: 'Sprint 1' }));
-    expect(flowApi.createCycle).toHaveBeenCalledWith({ workspaceId: 'ws-store', name: 'Sprint 1' });
+    await act(() => result.current.mutateAsync({ projectId: 'p-1', name: 'Sprint 1' }));
+    expect(flowApi.createCycle).toHaveBeenCalledWith({ projectId: 'p-1', name: 'Sprint 1' });
     expect(spy).toHaveBeenCalledWith({ queryKey: ['cycles'] });
-  });
-
-  it('lets an explicit workspaceId on the payload override the active workspace default', async () => {
-    (flowApi.createCycle as any).mockResolvedValue({ id: 'c-new' });
-    const { wrapper } = createWrapper();
-    const { result } = renderHook(() => useCreateCycle(), { wrapper });
-    await act(() => result.current.mutateAsync({ workspaceId: 'ws-explicit', name: 'Sprint 1' }));
-    expect(flowApi.createCycle).toHaveBeenCalledWith({
-      workspaceId: 'ws-explicit',
-      name: 'Sprint 1',
-    });
   });
 
   it('shows an error toast and does not invalidate when the create call fails', async () => {

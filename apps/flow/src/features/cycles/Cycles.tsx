@@ -9,10 +9,17 @@ import { useCycles, useCreateCycle } from './useCycles';
 import { type ApiCycle } from '../../shared/services/flowApi';
 import { formatDate } from '../../shared/lib/utils';
 import CycleBadge from '../../shared/components/CycleBadge';
+import { useProjects } from '../projects/useProjects';
 
 const Cycles: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { data: cycles = [], isLoading } = useCycles();
+  // Cycles belong to a project on v2, and this screen is business-level, so it
+  // asks which project to show. Defaults to the first rather than rendering an
+  // empty board with no explanation.
+  const { data: projects = [] } = useProjects();
+  const [projectId, setProjectId] = useState('');
+  const selectedProjectId = projectId || projects[0]?.id || '';
+  const { data: cycles = [], isLoading } = useCycles(selectedProjectId || undefined);
   const createCycle = useCreateCycle();
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
@@ -45,14 +52,41 @@ const Cycles: React.FC = () => {
             {t('flow.cycles.subtitle')}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-semibold"
-          style={{ background: 'var(--accent)', color: '#0a0a0a' }}
-        >
-          <Plus size={11} /> {t('flow.cycles.newCycle')}
-        </button>
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-1.5">
+            <span className="sr-only">{t('flow.cycles.project')}</span>
+            <select
+              value={selectedProjectId}
+              onChange={(e) => setProjectId(e.target.value)}
+              aria-label={t('flow.cycles.project')}
+              className="min-h-[44px] rounded-md px-2 text-[16px] outline-none sm:min-h-0 sm:py-1.5 sm:text-[12px]"
+              style={{
+                background: 'var(--flow-input-bg)',
+                border: '1px solid var(--flow-border)',
+                color: 'var(--flow-text)',
+              }}
+            >
+              {projects.length === 0 ? (
+                <option value="">{t('flow.cycles.noProjects')}</option>
+              ) : (
+                projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))
+              )}
+            </select>
+          </label>
+          <button
+            type="button"
+            onClick={() => setShowCreate(true)}
+            disabled={!selectedProjectId}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
+            style={{ background: 'var(--accent)', color: '#0a0a0a' }}
+          >
+            <Plus size={11} /> {t('flow.cycles.newCycle')}
+          </button>
+        </div>
       </div>
 
       {showCreate && (
@@ -103,12 +137,13 @@ const Cycles: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                if (!newName.trim() || !newStart || !newEnd) {
+                if (!newName.trim() || !newStart || !newEnd || !selectedProjectId) {
                   toast.error(t('errors.generic'));
                   return;
                 }
                 createCycle.mutate(
                   {
+                    projectId: selectedProjectId,
                     name: newName,
                     startDate: newStart,
                     endDate: newEnd,

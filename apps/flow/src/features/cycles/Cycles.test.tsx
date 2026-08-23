@@ -24,6 +24,11 @@ const cyclesState = vi.hoisted(() => ({
   value: { data: [] as ApiCycle[], isLoading: false },
 }));
 
+// The screen asks which project's cycles to show, so it reads the project list.
+vi.mock('../projects/useProjects', () => ({
+  useProjects: () => ({ data: [{ id: 'p-1', name: 'Website Redesign' }], isLoading: false }),
+}));
+
 vi.mock('./useCycles', () => ({
   useCycles: () => cyclesState.value,
   useCreateCycle: () => ({ mutate: mutateSpy, isPending: false }),
