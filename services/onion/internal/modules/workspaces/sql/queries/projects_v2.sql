@@ -28,7 +28,19 @@ WHERE p.business_id = ?
   AND p.archived_at IS NULL
   AND (? = 1 OR p.created_by = ? OR EXISTS (
         SELECT 1 FROM flow_project_members pm
-        WHERE pm.project_id = p.id AND pm.user_id = ?))
+        WHERE pm.project_id = p.id AND pm.user_id = ?)
+    -- Dept-manager visibility proxy (M3). A caller who manages nobody is passed
+    -- a single 0: sqlc expands an empty slice into an invalid IN (), and no user
+    -- has id 0, so IN (0) matches nothing.
+    --
+    -- The surrounding WHERE already has p.is_personal = FALSE, which is what
+    -- keeps a report's My Tasks bucket out, as Project.is_personal's contract
+    -- requires.
+    OR p.created_by IN (sqlc.slice('managed_creators'))
+    OR p.owner_id IN (sqlc.slice('managed_owners'))
+    OR EXISTS (
+        SELECT 1 FROM flow_project_members pmr
+        WHERE pmr.project_id = p.id AND pmr.user_id IN (sqlc.slice('managed_members'))))
   AND (? = '' OR p.status = ?)
   AND (? = '' OR p.visibility = ?)
   AND (? = '' OR p.name LIKE CONCAT('%', ?, '%'));
@@ -54,13 +66,30 @@ WHERE p.business_id = ?
   AND p.archived_at IS NULL
   AND (? = 1 OR p.created_by = ? OR EXISTS (
         SELECT 1 FROM flow_project_members pm
-        WHERE pm.project_id = p.id AND pm.user_id = ?))
+        WHERE pm.project_id = p.id AND pm.user_id = ?)
+    -- Dept-manager visibility proxy (M3). A caller who manages nobody is passed
+    -- a single 0: sqlc expands an empty slice into an invalid IN (), and no user
+    -- has id 0, so IN (0) matches nothing.
+    --
+    -- The surrounding WHERE already has p.is_personal = FALSE, which is what
+    -- keeps a report's My Tasks bucket out, as Project.is_personal's contract
+    -- requires.
+    OR p.created_by IN (sqlc.slice('managed_creators'))
+    OR p.owner_id IN (sqlc.slice('managed_owners'))
+    OR EXISTS (
+        SELECT 1 FROM flow_project_members pmr
+        WHERE pmr.project_id = p.id AND pmr.user_id IN (sqlc.slice('managed_members'))))
   AND (? = '' OR p.status = ?)
   AND (? = '' OR p.visibility = ?)
   AND (? = '' OR p.name LIKE CONCAT('%', ?, '%'))
 ORDER BY p.created_at DESC, p.id DESC
 LIMIT ? OFFSET ?;
 
+-- The two archived queries below are deliberately NOT widened for the
+-- dept-manager proxy. The recycle bin is where projects are restored and
+-- purged, so widening read there widens a destructive surface, and P9 asks for
+-- a sidebar group of a report's active work. A manager who needs something
+-- restored can ask its owner.
 -- name: CountArchivedProjectsV2 :one
 SELECT COUNT(*) FROM flow_projects p
 WHERE p.business_id = ?

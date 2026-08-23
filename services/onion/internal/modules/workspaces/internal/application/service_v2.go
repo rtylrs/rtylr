@@ -93,7 +93,13 @@ func (s *Service) GetProjectV2(ctx context.Context, projectID, callerID, busines
 // callers see the whole business; everyone else sees created + member.
 func (s *Service) ListProjectsV2(ctx context.Context, callerID, businessID int64, status, visibility, q string, limit, offset int64) ([]domain.Project, int64, error) {
 	includeAll := s.hubProfileBypasses(ctx, callerID, businessID)
-	return s.repo.ListProjectsV2(ctx, businessID, callerID, includeAll, status, visibility, q, limit, offset)
+	// A bypass caller already sees the whole business, so resolving reports for
+	// them would be a query with nothing to add.
+	var managed []int64
+	if !includeAll {
+		managed = s.managedUserIDs(ctx, callerID, businessID)
+	}
+	return s.repo.ListProjectsV2(ctx, businessID, callerID, includeAll, managed, status, visibility, q, limit, offset)
 }
 
 // ListArchivedProjectsV2 lists the caller's visible recycle-bin entries,

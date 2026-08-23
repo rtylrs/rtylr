@@ -100,23 +100,39 @@ func (r *Repository) GetProjectV2ByID(ctx context.Context, id, businessID int64)
 // ListProjectsV2 lists active, non-personal projects of one business under the
 // curation rule: bypass callers see everything; everyone else sees projects
 // they created or belong to.
-func (r *Repository) ListProjectsV2(ctx context.Context, businessID, callerID int64, includeAll bool, status, visibility, q string, limit, offset int64) ([]domain.Project, int64, error) {
+// ListProjectsV2 lists projects under curation. managedUserIDs widens the scope
+// for the dept-manager proxy; an empty or nil slice widens nothing.
+// managedInClause shapes the managed-user set for an IN clause. sqlc expands an
+// empty slice into an invalid IN (), so an empty set becomes a single 0: no user
+// has id 0, which makes IN (0) match nothing without special-casing the SQL.
+func managedInClause(ids []int64) []int64 {
+	if len(ids) == 0 {
+		return []int64{0}
+	}
+	return ids
+}
+
+func (r *Repository) ListProjectsV2(ctx context.Context, businessID, callerID int64, includeAll bool, managedUserIDs []int64, status, visibility, q string, limit, offset int64) ([]domain.Project, int64, error) {
+	managed := managedInClause(managedUserIDs)
 	all := int64(0)
 	if includeAll {
 		all = 1
 	}
 	statusParam := sqlc.NullFlowProjectsStatus{FlowProjectsStatus: sqlc.FlowProjectsStatus(status), Valid: status != ""}
 	total, err := r.queries.CountProjectsV2(ctx, sqlc.CountProjectsV2Params{
-		BusinessID: businessID,
-		Column2:    all,
-		CreatedBy:  callerID,
-		UserID:     callerID,
-		Column5:    status,
-		Status:     statusParam,
-		Column7:    visibility,
-		Visibility: sqlc.FlowProjectsVisibility(visibility),
-		Column9:    q,
-		CONCAT:     q,
+		BusinessID:      businessID,
+		Column2:         all,
+		CreatedBy:       callerID,
+		UserID:          callerID,
+		ManagedCreators: managed,
+		ManagedOwners:   managed,
+		ManagedMembers:  managed,
+		Column8:         status,
+		Status:          statusParam,
+		Column10:        visibility,
+		Visibility:      sqlc.FlowProjectsVisibility(visibility),
+		Column12:        q,
+		CONCAT:          q,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CountProjectsV2 failed", logger.Error(err))
@@ -124,18 +140,21 @@ func (r *Repository) ListProjectsV2(ctx context.Context, businessID, callerID in
 	}
 
 	rows, err := r.queries.ListProjectsV2(ctx, sqlc.ListProjectsV2Params{
-		BusinessID: businessID,
-		Column2:    all,
-		CreatedBy:  callerID,
-		UserID:     callerID,
-		Column5:    status,
-		Status:     statusParam,
-		Column7:    visibility,
-		Visibility: sqlc.FlowProjectsVisibility(visibility),
-		Column9:    q,
-		CONCAT:     q,
-		Limit:      int32(limit),
-		Offset:     int32(offset),
+		BusinessID:      businessID,
+		Column2:         all,
+		CreatedBy:       callerID,
+		UserID:          callerID,
+		ManagedCreators: managed,
+		ManagedOwners:   managed,
+		ManagedMembers:  managed,
+		Column8:         status,
+		Status:          statusParam,
+		Column10:        visibility,
+		Visibility:      sqlc.FlowProjectsVisibility(visibility),
+		Column12:        q,
+		CONCAT:          q,
+		Limit:           int32(limit),
+		Offset:          int32(offset),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListProjectsV2 failed", logger.Error(err))
@@ -226,8 +245,8 @@ func (r *Repository) RestoreProjectV2(ctx context.Context, id, businessID int64)
 // plumbing is still landing.
 func (r *Repository) ArchiveProject(ctx context.Context, id, businessID int64, purgeAt *time.Time) error {
 	err := r.queries.ArchiveProject(ctx, sqlc.ArchiveProjectParams{
-		PurgeAt:  nullTimePtrToSql(purgeAt),
-		ID:       id,
+		PurgeAt:    nullTimePtrToSql(purgeAt),
+		ID:         id,
 		BusinessID: businessID,
 	})
 	if err != nil {

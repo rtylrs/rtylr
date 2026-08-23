@@ -186,5 +186,7 @@ func (r *Repository) BusinessEmployeeIDs(ctx context.Context, businessID int64) 
 // GetProjectsByCreatorOrMembership lists projects where the caller is the
 // creator or a member (the curation rule from the v2 project listing).
 func (r *Repository) GetProjectsByCreatorOrMembership(ctx context.Context, businessID, callerID int64, limit, offset int64) ([]domain.Project, int64, error) {
-	return r.ListProjectsV2(ctx, businessID, callerID, false, "", "", "", limit, offset)
+	// nil managed set on purpose: this helper means creator-or-member exactly,
+	// as its name says, so the dept-manager proxy must not widen it.
+	return r.ListProjectsV2(ctx, businessID, callerID, false, nil, "", "", "", limit, offset)
 }
