@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import {
   CreditCard,
@@ -20,6 +21,7 @@ import { itemListSchema } from '../../lib/structured-data';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
+import Lines from '../../components/text/Lines';
 import styles from './integrations.module.scss';
 
 // ── Integration catalog ───────────────────────────────────────────────────
@@ -169,25 +171,22 @@ const INTEGRATIONS: Integration[] = [
 
 const CATEGORIES: {
   id: Integration['category'] | 'all';
-  label: string;
+  key: string;
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
 }[] = [
-  { id: 'all', label: 'All', icon: Globe },
-  { id: 'Payments', label: 'Payments', icon: CreditCard },
-  { id: 'Accounting', label: 'Accounting', icon: BookOpen },
-  { id: 'Delivery', label: 'Delivery', icon: Truck },
-  { id: 'Comms', label: 'Comms', icon: Mail },
-  { id: 'Hardware', label: 'Hardware', icon: Printer },
-  { id: 'Productivity', label: 'Productivity', icon: Calendar },
+  // The id is the filter value and matches Integration['category']; the
+  // visible label comes from integrations.categories.<key>.
+  { id: 'all', key: 'all', icon: Globe },
+  { id: 'Payments', key: 'payments', icon: CreditCard },
+  { id: 'Accounting', key: 'accounting', icon: BookOpen },
+  { id: 'Delivery', key: 'delivery', icon: Truck },
+  { id: 'Comms', key: 'comms', icon: Mail },
+  { id: 'Hardware', key: 'hardware', icon: Printer },
+  { id: 'Productivity', key: 'productivity', icon: Calendar },
 ];
 
-const STATUS_LABEL: Record<Integration['status'], string> = {
-  live: 'Live',
-  beta: 'Beta',
-  soon: 'Coming soon',
-};
-
 const IntegrationsPage = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<(typeof CATEGORIES)[number]['id']>('all');
@@ -217,8 +216,8 @@ const IntegrationsPage = (): React.JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Integrations · Payments, Accounting & 100+ Apps | rtylr"
-          description="Every service rtylr connects to, payments, accounting, delivery, comms, hardware, and productivity."
+          title={t('integrations.meta.title')}
+          description={t('integrations.meta.description')}
           canonical="https://rtylr.com/integrations/"
           structuredData={itemListSchema({
             name: 'Integrations',
@@ -242,16 +241,13 @@ const IntegrationsPage = (): React.JSX.Element => {
             >
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
                 <LinkIcon size={13} strokeWidth={2} />
-                INTEGRATIONS
+                {t('integrations.hero.eyebrow')}
               </motion.span>
               <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-                Plug in what you
-                <br />
-                already use.
+                <Lines text={t('integrations.hero.title')} />
               </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                rtylr connects to payments, accounting, delivery marketplaces, communications, and
-                hardware out of the box. Everything a real business runs on, ready from day one.
+                {t('integrations.hero.subtitle')}
               </motion.p>
 
               <motion.div className={styles.searchRow} variants={blurFadeIn}>
@@ -259,7 +255,7 @@ const IntegrationsPage = (): React.JSX.Element => {
                   <Search size={16} strokeWidth={2} className={styles.searchIcon} />
                   <input
                     type="search"
-                    placeholder="Search integrations…"
+                    placeholder={t('integrations.hero.searchPlaceholder')}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     className={styles.searchInput}
@@ -268,7 +264,7 @@ const IntegrationsPage = (): React.JSX.Element => {
               </motion.div>
 
               <motion.div className={styles.categoryTabs} variants={blurFadeIn}>
-                {CATEGORIES.map(({ id, label, icon: Icon }) => (
+                {CATEGORIES.map(({ id, key, icon: Icon }) => (
                   <button
                     key={id}
                     type="button"
@@ -279,7 +275,7 @@ const IntegrationsPage = (): React.JSX.Element => {
                     onClick={() => setActiveCategory(id)}
                   >
                     <Icon width={14} height={14} strokeWidth={1.8} />
-                    {label}
+                    {t(`integrations.categories.${key}`)}
                   </button>
                 ))}
               </motion.div>
@@ -320,7 +316,7 @@ const IntegrationsPage = (): React.JSX.Element => {
                       <span
                         className={cn(styles.statusPill, styles[`status_${integration.status}`])}
                       >
-                        {STATUS_LABEL[integration.status]}
+                        {t(`integrations.status.${integration.status}`)}
                       </span>
                     </div>
                     <div className={styles.cardName}>{integration.name}</div>
@@ -342,12 +338,10 @@ const IntegrationsPage = (): React.JSX.Element => {
           >
             <motion.div className={styles.apiInner} variants={blurFadeIn}>
               <div className={styles.apiSide}>
-                <span className={styles.sectionEyebrow}>BUILD YOUR OWN</span>
-                <h2 className={styles.apiTitle}>Nothing matching? Build on our API.</h2>
+                <span className={styles.sectionEyebrow}>{t('integrations.api.eyebrow')}</span>
+                <h2 className={styles.apiTitle}>{t('integrations.api.title')}</h2>
                 <p className={styles.apiCopy}>
-                  Full REST API covering every object in rtylr, menu items, orders, invoices,
-                  customers, shifts, tasks. Webhooks for every event. OAuth 2.0 for third-party
-                  apps. Rate-limited generously. Documented publicly.
+                  {t('integrations.api.copy')}
                 </p>
                 <div className={styles.apiLinks}>
                   <a
@@ -356,10 +350,10 @@ const IntegrationsPage = (): React.JSX.Element => {
                     rel="noopener noreferrer"
                     className={styles.apiPrimary}
                   >
-                    Read API docs
+                    {t('integrations.api.docs')}
                   </a>
                   <button type="button" onClick={goContact} className={styles.apiSecondary}>
-                    Talk to an engineer
+                    {t('integrations.api.contact')}
                   </button>
                 </div>
               </div>

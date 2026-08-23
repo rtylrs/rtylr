@@ -206,28 +206,60 @@ describe('Open Graph images', () => {
 });
 
 describe('translated copy reaches the page', () => {
-  // i18next renders the key name when a key is missing, so a typo ships as
-  // "footer.link.pos" in the middle of the footer. tests/unit/i18n-keys
-  // catches the mismatch at the source; this catches anything that gets
-  // past it and reaches the served HTML.
-  // Namespace list, not a generic dotted-word match: page copy legitimately
-  // contains things like "rtylr.com/pricing" and "info@voxire.com".
-  const KEY_SHAPE = /\b(?:common|footer|contact|pricing|home)\.[a-z]\w*\.[\w.]+\b/;
+  // Two different failures, one per gate, and it is worth being exact
+  // about which is which because they look identical on the page:
+  //
+  //   a key a component asks for that en.json does not define
+  //     -> tests/unit/i18n-keys, at the source. NOT this gate: the key
+  //        list here is derived from en.json, so a key missing from
+  //        en.json is absent from both sides and cannot be compared.
+  //
+  //   a key that exists in en.json and still renders as its own name
+  //     -> this gate. That is a resolution failure: the provider not
+  //        mounted, a namespace not loaded, a build that dropped the
+  //        locale file. The source looks perfectly correct.
+  //
+  // Verified by injecting "integrations.api.docs" into a built page.
+  //
+  // It checks for the EXACT keys en.json defines rather than for anything
+  // shaped like a dotted word. The shape approach failed both ways: it
+  // hardcoded five namespaces while the file grew to fourteen, so real
+  // leaks went unseen, and it flagged a false positive, because
+  // /integrations/ renders an API sample payload containing
+  // "integrations.delivery.uber", which is page content and not a key.
+  const KEYS = (() => {
+    const flatten = (obj, prefix = '', out = []) => {
+      for (const [k, v] of Object.entries(obj)) {
+        const key = prefix ? `${prefix}.${k}` : k;
+        if (v && typeof v === 'object' && !Array.isArray(v)) flatten(v, key, out);
+        else out.push(key);
+      }
+      return out;
+    };
+    const en = JSON.parse(readFileSync(path.join(REPO, 'apps/landing/locales/en.json'), 'utf8'));
+    return flatten(en);
+  })();
+
+  it('has keys to check against', () => {
+    // Guards the whole check: an empty list would pass everything.
+    assert.ok(KEYS.length > 100, `expected 100+ keys, found ${KEYS.length}`);
+  });
 
   it('no page renders a raw translation key', () => {
     const offenders = [];
     for (const p of pages) {
       const visible = stripScripts(read(p)).replace(/<[^>]+>/g, ' ');
-      const hit = visible.match(KEY_SHAPE);
-      if (hit) offenders.push([p, hit[0]]);
+      for (const key of KEYS) {
+        if (visible.includes(key)) offenders.push([p, key]);
+      }
     }
     assert.deepEqual(offenders, [], 'untranslated keys rendered as their own name');
   });
 
   it('the footer still renders its English labels', () => {
-    // The extraction moved 38 strings out of the markup. If the provider
-    // ever stops resolving, the page does not crash, it just loses its
-    // navigation text, which is the kind of thing a build log never shows.
+    // The extraction moved hundreds of strings out of the markup. If the
+    // provider ever stops resolving, the page does not crash, it just loses
+    // its text, which is the kind of thing a build log never shows.
     const visible = stripScripts(read('pos/index.html'));
     for (const label of ['PRODUCT', 'RESOURCES', 'DEVELOPERS', 'COMPANY', 'TERMS OF USE']) {
       assert.ok(visible.includes(label), `footer lost "${label}"`);

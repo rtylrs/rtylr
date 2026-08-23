@@ -762,5 +762,38 @@
     "cta": {
       "title": "Stop losing work\nbetween tools."
     }
+  },
+  "integrations": {
+    "meta": {
+      "title": "Integrations · Payments, accounting, delivery and hardware | rtylr",
+      "description": "Every service rtylr connects to, payments, accounting, delivery, comms, hardware, and productivity."
+    },
+    "hero": {
+      "eyebrow": "INTEGRATIONS",
+      "title": "Plug in what you\nalready use.",
+      "subtitle": "rtylr connects to payments, accounting, delivery marketplaces, communications, and hardware out of the box. Everything a real business runs on, ready from day one.",
+      "searchPlaceholder": "Search integrations…"
+    },
+    "categories": {
+      "all": "All",
+      "payments": "Payments",
+      "accounting": "Accounting",
+      "delivery": "Delivery",
+      "comms": "Comms",
+      "hardware": "Hardware",
+      "productivity": "Productivity"
+    },
+    "status": {
+      "live": "Live",
+      "beta": "Beta",
+      "soon": "Coming soon"
+    },
+    "api": {
+      "eyebrow": "BUILD YOUR OWN",
+      "title": "Nothing matching? Build on our API.",
+      "copy": "Full REST API covering every object in rtylr, menu items, orders, invoices, customers, shifts, tasks. Webhooks for every event. OAuth 2.0 for third-party apps. Rate-limited generously. Documented publicly.",
+      "docs": "Read API docs",
+      "contact": "Talk to an engineer"
+    }
   }
 }
