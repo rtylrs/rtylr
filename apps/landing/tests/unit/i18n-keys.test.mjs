@@ -193,6 +193,58 @@ describe('translation keys', () => {
     assert.deepEqual(broken, [], 'a translation dropped or renamed an interpolated value');
   });
 
+  it('multi-line values are rendered through something that breaks lines', () => {
+    // JSX collapses a newline in text content to a space. Headings on this
+    // site are deliberately two lines, and moving them out of the markup
+    // turned an explicit <br /> into a \n inside a string, which rendered
+    // as one line with no error and no visible diff.
+    //
+    // Two consumers handle \n: components/text/Lines, and SplitWords, which
+    // splits on it itself. Anything else silently loses the break.
+    const multiline = Object.entries(en)
+      .filter(([, v]) => typeof v === 'string' && v.includes('\n'))
+      .map(([k]) => k);
+    assert.ok(multiline.length > 0, 'no multi-line values found, so this check proves nothing');
+
+    const sources = SOURCE_GLOBS.flatMap((g) => globSync(g, { cwd: APP }))
+      .filter((f) => !/\.(test|spec)\.tsx?$/.test(f))
+      .map((f) => readFileSync(path.join(APP, f), 'utf8'))
+      .join('\n');
+
+    const unbroken = multiline.filter((k) => {
+      const call = `t('${k}')`;
+      return !(
+        sources.includes(`<Lines text={${call}}`) || sources.includes(`text={${call}}`)
+      );
+    });
+    assert.deepEqual(unbroken, [], 'multi-line copy rendered without a line break');
+  });
+
+  it('an extracted file has no hardcoded accessibility text left', () => {
+    // aria-label, alt, title and placeholder are read aloud or shown on
+    // hover, and none of them appear in a screenshot review. They are the
+    // strings that survive an extraction pass: seven were left behind in the
+    // two header files, found only by grepping for the attribute rather than
+    // by looking at the page.
+    //
+    // Scoped to files that already call useTranslation, so it gets stricter
+    // as extraction proceeds instead of failing on the pages not yet done.
+    const ATTR = /\b(aria-label|placeholder|alt|title)="([^"]+)"/g;
+    const offenders = [];
+
+    for (const rel of SOURCE_GLOBS.flatMap((g) => globSync(g, { cwd: APP }))) {
+      if (/\.(test|spec)\.tsx?$/.test(rel)) continue;
+      const src = readFileSync(path.join(APP, rel), 'utf8');
+      if (!src.includes('useTranslation')) continue;
+      for (const m of src.matchAll(ATTR)) {
+        // A URL or an anchor is not copy.
+        if (/^(#|https?:|\/|mailto:|tel:)/.test(m[2])) continue;
+        offenders.push([rel, m[0]]);
+      }
+    }
+    assert.deepEqual(offenders, [], 'hardcoded strings in accessibility attributes');
+  });
+
   it('reports locale coverage', () => {
     const total = Object.keys(en).length;
     for (const loc of ['ar', 'fr']) {

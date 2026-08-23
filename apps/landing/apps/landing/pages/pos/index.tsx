@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import { Receipt, CreditCard, Split, Wifi, WifiOff } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
@@ -14,6 +15,7 @@ import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import { SplitWords } from '../../components/motion/SplitWords';
+import Lines from '../../components/text/Lines';
 import styles from './pos.module.scss';
 
 // ── Static receipt items shown in the hero mockup ──────────────────────────
@@ -24,32 +26,45 @@ const RECEIPT_ITEMS = [
   { name: 'Espresso', qty: 2, price: 7.0 },
 ];
 
-const FEATURES = [
-  {
-    icon: Receipt,
-    title: 'Tickets that keep up',
-    copy: 'Split, merge, combine. Send courses to the right station. Fire when you say fire.',
-  },
-  {
-    icon: CreditCard,
-    title: 'Every payment method',
-    copy: 'Card, Apple Pay, Google Pay, cash, gift, comp, house account. One register handles all of it.',
-  },
-  {
-    icon: Split,
-    title: 'Tips, tabs, and splits',
-    copy: 'Seat-level splits. Auto-gratuity. Pre-auth tabs. Tips hit payroll the next morning.',
-  },
-  {
-    icon: WifiOff,
-    title: 'Works when the internet doesn\u2019t',
-    copy: 'Full offline mode. Queues transactions locally and syncs the moment you\u2019re back online.',
-  },
+const FEATURE_ICONS = [Receipt, CreditCard, Split, WifiOff];
+
+// Which product supports what, as codes. Column order is rtylr, Toast,
+// Square, Shopify POS. Row order matches pos.compare.rows in the locale
+// files, so the two arrays must stay the same length: the i18n gate checks
+// that a translated list keeps its source's length for exactly this reason.
+//
+// A "Per-location monthly fee" row used to sit second, reading $0 for rtylr
+// against $69 to $165 and $89/register for two competitors. It came out
+// with the rest of the placeholder pricing: rtylr publishes no price, so $0
+// was the same false claim being removed everywhere else, and quoting a
+// competitor's rate undated and uncited is the one thing the comparison
+// rules here forbid outright.
+const COMPARE_VALUES: string[][] = [
+  ['yes', 'no', 'partial', 'partial'],
+  ['no', 'yes', 'yes', 'yes'],
+  ['yes', 'no', 'partial', 'partial'],
+  ['yes', 'add-on', 'add-on', 'no'],
+  ['yes', 'add-on', 'no', 'no'],
+  ['yes', 'add-on', 'partial', 'no'],
+  ['yes', 'partial', 'yes', 'yes'],
 ];
 
 const POSPage = (): React.JSX.Element => {
   const faq = useFaq('pos');
   const router = useRouter();
+  const { t } = useTranslation();
+
+  const features = t('pos.features.items', { returnObjects: true }) as unknown as {
+    title: string;
+    copy: string;
+  }[];
+  const compareRows = t('pos.compare.rows', { returnObjects: true }) as unknown as string[];
+  const cell = {
+    yes: t('pos.compare.cell.included'),
+    no: t('pos.compare.cell.excluded'),
+    partial: t('pos.compare.cell.partial'),
+    addon: t('pos.compare.cell.paidAddon'),
+  };
 
   const goRegister = (): void => {
     navigateExternal(`${APP_URLS.auth}/register?redirect=pos`);
@@ -63,15 +78,14 @@ const POSPage = (): React.JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="POS · The register that keeps up. | rtylr"
-          description="Full-service POS for restaurants and retail. Tickets, splits, tips, and a real offline mode. Built into the rtylr platform."
+          title={t('pos.meta.title')}
+          description={t('pos.meta.description')}
           canonical="https://rtylr.com/pos/"
           structuredData={productWithBreadcrumbs({
             name: 'POS',
             path: '/pos/',
             subCategory: 'Point of Sale',
-            description:
-              'Full-service POS for restaurants and retail. Tickets, splits, tips, and a real offline mode.',
+            description: t('pos.meta.schemaDescription'),
           })}
         />
 
@@ -90,25 +104,23 @@ const POSPage = (): React.JSX.Element => {
               variants={staggerBlur}
             >
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
-                rtylr POS
+                {t('pos.hero.eyebrow')}
               </motion.span>
               <SplitWords
                 as="h1"
                 className={styles.heroTitle}
-                text={'The register\nthat keeps up.'}
+                text={t('pos.hero.title')}
                 delay={0.1}
               />
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Fire courses to the right station. Split a check seven ways. Take Apple Pay, gift
-                cards, house accounts. Keep running when the WiFi goes down. Built for the pace of
-                real service, not a demo video.
+                {t('pos.hero.subtitle')}
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goRegister} className={styles.primaryBtn}>
-                  Get started
+                  {t('common.cta.getStarted')}
                 </button>
                 <button type="button" onClick={goDemo} className={styles.outlineBtn}>
-                  See it live
+                  {t('common.cta.seeItLive')}
                 </button>
               </motion.div>
             </motion.div>
@@ -173,12 +185,8 @@ const POSPage = (): React.JSX.Element => {
             </motion.div>
           </section>
 
-          <DirectAnswer label="What is rtylr POS?">
-            rtylr POS is the point-of-sale app inside rtylr, built for restaurants and retail businesses
-            running one location or twenty. It handles tickets, course firing, check splits, tips,
-            modifiers and card payments, and it keeps taking orders when the connection drops. Because it
-            writes to the same database as inventory, staff and accounting, a sale moves stock and revenue
-            without an export.
+          <DirectAnswer label={t('pos.directAnswer.label')}>
+            {t('pos.directAnswer.body')}
           </DirectAnswer>
 
           {/* ── FEATURE QUAD, 2×2, asymmetric typography ─────────────────── */}
@@ -191,12 +199,10 @@ const POSPage = (): React.JSX.Element => {
               variants={staggerBlur}
             >
               <motion.span className={styles.sectionEyebrow} variants={blurFadeIn}>
-                WHAT IT DOES
+                {t('pos.features.eyebrow')}
               </motion.span>
               <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-                What does a register
-                <br />
-                have to get right?
+                <Lines text={t('pos.features.title')} />
               </motion.h2>
             </motion.div>
 
@@ -207,15 +213,22 @@ const POSPage = (): React.JSX.Element => {
               viewport={viewportOnce}
               variants={staggerBlur}
             >
-              {FEATURES.map(({ icon: Icon, title, copy }) => (
-                <motion.div key={title} className={styles.featureCard} variants={blurFadeIn}>
-                  <div className={styles.featureIcon}>
-                    <Icon size={20} strokeWidth={1.8} />
-                  </div>
-                  <h3 className={styles.featureTitle}>{title}</h3>
-                  <p className={styles.featureCopy}>{copy}</p>
-                </motion.div>
-              ))}
+              {features.map((feature, i) => {
+                const Icon = FEATURE_ICONS[i];
+                return (
+                  <motion.div
+                    key={feature.title}
+                    className={styles.featureCard}
+                    variants={blurFadeIn}
+                  >
+                    <div className={styles.featureIcon}>
+                      <Icon size={20} strokeWidth={1.8} />
+                    </div>
+                    <h3 className={styles.featureTitle}>{feature.title}</h3>
+                    <p className={styles.featureCopy}>{feature.copy}</p>
+                  </motion.div>
+                );
+              })}
             </motion.div>
           </section>
 
@@ -228,11 +241,9 @@ const POSPage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.div className={styles.compareHeader} variants={blurFadeIn}>
-              <span className={styles.sectionEyebrow}>VS THE OTHERS</span>
+              <span className={styles.sectionEyebrow}>{t('pos.compare.eyebrow')}</span>
               <h2 className={styles.sectionTitle}>
-                What do other registers
-                <br />
-                charge extra for?
+                <Lines text={t('pos.compare.title')} />
               </h2>
             </motion.div>
 
@@ -250,48 +261,10 @@ const POSPage = (): React.JSX.Element => {
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    {
-                      feature: 'Offline mode (full service, no internet)',
-                      values: ['yes', 'no', 'partial', 'partial'],
-                    },
-                    // A "Per-location monthly fee" row used to sit here,
-                    // reading $0 for rtylr against $69 to $165 and
-                    // $89/register for two competitors. It came out with the
-                    // rest of the placeholder pricing: rtylr publishes no
-                    // price, so $0 was the same false claim being removed
-                    // everywhere else, and quoting a competitor's rate
-                    // undated and uncited is the one thing the comparison
-                    // rules here forbid outright. A priced comparison needs
-                    // their published pricing page, cited, with the date read.
-                    {
-                      feature: 'Payment processing locked in',
-                      values: ['no', 'yes', 'yes', 'yes'],
-                    },
-                    {
-                      feature: 'Hardware you can buy elsewhere',
-                      values: ['yes', 'no', 'partial', 'partial'],
-                    },
-                    {
-                      feature: 'HR + payroll included',
-                      values: ['yes', 'add-on', 'add-on', 'no'],
-                    },
-                    {
-                      feature: 'Inventory depletes per recipe',
-                      values: ['yes', 'add-on', 'no', 'no'],
-                    },
-                    {
-                      feature: 'Real-time CRM tied to receipts',
-                      values: ['yes', 'add-on', 'partial', 'no'],
-                    },
-                    {
-                      feature: 'Public REST API v1',
-                      values: ['yes', 'partial', 'yes', 'yes'],
-                    },
-                  ].map((row) => (
-                    <tr key={row.feature}>
-                      <th scope="row">{row.feature}</th>
-                      {row.values.map((v, i) => {
+                  {COMPARE_VALUES.map((values, rowIndex) => (
+                    <tr key={compareRows[rowIndex]}>
+                      <th scope="row">{compareRows[rowIndex]}</th>
+                      {values.map((v, i) => {
                         const isUs = i === 0;
                         const variant =
                           v === 'yes'
@@ -319,15 +292,7 @@ const POSPage = (): React.JSX.Element => {
                                       : styles.cellText
                             )}
                           >
-                            {variant === 'yes'
-                              ? 'Included'
-                              : variant === 'no'
-                                ? '-'
-                                : variant === 'partial'
-                                  ? 'Partial'
-                                  : variant === 'addon'
-                                    ? 'Paid add-on'
-                                    : v}
+                            {variant === 'text' ? v : cell[variant]}
                           </td>
                         );
                       })}
@@ -353,16 +318,14 @@ const POSPage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.h2 className={styles.ctaTitle} variants={blurFadeIn}>
-              Your register should
-              <br />
-              keep up. This one does.
+              <Lines text={t('pos.cta.title')} />
             </motion.h2>
             <motion.div className={styles.ctaButtons} variants={blurFadeIn}>
               <button type="button" onClick={goRegister} className={styles.primaryBtn}>
-                Get started
+                {t('common.cta.getStarted')}
               </button>
               <button type="button" onClick={goDemo} className={styles.outlineBtn}>
-                Book a demo
+                {t('common.cta.bookDemo')}
               </button>
             </motion.div>
           </motion.section>

@@ -10,7 +10,16 @@
     },
     "cta": {
       "startFree": "Start for free",
-      "bookDemo": "Book a demo"
+      "bookDemo": "Book a demo",
+      "getStarted": "Get started",
+      "seeItLive": "See it live"
+    },
+    "a11y": {
+      "home": "rtylr home",
+      "logoAlt": "rtylr",
+      "toggleMenu": "Toggle mobile menu",
+      "navMenu": "Navigation menu",
+      "closeMenu": "Close menu"
     }
   },
   "footer": {
@@ -373,6 +382,116 @@
       "badge": "Pricing",
       "title": "One platform.\nEvery app included.",
       "description": "All 7 apps come with every plan. What changes is how many people and locations you run. Start free with no card."
+    }
+  },
+  "pos": {
+    "meta": {
+      "title": "POS · The register that keeps up. | rtylr",
+      "description": "Full-service POS for restaurants and retail. Tickets, splits, tips, and a real offline mode. Built into the rtylr platform.",
+      "schemaDescription": "Full-service POS for restaurants and retail. Tickets, splits, tips, and a real offline mode."
+    },
+    "hero": {
+      "eyebrow": "rtylr POS",
+      "title": "The register\nthat keeps up.",
+      "subtitle": "Fire courses to the right station. Split a check seven ways. Take Apple Pay, gift cards, house accounts. Keep running when the WiFi goes down. Built for the pace of real service, not a demo video."
+    },
+    "directAnswer": {
+      "label": "What is rtylr POS?",
+      "body": "rtylr POS is the point-of-sale app inside rtylr, built for restaurants and retail businesses running one location or twenty. It handles tickets, course firing, check splits, tips, modifiers and card payments, and it keeps taking orders when the connection drops. Because it writes to the same database as inventory, staff and accounting, a sale moves stock and revenue without an export."
+    },
+    "features": {
+      "eyebrow": "WHAT IT DOES",
+      "title": "What does a register\nhave to get right?",
+      "items": [
+        {
+          "title": "Tickets that keep up",
+          "copy": "Split, merge, combine. Send courses to the right station. Fire when you say fire."
+        },
+        {
+          "title": "Every payment method",
+          "copy": "Card, Apple Pay, Google Pay, cash, gift, comp, house account. One register handles all of it."
+        },
+        {
+          "title": "Tips, tabs, and splits",
+          "copy": "Seat-level splits. Auto-gratuity. Pre-auth tabs. Tips hit payroll the next morning."
+        },
+        {
+          "title": "Works when the internet doesn’t",
+          "copy": "Full offline mode. Queues transactions locally and syncs the moment you’re back online."
+        }
+      ]
+    },
+    "compare": {
+      "eyebrow": "VS THE OTHERS",
+      "title": "What do other registers\ncharge extra for?",
+      "rows": [
+        "Offline mode (full service, no internet)",
+        "Payment processing locked in",
+        "Hardware you can buy elsewhere",
+        "HR + payroll included",
+        "Inventory depletes per recipe",
+        "Real-time CRM tied to receipts",
+        "Public REST API v1"
+      ],
+      "cell": {
+        "included": "Included",
+        "excluded": "-",
+        "partial": "Partial",
+        "paidAddon": "Paid add-on"
+      }
+    },
+    "cta": {
+      "title": "Your register should\nkeep up. This one does."
+    }
+  },
+  "erp": {
+    "meta": {
+      "title": "ERP · Inventory that counts itself. | rtylr",
+      "description": "Real-time inventory, suppliers, and purchasing. Recipe-linked depletion. Multi-location transfers with full audit trail.",
+      "schemaDescription": "Real-time inventory, suppliers, purchase orders, and warehouse management."
+    },
+    "hero": {
+      "eyebrow": "rtylr ERP · Inventory",
+      "title": "Inventory that\ncounts itself.",
+      "subtitle": "Every margherita sold drops flour, mozzarella, and olive oil. Every PO approved moves the warehouse count. Every low-stock alert fires before you actually run out. Not after the Saturday rush notices."
+    },
+    "directAnswer": {
+      "label": "What is rtylr ERP?",
+      "body": "rtylr ERP is the inventory and supply chain app inside rtylr, for businesses holding stock across one or more locations. It covers on-hand counts, suppliers, purchase orders, transfers between sites, low-stock alerts and cost tracking. It reads sales from the POS as they happen, so stock stays accurate without a nightly sync and a reorder can be drafted before anyone notices an empty shelf."
+    },
+    "capabilities": {
+      "eyebrow": "CAPABILITIES",
+      "title": "What does rtylr ERP\ncover, from the dock\nto the P&L?",
+      "items": [
+        {
+          "title": "Every SKU, every variant",
+          "copy": "Track ingredients down to the gram. Recipe-linked depletion. Real-time counts as sales happen."
+        },
+        {
+          "title": "Suppliers & purchase orders",
+          "copy": "Auto-reorder at threshold. Multi-supplier price comparison. Expected-arrival tracking per line item."
+        },
+        {
+          "title": "Multi-location transfers",
+          "copy": "Move stock between sites with full audit trail. Location-level reporting. No spreadsheet reconciliation."
+        },
+        {
+          "title": "Low-stock before it hurts",
+          "copy": "Smart thresholds based on historical velocity. Alerts route to the right person. Nothing runs out mid-service."
+        }
+      ]
+    },
+    "depletion": {
+      "eyebrow": "LIVE RECIPE DEPLETION",
+      "title": "What happens to stock when a sale goes through?",
+      "copy": "Every POS sale cascades through the recipe tree. Flour, yeast, mozzarella, basil, olive oil, each depletes by exactly the gram. When anything crosses its reorder threshold, a PO is drafted with your preferred supplier and routed for approval."
+    },
+    "cta": {
+      "title": "Close your inventory\nbooks while you sleep."
+    },
+    "mock": {
+      "reset": "Reset",
+      "resetLabel": "Reset inventory"
     }
   }
 }
