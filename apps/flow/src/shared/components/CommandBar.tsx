@@ -43,7 +43,7 @@ export const CommandBar: React.FC = () => {
   const { commandBarOpen, setCommandBarOpen, setQuickCreateOpen, activeWorkspaceId } =
     useFlowStore();
   const { data: apiTasks = [] } = useTasks({});
-  const { data: apiProjects = [] } = useProjects(activeWorkspaceId || undefined);
+  const { data: apiProjects = [] } = useProjects();
   const tasks = apiTasks.map(apiTaskToTask);
   const projects = apiProjects;
   const [query, setQuery] = useState('');

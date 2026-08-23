@@ -24,6 +24,7 @@ const mockClients = vi.hoisted(() => {
     settingClient: mockClient(),
     userClient: mockClient(),
     projectV2: mockClient(),
+    taskV2: mockClient(),
   };
 });
 
@@ -42,6 +43,7 @@ vi.mock('../lib/clients', () => ({
   settingClient: mockClients.settingClient,
   userClient: mockClients.userClient,
   projectV2: mockClients.projectV2,
+  taskV2: mockClients.taskV2,
 }));
 
 import { flowApi } from './flowApi';
@@ -59,6 +61,7 @@ import {
   settingClient,
   userClient,
   projectV2,
+  taskV2,
 } from '../lib/clients';
 
 describe('flowApi OneKit adapters', () => {
@@ -75,14 +78,23 @@ describe('flowApi OneKit adapters', () => {
 
   it('uses generated project and member methods', async () => {
     await Promise.all([
-      flowApi.getProjects('ws-1'),
+      flowApi.getProjects(),
       flowApi.createProject({ name: 'Project A' }),
       flowApi.updateProject('7', { name: 'Renamed' }),
       flowApi.getProjectMembers('7'),
       flowApi.addProjectMember({ project_id: 7, user_id: 2, role: 'member' }),
     ]);
 
-    expect(projectClient.listProjects).toHaveBeenCalledWith({ workspaceId: 'ws-1' });
+    // The sidebar list is business-scoped and must be v2: a v2-created project
+    // is stored with workspace_id 0, and v1's listProjects filters on
+    // workspace_id, so a v1 list would never show a newly created project.
+    expect(projectV2.listProjects).toHaveBeenCalledWith({
+      status: '',
+      visibility: '',
+      q: '',
+      page: 1,
+      limit: 100,
+    });
     // v2: no workspace id, and description keeps the '-' sentinel because
     // CreateProjectRequest declares it @required and the generated validator
     // rejects an empty string.
@@ -118,7 +130,7 @@ describe('flowApi OneKit adapters', () => {
   it('keeps task boundary conversions at the generated client edge', async () => {
     await Promise.all([
       flowApi.getTasks({ projectId: '7', workspaceId: '1', status: 'todo' }),
-      flowApi.createTask({ workspaceId: '1', projectId: '7', title: 'Task' }),
+      flowApi.createTask({ projectId: '7', title: 'Task' }),
       flowApi.updateTask('9', { archived: false, status: 'done' }),
       flowApi.updateTaskStatus('9', 'done'),
       flowApi.deleteTask('9'),
@@ -130,9 +142,9 @@ describe('flowApi OneKit adapters', () => {
       status: 'todo',
       assigneeId: undefined,
     });
-    expect(taskClient.createTask).toHaveBeenCalledWith({
+    // v2 create carries no workspace_id.
+    expect(taskV2.createTask).toHaveBeenCalledWith({
       projectId: '7',
-      workspaceId: '1',
       title: 'Task',
       description: '-',
       priority: 'medium',
