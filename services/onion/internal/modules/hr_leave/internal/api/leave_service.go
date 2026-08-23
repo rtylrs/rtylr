@@ -22,6 +22,10 @@ func (s *LeaveService) ListLeaveRequests(ctx context.Context, req *hrleavev1.Lis
 	res, err := (&ListLeaveRequestsHandler{Service: s.service}).Serve(ctx, &ListLeaveRequestsRequest{
 		EmployeeID: req.GetEmployeeId(),
 		Status:     req.GetStatus(),
+		FromDate:   req.FromDate,
+		ToDate:     req.ToDate,
+		Limit:      int32(req.GetLimit()),
+		Offset:     int32(req.GetOffset()),
 	})
 	if err != nil {
 		return nil, err
