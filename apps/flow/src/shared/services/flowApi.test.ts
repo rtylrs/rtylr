@@ -19,7 +19,7 @@ const mockClients = vi.hoisted(() => {
     milestoneClient: mockClient(),
     cycleClient: mockClient(),
     viewV2: mockClient(),
-    insightsClient: mockClient(),
+    insightsV2: mockClient(),
     notificationClient: mockClient(),
     settingClient: mockClient(),
     userClient: mockClient(),
@@ -39,7 +39,7 @@ vi.mock('../lib/clients', () => ({
   milestoneClient: mockClients.milestoneClient,
   cycleClient: mockClients.cycleClient,
   viewV2: mockClients.viewV2,
-  insightsClient: mockClients.insightsClient,
+  insightsV2: mockClients.insightsV2,
   notificationClient: mockClients.notificationClient,
   settingClient: mockClients.settingClient,
   userClient: mockClients.userClient,
@@ -57,7 +57,7 @@ import {
   labelClient,
   milestoneClient,
   cycleClient,
-  insightsClient,
+  insightsV2,
   notificationClient,
   settingClient,
   userClient,
@@ -169,9 +169,9 @@ describe('flowApi OneKit adapters', () => {
       flowApi.getMilestones({ projectId: '7' }),
       flowApi.createCycle({ name: 'Sprint', workspaceId: '1' }),
       flowApi.getViews(),
-      flowApi.getInsights('1'),
-      flowApi.getTeamWorkload('1'),
-      flowApi.getRoadmap('1'),
+      flowApi.getInsights(),
+      flowApi.getTeamWorkload(),
+      flowApi.getRoadmap(),
     ]);
 
     // Labels are one business-wide pool on v2, so no workspace is sent. v1's
@@ -199,9 +199,11 @@ describe('flowApi OneKit adapters', () => {
       endDate: undefined,
     });
     expect(viewV2.listViews).toHaveBeenCalledWith({ page: 1, limit: 200 });
-    expect(insightsClient.getInsights).toHaveBeenCalledWith({ workspaceId: '1' });
-    expect(insightsClient.getTeamWorkload).toHaveBeenCalledWith({ workspaceId: '1' });
-    expect(insightsClient.getRoadmap).toHaveBeenCalledWith({ workspaceId: '1' });
+    // Insights, team workload and the roadmap are business-wide on v2 and take
+    // no parameters at all.
+    expect(insightsV2.getInsights).toHaveBeenCalledWith({});
+    expect(insightsV2.getTeamWorkload).toHaveBeenCalledWith({});
+    expect(insightsV2.getRoadmap).toHaveBeenCalledWith({});
   });
 
   it('encodes saved-view filters to the wire JSON string and decodes them back', async () => {

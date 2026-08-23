@@ -6,14 +6,12 @@ import { useNavigate } from '@tanstack/react-router';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
 import { useInsights } from './useInsights';
-import { useFlowStore } from '../../shared/stores/flowStore';
 import { Skeleton, CardSkeleton } from '../../shared/components/Skeleton';
 
 const Insights: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { activeWorkspaceId } = useFlowStore();
-  const { data, isLoading } = useInsights(activeWorkspaceId);
+  const { data, isLoading } = useInsights();
 
   if (isLoading || !data) {
     return (
