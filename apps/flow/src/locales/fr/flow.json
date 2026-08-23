@@ -627,7 +627,9 @@
       "active": "Actif",
       "atRisk": "À risque",
       "completed": "Terminé"
-    }
+    },
+    "project": "Projet",
+    "noProjects": "Aucun projet pour le moment"
   },
   "roadmap": {
     "loading": "Chargement de la feuille de route...",

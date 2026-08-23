@@ -627,7 +627,9 @@
       "active": "Active",
       "atRisk": "At risk",
       "completed": "Completed"
-    }
+    },
+    "project": "Project",
+    "noProjects": "No projects yet"
   },
   "roadmap": {
     "loading": "Loading roadmap...",

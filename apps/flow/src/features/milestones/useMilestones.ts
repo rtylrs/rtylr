@@ -5,11 +5,11 @@ import { toast } from 'sonner';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiMilestone } from '../../shared/services/flowApi';
 
-export function useMilestones(params?: { projectId?: string; workspaceId?: string } | string) {
+export function useMilestones(projectId?: string) {
   return useQuery<ApiMilestone[]>({
-    queryKey: ['milestones', params],
+    queryKey: projectId === undefined ? ['milestones'] : ['milestones', projectId],
     queryFn: async () => {
-      const res = await unwrap(flowApi.getMilestones(params));
+      const res = await unwrap(flowApi.getMilestones(projectId));
       if (Array.isArray(res)) return res;
       const wrapped = res as { milestones?: ApiMilestone[] };
       return wrapped.milestones ?? [];
@@ -21,7 +21,7 @@ export function useCreateMilestone() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<ApiMilestone> & { workspaceId?: string; projectId?: string }) => {
+    mutationFn: (data: Partial<ApiMilestone> & { projectId: string }) => {
       return unwrap(flowApi.createMilestone(data));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['milestones'] }),

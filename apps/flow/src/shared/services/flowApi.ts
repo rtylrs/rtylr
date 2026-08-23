@@ -7,7 +7,6 @@ import {
   workspaceClient,
   projectClient,
   taskClient,
-  milestoneClient,
   cycleClient,
   notificationClient,
   settingClient,
@@ -17,6 +16,7 @@ import {
   labelV2,
   viewV2,
   insightsV2,
+  milestoneV2,
 } from '../lib/clients';
 
 // -- Types ----------------------------------------------------------------
@@ -251,17 +251,6 @@ const toTaskCreatePayload = (data: {
   estimated_hours:
     data.estimatedHours ?? (data.effortMinutes !== undefined ? data.effortMinutes / 60 : undefined),
   labels: data.labels?.map((label) => String(Number(label))),
-});
-
-const toMilestoneCreatePayload = (data: Partial<ApiMilestone>) => ({
-  projectId: data.projectId,
-  workspaceId:
-    'workspaceId' in data
-      ? (data as Partial<ApiMilestone> & { workspaceId?: string }).workspaceId
-      : undefined,
-  name: data.name,
-  description: data.description,
-  targetDate: data.targetDate,
 });
 
 const toMilestoneUpdatePayload = (data: Partial<ApiMilestone>) => ({
@@ -812,38 +801,35 @@ export const flowApi = {
 
   // -- Milestones ---------------------------------------------------------
 
-  getMilestones: (query?: string | { projectId?: string; workspaceId?: string }) => {
-    const params =
-      typeof query === 'string'
-        ? query
-          ? { project_id: query }
-          : undefined
-        : query
-          ? {
-              ...(query.projectId ? { project_id: query.projectId } : {}),
-              ...(query.workspaceId ? { workspace_id: query.workspaceId } : {}),
-            }
-          : undefined;
-
-    return flowResult<{ milestones: ApiMilestone[] }>(() =>
-      milestoneClient.listMilestones({
-        projectId: params?.project_id,
-        workspaceId: params?.workspace_id,
+  // v2 lists business-wide with project_id as an optional narrowing filter, so
+  // the old string-or-object overload collapses to one optional project id.
+  getMilestones: (projectId?: string) =>
+    flowResult<{ milestones: ApiMilestone[] }>(() =>
+      milestoneV2.listMilestones({
+        projectId,
+        page: 1,
+        limit: 200,
+        sortBy: '',
+        sortDir: '',
       })
-    );
-  },
+    ),
 
-  createMilestone: (data: Partial<ApiMilestone>) =>
+  // projectId is required rather than optional: v2 declares project_id
+  // @required @gt(0), so every milestone belongs to a project and the caller
+  // has to say which. The old signature let it be omitted and 400d.
+  createMilestone: (data: Partial<ApiMilestone> & { projectId: string }) =>
     flowResult<{ milestone: ApiMilestone }>(() =>
-      milestoneClient.createMilestone({
-        ...toMilestoneCreatePayload(data),
+      milestoneV2.createMilestone({
+        projectId: data.projectId,
         name: data.name ?? '',
+        description: data.description,
+        targetDate: data.targetDate,
       })
     ),
 
   updateMilestone: (id: string, data: Partial<ApiMilestone>) =>
     flowResult<{ message: string }>(() =>
-      milestoneClient.updateMilestone({ id, ...toMilestoneUpdatePayload(data) })
+      milestoneV2.updateMilestone({ id, ...toMilestoneUpdatePayload(data) })
     ),
 
   // -- Cycles -------------------------------------------------------------

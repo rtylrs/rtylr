@@ -23,18 +23,23 @@ const STATUS_LABEL_KEYS: Record<string, string> = {
   completed: 'completed',
 };
 
-import { useFlowStore } from '../../shared/stores/flowStore';
+import { useProjects } from '../projects/useProjects';
 
 const Milestones: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { activeWorkspaceId } = useFlowStore();
-  const { data: milestones = [], isLoading } = useMilestones({
-    workspaceId: activeWorkspaceId || undefined,
-  });
+  // Business-wide list; v2 takes project_id only as an optional narrowing
+  // filter, which this screen does not use.
+  const { data: milestones = [], isLoading } = useMilestones();
+  const { data: projects = [] } = useProjects();
   const createMilestone = useCreateMilestone();
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [newDate, setNewDate] = useState('');
+  // Every milestone belongs to a project on v2 (project_id is @required), so
+  // the form has to ask. Defaults to the first project rather than leaving an
+  // empty select that fails on submit.
+  const [newProjectId, setNewProjectId] = useState('');
+  const selectedProjectId = newProjectId || projects[0]?.id || '';
 
   if (isLoading) {
     return (
@@ -127,6 +132,31 @@ const Milestones: React.FC = () => {
             }}
             autoFocus
           />
+          <label className="block">
+            <span className="mb-1 block text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
+              {t('flow.milestones.project')}
+            </span>
+            <select
+              value={selectedProjectId}
+              onChange={(e) => setNewProjectId(e.target.value)}
+              className="w-full rounded-md px-3 py-2 text-[16px] outline-none sm:text-[12px]"
+              style={{
+                background: 'var(--flow-input-bg)',
+                border: '1px solid var(--flow-border)',
+                color: 'var(--flow-text)',
+              }}
+            >
+              {projects.length === 0 ? (
+                <option value="">{t('flow.milestones.noProjects')}</option>
+              ) : (
+                projects.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))
+              )}
+            </select>
+          </label>
           <DatePicker
             value={newDate}
             onChange={setNewDate}
@@ -143,13 +173,13 @@ const Milestones: React.FC = () => {
             <button
               type="button"
               onClick={() => {
-                if (!newName.trim() || !newDate) {
+                if (!newName.trim() || !newDate || !selectedProjectId) {
                   toast.error(t('errors.generic'));
                   return;
                 }
                 createMilestone.mutate(
                   {
-                    workspaceId: activeWorkspaceId || undefined,
+                    projectId: selectedProjectId,
                     name: newName,
                     targetDate: newDate,
                   },
@@ -164,7 +194,9 @@ const Milestones: React.FC = () => {
                   }
                 );
               }}
-              disabled={createMilestone.isPending || !newName.trim() || !newDate}
+              disabled={
+                createMilestone.isPending || !newName.trim() || !newDate || !selectedProjectId
+              }
               className="px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-50"
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >

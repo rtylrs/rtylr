@@ -5,6 +5,12 @@ import Milestones from './Milestones';
 
 const mutateSpy = vi.fn();
 
+// The create form asks which project the milestone belongs to, so the screen
+// now reads the project list too.
+vi.mock('../projects/useProjects', () => ({
+  useProjects: () => ({ data: [{ id: 'p-1', name: 'Website Redesign' }], isLoading: false }),
+}));
+
 vi.mock('./useMilestones', () => ({
   useMilestones: () => ({ data: [], isLoading: false }),
   useCreateMilestone: () => ({ mutate: mutateSpy, isPending: false }),

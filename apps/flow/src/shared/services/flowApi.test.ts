@@ -16,7 +16,7 @@ const mockClients = vi.hoisted(() => {
     projectClient: mockClient(),
     taskClient: mockClient(),
     labelClient: mockClient(),
-    milestoneClient: mockClient(),
+    milestoneV2: mockClient(),
     cycleClient: mockClient(),
     viewV2: mockClient(),
     insightsV2: mockClient(),
@@ -36,7 +36,7 @@ vi.mock('../lib/clients', () => ({
   projectClient: mockClients.projectClient,
   taskClient: mockClients.taskClient,
   labelClient: mockClients.labelClient,
-  milestoneClient: mockClients.milestoneClient,
+  milestoneV2: mockClients.milestoneV2,
   cycleClient: mockClients.cycleClient,
   viewV2: mockClients.viewV2,
   insightsV2: mockClients.insightsV2,
@@ -55,7 +55,7 @@ import {
   projectClient,
   taskClient,
   labelClient,
-  milestoneClient,
+  milestoneV2,
   cycleClient,
   insightsV2,
   notificationClient,
@@ -166,7 +166,7 @@ describe('flowApi OneKit adapters', () => {
       flowApi.listLabels(),
       flowApi.createLabel({ name: 'Bug', color: '#f00' }),
       flowApi.setTaskLabels({ task_id: 9, label_ids: [2, 3] }),
-      flowApi.getMilestones({ projectId: '7' }),
+      flowApi.getMilestones('7'),
       flowApi.createCycle({ name: 'Sprint', workspaceId: '1' }),
       flowApi.getViews(),
       flowApi.getInsights(),
@@ -188,9 +188,13 @@ describe('flowApi OneKit adapters', () => {
       taskId: '9',
       labelIds: ['2', '3'],
     });
-    expect(milestoneClient.listMilestones).toHaveBeenCalledWith({
+    // v2 lists business-wide; project_id is only an optional narrowing filter.
+    expect(milestoneV2.listMilestones).toHaveBeenCalledWith({
       projectId: '7',
-      workspaceId: undefined,
+      page: 1,
+      limit: 200,
+      sortBy: '',
+      sortDir: '',
     });
     expect(cycleClient.createCycle).toHaveBeenCalledWith({
       name: 'Sprint',
