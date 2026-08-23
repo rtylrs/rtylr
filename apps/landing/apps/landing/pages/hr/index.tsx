@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import {
   Calendar,
@@ -22,6 +23,7 @@ import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import { SplitWords } from '../../components/motion/SplitWords';
+import Lines from '../../components/text/Lines';
 import styles from './hr.module.scss';
 
 // Schedule board mock, 7 days × 4 staff. State-driven so each cell is editable.
@@ -65,41 +67,15 @@ const INITIAL_STAFF: StaffMember[] = [
 // but we keep it simple and use the same ring everywhere.
 const SHIFT_CYCLE = ['OFF', '8–4', '9–5', '9–6', '11–7', '3–11', '4–12'];
 
-const PILLARS = [
-  {
-    icon: Calendar,
-    title: 'Schedules that publish themselves',
-    copy: 'Drag, drop, publish. Staff get texts the moment a shift posts. Conflicts caught before they ship.',
-  },
-  {
-    icon: Clock,
-    title: 'Time & attendance, zero paperwork',
-    copy: 'Clock in from the POS. Biometric, PIN, or geofenced. Auto-rounding and break enforcement built in.',
-  },
-  {
-    icon: DollarSign,
-    title: 'Payroll that runs itself',
-    copy: 'Hours, tips, deductions, taxes, rolled up automatically. Direct deposit, pay stubs, filings handled.',
-  },
-  {
-    icon: Palmtree,
-    title: 'Time off, clearly',
-    copy: 'One place for requests, approvals, and balances. Blackout dates, accrual rules, and coverage in one glance.',
-  },
-  {
-    icon: UserPlus,
-    title: 'Onboarding without friction',
-    copy: 'E-sign offer letters, W-4s and I-9s. Self-service docs, handbook, and training from day one.',
-  },
-  {
-    icon: FileCheck,
-    title: 'Compliance that watches itself',
-    copy: 'Overtime rules, break audits, minor labor, fair workweek. Flags before they become violations.',
-  },
-];
+const PILLARS_ICONS = [Calendar, Clock, DollarSign, Palmtree, UserPlus, FileCheck];
 
 const HRPage = (): React.JSX.Element => {
   const faq = useFaq('hr');
+  const { t } = useTranslation();
+  const pillars = t('hr.pillars.items', { returnObjects: true }) as unknown as {
+    title: string;
+    copy: string;
+  }[];
   const router = useRouter();
   const [staff, setStaff] = useState<StaffMember[]>(INITIAL_STAFF);
 
@@ -135,15 +111,14 @@ const HRPage = (): React.JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="HR · Your team. Looked after. | rtylr"
-          description="Scheduling, time & attendance, payroll, time off, onboarding, and compliance. One app that treats your staff like people."
+          title={t('hr.meta.title')}
+          description={t('hr.meta.description')}
           canonical="https://rtylr.com/hr/"
           structuredData={productWithBreadcrumbs({
             name: 'HR',
             path: '/hr/',
             subCategory: 'Human Resources and Payroll',
-            description:
-              'Scheduling, payroll, compliance, and time-off management for modern teams.',
+            description: t('hr.meta.schemaDescription'),
           })}
         />
 
@@ -158,19 +133,17 @@ const HRPage = (): React.JSX.Element => {
             >
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
                 <HeartHandshake size={13} strokeWidth={2} />
-                rtylr HR
+                {t('hr.hero.eyebrow')}
               </motion.span>
               <h1 className={styles.heroTitle}>
-                <SplitWords as="span" text={'Your team.'} delay={0.1} />
+                <SplitWords as="span" text={t('hr.hero.titleA')} delay={0.1} />
                 <br />
                 <span className={styles.heroTitleSoft}>
-                  <SplitWords as="span" text={'Looked after.'} delay={0.35} />
+                  <SplitWords as="span" text={t('hr.hero.titleB')} delay={0.35} />
                 </span>
               </h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Drag-to-publish schedules. Clock-in from the POS. Payroll that rolls up tips, hours,
-                and deductions on its own. Compliance flags before they become violations. Software
-                that treats staff like people, not line items in a spreadsheet.
+                {t('hr.hero.subtitle')}
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goRegister} className={styles.primaryBtn}>
@@ -264,11 +237,8 @@ const HRPage = (): React.JSX.Element => {
             </motion.div>
           </section>
 
-          <DirectAnswer label="What is rtylr HR?">
-            rtylr HR is the people app inside rtylr, for teams with shift workers, hourly staff or both.
-            It covers employee records, scheduling, shift swaps, time off, payroll calculation and
-            compliance documents. A person is created once: the schedule, the pay run and their POS login
-            all read that same record, so a new hire is not entered in four different places.
+          <DirectAnswer label={t('hr.directAnswer.label')}>
+            {t('hr.directAnswer.body')}
           </DirectAnswer>
 
           {/* ── PILLAR GRID, 3×2 shared-border cells ──────────────────────── */}
@@ -297,7 +267,9 @@ const HRPage = (): React.JSX.Element => {
               viewport={viewportOnce}
               variants={staggerBlur}
             >
-              {PILLARS.map(({ icon: Icon, title, copy }) => (
+              {pillars.map(({ title, copy }, i) => {
+                const Icon = PILLARS_ICONS[i];
+                return (
                 <motion.div key={title} className={styles.pillarCard} variants={blurFadeIn}>
                   <div className={styles.pillarIcon}>
                     <Icon size={18} strokeWidth={1.8} />
@@ -305,7 +277,8 @@ const HRPage = (): React.JSX.Element => {
                   <h3 className={styles.pillarTitle}>{title}</h3>
                   <p className={styles.pillarCopy}>{copy}</p>
                 </motion.div>
-              ))}
+              );
+              })}
             </motion.div>
           </section>
 
@@ -346,9 +319,7 @@ const HRPage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.h2 className={styles.ctaTitle} variants={blurFadeIn}>
-              Your staff deserve
-              <br />
-              software built for them.
+              <Lines text={t('hr.cta.title')} />
             </motion.h2>
             <motion.div className={styles.ctaButtons} variants={blurFadeIn}>
               <button type="button" onClick={goRegister} className={styles.primaryBtn}>

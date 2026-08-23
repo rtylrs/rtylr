@@ -596,5 +596,171 @@
       "reset": "Reset",
       "resetLabel": "Reset inventory"
     }
+  },
+  "crm": {
+    "meta": {
+      "title": "CRM · Every customer, remembered. | rtylr",
+      "description": "Customer profiles, loyalty, segments, and campaigns. Every POS purchase enriches the profile automatically.",
+      "schemaDescription": "Customer profiles, loyalty programs, and campaign tracking that connect to every other app."
+    },
+    "hero": {
+      "eyebrow": "rtylr CRM",
+      "subtitle": "Every POS sale enriches the profile on its own. Birthday, last visit, favorite dish, server they love, stored, segmented, ready the moment you want to send the right message. No CRM data entry. No forgotten customers at the door.",
+      "titleA": "Every customer,",
+      "titleB": "remembered."
+    },
+    "directAnswer": {
+      "label": "What is rtylr CRM?",
+      "body": "rtylr CRM is the customer app inside rtylr, for restaurants, retail and services businesses that want to know who their regulars are. It holds customer profiles, visit and purchase history, loyalty points, segments and email campaigns. Because it shares a database with the POS, it records what someone actually bought with no import, so a segment stays current on its own."
+    },
+    "campaigns": {
+      "items": [
+        {
+          "title": "Email that reads personal",
+          "copy": "Pre-built templates. Personalisation tokens. Auto-sent on triggers like birthday, lapse, or first-visit."
+        },
+        {
+          "title": "Loyalty that means something",
+          "copy": "Points, tiers, rewards. Auto-applied at checkout. Built into POS, not stapled onto it."
+        },
+        {
+          "title": "Segments that make sense",
+          "copy": "Slice by visit frequency, average spend, last order, dietary preferences. Save as a segment, send a campaign."
+        },
+        {
+          "title": "SMS that doesn\\u2019t feel like spam",
+          "copy": "Short-code, opt-in, transactional or broadcast. Throttled to protect your sender reputation."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Stop forgetting\nyour best customers."
+    }
+  },
+  "hr": {
+    "meta": {
+      "title": "HR · Your team. Looked after. | rtylr",
+      "description": "Scheduling, time & attendance, payroll, time off, onboarding, and compliance. One app that treats your staff like people.",
+      "schemaDescription": "Scheduling, payroll, compliance, and time-off management for modern teams."
+    },
+    "hero": {
+      "eyebrow": "rtylr HR",
+      "subtitle": "Drag-to-publish schedules. Clock-in from the POS. Payroll that rolls up tips, hours, and deductions on its own. Compliance flags before they become violations. Software that treats staff like people, not line items in a spreadsheet.",
+      "titleA": "Your team.",
+      "titleB": "Looked after."
+    },
+    "directAnswer": {
+      "label": "What is rtylr HR?",
+      "body": "rtylr HR is the people app inside rtylr, for teams with shift workers, hourly staff or both. It covers employee records, scheduling, shift swaps, time off, payroll calculation and compliance documents. A person is created once: the schedule, the pay run and their POS login all read that same record, so a new hire is not entered in four different places."
+    },
+    "pillars": {
+      "items": [
+        {
+          "title": "Schedules that publish themselves",
+          "copy": "Drag, drop, publish. Staff get texts the moment a shift posts. Conflicts caught before they ship."
+        },
+        {
+          "title": "Time & attendance, zero paperwork",
+          "copy": "Clock in from the POS. Biometric, PIN, or geofenced. Auto-rounding and break enforcement built in."
+        },
+        {
+          "title": "Payroll that runs itself",
+          "copy": "Hours, tips, deductions, taxes, rolled up automatically. Direct deposit, pay stubs, filings handled."
+        },
+        {
+          "title": "Time off, clearly",
+          "copy": "One place for requests, approvals, and balances. Blackout dates, accrual rules, and coverage in one glance."
+        },
+        {
+          "title": "Onboarding without friction",
+          "copy": "E-sign offer letters, W-4s and I-9s. Self-service docs, handbook, and training from day one."
+        },
+        {
+          "title": "Compliance that watches itself",
+          "copy": "Overtime rules, break audits, minor labor, fair workweek. Flags before they become violations."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Your staff deserve\nsoftware built for them."
+    }
+  },
+  "finance": {
+    "meta": {
+      "title": "Finance · A real P&L, in real time. | rtylr",
+      "description": "Invoices, expenses, sales tax, and a live profit-and-loss. Every sale and every payroll roll into the books automatically.",
+      "schemaDescription": "Invoices, expenses, tax, and a real P&L in real time. Accounting that keeps up with your business."
+    },
+    "hero": {
+      "eyebrow": "rtylr Finance",
+      "subtitle": "Every POS sale, every payroll run, every paid invoice rolls into the books on its own. The P&amp;L you&apos;re looking at right now? That&apos;s what the numbers actually are. No exports. No reconciliation. No month-end surprises."
+    },
+    "directAnswer": {
+      "label": "What is rtylr Finance?",
+      "body": "rtylr Finance is the accounting app inside rtylr, for owners who want a current profit and loss rather than one that arrives weeks late. It covers invoicing, expenses, bill payments, bank reconciliation, and P&L, balance sheet and cash flow reports. Revenue, refunds, tips and payroll already sit in the same database, so the month-end close does not start by reconciling four systems."
+    },
+    "pillars": {
+      "items": [
+        {
+          "title": "Invoices that collect themselves",
+          "copy": "Recurring schedules, auto-reminders, one-click payment. Paid invoices reconcile automatically against the books."
+        },
+        {
+          "title": "Expenses, captured at source",
+          "copy": "Snap the receipt. Policy-aware categorisation. Approved-to-paid in the same app. No more Friday shoeboxes."
+        },
+        {
+          "title": "Real P&L in real time",
+          "copy": "Every POS sale, every invoice, every payroll run rolls into a live profit-and-loss. Not a month-end surprise."
+        },
+        {
+          "title": "Tax prep without the scramble",
+          "copy": "Jurisdiction-aware sales tax. Quarter-end snapshots. One export your accountant will actually thank you for."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Stop closing your books\nwith a spreadsheet."
+    },
+    "chart": {
+      "rangeLabel": "Time range",
+      "metricLabel": "Metric"
+    }
+  },
+  "flow": {
+    "meta": {
+      "title": "Flow · Projects, tasks, and team workspaces. | rtylr",
+      "description": "Kanban boards, automations, templates, and tasks linked to everything else in rtylr. Operations that don't slip.",
+      "schemaDescription": "Kanban boards, automations, and task management that stay connected to every other app."
+    },
+    "hero": {
+      "eyebrow": "rtylr Flow · Work OS",
+      "subtitle": "Drag-drop kanban. Tasks linked to the actual invoice, customer, or shift they care about. Automations that fire when a PO is approved or payroll closes, no Zapier, no duct tape. The work OS your team will actually open.",
+      "titleA": "Work that moves.",
+      "titleB": "Operations that don't slip."
+    },
+    "directAnswer": {
+      "label": "What is rtylr Flow?",
+      "body": "rtylr Flow is the project and task app inside rtylr, for teams tracking work that touches real customers, staff and money. It has boards, lists, timelines, cycles, milestones, custom fields and automations. What a standalone tracker cannot do is read the rest of the business: assign work to a person from HR, attach it to a customer from CRM, push billable hours onto an invoice in Finance."
+    },
+    "features": {
+      "items": [
+        {
+          "title": "Boards for every team",
+          "copy": "Kanban, list, timeline, or calendar. Each team picks their view. Same data underneath."
+        },
+        {
+          "title": "Tasks that link to reality",
+          "copy": "Attach a task to a customer, a supplier, an invoice, or a shift. When it moves, everything updates."
+        },
+        {
+          "title": "Automations without Zapier",
+          "copy": "When a PO is approved → task on purchasing. When payroll closes → reminder on HR. Built in."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Stop losing work\nbetween tools."
+    }
   }
 }

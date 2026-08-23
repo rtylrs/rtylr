@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import { Heart, Mail, Gift, Users, Star, Send, Target, ChevronRight, Plus } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
@@ -14,6 +15,7 @@ import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import { SplitWords } from '../../components/motion/SplitWords';
+import Lines from '../../components/text/Lines';
 import styles from './crm.module.scss';
 
 const VISITS = [
@@ -224,31 +226,15 @@ const FILTERS: FilterDef[] = [
   { id: 'bigSpend', label: 'Lifetime spend > $500', test: (g) => g.lifetime > 500 },
 ];
 
-const CAMPAIGNS = [
-  {
-    icon: Mail,
-    title: 'Email that reads personal',
-    copy: 'Pre-built templates. Personalisation tokens. Auto-sent on triggers like birthday, lapse, or first-visit.',
-  },
-  {
-    icon: Gift,
-    title: 'Loyalty that means something',
-    copy: 'Points, tiers, rewards. Auto-applied at checkout. Built into POS, not stapled onto it.',
-  },
-  {
-    icon: Target,
-    title: 'Segments that make sense',
-    copy: 'Slice by visit frequency, average spend, last order, dietary preferences. Save as a segment, send a campaign.',
-  },
-  {
-    icon: Send,
-    title: 'SMS that doesn\u2019t feel like spam',
-    copy: 'Short-code, opt-in, transactional or broadcast. Throttled to protect your sender reputation.',
-  },
-];
+const CAMPAIGNS_ICONS = [Mail, Gift, Target, Send];
 
 const CRMPage = (): React.JSX.Element => {
   const faq = useFaq('crm');
+  const { t } = useTranslation();
+  const campaigns = t('crm.campaigns.items', { returnObjects: true }) as unknown as {
+    title: string;
+    copy: string;
+  }[];
   const router = useRouter();
 
   // Segment-builder state, toggle attributes to watch the audience shrink/grow
@@ -281,15 +267,14 @@ const CRMPage = (): React.JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="CRM · Every customer, remembered. | rtylr"
-          description="Customer profiles, loyalty, segments, and campaigns. Every POS purchase enriches the profile automatically."
+          title={t('crm.meta.title')}
+          description={t('crm.meta.description')}
           canonical="https://rtylr.com/crm/"
           structuredData={productWithBreadcrumbs({
             name: 'CRM',
             path: '/crm/',
             subCategory: 'Customer Relationship Management',
-            description:
-              'Customer profiles, loyalty programs, and campaign tracking that connect to every other app.',
+            description: t('crm.meta.schemaDescription'),
           })}
         />
 
@@ -304,19 +289,17 @@ const CRMPage = (): React.JSX.Element => {
             >
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
                 <Heart size={13} strokeWidth={2} fill="currentColor" />
-                rtylr CRM
+                {t('crm.hero.eyebrow')}
               </motion.span>
               <h1 className={styles.heroTitle}>
-                <SplitWords as="span" text={'Every customer,'} delay={0.1} />
+                <SplitWords as="span" text={t('crm.hero.titleA')} delay={0.1} />
                 <br />
                 <span className={styles.heroTitleSoft}>
-                  <SplitWords as="span" text={'remembered.'} delay={0.35} />
+                  <SplitWords as="span" text={t('crm.hero.titleB')} delay={0.35} />
                 </span>
               </h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Every POS sale enriches the profile on its own. Birthday, last visit, favorite dish,
-                server they love, stored, segmented, ready the moment you want to send the right
-                message. No CRM data entry. No forgotten customers at the door.
+                {t('crm.hero.subtitle')}
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goRegister} className={styles.primaryBtn}>
@@ -393,12 +376,8 @@ const CRMPage = (): React.JSX.Element => {
             </motion.div>
           </section>
 
-          <DirectAnswer label="What is rtylr CRM?">
-            rtylr CRM is the customer app inside rtylr, for restaurants, retail and services businesses
-            that want to know who their regulars are. It holds customer profiles, visit and purchase
-            history, loyalty points, segments and email campaigns. Because it shares a database with the
-            POS, it records what someone actually bought with no import, so a segment stays current on its
-            own.
+          <DirectAnswer label={t('crm.directAnswer.label')}>
+            {t('crm.directAnswer.body')}
           </DirectAnswer>
 
           {/* ── SEGMENT BUBBLES ─────────────────────────────────────────── */}
@@ -477,7 +456,9 @@ const CRMPage = (): React.JSX.Element => {
               viewport={viewportOnce}
               variants={staggerBlur}
             >
-              {CAMPAIGNS.map(({ icon: Icon, title, copy }) => (
+              {campaigns.map(({ title, copy }, i) => {
+                const Icon = CAMPAIGNS_ICONS[i];
+                return (
                 <motion.div
                   key={title}
                   className={styles.campaignCard}
@@ -494,7 +475,8 @@ const CRMPage = (): React.JSX.Element => {
                     <ChevronRight size={14} strokeWidth={2} />
                   </span>
                 </motion.div>
-              ))}
+              );
+              })}
             </motion.div>
           </section>
 
@@ -628,9 +610,7 @@ const CRMPage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.h2 className={styles.ctaTitle} variants={blurFadeIn}>
-              Stop forgetting
-              <br />
-              your best customers.
+              <Lines text={t('crm.cta.title')} />
             </motion.h2>
             <motion.div className={styles.ctaButtons} variants={blurFadeIn}>
               <button type="button" onClick={goRegister} className={styles.primaryBtn}>

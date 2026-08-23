@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import {
   FileText,
@@ -22,6 +23,7 @@ import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import { SplitWords } from '../../components/motion/SplitWords';
+import Lines from '../../components/text/Lines';
 import styles from './finance.module.scss';
 
 // ── P&L data shaped per time range ────────────────────────────────────────
@@ -186,28 +188,7 @@ const CHART_DATA: Record<ChartMetric, number[]> = {
   net: CHART_NET,
 };
 
-const PILLARS = [
-  {
-    icon: FileText,
-    title: 'Invoices that collect themselves',
-    copy: 'Recurring schedules, auto-reminders, one-click payment. Paid invoices reconcile automatically against the books.',
-  },
-  {
-    icon: Receipt,
-    title: 'Expenses, captured at source',
-    copy: 'Snap the receipt. Policy-aware categorisation. Approved-to-paid in the same app. No more Friday shoeboxes.',
-  },
-  {
-    icon: PieChart,
-    title: 'Real P&L in real time',
-    copy: 'Every POS sale, every invoice, every payroll run rolls into a live profit-and-loss. Not a month-end surprise.',
-  },
-  {
-    icon: Landmark,
-    title: 'Tax prep without the scramble',
-    copy: 'Jurisdiction-aware sales tax. Quarter-end snapshots. One export your accountant will actually thank you for.',
-  },
-];
+const PILLARS_ICONS = [FileText, Receipt, PieChart, Landmark];
 
 const fmt = (n: number): string => {
   const sign = n < 0 ? '−' : '';
@@ -216,6 +197,11 @@ const fmt = (n: number): string => {
 
 const FinancePage = (): React.JSX.Element => {
   const faq = useFaq('finance');
+  const { t } = useTranslation();
+  const pillars = t('finance.pillars.items', { returnObjects: true }) as unknown as {
+    title: string;
+    copy: string;
+  }[];
   const router = useRouter();
   const [range, setRange] = useState<Range>('month');
   const data = PL_DATA[range];
@@ -242,15 +228,14 @@ const FinancePage = (): React.JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Finance · A real P&L, in real time. | rtylr"
-          description="Invoices, expenses, sales tax, and a live profit-and-loss. Every sale and every payroll roll into the books automatically."
+          title={t('finance.meta.title')}
+          description={t('finance.meta.description')}
           canonical="https://rtylr.com/finance/"
           structuredData={productWithBreadcrumbs({
             name: 'Finance',
             path: '/finance/',
             subCategory: 'Accounting and Finance',
-            description:
-              'Invoices, expenses, tax, and a real P&L in real time. Accounting that keeps up with your business.',
+            description: t('finance.meta.schemaDescription'),
           })}
         />
 
@@ -264,7 +249,7 @@ const FinancePage = (): React.JSX.Element => {
               variants={staggerBlur}
             >
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
-                rtylr Finance
+                {t('finance.hero.eyebrow')}
               </motion.span>
               <SplitWords
                 as="h1"
@@ -273,9 +258,7 @@ const FinancePage = (): React.JSX.Element => {
                 delay={0.1}
               />
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Every POS sale, every payroll run, every paid invoice rolls into the books on its
-                own. The P&amp;L you&apos;re looking at right now? That&apos;s what the numbers
-                actually are. No exports. No reconciliation. No month-end surprises.
+                {t('finance.hero.subtitle')}
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goRegister} className={styles.primaryBtn}>
@@ -321,7 +304,7 @@ const FinancePage = (): React.JSX.Element => {
               </div>
 
               {/* Range tabs, live re-computation */}
-              <div className={styles.rangeTabs} role="tablist" aria-label="Time range">
+              <div className={styles.rangeTabs} role="tablist" aria-label={t('finance.chart.rangeLabel')}>
                 {RANGE_TABS.map((t) => (
                   <button
                     key={t.id}
@@ -394,12 +377,8 @@ const FinancePage = (): React.JSX.Element => {
             </motion.div>
           </section>
 
-          <DirectAnswer label="What is rtylr Finance?">
-            rtylr Finance is the accounting app inside rtylr, for owners who want a current profit and
-            loss rather than one that arrives weeks late. It covers invoicing, expenses, bill payments,
-            bank reconciliation, and P&L, balance sheet and cash flow reports. Revenue, refunds, tips and
-            payroll already sit in the same database, so the month-end close does not start by reconciling
-            four systems.
+          <DirectAnswer label={t('finance.directAnswer.label')}>
+            {t('finance.directAnswer.body')}
           </DirectAnswer>
 
           {/* ── LIVE 12-MONTH CHART + PILLAR STRIP ───────────────────────── */}
@@ -432,7 +411,7 @@ const FinancePage = (): React.JSX.Element => {
               viewport={viewportOnce}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className={styles.chartTabs} role="tablist" aria-label="Metric">
+              <div className={styles.chartTabs} role="tablist" aria-label={t('finance.chart.metricLabel')}>
                 {CHART_METRICS.map((m) => (
                   <button
                     key={m.id}
@@ -500,7 +479,9 @@ const FinancePage = (): React.JSX.Element => {
               viewport={viewportOnce}
               variants={staggerBlur}
             >
-              {PILLARS.map(({ icon: Icon, title, copy }) => (
+              {pillars.map(({ title, copy }, i) => {
+                const Icon = PILLARS_ICONS[i];
+                return (
                 <motion.div key={title} className={styles.pillarStripItem} variants={blurFadeIn}>
                   <div className={styles.pillarIcon}>
                     <Icon size={16} strokeWidth={1.8} />
@@ -510,7 +491,8 @@ const FinancePage = (): React.JSX.Element => {
                     <p className={styles.pillarCopy}>{copy}</p>
                   </div>
                 </motion.div>
-              ))}
+              );
+              })}
             </motion.div>
           </section>
 
@@ -555,9 +537,7 @@ const FinancePage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.h2 className={styles.ctaTitle} variants={blurFadeIn}>
-              Stop closing your books
-              <br />
-              with a spreadsheet.
+              <Lines text={t('finance.cta.title')} />
             </motion.h2>
             <motion.div className={styles.ctaButtons} variants={blurFadeIn}>
               <button type="button" onClick={goRegister} className={styles.primaryBtn}>

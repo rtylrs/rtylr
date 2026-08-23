@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { cn } from '../../lib/cn';
 import { motion, AnimatePresence, type PanInfo } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import {
   CheckSquare,
@@ -30,6 +31,7 @@ import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import { SplitWords } from '../../components/motion/SplitWords';
+import Lines from '../../components/text/Lines';
 import styles from './flow.module.scss';
 
 // ── Board data types ───────────────────────────────────────────────────────
@@ -215,38 +217,9 @@ const RULES: Rule[] = [
   },
 ];
 
-const FEATURES = [
-  {
-    icon: LayoutGrid,
-    title: 'Boards for every team',
-    copy: 'Kanban, list, timeline, or calendar. Each team picks their view. Same data underneath.',
-  },
-  {
-    icon: GitBranch,
-    title: 'Tasks that link to reality',
-    copy: 'Attach a task to a customer, a supplier, an invoice, or a shift. When it moves, everything updates.',
-  },
-  {
-    icon: Zap,
-    title: 'Automations without Zapier',
-    copy: 'When a PO is approved → task on purchasing. When payroll closes → reminder on HR. Built in.',
-  },
-  {
-    icon: MessageSquare,
-    title: 'Conversations in context',
-    copy: 'Comments, mentions, and files live on the task. No more "which Slack thread was this in?"',
-  },
-  {
-    icon: Calendar,
-    title: 'Deadlines that actually land',
-    copy: 'Due-date enforcement. Roll-up views by owner. Escalation before things slip.',
-  },
-  {
-    icon: CheckSquare,
-    title: 'Templates for repeatable ops',
-    copy: 'Weekly checklists, monthly closes, new-location launches, reusable project templates.',
-  },
-];
+// Three icons, because the strip renders three cards. The array used to
+// hold six, and three of them had never been on the page.
+const FEATURES_ICONS = [LayoutGrid, GitBranch, Zap];
 
 // ── Draggable task card ────────────────────────────────────────────────────
 // On drag end, it reads the element rects of every column to decide which one
@@ -322,6 +295,11 @@ const DragTaskCard = ({
 
 const FlowPage = (): React.JSX.Element => {
   const faq = useFaq('flow');
+  const { t } = useTranslation();
+  const features = t('flow.features.items', { returnObjects: true }) as unknown as {
+    title: string;
+    copy: string;
+  }[];
   const router = useRouter();
   const [columns, setColumns] = useState<Column[]>(INITIAL_COLUMNS);
   const [ruleIdx, setRuleIdx] = useState(0);
@@ -382,15 +360,14 @@ const FlowPage = (): React.JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Flow · Projects, tasks, and team workspaces. | rtylr"
-          description="Kanban boards, automations, templates, and tasks linked to everything else in rtylr. Operations that don't slip."
+          title={t('flow.meta.title')}
+          description={t('flow.meta.description')}
           canonical="https://rtylr.com/flow/"
           structuredData={productWithBreadcrumbs({
             name: 'Flow',
             path: '/flow/',
             subCategory: 'Project and Task Management',
-            description:
-              'Kanban boards, automations, and task management that stay connected to every other app.',
+            description: t('flow.meta.schemaDescription'),
           })}
         />
 
@@ -404,19 +381,17 @@ const FlowPage = (): React.JSX.Element => {
               variants={staggerBlur}
             >
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
-                rtylr Flow · Work OS
+                {t('flow.hero.eyebrow')}
               </motion.span>
               <h1 className={styles.heroTitle}>
-                <SplitWords as="span" text={'Work that moves.'} delay={0.1} />
+                <SplitWords as="span" text={t('flow.hero.titleA')} delay={0.1} />
                 <br />
                 <span className={styles.heroTitleSoft}>
-                  <SplitWords as="span" text={'Operations that don\'t slip.'} delay={0.35} />
+                  <SplitWords as="span" text={t('flow.hero.titleB')} delay={0.35} />
                 </span>
               </h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-                Drag-drop kanban. Tasks linked to the actual invoice, customer, or shift they care
-                about. Automations that fire when a PO is approved or payroll closes, no Zapier, no
-                duct tape. The work OS your team will actually open.
+                {t('flow.hero.subtitle')}
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goRegister} className={styles.primaryBtn}>
@@ -490,12 +465,8 @@ const FlowPage = (): React.JSX.Element => {
             </motion.div>
           </section>
 
-          <DirectAnswer label="What is rtylr Flow?">
-            rtylr Flow is the project and task app inside rtylr, for teams tracking work that touches real
-            customers, staff and money. It has boards, lists, timelines, cycles, milestones, custom fields
-            and automations. What a standalone tracker cannot do is read the rest of the business: assign
-            work to a person from HR, attach it to a customer from CRM, push billable hours onto an
-            invoice in Finance.
+          <DirectAnswer label={t('flow.directAnswer.label')}>
+            {t('flow.directAnswer.body')}
           </DirectAnswer>
 
           {/* ── AUTOMATION BUILDER ─────────────────────────────────────── */}
@@ -639,17 +610,24 @@ const FlowPage = (): React.JSX.Element => {
               viewport={viewportOnce}
               variants={staggerBlur}
             >
-              {FEATURES.slice(0, 3).map(({ icon: Icon, title, copy }) => (
-                <motion.div key={title} className={styles.featureStripCard} variants={blurFadeIn}>
-                  <div className={styles.featureIcon}>
-                    <Icon size={16} strokeWidth={1.8} />
-                  </div>
-                  <div>
-                    <h3 className={styles.featureTitle}>{title}</h3>
-                    <p className={styles.featureCopy}>{copy}</p>
-                  </div>
-                </motion.div>
-              ))}
+              {features.map(({ title, copy }, i) => {
+                const Icon = FEATURES_ICONS[i];
+                return (
+                  <motion.div
+                    key={title}
+                    className={styles.featureStripCard}
+                    variants={blurFadeIn}
+                  >
+                    <div className={styles.featureIcon}>
+                      <Icon size={16} strokeWidth={1.8} />
+                    </div>
+                    <div>
+                      <h3 className={styles.featureTitle}>{title}</h3>
+                      <p className={styles.featureCopy}>{copy}</p>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </motion.div>
           </section>
 
@@ -696,9 +674,7 @@ const FlowPage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.h2 className={styles.ctaTitle} variants={blurFadeIn}>
-              Stop losing work
-              <br />
-              between tools.
+              <Lines text={t('flow.cta.title')} />
             </motion.h2>
             <motion.div className={styles.ctaButtons} variants={blurFadeIn}>
               <button type="button" onClick={goRegister} className={styles.primaryBtn}>
