@@ -7,8 +7,16 @@
 // per-page code stays to three lines.
 
 const BASE = 'https://rtylr.com';
+
+// Stable node identity for the publisher. _document.tsx emits the full
+// Organization on every page and several pages emit their own (about,
+// contact). Without an @id those are separate anonymous nodes that a
+// consumer cannot tell are the same company; with it they merge.
+const ORG_ID = `${BASE}/#organization`;
+
 const ORG = {
   '@type': 'Organization',
+  '@id': ORG_ID,
   name: 'rtylr',
   url: BASE,
   logo: `${BASE}/favicon/android-chrome-512x512.png`,
@@ -220,6 +228,7 @@ export function organizationSchema(): Record<string, unknown> {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
+    '@id': ORG_ID,
     name: 'rtylr',
     url: BASE,
     logo: `${BASE}/favicon/android-chrome-512x512.png`,
