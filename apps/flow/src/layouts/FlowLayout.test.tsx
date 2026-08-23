@@ -130,6 +130,11 @@ vi.mock('../shared/components/TrialBanner', () => ({ default: () => null }));
 vi.mock('../shared/components/CommandBar', () => ({ default: () => null }));
 vi.mock('../shared/components/QuickCreate', () => ({ default: () => null }));
 vi.mock('../shared/components/BulkEditBar', () => ({ default: () => null }));
+// The bin section runs its own react-query hook; this suite renders the layout
+// without a QueryClientProvider, like the other data-fetching children above.
+vi.mock('../features/projects-v2/RecycleBinSection', () => ({
+  RecycleBinSection: () => null,
+}));
 
 vi.mock('../features/workspace-dashboard/useWorkspaces', () => ({
   useWorkspaces: () => ({ data: undefined, isLoading: false }),
