@@ -1,23 +1,20 @@
-/** Returns true if the string is a valid 6-digit hex color (with or without #). */
-export function isValidHex(color: string): boolean {
-  return /^#?[0-9a-fA-F]{6}$/.test(color);
-}
+/**
+ * Flow-specific colour helpers.
+ *
+ * isValidHex, normalizeHex and hexLuminance used to be defined here, byte for
+ * byte alongside the same functions in @voxire/utils. They are imported now, so
+ * there is one implementation rather than two drifting copies.
+ *
+ * The local hexLuminance also used 0.03928 as the sRGB linear-segment threshold
+ * where WCAG specifies 0.04045. Verified before switching that the difference
+ * changes no textOnColor decision, across all twenty palette colours and all 256
+ * greyscale values, so this is a dedupe and not a behaviour change.
+ */
+import { hexLuminance, isValidHex, normalizeHex } from '@voxire/utils';
 
-/** Normalizes a hex color to lowercase with leading #. */
-export function normalizeHex(color: string): string {
-  const hex = color.startsWith('#') ? color : `#${color}`;
-  return hex.toLowerCase();
-}
-
-/** Returns the luminance of a hex color (0-1). */
-export function hexLuminance(hex: string): number {
-  const clean = hex.replace('#', '');
-  const r = parseInt(clean.slice(0, 2), 16) / 255;
-  const g = parseInt(clean.slice(2, 4), 16) / 255;
-  const b = parseInt(clean.slice(4, 6), 16) / 255;
-  const toLinear = (c: number) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
-  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
-}
+// Re-exported so this module's public surface is unchanged: the duplicate
+// implementations are gone, the names callers already use are not.
+export { hexLuminance, isValidHex, normalizeHex };
 
 /** Returns 'dark' or 'light' based on whether the background color is dark. */
 export function textOnColor(hex: string): 'dark' | 'light' {

@@ -66,6 +66,27 @@ function renderCampaigns(): void {
   render(<Campaigns />);
 }
 
+/**
+ * File-level, deliberately, not inside a describe.
+ *
+ * campaignsList is module state and two tests in "Campaigns empty state" empty
+ * it in place (`campaignsList.length = 0`). Only that describe had a beforeEach
+ * to put it back, so the gating describe below depended on running first. With
+ * --sequence.shuffle this file failed roughly 1 run in 5: an emptied list means
+ * no campaign row, so the edit and activate controls the gating tests look for
+ * are absent and the failure reads as a permissions bug rather than a fixture
+ * leak.
+ *
+ * role is reset too. Every test sets it, so it is not load-bearing today, but a
+ * future test that forgets would silently inherit the previous one's role.
+ */
+beforeEach(() => {
+  refetchCampaigns.mockClear();
+  mocks.role = 'operator';
+  campaignsList.length = 0;
+  campaignsList.push(draftCampaign);
+});
+
 describe('Campaigns send gating', () => {
   it('hides the Activate (send) control for an operator, who lacks crm:campaigns:send', () => {
     mocks.role = 'operator';
@@ -91,12 +112,6 @@ describe('Campaigns send gating', () => {
 });
 
 describe('Campaigns empty state', () => {
-  beforeEach(() => {
-    refetchCampaigns.mockClear();
-    campaignsList.length = 0;
-    campaignsList.push(draftCampaign);
-  });
-
   it('shows a "view all campaigns" call-to-action when the selected status filter has no matches', () => {
     mocks.role = 'admin';
     renderCampaigns();

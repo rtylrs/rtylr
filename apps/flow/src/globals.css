@@ -113,6 +113,11 @@
    * --accent is a fill. --accent-fg is the same teal used as text or icon
    * stroke, which light mode has to darken while the fill stays put. */
   --accent-fg: #64c5b9;
+  /* Text on the --accent-muted tint. A separate token because the tint is a
+     different background from the card, and reusing --accent-fg there put 40
+     of 56 light-mode combinations under 4.5:1 (rtylr#970). Dark happens to
+     match --accent-fg for this accent at 7.12:1; light does not. */
+  --accent-on-muted: #64c5b9;
   /* Text on any accent fill. Near-black for the teal: white on #64c5b9 measures
    * 2.05:1 and fails AA at every size. The provider measures both against the
    * accent in play rather than assuming, because near-black on a dark custom
@@ -158,6 +163,7 @@
   /* The light half of the same pre-hydration fallback pair. Kept for the reason
    * given in the dark block above. */
   --accent-fg: #1f7d72;
+  --accent-on-muted: #2b7269;
   --flow-on-accent: #0a0a0a;
   --flow-focus-ring: rgba(31, 125, 114, 0.9);
 
@@ -266,6 +272,38 @@
  * touch target and reads 33px at the compact multiplier of 0.75. */
 :root {
   --spacing: calc(0.25rem * var(--flow-u, 1));
+}
+
+/* ── Touch-target floor, and why it is here rather than at 36 call sites ─────
+ * The density control multiplies --spacing, and most heights in this app derive
+ * from it, so compact (0.75) shrinks interactive controls proportionally: an h-8
+ * button reads 32px at cozy and 24px at compact. Both are under the 44px floor
+ * this codebase requires, and the second is a control this feature introduced
+ * making an existing problem worse.
+ *
+ * Pinning each site to a literal was the alternative. It was rejected because it
+ * is 36 edits that any new component silently reintroduces, whereas one rule
+ * cannot be forgotten.
+ *
+ * Scoped to coarse pointers because that is already this app's idiom: the
+ * established pattern is `h-[44px] ... md:h-8`, 44px where a finger is used and
+ * smaller where a cursor is. A floor on every pointer type would inflate dense
+ * desktop toolbars for no accessibility gain, since WCAG's 44px figure is about
+ * touch.
+ *
+ * :where() keeps specificity at zero, so any component can still opt out with an
+ * ordinary utility class.
+ *
+ * Checkboxes and radios are excluded on purpose, and are the one gap this rule
+ * does not close: a min-height on them stretches or pads the box rather than
+ * enlarging the target, so an h-4 checkbox still reads 12px at compact. The fix
+ * there is a wrapping label carrying its own 44px hit area, which is a change
+ * per component rather than a floor. */
+@media (pointer: coarse) {
+  :where(button, [role='button'], a[href], summary, select, textarea),
+  :where(input):not([type='hidden'], [type='checkbox'], [type='radio']) {
+    min-height: 44px;
+  }
 }
 
 @layer base {

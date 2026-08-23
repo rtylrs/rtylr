@@ -74,9 +74,55 @@ vi.mock('./RequestLeaveDialog', () => ({
 
 import LeaveScreen from './LeaveScreen';
 
+/**
+ * Every shared fixture is rebuilt here, not just the employee id.
+ *
+ * Seven of the tests below reassign leaveTypesState, balancesState or
+ * requestsState to model an empty, loading or failed response, and nothing put
+ * them back. That passed only because those tests are declared after the ones
+ * that need pristine data: running this file with --sequence.shuffle failed 2 to
+ * 6 of its 10 tests, most often "Unable to find an element with the text:
+ * Annual Leave" from the test on line 117 that empties the leave types.
+ *
+ * Fresh objects rather than saved references, so a test that mutates a nested
+ * array in place cannot leak either.
+ */
 beforeEach(() => {
   vi.clearAllMocks();
   employeeIdState.value = { data: '4201', isLoading: false };
+  leaveTypesState.value = {
+    data: [{ id: '1', name: 'Annual Leave', isPaid: true, requiresApproval: true }],
+  };
+  balancesState.value = {
+    data: [
+      {
+        id: 'b1',
+        employeeId: '4201',
+        leaveTypeId: '1',
+        year: 2027,
+        entitledDays: 20,
+        usedDays: 5,
+        pendingDays: 2,
+        remainingDays: 13,
+      },
+    ],
+    refetch: balancesRefetch,
+  } as LeaveQueryState;
+  requestsState.value = {
+    data: [
+      {
+        id: 'r1',
+        employeeId: '4201',
+        leaveTypeId: '1',
+        startDate: '2027-02-01',
+        endDate: '2027-02-03',
+        totalDays: 3,
+        status: 'pending',
+        currentApprovalLevel: 0,
+      },
+    ],
+    refetch: requestsRefetch,
+  } as LeaveQueryState;
 });
 
 describe('LeaveScreen', () => {

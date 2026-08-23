@@ -437,7 +437,13 @@ export const AppearanceSection = (): React.JSX.Element => {
         <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.appearance.subtitle')}
         </p>
-        <p className="mt-1 text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+        {/* --flow-text-muted, not --flow-text-dim. axe measured dim at 2.23:1
+            here, against the 4.5 AA floor for body text, and it fails in both
+            modes (2.25 dark, 2.35 light) because it is a 0.28 alpha decorative
+            token. This line is the disclosure that makes the settings-seam rule
+            satisfiable, so it is the one string on the screen that must not be
+            hard to read. Muted measures 6.15 dark and 5.69 light. */}
+        <p className="mt-1 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.appearance.perDevice')}
         </p>
       </div>
@@ -579,6 +585,17 @@ export const AppearanceSection = (): React.JSX.Element => {
             <input
               id="appearance-accent-hex"
               type="text"
+              // dir="ltr" because the value is a hex literal, not prose.
+              //
+              // Without it the field inherits the document direction, and under
+              // RTL the leading '#' is a neutral character that resolves to the
+              // visual right: "#f56d8f" renders as "f56d8f#". Confirmed in the
+              // browser with dir=rtl on the document before this was added.
+              //
+              // The surrounding labels and descriptions are deliberately left to
+              // inherit, since those are prose and should follow the reader's
+              // direction. Only the value is pinned.
+              dir="ltr"
               spellCheck={false}
               autoComplete="off"
               value={hexValue}
@@ -626,7 +643,7 @@ export const AppearanceSection = (): React.JSX.Element => {
             background: accent === null ? 'var(--accent-muted)' : 'var(--flow-card)',
             border: `1px solid ${accent === null ? 'var(--accent-border)' : 'var(--flow-border)'}`,
             borderRadius: 'var(--flow-r)',
-            color: accent === null ? 'var(--accent-fg)' : 'var(--flow-text-muted)',
+            color: accent === null ? 'var(--accent-on-muted)' : 'var(--flow-text-muted)',
           }}
         >
           <span
@@ -634,7 +651,7 @@ export const AppearanceSection = (): React.JSX.Element => {
             className="block h-4 w-4 shrink-0 rounded-full"
             style={{ background: workspaceAccent }}
           />
-          {t('flow.settings.appearance.accentWorkspace')}
+          {t('flow.settings.appearance.accentReset')}
         </button>
       </div>
 
