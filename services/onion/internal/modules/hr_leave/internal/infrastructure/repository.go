@@ -128,10 +128,23 @@ func (r *Repository) ListDistinctOwnerIDs(ctx context.Context) ([]int64, error) 
 // --- Leave Requests ---
 
 func (r *Repository) ListLeaveRequests(ctx context.Context, ownerID int64, params domain.ListLeaveRequestsParams) ([]domain.LeaveRequestRecord, int64, error) {
+	fromDate, err := leaveDateArg(params.FromDate)
+	if err != nil {
+		logger.Ctx(ctx).Warn("invalid leave list from_date", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, 0, err
+	}
+	toDate, err := leaveDateArg(params.ToDate)
+	if err != nil {
+		logger.Ctx(ctx).Warn("invalid leave list to_date", logger.Any("owner_id", ownerID), logger.Error(err))
+		return nil, 0, err
+	}
+
 	total, err := r.queries.CountLeaveRequests(ctx, sqlc.CountLeaveRequestsParams{
 		BusinessID: ownerID,
 		EmployeeID: params.EmployeeID,
 		Status:     params.Status,
+		FromDate:   fromDate,
+		ToDate:     toDate,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to count leave requests", logger.Any("owner_id", ownerID), logger.Error(err))
@@ -142,6 +155,8 @@ func (r *Repository) ListLeaveRequests(ctx context.Context, ownerID int64, param
 		BusinessID: ownerID,
 		EmployeeID: params.EmployeeID,
 		Status:     params.Status,
+		FromDate:   fromDate,
+		ToDate:     toDate,
 		Limit:      params.Limit,
 		Offset:     params.Offset,
 	})
@@ -555,4 +570,17 @@ func nullStringFromFloat(f float64) sql.NullString {
 		return sql.NullString{Valid: false}
 	}
 	return sql.NullString{String: fmt.Sprintf("%.2f", f), Valid: true}
+}
+
+// leaveDateArg converts an optional ISO date string to the nullable time
+// shape the range filters expect; nil stays open-ended.
+func leaveDateArg(v *string) (sql.NullTime, error) {
+	if v == nil || *v == "" {
+		return sql.NullTime{}, nil
+	}
+	t, err := time.Parse("2006-01-02", *v)
+	if err != nil {
+		return sql.NullTime{}, fmt.Errorf("invalid date %q: %w", *v, err)
+	}
+	return sql.NullTime{Time: t, Valid: true}, nil
 }

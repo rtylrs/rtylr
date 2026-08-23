@@ -189,7 +189,7 @@ func (s *Service) ListLeaveRequests(ctx context.Context, ownerID, callerUserID i
 		Items []domain.LeaveRequestRecord
 		Total int64
 	}
-	key := cacheKeys.Scoped(hrLeaveScope, ownerID, fmt.Sprintf("reqs|e=%d|s=%s|l=%d|o=%d", params.EmployeeID, params.Status, params.Limit, params.Offset))
+	key := cacheKeys.Scoped(hrLeaveScope, ownerID, fmt.Sprintf("reqs|e=%d|s=%s|f=%s|t=%s|l=%d|o=%d", params.EmployeeID, params.Status, derefStr(params.FromDate), derefStr(params.ToDate), params.Limit, params.Offset))
 	res, err := cacher.Of[lr]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) (lr, error) {
 			items, total, err := s.repo.ListLeaveRequests(ctx, ownerID, params)
@@ -556,4 +556,11 @@ func (s *Service) accrueForOwner(ctx context.Context, ownerID int64, year, month
 	}
 
 	return nil
+}
+
+func derefStr(v *string) string {
+	if v == nil {
+		return ""
+	}
+	return *v
 }

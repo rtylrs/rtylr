@@ -59,8 +59,13 @@ type ListLeaveTypesParams struct {
 type ListLeaveRequestsParams struct {
 	EmployeeID int64
 	Status     string
-	Limit      int32
-	Offset     int32
+	// FromDate/ToDate bound the overlap window (ISO-8601 dates): a request is
+	// included when it starts on/before ToDate and ends on/after FromDate.
+	// Nil leaves that side of the range open.
+	FromDate *string
+	ToDate   *string
+	Limit    int32
+	Offset   int32
 }
 
 type LeaveCalendarParams struct {
