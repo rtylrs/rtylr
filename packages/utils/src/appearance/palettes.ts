@@ -80,7 +80,14 @@ export const PALETTES: readonly PalettePreset[] = [
     id: 'mist',
     labelKey: 'appearance.palettes.mist',
     mode: 'light',
-    bg: '#edf0f4',
+    // #e2e9f4 rather than #edf0f4. At the lighter value mist sat 2.41 dE from
+    // paper, which is barely past the just-noticeable threshold, so the two read
+    // as the same choice in a 56px card. This raises the minimum pairwise
+    // separation across the four light palettes from 2.41 to 2.67 and moves the
+    // binding constraint to paper against linen, which is inherent: a warm and a
+    // neutral near-white cannot be pulled much further apart while both stay
+    // light. Text contrast is 15.48:1, so there is no accessibility cost.
+    bg: '#e2e9f4',
     surface: '#ffffff',
     card: '#ffffff',
     textRgb: '12,17,26',
