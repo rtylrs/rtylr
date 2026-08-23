@@ -1,27 +1,46 @@
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+import ar from '../locales/ar.json';
 import en from '../locales/en.json';
 import fr from '../locales/fr.json';
-import ar from '../locales/ar.json';
+import { DEFAULT_LOCALE, localeFromPath } from '../lib/locales';
 
 export const resources = {
-  en: {
-    translation: en,
-  },
-  fr: {
-    translation: fr,
-  },
-  ar: {
-    translation: ar,
-  },
+  en: { translation: en },
+  fr: { translation: fr },
+  ar: { translation: ar },
 };
 
-import { getCookie, setCookie, getDefaultCookieDomain } from '../lib/cookies';
+/**
+ * The active language comes from the URL, never from a cookie.
+ *
+ * It used to be `lng: getCookie('language') || 'en'`, and that was a live
+ * bug waiting for content. `_document.tsx` derives the `lang` and `dir`
+ * attributes from the route, so the two disagreed by construction: a
+ * visitor carrying `language=ar` would have been served Arabic copy at
+ * `/pricing/` under `lang="en"`. That is the doorway case Google treats as
+ * duplicate content, on a page whose own markup contradicts its content.
+ *
+ * It was harmless only because ar.json and fr.json were empty and every key
+ * fell through to English. Writing the copy is what would have activated
+ * it, which is exactly the kind of bug that appears to arrive from nowhere.
+ *
+ * Under `output: 'export'` there is a second reason: the server renders with
+ * no cookie and the client hydrates with one, so a cookie-selected language
+ * is a guaranteed hydration mismatch. The URL is the same on both sides.
+ *
+ * The URL is also simply the right answer. It is what was requested, it is
+ * what gets shared, and it is what the canonical and hreflang point at.
+ */
+const initialLanguage = (): string => {
+  if (typeof window === 'undefined') return DEFAULT_LOCALE;
+  return localeFromPath(window.location.pathname).code;
+};
 
 i18next.use(initReactI18next).init({
   resources,
-  lng: getCookie('language') || 'en',
+  lng: initialLanguage(),
   // en, not fr. This was 'fr', which meant any key missing from the
   // active locale resolved to French: on an English page, for an
   // English visitor. en.json is the source of truth and the only
@@ -32,23 +51,17 @@ i18next.use(initReactI18next).init({
   },
 });
 
-export const selectLanguage = (language?: string) => {
-  if (language) {
-    i18next.changeLanguage(language);
-    setCookie('language', language, {
-      days: 365,
-      sameSite: 'lax',
-      domain: getDefaultCookieDomain(),
-    });
-  } else {
-    language = 'en';
-    i18next.changeLanguage(language);
-    setCookie('language', language, {
-      days: 365,
-      sameSite: 'lax',
-      domain: getDefaultCookieDomain(),
-    });
-  }
+/**
+ * Follow a route change. Called from _app.tsx on mount and on every
+ * navigation, because a client-side route change does not re-run init.
+ *
+ * No cookie is written. Switching language means going to that language's
+ * URL, so the language switcher is a set of links rather than a control
+ * with hidden state, and a shared link always renders what the sharer saw.
+ */
+export const syncLanguageToPath = (pathname: string): void => {
+  const next = localeFromPath(pathname).code;
+  if (i18next.language !== next) void i18next.changeLanguage(next);
 };
 
 export default i18next;

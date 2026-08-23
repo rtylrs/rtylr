@@ -87,6 +87,38 @@ export const LOCALES: Locale[] = [
 
 export const shippedLocales = (): Locale[] => LOCALES.filter((l) => l.shipped);
 
+/**
+ * The routes a non-default locale actually covers.
+ *
+ * This exists because `shipped` is per locale but coverage is per page. The
+ * first version of `alternatesFor` took only a path, so the moment a second
+ * locale shipped it would have advertised an alternate for all 21 pages in
+ * both languages while only these were translated. Fourteen of those URLs
+ * would 404, and Google drops a hreflang set that fails to reciprocate
+ * silently and in full, so the whole annotation would have been worth
+ * nothing while looking correct in the sitemap.
+ *
+ * Paths are the canonical trailing-slash form, matching what the export
+ * serves. Add a route here only when its namespace is complete in every
+ * shipped locale.
+ *
+ * The legal pages are absent by decision, not omission. See the note at the
+ * top of each file in pages/legal/.
+ */
+export const LOCALISED_ROUTES: string[] = [
+  '/',
+  '/pricing/',
+  '/pos/',
+  '/erp/',
+  '/contact/',
+];
+
+/** Whether one route is translated in the non-default locales. */
+export const isLocalisedRoute = (path: string): boolean => {
+  const norm = path === '/' ? '/' : `${path.replace(/\/$/, '')}/`;
+  return LOCALISED_ROUTES.includes(norm);
+};
+
 export const findLocale = (code: string): Locale | undefined =>
   LOCALES.find((l) => l.code === code);
 
@@ -136,6 +168,10 @@ export function alternatesFor(path: string, siteUrl = 'https://rtylr.com'): {
 }[] {
   const shipped = shippedLocales();
   if (shipped.length < 2) return [];
+
+  // A page nobody translated has no alternates. Emitting them would point
+  // at URLs that do not exist, and one broken member voids the whole set.
+  if (!isLocalisedRoute(path)) return [];
 
   const set = shipped.map((l) => ({
     hreflang: l.htmlLang,

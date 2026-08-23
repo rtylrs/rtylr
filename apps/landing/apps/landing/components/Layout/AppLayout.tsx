@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
-import i18next from '../../services/i18next';
-import { getCookie } from '../../lib/cookies';
 import CustomScrollbar from '../CustomScrollbar/CustomScrollbar';
 
 // Import Zustand stores and React Query hooks
@@ -30,12 +28,6 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   // States
 
-  useEffect(() => {
-    const language = getCookie('language');
-    if (language) {
-      i18next.changeLanguage(language);
-    }
-  }, []);
 
   return (
     <React.Fragment>

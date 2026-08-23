@@ -7,7 +7,9 @@ import path from 'node:path';
 import {
   LOCALES,
   DEFAULT_LOCALE,
+  LOCALISED_ROUTES,
   shippedLocales,
+  isLocalisedRoute,
   localeFromPath,
   localisePath,
   alternatesFor,
@@ -195,6 +197,92 @@ describe('alternatesFor', () => {
       }
     });
   }
+});
+
+describe('coverage is per page, not just per locale', () => {
+  // `shipped` is per locale; translation happens page by page. The first
+  // version of alternatesFor took only a path, so a second shipped locale
+  // would have advertised alternates for all 21 pages while five were
+  // translated. Sixteen would 404, and one broken member voids the set.
+  it('only routes listed as localised get alternates', () => {
+    for (const p of ['/crm/', '/hr/', '/about/', '/support/', '/blog/']) {
+      assert.equal(isLocalisedRoute(p), false, `${p} claims to be translated`);
+      assert.deepEqual(alternatesFor(p), [], `${p} would advertise dead alternates`);
+    }
+  });
+
+  it('the localised list is trailing-slash normalised', () => {
+    for (const r of LOCALISED_ROUTES) {
+      assert.ok(r.startsWith('/'), `${r} is not absolute`);
+      assert.ok(r.endsWith('/'), `${r} lacks the trailing slash the export serves`);
+      assert.ok(isLocalisedRoute(r), `${r} does not match its own predicate`);
+      // The predicate has to cope with either form, because next-sitemap
+      // does not guarantee the trailing slash on the path it passes in.
+      assert.ok(isLocalisedRoute(r.replace(/\/$/, '') || '/'), `${r} fails unslashed`);
+    }
+  });
+
+  it('excludes the legal pages, which are not translated by decision', () => {
+    for (const p of ['/legal/terms/', '/legal/privacy-policy/', '/legal/security/']) {
+      assert.equal(isLocalisedRoute(p), false, `${p} must not be advertised as translated`);
+    }
+  });
+
+  it('the sitemap advertises alternates only for localised routes', () => {
+    const f = path.join(OUT, 'sitemap-0.xml');
+    if (!existsSync(f)) return;
+    const xml = readFileSync(f, 'utf8');
+    const offenders = [];
+    for (const block of xml.match(/<url>[\s\S]*?<\/url>/g) ?? []) {
+      if (!block.includes('hreflang')) continue;
+      const loc = block.match(/<loc>([^<]+)<\/loc>/)?.[1] ?? '';
+      const p = loc.replace('https://rtylr.com', '');
+      if (!isLocalisedRoute(p)) offenders.push(p);
+    }
+    assert.deepEqual(offenders, [], 'sitemap advertises alternates for untranslated routes');
+  });
+});
+
+/**
+ * Strip comments before scanning source text.
+ *
+ * Both checks below failed on their first run, against correct code: the
+ * fix's own docblock quotes the bug it removed, so a naive regex matched
+ * the explanation rather than an occurrence. A gate that fires on its own
+ * documentation trains people to delete the documentation.
+ */
+const codeOnly = (src) =>
+  src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+
+describe('the active language comes from the URL', () => {
+  // It used to come from a cookie while the document derived lang and dir
+  // from the route, so the two disagreed by construction. Under a static
+  // export that is also a guaranteed hydration mismatch: the server has no
+  // cookie and the client does.
+  const src = codeOnly(readFileSync(path.join(APP, 'services/i18next.ts'), 'utf8'));
+
+  it('i18next does not read a cookie for its language', () => {
+    assert.ok(
+      !/lng:\s*getCookie/.test(src),
+      'the active language is being taken from a cookie again'
+    );
+    assert.ok(src.includes('localeFromPath'), 'the language is not derived from the path');
+  });
+
+  it('nothing calls changeLanguage from a cookie', () => {
+    const offenders = [];
+    for (const rel of globSync('**/*.{ts,tsx}', { cwd: APP })) {
+      if (rel.includes('node_modules')) continue;
+      const f = codeOnly(readFileSync(path.join(APP, rel), 'utf8'));
+      // A changeLanguage call in the same file as a language-cookie read is
+      // the shape of the bug: AppLayout did exactly this on every mount,
+      // overriding the route after hydration.
+      if (f.includes('changeLanguage') && /getCookie\(\s*['"]language['"]/.test(f)) {
+        offenders.push(rel);
+      }
+    }
+    assert.deepEqual(offenders, [], 'a cookie is overriding the route language');
+  });
 });
 
 describe('the sitemap config asks for absolute alternates', () => {

@@ -10,7 +10,7 @@ import { I18nextProvider } from 'react-i18next';
 import { CookiesProvider } from 'react-cookie';
 import { DM_Sans } from 'next/font/google';
 
-import i18next from '../services/i18next';
+import i18next, { syncLanguageToPath } from '../services/i18next';
 import { initFeatureVariant } from '../lib/featureVariant';
 import { watchConsentMode } from '../lib/consentMode';
 
@@ -57,6 +57,13 @@ function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
     void initFeatureVariant();
   }, []);
+
+  // Keep the active language on the route. init() reads the URL once, and a
+  // client-side navigation does not re-run it, so /ar/pricing/ reached by
+  // link would otherwise keep rendering the previous locale.
+  useEffect(() => {
+    syncLanguageToPath(router.asPath);
+  }, [router.asPath]);
 
   // Mirror the cookie banner's decision into Google Consent Mode. The
   // deny-by-default half runs inline in _document's head; this half
