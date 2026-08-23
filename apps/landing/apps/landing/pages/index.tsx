@@ -2,6 +2,7 @@ import React from 'react';
 import AppLayout from '../components/Layout/AppLayout';
 import MainLayout from '../layouts/Main/MainLayout';
 import HelmetContainer from '../components/HelmetContainer';
+import DirectAnswer from '../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../components/FaqSection/FaqSection';
 import { GLOBAL_FAQS } from '../lib/faqs';
 import { webSiteSchema, organizationSchema, productSchema } from '../lib/structured-data';
@@ -52,6 +53,13 @@ const WebsiteContent = (): JSX.Element => (
     <MainLayout>
       <div className={styles.Homepage}>
         <HeroSection />
+        <DirectAnswer label="What is rtylr?">
+          rtylr is an all-in-one business operating system for small and mid-sized companies: point
+          of sale, ERP, HR, CRM, finance and project management on a single database. It is built
+          for restaurants, retail and services businesses running 2 to 200 staff, across one
+          location or twenty. The point is not that it is seven apps. It is that a sale moves stock,
+          revenue and loyalty without anyone exporting a file.
+        </DirectAnswer>
         <ProductsSection />
         <FeaturesSection />
         <HowItWorksSection />

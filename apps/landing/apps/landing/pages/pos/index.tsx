@@ -6,6 +6,7 @@ import { Receipt, CreditCard, Split, Wifi, WifiOff } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { POS_FAQS } from '../../lib/faqs';
@@ -170,6 +171,14 @@ const POSPage = (): JSX.Element => {
               <div className={styles.receiptTear} aria-hidden="true" />
             </motion.div>
           </section>
+
+          <DirectAnswer label="What is rtylr POS?">
+            rtylr POS is the point-of-sale app inside rtylr, built for restaurants and retail businesses
+            running one location or twenty. It handles tickets, course firing, check splits, tips,
+            modifiers and card payments, and it keeps taking orders when the connection drops. Because it
+            writes to the same database as inventory, staff and accounting, a sale moves stock and revenue
+            without an export.
+          </DirectAnswer>
 
           {/* ── FEATURE QUAD, 2×2, asymmetric typography ─────────────────── */}
           <section className={styles.featureSection}>

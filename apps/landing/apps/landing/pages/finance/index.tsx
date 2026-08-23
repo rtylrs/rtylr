@@ -14,6 +14,7 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { FINANCE_FAQS } from '../../lib/faqs';
@@ -391,6 +392,14 @@ const FinancePage = (): JSX.Element => {
               </div>
             </motion.div>
           </section>
+
+          <DirectAnswer label="What is rtylr Finance?">
+            rtylr Finance is the accounting app inside rtylr, for owners who want a current profit and
+            loss rather than one that arrives weeks late. It covers invoicing, expenses, bill payments,
+            bank reconciliation, and P&L, balance sheet and cash flow reports. Revenue, refunds, tips and
+            payroll already sit in the same database, so the month-end close does not start by reconciling
+            four systems.
+          </DirectAnswer>
 
           {/* ── LIVE 12-MONTH CHART + PILLAR STRIP ───────────────────────── */}
           <section className={styles.chartSection}>

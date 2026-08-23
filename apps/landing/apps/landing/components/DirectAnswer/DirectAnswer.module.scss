@@ -1,0 +1,41 @@
+// A quiet band under the hero. Deliberately plain: this block exists to
+// be read and extracted, so nothing here should compete with the hero
+// above it or the feature sections below.
+.directAnswer {
+  padding: 48px 20px;
+  border-block: 1px solid var(--hairline);
+  background: var(--bg-surface-a);
+}
+
+.inner {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--subtext-color);
+  margin-bottom: 12px;
+}
+
+.answer {
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+
+@media (min-width: 768px) {
+  .directAnswer {
+    padding: 64px 32px;
+  }
+
+  .answer {
+    font-size: 1.1875rem;
+    line-height: 1.65;
+  }
+}

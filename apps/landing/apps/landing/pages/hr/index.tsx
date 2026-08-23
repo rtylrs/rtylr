@@ -14,6 +14,7 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { HR_FAQS } from '../../lib/faqs';
@@ -261,6 +262,13 @@ const HRPage = (): JSX.Element => {
               </div>
             </motion.div>
           </section>
+
+          <DirectAnswer label="What is rtylr HR?">
+            rtylr HR is the people app inside rtylr, for teams with shift workers, hourly staff or both.
+            It covers employee records, scheduling, shift swaps, time off, payroll calculation and
+            compliance documents. A person is created once: the schedule, the pay run and their POS login
+            all read that same record, so a new hire is not entered in four different places.
+          </DirectAnswer>
 
           {/* ── PILLAR GRID, 3×2 shared-border cells ──────────────────────── */}
           <section className={styles.pillarsSection}>

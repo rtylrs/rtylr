@@ -22,6 +22,7 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { FLOW_FAQS } from '../../lib/faqs';
@@ -487,6 +488,14 @@ const FlowPage = (): JSX.Element => {
               </div>
             </motion.div>
           </section>
+
+          <DirectAnswer label="What is rtylr Flow?">
+            rtylr Flow is the project and task app inside rtylr, for teams tracking work that touches real
+            customers, staff and money. It has boards, lists, timelines, cycles, milestones, custom fields
+            and automations. What a standalone tracker cannot do is read the rest of the business: assign
+            work to a person from HR, attach it to a customer from CRM, push billable hours onto an
+            invoice in Finance.
+          </DirectAnswer>
 
           {/* ── AUTOMATION BUILDER ─────────────────────────────────────── */}
           <section className={styles.automationSection}>

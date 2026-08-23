@@ -17,6 +17,7 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { ERP_FAQS } from '../../lib/faqs';
@@ -304,6 +305,14 @@ const ERPPage = (): JSX.Element => {
               </div>
             </motion.div>
           </section>
+
+          <DirectAnswer label="What is rtylr ERP?">
+            rtylr ERP is the inventory and supply chain app inside rtylr, for businesses holding stock
+            across one or more locations. It covers on-hand counts, suppliers, purchase orders, transfers
+            between sites, low-stock alerts and cost tracking. It reads sales from the POS as they happen,
+            so stock stays accurate without a nightly sync and a reorder can be drafted before anyone
+            notices an empty shelf.
+          </DirectAnswer>
 
           {/* ── CAPABILITIES, alternating left/right layout ──────────────── */}
           <section className={styles.capabilitiesSection}>

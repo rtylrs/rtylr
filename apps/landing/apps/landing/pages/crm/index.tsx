@@ -6,6 +6,7 @@ import { Heart, Mail, Gift, Users, Star, Send, Target, ChevronRight, Plus } from
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
+import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../../components/FaqSection/FaqSection';
 import { productWithBreadcrumbs } from '../../lib/structured-data';
 import { CRM_FAQS } from '../../lib/faqs';
@@ -390,6 +391,14 @@ const CRMPage = (): JSX.Element => {
               </div>
             </motion.div>
           </section>
+
+          <DirectAnswer label="What is rtylr CRM?">
+            rtylr CRM is the customer app inside rtylr, for restaurants, retail and services businesses
+            that want to know who their regulars are. It holds customer profiles, visit and purchase
+            history, loyalty points, segments and email campaigns. Because it shares a database with the
+            POS, it records what someone actually bought with no import, so a segment stays current on its
+            own.
+          </DirectAnswer>
 
           {/* ── SEGMENT BUBBLES ─────────────────────────────────────────── */}
           <motion.section
