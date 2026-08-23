@@ -16,25 +16,23 @@ import (
 )
 
 const (
-	listTasksToolName           = "flow.list_tasks"
-	getTaskToolName             = "flow.get_task"
-	createTaskToolName          = "flow.create_task"
-	defaultListTasksToolLimit   = int64(20)
-	maxListTasksToolLimit       = int64(50)
-	taskToolTimestampDate       = "2006-01-02T15:04:05Z"
-	defaultListTasksWorkspaceID = "personal"
+	listTasksToolName         = "flow.list_tasks"
+	getTaskToolName           = "flow.get_task"
+	createTaskToolName        = "flow.create_task"
+	defaultListTasksToolLimit = int64(20)
+	maxListTasksToolLimit     = int64(50)
+	taskToolTimestampDate     = "2006-01-02T15:04:05Z"
 )
 
 type listTasksToolInput struct {
-	ProjectID    int64
-	WorkspaceRaw string
-	Status       string
-	AssigneeID   *int64
-	Priority     string
-	ActiveOnly   bool
-	Compact      bool
-	Page         int64
-	Limit        int64
+	ProjectID  int64
+	Status     string
+	AssigneeID *int64
+	Priority   string
+	ActiveOnly bool
+	Compact    bool
+	Page       int64
+	Limit      int64
 }
 
 func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[string]any) (map[string]any, bool, error) {
@@ -68,31 +66,23 @@ func (m *Module) executeListTasksTool(ctx context.Context, input map[string]any)
 		return nil, err
 	}
 
-	workspaceID := int64(0)
-	if parsed.WorkspaceRaw != "" {
-		resolved, resolveErr := m.service.ResolveWorkspaceID(ctx, authUser.UserID, businessID, parsed.WorkspaceRaw)
-		if resolveErr != nil || resolved <= 0 {
-			return nil, errors.New("invalid workspace_id")
-		}
-		workspaceID = resolved
-	}
-
 	if parsed.ProjectID != 0 && !m.service.IsProjectMember(ctx, authUser.UserID, parsed.ProjectID) {
 		return nil, errors.New("permission denied")
 	}
 
+	// X2: Caret's context is the business, not a workspace. ListTasksV2 scopes
+	// to the caller's business and filters row by row on what the caller can
+	// actually open, which is stricter than the workspace listing this replaced.
 	offset := (parsed.Page - 1) * parsed.Limit
-	tasks, total, err := m.service.ListTasks(ctx, domain.ListTasksFilter{
-		ProjectID:   parsed.ProjectID,
-		BusinessID:  businessID,
-		WorkspaceID: workspaceID,
-		Status:      parsed.Status,
-		AssigneeID:  parsed.AssigneeID,
-		Priority:    parsed.Priority,
-		ActiveOnly:  parsed.ActiveOnly,
-		Compact:     parsed.Compact,
-		Limit:       parsed.Limit,
-		Offset:      offset,
+	tasks, total, err := m.service.ListTasksV2(ctx, authUser.UserID, businessID, domain.ListTasksFilter{
+		ProjectID:  parsed.ProjectID,
+		Status:     parsed.Status,
+		AssigneeID: parsed.AssigneeID,
+		Priority:   parsed.Priority,
+		ActiveOnly: parsed.ActiveOnly,
+		Compact:    parsed.Compact,
+		Limit:      parsed.Limit,
+		Offset:     offset,
 	})
 	if err != nil {
 		return nil, err
@@ -112,7 +102,6 @@ func (m *Module) executeListTasksTool(ctx context.Context, input map[string]any)
 		"has_more":  offset+int64(len(payloads)) < total,
 		"filters": map[string]any{
 			"project_id":  parsed.ProjectID,
-			"workspace":   parsed.WorkspaceRaw,
 			"status":      parsed.Status,
 			"assignee_id": parsed.AssigneeID,
 			"priority":    parsed.Priority,
@@ -167,15 +156,6 @@ func (m *Module) executeCreateTaskTool(ctx context.Context, input map[string]any
 		return nil, errors.New("priority must be one of none, low, medium, high, or urgent")
 	}
 
-	workspaceRaw := strings.TrimSpace(stringValue(input["workspace_id"]))
-	if workspaceRaw == "" {
-		workspaceRaw = "personal"
-	}
-	workspaceID, err := m.service.ResolveWorkspaceID(ctx, authUser.UserID, businessID, workspaceRaw)
-	if err != nil || workspaceID <= 0 {
-		return nil, errors.New("invalid workspace_id")
-	}
-
 	projectID, err := int64Value(input["project_id"])
 	if err != nil {
 		return nil, fmt.Errorf("invalid project_id: %w", err)
@@ -184,7 +164,10 @@ func (m *Module) executeCreateTaskTool(ctx context.Context, input map[string]any
 		return nil, errors.New("project_id must be non-negative")
 	}
 	if projectID == 0 {
-		resolvedProjectID, _, ensureErr := m.service.EnsureMyTasksProject(ctx, authUser.UserID, businessID, workspaceID)
+		// X2: no workspace to file into. Passing 0 is what the v2 task API does
+		// for the same case, and EnsureMyTasksProject keys the bucket on
+		// (user, business).
+		resolvedProjectID, _, ensureErr := m.service.EnsureMyTasksProject(ctx, authUser.UserID, businessID, 0)
 		if ensureErr != nil || resolvedProjectID <= 0 {
 			return nil, errors.New("failed to resolve My Tasks project")
 		}
@@ -218,7 +201,6 @@ func (m *Module) executeCreateTaskTool(ctx context.Context, input map[string]any
 
 	task, err := m.service.CreateTask(ctx, domain.TaskInput{
 		ProjectID:      projectID,
-		WorkspaceID:    workspaceID,
 		OwnerID:        authUser.UserID,
 		BusinessID:     businessID,
 		ParentTaskID:   parentTaskID,
@@ -276,11 +258,6 @@ func parseListTasksToolInput(input map[string]any, userID int64) (listTasksToolI
 		return listTasksToolInput{}, errors.New("project_id must be non-negative")
 	}
 
-	workspaceRaw := strings.TrimSpace(stringValue(firstToolValue(input, "workspace_id", "workspace")))
-	if projectID == 0 && workspaceRaw == "" {
-		workspaceRaw = defaultListTasksWorkspaceID
-	}
-
 	status := normalizeTaskToolStatus(input["status"])
 	if strings.TrimSpace(stringValue(input["status"])) != "" && status == "" {
 		return listTasksToolInput{}, errors.New("status must be one of todo, in_progress, done, or cancelled")
@@ -335,15 +312,14 @@ func parseListTasksToolInput(input map[string]any, userID int64) (listTasksToolI
 	}
 
 	return listTasksToolInput{
-		ProjectID:    projectID,
-		WorkspaceRaw: workspaceRaw,
-		Status:       status,
-		AssigneeID:   assigneeID,
-		Priority:     priority,
-		ActiveOnly:   activeOnly,
-		Compact:      compact,
-		Page:         page,
-		Limit:        limit,
+		ProjectID:  projectID,
+		Status:     status,
+		AssigneeID: assigneeID,
+		Priority:   priority,
+		ActiveOnly: activeOnly,
+		Compact:    compact,
+		Page:       page,
+		Limit:      limit,
 	}, nil
 }
 

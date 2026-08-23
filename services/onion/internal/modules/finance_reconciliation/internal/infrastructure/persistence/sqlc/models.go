@@ -1090,6 +1090,7 @@ type FinanceInvoice struct {
 	ClientEmail    sql.NullString                  `db:"client_email" json:"client_email"`
 	ClientAddress  sql.NullString                  `db:"client_address" json:"client_address"`
 	ClientTaxID    sql.NullString                  `db:"client_tax_id" json:"client_tax_id"`
+	CustomerID     sql.NullInt64                   `db:"customer_id" json:"customer_id"`
 	Status         NullFinanceInvoicesStatus       `db:"status" json:"status"`
 	IssueDate      time.Time                       `db:"issue_date" json:"issue_date"`
 	DueDate        time.Time                       `db:"due_date" json:"due_date"`

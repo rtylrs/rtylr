@@ -25,9 +25,6 @@ func TestParseListTasksToolInput(t *testing.T) {
 	if parsed.ProjectID != 42 {
 		t.Fatalf("ProjectID = %d, want 42", parsed.ProjectID)
 	}
-	if parsed.WorkspaceRaw != "" {
-		t.Fatalf("WorkspaceRaw = %q, want empty when project provided", parsed.WorkspaceRaw)
-	}
 	if parsed.Status != "in_progress" {
 		t.Fatalf("Status = %q, want in_progress", parsed.Status)
 	}
@@ -51,13 +48,16 @@ func TestParseListTasksToolInput(t *testing.T) {
 	}
 }
 
-func TestParseListTasksToolInputUsesPersonalWorkspaceDefault(t *testing.T) {
+// X2: with no project given the tool lists the caller's business rather than
+// defaulting into a "personal" workspace, so there is no workspace default left
+// to assert. The pagination defaults this also covered still matter.
+func TestParseListTasksToolInputAppliesPaginationDefaults(t *testing.T) {
 	parsed, err := parseListTasksToolInput(map[string]any{}, 99)
 	if err != nil {
 		t.Fatalf("parseListTasksToolInput returned error: %v", err)
 	}
-	if parsed.WorkspaceRaw != defaultListTasksWorkspaceID {
-		t.Fatalf("WorkspaceRaw = %q, want personal", parsed.WorkspaceRaw)
+	if parsed.ProjectID != 0 {
+		t.Fatalf("ProjectID = %d, want 0 for a business-wide listing", parsed.ProjectID)
 	}
 	if parsed.Page != 1 {
 		t.Fatalf("Page = %d, want 1", parsed.Page)
