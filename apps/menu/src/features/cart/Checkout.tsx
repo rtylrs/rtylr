@@ -93,7 +93,7 @@ const Checkout = (): React.JSX.Element => {
 
     try {
       const response = await orderClient.createPublicOrder(request);
-      const { orderId, orderNumber } = response;
+      const { orderId, orderNumber, publicToken } = response;
       if (!orderId || !orderNumber) throw new Error('Incomplete order response');
 
       clearCart();
@@ -102,8 +102,13 @@ const Checkout = (): React.JSX.Element => {
         : '';
       const slug = new URLSearchParams(searchStr).get('slug');
       const slugQuery = slug ? `&slug=${encodeURIComponent(slug)}` : '';
+      // The status endpoint takes an opaque per-order token now, so the
+      // sequential order id alone can no longer be used to read anyone's
+      // order. This is the only place it is handed out, so it has to travel
+      // to the status page or that page cannot poll at all.
+      const tokenQuery = publicToken ? `&public_token=${encodeURIComponent(publicToken)}` : '';
       void navigate({
-        to: `/order-status/${orderId}?number=${encodeURIComponent(orderNumber)}${businessQuery}${slugQuery}`,
+        to: `/order-status/${orderId}?number=${encodeURIComponent(orderNumber)}${businessQuery}${slugQuery}${tokenQuery}`,
       });
     } catch {
       setErrorMessage('Failed to place order. Please try again.');
