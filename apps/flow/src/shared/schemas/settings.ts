@@ -18,6 +18,7 @@ const SETTINGS_SECTION_IDS = [
   'labels',
   'life',
   'shortcuts',
+  'bin',
 ] as const;
 
 export type SettingsSectionId = (typeof SETTINGS_SECTION_IDS)[number];

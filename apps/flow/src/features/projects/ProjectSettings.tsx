@@ -37,7 +37,8 @@ import Breadcrumbs from '../../shared/components/Breadcrumbs';
 import GateNotice from '../../shared/components/GateNotice';
 import AddProjectMemberDialog from './components/AddProjectMemberDialog';
 import { displayDescription } from '../../shared/lib/stringUtils';
-import { useCanDeleteResource } from '../../shared/lib/currentUser';
+import { useCanAdministerProject } from '../../shared/lib/currentUser';
+import ProjectVisibilityField from './components/ProjectVisibilityField';
 
 const ROLE_META: Record<string, { icon: React.ReactNode; color: string }> = {
   admin: { icon: <Crown size={10} />, color: '#f59e0b' },
@@ -85,7 +86,7 @@ const ProjectSettings: React.FC = () => {
   // reaching this screen sees it, but every control on it is disabled with
   // a GateNotice rather than actually usable - this is the fix for #793,
   // where none of these actions had any check at all.
-  const canManageProject = useCanDeleteResource(projectId);
+  const canManageProject = useCanAdministerProject(projectId);
 
   const transferRef = useRef<HTMLSelectElement>(null);
   const [targetWorkspaceId, setTargetWorkspaceId] = useState('');
@@ -166,7 +167,7 @@ const ProjectSettings: React.FC = () => {
                 reason={t('flow.projectSettings.generalGateReason')}
               />
             )}
-            <Field label="Name">
+            <Field label={t('common.name')}>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -180,7 +181,7 @@ const ProjectSettings: React.FC = () => {
                 }}
               />
             </Field>
-            <Field label="Description">
+            <Field label={t('common.description')}>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -196,6 +197,9 @@ const ProjectSettings: React.FC = () => {
                 }}
               />
             </Field>
+
+            <ProjectVisibilityField projectId={projectId} canAdminister={canManageProject} />
+
             <button
               type="button"
               onClick={() => {
@@ -230,7 +234,8 @@ const ProjectSettings: React.FC = () => {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-semibold disabled:opacity-40"
               style={{ background: 'var(--accent)', color: '#0a0a0a' }}
             >
-              <Save size={11} /> {updateProject.isPending ? 'Saving...' : 'Save changes'}
+              <Save size={11} />{' '}
+              {updateProject.isPending ? t('common.saving') : t('common.saveChanges')}
             </button>
           </>
         )}

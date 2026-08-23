@@ -85,7 +85,8 @@
     "selectWorkspace": "Sélectionnez un espace de travail",
     "deleted": "Projet supprimé",
     "restoreFailed": "Échec de la restauration du projet",
-    "purgeFailed": "Échec de la suppression définitive du projet"
+    "purgeFailed": "Échec de la suppression définitive du projet",
+    "visibilityFailed": "Échec de la mise à jour de la visibilité"
   },
   "milestone": {
     "createFailed": "Échec de la création du jalon",

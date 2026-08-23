@@ -131,5 +131,7 @@
     "openTask": "Open task {{identifier}}: {{title}}",
     "selectTask": "Select task",
     "deselectTask": "Deselect task"
-  }
+  },
+  "saving": "Saving…",
+  "saveChanges": "Save changes"
 }

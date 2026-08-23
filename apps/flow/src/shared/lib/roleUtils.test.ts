@@ -6,6 +6,7 @@ import {
   canCreateProject,
   canEditTask,
   canDelete,
+  hasBusinessRoleBypass,
   mostRestrictiveProjectRole,
   canInviteMembers,
   toFlowMemberRole,
@@ -170,5 +171,38 @@ describe('membersByRole', () => {
   it('filters by role', () => {
     const members = [makeMember({ role: 'owner' }), makeMember({ id: 'm2', role: 'member' })];
     expect(membersByRole(members, 'owner').length).toBe(1);
+  });
+});
+
+describe('hasBusinessRoleBypass', () => {
+  // These three are the exact set onion's hubProfileBypasses admits. A role
+  // added to USER_ROLES without a decision here would otherwise default to
+  // denied silently, which is the safe direction but should still be explicit.
+  it.each(['owner', 'admin', 'operator'])('admits %s', (role) => {
+    expect(hasBusinessRoleBypass(role)).toBe(true);
+  });
+
+  it.each(['billing', 'menu_manager', 'store_manager', 'staff', 'viewer', 'member'])(
+    'denies %s',
+    (role) => {
+      expect(hasBusinessRoleBypass(role)).toBe(false);
+    }
+  );
+
+  it('fails closed on an absent role', () => {
+    expect(hasBusinessRoleBypass(null)).toBe(false);
+    expect(hasBusinessRoleBypass(undefined)).toBe(false);
+    expect(hasBusinessRoleBypass('')).toBe(false);
+  });
+
+  it('does not admit an unrecognised role', () => {
+    expect(hasBusinessRoleBypass('superuser')).toBe(false);
+  });
+
+  // toFlowMemberRole collapses operator to viewer, so mapping before this
+  // predicate would drop the one role it most needs to admit.
+  it('must be given the raw business role, not a Flow-mapped one', () => {
+    expect(hasBusinessRoleBypass(toFlowMemberRole('operator'))).toBe(false);
+    expect(hasBusinessRoleBypass('operator')).toBe(true);
   });
 });

@@ -439,7 +439,23 @@
       "deleteConfirmSuffix": "? It is removed from every task it is attached to."
     },
     "chooseColorLabel": "Choose color {{color}}",
-    "deleteLabelLabel": "Delete label"
+    "deleteLabelLabel": "Delete label",
+    "bin": {
+      "section": "Recycle bin",
+      "description": "Archived projects across the business. Restore one, or permanently delete what you no longer need.",
+      "emptyTitle": "The bin is empty",
+      "emptyDescription": "Archived projects appear here until they are permanently deleted.",
+      "refreshCta": "Refresh",
+      "selectAll": "Select all {{count}}",
+      "purgeSelected": "Delete {{count}} permanently",
+      "selectProject": "Select {{name}}",
+      "purgesOn": "Deletes {{date}}",
+      "truncated": "Showing {{shown}} of {{total}}. Restore or delete some to see the rest.",
+      "purgeTitle": "Delete permanently",
+      "purgeConfirm": "This permanently deletes the selected projects ({{count}}) and everything inside them. This cannot be undone.",
+      "purgeKeyword": "delete",
+      "retentionNote": "Projects are deleted automatically once their retention period ends."
+    }
   },
   "presence": {
     "heading": "Who's in today",
@@ -728,7 +744,11 @@
     "refreshMembersCta": "Refresh",
     "moveGateReason": "Only project admins can move this project to another workspace.",
     "transferGateReason": "Only project admins can transfer ownership of this project.",
-    "deleteGateReason": "Only project admins can delete this project."
+    "deleteGateReason": "Only project admins can delete this project.",
+    "visibility": "Visibility",
+    "visibilitySaved": "Visibility updated",
+    "visibilityGateReason": "Only a project admin can change visibility.",
+    "visibilityPersonalGate": "Your My Tasks project is always private."
   },
   "bulkEdit": {
     "clearSelectionLabel": "Clear selection"
@@ -757,5 +777,11 @@
     "purge": "Permanently delete {{name}}",
     "purgeTitle": "Delete permanently",
     "purgeCta": "Delete permanently"
+  },
+  "visibility": {
+    "private": "Private",
+    "public": "Public",
+    "archived": "Archived",
+    "publicHint": "Public exposes this project's name, colour, status and dates on member profiles to business colleagues. It never grants access to its tasks."
   }
 }

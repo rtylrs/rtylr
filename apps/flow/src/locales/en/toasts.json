@@ -85,7 +85,8 @@
     "selectWorkspace": "Select a workspace",
     "deleted": "Project deleted",
     "restoreFailed": "Failed to restore project",
-    "purgeFailed": "Failed to permanently delete project"
+    "purgeFailed": "Failed to permanently delete project",
+    "visibilityFailed": "Failed to update visibility"
   },
   "milestone": {
     "createFailed": "Failed to create milestone",

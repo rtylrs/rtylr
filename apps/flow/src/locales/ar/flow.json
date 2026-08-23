@@ -450,7 +450,23 @@
       "deleteConfirmSuffix": "؟ ستتم إزالته من كل مهمة مرتبط بها."
     },
     "chooseColorLabel": "اختيار اللون {{color}}",
-    "deleteLabelLabel": "حذف التسمية"
+    "deleteLabelLabel": "حذف التسمية",
+    "bin": {
+      "section": "سلة المحذوفات",
+      "description": "المشاريع المؤرشفة على مستوى الشركة بالكامل. استعد مشروعًا أو احذف نهائيًا ما لم تعد بحاجة إليه.",
+      "emptyTitle": "السلة فارغة",
+      "emptyDescription": "تظهر المشاريع المؤرشفة هنا حتى يتم حذفها نهائيًا.",
+      "refreshCta": "تحديث",
+      "selectAll": "تحديد الكل ({{count}})",
+      "purgeSelected": "حذف {{count}} نهائيًا",
+      "selectProject": "تحديد {{name}}",
+      "purgesOn": "يُحذف في {{date}}",
+      "truncated": "يتم عرض {{shown}} من {{total}}. استعد أو احذف بعضها لعرض الباقي.",
+      "purgeTitle": "حذف نهائي",
+      "purgeConfirm": "سيؤدي هذا إلى حذف المشاريع المحددة ({{count}}) وكل ما بداخلها نهائيًا. لا يمكن التراجع عن ذلك.",
+      "purgeKeyword": "حذف",
+      "retentionNote": "تُحذف المشاريع تلقائيًا بعد انتهاء مدة الاحتفاظ."
+    }
   },
   "presence": {
     "heading": "من موجود اليوم",
@@ -759,7 +775,11 @@
     "refreshMembersCta": "تحديث",
     "moveGateReason": "يمكن لمسؤولي المشروع فقط نقل هذا المشروع إلى مساحة عمل أخرى.",
     "transferGateReason": "يمكن لمسؤولي المشروع فقط نقل ملكية هذا المشروع.",
-    "deleteGateReason": "يمكن لمسؤولي المشروع فقط حذف هذا المشروع."
+    "deleteGateReason": "يمكن لمسؤولي المشروع فقط حذف هذا المشروع.",
+    "visibility": "الظهور",
+    "visibilitySaved": "تم تحديث الظهور",
+    "visibilityGateReason": "يمكن لمسؤول المشروع فقط تغيير الظهور.",
+    "visibilityPersonalGate": "مشروع «مهامي» خاص دائمًا."
   },
   "bulkEdit": {
     "clearSelectionLabel": "إلغاء التحديد"
@@ -788,5 +808,11 @@
     "purge": "حذف {{name}} نهائيًا",
     "purgeTitle": "حذف نهائي",
     "purgeCta": "حذف نهائي"
+  },
+  "visibility": {
+    "private": "خاص",
+    "public": "عام",
+    "archived": "مؤرشف",
+    "publicHint": "يعرض الوضع العام اسم المشروع ولونه وحالته وتواريخه في الملفات الشخصية للأعضاء لزملاء العمل. ولا يمنح ذلك أي وصول إلى مهامه."
   }
 }

@@ -93,7 +93,8 @@
     "selectWorkspace": "اختر مساحة عمل",
     "deleted": "تم حذف المشروع",
     "restoreFailed": "فشل استعادة المشروع",
-    "purgeFailed": "فشل الحذف النهائي للمشروع"
+    "purgeFailed": "فشل الحذف النهائي للمشروع",
+    "visibilityFailed": "فشل تحديث الظهور"
   },
   "milestone": {
     "createFailed": "فشل إنشاء المرحلة",

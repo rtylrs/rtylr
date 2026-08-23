@@ -131,5 +131,7 @@
     "openTask": "Ouvrir la tâche {{identifier}} : {{title}}",
     "selectTask": "Sélectionner la tâche",
     "deselectTask": "Désélectionner la tâche"
-  }
+  },
+  "saving": "Enregistrement…",
+  "saveChanges": "Enregistrer les modifications"
 }

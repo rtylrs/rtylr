@@ -68,7 +68,12 @@ import AppearanceSwitch from './components/AppearanceSwitch';
 import SegmentedControl from './components/SegmentedControl';
 import { useSystemDark } from './components/useSystemDark';
 import TimeSection from './sections/TimeSection';
-import { canInviteMembers, toFlowMemberRole } from '../../shared/lib/roleUtils';
+import BinSection from './sections/BinSection';
+import {
+  canInviteMembers,
+  hasBusinessRoleBypass,
+  toFlowMemberRole,
+} from '../../shared/lib/roleUtils';
 
 interface SettingsSection {
   id: string;
@@ -79,7 +84,8 @@ interface SettingsSection {
 function buildSections(
   t: (key: string) => string,
   canManageWorkspaces: boolean,
-  canManageTeam: boolean
+  canManageTeam: boolean,
+  canManageBin: boolean
 ): SettingsSection[] {
   const sections: SettingsSection[] = [
     // Owner/admin only: grants and revokes Flow access for other business
@@ -95,6 +101,11 @@ function buildSections(
     { id: 'labels', label: t('common.settings.labels'), icon: Tag },
     { id: 'life', label: t('common.settings.life'), icon: Sparkles },
     { id: 'shortcuts', label: t('common.settings.shortcuts'), icon: Keyboard },
+    // Business-wide recycle bin. Gated on the owner/admin/operator bypass
+    // rather than MANAGE_WORKSPACE_ROLES because that same bypass is what
+    // makes listArchivedProjects return the whole business instead of only
+    // the caller's own archived projects.
+    ...(canManageBin ? [{ id: 'bin', label: t('flow.settings.bin.section'), icon: Trash2 }] : []),
   ];
   if (canManageWorkspaces) {
     sections.unshift({
@@ -1250,6 +1261,7 @@ export const TeamSection: React.FC = () => {
 // ── Section content map ───────────────────────────────────────────────────────
 
 const SECTION_CONTENT: Record<string, React.FC> = {
+  bin: BinSection,
   team: TeamSection,
   notifications: NotificationsSection,
   appearance: AppearanceSection,
@@ -1261,7 +1273,7 @@ const SECTION_CONTENT: Record<string, React.FC> = {
 
 const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => {
   const { t } = useTranslation();
-  const sections = buildSections(t, false, false);
+  const sections = buildSections(t, false, false, false);
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <p className="text-[14px] font-medium mb-1" style={{ color: 'var(--flow-text-muted)' }}>
@@ -1299,9 +1311,10 @@ const FlowSettings: React.FC = () => {
   // canInviteMembers expects Flow's own Member['role'] vocabulary, not the raw
   // business-wide role string a non-Flow business type can hand back.
   const canManageTeam = canInviteMembers(toFlowMemberRole(role));
+  const canManageBin = hasBusinessRoleBypass(role);
   const sections = useMemo(
-    () => buildSections(t, canManageWorkspaces, canManageTeam),
-    [t, canManageWorkspaces, canManageTeam]
+    () => buildSections(t, canManageWorkspaces, canManageTeam, canManageBin),
+    [t, canManageWorkspaces, canManageTeam, canManageBin]
   );
   const isAccessibleSection = (id: string): boolean => sections.some((s) => s.id === id);
   // ?section=time makes a section linkable, so the sidebar can point at one -

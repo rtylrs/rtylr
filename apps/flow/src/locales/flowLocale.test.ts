@@ -90,6 +90,10 @@ describe('flow locale parity', () => {
       'settings.appearance.groups.mode',
       'settings.appearance.groups.palette',
       'settings.appearance.density.compact',
+      // "Public" is the same word in French too. Its counterpart
+      // visibility.private ("Privé") does differ, which is the check that this
+      // is a cognate rather than an untranslated string.
+      'visibility.public',
     ]);
 
     const copied = keyPaths(en).filter((path) => {

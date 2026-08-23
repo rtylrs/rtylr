@@ -439,7 +439,23 @@
       "deleteConfirmSuffix": " ? Elle sera retirée de toutes les tâches auxquelles elle est associée."
     },
     "chooseColorLabel": "Choisir la couleur {{color}}",
-    "deleteLabelLabel": "Supprimer l'étiquette"
+    "deleteLabelLabel": "Supprimer l'étiquette",
+    "bin": {
+      "section": "Corbeille",
+      "description": "Projets archivés de toute l'entreprise. Restaurez-en un, ou supprimez définitivement ce dont vous n'avez plus besoin.",
+      "emptyTitle": "La corbeille est vide",
+      "emptyDescription": "Les projets archivés apparaissent ici jusqu'à leur suppression définitive.",
+      "refreshCta": "Actualiser",
+      "selectAll": "Tout sélectionner ({{count}})",
+      "purgeSelected": "Supprimer définitivement ({{count}})",
+      "selectProject": "Sélectionner {{name}}",
+      "purgesOn": "Suppression le {{date}}",
+      "truncated": "{{shown}} sur {{total}} affichés. Restaurez ou supprimez-en pour voir le reste.",
+      "purgeTitle": "Suppression définitive",
+      "purgeConfirm": "Cette action supprime définitivement les projets sélectionnés ({{count}}) et tout leur contenu. Elle est irréversible.",
+      "purgeKeyword": "supprimer",
+      "retentionNote": "Les projets sont supprimés automatiquement à la fin de leur période de conservation."
+    }
   },
   "presence": {
     "heading": "Qui est présent aujourd'hui",
@@ -728,7 +744,11 @@
     "refreshMembersCta": "Actualiser",
     "moveGateReason": "Seuls les administrateurs du projet peuvent déplacer ce projet vers un autre espace de travail.",
     "transferGateReason": "Seuls les administrateurs du projet peuvent transférer la propriété de ce projet.",
-    "deleteGateReason": "Seuls les administrateurs du projet peuvent supprimer ce projet."
+    "deleteGateReason": "Seuls les administrateurs du projet peuvent supprimer ce projet.",
+    "visibility": "Visibilité",
+    "visibilitySaved": "Visibilité mise à jour",
+    "visibilityGateReason": "Seul un administrateur du projet peut changer la visibilité.",
+    "visibilityPersonalGate": "Votre projet Mes tâches est toujours privé."
   },
   "bulkEdit": {
     "clearSelectionLabel": "Effacer la sélection"
@@ -757,5 +777,11 @@
     "purge": "Supprimer définitivement {{name}}",
     "purgeTitle": "Suppression définitive",
     "purgeCta": "Supprimer définitivement"
+  },
+  "visibility": {
+    "private": "Privé",
+    "public": "Public",
+    "archived": "Archivé",
+    "publicHint": "Le mode public expose le nom, la couleur, le statut et les dates du projet sur les profils des membres, pour les collègues de l'entreprise. Il ne donne jamais accès à ses tâches."
   }
 }
