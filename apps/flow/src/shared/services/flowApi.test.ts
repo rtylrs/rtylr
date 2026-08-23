@@ -11,7 +11,6 @@ const mockClients = vi.hoisted(() => {
 
   return {
     businessClient: mockClient(),
-    projectClient: mockClient(),
     labelClient: mockClient(),
     milestoneV2: mockClient(),
     cycleV2: mockClient(),
@@ -28,7 +27,6 @@ const mockClients = vi.hoisted(() => {
 
 vi.mock('../lib/clients', () => ({
   businessClient: mockClients.businessClient,
-  projectClient: mockClients.projectClient,
   labelClient: mockClients.labelClient,
   milestoneV2: mockClients.milestoneV2,
   cycleV2: mockClients.cycleV2,
@@ -45,7 +43,6 @@ vi.mock('../lib/clients', () => ({
 import { flowApi } from './flowApi';
 import {
   businessClient,
-  projectClient,
   milestoneV2,
   cycleV2,
   insightsV2,
@@ -128,13 +125,13 @@ describe('flowApi OneKit adapters', () => {
     expect(projectClient.addProjectMember).not.toHaveBeenCalled();
   });
 
-  // deleteProject is the one call still on v1, because v2 offers archiveProject
-  // instead: a recycle-bin move, not a delete. Pinning it keeps that a decision
-  // someone makes rather than something that drifts.
-  it('still routes project deletion through v1 until archive replaces it', async () => {
-    await flowApi.deleteProject('7');
+  // deleteProject is gone: v2 has no such call, so project removal now archives
+  // to the recycle bin. The assertion moved rather than being deleted, because
+  // "which client does removal go through" is exactly what regressed before.
+  it('routes project removal through v2 archive', async () => {
+    await flowApi.archiveProject('7');
 
-    expect(projectClient.deleteProject).toHaveBeenCalledWith({ id: '7' });
+    expect(projectV2.archiveProject).toHaveBeenCalledWith({ id: '7' });
   });
 
   it('keeps task boundary conversions at the generated client edge', async () => {

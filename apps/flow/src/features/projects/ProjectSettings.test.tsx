@@ -36,7 +36,7 @@ vi.mock('@tanstack/react-router', () => ({
 
 vi.mock('./useProjects', () => ({
   useUpdateProject: () => ({ mutate: updateProjectMutate, isPending: false }),
-  useDeleteProject: () => ({ mutate: deleteProjectMutate, isPending: false }),
+  useArchiveProject: () => ({ mutate: deleteProjectMutate, isPending: false }),
 }));
 
 vi.mock('./useProjectMembers', () => ({
@@ -296,12 +296,12 @@ describe('ProjectSettings role gating (#793)', () => {
     );
   });
 
-  it('disables Delete for a non-admin so the type-to-confirm dialog can never open', () => {
+  it('disables Archive for a non-admin so the type-to-confirm dialog can never open', () => {
     canManageProjectMock.mockReturnValue(false);
     renderProjectSettings();
     fireEvent.click(screen.getByRole('button', { name: 'Danger Zone' }));
 
-    const deleteButton = screen.getByRole('button', { name: 'Delete' });
+    const deleteButton = screen.getByRole('button', { name: 'flow.projectSettings.archiveAction' });
     expect(deleteButton).toBeDisabled();
 
     fireEvent.click(deleteButton);
@@ -309,12 +309,12 @@ describe('ProjectSettings role gating (#793)', () => {
     expect(deleteProjectMutate).not.toHaveBeenCalled();
   });
 
-  it('lets a project admin open the delete confirmation dialog', () => {
+  it('lets a project admin open the archive confirmation dialog', () => {
     canManageProjectMock.mockReturnValue(true);
     renderProjectSettings();
     fireEvent.click(screen.getByRole('button', { name: 'Danger Zone' }));
 
-    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.archiveAction' }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
@@ -430,11 +430,11 @@ describe('ProjectSettings mutation error toasts (no double-toast on failure)', (
   it('does not show a call-site toast when deleting a project fails - the hook already shows one', () => {
     renderProjectSettings();
     fireEvent.click(screen.getByRole('button', { name: 'Danger Zone' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.archiveAction' }));
     fireEvent.change(screen.getByPlaceholderText('Demo project'), {
       target: { value: 'Demo project' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Delete project' }));
+    fireEvent.click(screen.getByRole('button', { name: 'flow.projectSettings.archiveConfirm' }));
 
     const [, options] = deleteProjectMutate.mock.calls[0];
     act(() => options.onError?.(new Error('boom')));
