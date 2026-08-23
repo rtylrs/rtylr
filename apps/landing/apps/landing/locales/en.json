@@ -1292,5 +1292,23 @@
       "title": "Looking for developer docs?",
       "link": "Still need a human? Contact us →"
     }
+  },
+  "blog": {
+    "meta": {
+      "title": "Blog · POS, inventory & operations playbooks | rtylr",
+      "description": "Operator playbooks on POS, inventory, payroll, and running an all-in-one business platform: concrete tactics for restaurants, retail, and grocery.",
+      "schemaDescription": "Operator playbooks on POS, inventory, payroll, and all-in-one business software."
+    },
+    "hero": {
+      "eyebrow": "BLOG",
+      "title": "Playbooks for running the whole business."
+    },
+    "readingTime": "{{minutes}} min read",
+    "readingTimeShort": "{{minutes}} min",
+    "post": {
+      "allPosts": "All posts",
+      "ctaTitle": "See rtylr on your own numbers",
+      "ctaBody": "POS, inventory, HR, CRM, and finance on one platform. Free to start."
+    }
   }
 }

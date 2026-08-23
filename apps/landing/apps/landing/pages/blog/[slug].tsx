@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import React from 'react';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Link from 'next/link';
@@ -53,6 +54,7 @@ interface BlogPostPageProps {
 }
 
 const BlogPostPage = ({ post }: BlogPostPageProps): React.JSX.Element => {
+  const { t } = useTranslation();
   return (
     <AppLayout>
       <MainLayout>
@@ -73,23 +75,23 @@ const BlogPostPage = ({ post }: BlogPostPageProps): React.JSX.Element => {
         <article className={styles.page}>
           <div className={styles.inner}>
             <Link href="/blog" className={styles.back}>
-              <ArrowLeft size={15} /> All posts
+              <ArrowLeft size={15} /> {t('blog.post.allPosts')}
             </Link>
             <span className={styles.category}>{post.category}</span>
             <h1 className={styles.title}>{post.title}</h1>
             <div className={styles.meta}>
               <time dateTime={post.date}>{post.dateDisplay}</time>
               <span className={styles.dot}>·</span>
-              <span>{post.readingMinutes} min read</span>
+              <span>{t('blog.readingTime', { minutes: post.readingMinutes })}</span>
             </div>
             <div className={styles.body}>{post.blocks.map(renderBlock)}</div>
 
             <div className={styles.cta}>
-              <h3>See rtylr on your own numbers</h3>
-              <p>POS, inventory, HR, CRM, and finance on one platform. Free to start.</p>
+              <h3>{t('blog.post.ctaTitle')}</h3>
+              <p>{t('blog.post.ctaBody')}</p>
               <Link href="/demo" className={styles.ctaBtn}>
-                Book a demo
-              </Link>
+            {t('common.cta.bookDemo')}
+          </Link>
             </div>
           </div>
         </article>

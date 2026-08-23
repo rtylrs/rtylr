@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { Clock } from 'lucide-react';
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
@@ -11,6 +12,7 @@ import { getAllPosts } from '../../lib/blog/posts';
 import styles from './blog.module.scss';
 
 const BlogPage = (): React.JSX.Element => {
+  const { t } = useTranslation();
   const posts = getAllPosts();
   const [featured, ...rest] = posts;
 
@@ -18,12 +20,12 @@ const BlogPage = (): React.JSX.Element => {
     <AppLayout>
       <MainLayout>
         <HelmetContainer
-          title="Blog · POS, inventory & operations playbooks | rtylr"
-          description="Operator playbooks on POS, inventory, payroll, and running an all-in-one business platform: concrete tactics for restaurants, retail, and grocery."
+          title={t('blog.meta.title')}
+          description={t('blog.meta.description')}
           canonical="https://rtylr.com/blog/"
           structuredData={blogIndexSchema({
             description:
-              'Operator playbooks on POS, inventory, payroll, and all-in-one business software.',
+              t('blog.meta.schemaDescription'),
             posts: posts.map((p) => ({
               title: p.title,
               slug: p.slug,
@@ -41,11 +43,11 @@ const BlogPage = (): React.JSX.Element => {
               variants={staggerBlur}
             >
               <motion.span className={styles.heroEyebrow} variants={blurFadeIn}>
-                BLOG
-              </motion.span>
+            {t('blog.hero.eyebrow')}
+          </motion.span>
               <motion.h1 className={styles.heroTitle} variants={blurFadeIn}>
-                Playbooks for running the whole business.
-              </motion.h1>
+            {t('blog.hero.title')}
+          </motion.h1>
               <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
                 Concrete, operator-tested writing on POS, inventory, payroll, and what changes when
                 they share one platform. No fluff, just what works on a Saturday night.
@@ -64,7 +66,7 @@ const BlogPage = (): React.JSX.Element => {
                     <time dateTime={featured.date}>{featured.dateDisplay}</time>
                     <span className={styles.postDot}>·</span>
                     <span className={styles.postReadTime}>
-                      <Clock size={13} /> {featured.readingMinutes} min read
+                      <Clock size={13} /> {t('blog.readingTime', { minutes: featured.readingMinutes })}
                     </span>
                   </div>
                 </div>
@@ -93,7 +95,7 @@ const BlogPage = (): React.JSX.Element => {
                       <time dateTime={post.date}>{post.dateDisplay}</time>
                       <span className={styles.postDot}>·</span>
                       <span className={styles.postReadTime}>
-                        <Clock size={12} /> {post.readingMinutes} min
+                        <Clock size={12} /> {t('blog.readingTimeShort', { minutes: post.readingMinutes })}
                       </span>
                     </div>
                   </Link>
