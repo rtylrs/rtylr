@@ -9,6 +9,7 @@ SELECT
     p.sku,
     p.barcode,
     p.sale_price,
+    p.cost_price,
     p.tax_rate,
     p.description,
     COALESCE(img.url, '') AS image_url,
