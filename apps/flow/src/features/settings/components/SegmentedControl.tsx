@@ -80,7 +80,18 @@ function SegmentedControl<T extends string>({
             onBlur={disabled ? undefined : () => onAudition?.(null)}
             className={cn(
               'flow-focus inline-flex min-h-[44px] items-center justify-center px-3 text-center text-[13px] font-medium transition-colors',
-              disabled && 'cursor-not-allowed opacity-60'
+              // opacity-75, not 60. At 60 the label measured 2.96:1 against the
+              // card, because the opacity multiplies an already-muted token:
+              // 0.58 * 0.6 leaves an effective alpha of 0.35. WCAG exempts
+              // inactive controls, so this was not a violation, but 2.96:1 is
+              // hard to read and the reason beside the control is the whole
+              // point of gating it rather than hiding it.
+              //
+              // 75 measures 3.92:1 and stays visibly dimmer than an enabled
+              // step. 85 would reach 4.64:1 and start reading as enabled, which
+              // trades one confusion for another. cursor-not-allowed and
+              // aria-disabled carry the state regardless.
+              disabled && 'cursor-not-allowed opacity-75'
             )}
             style={{
               background: selected ? 'var(--accent-muted)' : 'var(--flow-card)',
