@@ -644,7 +644,7 @@ export const AppearanceSection = (): React.JSX.Element => {
             background: accent === null ? 'var(--accent-muted)' : 'var(--flow-card)',
             border: `1px solid ${accent === null ? 'var(--accent-border)' : 'var(--flow-border)'}`,
             borderRadius: 'var(--flow-r)',
-            color: accent === null ? 'var(--accent-fg)' : 'var(--flow-text-muted)',
+            color: accent === null ? 'var(--accent-on-muted)' : 'var(--flow-text-muted)',
           }}
         >
           <span

@@ -101,7 +101,7 @@ const AppearancePreview = ({
             style={{
               background: item.active ? 'var(--accent-muted)' : 'transparent',
               borderRadius: 'var(--flow-r)',
-              color: item.active ? 'var(--accent-fg)' : 'var(--flow-text-muted)',
+              color: item.active ? 'var(--accent-on-muted)' : 'var(--flow-text-muted)',
               gap: 'var(--pane-u)',
               padding: 'var(--pane-u) calc(var(--pane-u) * 1.5)',
             }}
@@ -145,7 +145,7 @@ const AppearancePreview = ({
               background: 'var(--accent-muted)',
               border: '1px solid var(--accent-border)',
               borderRadius: 'var(--flow-r)',
-              color: 'var(--accent-fg)',
+              color: 'var(--accent-on-muted)',
               padding: 'calc(var(--pane-u) * 0.5) var(--pane-u)',
             }}
           >

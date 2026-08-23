@@ -97,7 +97,7 @@ function SegmentedControl<T extends string>({
               background: selected ? 'var(--accent-muted)' : 'var(--flow-card)',
               border: `1px solid ${selected ? 'var(--accent-border)' : 'var(--flow-border)'}`,
               borderRadius: 'var(--flow-r)',
-              color: selected ? 'var(--accent-fg)' : 'var(--flow-text-muted)',
+              color: selected ? 'var(--accent-on-muted)' : 'var(--flow-text-muted)',
             }}
           >
             {option.label}
