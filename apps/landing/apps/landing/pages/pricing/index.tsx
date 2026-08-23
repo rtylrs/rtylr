@@ -6,6 +6,7 @@ import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
 import { pricingPageSchema } from '../../lib/structured-data';
+import DirectAnswer from '../../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../../components/FaqSection/FaqSection';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
@@ -136,19 +137,24 @@ const PricingPage = (): React.JSX.Element => {
               delay={0.1}
             />
             <motion.p className={styles.heroSubtitle} variants={blurFadeIn}>
-              POS, ERP, CRM, HR, Finance, Flow and hardware are included on every tier. What changes
-              between plans is scale: how many people, how many locations, and the controls a larger
-              team needs. Start on Free without a card. We have not published prices yet, so ask us
-              and we will quote your setup.
+              No module upsells and no per-app licence. What changes between plans is scale.
             </motion.p>
           </motion.section>
+
+          <DirectAnswer label="What do rtylr plans include?">
+            Every rtylr plan includes all seven apps: POS, ERP, CRM, HR, Finance, Flow and the
+            hardware integrations. Plans differ by scale rather than by feature, so what changes is
+            how many people and locations you run and the controls a larger team needs. Free covers
+            10 people at one location and needs no card. rtylr has not published prices for Pro and
+            Scale yet, so those are quoted.
+          </DirectAnswer>
 
           {/* Plan cards */}
           <section className={styles.plansSection}>
             <div className={styles.plansContainer}>
               {/* The plan names inside PricingCards are h3. Without an h2
                   here the page jumped h1 to h3. */}
-              <h2 className={styles.plansTitle}>The three plans</h2>
+              <h2 className={styles.plansTitle}>What is in each plan?</h2>
               <PricingCards onCta={handleCta} />
             </div>
           </section>
@@ -162,7 +168,7 @@ const PricingPage = (): React.JSX.Element => {
             variants={staggerBlur}
           >
             <motion.h2 className={styles.sectionTitle} variants={blurFadeIn}>
-              Compare all features
+              What changes between plans?
             </motion.h2>
             <motion.div className={styles.tableWrapper} variants={blurFadeIn}>
               <table className={styles.comparisonTable}>
@@ -203,7 +209,7 @@ const PricingPage = (): React.JSX.Element => {
             mechanism. FaqSection uses <details>: every answer is in the
             DOM, collapsed by CSS.
           */}
-          <FaqSection title="Frequently asked questions" faqs={FAQ_ITEMS} />
+          <FaqSection title="Questions about rtylr pricing" faqs={FAQ_ITEMS} />
 
           {/* Bottom CTA */}
           <motion.section
