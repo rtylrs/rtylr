@@ -6,7 +6,7 @@ import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
 import { blurFadeIn, staggerBlur } from '../../lib/animations';
-import { webPageSchema } from '../../lib/structured-data';
+import { blogIndexSchema } from '../../lib/structured-data';
 import { getAllPosts } from '../../lib/blog/posts';
 import styles from './blog.module.scss';
 
@@ -21,10 +21,14 @@ const BlogPage = (): JSX.Element => {
           title="Blog · POS, inventory & operations playbooks | rtylr"
           description="Operator playbooks on POS, inventory, payroll, and running an all-in-one business platform — concrete tactics for restaurants, retail, and grocery."
           canonical="https://rtylr.com/blog/"
-          structuredData={webPageSchema({
-            name: 'Blog',
-            path: '/blog/',
-            description: 'Operator playbooks on POS, inventory, payroll, and all-in-one business software.',
+          structuredData={blogIndexSchema({
+            description:
+              'Operator playbooks on POS, inventory, payroll, and all-in-one business software.',
+            posts: posts.map((p) => ({
+              title: p.title,
+              slug: p.slug,
+              datePublished: p.date,
+            })),
           })}
         />
 

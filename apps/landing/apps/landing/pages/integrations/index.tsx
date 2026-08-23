@@ -16,7 +16,7 @@ import {
 import AppLayout from '../../components/Layout/AppLayout';
 import MainLayout from '../../layouts/Main/MainLayout';
 import HelmetContainer from '../../components/HelmetContainer';
-import { webPageSchema } from '../../lib/structured-data';
+import { itemListSchema } from '../../lib/structured-data';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
@@ -220,11 +220,14 @@ const IntegrationsPage = (): JSX.Element => {
           title="Integrations · Payments, Accounting & 100+ Apps | rtylr"
           description="Every service rtylr connects to, payments, accounting, delivery, comms, hardware, and productivity."
           canonical="https://rtylr.com/integrations/"
-          structuredData={webPageSchema({
+          structuredData={itemListSchema({
             name: 'Integrations',
             path: '/integrations/',
             description:
               'Every service rtylr connects to, payments, accounting, delivery, comms, hardware, and productivity.',
+            // Generated from the array the page renders, so the list in
+            // the markup and the list on screen cannot drift apart.
+            items: INTEGRATIONS.map((i) => i.name),
           })}
         />
 
