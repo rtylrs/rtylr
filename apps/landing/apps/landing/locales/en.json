@@ -26,30 +26,32 @@
     "Feature6-description": "Build customer loyalty and drive reoeat business with integrated loyalty rewards programs tailored to your restaurant."
   },
   "PricingSection": {
-    "title": "Plans & Pricing",
-    "description": "Discover the ideal plan for you. Start with our complimentary plan, and then pick a plan.",
-    "Section1_title": "Starter",
-    "Section1_Price": "Free",
-    "Section1_Requirements": "No credit card required",
-    "Section1_star1": "Unlimited chats & websites",
-    "Section1_star2": "60-day conversations hiPstory",
-    "Section1_star3": "Basic widget customization",
+    "title": "Plans",
+    "description": "All 7 apps come with every plan. What changes is how many people and locations you run. Prices are not published yet, so start on Free and talk to us when you need more.",
+
+    "tier_free_title": "Free",
+    "tier_free_description": "Everything you need to run a single location.",
+    "tier_free_note": "No credit card required",
+    "tier_free_item1": "Up to 10 team members",
+    "tier_free_item2": "All 7 apps included",
+    "tier_free_item3": "1 location",
+
+    "tier_pro_title": "Pro",
+    "tier_pro_description": "Growing teams scaling across multiple locations.",
+    "tier_pro_note": "Most popular",
+    "tier_pro_item1": "Up to 30 team members",
+    "tier_pro_item2": "Up to 5 locations",
+    "tier_pro_item3": "AI assistant and priority support",
+
+    "tier_scale_title": "Scale",
+    "tier_scale_description": "Unlimited seats and every feature unlocked.",
+    "tier_scale_note": "For teams past 30 active seats",
+    "tier_scale_item1": "Unlimited team members and locations",
+    "tier_scale_item2": "SSO and audit logs",
+    "tier_scale_item3": "Dedicated success manager and SLA",
+
     "purchase_button": "Get Started",
-    "link": "Learn More",
-
-    "Section2_title": "Most Popular",
-    "Section2_Price": "199/month",
-    "Section2_Requirements": "No credit card required",
-    "Section2_star1": "Unlimited chats & websites",
-    "Section2_star2": "60-day conversations history",
-    "Section2_star3": "Basic widget customization",
-
-    "Section3_title": "Standard Plan",
-    "Section3_Price": "400/month",
-    "Section3_Requirements": "No credit card required",
-    "Section3_star1": "Unlimited chats & websites",
-    "Section3_star2": "60-day conversations history",
-    "Section3_star3": "Basic widget customization"
+    "link": "Learn More"
   },
 
   "Demo": {
