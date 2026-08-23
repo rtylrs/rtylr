@@ -172,8 +172,24 @@ func (s *Service) EnsureAssigneeMembership(ctx context.Context, projectID, busin
 	if err != nil {
 		return err
 	}
-	if !s.repo.IsWorkspaceMember(ctx, assigneeID, p.WorkspaceID) {
-		return fmt.Errorf("assignee is not a workspace member")
+	// The assignee has to be a colleague. This was a workspace-membership check,
+	// which a v2 project can never pass: its workspace_id is 0, so every
+	// assignment to someone other than yourself failed with "assignee is not a
+	// workspace member" and CreateTask propagated that as fatal. Since all
+	// project creation moved to v2, that was every new project.
+	//
+	// The hub profile resolver is the business-membership primitive: it looks the
+	// subject up inside the given business and reports ErrUserNotFound otherwise.
+	//
+	// Skipped rather than failed when the resolver is not wired, which happens in
+	// tests and some dev setups. GetProjectV2ByID above already scoped the project
+	// to the caller's business, so the worst case without this check is a member
+	// row for a user id outside the business, which does not make another
+	// tenant's data reachable.
+	if s.hubProfiles != nil {
+		if _, profileErr := s.hubProfiles.GetProfile(ctx, assigneeID, businessID); profileErr != nil {
+			return fmt.Errorf("assignee is not a member of this business")
+		}
 	}
 	if s.hubProfileBypasses(ctx, assigneeID, businessID) {
 		return nil
