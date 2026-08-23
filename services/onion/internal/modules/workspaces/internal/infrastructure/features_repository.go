@@ -290,7 +290,8 @@ func (r *Repository) UpdateMilestone(ctx context.Context, input domain.UpdateMil
 // Views
 // ─────────────────────────────────────────────
 
-func (r *Repository) ListViews(ctx context.Context, businessID, workspaceID, limit, offset int64) ([]domain.View, int64, error) {
+// ListViews returns the shared views plus the caller's own private ones.
+func (r *Repository) ListViews(ctx context.Context, businessID, workspaceID, callerID, limit, offset int64) ([]domain.View, int64, error) {
 	total, err := r.queries.CountViewsByWorkspace(ctx, sqlc.CountViewsByWorkspaceParams{
 		BusinessID:  businessID,
 		WorkspaceID: workspaceID,
@@ -303,8 +304,12 @@ func (r *Repository) ListViews(ctx context.Context, businessID, workspaceID, lim
 	rows, err := r.queries.ListViews(ctx, sqlc.ListViewsParams{
 		BusinessID:  businessID,
 		WorkspaceID: workspaceID,
-		Limit:       int32(limit),
-		Offset:      int32(offset),
+		// Drives the private-view filter. Valid: true unconditionally, because a
+		// NULL here would compare against created_by as NULL and hide every
+		// private view from its own creator too.
+		CreatedBy: sql.NullInt64{Int64: callerID, Valid: true},
+		Limit:     int32(limit),
+		Offset:    int32(offset),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListViews failed", logger.Error(err))
@@ -325,6 +330,7 @@ func (r *Repository) ListViews(ctx context.Context, businessID, workspaceID, lim
 			GroupBy:     row.GroupBy.String,
 			SortBy:      row.SortBy.String,
 			SortDir:     sortDir,
+			Visibility:  string(row.Visibility),
 			CreatedBy:   row.CreatedBy.Int64,
 			CreatedAt:   row.CreatedAt.Time,
 		}
@@ -339,6 +345,16 @@ func (r *Repository) ListViews(ctx context.Context, businessID, workspaceID, lim
 		views = append(views, v)
 	}
 	return views, total, nil
+}
+
+// visibilityOrShared normalises an unset visibility to "shared". Sending "" to
+// an ENUM column is rejected, and defaulting to private would hide views that
+// used to be visible to everyone.
+func visibilityOrShared(v string) string {
+	if v == "" {
+		return "shared"
+	}
+	return v
 }
 
 func (r *Repository) CreateView(ctx context.Context, input domain.ViewInput) (int64, error) {
@@ -356,7 +372,10 @@ func (r *Repository) CreateView(ctx context.Context, input domain.ViewInput) (in
 		GroupBy:     sql.NullString{String: input.GroupBy, Valid: input.GroupBy != ""},
 		SortBy:      sql.NullString{String: input.SortBy, Valid: input.SortBy != ""},
 		SortDir:     sqlc.NullFlowViewsSortDir{FlowViewsSortDir: sqlc.FlowViewsSortDir(input.SortDir), Valid: input.SortDir != ""},
-		CreatedBy:   sql.NullInt64{Int64: input.CreatedBy, Valid: true},
+		// Empty means shared, matching the column default and how every view
+		// behaved before the field existed.
+		Visibility: sqlc.FlowViewsVisibility(visibilityOrShared(input.Visibility)),
+		CreatedBy:  sql.NullInt64{Int64: input.CreatedBy, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("CreateView failed", logger.Error(err))

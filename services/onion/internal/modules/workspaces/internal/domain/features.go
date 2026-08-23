@@ -100,6 +100,7 @@ type View struct {
 	GroupBy     string
 	SortBy      string
 	SortDir     string
+	Visibility  string
 	CreatedBy   int64
 	CreatedAt   time.Time
 }
@@ -113,6 +114,7 @@ type ViewInput struct {
 	GroupBy     string
 	SortBy      string
 	SortDir     string
+	Visibility  string
 	CreatedBy   int64
 }
 
@@ -126,6 +128,7 @@ type UpdateViewInput struct {
 	GroupBy    string
 	SortBy     string
 	SortDir    string
+	Visibility string
 }
 
 // ─────────────────────────────────────────────

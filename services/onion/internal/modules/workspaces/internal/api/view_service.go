@@ -45,13 +45,14 @@ func filtersFromStruct(s string) map[string]interface{} {
 
 func toView(v domain.View) *flowviewv1.View {
 	return &flowviewv1.View{
-		Id:      v.ID,
-		Name:    v.Name,
-		Icon:    v.Icon,
-		Filters: filtersToStruct(v.Filters),
-		GroupBy: v.GroupBy,
-		SortBy:  v.SortBy,
-		SortDir: v.SortDir,
+		Id:         v.ID,
+		Name:       v.Name,
+		Icon:       v.Icon,
+		Filters:    filtersToStruct(v.Filters),
+		GroupBy:    v.GroupBy,
+		SortBy:     v.SortBy,
+		SortDir:    v.SortDir,
+		Visibility: v.Visibility,
 	}
 }
 
@@ -71,7 +72,7 @@ func (a *ViewAPI) ListViews(ctx context.Context, req *flowviewv1.ListViewsReques
 	}
 
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
-	views, total, err := a.Service.ListViews(ctx, businessID, wsID, int64(limit), offset)
+	views, total, err := a.Service.ListViews(ctx, businessID, wsID, authUser.UserID, int64(limit), offset)
 	if err != nil {
 		return nil, workspaceInternalError(ctx, "ListViews failed", err)
 	}
@@ -112,6 +113,7 @@ func (a *ViewAPI) CreateView(ctx context.Context, req *flowviewv1.CreateViewRequ
 		GroupBy:     req.GetGroupBy(),
 		SortBy:      req.GetSortBy(),
 		SortDir:     req.GetSortDir(),
+		Visibility:  req.GetVisibility(),
 		CreatedBy:   authUser.UserID,
 	})
 	if err != nil {
@@ -141,6 +143,7 @@ func (a *ViewAPI) UpdateView(ctx context.Context, req *flowviewv1.UpdateViewRequ
 		GroupBy:    req.GetGroupBy(),
 		SortBy:     req.GetSortBy(),
 		SortDir:    req.GetSortDir(),
+		Visibility: req.GetVisibility(),
 	}); err != nil {
 		if errors.Is(err, domain.ErrUnauthorized) {
 			return nil, onekiterrors.PermissionDenied()

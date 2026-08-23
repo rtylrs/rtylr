@@ -1160,8 +1160,11 @@ func (s *Service) UpdateMilestone(ctx context.Context, input domain.UpdateMilest
 // Views
 // ─────────────────────────────────────────────
 
-func (s *Service) ListViews(ctx context.Context, businessID, workspaceID, limit, offset int64) ([]domain.View, int64, error) {
-	return s.repo.ListViews(ctx, businessID, workspaceID, limit, offset)
+// ListViews returns the business's shared views plus the caller's own private
+// ones. callerID is required rather than optional: passing 0 would hide every
+// private view from its own creator.
+func (s *Service) ListViews(ctx context.Context, businessID, workspaceID, callerID, limit, offset int64) ([]domain.View, int64, error) {
+	return s.repo.ListViews(ctx, businessID, workspaceID, callerID, limit, offset)
 }
 
 func (s *Service) CreateView(ctx context.Context, input domain.ViewInput) (domain.View, error) {
