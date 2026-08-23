@@ -75,6 +75,10 @@ vi.mock('../../shared/lib/useTaskRealtime', () => ({
 const useCurrentProjectSpy = vi.hoisted(() =>
   vi.fn(() => ({ project: undefined, isLoading: false }))
 );
+vi.mock('../../shared/hooks/queries/useApprovedLeaveInRange', () => ({
+  useApprovedLeaveInRange: vi.fn(() => ({ data: null })),
+}));
+
 vi.mock('../projects/useCurrentProject', () => ({
   useCurrentProject: useCurrentProjectSpy,
 }));

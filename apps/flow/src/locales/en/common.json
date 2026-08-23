@@ -133,5 +133,12 @@
     "deselectTask": "Deselect task"
   },
   "saving": "Saving…",
-  "saveChanges": "Save changes"
+  "saveChanges": "Save changes",
+  "toasts": {
+    "view": {
+      "madePrivate": "View is now private",
+      "madeShared": "View is now shared",
+      "visibilityFailed": "Could not change visibility"
+    }
+  }
 }

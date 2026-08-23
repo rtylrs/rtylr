@@ -114,7 +114,8 @@
     "noPriority": "Aucune priorité",
     "subtaskAddPlaceholder": "Ajouter une sous-tâche…",
     "subtaskCount": "{{done}} sur {{total}}",
-    "removeAttachmentLabel": "Supprimer la pièce jointe"
+    "removeAttachmentLabel": "Supprimer la pièce jointe",
+    "leaveOverlap": "{count} période(s) de congé approuvé chevauchent l'échéance"
   },
   "time": {
     "heading": "Temps",
@@ -152,8 +153,8 @@
     "teamNotStarted": "Pas commencé",
     "teamAccessDenied": "Vous n'avez pas accès au temps de l'équipe. Cela nécessite le rôle admin sur l'espace de travail.",
     "teamEmptyTitle": "Personne à afficher pour l'instant",
-    "teamEmptyDescription": "Ajoutez des coéquipiers à cet espace de travail pour voir leur temps ici.",
-    "teamEmptyCta": "Gérer les membres de l'espace de travail",
+    "teamEmptyDescription": "Donnez à vos coéquipiers l'accès à Flow pour voir leur temps ici.",
+    "teamEmptyCta": "Gérer l'accès à Flow",
     "clocked": "Pointé",
     "logged": "Saisi",
     "unaccounted": "Non affecté",
@@ -172,8 +173,8 @@
     "reportsPerson": "Personne",
     "reportsScopeNote": "Totaux par personne sur la période. Le regroupement par projet ou type de travail nécessite un point d'accès qui n'existe pas encore.",
     "reportsEmptyTitle": "Rien à signaler pour l'instant",
-    "reportsEmptyDescription": "Personne dans cet espace de travail n'a de temps à afficher pour cette période.",
-    "reportsEmptyCta": "Gérer les membres de l'espace de travail",
+    "reportsEmptyDescription": "Personne n'a encore accès à Flow, il n'y a donc rien à afficher pour cette période.",
+    "reportsEmptyCta": "Gérer l'accès à Flow",
     "project": "Projet",
     "selectProject": "Sélectionner un projet",
     "workType": "Type de travail",
@@ -589,7 +590,11 @@
     "confirmRenameLabel": "Confirmer le renommage",
     "cancelRenameLabel": "Annuler le renommage",
     "renameLabel": "Renommer",
-    "deleteLabel": "Supprimer"
+    "deleteLabel": "Supprimer",
+    "makePrivateTooltip": "Rendre cette vue privée",
+    "makeSharedTooltip": "Partager cette vue avec l'entreprise",
+    "makePrivateLabel": "Rendre la vue privée",
+    "makeSharedLabel": "Partager la vue"
   },
   "calendar": {
     "heading": "Calendrier",
@@ -769,7 +774,9 @@
     "tryClearing": "Essayez de vider votre recherche ou vos filtres.",
     "emptyTitle": "Aucun projet pour le moment",
     "emptyDescription": "Créez votre premier projet pour commencer.",
-    "createFirst": "Créer un projet"
+    "createFirst": "Créer un projet",
+    "yourProjects": "Vos projets",
+    "yourReports": "Vos équipes"
   },
   "bin": {
     "title": "Corbeille",
@@ -789,5 +796,12 @@
     "public": "Public",
     "archived": "Archivé",
     "publicHint": "Le mode public expose le nom, la couleur, le statut et les dates du projet sur les profils des membres, pour les collègues de l'entreprise. Il ne donne jamais accès à ses tâches."
+  },
+  "projectStatus": {
+    "active": "Actif",
+    "completed": "Terminé"
+  },
+  "sidebar": {
+    "yourReports": "Vos équipes"
   }
 }

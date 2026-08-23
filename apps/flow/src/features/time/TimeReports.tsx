@@ -6,6 +6,7 @@ import { DatePicker, EmptyState } from '@voxire/ui';
 import { useNavigate } from '@tanstack/react-router';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTimeSettingsStore } from '../../shared/stores/timeSettingsStore';
+import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import GateNotice from '../../shared/components/GateNotice';
 import { formatDurationClock } from '../../shared/lib/durationUtils';
 import { startOfWeek, endOfWeek } from '../../shared/lib/dateUtils';
@@ -40,8 +41,12 @@ const TimeReports = (): React.JSX.Element => {
     setTo(endOfWeek(today, weekStart));
   }, [today, weekStart]);
 
-  const members: { id: string; userId: string; name: string; role?: string }[] = []; // TODO: switch to useFlowTeam
-  const membersLoading = false;
+  // Same stale TODO as TeamView: the roster was a hardcoded empty array, so this
+  // screen could only ever render its empty state and the table below was
+  // unreachable. useFlowTeam had already shipped. A member's `id` is their user
+  // id, which is what the work-day totals are keyed on.
+  const { data: allMembers = [], isLoading: membersLoading } = useFlowTeam();
+  const members = useMemo(() => allMembers.filter((m) => m.apps?.includes('flow')), [allMembers]);
   const { data, isLoading, isError } = useWorkDaysForWorkspace(activeWorkspaceId, from, to);
 
   const totalsByUserId = useMemo(() => {
@@ -124,7 +129,9 @@ const TimeReports = (): React.JSX.Element => {
             description={t('flow.time.reportsEmptyDescription')}
             action={{
               label: t('flow.time.reportsEmptyCta'),
-              onClick: () => {},
+              onClick: (): void => {
+                void navigate({ to: '/settings', search: { section: 'team' } });
+              },
             }}
           />
         ) : (
@@ -152,7 +159,7 @@ const TimeReports = (): React.JSX.Element => {
               </thead>
               <tbody>
                 {(members ?? []).map((member) => {
-                  const totals = totalsByUserId.get(member.userId) ?? {
+                  const totals = totalsByUserId.get(member.id) ?? {
                     clockedMinutes: 0,
                     loggedMinutes: 0,
                     gapMinutes: 0,

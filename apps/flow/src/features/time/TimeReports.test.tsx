@@ -1,10 +1,17 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { ApiWorkspaceMember } from '../../shared/services/flowApi';
+import userEvent from '@testing-library/user-event';
+import type { FlowTeamMember } from '../../shared/hooks/queries/useFlowTeam';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en-US' } }),
+}));
+
+const navigateSpy = vi.hoisted(() => vi.fn());
+
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => navigateSpy,
 }));
 
 vi.mock('../../shared/stores/flowStore', () => ({
@@ -22,11 +29,11 @@ vi.mock('../../shared/stores/timeSettingsStore', () => ({
 }));
 
 const membersState = vi.hoisted(() => ({
-  value: { data: [] as ApiWorkspaceMember[], isLoading: false },
+  value: { data: [] as FlowTeamMember[], isLoading: false },
 }));
 
-vi.mock('../workspace-manager/useWorkspaceManager', () => ({
-  useWorkspaceMembers: () => membersState.value,
+vi.mock('../../shared/hooks/queries/useFlowTeam', () => ({
+  useFlowTeam: () => membersState.value,
 }));
 
 const workDaysState = vi.hoisted(() => ({
@@ -44,15 +51,15 @@ vi.mock('./useWorkDay', () => ({
 
 import TimeReports from './TimeReports';
 
-function member(over: Partial<ApiWorkspaceMember> = {}): ApiWorkspaceMember {
+// A FlowTeamMember's `id` is the user id, which is what the totals are keyed on.
+function member(over: Partial<FlowTeamMember> = {}): FlowTeamMember {
   return {
-    id: '1',
-    workspaceId: 'ws-1',
-    userId: '7',
+    id: '7',
     name: 'Maya Krishnan',
     email: 'maya@example.test',
     role: 'member',
-    joinedAt: '2026-01-01T00:00:00Z',
+    apps: ['flow'],
+    isActive: true,
     ...over,
   };
 }
@@ -61,7 +68,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   timeSettingsState.value = { weekStart: 'monday', trackAttendance: true };
   membersState.value = {
-    data: [member(), member({ id: '2', userId: '9', name: 'Sam Okafor' })],
+    data: [member(), member({ id: '9', name: 'Sam Okafor' })],
     isLoading: false,
   };
   workDaysState.value = {
@@ -78,20 +85,10 @@ beforeEach(() => {
 });
 
 describe('TimeReports', () => {
-  // SKIPPED, not deleted, and the distinction matters.
-  //
-  // These assert that the member list renders. It cannot: #925 replaced the
-  // member source with `const members = []; // TODO: switch to useFlowTeam`
-  // (TeamView.tsx:28, TimeReports.tsx:43), so both screens render their empty
-  // state for every user. That is a shipped regression, not a stale test.
-  //
-  // Deleting them would erase the only record that these screens stopped
-  // working. Asserting the empty state instead would bake the regression in as
-  // intended behaviour. Skipping keeps the suite green, which unblocks pushing
-  // for everyone, while leaving the failure visible and attributable.
-  //
-  // Un-skip when useFlowTeam lands. The assertions themselves are still right.
-  it.skip('sums clocked, logged and gap minutes per person across the range', () => {
+  // These were skipped while the member source was a hardcoded `[]`, with a note
+  // to un-skip once useFlowTeam landed. It has, so they run again. The
+  // assertions are unchanged from when they were written.
+  it('sums clocked, logged and gap minutes per person across the range', () => {
     render(<TimeReports />);
 
     const mayaRow = screen.getByText('Maya Krishnan').closest('tr');
@@ -104,9 +101,9 @@ describe('TimeReports', () => {
     expect(samRow?.textContent).toContain('1:20'); // 80 gap
   });
 
-  it.skip('shows a member with no days in the range as all zero rather than omitting them', () => {
+  it('shows a member with no days in the range as all zero rather than omitting them', () => {
     membersState.value = {
-      data: [member(), member({ id: '3', userId: '11', name: 'No Entries Yet' })],
+      data: [member(), member({ id: '11', name: 'No Entries Yet' })],
       isLoading: false,
     };
     render(<TimeReports />);
@@ -120,23 +117,44 @@ describe('TimeReports', () => {
     expect(screen.getByText('flow.time.teamAccessDenied')).toBeInTheDocument();
   });
 
-  it('shows a real empty state instead of a headers-only table when the workspace has no members', () => {
+  it('shows a real empty state instead of a headers-only table when nobody has Flow access', () => {
     membersState.value = { data: [], isLoading: false };
     render(<TimeReports />);
     expect(screen.getByText('flow.time.reportsEmptyTitle')).toBeInTheDocument();
     expect(screen.getByText('flow.time.reportsEmptyDescription')).toBeInTheDocument();
   });
+
+  // useFlowTeam returns the whole business team, not just Flow's users, so the
+  // filter is what keeps someone who has no Flow access out of a Flow report.
+  it('leaves out a business member who does not have Flow access', () => {
+    membersState.value = {
+      data: [member(), member({ id: '9', name: 'Dana Reeves', apps: ['crm'] })],
+      isLoading: false,
+    };
+    render(<TimeReports />);
+    expect(screen.getByText('Maya Krishnan')).toBeInTheDocument();
+    expect(screen.queryByText('Dana Reeves')).not.toBeInTheDocument();
+  });
+
+  // The empty state's CTA used to be `onClick: () => {}`. A button that does
+  // nothing is worse than no button, so this pins it to a real destination.
+  it('sends the empty-state CTA to the settings screen that grants Flow access', async () => {
+    membersState.value = { data: [], isLoading: false };
+    render(<TimeReports />);
+    await userEvent.click(screen.getByRole('button', { name: 'flow.time.reportsEmptyCta' }));
+    expect(navigateSpy).toHaveBeenCalledWith({ to: '/settings', search: { section: 'team' } });
+  });
 });
 
 describe('TimeReports: trackAttendance gating', () => {
-  it.skip('shows Clocked and Unaccounted columns by default', () => {
+  it('shows Clocked and Unaccounted columns by default', () => {
     render(<TimeReports />);
     expect(screen.getByText('flow.time.clocked')).toBeInTheDocument();
     expect(screen.getByText('flow.time.unaccounted')).toBeInTheDocument();
     expect(screen.getByText('flow.time.logged')).toBeInTheDocument();
   });
 
-  it.skip('hides Clocked and Unaccounted, keeping only Logged, when attendance tracking is off', () => {
+  it('hides Clocked and Unaccounted, keeping only Logged, when attendance tracking is off', () => {
     timeSettingsState.value = { ...timeSettingsState.value, trackAttendance: false };
     render(<TimeReports />);
     expect(screen.queryByText('flow.time.clocked')).not.toBeInTheDocument();

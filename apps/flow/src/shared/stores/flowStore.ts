@@ -72,6 +72,13 @@ export interface Project {
   lead: string;
   archived?: boolean;
   icon?: string;
+  /**
+   * True when the caller sees this project only because they manage someone
+   * involved in it (the dept-manager proxy). A per-caller projection from the
+   * server, not a property of the project: the same project is false for its own
+   * members and true for their manager.
+   */
+  visibleViaReport?: boolean;
 }
 
 export interface Comment {
@@ -193,6 +200,13 @@ export interface SavedView {
   id: string;
   name: string;
   icon: string;
+  /**
+   * 'shared' means every colleague in the business can use this view; 'private'
+   * means only its creator. Optional because the server omits it on older
+   * responses, and an absent value means shared - which is how every view
+   * behaved before the field existed.
+   */
+  visibility?: 'shared' | 'private';
   filters: {
     status?: Task['status'][];
     priority?: Task['priority'][];

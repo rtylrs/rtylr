@@ -14,7 +14,6 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 const Timeline: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { activeWorkspaceId } = useFlowStore();
   const storeProjects = useFlowStore((s) => s.projects);
   const storeMilestones = useFlowStore((s) => s.milestones);
   const { data: apiProjects } = useProjects();

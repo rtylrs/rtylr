@@ -48,9 +48,9 @@ const ROLE_META: Record<string, { icon: React.ReactNode; color: string }> = {
 
 const ProjectSettings: React.FC = () => {
   const { t } = useTranslation();
-  const { projectId, workspaceId } = useParams({ strict: false });
+  const { projectId } = useParams({ strict: false });
   const navigate = useNavigate();
-  const { projects, workspaces } = useFlowStore();
+  const { projects } = useFlowStore();
   const project = projects.find((p) => p.id === projectId);
 
   const [name, setName] = useState(project?.name || '');

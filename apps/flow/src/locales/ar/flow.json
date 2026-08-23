@@ -114,7 +114,8 @@
     "noPriority": "بلا أولوية",
     "subtaskAddPlaceholder": "أضف مهمة فرعية…",
     "subtaskCount": "{{done}} من {{total}}",
-    "removeAttachmentLabel": "إزالة المرفق"
+    "removeAttachmentLabel": "إزالة المرفق",
+    "leaveOverlap": "تتداخل {count} فترات إجازة معتمدة مع تاريخ استحقاق هذه المهمة"
   },
   "time": {
     "heading": "الوقت",
@@ -156,8 +157,8 @@
     "teamNotStarted": "لم يبدأ",
     "teamAccessDenied": "لا تملك صلاحية الاطلاع على وقت الفريق. هذا يتطلب صلاحية المدير على مساحة العمل.",
     "teamEmptyTitle": "لا يوجد أحد لعرضه بعد",
-    "teamEmptyDescription": "أضف أعضاء إلى مساحة العمل هذه لرؤية وقتهم هنا.",
-    "teamEmptyCta": "إدارة أعضاء مساحة العمل",
+    "teamEmptyDescription": "امنح أعضاء فريقك حق الوصول إلى Flow لرؤية وقتهم هنا.",
+    "teamEmptyCta": "إدارة الوصول إلى Flow",
     "clocked": "المسجّل بالساعات",
     "logged": "الموزّع على المهام",
     "unaccounted": "غير موزّع",
@@ -176,8 +177,8 @@
     "reportsPerson": "الشخص",
     "reportsScopeNote": "الإجماليات لكل شخص خلال الفترة المحددة. التجميع حسب المشروع أو نوع العمل يتطلب نقطة وصول غير متوفرة بعد.",
     "reportsEmptyTitle": "لا يوجد شيء لعرضه بعد",
-    "reportsEmptyDescription": "لا يملك أحد في مساحة العمل هذه وقتًا لعرضه خلال هذه الفترة.",
-    "reportsEmptyCta": "إدارة أعضاء مساحة العمل",
+    "reportsEmptyDescription": "لا يملك أحد حق الوصول إلى Flow بعد، لذلك لا يوجد شيء لعرضه خلال هذه الفترة.",
+    "reportsEmptyCta": "إدارة الوصول إلى Flow",
     "project": "المشروع",
     "selectProject": "اختر مشروعاً",
     "workType": "نوع العمل",
@@ -604,7 +605,11 @@
     "confirmRenameLabel": "تأكيد إعادة التسمية",
     "cancelRenameLabel": "إلغاء إعادة التسمية",
     "renameLabel": "إعادة تسمية",
-    "deleteLabel": "حذف"
+    "deleteLabel": "حذف",
+    "makePrivateTooltip": "اجعل هذا العرض خاصًا",
+    "makeSharedTooltip": "شارك هذا العرض مع الشركة",
+    "makePrivateLabel": "اجعل العرض خاصًا",
+    "makeSharedLabel": "شارك العرض"
   },
   "calendar": {
     "heading": "التقويم",
@@ -800,7 +805,9 @@
     "tryClearing": "حاول مسح البحث أو عوامل التصفية.",
     "emptyTitle": "لا توجد مشاريع بعد",
     "emptyDescription": "أنشئ مشروعك الأول للبدء.",
-    "createFirst": "إنشاء مشروع"
+    "createFirst": "إنشاء مشروع",
+    "yourProjects": "مشاريعك",
+    "yourReports": "مشاريع فريقك"
   },
   "bin": {
     "title": "سلة المحذوفات",
@@ -820,5 +827,12 @@
     "public": "عام",
     "archived": "مؤرشف",
     "publicHint": "يعرض الوضع العام اسم المشروع ولونه وحالته وتواريخه في الملفات الشخصية للأعضاء لزملاء العمل. ولا يمنح ذلك أي وصول إلى مهامه."
+  },
+  "projectStatus": {
+    "active": "نشط",
+    "completed": "مكتمل"
+  },
+  "sidebar": {
+    "yourReports": "مشاريع فريقك"
   }
 }

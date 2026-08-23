@@ -1,8 +1,6 @@
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from '@tanstack/react-router';
-import { Lock, Globe, ChevronLeft } from 'lucide-react';
+import { Globe, ChevronLeft } from 'lucide-react';
 import { profileClient } from '../../shared/lib/clients';
 
 interface ProfileProject {
@@ -18,7 +16,6 @@ interface ProfileProject {
 
 export const Profile: React.FC<{ userId: string }> = ({ userId }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['profile', userId],

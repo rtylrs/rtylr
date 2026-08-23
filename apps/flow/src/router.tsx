@@ -10,7 +10,6 @@ import { AppFlagGuard, FLAG_KEYS } from '@voxire/config';
 import { ErrorBoundary } from '@voxire/ui';
 import { AppGuard } from '@voxire/auth';
 import FlowLayout from './layouts/FlowLayout';
-import { PERSONAL_WORKSPACE_ID } from './shared/lib/personalWorkspace';
 import { userClient } from './shared/lib/clients';
 import PreviewRouteUnavailable from './shared/components/PreviewRouteUnavailable';
 import { settingsSearchSchema } from './shared/schemas/settings';
@@ -29,7 +28,6 @@ const ProjectDashboard = React.lazy(() => import('./features/projects/ProjectDas
 const Inbox = React.lazy(() => import('./features/inbox/Inbox'));
 const FlowSettings = React.lazy(() => import('./features/settings/FlowSettings'));
 const MyDay = React.lazy(() => import('./features/time/MyDay'));
-const ProfileScreen = React.lazy(() => import('./features/profile/ProfileScreen'));
 const LeaveScreen = React.lazy(() => import('./features/leave/LeaveScreen'));
 const DirectoryScreen = React.lazy(() => import('./features/directory/DirectoryScreen'));
 const PresenceScreen = React.lazy(() => import('./features/presence/PresenceScreen'));

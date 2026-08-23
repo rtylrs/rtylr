@@ -63,6 +63,12 @@ const OrderStatus = (): React.JSX.Element => {
     new URLSearchParams(searchStr).get('businessId') ??
     '';
 
+  // Handed out once by createPublicOrder and carried here in the URL. The
+  // status endpoint requires it, so a link that predates it (an old bookmark,
+  // a shared URL) can no longer poll. That is the point of the change: the
+  // sequential order id on its own used to be enough to read any order.
+  const publicToken = new URLSearchParams(searchStr).get('public_token') ?? '';
+
   const [status, setStatus] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState(false);
   const [notFound, setNotFound] = useState(false);
@@ -71,8 +77,19 @@ const OrderStatus = (): React.JSX.Element => {
 
   const fetchStatus = useCallback(async (): Promise<void> => {
     if (!id || !businessId) return;
+    // Without the token the request would be rejected as malformed rather than
+    // as not-found, so surface the same dead-end state instead of polling a
+    // call that cannot succeed.
+    if (!publicToken) {
+      setNotFound(true);
+      return;
+    }
     try {
-      const res = await orderClient.getPublicOrderStatus({ orderId: id, businessId });
+      const res = await orderClient.getPublicOrderStatus({
+        orderId: id,
+        businessId,
+        publicToken,
+      });
       const nextStatus = res.status ?? '';
       setStatus(nextStatus);
       setFetchError(false);
@@ -100,7 +117,7 @@ const OrderStatus = (): React.JSX.Element => {
         setFetchError(true);
       }
     }
-  }, [id, businessId]);
+  }, [id, businessId, publicToken]);
 
   useEffect(() => {
     void fetchStatus();

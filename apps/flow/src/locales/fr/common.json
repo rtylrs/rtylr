@@ -133,5 +133,12 @@
     "deselectTask": "Désélectionner la tâche"
   },
   "saving": "Enregistrement…",
-  "saveChanges": "Enregistrer les modifications"
+  "saveChanges": "Enregistrer les modifications",
+  "toasts": {
+    "view": {
+      "madePrivate": "La vue est maintenant privée",
+      "madeShared": "La vue est maintenant partagée",
+      "visibilityFailed": "Impossible de changer la visibilité"
+    }
+  }
 }

@@ -114,7 +114,8 @@
     "noPriority": "No priority",
     "subtaskAddPlaceholder": "Add subtask…",
     "subtaskCount": "{{done}} of {{total}}",
-    "removeAttachmentLabel": "Remove attachment"
+    "removeAttachmentLabel": "Remove attachment",
+    "leaveOverlap": "{count} approved leave window(s) overlap this task's due date"
   },
   "time": {
     "heading": "Time",
@@ -152,8 +153,8 @@
     "teamNotStarted": "Not started",
     "teamAccessDenied": "You don't have access to see the team's time. This needs admin on the workspace.",
     "teamEmptyTitle": "No one to show yet",
-    "teamEmptyDescription": "Add teammates to this workspace to see their time here.",
-    "teamEmptyCta": "Manage workspace members",
+    "teamEmptyDescription": "Give your teammates access to Flow to see their time here.",
+    "teamEmptyCta": "Manage Flow access",
     "clocked": "Clocked",
     "logged": "Logged",
     "unaccounted": "Unaccounted",
@@ -172,8 +173,8 @@
     "reportsPerson": "Person",
     "reportsScopeNote": "Totals per person for the range. Grouping by project or type of work needs an endpoint that doesn't exist yet.",
     "reportsEmptyTitle": "Nothing to report yet",
-    "reportsEmptyDescription": "No one on this workspace has time to show for this range.",
-    "reportsEmptyCta": "Manage workspace members",
+    "reportsEmptyDescription": "No one has Flow access yet, so there is nothing to report for this range.",
+    "reportsEmptyCta": "Manage Flow access",
     "project": "Project",
     "selectProject": "Select a project",
     "workType": "Type of work",
@@ -589,7 +590,11 @@
     "confirmRenameLabel": "Confirm rename",
     "cancelRenameLabel": "Cancel rename",
     "renameLabel": "Rename",
-    "deleteLabel": "Delete"
+    "deleteLabel": "Delete",
+    "makePrivateTooltip": "Make this view private",
+    "makeSharedTooltip": "Share this view with the business",
+    "makePrivateLabel": "Make view private",
+    "makeSharedLabel": "Share view"
   },
   "calendar": {
     "heading": "Calendar",
@@ -769,7 +774,9 @@
     "tryClearing": "Try clearing your search or filters.",
     "emptyTitle": "No projects yet",
     "emptyDescription": "Create your first project to get started.",
-    "createFirst": "Create project"
+    "createFirst": "Create project",
+    "yourProjects": "Your projects",
+    "yourReports": "Your reports"
   },
   "bin": {
     "title": "Recycle bin",
@@ -789,5 +796,12 @@
     "public": "Public",
     "archived": "Archived",
     "publicHint": "Public exposes this project's name, colour, status and dates on member profiles to business colleagues. It never grants access to its tasks."
+  },
+  "projectStatus": {
+    "active": "Active",
+    "completed": "Completed"
+  },
+  "sidebar": {
+    "yourReports": "Your reports"
   }
 }
