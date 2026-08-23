@@ -4,6 +4,7 @@ import MainLayout from '../layouts/Main/MainLayout';
 import HelmetContainer from '../components/HelmetContainer';
 import DirectAnswer from '../components/DirectAnswer/DirectAnswer';
 import FaqSection from '../components/FaqSection/FaqSection';
+import ProductTruthSection from '../components/home/ProductTruthSection/ProductTruthSection';
 import { GLOBAL_FAQS } from '../lib/faqs';
 import { webSiteSchema, organizationSchema, productSchema } from '../lib/structured-data';
 import HeroSection from '../components/home/HeroSection/HeroSection';
@@ -65,6 +66,9 @@ const WebsiteContent = (): JSX.Element => (
         <HowItWorksSection />
         <PricingSection />
         <TestimonialsSection />
+        {/* Verifiable claims, sitting directly after the quotes. See the
+            component for what was cut from it and why. */}
+        <ProductTruthSection />
         <IntegrationsSection />
         <FaqSection
           title="Questions about rtylr"
