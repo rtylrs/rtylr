@@ -438,7 +438,13 @@ export const AppearanceSection = (): React.JSX.Element => {
         <p className="text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.appearance.subtitle')}
         </p>
-        <p className="mt-1 text-[11px]" style={{ color: 'var(--flow-text-dim)' }}>
+        {/* --flow-text-muted, not --flow-text-dim. axe measured dim at 2.23:1
+            here, against the 4.5 AA floor for body text, and it fails in both
+            modes (2.25 dark, 2.35 light) because it is a 0.28 alpha decorative
+            token. This line is the disclosure that makes the settings-seam rule
+            satisfiable, so it is the one string on the screen that must not be
+            hard to read. Muted measures 6.15 dark and 5.69 light. */}
+        <p className="mt-1 text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
           {t('flow.settings.appearance.perDevice')}
         </p>
       </div>
