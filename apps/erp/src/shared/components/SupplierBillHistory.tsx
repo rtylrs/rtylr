@@ -8,7 +8,7 @@ interface SupplierBillHistoryProps {
   supplier: { id?: string };
 }
 
-/** FIN->ERP-01 (#844): bill history panel for one supplier. Hidden when
+/** FIN->ERP-01 (issue 844): bill history panel for one supplier. Hidden when
  *  Finance is absent or unreachable; never shows a zero-bill claim. */
 const SupplierBillHistory: React.FC<SupplierBillHistoryProps> = ({ supplier }) => {
   const { t } = useTranslation();
