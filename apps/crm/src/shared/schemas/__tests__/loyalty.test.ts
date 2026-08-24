@@ -200,3 +200,91 @@ describe('getTransactionIcon', () => {
     expect(getTransactionIcon('upgrade')).toBe('arrow-up');
   });
 });
+
+// rtylr#942: int64 travels as a string on the wire (docs/cross-app/07-plumbing.md).
+// Every fixture above uses already-numeric values, which is exactly why this
+// bug shipped: none of them exercise the real wire shape.
+describe('loyalty schemas accept int64-as-string wire values (rtylr#942)', () => {
+  it('config: parses bronze/silver/gold/platinum minimums and points expiry as wire strings', () => {
+    const config = {
+      isEnabled: true,
+      pointsPerCurrencyUnit: 10,
+      currencyPerPoint: 0.01,
+      bronzeMin: '100',
+      silverMin: '500',
+      goldMin: '1500',
+      platinumMin: '5000',
+      bronzeDiscountPct: 0,
+      silverDiscountPct: 5,
+      goldDiscountPct: 10,
+      platinumDiscountPct: 15,
+      pointsExpiryDays: '365',
+    };
+    const result = loyaltyConfigSchema.parse(config);
+    expect(result.bronzeMin).toBe(100);
+    expect(result.silverMin).toBe(500);
+    expect(result.goldMin).toBe(1500);
+    expect(result.platinumMin).toBe(5000);
+    expect(result.pointsExpiry).toBe(365);
+  });
+
+  it('transaction: parses points/balanceBefore/balanceAfter as wire strings', () => {
+    const tx = {
+      id: '1',
+      customerId: '42',
+      type: 'earn',
+      points: '150',
+      balanceBefore: '1000',
+      balanceAfter: '1150',
+      createdAt: '2026-01-01',
+    };
+    const result = loyaltyTransactionSchema.parse(tx);
+    expect(result.points).toBe(150);
+    expect(result.balanceBefore).toBe(1000);
+    expect(result.balanceAfter).toBe(1150);
+  });
+
+  it('member: parses points and visits as wire strings, rather than throwing', () => {
+    const member = {
+      id: 1,
+      name: 'Jane Doe',
+      initials: 'JD',
+      points: '1200',
+      tier: 'Gold',
+      visits: '24',
+      joinedAt: '2023-01-01',
+      lastActive: '2024-05-01',
+    };
+    const result = loyaltyMemberSchema.parse(member);
+    expect(result.points).toBe(1200);
+    expect(result.visits).toBe(24);
+  });
+
+  it('reward: parses pointsCost as a wire string', () => {
+    const reward = {
+      id: 1,
+      name: 'Free Coffee',
+      description: 'Redeem for a free coffee',
+      pointsCost: '200',
+      category: 'beverage',
+      stock: 50,
+      active: true,
+    };
+    const result = loyaltyRewardSchema.parse(reward);
+    expect(result.pointsCost).toBe(200);
+  });
+
+  it('tier: parses minPoints and sortOrder as wire strings from the backend shape', () => {
+    const tier = {
+      id: '1',
+      name: 'Gold',
+      minPoints: '1000',
+      discountPct: 2.0,
+      perks: ['Free shipping'],
+      sortOrder: '3',
+    };
+    const result = loyaltyTierSchema.parse(tier);
+    expect(result.threshold).toBe(1000);
+    expect(result.sortOrder).toBe(3);
+  });
+});
