@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 
+import { formatMoney } from '../../../../lib/formatMoney';
+
 interface MenuItem {
   id: string;
   name: string;
@@ -54,10 +56,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
   }, [isActive]);
 
   const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
-  // toFixed(2) always renders a period, which is the wrong decimal mark
-  // in French; toLocaleString respects the active language.
-  const money = (n: number): string =>
-    n.toLocaleString(i18n.language, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const money = (n: number): string => formatMoney(n, i18n.language);
 
   return (
     <div
@@ -111,7 +110,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
               <div style={{ marginBottom: 3, fontSize: 16 }}>{item.emoji}</div>
               <div style={{ fontWeight: 500, fontSize: 12, marginBottom: 2 }}>{item.name}</div>
               <div style={{ fontSize: 11, color: 'rgba(19,19,19,0.55)' }}>
-                ${money(item.price)}
+                {money(item.price)}
               </div>
             </button>
           ))}
@@ -170,7 +169,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                     {item.qty}× {item.name}
                   </span>
                   <span style={{ color: 'var(--ink)', fontWeight: 600 }}>
-                    ${money(item.price * item.qty)}
+                    {money(item.price * item.qty)}
                   </span>
                 </motion.div>
               ))}
@@ -189,7 +188,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
           >
             <span style={{ color: 'rgba(19,19,19,0.55)', fontSize: 12 }}>{t('home.features.demos.pos.total')}</span>
             <span style={{ color: 'var(--ink)', fontWeight: 700, fontSize: 16 }}>
-              ${money(total)}
+              {money(total)}
             </span>
           </div>
           <div
@@ -206,7 +205,16 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
             }}
           >
             {cart.length
-              ? t('home.features.demos.pos.chargeAmount', { amount: money(total) })
+              ? t('home.features.demos.pos.chargeAmount', {
+                  // Plain decimal, not formatMoney(): chargeAmount's own
+                  // translated string already places the $ (before the
+                  // number in English/Arabic, after it in French), so the
+                  // interpolated value must not carry a second one.
+                  amount: total.toLocaleString(i18n.language, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }),
+                })
               : t('home.features.demos.pos.charge')}
           </div>
         </div>

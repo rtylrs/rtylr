@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 
+import { formatMoney } from '../../../../lib/formatMoney';
+
 type Segment = 'all' | 'vip' | 'regular' | 'atrisk' | 'new';
 
 interface Customer {
@@ -245,7 +247,7 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                     color: 'var(--ink)',
                   }}
                 >
-                  ${c.spend.toLocaleString(i18n.language)}
+                  {formatMoney(c.spend, i18n.language, 0)}
                 </div>
                 <div
                   style={{

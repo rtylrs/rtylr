@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 
+import { formatMoneyK } from '../../../../lib/formatMoney';
+
 const MONTH_KEYS = ['nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may'];
 const REVENUE = [31200, 44800, 28400, 33600, 38900, 41200, 42840];
 const EXPENSES = [21800, 30100, 20200, 23400, 26100, 27800, 28310];
-
-const fmt = (n: number): string => (n >= 1000 ? `$${(n / 1000).toFixed(1)}k` : `$${n}`);
 
 interface Metric {
   labelKey: 'revenue' | 'expenses' | 'netProfit';
@@ -21,10 +21,14 @@ const METRICS: Metric[] = [
   { labelKey: 'netProfit', value: 14530, prev: 13400, prefix: '$' },
 ];
 
+// French typography puts a non-breaking space before %; other locales in
+// this batch don't.
+const pctSuffix = (locale: string): string => (locale === 'fr' ? ' %' : '%');
+
 const pctChange = (cur: number, prev: number, locale: string): string => {
   const d = ((cur - prev) / prev) * 100;
   // toFixed always renders a period; toLocaleString respects the active language.
-  return `${d >= 0 ? '+' : ''}${d.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+  return `${d >= 0 ? '+' : ''}${d.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}${pctSuffix(locale)}`;
 };
 
 const maxVal = Math.max(...REVENUE);
@@ -111,11 +115,15 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
             </div>
             <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)', marginBottom: 4 }}>
               {shown
-                ? `$${(m.value / 1000).toLocaleString(i18n.language, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k`
+                ? formatMoneyK(m.value / 1000, i18n.language)
                 : '-'}
             </div>
             <div style={{ fontSize: 11, color: '#16a34a' }}>
-              {pctChange(m.value, m.prev, i18n.language)} {t('home.features.demos.finance.momSuffix')}
+              {/* dir="ltr" is load-bearing: a leading "+" is bidi-neutral, so
+                  inside an RTL paragraph it resolves to the paragraph
+                  direction and the sign lands on the wrong end of the number. */}
+              <span dir="ltr">{pctChange(m.value, m.prev, i18n.language)}</span>{' '}
+              {t('home.features.demos.finance.momSuffix')}
             </div>
           </div>
         ))}

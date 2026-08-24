@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 
+import { formatMoney, formatMoneyK } from '../../../../lib/formatMoney';
+import { findLocale } from '../../../../lib/locales';
+
 const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const REVENUE = [9800, 11200, 10400, 12800, 18600, 21400, 14200];
 const COVERS = [142, 163, 148, 184, 268, 309, 204];
@@ -35,6 +38,12 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
   const { t, i18n } = useTranslation();
   const [drawn, setDrawn] = useState(false);
   const [hoveredDay, setHoveredDay] = useState<number | null>(null);
+  // SVG coordinates don't mirror under dir="rtl" the way flex/grid layout
+  // does - this chart's day axis stays left-to-right by design (common in
+  // RTL analytics products, and unlike a mismirrored y-axis it isn't a
+  // correctness bug), but the y-axis labels are typography-adjacent chrome
+  // and belong at the inline-start edge, so their side is set explicitly.
+  const isRtl = findLocale(i18n.language)?.dir === 'rtl';
 
   useEffect(() => {
     if (isActive) {
@@ -45,21 +54,26 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
     }
   }, [isActive]);
 
-  // toFixed always renders a period; toLocaleString respects the active
-  // language. Not used for the SVG path math further down - that syntax
-  // needs a period regardless of locale.
-  const fmtK = (n: number): string =>
-    `$${(n / 1000).toLocaleString(i18n.language, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k`;
+  // Not used for the SVG path math further down - that syntax needs a
+  // period regardless of locale, formatMoneyK is for on-screen text only.
+  const fmtK = (n: number): string => formatMoneyK(n / 1000, i18n.language);
+
+  // French wants a non-breaking space before %; the leading "+" is
+  // bidi-neutral, so without dir="ltr" at the render site it resolves to
+  // the surrounding paragraph direction and lands on the wrong end of the
+  // number under dir="rtl" (renders "12%+" instead of "+12%").
+  const pct = (n: number): string => `+${n}${i18n.language === 'fr' ? ' %' : '%'}`;
 
   const kpis = [
-    { key: 'revenue', label: t('home.features.demos.insights.revenue'), value: fmtK(total), delta: '+12%', good: true },
-    { key: 'covers', label: t('home.features.demos.insights.kpis.covers'), value: totalCovers.toLocaleString(i18n.language), delta: '+8%', good: true },
-    { key: 'avgOrder', label: t('home.features.demos.insights.kpis.avgOrder'), value: `$${avgOrder}`, delta: '+4%', good: true },
+    { key: 'revenue', label: t('home.features.demos.insights.revenue'), value: fmtK(total), delta: pct(12), numericDelta: true, good: true },
+    { key: 'covers', label: t('home.features.demos.insights.kpis.covers'), value: totalCovers.toLocaleString(i18n.language), delta: pct(8), numericDelta: true, good: true },
+    { key: 'avgOrder', label: t('home.features.demos.insights.kpis.avgOrder'), value: formatMoney(avgOrder, i18n.language, 0), delta: pct(4), numericDelta: true, good: true },
     {
       key: 'peakDay',
       label: t('home.features.demos.insights.kpis.peakDay'),
       value: t(`home.features.demos.insights.days.${peakDayKey}`),
       delta: t('home.features.demos.insights.vsPrefix', { day: t('home.features.demos.insights.days.thu') }),
+      numericDelta: false,
       good: true,
     },
   ];
@@ -135,7 +149,9 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
             <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--ink)', marginBottom: 3 }}>
               {k.value}
             </div>
-            <div style={{ fontSize: 10, color: k.good ? '#16a34a' : '#dc2626' }}>{k.delta}</div>
+            <div style={{ fontSize: 10, color: k.good ? '#16a34a' : '#dc2626' }}>
+              {k.numericDelta ? <span dir="ltr">{k.delta}</span> : k.delta}
+            </div>
           </div>
         ))}
       </div>
@@ -155,13 +171,13 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
             return (
               <text
                 key={frac}
-                x={PAD.l - 6}
+                x={isRtl ? W - PAD.r + 6 : PAD.l - 6}
                 y={y + 4}
-                textAnchor="end"
+                textAnchor={isRtl ? 'start' : 'end'}
                 fontSize={8}
                 fill="rgba(19,19,19,0.4)"
               >
-                ${((max * frac) / 1000).toLocaleString(i18n.language, { maximumFractionDigits: 0 })}k
+                {formatMoneyK((max * frac) / 1000, i18n.language)}
               </text>
             );
           })}

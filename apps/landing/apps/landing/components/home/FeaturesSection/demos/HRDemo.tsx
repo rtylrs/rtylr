@@ -97,10 +97,13 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
   const nowPct = ((now - DAY_START) / TOTAL_HRS) * 100;
   const clocked = STAFF.filter((s) => now >= s.start && now < s.end).length;
 
+  // 24-hour, not 12-hour with an am/pm suffix: am/pm has no equivalent
+  // worth inventing in French or Arabic, and 24-hour is the locale-neutral
+  // convention anyway, so this sidesteps translating it at all.
   const fmtHour = (h: number): string => {
     const hh = Math.floor(h);
-    const suffix = hh >= 12 ? 'pm' : 'am';
-    return `${hh > 12 ? hh - 12 : hh}${suffix}`;
+    const mm = Math.round((h - hh) * 60);
+    return mm === 0 ? `${hh}:00` : `${hh}:${String(mm).padStart(2, '0')}`;
   };
 
   return (
@@ -157,6 +160,7 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
         {[8, 10, 12, 14, 16, 18, 20, 22].map((h) => (
           <span
             key={h}
+            dir="ltr"
             style={{ fontSize: 9, color: 'rgba(19,19,19,0.4)', width: 24, textAlign: 'center' }}
           >
             {fmtHour(h)}
@@ -180,6 +184,7 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
           }}
         >
           <div
+            dir="ltr"
             style={{
               position: 'absolute',
               top: 0,
@@ -242,7 +247,11 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
                   {s.initials}
                 </div>
                 <div>
+                  {/* dir="ltr": a Latin name ending in a period (an
+                      abbreviated surname) puts the period at the visual
+                      start under dir="rtl" otherwise, e.g. ".James K". */}
                   <div
+                    dir="ltr"
                     style={{
                       fontSize: 11,
                       fontWeight: 500,
@@ -279,6 +288,7 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
                   }}
                 >
                   <span
+                    dir="ltr"
                     style={{
                       fontSize: 9,
                       color: isOn ? s.color : 'rgba(19,19,19,0.4)',
