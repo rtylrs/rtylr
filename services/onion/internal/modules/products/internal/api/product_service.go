@@ -292,7 +292,7 @@ func (a *ProductAPI) ListReorderSuggestions(ctx context.Context, _ *erpproductv1
 			Confidence:        s.Confidence,
 		})
 	}
-	return &erpproductv1.ListReorderSuggestionsResponse{Suggestions: out, Truncated: list.Truncated}, nil
+	return &erpproductv1.ListReorderSuggestionsResponse{Suggestions: out, HasMore: list.Truncated}, nil
 }
 
 func (a *ProductAPI) ListExpiringItems(ctx context.Context, req *erpproductv1.ListExpiringItemsRequest) (*erpproductv1.ListExpiringItemsResponse, error) {
