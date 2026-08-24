@@ -486,7 +486,7 @@
         },
         {
           "title": "The whole site is indexed as data",
-          "body": "A machine-readable index of all 23 pages, with titles and descriptions, generated at build time. It cannot drift from the site, because the site is what generates it.",
+          "body": "A machine-readable index of every page on the site, with titles and descriptions, generated at build time. It cannot drift from the site, because the site is what generates it.",
           "check": "https://rtylr.com/pages.json"
         },
         {
