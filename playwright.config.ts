@@ -43,7 +43,26 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        // Opt-in escape hatch for a browser cache that does not match the
+        // Playwright version this repo pins. Unset, this is a no-op and
+        // Playwright resolves its own download as usual.
+        //
+        // It exists because `npx playwright install chromium` can appear to
+        // succeed while delivering nothing: it left a 448 kB stub directory for
+        // the expected build and never exited, so every launch failed with
+        // "Executable doesn't exist" and no obvious cause. Pointing at a working
+        // build that IS on disk is the difference between a runnable suite and
+        // an unrunnable one, and hard-coding a path would not survive CI.
+        //
+        //   PLAYWRIGHT_CHROMIUM_PATH="$HOME/Library/Caches/ms-playwright/\
+        //   chromium-1223/chrome-mac-arm64/Google Chrome for Testing.app/\
+        //   Contents/MacOS/Google Chrome for Testing" pnpm test:e2e
+        ...(process.env.PLAYWRIGHT_CHROMIUM_PATH
+          ? { launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH } }
+          : {}),
+      },
     },
   ],
 

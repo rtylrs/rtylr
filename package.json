@@ -9,6 +9,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "test:screenshots": "playwright test --grep @screenshots",
     "typecheck": "./scripts/check-packages-ref.sh && turbo typecheck",
     "lint": "eslint apps packages",
     "lint:fix": "eslint apps packages --fix",
