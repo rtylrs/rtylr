@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { injectTheme } from '@voxire/config';
 import { bootObservability } from '@voxire/observability';
 import { CookieBanner } from '@voxire/consent';
@@ -8,9 +8,10 @@ import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import { CookiesProvider } from 'react-cookie';
-import { DM_Sans } from 'next/font/google';
+import { DM_Sans, IBM_Plex_Sans_Arabic } from 'next/font/google';
 
-import i18next, { syncLanguageToPath } from '../services/i18next';
+import i18next from '../services/i18next';
+import { localeFromPath } from '../lib/locales';
 import { initFeatureVariant } from '../lib/featureVariant';
 import { watchConsentMode } from '../lib/consentMode';
 
@@ -25,6 +26,34 @@ const dmSans = DM_Sans({
   weight: ['400', '500', '600', '700'],
   variable: '--font-dm-sans',
   display: 'swap',
+});
+
+// Arabic display face. DM Sans ships Latin only, so an Arabic page rendered
+// in it falls back per glyph to whatever the OS has, which is why this is a
+// real font dependency and not a CSS-only change.
+//
+// Exposes --font-plex-arabic, consumed by --rtl-font in styles/_variables.scss
+// and switched on by :root[dir='rtl'] .dir-font-scope in styles/index.scss.
+// Nothing here changes a Latin page: the variable is defined, and no glyph on
+// those pages matches the Arabic unicode-range, so the file is never fetched.
+//
+// preload: false is deliberate. next/font would otherwise emit a preload link
+// for the Arabic woff2 into the head of every exported page, including the
+// Latin ones that will never paint a single Arabic glyph. Without the preload
+// the browser still fetches it as soon as Arabic text needs it, driven by the
+// unicode-range on the generated @font-face.
+//
+// Verify it rather than trust it: scripts/verify-arabic-font.mjs renders the
+// same Arabic string twice, once with this face and once with its src
+// emptied, and fails if the two renders match. Naming a family that is not
+// there substitutes silently, which is the failure this repo has already had
+// once with cover images.
+const plexArabic = IBM_Plex_Sans_Arabic({
+  subsets: ['arabic'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-plex-arabic',
+  display: 'swap',
+  preload: false,
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -58,24 +87,42 @@ function MyApp({ Component, pageProps }: AppProps) {
     void initFeatureVariant();
   }, []);
 
-  // Keep the active language on the route. init() reads the URL once, and a
-  // client-side navigation does not re-run it, so /ar/pricing/ reached by
-  // link would otherwise keep rendering the previous locale.
-  useEffect(() => {
-    syncLanguageToPath(router.asPath);
-  }, [router.asPath]);
-
   // Mirror the cookie banner's decision into Google Consent Mode. The
   // deny-by-default half runs inline in _document's head; this half
   // carries a decision made during this page view, so accepting the
   // banner unblocks GA4 without a reload.
   useEffect(() => watchConsentMode(), []);
 
+  /**
+   * One i18next instance per locale, chosen from the route.
+   *
+   * This has to happen during render, not in an effect. The export
+   * prerenders every page on the server where there is no window, so an
+   * effect-driven language means the prerendered HTML is always English:
+   * /ar/pricing/ shipped with lang="ar" dir="rtl" and English body copy,
+   * which is precisely the doorway page the locale registry warns about.
+   * A crawler, a markdown twin and a reader without JavaScript all see that
+   * HTML and never the corrected client render.
+   *
+   * cloneInstance rather than changeLanguage on the shared instance:
+   * changeLanguage mutates module-level state, and the export renders every
+   * page in one process, so page order would decide which language a page
+   * came out in. A clone shares the loaded resources and carries its own
+   * language, so /pricing/ and /ar/pricing/ can be rendered in any order.
+   */
+  const locale = localeFromPath(router.asPath);
+  const i18n = useMemo(
+    () => (locale.code === i18next.language ? i18next : i18next.cloneInstance({ lng: locale.code })),
+    [locale.code]
+  );
+
   return (
     <QueryClientProvider client={queryClient}>
       <CookiesProvider>
-        <I18nextProvider i18n={i18next}>
-          <div className={`${dmSans.variable} ${dmSans.className}`}>
+        <I18nextProvider i18n={i18n}>
+          <div
+            className={`${dmSans.variable} ${plexArabic.variable} ${dmSans.className} dir-font-scope`}
+          >
             <MotionConfig reducedMotion="user">
               {/* Opacity-only route crossfade - no transform, so fixed headers
                   inside pages are never re-anchored mid-transition. */}

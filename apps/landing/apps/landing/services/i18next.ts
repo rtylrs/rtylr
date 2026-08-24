@@ -51,17 +51,4 @@ i18next.use(initReactI18next).init({
   },
 });
 
-/**
- * Follow a route change. Called from _app.tsx on mount and on every
- * navigation, because a client-side route change does not re-run init.
- *
- * No cookie is written. Switching language means going to that language's
- * URL, so the language switcher is a set of links rather than a control
- * with hidden state, and a shared link always renders what the sharer saw.
- */
-export const syncLanguageToPath = (pathname: string): void => {
-  const next = localeFromPath(pathname).code;
-  if (i18next.language !== next) void i18next.changeLanguage(next);
-};
-
 export default i18next;
