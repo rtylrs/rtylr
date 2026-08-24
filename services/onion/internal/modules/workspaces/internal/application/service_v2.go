@@ -306,18 +306,42 @@ func (s *Service) EnsureAssigneeMembership(ctx context.Context, projectID, busin
 }
 
 // AddTaskDependency records that taskID is blocked by dependsOnTaskID.
-func (s *Service) AddTaskDependency(ctx context.Context, taskID, dependsOnTaskID int64) error {
+//
+// businessID is written onto the row and is not optional. Omitting it stored
+// every edge with business_id = 0 while ListTaskDependencies filters on the
+// caller's real business, so dependencies were written and then never read back:
+// adding one succeeded and it never appeared anywhere.
+//
+// Ruling T2 keeps dependencies cross-project but within the business, so the
+// blocker is checked to belong to the same business rather than trusted from the
+// request.
+func (s *Service) AddTaskDependency(ctx context.Context, taskID, dependsOnTaskID, businessID int64) error {
+	// Validated through the blocker's project, not through task.BusinessID:
+	// enrichedTaskSelect does not select business_id, so a task read back here
+	// always reports BusinessID 0 and a direct comparison could never pass.
+	// GetProjectV2ByID is business-scoped, and a task belongs to a project, so a
+	// blocker whose project is not in this business is refused.
+	blocker, err := s.repo.GetTaskByID(ctx, dependsOnTaskID)
+	if err != nil {
+		return domain.ErrUnauthorized
+	}
+	if _, projErr := s.repo.GetProjectV2ByID(ctx, blocker.ProjectID, businessID); projErr != nil {
+		return domain.ErrUnauthorized
+	}
 	return s.repo.AddTaskDependency(ctx, domain.AddTaskDependencyInput{
 		TaskID:          taskID,
 		DependsOnTaskID: dependsOnTaskID,
+		BusinessID:      businessID,
 	})
 }
 
-// RemoveTaskDependency drops the blocking edge between two tasks.
-func (s *Service) RemoveTaskDependency(ctx context.Context, taskID, dependsOnTaskID int64) error {
+// RemoveTaskDependency drops the blocking edge between two tasks. businessID
+// matches what AddTaskDependency wrote; see the note there.
+func (s *Service) RemoveTaskDependency(ctx context.Context, taskID, dependsOnTaskID, businessID int64) error {
 	return s.repo.RemoveTaskDependency(ctx, domain.RemoveTaskDependencyInput{
 		TaskID:          taskID,
 		DependsOnTaskID: dependsOnTaskID,
+		BusinessID:      businessID,
 	})
 }
 

@@ -622,7 +622,7 @@ func (a *TaskAPI) AddTaskDependency(ctx context.Context, req *flowtaskv1.AddTask
 	if body == nil || body.GetDependsOnTaskId() == 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "depends_on_task_id is required")
 	}
-	if err := a.Service.AddTaskDependency(ctx, req.GetTaskId(), body.GetDependsOnTaskId()); err != nil {
+	if err := a.Service.AddTaskDependency(ctx, req.GetTaskId(), body.GetDependsOnTaskId(), businessID); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to add dependency")
 	}
 	return &flowtaskv1.AddTaskDependencyResponse{Message: "Dependency added"}, nil
@@ -639,7 +639,7 @@ func (a *TaskAPI) RemoveTaskDependency(ctx context.Context, req *flowtaskv1.Remo
 	if req.GetDependsOnTaskId() == 0 {
 		return nil, onekiterrors.New(http.StatusBadRequest, "depends_on_task_id is required")
 	}
-	if err := a.Service.RemoveTaskDependency(ctx, req.GetTaskId(), req.GetDependsOnTaskId()); err != nil {
+	if err := a.Service.RemoveTaskDependency(ctx, req.GetTaskId(), req.GetDependsOnTaskId(), businessID); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to remove dependency")
 	}
 	return &flowtaskv1.RemoveTaskDependencyResponse{Message: "Dependency removed"}, nil
