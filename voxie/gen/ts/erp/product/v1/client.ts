@@ -270,6 +270,12 @@ const violations = validateListReorderSuggestionsRequest(req);
 if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
 let path = "/erp/product/v1/reorder-suggestions";
 const query = new URLSearchParams();
+if (req.limit !== undefined) {
+query.set("limit", String(req.limit));
+}
+if (req.offset !== undefined) {
+query.set("offset", String(req.offset));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
@@ -292,6 +298,12 @@ let path = "/erp/product/v1/expiry";
 const query = new URLSearchParams();
 if (req.daysAhead !== undefined) {
 query.set("days_ahead", String(req.daysAhead));
+}
+if (req.limit !== undefined) {
+query.set("limit", String(req.limit));
+}
+if (req.offset !== undefined) {
+query.set("offset", String(req.offset));
 }
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }

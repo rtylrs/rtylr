@@ -283,17 +283,33 @@ message GetDashboardResponse {
   top_categories: DashboardTopCategory[]
 }
 
-message ListReorderSuggestionsRequest {}
+message ListReorderSuggestionsRequest {
+  /// Maximum number of reorder suggestions to return.
+  limit: int64 @query("limit") @encode(number)
+  /// Number of reorder suggestions to skip.
+  offset: int64 @query("offset") @encode(number)
+}
 
 message ListReorderSuggestionsResponse {
   suggestions: ReorderSuggestion[]
-  truncated: bool
+  has_more: bool
+  limit: int64 @encode(number)
+  offset: int64 @encode(number)
+  total: int64 @encode(number)
 }
 
 message ListExpiringItemsRequest {
   days_ahead: int32 @query("days_ahead")
+  /// Maximum number of expiring items to return.
+  limit: int64 @query("limit") @encode(number)
+  /// Number of expiring items to skip.
+  offset: int64 @query("offset") @encode(number)
 }
 
 message ListExpiringItemsResponse {
   items: ExpiringItem[]
+  has_more: bool
+  limit: int64 @encode(number)
+  offset: int64 @encode(number)
+  total: int64 @encode(number)
 }

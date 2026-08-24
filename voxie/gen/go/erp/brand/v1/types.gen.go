@@ -356,10 +356,32 @@ func (x *DeleteBrandResponse) GetMessage() string {
 }
 
 type ListBrandsRequest struct {
+	Limit  int64 `json:"limit,omitempty"`
+	Offset int64 `json:"offset,omitempty"`
+}
+
+func (x *ListBrandsRequest) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListBrandsRequest) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
 }
 
 type ListBrandsResponse struct {
-	Brands []*Brand `json:"brands,omitempty"`
+	Brands  []*Brand `json:"brands,omitempty"`
+	HasMore bool     `json:"has_more,omitempty"`
+	Limit   int64    `json:"limit,omitempty"`
+	Offset  int64    `json:"offset,omitempty"`
+	Total   int64    `json:"total,omitempty"`
 }
 
 func (x *ListBrandsResponse) GetBrands() []*Brand {
@@ -368,4 +390,36 @@ func (x *ListBrandsResponse) GetBrands() []*Brand {
 		return zero
 	}
 	return x.Brands
+}
+
+func (x *ListBrandsResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
+}
+
+func (x *ListBrandsResponse) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListBrandsResponse) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
+}
+
+func (x *ListBrandsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
 }

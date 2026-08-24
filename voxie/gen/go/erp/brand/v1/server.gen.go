@@ -273,6 +273,24 @@ func RegisterBrandServiceServer(first any, rest ...any) error {
 	mux := o.mux
 	mux.Handle("GET /erp/brand/v1/brands", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListBrandsRequest)
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
+		}
+		if values := r.URL.Query()["offset"]; len(values) > 0 {
+			value := values[0]
+			parsedOffset, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter offset: "+err.Error())
+				return
+			}
+			req.Offset = parsedOffset
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())

@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -54,6 +55,8 @@ func (c *CategoryServiceClient) ListCategories(ctx context.Context, req *ListCat
 	}
 	path := "/erp/category/v1/categories"
 	query := url.Values{}
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("offset", strconv.FormatInt(int64(req.Offset), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

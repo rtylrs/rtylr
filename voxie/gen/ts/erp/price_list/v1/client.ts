@@ -76,6 +76,12 @@ const violations = validateListPriceListsRequest(req);
 if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
 let path = "/erp/price-list/v1/price-lists";
 const query = new URLSearchParams();
+if (req.limit !== undefined) {
+query.set("limit", String(req.limit));
+}
+if (req.offset !== undefined) {
+query.set("offset", String(req.offset));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {

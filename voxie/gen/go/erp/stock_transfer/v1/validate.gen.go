@@ -38,6 +38,12 @@ func (m *CreateStockTransferItemRequest) Validate() error {
 		return nil
 	}
 	var violations []string
+	if m.ProductId <= 0 {
+		violations = append(violations, "product_id must be greater than 0")
+	}
+	if m.Quantity <= 0 {
+		violations = append(violations, "quantity must be greater than 0")
+	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -54,6 +60,9 @@ func (m *CreateStockTransferRequest) Validate() error {
 	}
 	if m.ToWarehouseId <= 0 {
 		violations = append(violations, "to_warehouse_id must be greater than 0")
+	}
+	if len(m.Items) < 1 {
+		violations = append(violations, "items must have at least 1 items")
 	}
 	for _, value := range m.Items {
 		if err := value.Validate(); err != nil {

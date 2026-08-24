@@ -45,8 +45,17 @@ message DeleteBrandResponse {
   message: string
 }
 
-message ListBrandsRequest {}
+message ListBrandsRequest {
+  /// Maximum number of brands to return.
+  limit: int64 @query("limit") @encode(number)
+  /// Number of brands to skip.
+  offset: int64 @query("offset") @encode(number)
+}
 
 message ListBrandsResponse {
   brands: Brand[]
+  has_more: bool
+  limit: int64 @encode(number)
+  offset: int64 @encode(number)
+  total: int64 @encode(number)
 }

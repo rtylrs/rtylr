@@ -56,6 +56,8 @@ func (c *VariantServiceClient) ListVariants(ctx context.Context, req *ListVarian
 	path := "/erp/variant/v1/variants"
 	query := url.Values{}
 	query.Set("product_id", strconv.FormatInt(int64(req.ProductId), 10))
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("offset", strconv.FormatInt(int64(req.Offset), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

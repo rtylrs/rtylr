@@ -310,10 +310,32 @@ func (x *DeleteCategoryResponse) GetMessage() string {
 }
 
 type ListCategoriesRequest struct {
+	Limit  int64 `json:"limit,omitempty"`
+	Offset int64 `json:"offset,omitempty"`
+}
+
+func (x *ListCategoriesRequest) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListCategoriesRequest) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
 }
 
 type ListCategoriesResponse struct {
 	Categories []*Category `json:"categories,omitempty"`
+	HasMore    bool        `json:"has_more,omitempty"`
+	Limit      int64       `json:"limit,omitempty"`
+	Offset     int64       `json:"offset,omitempty"`
+	Total      int64       `json:"total,omitempty"`
 }
 
 func (x *ListCategoriesResponse) GetCategories() []*Category {
@@ -322,4 +344,36 @@ func (x *ListCategoriesResponse) GetCategories() []*Category {
 		return zero
 	}
 	return x.Categories
+}
+
+func (x *ListCategoriesResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
+}
+
+func (x *ListCategoriesResponse) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListCategoriesResponse) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
+}
+
+func (x *ListCategoriesResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
 }

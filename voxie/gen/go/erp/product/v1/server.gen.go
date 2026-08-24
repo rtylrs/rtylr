@@ -500,6 +500,24 @@ func RegisterProductServiceServer(first any, rest ...any) error {
 	}), RequestMetadata{Service: "ProductService", Method: "getDashboard", HTTPMethod: "GET", Route: "/erp/product/v1/dashboard", AuthSchemes: nil}))
 	mux.Handle("GET /erp/product/v1/reorder-suggestions", o.wrapHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		req := new(ListReorderSuggestionsRequest)
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
+		}
+		if values := r.URL.Query()["offset"]; len(values) > 0 {
+			value := values[0]
+			parsedOffset, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter offset: "+err.Error())
+				return
+			}
+			req.Offset = parsedOffset
+		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -524,6 +542,24 @@ func RegisterProductServiceServer(first any, rest ...any) error {
 				return
 			}
 			req.DaysAhead = parsedDaysAhead
+		}
+		if values := r.URL.Query()["limit"]; len(values) > 0 {
+			value := values[0]
+			parsedLimit, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter limit: "+err.Error())
+				return
+			}
+			req.Limit = parsedLimit
+		}
+		if values := r.URL.Query()["offset"]; len(values) > 0 {
+			value := values[0]
+			parsedOffset, err := parseInt64(value)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid query parameter offset: "+err.Error())
+				return
+			}
+			req.Offset = parsedOffset
 		}
 		if v, ok := any(req).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {

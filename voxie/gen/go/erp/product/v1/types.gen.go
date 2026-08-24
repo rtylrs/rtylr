@@ -2420,11 +2420,32 @@ func (x *GetDashboardResponse) GetTopCategories() []*DashboardTopCategory {
 }
 
 type ListReorderSuggestionsRequest struct {
+	Limit  int64 `json:"limit,omitempty"`
+	Offset int64 `json:"offset,omitempty"`
+}
+
+func (x *ListReorderSuggestionsRequest) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListReorderSuggestionsRequest) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
 }
 
 type ListReorderSuggestionsResponse struct {
 	Suggestions []*ReorderSuggestion `json:"suggestions,omitempty"`
-	Truncated   bool                 `json:"truncated,omitempty"`
+	HasMore     bool                 `json:"has_more,omitempty"`
+	Limit       int64                `json:"limit,omitempty"`
+	Offset      int64                `json:"offset,omitempty"`
+	Total       int64                `json:"total,omitempty"`
 }
 
 func (x *ListReorderSuggestionsResponse) GetSuggestions() []*ReorderSuggestion {
@@ -2435,16 +2456,42 @@ func (x *ListReorderSuggestionsResponse) GetSuggestions() []*ReorderSuggestion {
 	return x.Suggestions
 }
 
-func (x *ListReorderSuggestionsResponse) GetTruncated() bool {
+func (x *ListReorderSuggestionsResponse) GetHasMore() bool {
 	if x == nil {
 		var zero bool
 		return zero
 	}
-	return x.Truncated
+	return x.HasMore
+}
+
+func (x *ListReorderSuggestionsResponse) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListReorderSuggestionsResponse) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
+}
+
+func (x *ListReorderSuggestionsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
 }
 
 type ListExpiringItemsRequest struct {
 	DaysAhead int32 `json:"days_ahead,omitempty"`
+	Limit     int64 `json:"limit,omitempty"`
+	Offset    int64 `json:"offset,omitempty"`
 }
 
 func (x *ListExpiringItemsRequest) GetDaysAhead() int32 {
@@ -2455,8 +2502,28 @@ func (x *ListExpiringItemsRequest) GetDaysAhead() int32 {
 	return x.DaysAhead
 }
 
+func (x *ListExpiringItemsRequest) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListExpiringItemsRequest) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
+}
+
 type ListExpiringItemsResponse struct {
-	Items []*ExpiringItem `json:"items,omitempty"`
+	Items   []*ExpiringItem `json:"items,omitempty"`
+	HasMore bool            `json:"has_more,omitempty"`
+	Limit   int64           `json:"limit,omitempty"`
+	Offset  int64           `json:"offset,omitempty"`
+	Total   int64           `json:"total,omitempty"`
 }
 
 func (x *ListExpiringItemsResponse) GetItems() []*ExpiringItem {
@@ -2465,4 +2532,36 @@ func (x *ListExpiringItemsResponse) GetItems() []*ExpiringItem {
 		return zero
 	}
 	return x.Items
+}
+
+func (x *ListExpiringItemsResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
+}
+
+func (x *ListExpiringItemsResponse) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListExpiringItemsResponse) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
+}
+
+func (x *ListExpiringItemsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
 }

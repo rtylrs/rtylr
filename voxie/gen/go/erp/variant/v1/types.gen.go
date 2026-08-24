@@ -412,6 +412,8 @@ func (x *DeleteVariantResponse) GetMessage() string {
 
 type ListVariantsRequest struct {
 	ProductId int64 `json:"product_id,omitempty"`
+	Limit     int64 `json:"limit,omitempty"`
+	Offset    int64 `json:"offset,omitempty"`
 }
 
 func (m *ListVariantsRequest) MarshalJSON() ([]byte, error) {
@@ -451,8 +453,28 @@ func (x *ListVariantsRequest) GetProductId() int64 {
 	return x.ProductId
 }
 
+func (x *ListVariantsRequest) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListVariantsRequest) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
+}
+
 type ListVariantsResponse struct {
 	Variants []*Variant `json:"variants,omitempty"`
+	HasMore  bool       `json:"has_more,omitempty"`
+	Limit    int64      `json:"limit,omitempty"`
+	Offset   int64      `json:"offset,omitempty"`
+	Total    int64      `json:"total,omitempty"`
 }
 
 func (x *ListVariantsResponse) GetVariants() []*Variant {
@@ -461,6 +483,38 @@ func (x *ListVariantsResponse) GetVariants() []*Variant {
 		return zero
 	}
 	return x.Variants
+}
+
+func (x *ListVariantsResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
+}
+
+func (x *ListVariantsResponse) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListVariantsResponse) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
+}
+
+func (x *ListVariantsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
 }
 
 type UpdateVariantBody struct {

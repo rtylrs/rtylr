@@ -409,6 +409,8 @@ func (c *ProductServiceClient) ListReorderSuggestions(ctx context.Context, req *
 	}
 	path := "/erp/product/v1/reorder-suggestions"
 	query := url.Values{}
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("offset", strconv.FormatInt(int64(req.Offset), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
@@ -448,6 +450,8 @@ func (c *ProductServiceClient) ListExpiringItems(ctx context.Context, req *ListE
 	path := "/erp/product/v1/expiry"
 	query := url.Values{}
 	query.Set("days_ahead", strconv.FormatInt(int64(req.DaysAhead), 10))
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("offset", strconv.FormatInt(int64(req.Offset), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

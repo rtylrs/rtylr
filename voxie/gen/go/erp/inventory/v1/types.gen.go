@@ -295,11 +295,33 @@ func (x *AdjustInventoryResponse) GetMessage() string {
 }
 
 type GetInventoryReportRequest struct {
+	Limit  int64 `json:"limit,omitempty"`
+	Offset int64 `json:"offset,omitempty"`
+}
+
+func (x *GetInventoryReportRequest) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *GetInventoryReportRequest) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
 }
 
 type GetInventoryReportResponse struct {
 	Items      []*InventoryReportItem `json:"items,omitempty"`
 	TotalValue float64                `json:"total_value,omitempty"`
+	HasMore    bool                   `json:"has_more,omitempty"`
+	Limit      int64                  `json:"limit,omitempty"`
+	Offset     int64                  `json:"offset,omitempty"`
+	Total      int64                  `json:"total,omitempty"`
 }
 
 func (x *GetInventoryReportResponse) GetItems() []*InventoryReportItem {
@@ -318,12 +340,66 @@ func (x *GetInventoryReportResponse) GetTotalValue() float64 {
 	return x.TotalValue
 }
 
+func (x *GetInventoryReportResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
+}
+
+func (x *GetInventoryReportResponse) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *GetInventoryReportResponse) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
+}
+
+func (x *GetInventoryReportResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
 type GetLowStockRequest struct {
+	Limit  int64 `json:"limit,omitempty"`
+	Offset int64 `json:"offset,omitempty"`
+}
+
+func (x *GetLowStockRequest) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *GetLowStockRequest) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
 }
 
 type GetLowStockResponse struct {
-	Items []*InventoryReportItem `json:"items,omitempty"`
-	Count int64                  `json:"count,omitempty"`
+	Items   []*InventoryReportItem `json:"items,omitempty"`
+	Count   int64                  `json:"count,omitempty"`
+	HasMore bool                   `json:"has_more,omitempty"`
+	Limit   int64                  `json:"limit,omitempty"`
+	Offset  int64                  `json:"offset,omitempty"`
+	Total   int64                  `json:"total,omitempty"`
 }
 
 func (x *GetLowStockResponse) GetItems() []*InventoryReportItem {
@@ -342,12 +418,66 @@ func (x *GetLowStockResponse) GetCount() int64 {
 	return x.Count
 }
 
+func (x *GetLowStockResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
+}
+
+func (x *GetLowStockResponse) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *GetLowStockResponse) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
+}
+
+func (x *GetLowStockResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
+}
+
 type GetValuationRequest struct {
+	Limit  int64 `json:"limit,omitempty"`
+	Offset int64 `json:"offset,omitempty"`
+}
+
+func (x *GetValuationRequest) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *GetValuationRequest) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
 }
 
 type GetValuationResponse struct {
 	Items      []*ValuationItem `json:"items,omitempty"`
 	TotalValue float64          `json:"total_value,omitempty"`
+	HasMore    bool             `json:"has_more,omitempty"`
+	Limit      int64            `json:"limit,omitempty"`
+	Offset     int64            `json:"offset,omitempty"`
+	Total      int64            `json:"total,omitempty"`
 }
 
 func (x *GetValuationResponse) GetItems() []*ValuationItem {
@@ -364,4 +494,36 @@ func (x *GetValuationResponse) GetTotalValue() float64 {
 		return zero
 	}
 	return x.TotalValue
+}
+
+func (x *GetValuationResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
+}
+
+func (x *GetValuationResponse) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *GetValuationResponse) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
+}
+
+func (x *GetValuationResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
 }

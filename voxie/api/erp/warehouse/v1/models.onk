@@ -39,10 +39,19 @@ message DeleteWarehouseResponse {
   message: string
 }
 
-message ListWarehousesRequest {}
+message ListWarehousesRequest {
+  /// Maximum number of warehouses to return.
+  limit: int64 @query("limit") @encode(number)
+  /// Number of warehouses to skip.
+  offset: int64 @query("offset") @encode(number)
+}
 
 message ListWarehousesResponse {
   warehouses: Warehouse[]
+  has_more: bool
+  limit: int64 @encode(number)
+  offset: int64 @encode(number)
+  total: int64 @encode(number)
 }
 
 message UpdateWarehouseBody {

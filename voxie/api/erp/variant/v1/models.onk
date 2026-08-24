@@ -44,10 +44,18 @@ message DeleteVariantResponse {
 
 message ListVariantsRequest {
   product_id: int64 @query("product_id")
+  /// Maximum number of variants to return.
+  limit: int64 @query("limit") @encode(number)
+  /// Number of variants to skip.
+  offset: int64 @query("offset") @encode(number)
 }
 
 message ListVariantsResponse {
   variants: Variant[]
+  has_more: bool
+  limit: int64 @encode(number)
+  offset: int64 @encode(number)
+  total: int64 @encode(number)
 }
 
 message UpdateVariantBody {

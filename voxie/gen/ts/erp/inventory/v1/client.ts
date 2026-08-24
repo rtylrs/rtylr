@@ -76,6 +76,12 @@ const violations = validateGetInventoryReportRequest(req);
 if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
 let path = "/erp/inventory/v1/report";
 const query = new URLSearchParams();
+if (req.limit !== undefined) {
+query.set("limit", String(req.limit));
+}
+if (req.offset !== undefined) {
+query.set("offset", String(req.offset));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
@@ -96,6 +102,12 @@ const violations = validateGetLowStockRequest(req);
 if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
 let path = "/erp/inventory/v1/low-stock";
 const query = new URLSearchParams();
+if (req.limit !== undefined) {
+query.set("limit", String(req.limit));
+}
+if (req.offset !== undefined) {
+query.set("offset", String(req.offset));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {
@@ -116,6 +128,12 @@ const violations = validateGetValuationRequest(req);
 if (violations.length > 0) throw new TypeError("invalid request: " + violations.join("; "));
 let path = "/erp/inventory/v1/valuation";
 const query = new URLSearchParams();
+if (req.limit !== undefined) {
+query.set("limit", String(req.limit));
+}
+if (req.offset !== undefined) {
+query.set("offset", String(req.offset));
+}
 const queryStr = query.toString();
 if (queryStr) { path += "?" + queryStr; }
 const res = await this.request(this.baseUrl + path, {

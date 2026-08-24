@@ -244,38 +244,58 @@ return violations;
 }
 
 export interface ListBrandsRequest {
+limit?: number;
+offset?: number;
 }
 
 export function decodeListBrandsRequest(v: any): ListBrandsRequest {
 if (v === null || v === undefined) return v;
 return {
+limit: v.limit,
+offset: v.offset,
 };
 }
 
 export function encodeListBrandsRequest(v: ListBrandsRequest): Record<string, unknown> {
 const out: Record<string, unknown> = {};
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
 return out;
 }
 
 export function validateListBrandsRequest(v: ListBrandsRequest): string[] {
 const violations: string[] = [];
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isSafeInteger(v.limit) && v.limit >= Number.MIN_SAFE_INTEGER && v.limit <= Number.MAX_SAFE_INTEGER)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isSafeInteger(v.offset) && v.offset >= Number.MIN_SAFE_INTEGER && v.offset <= Number.MAX_SAFE_INTEGER)) violations.push("offset has invalid type");
 return violations;
 }
 
 export interface ListBrandsResponse {
 brands?: (Brand)[];
+hasMore?: boolean;
+limit?: number;
+offset?: number;
+total?: number;
 }
 
 export function decodeListBrandsResponse(v: any): ListBrandsResponse {
 if (v === null || v === undefined) return v;
 return {
 brands: (v.brands !== undefined ? (v.brands as any[]).map(decodeBrand) : v.brands),
+hasMore: v.has_more,
+limit: v.limit,
+offset: v.offset,
+total: v.total,
 };
 }
 
 export function encodeListBrandsResponse(v: ListBrandsResponse): Record<string, unknown> {
 const out: Record<string, unknown> = {};
 if (v.brands !== undefined) { out.brands = (v.brands as any[]).map(encodeBrand); }
+if (v.hasMore !== undefined) { out.has_more = v.hasMore; }
+if (v.limit !== undefined) { out.limit = v.limit; }
+if (v.offset !== undefined) { out.offset = v.offset; }
+if (v.total !== undefined) { out.total = v.total; }
 return out;
 }
 
@@ -283,6 +303,10 @@ export function validateListBrandsResponse(v: ListBrandsResponse): string[] {
 const violations: string[] = [];
 if (v.brands !== undefined && v.brands !== null && !(Array.isArray(v.brands) && (v.brands).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("brands has invalid type");
 if (v.brands !== undefined && v.brands !== null) for (const item of v.brands) violations.push(...validateBrand(item).map((message) => "brands: " + message));
+if (v.hasMore !== undefined && v.hasMore !== null && !(typeof v.hasMore === "boolean")) violations.push("has_more has invalid type");
+if (v.limit !== undefined && v.limit !== null && !(typeof v.limit === "number" && Number.isSafeInteger(v.limit) && v.limit >= Number.MIN_SAFE_INTEGER && v.limit <= Number.MAX_SAFE_INTEGER)) violations.push("limit has invalid type");
+if (v.offset !== undefined && v.offset !== null && !(typeof v.offset === "number" && Number.isSafeInteger(v.offset) && v.offset >= Number.MIN_SAFE_INTEGER && v.offset <= Number.MAX_SAFE_INTEGER)) violations.push("offset has invalid type");
+if (v.total !== undefined && v.total !== null && !(typeof v.total === "number" && Number.isSafeInteger(v.total) && v.total >= Number.MIN_SAFE_INTEGER && v.total <= Number.MAX_SAFE_INTEGER)) violations.push("total has invalid type");
 return violations;
 }
 

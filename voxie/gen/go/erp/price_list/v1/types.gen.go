@@ -192,10 +192,32 @@ func (x *CreatePriceListResponse) GetMessage() string {
 }
 
 type ListPriceListsRequest struct {
+	Limit  int64 `json:"limit,omitempty"`
+	Offset int64 `json:"offset,omitempty"`
+}
+
+func (x *ListPriceListsRequest) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListPriceListsRequest) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
 }
 
 type ListPriceListsResponse struct {
 	PriceLists []*PriceList `json:"price_lists,omitempty"`
+	HasMore    bool         `json:"has_more,omitempty"`
+	Limit      int64        `json:"limit,omitempty"`
+	Offset     int64        `json:"offset,omitempty"`
+	Total      int64        `json:"total,omitempty"`
 }
 
 func (x *ListPriceListsResponse) GetPriceLists() []*PriceList {
@@ -204,4 +226,36 @@ func (x *ListPriceListsResponse) GetPriceLists() []*PriceList {
 		return zero
 	}
 	return x.PriceLists
+}
+
+func (x *ListPriceListsResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
+}
+
+func (x *ListPriceListsResponse) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListPriceListsResponse) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
+}
+
+func (x *ListPriceListsResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
 }

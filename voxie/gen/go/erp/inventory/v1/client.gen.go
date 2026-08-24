@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 const defaultMaxResponseBodyBytes int64 = 8 << 20
@@ -53,6 +54,8 @@ func (c *InventoryServiceClient) GetInventoryReport(ctx context.Context, req *Ge
 	}
 	path := "/erp/inventory/v1/report"
 	query := url.Values{}
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("offset", strconv.FormatInt(int64(req.Offset), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
@@ -91,6 +94,8 @@ func (c *InventoryServiceClient) GetLowStock(ctx context.Context, req *GetLowSto
 	}
 	path := "/erp/inventory/v1/low-stock"
 	query := url.Values{}
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("offset", strconv.FormatInt(int64(req.Offset), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}
@@ -129,6 +134,8 @@ func (c *InventoryServiceClient) GetValuation(ctx context.Context, req *GetValua
 	}
 	path := "/erp/inventory/v1/valuation"
 	query := url.Values{}
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("offset", strconv.FormatInt(int64(req.Offset), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

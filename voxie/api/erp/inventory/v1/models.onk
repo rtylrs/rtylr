@@ -34,23 +34,50 @@ message AdjustInventoryResponse {
   message: string
 }
 
-message GetInventoryReportRequest {}
+message GetInventoryReportRequest {
+  /// Maximum number of inventory rows to return.
+  limit: int64 @query("limit") @encode(number)
+  /// Number of inventory rows to skip.
+  offset: int64 @query("offset") @encode(number)
+}
 
 message GetInventoryReportResponse {
   items: InventoryReportItem[]
   total_value: float64
+  has_more: bool
+  limit: int64 @encode(number)
+  offset: int64 @encode(number)
+  total: int64 @encode(number)
 }
 
-message GetLowStockRequest {}
+message GetLowStockRequest {
+  /// Maximum number of low-stock rows to return.
+  limit: int64 @query("limit") @encode(number)
+  /// Number of low-stock rows to skip.
+  offset: int64 @query("offset") @encode(number)
+}
 
 message GetLowStockResponse {
   items: InventoryReportItem[]
   count: int64 @encode(number)
+  has_more: bool
+  limit: int64 @encode(number)
+  offset: int64 @encode(number)
+  total: int64 @encode(number)
 }
 
-message GetValuationRequest {}
+message GetValuationRequest {
+  /// Maximum number of valuation rows to return.
+  limit: int64 @query("limit") @encode(number)
+  /// Number of valuation rows to skip.
+  offset: int64 @query("offset") @encode(number)
+}
 
 message GetValuationResponse {
   items: ValuationItem[]
   total_value: float64
+  has_more: bool
+  limit: int64 @encode(number)
+  offset: int64 @encode(number)
+  total: int64 @encode(number)
 }

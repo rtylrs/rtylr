@@ -96,8 +96,8 @@ return violations;
 }
 
 export interface CreateStockTransferItemRequest {
-productId?: string;
-quantity?: number;
+productId: string;
+quantity: number;
 }
 
 export function decodeCreateStockTransferItemRequest(v: any): CreateStockTransferItemRequest {
@@ -118,7 +118,11 @@ return out;
 export function validateCreateStockTransferItemRequest(v: CreateStockTransferItemRequest): string[] {
 const violations: string[] = [];
 if (v.productId !== undefined && v.productId !== null && !(typeof v.productId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.productId))) violations.push("product_id has invalid type");
+if (!(v.productId !== undefined && v.productId !== null)) violations.push("product_id is required");
+if (v.productId !== undefined && v.productId !== null && !(Number(v.productId) > 0)) violations.push("product_id violates @gt");
 if (v.quantity !== undefined && v.quantity !== null && !(typeof v.quantity === "number" && Number.isFinite(v.quantity))) violations.push("quantity has invalid type");
+if (!(v.quantity !== undefined && v.quantity !== null)) violations.push("quantity is required");
+if (v.quantity !== undefined && v.quantity !== null && !(Number(v.quantity) > 0)) violations.push("quantity violates @gt");
 return violations;
 }
 
@@ -158,6 +162,7 @@ if (!(v.toWarehouseId !== undefined && v.toWarehouseId !== null)) violations.pus
 if (v.toWarehouseId !== undefined && v.toWarehouseId !== null && !(Number(v.toWarehouseId) > 0)) violations.push("to_warehouse_id violates @gt");
 if (v.notes !== undefined && v.notes !== null && !(typeof v.notes === "string")) violations.push("notes has invalid type");
 if (v.items !== undefined && v.items !== null && !(Array.isArray(v.items) && (v.items).every((item: any) => typeof item === "object" && item !== null && !Array.isArray(item)))) violations.push("items has invalid type");
+if (v.items !== undefined && v.items !== null && v.items.length < 1) violations.push("items must contain at least 1 items");
 if (v.items !== undefined && v.items !== null) for (const item of v.items) violations.push(...validateCreateStockTransferItemRequest(item).map((message) => "items: " + message));
 return violations;
 }

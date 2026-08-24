@@ -374,10 +374,32 @@ func (x *DeleteWarehouseResponse) GetMessage() string {
 }
 
 type ListWarehousesRequest struct {
+	Limit  int64 `json:"limit,omitempty"`
+	Offset int64 `json:"offset,omitempty"`
+}
+
+func (x *ListWarehousesRequest) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListWarehousesRequest) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
 }
 
 type ListWarehousesResponse struct {
 	Warehouses []*Warehouse `json:"warehouses,omitempty"`
+	HasMore    bool         `json:"has_more,omitempty"`
+	Limit      int64        `json:"limit,omitempty"`
+	Offset     int64        `json:"offset,omitempty"`
+	Total      int64        `json:"total,omitempty"`
 }
 
 func (x *ListWarehousesResponse) GetWarehouses() []*Warehouse {
@@ -386,6 +408,38 @@ func (x *ListWarehousesResponse) GetWarehouses() []*Warehouse {
 		return zero
 	}
 	return x.Warehouses
+}
+
+func (x *ListWarehousesResponse) GetHasMore() bool {
+	if x == nil {
+		var zero bool
+		return zero
+	}
+	return x.HasMore
+}
+
+func (x *ListWarehousesResponse) GetLimit() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Limit
+}
+
+func (x *ListWarehousesResponse) GetOffset() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Offset
+}
+
+func (x *ListWarehousesResponse) GetTotal() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Total
 }
 
 type UpdateWarehouseBody struct {

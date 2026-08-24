@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 const defaultMaxResponseBodyBytes int64 = 8 << 20
@@ -53,6 +54,8 @@ func (c *PriceListServiceClient) ListPriceLists(ctx context.Context, req *ListPr
 	}
 	path := "/erp/price-list/v1/price-lists"
 	query := url.Values{}
+	query.Set("limit", strconv.FormatInt(int64(req.Limit), 10))
+	query.Set("offset", strconv.FormatInt(int64(req.Offset), 10))
 	if len(query) > 0 {
 		path += "?" + query.Encode()
 	}

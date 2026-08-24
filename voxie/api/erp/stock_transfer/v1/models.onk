@@ -21,15 +21,15 @@ message StockTransfer {
 }
 
 message CreateStockTransferItemRequest {
-  product_id: int64
-  quantity: float64
+  product_id: int64 @required @gt(0)
+  quantity: float64 @required @gt(0)
 }
 
 message CreateStockTransferRequest {
   from_warehouse_id: int64 @required @gt(0)
   to_warehouse_id: int64 @required @gt(0)
   notes: string
-  items: CreateStockTransferItemRequest[]
+  items: CreateStockTransferItemRequest[] @min_items(1)
 }
 
 message CreateStockTransferResponse {
