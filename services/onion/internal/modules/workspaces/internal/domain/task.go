@@ -37,6 +37,7 @@ type Task struct {
 	Title          string
 	Description    string
 	Status         string
+	StatusID       *int64
 	Priority       string
 	AssigneeID     *int64
 	ReporterID     int64
@@ -59,6 +60,8 @@ type Task struct {
 	AssigneeName     string
 	AssigneeInitials string
 	SubtaskCount     int32
+	StatusName       string
+	StatusColor      string
 }
 
 type ProjectColumn struct {

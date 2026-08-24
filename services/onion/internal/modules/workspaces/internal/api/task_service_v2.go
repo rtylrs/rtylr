@@ -112,6 +112,8 @@ func toTaskV2(t domain.Task) *flowtaskv2.FlowTask {
 		AssigneeName:     t.AssigneeName,
 		AssigneeInitials: t.AssigneeInitials,
 		SubtaskCount:     t.SubtaskCount,
+		StatusName:       t.StatusName,
+		StatusColor:      t.StatusColor,
 	}
 	if t.ParentTaskID != nil {
 		v := *t.ParentTaskID
@@ -120,6 +122,10 @@ func toTaskV2(t domain.Task) *flowtaskv2.FlowTask {
 	if t.AssigneeID != nil {
 		v := *t.AssigneeID
 		out.AssigneeId = &v
+	}
+	if t.StatusID != nil {
+		v := *t.StatusID
+		out.StatusId = &v
 	}
 	if t.DueDate != nil {
 		v := t.DueDate.Format("2006-01-02")

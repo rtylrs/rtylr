@@ -1170,6 +1170,9 @@ func enrichedTaskColumns(includeDescription bool) []string {
 		"COALESCE(p.color, '') AS project_color",
 		"COALESCE(u.full_name, '') AS assignee_name",
 		"COALESCE((SELECT COUNT(*) FROM flow_tasks st WHERE st.parent_task_id = t.id), 0) AS subtask_count",
+		"t.status_id",
+		"COALESCE(fs.name, '') AS status_name",
+		"COALESCE(fs.color, '') AS status_color",
 	}
 }
 
@@ -1189,6 +1192,7 @@ func enrichedTaskSelectForList(compact bool) sq.SelectBuilder {
 		From("flow_tasks t").
 		LeftJoin("flow_projects p ON p.id = t.project_id").
 		LeftJoin("users u ON u.id = t.assignee_id").
+		LeftJoin("flow_statuses fs ON fs.id = t.status_id").
 		PlaceholderFormat(sq.Question)
 }
 
@@ -1233,7 +1237,7 @@ func (r *Repository) listEnrichedTasks(ctx context.Context, builder sq.SelectBui
 func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) {
 	var t domain.Task
 	var desc sql.NullString
-	var parentID, sectionID, assigneeID sql.NullInt64
+	var parentID, sectionID, assigneeID, statusID sql.NullInt64
 	var dueDate, startDate, completedAt sql.NullTime
 	var estHours, actHours sql.NullFloat64
 	var labelsRaw []byte
@@ -1246,6 +1250,7 @@ func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) 
 		&estHours, &actHours, &t.SortOrder, &labelsRaw, &t.Archived,
 		&t.CreatedAt, &t.UpdatedAt,
 		&t.ProjectName, &t.ProjectColor, &t.AssigneeName, &t.SubtaskCount,
+		&statusID, &t.StatusName, &t.StatusColor,
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("scanEnrichedTask row scan failed", logger.Error(err))
@@ -1261,6 +1266,9 @@ func scanEnrichedTask(ctx context.Context, rows *sql.Rows) (domain.Task, error) 
 	}
 	if assigneeID.Valid {
 		t.AssigneeID = &assigneeID.Int64
+	}
+	if statusID.Valid {
+		t.StatusID = &statusID.Int64
 	}
 	if dueDate.Valid {
 		t.DueDate = &dueDate.Time

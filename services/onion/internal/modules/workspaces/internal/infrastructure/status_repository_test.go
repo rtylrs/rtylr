@@ -230,3 +230,63 @@ func TestDeleteStatus_MovesItsTasksBackToTheStringStatus(t *testing.T) {
 		t.Errorf("status should be gone, got err = %v", err)
 	}
 }
+
+// TestGetTaskByID_ReflectsAppliedStatus is the read side of a write that
+// existed with nothing to prove it worked: SetTaskStatusID could set a
+// task's custom status, but FlowTask had no field to read it back on, so
+// nothing the API returned could ever show which custom status a task had.
+func TestGetTaskByID_ReflectsAppliedStatus(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	const owner int64 = 990701
+	projID := newStatusProbeProject(t, repo, owner, "Status Projection Probe")
+
+	in, _ := domain.NormalizeStatusInput(domain.StatusInput{
+		ProjectID: projID, Name: "Legal review", Bucket: domain.StatusBucketActive,
+		Color: "#ec4899",
+	})
+	status, err := repo.CreateStatus(ctx, testutil.BusinessID, owner, in)
+	if err != nil {
+		t.Fatalf("CreateStatus: %v", err)
+	}
+
+	taskID, err := repo.CreateTask(ctx, domain.TaskInput{
+		ProjectID: projID, BusinessID: testutil.BusinessID,
+		Title: "Status projection probe task", ReporterID: owner, OwnerID: owner,
+	})
+	if err != nil {
+		t.Fatalf("CreateTask: %v", err)
+	}
+
+	// Before assignment: no custom status, so the projection fields must be
+	// absent, not a stale or zero-valued status.
+	before, err := repo.GetTaskByID(ctx, taskID)
+	if err != nil {
+		t.Fatalf("GetTaskByID before: %v", err)
+	}
+	if before.StatusID != nil {
+		t.Errorf("StatusID before assignment = %v, want nil", *before.StatusID)
+	}
+	if before.StatusName != "" || before.StatusColor != "" {
+		t.Errorf("StatusName/StatusColor before assignment = %q/%q, want empty", before.StatusName, before.StatusColor)
+	}
+
+	if err := repo.SetTaskStatusID(ctx, taskID, testutil.BusinessID, status.ID, status.LegacyStatus); err != nil {
+		t.Fatalf("SetTaskStatusID: %v", err)
+	}
+
+	after, err := repo.GetTaskByID(ctx, taskID)
+	if err != nil {
+		t.Fatalf("GetTaskByID after: %v", err)
+	}
+	if after.StatusID == nil || *after.StatusID != status.ID {
+		t.Fatalf("StatusID after assignment = %v, want %d", after.StatusID, status.ID)
+	}
+	if after.StatusName != "Legal review" {
+		t.Errorf("StatusName = %q, want %q", after.StatusName, "Legal review")
+	}
+	if after.StatusColor != "#ec4899" {
+		t.Errorf("StatusColor = %q, want %q", after.StatusColor, "#ec4899")
+	}
+}
