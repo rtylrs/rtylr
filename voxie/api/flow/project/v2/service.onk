@@ -48,4 +48,9 @@ service ProjectService {
   inviteProjectMember(InviteProjectMemberRequest) -> InviteProjectMemberResponse @post("/projects/members/invite")
 
   transferProjectOwnership(TransferProjectOwnershipRequest) -> TransferProjectOwnershipResponse @put("/projects/transfer")
+
+  /// getProjectLabourCost returns the labour cost of billable logged time on a
+  /// project. Requires admin on the project: it exposes aggregate spend, and
+  /// the aggregate is derived from HR rates that must not leak through Flow.
+  getProjectLabourCost(GetProjectLabourCostRequest) -> GetProjectLabourCostResponse @get("/projects/{id}/labour-cost")
 }

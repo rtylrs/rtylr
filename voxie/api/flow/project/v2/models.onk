@@ -403,3 +403,34 @@ message TransferProjectOwnershipResponse {
   /// message is a human-readable result message.
   message: string
 }
+
+// ── Labour cost ───────────────────────────────────────────────────
+
+message ProjectLabourCost {
+  /// project_id is the project the cost was computed for.
+  project_id: int64
+  /// cost_minor_units is the labour cost of billable logged time in the
+  /// smallest unit of the business currency, so no rounding happens before
+  /// the caller sees it.
+  cost_minor_units: int64
+  /// costed_minutes is billable logged time whose contributor had a rate on
+  /// record; it is the time included in cost_minor_units.
+  costed_minutes: int64
+  /// uncosted_minutes is billable logged time whose contributor has no rate
+  /// on record. A total with uncosted_minutes above zero understates true
+  /// labour cost and must be labelled as partial where it is displayed.
+  uncosted_minutes: int64
+  /// uncosted_employee_count is how many distinct contributors have no rate
+  /// on record.
+  uncosted_employee_count: int32
+}
+
+message GetProjectLabourCostRequest {
+  /// id is the Flow project id path parameter.
+  id: int64 @required @gt(0)
+}
+
+message GetProjectLabourCostResponse {
+  /// cost is the aggregate for the requested project.
+  cost: ProjectLabourCost
+}

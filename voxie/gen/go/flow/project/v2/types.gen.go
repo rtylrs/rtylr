@@ -1961,3 +1961,163 @@ func (x *TransferProjectOwnershipResponse) GetMessage() string {
 	}
 	return x.Message
 }
+
+type ProjectLabourCost struct {
+	ProjectId             int64 `json:"project_id,omitempty"`
+	CostMinorUnits        int64 `json:"cost_minor_units,omitempty"`
+	CostedMinutes         int64 `json:"costed_minutes,omitempty"`
+	UncostedMinutes       int64 `json:"uncosted_minutes,omitempty"`
+	UncostedEmployeeCount int32 `json:"uncosted_employee_count,omitempty"`
+}
+
+func (m *ProjectLabourCost) MarshalJSON() ([]byte, error) {
+	type alias ProjectLabourCost
+	aux := struct {
+		*alias
+		ProjectId       string `json:"project_id,omitempty"`
+		CostMinorUnits  string `json:"cost_minor_units,omitempty"`
+		CostedMinutes   string `json:"costed_minutes,omitempty"`
+		UncostedMinutes string `json:"uncosted_minutes,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.ProjectId = strconv.FormatInt(m.ProjectId, 10)
+	aux.CostMinorUnits = strconv.FormatInt(m.CostMinorUnits, 10)
+	aux.CostedMinutes = strconv.FormatInt(m.CostedMinutes, 10)
+	aux.UncostedMinutes = strconv.FormatInt(m.UncostedMinutes, 10)
+	return json.Marshal(aux)
+}
+
+func (m *ProjectLabourCost) UnmarshalJSON(data []byte) error {
+	type alias ProjectLabourCost
+	aux := struct {
+		*alias
+		ProjectId       string `json:"project_id,omitempty"`
+		CostMinorUnits  string `json:"cost_minor_units,omitempty"`
+		CostedMinutes   string `json:"costed_minutes,omitempty"`
+		UncostedMinutes string `json:"uncosted_minutes,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.ProjectId != "" {
+		v, err := strconv.ParseInt(aux.ProjectId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.ProjectId = v
+	}
+	if aux.CostMinorUnits != "" {
+		v, err := strconv.ParseInt(aux.CostMinorUnits, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CostMinorUnits = v
+	}
+	if aux.CostedMinutes != "" {
+		v, err := strconv.ParseInt(aux.CostedMinutes, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.CostedMinutes = v
+	}
+	if aux.UncostedMinutes != "" {
+		v, err := strconv.ParseInt(aux.UncostedMinutes, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.UncostedMinutes = v
+	}
+	return nil
+}
+
+func (x *ProjectLabourCost) GetProjectId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.ProjectId
+}
+
+func (x *ProjectLabourCost) GetCostMinorUnits() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CostMinorUnits
+}
+
+func (x *ProjectLabourCost) GetCostedMinutes() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.CostedMinutes
+}
+
+func (x *ProjectLabourCost) GetUncostedMinutes() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.UncostedMinutes
+}
+
+func (x *ProjectLabourCost) GetUncostedEmployeeCount() int32 {
+	if x == nil {
+		var zero int32
+		return zero
+	}
+	return x.UncostedEmployeeCount
+}
+
+type GetProjectLabourCostRequest struct {
+	Id int64 `json:"id,omitempty"`
+}
+
+func (m *GetProjectLabourCostRequest) MarshalJSON() ([]byte, error) {
+	type alias GetProjectLabourCostRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	aux.Id = strconv.FormatInt(m.Id, 10)
+	return json.Marshal(aux)
+}
+
+func (m *GetProjectLabourCostRequest) UnmarshalJSON(data []byte) error {
+	type alias GetProjectLabourCostRequest
+	aux := struct {
+		*alias
+		Id string `json:"id,omitempty"`
+	}{alias: (*alias)(m)}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Id != "" {
+		v, err := strconv.ParseInt(aux.Id, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.Id = v
+	}
+	return nil
+}
+
+func (x *GetProjectLabourCostRequest) GetId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	return x.Id
+}
+
+type GetProjectLabourCostResponse struct {
+	Cost *ProjectLabourCost `json:"cost,omitempty"`
+}
+
+func (x *GetProjectLabourCostResponse) GetCost() *ProjectLabourCost {
+	if x == nil {
+		var zero *ProjectLabourCost
+		return zero
+	}
+	return x.Cost
+}
