@@ -2,8 +2,7 @@
 .header {
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
+  inset-inline: 0;
   color: var(--ink);
   z-index: 1000;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -133,7 +132,7 @@
 .header-dropdown {
   position: absolute;
   top: 100%;
-  left: 0;
+  inset-inline-start: 0;
   margin-top: 15px;
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
@@ -174,7 +173,7 @@
 .header-dropdown-wide {
   position: absolute;
   top: 100%;
-  left: 0;
+  inset-inline-start: 0;
   margin-top: 15px;
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
@@ -224,7 +223,7 @@
   flex-direction: column;
   position: absolute;
   top: 100%;
-  right: 0;
+  inset-inline-end: 0;
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);

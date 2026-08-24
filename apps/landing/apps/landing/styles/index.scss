@@ -10,6 +10,61 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  // ── Direction primitives ──────────────────────────────────────────────────
+  //
+  // Logical properties (padding-inline-start, inset-inline-end, and the rest)
+  // mirror box geometry on their own, and they are the only way box geometry
+  // should be written here. Two things they cannot do:
+  //
+  //   --dir-x   the sign of a translate along the inline axis. A CTA arrow
+  //             that nudges 2px "forward" on hover has to nudge -2px in RTL,
+  //             and `transform` has no logical form.
+  //   --dir-mirror  the scaleX factor for a glyph that carries direction as
+  //             meaning. An arrow is not mirrored by any layout property.
+  //
+  // Both are plain numbers so they compose inside calc() and scaleX().
+  --dir-x: 1;
+  --dir-mirror: 1;
+}
+
+// :root[dir='rtl'] rather than a bare [dir='rtl'], so this beats the :root
+// block above on specificity rather than on source order.
+:root[dir='rtl'] {
+  --dir-x: -1;
+  --dir-mirror: -1;
+
+  // DM Sans has no Arabic coverage, so an Arabic page rendered in it falls
+  // back per glyph to whatever the OS happens to offer: Geeza Pro on macOS,
+  // something else everywhere else, none of it the site's typography. This
+  // stack keeps Latin runs (the wordmark, "POS", numerals) in DM Sans and
+  // hands the Arabic codepoints to a face that actually has them.
+  //
+  // Scoped to dir='rtl' on the document element, so the Latin pages resolve
+  // --primary-font exactly as before.
+  --primary-font: var(--rtl-font);
+}
+
+// The wrapper div in _app.tsx carries .dir-font-scope. next/font puts DM Sans
+// on that same div through its own generated class, and a font-family
+// inherited from :root or body can never beat a declaration on the element
+// itself, so the RTL switch has to be a rule on the div that outranks the
+// generated one. (0,3,0) against (0,1,0) does that on specificity rather than
+// on source order, which is what makes it independent of how Next orders the
+// next/font styles against this stylesheet.
+:root[dir='rtl'] .dir-font-scope {
+  font-family: var(--rtl-font);
+}
+
+// Opt-in mirror for a directional glyph: <ArrowRight className="rtl-mirror" />.
+// Deliberately opt-in rather than a blanket rule on every svg, because most
+// icons (a cart, a receipt, a padlock) must NOT mirror.
+//
+// A rule that also sets `transform` on the same element wins over this one,
+// so any such rule has to carry scaleX(var(--dir-mirror)) itself. The hover
+// nudges in HeroSection and ProductsSection do.
+.rtl-mirror {
+  transform: scaleX(var(--dir-mirror));
 }
 
 * {

@@ -20,7 +20,7 @@
   justify-content: center;
   gap: 32px;
   padding: 96px 80px;
-  border-right: 1px solid var(--hairline);
+  border-inline-end: 1px solid var(--hairline);
 }
 
 .ctaTitle {
@@ -128,7 +128,7 @@
 
   .left {
     padding: 72px 32px;
-    border-right: none;
+    border-inline-end: none;
     border-bottom: 1px solid var(--hairline);
   }
 

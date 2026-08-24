@@ -36,6 +36,19 @@
   // falls through to Inter instead of silently landing on a serif default.
   --primary-font: var(--font-dm-sans, 'DM Sans Fallback'), 'Inter', ui-sans-serif, system-ui,
     -apple-system, sans-serif;
+  // The RTL stack, applied by :root[dir='rtl'] in index.scss and by the
+  // wrapper class in _app.tsx. DM Sans stays first so Latin runs inside
+  // Arabic copy keep the site's face; the browser falls through per glyph to
+  // the Arabic face for anything DM Sans does not cover.
+  //
+  // 'IBM Plex Sans Arabic Fallback' is the same sentinel trick as 'DM Sans
+  // Fallback' above: a name no system has, so a missing --font-plex-arabic
+  // falls through to the real families listed after it instead of resolving
+  // silently to something that happens to be installed. Those three are the
+  // platform Arabic UI faces (macOS/iOS, Windows, Android/Linux).
+  --rtl-font: var(--font-dm-sans, 'DM Sans Fallback'),
+    var(--font-plex-arabic, 'IBM Plex Sans Arabic Fallback'), 'Geeza Pro', 'Segoe UI',
+    'Noto Sans Arabic', ui-sans-serif, system-ui, sans-serif;
   --primary-font-bold: var(--primary-font);
   --gg-sans: 'Gg-Sans', sans-serif;
   --secondary-font: var(--primary-font);

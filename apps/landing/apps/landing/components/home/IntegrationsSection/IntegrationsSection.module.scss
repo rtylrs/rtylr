@@ -65,7 +65,7 @@
   position: relative;
   padding: 40px 20px;
   background: transparent;
-  border-right: 1px solid var(--hairline);
+  border-inline-end: 1px solid var(--hairline);
   border-bottom: 1px solid var(--hairline);
   display: flex;
   flex-direction: column;
@@ -76,7 +76,7 @@
 
   // Last column: no right border
   &:nth-child(4n) {
-    border-right: none;
+    border-inline-end: none;
   }
 
   // Last row (assuming 8 items / 2 rows): no bottom border on last row
@@ -168,11 +168,11 @@
   // Recalculate border-sharing for a 2-col grid
   .integrationCard {
     padding: 28px 16px;
-    border-right: 1px solid var(--hairline);
+    border-inline-end: 1px solid var(--hairline);
     border-bottom: 1px solid var(--hairline);
 
     &:nth-child(4n) {
-      border-right: 1px solid var(--hairline);
+      border-inline-end: 1px solid var(--hairline);
     }
 
     &:nth-last-child(-n + 4) {
@@ -180,7 +180,7 @@
     }
 
     &:nth-child(2n) {
-      border-right: none;
+      border-inline-end: none;
     }
 
     &:nth-last-child(-n + 2) {

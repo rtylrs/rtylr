@@ -78,7 +78,8 @@
 
     .cardArrow {
       opacity: 1;
-      transform: translateX(2px);
+      // --dir-x flips this to -2px in RTL; see HeroSection.module.scss.
+      transform: translateX(calc(2px * var(--dir-x)));
     }
 
     // transform not set here - iconWrap has its own whileHover in

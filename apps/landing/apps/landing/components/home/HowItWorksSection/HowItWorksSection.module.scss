@@ -69,11 +69,11 @@
   flex-direction: column;
   gap: 16px;
   padding: 40px 32px;
-  border-right: 1px solid var(--hairline);
+  border-inline-end: 1px solid var(--hairline);
   transition: background 0.25s ease;
 
   &:last-child {
-    border-right: none;
+    border-inline-end: none;
   }
 
   &:hover {
@@ -123,15 +123,15 @@
   }
 
   .step {
-    border-right: 1px solid var(--hairline);
+    border-inline-end: 1px solid var(--hairline);
     border-bottom: 1px solid var(--hairline);
 
     &:last-child {
-      border-right: 1px solid var(--hairline);
+      border-inline-end: 1px solid var(--hairline);
     }
 
     &:nth-child(2n) {
-      border-right: none;
+      border-inline-end: none;
     }
 
     &:nth-last-child(-n + 2) {
@@ -173,7 +173,7 @@
   }
 
   .step {
-    border-right: none;
+    border-inline-end: none;
     border-bottom: 1px solid var(--hairline);
 
     &:last-child {
@@ -181,7 +181,7 @@
     }
 
     &:nth-child(2n) {
-      border-right: none;
+      border-inline-end: none;
     }
   }
 }

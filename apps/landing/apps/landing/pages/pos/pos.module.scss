@@ -57,7 +57,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  text-align: left;
+  text-align: start;
 }
 
 .heroEyebrow {
@@ -172,7 +172,7 @@
     0 0 0 1px rgba(255, 255, 255, 0.05);
   transform: rotate(1.5deg);
   max-width: 360px;
-  margin-left: auto;
+  margin-inline-start: auto;
   font-family: 'Courier New', Courier, monospace;
 }
 
@@ -397,12 +397,12 @@
 
 .featureCard {
   padding: 32px 28px;
-  border-right: 1px solid var(--hairline);
+  border-inline-end: 1px solid var(--hairline);
   border-bottom: 1px solid var(--hairline);
   transition: background 0.25s ease;
 
   &:nth-child(2n) {
-    border-right: none;
+    border-inline-end: none;
   }
 
   &:nth-last-child(-n + 2) {
@@ -480,13 +480,13 @@
     background: var(--bg-surface-b);
 
     &:first-child {
-      text-align: left;
-      padding-left: 24px;
+      text-align: start;
+      padding-inline-start: 24px;
     }
   }
 
   tbody th {
-    text-align: left;
+    text-align: start;
     padding: 16px 24px 16px 24px;
     font-weight: 500;
     color: var(--ink);
@@ -523,8 +523,8 @@
 
 .compareUs {
   background: rgba(19, 19, 19, 0.03);
-  border-left: 1px solid rgba(19, 19, 19, 0.15);
-  border-right: 1px solid rgba(19, 19, 19, 0.15);
+  border-inline-start: 1px solid rgba(19, 19, 19, 0.15);
+  border-inline-end: 1px solid rgba(19, 19, 19, 0.15);
 }
 
 // Cell variants
@@ -560,7 +560,7 @@
   border-top: 1px solid var(--hairline);
   background: var(--bg-surface-b);
   margin: 0;
-  text-align: left;
+  text-align: start;
 
   a {
     color: rgba(19, 19, 19, 0.75);
@@ -585,7 +585,7 @@
 
 .statCell {
   padding: 36px 24px;
-  border-right: 1px solid var(--hairline);
+  border-inline-end: 1px solid var(--hairline);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -594,7 +594,7 @@
   text-align: center;
 
   &:last-child {
-    border-right: none;
+    border-inline-end: none;
   }
 }
 
@@ -742,7 +742,7 @@
     grid-template-columns: repeat(2, 1fr);
 
     .statCell:nth-child(2n) {
-      border-right: none;
+      border-inline-end: none;
     }
 
     .statCell:nth-child(n + 3) {
@@ -764,7 +764,7 @@
     grid-template-columns: 1fr;
 
     .featureCard {
-      border-right: none;
+      border-inline-end: none;
       border-bottom: 1px solid var(--hairline);
 
       &:last-child {
@@ -785,7 +785,7 @@
     grid-template-columns: 1fr;
 
     .statCell {
-      border-right: none;
+      border-inline-end: none;
       border-bottom: 1px solid var(--hairline);
 
       &:last-child {

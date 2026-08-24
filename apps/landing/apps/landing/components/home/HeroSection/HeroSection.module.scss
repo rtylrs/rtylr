@@ -189,7 +189,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  text-align: left;
+  text-align: start;
   box-shadow: var(--elev-1);
   transition:
     box-shadow 0.2s ease,
@@ -339,7 +339,9 @@
     box-shadow: var(--btn-cream-shadow-hover);
 
     svg {
-      transform: translateX(2px);
+      // --dir-x flips this to -2px in RTL, so the nudge is toward the
+      // reading direction rather than always physically rightward.
+      transform: translateX(calc(2px * var(--dir-x)));
     }
   }
 
@@ -392,7 +394,7 @@
       transition: all 0.3s;
       padding: 30px 20px;
       text-align: center;
-      border-right: 1px solid var(--hairline);
+      border-inline-end: 1px solid var(--hairline);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -402,7 +404,7 @@
       overflow: hidden;
 
       &:last-child {
-        border-right: none;
+        border-inline-end: none;
       }
 
       &:hover {
@@ -441,7 +443,7 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
 
     .logoItem:nth-child(4n) {
-      border-right: none;
+      border-inline-end: none;
     }
 
     .logoItem:nth-child(n + 5) {
@@ -511,7 +513,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
 
     .logoItem:nth-child(2n) {
-      border-right: none;
+      border-inline-end: none;
     }
 
     .logoItem:nth-child(n + 3) {
