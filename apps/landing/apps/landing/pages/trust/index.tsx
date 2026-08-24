@@ -3,6 +3,7 @@ import { cn } from '../../lib/cn';
 import { motion } from 'motion/react';
 import { Trans, useTranslation } from 'react-i18next';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import {
   ShieldCheck,
   Lock,
@@ -19,6 +20,7 @@ import HelmetContainer from '../../components/HelmetContainer';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import { webPageSchema } from '../../lib/structured-data';
 import Lines from '../../components/text/Lines';
+import { localeFromPath, navPath, navPathWithHash } from '../../lib/locales';
 import styles from './trust.module.scss';
 
 // Icon and anchor only. Title and copy resolve from trust.pillars,
@@ -45,6 +47,8 @@ const secMailComponent = <a href="mailto:security@voxire.com" />;
 
 const TrustPage = (): React.JSX.Element => {
   const { t, i18n } = useTranslation();
+  const router = useRouter();
+  const locale = localeFromPath(router.asPath).code;
   const uptimeValue = i18n.language === 'fr' ? '99,99 %' : '99.99%';
   const pillars = t('trust.pillars', { returnObjects: true }) as unknown as {
     title: string;
@@ -88,12 +92,12 @@ const TrustPage = (): React.JSX.Element => {
                 {t('trust.hero.subtitle')}
               </motion.p>
               <motion.div className={styles.heroLinks} variants={blurFadeIn}>
-                <Link href="/legal/security" className={styles.primaryBtn}>
-                {t('trust.hero.securityDocs')}
-              </Link>
-                <Link href="/legal/privacy-policy" className={styles.outlineBtn}>
-                {t('trust.hero.privacyPolicy')}
-              </Link>
+                <Link href={navPath('/legal/security', locale)} className={styles.primaryBtn}>
+                  {t('trust.hero.securityDocs')}
+                </Link>
+                <Link href={navPath('/legal/privacy-policy', locale)} className={styles.outlineBtn}>
+                  {t('trust.hero.privacyPolicy')}
+                </Link>
               </motion.div>
             </motion.div>
           </section>
@@ -121,7 +125,7 @@ const TrustPage = (): React.JSX.Element => {
                 <div className={styles.statusSub}>{t('trust.status.uptimeLabel')}</div>
               </div>
               <div className={styles.statusCell}>
-                <div className={styles.statusBig} dir="ltr">&lt; 72h</div>
+                <div className={styles.statusBig} dir="ltr">{t('trust.status.breachValue')}</div>
                 <div className={styles.statusSub}>{t('trust.status.breachLabel')}</div>
               </div>
               <div className={styles.statusCell}>
@@ -161,7 +165,7 @@ const TrustPage = (): React.JSX.Element => {
                   </div>
                   <h3 className={styles.pillarTitle}>{pillars[pi].title}</h3>
                   <p className={styles.pillarCopy}>{pillars[pi].copy}</p>
-                  <Link href={link} className={styles.pillarLink}>
+                  <Link href={navPathWithHash(link, locale)} className={styles.pillarLink}>
                     {t('trust.pillarsSection.learnMore')}
                   </Link>
                 </motion.div>
