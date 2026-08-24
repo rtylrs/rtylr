@@ -36,10 +36,14 @@ Thumbs.db
 # Log files
 *.log
 
-# Environment variables
-.env
-.env.local
-.env.*.local
+# Environment variables.
+#
+# .env* rather than an enumerated list: the previous three patterns missed
+# .env.backup, .env.bak, .env.old and anything else a person creates while
+# debugging, so a `git add -A` would have staged real credentials. The negation
+# keeps the committed example files addable.
+.env*
+!.env.example
 
 # Build artifacts
 /dist/
