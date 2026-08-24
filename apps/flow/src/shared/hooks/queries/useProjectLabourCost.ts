@@ -1,7 +1,7 @@
 import { createOneKitClient } from '@voxire/api';
 import { useQuery } from '@tanstack/react-query';
-import { ProjectServiceClient } from '@voxire/voxie/flow/project/v1/client';
-import type { ProjectLabourCost } from '@voxire/voxie/flow/project/v1/types';
+import { ProjectServiceClient } from '@voxire/voxie/flow/project/v2/client';
+import type { ProjectLabourCost } from '@voxire/voxie/flow/project/v2/types';
 
 // The project service serves the labour-cost aggregate via the HR-owned
 // labourcost port. Rates never cross the boundary; only aggregate cents and
