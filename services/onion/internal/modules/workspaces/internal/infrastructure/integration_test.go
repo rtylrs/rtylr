@@ -89,6 +89,20 @@ func TestWorkspaces_ClientKeyIsScopedByBusiness(t *testing.T) {
 	ctx := context.Background()
 	const sharedOwner int64 = 970200
 
+	// Registered before the inserts, not after. A run that failed partway
+	// through the loop never reached a cleanup placed below it, so the first
+	// row leaked and every later run failed on that leftover as a duplicate:
+	// the test poisoned itself permanently after one bad run.
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx,
+			"DELETE FROM hr_time_entries WHERE owner_id = ? AND client_key = ?",
+			sharedOwner, "shared-client-key",
+		)
+	})
+
+	// Both inserts must succeed. The same client_key in two businesses is the
+	// whole point: uk_time_entries_client_key_tenant is scoped by business_id,
+	// so one tenant's key must not block another's.
 	for _, businessID := range []int64{testutil.BusinessID, testutil.OtherBusinessID} {
 		if _, err := db.ExecContext(ctx, `
 			INSERT INTO hr_time_entries (
@@ -101,12 +115,6 @@ func TestWorkspaces_ClientKeyIsScopedByBusiness(t *testing.T) {
 			t.Fatalf("insert business %d: %v", businessID, err)
 		}
 	}
-	t.Cleanup(func() {
-		_, _ = db.ExecContext(ctx,
-			"DELETE FROM hr_time_entries WHERE owner_id = ? AND client_key = ?",
-			sharedOwner, "shared-client-key",
-		)
-	})
 }
 
 func TestWorkspaces_GetWorkspacesByOwner_NoError(t *testing.T) {
@@ -132,18 +140,31 @@ func TestWorkspaces_CreateWorkspace_AppearsInList(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = repo.DeleteWorkspace(context.Background(), id, testutil.BusinessID) })
 
-	workspaces, _, err := repo.GetWorkspacesByOwner(context.Background(), testutil.BusinessID, 500, 0)
-	if err != nil {
-		t.Fatalf("GetWorkspacesByOwner: %v", err)
-	}
+	// Page rather than assume the new row is on the first one. The query orders
+	// by is_default DESC, created_at ASC, id ASC, so a freshly created workspace
+	// sorts LAST - and the dev database holds over a thousand for this business,
+	// well past any single page. Asserting against a fixed limit made this test
+	// fail purely because the fixture data grew.
+	const pageSize = 500
 	found := false
-	for _, w := range workspaces {
-		if w.ID == id {
-			found = true
+	for offset := int64(0); !found; offset += pageSize {
+		workspaces, _, err := repo.GetWorkspacesByOwner(
+			context.Background(), testutil.BusinessID, pageSize, offset)
+		if err != nil {
+			t.Fatalf("GetWorkspacesByOwner(offset=%d): %v", offset, err)
+		}
+		if len(workspaces) == 0 {
+			break
+		}
+		for _, w := range workspaces {
+			if w.ID == id {
+				found = true
+				break
+			}
 		}
 	}
 	if !found {
-		t.Errorf("created workspace id=%d not found in list", id)
+		t.Errorf("created workspace id=%d not found in any page of the list", id)
 	}
 }
 
