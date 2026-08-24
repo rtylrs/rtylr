@@ -92,13 +92,23 @@ func (s *Service) GetProjectV2(ctx context.Context, projectID, callerID, busines
 // ListProjectsV2 lists active non-personal projects under curation. Bypass
 // callers see the whole business; everyone else sees created + member.
 func (s *Service) ListProjectsV2(ctx context.Context, callerID, businessID int64, status, visibility, q string, limit, offset int64) ([]domain.Project, int64, error) {
-	includeAll := s.hubProfileBypasses(ctx, callerID, businessID)
-	// A bypass caller already sees the whole business, so resolving reports for
-	// them would be a query with nothing to add.
-	var managed []int64
-	if !includeAll {
-		managed = s.managedUserIDs(ctx, callerID, businessID)
-	}
+	// Ruling P8: this listing is curated for EVERYONE, bypass roles included.
+	// A hub Owner/Admin/Operator holds access to every project, but access is not
+	// listing: their sidebar shows what they created or belong to, like anyone
+	// else's. Passing the bypass through here put every private project in the
+	// business into an admin's sidebar, which is the precise thing P8 forbids.
+	//
+	// Deliberately not applied to ListArchivedProjectsV2: the recycle bin is
+	// governed by P4, which gives the business owner and admins restore rights
+	// and therefore sight of the entries.
+	const includeAll = false
+
+	// Resolved unconditionally now. Previously skipped for bypass callers on the
+	// grounds that they already saw everything; with the listing curated, a
+	// manager who also holds a bypass role still needs their reports' projects
+	// grouped under P9.
+	managed := s.managedUserIDs(ctx, callerID, businessID)
+
 	projects, total, err := s.repo.ListProjectsV2(ctx, businessID, callerID, includeAll, managed, status, visibility, q, limit, offset)
 	if err != nil {
 		return nil, 0, err
