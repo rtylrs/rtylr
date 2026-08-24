@@ -36,20 +36,11 @@ func (m *CreateCampaignRequest) Validate() error {
 	if m.Name == "" {
 		violations = append(violations, "name is required")
 	}
-	if m.Description == "" {
-		violations = append(violations, "description is required")
-	}
 	if m.Channel == "" {
 		violations = append(violations, "channel is required")
 	}
-	if m.Subject == "" {
-		violations = append(violations, "subject is required")
-	}
 	if m.Content == "" {
 		violations = append(violations, "content is required")
-	}
-	if m.ScheduledAt == "" {
-		violations = append(violations, "scheduled_at is required")
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
@@ -168,20 +159,11 @@ func (m *UpdateCampaignBody) Validate() error {
 	if m.Name == "" {
 		violations = append(violations, "name is required")
 	}
-	if m.Description == "" {
-		violations = append(violations, "description is required")
-	}
 	if m.Channel == "" {
 		violations = append(violations, "channel is required")
 	}
-	if m.Subject == "" {
-		violations = append(violations, "subject is required")
-	}
 	if m.Content == "" {
 		violations = append(violations, "content is required")
-	}
-	if m.ScheduledAt == "" {
-		violations = append(violations, "scheduled_at is required")
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))

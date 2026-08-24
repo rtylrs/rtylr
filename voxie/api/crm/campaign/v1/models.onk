@@ -38,12 +38,19 @@ message CampaignStats {
 
 message CreateCampaignRequest {
   name: string @required
-  description: string @required
+  /// Free-text summary. Optional: the server does not require it, and a
+  /// campaign entered without one is valid.
+  description: string
   channel: string @required
   segment_id: int64?
-  subject: string @required
+  /// Subject line. Optional because it is channel-specific: an SMS campaign has
+  /// no subject, so requiring it made that channel impossible to save.
+  subject: string
   content: string @required
-  scheduled_at: string @required
+  /// Absent for a draft or an immediate send. A draft has no scheduled time, so
+  /// requiring one forced callers to invent a value, and the server already
+  /// treats an empty scheduled_at as "not scheduled".
+  scheduled_at: string?
 }
 
 message CreateCampaignResponse {
@@ -86,12 +93,19 @@ message ListCampaignsResponse {
 
 message UpdateCampaignBody {
   name: string @required
-  description: string @required
+  /// Free-text summary. Optional: the server does not require it, and a
+  /// campaign entered without one is valid.
+  description: string
   channel: string @required
   segment_id: int64?
-  subject: string @required
+  /// Subject line. Optional because it is channel-specific: an SMS campaign has
+  /// no subject, so requiring it made that channel impossible to save.
+  subject: string
   content: string @required
-  scheduled_at: string @required
+  /// Absent for a draft or an immediate send. A draft has no scheduled time, so
+  /// requiring one forced callers to invent a value, and the server already
+  /// treats an empty scheduled_at as "not scheduled".
+  scheduled_at: string?
 }
 
 message UpdateCampaignRequest {

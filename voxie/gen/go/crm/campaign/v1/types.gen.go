@@ -460,13 +460,13 @@ func (x *CampaignStats) GetFailedCount() int64 {
 }
 
 type CreateCampaignRequest struct {
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	Channel     string `json:"channel,omitempty"`
-	SegmentId   *int64 `json:"segment_id,omitempty"`
-	Subject     string `json:"subject,omitempty"`
-	Content     string `json:"content,omitempty"`
-	ScheduledAt string `json:"scheduled_at,omitempty"`
+	Name        string  `json:"name,omitempty"`
+	Description string  `json:"description,omitempty"`
+	Channel     string  `json:"channel,omitempty"`
+	SegmentId   *int64  `json:"segment_id,omitempty"`
+	Subject     string  `json:"subject,omitempty"`
+	Content     string  `json:"content,omitempty"`
+	ScheduledAt *string `json:"scheduled_at,omitempty"`
 }
 
 func (m *CreateCampaignRequest) MarshalJSON() ([]byte, error) {
@@ -558,7 +558,11 @@ func (x *CreateCampaignRequest) GetScheduledAt() string {
 		var zero string
 		return zero
 	}
-	return x.ScheduledAt
+	if x.ScheduledAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.ScheduledAt
 }
 
 type CreateCampaignResponse struct {
@@ -884,13 +888,13 @@ func (x *ListCampaignsResponse) GetOffset() int64 {
 }
 
 type UpdateCampaignBody struct {
-	Name        string `json:"name,omitempty"`
-	Description string `json:"description,omitempty"`
-	Channel     string `json:"channel,omitempty"`
-	SegmentId   *int64 `json:"segment_id,omitempty"`
-	Subject     string `json:"subject,omitempty"`
-	Content     string `json:"content,omitempty"`
-	ScheduledAt string `json:"scheduled_at,omitempty"`
+	Name        string  `json:"name,omitempty"`
+	Description string  `json:"description,omitempty"`
+	Channel     string  `json:"channel,omitempty"`
+	SegmentId   *int64  `json:"segment_id,omitempty"`
+	Subject     string  `json:"subject,omitempty"`
+	Content     string  `json:"content,omitempty"`
+	ScheduledAt *string `json:"scheduled_at,omitempty"`
 }
 
 func (m *UpdateCampaignBody) MarshalJSON() ([]byte, error) {
@@ -982,7 +986,11 @@ func (x *UpdateCampaignBody) GetScheduledAt() string {
 		var zero string
 		return zero
 	}
-	return x.ScheduledAt
+	if x.ScheduledAt == nil {
+		var zero string
+		return zero
+	}
+	return *x.ScheduledAt
 }
 
 type UpdateCampaignRequest struct {

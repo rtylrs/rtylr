@@ -144,12 +144,12 @@ return violations;
 
 export interface CreateCampaignRequest {
 name: string;
-description: string;
+description?: string;
 channel: string;
 segmentId?: string;
-subject: string;
+subject?: string;
 content: string;
-scheduledAt: string;
+scheduledAt?: string;
 }
 
 export function decodeCreateCampaignRequest(v: any): CreateCampaignRequest {
@@ -182,16 +182,13 @@ const violations: string[] = [];
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
 if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
-if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
 if (v.channel !== undefined && v.channel !== null && !(typeof v.channel === "string")) violations.push("channel has invalid type");
 if (!(v.channel !== undefined && v.channel !== null) || v.channel === "") violations.push("channel is required");
 if (v.segmentId !== undefined && v.segmentId !== null && !(typeof v.segmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.segmentId))) violations.push("segment_id has invalid type");
 if (v.subject !== undefined && v.subject !== null && !(typeof v.subject === "string")) violations.push("subject has invalid type");
-if (!(v.subject !== undefined && v.subject !== null) || v.subject === "") violations.push("subject is required");
 if (v.content !== undefined && v.content !== null && !(typeof v.content === "string")) violations.push("content has invalid type");
 if (!(v.content !== undefined && v.content !== null) || v.content === "") violations.push("content is required");
 if (v.scheduledAt !== undefined && v.scheduledAt !== null && !(typeof v.scheduledAt === "string")) violations.push("scheduled_at has invalid type");
-if (!(v.scheduledAt !== undefined && v.scheduledAt !== null) || v.scheduledAt === "") violations.push("scheduled_at is required");
 return violations;
 }
 
@@ -394,12 +391,12 @@ return violations;
 
 export interface UpdateCampaignBody {
 name: string;
-description: string;
+description?: string;
 channel: string;
 segmentId?: string;
-subject: string;
+subject?: string;
 content: string;
-scheduledAt: string;
+scheduledAt?: string;
 }
 
 export function decodeUpdateCampaignBody(v: any): UpdateCampaignBody {
@@ -432,16 +429,13 @@ const violations: string[] = [];
 if (v.name !== undefined && v.name !== null && !(typeof v.name === "string")) violations.push("name has invalid type");
 if (!(v.name !== undefined && v.name !== null) || v.name === "") violations.push("name is required");
 if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
-if (!(v.description !== undefined && v.description !== null) || v.description === "") violations.push("description is required");
 if (v.channel !== undefined && v.channel !== null && !(typeof v.channel === "string")) violations.push("channel has invalid type");
 if (!(v.channel !== undefined && v.channel !== null) || v.channel === "") violations.push("channel is required");
 if (v.segmentId !== undefined && v.segmentId !== null && !(typeof v.segmentId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.segmentId))) violations.push("segment_id has invalid type");
 if (v.subject !== undefined && v.subject !== null && !(typeof v.subject === "string")) violations.push("subject has invalid type");
-if (!(v.subject !== undefined && v.subject !== null) || v.subject === "") violations.push("subject is required");
 if (v.content !== undefined && v.content !== null && !(typeof v.content === "string")) violations.push("content has invalid type");
 if (!(v.content !== undefined && v.content !== null) || v.content === "") violations.push("content is required");
 if (v.scheduledAt !== undefined && v.scheduledAt !== null && !(typeof v.scheduledAt === "string")) violations.push("scheduled_at has invalid type");
-if (!(v.scheduledAt !== undefined && v.scheduledAt !== null) || v.scheduledAt === "") violations.push("scheduled_at is required");
 return violations;
 }
 
