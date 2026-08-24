@@ -170,7 +170,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                   }}
                 >
                   <span style={{ color: 'rgba(19,19,19,0.7)' }}>
-                    {item.qty}× {itemNames[item.nameIndex]}
+                    <span dir="ltr">{item.qty}×</span> {itemNames[item.nameIndex]}
                   </span>
                   <span style={{ color: 'var(--ink)', fontWeight: 600 }}>
                     {money(item.price * item.qty)}
