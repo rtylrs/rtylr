@@ -20,19 +20,17 @@ function createWrapper() {
     React.createElement(QueryClientProvider, { client }, children);
 }
 
+// hub.dashboard.v1.GetKPIsResponse. The previous fixture was twelve fields that
+// the contract does not carry, so it agreed with the schema and disagreed with
+// the server, which is how rtylr#947 survived a green suite.
 const mockKpis: HubKpis = {
-  revenueToday: 5200,
-  revenueTrendPct: 12.5,
-  ordersToday: 48,
-  ordersTrendPct: -3.2,
-  headcount: 15,
-  activeStaff: 12,
-  lowStockItems: 3,
-  openInvoices: 7,
-  newCustomers: 9,
-  apiHealthPct: 99.5,
-  revenueSeries: [100, 200, 300],
-  ordersSeries: [10, 20, 30],
+  revenue: 5200,
+  orderCount: 48,
+  staffCount: 15,
+  customerCount: 9,
+  lowStockCount: 3,
+  activeApps: 4,
+  openInvoices: 0,
 };
 
 describe('useKpis', () => {
@@ -44,9 +42,9 @@ describe('useKpis', () => {
     const { result } = renderHook(() => useKpis(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(result.current.data?.revenueToday).toBe(5200);
-    expect(result.current.data?.ordersToday).toBe(48);
-    expect(result.current.data?.revenueSeries).toEqual([100, 200, 300]);
+    expect(result.current.data?.revenue).toBe(5200);
+    expect(result.current.data?.orderCount).toBe(48);
+    expect(result.current.data?.customerCount).toBe(9);
   });
 
   it('calls the correct endpoint with range parameter', async () => {
@@ -70,12 +68,12 @@ describe('useKpis', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     const data = result.current.data!;
-    expect(data).toHaveProperty('revenueToday');
-    expect(data).toHaveProperty('revenueTrendPct');
-    expect(data).toHaveProperty('headcount');
-    expect(data).toHaveProperty('activeStaff');
-    expect(data).toHaveProperty('lowStockItems');
-    expect(data).toHaveProperty('apiHealthPct');
+    expect(data).toHaveProperty('revenue');
+    expect(data).toHaveProperty('orderCount');
+    expect(data).toHaveProperty('staffCount');
+    expect(data).toHaveProperty('customerCount');
+    expect(data).toHaveProperty('lowStockCount');
+    expect(data).toHaveProperty('activeApps');
   });
 
   it('has a 30s stale time', async () => {

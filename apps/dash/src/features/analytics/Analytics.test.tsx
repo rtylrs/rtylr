@@ -23,9 +23,12 @@ vi.mock('@tanstack/react-query', () => ({
 }));
 
 const kpisState = vi.hoisted(() => ({
-  data: undefined as
-    | { revenueToday: number; ordersToday: number; newCustomers: number; revenueSeries: number[] }
-    | undefined,
+  // Contract field names. hub.dashboard.v1.GetKPIsResponse carries revenue,
+  // orderCount, staffCount, customerCount, lowStockCount and activeApps, and
+  // nothing else. The previous fixture used revenueToday/ordersToday/
+  // newCustomers/revenueSeries, none of which exist on it, so it agreed with the
+  // schema and disagreed with the server.
+  data: undefined as { revenue: number; orderCount: number; customerCount: number } | undefined,
   isLoading: false,
 }));
 
@@ -39,7 +42,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   bestSellersState.data = [];
   bestSellersState.isLoading = false;
-  kpisState.data = { revenueToday: 0, ordersToday: 0, newCustomers: 0, revenueSeries: [] };
+  kpisState.data = { revenue: 0, orderCount: 0, customerCount: 0 };
   kpisState.isLoading = false;
 });
 
@@ -66,5 +69,53 @@ describe('Analytics: top-items empty state', () => {
 
     expect(screen.queryByText('analytics.emptyNoDataTitle')).not.toBeInTheDocument();
     expect(screen.getByText('Burger')).toBeInTheDocument();
+  });
+});
+
+/**
+ * rtylr#947. The stat cards read revenueToday, ordersToday and newCustomers.
+ * None of those exist on GetKPIsResponse, and every one was .optional() with a
+ * transform default of 0, so the screen showed $0.00 / 0 / 0 no matter how much
+ * business had happened.
+ *
+ * revenue and orderCount are genuinely today-scoped server-side: onion's
+ * kpis.sql defines them as SumRevenueToday and CountOrdersToday, both filtered
+ * to `created_at >= CURDATE()`. So the "Today" labels were right all along and
+ * only the field names were wrong.
+ */
+describe('Analytics stat cards read the contract fields (rtylr#947)', () => {
+  it('shows revenue rather than a permanent zero', () => {
+    kpisState.data = { revenue: 1234.5, orderCount: 10, customerCount: 7 };
+    render(<Analytics />);
+    expect(screen.getByText('$1234.50')).toBeInTheDocument();
+  });
+
+  it('shows the order count', () => {
+    kpisState.data = { revenue: 1234.5, orderCount: 10, customerCount: 7 };
+    render(<Analytics />);
+    expect(screen.getByText('10')).toBeInTheDocument();
+  });
+
+  it('derives average order value from revenue and order count', () => {
+    kpisState.data = { revenue: 250, orderCount: 4, customerCount: 0 };
+    render(<Analytics />);
+    // 250 / 4
+    expect(screen.getByText('$62.50')).toBeInTheDocument();
+  });
+
+  it('avoids dividing by zero when nothing was ordered', () => {
+    kpisState.data = { revenue: 0, orderCount: 0, customerCount: 0 };
+    render(<Analytics />);
+    // Both the revenue card and the derived average read $0.00 here, so this
+    // asserts on the pair rather than a single match. A NaN from 0/0 would
+    // render as "$NaN" and fail.
+    expect(screen.getAllByText('$0.00')).toHaveLength(2);
+    expect(screen.queryByText(/NaN/)).not.toBeInTheDocument();
+  });
+
+  it('shows the customer count', () => {
+    kpisState.data = { revenue: 0, orderCount: 0, customerCount: 42 };
+    render(<Analytics />);
+    expect(screen.getByText('42')).toBeInTheDocument();
   });
 });
