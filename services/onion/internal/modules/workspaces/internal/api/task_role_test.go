@@ -43,6 +43,11 @@ func newRoleFixture(t *testing.T) *roleFixture {
 	repo := infrastructure.NewRepository(db)
 	svc := application.NewService(ctx, db)
 
+	// v2 handlers resolve the tenant through user_business_access; without a row
+	// there they answer 403 regardless of project membership.
+	testutil.GrantBusinessAccess(t, db, testutil.BusinessID,
+		roleOwnerID, roleViewerID, roleMemberID, roleManagerID, roleStrangerID)
+
 	wsID, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
 		OwnerID: roleOwnerID, BusinessID: testutil.BusinessID,
 		Name: "RoleGateWS", CreatedBy: roleOwnerID,
@@ -58,6 +63,22 @@ func newRoleFixture(t *testing.T) *roleFixture {
 	})
 	if err != nil {
 		t.Fatalf("CreateProject: %v", err)
+	}
+
+	// Workspace rows as well as project rows. v1's CreateTask resolves the
+	// workspace before it checks any role, so without these a viewer is turned
+	// away with "Invalid workspace_id" and the role gate is never reached: the
+	// test would report a block it never actually exercised.
+	for userID, role := range map[int64]string{
+		roleViewerID:  domain.FlowRoleViewer,
+		roleMemberID:  domain.FlowRoleMember,
+		roleManagerID: domain.FlowRoleAdmin,
+	} {
+		if addErr := repo.AddWorkspaceMember(ctx, domain.AddWorkspaceMemberInput{
+			WorkspaceID: wsID, UserID: userID, Role: role, InvitedBy: roleOwnerID,
+		}); addErr != nil {
+			t.Fatalf("AddWorkspaceMember(%d, %s): %v", userID, role, addErr)
+		}
 	}
 
 	for userID, role := range map[int64]string{

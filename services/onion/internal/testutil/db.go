@@ -8,6 +8,8 @@ import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql" // registers the mysql driver with database/sql
+
+	"github.com/voxire/onion/internal/platform/database/dbclient"
 )
 
 // OpenDB returns a *sql.DB connected to a MySQL instance for integration tests.
@@ -40,6 +42,12 @@ func OpenDB(tb testing.TB) *sql.DB {
 	if err := db.PingContext(context.Background()); err != nil {
 		tb.Fatalf("db.PingContext: %v", err)
 	}
+
+	// Point the package-level pool at this handle too. Platform code that reads
+	// dbclient.Pool() rather than taking a *sql.DB (tenant.ResolveBusinessID
+	// most notably) otherwise sees nil and fails closed, which surfaces as a
+	// 403 and is indistinguishable from a real permission error.
+	tb.Cleanup(dbclient.SetPoolForTesting(db))
 
 	tb.Cleanup(func() { _ = db.Close() })
 	return db
