@@ -791,5 +791,353 @@
         }
       ]
     }
+  },
+  "legal": {
+    "terms": {
+      "meta": {
+        "title": "Conditions d’utilisation | rtylr",
+        "description": "Les conditions qui régissent votre utilisation de rtylr, exploité par Voxire.",
+        "schemaDescription": "Les conditions qui régissent votre utilisation de rtylr, exploité par Voxire."
+      },
+      "eyebrow": "JURIDIQUE · CONDITIONS D’UTILISATION",
+      "title": "Conditions d’utilisation",
+      "lastUpdated": "Dernière mise à jour\u00a0: 18 avril 2026 · Entrée en vigueur immédiate pour les nouveaux clients, et 30 jours après notification pour les clients existants.",
+      "tocTitle": "Sur cette page",
+      "tocAriaLabel": "Navigation par section",
+      "sections": {
+        "acceptance": "Acceptation des conditions",
+        "account": "Votre compte",
+        "plans-billing": "Forfaits et facturation",
+        "seat-proration": "Facturation par poste et prorata",
+        "trial-refunds": "Essais, résiliation, remboursements",
+        "acceptable-use": "Utilisation acceptable",
+        "data-ownership": "Vos données",
+        "ip": "Propriété intellectuelle",
+        "third-party": "Services tiers",
+        "disclaimers": "Exclusions de garantie",
+        "liability": "Limitation de responsabilité",
+        "indemnification": "Indemnisation",
+        "termination": "Résiliation",
+        "changes": "Modifications des présentes conditions",
+        "governing-law": "Droit applicable",
+        "contact": "Contact"
+      },
+      "body": {
+        "acceptance": {
+          "p1": "Les présentes conditions d’utilisation («\u00a0<b>Conditions</b>\u00a0») régissent votre accès à la plateforme rtylr, à ses applications et aux services associés (ensemble, «\u00a0<b>rtylr</b>\u00a0» ou le «\u00a0<b>Service</b>\u00a0»), exploités par Voxire («\u00a0<b>nous</b>\u00a0»), ainsi que votre utilisation de ceux-ci. En créant un compte, en cliquant sur «\u00a0Commencer\u00a0» ou en utilisant rtylr de quelque autre manière, vous acceptez les présentes Conditions en votre nom et au nom de toute entreprise, organisation ou entité que vous représentez.",
+          "p2": "Si vous n’acceptez pas les présentes Conditions, n’utilisez pas rtylr. Si vous acceptez les présentes Conditions au nom d’une entreprise, vous déclarez avoir le pouvoir d’engager cette entreprise."
+        },
+        "account": {
+          "p1": "Pour utiliser la plupart des fonctionnalités de rtylr, vous devez créer un compte. Vous vous engagez à fournir des informations exactes, à jour et complètes lors de l’inscription, et à les tenir à jour. Vous êtes responsable\u00a0:",
+          "list1": [
+            "de la confidentialité de votre mot de passe et de vos jetons d’accès\u00a0;",
+            "de toute activité réalisée depuis votre compte, y compris celle des membres d’équipe que vous ajoutez\u00a0;",
+            "de nous signaler sans délai, à l’adresse <secMail>security@voxire.com</secMail>, tout accès non autorisé ou toute violation de sécurité."
+          ],
+          "p2": "Les comptes doivent être détenus par des personnes physiques âgées d’au moins 18 ans, ou par des personnes morales agissant par l’intermédiaire d’un représentant habilité."
+        },
+        "plans-billing": {
+          "p1": "rtylr est proposé sous la forme d’un forfait Free et de forfaits payants (Pro, Scale). Les fonctionnalités, les limites et les prix de chaque forfait sont décrits sur <pricingLink>rtylr.com/pricing</pricingLink>. En souscrivant à un forfait payant, vous nous autorisez, ou autorisez notre prestataire de paiement, à prélever sur le moyen de paiement enregistré les frais récurrents, les taxes et tout dépassement défini sur la page des tarifs.",
+          "p2": "Sauf indication contraire, tous les frais s’entendent hors taxes applicables. Nous faisons appel à Paddle Inc. en qualité de Merchant of Record pour la plupart des transactions\u00a0; les conditions de paiement de Paddle peuvent également s’appliquer à votre achat."
+        },
+        "seat-proration": {
+          "p1": "Les forfaits payants sont facturés par poste actif. Un «\u00a0poste\u00a0» désigne tout utilisateur disposant d’un accès de connexion à votre espace de travail. Les postes sont facturés au prorata journalier\u00a0:",
+          "list1": [
+            "Lorsque vous ajoutez un poste en cours de cycle, vous n’êtes facturé que pour les jours restants de cette période de facturation.",
+            "Lorsque vous supprimez un poste en cours de cycle, les jours restants de ce poste sont crédités sur votre facture suivante.",
+            "La facturation est récapitulée à la fin de chaque période, afin que vous voyiez exactement quels postes étaient actifs et sur quels jours."
+          ],
+          "p2": "Sur le forfait Scale, une tarification par palier s’applique automatiquement lorsque votre espace de travail dépasse 30 postes actifs au cours de la période de facturation."
+        },
+        "trial-refunds": {
+          "p1": "Les nouveaux espaces de travail peuvent démarrer par un essai d’un forfait payant. À la fin de l’essai, l’espace de travail revient automatiquement au forfait Free si aucun moyen de paiement n’a été ajouté. Vous pouvez résilier à tout moment\u00a0; la résiliation prend effet à la fin de la période de facturation en cours.",
+          "p2": "Comme rtylr est facturé au prorata journalier, les jours non utilisés du cycle en cours sont portés au crédit de la période suivante plutôt que remboursés. Nous n’effectuons un remboursement que lorsque le droit de la consommation applicable l’exige."
+        },
+        "acceptable-use": {
+          "p1": "Vous vous engagez à ne pas\u00a0:",
+          "list1": [
+            "utiliser rtylr pour stocker ou transmettre des contenus illicites, des logiciels malveillants ou des éléments portant atteinte aux droits de tiers\u00a0;",
+            "sonder, scanner ou tester la vulnérabilité de rtylr, ni contourner ses contrôles de sécurité, sauf dans le cadre d’un programme public de divulgation responsable\u00a0;",
+            "recourir à des moyens automatisés pour extraire des données du Service au-delà d’un usage raisonnable de l’API, conforme à votre forfait\u00a0;",
+            "revendre rtylr, en accorder une sous-licence ou l’utiliser pour créer un produit concurrent\u00a0;",
+            "utiliser le Service pour envoyer du spam, enfreindre les lois sur la protection de la vie privée des consommateurs ou traiter des données de paiement en dehors des points de terminaison conformes à la norme PCI que nous mettons à disposition."
+          ],
+          "p2": "Nous nous réservons le droit de suspendre l’accès aux espaces de travail dont nous estimons raisonnablement qu’ils enfreignent la présente section Utilisation acceptable."
+        },
+        "data-ownership": {
+          "p1": "Vous conservez l’intégralité des droits sur les données que vous téléversez, stockez ou générez dans rtylr (les «\u00a0<b>Données client</b>\u00a0»). Vous accordez à Voxire une licence limitée, mondiale et exempte de redevance pour héberger, traiter, afficher et transmettre les Données client, aux seules fins de fourniture du Service.",
+          "p2": "Vous pouvez exporter vos Données client à tout moment depuis les réglages de votre espace de travail. À la clôture du compte, les Données client sont conservées 30 jours afin de permettre une restauration, puis supprimées des systèmes actifs dans un délai de 60 jours (les sauvegardes sont purgées selon leur cycle glissant, au plus tard sous 90 jours).",
+          "p3": "La manière dont nous traitons les données à caractère personnel est décrite dans notre <privacyLink>politique de confidentialité</privacyLink>."
+        },
+        "ip": {
+          "p1": "rtylr, y compris l’ensemble des logiciels, designs, marques et documentations, est la propriété de Voxire et de ses concédants de licence. Les présentes Conditions vous confèrent un droit d’utilisation du Service limité, non exclusif et non transférable, tel que ce Service est fourni. Aucun autre droit n’est accordé.",
+          "p2": "Si vous nous transmettez des commentaires ou des suggestions concernant le Service, vous nous accordez une licence perpétuelle et exempte de redevance pour utiliser ces retours afin d’améliorer rtylr."
+        },
+        "third-party": {
+          "p1": "rtylr s’intègre à des services tiers (prestataires de paiement, exports comptables, acheminement des e-mails, par exemple). Votre utilisation de ces intégrations est régie par les conditions de ces tiers. Nous ne sommes pas responsables de la disponibilité, du contenu ni des pratiques des services tiers."
+        },
+        "disclaimers": {
+          "p1": "rtylr est fourni «\u00a0<b>en l’état</b>\u00a0» et «\u00a0<b>selon disponibilité</b>\u00a0». Dans la mesure maximale permise par la loi, nous excluons toute garantie, expresse ou implicite, y compris les garanties de qualité marchande, d’adéquation à un usage particulier et d’absence de contrefaçon. Nous ne garantissons pas que le Service sera ininterrompu ni exempt d’erreurs, ni qu’il répondra à vos besoins particuliers."
+        },
+        "liability": {
+          "p1": "Dans la mesure maximale permise par la loi, Voxire ainsi que ses dirigeants, ses salariés et ses mandataires ne sont pas responsables des dommages indirects, accessoires, spéciaux, consécutifs ou punitifs, y compris la perte de bénéfices, la perte de chiffre d’affaires, la perte de données ou les coûts de remplacement, découlant de votre utilisation de rtylr ou liés à celle-ci.",
+          "p2": "Notre responsabilité totale cumulée envers vous, pour toute réclamation née des présentes Conditions, est limitée au plus élevé des deux montants suivants\u00a0: (a) les frais que vous nous avez versés au cours des douze mois précédant le fait générateur de la réclamation, ou (b) cent dollars américains (100 USD)."
+        },
+        "indemnification": {
+          "p1": "Vous vous engagez à défendre, indemniser et garantir Voxire contre toute réclamation découlant de vos Données client, de votre manquement aux présentes Conditions ou de votre violation du droit applicable, sauf lorsque cette réclamation résulte de notre faute lourde ou de notre faute intentionnelle."
+        },
+        "termination": {
+          "p1": "Vous pouvez clôturer votre compte à tout moment depuis les réglages de l’espace de travail. Nous pouvons suspendre ou résilier votre accès en cas de manquement substantiel aux présentes Conditions, si la loi l’exige, ou si votre compte présente un impayé de plus de 30 jours. Les sections qui, par leur nature, doivent survivre à la résiliation (obligations de paiement, limitations de responsabilité, droit applicable) resteront en vigueur."
+        },
+        "changes": {
+          "p1": "Nous pouvons modifier les présentes Conditions de temps à autre. Le cas échéant, nous mettons à jour la date de «\u00a0dernière mise à jour\u00a0» et, pour les modifications substantielles, envoyons un avis à l’adresse e-mail du propriétaire principal enregistrée. La poursuite de l’utilisation de rtylr après l’entrée en vigueur d’une modification vaut acceptation des Conditions mises à jour."
+        },
+        "governing-law": {
+          "p1": "Les présentes Conditions sont régies par le droit du ressort dans lequel Voxire est immatriculée, sans égard aux règles de conflit de lois. Vous et Voxire acceptez la compétence exclusive des tribunaux compétents de ce ressort pour tout litige né des présentes Conditions, étant entendu que chaque partie peut solliciter des mesures d’injonction devant toute juridiction compétente afin de protéger sa propriété intellectuelle ou sa sécurité."
+        },
+        "contact": {
+          "p1": "Des questions sur les présentes Conditions\u00a0? Écrivez à <infoMail>info@voxire.com</infoMail>. Pour les sujets de sécurité en particulier, utilisez <secMail>security@voxire.com</secMail>."
+        }
+      },
+      "contactStrip": {
+        "title": "Une question juridique ou de conformité\u00a0?",
+        "body": "Nous y répondrons volontiers. Écrivez-nous à <infoMail>info@voxire.com</infoMail>, ou contactez-nous sur WhatsApp au +961 3 940 708."
+      }
+    },
+    "privacyPolicy": {
+      "meta": {
+        "title": "Politique de confidentialité | rtylr",
+        "description": "Comment rtylr et Voxire traitent vos données à caractère personnel, au titre du RGPD, du CCPA et des lois équivalentes.",
+        "schemaDescription": "Comment rtylr et Voxire traitent vos données à caractère personnel."
+      },
+      "eyebrow": "JURIDIQUE · POLITIQUE DE CONFIDENTIALITÉ",
+      "title": "Politique de confidentialité",
+      "lastUpdated": "Dernière mise à jour\u00a0: 18 avril 2026 · S’applique à rtylr.com et à la plateforme rtylr.",
+      "tocTitle": "Sur cette page",
+      "tocAriaLabel": "Navigation par section",
+      "sections": {
+        "overview": "Vue d’ensemble",
+        "data-we-collect": "Données que nous collectons",
+        "how-we-use": "Comment nous utilisons les données",
+        "legal-bases": "Bases légales (RGPD)",
+        "sharing": "Partage et sous-traitants ultérieurs",
+        "international": "Transferts internationaux",
+        "retention": "Conservation et suppression",
+        "your-rights": "Vos droits",
+        "cookies": "Cookies",
+        "children": "Enfants",
+        "changes": "Modifications de la présente politique",
+        "contact": "Contacter le DPO"
+      },
+      "body": {
+        "overview": {
+          "p1": "La présente politique de confidentialité décrit la manière dont Voxire («\u00a0<b>nous</b>\u00a0») collecte, utilise, partage et protège les données à caractère personnel dans le cadre de la plateforme rtylr. Nous agissons en qualité de <b>responsable du traitement</b> pour les données personnelles relatives à nos clients et aux visiteurs de notre site, et en qualité de <b>sous-traitant</b> pour les Données client que nos clients traitent dans rtylr pour le compte de leurs propres utilisateurs finaux.",
+          "p2": "Si vous êtes l’utilisateur final d’une entreprise qui utilise rtylr (par exemple un client de restaurant dont l’adresse e-mail est enregistrée dans le CRM de ce restaurant), c’est le client rtylr qui est responsable du traitement de vos données. Adressez-vous d’abord à cette entreprise pour exercer vos droits\u00a0; nous l’aiderons à y répondre."
+        },
+        "data-we-collect": {
+          "subsections": [
+            {
+              "heading": "Données de compte et de facturation",
+              "body": "Lorsque vous créez un espace de travail, nous collectons vos nom, adresse e-mail, nom d’entreprise, fonction, pays et un hachage de votre mot de passe. Lorsque vous souscrivez un abonnement, notre prestataire de paiement (Paddle) collecte l’adresse de facturation, les identifiants fiscaux et les jetons de carte bancaire. Nous ne conservons pas les numéros de carte en clair sur nos serveurs."
+            },
+            {
+              "heading": "Données client",
+              "body": "Il s’agit des données que vous téléversez ou générez dans rtylr\u00a0: articles de menu, factures, plannings, fiches clients, tâches. Vous gardez la maîtrise de ces données\u00a0; nous ne les traitons que pour fournir le Service et selon vos instructions."
+            },
+            {
+              "heading": "Données d’usage et d’appareil",
+              "body": "Nous enregistrons l’adresse IP, le type de navigateur et d’appareil, l’URL de provenance, les pages consultées et les horodatages. Nous nous en servons pour exploiter, sécuriser et améliorer rtylr, ainsi que pour produire des statistiques agrégées."
+            },
+            {
+              "heading": "Cookies et technologies similaires",
+              "body": "Voir la section <cookiesAnchor>Cookies</cookiesAnchor> ci-dessous pour le détail."
+            }
+          ]
+        },
+        "how-we-use": {
+          "p1": "Nous utilisons les données à caractère personnel pour\u00a0:",
+          "list1": [
+            "fournir, sécuriser et maintenir le Service\u00a0;",
+            "gérer la facturation et envoyer les e-mails transactionnels\u00a0;",
+            "répondre aux demandes d’assistance et améliorer la qualité du produit\u00a0;",
+            "détecter et prévenir la fraude, les abus et les incidents de sécurité\u00a0;",
+            "envoyer des annonces produit au propriétaire principal d’un espace de travail (vous pouvez vous désabonner depuis votre profil)\u00a0;",
+            "respecter nos obligations légales et faire appliquer nos Conditions."
+          ]
+        },
+        "legal-bases": {
+          "p1": "Pour les résidents de l’EEE et du Royaume-Uni, nous nous appuyons sur les bases légales suivantes\u00a0:",
+          "list1": [
+            "<b>Contrat</b>, pour fournir le Service et gérer la facturation.",
+            "<b>Intérêts légitimes</b>, pour sécuriser le Service, détecter les abus et améliorer les fonctionnalités. Nous mettons ces intérêts en balance avec vos droits.",
+            "<b>Consentement</b>, pour les cookies non essentiels et certaines communications marketing. Vous pouvez retirer votre consentement à tout moment.",
+            "<b>Obligation légale</b>, lorsque la loi nous impose de conserver ou de divulguer des données."
+          ]
+        },
+        "sharing": {
+          "p1": "Nous ne partageons les données à caractère personnel qu’avec des prestataires (les «\u00a0sous-traitants ultérieurs\u00a0») qui nous aident à exploiter rtylr, dans le cadre de contrats qui leur imposent de protéger ces données. Nos principaux sous-traitants ultérieurs sont\u00a0:",
+          "list1": [
+            "<b>Cloudflare</b>, CDN, DNS, protection anti-DDoS.",
+            "<b>Paddle</b>, traitement des paiements et Merchant of Record.",
+            "<b>Firebase / Google Cloud</b>, infrastructure d’authentification.",
+            "<b>Resend / Postmark</b>, acheminement des e-mails transactionnels.",
+            "<b>PostHog / Axiom</b>, analyse produit et suivi des erreurs (lorsqu’ils sont activés)."
+          ],
+          "p2": "La liste à jour est disponible sur demande à <privacyMail>privacy@voxire.com</privacyMail>. Nous informons les clients avant d’ajouter un nouveau sous-traitant ultérieur ayant accès aux Données client.",
+          "p3": "Nous ne vendons pas de données à caractère personnel. Nous ne partageons pas de données à caractère personnel avec des annonceurs."
+        },
+        "international": {
+          "p1": "rtylr peut traiter des données en dehors de votre pays de résidence. Lorsque nous transférons des données depuis l’EEE, le Royaume-Uni ou la Suisse, nous nous appuyons sur les clauses contractuelles types de la Commission européenne (2021) ou sur un mécanisme équivalent."
+        },
+        "retention": {
+          "list1": [
+            "Les données de compte sont conservées pendant toute la durée de vie du compte, puis 30 jours pour permettre une restauration, avant d’être supprimées dans un délai de 60 jours.",
+            "Les pièces de facturation sont conservées 7 ans pour respecter les règles fiscales et comptables.",
+            "Les journaux de sécurité sont conservés 90 jours\u00a0; les journaux d’audit, 12 mois.",
+            "Les sauvegardes chiffrées suivent un cycle glissant et sont purgées sous 90 jours."
+          ]
+        },
+        "your-rights": {
+          "p1": "Selon votre lieu de résidence, vous pouvez disposer du droit\u00a0:",
+          "list1": [
+            "d’accéder aux données à caractère personnel que nous détenons à votre sujet\u00a0;",
+            "de faire rectifier des données inexactes\u00a0;",
+            "de demander la suppression de vos données\u00a0;",
+            "de vous opposer au traitement ou d’en demander la limitation\u00a0;",
+            "de porter vos données vers un autre service\u00a0;",
+            "de retirer votre consentement à tout moment (lorsque le traitement repose sur le consentement)\u00a0;",
+            "d’introduire une réclamation auprès d’une autorité de contrôle."
+          ],
+          "p2": "Pour exercer l’un de ces droits, écrivez à <privacyMail>privacy@voxire.com</privacyMail>. Nous répondons dans un délai de 30 jours."
+        },
+        "cookies": {
+          "p1": "Nous utilisons trois catégories de cookies\u00a0:",
+          "list1": [
+            "<b>Strictement nécessaires</b>, authentification, répartition de charge, protection CSRF. Ils sont toujours actifs.",
+            "<b>Préférences</b>, mémorisation de votre langue, de votre thème et de l’espace de travail sélectionné.",
+            "<b>Mesure d’audience</b>, pour comprendre quelles pages fonctionnent et lesquelles ne fonctionnent pas. Ils ne se déclenchent qu’avec votre consentement (demandé lors de la première visite)."
+          ],
+          "p2": "Vous pouvez effacer les cookies à tout moment depuis votre navigateur. Cela peut vous déconnecter de rtylr."
+        },
+        "children": {
+          "p1": "rtylr ne s’adresse pas aux enfants de moins de 16 ans. Nous ne collectons pas sciemment de données à caractère personnel auprès d’enfants. Si vous pensez qu’un enfant s’est inscrit, contactez <privacyMail>privacy@voxire.com</privacyMail> et nous supprimerons le compte."
+        },
+        "changes": {
+          "p1": "Nous pouvons mettre à jour la présente politique de confidentialité pour refléter des évolutions du Service ou du droit applicable. Le cas échéant, nous mettons à jour la date de «\u00a0dernière mise à jour\u00a0» et, pour les modifications substantielles, informons les propriétaires principaux par e-mail."
+        },
+        "contact": {
+          "p1": "Notre contact en matière de protection des données est joignable à <privacyMail>privacy@voxire.com</privacyMail>. Courrier postal\u00a0: Voxire, c/o Data Protection, Beyrouth, Liban."
+        }
+      },
+      "contactStrip": {
+        "title": "Une demande d’exercice de droits, une réclamation ou simplement une question\u00a0?",
+        "body": "Écrivez à <privacyMail>privacy@voxire.com</privacyMail>. Nous visons une réponse sous 3 jours ouvrés et un traitement complet sous 30 jours."
+      }
+    },
+    "security": {
+      "meta": {
+        "title": "Sécurité | rtylr",
+        "description": "Comment rtylr protège vos données\u00a0: chiffrement, infrastructure, contrôles d’accès et réponse aux incidents.",
+        "schemaDescription": "Comment rtylr protège vos données\u00a0: chiffrement, infrastructure et réponse aux incidents."
+      },
+      "eyebrow": "JURIDIQUE · SÉCURITÉ",
+      "title": "La sécurité chez rtylr",
+      "lastUpdated": "Dernière mise à jour\u00a0: 18 avril 2026 · Notre programme de sécurité est revu chaque trimestre.",
+      "tocTitle": "Sur cette page",
+      "tocAriaLabel": "Navigation par section",
+      "sections": {
+        "program": "Programme de sécurité",
+        "data-protection": "Protection des données",
+        "infrastructure": "Infrastructure",
+        "access-control": "Contrôle des accès",
+        "application": "Sécurité applicative",
+        "vulnerability": "Gestion des vulnérabilités",
+        "monitoring": "Supervision et réponse aux incidents",
+        "compliance": "Conformité et certifications",
+        "vendor": "Gestion des prestataires",
+        "disclosure": "Divulgation responsable",
+        "contact": "Contacter l’équipe sécurité"
+      },
+      "body": {
+        "program": {
+          "p1": "Voxire applique un programme formel de sécurité de l’information aligné sur les principes des normes ISO 27001 et SOC 2 Type II. Il est maintenu par notre direction technique et revu chaque trimestre. Le programme couvre les contrôles humains, organisationnels et techniques, sur le développement, l’exploitation et le support client."
+        },
+        "data-protection": {
+          "subsections": [
+            {
+              "heading": "Chiffrement en transit",
+              "body": "Tout le trafic entre les appareils des clients et rtylr est chiffré en TLS 1.2+ (suites cryptographiques robustes, confidentialité persistante, HSTS activé). Nous refusons les connexions provenant de versions obsolètes de TLS."
+            },
+            {
+              "heading": "Chiffrement au repos",
+              "body": "Les Données client sont stockées sur des volumes chiffrés (AES-256). Le chiffrement au niveau de la base de données est activé pour tous les espaces de travail. Les sauvegardes sont également chiffrées et conservées dans des régions géographiques distinctes."
+            },
+            {
+              "heading": "Gestion des secrets",
+              "body": "Les clés d’API, les jetons et les identifiants sont conservés dans un coffre à secrets managé, renouvelés à intervalles réguliers et limités aux permissions minimales nécessaires."
+            }
+          ]
+        },
+        "infrastructure": {
+          "p1": "rtylr s’appuie sur des infrastructures cloud reconnues, couvertes par des attestations ISO 27001, SOC 2, PCI DSS et RGPD. Nos principaux fournisseurs sont Cloudflare (edge), Firebase / Google Cloud (authentification et services managés) et un fournisseur de base de données managée avec bascule automatique.",
+          "list1": [
+            "Les environnements de production sont isolés de la préproduction et du développement.",
+            "Sauvegardes multirégions avec restauration à un instant donné jusqu’à 7 jours.",
+            "Planification de la capacité et atténuation des attaques DDoS en périphérie de réseau."
+          ]
+        },
+        "access-control": {
+          "p1": "L’accès aux systèmes de production est réservé à un groupe nommé d’ingénieurs, derrière un SSO avec authentification multifacteur obligatoire. Nous appliquons le principe du moindre privilège\u00a0: chaque ingénieur ne reçoit que les accès dont il a besoin, et ces accès sont revus au moins chaque trimestre.",
+          "p2": "Tous les accès en production sont journalisés avec l’auteur, l’action et l’horodatage. Les journaux d’audit sont conservés 12 mois."
+        },
+        "application": {
+          "list1": [
+            "<b>Authentification.</b> Les mots de passe sont hachés avec des algorithmes standard du secteur\u00a0; le MFA est disponible sur tous les comptes\u00a0; les sessions utilisent des cookies httpOnly, Secure et SameSite à durée de vie courte.",
+            "<b>Autorisation.</b> Permissions par rôle appliquées côté serveur à chaque appel d’API. Aucune logique reposant sur la confiance accordée au client pour les actions sensibles.",
+            "<b>Validation des entrées.</b> Toutes les entrées externes sont validées par des règles de schéma\u00a0; les points d’injection dangereux sont évités.",
+            "<b>CSRF, XSS, injections SQL.</b> Prévenus par les protections standard du framework, des requêtes paramétrées et des en-têtes content-security-policy stricts.",
+            "<b>Limitation de débit.</b> Limites de débit par IP et par utilisateur sur les points de terminaison publics."
+          ]
+        },
+        "vulnerability": {
+          "list1": [
+            "Dépendances analysées à chaque build\u00a0; CVE critiques corrigées sous 7 jours.",
+            "Analyse des conteneurs et des images dans la CI.",
+            "Test d’intrusion annuel réalisé par un tiers\u00a0; résultats et preuves de remédiation disponibles sous NDA pour les clients potentiels du forfait Scale.",
+            "Analyse statique (SAST) sur la base de code principale."
+          ]
+        },
+        "monitoring": {
+          "p1": "Nous assurons une supervision et une alerte 24\u00a0h/24 et 7\u00a0j/7 sur l’infrastructure, les applications et les parcours d’authentification. Les incidents suspectés sont triés selon un runbook documenté de réponse aux incidents. Les clients concernés par un incident de sécurité sont informés conformément au droit applicable et, au minimum, dans les 72 heures suivant la confirmation d’une violation substantielle."
+        },
+        "compliance": {
+          "list1": [
+            "<b>RGPD et RGPD britannique</b>, nous agissons en qualité de sous-traitant pour les Données client, avec un DPA disponible sur demande.",
+            "<b>CCPA/CPRA</b>, respectés pour les résidents de Californie\u00a0; des mécanismes d’opposition sont disponibles.",
+            "<b>PCI DSS</b>, le traitement des paiements est délégué à Paddle, Merchant of Record certifié de niveau 1.",
+            "<b>SOC 2 Type II</b>, en cours\u00a0; achèvement visé au T4 2026."
+          ]
+        },
+        "vendor": {
+          "p1": "Nous évaluons la posture de sécurité des sous-traitants ultérieurs avant leur intégration, exigeons des accords de protection des données et réexaminons nos principaux prestataires chaque année. Une liste à jour des sous-traitants ultérieurs est tenue et disponible via <secMail>security@voxire.com</secMail>."
+        },
+        "disclosure": {
+          "p1": "Nous accueillons volontiers les signalements des chercheurs en sécurité. Si vous pensez avoir découvert une vulnérabilité, écrivez à <secMail>security@voxire.com</secMail> en indiquant\u00a0:",
+          "list1": [
+            "une description claire du problème et de son impact\u00a0;",
+            "les étapes permettant de le reproduire\u00a0;",
+            "tout élément de preuve de concept (merci de ne pas exfiltrer de données au-delà de ce qui est nécessaire pour démontrer le problème)."
+          ],
+          "p2": "Nous nous engageons à accuser réception sous 48 heures, à travailler de bonne foi à un correctif et à vous créditer publiquement une fois le problème résolu (sauf si vous préférez rester anonyme). Nous n’engageons pas de poursuites contre les chercheurs agissant de bonne foi dans le cadre de la présente politique."
+        },
+        "contact": {
+          "p1": "Pour toute question de sécurité, tout signalement ou toute demande de conformité, écrivez à <secMail>security@voxire.com</secMail>. Pour les urgences, WhatsApp au +961 3 940 708."
+        }
+      },
+      "contactStrip": {
+        "title": "Besoin de notre lettre SOC 2, de notre SIG ou de notre DPA\u00a0?",
+        "body": "Écrivez à <secMail>security@voxire.com</secMail> et nous vous enverrons le dossier à jour sous NDA dans un délai de 7 jours ouvrés."
+      }
+    }
   }
 }
