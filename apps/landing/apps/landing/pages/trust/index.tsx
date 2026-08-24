@@ -46,10 +46,9 @@ const secMailComponent = <a href="mailto:security@voxire.com" />;
 
 
 const TrustPage = (): React.JSX.Element => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const router = useRouter();
   const locale = localeFromPath(router.asPath).code;
-  const uptimeValue = i18n.language === 'fr' ? '99,99 %' : '99.99%';
   const pillars = t('trust.pillars', { returnObjects: true }) as unknown as {
     title: string;
     copy: string;
@@ -121,7 +120,7 @@ const TrustPage = (): React.JSX.Element => {
                 </div>
               </div>
               <div className={styles.statusCell}>
-                <div className={styles.statusBig} dir="ltr">{uptimeValue}</div>
+                <div className={styles.statusBig} dir="ltr">{t('trust.status.uptimeValue')}</div>
                 <div className={styles.statusSub}>{t('trust.status.uptimeLabel')}</div>
               </div>
               <div className={styles.statusCell}>

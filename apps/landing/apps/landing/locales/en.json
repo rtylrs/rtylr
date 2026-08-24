@@ -1414,7 +1414,8 @@
       "uptimeLabel": "Rolling 90-day uptime",
       "breachLabel": "Breach notification commitment",
       "penTestLabel": "Annual third-party pen test",
-      "breachValue": "< 72h"
+      "breachValue": "< 72h",
+      "uptimeValue": "99.99%"
     }
   },
   "hardware": {
