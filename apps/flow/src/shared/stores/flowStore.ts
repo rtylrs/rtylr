@@ -194,6 +194,11 @@ export interface Task {
   sectionId?: string;
   /** Values keyed by CustomFieldDefinition.id */
   customFieldValues?: Record<string, string | number>;
+  /** F-A: the custom status (flow.status.v2) applied to this task, if any.
+   * Undefined means the task is on its built-in string status alone. */
+  statusId?: string;
+  statusName?: string;
+  statusColor?: string;
 }
 
 export interface SavedView {
