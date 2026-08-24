@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { useShortcuts } from '../shared/components/ShortcutsProvider';
 import { useForesightLinks } from '@voxire/utils';
+import { getPageTitle, routeLabels } from '../shared/lib/routeLabels';
 import { createOneKitClient } from '@voxire/api';
 import { LicenseBanner } from '@voxire/components';
 import { AppServiceClient } from '@voxire/voxie/hub/app/v1/client';
@@ -77,36 +78,6 @@ const navItems: NavItem[] = [
   { label: 'Feedback', path: '/feedback', icon: MessageSquare },
   { label: 'Settings', path: '/settings', icon: SettingsIcon },
 ];
-
-const routeLabels: Record<string, string> = {
-  '/': 'Dashboard',
-  '/customers': 'Customers',
-  '/customers/new': 'New customer',
-  '/customers/import': 'Import customers',
-  '/loyalty': 'Loyalty',
-  '/loyalty/members': 'Loyalty members',
-  '/loyalty/rewards': 'Rewards catalog',
-  '/loyalty/tiers': 'Loyalty tiers',
-  '/campaigns': 'Campaigns',
-  '/campaigns/email': 'New email campaign',
-  '/campaigns/sms': 'New SMS campaign',
-  '/segments': 'Segments',
-  '/segments/new': 'New segment',
-  '/automations': 'Automations',
-  '/automations/new': 'New automation',
-  '/templates': 'Templates',
-  '/feedback': 'Feedback & NPS',
-  '/settings': 'Settings',
-  '/sales': 'Pipeline',
-  '/sales/leads': 'Leads',
-  '/sales/contracts': 'Contracts',
-};
-
-function getPageTitle(pathname: string): string {
-  if (routeLabels[pathname]) return routeLabels[pathname];
-  const match = Object.keys(routeLabels).find((key) => pathname.startsWith(key) && key !== '/');
-  return match ? routeLabels[match] : 'CRM';
-}
 
 type Theme = 'light' | 'dark' | 'system';
 
