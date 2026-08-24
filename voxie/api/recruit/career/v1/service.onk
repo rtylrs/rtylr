@@ -1,0 +1,12 @@
+package recruit.career.v1
+
+/// RecruitCareerService defines the read surface for recruit submissions and
+/// the status transition endpoint. Create/update of careers and sections stay
+/// on legacy routes until that migration happens.
+service RecruitCareerService {
+  /// Returns one page of submissions for this business.
+  listSubmissions(ListSubmissionsRequest) -> ListSubmissionsResponse @get("/submissions")
+
+  /// Advances a candidate through the hiring funnel.
+  updateSubmissionStatus(UpdateSubmissionStatusRequest) -> UpdateSubmissionStatusResponse @patch("/submissions/status") @body("body")
+}
