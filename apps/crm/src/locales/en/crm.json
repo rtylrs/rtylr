@@ -93,7 +93,9 @@
     "emptyAllDescription": "Create a campaign to reach your customers.",
     "viewAllCampaigns": "View all campaigns",
     "loadMore": "Load more campaigns",
-    "newEmailCampaign": "New email campaign"
+    "newEmailCampaign": "New email campaign",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "What this campaign is for"
   },
   "campaignDetail": {
     "notFoundTitle": "Campaign not found",
