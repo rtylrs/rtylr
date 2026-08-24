@@ -104,13 +104,31 @@ before(() => {
   }
 });
 
-/** Used directly, or covered by a runtime-built key's static prefix. */
+// i18next's built-in pluralisation (Intl.PluralRules): a call for the bare
+// key resolves at runtime to whichever of these suffixed variants matches
+// the count's plural category, so the bare key itself need not exist in
+// en.json as long as at least one variant does, and a suffixed key in
+// en.json is "used" by a t() call for its unsuffixed base.
+const PLURAL_SUFFIXES = ['_zero', '_one', '_two', '_few', '_many', '_other'];
+
+const hasPluralVariant = (key) => PLURAL_SUFFIXES.some((s) => `${key}${s}` in en);
+
+const pluralBase = (key) => {
+  const suffix = PLURAL_SUFFIXES.find((s) => key.endsWith(s));
+  return suffix ? key.slice(0, -suffix.length) : null;
+};
+
+/** Used directly, via a plural variant, or covered by a runtime-built key's static prefix. */
 const isUsed = (key) =>
-  used.has(key) || [...usedPrefixes.keys()].some((prefix) => key.startsWith(prefix));
+  used.has(key) ||
+  used.has(pluralBase(key)) ||
+  [...usedPrefixes.keys()].some((prefix) => key.startsWith(prefix));
 
 describe('translation keys', () => {
   it('every key a component asks for exists in en.json', () => {
-    const missing = [...used.keys()].filter((k) => !(k in en)).map((k) => [k, used.get(k)[0]]);
+    const missing = [...used.keys()]
+      .filter((k) => !(k in en) && !hasPluralVariant(k))
+      .map((k) => [k, used.get(k)[0]]);
     assert.deepEqual(missing, [], 'keys that would render as their own name');
   });
 
@@ -177,21 +195,38 @@ describe('translation keys', () => {
   });
 
   it('no locale invents keys en.json does not have', () => {
+    // A locale may define plural categories English does not need (Arabic
+    // has six, English effectively two), so a suffixed key whose base has
+    // any variant in en.json is a legal extra plural form, not an invented
+    // key.
     const strays = [];
     for (const loc of ['ar', 'fr']) {
       for (const k of Object.keys(loadLocale(loc))) {
-        if (!(k in en)) strays.push([loc, k]);
+        if (k in en) continue;
+        const base = pluralBase(k);
+        if (base !== null && hasPluralVariant(base)) continue;
+        strays.push([loc, k]);
       }
     }
     assert.deepEqual(strays, [], 'keys present in a translation but not in the source locale');
   });
 
   it('translations keep the interpolation placeholders of their source', () => {
+    // For a plural form the source doesn't itself define (an Arabic-only
+    // category like _few), compare against whichever sibling variant does
+    // exist: every plural form of one key interpolates the same values.
+    const sourceValueFor = (k) => {
+      if (k in en) return en[k];
+      const base = pluralBase(k);
+      if (base === null) return undefined;
+      const sibling = PLURAL_SUFFIXES.map((s) => `${base}${s}`).find((sk) => sk in en);
+      return sibling ? en[sibling] : undefined;
+    };
     const broken = [];
     for (const loc of ['ar', 'fr']) {
       const other = loadLocale(loc);
       for (const [k, v] of Object.entries(other)) {
-        const want = placeholders(en[k]);
+        const want = placeholders(sourceValueFor(k));
         const got = placeholders(v);
         if (want.join() !== got.join()) broken.push([loc, k, want, got]);
       }
