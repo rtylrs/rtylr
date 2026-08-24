@@ -158,6 +158,62 @@ func (q *Queries) GetProductMarginDistribution(ctx context.Context, businessID i
 	return i, err
 }
 
+const getProductMarginRows = `-- name: GetProductMarginRows :many
+SELECT p.id,
+       p.name,
+       COALESCE(SUM(oi.quantity), 0)     AS units_sold,
+       COALESCE(SUM(oi.total), 0)        AS revenue_minor_units_x100,
+       CAST(p.cost_price * 100 AS SIGNED) AS cost_minor_units_x100
+FROM erp_products p
+JOIN pos_order_items oi ON oi.menu_item_id = p.id
+JOIN pos_orders o       ON o.id = oi.order_id AND o.business_id = p.business_id
+WHERE p.business_id = ?
+GROUP BY p.id, p.name, p.cost_price
+HAVING SUM(oi.quantity) > 0
+ORDER BY revenue DESC
+LIMIT 200
+`
+
+type GetProductMarginRowsRow struct {
+	ID                    int64       `db:"id" json:"id"`
+	Name                  string      `db:"name" json:"name"`
+	UnitsSold             interface{} `db:"units_sold" json:"units_sold"`
+	RevenueMinorUnitsX100 interface{} `db:"revenue_minor_units_x100" json:"revenue_minor_units_x100"`
+	CostMinorUnitsX100    int64       `db:"cost_minor_units_x100" json:"cost_minor_units_x100"`
+}
+
+// Per-product margin rows (#853): joins sales volume to cost price so the
+// response carries per-item economics alongside the distribution buckets.
+// All-time window; the request message carries no date params.
+func (q *Queries) GetProductMarginRows(ctx context.Context, businessID int64) ([]GetProductMarginRowsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getProductMarginRows, businessID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetProductMarginRowsRow
+	for rows.Next() {
+		var i GetProductMarginRowsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.UnitsSold,
+			&i.RevenueMinorUnitsX100,
+			&i.CostMinorUnitsX100,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getSalesByCategory = `-- name: GetSalesByCategory :many
 SELECT COALESCE(c.id, 0) AS category_id,
        COALESCE(c.name, 'Uncategorised') AS category_name,

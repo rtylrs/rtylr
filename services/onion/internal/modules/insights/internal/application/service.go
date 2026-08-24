@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure"
 )
 
@@ -17,4 +18,9 @@ type Service struct {
 
 func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{repo: infrastructure.NewRepository(db)}
+}
+
+// GetProductMarginRows returns per-product margin rows for margin reporting.
+func (s *Service) GetProductMarginRows(ctx context.Context, businessID int64) ([]domain.ProductMarginRow, error) {
+	return s.repo.GetProductMarginRows(ctx, businessID)
 }
