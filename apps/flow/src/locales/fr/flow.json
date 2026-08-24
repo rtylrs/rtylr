@@ -733,7 +733,8 @@
     "byAssignee": "Par responsable",
     "noTasksYet": "Aucune tâche pour l'instant",
     "noTasksYetDescription": "Ajoutez une tâche pour remplir le tableau de bord.",
-    "addTaskCta": "Ajouter une tâche"
+    "addTaskCta": "Ajouter une tâche",
+    "partialCost": "Certain temps n'a pas de tarif enregistré"
   },
   "projectCalendar": {
     "pageTitle": "Calendrier · rtylr"

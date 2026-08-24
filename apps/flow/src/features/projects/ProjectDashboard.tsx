@@ -10,6 +10,7 @@ import { PERSONAL_WORKSPACE_ID } from '../../shared/lib/personalWorkspace';
 import { useProjectRealtime } from '../../shared/lib/useProjectRealtime';
 import ProjectViewTabs from './ProjectViewTabs';
 import { useCurrentProject } from './useCurrentProject';
+import { useProjectLabourCost } from '../../shared/hooks/queries/useProjectLabourCost';
 
 /**
  * ProjectDashboard - one-glance health view. Four tiles across the top:
@@ -27,6 +28,8 @@ const ProjectDashboard: React.FC = () => {
   useProjectRealtime(projectId);
 
   const { project, isLoading: projectLoading } = useCurrentProject(workspaceId, projectId);
+  // HR->FLOW-01 (#837): live labour cost from HR's port, admin-gated server-side.
+  const { data: labourCost } = useProjectLabourCost(projectId);
   const { data: apiTasks = [] } = useTasks({ projectId, compact: true });
 
   const stats = useMemo(() => {
@@ -103,6 +106,18 @@ const ProjectDashboard: React.FC = () => {
           />
           <StatTile label="In progress" value={stats.inProgress} tint="var(--flow-info, #3b82f6)" />
           <StatTile label="Overdue" value={stats.overdue} tint="var(--flow-danger, #ef4444)" />
+          {labourCost && Number(labourCost.costMinorUnits ?? 0) > 0 && (
+            <StatTile
+              label="Labour cost"
+              value={Number(labourCost.costMinorUnits ?? 0) / 100}
+              tint="var(--flow-info, #3b82f6)"
+              hint={
+                Number(labourCost.uncostedMinutes ?? 0) > 0
+                  ? t('flow.projectDashboard.partialCost')
+                  : undefined
+              }
+            />
+          )}
         </div>
 
         {/* Status breakdown bar */}
