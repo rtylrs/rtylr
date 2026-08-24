@@ -44,7 +44,9 @@ interface AwardRedeemPayload {
   reason?: string;
 }
 
-function toUpdateLoyaltyConfigRequest(config: Partial<LoyaltyConfig>): Record<string, unknown> {
+export function toUpdateLoyaltyConfigRequest(
+  config: Partial<LoyaltyConfig>
+): Record<string, unknown> {
   return {
     isEnabled: config.programEnabled ?? false,
     pointsPerCurrencyUnit: config.pointsPerDollar ?? 1,
