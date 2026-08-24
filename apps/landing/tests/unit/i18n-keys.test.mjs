@@ -56,6 +56,12 @@ const T_TEMPLATE = /\bt\(\s*`([^`$]*)\$\{/g;
 // part starts at position zero. The literal value passed at each of the
 // three call sites is the actual prefix; this reads it the same way
 // T_TEMPLATE reads a template literal's static lead-in.
+//
+// <Trans i18nKey="trust.packet.body" components={...} /> matches the same
+// prop, but is a plain literal leaf key, not a dynamic-prefix root - it
+// needs registering like a normal t() call, not exempting a whole subtree.
+// The two are told apart below by checking whether the literal value is
+// itself a key in en.json.
 const I18N_KEY_PROP = /\bi18nKey=["']([\w.-]+)["']/g;
 
 // lib and services are in here because t() is not confined to components:
@@ -111,6 +117,11 @@ before(() => {
       usedPrefixes.get(m[1]).push(rel);
     }
     for (const m of src.matchAll(I18N_KEY_PROP)) {
+      if (m[1] in en) {
+        if (!used.has(m[1])) used.set(m[1], []);
+        used.get(m[1]).push(rel);
+        continue;
+      }
       const prefix = `${m[1]}.`;
       if (!usedPrefixes.has(prefix)) usedPrefixes.set(prefix, []);
       usedPrefixes.get(prefix).push(rel);
