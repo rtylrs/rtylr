@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 type Segment = 'all' | 'vip' | 'regular' | 'atrisk' | 'new';
 
@@ -9,7 +10,15 @@ interface Customer {
   segment: Exclude<Segment, 'all'>;
   visits: number;
   spend: number;
-  last: string;
+  lastKey:
+    | 'yesterday'
+    | 'oneDayAgo'
+    | 'twoDaysAgo'
+    | 'threeDaysAgo'
+    | 'fiveDaysAgo'
+    | 'oneWeekAgo'
+    | 'threeWeeksAgo'
+    | 'oneMonthAgo';
 }
 
 const CUSTOMERS: Customer[] = [
@@ -19,7 +28,7 @@ const CUSTOMERS: Customer[] = [
     segment: 'vip',
     visits: 20,
     spend: 4200,
-    last: '2d ago',
+    lastKey: 'twoDaysAgo' as const,
   },
   {
     initials: 'MB',
@@ -27,7 +36,7 @@ const CUSTOMERS: Customer[] = [
     segment: 'vip',
     visits: 15,
     spend: 3100,
-    last: '1d ago',
+    lastKey: 'oneDayAgo' as const,
   },
   {
     initials: 'YK',
@@ -35,16 +44,16 @@ const CUSTOMERS: Customer[] = [
     segment: 'regular',
     visits: 8,
     spend: 890,
-    last: '5d ago',
+    lastKey: 'fiveDaysAgo' as const,
   },
-  { initials: 'TP', name: 'Tom Park', segment: 'regular', visits: 6, spend: 620, last: '1w ago' },
+  { initials: 'TP', name: 'Tom Park', segment: 'regular', visits: 6, spend: 620, lastKey: 'oneWeekAgo' as const },
   {
     initials: 'SN',
     name: 'Sofia Nour',
     segment: 'atrisk',
     visits: 12,
     spend: 1440,
-    last: '3w ago',
+    lastKey: 'threeWeeksAgo' as const,
   },
   {
     initials: 'RD',
@@ -52,28 +61,32 @@ const CUSTOMERS: Customer[] = [
     segment: 'atrisk',
     visits: 9,
     spend: 970,
-    last: '1mo ago',
+    lastKey: 'oneMonthAgo' as const,
   },
-  { initials: 'LW', name: 'Lily Wang', segment: 'new', visits: 1, spend: 48, last: 'Yesterday' },
-  { initials: 'JH', name: 'Jonas Hall', segment: 'new', visits: 2, spend: 95, last: '3d ago' },
+  { initials: 'LW', name: 'Lily Wang', segment: 'new', visits: 1, spend: 48, lastKey: 'yesterday' as const },
+  { initials: 'JH', name: 'Jonas Hall', segment: 'new', visits: 2, spend: 95, lastKey: 'threeDaysAgo' as const },
 ];
 
-const SEGMENTS: { id: Segment; label: string; color: string }[] = [
-  { id: 'all', label: 'All', color: 'var(--ink)' },
-  { id: 'vip', label: '★ VIP', color: '#b45309' },
-  { id: 'regular', label: 'Regular', color: '#2563eb' },
-  { id: 'atrisk', label: 'At risk', color: '#dc2626' },
-  { id: 'new', label: 'New', color: '#16a34a' },
+// labelKey matches home.features.demos.crm.segments.<labelKey> - one
+// translated set shared by the filter tabs and the row tier badge, so the
+// two cannot drift the way two copies of '★ VIP' eventually would.
+const SEGMENTS: { id: Segment; labelKey: string; color: string }[] = [
+  { id: 'all', labelKey: 'all', color: 'var(--ink)' },
+  { id: 'vip', labelKey: 'vip', color: '#b45309' },
+  { id: 'regular', labelKey: 'regular', color: '#2563eb' },
+  { id: 'atrisk', labelKey: 'atRisk', color: '#dc2626' },
+  { id: 'new', labelKey: 'new', color: '#16a34a' },
 ];
 
-const TIER: Record<Exclude<Segment, 'all'>, { label: string; color: string; bg: string }> = {
-  vip: { label: '★ VIP', color: '#b45309', bg: 'rgba(251,191,36,0.15)' },
-  regular: { label: 'Regular', color: '#2563eb', bg: 'rgba(96,165,250,0.15)' },
-  atrisk: { label: 'At risk', color: '#dc2626', bg: 'rgba(248,113,113,0.15)' },
-  new: { label: 'New', color: '#16a34a', bg: 'rgba(52,211,153,0.15)' },
+const TIER: Record<Exclude<Segment, 'all'>, { labelKey: string; color: string; bg: string }> = {
+  vip: { labelKey: 'vip', color: '#b45309', bg: 'rgba(251,191,36,0.15)' },
+  regular: { labelKey: 'regular', color: '#2563eb', bg: 'rgba(96,165,250,0.15)' },
+  atrisk: { labelKey: 'atRisk', color: '#dc2626', bg: 'rgba(248,113,113,0.15)' },
+  new: { labelKey: 'new', color: '#16a34a', bg: 'rgba(52,211,153,0.15)' },
 };
 
 export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
+  const { t } = useTranslation();
   const [active, setActive] = useState<Segment>('all');
 
   const visible = active === 'all' ? CUSTOMERS : CUSTOMERS.filter((c) => c.segment === active);
@@ -107,8 +120,12 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
             marginBottom: 12,
           }}
         >
-          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>Customers</span>
-          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12 }}>1,204 total</span>
+          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>
+            {t('home.features.demos.crm.customers')}
+          </span>
+          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12 }}>
+            {t('home.features.demos.crm.totalCount')}
+          </span>
         </div>
         {/* Segment tabs */}
         <div style={{ display: 'flex', gap: 6, overflowX: 'auto' }}>
@@ -129,7 +146,7 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                 transition: 'all 0.15s ease',
               }}
             >
-              {seg.label}
+              {t(`home.features.demos.crm.segments.${seg.labelKey}`)}
             </button>
           ))}
         </div>
@@ -150,10 +167,10 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
           flexShrink: 0,
         }}
       >
-        <span>Customer</span>
-        <span style={{ textAlign: 'center' }}>Tier</span>
-        <span style={{ textAlign: 'right' }}>Spend</span>
-        <span style={{ textAlign: 'right' }}>Last visit</span>
+        <span>{t('home.features.demos.crm.table.customer')}</span>
+        <span style={{ textAlign: 'center' }}>{t('home.features.demos.crm.table.tier')}</span>
+        <span style={{ textAlign: 'end' }}>{t('home.features.demos.crm.table.spend')}</span>
+        <span style={{ textAlign: 'end' }}>{t('home.features.demos.crm.table.lastVisit')}</span>
       </div>
 
       {/* Rows */}
@@ -201,7 +218,9 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                     <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink)' }}>
                       {c.name}
                     </div>
-                    <div style={{ fontSize: 10, color: 'rgba(19,19,19,0.5)' }}>{c.visits} visits</div>
+                    <div style={{ fontSize: 10, color: 'rgba(19,19,19,0.5)' }}>
+                      {t('home.features.demos.crm.visitCount', { count: c.visits })}
+                    </div>
                   </div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
@@ -215,12 +234,12 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                       fontWeight: 600,
                     }}
                   >
-                    {tier.label}
+                    {t(`home.features.demos.crm.segments.${tier.labelKey}`)}
                   </span>
                 </div>
                 <div
                   style={{
-                    textAlign: 'right',
+                    textAlign: 'end',
                     fontSize: 12,
                     fontWeight: 600,
                     color: 'var(--ink)',
@@ -230,12 +249,12 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                 </div>
                 <div
                   style={{
-                    textAlign: 'right',
+                    textAlign: 'end',
                     fontSize: 11,
                     color: 'rgba(19,19,19,0.5)',
                   }}
                 >
-                  {c.last}
+                  {t(`home.features.demos.crm.relativeTime.${c.lastKey}`)}
                 </div>
               </motion.div>
             );

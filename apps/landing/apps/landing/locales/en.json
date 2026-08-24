@@ -555,6 +555,172 @@
       "submit": "Start building",
       "demoLinePrefix": "Talk with an expert and",
       "demoLineLink": "book a demo"
+    },
+    "features": {
+      "badge": "THE PLATFORM",
+      "title": "What does each app do?",
+      "titleAccent": "One screen at a time.",
+      "openCta": "Open {{app}}",
+      "showLabel": "Show {{app}}",
+      "chooseAppLabel": "Choose a platform app",
+      "items": [
+        {
+          "title": "A register that keeps up with real service.",
+          "description": "Tickets, tables, splits, tips, and every payment type - card, Apple Pay, cash, gift, comp. Works offline when the WiFi doesn’t. < 200ms per checkout."
+        },
+        {
+          "title": "Inventory that counts itself.",
+          "description": "Recipe-linked depletion as sales ring up. Auto-reorder at threshold. Multi-location transfers with a full audit trail. Your shelves tell the database, not the other way around."
+        },
+        {
+          "title": "The people side, without the paperwork.",
+          "description": "Drag-to-publish schedules. Clock-in from the POS. Payroll that rolls up tips, hours, and deductions automatically. Compliance flags before they become violations."
+        },
+        {
+          "title": "Every customer, remembered.",
+          "description": "Every POS sale enriches the profile. Segment by spend, visit cadence, birthday, tags. Send the campaign from the same app - no Mailchimp detour required."
+        },
+        {
+          "title": "A real P&L, in real time.",
+          "description": "Recurring invoices that collect themselves. Expenses captured at source. Sales tax by jurisdiction. A P&L that updates with every sale, not at month-end."
+        },
+        {
+          "title": "Work that moves between apps.",
+          "description": "Kanban boards, automations, and tasks linked to the invoice, customer, or shift they’re actually about. Operations that don’t slip between tools."
+        },
+        {
+          "title": "The dashboard that sees everything.",
+          "description": "Revenue trends, customer cohorts, product performance, labor margin. Every number pulled live from every other app. No SQL, no nightly ETL."
+        }
+      ],
+      "demos": {
+        "hr": {
+          "scheduleTitle": "Schedule",
+          "today": "Today · Mon 5 May",
+          "onShift_one": "{{count}} on shift",
+          "onShift_other": "{{count}} on shift",
+          "roles": {
+            "floorManager": "Floor Manager",
+            "barista": "Barista",
+            "chef": "Chef",
+            "server": "Server"
+          }
+        },
+        "pos": {
+          "menuLabel": "Menu · Dine-in",
+          "orderLabel": "Order · Table 4",
+          "addItems": "Add items…",
+          "total": "Total",
+          "charge": "Charge",
+          "chargeAmount": "Charge ${{amount}}"
+        },
+        "erp": {
+          "inventory": "Inventory",
+          "itemCount_one": "{{count}} item",
+          "itemCount_other": "{{count}} items",
+          "alertCount_one": "{{count}} alert",
+          "alertCount_other": "{{count}} alerts",
+          "table": {
+            "item": "Item",
+            "stock": "Stock",
+            "onHand": "On hand",
+            "status": "Status"
+          },
+          "status": {
+            "out": "Out",
+            "critical": "Critical",
+            "low": "Low",
+            "ok": "OK"
+          }
+        },
+        "crm": {
+          "customers": "Customers",
+          "totalCount": "1,204 total",
+          "segments": {
+            "all": "All",
+            "vip": "★ VIP",
+            "regular": "Regular",
+            "atRisk": "At risk",
+            "new": "New"
+          },
+          "table": {
+            "customer": "Customer",
+            "tier": "Tier",
+            "spend": "Spend",
+            "lastVisit": "Last visit"
+          },
+          "visitCount_one": "{{count}} visit",
+          "visitCount_other": "{{count}} visits",
+          "relativeTime": {
+            "yesterday": "Yesterday",
+            "oneDayAgo": "1d ago",
+            "twoDaysAgo": "2d ago",
+            "threeDaysAgo": "3d ago",
+            "fiveDaysAgo": "5d ago",
+            "oneWeekAgo": "1w ago",
+            "threeWeeksAgo": "3w ago",
+            "oneMonthAgo": "1mo ago"
+          }
+        },
+        "finance": {
+          "pnl": "P&L",
+          "monthLabel": "May 2026",
+          "profitable": "Profitable",
+          "metrics": {
+            "revenue": "Revenue",
+            "expenses": "Expenses",
+            "netProfit": "Net profit"
+          },
+          "momSuffix": "MoM",
+          "months": {
+            "nov": "Nov",
+            "dec": "Dec",
+            "jan": "Jan",
+            "feb": "Feb",
+            "mar": "Mar",
+            "apr": "Apr",
+            "may": "May"
+          }
+        },
+        "flow": {
+          "breadcrumb": {
+            "workspaces": "Workspaces",
+            "operations": "Operations",
+            "sprint": "Weekly sprint"
+          },
+          "views": {
+            "board": "Board",
+            "list": "List",
+            "timeline": "Timeline"
+          },
+          "columns": {
+            "backlog": "Backlog",
+            "progress": "In progress",
+            "review": "Review",
+            "done": "Done"
+          },
+          "priorityHigh": "High"
+        },
+        "insights": {
+          "revenue": "Revenue",
+          "last7Days": "Last 7 days",
+          "kpis": {
+            "covers": "Covers",
+            "avgOrder": "Avg order",
+            "peakDay": "Peak day"
+          },
+          "vsPrefix": "vs {{day}}",
+          "days": {
+            "mon": "Mon",
+            "tue": "Tue",
+            "wed": "Wed",
+            "thu": "Thu",
+            "fri": "Fri",
+            "sat": "Sat",
+            "sun": "Sun"
+          }
+        }
+      }
     }
   },
   "pos": {

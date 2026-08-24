@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowUpRight } from 'lucide-react';
 import { Button } from '@voxire/components';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'react-i18next';
 import { blurFadeIn, blurFadeInSlow, viewportOnce, SPRING_SMOOTH } from '../../../lib/animations';
 import { POSDemo } from './demos/POSDemo';
 import { ERPDemo } from './demos/ERPDemo';
@@ -18,88 +19,50 @@ interface DemoProps {
   isActive: boolean;
 }
 
-interface Feature {
+interface FeatureMeta {
   id: string;
   category: string;
-  title: string;
-  description: string;
-  ctaText: string;
   Demo: React.ComponentType<DemoProps>;
 }
 
-const FEATURES: Feature[] = [
-  {
-    id: 'pos',
-    category: 'POS',
-    title: 'A register that keeps up with real service.',
-    description:
-      'Tickets, tables, splits, tips, and every payment type - card, Apple Pay, cash, gift, comp. Works offline when the WiFi doesn’t. < 200ms per checkout.',
-    ctaText: 'Open POS',
-    Demo: POSDemo,
-  },
-  {
-    id: 'erp',
-    category: 'ERP',
-    title: 'Inventory that counts itself.',
-    description:
-      'Recipe-linked depletion as sales ring up. Auto-reorder at threshold. Multi-location transfers with a full audit trail. Your shelves tell the database, not the other way around.',
-    ctaText: 'Open ERP',
-    Demo: ERPDemo,
-  },
-  {
-    id: 'hr',
-    category: 'HR',
-    title: 'The people side, without the paperwork.',
-    description:
-      'Drag-to-publish schedules. Clock-in from the POS. Payroll that rolls up tips, hours, and deductions automatically. Compliance flags before they become violations.',
-    ctaText: 'Open HR',
-    Demo: HRDemo,
-  },
-  {
-    id: 'crm',
-    category: 'CRM',
-    title: 'Every customer, remembered.',
-    description:
-      'Every POS sale enriches the profile. Segment by spend, visit cadence, birthday, tags. Send the campaign from the same app - no Mailchimp detour required.',
-    ctaText: 'Open CRM',
-    Demo: CRMDemo,
-  },
-  {
-    id: 'finance',
-    category: 'Finance',
-    title: 'A real P&L, in real time.',
-    description:
-      'Recurring invoices that collect themselves. Expenses captured at source. Sales tax by jurisdiction. A P&L that updates with every sale, not at month-end.',
-    ctaText: 'Open Finance',
-    Demo: FinanceDemo,
-  },
-  {
-    id: 'flow',
-    category: 'Flow',
-    title: 'Work that moves between apps.',
-    description:
-      'Kanban boards, automations, and tasks linked to the invoice, customer, or shift they’re actually about. Operations that don’t slip between tools.',
-    ctaText: 'Open Flow',
-    Demo: FlowDemo,
-  },
-  {
-    id: 'insights',
-    category: 'Insights',
-    title: 'The dashboard that sees everything.',
-    description:
-      'Revenue trends, customer cohorts, product performance, labor margin. Every number pulled live from every other app. No SQL, no nightly ETL.',
-    ctaText: 'Open Insights',
-    Demo: InsightsDemo,
-  },
+interface Feature extends FeatureMeta {
+  title: string;
+  description: string;
+  ctaText: string;
+}
+
+// category is the product name, not copy - POS, ERP, HR, CRM, Finance and
+// Flow are the same protected, untranslated terms used everywhere else on
+// the site. Only title and description are written per language, in
+// home.features.items, matched to this array by index.
+const FEATURE_META: FeatureMeta[] = [
+  { id: 'pos', category: 'POS', Demo: POSDemo },
+  { id: 'erp', category: 'ERP', Demo: ERPDemo },
+  { id: 'hr', category: 'HR', Demo: HRDemo },
+  { id: 'crm', category: 'CRM', Demo: CRMDemo },
+  { id: 'finance', category: 'Finance', Demo: FinanceDemo },
+  { id: 'flow', category: 'Flow', Demo: FlowDemo },
+  { id: 'insights', category: 'Insights', Demo: InsightsDemo },
 ];
 
 const AUTO_ADVANCE_MS = 6000;
 
 const FeaturesSection: React.FC = (): React.JSX.Element => {
   const router = useRouter();
+  const { t } = useTranslation();
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const timerRef = useRef<number | null>(null);
+
+  const items = t('home.features.items', { returnObjects: true }) as unknown as {
+    title: string;
+    description: string;
+  }[];
+  const FEATURES: Feature[] = FEATURE_META.map((meta, i) => ({
+    ...meta,
+    ...items[i],
+    ctaText: t('home.features.openCta', { app: meta.category }),
+  }));
 
   const active = FEATURES[activeIndex];
 
@@ -134,11 +97,11 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
     >
       <div className={styles.container}>
         <motion.div className={styles.header} variants={blurFadeIn}>
-          <span className={styles.badge}>THE PLATFORM</span>
+          <span className={styles.badge}>{t('home.features.badge')}</span>
           <h2 className={styles.sectionTitle}>
-            What does each app do?
+            {t('home.features.title')}
             <br />
-            <span className={styles.sectionTitleAccent}>One screen at a time.</span>
+            <span className={styles.sectionTitleAccent}>{t('home.features.titleAccent')}</span>
           </h2>
         </motion.div>
 
@@ -211,12 +174,16 @@ const FeaturesSection: React.FC = (): React.JSX.Element => {
               ))}
             </div>
 
-            <div className={styles.progressRow} role="group" aria-label="Choose a platform app">
+            <div
+              className={styles.progressRow}
+              role="group"
+              aria-label={t('home.features.chooseAppLabel')}
+            >
               {FEATURES.map((f, i) => (
                 <button
                   key={f.id}
                   type="button"
-                  aria-label={`Show ${f.category}`}
+                  aria-label={t('home.features.showLabel', { app: f.category })}
                   aria-pressed={i === activeIndex}
                   onClick={() => selectFeature(i)}
                   className={cn(styles.progressDot, i === activeIndex && styles.progressDotActive)}

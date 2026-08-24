@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 interface MenuItem {
   id: string;
@@ -26,6 +27,7 @@ const MENU: MenuItem[] = [
 const SEQ = ['esp', 'cro', 'lat', 'esp', 'avo'];
 
 export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
+  const { t } = useTranslation();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [flash, setFlash] = useState<string | null>(null);
   const seqRef = useRef(0);
@@ -44,11 +46,11 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
 
   useEffect(() => {
     if (!isActive) return;
-    const t = setInterval(() => {
+    const timer = setInterval(() => {
       addItem(SEQ[seqRef.current % SEQ.length]);
       seqRef.current += 1;
     }, 2000);
-    return () => clearInterval(t);
+    return () => clearInterval(timer);
   }, [isActive]);
 
   const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
@@ -69,7 +71,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
       <div
         style={{
           flex: 1,
-          borderRight: '1px solid var(--hairline)',
+          borderInlineEnd: '1px solid var(--hairline)',
           padding: '20px 16px',
           overflow: 'hidden',
         }}
@@ -84,7 +86,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
             marginBottom: 14,
           }}
         >
-          Menu · Dine-in
+          {t('home.features.demos.pos.menuLabel')}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
           {MENU.map((item) => (
@@ -97,7 +99,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                 borderRadius: 8,
                 padding: '10px 12px',
                 cursor: 'pointer',
-                textAlign: 'left',
+                textAlign: 'start',
                 transition: 'background 0.15s ease, border-color 0.15s ease',
                 color: 'var(--ink)',
               }}
@@ -132,7 +134,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
             marginBottom: 14,
           }}
         >
-          Order · Table 4
+          {t('home.features.demos.pos.orderLabel')}
         </div>
 
         <div
@@ -145,7 +147,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
           }}
         >
           {cart.length === 0 ? (
-            <div style={{ color: 'rgba(19,19,19,0.35)', fontSize: 12 }}>Add items…</div>
+            <div style={{ color: 'rgba(19,19,19,0.35)', fontSize: 12 }}>{t('home.features.demos.pos.addItems')}</div>
           ) : (
             <AnimatePresence>
               {cart.map((item) => (
@@ -181,7 +183,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
               marginBottom: 14,
             }}
           >
-            <span style={{ color: 'rgba(19,19,19,0.55)', fontSize: 12 }}>Total</span>
+            <span style={{ color: 'rgba(19,19,19,0.55)', fontSize: 12 }}>{t('home.features.demos.pos.total')}</span>
             <span style={{ color: 'var(--ink)', fontWeight: 700, fontSize: 16 }}>
               ${total.toFixed(2)}
             </span>
@@ -199,7 +201,9 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
               cursor: cart.length ? 'pointer' : 'default',
             }}
           >
-            {cart.length ? `Charge $${total.toFixed(2)}` : 'Charge'}
+            {cart.length
+              ? t('home.features.demos.pos.chargeAmount', { amount: total.toFixed(2) })
+              : t('home.features.demos.pos.charge')}
           </div>
         </div>
       </div>

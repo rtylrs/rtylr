@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 interface StockItem {
   name: string;
@@ -19,21 +20,22 @@ const ITEMS: StockItem[] = [
   { name: 'Sourdough', unit: 'pcs', qty: 21, par: 30, supplier: 'Artisan' },
 ];
 
-const status = (qty: number, par: number): { label: string; color: string; bg: string } => {
+const statusOf = (qty: number, par: number): { key: string; color: string; bg: string } => {
   const r = qty / par;
-  if (r === 0) return { label: 'Out', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' };
-  if (r < 0.3) return { label: 'Critical', color: '#f97316', bg: 'rgba(249,115,22,0.12)' };
-  if (r < 0.55) return { label: 'Low', color: '#eab308', bg: 'rgba(234,179,8,0.12)' };
-  return { label: 'OK', color: '#22c55e', bg: 'rgba(34,197,94,0.1)' };
+  if (r === 0) return { key: 'out', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' };
+  if (r < 0.3) return { key: 'critical', color: '#f97316', bg: 'rgba(249,115,22,0.12)' };
+  if (r < 0.55) return { key: 'low', color: '#eab308', bg: 'rgba(234,179,8,0.12)' };
+  return { key: 'ok', color: '#22c55e', bg: 'rgba(34,197,94,0.1)' };
 };
 
 export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
+  const { t } = useTranslation();
   const [items, setItems] = useState<StockItem[]>(ITEMS);
   const [pulse, setPulse] = useState(false);
 
   useEffect(() => {
     if (!isActive) return;
-    const t = setInterval(() => {
+    const timer = setInterval(() => {
       setItems((prev) =>
         prev.map((item) => {
           if (item.qty > 0 && Math.random() < 0.25) {
@@ -45,7 +47,7 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
       setPulse(true);
       setTimeout(() => setPulse(false), 600);
     }, 2500);
-    return () => clearInterval(t);
+    return () => clearInterval(timer);
   }, [isActive]);
 
   const alerts = items.filter((i) => i.qty / i.par < 0.3).length;
@@ -75,9 +77,11 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
         }}
       >
         <div>
-          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>Inventory</span>
-          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12, marginLeft: 10 }}>
-            {items.length} items
+          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>
+            {t('home.features.demos.erp.inventory')}
+          </span>
+          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12, marginInlineStart: 10 }}>
+            {t('home.features.demos.erp.itemCount', { count: items.length })}
           </span>
         </div>
         {alerts > 0 && (
@@ -92,7 +96,7 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
               color: '#f97316',
             }}
           >
-            {alerts} alert{alerts !== 1 ? 's' : ''}
+            {t('home.features.demos.erp.alertCount', { count: alerts })}
           </div>
         )}
       </div>
@@ -112,16 +116,16 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
           flexShrink: 0,
         }}
       >
-        <span>Item</span>
-        <span>Stock</span>
-        <span style={{ textAlign: 'center' }}>On hand</span>
-        <span style={{ textAlign: 'center' }}>Status</span>
+        <span>{t('home.features.demos.erp.table.item')}</span>
+        <span>{t('home.features.demos.erp.table.stock')}</span>
+        <span style={{ textAlign: 'center' }}>{t('home.features.demos.erp.table.onHand')}</span>
+        <span style={{ textAlign: 'center' }}>{t('home.features.demos.erp.table.status')}</span>
       </div>
 
       {/* Rows */}
       <div style={{ flex: 1, overflow: 'hidden' }}>
         {items.map((item, i) => {
-          const s = status(item.qty, item.par);
+          const s = statusOf(item.qty, item.par);
           const pct = Math.min(100, (item.qty / item.par) * 100);
           return (
             <div
@@ -132,7 +136,7 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                 padding: '10px 20px',
                 borderBottom: '1px solid var(--hairline)',
                 alignItems: 'center',
-                background: pulse && s.label !== 'OK' ? 'rgba(19,19,19,0.02)' : 'transparent',
+                background: pulse && s.key !== 'ok' ? 'rgba(19,19,19,0.02)' : 'transparent',
                 transition: 'background 0.4s ease',
               }}
             >
@@ -142,7 +146,7 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                 </div>
                 <div style={{ color: 'rgba(19,19,19,0.45)', fontSize: 11 }}>{item.supplier}</div>
               </div>
-              <div style={{ paddingRight: 8 }}>
+              <div style={{ paddingInlineEnd: 8 }}>
                 <div
                   style={{
                     height: 4,
@@ -176,7 +180,7 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                     fontWeight: 600,
                   }}
                 >
-                  {s.label}
+                  {t(`home.features.demos.erp.status.${s.key}`)}
                 </span>
               </div>
             </div>

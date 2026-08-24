@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 interface Task {
   id: string;
@@ -11,7 +12,7 @@ interface Task {
 
 interface Column {
   id: string;
-  title: string;
+  titleKey: 'backlog' | 'progress' | 'review' | 'done';
   tint: string;
   tasks: Task[];
 }
@@ -19,7 +20,7 @@ interface Column {
 const INITIAL: Column[] = [
   {
     id: 'backlog',
-    title: 'Backlog',
+    titleKey: 'backlog',
     tint: '#8a8a8a',
     tasks: [
       { id: 't1', title: 'Seasonal menu rollout, Q3', tag: 'Ops', assignee: 'MC' },
@@ -28,7 +29,7 @@ const INITIAL: Column[] = [
   },
   {
     id: 'progress',
-    title: 'In progress',
+    titleKey: 'progress',
     tint: '#d6b88e',
     tasks: [
       {
@@ -44,13 +45,13 @@ const INITIAL: Column[] = [
   },
   {
     id: 'review',
-    title: 'Review',
+    titleKey: 'review',
     tint: '#8ca39d',
     tasks: [{ id: 't6', title: 'Espresso machine SLA', tag: 'Vendor', assignee: 'JK' }],
   },
   {
     id: 'done',
-    title: 'Done',
+    titleKey: 'done',
     tint: '#6bcf7f',
     tasks: [
       { id: 't7', title: 'Q1 sales-tax filing', tag: 'Finance', assignee: 'SP' },
@@ -62,6 +63,7 @@ const INITIAL: Column[] = [
 const COL_ORDER = ['backlog', 'progress', 'review', 'done'];
 
 export const FlowDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
+  const { t } = useTranslation();
   const [cols, setCols] = useState<Column[]>(INITIAL);
   const tickRef = useRef(0);
 
@@ -69,7 +71,7 @@ export const FlowDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element
     setCols((prev) => {
       const moveable = prev
         .filter((c) => c.id !== 'done' && c.tasks.length > 0)
-        .flatMap((c) => c.tasks.map((t) => ({ task: t, colId: c.id })));
+        .flatMap((c) => c.tasks.map((task) => ({ task, colId: c.id })));
       if (!moveable.length) return prev;
       const pick = moveable[tickRef.current % moveable.length];
       const fromIdx = COL_ORDER.indexOf(pick.colId);
@@ -77,7 +79,7 @@ export const FlowDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element
       if (toId === pick.colId) return prev;
       return prev.map((c) => {
         if (c.id === pick.colId)
-          return { ...c, tasks: c.tasks.filter((t) => t.id !== pick.task.id) };
+          return { ...c, tasks: c.tasks.filter((task) => task.id !== pick.task.id) };
         if (c.id === toId) return { ...c, tasks: [pick.task, ...c.tasks] };
         return c;
       });
@@ -87,8 +89,8 @@ export const FlowDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element
 
   useEffect(() => {
     if (!isActive) return;
-    const t = setInterval(moveTask, 2800);
-    return () => clearInterval(t);
+    const timer = setInterval(moveTask, 2800);
+    return () => clearInterval(timer);
   }, [isActive]);
 
   return (
@@ -115,13 +117,19 @@ export const FlowDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element
           flexShrink: 0,
         }}
       >
-        <span style={{ color: 'rgba(19,19,19,0.55)', fontSize: 12 }}>Workspaces</span>
+        <span style={{ color: 'rgba(19,19,19,0.55)', fontSize: 12 }}>
+          {t('home.features.demos.flow.breadcrumb.workspaces')}
+        </span>
         <span style={{ color: 'rgba(19,19,19,0.3)', fontSize: 12 }}>/</span>
-        <span style={{ color: 'rgba(19,19,19,0.55)', fontSize: 12 }}>Operations</span>
+        <span style={{ color: 'rgba(19,19,19,0.55)', fontSize: 12 }}>
+          {t('home.features.demos.flow.breadcrumb.operations')}
+        </span>
         <span style={{ color: 'rgba(19,19,19,0.3)', fontSize: 12 }}>/</span>
-        <span style={{ color: 'var(--ink)', fontSize: 12, fontWeight: 500 }}>Weekly sprint</span>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
-          {['Board', 'List', 'Timeline'].map((v, i) => (
+        <span style={{ color: 'var(--ink)', fontSize: 12, fontWeight: 500 }}>
+          {t('home.features.demos.flow.breadcrumb.sprint')}
+        </span>
+        <div style={{ marginInlineStart: 'auto', display: 'flex', gap: 6 }}>
+          {(['board', 'list', 'timeline'] as const).map((v, i) => (
             <div
               key={v}
               style={{
@@ -134,7 +142,7 @@ export const FlowDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element
                 border: i === 0 ? '1px solid var(--hairline-strong)' : '1px solid transparent',
               }}
             >
-              {v}
+              {t(`home.features.demos.flow.views.${v}`)}
             </div>
           ))}
         </div>
@@ -186,11 +194,11 @@ export const FlowDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element
                 }}
               />
               <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink)' }}>
-                {col.title}
+                {t(`home.features.demos.flow.columns.${col.titleKey}`)}
               </span>
               <span
                 style={{
-                  marginLeft: 'auto',
+                  marginInlineStart: 'auto',
                   fontSize: 10,
                   color: 'rgba(19,19,19,0.5)',
                   background: 'var(--hairline)',
@@ -266,12 +274,12 @@ export const FlowDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element
                             fontWeight: 600,
                           }}
                         >
-                          High
+                          {t('home.features.demos.flow.priorityHigh')}
                         </span>
                       )}
                       <div
                         style={{
-                          marginLeft: 'auto',
+                          marginInlineStart: 'auto',
                           width: 18,
                           height: 18,
                           borderRadius: '50%',

@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
-const MONTHS = ['Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May'];
+const MONTH_KEYS = ['nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may'];
 const REVENUE = [31200, 44800, 28400, 33600, 38900, 41200, 42840];
 const EXPENSES = [21800, 30100, 20200, 23400, 26100, 27800, 28310];
 
 const fmt = (n: number): string => (n >= 1000 ? `$${(n / 1000).toFixed(1)}k` : `$${n}`);
 
 interface Metric {
-  label: string;
+  labelKey: 'revenue' | 'expenses' | 'netProfit';
   value: number;
   prev: number;
   prefix: string;
 }
 
 const METRICS: Metric[] = [
-  { label: 'Revenue', value: 42840, prev: 41200, prefix: '$' },
-  { label: 'Expenses', value: 28310, prev: 27800, prefix: '$' },
-  { label: 'Net profit', value: 14530, prev: 13400, prefix: '$' },
+  { labelKey: 'revenue', value: 42840, prev: 41200, prefix: '$' },
+  { labelKey: 'expenses', value: 28310, prev: 27800, prefix: '$' },
+  { labelKey: 'netProfit', value: 14530, prev: 13400, prefix: '$' },
 ];
 
 const pctChange = (cur: number, prev: number): string => {
@@ -28,12 +29,13 @@ const pctChange = (cur: number, prev: number): string => {
 const maxVal = Math.max(...REVENUE);
 
 export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
+  const { t } = useTranslation();
   const [shown, setShown] = useState(false);
 
   useEffect(() => {
     if (isActive) {
-      const t = setTimeout(() => setShown(true), 100);
-      return () => clearTimeout(t);
+      const timer = setTimeout(() => setShown(true), 100);
+      return () => clearTimeout(timer);
     } else {
       setShown(false);
     }
@@ -63,9 +65,11 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
         }}
       >
         <div>
-          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>P&amp;L</span>
-          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12, marginLeft: 10 }}>
-            May 2026
+          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>
+            {t('home.features.demos.finance.pnl')}
+          </span>
+          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12, marginInlineStart: 10 }}>
+            {t('home.features.demos.finance.monthLabel')}
           </span>
         </div>
         <span
@@ -78,7 +82,7 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
             fontWeight: 600,
           }}
         >
-          Profitable
+          {t('home.features.demos.finance.profitable')}
         </span>
       </div>
 
@@ -93,7 +97,7 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
       >
         {METRICS.map((m) => (
           <div
-            key={m.label}
+            key={m.labelKey}
             style={{
               background: 'var(--bg-surface-b)',
               border: '1px solid var(--hairline)',
@@ -102,12 +106,14 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
             }}
           >
             <div style={{ fontSize: 10, color: 'rgba(19,19,19,0.55)', marginBottom: 6 }}>
-              {m.label}
+              {t(`home.features.demos.finance.metrics.${m.labelKey}`)}
             </div>
             <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)', marginBottom: 4 }}>
               {shown ? `$${(m.value / 1000).toFixed(1)}k` : '-'}
             </div>
-            <div style={{ fontSize: 11, color: '#16a34a' }}>{pctChange(m.value, m.prev)} MoM</div>
+            <div style={{ fontSize: 11, color: '#16a34a' }}>
+              {pctChange(m.value, m.prev)} {t('home.features.demos.finance.momSuffix')}
+            </div>
           </div>
         ))}
       </div>
@@ -133,7 +139,7 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
                 display: 'inline-block',
               }}
             />
-            Revenue
+            {t('home.features.demos.finance.metrics.revenue')}
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <span
@@ -145,13 +151,13 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
                 display: 'inline-block',
               }}
             />
-            Expenses
+            {t('home.features.demos.finance.metrics.expenses')}
           </span>
         </div>
         <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: 8, minHeight: 0 }}>
-          {MONTHS.map((month, i) => (
+          {MONTH_KEYS.map((monthKey, i) => (
             <div
-              key={month}
+              key={monthKey}
               style={{
                 flex: 1,
                 display: 'flex',
@@ -177,7 +183,7 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
                   transition={{ duration: 0.7, delay: i * 0.05, ease: 'easeOut' }}
                   style={{
                     flex: 1,
-                    background: i === MONTHS.length - 1 ? 'var(--ink)' : 'rgba(19,19,19,0.3)',
+                    background: i === MONTH_KEYS.length - 1 ? 'var(--ink)' : 'rgba(19,19,19,0.3)',
                     borderRadius: '3px 3px 0 0',
                     minHeight: 2,
                   }}
@@ -188,14 +194,14 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
                   style={{
                     flex: 1,
                     background:
-                      i === MONTHS.length - 1 ? 'rgba(19,19,19,0.35)' : 'rgba(19,19,19,0.12)',
+                      i === MONTH_KEYS.length - 1 ? 'rgba(19,19,19,0.35)' : 'rgba(19,19,19,0.12)',
                     borderRadius: '3px 3px 0 0',
                     minHeight: 2,
                   }}
                 />
               </div>
               <div style={{ fontSize: 9, color: 'rgba(19,19,19,0.45)', whiteSpace: 'nowrap' }}>
-                {month}
+                {t(`home.features.demos.finance.months.${monthKey}`)}
               </div>
             </div>
           ))}

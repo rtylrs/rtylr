@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 interface Staff {
   initials: string;
   name: string;
-  role: string;
+  roleKey: 'floorManager' | 'barista' | 'chef' | 'server';
   start: number;
   end: number;
   color: string;
@@ -15,7 +16,7 @@ const STAFF: Staff[] = [
   {
     initials: 'MC',
     name: 'Maya Chen',
-    role: 'Floor Manager',
+    roleKey: 'floorManager',
     start: 8,
     end: 16,
     color: '#b3c5e8',
@@ -24,7 +25,7 @@ const STAFF: Staff[] = [
   {
     initials: 'SP',
     name: 'Sam Park',
-    role: 'Barista',
+    roleKey: 'barista',
     start: 9,
     end: 17,
     color: '#a2d9af',
@@ -33,7 +34,7 @@ const STAFF: Staff[] = [
   {
     initials: 'JK',
     name: 'James K.',
-    role: 'Chef',
+    roleKey: 'chef',
     start: 10,
     end: 22,
     color: '#f3c08a',
@@ -42,7 +43,7 @@ const STAFF: Staff[] = [
   {
     initials: 'AR',
     name: 'Aisha R.',
-    role: 'Server',
+    roleKey: 'server',
     start: 11,
     end: 19,
     color: '#c9a48a',
@@ -51,7 +52,7 @@ const STAFF: Staff[] = [
   {
     initials: 'LB',
     name: 'Luca B.',
-    role: 'Barista',
+    roleKey: 'barista',
     start: 14,
     end: 22,
     color: '#d6b88e',
@@ -60,7 +61,7 @@ const STAFF: Staff[] = [
   {
     initials: 'NA',
     name: 'Nadia A.',
-    role: 'Server',
+    roleKey: 'server',
     start: 16,
     end: 23,
     color: '#b3c5e8',
@@ -73,17 +74,18 @@ const DAY_END = 24;
 const TOTAL_HRS = DAY_END - DAY_START;
 
 export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
+  const { t } = useTranslation();
   const [now, setNow] = useState(10.5);
 
   useEffect(() => {
     if (!isActive) return;
-    const t = setInterval(() => {
+    const timer = setInterval(() => {
       setNow((h) => {
         const next = h + 0.15;
         return next > 22 ? 8.5 : next;
       });
     }, 120);
-    return () => clearInterval(t);
+    return () => clearInterval(timer);
   }, [isActive]);
 
   const nowPct = ((now - DAY_START) / TOTAL_HRS) * 100;
@@ -120,14 +122,18 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
         }}
       >
         <div>
-          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>Schedule</span>
-          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12, marginLeft: 10 }}>
-            Today · Mon 5 May
+          <span style={{ color: 'var(--ink)', fontWeight: 600, fontSize: 14 }}>
+            {t('home.features.demos.hr.scheduleTitle')}
+          </span>
+          <span style={{ color: 'rgba(19,19,19,0.5)', fontSize: 12, marginInlineStart: 10 }}>
+            {t('home.features.demos.hr.today')}
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e' }} />
-          <span style={{ color: 'rgba(19,19,19,0.65)', fontSize: 12 }}>{clocked} on shift</span>
+          <span style={{ color: 'rgba(19,19,19,0.65)', fontSize: 12 }}>
+            {t('home.features.demos.hr.onShift', { count: clocked })}
+          </span>
         </div>
       </div>
 
@@ -236,7 +242,9 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
                   >
                     {s.name}
                   </div>
-                  <div style={{ fontSize: 10, color: 'rgba(19,19,19,0.45)' }}>{s.role}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(19,19,19,0.45)' }}>
+                    {t(`home.features.demos.hr.roles.${s.roleKey}`)}
+                  </div>
                 </div>
               </div>
 
