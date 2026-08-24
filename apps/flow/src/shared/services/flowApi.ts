@@ -17,6 +17,7 @@ import {
   insightsV2,
   milestoneV2,
   cycleV2,
+  statusClient,
 } from '../lib/clients';
 
 // -- Types ----------------------------------------------------------------
@@ -121,6 +122,12 @@ export interface ApiTask {
   // tracks voxie directly - if the contract drops it or makes it required,
   // this file stops compiling instead of silently disagreeing.
   archived?: ContractTask['archived'];
+  // F-A: the custom status (flow.status.v2) applied to this task, if any.
+  // Absent means the task is on its built-in string status alone. Pinned to
+  // the generated contract for the same reason as archived above.
+  statusId?: ContractTask['statusId'];
+  statusName?: ContractTask['statusName'];
+  statusColor?: ContractTask['statusColor'];
   identifier?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -142,6 +149,18 @@ export interface ApiLabel {
   workspaceId: number;
   name: string;
   color: string;
+  createdAt: string;
+}
+
+export interface ApiStatus {
+  id: string;
+  projectId: string;
+  name: string;
+  bucket: 'backlog' | 'active' | 'done' | 'cancelled';
+  legacyStatus: string;
+  color: string;
+  sortOrder: number;
+  isDefault: boolean;
   createdAt: string;
 }
 
@@ -776,6 +795,73 @@ export const flowApi = {
         taskId: String(data.task_id),
         labelIds: data.label_ids.map((id) => String(id)),
       })
+    ),
+
+  // -- Statuses (F-A) -------------------------------------------------------
+
+  // Empty means "use the six built-in string statuses", never "not configured
+  // yet" - the panel and board both read it that way, so nothing here needs a
+  // separate has-custom-statuses flag.
+  listStatuses: (projectId: string) =>
+    flowResult<{ statuses: ApiStatus[] }>(() => statusClient.listStatuses({ projectId })),
+
+  createStatus: (data: {
+    projectId: string;
+    name: string;
+    bucket: string;
+    legacyStatus?: string;
+    color?: string;
+    sortOrder?: number;
+    isDefault?: boolean;
+  }) =>
+    flowResult<{ status: ApiStatus }>(() =>
+      statusClient.createStatus({
+        projectId: data.projectId,
+        name: data.name,
+        bucket: data.bucket,
+        legacyStatus: data.legacyStatus,
+        color: data.color,
+        sortOrder: data.sortOrder,
+        isDefault: data.isDefault,
+      })
+    ),
+
+  updateStatus: (data: {
+    id: string;
+    name: string;
+    bucket: string;
+    color: string;
+    legacyStatus?: string;
+    sortOrder?: number;
+    isDefault?: boolean;
+  }) =>
+    flowResult<{ status: ApiStatus }>(() =>
+      statusClient.updateStatus({
+        id: data.id,
+        body: {
+          name: data.name,
+          bucket: data.bucket,
+          color: data.color,
+          legacyStatus: data.legacyStatus,
+          sortOrder: data.sortOrder,
+          isDefault: data.isDefault,
+        },
+      })
+    ),
+
+  // Never blocks on the status's tasks: they fall back to the built-in string
+  // status they already carry rather than being deleted or held hostage.
+  deleteStatus: (id: string) =>
+    flowResult<{ message: string; reassignedTaskCount: number }>(() =>
+      statusClient.deleteStatus({ id })
+    ),
+
+  // status_id 0 clears a task's custom status, putting it back on its
+  // built-in string status - not a missing argument, so this always sends the
+  // field rather than omitting it on falsy.
+  setTaskStatus: (data: { taskId: string; statusId: string }) =>
+    flowResult<{ message: string; status: string }>(() =>
+      statusClient.setTaskStatus({ taskId: data.taskId, statusId: data.statusId })
     ),
 
   // -- Milestones ---------------------------------------------------------
