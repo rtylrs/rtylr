@@ -28,6 +28,7 @@ const (
 type roleFixture struct {
 	taskAPI  *api.TaskAPI
 	labelAPI *api.LabelAPI
+	projAPI  *api.ProjectAPIV2
 	repo     *infrastructure.Repository
 	wsID     int64
 	projID   int64
@@ -96,6 +97,7 @@ func newRoleFixture(t *testing.T) *roleFixture {
 	return &roleFixture{
 		taskAPI:  api.NewTaskAPI(svc),
 		labelAPI: api.NewLabelAPI(svc),
+		projAPI:  api.NewProjectAPIV2(svc),
 		repo:     repo,
 		wsID:     wsID,
 		projID:   projID,

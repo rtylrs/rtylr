@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
@@ -652,4 +653,46 @@ func (a *ProjectAPIV2) TransferProjectOwnership(ctx context.Context, req *flowpr
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to transfer ownership")
 	}
 	return &flowprojectv2.TransferProjectOwnershipResponse{Message: "Ownership transferred"}, nil
+}
+
+// GetProjectLabourCost returns the labour cost of billable logged time on a
+// project. Admin only: it exposes aggregate spend, and that aggregate comes from
+// HR rates which must not become readable through Flow.
+//
+// Ported from the v1 handler unchanged in behaviour. The zero-id check v1 did by
+// hand is gone because the v2 contract declares id @required @gt(0), so a zero
+// never reaches here.
+func (a *ProjectAPIV2) GetProjectLabourCost(ctx context.Context, req *flowprojectv2.GetProjectLabourCostRequest) (*flowprojectv2.GetProjectLabourCostResponse, error) {
+	businessID, authUser, err := a.resolveBusinessID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	projectID := req.GetId()
+	if roleErr := a.Service.RequireProjectRole(ctx, projectID, authUser.UserID, businessID, domain.FlowRoleAdmin); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	cost, costErr := a.Service.GetProjectLabourCost(ctx, businessID, projectID)
+	if costErr != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load project labour cost")
+	}
+
+	// UncostedEmployeeCount is wider than the contract field. Clamping rather
+	// than letting the conversion wrap keeps a large count reading as "very
+	// many" instead of flipping negative.
+	uncostedEmployees := cost.UncostedEmployeeCount
+	if uncostedEmployees > math.MaxInt32 {
+		uncostedEmployees = math.MaxInt32
+	}
+
+	return &flowprojectv2.GetProjectLabourCostResponse{
+		Cost: &flowprojectv2.ProjectLabourCost{
+			ProjectId:             cost.ProjectID,
+			CostMinorUnits:        cost.CostCents,
+			CostedMinutes:         cost.CostedMinutes,
+			UncostedMinutes:       cost.UncostedMinutes,
+			UncostedEmployeeCount: int32(uncostedEmployees),
+		},
+	}, nil
 }
