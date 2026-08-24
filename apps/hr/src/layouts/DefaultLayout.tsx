@@ -26,6 +26,7 @@ import {
   Shield,
   GraduationCap,
   Network,
+  GitBranch,
   Settings,
   MessageSquare,
   CalendarDays,
@@ -97,6 +98,12 @@ const navSections: NavSection[] = [
         permission: 'hr:departments',
       },
       { i18nKey: 'nav.orgChart', path: '/org-chart', icon: Network },
+      {
+        i18nKey: 'nav.reportingLines',
+        path: '/staff/reporting-lines',
+        icon: GitBranch,
+        permission: 'hr:staff:manage',
+      },
     ],
   },
   {
@@ -234,6 +241,7 @@ const navSections: NavSection[] = [
 const routeLabelKeys: Record<string, string> = {
   '/': 'nav.dashboard',
   '/staff': 'nav.staff',
+  '/staff/reporting-lines': 'nav.reportingLines',
   '/shifts': 'nav.shifts',
   '/payroll': 'nav.payroll',
   '/payroll/my-payslips': 'nav.myPaySlips',
