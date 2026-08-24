@@ -92,18 +92,23 @@ const Analytics: React.FC = () => {
     refetch: refetchBestSellers,
   } = useBestSellers(range);
 
-  const avgOrderValue = kpis && kpis.ordersToday > 0 ? kpis.revenueToday / kpis.ordersToday : 0;
+  // revenue and orderCount are today-scoped server-side: onion's kpis.sql
+  // defines them as SumRevenueToday and CountOrdersToday, both filtered to
+  // created_at >= CURDATE(). The card labels below are accurate; the field
+  // names this screen used (revenueToday, ordersToday) never existed on
+  // GetKPIsResponse, so every card read a transform default of 0.
+  const avgOrderValue = kpis && kpis.orderCount > 0 ? kpis.revenue / kpis.orderCount : 0;
 
   const statCards = [
     {
       label: 'Revenue Today',
-      value: isLoading ? '-' : `$${(kpis?.revenueToday ?? 0).toFixed(2)}`,
+      value: isLoading ? '-' : `$${(kpis?.revenue ?? 0).toFixed(2)}`,
       icon: DollarSign,
       iconClass: 'text-emerald-600 bg-emerald-500/15',
     },
     {
       label: 'Orders Today',
-      value: isLoading ? '-' : String(kpis?.ordersToday ?? 0),
+      value: isLoading ? '-' : String(kpis?.orderCount ?? 0),
       icon: ShoppingBag,
       iconClass: 'text-blue-600 bg-blue-500/15',
     },
@@ -114,8 +119,11 @@ const Analytics: React.FC = () => {
       iconClass: 'text-violet-600 bg-violet-500/15',
     },
     {
-      label: 'New Customers',
-      value: isLoading ? '-' : String(kpis?.newCustomers ?? 0),
+      // 'Customers', not 'New Customers': onion's CountCustomers has no date
+      // filter, so this is the total. The old label described data that does
+      // not exist on the contract.
+      label: 'Customers',
+      value: isLoading ? '-' : String(kpis?.customerCount ?? 0),
       icon: Star,
       iconClass: 'text-amber-600 bg-amber-500/15',
     },
@@ -174,51 +182,6 @@ const Analytics: React.FC = () => {
             );
           })}
         </div>
-
-        {/* Revenue sparkline */}
-        {kpis && kpis.revenueSeries.length > 1 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Revenue Trend</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div style={{ height: 80, position: 'relative' }}>
-                <svg
-                  width="100%"
-                  height="80"
-                  viewBox={`0 0 ${kpis.revenueSeries.length - 1} 100`}
-                  preserveAspectRatio="none"
-                >
-                  {(() => {
-                    const vals = kpis.revenueSeries;
-                    const max = Math.max(...vals);
-                    const min = Math.min(...vals);
-                    const range = max - min || 1;
-                    const pts = vals
-                      .map((v, i) => `${i},${100 - ((v - min) / range) * 90}`)
-                      .join(' ');
-                    return (
-                      <>
-                        <polyline
-                          fill="none"
-                          stroke="#10b981"
-                          strokeWidth="2"
-                          vectorEffect="non-scaling-stroke"
-                          points={pts}
-                        />
-                        <polyline
-                          fill="rgba(16,185,129,0.12)"
-                          stroke="none"
-                          points={`0,100 ${pts} ${vals.length - 1},100`}
-                        />
-                      </>
-                    );
-                  })()}
-                </svg>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         <Card>
           <CardHeader>
