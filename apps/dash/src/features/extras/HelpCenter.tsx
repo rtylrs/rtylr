@@ -56,13 +56,6 @@ const ARTICLES: Article[] = [
     excerpt: 'Understand revenue, orders, and trends.',
   },
   {
-    id: '7',
-    title: 'Setting up API keys and webhooks',
-    category: 'Developer',
-    href: 'https://docs.rtylr.com/developer',
-    excerpt: 'Integrate rtylr into your systems.',
-  },
-  {
     id: '8',
     title: 'Enabling two-factor authentication',
     category: 'Security',
