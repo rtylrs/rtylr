@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -34,9 +35,11 @@ const EmailCampaign: React.FC = () => {
   const segments = useMemo(() => fetchedSegments ?? [], [fetchedSegments]);
   const templates = (fetchedTemplates ?? []).filter((template) => template.channel === 'email');
 
+  const { t } = useTranslation();
   const [name, setName] = useState(search.name || '');
   const [segmentId, setSegmentId] = useState<string>(search.segment || '');
   const [subject, setSubject] = useState(search.subject || '');
+  const [description, setDescription] = useState(search.description || '');
   const [body, setBody] = useState(search.body || '');
   const [previewOpen, setPreviewOpen] = useState(false);
   const pending = create.isPending || update.isPending || updateStatus.isPending;
@@ -73,6 +76,7 @@ const EmailCampaign: React.FC = () => {
       name,
       type: 'email',
       subject,
+      description,
       body,
       audienceSegmentId: segmentId ? Number(segmentId) : null,
     };
@@ -174,6 +178,15 @@ const EmailCampaign: React.FC = () => {
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   placeholder="Spring promo"
+                />
+                {/* The rest of this screen predates i18n and is still hardcoded
+                    English. New strings go through t() per the repo rule;
+                    converting the other ~40 is its own change. */}
+                <Input
+                  label={t('crm.campaigns.descriptionLabel')}
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  placeholder={t('crm.campaigns.descriptionPlaceholder')}
                 />
                 <Select
                   label="Start from template"
