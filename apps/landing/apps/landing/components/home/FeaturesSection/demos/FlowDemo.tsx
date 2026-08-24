@@ -4,8 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 interface Task {
   id: string;
-  title: string;
-  tag: string;
+  tagKey: 'ops' | 'erp' | 'hr' | 'kitchen' | 'crm' | 'vendor' | 'finance';
   assignee: string;
   priority?: 'high' | 'med';
 }
@@ -17,14 +16,15 @@ interface Column {
   tasks: Task[];
 }
 
+// title comes from home.features.demos.flow.tasks[id], tag from .tags[tagKey].
 const INITIAL: Column[] = [
   {
     id: 'backlog',
     titleKey: 'backlog',
     tint: '#8a8a8a',
     tasks: [
-      { id: 't1', title: 'Seasonal menu rollout, Q3', tag: 'Ops', assignee: 'MC' },
-      { id: 't2', title: 'New supplier: Rossini', tag: 'ERP', assignee: 'JK' },
+      { id: 't1', tagKey: 'ops', assignee: 'MC' },
+      { id: 't2', tagKey: 'erp', assignee: 'JK' },
     ],
   },
   {
@@ -34,28 +34,27 @@ const INITIAL: Column[] = [
     tasks: [
       {
         id: 't3',
-        title: 'Friday covers, staffing plan',
-        tag: 'HR',
+        tagKey: 'hr',
         assignee: 'SP',
         priority: 'high',
       },
-      { id: 't4', title: 'Redo brunch prep checklist', tag: 'Kitchen', assignee: 'AR' },
-      { id: 't5', title: "Email blast: Mother's Day", tag: 'CRM', assignee: 'MC' },
+      { id: 't4', tagKey: 'kitchen', assignee: 'AR' },
+      { id: 't5', tagKey: 'crm', assignee: 'MC' },
     ],
   },
   {
     id: 'review',
     titleKey: 'review',
     tint: '#8ca39d',
-    tasks: [{ id: 't6', title: 'Espresso machine SLA', tag: 'Vendor', assignee: 'JK' }],
+    tasks: [{ id: 't6', tagKey: 'vendor', assignee: 'JK' }],
   },
   {
     id: 'done',
     titleKey: 'done',
     tint: '#6bcf7f',
     tasks: [
-      { id: 't7', title: 'Q1 sales-tax filing', tag: 'Finance', assignee: 'SP' },
-      { id: 't8', title: 'POS firmware v4.2', tag: 'Ops', assignee: 'AR' },
+      { id: 't7', tagKey: 'finance', assignee: 'SP' },
+      { id: 't8', tagKey: 'ops', assignee: 'AR' },
     ],
   },
 ];
@@ -246,7 +245,7 @@ export const FlowDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element
                         fontWeight: 500,
                       }}
                     >
-                      {task.title}
+                      {t(`home.features.demos.flow.tasks.${task.id}`)}
                     </div>
                     <div
                       style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}
@@ -261,7 +260,7 @@ export const FlowDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element
                           color: 'rgba(19,19,19,0.6)',
                         }}
                       >
-                        {task.tag}
+                        {t(`home.features.demos.flow.tags.${task.tagKey}`)}
                       </span>
                       {task.priority === 'high' && (
                         <span

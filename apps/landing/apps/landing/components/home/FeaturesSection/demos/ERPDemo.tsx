@@ -3,21 +3,24 @@ import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 
 interface StockItem {
-  name: string;
-  unit: string;
+  itemIndex: number;
+  unitKey: 'btl' | 'bag' | 'kg' | 'L' | 'pcs';
   qty: number;
   par: number;
   supplier: string;
 }
 
+// itemIndex points at home.features.demos.erp.items[i] - the display name
+// is translated, everything else here (unit, quantities, supplier) is
+// presentational or a proper noun and stays local.
 const ITEMS: StockItem[] = [
-  { name: 'Olive Oil 5L', unit: 'btl', qty: 5, par: 24, supplier: 'Rossini' },
-  { name: 'Flour 25kg', unit: 'bag', qty: 8, par: 10, supplier: 'GrainCo' },
-  { name: 'Espresso Beans', unit: 'kg', qty: 3, par: 15, supplier: 'Nomad' },
-  { name: 'Atlantic Salmon', unit: 'kg', qty: 6, par: 8, supplier: 'FreshSea' },
-  { name: 'Truffle Oil', unit: 'btl', qty: 0, par: 6, supplier: 'Rossini' },
-  { name: 'Heavy Cream', unit: 'L', qty: 14, par: 20, supplier: 'DairyHub' },
-  { name: 'Sourdough', unit: 'pcs', qty: 21, par: 30, supplier: 'Artisan' },
+  { itemIndex: 0, unitKey: 'btl', qty: 5, par: 24, supplier: 'Rossini' },
+  { itemIndex: 1, unitKey: 'bag', qty: 8, par: 10, supplier: 'GrainCo' },
+  { itemIndex: 2, unitKey: 'kg', qty: 3, par: 15, supplier: 'Nomad' },
+  { itemIndex: 3, unitKey: 'kg', qty: 6, par: 8, supplier: 'FreshSea' },
+  { itemIndex: 4, unitKey: 'btl', qty: 0, par: 6, supplier: 'Rossini' },
+  { itemIndex: 5, unitKey: 'L', qty: 14, par: 20, supplier: 'DairyHub' },
+  { itemIndex: 6, unitKey: 'pcs', qty: 21, par: 30, supplier: 'Artisan' },
 ];
 
 const statusOf = (qty: number, par: number): { key: string; color: string; bg: string } => {
@@ -31,6 +34,7 @@ const statusOf = (qty: number, par: number): { key: string; color: string; bg: s
 export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
   const { t } = useTranslation();
   const [items, setItems] = useState<StockItem[]>(ITEMS);
+  const itemNames = t('home.features.demos.erp.items', { returnObjects: true }) as string[];
   const [pulse, setPulse] = useState(false);
 
   useEffect(() => {
@@ -129,7 +133,7 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
           const pct = Math.min(100, (item.qty / item.par) * 100);
           return (
             <div
-              key={item.name}
+              key={item.itemIndex}
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 100px 80px 80px',
@@ -142,7 +146,7 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
             >
               <div>
                 <div style={{ color: 'var(--ink)', fontSize: 12, fontWeight: 500 }}>
-                  {item.name}
+                  {itemNames[item.itemIndex]}
                 </div>
                 <div style={{ color: 'rgba(19,19,19,0.45)', fontSize: 11 }}>{item.supplier}</div>
               </div>
@@ -167,7 +171,7 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                 </div>
               </div>
               <div style={{ textAlign: 'center', fontSize: 12, color: 'rgba(19,19,19,0.65)' }}>
-                {item.qty} {item.unit}
+                {item.qty} {t(`home.features.demos.erp.units.${item.unitKey}`)}
               </div>
               <div style={{ textAlign: 'center' }}>
                 <span

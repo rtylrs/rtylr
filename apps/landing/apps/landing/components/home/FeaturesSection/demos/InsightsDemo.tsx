@@ -110,9 +110,10 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
           </span>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
-          {['7d', '30d', '90d'].map((r, i) => (
+          {(['7d', '30d', '90d'] as const).map((r, i) => (
             <div
               key={r}
+              dir="ltr"
               style={{
                 padding: '4px 10px',
                 borderRadius: 6,
@@ -123,7 +124,7 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
                 cursor: 'pointer',
               }}
             >
-              {r}
+              {t(`home.features.demos.insights.ranges.${r}`)}
             </div>
           ))}
         </div>

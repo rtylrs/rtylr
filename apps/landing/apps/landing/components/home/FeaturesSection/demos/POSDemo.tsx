@@ -6,7 +6,7 @@ import { formatMoney } from '../../../../lib/formatMoney';
 
 interface MenuItem {
   id: string;
-  name: string;
+  nameIndex: number;
   price: number;
   emoji: string;
 }
@@ -15,15 +15,16 @@ interface CartItem extends MenuItem {
   qty: number;
 }
 
+// nameIndex points at home.features.demos.pos.items[i], in the same order.
 const MENU: MenuItem[] = [
-  { id: 'esp', name: 'Espresso', price: 3.5, emoji: '☕' },
-  { id: 'lat', name: 'Latte', price: 5.0, emoji: '🥛' },
-  { id: 'cap', name: 'Cappuccino', price: 5.0, emoji: '☕' },
-  { id: 'cro', name: 'Croissant', price: 3.5, emoji: '🥐' },
-  { id: 'oj', name: 'Orange Juice', price: 4.5, emoji: '🍊' },
-  { id: 'avo', name: 'Avo Toast', price: 12.0, emoji: '🥑' },
-  { id: 'sal', name: 'Greek Salad', price: 14.0, emoji: '🥗' },
-  { id: 'cake', name: 'Cheesecake', price: 7.5, emoji: '🍰' },
+  { id: 'esp', nameIndex: 0, price: 3.5, emoji: '☕' },
+  { id: 'lat', nameIndex: 1, price: 5.0, emoji: '🥛' },
+  { id: 'cap', nameIndex: 2, price: 5.0, emoji: '☕' },
+  { id: 'cro', nameIndex: 3, price: 3.5, emoji: '🥐' },
+  { id: 'oj', nameIndex: 4, price: 4.5, emoji: '🍊' },
+  { id: 'avo', nameIndex: 5, price: 12.0, emoji: '🥑' },
+  { id: 'sal', nameIndex: 6, price: 14.0, emoji: '🥗' },
+  { id: 'cake', nameIndex: 7, price: 7.5, emoji: '🍰' },
 ];
 
 const SEQ = ['esp', 'cro', 'lat', 'esp', 'avo'];
@@ -57,6 +58,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
 
   const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
   const money = (n: number): string => formatMoney(n, i18n.language);
+  const itemNames = t('home.features.demos.pos.items', { returnObjects: true }) as string[];
 
   return (
     <div
@@ -108,7 +110,9 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
               }}
             >
               <div style={{ marginBottom: 3, fontSize: 16 }}>{item.emoji}</div>
-              <div style={{ fontWeight: 500, fontSize: 12, marginBottom: 2 }}>{item.name}</div>
+              <div style={{ fontWeight: 500, fontSize: 12, marginBottom: 2 }}>
+                {itemNames[item.nameIndex]}
+              </div>
               <div style={{ fontSize: 11, color: 'rgba(19,19,19,0.55)' }}>
                 {money(item.price)}
               </div>
@@ -166,7 +170,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                   }}
                 >
                   <span style={{ color: 'rgba(19,19,19,0.7)' }}>
-                    {item.qty}× {item.name}
+                    {item.qty}× {itemNames[item.nameIndex]}
                   </span>
                   <span style={{ color: 'var(--ink)', fontWeight: 600 }}>
                     {money(item.price * item.qty)}

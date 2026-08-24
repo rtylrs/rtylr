@@ -612,7 +612,17 @@
           "addItems": "Add items…",
           "total": "Total",
           "charge": "Charge",
-          "chargeAmount": "Charge ${{amount}}"
+          "chargeAmount": "Charge ${{amount}}",
+          "items": [
+            "Espresso",
+            "Latte",
+            "Cappuccino",
+            "Croissant",
+            "Orange Juice",
+            "Avo Toast",
+            "Greek Salad",
+            "Cheesecake"
+          ]
         },
         "erp": {
           "inventory": "Inventory",
@@ -631,6 +641,22 @@
             "critical": "Critical",
             "low": "Low",
             "ok": "OK"
+          },
+          "items": [
+            "Olive Oil 5L",
+            "Flour 25kg",
+            "Espresso Beans",
+            "Atlantic Salmon",
+            "Truffle Oil",
+            "Heavy Cream",
+            "Sourdough"
+          ],
+          "units": {
+            "btl": "btl",
+            "bag": "bag",
+            "kg": "kg",
+            "L": "L",
+            "pcs": "pcs"
           }
         },
         "crm": {
@@ -699,7 +725,26 @@
             "review": "Review",
             "done": "Done"
           },
-          "priorityHigh": "High"
+          "priorityHigh": "High",
+          "tasks": {
+            "t1": "Seasonal menu rollout, Q3",
+            "t2": "New supplier: Rossini",
+            "t3": "Friday covers, staffing plan",
+            "t4": "Redo brunch prep checklist",
+            "t5": "Email blast: Mother's Day",
+            "t6": "Espresso machine SLA",
+            "t7": "Q1 sales-tax filing",
+            "t8": "POS firmware v4.2"
+          },
+          "tags": {
+            "ops": "Ops",
+            "erp": "ERP",
+            "hr": "HR",
+            "kitchen": "Kitchen",
+            "crm": "CRM",
+            "vendor": "Vendor",
+            "finance": "Finance"
+          }
         },
         "insights": {
           "revenue": "Revenue",
@@ -718,6 +763,11 @@
             "fri": "Fri",
             "sat": "Sat",
             "sun": "Sun"
+          },
+          "ranges": {
+            "7d": "7d",
+            "30d": "30d",
+            "90d": "90d"
           }
         }
       }
