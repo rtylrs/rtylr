@@ -5,65 +5,42 @@ import { useTranslation } from 'react-i18next';
 import { SplitWords } from '../../motion/SplitWords';
 import styles from './TestimonialsSection.module.scss';
 
-const testimonials = [
-  {
-    quote:
-      'We used to close the books on the 8th of every month. Now we close them on the 2nd - nothing needs reconciling.',
-    author: 'Layla Ahmed',
-    role: 'Owner, Byblos Kitchen',
-    company: 'Restaurant · 3 branches',
-    initials: 'LA',
-    avatarColor: '#d6b88e',
-  },
-  {
-    quote:
-      "The waiter hit 20 visits and rtylr sent the thank-you email on its own. My manager asked if I set it up. I didn't.",
-    author: 'Karim Mansour',
-    role: 'General Manager, The Terrace',
-    company: 'Restaurant',
-    initials: 'KM',
-    avatarColor: '#c9a48a',
-  },
-  {
-    quote:
-      "The internet went down on a Saturday night with 200 tables. The cashier didn't stop. I didn't expect software to handle that.",
-    author: 'Tarek Zein',
-    role: 'Owner, Mountain Café',
-    company: 'Restaurant',
-    initials: 'TZ',
-    avatarColor: '#b89a8a',
-  },
-  {
-    quote:
-      'Schedules used to live on WhatsApp. Now shifts go out in four taps and payroll runs automatically every Sunday night.',
-    author: 'Sara Halabi',
-    role: 'Operations Manager, Urban Chain',
-    company: 'Retail · 5 branches',
-    initials: 'SH',
-    avatarColor: '#a89680',
-  },
-  {
-    quote:
-      "Switching from the old system saved us roughly $600 per branch per month. And that's before I count the add-ons.",
-    author: 'Nadine Farhat',
-    role: 'Founder, Fresh Market',
-    company: 'Grocery · 4 branches',
-    initials: 'NF',
-    avatarColor: '#d6b88e',
-  },
-  {
-    quote:
-      'The task is linked to the invoice, the customer, the shift. I stopped opening four tabs for four apps - I just open Flow.',
-    author: 'Jad Maalof',
-    role: 'Manager, Tech Store Pro',
-    company: 'Retail',
-    initials: 'JM',
-    avatarColor: '#c9a48a',
-  },
+// Initials and avatar colour are presentational, not language-dependent,
+// so they stay here rather than in the locale files - indexed to line up
+// with home.testimonials.items.
+const AVATARS = [
+  { initials: 'LA', color: '#d6b88e' },
+  { initials: 'KM', color: '#c9a48a' },
+  { initials: 'TZ', color: '#b89a8a' },
+  { initials: 'SH', color: '#a89680' },
+  { initials: 'NF', color: '#d6b88e' },
+  { initials: 'JM', color: '#c9a48a' },
 ];
 
+// The quote mark is typography, not copy, so it does not belong in the
+// locale files - but a hardcoded &ldquo;/&rdquo; is still an English quote
+// mark left on the Arabic and French pages. French and Arabic content in
+// this codebase already uses guillemets elsewhere (fr.json's non-breaking-
+// space convention, ar.json's «» around quoted questions); this matches
+// that rather than inventing a third convention here.
+const QUOTE_MARKS: Record<string, [string, string]> = {
+  // Non-breaking space inside the guillemets, matching fr.json's own
+  // convention, so a reflow can never strand « or » on its own line.
+  fr: ['« ', ' »'],
+  ar: ['«', '»'],
+};
+const DEFAULT_QUOTE_MARKS: [string, string] = ['“', '”'];
+
 const TestimonialsSection: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [openQuote, closeQuote] = QUOTE_MARKS[i18n.language] ?? DEFAULT_QUOTE_MARKS;
+  const testimonials = (
+    t('home.testimonials.items', { returnObjects: true }) as unknown as {
+      quote: string;
+      author: string;
+      role: string;
+    }[]
+  ).map((item, i) => ({ ...item, ...AVATARS[i] }));
   const duplicatedTestimonials = [...testimonials, ...testimonials];
 
   return (
@@ -86,11 +63,11 @@ const TestimonialsSection: React.FC = () => {
             <div className={cn(styles.tickerTrack, styles.tickerLeft)}>
               {duplicatedTestimonials.map((testimonial, index) => (
                 <div key={index} className={styles.testimonialCard}>
-                  <p className={styles.quote}>&ldquo;{testimonial.quote}&rdquo;</p>
+                  <p className={styles.quote}>{openQuote}{testimonial.quote}{closeQuote}</p>
                   <div className={styles.authorInfo}>
                     <div
                       className={styles.authorImage}
-                      style={{ background: testimonial.avatarColor }}
+                      style={{ background: testimonial.color }}
                       aria-hidden="true"
                     >
                       {testimonial.initials}
@@ -108,11 +85,11 @@ const TestimonialsSection: React.FC = () => {
             <div className={cn(styles.tickerTrack, styles.tickerRight)}>
               {duplicatedTestimonials.map((testimonial, index) => (
                 <div key={index} className={styles.testimonialCard}>
-                  <p className={styles.quote}>&ldquo;{testimonial.quote}&rdquo;</p>
+                  <p className={styles.quote}>{openQuote}{testimonial.quote}{closeQuote}</p>
                   <div className={styles.authorInfo}>
                     <div
                       className={styles.authorImage}
-                      style={{ background: testimonial.avatarColor }}
+                      style={{ background: testimonial.color }}
                       aria-hidden="true"
                     >
                       {testimonial.initials}
