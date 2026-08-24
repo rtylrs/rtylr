@@ -29,7 +29,6 @@ function useSeoProps() {
     description: t('home.meta.description'),
     url: 'https://rtylr.com/',
     ogType: 'website' as const,
-    ogLocale: 'en_US',
     ogSiteName: t('home.meta.ogSiteName'),
     ogDescription: t('home.meta.description'),
     twitterCard: 'summary_large_image' as const,
@@ -81,8 +80,6 @@ const WebsiteContent = (): React.JSX.Element => {
     </AppLayout>
   );
 };
-
-export { WebsiteContent };
 
 const HomePage = (): React.JSX.Element => {
   const seo = useSeoProps();

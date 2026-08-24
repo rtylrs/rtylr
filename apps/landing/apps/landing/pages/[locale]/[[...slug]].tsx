@@ -4,7 +4,7 @@ import React from 'react';
 import { baseRouteOf, localeRouteParams } from '../../lib/locales';
 import AboutlessNotFound from '../404';
 import ContactPage from '../contact';
-import { WebsiteContent } from '../index';
+import HomePage from '../index';
 import ErpPage from '../erp';
 import PosPage from '../pos';
 import PricingPage from '../pricing';
@@ -33,7 +33,7 @@ import PricingPage from '../pricing';
  */
 
 const PAGES: Record<string, React.ComponentType> = {
-  '/': WebsiteContent,
+  '/': HomePage,
   '/pricing/': PricingPage,
   '/pos/': PosPage,
   '/erp/': ErpPage,
