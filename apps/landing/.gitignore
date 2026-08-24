@@ -21,3 +21,4 @@ test-results/
 # Agent definitions are local to this machine, per the global rule that
 # CLAUDE.md, .claude/ and other agent config stay untracked.
 .claude/
+.codex/
