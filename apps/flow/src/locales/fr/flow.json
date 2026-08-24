@@ -814,5 +814,36 @@
       "archived": "Projet archivé.",
       "archivedUntil": "Projet archivé. Il sera supprimé définitivement le {{date}}."
     }
+  },
+  "status": {
+    "openSettings": "Statuts",
+    "settingsTitle": "Statuts",
+    "settingsSubtitle": "Un projet sans statut personnalisé utilise les six statuts intégrés. Ajoutez un statut ici pour les remplacer, pour ce projet uniquement.",
+    "closeSettings": "Fermer les statuts",
+    "readOnlyReason": "Seuls les administrateurs du projet peuvent modifier les statuts.",
+    "emptyExplainer": "Aucun statut personnalisé pour le moment. Ce projet utilise les statuts intégrés.",
+    "newStatusName": "Nom du nouveau statut",
+    "newStatusPlaceholder": "Nom du statut",
+    "bucketLabel": "Catégorie",
+    "bucket": {
+      "backlog": "Backlog",
+      "active": "En cours",
+      "done": "Terminé",
+      "cancelled": "Annulé"
+    },
+    "addStatus": "Ajouter un statut",
+    "chooseColorLabel": "Choisir {{color}}",
+    "statusName": "Nom du statut",
+    "bucketFor": "Catégorie de {{name}}",
+    "moveUpLabel": "Déplacer {{name}} vers le haut",
+    "moveDownLabel": "Déplacer {{name}} vers le bas",
+    "movedAnnouncement": "{{name}} déplacé à la position {{position}} sur {{total}}",
+    "isDefault": "Statut par défaut pour les nouvelles tâches",
+    "isDefaultFor": "Définir {{name}} comme statut par défaut pour les nouvelles tâches",
+    "removeStatusLabel": "Supprimer {{name}}",
+    "removeStatusConfirm": "Supprimer {{name}} ? Les tâches qui l'utilisent reviendront à leur statut intégré.",
+    "confirmRemoveStatus": "Supprimer le statut",
+    "cancel": "Annuler",
+    "none": "Aucun statut personnalisé"
   }
 }

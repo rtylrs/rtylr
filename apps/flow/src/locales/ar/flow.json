@@ -845,5 +845,36 @@
       "archived": "تمت أرشفة المشروع.",
       "archivedUntil": "تمت أرشفة المشروع. سيُحذف نهائيًا في {{date}}."
     }
+  },
+  "status": {
+    "openSettings": "الحالات",
+    "settingsTitle": "الحالات",
+    "settingsSubtitle": "يستخدم المشروع بلا حالات مخصّصة الحالات الست المدمجة. أضف حالة هنا لتحلّ محلّها في هذا المشروع فقط.",
+    "closeSettings": "إغلاق الحالات",
+    "readOnlyReason": "يمكن لمديري المشروع فقط تغيير الحالات.",
+    "emptyExplainer": "لا توجد حالات مخصّصة بعد. يستخدم هذا المشروع الحالات المدمجة.",
+    "newStatusName": "اسم الحالة الجديدة",
+    "newStatusPlaceholder": "اسم الحالة",
+    "bucketLabel": "الفئة",
+    "bucket": {
+      "backlog": "قائمة الانتظار",
+      "active": "نشطة",
+      "done": "منتهية",
+      "cancelled": "ملغاة"
+    },
+    "addStatus": "إضافة حالة",
+    "chooseColorLabel": "اختيار {{color}}",
+    "statusName": "اسم الحالة",
+    "bucketFor": "فئة {{name}}",
+    "moveUpLabel": "نقل {{name}} للأعلى",
+    "moveDownLabel": "نقل {{name}} للأسفل",
+    "movedAnnouncement": "تم نقل {{name}} إلى الموضع {{position}} من {{total}}",
+    "isDefault": "الحالة الافتراضية للمهام الجديدة",
+    "isDefaultFor": "جعل {{name}} الحالة الافتراضية للمهام الجديدة",
+    "removeStatusLabel": "إزالة {{name}}",
+    "removeStatusConfirm": "إزالة {{name}}؟ ستعود المهام عليها إلى حالتها المدمجة.",
+    "confirmRemoveStatus": "إزالة الحالة",
+    "cancel": "إلغاء",
+    "none": "بلا حالة مخصّصة"
   }
 }

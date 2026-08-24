@@ -69,5 +69,10 @@ export function apiTaskToTask(t: ApiTask): Task {
     // concrete boolean and nobody is tempted to write `archived === false`
     // (which would silently match nothing).
     archived: t.archived ?? false,
+    // statusId is int64-as-string on the wire already; no coercion needed.
+    // Absent/empty means no custom status, never a status to render.
+    statusId: t.statusId || undefined,
+    statusName: t.statusName || undefined,
+    statusColor: t.statusColor || undefined,
   };
 }

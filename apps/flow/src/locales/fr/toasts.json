@@ -140,5 +140,14 @@
     "grantAccessFailed": "Échec de l'octroi de l'accès à Flow",
     "memberRemoved": "Membre retiré de Flow",
     "removeMemberFailed": "Échec de la suppression du membre"
+  },
+  "status": {
+    "created": "Statut créé",
+    "createFailed": "Impossible de créer le statut",
+    "updateFailed": "Échec de la mise à jour du statut",
+    "deleted": "Statut supprimé",
+    "deletedWithReassignment": "Statut supprimé. {{count}} tâche(s) revenue(s) à leur statut intégré.",
+    "deleteFailed": "Impossible de supprimer le statut",
+    "setFailed": "Échec de la définition du statut de la tâche"
   }
 }

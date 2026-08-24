@@ -140,5 +140,14 @@
     "grantAccessFailed": "Failed to grant Flow access",
     "memberRemoved": "Member removed from Flow",
     "removeMemberFailed": "Failed to remove member"
+  },
+  "status": {
+    "created": "Status created",
+    "createFailed": "Failed to create status",
+    "updateFailed": "Failed to update status",
+    "deleted": "Status deleted",
+    "deletedWithReassignment": "Status deleted. {{count}} task(s) fell back to their built-in status.",
+    "deleteFailed": "Failed to delete status",
+    "setFailed": "Failed to set task status"
   }
 }

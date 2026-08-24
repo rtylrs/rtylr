@@ -21,6 +21,7 @@ import {
   LayoutList,
   Link2,
   ListChecks,
+  Layers,
   Gauge,
   Hourglass,
   Pin,
@@ -42,6 +43,7 @@ import {
   useRemoveAttachment,
 } from './useTasks';
 import { useLabels, useSetTaskLabels } from './useLabels';
+import { useProjectStatuses, useSetTaskStatus } from '../projects/useStatuses';
 import { useTaskActivity } from './useTaskActivity';
 import { useTaskRealtime } from '../../shared/lib/useTaskRealtime';
 import { useCurrentProject } from '../projects/useCurrentProject';
@@ -160,6 +162,11 @@ const TaskDetail: React.FC = () => {
   // hooks, so they have to run on every render, and they need the task's project.
   const detail = taskData as ApiTaskDetail | undefined;
   const canEdit = useCanEditTask(detail?.task?.projectId);
+  // F-A: empty means the project has not configured any custom statuses, the
+  // normal case - the picker below stays hidden rather than showing an
+  // empty dropdown.
+  const { data: projectStatuses = [] } = useProjectStatuses(detail?.task?.projectId ?? '');
+  const setTaskStatus = useSetTaskStatus();
   // HR->FLOW-02 (#838): warn before assigning work into approved leave.
   // Window is today through the task's due date (or two weeks out when
   // undated). Hidden entirely when HR is absent or unreachable; assignment
@@ -167,13 +174,8 @@ const TaskDetail: React.FC = () => {
   // records key on HR employee ids — the hub-user mapping lands with #848.
   const warningFrom = new Date().toISOString().slice(0, 10);
   const warningTo =
-    detail?.task?.dueDate ||
-      new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10);
-  const { data: overlappingLeave } = useApprovedLeaveInRange(
-    warningFrom,
-    warningTo,
-    canEdit,
-  );
+    detail?.task?.dueDate || new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10);
+  const { data: overlappingLeave } = useApprovedLeaveInRange(warningFrom, warningTo, canEdit);
   const canRemove = useCanDeleteResource(detail?.task?.projectId);
   const updateTaskMut = useUpdateTask();
   const deleteTaskMut = useDeleteTask();
@@ -602,6 +604,29 @@ const TaskDetail: React.FC = () => {
             ))}
           </select>
         </DetailField>
+
+        {projectStatuses.length > 0 && (
+          <DetailField icon={Layers} label={t('flow.status.settingsTitle')}>
+            <select
+              value={task.statusId ?? ''}
+              onChange={(e) => {
+                setTaskStatus.mutate({ taskId: task.id, statusId: e.target.value || '0' });
+              }}
+              disabled={!canEdit}
+              className="bg-transparent text-[12px] outline-none w-full disabled:opacity-70"
+              style={{ color: 'var(--flow-text)' }}
+            >
+              <option value="" style={{ background: 'var(--flow-card)' }}>
+                {t('flow.status.none')}
+              </option>
+              {projectStatuses.map((s) => (
+                <option key={s.id} value={s.id} style={{ background: 'var(--flow-card)' }}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </DetailField>
+        )}
 
         <DetailField icon={Flag} label={t('flow.taskDetail.priority')}>
           <select

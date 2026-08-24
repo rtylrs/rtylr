@@ -14,6 +14,7 @@ import { ViewServiceClient as ViewServiceV2 } from '@voxire/voxie/flow/view/v2/c
 import { InsightsServiceClient as InsightsServiceV2 } from '@voxire/voxie/flow/insights/v2/client';
 import { TimeServiceClient as TimeServiceV2 } from '@voxire/voxie/flow/time/v2/client';
 import { ProfileServiceClient as ProfileClient } from '@voxire/voxie/flow/profile/v1/client';
+import { StatusServiceClient } from '@voxire/voxie/flow/status/v2/client';
 
 export const businessClient = createOneKitClient(BusinessServiceClient, 'flow');
 export const userClient = createOneKitClient(UserServiceClient, 'flow');
@@ -31,6 +32,7 @@ export const viewV2 = createOneKitClient(ViewServiceV2, 'flow');
 export const insightsV2 = createOneKitClient(InsightsServiceV2, 'flow');
 export const timeV2 = createOneKitClient(TimeServiceV2, 'flow');
 export const profileClient = createOneKitClient(ProfileClient, 'flow');
+export const statusClient = createOneKitClient(StatusServiceClient, 'flow');
 
 // license, flow presence and hr compat are deliberately absent. Those three
 // contracts do not exist in voxie and never have, so no client can be generated

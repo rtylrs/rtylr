@@ -156,5 +156,14 @@
     "grantAccessFailed": "فشل منح الوصول إلى Flow",
     "memberRemoved": "تمت إزالة العضو من Flow",
     "removeMemberFailed": "فشل إزالة العضو"
+  },
+  "status": {
+    "created": "تم إنشاء الحالة",
+    "createFailed": "تعذّر إنشاء الحالة",
+    "updateFailed": "فشل تحديث الحالة",
+    "deleted": "تم حذف الحالة",
+    "deletedWithReassignment": "تم حذف الحالة. عادت {{count}} مهمة إلى حالتها المدمجة.",
+    "deleteFailed": "تعذّر حذف الحالة",
+    "setFailed": "فشل تعيين حالة المهمة"
   }
 }
