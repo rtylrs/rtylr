@@ -23,7 +23,7 @@
 //
 // Required in a require() rather than an import: next-sitemap loads this
 // file with the CommonJS loader. Node strips the types.
-const { alternatesFor, shippedLocales } = require('./lib/locales.ts');
+const { alternatesFor, basePathOf, shippedLocales } = require('./lib/locales.ts');
 
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
@@ -71,13 +71,20 @@ module.exports = {
       changefreq = 'yearly';
     }
 
+    // basePathOf() first: this transform runs for every URL in the export,
+    // including /ar/pricing/ and /fr/pricing/ themselves, and alternatesFor
+    // matches against the bare route. Without it, only the English URLs
+    // matched LOCALISED_ROUTES and got an alternate set - the /ar/* and
+    // /fr/* pages each got an empty one, which is non-reciprocal hreflang
+    // and Google discards the whole set silently.
+    //
     // hrefIsAbsolute is required, not optional. Without it next-sitemap
     // treats href as a BASE and appends the page path to it, so a full URL
     // like https://rtylr.com/pricing/ comes out as
     // https://rtylr.com/pricing/pricing/. Every alternate would 404 and
     // Google would drop the whole set silently. The default is designed for
     // multi-domain setups (fr.example.com) where href really is a base.
-    const alternateRefs = alternatesFor(norm).map(({ hreflang, href }) => ({
+    const alternateRefs = alternatesFor(basePathOf(norm)).map(({ hreflang, href }) => ({
       href,
       hreflang,
       hrefIsAbsolute: true,

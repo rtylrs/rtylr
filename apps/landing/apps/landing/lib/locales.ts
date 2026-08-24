@@ -153,6 +153,28 @@ export function localisePath(path: string, code: string): string {
 }
 
 /**
+ * The inverse of localisePath: strips a shipped, non-default locale prefix
+ * back to the bare route.
+ *
+ *   ('/ar/pricing/', ) -> '/pricing/'
+ *   ('/pricing/', )    -> '/pricing/'   (already bare)
+ *   ('/ar/', )         -> '/'
+ *
+ * Exists because alternatesFor() and isLocalisedRoute() key off the bare
+ * route, but next-sitemap's transform() sees the real, already-localised
+ * path for every URL in the export - including the /ar/ and /fr/ ones
+ * themselves. Calling alternatesFor() on '/ar/pricing/' directly matches
+ * nothing in LOCALISED_ROUTES, so those pages got an empty alternate set:
+ * hreflang without reciprocity, which Google discards in full.
+ */
+export function basePathOf(path: string): string {
+  const locale = localeFromPath(path);
+  if (locale.code === DEFAULT_LOCALE) return path;
+  const stripped = path.replace(new RegExp(`^/${locale.code}(?=/|$)`), '');
+  return stripped === '' ? '/' : stripped;
+}
+
+/**
  * The hreflang set for one route: every shipped locale, including itself,
  * plus x-default.
  *
