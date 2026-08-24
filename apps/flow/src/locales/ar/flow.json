@@ -764,7 +764,8 @@
     "byAssignee": "حسب المسؤول",
     "noTasksYet": "لا توجد مهام بعد",
     "noTasksYetDescription": "أضف مهمة لملء لوحة المعلومات.",
-    "addTaskCta": "إضافة مهمة"
+    "addTaskCta": "إضافة مهمة",
+    "partialCost": "بعض الوقت ليس له سعر محدد"
   },
   "projectCalendar": {
     "pageTitle": "التقويم · rtylr"

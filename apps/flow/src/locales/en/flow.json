@@ -733,7 +733,8 @@
     "byAssignee": "By assignee",
     "noTasksYet": "No tasks yet",
     "noTasksYetDescription": "Add a task to populate the dashboard.",
-    "addTaskCta": "Add task"
+    "addTaskCta": "Add task",
+    "partialCost": "Some time has no rate on file"
   },
   "projectCalendar": {
     "pageTitle": "Calendar · rtylr"
