@@ -16,6 +16,7 @@ interface InvitePayload {
   email: string;
   fullName: string;
   role: string;
+  password?: string;
 }
 
 // ── Hooks ─────────────────────────────────────────────────────────────────────
@@ -35,7 +36,11 @@ export const useCrmInviteMember = (): UseMutationResult<unknown, unknown, Invite
   const { t } = useTranslation();
   return useMutation<unknown, unknown, InvitePayload>({
     mutationFn: (payload: InvitePayload) =>
-      invitationsClient.inviteUser({ ...payload, apps: ['crm'], password: '' }),
+      invitationsClient.inviteUser({
+        ...payload,
+        apps: ['crm'],
+        ...(payload.password ? { password: payload.password } : {}),
+      }),
     onSuccess: (): void => {
       toast.success(t('crm.team.inviteSent'));
       void qc.invalidateQueries({ queryKey: ['crm-team'] });
