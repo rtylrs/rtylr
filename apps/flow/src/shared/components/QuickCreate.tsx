@@ -90,20 +90,12 @@ export const QuickCreate: React.FC = () => {
     }
   }, [quickCreateOpen, projects, activeWorkspaceId]);
 
-  useEffect(() => {
-    if (!labelId && labels.length > 0) setLabelId(String(labels[0].id));
-  }, [labelId, labels]);
-
   const submit = async () => {
     if (!title.trim()) {
       toast.error(t('toasts.task.titleRequired'));
       return;
     }
     if (!projectId) return;
-    if (!labelId) {
-      toast.error(t('errors.generic'));
-      return;
-    }
     const project = projects.find((p) => p.id === projectId);
     if (!project) return;
 
@@ -120,7 +112,7 @@ export const QuickCreate: React.FC = () => {
         dueDate: dueDate || undefined,
         assigneeId: assignToMe ? (uid ?? undefined) : undefined,
         effortMinutes,
-        labels: [labelId],
+        labels: labelId ? [labelId] : undefined,
       });
       const task = res.task;
       const taskId = String(task.id);
@@ -365,11 +357,14 @@ export const QuickCreate: React.FC = () => {
                     {labels.length === 0 ? (
                       <option value="">{t('common.noData')}</option>
                     ) : (
-                      labels.map((label) => (
-                        <option key={label.id} value={label.id}>
-                          {label.name}
-                        </option>
-                      ))
+                      <>
+                        <option value="">{t('flow.quickCreate.noLabel')}</option>
+                        {labels.map((label) => (
+                          <option key={label.id} value={label.id}>
+                            {label.name}
+                          </option>
+                        ))}
+                      </>
                     )}
                   </select>
                 </FieldRow>
