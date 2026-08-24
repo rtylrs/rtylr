@@ -151,10 +151,20 @@ func (a *LabelAPIV2) DeleteLabel(ctx context.Context, req *flowlabelv2.DeleteLab
 }
 
 func (a *LabelAPIV2) SetTaskLabels(ctx context.Context, req *flowlabelv2.SetTaskLabelsRequest) (*flowlabelv2.SetTaskLabelsResponse, error) {
-	caller, _, err := resolveV2(ctx)
+	caller, businessID, err := resolveV2(ctx)
 	if err != nil {
 		return nil, err
 	}
+
+	// Setting a task's labels is a task mutation, so it takes the same tier as
+	// the task handlers. The repository guard underneath only checks workspace
+	// membership, which admits a viewer - so without this a viewer can relabel
+	// any task they can see. The v1 handler had this check and carried the same
+	// warning in a comment; v2 shipped without it.
+	if roleErr := a.Service.RequireTaskRole(ctx, req.GetTaskId(), caller.UserID, businessID, domain.FlowRoleMember); roleErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
 	if err := a.Service.SetTaskLabels(ctx, req.GetTaskId(), caller.UserID, req.GetLabelIds()); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to set task labels")
 	}

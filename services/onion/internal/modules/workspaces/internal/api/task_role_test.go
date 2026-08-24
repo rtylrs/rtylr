@@ -26,6 +26,7 @@ const (
 )
 
 type roleFixture struct {
+	service  *application.Service
 	taskAPI  *api.TaskAPI
 	labelAPI *api.LabelAPI
 	projAPI  *api.ProjectAPIV2
@@ -95,6 +96,7 @@ func newRoleFixture(t *testing.T) *roleFixture {
 	}
 
 	return &roleFixture{
+		service:  svc,
 		taskAPI:  api.NewTaskAPI(svc),
 		labelAPI: api.NewLabelAPI(svc),
 		projAPI:  api.NewProjectAPIV2(svc),
@@ -396,3 +398,7 @@ func TestTaskRole_WorkspaceMemberCanUpdateTask(t *testing.T) {
 		t.Fatalf("workspace member UpdateTask: expected success, got %v", err)
 	}
 }
+
+// svc exposes the fixture's service so a test can build another handler against
+// the same seeded workspace, project and role rows.
+func (f *roleFixture) svc() *application.Service { return f.service }
