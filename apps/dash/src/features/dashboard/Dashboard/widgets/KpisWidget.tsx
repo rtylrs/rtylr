@@ -2,6 +2,7 @@ import React from 'react';
 import { DollarSign, ShoppingBag, Users, TrendingUp, FileText } from 'lucide-react';
 import { Skeleton } from '../../../../shared/components/ui';
 import { useKpis } from '../../../../shared/hooks/queries/useKpis';
+import { useOpenInvoiceCount } from '../../../../shared/hooks/queries/useOpenInvoiceCount';
 
 function fmt(n: number | undefined | null) {
   if (n == null) return '—';
@@ -96,11 +97,15 @@ export const KpiTeam: React.FC = () => {
 };
 
 export const KpiInvoices: React.FC = () => {
-  const { data: kpis, isLoading } = useKpis();
+  // Not from useKpis: hub.dashboard.v1 has no invoice count, so this card read a
+  // field that did not exist and showed a confident 0 forever (rtylr#1001).
+  // insights.financial.v1 getInvoiceAging already carries it, and dash already
+  // calls that endpoint for InvoiceAgingWidget.
+  const { data: openInvoices, isLoading } = useOpenInvoiceCount();
   return (
     <KpiCard
       label="Invoices"
-      value={kpis?.openInvoices ?? 0}
+      value={openInvoices ?? 0}
       sub="open"
       icon={FileText}
       color="#10b981"

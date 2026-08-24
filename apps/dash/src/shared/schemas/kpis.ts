@@ -18,6 +18,10 @@ const finiteNumber = z.preprocess((value) => {
  * They are gone so tsc catches the next drift instead of zod silently absorbing
  * it. Add a field here only when the contract has it.
  *
+ * openInvoices was the last holdout, kept only because KpiInvoices read it. That
+ * card now sources the count from insights.financial.v1 getInvoiceAging
+ * (rtylr#1001), so this schema finally declares nothing the contract lacks.
+ *
  * On scope: revenue and orderCount are today-scoped server-side (onion's
  * kpis.sql: SumRevenueToday, CountOrdersToday, both filtered to
  * created_at >= CURDATE()). staffCount, customerCount and lowStockCount are not
@@ -31,15 +35,6 @@ export const dashKpisSchema = z
     customerCount: finiteNumber.optional(),
     lowStockCount: finiteNumber.optional(),
     activeApps: finiteNumber.optional(),
-    /**
-     * Not on the contract. Retained only because KpiInvoices reads it and would
-     * otherwise stop compiling; it renders a permanent 0 today. There is no
-     * invoice count on hub.dashboard.v1, so that widget cannot work until one
-     * exists or it sources from finance. Tracked separately rather than removed
-     * here, because deleting a widget people may have on their dashboard is a
-     * product call and not part of a data fix.
-     */
-    openInvoices: finiteNumber.optional(),
   })
   .transform((raw) => ({
     revenue: raw.revenue,
@@ -48,7 +43,6 @@ export const dashKpisSchema = z
     customerCount: raw.customerCount ?? 0,
     lowStockCount: raw.lowStockCount ?? 0,
     activeApps: raw.activeApps ?? 0,
-    openInvoices: raw.openInvoices ?? 0,
   }));
 
 export type HubKpis = z.infer<typeof dashKpisSchema>;
