@@ -56,6 +56,7 @@ const POSPage = (): React.JSX.Element => {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const receiptItemNames = t('pos.hero.receipt.items', { returnObjects: true }) as string[];
+  const receiptTime = i18n.language === 'fr' ? `19 h 42` : '19:42';
   const pct = (n: number): string => `${n}${i18n.language === 'fr' ? ' %' : '%'}`;
 
   const features = t('pos.features.items', { returnObjects: true }) as unknown as {
@@ -154,7 +155,7 @@ const POSPage = (): React.JSX.Element => {
               <div className={styles.receiptBody}>
                 <div className={styles.receiptTitle}>{t('pos.hero.receipt.venue')}</div>
                 <div className={styles.receiptDate}>
-                  {t('pos.hero.receipt.date')} · <span dir="ltr">19:42</span> ·{' '}
+                  {t('pos.hero.receipt.date')} · <span dir="ltr">{receiptTime}</span> ·{' '}
                   {t('pos.hero.receipt.server', { name: 'Maya' })}
                 </div>
                 <div className={styles.receiptDivider} />
