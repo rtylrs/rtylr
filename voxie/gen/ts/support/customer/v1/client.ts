@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListCustomersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListCustomersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getCustomer(req: GetCustomerRequest): Promise<GetCustomerResponse> {
@@ -115,7 +116,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetCustomerResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetCustomerResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

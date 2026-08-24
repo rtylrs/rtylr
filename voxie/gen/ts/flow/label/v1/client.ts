@@ -103,7 +103,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListLabelsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListLabelsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createLabel(req: CreateLabelRequest): Promise<CreateLabelResponse> {
@@ -121,7 +122,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateLabelResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateLabelResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateLabel(req: UpdateLabelRequest): Promise<UpdateLabelResponse> {
@@ -140,7 +142,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateLabelResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateLabelResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteLabel(req: DeleteLabelRequest): Promise<DeleteLabelResponse> {
@@ -161,7 +164,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteLabelResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteLabelResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async setTaskLabels(req: SetTaskLabelsRequest): Promise<SetTaskLabelsResponse> {
@@ -179,7 +183,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSetTaskLabelsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeSetTaskLabelsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

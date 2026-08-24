@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetPLReportResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetPLReportResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getTaxReport(req: GetTaxReportRequest): Promise<GetTaxReportResponse> {
@@ -120,7 +121,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetTaxReportResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetTaxReportResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listExpenseCategoryDetails(req: ListExpenseCategoryDetailsRequest): Promise<ListExpenseCategoryDetailsResponse> {
@@ -140,7 +142,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListExpenseCategoryDetailsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListExpenseCategoryDetailsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createExpenseCategoryDetail(req: CreateExpenseCategoryDetailRequest): Promise<CreateExpenseCategoryDetailResponse> {
@@ -158,7 +161,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateExpenseCategoryDetailResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateExpenseCategoryDetailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listTaxConfig(req: ListTaxConfigRequest): Promise<ListTaxConfigResponse> {
@@ -178,7 +182,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTaxConfigResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListTaxConfigResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createTaxConfig(req: CreateTaxConfigRequest): Promise<CreateTaxConfigResponse> {
@@ -196,7 +201,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateTaxConfigResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateTaxConfigResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

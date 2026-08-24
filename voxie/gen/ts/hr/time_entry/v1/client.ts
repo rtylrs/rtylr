@@ -115,7 +115,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTimeEntriesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListTimeEntriesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createTimeEntry(req: CreateTimeEntryRequest): Promise<CreateTimeEntryResponse> {
@@ -133,7 +134,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateTimeEntryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateTimeEntryResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listTimesheets(req: ListTimesheetsRequest): Promise<ListTimesheetsResponse> {
@@ -159,7 +161,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTimesheetsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListTimesheetsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async submitTimesheet(req: SubmitTimesheetRequest): Promise<SubmitTimesheetResponse> {
@@ -177,7 +180,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSubmitTimesheetResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeSubmitTimesheetResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async approveTimesheet(req: ApproveTimesheetRequest): Promise<ApproveTimesheetResponse> {
@@ -196,7 +200,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeApproveTimesheetResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeApproveTimesheetResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async markTimeEntriesInvoiced(req: MarkTimeEntriesInvoicedRequest): Promise<MarkTimeEntriesInvoicedResponse> {
@@ -214,7 +219,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeMarkTimeEntriesInvoicedResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeMarkTimeEntriesInvoicedResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

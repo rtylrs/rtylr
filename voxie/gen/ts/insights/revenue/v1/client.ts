@@ -91,7 +91,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetRevenueOverviewResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetRevenueOverviewResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getRevenueByApp(req: GetRevenueByAppRequest): Promise<GetRevenueByAppResponse> {
@@ -114,7 +115,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetRevenueByAppResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetRevenueByAppResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getRevenueComparison(req: GetRevenueComparisonRequest): Promise<GetRevenueComparisonResponse> {
@@ -140,7 +142,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetRevenueComparisonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetRevenueComparisonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

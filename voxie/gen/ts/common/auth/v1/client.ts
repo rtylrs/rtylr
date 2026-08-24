@@ -86,7 +86,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRegisterResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeRegisterResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async login(req: LoginRequest): Promise<LoginResponse> {
@@ -104,7 +105,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeLoginResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeLoginResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async googleAuth(req: GoogleAuthRequest): Promise<GoogleAuthResponse> {
@@ -122,7 +124,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGoogleAuthResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGoogleAuthResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async resetPassword(req: ResetPasswordRequest): Promise<ResetPasswordResponse> {
@@ -140,7 +143,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeResetPasswordResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeResetPasswordResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async resetPasswordConfirm(req: ResetPasswordConfirmRequest): Promise<ResetPasswordConfirmResponse> {
@@ -158,7 +162,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeResetPasswordConfirmResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeResetPasswordConfirmResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async verifyEmail(req: VerifyEmailRequest): Promise<VerifyEmailResponse> {
@@ -176,7 +181,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeVerifyEmailResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeVerifyEmailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async resendVerification(req: ResendVerificationRequest): Promise<ResendVerificationResponse> {
@@ -194,7 +200,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeResendVerificationResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeResendVerificationResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async inviteAccept(req: InviteAcceptRequest): Promise<InviteAcceptResponse> {
@@ -212,7 +219,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeInviteAcceptResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeInviteAcceptResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async checkEmailExists(req: CheckEmailExistsRequest): Promise<CheckEmailExistsResponse> {
@@ -235,7 +243,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCheckEmailExistsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCheckEmailExistsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async socialAuthorize(req: SocialAuthorizeRequest): Promise<SocialAuthorizeResponse> {
@@ -258,7 +267,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSocialAuthorizeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeSocialAuthorizeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

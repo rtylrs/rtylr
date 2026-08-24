@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetSecurityStateResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetSecurityStateResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async loginHistory(req: LoginHistoryRequest): Promise<LoginHistoryResponse> {
@@ -114,7 +115,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeLoginHistoryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeLoginHistoryResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async invalidateSessions(req: InvalidateSessionsRequest): Promise<InvalidateSessionsResponse> {
@@ -132,7 +134,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeInvalidateSessionsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeInvalidateSessionsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async update2FA(req: Update2FARequest): Promise<Update2FAResponse> {
@@ -150,7 +153,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdate2FAResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdate2FAResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

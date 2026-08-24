@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetErpSettingsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetErpSettingsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateErpSettings(req: UpdateErpSettingsRequest): Promise<UpdateErpSettingsResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateErpSettingsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateErpSettingsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListOneOnOnesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListOneOnOnesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createOneOnOne(req: CreateOneOnOneRequest): Promise<CreateOneOnOneResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateOneOnOneResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateOneOnOneResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

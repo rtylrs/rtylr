@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListAttendanceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListAttendanceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async attendanceClockIn(req: AttendanceClockInRequest): Promise<AttendanceClockInResponse> {
@@ -112,7 +113,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAttendanceClockInResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeAttendanceClockInResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async attendanceClockOut(req: AttendanceClockOutRequest): Promise<AttendanceClockOutResponse> {
@@ -130,7 +132,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAttendanceClockOutResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeAttendanceClockOutResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

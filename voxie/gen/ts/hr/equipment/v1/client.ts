@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListAssetsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListAssetsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listEquipmentRequests(req: ListEquipmentRequestsRequest): Promise<ListEquipmentRequestsResponse> {
@@ -120,7 +121,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListEquipmentRequestsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListEquipmentRequestsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createEquipmentRequest(req: CreateEquipmentRequestRequest): Promise<CreateEquipmentRequestResponse> {
@@ -138,7 +140,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateEquipmentRequestResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateEquipmentRequestResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async approveEquipment(req: ApproveEquipmentRequest): Promise<ApproveEquipmentResponse> {
@@ -157,7 +160,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeApproveEquipmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeApproveEquipmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

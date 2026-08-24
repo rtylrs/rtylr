@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListRecurringInvoicesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListRecurringInvoicesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createRecurringInvoice(req: CreateRecurringInvoiceRequest): Promise<CreateRecurringInvoiceResponse> {
@@ -112,7 +113,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateRecurringInvoiceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateRecurringInvoiceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getRecurringInvoice(req: GetRecurringInvoiceRequest): Promise<GetRecurringInvoiceResponse> {
@@ -133,7 +135,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetRecurringInvoiceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetRecurringInvoiceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateRecurringInvoice(req: UpdateRecurringInvoiceRequest): Promise<UpdateRecurringInvoiceResponse> {
@@ -152,7 +155,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateRecurringInvoiceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateRecurringInvoiceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async pauseRecurringInvoice(req: PauseRecurringInvoiceRequest): Promise<PauseRecurringInvoiceResponse> {
@@ -171,7 +175,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodePauseRecurringInvoiceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodePauseRecurringInvoiceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async resumeRecurringInvoice(req: ResumeRecurringInvoiceRequest): Promise<ResumeRecurringInvoiceResponse> {
@@ -190,7 +195,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeResumeRecurringInvoiceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeResumeRecurringInvoiceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

@@ -106,7 +106,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListFeedbackResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListFeedbackResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createFeedback(req: CreateFeedbackRequest): Promise<CreateFeedbackResponse> {
@@ -124,7 +125,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateFeedbackResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateFeedbackResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

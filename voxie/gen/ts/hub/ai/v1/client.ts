@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetAiUsageResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetAiUsageResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getAiQuotaSettings(req: GetAiQuotaSettingsRequest): Promise<GetAiQuotaSettingsResponse> {
@@ -108,7 +109,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetAiQuotaSettingsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetAiQuotaSettingsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateAiQuotaSettings(req: UpdateAiQuotaSettingsRequest): Promise<UpdateAiQuotaSettingsResponse> {
@@ -126,7 +128,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateAiQuotaSettingsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateAiQuotaSettingsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListGiftCardsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListGiftCardsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createGiftCard(req: CreateGiftCardRequest): Promise<CreateGiftCardResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateGiftCardResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateGiftCardResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async redeemGiftCard(req: RedeemGiftCardRequest): Promise<RedeemGiftCardResponse> {
@@ -125,7 +127,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRedeemGiftCardResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeRedeemGiftCardResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getGiftCardByCode(req: GetGiftCardByCodeRequest): Promise<GetGiftCardByCodeResponse> {
@@ -146,7 +149,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetGiftCardByCodeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetGiftCardByCodeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

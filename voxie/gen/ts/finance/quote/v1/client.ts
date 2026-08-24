@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListQuotesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListQuotesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createQuote(req: CreateQuoteRequest): Promise<CreateQuoteResponse> {
@@ -112,7 +113,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateQuoteResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateQuoteResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getQuote(req: GetQuoteRequest): Promise<GetQuoteResponse> {
@@ -133,7 +135,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetQuoteResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetQuoteResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateQuoteStatus(req: UpdateQuoteStatusRequest): Promise<UpdateQuoteStatusResponse> {
@@ -152,7 +155,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateQuoteStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateQuoteStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async convertQuote(req: ConvertQuoteRequest): Promise<ConvertQuoteResponse> {
@@ -171,7 +175,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeConvertQuoteResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeConvertQuoteResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListSessionsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListSessionsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async openSession(req: OpenSessionRequest): Promise<OpenSessionResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeOpenSessionResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeOpenSessionResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async closeSession(req: CloseSessionRequest): Promise<CloseSessionResponse> {
@@ -125,7 +127,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCloseSessionResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCloseSessionResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

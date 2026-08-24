@@ -112,7 +112,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTasksResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListTasksResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getMyTasks(req: GetMyTasksRequest): Promise<GetMyTasksResponse> {
@@ -144,7 +145,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetMyTasksResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetMyTasksResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getMyTasksProject(req: GetMyTasksProjectRequest): Promise<GetMyTasksProjectResponse> {
@@ -164,7 +166,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetMyTasksProjectResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetMyTasksProjectResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async searchTasks(req: SearchTasksRequest): Promise<SearchTasksResponse> {
@@ -199,7 +202,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSearchTasksResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeSearchTasksResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createTask(req: CreateTaskRequest): Promise<CreateTaskResponse> {
@@ -217,7 +221,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateTaskResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateTaskResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getTaskDetail(req: GetTaskDetailRequest): Promise<GetTaskDetailResponse> {
@@ -238,7 +243,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetTaskDetailResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetTaskDetailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateTask(req: UpdateTaskRequest): Promise<UpdateTaskResponse> {
@@ -257,7 +263,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateTaskResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateTaskResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateTaskStatus(req: UpdateTaskStatusRequest): Promise<UpdateTaskStatusResponse> {
@@ -276,7 +283,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateTaskStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateTaskStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteTask(req: DeleteTaskRequest): Promise<DeleteTaskResponse> {
@@ -297,7 +305,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteTaskResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteTaskResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createSubtask(req: CreateSubtaskRequest): Promise<CreateSubtaskResponse> {
@@ -315,7 +324,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateSubtaskResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateSubtaskResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getSubtasks(req: GetSubtasksRequest): Promise<GetSubtasksResponse> {
@@ -348,7 +358,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetSubtasksResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetSubtasksResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async addComment(req: AddCommentRequest): Promise<AddCommentResponse> {
@@ -367,7 +378,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAddCommentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeAddCommentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteComment(req: DeleteCommentRequest): Promise<DeleteCommentResponse> {
@@ -388,7 +400,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteCommentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteCommentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getTaskActivity(req: GetTaskActivityRequest): Promise<GetTaskActivityResponse> {
@@ -409,7 +422,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetTaskActivityResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetTaskActivityResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createAttachment(req: CreateAttachmentRequest): Promise<CreateAttachmentResponse> {
@@ -427,7 +441,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateAttachmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateAttachmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getAttachments(req: GetAttachmentsRequest): Promise<GetAttachmentsResponse> {
@@ -448,7 +463,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetAttachmentsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetAttachmentsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteAttachment(req: DeleteAttachmentRequest): Promise<DeleteAttachmentResponse> {
@@ -469,7 +485,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteAttachmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteAttachmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createTimeLog(req: CreateTimeLogRequest): Promise<CreateTimeLogResponse> {
@@ -488,7 +505,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateTimeLogResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateTimeLogResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getTimeLogs(req: GetTimeLogsRequest): Promise<GetTimeLogsResponse> {
@@ -509,7 +527,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetTimeLogsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetTimeLogsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteTimeLog(req: DeleteTimeLogRequest): Promise<DeleteTimeLogResponse> {
@@ -530,7 +549,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteTimeLogResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteTimeLogResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async addTaskDependency(req: AddTaskDependencyRequest): Promise<AddTaskDependencyResponse> {
@@ -549,7 +569,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAddTaskDependencyResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeAddTaskDependencyResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async removeTaskDependency(req: RemoveTaskDependencyRequest): Promise<RemoveTaskDependencyResponse> {
@@ -571,7 +592,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRemoveTaskDependencyResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeRemoveTaskDependencyResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

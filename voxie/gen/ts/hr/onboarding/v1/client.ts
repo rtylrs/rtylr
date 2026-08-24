@@ -91,7 +91,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListChecklistTemplatesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListChecklistTemplatesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createChecklistTemplate(req: CreateChecklistTemplateRequest): Promise<CreateChecklistTemplateResponse> {
@@ -109,7 +110,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateChecklistTemplateResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateChecklistTemplateResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateChecklistTemplate(req: UpdateChecklistTemplateRequest): Promise<UpdateChecklistTemplateResponse> {
@@ -128,7 +130,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateChecklistTemplateResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateChecklistTemplateResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async addItemToChecklistTemplate(req: AddItemToChecklistTemplateRequest): Promise<AddItemToChecklistTemplateResponse> {
@@ -147,7 +150,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAddItemToChecklistTemplateResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeAddItemToChecklistTemplateResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listEmployeeChecklists(req: ListEmployeeChecklistsRequest): Promise<ListEmployeeChecklistsResponse> {
@@ -176,7 +180,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListEmployeeChecklistsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListEmployeeChecklistsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getEmployeeChecklist(req: GetEmployeeChecklistRequest): Promise<GetEmployeeChecklistResponse> {
@@ -197,7 +202,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetEmployeeChecklistResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetEmployeeChecklistResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async triggerChecklist(req: TriggerChecklistRequest): Promise<TriggerChecklistResponse> {
@@ -215,7 +221,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeTriggerChecklistResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeTriggerChecklistResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async completeChecklistItem(req: CompleteChecklistItemRequest): Promise<CompleteChecklistItemResponse> {
@@ -233,7 +240,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCompleteChecklistItemResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCompleteChecklistItemResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

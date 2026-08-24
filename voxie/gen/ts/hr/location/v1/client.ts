@@ -86,7 +86,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateLocationResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateLocationResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateLocation(req: UpdateLocationRequest): Promise<UpdateLocationResponse> {
@@ -105,7 +106,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateLocationResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateLocationResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

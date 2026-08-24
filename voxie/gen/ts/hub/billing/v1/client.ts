@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetBillingSummaryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetBillingSummaryResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listInvoices(req: ListInvoicesRequest): Promise<ListInvoicesResponse> {
@@ -108,7 +109,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListInvoicesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListInvoicesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

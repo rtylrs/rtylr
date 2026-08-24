@@ -109,7 +109,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListOrdersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListOrdersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createOrder(req: CreateOrderRequest): Promise<CreateOrderResponse> {
@@ -127,7 +128,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateOrderResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateOrderResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createPublicOrder(req: CreatePublicOrderRequest): Promise<CreatePublicOrderResponse> {
@@ -145,7 +147,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreatePublicOrderResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreatePublicOrderResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getPublicOrderStatus(req: GetPublicOrderStatusRequest): Promise<GetPublicOrderStatusResponse> {
@@ -172,7 +175,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetPublicOrderStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetPublicOrderStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getOrderDetail(req: GetOrderDetailRequest): Promise<GetOrderDetailResponse> {
@@ -193,7 +197,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetOrderDetailResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetOrderDetailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateOrderStatus(req: UpdateOrderStatusRequest): Promise<UpdateOrderStatusResponse> {
@@ -212,7 +217,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateOrderStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateOrderStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async voidOrder(req: VoidOrderRequest): Promise<VoidOrderResponse> {
@@ -231,7 +237,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeVoidOrderResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeVoidOrderResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

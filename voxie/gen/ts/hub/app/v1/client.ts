@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListAppsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListAppsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listAddons(req: ListAddonsRequest): Promise<ListAddonsResponse> {
@@ -108,7 +109,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListAddonsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListAddonsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async addonStatus(req: AddonStatusRequest): Promise<AddonStatusResponse> {
@@ -129,7 +131,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAddonStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeAddonStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async enableAddon(req: EnableAddonRequest): Promise<EnableAddonResponse> {
@@ -148,7 +151,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeEnableAddonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeEnableAddonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async disableAddon(req: DisableAddonRequest): Promise<DisableAddonResponse> {
@@ -167,7 +171,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDisableAddonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDisableAddonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

@@ -97,7 +97,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListCampaignsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListCampaignsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createCampaign(req: CreateCampaignRequest): Promise<CreateCampaignResponse> {
@@ -115,7 +116,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateCampaignResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateCampaignResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getCampaignDetail(req: GetCampaignDetailRequest): Promise<GetCampaignDetailResponse> {
@@ -136,7 +138,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetCampaignDetailResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetCampaignDetailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getCampaignStats(req: GetCampaignStatsRequest): Promise<GetCampaignStatsResponse> {
@@ -159,7 +162,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetCampaignStatsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetCampaignStatsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateCampaign(req: UpdateCampaignRequest): Promise<UpdateCampaignResponse> {
@@ -178,7 +182,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateCampaignResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateCampaignResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateCampaignStatus(req: UpdateCampaignStatusRequest): Promise<UpdateCampaignStatusResponse> {
@@ -197,7 +202,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateCampaignStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateCampaignStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

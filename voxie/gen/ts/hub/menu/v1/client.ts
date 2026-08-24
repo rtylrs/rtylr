@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListMenuResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListMenuResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateMenu(req: UpdateMenuRequest): Promise<UpdateMenuResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateMenuResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateMenuResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listMenuBanners(req: ListMenuBannersRequest): Promise<ListMenuBannersResponse> {
@@ -126,7 +128,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListMenuBannersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListMenuBannersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createMenuBanner(req: CreateMenuBannerRequest): Promise<CreateMenuBannerResponse> {
@@ -144,7 +147,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateMenuBannerResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateMenuBannerResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateMenuBanner(req: UpdateMenuBannerRequest): Promise<UpdateMenuBannerResponse> {
@@ -163,7 +167,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateMenuBannerResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateMenuBannerResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteMenuBanner(req: DeleteMenuBannerRequest): Promise<DeleteMenuBannerResponse> {
@@ -184,7 +189,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteMenuBannerResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteMenuBannerResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

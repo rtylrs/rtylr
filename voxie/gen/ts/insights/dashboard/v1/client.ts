@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetInsightsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetInsightsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getRoadmap(req: GetRoadmapRequest): Promise<GetRoadmapResponse> {
@@ -108,7 +109,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetRoadmapResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetRoadmapResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getWorkload(req: GetWorkloadRequest): Promise<GetWorkloadResponse> {
@@ -128,7 +130,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetWorkloadResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetWorkloadResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getDashboardSummary(req: GetDashboardSummaryRequest): Promise<GetDashboardSummaryResponse> {
@@ -148,7 +151,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetDashboardSummaryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetDashboardSummaryResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

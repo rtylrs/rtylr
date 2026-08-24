@@ -91,7 +91,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListCashMovementsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListCashMovementsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async cashDrop(req: CashDropRequest): Promise<CashDropResponse> {
@@ -109,7 +110,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCashDropResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCashDropResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async cashPickup(req: CashPickupRequest): Promise<CashPickupResponse> {
@@ -127,7 +129,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCashPickupResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCashPickupResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async cashAdjust(req: CashAdjustRequest): Promise<CashAdjustResponse> {
@@ -145,7 +148,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCashAdjustResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCashAdjustResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

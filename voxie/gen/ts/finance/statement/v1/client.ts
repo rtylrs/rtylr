@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetBalanceSheetResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetBalanceSheetResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getCashFlow(req: GetCashFlowRequest): Promise<GetCashFlowResponse> {
@@ -111,7 +112,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetCashFlowResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetCashFlowResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

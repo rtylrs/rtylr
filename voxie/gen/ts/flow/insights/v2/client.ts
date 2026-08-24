@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetInsightsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetInsightsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getTeamWorkload(req: GetTeamWorkloadRequest): Promise<GetTeamWorkloadResponse> {
@@ -120,7 +121,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetTeamWorkloadResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetTeamWorkloadResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getRoadmap(req: GetRoadmapRequest): Promise<GetRoadmapResponse> {
@@ -152,7 +154,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetRoadmapResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetRoadmapResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

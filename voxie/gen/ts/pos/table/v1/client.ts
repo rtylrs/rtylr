@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTablesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListTablesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createTable(req: CreateTableRequest): Promise<CreateTableResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateTableResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateTableResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateTable(req: UpdateTableRequest): Promise<UpdateTableResponse> {
@@ -125,7 +127,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateTableResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateTableResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteTable(req: DeleteTableRequest): Promise<DeleteTableResponse> {
@@ -146,7 +149,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteTableResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteTableResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

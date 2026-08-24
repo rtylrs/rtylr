@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListWarehousesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListWarehousesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createWarehouse(req: CreateWarehouseRequest): Promise<CreateWarehouseResponse> {
@@ -112,7 +113,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateWarehouseResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateWarehouseResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateWarehouse(req: UpdateWarehouseRequest): Promise<UpdateWarehouseResponse> {
@@ -131,7 +133,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateWarehouseResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateWarehouseResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteWarehouse(req: DeleteWarehouseRequest): Promise<DeleteWarehouseResponse> {
@@ -152,7 +155,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteWarehouseResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteWarehouseResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

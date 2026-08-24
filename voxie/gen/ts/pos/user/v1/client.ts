@@ -91,7 +91,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListPOSUsersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListPOSUsersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createPOSUser(req: CreatePOSUserRequest): Promise<CreatePOSUserResponse> {
@@ -109,7 +110,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreatePOSUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreatePOSUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updatePOSUser(req: UpdatePOSUserRequest): Promise<UpdatePOSUserResponse> {
@@ -127,7 +129,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdatePOSUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdatePOSUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deactivatePOSUser(req: DeactivatePOSUserRequest): Promise<DeactivatePOSUserResponse> {
@@ -145,7 +148,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeactivatePOSUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeactivatePOSUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async verifyPOSUserPIN(req: VerifyPOSUserPINRequest): Promise<VerifyPOSUserPINResponse> {
@@ -163,7 +167,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeVerifyPOSUserPINResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeVerifyPOSUserPINResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async setPIN(req: SetPINRequest): Promise<SetPINResponse> {
@@ -181,7 +186,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSetPINResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeSetPINResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

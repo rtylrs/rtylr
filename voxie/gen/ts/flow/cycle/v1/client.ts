@@ -103,7 +103,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListCyclesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListCyclesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createCycle(req: CreateCycleRequest): Promise<CreateCycleResponse> {
@@ -121,7 +122,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateCycleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateCycleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateCycle(req: UpdateCycleRequest): Promise<UpdateCycleResponse> {
@@ -140,7 +142,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateCycleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateCycleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

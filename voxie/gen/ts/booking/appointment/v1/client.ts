@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListAppointmentsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListAppointmentsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listTodayAppointments(req: ListTodayAppointmentsRequest): Promise<ListTodayAppointmentsResponse> {
@@ -108,7 +109,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTodayAppointmentsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListTodayAppointmentsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createAppointment(req: CreateAppointmentRequest): Promise<CreateAppointmentResponse> {
@@ -126,7 +128,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateAppointmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateAppointmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateAppointment(req: UpdateAppointmentRequest): Promise<UpdateAppointmentResponse> {
@@ -145,7 +148,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateAppointmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateAppointmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteAppointment(req: DeleteAppointmentRequest): Promise<DeleteAppointmentResponse> {
@@ -166,7 +170,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteAppointmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteAppointmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

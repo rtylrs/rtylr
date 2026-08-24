@@ -106,7 +106,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListShiftsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListShiftsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createShift(req: CreateShiftRequest): Promise<CreateShiftResponse> {
@@ -124,7 +125,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateShiftResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateShiftResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateShift(req: UpdateShiftRequest): Promise<UpdateShiftResponse> {
@@ -142,7 +144,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateShiftResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateShiftResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteShift(req: DeleteShiftRequest): Promise<DeleteShiftResponse> {
@@ -162,7 +165,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteShiftResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteShiftResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createShiftAssignment(req: CreateShiftAssignmentRequest): Promise<CreateShiftAssignmentResponse> {
@@ -180,7 +184,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateShiftAssignmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateShiftAssignmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getRoster(req: GetRosterRequest): Promise<GetRosterResponse> {
@@ -204,7 +209,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetRosterResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetRosterResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async publishRoster(req: PublishRosterRequest): Promise<PublishRosterResponse> {
@@ -222,7 +228,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodePublishRosterResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodePublishRosterResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listAvailability(req: ListAvailabilityRequest): Promise<ListAvailabilityResponse> {
@@ -260,7 +267,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListAvailabilityResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListAvailabilityResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async setAvailability(req: SetAvailabilityRequest): Promise<SetAvailabilityResponse> {
@@ -278,7 +286,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSetAvailabilityResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeSetAvailabilityResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteAvailability(req: DeleteAvailabilityRequest): Promise<DeleteAvailabilityResponse> {
@@ -299,7 +308,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteAvailabilityResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteAvailabilityResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

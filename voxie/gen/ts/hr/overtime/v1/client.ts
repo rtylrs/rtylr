@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListOvertimeRequestsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListOvertimeRequestsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createOvertimeRequest(req: CreateOvertimeRequestRequest): Promise<CreateOvertimeRequestResponse> {
@@ -112,7 +113,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateOvertimeRequestResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateOvertimeRequestResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async approveOvertime(req: ApproveOvertimeRequest): Promise<ApproveOvertimeResponse> {
@@ -131,7 +133,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeApproveOvertimeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeApproveOvertimeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

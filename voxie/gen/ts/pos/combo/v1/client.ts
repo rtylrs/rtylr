@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListCombosResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListCombosResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createCombo(req: CreateComboRequest): Promise<CreateComboResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateComboResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateComboResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateCombo(req: UpdateComboRequest): Promise<UpdateComboResponse> {
@@ -125,7 +127,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateComboResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateComboResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteCombo(req: DeleteComboRequest): Promise<DeleteComboResponse> {
@@ -146,7 +149,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteComboResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteComboResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

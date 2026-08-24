@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListReceiptsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListReceiptsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async emailReceipt(req: EmailReceiptRequest): Promise<EmailReceiptResponse> {
@@ -113,7 +114,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeEmailReceiptResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeEmailReceiptResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

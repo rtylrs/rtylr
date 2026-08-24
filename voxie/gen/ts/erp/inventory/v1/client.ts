@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetInventoryReportResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetInventoryReportResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getLowStock(req: GetLowStockRequest): Promise<GetLowStockResponse> {
@@ -120,7 +121,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetLowStockResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetLowStockResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getValuation(req: GetValuationRequest): Promise<GetValuationResponse> {
@@ -146,7 +148,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetValuationResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetValuationResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async adjustInventory(req: AdjustInventoryRequest): Promise<AdjustInventoryResponse> {
@@ -164,7 +167,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAdjustInventoryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeAdjustInventoryResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

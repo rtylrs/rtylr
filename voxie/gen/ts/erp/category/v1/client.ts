@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListCategoriesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListCategoriesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createCategory(req: CreateCategoryRequest): Promise<CreateCategoryResponse> {
@@ -112,7 +113,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateCategoryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateCategoryResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateCategory(req: UpdateCategoryRequest): Promise<UpdateCategoryResponse> {
@@ -131,7 +133,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateCategoryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateCategoryResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteCategory(req: DeleteCategoryRequest): Promise<DeleteCategoryResponse> {
@@ -152,7 +155,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteCategoryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteCategoryResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

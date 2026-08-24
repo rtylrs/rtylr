@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListCannedResponsesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListCannedResponsesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createCannedResponse(req: CreateCannedResponseRequest): Promise<CreateCannedResponseResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateCannedResponseResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateCannedResponseResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateCannedResponse(req: UpdateCannedResponseRequest): Promise<UpdateCannedResponseResponse> {
@@ -125,7 +127,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateCannedResponseResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateCannedResponseResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteCannedResponse(req: DeleteCannedResponseRequest): Promise<DeleteCannedResponseResponse> {
@@ -146,7 +149,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteCannedResponseResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteCannedResponseResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetHRDashboardResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetHRDashboardResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getDashboardWidgets(req: GetDashboardWidgetsRequest): Promise<GetDashboardWidgetsResponse> {
@@ -108,7 +109,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetDashboardWidgetsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetDashboardWidgetsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateDashboardWidgets(req: UpdateDashboardWidgetsRequest): Promise<UpdateDashboardWidgetsResponse> {
@@ -126,7 +128,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateDashboardWidgetsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateDashboardWidgetsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

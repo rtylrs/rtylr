@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListDocumentsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListDocumentsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createDocument(req: CreateDocumentRequest): Promise<CreateDocumentResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateDocumentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateDocumentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteDocument(req: DeleteDocumentRequest): Promise<DeleteDocumentResponse> {
@@ -127,7 +129,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteDocumentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteDocumentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

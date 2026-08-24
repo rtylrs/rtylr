@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTeamResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListTeamResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getMember(req: GetMemberRequest): Promise<GetMemberResponse> {
@@ -115,7 +116,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetMemberResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetMemberResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async removeMember(req: RemoveMemberRequest): Promise<RemoveMemberResponse> {
@@ -136,7 +138,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRemoveMemberResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeRemoveMemberResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

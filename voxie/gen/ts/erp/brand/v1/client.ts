@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListBrandsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListBrandsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createBrand(req: CreateBrandRequest): Promise<CreateBrandResponse> {
@@ -112,7 +113,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateBrandResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateBrandResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateBrand(req: UpdateBrandRequest): Promise<UpdateBrandResponse> {
@@ -131,7 +133,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateBrandResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateBrandResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteBrand(req: DeleteBrandRequest): Promise<DeleteBrandResponse> {
@@ -152,7 +155,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteBrandResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteBrandResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

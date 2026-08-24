@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListInboxResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListInboxResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getUnreadCount(req: GetUnreadCountRequest): Promise<GetUnreadCountResponse> {
@@ -114,7 +115,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetUnreadCountResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetUnreadCountResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

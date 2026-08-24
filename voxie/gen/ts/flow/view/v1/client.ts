@@ -103,7 +103,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListViewsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListViewsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createView(req: CreateViewRequest): Promise<CreateViewResponse> {
@@ -121,7 +122,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateViewResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateViewResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateView(req: UpdateViewRequest): Promise<UpdateViewResponse> {
@@ -140,7 +142,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateViewResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateViewResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteView(req: DeleteViewRequest): Promise<DeleteViewResponse> {
@@ -161,7 +164,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteViewResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteViewResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

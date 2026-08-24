@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListModifiersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListModifiersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createModifier(req: CreateModifierRequest): Promise<CreateModifierResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateModifierResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateModifierResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateModifier(req: UpdateModifierRequest): Promise<UpdateModifierResponse> {
@@ -125,7 +127,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateModifierResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateModifierResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteModifier(req: DeleteModifierRequest): Promise<DeleteModifierResponse> {
@@ -146,7 +149,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteModifierResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteModifierResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListDepartmentsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListDepartmentsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createDepartment(req: CreateDepartmentRequest): Promise<CreateDepartmentResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateDepartmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateDepartmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateDepartment(req: UpdateDepartmentRequest): Promise<UpdateDepartmentResponse> {
@@ -125,7 +127,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateDepartmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateDepartmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteDepartment(req: DeleteDepartmentRequest): Promise<DeleteDepartmentResponse> {
@@ -146,7 +149,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteDepartmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteDepartmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

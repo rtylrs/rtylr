@@ -100,7 +100,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListBillsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListBillsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createBill(req: CreateBillRequest): Promise<CreateBillResponse> {
@@ -118,7 +119,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateBillResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateBillResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateBill(req: UpdateBillRequest): Promise<UpdateBillResponse> {
@@ -137,7 +139,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateBillResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateBillResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getBill(req: GetBillRequest): Promise<GetBillResponse> {
@@ -158,7 +161,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetBillResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetBillResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteBill(req: DeleteBillRequest): Promise<DeleteBillResponse> {
@@ -179,7 +183,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteBillResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteBillResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

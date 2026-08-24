@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetMeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetMeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateProfile(req: UpdateProfileRequest): Promise<UpdateProfileResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateProfileResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateProfileResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async changePassword(req: ChangePasswordRequest): Promise<ChangePasswordResponse> {
@@ -124,7 +126,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeChangePasswordResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeChangePasswordResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async switchBusiness(req: SwitchBusinessRequest): Promise<SwitchBusinessResponse> {
@@ -142,7 +145,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSwitchBusinessResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeSwitchBusinessResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

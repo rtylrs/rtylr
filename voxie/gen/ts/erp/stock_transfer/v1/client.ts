@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListStockTransfersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListStockTransfersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createStockTransfer(req: CreateStockTransferRequest): Promise<CreateStockTransferResponse> {
@@ -112,7 +113,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateStockTransferResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateStockTransferResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateStockTransferStatus(req: UpdateStockTransferStatusRequest): Promise<UpdateStockTransferStatusResponse> {
@@ -131,7 +133,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateStockTransferStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateStockTransferStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

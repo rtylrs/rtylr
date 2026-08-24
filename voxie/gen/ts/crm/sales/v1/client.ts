@@ -97,7 +97,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListContractsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListContractsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getContract(req: GetContractRequest): Promise<GetContractResponse> {
@@ -118,7 +119,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetContractResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetContractResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createContract(req: CreateContractRequest): Promise<CreateContractResponse> {
@@ -136,7 +138,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateContractResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateContractResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateContract(req: UpdateContractRequest): Promise<UpdateContractResponse> {
@@ -155,7 +158,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateContractResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateContractResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

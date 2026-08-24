@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListApiKeysResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListApiKeysResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createApiKey(req: CreateApiKeyRequest): Promise<CreateApiKeyResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateApiKeyResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateApiKeyResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async revokeApiKey(req: RevokeApiKeyRequest): Promise<RevokeApiKeyResponse> {
@@ -124,7 +126,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRevokeApiKeyResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeRevokeApiKeyResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listWebhooks(req: ListWebhooksRequest): Promise<ListWebhooksResponse> {
@@ -144,7 +147,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListWebhooksResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListWebhooksResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createWebhook(req: CreateWebhookRequest): Promise<CreateWebhookResponse> {
@@ -162,7 +166,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateWebhookResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateWebhookResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateWebhook(req: UpdateWebhookRequest): Promise<UpdateWebhookResponse> {
@@ -181,7 +186,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateWebhookResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateWebhookResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteWebhook(req: DeleteWebhookRequest): Promise<DeleteWebhookResponse> {
@@ -202,7 +208,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteWebhookResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteWebhookResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

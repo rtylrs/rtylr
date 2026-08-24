@@ -91,7 +91,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetCustomerAnalyticsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetCustomerAnalyticsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getChurnAnalysis(req: GetChurnAnalysisRequest): Promise<GetChurnAnalysisResponse> {
@@ -114,7 +115,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetChurnAnalysisResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetChurnAnalysisResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getLTVAnalysis(req: GetLTVAnalysisRequest): Promise<GetLTVAnalysisResponse> {
@@ -134,7 +136,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetLTVAnalysisResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetLTVAnalysisResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getTopCustomers(req: GetTopCustomersRequest): Promise<GetTopCustomersResponse> {
@@ -169,7 +172,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetTopCustomersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetTopCustomersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

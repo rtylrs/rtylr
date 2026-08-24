@@ -87,7 +87,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeHoldOrderResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeHoldOrderResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listHeldOrders(req: ListHeldOrdersRequest): Promise<ListHeldOrdersResponse> {
@@ -107,7 +108,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListHeldOrdersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListHeldOrdersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

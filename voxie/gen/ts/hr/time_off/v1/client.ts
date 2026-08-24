@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTimeOffResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListTimeOffResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async submitTimeOff(req: SubmitTimeOffRequest): Promise<SubmitTimeOffResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSubmitTimeOffResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeSubmitTimeOffResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

@@ -103,7 +103,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListEmployeesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListEmployeesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createEmployee(req: CreateEmployeeRequest): Promise<CreateEmployeeResponse> {
@@ -121,7 +122,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateEmployeeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateEmployeeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateEmployee(req: UpdateEmployeeRequest): Promise<UpdateEmployeeResponse> {
@@ -140,7 +142,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateEmployeeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateEmployeeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async inviteEmployee(req: InviteEmployeeRequest): Promise<InviteEmployeeResponse> {
@@ -158,7 +161,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeInviteEmployeeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeInviteEmployeeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async acceptInvite(req: AcceptInviteRequest): Promise<AcceptInviteResponse> {
@@ -176,7 +180,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAcceptInviteResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeAcceptInviteResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetPOSSettingsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetPOSSettingsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updatePOSSettings(req: UpdatePOSSettingsRequest): Promise<UpdatePOSSettingsResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdatePOSSettingsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdatePOSSettingsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

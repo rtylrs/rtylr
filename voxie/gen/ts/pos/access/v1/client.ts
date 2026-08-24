@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetMyLocationsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetMyLocationsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getMemberLocations(req: GetMemberLocationsRequest): Promise<GetMemberLocationsResponse> {
@@ -111,7 +112,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetMemberLocationsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetMemberLocationsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getLocationRoster(req: GetLocationRosterRequest): Promise<GetLocationRosterResponse> {
@@ -134,7 +136,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetLocationRosterResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetLocationRosterResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async assignLocation(req: AssignLocationRequest): Promise<AssignLocationResponse> {
@@ -152,7 +155,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAssignLocationResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeAssignLocationResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async removeLocation(req: RemoveLocationRequest): Promise<RemoveLocationResponse> {
@@ -170,7 +174,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRemoveLocationResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeRemoveLocationResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

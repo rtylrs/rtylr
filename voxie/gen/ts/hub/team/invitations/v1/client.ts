@@ -86,7 +86,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeInviteUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeInviteUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async bulkInvite(req: BulkInviteRequest): Promise<BulkInviteResponse> {
@@ -104,7 +105,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeBulkInviteResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeBulkInviteResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async verifyInvite(req: VerifyInviteRequest): Promise<VerifyInviteResponse> {
@@ -122,7 +124,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeVerifyInviteResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeVerifyInviteResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async acceptInvite(req: AcceptInviteRequest): Promise<AcceptInviteResponse> {
@@ -140,7 +143,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAcceptInviteResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeAcceptInviteResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

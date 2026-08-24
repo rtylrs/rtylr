@@ -100,7 +100,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListBankAccountsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListBankAccountsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createBankAccount(req: CreateBankAccountRequest): Promise<CreateBankAccountResponse> {
@@ -118,7 +119,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateBankAccountResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateBankAccountResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getBankAccount(req: GetBankAccountRequest): Promise<GetBankAccountResponse> {
@@ -139,7 +141,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetBankAccountResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetBankAccountResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListGroupsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListGroupsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createGroup(req: CreateGroupRequest): Promise<CreateGroupResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateGroupResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateGroupResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getGroupDetail(req: GetGroupDetailRequest): Promise<GetGroupDetailResponse> {
@@ -127,7 +129,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetGroupDetailResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetGroupDetailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateGroup(req: UpdateGroupRequest): Promise<UpdateGroupResponse> {
@@ -146,7 +149,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateGroupResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateGroupResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteGroup(req: DeleteGroupRequest): Promise<DeleteGroupResponse> {
@@ -167,7 +171,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteGroupResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteGroupResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async addGroupMembers(req: AddGroupMembersRequest): Promise<AddGroupMembersResponse> {
@@ -186,7 +191,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAddGroupMembersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeAddGroupMembersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async removeGroupMember(req: RemoveGroupMemberRequest): Promise<RemoveGroupMemberResponse> {
@@ -208,7 +214,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRemoveGroupMemberResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeRemoveGroupMemberResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getUserGroups(req: GetUserGroupsRequest): Promise<GetUserGroupsResponse> {
@@ -229,7 +236,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetUserGroupsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetUserGroupsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

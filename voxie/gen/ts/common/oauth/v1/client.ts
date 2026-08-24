@@ -86,7 +86,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeIssueResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeIssueResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async token(req: TokenRequest): Promise<TokenResponse> {
@@ -104,7 +105,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeTokenResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeTokenResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async revoke(req: RevokeRequest): Promise<RevokeResponse> {
@@ -122,7 +124,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRevokeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeRevokeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async me(req: MeRequest): Promise<MeResponse> {
@@ -142,7 +145,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeMeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeMeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

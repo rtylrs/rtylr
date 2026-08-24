@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetWorkDayResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetWorkDayResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async upsertWorkDay(req: UpsertWorkDayRequest): Promise<UpsertWorkDayResponse> {
@@ -112,7 +113,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpsertWorkDayResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpsertWorkDayResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listWorkDays(req: ListWorkDaysRequest): Promise<ListWorkDaysResponse> {
@@ -147,7 +149,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListWorkDaysResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListWorkDaysResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listTeamWorkDays(req: ListTeamWorkDaysRequest): Promise<ListTeamWorkDaysResponse> {
@@ -179,7 +182,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTeamWorkDaysResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListTeamWorkDaysResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createWorkDayLine(req: CreateWorkDayLineRequest): Promise<CreateWorkDayLineResponse> {
@@ -198,7 +202,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateWorkDayLineResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateWorkDayLineResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateWorkDayLine(req: UpdateWorkDayLineRequest): Promise<UpdateWorkDayLineResponse> {
@@ -217,7 +222,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateWorkDayLineResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateWorkDayLineResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteWorkDayLine(req: DeleteWorkDayLineRequest): Promise<DeleteWorkDayLineResponse> {
@@ -238,7 +244,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteWorkDayLineResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteWorkDayLineResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listWorkTypes(req: ListWorkTypesRequest): Promise<ListWorkTypesResponse> {
@@ -261,7 +268,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListWorkTypesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListWorkTypesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createWorkType(req: CreateWorkTypeRequest): Promise<CreateWorkTypeResponse> {
@@ -279,7 +287,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateWorkTypeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateWorkTypeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateWorkType(req: UpdateWorkTypeRequest): Promise<UpdateWorkTypeResponse> {
@@ -298,7 +307,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateWorkTypeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateWorkTypeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteWorkType(req: DeleteWorkTypeRequest): Promise<DeleteWorkTypeResponse> {
@@ -319,7 +329,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteWorkTypeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteWorkTypeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

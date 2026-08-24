@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListWorkSchedulesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListWorkSchedulesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createWorkSchedule(req: CreateWorkScheduleRequest): Promise<CreateWorkScheduleResponse> {
@@ -112,7 +113,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateWorkScheduleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateWorkScheduleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateWorkSchedule(req: UpdateWorkScheduleRequest): Promise<UpdateWorkScheduleResponse> {
@@ -131,7 +133,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateWorkScheduleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateWorkScheduleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

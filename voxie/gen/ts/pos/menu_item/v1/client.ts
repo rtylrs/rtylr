@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListMenuItemsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListMenuItemsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listPublicMenuItems(req: ListPublicMenuItemsRequest): Promise<ListPublicMenuItemsResponse> {
@@ -114,7 +115,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListPublicMenuItemsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListPublicMenuItemsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createMenuItem(req: CreateMenuItemRequest): Promise<CreateMenuItemResponse> {
@@ -132,7 +134,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateMenuItemResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateMenuItemResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateMenuItem(req: UpdateMenuItemRequest): Promise<UpdateMenuItemResponse> {
@@ -151,7 +154,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateMenuItemResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateMenuItemResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

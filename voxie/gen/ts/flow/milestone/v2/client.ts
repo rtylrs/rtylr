@@ -103,7 +103,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListMilestonesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListMilestonesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createMilestone(req: CreateMilestoneRequest): Promise<CreateMilestoneResponse> {
@@ -121,7 +122,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateMilestoneResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateMilestoneResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateMilestone(req: UpdateMilestoneRequest): Promise<UpdateMilestoneResponse> {
@@ -140,7 +142,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateMilestoneResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateMilestoneResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

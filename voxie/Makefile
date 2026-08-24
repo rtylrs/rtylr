@@ -4,7 +4,7 @@
 # (zod schemas, React Query hooks, MSW handlers) and the stdlib `onek mock`
 # dev server. No output changes for our current config; flags stay off until
 # a consumer needs them. See 1homsi/onekit@e526fb5.
-ONK_VERSION := e526fb5587d8963206cb29818266a70b627b1123
+ONK_VERSION := 6186effb3818a5dd8cbd4668b285c843b69b5e1a
 
 # Clean generated code
 clean:

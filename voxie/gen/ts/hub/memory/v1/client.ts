@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListChatsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListChatsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getChatMessages(req: GetChatMessagesRequest): Promise<GetChatMessagesResponse> {
@@ -115,7 +116,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetChatMessagesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetChatMessagesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteChat(req: DeleteChatRequest): Promise<DeleteChatResponse> {
@@ -136,7 +138,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteChatResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteChatResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async renameChat(req: RenameChatRequest): Promise<RenameChatResponse> {
@@ -155,7 +158,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRenameChatResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeRenameChatResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async pinChat(req: PinChatRequest): Promise<PinChatResponse> {
@@ -174,7 +178,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodePinChatResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodePinChatResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

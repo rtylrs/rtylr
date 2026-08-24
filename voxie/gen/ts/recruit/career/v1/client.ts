@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListSubmissionsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListSubmissionsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateSubmissionStatus(req: UpdateSubmissionStatusRequest): Promise<UpdateSubmissionStatusResponse> {
@@ -112,7 +113,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateSubmissionStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateSubmissionStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

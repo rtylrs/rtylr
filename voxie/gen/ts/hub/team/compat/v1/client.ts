@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListMembersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListMembersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async inviteMember(req: InviteMemberRequest): Promise<EmptyJsonResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeEmptyJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeEmptyJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deactivateMember(req: DeactivateMemberRequest): Promise<EmptyJsonResponse> {
@@ -125,7 +127,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeEmptyJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeEmptyJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

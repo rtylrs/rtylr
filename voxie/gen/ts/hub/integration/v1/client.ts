@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListIntegrationsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListIntegrationsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async connectIntegration(req: ConnectIntegrationRequest): Promise<ConnectIntegrationResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeConnectIntegrationResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeConnectIntegrationResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async disconnectIntegration(req: DisconnectIntegrationRequest): Promise<DisconnectIntegrationResponse> {
@@ -124,7 +126,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDisconnectIntegrationResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDisconnectIntegrationResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

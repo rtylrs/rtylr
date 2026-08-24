@@ -97,7 +97,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListStaffResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListStaffResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createStaff(req: CreateStaffRequest): Promise<CreateStaffResponse> {
@@ -115,7 +116,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateStaffResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateStaffResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getStaff(req: GetStaffRequest): Promise<GetStaffResponse> {
@@ -136,7 +138,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetStaffResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetStaffResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateStaff(req: UpdateStaffRequest): Promise<UpdateStaffResponse> {
@@ -155,7 +158,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateStaffResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateStaffResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteStaff(req: DeleteStaffRequest): Promise<DeleteStaffResponse> {
@@ -176,7 +180,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteStaffResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteStaffResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async clockIn(req: ClockInRequest): Promise<ClockInResponse> {
@@ -194,7 +199,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeClockInResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeClockInResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async clockOut(req: ClockOutRequest): Promise<ClockOutResponse> {
@@ -212,7 +218,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeClockOutResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeClockOutResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listStaffDirectory(req: ListStaffDirectoryRequest): Promise<ListStaffDirectoryResponse> {
@@ -238,7 +245,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListStaffDirectoryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListStaffDirectoryResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

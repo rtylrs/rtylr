@@ -100,7 +100,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListProductsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListProductsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createProduct(req: CreateProductRequest): Promise<CreateProductResponse> {
@@ -118,7 +119,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateProductResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateProductResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getProductByBarcode(req: GetProductByBarcodeRequest): Promise<GetProductByBarcodeResponse> {
@@ -139,7 +141,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetProductByBarcodeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetProductByBarcodeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getProduct(req: GetProductRequest): Promise<GetProductResponse> {
@@ -160,7 +163,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetProductResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetProductResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getProductFull(req: GetProductFullRequest): Promise<GetProductFullResponse> {
@@ -181,7 +185,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetProductFullResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetProductFullResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listProductAttributes(req: ListProductAttributesRequest): Promise<ListProductAttributesResponse> {
@@ -202,7 +207,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListProductAttributesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListProductAttributesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateProduct(req: UpdateProductRequest): Promise<UpdateProductResponse> {
@@ -221,7 +227,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateProductResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateProductResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteProduct(req: DeleteProductRequest): Promise<DeleteProductResponse> {
@@ -242,7 +249,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteProductResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteProductResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getDashboard(req: GetDashboardRequest): Promise<GetDashboardResponse> {
@@ -262,7 +270,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetDashboardResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetDashboardResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listReorderSuggestions(req: ListReorderSuggestionsRequest): Promise<ListReorderSuggestionsResponse> {
@@ -288,7 +297,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListReorderSuggestionsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListReorderSuggestionsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listExpiringItems(req: ListExpiringItemsRequest): Promise<ListExpiringItemsResponse> {
@@ -317,7 +327,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListExpiringItemsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListExpiringItemsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

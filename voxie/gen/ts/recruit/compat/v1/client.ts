@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createCareer(req: BodyRequest): Promise<JsonResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateCareer(req: BodyRequest): Promise<JsonResponse> {
@@ -124,7 +126,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteCareer(req: IdQueryRequest): Promise<JsonResponse> {
@@ -147,7 +150,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getCustomization(req: EmptyRequest): Promise<JsonResponse> {
@@ -167,7 +171,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateCustomization(req: BodyRequest): Promise<JsonResponse> {
@@ -185,7 +190,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listSubmissions(req: QueryRequest): Promise<JsonResponse> {
@@ -226,7 +232,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateSubmissionStatus(req: BodyRequest): Promise<JsonResponse> {
@@ -244,7 +251,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getResumeURL(req: QueryRequest): Promise<JsonResponse> {
@@ -285,7 +293,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listSections(req: EmptyRequest): Promise<JsonResponse> {
@@ -305,7 +314,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createSection(req: BodyRequest): Promise<JsonResponse> {
@@ -323,7 +333,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateSection(req: BodyRequest): Promise<JsonResponse> {
@@ -341,7 +352,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteSection(req: IdQueryRequest): Promise<JsonResponse> {
@@ -364,7 +376,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async reorderSections(req: BodyRequest): Promise<JsonResponse> {
@@ -382,7 +395,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listFormFields(req: QueryRequest): Promise<JsonResponse> {
@@ -423,7 +437,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createFormField(req: BodyRequest): Promise<JsonResponse> {
@@ -441,7 +456,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateFormField(req: BodyRequest): Promise<JsonResponse> {
@@ -459,7 +475,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteFormField(req: IdQueryRequest): Promise<JsonResponse> {
@@ -482,7 +499,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listPublicCareers(req: QueryRequest): Promise<JsonResponse> {
@@ -523,7 +541,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getPublicCareer(req: QueryRequest): Promise<JsonResponse> {
@@ -564,7 +583,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async submitApplication(req: BodyRequest): Promise<JsonResponse> {
@@ -582,7 +602,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async requestResumeUploadURL(req: BodyRequest): Promise<JsonResponse> {
@@ -600,7 +621,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

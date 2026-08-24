@@ -109,7 +109,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListInvoicesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListInvoicesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createInvoice(req: CreateInvoiceRequest): Promise<CreateInvoiceResponse> {
@@ -127,7 +128,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateInvoiceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateInvoiceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getInvoice(req: GetInvoiceRequest): Promise<GetInvoiceResponse> {
@@ -148,7 +150,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetInvoiceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetInvoiceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateInvoice(req: UpdateInvoiceRequest): Promise<UpdateInvoiceResponse> {
@@ -167,7 +170,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateInvoiceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateInvoiceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateInvoiceStatus(req: UpdateInvoiceStatusRequest): Promise<UpdateInvoiceStatusResponse> {
@@ -186,7 +190,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateInvoiceStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateInvoiceStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteInvoice(req: DeleteInvoiceRequest): Promise<DeleteInvoiceResponse> {
@@ -207,7 +212,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteInvoiceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteInvoiceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async sendInvoice(req: SendInvoiceRequest): Promise<SendInvoiceResponse> {
@@ -226,7 +232,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSendInvoiceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeSendInvoiceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

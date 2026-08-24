@@ -91,7 +91,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListFloorsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListFloorsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createFloor(req: CreateFloorRequest): Promise<CreateFloorResponse> {
@@ -109,7 +110,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateFloorResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateFloorResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateFloor(req: UpdateFloorRequest): Promise<UpdateFloorResponse> {
@@ -128,7 +130,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateFloorResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateFloorResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteFloor(req: DeleteFloorRequest): Promise<DeleteFloorResponse> {
@@ -149,7 +152,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteFloorResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteFloorResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

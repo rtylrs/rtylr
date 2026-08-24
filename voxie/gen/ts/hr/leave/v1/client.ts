@@ -106,7 +106,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListLeaveRequestsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListLeaveRequestsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createLeaveRequest(req: CreateLeaveRequestRequest): Promise<CreateLeaveRequestResponse> {
@@ -124,7 +125,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateLeaveRequestResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateLeaveRequestResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async approveLeave(req: ApproveLeaveRequest): Promise<ApproveLeaveResponse> {
@@ -143,7 +145,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeApproveLeaveResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeApproveLeaveResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async cancelLeaveRequest(req: CancelLeaveRequestRequest): Promise<CancelLeaveResponse> {
@@ -162,7 +165,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCancelLeaveResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCancelLeaveResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listLeaveTypes(req: ListLeaveTypesRequest): Promise<ListLeaveTypesResponse> {
@@ -182,7 +186,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListLeaveTypesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListLeaveTypesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createLeaveType(req: CreateLeaveTypeRequest): Promise<CreateLeaveTypeResponse> {
@@ -200,7 +205,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateLeaveTypeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateLeaveTypeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateLeaveType(req: UpdateLeaveTypeRequest): Promise<UpdateLeaveTypeResponse> {
@@ -219,7 +225,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateLeaveTypeResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateLeaveTypeResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listLeaveBalances(req: ListLeaveBalancesRequest): Promise<ListLeaveBalancesResponse> {
@@ -245,7 +252,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListLeaveBalancesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListLeaveBalancesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

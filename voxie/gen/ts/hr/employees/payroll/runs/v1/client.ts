@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListPayrollRunsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListPayrollRunsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async triggerPayrollRun(req: TriggerPayrollRunRequest): Promise<TriggerPayrollRunResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeTriggerPayrollRunResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeTriggerPayrollRunResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async approvePayrollRun(req: ApprovePayrollRunRequest): Promise<ApprovePayrollRunResponse> {
@@ -125,7 +127,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeApprovePayrollRunResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeApprovePayrollRunResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async exportPayroll(req: ExportPayrollRequest): Promise<ExportPayrollResponse> {
@@ -143,7 +146,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeExportPayrollResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeExportPayrollResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

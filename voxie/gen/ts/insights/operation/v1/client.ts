@@ -91,7 +91,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetHeadcountMetricsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetHeadcountMetricsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getShiftMetrics(req: GetShiftMetricsRequest): Promise<GetShiftMetricsResponse> {
@@ -114,7 +115,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetShiftMetricsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetShiftMetricsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getTimeOffMetrics(req: GetTimeOffMetricsRequest): Promise<GetTimeOffMetricsResponse> {
@@ -137,7 +139,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetTimeOffMetricsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetTimeOffMetricsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getUtilization(req: GetUtilizationRequest): Promise<GetUtilizationResponse> {
@@ -160,7 +163,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetUtilizationResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetUtilizationResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getOperationsSummary(req: GetOperationsSummaryRequest): Promise<GetOperationsSummaryResponse> {
@@ -180,7 +184,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetOperationsSummaryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetOperationsSummaryResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

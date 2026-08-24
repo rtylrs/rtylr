@@ -97,7 +97,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListVariantsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListVariantsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createVariant(req: CreateVariantRequest): Promise<CreateVariantResponse> {
@@ -115,7 +116,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateVariantResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateVariantResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateVariant(req: UpdateVariantRequest): Promise<UpdateVariantResponse> {
@@ -134,7 +136,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateVariantResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateVariantResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteVariant(req: DeleteVariantRequest): Promise<DeleteVariantResponse> {
@@ -155,7 +158,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteVariantResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteVariantResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

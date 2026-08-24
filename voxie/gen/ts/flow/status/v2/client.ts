@@ -91,7 +91,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListStatusesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListStatusesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createStatus(req: CreateStatusRequest): Promise<CreateStatusResponse> {
@@ -109,7 +110,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateStatus(req: UpdateStatusRequest): Promise<UpdateStatusResponse> {
@@ -128,7 +130,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteStatus(req: DeleteStatusRequest): Promise<DeleteStatusResponse> {
@@ -149,7 +152,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async setTaskStatus(req: SetTaskStatusRequest): Promise<SetTaskStatusResponse> {
@@ -167,7 +171,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSetTaskStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeSetTaskStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

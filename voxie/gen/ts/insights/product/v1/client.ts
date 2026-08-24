@@ -91,7 +91,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetBestSellersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetBestSellersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getCategoryPerformance(req: GetCategoryPerformanceRequest): Promise<GetCategoryPerformanceResponse> {
@@ -111,7 +112,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetCategoryPerformanceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetCategoryPerformanceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getProductMargins(req: GetProductMarginsRequest): Promise<GetProductMarginsResponse> {
@@ -131,7 +133,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetProductMarginsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetProductMarginsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getSlowMovers(req: GetSlowMoversRequest): Promise<GetSlowMoversResponse> {
@@ -154,7 +157,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetSlowMoversResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetSlowMoversResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getProductPerformance(req: GetProductPerformanceRequest): Promise<GetProductPerformanceResponse> {
@@ -174,7 +178,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetProductPerformanceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetProductPerformanceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

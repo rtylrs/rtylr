@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetLoyaltyConfigResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetLoyaltyConfigResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateLoyaltyConfig(req: UpdateLoyaltyConfigRequest): Promise<UpdateLoyaltyConfigResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateLoyaltyConfigResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateLoyaltyConfigResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listLoyaltyTiers(req: ListLoyaltyTiersRequest): Promise<ListLoyaltyTiersResponse> {
@@ -126,7 +128,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListLoyaltyTiersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListLoyaltyTiersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createLoyaltyTier(req: CreateLoyaltyTierRequest): Promise<CreateLoyaltyTierResponse> {
@@ -144,7 +147,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateLoyaltyTierResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateLoyaltyTierResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateLoyaltyTier(req: UpdateLoyaltyTierRequest): Promise<UpdateLoyaltyTierResponse> {
@@ -163,7 +167,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateLoyaltyTierResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateLoyaltyTierResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listLoyaltyTransactions(req: ListLoyaltyTransactionsRequest): Promise<ListLoyaltyTransactionsResponse> {
@@ -192,7 +197,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListLoyaltyTransactionsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListLoyaltyTransactionsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async awardPoints(req: AwardPointsRequest): Promise<AwardPointsResponse> {
@@ -210,7 +216,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAwardPointsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeAwardPointsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async redeemPoints(req: RedeemPointsRequest): Promise<RedeemPointsResponse> {
@@ -228,7 +235,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRedeemPointsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeRedeemPointsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

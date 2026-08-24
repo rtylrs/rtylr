@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListReviewCyclesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListReviewCyclesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createReviewCycle(req: CreateReviewCycleRequest): Promise<CreateReviewCycleResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateReviewCycleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateReviewCycleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async openReviewCycle(req: OpenReviewCycleRequest): Promise<OpenReviewCycleResponse> {
@@ -124,7 +126,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeOpenReviewCycleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeOpenReviewCycleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listGoals(req: ListGoalsRequest): Promise<ListGoalsResponse> {
@@ -150,7 +153,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListGoalsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListGoalsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async submitReview(req: SubmitReviewRequest): Promise<SubmitReviewResponse> {
@@ -168,7 +172,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSubmitReviewResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeSubmitReviewResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

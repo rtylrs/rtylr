@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListSegmentsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListSegmentsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createSegment(req: CreateSegmentRequest): Promise<CreateSegmentResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateSegmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateSegmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getSegmentDetail(req: GetSegmentDetailRequest): Promise<GetSegmentDetailResponse> {
@@ -127,7 +129,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetSegmentDetailResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetSegmentDetailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getSegmentCustomers(req: GetSegmentCustomersRequest): Promise<GetSegmentCustomersResponse> {
@@ -154,7 +157,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetSegmentCustomersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetSegmentCustomersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateSegment(req: UpdateSegmentRequest): Promise<UpdateSegmentResponse> {
@@ -173,7 +177,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateSegmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateSegmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteSegment(req: DeleteSegmentRequest): Promise<DeleteSegmentResponse> {
@@ -194,7 +199,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteSegmentResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteSegmentResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

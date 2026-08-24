@@ -103,7 +103,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListReportTemplatesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListReportTemplatesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createReportTemplate(req: CreateReportTemplateRequest): Promise<CreateReportTemplateResponse> {
@@ -121,7 +122,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateReportTemplateResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateReportTemplateResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getReportTemplate(req: GetReportTemplateRequest): Promise<GetReportTemplateResponse> {
@@ -142,7 +144,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetReportTemplateResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetReportTemplateResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listScheduledReports(req: ListScheduledReportsRequest): Promise<ListScheduledReportsResponse> {
@@ -174,7 +177,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListScheduledReportsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListScheduledReportsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createScheduledReport(req: CreateScheduledReportRequest): Promise<CreateScheduledReportResponse> {
@@ -192,7 +196,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateScheduledReportResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateScheduledReportResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateScheduledReport(req: UpdateScheduledReportRequest): Promise<UpdateScheduledReportResponse> {
@@ -211,7 +216,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateScheduledReportResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateScheduledReportResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteScheduledReport(req: DeleteScheduledReportRequest): Promise<DeleteScheduledReportResponse> {
@@ -232,7 +238,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteScheduledReportResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteScheduledReportResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async generateRevenueReport(req: GenerateRevenueReportRequest): Promise<GenerateRevenueReportResponse> {
@@ -250,7 +257,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGenerateRevenueReportResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGenerateRevenueReportResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async exportRevenueReport(req: ExportRevenueReportRequest): Promise<ExportRevenueReportResponse> {
@@ -276,7 +284,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeExportRevenueReportResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeExportRevenueReportResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

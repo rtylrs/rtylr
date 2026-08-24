@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetConfigResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetConfigResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createConfig(req: CreateConfigRequest): Promise<CreateConfigResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateConfigResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateConfigResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateConfig(req: UpdateConfigRequest): Promise<UpdateConfigResponse> {
@@ -124,7 +126,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateConfigResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateConfigResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getCustomDomain(req: GetCustomDomainRequest): Promise<GetCustomDomainResponse> {
@@ -144,7 +147,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetCustomDomainResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetCustomDomainResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async registerCustomDomain(req: RegisterCustomDomainRequest): Promise<RegisterCustomDomainResponse> {
@@ -162,7 +166,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRegisterCustomDomainResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeRegisterCustomDomainResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async verifyCustomDomain(req: VerifyCustomDomainRequest): Promise<VerifyCustomDomainResponse> {
@@ -180,7 +185,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeVerifyCustomDomainResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeVerifyCustomDomainResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async removeCustomDomain(req: RemoveCustomDomainRequest): Promise<RemoveCustomDomainResponse> {
@@ -200,7 +206,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRemoveCustomDomainResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeRemoveCustomDomainResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async sendTestEmail(req: SendTestEmailRequest): Promise<SendTestEmailResponse> {
@@ -218,7 +225,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSendTestEmailResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeSendTestEmailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getIndustries(req: GetIndustriesRequest): Promise<GetIndustriesResponse> {
@@ -238,7 +246,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetIndustriesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetIndustriesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

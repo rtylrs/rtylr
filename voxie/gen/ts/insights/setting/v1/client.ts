@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetInsightsSettingsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetInsightsSettingsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateInsightsSettings(req: UpdateInsightsSettingsRequest): Promise<UpdateInsightsSettingsResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateInsightsSettingsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateInsightsSettingsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

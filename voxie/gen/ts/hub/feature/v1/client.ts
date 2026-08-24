@@ -86,7 +86,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeResolveFeaturesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeResolveFeaturesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async resolveMyFeatures(req: ResolveMyFeaturesRequest): Promise<ResolveMyFeaturesResponse> {
@@ -104,7 +105,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeResolveMyFeaturesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeResolveMyFeaturesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listFlags(req: ListFlagsRequest): Promise<ListFlagsResponse> {
@@ -124,7 +126,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListFlagsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListFlagsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async upsertFlag(req: UpsertFlagRequest): Promise<UpsertFlagResponse> {
@@ -142,7 +145,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpsertFlagResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpsertFlagResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteFlag(req: DeleteFlagRequest): Promise<DeleteFlagResponse> {
@@ -163,7 +167,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteFlagResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteFlagResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listTargets(req: ListTargetsRequest): Promise<ListTargetsResponse> {
@@ -186,7 +191,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTargetsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListTargetsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async upsertTarget(req: UpsertTargetRequest): Promise<UpsertTargetResponse> {
@@ -204,7 +210,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpsertTargetResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpsertTargetResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteTarget(req: DeleteTargetRequest): Promise<DeleteTargetResponse> {
@@ -226,7 +233,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteTargetResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteTargetResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listRules(req: ListRulesRequest): Promise<ListRulesResponse> {
@@ -249,7 +257,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListRulesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListRulesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createRule(req: CreateRuleRequest): Promise<CreateRuleResponse> {
@@ -267,7 +276,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateRuleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateRuleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateRule(req: UpdateRuleRequest): Promise<UpdateRuleResponse> {
@@ -285,7 +295,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateRuleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateRuleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteRule(req: DeleteRuleRequest): Promise<DeleteRuleResponse> {
@@ -306,7 +317,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteRuleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteRuleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

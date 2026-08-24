@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListNotificationsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListNotificationsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async markAllRead(req: MarkAllReadRequest): Promise<MarkAllReadResponse> {
@@ -112,7 +113,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeMarkAllReadResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeMarkAllReadResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async markNotificationRead(req: MarkNotificationReadRequest): Promise<MarkNotificationReadResponse> {
@@ -131,7 +133,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeMarkNotificationReadResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeMarkNotificationReadResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

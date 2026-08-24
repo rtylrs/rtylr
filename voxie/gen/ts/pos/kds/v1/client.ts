@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListKDSOrdersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListKDSOrdersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateKDSItemStatus(req: UpdateKDSItemStatusRequest): Promise<UpdateKDSItemStatusResponse> {
@@ -108,7 +109,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateKDSItemStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateKDSItemStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

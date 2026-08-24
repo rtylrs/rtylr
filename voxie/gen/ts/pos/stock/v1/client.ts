@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListStockMovementsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListStockMovementsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async receiveStock(req: ReceiveStockRequest): Promise<ReceiveStockResponse> {
@@ -112,7 +113,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeReceiveStockResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeReceiveStockResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async adjustStock(req: AdjustStockRequest): Promise<AdjustStockResponse> {
@@ -130,7 +132,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAdjustStockResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeAdjustStockResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async wasteStock(req: WasteStockRequest): Promise<WasteStockResponse> {
@@ -148,7 +151,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeWasteStockResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeWasteStockResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async transferStock(req: TransferStockRequest): Promise<TransferStockResponse> {
@@ -166,7 +170,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeTransferStockResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeTransferStockResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listInventory(req: ListInventoryRequest): Promise<ListInventoryResponse> {
@@ -189,7 +194,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListInventoryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListInventoryResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async lowStock(req: LowStockRequest): Promise<LowStockResponse> {
@@ -212,7 +218,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeLowStockResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeLowStockResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

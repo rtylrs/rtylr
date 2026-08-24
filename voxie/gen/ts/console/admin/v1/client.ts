@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetStatsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetStatsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listUsers(req: ListUsersRequest): Promise<ListUsersResponse> {
@@ -123,7 +124,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListUsersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListUsersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getUser(req: GetUserRequest): Promise<GetUserResponse> {
@@ -144,7 +146,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createUser(req: CreateUserRequest): Promise<CreateUserResponse> {
@@ -162,7 +165,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateUser(req: UpdateUserRequest): Promise<UpdateUserResponse> {
@@ -181,7 +185,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteUser(req: DeleteUserRequest): Promise<DeleteUserResponse> {
@@ -202,7 +207,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async banUser(req: BanUserRequest): Promise<BanUserResponse> {
@@ -221,7 +227,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeBanUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeBanUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async unbanUser(req: UnbanUserRequest): Promise<UnbanUserResponse> {
@@ -240,7 +247,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUnbanUserResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUnbanUserResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async setConsoleAdmin(req: SetConsoleAdminRequest): Promise<SetConsoleAdminResponse> {
@@ -259,7 +267,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeSetConsoleAdminResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeSetConsoleAdminResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getUserSubscription(req: GetUserSubscriptionRequest): Promise<GetUserSubscriptionResponse> {
@@ -280,7 +289,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetUserSubscriptionResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetUserSubscriptionResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listBusinesses(req: ListBusinessesRequest): Promise<ListBusinessesResponse> {
@@ -315,7 +325,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListBusinessesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListBusinessesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateBusiness(req: UpdateBusinessRequest): Promise<UpdateBusinessResponse> {
@@ -334,7 +345,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateBusinessResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateBusinessResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteBusiness(req: DeleteBusinessRequest): Promise<DeleteBusinessResponse> {
@@ -355,7 +367,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteBusinessResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteBusinessResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createBusinessOwner(req: CreateBusinessOwnerRequest): Promise<CreateBusinessOwnerResponse> {
@@ -373,7 +386,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateBusinessOwnerResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateBusinessOwnerResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listSubscriptions(req: ListSubscriptionsRequest): Promise<ListSubscriptionsResponse> {
@@ -402,7 +416,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListSubscriptionsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListSubscriptionsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async upsertSubscription(req: UpsertSubscriptionRequest): Promise<UpsertSubscriptionResponse> {
@@ -420,7 +435,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpsertSubscriptionResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpsertSubscriptionResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteSubscription(req: DeleteSubscriptionRequest): Promise<DeleteSubscriptionResponse> {
@@ -441,7 +457,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteSubscriptionResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteSubscriptionResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listPlans(req: ListPlansRequest): Promise<ListPlansResponse> {
@@ -461,7 +478,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListPlansResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListPlansResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updatePlan(req: UpdatePlanRequest): Promise<UpdatePlanResponse> {
@@ -480,7 +498,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdatePlanResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdatePlanResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTerminalsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListTerminalsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createTerminal(req: CreateTerminalRequest): Promise<CreateTerminalResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateTerminalResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateTerminalResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateTerminal(req: UpdateTerminalRequest): Promise<UpdateTerminalResponse> {
@@ -125,7 +127,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateTerminalResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateTerminalResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async heartbeatTerminal(req: HeartbeatTerminalRequest): Promise<HeartbeatTerminalResponse> {
@@ -143,7 +146,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeHeartbeatTerminalResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeHeartbeatTerminalResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

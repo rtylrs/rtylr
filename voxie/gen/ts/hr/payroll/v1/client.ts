@@ -91,7 +91,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListPayrollResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListPayrollResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async runPayroll(req: RunPayrollRequest): Promise<RunPayrollResponse> {
@@ -109,7 +110,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRunPayrollResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeRunPayrollResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async markPayrollPaid(req: MarkPayrollPaidRequest): Promise<MarkPayrollPaidResponse> {
@@ -128,7 +130,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeMarkPayrollPaidResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeMarkPayrollPaidResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

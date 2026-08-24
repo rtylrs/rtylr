@@ -86,7 +86,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateRoleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateRoleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateRole(req: UpdateRoleRequest): Promise<UpdateRoleResponse> {
@@ -105,7 +106,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateRoleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateRoleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async assignRole(req: AssignRoleRequest): Promise<AssignRoleResponse> {
@@ -123,7 +125,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAssignRoleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeAssignRoleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

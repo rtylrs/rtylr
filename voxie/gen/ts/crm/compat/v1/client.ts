@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listCustomers(req: CustomerListRequest): Promise<JsonResponse> {
@@ -129,7 +130,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getCustomer(req: IdQueryRequest): Promise<JsonResponse> {
@@ -152,7 +154,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getCustomerFull(req: IdQueryRequest): Promise<JsonResponse> {
@@ -175,7 +178,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getCustomerTimeline(req: CustomerTimelineRequest): Promise<JsonResponse> {
@@ -207,7 +211,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createCustomer(req: BodyRequest): Promise<JsonResponse> {
@@ -225,7 +230,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateCustomer(req: BodyRequest): Promise<JsonResponse> {
@@ -243,7 +249,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async recordVisit(req: BodyRequest): Promise<JsonResponse> {
@@ -261,7 +268,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async importCustomers(req: BodyRequest): Promise<JsonResponse> {
@@ -279,7 +287,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async mergeCustomers(req: BodyRequest): Promise<JsonResponse> {
@@ -297,7 +306,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async exportCustomer(req: ExportCustomerRequest): Promise<JsonResponse> {
@@ -323,7 +333,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async awardPoints(req: BodyRequest): Promise<JsonResponse> {
@@ -341,7 +352,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async redeemPoints(req: BodyRequest): Promise<JsonResponse> {
@@ -359,7 +371,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getLoyaltyConfig(req: EmptyRequest): Promise<JsonResponse> {
@@ -379,7 +392,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateLoyaltyConfig(req: BodyRequest): Promise<JsonResponse> {
@@ -397,7 +411,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getLoyaltyTransactions(req: LoyaltyTransactionsRequest): Promise<JsonResponse> {
@@ -426,7 +441,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getLoyaltyMembers(req: PageRequest): Promise<JsonResponse> {
@@ -452,7 +468,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getLoyaltyRewards(req: EmptyRequest): Promise<JsonResponse> {
@@ -472,7 +489,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async upsertLoyaltyReward(req: BodyRequest): Promise<JsonResponse> {
@@ -490,7 +508,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getLoyaltyTiers(req: EmptyRequest): Promise<JsonResponse> {
@@ -510,7 +529,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createLoyaltyTier(req: BodyRequest): Promise<JsonResponse> {
@@ -528,7 +548,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateLoyaltyTier(req: BodyRequest): Promise<JsonResponse> {
@@ -546,7 +567,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listSegments(req: EmptyRequest): Promise<JsonResponse> {
@@ -566,7 +588,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getSegment(req: IdQueryRequest): Promise<JsonResponse> {
@@ -589,7 +612,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getSegmentCustomers(req: SegmentCustomersRequest): Promise<JsonResponse> {
@@ -612,7 +636,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createSegment(req: BodyRequest): Promise<JsonResponse> {
@@ -630,7 +655,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateSegment(req: BodyRequest): Promise<JsonResponse> {
@@ -648,7 +674,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listCampaigns(req: PageRequest): Promise<JsonResponse> {
@@ -674,7 +701,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getCampaign(req: IdQueryRequest): Promise<JsonResponse> {
@@ -697,7 +725,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getCampaignStats(req: CampaignStatsRequest): Promise<JsonResponse> {
@@ -720,7 +749,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createCampaign(req: BodyRequest): Promise<JsonResponse> {
@@ -738,7 +768,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateCampaign(req: PathBodyRequest): Promise<JsonResponse> {
@@ -757,7 +788,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateCampaignStatus(req: PathBodyRequest): Promise<JsonResponse> {
@@ -776,7 +808,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteCampaign(req: PathRequest): Promise<JsonResponse> {
@@ -797,7 +830,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listAutomations(req: EmptyRequest): Promise<JsonResponse> {
@@ -817,7 +851,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getAutomation(req: PathRequest): Promise<JsonResponse> {
@@ -838,7 +873,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createAutomation(req: BodyRequest): Promise<JsonResponse> {
@@ -856,7 +892,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateAutomation(req: PathBodyRequest): Promise<JsonResponse> {
@@ -875,7 +912,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteAutomation(req: PathRequest): Promise<JsonResponse> {
@@ -896,7 +934,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listTemplates(req: EmptyRequest): Promise<JsonResponse> {
@@ -916,7 +955,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createTemplate(req: BodyRequest): Promise<JsonResponse> {
@@ -934,7 +974,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listFeedback(req: EmptyRequest): Promise<JsonResponse> {
@@ -954,7 +995,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getSettings(req: EmptyRequest): Promise<JsonResponse> {
@@ -974,7 +1016,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateSettings(req: BodyRequest): Promise<JsonResponse> {
@@ -992,7 +1035,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getSalesPipeline(req: EmptyRequest): Promise<JsonResponse> {
@@ -1012,7 +1056,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listLeads(req: PageRequest): Promise<JsonResponse> {
@@ -1038,7 +1083,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getLead(req: PathRequest): Promise<JsonResponse> {
@@ -1059,7 +1105,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createLead(req: BodyRequest): Promise<JsonResponse> {
@@ -1077,7 +1124,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateLead(req: PathBodyRequest): Promise<JsonResponse> {
@@ -1096,7 +1144,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteLead(req: PathRequest): Promise<JsonResponse> {
@@ -1117,7 +1166,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listTouchpoints(req: PathRequest): Promise<JsonResponse> {
@@ -1138,7 +1188,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createTouchpoint(req: BodyRequest): Promise<JsonResponse> {
@@ -1156,7 +1207,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteTouchpoint(req: PathRequest): Promise<JsonResponse> {
@@ -1177,7 +1229,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listContacts(req: ContactsRequest): Promise<JsonResponse> {
@@ -1209,7 +1262,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createContact(req: BodyRequest): Promise<JsonResponse> {
@@ -1227,7 +1281,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateContact(req: PathBodyRequest): Promise<JsonResponse> {
@@ -1246,7 +1301,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteContact(req: PathRequest): Promise<JsonResponse> {
@@ -1267,7 +1323,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listContracts(req: PageRequest): Promise<JsonResponse> {
@@ -1293,7 +1350,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getContract(req: PathRequest): Promise<JsonResponse> {
@@ -1314,7 +1372,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createContract(req: BodyRequest): Promise<JsonResponse> {
@@ -1332,7 +1391,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateContract(req: PathBodyRequest): Promise<JsonResponse> {
@@ -1351,7 +1411,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeJsonResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeJsonResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

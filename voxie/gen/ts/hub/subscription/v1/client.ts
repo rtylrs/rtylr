@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetMySubscriptionResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetMySubscriptionResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listPlans(req: ListPlansRequest): Promise<ListPlansResponse> {
@@ -108,7 +109,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListPlansResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListPlansResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getBillingDetail(req: GetBillingDetailRequest): Promise<GetBillingDetailResponse> {
@@ -128,7 +130,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetBillingDetailResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetBillingDetailResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getBillingHistory(req: GetBillingHistoryRequest): Promise<GetBillingHistoryResponse> {
@@ -148,7 +151,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetBillingHistoryResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetBillingHistoryResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async upsertSubscription(req: UpsertSubscriptionRequest): Promise<UpsertSubscriptionResponse> {
@@ -166,7 +170,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpsertSubscriptionResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpsertSubscriptionResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createCheckout(req: CreateCheckoutRequest): Promise<CreateCheckoutResponse> {
@@ -184,7 +189,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateCheckoutResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateCheckoutResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

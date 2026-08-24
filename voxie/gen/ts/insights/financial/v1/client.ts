@@ -91,7 +91,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetCashFlowAnalyticsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetCashFlowAnalyticsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getExpenseAnalytics(req: GetExpenseAnalyticsRequest): Promise<GetExpenseAnalyticsResponse> {
@@ -114,7 +115,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetExpenseAnalyticsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetExpenseAnalyticsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getInvoiceAging(req: GetInvoiceAgingRequest): Promise<GetInvoiceAgingResponse> {
@@ -134,7 +136,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetInvoiceAgingResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetInvoiceAgingResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

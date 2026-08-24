@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListTrainingCoursesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListTrainingCoursesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createTrainingCourse(req: CreateTrainingCourseRequest): Promise<CreateTrainingCourseResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateTrainingCourseResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateTrainingCourseResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

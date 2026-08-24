@@ -94,7 +94,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListAccountsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListAccountsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createAccount(req: CreateAccountRequest): Promise<CreateAccountResponse> {
@@ -112,7 +113,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateAccountResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateAccountResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateAccount(req: UpdateAccountRequest): Promise<UpdateAccountResponse> {
@@ -131,7 +133,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateAccountResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateAccountResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteAccount(req: DeleteAccountRequest): Promise<DeleteAccountResponse> {
@@ -152,7 +155,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteAccountResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteAccountResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getChartOfAccounts(req: GetChartOfAccountsRequest): Promise<GetChartOfAccountsResponse> {
@@ -172,7 +176,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetChartOfAccountsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetChartOfAccountsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

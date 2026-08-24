@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetPermissionsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetPermissionsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listRoles(req: ListRolesRequest): Promise<ListRolesResponse> {
@@ -108,7 +109,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListRolesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListRolesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createRole(req: CreateRoleRequest): Promise<CreateRoleResponse> {
@@ -126,7 +128,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateRoleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateRoleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateRole(req: UpdateRoleRequest): Promise<UpdateRoleResponse> {
@@ -145,7 +148,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateRoleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateRoleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteRole(req: DeleteRoleRequest): Promise<DeleteRoleResponse> {
@@ -166,7 +170,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteRoleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteRoleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updatePermissionMatrix(req: UpdatePermissionMatrixRequest): Promise<UpdatePermissionMatrixResponse> {
@@ -184,7 +189,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdatePermissionMatrixResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdatePermissionMatrixResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

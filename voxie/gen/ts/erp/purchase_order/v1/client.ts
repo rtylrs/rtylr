@@ -97,7 +97,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListPurchaseOrdersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListPurchaseOrdersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createPurchaseOrder(req: CreatePurchaseOrderRequest): Promise<CreatePurchaseOrderResponse> {
@@ -115,7 +116,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreatePurchaseOrderResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreatePurchaseOrderResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async getPurchaseOrder(req: GetPurchaseOrderRequest): Promise<GetPurchaseOrderResponse> {
@@ -136,7 +138,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeGetPurchaseOrderResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeGetPurchaseOrderResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updatePurchaseOrderStatus(req: UpdatePurchaseOrderStatusRequest): Promise<UpdatePurchaseOrderStatusResponse> {
@@ -155,7 +158,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdatePurchaseOrderStatusResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdatePurchaseOrderStatusResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async approvePurchaseOrder(req: ApprovePurchaseOrderRequest): Promise<ApprovePurchaseOrderResponse> {
@@ -174,7 +178,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeApprovePurchaseOrderResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeApprovePurchaseOrderResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

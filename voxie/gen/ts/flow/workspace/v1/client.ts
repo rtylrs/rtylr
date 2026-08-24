@@ -100,7 +100,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListWorkspacesResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListWorkspacesResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createWorkspace(req: CreateWorkspaceRequest): Promise<CreateWorkspaceResponse> {
@@ -118,7 +119,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateWorkspaceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateWorkspaceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateWorkspace(req: UpdateWorkspaceRequest): Promise<UpdateWorkspaceResponse> {
@@ -137,7 +139,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateWorkspaceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateWorkspaceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async deleteWorkspace(req: DeleteWorkspaceRequest): Promise<DeleteWorkspaceResponse> {
@@ -158,7 +161,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeDeleteWorkspaceResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeDeleteWorkspaceResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listWorkspaceMembers(req: ListWorkspaceMembersRequest): Promise<ListWorkspaceMembersResponse> {
@@ -193,7 +197,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListWorkspaceMembersResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListWorkspaceMembersResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async addWorkspaceMember(req: AddWorkspaceMemberRequest): Promise<AddWorkspaceMemberResponse> {
@@ -211,7 +216,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeAddWorkspaceMemberResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeAddWorkspaceMemberResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async removeWorkspaceMember(req: RemoveWorkspaceMemberRequest): Promise<RemoveWorkspaceMemberResponse> {
@@ -237,7 +243,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRemoveWorkspaceMemberResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeRemoveWorkspaceMemberResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async updateWorkspaceMemberRole(req: UpdateWorkspaceMemberRoleRequest): Promise<UpdateWorkspaceMemberRoleResponse> {
@@ -255,7 +262,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeUpdateWorkspaceMemberRoleResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeUpdateWorkspaceMemberRoleResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

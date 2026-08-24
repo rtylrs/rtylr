@@ -88,7 +88,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListBenefitsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListBenefitsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async createBenefit(req: CreateBenefitRequest): Promise<CreateBenefitResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeCreateBenefitResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeCreateBenefitResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async enrollInBenefit(req: EnrollInBenefitRequest): Promise<EnrollInBenefitResponse> {
@@ -124,7 +126,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeEnrollInBenefitResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeEnrollInBenefitResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listMyBenefitEnrollments(req: ListMyBenefitEnrollmentsRequest): Promise<ListMyBenefitEnrollmentsResponse> {
@@ -156,7 +159,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListMyBenefitEnrollmentsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListMyBenefitEnrollmentsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }

@@ -86,7 +86,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeRequestAccessResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeRequestAccessResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async listAccessRequests(req: ListAccessRequestsRequest): Promise<ListAccessRequestsResponse> {
@@ -106,7 +107,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeListAccessRequestsResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeListAccessRequestsResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 async approveAccessRequest(req: ApproveAccessRequestRequest): Promise<ApproveAccessRequestResponse> {
@@ -125,7 +127,8 @@ const body = await readResponseText(res, this.options.maxResponseBodyBytes);
 throw new ApiError(res.status, body);
 }
 
-return decodeApproveAccessRequestResponse(JSON.parse(await readResponseText(res, this.options.maxResponseBodyBytes)));
+const text = await readResponseText(res, this.options.maxResponseBodyBytes);
+return decodeApproveAccessRequestResponse(text.trim() === "" ? {} : JSON.parse(text));
 }
 
 }
