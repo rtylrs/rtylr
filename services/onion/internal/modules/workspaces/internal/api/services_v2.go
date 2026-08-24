@@ -179,12 +179,12 @@ type CycleAPIV2 struct{ Service *application.Service }
 func NewCycleAPIV2(s *application.Service) *CycleAPIV2 { return &CycleAPIV2{Service: s} }
 
 func (a *CycleAPIV2) ListCycles(ctx context.Context, req *flowcyclev2.ListCyclesRequest) (*flowcyclev2.ListCyclesResponse, error) {
-	_, businessID, err := resolveV2(ctx)
+	caller, businessID, err := resolveV2(ctx)
 	if err != nil {
 		return nil, err
 	}
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
-	cycles, total, err := a.Service.ListCyclesV2(ctx, req.GetProjectId(), businessID, int64(limit), offset)
+	cycles, total, err := a.Service.ListCyclesV2(ctx, req.GetProjectId(), businessID, caller.UserID, int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list cycles")
 	}
@@ -233,7 +233,7 @@ type MilestoneAPIV2 struct{ Service *application.Service }
 func NewMilestoneAPIV2(s *application.Service) *MilestoneAPIV2 { return &MilestoneAPIV2{Service: s} }
 
 func (a *MilestoneAPIV2) ListMilestones(ctx context.Context, req *flowmilestonev2.ListMilestonesRequest) (*flowmilestonev2.ListMilestonesResponse, error) {
-	_, businessID, err := resolveV2(ctx)
+	caller, businessID, err := resolveV2(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +242,7 @@ func (a *MilestoneAPIV2) ListMilestones(ctx context.Context, req *flowmilestonev
 	if pid := req.GetProjectId(); pid != 0 {
 		projectID = &pid
 	}
-	milestones, total, err := a.Service.ListMilestonesV2(ctx, businessID, projectID, int64(limit), offset)
+	milestones, total, err := a.Service.ListMilestonesV2(ctx, businessID, projectID, caller.UserID, int64(limit), offset)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list milestones")
 	}

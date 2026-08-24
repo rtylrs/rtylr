@@ -339,8 +339,9 @@ func (s *Service) CreateLabelV2(ctx context.Context, businessID int64, name, col
 	return domain.Label{ID: id, Name: name, Color: color, CreatedAt: now}, nil
 }
 
-func (s *Service) ListCyclesV2(ctx context.Context, projectID, businessID, limit, offset int64) ([]domain.Cycle, int64, error) {
-	return s.repo.ListCyclesV2(ctx, projectID, businessID, limit, offset)
+func (s *Service) ListCyclesV2(ctx context.Context, projectID, businessID, callerID, limit, offset int64) ([]domain.Cycle, int64, error) {
+	includeAll := s.hubProfileBypasses(ctx, callerID, businessID)
+	return s.repo.ListCyclesV2(ctx, projectID, businessID, callerID, includeAll, limit, offset)
 }
 
 // ErrInvalidCycleDates reports a start/end pair a cycle cannot be created from.
@@ -410,8 +411,9 @@ func (s *Service) CreateCycleV2(ctx context.Context, businessID, projectID int64
 	return domain.Cycle{ID: id, ProjectID: &projectID, Name: name, Status: status}, nil
 }
 
-func (s *Service) ListMilestonesV2(ctx context.Context, businessID int64, projectID *int64, limit, offset int64) ([]domain.Milestone, int64, error) {
-	return s.repo.ListMilestonesV2(ctx, businessID, projectID, limit, offset)
+func (s *Service) ListMilestonesV2(ctx context.Context, businessID int64, projectID *int64, callerID, limit, offset int64) ([]domain.Milestone, int64, error) {
+	includeAll := s.hubProfileBypasses(ctx, callerID, businessID)
+	return s.repo.ListMilestonesV2(ctx, businessID, projectID, callerID, includeAll, limit, offset)
 }
 
 func (s *Service) CreateMilestoneV2(ctx context.Context, businessID, projectID int64, name, description, targetDate string) (domain.Milestone, error) {

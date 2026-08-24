@@ -286,11 +286,22 @@ SELECT c.id, c.project_id, c.name, c.description, c.status,
         WHERE ct.cycle_id = c.id AND t.status = 'done') AS completed
 FROM flow_cycles c
 WHERE c.project_id = ? AND c.business_id = ?
+  AND (? = 1 OR EXISTS (SELECT 1 FROM flow_projects p
+        WHERE p.id = c.project_id
+          AND (p.created_by = ? OR p.owner_id = ?
+               OR EXISTS (SELECT 1 FROM flow_project_members pm
+                          WHERE pm.project_id = p.id AND pm.user_id = ?))))
 ORDER BY c.start_date DESC
 LIMIT ? OFFSET ?;
 
 -- name: CountCyclesV2 :one
-SELECT COUNT(*) FROM flow_cycles WHERE project_id = ? AND business_id = ?;
+SELECT COUNT(*) FROM flow_cycles c
+WHERE c.project_id = ? AND c.business_id = ?
+  AND (? = 1 OR EXISTS (SELECT 1 FROM flow_projects p
+        WHERE p.id = c.project_id
+          AND (p.created_by = ? OR p.owner_id = ?
+               OR EXISTS (SELECT 1 FROM flow_project_members pm
+                          WHERE pm.project_id = p.id AND pm.user_id = ?))));
 
 -- name: GetInsightsTaskCountsV2 :one
 SELECT

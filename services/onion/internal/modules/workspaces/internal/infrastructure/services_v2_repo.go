@@ -54,13 +54,27 @@ func (r *Repository) CreateLabelV2(ctx context.Context, businessID int64, name, 
 	return res.LastInsertId()
 }
 
-func (r *Repository) ListCyclesV2(ctx context.Context, projectID, businessID, limit, offset int64) ([]domain.Cycle, int64, error) {
-	total, err := r.queries.CountCyclesV2(ctx, sqlc.CountCyclesV2Params{ProjectID: nullInt64(projectID), BusinessID: businessID})
+// ListCyclesV2 applies the same project-visibility rule as task listing: a
+// caller sees a project's cycles only if they created it, own it, or are a
+// member. Without it any member of the business could list the cycles of a
+// private project by passing its id, which leaked names and date ranges.
+// includeAll is the hub-role bypass.
+func (r *Repository) ListCyclesV2(ctx context.Context, projectID, businessID, callerID int64, includeAll bool, limit, offset int64) ([]domain.Cycle, int64, error) {
+	bypass := 0
+	if includeAll {
+		bypass = 1
+	}
+	total, err := r.queries.CountCyclesV2(ctx, sqlc.CountCyclesV2Params{
+		ProjectID: nullInt64(projectID), BusinessID: businessID,
+		Column3: bypass, CreatedBy: callerID, OwnerID: callerID, UserID: callerID,
+	})
 	if err != nil {
 		return nil, 0, err
 	}
 	rows, err := r.queries.ListCyclesV2(ctx, sqlc.ListCyclesV2Params{
-		ProjectID: nullInt64(projectID), BusinessID: businessID, Limit: int32(limit), Offset: int32(offset),
+		ProjectID: nullInt64(projectID), BusinessID: businessID,
+		Column3: bypass, CreatedBy: callerID, OwnerID: callerID, UserID: callerID,
+		Limit: int32(limit), Offset: int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err
@@ -90,13 +104,22 @@ func (r *Repository) CreateCycleV2(ctx context.Context, input domain.CycleInput)
 	return res.LastInsertId()
 }
 
-func (r *Repository) ListMilestonesV2(ctx context.Context, businessID int64, projectID *int64, limit, offset int64) ([]domain.Milestone, int64, error) {
+// ListMilestonesV2 carries the same visibility rule as ListCyclesV2, for the
+// same reason: a milestone name and target date describe a project, so a caller
+// who cannot see the project must not see them.
+func (r *Repository) ListMilestonesV2(ctx context.Context, businessID int64, projectID *int64, callerID int64, includeAll bool, limit, offset int64) ([]domain.Milestone, int64, error) {
 	pid := int64(0)
 	if projectID != nil {
 		pid = *projectID
 	}
+	bypass := 0
+	if includeAll {
+		bypass = 1
+	}
 	rows, err := r.queries.ListMilestonesByBusiness(ctx, sqlc.ListMilestonesByBusinessParams{
-		BusinessID: businessID, Column2: pid, ProjectID: pid, Limit: int32(limit), Offset: int32(offset),
+		BusinessID: businessID, Column2: pid, ProjectID: pid,
+		Column4: bypass, CreatedBy: callerID, OwnerID: callerID, UserID: callerID,
+		Limit: int32(limit), Offset: int32(offset),
 	})
 	if err != nil {
 		return nil, 0, err
