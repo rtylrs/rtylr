@@ -93,7 +93,9 @@
     "emptyAllDescription": "أنشئ حملة للوصول إلى عملائك.",
     "viewAllCampaigns": "عرض جميع الحملات",
     "loadMore": "تحميل المزيد من الحملات",
-    "newEmailCampaign": "حملة بريد إلكتروني جديدة"
+    "newEmailCampaign": "حملة بريد إلكتروني جديدة",
+    "descriptionLabel": "الوصف",
+    "descriptionPlaceholder": "الغرض من هذه الحملة"
   },
   "campaignDetail": {
     "notFoundTitle": "الحملة غير موجودة",
