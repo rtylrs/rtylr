@@ -141,7 +141,10 @@
       "title": "No warehouses",
       "description": "Create your first warehouse to track stock locations"
     },
-    "status": { "default": "Default", "inactive": "Inactive" },
+    "status": {
+      "default": "Default",
+      "inactive": "Inactive"
+    },
     "delete": "Delete warehouse",
     "managedBy": "Managed by {{name}}",
     "capacity": "Capacity",
@@ -155,7 +158,9 @@
       "manager": "Manager name (optional)",
       "capacity": "Capacity (optional)"
     },
-    "validation": { "nameRequired": "Warehouse name is required" },
+    "validation": {
+      "nameRequired": "Warehouse name is required"
+    },
     "toast": {
       "created": "Warehouse created",
       "createFailed": "Failed to create warehouse",
@@ -176,7 +181,9 @@
     },
     "goToPurchasing": "Go to Purchase Orders",
     "orderSummary": "{{count}} items / Expected {{date}}",
-    "validation": { "overReceived": "Cannot receive more units than ordered" },
+    "validation": {
+      "overReceived": "Cannot receive more units than ordered"
+    },
     "toast": {
       "completed": "Receipt completed, all items received",
       "completedVariance": "Receipt completed with {{count}} unit variance",
@@ -251,7 +258,9 @@
   },
   "settings": {
     "team": {
-      "empty": { "title": "No team members yet." },
+      "empty": {
+        "title": "No team members yet."
+      },
       "invite": "Invite member",
       "refresh": "Refresh"
     }
@@ -270,5 +279,8 @@
       "description": "Valuation appears once inventory is tracked in a warehouse."
     },
     "refresh": "Refresh"
+  },
+  "supplierBills": {
+    "supplierBills": "{count} bill(s)"
   }
 }
