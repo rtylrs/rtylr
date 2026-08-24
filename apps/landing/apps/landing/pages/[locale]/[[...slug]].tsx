@@ -8,6 +8,10 @@ import HomePage from '../index';
 import ErpPage from '../erp';
 import PosPage from '../pos';
 import PricingPage from '../pricing';
+import TermsPage from '../legal/terms';
+import PrivacyPage from '../legal/privacy-policy';
+import SecurityPage from '../legal/security';
+import TrustPage from '../trust';
 
 /**
  * One catch-all that serves every localised route.
@@ -38,6 +42,10 @@ const PAGES: Record<string, React.ComponentType> = {
   '/pos/': PosPage,
   '/erp/': ErpPage,
   '/contact/': ContactPage,
+  '/legal/terms/': TermsPage,
+  '/legal/privacy-policy/': PrivacyPage,
+  '/legal/security/': SecurityPage,
+  '/trust/': TrustPage,
 };
 
 interface Props {

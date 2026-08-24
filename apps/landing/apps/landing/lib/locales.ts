@@ -105,8 +105,10 @@ export const shippedLocales = (): Locale[] => LOCALES.filter((l) => l.shipped);
  * serves. Add a route here only when its namespace is complete in every
  * shipped locale.
  *
- * The legal pages are absent by decision, not omission. See the note at the
- * top of each file in pages/legal/.
+ * The legal pages (terms, privacy policy, security) and the Trust Center
+ * are translated as full authoritative text, not machine-flagged drafts -
+ * see components/legal/LegalArticle.tsx for how the legal pages' inline
+ * markup survives translation intact.
  */
 export const LOCALISED_ROUTES: string[] = [
   '/',
@@ -114,6 +116,10 @@ export const LOCALISED_ROUTES: string[] = [
   '/pos/',
   '/erp/',
   '/contact/',
+  '/legal/terms/',
+  '/legal/privacy-policy/',
+  '/legal/security/',
+  '/trust/',
 ];
 
 /** Whether one route is translated in the non-default locales. */
