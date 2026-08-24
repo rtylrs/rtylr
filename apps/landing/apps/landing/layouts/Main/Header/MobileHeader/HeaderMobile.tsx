@@ -308,6 +308,7 @@ const HeaderMobile: React.FC = () => {
           </div>
 
           <div className={styles['mobile-menu-footer']}>
+            <LanguageSwitcher openUpward />
             <div className={styles['mobile-menu-buttons']}>
               <Button onClick={handleLoginClick} variant="dark-outline" width="100%" height="44px">
                 {t('common.nav.signIn')}
@@ -316,7 +317,6 @@ const HeaderMobile: React.FC = () => {
                 {t('common.nav.signUp')}
               </Button>
             </div>
-            <LanguageSwitcher />
           </div>
           </motion.div>
         )}
