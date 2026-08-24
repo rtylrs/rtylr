@@ -143,3 +143,76 @@ describe('crmApi', () => {
     ).toMatchObject({ leadId: 1, signedAt: undefined, signedByName: '', closedBy: 12 });
   });
 });
+
+/**
+ * Campaign create and update payloads. rtylr#938.
+ *
+ * The editors send `{name, type, subject?, body, audienceSegmentId}`. The mapping
+ * read `data.channel`, which the editors never set, so every campaign was saved
+ * as email regardless of the channel the operator picked. It also invented a
+ * description and a subject from the name, and stamped scheduledAt with the
+ * current time on every save, which asserts that a draft is scheduled for now.
+ *
+ * Inventing those was a response to the contract marking them @required.
+ * voxie#73 relaxed them to match what onion actually validates (name, channel,
+ * content), so the client no longer has to fabricate anything.
+ */
+describe('campaign mutation payload (rtylr#938)', () => {
+  const sent = (): Record<string, unknown> =>
+    (mockClients.compatibility.createCampaign as ReturnType<typeof vi.fn>).mock
+      .calls[0][0] as Record<string, unknown>;
+
+  it('sends the channel the editor chose, not always email', async () => {
+    vi.clearAllMocks();
+    // SMSCampaign.tsx sends `type`, never `channel`.
+    await crmApi.createCampaign({ name: 'Flash sale', type: 'sms', body: 'Today only' } as never);
+    expect(sent().channel).toBe('sms');
+  });
+
+  it('does not invent a description from the subject or the name', async () => {
+    vi.clearAllMocks();
+    await crmApi.createCampaign({ name: 'Flash sale', type: 'sms', body: 'Today only' } as never);
+    const description = sent().description;
+    expect(description == null || description === '').toBe(true);
+  });
+
+  it('does not invent a subject for a channel that has none', async () => {
+    vi.clearAllMocks();
+    await crmApi.createCampaign({ name: 'Flash sale', type: 'sms', body: 'Today only' } as never);
+    const subject = sent().subject;
+    expect(subject == null || subject === '').toBe(true);
+  });
+
+  it('omits scheduledAt when nothing was scheduled', async () => {
+    vi.clearAllMocks();
+    await crmApi.createCampaign({ name: 'Flash sale', type: 'sms', body: 'Today only' } as never);
+    const scheduledAt = sent().scheduled_at;
+    expect(scheduledAt == null || scheduledAt === '').toBe(true);
+  });
+
+  it('passes a real description and subject through untouched', async () => {
+    vi.clearAllMocks();
+    await crmApi.createCampaign({
+      name: 'Newsletter',
+      type: 'email',
+      subject: 'March news',
+      description: 'Monthly roundup',
+      body: 'Hello',
+    } as never);
+    expect(sent().description).toBe('Monthly roundup');
+    expect(sent().subject).toBe('March news');
+    expect(sent().channel).toBe('email');
+    expect(sent().content).toBe('Hello');
+  });
+
+  it('passes a real schedule through', async () => {
+    vi.clearAllMocks();
+    await crmApi.createCampaign({
+      name: 'Later',
+      type: 'email',
+      body: 'x',
+      scheduledAt: '2026-09-01T10:00:00Z',
+    } as never);
+    expect(sent().scheduled_at).toBe('2026-09-01T10:00:00Z');
+  });
+});
