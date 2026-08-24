@@ -808,5 +808,11 @@
   },
   "sidebar": {
     "yourReports": "Vos équipes"
+  },
+  "toasts": {
+    "project": {
+      "archived": "Projet archivé.",
+      "archivedUntil": "Projet archivé. Il sera supprimé définitivement le {{date}}."
+    }
   }
 }

@@ -73,6 +73,12 @@ export interface ApiProject {
   // the project through the dept-manager proxy rather than as creator, owner or
   // member. Optional because the v1 shape has no such field.
   visibleViaReport?: boolean;
+  // Stamped when the project is archived. purgeAt is the scheduled permanent
+  // deletion, computed server-side from the business's retention setting, and
+  // ruling P3 requires it to be stated explicitly rather than described as
+  // "when retention expires".
+  archivedAt?: string;
+  purgeAt?: string;
 }
 
 export type ProjectUpdate = Partial<{
@@ -512,8 +518,12 @@ export const flowApi = {
   // the project to the recycle bin with a purge_at stamp, so it stays restorable
   // until retention expires. The UI copy says so - it used to promise the
   // opposite ("cannot be restored").
+  // The contract returns the archived project carrying purge_at, and says
+  // clients should surface it wherever they show the archive confirmation.
+  // Typing this as { message } discarded that, which is why the confirmation
+  // could only speak vaguely about retention.
   archiveProject: (id: string) =>
-    flowResult<{ message: string }>(() => projectV2.archiveProject({ id })),
+    flowResult<{ project: ApiProject }>(() => projectV2.archiveProject({ id })),
 
   getProjectMembers: (projectId: string) =>
     flowResult<{ members: ApiProjectMember[] }>(() => projectV2.listProjectMembers({ projectId })),
