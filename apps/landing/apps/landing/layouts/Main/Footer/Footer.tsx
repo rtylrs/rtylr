@@ -8,7 +8,7 @@ import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { fadeInUp, staggerContainer, viewportOnce } from '../../../lib/animations';
 import { navigateExternal } from '../../../lib/navigation';
-import { localeFromPath, localisePath } from '../../../lib/locales';
+import { localeFromPath, localisePath, navPath } from '../../../lib/locales';
 import styles from './Footer.module.scss';
 
 const Footer: React.FC = () => {
@@ -34,13 +34,13 @@ const Footer: React.FC = () => {
       id: 'product',
       title: t('footer.group.product'),
       links: [
-        { to: '/pos', label: t('footer.link.pos') },
-        { to: '/erp', label: t('footer.link.erp') },
+        { to: navPath('/pos', locale), label: t('footer.link.pos') },
+        { to: navPath('/erp', locale), label: t('footer.link.erp') },
         { to: '/hr', label: t('footer.link.hr') },
         { to: '/crm', label: t('footer.link.crm') },
         { to: '/finance', label: t('footer.link.finance') },
         { to: '/flow', label: t('footer.link.flow') },
-        { to: '/pricing', label: t('footer.link.pricing') },
+        { to: navPath('/pricing', locale), label: t('footer.link.pricing') },
         { to: '/hardware', label: t('footer.link.hardware') },
       ],
     },
@@ -82,7 +82,7 @@ const Footer: React.FC = () => {
         { to: '/about', label: t('footer.link.about') },
         { to: 'https://voxire.com/careers', label: t('footer.link.careers'), external: true },
         { to: '/partners', label: t('footer.link.partners') },
-        { to: '/contact', label: t('footer.link.contact') },
+        { to: navPath('/contact', locale), label: t('footer.link.contact') },
       ],
     },
   ];
