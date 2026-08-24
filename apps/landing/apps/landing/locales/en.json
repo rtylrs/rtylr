@@ -579,7 +579,9 @@
         "excluded": "-",
         "partial": "Partial",
         "paidAddon": "Paid add-on"
-      }
+      },
+      "footnote": "Comparison based on publicly available pricing and product documentation, April 2026. Something out of date?",
+      "footnoteLink": "Let us know"
     },
     "cta": {
       "title": "Your register should\nkeep up. This one does."

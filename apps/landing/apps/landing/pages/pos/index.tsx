@@ -301,8 +301,8 @@ const POSPage = (): React.JSX.Element => {
                 </tbody>
               </table>
               <p className={styles.compareFootnote}>
-                Comparison based on publicly available pricing and product documentation, April
-                2026. Something out of date? <a href="mailto:hello@voxire.com">Let us know</a>.
+                {t('pos.compare.footnote')}{' '}
+                <a href="mailto:hello@voxire.com">{t('pos.compare.footnoteLink')}</a>.
               </p>
             </motion.div>
           </motion.section>
