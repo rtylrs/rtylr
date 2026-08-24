@@ -1,10 +1,12 @@
 package infrastructure
 
 import (
+	"context"
 	"database/sql"
 	"strconv"
 	"time"
 
+	"github.com/voxire/onion/internal/modules/insights/internal/domain"
 	"github.com/voxire/onion/internal/modules/insights/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 )
@@ -94,6 +96,45 @@ func ifaceToInt64(v interface{}) int64 {
 		return decimalToMinorUnits(string(val)) / 100
 	case string:
 		return decimalToMinorUnits(val) / 100
+	default:
+		return 0
+	}
+}
+
+// GetProductMarginRows returns per-product margin rows joining sales volume
+// with cost price (#853).
+func (r *Repository) GetProductMarginRows(ctx context.Context, businessID int64) ([]domain.ProductMarginRow, error) {
+	rows, err := r.queries.GetProductMarginRows(ctx, businessID)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to get product margin rows", logger.Any("business_id", businessID), logger.Error(err))
+		return nil, err
+	}
+	out := make([]domain.ProductMarginRow, 0, len(rows))
+	for _, row := range rows {
+		units := ifaceToFloat64(row.UnitsSold)
+		revenue := ifaceToInt64(row.RevenueMinorUnitsX100)
+		var cost *int64
+		if row.CostMinorUnitsX100 != 0 {
+			v := row.CostMinorUnitsX100
+			cost = &v
+		}
+		out = append(out, domain.ProductMarginRow{
+			ID:             row.ID,
+			Name:           row.Name,
+			UnitsSold:      units,
+			RevenueMinor:   revenue,
+			CostMinorUnits: cost,
+		})
+	}
+	return out, nil
+}
+
+func ifaceToFloat64(v interface{}) float64 {
+	switch n := v.(type) {
+	case int64:
+		return float64(n)
+	case float64:
+		return n
 	default:
 		return 0
 	}

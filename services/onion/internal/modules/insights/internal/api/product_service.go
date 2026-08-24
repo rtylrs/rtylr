@@ -86,7 +86,27 @@ func (a *ProductAPI) GetProductMargins(ctx context.Context, _ *insightsproductv1
 		})
 	}
 
-	return &insightsproductv1.GetProductMarginsResponse{Buckets: out}, nil
+	// Per-product margin rows (#853): join sales volume with cost price.
+	rows, rowsErr := a.Service.GetProductMarginRows(ctx, businessID)
+	if rowsErr != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to load product margin rows")
+	}
+	products := make([]*insightsproductv1.ProductMargin, 0, len(rows))
+	for _, r := range rows {
+		pm := &insightsproductv1.ProductMargin{
+			ProductId:         r.ID,
+			Name:              r.Name,
+			UnitsSold:         r.UnitsSold,
+			RevenueMinorUnits: r.RevenueMinor,
+		}
+		if r.CostMinorUnits != nil {
+			v := *r.CostMinorUnits
+			pm.CostMinorUnits = &v
+		}
+		products = append(products, pm)
+	}
+
+	return &insightsproductv1.GetProductMarginsResponse{Buckets: out, Products: products}, nil
 }
 
 func (a *ProductAPI) GetSlowMovers(ctx context.Context, req *insightsproductv1.GetSlowMoversRequest) (*insightsproductv1.GetSlowMoversResponse, error) {
