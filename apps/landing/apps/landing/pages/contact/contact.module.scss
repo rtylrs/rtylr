@@ -44,6 +44,11 @@ $text-mid: rgba(19, 19, 19, 0.72);
 
 .mainSection {
   padding: 80px 24px;
+  // .formSection's hidden animation state offsets it 40px off its resting
+  // x position, which extends past the viewport edge and forces a
+  // horizontal scrollbar for as long as the section sits below the fold
+  // (i.e. every mobile load, until whileInView fires it in).
+  overflow-x: hidden;
 }
 
 .mainContainer {
