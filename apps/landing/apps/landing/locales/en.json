@@ -1308,7 +1308,8 @@
       "eyebrow": "TRUST CENTER",
       "title": "Run your business on something trustworthy.",
       "securityDocs": "Security documentation",
-      "privacyPolicy": "Privacy policy"
+      "privacyPolicy": "Privacy policy",
+      "subtitle": "Security, privacy, uptime, and compliance: the stuff that should be straightforward, made transparent. Everything you need to evaluate rtylr before you commit."
     },
     "pillarsSection": {
       "eyebrow": "HOW WE PROTECT YOUR DATA",
@@ -1321,10 +1322,19 @@
       "copy": "We publish our compliance status transparently, certified, aligned, or in progress."
     },
     "residency": {
-      "title": "Where your data lives, and how you can take it with you."
+      "title": "Where your data lives, and how you can take it with you.",
+      "body": "Customer Data is hosted in the cloud region that best matches your workspace settings. EU-region hosting is available on request for customers with data-residency requirements. You can export your full workspace (CSV, XLSX, or API dump) at any time from settings. On account termination, your data is retained for 30 days for recovery, then deleted within 60 days from live systems and within 90 days from backups."
     },
     "packet": {
-      "title": "Need our security packet, SIG, or DPA?"
+      "title": "Need our security packet, SIG, or DPA?",
+      "body": "Email <secMail>security@voxire.com</secMail> and we'll send the current packet under NDA within 7 business days, including the latest status of our SOC 2 Type II audit."
+    },
+    "status": {
+      "operational": "All systems operational",
+      "viewLive": "View live status at <statusLink>status.rtylr.com</statusLink>",
+      "uptimeLabel": "Rolling 90-day uptime",
+      "breachLabel": "Breach notification commitment",
+      "penTestLabel": "Annual third-party pen test"
     }
   },
   "hardware": {
