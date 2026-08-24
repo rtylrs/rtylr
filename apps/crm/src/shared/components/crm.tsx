@@ -19,6 +19,7 @@ import {
   User,
 } from 'lucide-react';
 import { Tier, tierColor, getTier, getCustomerTier, pointsToNextTier } from '../lib/tiers';
+import { getSegmentRuleOperators, SEGMENT_RULE_FIELDS } from '../lib/segmentRules';
 import { ACCENT, Input, Select, Button } from './ui';
 import type { TimelineEntry, Customer } from '../services/crmApi';
 
@@ -463,19 +464,12 @@ export const SMSComposer: React.FC<{
 };
 
 // ── 24. SegmentRule ─────────────────────────────────────────────
-const FIELDS = [
-  { value: 'totalSpent', label: 'Total Spent' },
-  { value: 'visits', label: 'Visits' },
-  { value: 'lastVisitDays', label: 'Days Since Visit' },
-  { value: 'loyaltyPoints', label: 'Loyalty Points' },
-  { value: 'tier', label: 'Tier' },
-];
-const OPERATORS = [
-  { value: '>', label: 'greater than' },
-  { value: '<', label: 'less than' },
-  { value: '=', label: 'equals' },
-  { value: '!=', label: 'not equals' },
-];
+const OPERATOR_LABELS: Record<string, string> = {
+  '>': 'greater than',
+  '<': 'less than',
+  '=': 'equals',
+  '!=': 'not equals',
+};
 export const SegmentRuleRow: React.FC<{
   rule: { field: string; operator: string; value: string };
   onChange: (rule: { field: string; operator: string; value: string }) => void;
@@ -494,10 +488,17 @@ export const SegmentRuleRow: React.FC<{
   >
     <Select
       value={rule.field}
-      onChange={(e) => onChange({ ...rule, field: e.target.value })}
+      onChange={(e) => {
+        const field = e.target.value;
+        const operators = getSegmentRuleOperators(field);
+        const operator = operators.includes(rule.operator as (typeof operators)[number])
+          ? rule.operator
+          : operators[0];
+        onChange({ ...rule, field, operator });
+      }}
       style={{ flex: 1 }}
     >
-      {FIELDS.map((f) => (
+      {SEGMENT_RULE_FIELDS.map((f) => (
         <option key={f.value} value={f.value}>
           {f.label}
         </option>
@@ -508,9 +509,9 @@ export const SegmentRuleRow: React.FC<{
       onChange={(e) => onChange({ ...rule, operator: e.target.value })}
       style={{ width: '130px' }}
     >
-      {OPERATORS.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
+      {getSegmentRuleOperators(rule.field).map((operator) => (
+        <option key={operator} value={operator}>
+          {OPERATOR_LABELS[operator] ?? operator}
         </option>
       ))}
     </Select>
