@@ -1,0 +1,69 @@
+.container {
+  position: relative;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 40px;
+  padding-inline: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--hairline);
+  }
+}
+
+.icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.panel {
+  position: absolute;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid var(--hairline);
+  background: var(--bg-surface-a);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  transform-origin: top right;
+  z-index: 10;
+}
+
+[dir='rtl'] .panel {
+  transform-origin: top left;
+}
+
+.option {
+  display: block;
+  padding: 8px 10px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  color: var(--ink);
+  font-size: 14px;
+  text-decoration: none;
+
+  &:hover {
+    background: var(--hairline);
+  }
+
+  &[aria-current='true'] {
+    font-weight: 600;
+  }
+}
