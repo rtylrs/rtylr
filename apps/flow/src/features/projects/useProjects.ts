@@ -53,9 +53,21 @@ export function useArchiveProject() {
     mutationFn: (id: string) => {
       return unwrap(flowApi.archiveProject(id));
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
       void qc.invalidateQueries({ queryKey: ['projects'] });
       void qc.invalidateQueries({ queryKey: ['archived-projects'] });
+
+      // Ruling P3: state the scheduled permanent-deletion date explicitly. The
+      // date is only knowable after the archive, because the server stamps
+      // purge_at from the business's retention setting, so the confirmation is
+      // where it belongs. Falls back to the undated message if the server did
+      // not send one, rather than printing "undefined".
+      const purgeAt = res?.project?.purgeAt;
+      if (purgeAt) {
+        toast.success(t('toasts.project.archivedUntil', { date: purgeAt.slice(0, 10) }));
+      } else {
+        toast.success(t('toasts.project.archived'));
+      }
     },
     onError: () => toast.error(t('toasts.project.archiveFailed')),
   });
