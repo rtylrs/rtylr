@@ -1,19 +1,12 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { CountUp } from '../../../motion/CountUp';
 import styles from '../HeroSection.module.scss';
 
 const StatsSection: React.FC = () => {
-  const stats = [
-    { number: '50K+', label: 'Daily Transactions' },
-    { number: '99.9%', label: 'Uptime' },
-    { number: '20+', label: 'Countries' },
-    { number: '24/7', label: 'Support' },
-    { number: 'Offline', label: 'Always Works' },
-    { number: 'AI', label: 'Powered' },
-    { number: 'Multi', label: 'Language' },
-    { number: 'Cloud', label: 'Native' },
-  ];
+  const { t } = useTranslation();
+  const stats = t('home.hero.stats', { returnObjects: true }) as { number: string; label: string }[];
 
   return (
     <motion.div
