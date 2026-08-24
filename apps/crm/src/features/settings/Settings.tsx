@@ -200,7 +200,7 @@ const TeamTab: React.FC = () => {
       return;
     }
     invite.mutate(
-      { email: email.trim(), fullName: fullName.trim(), role: 'member' },
+      { email: email.trim(), fullName: fullName.trim(), role: 'staff' },
       {
         onSuccess: () => {
           setEmail('');
