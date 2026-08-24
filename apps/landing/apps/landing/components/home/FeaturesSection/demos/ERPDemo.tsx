@@ -171,7 +171,11 @@ export const ERPDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                 </div>
               </div>
               <div style={{ textAlign: 'center', fontSize: 12, color: 'rgba(19,19,19,0.65)' }}>
-                {item.qty} {t(`home.features.demos.erp.units.${item.unitKey}`)}
+                {/* Non-breaking space, not JSX whitespace: a quantity should
+                    never wrap away from its unit, in any language. */}
+                {item.qty}
+                {' '}
+                {t(`home.features.demos.erp.units.${item.unitKey}`)}
               </div>
               <div style={{ textAlign: 'center' }}>
                 <span
