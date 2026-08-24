@@ -145,12 +145,13 @@ const campaignsRoute = createRoute({
 });
 
 // Editor deep-links carry optional context (?id= for edit mode, ?segment=
-// when arriving from a segment, ?name/?subject/?body= prefills). Validated so
-// stale or hand-edited URLs degrade to defaults instead of erroring.
+// when arriving from a segment, ?name/?subject/?description/?body= prefills).
+// Validated so stale or hand-edited URLs degrade to defaults instead of erroring.
 const campaignEditorSearchSchema = z.object({
   id: z.number().int().positive().optional().catch(undefined),
   name: z.string().optional().catch(undefined),
   subject: z.string().optional().catch(undefined),
+  description: z.string().optional().catch(undefined),
   body: z.string().optional().catch(undefined),
   segment: z.string().optional().catch(undefined),
 });
