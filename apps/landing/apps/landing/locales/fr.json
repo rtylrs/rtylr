@@ -6,7 +6,51 @@
       "resources": "Ressources",
       "company": "Entreprise",
       "signIn": "Se connecter",
-      "signUp": "Créer un compte"
+      "signUp": "Créer un compte",
+      "featureLinks": {
+        "pos": {
+          "title": "POS",
+          "desc": "Paiements, tables, commandes et tickets dans une seule caisse."
+        },
+        "erp": {
+          "title": "ERP",
+          "desc": "Stocks, fournisseurs et achats qui restent synchronisés."
+        },
+        "hr": {
+          "title": "HR",
+          "desc": "Équipes, plannings, congés et paie au même endroit."
+        },
+        "crm": {
+          "title": "CRM",
+          "desc": "Fiches clients, fidélité, segments et campagnes."
+        },
+        "finance": {
+          "title": "Finance",
+          "desc": "Factures, dépenses, TVA et un vrai compte de résultat en quelques secondes."
+        },
+        "flow": {
+          "title": "Flow",
+          "desc": "Projets, tâches et espaces d’équipe pour chaque département."
+        }
+      },
+      "resourceLinks": {
+        "hardware": "Matériel",
+        "integrations": "Intégrations",
+        "blog": "Blog",
+        "documentation": "Documentation",
+        "helpCenter": "Centre d’aide",
+        "trustCenter": "Centre de confiance",
+        "security": "Sécurité",
+        "privacyPolicy": "Politique de confidentialité",
+        "termsOfUse": "Conditions d’utilisation",
+        "status": "État des services"
+      },
+      "companyLinks": {
+        "about": "À propos",
+        "partners": "Partenaires",
+        "careers": "Carrières",
+        "contact": "Contact"
+      }
     },
     "cta": {
       "startFree": "Commencer gratuitement",
@@ -19,7 +63,14 @@
       "logoAlt": "rtylr",
       "toggleMenu": "Ouvrir ou fermer le menu mobile",
       "navMenu": "Menu de navigation",
-      "closeMenu": "Fermer le menu"
+      "closeMenu": "Fermer le menu",
+      "languageSwitcher": "Choisir la langue"
+    },
+    "cookieBanner": {
+      "message": "Nous utilisons des cookies essentiels au fonctionnement de rtylr, et une mesure d’audience facultative pour savoir quelles fonctionnalités développer ensuite. Voir notre <privacyLink>politique de confidentialité</privacyLink>.",
+      "decline": "Refuser",
+      "accept": "Accepter",
+      "ariaLabel": "Consentement aux cookies"
     }
   },
   "footer": {
@@ -271,7 +322,8 @@
           "number": "Cloud",
           "label": "Natif"
         }
-      ]
+      ],
+      "promptLabel": "Décrivez votre activité"
     },
     "features": {
       "badge": "LA PLATEFORME",
@@ -572,7 +624,25 @@
     "hero": {
       "eyebrow": "rtylr POS",
       "title": "La caisse\nqui suit le rythme.",
-      "subtitle": "Envoyez les plats à la bonne station. Partagez une addition en sept. Acceptez Apple Pay, les cartes cadeaux, les comptes clients. Continuez à encaisser quand le WiFi tombe. Conçue pour le rythme du vrai service, pas pour une vidéo de démonstration."
+      "subtitle": "Envoyez les plats à la bonne station. Partagez une addition en sept. Acceptez Apple Pay, les cartes cadeaux, les comptes clients. Continuez à encaisser quand le WiFi tombe. Conçue pour le rythme du vrai service, pas pour une vidéo de démonstration.",
+      "receipt": {
+        "items": [
+          "Pizza margherita",
+          "Salade maison",
+          "Eau pétillante",
+          "Expresso"
+        ],
+        "order": "Commande n°\u00a0{{orderId}} · Table {{table}}",
+        "live": "DIRECT",
+        "venue": "rtylr · Terrasse",
+        "date": "18 avr.",
+        "server": "Servi par {{name}}",
+        "subtotal": "Sous-total",
+        "tax": "TVA ({{pct}})",
+        "tip": "Pourboire ({{pct}})",
+        "total": "Total",
+        "paid": "Payé · Visa ••4891"
+      }
     },
     "directAnswer": {
       "label": "Qu’est-ce que rtylr POS\u00a0?",
@@ -617,7 +687,9 @@
         "excluded": "-",
         "partial": "Partiel",
         "paidAddon": "Option payante"
-      }
+      },
+      "footnote": "Comparatif établi d’après les tarifs et la documentation produit accessibles publiquement, avril 2026. Une information n’est plus à jour\u00a0?",
+      "footnoteLink": "Signalez-le-nous"
     },
     "cta": {
       "title": "Votre caisse devrait\nsuivre le rythme. Celle-ci le fait."
@@ -632,7 +704,16 @@
     "hero": {
       "eyebrow": "rtylr ERP · Stocks",
       "title": "Des stocks qui\nse comptent tout seuls.",
-      "subtitle": "Chaque margherita vendue retire de la farine, de la mozzarella et de l’huile d’olive. Chaque bon de commande approuvé met à jour le stock de l’entrepôt. Chaque alerte de stock bas part avant la rupture, pas après que le coup de feu du samedi s’en est aperçu."
+      "subtitle": "Chaque margherita vendue retire de la farine, de la mozzarella et de l’huile d’olive. Chaque bon de commande approuvé met à jour le stock de l’entrepôt. Chaque alerte de stock bas part avant la rupture, pas après que le coup de feu du samedi s’en est aperçu.",
+      "inventory": {
+        "items": [
+          "Margherita (225\u00a0g de pâte)",
+          "Rouge maison (750\u00a0ml)",
+          "Huile d’olive (5\u00a0L)",
+          "Café en grains (1\u00a0kg)",
+          "Farine 00 (3\u00a0kg)"
+        ]
+      }
     },
     "directAnswer": {
       "label": "Qu’est-ce que rtylr ERP\u00a0?",
@@ -963,7 +1044,8 @@
       "viewLive": "État des services en direct sur <statusLink>status.rtylr.com</statusLink>",
       "uptimeLabel": "Disponibilité sur 90 jours glissants",
       "breachLabel": "Engagement de notification des violations",
-      "penTestLabel": "Test d’intrusion annuel réalisé par un tiers"
+      "penTestLabel": "Test d’intrusion annuel réalisé par un tiers",
+      "breachValue": "<\u00a072\u00a0h"
     }
   },
   "legal": {
