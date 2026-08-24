@@ -2,15 +2,19 @@ import React, { useState } from 'react';
 import { cn } from '../../../../lib/cn';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'next/router';
 import { ArrowRight, Sparkles, Shuffle } from 'lucide-react';
 import { APP_URLS } from '@voxire/config';
 import { navigateExternal } from '../../../../lib/navigation';
 import { SplitWords } from '../../../motion/SplitWords';
 import { SPRING_SNAPPY } from '../../../../lib/animations';
+import { localeFromPath, navPath } from '../../../../lib/locales';
 import styles from '../HeroSection.module.scss';
 
 const MainHero: React.FC = (): React.JSX.Element => {
   const { t } = useTranslation();
+  const router = useRouter();
+  const locale = localeFromPath(router.asPath).code;
   const [prompt, setPrompt] = useState('');
 
   const goToRegister = (): void => {
@@ -44,7 +48,7 @@ const MainHero: React.FC = (): React.JSX.Element => {
 
       {/* Announcement row, BETA pill sits next to plain link text */}
       <motion.a
-        href="/pricing"
+        href={navPath('/pricing', locale)}
         className={styles.announceRow}
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -76,7 +80,7 @@ const MainHero: React.FC = (): React.JSX.Element => {
         transition={{ delay: 0.45, duration: 0.95, ease: [0.16, 1, 0.3, 1] }}
       >
         <label htmlFor="hero-prompt" className={styles.srOnly}>
-          Describe your business
+          {t('home.hero.promptLabel')}
         </label>
         <textarea
           id="hero-prompt"
