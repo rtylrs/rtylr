@@ -56,7 +56,11 @@ apps/*/.next
 
 # Turborepo
 .turbo/
+
+# AI agent config: local to each machine, per the agreement in #33
 .claude/
+CLAUDE.md
+AGENTS.md
 
 # Playwright artifacts
 /playwright-report/
