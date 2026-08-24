@@ -425,14 +425,30 @@ interface CampaignMutationPayload {
 function toCampaignMutationPayload(
   data: Partial<Campaign> & Record<string, unknown>
 ): CampaignMutationPayload {
+  // The editors send `type`, never `channel`. Reading only `channel` meant the
+  // fallback always won, so every campaign was saved as email whatever the
+  // operator picked.
+  const channel = (data.type as string | undefined) ?? data.channel ?? 'email';
+
+  // Nothing is invented any more. description and subject used to fall back to
+  // the name, and scheduledAt was stamped with the current time on every save,
+  // because the contract marked all three @required. voxie#73 relaxed them to
+  // match what onion validates (name, channel, content), so a value the operator
+  // did not supply is now simply absent instead of fabricated. Stamping
+  // scheduledAt was the worst of the three: it asserts a draft is scheduled for
+  // this instant, which anything reading scheduled_at could act on.
+  const description = typeof data.description === 'string' ? data.description : undefined;
+  const subject = typeof data.subject === 'string' ? data.subject : undefined;
+  const scheduledAt = typeof data.scheduledAt === 'string' ? data.scheduledAt : undefined;
+
   return {
     name: data.name,
-    description: data.description ?? data.subject ?? data.name ?? '',
-    channel: data.channel ?? 'email',
+    channel,
     segmentId: data.audienceSegmentId != null ? String(data.audienceSegmentId) : undefined,
-    subject: data.subject ?? data.name ?? '',
     content: data.body ?? '',
-    scheduledAt: new Date().toISOString(),
+    ...(description ? { description } : {}),
+    ...(subject ? { subject } : {}),
+    ...(scheduledAt ? { scheduledAt } : {}),
   };
 }
 

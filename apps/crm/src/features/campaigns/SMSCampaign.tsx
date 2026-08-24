@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { toast } from 'sonner';
@@ -36,8 +37,10 @@ const SMSCampaign: React.FC = () => {
   const segments = useMemo(() => fetchedSegments ?? [], [fetchedSegments]);
   const customers = fetchedCustomers ?? [];
 
+  const { t } = useTranslation();
   const [name, setName] = useState(search.name || '');
   const [segmentId, setSegmentId] = useState<string>(search.segment || '');
+  const [description, setDescription] = useState(search.description || '');
   const [body, setBody] = useState(search.body || DEFAULT_SMS_BODY);
   const pending = create.isPending || update.isPending || updateStatus.isPending;
 
@@ -62,6 +65,7 @@ const SMSCampaign: React.FC = () => {
     const payload = {
       name,
       type: 'sms',
+      description,
       body,
       audienceSegmentId: segmentId ? Number(segmentId) : null,
     };
@@ -152,6 +156,16 @@ const SMSCampaign: React.FC = () => {
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 placeholder="SMS Promo"
+                style={{ marginBottom: '14px' }}
+              />
+              {/* The rest of this screen predates i18n and is still hardcoded
+                  English. New strings go through t() per the repo rule;
+                  converting the other ~40 is its own change. */}
+              <Input
+                label={t('crm.campaigns.descriptionLabel')}
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder={t('crm.campaigns.descriptionPlaceholder')}
                 style={{ marginBottom: '14px' }}
               />
               <SMSComposer body={body} onChange={setBody} />

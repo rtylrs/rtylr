@@ -93,7 +93,9 @@
     "emptyAllDescription": "Créez une campagne pour toucher vos clients.",
     "viewAllCampaigns": "Voir toutes les campagnes",
     "loadMore": "Charger plus de campagnes",
-    "newEmailCampaign": "Nouvelle campagne e-mail"
+    "newEmailCampaign": "Nouvelle campagne e-mail",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "L'objet de cette campagne"
   },
   "campaignDetail": {
     "notFoundTitle": "Campagne introuvable",
