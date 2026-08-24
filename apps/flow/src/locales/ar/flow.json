@@ -739,7 +739,8 @@
     "noEffort": "بدون",
     "descriptionPlaceholder": "ما الذي يجب إنجازه؟",
     "creating": "جارٍ الإنشاء…",
-    "createTask": "إنشاء مهمة"
+    "createTask": "إنشاء مهمة",
+    "noLabel": "بدون تصنيف"
   },
   "projectList": {
     "pageTitle": "القائمة · rtylr",
