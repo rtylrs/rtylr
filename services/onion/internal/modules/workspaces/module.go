@@ -31,6 +31,7 @@ import (
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 	flowprojectv2 "github.com/voxire/voxie/gen/go/flow/project/v2"
 	flowsettingv1 "github.com/voxire/voxie/gen/go/flow/setting/v1"
+	flowstatusv2 "github.com/voxire/voxie/gen/go/flow/status/v2"
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 	flowtaskv2 "github.com/voxire/voxie/gen/go/flow/task/v2"
 	flowtimev1 "github.com/voxire/voxie/gen/go/flow/time/v1"
@@ -116,6 +117,12 @@ func (m *Module) RegisterAPI(mux *http.ServeMux) {
 		flowlabelv2.WithMux(mux),
 	); err != nil {
 		panic(fmt.Errorf("register flow label v2: %w", err))
+	}
+	if err := flowstatusv2.RegisterStatusServiceServer(
+		api.NewStatusAPIV2(m.service),
+		flowstatusv2.WithMux(mux),
+	); err != nil {
+		panic(fmt.Errorf("register flow status v2: %w", err))
 	}
 	if err := flowcyclev2.RegisterCycleServiceServer(
 		api.NewCycleAPIV2(m.service),

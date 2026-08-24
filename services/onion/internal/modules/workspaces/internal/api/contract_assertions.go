@@ -22,6 +22,7 @@ import (
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"
 	flowprojectv2 "github.com/voxire/voxie/gen/go/flow/project/v2"
 	flowsettingv1 "github.com/voxire/voxie/gen/go/flow/setting/v1"
+	flowstatusv2 "github.com/voxire/voxie/gen/go/flow/status/v2"
 	flowtaskv1 "github.com/voxire/voxie/gen/go/flow/task/v1"
 	flowtaskv2 "github.com/voxire/voxie/gen/go/flow/task/v2"
 	flowtimev1 "github.com/voxire/voxie/gen/go/flow/time/v1"
@@ -37,6 +38,7 @@ var (
 	_ flowprojectv2.ProjectServiceServer           = (*ProjectAPIV2)(nil)
 	_ flowlabelv1.LabelServiceServer               = (*LabelAPI)(nil)
 	_ flowlabelv2.LabelServiceServer               = (*LabelAPIV2)(nil)
+	_ flowstatusv2.StatusServiceServer             = (*StatusAPIV2)(nil)
 	_ flowtaskv1.TaskServiceServer                 = (*TaskAPI)(nil)
 	_ flowtaskv2.TaskServiceServer                 = (*TaskAPIV2)(nil)
 	_ flowdashboardv1.DashboardServiceServer       = (*DashboardAPI)(nil)
