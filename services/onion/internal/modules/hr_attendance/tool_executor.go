@@ -12,6 +12,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 const (
@@ -35,13 +36,15 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 }
 
 func (m *Module) executeListAttendanceTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := hrAttendanceToolOwnerID(ctx)
+	ownerID, _, err := m.hrAttendanceToolScope(ctx)
 	if err != nil {
 		return nil, err
 	}
-	employeeID, err := hrAttendanceToolPositiveInt64(firstHRAttendanceToolValue(input, "employee_id", "employee"))
+	// employee_id from the input is intentionally ignored: reads are scoped
+	// to the caller's own employee record (#817).
+	_, employeeID, err := m.hrAttendanceToolScope(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("invalid employee_id: %w", err)
+		return nil, err
 	}
 	limit, offset, err := hrAttendanceToolPagination(input)
 	if err != nil {
@@ -86,7 +89,7 @@ func (m *Module) executeListAttendanceTool(ctx context.Context, input map[string
 }
 
 func (m *Module) executeGetLocationAttendanceTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, err := hrAttendanceToolOwnerID(ctx)
+	ownerID, _, err := m.hrAttendanceToolScope(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -122,12 +125,24 @@ func (m *Module) executeGetLocationAttendanceTool(ctx context.Context, input map
 	}, nil
 }
 
-func hrAttendanceToolOwnerID(ctx context.Context) (int64, error) {
+// hrAttendanceToolScope derives the caller's tenant scope and employee record
+// from the JWT. Client-supplied owner/employee ids are ignored: trusting them
+// let any authenticated user read any tenant's attendance via a Caret tool
+// (#817).
+func (m *Module) hrAttendanceToolScope(ctx context.Context) (businessID, employeeID int64, err error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
-		return 0, errors.New("authentication is required")
+		return 0, 0, errors.New("authentication is required")
 	}
-	return authUser.UserID, nil
+	businessID, err = tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if err != nil {
+		return 0, 0, err
+	}
+	employeeID, err = m.employeeResolver.GetEmployeeIDByUserID(ctx, businessID, authUser.UserID)
+	if err != nil || employeeID <= 0 {
+		return 0, 0, errors.New("no employee record for caller")
+	}
+	return businessID, employeeID, nil
 }
 
 func hrAttendanceToolPagination(input map[string]any) (int32, int32, error) {

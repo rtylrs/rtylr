@@ -147,6 +147,9 @@ func (a *FeatureAPI) UpsertTarget(ctx context.Context, req *hubfeaturev1.UpsertT
 	if req.GetOwnerId() == 0 {
 		return nil, badRequest("owner_id is required")
 	}
+	if err := requireTargetScope(ctx, req.GetOwnerId()); err != nil {
+		return nil, err
+	}
 	if err := a.Service.UpsertTarget(ctx, domain.Target{
 		FeatureKey: key,
 		OwnerID:    req.GetOwnerId(),
@@ -168,6 +171,9 @@ func (a *FeatureAPI) DeleteTarget(ctx context.Context, req *hubfeaturev1.DeleteT
 	}
 	if req.GetOwnerId() == 0 {
 		return nil, badRequest("owner_id is required")
+	}
+	if err := requireTargetScope(ctx, req.GetOwnerId()); err != nil {
+		return nil, err
 	}
 	if err := a.Service.DeleteTarget(ctx, key, req.GetOwnerId()); err != nil {
 		return nil, internalError("Failed to delete feature target")
@@ -258,6 +264,25 @@ func requireAdmin(ctx context.Context) error {
 	}
 	role := strings.ToLower(user.Role)
 	if role != "owner" && role != "admin" && role != "console_admin" {
+		return onekiterrors.PermissionDenied()
+	}
+	return nil
+}
+
+// requireTargetScope gates feature-target writes: console_admin may target
+// any tenant; every other admin may only target their own business (#817).
+func requireTargetScope(ctx context.Context, requestedOwner int64) error {
+	if err := requireAdmin(ctx); err != nil {
+		return err
+	}
+	user, ok := authPkg.GetAuthUser(ctx)
+	if !ok || user == nil {
+		return onekiterrors.PermissionDenied()
+	}
+	if strings.EqualFold(user.Role, "console_admin") {
+		return nil
+	}
+	if requestedOwner != user.BusinessID {
 		return onekiterrors.PermissionDenied()
 	}
 	return nil

@@ -6,7 +6,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/domain"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	hrattendancev1 "github.com/voxire/voxie/gen/go/hr/attendance/v1"
@@ -14,7 +13,14 @@ import (
 
 func GetAttendanceRoutes() []string { return []string{"/hr/attendance"} }
 
-type GetAttendanceHandler struct{ Service *application.Service }
+// GetAttendanceHandler serves attendance history. Identity is resolved
+// server-side from the JWT — client-supplied owner/employee ids are ignored,
+// since trusting them let any authenticated tenant read any other tenant's
+// payroll-sensitive attendance (#817).
+type GetAttendanceHandler struct {
+	Service *application.Service
+	Resolve func(ctx context.Context) (businessID, employeeID int64, err error)
+}
 
 type GetAttendanceRequest struct {
 	OwnerID    int64  `json:"owner_id"`
@@ -33,24 +39,29 @@ type GetAttendanceResponse struct {
 }
 
 func (h *GetAttendanceHandler) Serve(ctx context.Context, req *GetAttendanceRequest) (GetAttendanceResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.IsAnonymous || device.User == nil || req.OwnerID <= 0 || req.EmployeeID <= 0 {
+	if h.Resolve == nil {
 		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
 	}
+	businessID, employeeID, err := h.Resolve(ctx)
+	if err != nil {
+		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
+	}
+	_ = req.OwnerID
+	_ = req.EmployeeID
 
 	limit := req.Limit
 	if limit <= 0 || limit > 100 {
 		limit = 50
 	}
 
-	records, total, err := h.Service.GetMyAttendance(ctx, req.OwnerID, req.EmployeeID, domain.ListAttendanceParams{
+	records, total, err := h.Service.GetMyAttendance(ctx, businessID, employeeID, domain.ListAttendanceParams{
 		DateFrom: req.DateFrom,
 		DateTo:   req.DateTo,
 		Limit:    limit,
 		Offset:   req.Offset,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to get attendance", logger.Any("owner_id", req.OwnerID), logger.Any("employee_id", req.EmployeeID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get attendance", logger.Any("owner_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
 		return GetAttendanceResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get attendance")
 	}
 

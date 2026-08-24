@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"math"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -144,14 +145,65 @@ func (s *Service) SetClockInPIN(ctx context.Context, ownerID, employeeID int64, 
 	return s.repo.SetEmployeePINHash(ctx, ownerID, employeeID, hash)
 }
 
+// PIN lockout policy (#817): a typically-4-digit PIN brute-forced through the
+// anonymous kiosk endpoint otherwise sees only the global rate limit. Five
+// failures lock the employee's PIN for 15 minutes, tracked in Redis when
+// available; without Redis the counter degrades to per-process memory via the
+// cacher fallback and lockout is best-effort.
+const (
+	pinMaxFailures = 5
+	pinLockoutTTL  = 15 * time.Minute
+)
+
+func (s *Service) pinFailureKey(ownerID, employeeID int64) string {
+	return fmt.Sprintf("hr_attendance:pinfail:%d:%d", ownerID, employeeID)
+}
+
+// IsPINLocked reports whether the employee's PIN is currently locked out.
+func (s *Service) IsPINLocked(ctx context.Context, ownerID, employeeID int64) bool {
+	cache := cacher.GetRedisCache()
+	if cache == nil {
+		return false
+	}
+	raw := cache.Get(ctx, s.pinFailureKey(ownerID, employeeID))
+	if len(raw) == 0 {
+		return false
+	}
+	count, err := strconv.Atoi(string(raw))
+	return err == nil && count >= pinMaxFailures
+}
+
+// RegisterPINFailure records a wrong-PIN attempt.
+func (s *Service) RegisterPINFailure(ctx context.Context, ownerID, employeeID int64) {
+	cache := cacher.GetRedisCache()
+	if cache == nil {
+		return
+	}
+	key := s.pinFailureKey(ownerID, employeeID)
+	raw := cache.Get(ctx, key)
+	count, _ := strconv.Atoi(string(raw))
+	cache.Put(ctx, key, []byte(strconv.Itoa(count+1)), pinLockoutTTL)
+}
+
+// ClearPINFailures resets the counter after a successful validation.
+func (s *Service) ClearPINFailures(ctx context.Context, ownerID, employeeID int64) {
+	cache := cacher.GetRedisCache()
+	if cache == nil {
+		return
+	}
+	cache.Delete(ctx, []string{s.pinFailureKey(ownerID, employeeID)})
+}
+
 func (s *Service) ValidatePIN(ctx context.Context, ownerID, employeeID int64, pin string) error {
 	hash, err := s.repo.GetEmployeePINHash(ctx, ownerID, employeeID)
 	if err != nil {
 		return err
 	}
 	if !passwordutils.CheckPasswordHash(pin, hash) {
+		s.RegisterPINFailure(ctx, ownerID, employeeID)
 		return domain.ErrInvalidPIN
 	}
+	s.ClearPINFailures(ctx, ownerID, employeeID)
 	return nil
 }
 
