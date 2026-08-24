@@ -476,6 +476,188 @@
       "submit": "ابدأ البناء",
       "demoLinePrefix": "للتحدّث مع خبير،",
       "demoLineLink": "احجز عرضًا تجريبيًا"
+    },
+    "features": {
+      "badge": "المنصة",
+      "title": "ماذا يفعل كل تطبيق؟",
+      "titleAccent": "شاشة تلو الأخرى.",
+      "openCta": "افتح {{app}}",
+      "showLabel": "اعرض {{app}}",
+      "chooseAppLabel": "اختر تطبيقًا من المنصة",
+      "items": [
+        {
+          "title": "كاشير يلاحق إيقاع الخدمة الحقيقية.",
+          "description": "الطلبات، الطاولات، تقسيم الفاتورة، البقشيش، وكل طرق الدفع: البطاقة، Apple Pay، النقد، بطاقات الهدايا، والضيافة. ويعمل دون اتصال حين ينقطع الواي فاي. أقل من 200 مللي ثانية لكل عملية دفع."
+        },
+        {
+          "title": "مخزون يجرد نفسه.",
+          "description": "خصم مرتبط بالوصفة لحظة تسجيل البيع. إعادة طلب تلقائية عند الحد الأدنى. تحويلات بين الفروع بسجل تدقيق كامل. رفوفك هي التي تخبر قاعدة البيانات، لا العكس."
+        },
+        {
+          "title": "الجانب البشري بلا أوراق.",
+          "description": "جداول دوام تُنشر بالسحب والإفلات. تسجيل حضور من POS. ورواتب تجمع البقشيش والساعات والاستقطاعات تلقائيًا. وتنبيهات الالتزام النظامي تصل قبل أن تتحوّل إلى مخالفات."
+        },
+        {
+          "title": "لا عميل يُنسى.",
+          "description": "كل عملية بيع في POS تُغني ملف العميل. صنّف بالإنفاق أو وتيرة الزيارة أو تاريخ الميلاد أو الوسوم. وأرسل الحملة من التطبيق نفسه، بلا مرور على Mailchimp."
+        },
+        {
+          "title": "قائمة أرباح وخسائر حقيقية، لحظة بلحظة.",
+          "description": "فواتير متكررة تحصّل نفسها. مصروفات تُسجَّل من مصدرها. ضريبة مبيعات لكل نطاق ضريبي. وقائمة أرباح وخسائر تُحدَّث مع كل عملية بيع، لا في آخر الشهر."
+        },
+        {
+          "title": "عمل يتنقّل بين التطبيقات.",
+          "description": "لوحات كانبان، وأتمتة، ومهام مرتبطة بالفاتورة أو العميل أو الوردية التي تنتمي إليها فعلًا. عمليات لا تضيع بين الأدوات."
+        },
+        {
+          "title": "لوحة ترى كل شيء.",
+          "description": "اتجاهات الإيراد، مجموعات العملاء، أداء الأصناف، هامش تكلفة العمالة. كل رقم يأتي لحظيًا من بقية التطبيقات. بلا SQL وبلا ETL ليلي."
+        }
+      ],
+      "demos": {
+        "hr": {
+          "scheduleTitle": "جدول الدوام",
+          "today": "اليوم · الاثنين 5 أيار",
+          "onShift_zero": "{{count}} موظف في الوردية",
+          "onShift_one": "{{count}} موظف في الوردية",
+          "onShift_two": "{{count}} موظفان في الوردية",
+          "onShift_few": "{{count}} موظفين في الوردية",
+          "onShift_many": "{{count}} موظفًا في الوردية",
+          "onShift_other": "{{count}} موظف في الوردية",
+          "roles": {
+            "floorManager": "مدير الصالة",
+            "barista": "باريستا",
+            "chef": "شيف",
+            "server": "نادل"
+          }
+        },
+        "pos": {
+          "menuLabel": "القائمة · في الصالة",
+          "orderLabel": "الطلب · طاولة 4",
+          "addItems": "أضف أصنافًا…",
+          "total": "الإجمالي",
+          "charge": "تحصيل",
+          "chargeAmount": "تحصيل ${{amount}}"
+        },
+        "erp": {
+          "inventory": "المخزون",
+          "itemCount_zero": "{{count}} صنف",
+          "itemCount_one": "{{count}} صنف",
+          "itemCount_two": "{{count}} صنفان",
+          "itemCount_few": "{{count}} أصناف",
+          "itemCount_many": "{{count}} صنفًا",
+          "itemCount_other": "{{count}} صنف",
+          "alertCount_zero": "{{count}} تنبيه",
+          "alertCount_one": "{{count}} تنبيه",
+          "alertCount_two": "{{count}} تنبيهان",
+          "alertCount_few": "{{count}} تنبيهات",
+          "alertCount_many": "{{count}} تنبيهًا",
+          "alertCount_other": "{{count}} تنبيه",
+          "table": {
+            "item": "الصنف",
+            "stock": "الرصيد",
+            "onHand": "المتوفر",
+            "status": "الحالة"
+          },
+          "status": {
+            "out": "نافد",
+            "critical": "حرج",
+            "low": "منخفض",
+            "ok": "سليم"
+          }
+        },
+        "crm": {
+          "customers": "العملاء",
+          "totalCount": "الإجمالي 1,204",
+          "segments": {
+            "all": "الكل",
+            "vip": "★ VIP",
+            "regular": "عادي",
+            "atRisk": "خطر الفقدان",
+            "new": "جديد"
+          },
+          "table": {
+            "customer": "العميل",
+            "tier": "الفئة",
+            "spend": "الإنفاق",
+            "lastVisit": "آخر زيارة"
+          },
+          "visitCount_zero": "{{count}} زيارة",
+          "visitCount_one": "{{count}} زيارة",
+          "visitCount_two": "{{count}} زيارتان",
+          "visitCount_few": "{{count}} زيارات",
+          "visitCount_many": "{{count}} زيارة",
+          "visitCount_other": "{{count}} زيارة",
+          "relativeTime": {
+            "yesterday": "أمس",
+            "oneDayAgo": "قبل يوم",
+            "twoDaysAgo": "قبل يومين",
+            "threeDaysAgo": "قبل 3 أيام",
+            "fiveDaysAgo": "قبل 5 أيام",
+            "oneWeekAgo": "قبل أسبوع",
+            "threeWeeksAgo": "قبل 3 أسابيع",
+            "oneMonthAgo": "قبل شهر"
+          }
+        },
+        "finance": {
+          "pnl": "الأرباح والخسائر",
+          "monthLabel": "أيار 2026",
+          "profitable": "مربح",
+          "metrics": {
+            "revenue": "الإيراد",
+            "expenses": "المصروفات",
+            "netProfit": "صافي الربح"
+          },
+          "momSuffix": "عن الشهر السابق",
+          "months": {
+            "nov": "تشرين 2",
+            "dec": "كانون 1",
+            "jan": "كانون 2",
+            "feb": "شباط",
+            "mar": "آذار",
+            "apr": "نيسان",
+            "may": "أيار"
+          }
+        },
+        "flow": {
+          "breadcrumb": {
+            "workspaces": "مساحات العمل",
+            "operations": "العمليات",
+            "sprint": "خطة الأسبوع"
+          },
+          "views": {
+            "board": "لوحة",
+            "list": "قائمة",
+            "timeline": "جدول زمني"
+          },
+          "columns": {
+            "backlog": "بالانتظار",
+            "progress": "قيد التنفيذ",
+            "review": "قيد المراجعة",
+            "done": "منجز"
+          },
+          "priorityHigh": "عالية"
+        },
+        "insights": {
+          "revenue": "الإيراد",
+          "last7Days": "آخر 7 أيام",
+          "kpis": {
+            "covers": "عدد الزبائن",
+            "avgOrder": "متوسط الفاتورة",
+            "peakDay": "يوم الذروة"
+          },
+          "vsPrefix": "مقابل {{day}}",
+          "days": {
+            "mon": "الاثنين",
+            "tue": "الثلاثاء",
+            "wed": "الأربعاء",
+            "thu": "الخميس",
+            "fri": "الجمعة",
+            "sat": "السبت",
+            "sun": "الأحد"
+          }
+        }
+      }
     }
   },
   "pos": {
