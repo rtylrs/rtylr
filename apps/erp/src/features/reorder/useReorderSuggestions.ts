@@ -20,7 +20,7 @@ export function useReorderSuggestions() {
       const response = await productClient.listReorderSuggestions(withErpListBounds({}));
       return {
         suggestions: response.suggestions ?? [],
-        truncated: response.truncated ?? false,
+        truncated: response.hasMore ?? false,
       };
     },
   });
