@@ -16,14 +16,16 @@ import { navigateExternal } from '../../lib/navigation';
 import { blurFadeIn, staggerBlur, viewportOnce } from '../../lib/animations';
 import { SplitWords } from '../../components/motion/SplitWords';
 import Lines from '../../components/text/Lines';
+import { formatMoney } from '../../lib/formatMoney';
 import styles from './pos.module.scss';
 
 // ── Static receipt items shown in the hero mockup ──────────────────────────
+// itemIndex points at pos.hero.receipt.items[i] for the display name.
 const RECEIPT_ITEMS = [
-  { name: 'Margherita Pizza', qty: 2, price: 28.0 },
-  { name: 'House Salad', qty: 1, price: 9.5 },
-  { name: 'Sparkling Water', qty: 2, price: 6.0 },
-  { name: 'Espresso', qty: 2, price: 7.0 },
+  { itemIndex: 0, qty: 2, price: 28.0 },
+  { itemIndex: 1, qty: 1, price: 9.5 },
+  { itemIndex: 2, qty: 2, price: 6.0 },
+  { itemIndex: 3, qty: 2, price: 7.0 },
 ];
 
 const FEATURE_ICONS = [Receipt, CreditCard, Split, WifiOff];
@@ -52,7 +54,9 @@ const COMPARE_VALUES: string[][] = [
 const POSPage = (): React.JSX.Element => {
   const faq = useFaq('pos');
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const receiptItemNames = t('pos.hero.receipt.items', { returnObjects: true }) as string[];
+  const pct = (n: number): string => `${n}${i18n.language === 'fr' ? ' %' : '%'}`;
 
   const features = t('pos.features.items', { returnObjects: true }) as unknown as {
     title: string;
@@ -139,46 +143,55 @@ const POSPage = (): React.JSX.Element => {
                   <span />
                   <span />
                 </span>
-                <span className={styles.receiptOrder}>Order #A-2048 · Table 12</span>
+                <span className={styles.receiptOrder} dir="ltr">
+                  {t('pos.hero.receipt.order', { orderId: 'A-2048', table: 12 })}
+                </span>
                 <span className={styles.receiptLive}>
                   <span className={styles.livePulse} />
-                  LIVE
+                  {t('pos.hero.receipt.live')}
                 </span>
               </div>
               <div className={styles.receiptBody}>
-                <div className={styles.receiptTitle}>rtylr · Terrace</div>
-                <div className={styles.receiptDate}>Apr 18 · 7:42 PM · Server: Maya</div>
+                <div className={styles.receiptTitle}>{t('pos.hero.receipt.venue')}</div>
+                <div className={styles.receiptDate}>
+                  {t('pos.hero.receipt.date')} · <span dir="ltr">19:42</span> ·{' '}
+                  {t('pos.hero.receipt.server', { name: 'Maya' })}
+                </div>
                 <div className={styles.receiptDivider} />
                 <ul className={styles.receiptList}>
                   {RECEIPT_ITEMS.map((item) => (
-                    <li key={item.name} className={styles.receiptItem}>
-                      <span className={styles.receiptQty}>{item.qty}×</span>
-                      <span className={styles.receiptName}>{item.name}</span>
-                      <span className={styles.receiptPrice}>${item.price.toFixed(2)}</span>
+                    <li key={item.itemIndex} className={styles.receiptItem}>
+                      <span className={styles.receiptQty} dir="ltr">
+                        {item.qty}×
+                      </span>
+                      <span className={styles.receiptName}>{receiptItemNames[item.itemIndex]}</span>
+                      <span className={styles.receiptPrice}>
+                        {formatMoney(item.price, i18n.language)}
+                      </span>
                     </li>
                   ))}
                 </ul>
                 <div className={styles.receiptDivider} />
                 <div className={styles.receiptSumRow}>
-                  <span>Subtotal</span>
-                  <span>$50.50</span>
+                  <span>{t('pos.hero.receipt.subtotal')}</span>
+                  <span>{formatMoney(50.5, i18n.language)}</span>
                 </div>
                 <div className={styles.receiptSumRow}>
-                  <span>Tax (10%)</span>
-                  <span>$5.05</span>
+                  <span>{t('pos.hero.receipt.tax', { pct: pct(10) })}</span>
+                  <span>{formatMoney(5.05, i18n.language)}</span>
                 </div>
                 <div className={styles.receiptSumRow}>
-                  <span>Tip (18%)</span>
-                  <span>$9.99</span>
+                  <span>{t('pos.hero.receipt.tip', { pct: pct(18) })}</span>
+                  <span>{formatMoney(9.99, i18n.language)}</span>
                 </div>
                 <div className={styles.receiptDivider} />
                 <div className={cn(styles.receiptSumRow, styles.receiptTotal)}>
-                  <span>Total</span>
-                  <span>$65.54</span>
+                  <span>{t('pos.hero.receipt.total')}</span>
+                  <span>{formatMoney(65.54, i18n.language)}</span>
                 </div>
                 <div className={styles.receiptPaid}>
                   <Wifi size={12} strokeWidth={2.5} />
-                  Paid · Visa ••4891
+                  {t('pos.hero.receipt.paid')}
                 </div>
               </div>
               <div className={styles.receiptTear} aria-hidden="true" />
