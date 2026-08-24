@@ -49,6 +49,15 @@ const T_CALL = /\bt\(\s*(['"])([A-Za-z][\w.]*)\1/g;
 // exemption stays narrow.
 const T_TEMPLATE = /\bt\(\s*`([^`$]*)\$\{/g;
 
+// <LegalPageLayout i18nKey="legal.terms" .../>. LegalArticle and
+// LegalPageLayout take the whole document's key prefix as a prop and build
+// every key inside it at runtime (`t(`${i18nKey}.body.${id}.${blockKey}`)`),
+// so there is no static string prefix for T_TEMPLATE to find - the dynamic
+// part starts at position zero. The literal value passed at each of the
+// three call sites is the actual prefix; this reads it the same way
+// T_TEMPLATE reads a template literal's static lead-in.
+const I18N_KEY_PROP = /\bi18nKey=["']([\w.-]+)["']/g;
+
 // lib and services are in here because t() is not confined to components:
 // lib/faqs.ts exports a useFaq hook that builds keys, and leaving lib out
 // made every FAQ key look orphaned.
@@ -100,6 +109,11 @@ before(() => {
       if (!m[1]) continue;
       if (!usedPrefixes.has(m[1])) usedPrefixes.set(m[1], []);
       usedPrefixes.get(m[1]).push(rel);
+    }
+    for (const m of src.matchAll(I18N_KEY_PROP)) {
+      const prefix = `${m[1]}.`;
+      if (!usedPrefixes.has(prefix)) usedPrefixes.set(prefix, []);
+      usedPrefixes.get(prefix).push(rel);
     }
   }
 });
