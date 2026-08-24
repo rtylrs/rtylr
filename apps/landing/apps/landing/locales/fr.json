@@ -238,6 +238,172 @@
       "submit": "Commencer à construire",
       "demoLinePrefix": "Parlez à un expert et",
       "demoLineLink": "réservez une démo"
+    },
+    "features": {
+      "badge": "LA PLATEFORME",
+      "title": "Que fait chaque application\u00a0?",
+      "titleAccent": "Un écran à la fois.",
+      "openCta": "Ouvrir {{app}}",
+      "showLabel": "Afficher {{app}}",
+      "chooseAppLabel": "Choisir une application de la plateforme",
+      "items": [
+        {
+          "title": "Une caisse qui suit le rythme du vrai service.",
+          "description": "Tickets, tables, additions partagées, pourboires et tous les moyens de paiement\u00a0: carte, Apple Pay, espèces, carte cadeau, offert. Fonctionne hors ligne quand le WiFi lâche. Moins de 200\u00a0ms par encaissement."
+        },
+        {
+          "title": "Un stock qui se compte tout seul.",
+          "description": "Décrémentation liée aux recettes au fil des encaissements. Réassort automatique dès le seuil atteint. Transferts entre établissements avec piste d’audit complète. Ce sont vos étagères qui informent la base de données, pas l’inverse."
+        },
+        {
+          "title": "Le volet humain, sans la paperasse.",
+          "description": "Le planning se publie d’un glisser-déposer. Pointage depuis POS. Une paie qui agrège pourboires, heures et retenues automatiquement. Les manquements sont signalés avant de devenir des infractions."
+        },
+        {
+          "title": "Aucun client oublié.",
+          "description": "Chaque vente encaissée dans POS enrichit la fiche client. Segmentation par dépenses, fréquence de visite, anniversaire, étiquettes. La campagne part de la même application\u00a0: pas de détour par Mailchimp."
+        },
+        {
+          "title": "Un vrai compte de résultat, en temps réel.",
+          "description": "Des factures récurrentes qui s’encaissent toutes seules. Des dépenses saisies à la source. La TVA calculée par juridiction fiscale. Un compte de résultat qui se met à jour à chaque vente, pas à la clôture du mois."
+        },
+        {
+          "title": "Le travail circule entre les applications.",
+          "description": "Tableaux kanban, automatisations et tâches rattachées à la facture, au client ou au service dont elles parlent vraiment. Des opérations qui ne se perdent pas entre deux outils."
+        },
+        {
+          "title": "Le tableau de bord qui voit tout.",
+          "description": "Tendances du chiffre d’affaires, cohortes de clients, performance par produit, marge sur main-d’œuvre. Chaque chiffre est tiré en direct de toutes les autres applications. Ni SQL, ni ETL nocturne."
+        }
+      ],
+      "demos": {
+        "hr": {
+          "scheduleTitle": "Planning",
+          "today": "Aujourd’hui · lun. 5 mai",
+          "onShift_one": "{{count}} en service",
+          "onShift_other": "{{count}} en service",
+          "roles": {
+            "floorManager": "Chef de salle",
+            "barista": "Barista",
+            "chef": "Chef de cuisine",
+            "server": "Serveur"
+          }
+        },
+        "pos": {
+          "menuLabel": "Carte · Sur place",
+          "orderLabel": "Commande · Table 4",
+          "addItems": "Ajoutez des articles…",
+          "total": "Total",
+          "charge": "Encaisser",
+          "chargeAmount": "Encaisser {{amount}}\u00a0$"
+        },
+        "erp": {
+          "inventory": "Stocks",
+          "itemCount_one": "{{count}} article",
+          "itemCount_other": "{{count}} articles",
+          "alertCount_one": "{{count}} alerte",
+          "alertCount_other": "{{count}} alertes",
+          "table": {
+            "item": "Article",
+            "stock": "Stock",
+            "onHand": "En stock",
+            "status": "État"
+          },
+          "status": {
+            "out": "Épuisé",
+            "critical": "Critique",
+            "low": "Faible",
+            "ok": "OK"
+          }
+        },
+        "crm": {
+          "customers": "Clients",
+          "totalCount": "1\u00a0204 au total",
+          "segments": {
+            "all": "Tous",
+            "vip": "★ VIP",
+            "regular": "Régulier",
+            "atRisk": "À risque",
+            "new": "Nouveau"
+          },
+          "table": {
+            "customer": "Client",
+            "tier": "Segment",
+            "spend": "Dépensé",
+            "lastVisit": "Dernière visite"
+          },
+          "visitCount_one": "{{count}} visite",
+          "visitCount_other": "{{count}} visites",
+          "relativeTime": {
+            "yesterday": "Hier",
+            "oneDayAgo": "1\u00a0j",
+            "twoDaysAgo": "2\u00a0j",
+            "threeDaysAgo": "3\u00a0j",
+            "fiveDaysAgo": "5\u00a0j",
+            "oneWeekAgo": "1\u00a0sem.",
+            "threeWeeksAgo": "3\u00a0sem.",
+            "oneMonthAgo": "1\u00a0mois"
+          }
+        },
+        "finance": {
+          "pnl": "Compte de résultat",
+          "monthLabel": "mai 2026",
+          "profitable": "Rentable",
+          "metrics": {
+            "revenue": "Chiffre d’affaires",
+            "expenses": "Dépenses",
+            "netProfit": "Bénéfice net"
+          },
+          "momSuffix": "sur un mois",
+          "months": {
+            "nov": "nov.",
+            "dec": "déc.",
+            "jan": "janv.",
+            "feb": "févr.",
+            "mar": "mars",
+            "apr": "avr.",
+            "may": "mai"
+          }
+        },
+        "flow": {
+          "breadcrumb": {
+            "workspaces": "Espaces de travail",
+            "operations": "Opérations",
+            "sprint": "Sprint hebdo"
+          },
+          "views": {
+            "board": "Tableau",
+            "list": "Liste",
+            "timeline": "Chronologie"
+          },
+          "columns": {
+            "backlog": "À faire",
+            "progress": "En cours",
+            "review": "À valider",
+            "done": "Terminé"
+          },
+          "priorityHigh": "Haute"
+        },
+        "insights": {
+          "revenue": "Chiffre d’affaires",
+          "last7Days": "7 derniers jours",
+          "kpis": {
+            "covers": "Couverts",
+            "avgOrder": "Panier moyen",
+            "peakDay": "Jour de pointe"
+          },
+          "vsPrefix": "vs {{day}}",
+          "days": {
+            "mon": "lun.",
+            "tue": "mar.",
+            "wed": "mer.",
+            "thu": "jeu.",
+            "fri": "ven.",
+            "sat": "sam.",
+            "sun": "dim."
+          }
+        }
+      }
     }
   },
   "pricing": {
