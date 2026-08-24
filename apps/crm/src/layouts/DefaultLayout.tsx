@@ -37,6 +37,7 @@ import type { Addon } from '@voxire/voxie/hub/app/v1/types';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
 import { licenseClient } from '../shared/lib/clients';
 import { toast } from 'sonner';
+import { readLocalStorage, writeLocalStorage } from '../shared/lib/storage';
 
 const ACCENT = '#3b82f6';
 
@@ -110,7 +111,8 @@ function getPageTitle(pathname: string): string {
 type Theme = 'light' | 'dark' | 'system';
 
 function getStoredTheme(): Theme {
-  return (localStorage.getItem('crm-theme') as Theme) || 'dark';
+  const saved = readLocalStorage('crm-theme');
+  return saved === 'light' || saved === 'dark' || saved === 'system' ? saved : 'dark';
 }
 
 function applyTheme(theme: Theme) {
@@ -121,7 +123,7 @@ function applyTheme(theme: Theme) {
         : 'light'
       : theme;
   document.documentElement.setAttribute('data-theme', resolved);
-  localStorage.setItem('crm-theme', theme);
+  writeLocalStorage('crm-theme', theme);
 }
 
 const SidebarNavItem: React.FC<NavItem> = ({ label, path, icon: Icon }) => {
