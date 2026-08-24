@@ -149,7 +149,39 @@
       "footnote": "Consultez le répertoire complet pour tout ce qui est prévu."
     },
     "testimonials": {
-      "title": "Ce qu’en disent les exploitants."
+      "title": "Ce qu’en disent les exploitants.",
+      "items": [
+        {
+          "quote": "Avant, nous clôturions les comptes le 8 de chaque mois. Aujourd’hui, c’est le 2\u00a0: il n’y a plus rien à rapprocher.",
+          "author": "Layla Ahmed",
+          "role": "Propriétaire, Byblos Kitchen"
+        },
+        {
+          "quote": "À la 20e visite, rtylr a envoyé l’e-mail de remerciement tout seul. Mon responsable m’a demandé si c’était moi qui l’avais paramétré. Non.",
+          "author": "Karim Mansour",
+          "role": "Directeur général, The Terrace"
+        },
+        {
+          "quote": "La connexion est tombée un samedi soir, avec 200 tables à servir. La caisse ne s’est pas arrêtée. Je ne pensais pas qu’un logiciel tiendrait le coup.",
+          "author": "Tarek Zein",
+          "role": "Propriétaire, Mountain Café"
+        },
+        {
+          "quote": "Les plannings vivaient sur WhatsApp. Aujourd’hui, les services partent à l’équipe en quatre clics et la paie se lance toute seule chaque dimanche soir.",
+          "author": "Sara Halabi",
+          "role": "Responsable des opérations, Urban Chain"
+        },
+        {
+          "quote": "Quitter l’ancien système nous fait économiser environ 600\u00a0$US par établissement et par mois. Et c’est avant de compter les modules payants.",
+          "author": "Nadine Farhat",
+          "role": "Fondatrice, Fresh Market"
+        },
+        {
+          "quote": "La tâche est rattachée à la facture, au client, au service. J’ai arrêté d’ouvrir quatre onglets pour quatre applications\u00a0: j’ouvre Flow, c’est tout.",
+          "author": "Jad Maalof",
+          "role": "Gérant, Tech Store Pro"
+        }
+      ]
     },
     "truth": {
       "badge": "Vérifiable",
@@ -169,7 +201,7 @@
         },
         {
           "title": "Tout le site est indexé comme une donnée",
-          "body": "Un index lisible par une machine des 23 pages, avec leurs titres et leurs descriptions, généré à la compilation. Il ne peut pas s’écarter du site, puisque c’est le site qui le génère.",
+          "body": "Un index lisible par une machine de toutes les pages du site, avec leurs titres et leurs descriptions, généré à la compilation. Il ne peut pas s’écarter du site, puisque c’est le site qui le génère.",
           "check": "https://rtylr.com/pages.json"
         },
         {
@@ -190,10 +222,10 @@
       ],
       "limits": [
         "Les prix ne sont pas publiés. Le forfait Free est gratuit\u00a0; Pro et Scale sont sur devis.",
-        "Aucune intégration n’est encore active. /integrations/ liste ce qui est prévu et marque chaque entrée comme à venir.",
+        "Aucune intégration n’est encore active. /integrations/ liste ce qui est prévu et marque chaque entrée d’un «\u00a0Coming soon\u00a0».",
         "Les déclarations de paie ne sont pas de notre ressort. rtylr HR calcule la paie et exporte les fichiers que Gusto, ADP ou Rippling se chargent de déclarer.",
         "Une comptabilité complexe demande toujours un grand livre. La consolidation multi-entités et les pistes d’audit lourdes sont mieux servies par QuickBooks ou Xero, et rtylr Finance exporte vers les deux.",
-        "Les applications sont en anglais. L’arabe et le français sont en cours de rédaction, pas de traduction, et ne sont pas encore livrés."
+        "L’interface des applications est en anglais uniquement. Le français que vous lisez ici est écrit pour ce site, pas traduit, et ce site est la première chose que nous livrons dans cette langue\u00a0; dans les applications, l’arabe et le français sont encore en cours de rédaction."
       ]
     },
     "hero": {
@@ -589,7 +621,7 @@
         },
         {
           "question": "Qu’est-ce que rtylr ERP remplace\u00a0?",
-          "answer": "Le tableur de stock, et le CSV censé le tenir à jour avec les ventes. Une vente dans POS décrémente les composants de la recette dans ERP au moment où elle se produit\u00a0: «\u00a0combien d’unités d’un composant reste-t-il sur trois établissements\u00a0» devient une question à laquelle vous répondez sans ouvrir un second outil."
+          "answer": "Le tableur de stock, et le CSV censé le tenir à jour avec les ventes. Une vente dans POS décrémente les composants de la recette dans ERP au moment où elle se produit\u00a0: «\u00a0combien d’unités d’un composant reste-t-il sur trois établissements\u00a0?\u00a0» devient une question à laquelle vous répondez sans ouvrir un second outil."
         }
       ]
     }
