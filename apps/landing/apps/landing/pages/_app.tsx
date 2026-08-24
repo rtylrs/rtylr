@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { injectTheme } from '@voxire/config';
 import { bootObservability } from '@voxire/observability';
-import { CookieBanner } from '@voxire/consent';
+import { CookieBanner, privacyLinkStyle } from '@voxire/consent';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { I18nextProvider } from 'react-i18next';
+import { I18nextProvider, Trans } from 'react-i18next';
 import { CookiesProvider } from 'react-cookie';
 import { DM_Sans, IBM_Plex_Sans_Arabic } from 'next/font/google';
 
 import i18next from '../services/i18next';
-import { localeFromPath } from '../lib/locales';
+import { localeFromPath, localisePath } from '../lib/locales';
 import { initFeatureVariant } from '../lib/featureVariant';
 import { watchConsentMode } from '../lib/consentMode';
 
@@ -140,8 +140,29 @@ function MyApp({ Component, pageProps }: AppProps) {
             </MotionConfig>
             {/* Strict opt-in banner. Shows only until the visitor
                 accepts or declines - then cookies-granted unlocks the
-                PostHog init wired in bootObservability. */}
-            <CookieBanner />
+                PostHog init wired in bootObservability. Copy is passed
+                in rather than looked up inside the shared package - see
+                the note on CookieBannerProps in @voxire/consent. */}
+            <CookieBanner
+              privacyUrl={localisePath('/legal/privacy-policy/', locale.code)}
+              message={
+                <Trans
+                  i18n={i18n}
+                  i18nKey="common.cookieBanner.message"
+                  components={{
+                    privacyLink: (
+                      <a
+                        href={localisePath('/legal/privacy-policy/', locale.code)}
+                        style={privacyLinkStyle}
+                      />
+                    ),
+                  }}
+                />
+              }
+              declineLabel={i18n.t('common.cookieBanner.decline')}
+              acceptLabel={i18n.t('common.cookieBanner.accept')}
+              ariaLabel={i18n.t('common.cookieBanner.ariaLabel')}
+            />
           </div>
         </I18nextProvider>
       </CookiesProvider>
