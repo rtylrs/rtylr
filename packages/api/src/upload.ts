@@ -30,7 +30,18 @@ const getCdnBaseUrl = (override?: string): string => {
 const getToken = (): string | null => {
   if (typeof document === 'undefined') return null;
   const match = document.cookie.match(/(?:^|;\s*)token=([^;]+)/);
-  const token = match ? decodeURIComponent(match[1]) : null;
+  let token: string | null = null;
+  if (match) {
+    try {
+      token = decodeURIComponent(match[1]);
+    } catch {
+      // Malformed percent-encoding must not crash every upload. This mirrors
+      // the guard its two siblings already have (client.ts getToken,
+      // cookies.ts); this copy was the one that would throw URIError
+      // synchronously and opaquely on a corrupted cookie (rtylr#952).
+      token = match[1];
+    }
+  }
   if (!token || token.split('.').length !== 3) return null;
   return token;
 };
