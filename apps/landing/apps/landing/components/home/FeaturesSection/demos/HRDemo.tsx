@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 
+import { findLocale } from '../../../../lib/locales';
+
 interface Staff {
   initials: string;
   name: string;
@@ -74,8 +76,12 @@ const DAY_END = 24;
 const TOTAL_HRS = DAY_END - DAY_START;
 
 export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [now, setNow] = useState(10.5);
+  // transform-origin has no widely-supported logical keyword yet, so the
+  // scaleX growth anchor for each shift bar is set explicitly from the
+  // active locale's direction rather than a CSS property alone.
+  const isRtl = findLocale(i18n.language)?.dir === 'rtl';
 
   useEffect(() => {
     if (!isActive) return;
@@ -140,7 +146,9 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
       {/* Timeline header */}
       <div
         style={{
-          padding: '8px 20px 6px 148px',
+          paddingBlock: '8px 6px',
+          paddingInlineStart: 148,
+          paddingInlineEnd: 20,
           display: 'flex',
           justifyContent: 'space-between',
           flexShrink: 0,
@@ -164,7 +172,7 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
             position: 'absolute',
             top: 0,
             bottom: 0,
-            left: `calc(148px + ${nowPct}% * ((100% - 148px) / 100))`,
+            insetInlineStart: `calc(148px + ${nowPct}% * ((100% - 148px) / 100))`,
             width: 1,
             background: 'var(--ink)',
             zIndex: 10,
@@ -175,7 +183,7 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
             style={{
               position: 'absolute',
               top: 0,
-              left: -18,
+              insetInlineStart: -18,
               background: 'var(--ink)',
               color: '#ffffff',
               borderRadius: 4,
@@ -199,7 +207,8 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '7px 20px 7px 0',
+                paddingBlock: 7,
+                paddingInlineEnd: 20,
                 borderBottom: '1px solid var(--hairline)',
               }}
             >
@@ -207,7 +216,7 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
               <div
                 style={{
                   width: 148,
-                  paddingLeft: 20,
+                  paddingInlineStart: 20,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 10,
@@ -256,16 +265,16 @@ export const HRDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element =
                   transition={{ duration: 0.6, delay: 0.1, ease: 'easeOut' }}
                   style={{
                     position: 'absolute',
-                    left: `${leftPct}%`,
+                    insetInlineStart: `${leftPct}%`,
                     width: `${widthPct}%`,
                     height: '100%',
                     background: isOn ? `${s.color}33` : 'var(--hairline)',
                     borderRadius: 4,
                     border: `1px solid ${isOn ? `${s.color}66` : 'var(--hairline-strong)'}`,
-                    transformOrigin: 'left',
+                    transformOrigin: isRtl ? 'right' : 'left',
                     display: 'flex',
                     alignItems: 'center',
-                    paddingLeft: 6,
+                    paddingInlineStart: 6,
                     overflow: 'hidden',
                   }}
                 >
