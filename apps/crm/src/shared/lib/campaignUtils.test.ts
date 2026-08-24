@@ -10,23 +10,44 @@ import {
 } from './campaignUtils';
 import { campaignSchema, type Campaign } from '../schemas/campaigns';
 
+// Parsed input uses the contract's field names (channel, openedCount), because
+// that is what the generated client returns. The schema maps them to the UI
+// names the assertions below read (type, openCount).
 const makeCampaign = (overrides: Record<string, unknown> = {}): Campaign =>
   campaignSchema.parse({
     id: 1,
     name: 'Test Campaign',
-    type: 'email',
+    channel: 'email',
     status: 'active',
     sentCount: 90,
-    openCount: 36,
+    openedCount: 36,
     updatedAt: '2024-05-01',
     ...overrides,
   });
 
 const campaigns: Campaign[] = [
-  makeCampaign({ id: 1, status: 'active', type: 'email', sentCount: 90, updatedAt: '2024-05-01' }),
-  makeCampaign({ id: 2, status: 'paused', type: 'sms', sentCount: 180, updatedAt: '2024-04-15' }),
-  makeCampaign({ id: 3, status: 'active', type: 'email', sentCount: 140, updatedAt: '2024-05-10' }),
-  makeCampaign({ id: 4, status: 'draft', type: 'push', sentCount: 0, updatedAt: '2024-03-01' }),
+  makeCampaign({
+    id: 1,
+    status: 'active',
+    channel: 'email',
+    sentCount: 90,
+    updatedAt: '2024-05-01',
+  }),
+  makeCampaign({
+    id: 2,
+    status: 'paused',
+    channel: 'sms',
+    sentCount: 180,
+    updatedAt: '2024-04-15',
+  }),
+  makeCampaign({
+    id: 3,
+    status: 'active',
+    channel: 'email',
+    sentCount: 140,
+    updatedAt: '2024-05-10',
+  }),
+  makeCampaign({ id: 4, status: 'draft', channel: 'push', sentCount: 0, updatedAt: '2024-03-01' }),
 ];
 
 describe('filterCampaignsByStatus', () => {
@@ -65,20 +86,20 @@ describe('totalSent', () => {
 
 describe('totalOpened', () => {
   it('sums opened messages across all campaigns', () => {
-    expect(totalOpened([makeCampaign({ openCount: 10 }), makeCampaign({ openCount: 25 })])).toBe(
-      35
-    );
+    expect(
+      totalOpened([makeCampaign({ openedCount: 10 }), makeCampaign({ openedCount: 25 })])
+    ).toBe(35);
   });
 });
 
 describe('openRate', () => {
   it('calculates rate as opened / sent', () => {
-    const c = makeCampaign({ sentCount: 100, openCount: 40 });
+    const c = makeCampaign({ sentCount: 100, openedCount: 40 });
     expect(openRate(c)).toBeCloseTo(0.4);
   });
 
   it('returns 0 when sent is 0', () => {
-    const c = makeCampaign({ sentCount: 0, openCount: 0 });
+    const c = makeCampaign({ sentCount: 0, openedCount: 0 });
     expect(openRate(c)).toBe(0);
   });
 });

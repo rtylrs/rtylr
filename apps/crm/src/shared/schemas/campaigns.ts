@@ -7,32 +7,52 @@ const finiteNumber = z.preprocess((value) => {
 }, z.number());
 
 /**
- * Campaign wire shape mirrors the backend campaigns module
- * (onion campaigns/internal/routes/handlers/campaign_handlers.go → CampaignPayload).
- * The @voxire/api response interceptor converts snake_case → camelCase, so the
- * fields below match the Go json tags after conversion: type, audienceSegmentId,
- * sentCount, openCount, scheduledAt, sentAt, createdAt, updatedAt.
+ * Campaign reads come from the generated CampaignServiceClient, so the wire
+ * carries crm.campaign.v1.Campaign's field names. This schema is declared in
+ * those names and then mapped to the ones the UI already uses.
+ *
+ * It used to declare the retired REST names directly, which failed silently
+ * rather than loudly (rtylr#939): every mismatched field carried a .default or
+ * .catch, so zod substituted a fallback instead of erroring. channel was read as
+ * `type` and lost, so TYPE_TO_CHANNEL[''] badged every campaign as Email;
+ * openedCount was read as `openCount` and lost, so the open rate was
+ * permanently 0%; content and segmentId were lost, so opening a campaign for
+ * edit silently dropped its body and audience link.
+ *
+ * Mapping here rather than renaming at ~70 call sites keeps the translation in
+ * one visible place. The tradeoff is that this file is now the only thing
+ * standing between a contract rename and a silent regression, which is why the
+ * tests assert against a wire-shaped fixture rather than a UI-shaped one.
  *
  * The backend does NOT compute openRate / clickRate / revenue — derive those
  * client-side from sentCount / openCount when a display needs them.
  */
-export const campaignSchema = z.object({
-  id: finiteNumber,
-  ownerId: finiteNumber.optional(),
-  name: z.string(),
-  type: z.string().default(''),
-  status: z.string(),
-  audienceSegmentId: finiteNumber.nullable().optional(),
-  subject: z.string().nullable().optional(),
-  body: z.string().nullable().optional(),
-  audienceCount: finiteNumber.optional(),
-  sentCount: finiteNumber.catch(0),
-  openCount: finiteNumber.catch(0),
-  scheduledAt: z.string().nullable().optional(),
-  sentAt: z.string().nullable().optional(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-});
+export const campaignSchema = z
+  .object({
+    id: finiteNumber,
+    ownerId: finiteNumber.optional(),
+    name: z.string(),
+    description: z.string().nullable().optional(),
+    channel: z.string().default(''),
+    status: z.string(),
+    segmentId: finiteNumber.nullable().optional(),
+    subject: z.string().nullable().optional(),
+    content: z.string().nullable().optional(),
+    audienceCount: finiteNumber.optional(),
+    sentCount: finiteNumber.catch(0),
+    openedCount: finiteNumber.catch(0),
+    scheduledAt: z.string().nullable().optional(),
+    sentAt: z.string().nullable().optional(),
+    createdAt: z.string().optional(),
+    updatedAt: z.string().optional(),
+  })
+  .transform(({ channel, content, openedCount, segmentId, ...rest }) => ({
+    ...rest,
+    type: channel,
+    body: content,
+    openCount: openedCount,
+    audienceSegmentId: segmentId,
+  }));
 
 const legacyCampaignStatsSchema = z.object({
   id: finiteNumber,
