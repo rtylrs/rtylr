@@ -4,20 +4,38 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/voxire/onion/internal/testutil"
 )
 
+const reportQueries = "../../sql/queries/reports.sql"
+
 func TestReportsQueriesBoundInteractiveResults(t *testing.T) {
-	query, err := os.ReadFile("../../sql/queries/reports.sql")
-	if err != nil {
-		t.Fatalf("read reports queries: %v", err)
-	}
-	if got := strings.Count(string(query), "LIMIT 5001"); got != 6 {
-		t.Fatalf("expected six bounded report queries, found %d", got)
+	testutil.RequireBoundedListQueries(t, reportQueries)
+}
+
+// TestReportsQueriesUseTheInteractiveCap pins the cap itself. Boundedness alone
+// would accept any literal, and these are interactive reports: the 5001 row
+// bound is one over the page size the UI draws, so the caller can tell "there
+// is more" without a second count query.
+//
+// Asserted per query rather than by counting matches, so adding a report with
+// the wrong cap fails, and adding one with the right cap does not.
+func TestReportsQueriesUseTheInteractiveCap(t *testing.T) {
+	const cap = "LIMIT 5001"
+
+	for _, q := range testutil.ParseSQLQueries(t, reportQueries) {
+		if !q.IsMany() || q.IsPaginated() || q.Exempt() || q.IsAggregate() {
+			continue
+		}
+		if q.HasLimit() && !strings.Contains(q.Text, cap) {
+			t.Errorf("%s bounds its result but not with %q, so the UI cannot detect overflow", q.Name, cap)
+		}
 	}
 }
 
 func TestLeaveSummaryPreAggregatesRequestsBeforeEmployeeJoin(t *testing.T) {
-	query, err := os.ReadFile("../../sql/queries/reports.sql")
+	query, err := os.ReadFile(reportQueries)
 	if err != nil {
 		t.Fatalf("read reports queries: %v", err)
 	}

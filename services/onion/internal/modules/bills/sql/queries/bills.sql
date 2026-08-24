@@ -30,6 +30,7 @@ SELECT COALESCE(SUM(CAST(amount AS REAL)), 0) AS total
 FROM finance_bills
 WHERE business_id = ? AND status = ?;
 
+-- unbounded-ok: one row per status value, bounded by the enum's cardinality.
 -- name: CountBillsByStatus :many
 SELECT status, COUNT(*) AS cnt
 FROM finance_bills

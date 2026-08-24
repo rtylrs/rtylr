@@ -22,7 +22,10 @@ const engineJobTimeout = 55 * time.Second
 // engineProbeTimeout bounds the initial --serve capability probe. It has to
 // tolerate fork/exec + interpreter startup on a loaded host (the test suite
 // runs every package in parallel), while staying well under the job timeout.
-const engineProbeTimeout = 15 * time.Second
+//
+// A var rather than a const so a test driving a deliberately slow stub engine
+// can widen it; production never reassigns it.
+var engineProbeTimeout = 15 * time.Second
 
 // maxEngineResponse caps accepted response bodies so garbage on the wire
 // (e.g. usage text from a pre-serve binary) cannot be mistaken for framing.

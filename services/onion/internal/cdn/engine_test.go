@@ -16,6 +16,15 @@ import (
 // (exits after usage) or a minimal --serve responder.
 func stubEngine(t *testing.T, mode string) string {
 	t.Helper()
+	// The stub forks dd, od and tr for every frame, so it answers the serve
+	// probe orders of magnitude slower than the real binary and overruns the
+	// production window whenever the machine is busy with the rest of the
+	// suite. Widen the probe for stub-backed tests only; the deadlines each
+	// test sets on its own jobs are untouched, so what they assert is unchanged.
+	previousProbeTimeout := engineProbeTimeout
+	engineProbeTimeout = 30 * time.Second
+	t.Cleanup(func() { engineProbeTimeout = previousProbeTimeout })
+
 	dir := t.TempDir()
 	path := filepath.Join(dir, "media-engine")
 	script := "#!/bin/sh\n"
