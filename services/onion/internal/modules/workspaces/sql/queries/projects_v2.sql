@@ -161,8 +161,16 @@ GROUP BY u.id, u.full_name, u.email
 ORDER BY hours DESC;
 
 -- name: CreateCycleV2 :execresult
-INSERT INTO flow_cycles (business_id, project_id, name, start_date, end_date)
-VALUES (?, ?, ?, ?, ?);
+--
+-- workspace_id is supplied as a literal 0 because the column is NOT NULL with
+-- no default, unlike its siblings owner_id and business_id which both default
+-- to 0. Omitting it made every v2 cycle creation fail outright with
+-- "Error 1364: Field 'workspace_id' doesn't have a default value".
+--
+-- 0 is the same value a v2 project carries. The column is dropped in Phase 4,
+-- at which point this literal comes out with it.
+INSERT INTO flow_cycles (business_id, workspace_id, project_id, name, start_date, end_date)
+VALUES (?, 0, ?, ?, ?, ?);
 
 -- name: ListMilestonesByBusiness :many
 SELECT m.id, m.project_id, m.name,
