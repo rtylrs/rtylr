@@ -4,53 +4,20 @@ import { HiChevronDown } from 'react-icons/hi';
 import { AnimatePresence, motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 import { Button } from '@voxire/components';
-import { APP_URLS, ASSETS, resolveAuthUrl } from '@voxire/config';
+import { ASSETS, resolveAuthUrl } from '@voxire/config';
 import { navigateExternal } from '../../../../lib/navigation';
+import { localeFromPath, navPath } from '../../../../lib/locales';
+import { FEATURE_LINKS, RESOURCE_LINKS, COMPANY_LINKS } from '../../../../lib/navLinks';
+import { LanguageSwitcher } from '../../../../components/LanguageSwitcher/LanguageSwitcher';
 import styles from './HeaderDesktop.module.scss';
 
 interface LinkWithColorProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   color?: string;
   to: string;
 }
-
-const FEATURE_LINKS = [
-  { href: '/pos', title: 'POS', desc: 'Payments, tables, orders, and receipts in one register.' },
-  { href: '/erp', title: 'ERP', desc: 'Inventory, suppliers, and purchasing that stay in sync.' },
-  { href: '/hr', title: 'HR', desc: 'Staff, schedules, time off, and payroll in one place.' },
-  { href: '/crm', title: 'CRM', desc: 'Customer profiles, loyalty, segments, and campaigns.' },
-  {
-    href: '/finance',
-    title: 'Finance',
-    desc: 'Invoices, expenses, tax, and a real P&L in seconds.',
-  },
-  {
-    href: '/flow',
-    title: 'Flow',
-    desc: 'Projects, tasks, and team workspaces for every department.',
-  },
-];
-
-const RESOURCE_LINKS = [
-  { href: '/hardware', label: 'Hardware' },
-  { href: '/integrations', label: 'Integrations' },
-  { href: '/blog', label: 'Blog' },
-  { href: 'https://docs.rtylr.com', label: 'Documentation', external: true },
-  { href: '/support', label: 'Help Center' },
-  { href: '/trust', label: 'Trust Center' },
-  { href: '/legal/security', label: 'Security' },
-  { href: '/legal/privacy-policy', label: 'Privacy Policy' },
-  { href: '/legal/terms', label: 'Terms of Use' },
-  { href: APP_URLS.status, label: 'Status', external: true },
-];
-
-const COMPANY_LINKS = [
-  { href: '/about', label: 'About' },
-  { href: '/partners', label: 'Partners' },
-  { href: 'https://voxire.com/careers', label: 'Careers', external: true },
-  { href: '/contact', label: 'Contact' },
-];
 
 // Sheet-style dropdown: scales out of the trigger with a spring,
 // settles fast, exits quicker than it enters.
@@ -77,6 +44,8 @@ const DropdownPanel: React.FC<React.PropsWithChildren<{ open: boolean; className
 
 const HeaderDesktop: React.FC = () => {
   const { t } = useTranslation();
+  const router = useRouter();
+  const locale = localeFromPath(router.asPath).code;
   const [scrolled, setScrolled] = useState(false);
   const [featuresDropdown, setFeaturesDropdown] = useState(false);
   const [solutionsDropdown, setSolutionsDropdown] = useState(false);
@@ -212,7 +181,11 @@ const HeaderDesktop: React.FC = () => {
   return (
     <header className={headerClasses}>
       <div className={styles['header-left']}>
-        <Link href="/" className={styles['logo-container']} aria-label={t('common.a11y.home')}>
+        <Link
+          href={navPath('/', locale)}
+          className={styles['logo-container']}
+          aria-label={t('common.a11y.home')}
+        >
           <img src={ASSETS.logos.light} alt={t('common.a11y.logoAlt')} />
         </Link>
 
@@ -238,18 +211,22 @@ const HeaderDesktop: React.FC = () => {
               {FEATURE_LINKS.map((item) => (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={navPath(item.href, locale)}
                   className={styles['dropdown-item']}
                   onClick={closeDropdowns}
                 >
-                  <div className={styles['dropdown-item-title']}>{item.title}</div>
-                  <div className={styles['dropdown-item-desc']}>{item.desc}</div>
+                  <div className={styles['dropdown-item-title']}>
+                    {t(`common.nav.featureLinks.${item.key}.title`)}
+                  </div>
+                  <div className={styles['dropdown-item-desc']}>
+                    {t(`common.nav.featureLinks.${item.key}.desc`)}
+                  </div>
                 </Link>
               ))}
             </DropdownPanel>
           </div>
 
-          <LinkWithColor to="/pricing" className={styles['nav-link']}>
+          <LinkWithColor to={navPath('/pricing', locale)} className={styles['nav-link']}>
             {t('common.nav.pricing')}
           </LinkWithColor>
 
@@ -274,23 +251,23 @@ const HeaderDesktop: React.FC = () => {
               {RESOURCE_LINKS.map((item) =>
                 item.external ? (
                   <a
-                    key={item.label}
+                    key={item.key}
                     href={item.href}
                     className={styles['dropdown-link']}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={closeDropdowns}
                   >
-                    {item.label}
+                    {t(`common.nav.resourceLinks.${item.key}`)}
                   </a>
                 ) : (
                   <Link
-                    key={item.label}
-                    href={item.href}
+                    key={item.key}
+                    href={navPath(item.href, locale)}
                     className={styles['dropdown-link']}
                     onClick={closeDropdowns}
                   >
-                    {item.label}
+                    {t(`common.nav.resourceLinks.${item.key}`)}
                   </Link>
                 )
               )}
@@ -318,23 +295,23 @@ const HeaderDesktop: React.FC = () => {
               {COMPANY_LINKS.map((item) =>
                 item.external ? (
                   <a
-                    key={item.label}
+                    key={item.key}
                     href={item.href}
                     className={styles['dropdown-link']}
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={closeDropdowns}
                   >
-                    {item.label}
+                    {t(`common.nav.companyLinks.${item.key}`)}
                   </a>
                 ) : (
                   <Link
-                    key={item.label}
-                    href={item.href}
+                    key={item.key}
+                    href={navPath(item.href, locale)}
                     className={styles['dropdown-link']}
                     onClick={closeDropdowns}
                   >
-                    {item.label}
+                    {t(`common.nav.companyLinks.${item.key}`)}
                   </Link>
                 )
               )}
@@ -344,13 +321,7 @@ const HeaderDesktop: React.FC = () => {
       </div>
 
       <div className={styles['header-right']}>
-        {/* No language switcher until Phase 2 wires i18n. It used to be
-            rendered here behind style={{ display: 'none' }}, which hid it
-            from a browser and from nobody else: the build's markdown twins
-            are extracted from the DOM text, so the word "English" appeared
-            under the H1 of 20 of the 23 pages we serve to AI agents. Git
-            has the markup for when the switcher can actually switch
-            something. */}
+        <LanguageSwitcher />
 
         <div className={styles['header-buttons']}>
           <Button onClick={handleLoginClick} variant="soft" width="140px" height="40px">
