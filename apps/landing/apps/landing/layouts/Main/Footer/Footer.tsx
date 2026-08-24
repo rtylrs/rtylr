@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { fadeInUp, staggerContainer, viewportOnce } from '../../../lib/animations';
 import { navigateExternal } from '../../../lib/navigation';
+import { localeFromPath, localisePath } from '../../../lib/locales';
 import styles from './Footer.module.scss';
 
 const Footer: React.FC = () => {
@@ -16,6 +17,9 @@ const Footer: React.FC = () => {
   // _app.tsx since the site launched and nothing consumed it.
   const { t } = useTranslation();
   const isDemoPage = router.pathname === '/demo';
+  // The legal/trust links point at real routes in this locale now, not just
+  // a translated label over an English-only destination.
+  const locale = localeFromPath(router.asPath).code;
 
   const handleSignupClick = () => {
     navigateExternal(`${resolveAuthUrl()}/register`);
@@ -190,16 +194,19 @@ const Footer: React.FC = () => {
 
         <motion.div className={styles['footer-bottom']} variants={fadeInUp}>
           <div className={styles['footer-legal']}>
-            <Link href="/legal/terms" className={styles['legal-link']}>
+            <Link href={localisePath('/legal/terms/', locale)} className={styles['legal-link']}>
               {t('footer.legal.terms')}
             </Link>
-            <Link href="/legal/privacy-policy" className={styles['legal-link']}>
+            <Link
+              href={localisePath('/legal/privacy-policy/', locale)}
+              className={styles['legal-link']}
+            >
               {t('footer.legal.privacy')}
             </Link>
-            <Link href="/legal/security" className={styles['legal-link']}>
+            <Link href={localisePath('/legal/security/', locale)} className={styles['legal-link']}>
               {t('footer.legal.security')}
             </Link>
-            <Link href="/trust" className={styles['legal-link']}>
+            <Link href={localisePath('/trust/', locale)} className={styles['legal-link']}>
               {t('footer.legal.trust')}
             </Link>
             <ManageConsentLink className={styles['legal-link']}>
