@@ -814,5 +814,36 @@
       "archived": "Project archived.",
       "archivedUntil": "Project archived. It will be permanently deleted on {{date}}."
     }
+  },
+  "status": {
+    "openSettings": "Statuses",
+    "settingsTitle": "Statuses",
+    "settingsSubtitle": "A project with no custom statuses uses the six built-in ones. Add a status here to replace them for this project only.",
+    "closeSettings": "Close statuses",
+    "readOnlyReason": "Only project admins can change statuses.",
+    "emptyExplainer": "No custom statuses yet. This project is using the built-in statuses.",
+    "newStatusName": "New status name",
+    "newStatusPlaceholder": "Status name",
+    "bucketLabel": "Bucket",
+    "bucket": {
+      "backlog": "Backlog",
+      "active": "Active",
+      "done": "Done",
+      "cancelled": "Cancelled"
+    },
+    "addStatus": "Add status",
+    "chooseColorLabel": "Choose {{color}}",
+    "statusName": "Status name",
+    "bucketFor": "Bucket for {{name}}",
+    "moveUpLabel": "Move {{name}} up",
+    "moveDownLabel": "Move {{name}} down",
+    "movedAnnouncement": "{{name}} moved to position {{position}} of {{total}}",
+    "isDefault": "Default for new tasks",
+    "isDefaultFor": "Make {{name}} the default for new tasks",
+    "removeStatusLabel": "Remove {{name}}",
+    "removeStatusConfirm": "Remove {{name}}? Tasks on it fall back to their built-in status.",
+    "confirmRemoveStatus": "Remove status",
+    "cancel": "Cancel",
+    "none": "No custom status"
   }
 }
