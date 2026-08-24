@@ -159,6 +159,30 @@ export function localisePath(path: string, code: string): string {
 }
 
 /**
+ * The nav's href for one route in one locale: localised if the route has a
+ * translation, left as the bare English path otherwise. Nav data (header,
+ * footer) mixes translated routes (`/pricing/`) with routes that only exist
+ * in English (`/hr/`, `/blog/`) - localising the latter would link to a
+ * page that does not exist in that locale.
+ */
+export function navPath(path: string, code: string): string {
+  return isLocalisedRoute(path) ? localisePath(path, code) : path;
+}
+
+/**
+ * navPath for a path that may carry a `#fragment` (an in-page anchor into a
+ * translated document, e.g. `/legal/security#program`). The fragment is
+ * split off before the route lookup - isLocalisedRoute normalises trailing
+ * slashes on the whole string, which would never match with a fragment
+ * still attached - then reattached to the localised path.
+ */
+export function navPathWithHash(path: string, code: string): string {
+  const [route, hash] = path.split('#');
+  const localised = navPath(route, code);
+  return hash ? `${localised}#${hash}` : localised;
+}
+
+/**
  * The inverse of localisePath: strips a shipped, non-default locale prefix
  * back to the bare route.
  *
