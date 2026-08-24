@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { safeFetch, unwrap } from './result';
+import { safeFetch, unwrap, oneKitResult } from './result';
 import type { ApiError } from './result';
 import axios from 'axios';
 
@@ -180,6 +180,71 @@ describe('unwrap', () => {
       const apiError = e as ApiError;
       expect(apiError.message).toBe('Forbidden');
       expect(apiError.code).toBe('FORBIDDEN');
+    }
+  });
+});
+
+// ── oneKitResult: client-side validation vs transport failure ──────
+
+/**
+ * rtylr#950. Generated clients validate the request and throw
+ * `TypeError('invalid request: ...')` before any network call. That was falling
+ * through to the generic branch, which reports `status: 0` - the value reserved
+ * for "could not reach the server".
+ *
+ * Consequence, confirmed live: dash's `shouldRetryQuery` treats `status === 0`
+ * as retryable, so a request that can never succeed was retried, and in logs a
+ * programming error was indistinguishable from an outage.
+ */
+describe('oneKitResult error classification', () => {
+  it('classifies a generated-client validation throw as CLIENT_VALIDATION', async () => {
+    const result = await oneKitResult(() => {
+      throw new TypeError('invalid request: body.description is required');
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.code).toBe('CLIENT_VALIDATION');
+      // Not 0: that is the transport-failure value other code branches on.
+      expect(result.error.status).not.toBe(0);
+      expect(result.error.message).toContain('body.description is required');
+    }
+  });
+
+  it('keeps a real transport failure on status 0', async () => {
+    const result = await oneKitResult(() => {
+      throw new Error('Network request failed');
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.status).toBe(0);
+      expect(result.error.code).not.toBe('CLIENT_VALIDATION');
+    }
+  });
+
+  it('does not claim validation for an unrelated TypeError', async () => {
+    // A genuine programming bug must not be relabelled as a request problem.
+    const result = await oneKitResult(() => {
+      throw new TypeError('undefined is not a function');
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) expect(result.error.code).not.toBe('CLIENT_VALIDATION');
+  });
+
+  it('still maps a generated-client HTTP error by its statusCode', async () => {
+    const result = await oneKitResult(() => {
+      const err = new Error('boom') as Error & { statusCode: number; body: string };
+      err.statusCode = 404;
+      err.body = JSON.stringify({ message: 'Campaign not found' });
+      throw err;
+    });
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) {
+      expect(result.error.status).toBe(404);
+      expect(result.error.code).toBe('NOT_FOUND');
     }
   });
 });
