@@ -27,7 +27,7 @@ const MENU: MenuItem[] = [
 const SEQ = ['esp', 'cro', 'lat', 'esp', 'avo'];
 
 export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [flash, setFlash] = useState<string | null>(null);
   const seqRef = useRef(0);
@@ -54,6 +54,10 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
   }, [isActive]);
 
   const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  // toFixed(2) always renders a period, which is the wrong decimal mark
+  // in French; toLocaleString respects the active language.
+  const money = (n: number): string =>
+    n.toLocaleString(i18n.language, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
     <div
@@ -107,7 +111,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
               <div style={{ marginBottom: 3, fontSize: 16 }}>{item.emoji}</div>
               <div style={{ fontWeight: 500, fontSize: 12, marginBottom: 2 }}>{item.name}</div>
               <div style={{ fontSize: 11, color: 'rgba(19,19,19,0.55)' }}>
-                ${item.price.toFixed(2)}
+                ${money(item.price)}
               </div>
             </button>
           ))}
@@ -166,7 +170,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                     {item.qty}× {item.name}
                   </span>
                   <span style={{ color: 'var(--ink)', fontWeight: 600 }}>
-                    ${(item.price * item.qty).toFixed(2)}
+                    ${money(item.price * item.qty)}
                   </span>
                 </motion.div>
               ))}
@@ -185,7 +189,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
           >
             <span style={{ color: 'rgba(19,19,19,0.55)', fontSize: 12 }}>{t('home.features.demos.pos.total')}</span>
             <span style={{ color: 'var(--ink)', fontWeight: 700, fontSize: 16 }}>
-              ${total.toFixed(2)}
+              ${money(total)}
             </span>
           </div>
           <div
@@ -202,7 +206,7 @@ export const POSDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
             }}
           >
             {cart.length
-              ? t('home.features.demos.pos.chargeAmount', { amount: total.toFixed(2) })
+              ? t('home.features.demos.pos.chargeAmount', { amount: money(total) })
               : t('home.features.demos.pos.charge')}
           </div>
         </div>

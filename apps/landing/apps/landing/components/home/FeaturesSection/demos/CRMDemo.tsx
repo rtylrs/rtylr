@@ -86,7 +86,7 @@ const TIER: Record<Exclude<Segment, 'all'>, { labelKey: string; color: string; b
 };
 
 export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [active, setActive] = useState<Segment>('all');
 
   const visible = active === 'all' ? CUSTOMERS : CUSTOMERS.filter((c) => c.segment === active);
@@ -245,7 +245,7 @@ export const CRMDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element 
                     color: 'var(--ink)',
                   }}
                 >
-                  ${c.spend.toLocaleString()}
+                  ${c.spend.toLocaleString(i18n.language)}
                 </div>
                 <div
                   style={{

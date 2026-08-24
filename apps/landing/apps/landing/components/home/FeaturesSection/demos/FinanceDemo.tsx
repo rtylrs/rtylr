@@ -21,15 +21,16 @@ const METRICS: Metric[] = [
   { labelKey: 'netProfit', value: 14530, prev: 13400, prefix: '$' },
 ];
 
-const pctChange = (cur: number, prev: number): string => {
+const pctChange = (cur: number, prev: number, locale: string): string => {
   const d = ((cur - prev) / prev) * 100;
-  return `${d >= 0 ? '+' : ''}${d.toFixed(1)}%`;
+  // toFixed always renders a period; toLocaleString respects the active language.
+  return `${d >= 0 ? '+' : ''}${d.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 };
 
 const maxVal = Math.max(...REVENUE);
 
 export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [shown, setShown] = useState(false);
 
   useEffect(() => {
@@ -109,10 +110,12 @@ export const FinanceDemo = ({ isActive }: { isActive: boolean }): React.JSX.Elem
               {t(`home.features.demos.finance.metrics.${m.labelKey}`)}
             </div>
             <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--ink)', marginBottom: 4 }}>
-              {shown ? `$${(m.value / 1000).toFixed(1)}k` : '-'}
+              {shown
+                ? `$${(m.value / 1000).toLocaleString(i18n.language, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k`
+                : '-'}
             </div>
             <div style={{ fontSize: 11, color: '#16a34a' }}>
-              {pctChange(m.value, m.prev)} {t('home.features.demos.finance.momSuffix')}
+              {pctChange(m.value, m.prev, i18n.language)} {t('home.features.demos.finance.momSuffix')}
             </div>
           </div>
         ))}

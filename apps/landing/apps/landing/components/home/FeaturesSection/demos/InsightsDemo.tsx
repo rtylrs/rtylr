@@ -32,7 +32,7 @@ const peakDayKey = DAY_KEYS[REVENUE.indexOf(Math.max(...REVENUE))];
 const totalCovers = COVERS.reduce((s, v) => s + v, 0);
 
 export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Element => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [drawn, setDrawn] = useState(false);
   const [hoveredDay, setHoveredDay] = useState<number | null>(null);
 
@@ -45,9 +45,15 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
     }
   }, [isActive]);
 
+  // toFixed always renders a period; toLocaleString respects the active
+  // language. Not used for the SVG path math further down - that syntax
+  // needs a period regardless of locale.
+  const fmtK = (n: number): string =>
+    `$${(n / 1000).toLocaleString(i18n.language, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}k`;
+
   const kpis = [
-    { key: 'revenue', label: t('home.features.demos.insights.revenue'), value: `$${(total / 1000).toFixed(1)}k`, delta: '+12%', good: true },
-    { key: 'covers', label: t('home.features.demos.insights.kpis.covers'), value: totalCovers.toLocaleString(), delta: '+8%', good: true },
+    { key: 'revenue', label: t('home.features.demos.insights.revenue'), value: fmtK(total), delta: '+12%', good: true },
+    { key: 'covers', label: t('home.features.demos.insights.kpis.covers'), value: totalCovers.toLocaleString(i18n.language), delta: '+8%', good: true },
     { key: 'avgOrder', label: t('home.features.demos.insights.kpis.avgOrder'), value: `$${avgOrder}`, delta: '+4%', good: true },
     {
       key: 'peakDay',
@@ -155,7 +161,7 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
                 fontSize={8}
                 fill="rgba(19,19,19,0.4)"
               >
-                ${((max * frac) / 1000).toFixed(0)}k
+                ${((max * frac) / 1000).toLocaleString(i18n.language, { maximumFractionDigits: 0 })}k
               </text>
             );
           })}
@@ -249,7 +255,7 @@ export const InsightsDemo = ({ isActive }: { isActive: boolean }): React.JSX.Ele
                     fontWeight="700"
                     fill="#ffffff"
                   >
-                    ${(REVENUE[i] / 1000).toFixed(1)}k
+                    {fmtK(REVENUE[i])}
                   </text>
                 </g>
               )}
