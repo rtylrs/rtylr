@@ -33,6 +33,12 @@ export type ApiErrorCode =
   | 'CONFLICT'
   | 'RATE_LIMITED'
   | 'SERVER_ERROR'
+  /**
+   * The request was rejected by the generated client before any network call.
+   * Distinct from NETWORK_ERROR on purpose: this is a bug in the caller, not a
+   * transport problem, and it is never worth retrying.
+   */
+  | 'CLIENT_VALIDATION'
   | 'UNKNOWN';
 
 // ---------------------------------------------------------------------------
@@ -132,6 +138,28 @@ function toApiError(error: unknown): ApiError {
       body: genError.body,
     };
   }
+  // Generated clients validate the request and throw
+  // `TypeError('invalid request: <field> ...')` without touching the network.
+  // Without this branch that lands on `status: 0`, which is the value reserved
+  // for "could not reach the server", so a caller cannot tell a bug in its own
+  // payload from an outage. dash's shouldRetryQuery reads status 0 as retryable
+  // and retried a request that could never succeed.
+  //
+  // The prefix match is deliberately narrow. A TypeError with any other message
+  // is a genuine programming fault and must keep falling through rather than be
+  // relabelled as a request problem. If the generator ever changes its wording
+  // this degrades to the old behaviour rather than misclassifying something else.
+  if (error instanceof TypeError && /^invalid request\b/i.test(error.message.trim())) {
+    return {
+      // -1, not 0: transport failures own 0, and no HTTP status is negative, so
+      // existing `status >= 500` and `status === 0` checks both stay correct.
+      status: -1,
+      code: 'CLIENT_VALIDATION',
+      message: error.message,
+      cause: error,
+    };
+  }
+
   return {
     status: 0,
     code: 'UNKNOWN',
