@@ -30,6 +30,7 @@ import {
 } from '../../shared/schemas/campaigns';
 import { ConfirmModal } from '../../shared/components/ui';
 import { canCrmPermission } from '../../shared/lib/crmPermissions';
+import { canEditCampaign, hasVerifiedCampaignAudience } from './campaignActions';
 
 const ACCENT = '#3b82f6';
 
@@ -434,7 +435,7 @@ const Campaigns: React.FC = () => {
     isError,
     refetch,
   } = useListCampaigns(pageSize, offset);
-  const { data: fetchedSegments } = useListSegments();
+  const { data: fetchedSegments, error: segmentsError } = useListSegments();
   const updateStatus = useUpdateCampaignStatus();
   const removeCampaign = useDeleteCampaign();
   useEffect(() => {
@@ -471,7 +472,15 @@ const Campaigns: React.FC = () => {
 
   const handleLaunch = (id: number): void => {
     const campaign = campaigns.find((c) => c.id === id);
-    if (fetchedSegments !== undefined && (campaign?.audience ?? 0) <= 0) {
+    if (segmentsError || fetchedSegments === undefined) {
+      toast.error(
+        segmentsError
+          ? 'Cannot verify the campaign audience right now'
+          : 'Audience data is still loading'
+      );
+      return;
+    }
+    if (!campaign || !hasVerifiedCampaignAudience(campaign, audienceBySegment)) {
       toast.error('No eligible recipients for this campaign');
       return;
     }
@@ -495,7 +504,7 @@ const Campaigns: React.FC = () => {
   };
 
   const handleEdit = (c: Campaign): void => {
-    if (c.status === 'Completed' || c.status === 'Sent' || c.status === 'Cancelled') {
+    if (!canEditCampaign(c)) {
       navigate({ to: `/campaigns/${c.id}` });
       return;
     }
