@@ -28,6 +28,10 @@ vi.mock('./useProjects', () => ({
 }));
 
 const tasksState = vi.hoisted(() => ({ data: [] as ApiTask[] }));
+vi.mock('../../shared/hooks/queries/useProjectLabourCost', () => ({
+  useProjectLabourCost: vi.fn(() => ({ data: null })),
+}));
+
 vi.mock('../tasks/useTasks', () => ({
   useTasks: () => tasksState,
 }));
