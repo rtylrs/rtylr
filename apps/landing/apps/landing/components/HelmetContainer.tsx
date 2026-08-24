@@ -1,4 +1,7 @@
 import Head from 'next/head';
+import { useRouter } from 'next/router';
+
+import { DEFAULT_LOCALE, findLocale, localeFromPath, localisePath } from '../lib/locales';
 
 interface HelmetContainerProps {
   title?: string;
@@ -60,7 +63,14 @@ const DEFAULT_OG_IMAGE = `${OG_BASE}/og-default.png`;
  */
 function ogImageFor(canonicalUrl: string): string {
   if (!canonicalUrl.startsWith(OG_BASE)) return DEFAULT_OG_IMAGE;
-  const segments = canonicalUrl.slice(OG_BASE.length).split('/').filter(Boolean);
+  let segments = canonicalUrl.slice(OG_BASE.length).split('/').filter(Boolean);
+  // Strip a locale prefix before deriving the slug. The OG images are
+  // generated once per route, not once per route per locale, so /ar/pricing/
+  // shares pricing.png. Without this it would ask for ar-pricing.png and get
+  // a 404 on every shared Arabic link.
+  if (segments.length > 0 && findLocale(segments[0]) && segments[0] !== DEFAULT_LOCALE) {
+    segments = segments.slice(1);
+  }
   const slug = segments.length > 0 ? segments.join('-') : 'home';
   return `${OG_BASE}/og/${slug}.png`;
 }
@@ -85,15 +95,31 @@ function HelmetContainer({
   canonical = '',
   structuredData,
 }: HelmetContainerProps) {
+  // The locale of the route being rendered. Everything URL-shaped and
+  // language-shaped below follows it.
+  const router = useRouter();
+  const routeLocale = localeFromPath(router?.asPath ?? '/');
+
   const effectiveOgType = ogType || DEFAULT_OG_TYPE;
-  const effectiveOgLocale = ogLocale || DEFAULT_OG_LOCALE;
+  // og:locale follows the route too. It was a hardcoded en_US default, which
+  // would have told every scraper that the Arabic page was American English.
+  const effectiveOgLocale = ogLocale || routeLocale.ogLocale || DEFAULT_OG_LOCALE;
   const effectiveOgSiteName = ogSiteName || DEFAULT_OG_SITE_NAME;
   const effectiveTwitterCard = twitterCard || DEFAULT_TWITTER_CARD;
   // If a page passes `canonical` we use that; otherwise we fall back
   // to `url`. Both callers are common across the codebase - the
   // canonical prop is the new name we're threading in; url is the
   // legacy name most pages already pass.
-  const effectiveCanonical = canonical || url;
+  // The canonical has to be the localised URL, not the English one. Pages
+  // pass a bare path like https://rtylr.com/pos/, which is correct on /pos/
+  // and wrong on /ar/pos/: two URLs claiming the same canonical is how a
+  // locale route gets dropped from the index in favour of the other
+  // language. Derive the locale from the route and localise the path.
+  const baseCanonical = canonical || url;
+  const effectiveCanonical =
+    baseCanonical && baseCanonical.startsWith(OG_BASE)
+      ? OG_BASE + localisePath(baseCanonical.slice(OG_BASE.length) || '/', routeLocale.code)
+      : baseCanonical;
   // An explicit `image` still wins, for a page that wants a bespoke card.
   // Otherwise derive it from the canonical, and only fall back to the
   // shared default when there is no canonical at all (404).
