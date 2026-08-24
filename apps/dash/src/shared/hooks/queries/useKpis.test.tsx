@@ -47,11 +47,16 @@ describe('useKpis', () => {
     expect(result.current.data?.customerCount).toBe(9);
   });
 
-  it('calls the correct endpoint with range parameter', async () => {
+  it('sends no range, because the request message has no such field', async () => {
+    // This test used to assert getKPIs was called with { range: '7d' }, which
+    // locked in the defect: GetKPIsRequest is an empty message, `{ range }`
+    // compiled only because excess-property checks do not apply to one, and the
+    // generated encoder dropped it. The assertion described the call the client
+    // made rather than the call the contract accepts (rtylr#946).
     mockDashboardClient.getKPIs.mockResolvedValue(mockKpis);
 
-    renderHook(() => useKpis('7d'), { wrapper: createWrapper() });
-    await waitFor(() => expect(mockDashboardClient.getKPIs).toHaveBeenCalledWith({ range: '7d' }));
+    renderHook(() => useKpis(), { wrapper: createWrapper() });
+    await waitFor(() => expect(mockDashboardClient.getKPIs).toHaveBeenCalledWith({}));
   });
 
   it('handles API error', async () => {
