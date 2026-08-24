@@ -6,7 +6,51 @@
       "resources": "Resources",
       "company": "Company",
       "signIn": "Sign In",
-      "signUp": "Sign Up"
+      "signUp": "Sign Up",
+      "featureLinks": {
+        "pos": {
+          "title": "POS",
+          "desc": "Payments, tables, orders, and receipts in one register."
+        },
+        "erp": {
+          "title": "ERP",
+          "desc": "Inventory, suppliers, and purchasing that stay in sync."
+        },
+        "hr": {
+          "title": "HR",
+          "desc": "Staff, schedules, time off, and payroll in one place."
+        },
+        "crm": {
+          "title": "CRM",
+          "desc": "Customer profiles, loyalty, segments, and campaigns."
+        },
+        "finance": {
+          "title": "Finance",
+          "desc": "Invoices, expenses, tax, and a real P&L in seconds."
+        },
+        "flow": {
+          "title": "Flow",
+          "desc": "Projects, tasks, and team workspaces for every department."
+        }
+      },
+      "resourceLinks": {
+        "hardware": "Hardware",
+        "integrations": "Integrations",
+        "blog": "Blog",
+        "documentation": "Documentation",
+        "helpCenter": "Help Center",
+        "trustCenter": "Trust Center",
+        "security": "Security",
+        "privacyPolicy": "Privacy Policy",
+        "termsOfUse": "Terms of Use",
+        "status": "Status"
+      },
+      "companyLinks": {
+        "about": "About",
+        "partners": "Partners",
+        "careers": "Careers",
+        "contact": "Contact"
+      }
     },
     "cta": {
       "startFree": "Start for free",
@@ -19,7 +63,14 @@
       "logoAlt": "rtylr",
       "toggleMenu": "Toggle mobile menu",
       "navMenu": "Navigation menu",
-      "closeMenu": "Close menu"
+      "closeMenu": "Close menu",
+      "languageSwitcher": "Choose language"
+    },
+    "cookieBanner": {
+      "message": "We use essential cookies to run rtylr, and optional analytics to understand which features to build next. <privacyLink>Privacy</privacyLink>.",
+      "decline": "Decline",
+      "accept": "Accept",
+      "ariaLabel": "Cookie consent"
     }
   },
   "footer": {
@@ -588,7 +639,8 @@
           "number": "Cloud",
           "label": "Native"
         }
-      ]
+      ],
+      "promptLabel": "Describe your business"
     },
     "features": {
       "badge": "THE PLATFORM",
@@ -816,7 +868,25 @@
     "hero": {
       "eyebrow": "rtylr POS",
       "title": "The register\nthat keeps up.",
-      "subtitle": "Fire courses to the right station. Split a check seven ways. Take Apple Pay, gift cards, house accounts. Keep running when the WiFi goes down. Built for the pace of real service, not a demo video."
+      "subtitle": "Fire courses to the right station. Split a check seven ways. Take Apple Pay, gift cards, house accounts. Keep running when the WiFi goes down. Built for the pace of real service, not a demo video.",
+      "receipt": {
+        "items": [
+          "Margherita Pizza",
+          "House Salad",
+          "Sparkling Water",
+          "Espresso"
+        ],
+        "order": "Order #{{orderId}} · Table {{table}}",
+        "live": "LIVE",
+        "venue": "rtylr · Terrace",
+        "date": "Apr 18",
+        "server": "Server: {{name}}",
+        "subtotal": "Subtotal",
+        "tax": "Tax ({{pct}})",
+        "tip": "Tip ({{pct}})",
+        "total": "Total",
+        "paid": "Paid · Visa ••4891"
+      }
     },
     "directAnswer": {
       "label": "What is rtylr POS?",
@@ -878,7 +948,16 @@
     "hero": {
       "eyebrow": "rtylr ERP · Inventory",
       "title": "Inventory that\ncounts itself.",
-      "subtitle": "Every margherita sold drops flour, mozzarella, and olive oil. Every PO approved moves the warehouse count. Every low-stock alert fires before you actually run out. Not after the Saturday rush notices."
+      "subtitle": "Every margherita sold drops flour, mozzarella, and olive oil. Every PO approved moves the warehouse count. Every low-stock alert fires before you actually run out. Not after the Saturday rush notices.",
+      "inventory": {
+        "items": [
+          "Margherita (225g dough)",
+          "House Red (750ml)",
+          "Olive Oil (5L)",
+          "Espresso Bean (1kg)",
+          "Flour 00 (3kg)"
+        ]
+      }
     },
     "directAnswer": {
       "label": "What is rtylr ERP?",
@@ -1334,7 +1413,8 @@
       "viewLive": "View live status at <statusLink>status.rtylr.com</statusLink>",
       "uptimeLabel": "Rolling 90-day uptime",
       "breachLabel": "Breach notification commitment",
-      "penTestLabel": "Annual third-party pen test"
+      "penTestLabel": "Annual third-party pen test",
+      "breachValue": "< 72h"
     }
   },
   "hardware": {
