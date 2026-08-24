@@ -67,6 +67,11 @@ CREATE TABLE IF NOT EXISTS flow_tasks (
     title VARCHAR(500) NOT NULL,
     description TEXT,
     status ENUM('backlog','todo','in_progress','in_review','done','cancelled') DEFAULT 'todo',
+    -- F-A: the custom status this task carries, NULL meaning it uses the
+    -- built-in string status above. Additive on purpose: every existing row
+    -- is NULL and behaves exactly as before, and the string column stays
+    -- populated either way so no existing query or index changes.
+    status_id BIGINT NULL,
     priority ENUM('none','low','medium','high','urgent') DEFAULT 'none',
     assignee_id BIGINT,
     reporter_id BIGINT NOT NULL,
@@ -85,6 +90,7 @@ CREATE TABLE IF NOT EXISTS flow_tasks (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_flow_tasks_project_status (project_id, status),
+    INDEX idx_flow_tasks_project_status_id (project_id, status_id),
     INDEX idx_flow_tasks_workspace_updated (workspace_id, archived, updated_at),
     INDEX idx_flow_tasks_business_status_completed (business_id, status, completed_at),
     INDEX idx_flow_tasks_business_assignee (business_id, assignee_id),
@@ -202,6 +208,46 @@ CREATE TABLE IF NOT EXISTS flow_project_columns (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_flow_columns_project (project_id)
+);
+
+CREATE TABLE IF NOT EXISTS flow_statuses (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    -- No DEFAULT 0, unlike the eleven sibling flow_* tables. A default of 0 is
+    -- what made the task-dependency tenancy bug silent rather than an error:
+    -- rows were written with business_id 0 and read with the caller's real id,
+    -- so adding a dependency succeeded and it never appeared. Here a missing
+    -- write fails loudly.
+    business_id BIGINT NOT NULL,
+    -- Status sets are per project. A project with no rows here falls back to
+    -- the six built-in string statuses, which is what makes this additive:
+    -- every existing project keeps working with zero rows written.
+    project_id BIGINT NOT NULL,
+    name VARCHAR(64) NOT NULL,
+    -- The semantic bucket, for rollups that have to work across projects with
+    -- different pipelines. Four buckets exactly as the proposal specifies.
+    --
+    -- The mapping for the six built-ins is not a fresh invention: the frontend
+    -- already derives OPEN, CLOSED and ACTIVE sets in constantsFlow.ts, and
+    -- these buckets are a refinement of those three. ACTIVE_STATUSES is
+    -- in_progress and in_review only, so todo belongs to backlog, and then
+    -- OPEN = backlog + active, CLOSED = done + cancelled. Every set the app
+    -- computes today stays reconstructible.
+    bucket ENUM('backlog','active','done','cancelled') NOT NULL,
+    -- Which of the six enum values flow_tasks.status carries while this status
+    -- is applied. The string column is not going away, so every query and
+    -- index that filters on it keeps working; a custom status simply reports
+    -- its nearest built-in. Built-in statuses map to themselves.
+    legacy_status ENUM('backlog','todo','in_progress','in_review','done','cancelled') NOT NULL,
+    color VARCHAR(20) NOT NULL DEFAULT '#6366f1',
+    sort_order INT NOT NULL DEFAULT 0,
+    -- The status a new task gets. At most one per project, enforced by the
+    -- application: MySQL cannot express a partial unique index on it.
+    is_default BOOLEAN NOT NULL DEFAULT FALSE,
+    created_by BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_flow_statuses_project_name (project_id, name),
+    INDEX idx_flow_statuses_business_project (business_id, project_id, sort_order)
 );
 
 -- Flow association + per-user tables (restored into the canonical schema after
