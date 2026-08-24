@@ -91,18 +91,6 @@ func (m *CreateStaffRequest) Validate() error {
 	if m.StartDate == "" {
 		violations = append(violations, "start_date is required")
 	}
-	if m.EndDate == "" {
-		violations = append(violations, "end_date is required")
-	}
-	if m.EmergencyContactName == "" {
-		violations = append(violations, "emergency_contact_name is required")
-	}
-	if m.EmergencyContactPhone == "" {
-		violations = append(violations, "emergency_contact_phone is required")
-	}
-	if m.Apps == "" {
-		violations = append(violations, "apps is required")
-	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
 	}
@@ -187,18 +175,6 @@ func (m *UpdateStaffBody) Validate() error {
 	}
 	if m.OvertimeRate < 0 {
 		violations = append(violations, "overtime_rate must be greater than or equal to 0")
-	}
-	if m.EndDate == "" {
-		violations = append(violations, "end_date is required")
-	}
-	if m.EmergencyContactName == "" {
-		violations = append(violations, "emergency_contact_name is required")
-	}
-	if m.EmergencyContactPhone == "" {
-		violations = append(violations, "emergency_contact_phone is required")
-	}
-	if m.Apps == "" {
-		violations = append(violations, "apps is required")
 	}
 	if len(violations) > 0 {
 		return errors.New(strings.Join(violations, "; "))
