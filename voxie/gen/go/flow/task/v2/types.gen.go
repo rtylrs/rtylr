@@ -15,6 +15,9 @@ type FlowTask struct {
 	Title            string   `json:"title,omitempty"`
 	Description      string   `json:"description,omitempty"`
 	Status           string   `json:"status,omitempty"`
+	StatusId         *int64   `json:"status_id,omitempty"`
+	StatusName       string   `json:"status_name,omitempty"`
+	StatusColor      string   `json:"status_color,omitempty"`
 	Priority         string   `json:"priority,omitempty"`
 	AssigneeId       *int64   `json:"assignee_id,omitempty"`
 	ReporterId       int64    `json:"reporter_id,omitempty"`
@@ -54,6 +57,7 @@ func (m *FlowTask) MarshalJSON() ([]byte, error) {
 		ReporterId   string   `json:"reporter_id,omitempty"`
 		SortOrder    string   `json:"sort_order,omitempty"`
 		ParentTaskId *string  `json:"parent_task_id,omitempty"`
+		StatusId     *string  `json:"status_id,omitempty"`
 		AssigneeId   *string  `json:"assignee_id,omitempty"`
 		SectionId    *string  `json:"section_id,omitempty"`
 		CycleId      *string  `json:"cycle_id,omitempty"`
@@ -69,6 +73,10 @@ func (m *FlowTask) MarshalJSON() ([]byte, error) {
 	if m.ParentTaskId != nil {
 		encodedParentTaskId := strconv.FormatInt(*m.ParentTaskId, 10)
 		aux.ParentTaskId = &encodedParentTaskId
+	}
+	if m.StatusId != nil {
+		encodedStatusId := strconv.FormatInt(*m.StatusId, 10)
+		aux.StatusId = &encodedStatusId
 	}
 	if m.AssigneeId != nil {
 		encodedAssigneeId := strconv.FormatInt(*m.AssigneeId, 10)
@@ -107,6 +115,7 @@ func (m *FlowTask) UnmarshalJSON(data []byte) error {
 		ReporterId   string   `json:"reporter_id,omitempty"`
 		SortOrder    string   `json:"sort_order,omitempty"`
 		ParentTaskId *string  `json:"parent_task_id,omitempty"`
+		StatusId     *string  `json:"status_id,omitempty"`
 		AssigneeId   *string  `json:"assignee_id,omitempty"`
 		SectionId    *string  `json:"section_id,omitempty"`
 		CycleId      *string  `json:"cycle_id,omitempty"`
@@ -158,6 +167,13 @@ func (m *FlowTask) UnmarshalJSON(data []byte) error {
 			return err
 		}
 		m.ParentTaskId = &v
+	}
+	if aux.StatusId != nil {
+		v, err := strconv.ParseInt(*aux.StatusId, 10, 64)
+		if err != nil {
+			return err
+		}
+		m.StatusId = &v
 	}
 	if aux.AssigneeId != nil {
 		v, err := strconv.ParseInt(*aux.AssigneeId, 10, 64)
@@ -268,6 +284,34 @@ func (x *FlowTask) GetStatus() string {
 		return zero
 	}
 	return x.Status
+}
+
+func (x *FlowTask) GetStatusId() int64 {
+	if x == nil {
+		var zero int64
+		return zero
+	}
+	if x.StatusId == nil {
+		var zero int64
+		return zero
+	}
+	return *x.StatusId
+}
+
+func (x *FlowTask) GetStatusName() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StatusName
+}
+
+func (x *FlowTask) GetStatusColor() string {
+	if x == nil {
+		var zero string
+		return zero
+	}
+	return x.StatusColor
 }
 
 func (x *FlowTask) GetPriority() string {

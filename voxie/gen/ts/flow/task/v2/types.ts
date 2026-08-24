@@ -9,6 +9,9 @@ parentTaskId?: string;
 title?: string;
 description?: string;
 status?: string;
+statusId?: string;
+statusName?: string;
+statusColor?: string;
 priority?: string;
 assigneeId?: string;
 reporterId?: string;
@@ -48,6 +51,9 @@ parentTaskId: v.parent_task_id,
 title: v.title,
 description: v.description,
 status: v.status,
+statusId: v.status_id,
+statusName: v.status_name,
+statusColor: v.status_color,
 priority: v.priority,
 assigneeId: v.assignee_id,
 reporterId: v.reporter_id,
@@ -87,6 +93,9 @@ if (v.parentTaskId !== undefined) { out.parent_task_id = v.parentTaskId; }
 if (v.title !== undefined) { out.title = v.title; }
 if (v.description !== undefined) { out.description = v.description; }
 if (v.status !== undefined) { out.status = v.status; }
+if (v.statusId !== undefined) { out.status_id = v.statusId; }
+if (v.statusName !== undefined) { out.status_name = v.statusName; }
+if (v.statusColor !== undefined) { out.status_color = v.statusColor; }
 if (v.priority !== undefined) { out.priority = v.priority; }
 if (v.assigneeId !== undefined) { out.assignee_id = v.assigneeId; }
 if (v.reporterId !== undefined) { out.reporter_id = v.reporterId; }
@@ -126,6 +135,9 @@ if (v.parentTaskId !== undefined && v.parentTaskId !== null && !(typeof v.parent
 if (v.title !== undefined && v.title !== null && !(typeof v.title === "string")) violations.push("title has invalid type");
 if (v.description !== undefined && v.description !== null && !(typeof v.description === "string")) violations.push("description has invalid type");
 if (v.status !== undefined && v.status !== null && !(typeof v.status === "string")) violations.push("status has invalid type");
+if (v.statusId !== undefined && v.statusId !== null && !(typeof v.statusId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.statusId))) violations.push("status_id has invalid type");
+if (v.statusName !== undefined && v.statusName !== null && !(typeof v.statusName === "string")) violations.push("status_name has invalid type");
+if (v.statusColor !== undefined && v.statusColor !== null && !(typeof v.statusColor === "string")) violations.push("status_color has invalid type");
 if (v.priority !== undefined && v.priority !== null && !(typeof v.priority === "string")) violations.push("priority has invalid type");
 if (v.assigneeId !== undefined && v.assigneeId !== null && !(typeof v.assigneeId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.assigneeId))) violations.push("assignee_id has invalid type");
 if (v.reporterId !== undefined && v.reporterId !== null && !(typeof v.reporterId === "string" && /^-?(0|[1-9][0-9]*)$/.test(v.reporterId))) violations.push("reporter_id has invalid type");

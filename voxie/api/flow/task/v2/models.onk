@@ -18,6 +18,17 @@ message FlowTask {
   description: string
   /// status is the current lifecycle state.
   status: string
+  /// The custom status (flow.status.v2) applied to this task, if any. Zero
+  /// means the task is on its built-in string status alone - not a missing
+  /// value, since a task with no custom status is the normal case for a
+  /// project that has not configured any (F-A).
+  status_id: int64?
+  /// Name of the custom status identified by status_id, denormalised for list
+  /// views the same way project_name is. Empty when status_id is absent.
+  status_name: string
+  /// Color of the custom status identified by status_id, denormalised the
+  /// same way project_color is. Empty when status_id is absent.
+  status_color: string
   /// priority is the priority value for this contract.
   priority: string
   /// assignee_id is the assignee id value for this contract.
