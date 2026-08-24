@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { injectTheme } from '@voxire/config';
 import { bootObservability } from '@voxire/observability';
 import { CookieBanner, privacyLinkStyle } from '@voxire/consent';
@@ -116,6 +116,20 @@ function MyApp({ Component, pageProps }: AppProps) {
     [locale.code]
   );
 
+  // _document sets lang/dir correctly for a fresh load, but that only runs
+  // once per server render. Next's router does not reload the document on
+  // a client-side navigation, so without this a locale switch (or any link
+  // crossing between a localised and an unlocalised page) leaves the DOM's
+  // lang/dir stuck on whichever locale first loaded the page - Arabic text
+  // rendered inside an ltr document, or an English page fully mirrored rtl.
+  // useLayoutEffect rather than useEffect so the correction lands before
+  // the browser paints the new route, not one frame after.
+  const isomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+  isomorphicLayoutEffect(() => {
+    document.documentElement.lang = locale.htmlLang;
+    document.documentElement.dir = locale.dir;
+  }, [locale.htmlLang, locale.dir]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <CookiesProvider>
@@ -162,6 +176,11 @@ function MyApp({ Component, pageProps }: AppProps) {
               declineLabel={i18n.t('common.cookieBanner.decline')}
               acceptLabel={i18n.t('common.cookieBanner.accept')}
               ariaLabel={i18n.t('common.cookieBanner.ariaLabel')}
+              // Below the mobile nav's full-screen overlay (z-index 2000) so
+              // opening the menu doesn't leave the banner floating on top of
+              // it, intercepting taps meant for the menu underneath. Still
+              // above the header (1000) and ordinary page content.
+              zIndex={1500}
             />
           </div>
         </I18nextProvider>
