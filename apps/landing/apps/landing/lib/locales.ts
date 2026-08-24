@@ -70,8 +70,11 @@ export const LOCALES: Locale[] = [
     dir: 'rtl',
     endonym: 'العربية',
     ogLocale: 'ar_AR',
-    // locales/ar.json is empty. Serving /ar/ now would put English under
-    // lang="ar", which is the doorway case above.
+    // The copy exists: locales/ar.json covers the keys behind
+    // LOCALISED_ROUTES. What it has not had is a native review, and that is
+    // what this flag promises, so it stays false until a Lebanese native
+    // reader has confirmed the register and idiom choices, and the RTL
+    // rendering has been checked at 390px.
     shipped: false,
   },
   {
@@ -80,7 +83,7 @@ export const LOCALES: Locale[] = [
     dir: 'ltr',
     endonym: 'Français',
     ogLocale: 'fr_FR',
-    // locales/fr.json is empty.
+    // Same as Arabic: the copy exists, the native review does not.
     shipped: false,
   },
 ];
@@ -181,4 +184,59 @@ export function alternatesFor(path: string, siteUrl = 'https://rtylr.com'): {
   // matches nothing shipped.
   set.push({ hreflang: 'x-default', href: `${siteUrl}${localisePath(path, DEFAULT_LOCALE)}` });
   return set;
+}
+
+/**
+ * The `[locale]` route table for the static export.
+ *
+ * With `output: 'export'` there is no server, so Next's built-in i18n is not
+ * available and the localised URLs have to be real exported paths. This
+ * builds that path list from the registry, which is the whole point: an
+ * unshipped locale cannot produce a route, and an untranslated page cannot
+ * either, because both come from the same two lists the sitemap reads.
+ *
+ * Why a `pages/[locale]/` tree of thin re-exports rather than the
+ * alternatives. Duplicating each page under `pages/ar/` and `pages/fr/`
+ * means three copies of every page to keep in step, which is the drift this
+ * codebase has been removing all week. Moving to the app router for its
+ * `[locale]` segment is the better long-term shape and far too large a
+ * change to make as a side effect of shipping two languages. Thin
+ * re-exports keep one component per page and put the locale in the URL.
+ *
+ * The default locale is deliberately absent from the generated paths: it is
+ * served from the root, and emitting `/en/pricing/` as well would be two
+ * URLs for one page.
+ */
+
+export interface LocaleRouteParams {
+  locale: string;
+  /** Path segments after the locale, empty for the locale root. */
+  slug: string[];
+}
+
+/** Route segments for one localised path, minus the leading slash. */
+const segmentsOf = (route: string): string[] => route.split('/').filter(Boolean);
+
+/**
+ * Every `[locale]` path the export should produce: each shipped
+ * non-default locale crossed with each translated route.
+ *
+ * Returns an empty list while only the default locale ships, which is what
+ * keeps `/ar/` and `/fr/` out of the build until their copy is reviewed.
+ */
+export function localeRouteParams(): LocaleRouteParams[] {
+  return shippedLocales()
+    .filter((l) => l.code !== DEFAULT_LOCALE)
+    .flatMap((l) => LOCALISED_ROUTES.map((route) => ({ locale: l.code, slug: segmentsOf(route) })));
+}
+
+/**
+ * The un-prefixed route a `[locale]` param set corresponds to, in the
+ * canonical trailing-slash form. `{ locale: 'ar', slug: ['pricing'] }`
+ * becomes `/pricing/`, which is the key the page components and the OG
+ * image slug are both derived from.
+ */
+export function baseRouteOf(slug: string[] | undefined): string {
+  const parts = (slug ?? []).filter(Boolean);
+  return parts.length ? `/${parts.join('/')}/` : '/';
 }
