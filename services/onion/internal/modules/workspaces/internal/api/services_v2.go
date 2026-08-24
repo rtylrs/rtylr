@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
@@ -204,6 +205,11 @@ func (a *CycleAPIV2) CreateCycle(ctx context.Context, req *flowcyclev2.CreateCyc
 	}
 	cycle, err := a.Service.CreateCycleV2(ctx, businessID, req.GetProjectId(), req.GetName(), req.GetStartDate(), req.GetEndDate())
 	if err != nil {
+		// A bad date pair is the caller's mistake, not an outage. Reported as 500
+		// it would look like a broken server and get retried forever.
+		if errors.Is(err, application.ErrInvalidCycleDates) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "start_date and end_date are invalid")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create cycle")
 	}
 	return &flowcyclev2.CreateCycleResponse{Cycle: &flowcyclev2.Cycle{

@@ -343,9 +343,58 @@ func (s *Service) ListCyclesV2(ctx context.Context, projectID, businessID, limit
 	return s.repo.ListCyclesV2(ctx, projectID, businessID, limit, offset)
 }
 
+// ErrInvalidCycleDates reports a start/end pair a cycle cannot be created from.
+// The v1 handler grew these guards in the security/infra audit (4514d877); v2
+// had none, and its time.Parse discarded the error, so an unparseable or empty
+// date became the zero time and a year-0001 row. Deleting the v1 handler without
+// this would have quietly undone that audit fix on the only remaining path.
+var ErrInvalidCycleDates = errors.New("cycle dates are invalid")
+
+// NormalizeCycleDates parses and defaults a cycle's date pair.
+//
+// A pure function so the rules can be tested without a repository: the previous
+// shape only failed once it reached the database, which made the interesting
+// cases untestable except by panic.
+//
+// An empty date is defaulted, not rejected, matching v1 - a caller supplying only
+// an end date gets today as the start. An unparseable one is rejected, because
+// silently treating "not-a-date" as the zero time is how the year-0001 rows got
+// written.
+func NormalizeCycleDates(startDate, endDate string) (time.Time, time.Time, error) {
+	var start, end time.Time
+
+	if startDate != "" {
+		parsed, err := time.Parse("2006-01-02", startDate)
+		if err != nil {
+			return time.Time{}, time.Time{}, ErrInvalidCycleDates
+		}
+		start = parsed
+	}
+	if endDate != "" {
+		parsed, err := time.Parse("2006-01-02", endDate)
+		if err != nil {
+			return time.Time{}, time.Time{}, ErrInvalidCycleDates
+		}
+		end = parsed
+	}
+
+	if start.IsZero() {
+		start = time.Now().UTC().Truncate(24 * time.Hour)
+	}
+	if end.IsZero() {
+		end = start.AddDate(0, 0, 14)
+	}
+	if end.Before(start) {
+		return time.Time{}, time.Time{}, ErrInvalidCycleDates
+	}
+	return start, end, nil
+}
+
 func (s *Service) CreateCycleV2(ctx context.Context, businessID, projectID int64, name, startDate, endDate string) (domain.Cycle, error) {
-	sd, _ := time.Parse("2006-01-02", startDate)
-	ed, _ := time.Parse("2006-01-02", endDate)
+	sd, ed, dateErr := NormalizeCycleDates(startDate, endDate)
+	if dateErr != nil {
+		return domain.Cycle{}, dateErr
+	}
 	id, err := s.repo.CreateCycleV2(ctx, domain.CycleInput{
 		BusinessID: businessID, ProjectID: &projectID,
 		Name: name, StartDate: sd, EndDate: ed,
