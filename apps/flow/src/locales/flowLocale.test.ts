@@ -94,6 +94,11 @@ describe('flow locale parity', () => {
       // visibility.private ("Privé") does differ, which is the check that this
       // is a cognate rather than an untranslated string.
       'visibility.public',
+      // "Backlog" is the standard French agile/kanban term too - it is not
+      // translated in French project-management tooling generally. Its
+      // sibling bucket.active/done/cancelled all differ, which is the check
+      // that this is a cognate rather than a missed translation.
+      'status.bucket.backlog',
     ]);
 
     const copied = keyPaths(en).filter((path) => {
