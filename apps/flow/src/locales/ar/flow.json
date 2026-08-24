@@ -839,5 +839,11 @@
   },
   "sidebar": {
     "yourReports": "مشاريع فريقك"
+  },
+  "toasts": {
+    "project": {
+      "archived": "تمت أرشفة المشروع.",
+      "archivedUntil": "تمت أرشفة المشروع. سيُحذف نهائيًا في {{date}}."
+    }
   }
 }
