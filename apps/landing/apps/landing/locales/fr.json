@@ -876,6 +876,86 @@
       ]
     }
   },
+  "trust": {
+    "meta": {
+      "title": "Centre de confiance | rtylr",
+      "description": "Sécurité, confidentialité, conformité, disponibilité et transparence sur nos prestataires\u00a0: tout ce qu’il faut savoir avant de vous engager."
+    },
+    "pillars": [
+      {
+        "title": "Programme de sécurité",
+        "copy": "Programme formel de sécurité de l’information aligné sur les normes ISO 27001 et SOC 2. Revu chaque trimestre."
+      },
+      {
+        "title": "Chiffrement",
+        "copy": "TLS 1.2+ en transit, AES-256 au repos. Sauvegardes conservées dans des régions distinctes et secrets gérés dans un coffre à secrets managé."
+      },
+      {
+        "title": "Contrôle des accès",
+        "copy": "SSO et MFA obligatoire en production. Principe du moindre privilège, avec des accès revus chaque trimestre."
+      },
+      {
+        "title": "Infrastructure",
+        "copy": "Cloudflare en périphérie de réseau, services managés Firebase / GCP, sauvegardes multirégions avec restauration à un instant donné (PITR)."
+      },
+      {
+        "title": "Supervision 24\u00a0h/24 et 7\u00a0j/7",
+        "copy": "Surveillance et alertes en continu. Runbook documenté de réponse aux incidents. Notification des violations sous 72 heures."
+      },
+      {
+        "title": "Gestion des vulnérabilités",
+        "copy": "Dépendances analysées à chaque build. Test d’intrusion annuel réalisé par un tiers. CVE critiques corrigées sous 7 jours."
+      }
+    ],
+    "compliance": [
+      {
+        "label": "RGPD / RGPD britannique",
+        "status": "Conforme"
+      },
+      {
+        "label": "CCPA / CPRA",
+        "status": "Conforme"
+      },
+      {
+        "label": "PCI DSS",
+        "status": "Via Paddle (niveau 1)"
+      },
+      {
+        "label": "SOC 2 Type II",
+        "status": "En cours · T4 2026"
+      },
+      {
+        "label": "ISO 27001",
+        "status": "Aligné, pas encore certifié"
+      },
+      {
+        "label": "HIPAA",
+        "status": "Non applicable"
+      }
+    ],
+    "hero": {
+      "eyebrow": "CENTRE DE CONFIANCE",
+      "title": "Un logiciel digne de confiance pour faire tourner votre entreprise.",
+      "securityDocs": "Documentation de sécurité",
+      "privacyPolicy": "Politique de confidentialité"
+    },
+    "pillarsSection": {
+      "eyebrow": "COMMENT NOUS PROTÉGEONS VOS DONNÉES",
+      "title": "Six sujets que nous prenons\nau sérieux chaque jour.",
+      "learnMore": "En savoir plus →"
+    },
+    "complianceSection": {
+      "eyebrow": "POSTURE DE CONFORMITÉ",
+      "title": "Où nous en sommes.",
+      "copy": "Nous publions notre statut de conformité en toute transparence, qu’il soit certifié, aligné ou en cours."
+    },
+    "residency": {
+      "title": "Où sont hébergées vos données, et comment les emporter avec vous."
+    },
+    "packet": {
+      "title": "Besoin de notre dossier de sécurité, de notre SIG ou de notre DPA\u00a0?"
+    }
+  },
   "legal": {
     "terms": {
       "meta": {
