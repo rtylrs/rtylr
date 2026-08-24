@@ -632,7 +632,45 @@
     },
     "mock": {
       "reset": "Reset",
-      "resetLabel": "Reset inventory"
+      "resetLabel": "Reset inventory",
+      "tabs": {
+        "allSkus": "All SKUs",
+        "lowStock": "Low stock · {{count}}",
+        "suppliers": "Suppliers",
+        "purchaseOrders": "Purchase orders"
+      },
+      "simulate": "Simulate Friday service",
+      "simulateRunning": "Service running…",
+      "table": {
+        "sku": "SKU",
+        "item": "Item",
+        "onHand": "On hand",
+        "min": "Min",
+        "status": "Status"
+      },
+      "status": {
+        "critical": "Critical",
+        "reorder": "Reorder",
+        "healthy": "Healthy"
+      },
+      "footer_one": "Auto-reorder triggered for {{count}} item · PO #{{po}} drafted",
+      "footer_other": "Auto-reorder triggered for {{count}} items · PO #{{po}} drafted"
+    },
+    "flow": {
+      "steps": [
+        {
+          "title": "1 Margherita sold",
+          "desc": "POS fires recipe lookup"
+        },
+        {
+          "title": "7 ingredients depleted",
+          "desc": "Flour, mozz, basil, oil, salt, yeast, dough"
+        },
+        {
+          "title": "PO auto-drafted",
+          "desc": "Routed for manager approval"
+        }
+      ]
     }
   },
   "crm": {

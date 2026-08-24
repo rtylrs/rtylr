@@ -54,6 +54,7 @@ function statusFor(row: InventoryRow): 'critical' | 'low' | 'ok' {
 }
 
 const CAPABILITY_ICONS = [Boxes, Truck, Warehouse, AlertTriangle];
+const FLOW_ICONS = [Package, TrendingDown, Truck];
 
 const ERPPage = (): React.JSX.Element => {
   const faq = useFaq('erp');
@@ -62,6 +63,10 @@ const ERPPage = (): React.JSX.Element => {
   const capabilities = t('erp.capabilities.items', { returnObjects: true }) as unknown as {
     title: string;
     copy: string;
+  }[];
+  const flowSteps = t('erp.flow.steps', { returnObjects: true }) as unknown as {
+    title: string;
+    desc: string;
   }[];
   const router = useRouter();
   const [inventory, setInventory] = useState<InventoryRow[]>(INITIAL_INVENTORY);
@@ -153,10 +158,10 @@ const ERPPage = (): React.JSX.Element => {
               </motion.p>
               <motion.div className={styles.heroCtas} variants={blurFadeIn}>
                 <button type="button" onClick={goRegister} className={styles.primaryBtn}>
-                  Get started
+                  {t('common.cta.getStarted')}
                 </button>
                 <button type="button" onClick={goDemo} className={styles.outlineBtn}>
-                  Book a demo
+                  {t('common.cta.bookDemo')}
                 </button>
               </motion.div>
             </motion.div>
@@ -171,10 +176,14 @@ const ERPPage = (): React.JSX.Element => {
             >
               <div className={styles.tableHeader}>
                 <div className={styles.tableTabs}>
-                  <span className={cn(styles.tableTab, styles.tableTabActive)}>All SKUs</span>
-                  <span className={styles.tableTab}>Low stock · {lowStockCount}</span>
-                  <span className={styles.tableTab}>Suppliers</span>
-                  <span className={styles.tableTab}>Purchase orders</span>
+                  <span className={cn(styles.tableTab, styles.tableTabActive)}>
+                    {t('erp.mock.tabs.allSkus')}
+                  </span>
+                  <span className={styles.tableTab}>
+                    {t('erp.mock.tabs.lowStock', { count: lowStockCount })}
+                  </span>
+                  <span className={styles.tableTab}>{t('erp.mock.tabs.suppliers')}</span>
+                  <span className={styles.tableTab}>{t('erp.mock.tabs.purchaseOrders')}</span>
                 </div>
                 <div className={styles.tableActions}>
                   <button
@@ -186,12 +195,12 @@ const ERPPage = (): React.JSX.Element => {
                     {isSimulating ? (
                       <>
                         <span className={styles.simulatePulse} />
-                        Service running…
+                        {t('erp.mock.simulateRunning')}
                       </>
                     ) : (
                       <>
                         <Play size={11} strokeWidth={2.5} fill="currentColor" />
-                        Simulate Friday service
+                        {t('erp.mock.simulate')}
                       </>
                     )}
                   </button>
@@ -209,11 +218,11 @@ const ERPPage = (): React.JSX.Element => {
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>SKU</th>
-                    <th>Item</th>
-                    <th className={styles.colNum}>On hand</th>
-                    <th className={styles.colNum}>Min</th>
-                    <th>Status</th>
+                    <th>{t('erp.mock.table.sku')}</th>
+                    <th>{t('erp.mock.table.item')}</th>
+                    <th className={styles.colNum}>{t('erp.mock.table.onHand')}</th>
+                    <th className={styles.colNum}>{t('erp.mock.table.min')}</th>
+                    <th>{t('erp.mock.table.status')}</th>
                     <th className={styles.colAction} />
                   </tr>
                 </thead>
@@ -267,10 +276,10 @@ const ERPPage = (): React.JSX.Element => {
                             transition={{ duration: 0.2 }}
                           >
                             {status === 'critical'
-                              ? 'Critical'
+                              ? t('erp.mock.status.critical')
                               : status === 'low'
-                                ? 'Reorder'
-                                : 'Healthy'}
+                                ? t('erp.mock.status.reorder')
+                                : t('erp.mock.status.healthy')}
                           </motion.span>
                         </td>
                         <td className={styles.colAction}>
@@ -284,8 +293,7 @@ const ERPPage = (): React.JSX.Element => {
               <div className={styles.tableFooter}>
                 <span>
                   <Zap size={12} strokeWidth={2.5} />
-                  Auto-reorder triggered for {lowStockCount} item{lowStockCount === 1 ? '' : 's'} ·
-                  PO #{4821 + lowStockCount} drafted
+                  {t('erp.mock.footer', { count: lowStockCount, po: 4821 + lowStockCount })}
                 </span>
               </div>
             </motion.div>
@@ -351,37 +359,23 @@ const ERPPage = (): React.JSX.Element => {
               <h2 className={styles.depletionTitle}>{t('erp.depletion.title')}</h2>
               <p className={styles.depletionCopy}>{t('erp.depletion.copy')}</p>
               <div className={styles.depletionFlow}>
-                <div className={styles.flowStep}>
-                  <div className={styles.flowStepIcon}>
-                    <Package size={16} strokeWidth={2} />
-                  </div>
-                  <div>
-                    <div className={styles.flowStepTitle}>1 Margherita sold</div>
-                    <div className={styles.flowStepDesc}>POS fires recipe lookup</div>
-                  </div>
-                </div>
-                <div className={styles.flowArrow}>→</div>
-                <div className={styles.flowStep}>
-                  <div className={styles.flowStepIcon}>
-                    <TrendingDown size={16} strokeWidth={2} />
-                  </div>
-                  <div>
-                    <div className={styles.flowStepTitle}>7 ingredients depleted</div>
-                    <div className={styles.flowStepDesc}>
-                      Flour, mozz, basil, oil, salt, yeast, dough
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.flowArrow}>→</div>
-                <div className={styles.flowStep}>
-                  <div className={styles.flowStepIcon}>
-                    <Truck size={16} strokeWidth={2} />
-                  </div>
-                  <div>
-                    <div className={styles.flowStepTitle}>PO auto-drafted</div>
-                    <div className={styles.flowStepDesc}>Routed for manager approval</div>
-                  </div>
-                </div>
+                {flowSteps.map(({ title, desc }, i) => {
+                  const Icon = FLOW_ICONS[i];
+                  return (
+                    <React.Fragment key={title}>
+                      {i > 0 && <div className={cn(styles.flowArrow, 'rtl-mirror')}>→</div>}
+                      <div className={styles.flowStep}>
+                        <div className={styles.flowStepIcon}>
+                          <Icon size={16} strokeWidth={2} />
+                        </div>
+                        <div>
+                          <div className={styles.flowStepTitle}>{title}</div>
+                          <div className={styles.flowStepDesc}>{desc}</div>
+                        </div>
+                      </div>
+                    </React.Fragment>
+                  );
+                })}
               </div>
             </motion.div>
           </motion.section>
