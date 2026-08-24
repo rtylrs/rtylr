@@ -388,7 +388,45 @@
     },
     "mock": {
       "reset": "Réinitialiser",
-      "resetLabel": "Réinitialiser les stocks"
+      "resetLabel": "Réinitialiser les stocks",
+      "tabs": {
+        "allSkus": "Toutes les références",
+        "lowStock": "Stock bas · {{count}}",
+        "suppliers": "Fournisseurs",
+        "purchaseOrders": "Bons de commande"
+      },
+      "simulate": "Simuler le service du vendredi",
+      "simulateRunning": "Service en cours…",
+      "table": {
+        "sku": "Référence",
+        "item": "Article",
+        "onHand": "En stock",
+        "min": "Seuil",
+        "status": "État"
+      },
+      "status": {
+        "critical": "Critique",
+        "reorder": "À réassortir",
+        "healthy": "Suffisant"
+      },
+      "footer_one": "Réassort automatique déclenché pour {{count}} article · bon de commande n°\u00a0{{po}} préparé",
+      "footer_other": "Réassort automatique déclenché pour {{count}} articles · bon de commande n°\u00a0{{po}} préparé"
+    },
+    "flow": {
+      "steps": [
+        {
+          "title": "1 margherita vendue",
+          "desc": "POS interroge la fiche recette"
+        },
+        {
+          "title": "7 ingrédients décrémentés",
+          "desc": "Farine, mozza, basilic, huile, sel, levure, pâte"
+        },
+        {
+          "title": "Bon de commande préparé automatiquement",
+          "desc": "Envoyé au responsable pour approbation"
+        }
+      ]
     }
   },
   "contact": {
