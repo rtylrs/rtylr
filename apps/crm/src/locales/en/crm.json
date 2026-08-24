@@ -115,7 +115,8 @@
     "notFoundDescription": "This segment could not be loaded.",
     "backToSegments": "Back to segments",
     "noCustomersTitle": "No customers",
-    "noCustomersDescription": "This segment is empty."
+    "noCustomersDescription": "This segment is empty.",
+    "loadMoreCustomers": "Load more customers"
   },
   "automations": {
     "created": "Automation created",

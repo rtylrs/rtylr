@@ -115,7 +115,8 @@
     "notFoundDescription": "Ce segment n'a pas pu être chargé.",
     "backToSegments": "Retour aux segments",
     "noCustomersTitle": "Aucun client",
-    "noCustomersDescription": "Ce segment est vide."
+    "noCustomersDescription": "Ce segment est vide.",
+    "loadMoreCustomers": "Charger plus de clients"
   },
   "automations": {
     "created": "Automation created",

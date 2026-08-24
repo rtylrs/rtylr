@@ -42,8 +42,11 @@ vi.mock('../../shared/hooks/queries/useSegments', () => ({
     error: segmentMocks.segmentError,
   }),
   useSegmentCustomers: () => ({
-    data: customersInSegment,
+    data: { pages: [{ customers: customersInSegment }] },
     isLoading: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: vi.fn(),
     refetch: refetchSegmentCustomers,
   }),
 }));
