@@ -141,7 +141,10 @@
       "title": "Aucun entrepôt",
       "description": "Créez votre premier entrepôt pour suivre les emplacements"
     },
-    "status": { "default": "Par défaut", "inactive": "Inactif" },
+    "status": {
+      "default": "Par défaut",
+      "inactive": "Inactif"
+    },
     "delete": "Supprimer l'entrepôt",
     "managedBy": "Géré par {{name}}",
     "capacity": "Capacité",
@@ -155,7 +158,9 @@
       "manager": "Nom du responsable (facultatif)",
       "capacity": "Capacité (facultatif)"
     },
-    "validation": { "nameRequired": "Le nom de l'entrepôt est requis" },
+    "validation": {
+      "nameRequired": "Le nom de l'entrepôt est requis"
+    },
     "toast": {
       "created": "Entrepôt créé",
       "createFailed": "Échec de la création de l'entrepôt",
@@ -176,7 +181,9 @@
     },
     "goToPurchasing": "Aller aux bons de commande",
     "orderSummary": "{{count}} articles / Prévu le {{date}}",
-    "validation": { "overReceived": "Impossible de recevoir plus d'unités que commandé" },
+    "validation": {
+      "overReceived": "Impossible de recevoir plus d'unités que commandé"
+    },
     "toast": {
       "completed": "Réception terminée, tous les articles reçus",
       "completedVariance": "Réception terminée avec un écart de {{count}} unités",
@@ -251,7 +258,9 @@
   },
   "settings": {
     "team": {
-      "empty": { "title": "Pas encore de membres d'équipe." },
+      "empty": {
+        "title": "Pas encore de membres d'équipe."
+      },
       "invite": "Inviter un membre",
       "refresh": "Actualiser"
     }
@@ -270,5 +279,8 @@
       "description": "La valorisation apparaît une fois que l'inventaire est suivi dans un entrepôt."
     },
     "refresh": "Actualiser"
+  },
+  "supplierBills": {
+    "supplierBills": "{count} facture(s)"
   }
 }

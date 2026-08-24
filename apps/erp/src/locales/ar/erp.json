@@ -141,7 +141,10 @@
       "title": "لا توجد مستودعات",
       "description": "أنشئ مستودعك الأول لتتبع مواقع المخزون"
     },
-    "status": { "default": "افتراضي", "inactive": "غير نشط" },
+    "status": {
+      "default": "افتراضي",
+      "inactive": "غير نشط"
+    },
     "delete": "حذف المستودع",
     "managedBy": "يديره {{name}}",
     "capacity": "السعة",
@@ -155,7 +158,9 @@
       "manager": "اسم المدير (اختياري)",
       "capacity": "السعة (اختياري)"
     },
-    "validation": { "nameRequired": "اسم المستودع مطلوب" },
+    "validation": {
+      "nameRequired": "اسم المستودع مطلوب"
+    },
     "toast": {
       "created": "تم إنشاء المستودع",
       "createFailed": "فشل إنشاء المستودع",
@@ -170,10 +175,15 @@
     "expected": "المتوقع {{count}}",
     "ok": "موافق",
     "markReceived": "تحديد كمستلم",
-    "empty": { "title": "لا توجد أوامر مفتوحة للاستلام", "description": "تم استلام جميع الطلبات" },
+    "empty": {
+      "title": "لا توجد أوامر مفتوحة للاستلام",
+      "description": "تم استلام جميع الطلبات"
+    },
     "goToPurchasing": "الانتقال إلى أوامر الشراء",
     "orderSummary": "{{count}} عناصر / الموعد {{date}}",
-    "validation": { "overReceived": "لا يمكن استلام وحدات أكثر من الكمية المطلوبة" },
+    "validation": {
+      "overReceived": "لا يمكن استلام وحدات أكثر من الكمية المطلوبة"
+    },
     "toast": {
       "completed": "اكتمل الاستلام، تم استلام جميع العناصر",
       "completedVariance": "اكتمل الاستلام مع فرق {{count}} وحدة",
@@ -248,7 +258,9 @@
   },
   "settings": {
     "team": {
-      "empty": { "title": "لا يوجد أعضاء فريق بعد." },
+      "empty": {
+        "title": "لا يوجد أعضاء فريق بعد."
+      },
       "invite": "دعوة عضو",
       "refresh": "تحديث"
     }
@@ -267,5 +279,8 @@
       "description": "يظهر التقييم بعد تتبّع المخزون في أحد المستودعات."
     },
     "refresh": "تحديث"
+  },
+  "supplierBills": {
+    "supplierBills": "{count} فاتورة"
   }
 }

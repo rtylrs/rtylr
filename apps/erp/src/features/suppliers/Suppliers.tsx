@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import type { Supplier } from './useSuppliers';
 import { useSuppliers, useCreateSupplier } from './useSuppliers';
 import SupplierScorecard from '../../shared/components/SupplierScorecard';
+import SupplierBillHistory from '../../shared/components/SupplierBillHistory';
 import ExportButton from '../../shared/components/ExportButton';
 import PaginationControls from '../../shared/components/PaginationControls';
 import { canErpPermission } from '../../shared/lib/erpPermissions';
@@ -209,7 +210,10 @@ const Suppliers: React.FC = () => {
       {showScorecards && (
         <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           {suppliers.map((s) => (
-            <SupplierScorecard key={s.id} supplier={s} />
+            <div key={s.id}>
+              <SupplierScorecard supplier={s} />
+              <SupplierBillHistory supplier={s} />
+            </div>
           ))}
         </motion.div>
       )}
