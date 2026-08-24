@@ -30,9 +30,10 @@ import Lines from '../../components/text/Lines';
 import styles from './erp.module.scss';
 
 // Initial inventory, stock drains each time "Simulate Friday service" fires.
+// nameIndex points at erp.hero.inventory.items[i] for the display name.
 interface InventoryRow {
   sku: string;
-  name: string;
+  nameIndex: number;
   stock: number;
   min: number;
   // Depletion rate per simulated service cycle
@@ -40,11 +41,11 @@ interface InventoryRow {
 }
 
 const INITIAL_INVENTORY: InventoryRow[] = [
-  { sku: 'PIZ-MARG', name: 'Margherita (8oz dough)', stock: 34, min: 40, drain: 4 },
-  { sku: 'WIN-RED-02', name: 'House Red (750ml)', stock: 124, min: 60, drain: 12 },
-  { sku: 'OIL-OLIVE', name: 'Olive Oil (5L)', stock: 6, min: 12, drain: 1 },
-  { sku: 'COF-BEAN', name: 'Espresso Bean (1kg)', stock: 58, min: 30, drain: 6 },
-  { sku: 'FLR-00-3KG', name: 'Flour 00 (3kg)', stock: 19, min: 25, drain: 3 },
+  { sku: 'PIZ-MARG', nameIndex: 0, stock: 34, min: 40, drain: 4 },
+  { sku: 'WIN-RED-02', nameIndex: 1, stock: 124, min: 60, drain: 12 },
+  { sku: 'OIL-OLIVE', nameIndex: 2, stock: 6, min: 12, drain: 1 },
+  { sku: 'COF-BEAN', nameIndex: 3, stock: 58, min: 30, drain: 6 },
+  { sku: 'FLR-00-3KG', nameIndex: 4, stock: 19, min: 25, drain: 3 },
 ];
 
 function statusFor(row: InventoryRow): 'critical' | 'low' | 'ok' {
@@ -68,6 +69,7 @@ const ERPPage = (): React.JSX.Element => {
     title: string;
     desc: string;
   }[];
+  const inventoryItemNames = t('erp.hero.inventory.items', { returnObjects: true }) as string[];
   const router = useRouter();
   const [inventory, setInventory] = useState<InventoryRow[]>(INITIAL_INVENTORY);
   const [isSimulating, setIsSimulating] = useState(false);
@@ -233,7 +235,7 @@ const ERPPage = (): React.JSX.Element => {
                     return (
                       <tr key={row.sku}>
                         <td className={styles.cellSku}>{row.sku}</td>
-                        <td>{row.name}</td>
+                        <td>{inventoryItemNames[row.nameIndex]}</td>
                         <td className={styles.colNum}>
                           <motion.span
                             key={row.stock}
