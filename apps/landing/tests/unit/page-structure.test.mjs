@@ -5,6 +5,8 @@ import { globSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
+import { basePathOf } from '../../apps/landing/lib/locales.ts';
+
 // ---------------------------------------------------------------------------
 // Standing gates, asserted against the build output rather than the source.
 //
@@ -181,16 +183,28 @@ describe('Open Graph images', () => {
     assert.deepEqual(broken, [], 'og:image URLs pointing at files that do not exist');
   });
 
+  // A page's export path, as basePathOf() expects it: 'ar/pricing/index.html'
+  // -> '/ar/pricing/', 'index.html' -> '/'.
+  const routeOf = (p) => `/${p.replace(/index\.html$/, '')}`;
+
   it('no two indexable pages share the same og:image', () => {
     // The defect this replaces: one og-default.png on all 24 pages, so
     // every shared link looked the same. 404 is allowed the default.
+    //
+    // A locale sibling of the same route is allowed to share: /pricing/,
+    // /ar/pricing/ and /fr/pricing/ all cover one route and one image is
+    // generated for it, not one per route per locale. basePathOf() is what
+    // tells apart "same route, different locale" (fine) from "different
+    // route, same image" (the actual bug this test exists to catch).
     const byImage = new Map();
     for (const p of pages.filter((x) => x !== '404/index.html')) {
       const url = ogOf(read(p));
       byImage.set(url, [...(byImage.get(url) ?? []), p]);
     }
-    const shared = [...byImage].filter(([, ps]) => ps.length > 1);
-    assert.deepEqual(shared, [], 'pages sharing an OG image');
+    const shared = [...byImage]
+      .filter(([, ps]) => ps.length > 1)
+      .filter(([, ps]) => new Set(ps.map((p) => basePathOf(routeOf(p)))).size > 1);
+    assert.deepEqual(shared, [], 'pages sharing an OG image across different routes');
   });
 
   it('the og image dimensions match the declared width and height', () => {
