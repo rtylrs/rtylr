@@ -32,6 +32,56 @@ const baseCampaign = {
   updatedAt: '2024-06-01',
 };
 
+/**
+ * The shape the generated client actually returns. rtylr#939.
+ *
+ * Reads go through CampaignServiceClient, so the wire carries the contract's
+ * field names: channel, content, openedCount, segmentId. The schema used to
+ * declare the retired REST names, and because every one of them had a .default
+ * or .catch, zod substituted silently instead of failing: channel was lost so
+ * TYPE_TO_CHANNEL[''] made every campaign an Email badge, and openedCount was
+ * lost so the open rate was permanently 0%.
+ */
+const wireCampaign = {
+  id: 1,
+  name: 'Summer Sale',
+  description: 'Seasonal push',
+  channel: 'sms',
+  status: 'active',
+  segmentId: 3,
+  subject: 'Big summer savings',
+  content: 'Shop now',
+  audienceCount: 500,
+  sentCount: 480,
+  openedCount: 200,
+  updatedAt: '2024-06-01',
+};
+
+describe('campaignSchema against the contract wire shape (rtylr#939)', () => {
+  it('reads the delivery channel, so the badge is not always Email', () => {
+    // 'sms', deliberately not the 'email' that a lost value falls back to.
+    expect(campaignSchema.parse(wireCampaign).type).toBe('sms');
+  });
+
+  it('reads openedCount, so the open rate is not always 0%', () => {
+    const parsed = campaignSchema.parse(wireCampaign);
+    expect(parsed.openCount).toBe(200);
+    expect(Math.round(calculateOpenRate(parsed))).toBe(42);
+  });
+
+  it('reads content, so editing does not drop the body', () => {
+    expect(campaignSchema.parse(wireCampaign).body).toBe('Shop now');
+  });
+
+  it('reads segmentId, so editing does not drop the audience link', () => {
+    expect(campaignSchema.parse(wireCampaign).audienceSegmentId).toBe(3);
+  });
+
+  it('keeps the description the contract now returns', () => {
+    expect(campaignSchema.parse(wireCampaign).description).toBe('Seasonal push');
+  });
+});
+
 describe('campaignSchema', () => {
   it('parses a valid campaign object', () => {
     const result = campaignSchema.parse(baseCampaign);
