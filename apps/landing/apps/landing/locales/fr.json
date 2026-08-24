@@ -237,7 +237,41 @@
       "moreOptions": "Plus d’options",
       "submit": "Commencer à construire",
       "demoLinePrefix": "Parlez à un expert et",
-      "demoLineLink": "réservez une démo"
+      "demoLineLink": "réservez une démo",
+      "stats": [
+        {
+          "number": "50\u00a0k+",
+          "label": "Transactions par jour"
+        },
+        {
+          "number": "99,9\u00a0%",
+          "label": "Disponibilité"
+        },
+        {
+          "number": "20+",
+          "label": "Pays"
+        },
+        {
+          "number": "24/7",
+          "label": "Support"
+        },
+        {
+          "number": "Hors ligne",
+          "label": "Toujours opérationnel"
+        },
+        {
+          "number": "IA",
+          "label": "Intégrée"
+        },
+        {
+          "number": "Multi",
+          "label": "Langues"
+        },
+        {
+          "number": "Cloud",
+          "label": "Natif"
+        }
+      ]
     },
     "features": {
       "badge": "LA PLATEFORME",
@@ -295,7 +329,17 @@
           "addItems": "Ajoutez des articles…",
           "total": "Total",
           "charge": "Encaisser",
-          "chargeAmount": "Encaisser {{amount}}\u00a0$"
+          "chargeAmount": "Encaisser {{amount}}\u00a0$",
+          "items": [
+            "Expresso",
+            "Café latte",
+            "Cappuccino",
+            "Croissant",
+            "Jus d’orange",
+            "Tartine à l’avocat",
+            "Salade grecque",
+            "Cheesecake"
+          ]
         },
         "erp": {
           "inventory": "Stocks",
@@ -314,6 +358,22 @@
             "critical": "Critique",
             "low": "Faible",
             "ok": "OK"
+          },
+          "items": [
+            "Huile d’olive 5\u00a0L",
+            "Farine 25\u00a0kg",
+            "Café en grains",
+            "Saumon atlantique",
+            "Huile de truffe",
+            "Crème entière",
+            "Pain au levain"
+          ],
+          "units": {
+            "btl": "bout.",
+            "bag": "sac",
+            "kg": "kg",
+            "L": "L",
+            "pcs": "pces"
           }
         },
         "crm": {
@@ -382,7 +442,26 @@
             "review": "À valider",
             "done": "Terminé"
           },
-          "priorityHigh": "Haute"
+          "priorityHigh": "Haute",
+          "tasks": {
+            "t1": "Lancement de la carte de saison, T3",
+            "t2": "Nouveau fournisseur\u00a0: Rossini",
+            "t3": "Couverts du vendredi, planning des équipes",
+            "t4": "Refaire la checklist de mise en place du brunch",
+            "t5": "Campagne e-mail\u00a0: fête des Mères",
+            "t6": "Contrat de maintenance, machine à expresso",
+            "t7": "Déclaration de TVA, T1",
+            "t8": "Firmware POS v4.2"
+          },
+          "tags": {
+            "ops": "Opérations",
+            "erp": "ERP",
+            "hr": "HR",
+            "kitchen": "Cuisine",
+            "crm": "CRM",
+            "vendor": "Fournisseur",
+            "finance": "Finance"
+          }
         },
         "insights": {
           "revenue": "Chiffre d’affaires",
@@ -401,6 +480,11 @@
             "fri": "ven.",
             "sat": "sam.",
             "sun": "dim."
+          },
+          "ranges": {
+            "7d": "7\u00a0j",
+            "30d": "30\u00a0j",
+            "90d": "90\u00a0j"
           }
         }
       }
