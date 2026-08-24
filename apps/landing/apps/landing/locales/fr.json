@@ -937,7 +937,8 @@
       "eyebrow": "CENTRE DE CONFIANCE",
       "title": "Un logiciel digne de confiance pour faire tourner votre entreprise.",
       "securityDocs": "Documentation de sécurité",
-      "privacyPolicy": "Politique de confidentialité"
+      "privacyPolicy": "Politique de confidentialité",
+      "subtitle": "Sécurité, confidentialité, disponibilité, conformité\u00a0: autant de sujets qui devraient aller de soi, et que nous exposons ici noir sur blanc. De quoi évaluer rtylr avant de vous engager."
     },
     "pillarsSection": {
       "eyebrow": "COMMENT NOUS PROTÉGEONS VOS DONNÉES",
@@ -950,10 +951,19 @@
       "copy": "Nous publions notre statut de conformité en toute transparence, qu’il soit certifié, aligné ou en cours."
     },
     "residency": {
-      "title": "Où sont hébergées vos données, et comment les emporter avec vous."
+      "title": "Où sont hébergées vos données, et comment les emporter avec vous.",
+      "body": "Les Données client sont hébergées dans la région cloud la mieux adaptée aux réglages de votre espace de travail. Un hébergement en région UE est disponible sur demande pour les clients soumis à des exigences de résidence des données. Vous pouvez exporter l’intégralité de votre espace de travail à tout moment depuis les réglages, en CSV, en XLSX ou par extraction via l’API. À la clôture du compte, vos données sont conservées 30 jours afin de permettre une restauration, puis supprimées des systèmes actifs sous 60 jours et des sauvegardes sous 90 jours."
     },
     "packet": {
-      "title": "Besoin de notre dossier de sécurité, de notre SIG ou de notre DPA\u00a0?"
+      "title": "Besoin de notre dossier de sécurité, de notre SIG ou de notre DPA\u00a0?",
+      "body": "Écrivez à <secMail>security@voxire.com</secMail> et nous vous enverrons le dossier à jour sous NDA dans un délai de 7 jours ouvrés, avec le dernier état d’avancement de notre audit SOC 2 Type II."
+    },
+    "status": {
+      "operational": "Tous les systèmes sont opérationnels",
+      "viewLive": "État des services en direct sur <statusLink>status.rtylr.com</statusLink>",
+      "uptimeLabel": "Disponibilité sur 90 jours glissants",
+      "breachLabel": "Engagement de notification des violations",
+      "penTestLabel": "Test d’intrusion annuel réalisé par un tiers"
     }
   },
   "legal": {
