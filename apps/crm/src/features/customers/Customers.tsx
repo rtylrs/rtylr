@@ -22,6 +22,7 @@ import { type Customer } from '../../shared/schemas/customers';
 import { getCustomerTier, thresholdsFromConfig, Tier, tierColor } from '../../shared/lib/tiers';
 import { Button, PageHeader, SkeletonList } from '../../shared/components/ui';
 import { CustomerAvatar, TierBadge, TagChip } from '../../shared/components/crm';
+import { customersToCsv } from './customerExport';
 
 const ACCENT = '#3b82f6';
 
@@ -213,21 +214,7 @@ const Customers: React.FC = () => {
   };
 
   const exportCsv = () => {
-    const rows = [
-      ['Name', 'Email', 'Phone', 'Spent', 'Visits', 'Points', 'Tier'],
-      ...filtered.map((c) => [
-        c.name,
-        c.email,
-        c.phone,
-        String(c.totalSpent),
-        String(c.visits),
-        String(c.loyaltyPoints),
-        getCustomerTier(c.loyaltyPoints, c.loyaltyTier, thresholds),
-      ]),
-    ];
-    const csv = rows
-      .map((r) => r.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(','))
-      .join('\n');
+    const csv = customersToCsv(filtered, thresholds);
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
