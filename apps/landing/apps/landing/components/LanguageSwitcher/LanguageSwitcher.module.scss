@@ -6,7 +6,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  height: 40px;
+  height: 44px;
   padding-inline: 12px;
   border-radius: 8px;
   border: 1px solid var(--hairline);
@@ -46,6 +46,16 @@
 
 [dir='rtl'] .panel {
   transform-origin: top left;
+}
+
+.panelUp {
+  inset-block-start: auto;
+  inset-block-end: calc(100% + 8px);
+  transform-origin: bottom right;
+}
+
+[dir='rtl'] .panelUp {
+  transform-origin: bottom left;
 }
 
 .option {

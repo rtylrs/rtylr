@@ -22,7 +22,14 @@ import styles from './LanguageSwitcher.module.scss';
  * locale falls back to that locale's home page rather than linking to a
  * page that does not exist there.
  */
-export const LanguageSwitcher: React.FC = () => {
+interface LanguageSwitcherProps {
+  /** Opens the panel above the trigger instead of below. Use this wherever
+   *  the trigger sits near the bottom of its container - the mobile menu
+   *  footer, for instance - so the panel doesn't render off-screen. */
+  openUpward?: boolean;
+}
+
+export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ openUpward = false }) => {
   const { t } = useTranslation();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -78,10 +85,15 @@ export const LanguageSwitcher: React.FC = () => {
       <AnimatePresence>
         {open && (
           <motion.div
-            className={styles.panel}
-            initial={{ opacity: 0, scale: 0.96, y: -6 }}
+            className={cn(styles.panel, openUpward && styles.panelUp)}
+            initial={{ opacity: 0, scale: 0.96, y: openUpward ? 6 : -6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.97, y: -4, transition: { duration: 0.15, ease: 'easeIn' } }}
+            exit={{
+              opacity: 0,
+              scale: 0.97,
+              y: openUpward ? 4 : -4,
+              transition: { duration: 0.15, ease: 'easeIn' },
+            }}
             transition={{ type: 'spring', stiffness: 480, damping: 32, mass: 0.6 }}
           >
             {locales.map((l) => (
