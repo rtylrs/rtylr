@@ -23,6 +23,13 @@ import {
 } from '../../shared/hooks/queries/useSegments';
 import { ConfirmModal } from '../../shared/components/ui';
 import { canCrmPermission } from '../../shared/lib/crmPermissions';
+import {
+  getSegmentRuleOperators,
+  SEGMENT_RULE_FIELDS,
+  SEGMENT_RULE_VALUES,
+  serializeSegmentRule,
+  type SegmentRule,
+} from '../../shared/lib/segmentRules';
 
 const ACCENT = '#3b82f6';
 
@@ -38,70 +45,40 @@ interface Segment {
   trendUp: boolean;
 }
 
-// Static rule builder options
-const ruleFields = [
-  'Loyalty Tier',
-  'Total Spend',
-  'Visit Count',
-  'Last Visit',
-  'First Purchase',
-  'Points Balance',
-];
-const ruleOperators: Record<string, string[]> = {
-  'Loyalty Tier': ['=', '!='],
-  'Total Spend': ['>', '<', '>=', '<=', '='],
-  'Visit Count': ['>', '<', '>=', '<=', '='],
-  'Last Visit': ['within', 'more than'],
-  'First Purchase': ['within', 'more than'],
-  'Points Balance': ['>', '<', '>=', '<=', '='],
-};
-const ruleValues: Record<string, string[]> = {
-  'Loyalty Tier': ['Bronze', 'Silver', 'Gold', 'Platinum'],
-  'Total Spend': ['$100', '$250', '$500', '$1,000', '$2,500'],
-  'Visit Count': ['1', '3', '5', '10', '20'],
-  'Last Visit': ['7 days', '14 days', '30 days', '60 days', '90 days'],
-  'First Purchase': ['7 days', '14 days', '30 days', '60 days', '90 days'],
-  'Points Balance': ['100', '250', '500', '1000', '2500'],
-};
-
-interface Rule {
-  id: number;
-  field: string;
-  operator: string;
-  value: string;
-}
-
 function RuleBuilder({
   onClose,
   onSave,
 }: {
   onClose: () => void;
-  onSave: (name: string, rules: Rule[]) => void;
+  onSave: (name: string, rules: SegmentRule[]) => void;
 }) {
-  const [rules, setRules] = useState<Rule[]>([
-    { id: 1, field: 'Total Spend', operator: '>', value: '$500' },
+  const [rules, setRules] = useState<SegmentRule[]>([
+    { id: 1, field: 'totalSpent', operator: '>', value: '500' },
   ]);
   const [segmentName, setSegmentName] = useState('');
 
   const addRule = () => {
-    setRules((prev) => [
-      ...prev,
-      { id: Date.now(), field: 'Loyalty Tier', operator: '=', value: 'Gold' },
-    ]);
+    setRules((prev) => [...prev, { id: Date.now(), field: 'tier', operator: '=', value: 'Gold' }]);
   };
 
   const removeRule = (id: number) => setRules((prev) => prev.filter((r) => r.id !== id));
 
-  const updateRule = (id: number, key: keyof Rule, val: string) => {
+  const updateRule = (id: number, key: 'field' | 'operator' | 'value', val: string) => {
     setRules((prev) =>
       prev.map((r) => {
         if (r.id !== id) return r;
-        const updated = { ...r, [key]: val };
         if (key === 'field') {
-          updated.operator = ruleOperators[val][0];
-          updated.value = ruleValues[val][0];
+          const nextField = SEGMENT_RULE_FIELDS.find((field) => field.value === val)?.value;
+          if (!nextField) return r;
+          const nextOperators = getSegmentRuleOperators(nextField);
+          return {
+            ...r,
+            field: nextField,
+            operator: nextOperators[0],
+            value: SEGMENT_RULE_VALUES[nextField][0],
+          };
         }
-        return updated;
+        return { ...r, [key]: val } as SegmentRule;
       })
     );
   };
@@ -246,8 +223,10 @@ function RuleBuilder({
                   value={rule.field}
                   onChange={(e) => updateRule(rule.id, 'field', e.target.value)}
                 >
-                  {ruleFields.map((f) => (
-                    <option key={f}>{f}</option>
+                  {SEGMENT_RULE_FIELDS.map((f) => (
+                    <option key={f.value} value={f.value}>
+                      {f.label}
+                    </option>
                   ))}
                 </select>
                 <select
@@ -255,7 +234,7 @@ function RuleBuilder({
                   value={rule.operator}
                   onChange={(e) => updateRule(rule.id, 'operator', e.target.value)}
                 >
-                  {(ruleOperators[rule.field] || ['=']).map((op) => (
+                  {getSegmentRuleOperators(rule.field).map((op) => (
                     <option key={op}>{op}</option>
                   ))}
                 </select>
@@ -264,7 +243,7 @@ function RuleBuilder({
                   value={rule.value}
                   onChange={(e) => updateRule(rule.id, 'value', e.target.value)}
                 >
-                  {(ruleValues[rule.field] || []).map((v) => (
+                  {SEGMENT_RULE_VALUES[rule.field].map((v) => (
                     <option key={v}>{v}</option>
                   ))}
                 </select>
@@ -555,9 +534,10 @@ const Segments: React.FC = () => {
     });
   };
 
-  const handleCreate = (name: string, rules: Rule[]): void => {
+  const handleCreate = (name: string, rules: SegmentRule[]): void => {
+    if (createSegment.isPending) return;
     createSegment.mutate(
-      { name, rules: rules.map((r) => `${r.field} ${r.operator} ${r.value}`) },
+      { name, rules: rules.map(serializeSegmentRule) },
       {
         onSuccess: () => {
           toast.success('Segment created');
