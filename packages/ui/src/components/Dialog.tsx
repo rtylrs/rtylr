@@ -40,7 +40,10 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 transition-opacity">
+      <DialogPrimitive.Close
+        aria-label="Close dialog"
+        className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 transition-opacity"
+      >
         <svg
           width="16"
           height="16"

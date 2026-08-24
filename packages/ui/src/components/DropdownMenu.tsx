@@ -41,7 +41,12 @@ const DropdownMenuItem = React.forwardRef<
       'relative flex cursor-pointer select-none items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium outline-none transition-colors',
       'hover:bg-black/5 dark:hover:bg-white/8',
       'focus:bg-black/5 dark:focus:bg-white/8',
-      destructive && 'text-destructive hover:bg-destructive/10 focus:bg-destructive/10',
+      // Radix sets data-highlighted during keyboard arrow-navigation, which
+      // does not always coincide with :hover or :focus - without this, a
+      // keyboard user sees no indication of which item is selected.
+      'data-[highlighted]:bg-black/5 dark:data-[highlighted]:bg-white/8',
+      destructive &&
+        'text-destructive hover:bg-destructive/10 focus:bg-destructive/10 data-[highlighted]:bg-destructive/10',
       inset && 'pl-8',
       className
     )}

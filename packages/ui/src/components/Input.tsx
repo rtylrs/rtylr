@@ -14,12 +14,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === 'password';
     const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
+    // A caller that passes `label` without `id` produced an unassociated
+    // label - htmlFor got undefined and nothing pointed at this input.
+    // useId() generates a stable fallback so the association always exists.
+    const generatedId = React.useId();
+    const inputId = id ?? generatedId;
 
     return (
       <div className={cn('flex flex-col gap-1.5', wrapperClassName)}>
         {label && (
           <Label.Root
-            htmlFor={id}
+            htmlFor={inputId}
             className="text-xs font-semibold uppercase tracking-wide text-muted"
           >
             {label}
@@ -28,7 +33,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <div className="relative">
           <input
             ref={ref}
-            id={id}
+            id={inputId}
             type={inputType}
             className={cn(
               'w-full rounded-lg border bg-white/[0.06] px-3.5 py-3 text-sm text-inherit outline-none transition-colors placeholder:text-muted/50',
