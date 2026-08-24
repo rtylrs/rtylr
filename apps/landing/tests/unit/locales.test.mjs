@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 import {
+  baseRouteOf,
+  localeRouteParams,
   LOCALES,
   DEFAULT_LOCALE,
   LOCALISED_ROUTES,
@@ -296,6 +298,49 @@ describe('the sitemap config asks for absolute alternates', () => {
       cfg.includes('hrefIsAbsolute: true'),
       'alternateRefs without hrefIsAbsolute produce /pricing/pricing/'
     );
+  });
+});
+
+describe('the locale route table', () => {
+  // Both the routes and the sitemap read the same two lists, so a route
+  // cannot exist without an hreflang entry and vice versa. These assert the
+  // gate that keeps an unreviewed locale out of the export entirely.
+  it('emits no route while only the default locale ships', () => {
+    if (shippedLocales().length >= 2) return;
+    assert.deepEqual(localeRouteParams(), [], 'a locale route exists with no shipped locale');
+  });
+
+  it('never emits a route for the default locale', () => {
+    // /en/pricing/ and /pricing/ would be two URLs for one page.
+    const en = localeRouteParams().filter((p) => p.locale === DEFAULT_LOCALE);
+    assert.deepEqual(en, [], 'the default locale is served from the root, not a prefix');
+  });
+
+  it('produces exactly the translated routes for each shipped locale', () => {
+    const extra = shippedLocales().filter((l) => l.code !== DEFAULT_LOCALE);
+    const expected = extra.length * LOCALISED_ROUTES.length;
+    assert.equal(localeRouteParams().length, expected);
+  });
+
+  it('round-trips a param set back to its route', () => {
+    // getStaticProps derives the page to render from the slug, so a wrong
+    // round-trip renders the wrong page under the right URL.
+    assert.equal(baseRouteOf([]), '/');
+    assert.equal(baseRouteOf(undefined), '/');
+    assert.equal(baseRouteOf(['pricing']), '/pricing/');
+    assert.equal(baseRouteOf(['legal', 'terms']), '/legal/terms/');
+    for (const r of LOCALISED_ROUTES) {
+      const slug = r.split('/').filter(Boolean);
+      assert.equal(baseRouteOf(slug), r, `${r} does not round-trip`);
+    }
+  });
+
+  it('every route it would emit has a page behind it', () => {
+    // The catch-all maps a route to a component through its own table. A
+    // route in the registry with no entry there renders the 404.
+    const src = readFileSync(path.join(APP, 'pages/[locale]/[[...slug]].tsx'), 'utf8');
+    const missing = LOCALISED_ROUTES.filter((r) => !src.includes(`'${r}'`));
+    assert.deepEqual(missing, [], 'localised routes with no component mapped');
   });
 });
 
