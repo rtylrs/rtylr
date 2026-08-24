@@ -708,7 +708,8 @@
     "noEffort": "None",
     "descriptionPlaceholder": "What needs to be done?",
     "creating": "Creating…",
-    "createTask": "Create task"
+    "createTask": "Create task",
+    "noLabel": "No label"
   },
   "projectList": {
     "pageTitle": "List · rtylr",
