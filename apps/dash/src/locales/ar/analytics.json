@@ -1,4 +1,5 @@
 {
   "emptyNoDataTitle": "لا توجد بيانات بعد",
-  "emptyNoDataDescription": "ستظهر العناصر الأفضل أداءً هنا."
+  "emptyNoDataDescription": "ستظهر العناصر الأفضل أداءً هنا.",
+  "rangeUnavailable": "تُعرض أرقام اليوم. النطاقات الزمنية تتطلب دعمًا من الواجهة البرمجية."
 }

@@ -65,9 +65,12 @@ function revenueDollars(item: BestSeller): number {
   return item.revenue ?? 0;
 }
 
-const useBestSellers = (range: string = '7d') =>
+// No range parameter: insights.product.v1.GetBestSellersRequest carries only
+// `limit`, so there was nothing to send it in. It previously took one and used
+// it in the queryKey alone, which refetched byte-identical data under a new key.
+const useBestSellers = () =>
   useQuery({
-    queryKey: ['dash-best-sellers', range],
+    queryKey: ['dash-best-sellers'],
     queryFn: async (): Promise<BestSeller[]> => {
       const res = await insightsProductClient.getBestSellers({ limit: 5 });
       return (res.products ?? []).map((item) =>
@@ -84,13 +87,12 @@ const useBestSellers = (range: string = '7d') =>
 
 const Analytics: React.FC = () => {
   const { t } = useTranslation();
-  const [range, setRange] = useState('7d');
-  const { data: kpis, isLoading } = useKpis(range);
+  const { data: kpis, isLoading } = useKpis();
   const {
     data: bestSellers = [],
     isLoading: sellersLoading,
     refetch: refetchBestSellers,
-  } = useBestSellers(range);
+  } = useBestSellers();
 
   // revenue and orderCount are today-scoped server-side: onion's kpis.sql
   // defines them as SumRevenueToday and CountOrdersToday, both filtered to
@@ -139,13 +141,41 @@ const Analytics: React.FC = () => {
             <h1 className="text-xl font-bold text-primary">Analytics</h1>
             <p className="text-sm text-gray-400 mt-0.5">Track your business performance</p>
           </div>
-          <Tabs value={range} onValueChange={setRange}>
-            <TabsList>
-              <TabsTrigger value="7d">Last 7 days</TabsTrigger>
-              <TabsTrigger value="30d">Last 30 days</TabsTrigger>
-              <TabsTrigger value="90d">Last 90 days</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          {/* Disabled rather than removed, and never drawn as though it works.
+              A date range is a real analytics concept, but there is nowhere to
+              send one: hub.dashboard.v1.GetKPIsRequest is an empty message and
+              insights.product.v1.GetBestSellersRequest carries only `limit`. The
+              KPI figures are today-only server-side regardless (onion's
+              kpis.sql filters on CURDATE()).
+
+              aria-disabled rather than the native disabled attribute, so the
+              reason below stays reachable to a screen reader. onClick is passed
+              after TabsTrigger's own, which is what neutralises it. */}
+          <div className="flex flex-col items-end gap-1">
+            <Tabs value="" onValueChange={() => {}}>
+              <TabsList aria-describedby="analytics-range-note">
+                {[
+                  ['7d', 'Last 7 days'],
+                  ['30d', 'Last 30 days'],
+                  ['90d', 'Last 90 days'],
+                ].map(([value, label]) => (
+                  <TabsTrigger
+                    key={value}
+                    value={value}
+                    aria-disabled="true"
+                    tabIndex={-1}
+                    className="opacity-50 cursor-not-allowed"
+                    onClick={(event) => event.preventDefault()}
+                  >
+                    {label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+            <p id="analytics-range-note" className="text-xs text-gray-400">
+              {t('analytics.rangeUnavailable')}
+            </p>
+          </div>
         </div>
 
         {/* Stats Row */}

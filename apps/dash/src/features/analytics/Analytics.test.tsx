@@ -119,3 +119,30 @@ describe('Analytics stat cards read the contract fields (rtylr#947)', () => {
     expect(screen.getByText('42')).toBeInTheDocument();
   });
 });
+
+/**
+ * rtylr#946. The 7d/30d/90d controls sent nothing: GetKPIsRequest is an empty
+ * message and GetBestSellersRequest carries only `limit`, so the range reached
+ * the queryKey and nowhere else and every view showed identical numbers under a
+ * different heading.
+ */
+describe('Analytics range control is gated, not decorative (rtylr#946)', () => {
+  it('marks every range tab disabled rather than letting it look interactive', () => {
+    render(<Analytics />);
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs.length).toBeGreaterThan(0);
+    for (const tab of tabs) expect(tab).toHaveAttribute('aria-disabled', 'true');
+  });
+
+  it('states why the range cannot be changed', () => {
+    render(<Analytics />);
+    expect(screen.getByText('analytics.rangeUnavailable')).toBeInTheDocument();
+  });
+
+  it('uses aria-disabled rather than the native attribute, so the reason stays reachable', () => {
+    render(<Analytics />);
+    // A natively disabled button is skipped by some screen-reader navigation,
+    // which would hide the explanation the tab is described by.
+    for (const tab of screen.getAllByRole('tab')) expect(tab).not.toBeDisabled();
+  });
+});

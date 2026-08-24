@@ -1,4 +1,5 @@
 {
   "emptyNoDataTitle": "No data yet",
-  "emptyNoDataDescription": "Top performing items will appear here."
+  "emptyNoDataDescription": "Top performing items will appear here.",
+  "rangeUnavailable": "Showing today's figures. Date ranges need API support."
 }

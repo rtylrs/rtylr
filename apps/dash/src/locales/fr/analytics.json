@@ -1,4 +1,5 @@
 {
   "emptyNoDataTitle": "Aucune donnée pour l'instant",
-  "emptyNoDataDescription": "Les articles les plus performants apparaîtront ici."
+  "emptyNoDataDescription": "Les articles les plus performants apparaîtront ici.",
+  "rangeUnavailable": "Chiffres du jour. Les plages de dates nécessitent une prise en charge de l'API."
 }
