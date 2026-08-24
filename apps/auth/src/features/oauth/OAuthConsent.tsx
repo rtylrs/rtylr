@@ -11,12 +11,10 @@ import { getEmailError } from '../../shared/lib/validation';
 function isAllowedOAuthRedirect(url: string): boolean {
   try {
     const host = new URL(url).hostname.toLowerCase();
-    return (
-      host === 'localhost' ||
-      host === '127.0.0.1' ||
-      host === 'rtylr.com' ||
-      host.endsWith('.rtylr.com')
-    );
+    if (import.meta.env.DEV && (host === 'localhost' || host === '127.0.0.1')) {
+      return true;
+    }
+    return host === 'rtylr.com' || host.endsWith('.rtylr.com');
   } catch {
     return false;
   }
