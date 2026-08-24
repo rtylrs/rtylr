@@ -1,15 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { HiMenu, HiX, HiChevronDown, HiChevronRight } from 'react-icons/hi';
 import { AnimatePresence, motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@voxire/components';
 import { APP_URLS, ASSETS } from '@voxire/config';
 import { navigateExternal } from '../../../../lib/navigation';
+import { localeFromPath, navPath } from '../../../../lib/locales';
+import { FEATURE_LINKS, RESOURCE_LINKS, COMPANY_LINKS } from '../../../../lib/navLinks';
+import { LanguageSwitcher } from '../../../../components/LanguageSwitcher/LanguageSwitcher';
 import styles from './HeaderMobile.module.scss';
 
 const HeaderMobile: React.FC = () => {
   const { t } = useTranslation();
+  const router = useRouter();
+  const locale = localeFromPath(router.asPath).code;
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [scrolled, setScrolled] = useState(false);
   const [featuresDropdown, setFeaturesDropdown] = useState(false);
@@ -106,7 +112,7 @@ const HeaderMobile: React.FC = () => {
       <header className={headerClasses}>
         <div className={styles['mobile-header-content']}>
           <Link
-            href="/"
+            href={navPath('/', locale)}
             className={styles['logo-container']}
             aria-label={t('common.a11y.home')}
             onClick={closeMenu}
@@ -149,7 +155,7 @@ const HeaderMobile: React.FC = () => {
           >
           <div className={styles['mobile-menu-header']}>
             <Link
-              href="/"
+              href={navPath('/', locale)}
               className={styles['mobile-menu-logo']}
               aria-label={t('common.a11y.home')}
               onClick={closeMenu}
@@ -172,7 +178,7 @@ const HeaderMobile: React.FC = () => {
                 onClick={toggleFeaturesDropdown}
                 aria-expanded={featuresDropdown}
               >
-                Features
+                {t('common.nav.features')}
                 {featuresDropdown ? (
                   <HiChevronDown
                     style={{
@@ -185,46 +191,21 @@ const HeaderMobile: React.FC = () => {
               </button>
               {featuresDropdown && (
                 <div className={styles['mobile-dropdown']}>
-                  <Link href="/pos" onClick={closeMenu} className={styles['mobile-feature-link']}>
-                    <span className={styles['mobile-feature-title']}>POS</span>
-                    <span className={styles['mobile-feature-desc']}>
-                      Payments, tables, orders, and receipts in one register.
-                    </span>
-                  </Link>
-                  <Link href="/erp" onClick={closeMenu} className={styles['mobile-feature-link']}>
-                    <span className={styles['mobile-feature-title']}>ERP</span>
-                    <span className={styles['mobile-feature-desc']}>
-                      Inventory, suppliers, and purchasing that stay in sync.
-                    </span>
-                  </Link>
-                  <Link href="/hr" onClick={closeMenu} className={styles['mobile-feature-link']}>
-                    <span className={styles['mobile-feature-title']}>HR</span>
-                    <span className={styles['mobile-feature-desc']}>
-                      Staff, schedules, time off, and payroll in one place.
-                    </span>
-                  </Link>
-                  <Link href="/crm" onClick={closeMenu} className={styles['mobile-feature-link']}>
-                    <span className={styles['mobile-feature-title']}>CRM</span>
-                    <span className={styles['mobile-feature-desc']}>
-                      Customer profiles, loyalty, segments, and campaigns.
-                    </span>
-                  </Link>
-                  <Link
-                    href="/finance"
-                    onClick={closeMenu}
-                    className={styles['mobile-feature-link']}
-                  >
-                    <span className={styles['mobile-feature-title']}>Finance</span>
-                    <span className={styles['mobile-feature-desc']}>
-                      Invoices, expenses, tax, and a real P&L in seconds.
-                    </span>
-                  </Link>
-                  <Link href="/flow" onClick={closeMenu} className={styles['mobile-feature-link']}>
-                    <span className={styles['mobile-feature-title']}>Flow</span>
-                    <span className={styles['mobile-feature-desc']}>
-                      Projects, tasks, and team workspaces for every department.
-                    </span>
-                  </Link>
+                  {FEATURE_LINKS.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={navPath(item.href, locale)}
+                      onClick={closeMenu}
+                      className={styles['mobile-feature-link']}
+                    >
+                      <span className={styles['mobile-feature-title']}>
+                        {t(`common.nav.featureLinks.${item.key}.title`)}
+                      </span>
+                      <span className={styles['mobile-feature-desc']}>
+                        {t(`common.nav.featureLinks.${item.key}.desc`)}
+                      </span>
+                    </Link>
+                  ))}
                 </div>
               )}
             </div>
@@ -235,7 +216,7 @@ const HeaderMobile: React.FC = () => {
                 onClick={toggleSolutionsDropdown}
                 aria-expanded={solutionsDropdown}
               >
-                Company
+                {t('common.nav.company')}
                 {solutionsDropdown ? (
                   <HiChevronDown
                     style={{
@@ -248,29 +229,33 @@ const HeaderMobile: React.FC = () => {
               </button>
               {solutionsDropdown && (
                 <div className={styles['mobile-dropdown']}>
-                  <Link href="/about" onClick={closeMenu}>
-                    About
-                  </Link>
-                  <Link href="/partners" onClick={closeMenu}>
-                    Partners
-                  </Link>
-                  <a
-                    href="https://voxire.com/careers"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={closeMenu}
-                  >
-                    Careers
-                  </a>
-                  <Link href="/contact" onClick={closeMenu}>
-                    Contact
-                  </Link>
+                  {COMPANY_LINKS.map((item) =>
+                    item.external ? (
+                      <a
+                        key={item.key}
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={closeMenu}
+                      >
+                        {t(`common.nav.companyLinks.${item.key}`)}
+                      </a>
+                    ) : (
+                      <Link key={item.key} href={navPath(item.href, locale)} onClick={closeMenu}>
+                        {t(`common.nav.companyLinks.${item.key}`)}
+                      </Link>
+                    )
+                  )}
                 </div>
               )}
             </div>
 
-            <Link href="/pricing" onClick={closeMenu} className={styles['mobile-nav-link']}>
-              Pricing <HiChevronRight />
+            <Link
+              href={navPath('/pricing', locale)}
+              onClick={closeMenu}
+              className={styles['mobile-nav-link']}
+            >
+              {t('common.nav.pricing')} <HiChevronRight />
             </Link>
 
             <div className={styles['mobile-nav-item']}>
@@ -279,7 +264,7 @@ const HeaderMobile: React.FC = () => {
                 onClick={toggleResourcesDropdown}
                 aria-expanded={resourcesDropdown}
               >
-                Resources
+                {t('common.nav.resources')}
                 {resourcesDropdown ? (
                   <HiChevronDown
                     style={{
@@ -292,52 +277,33 @@ const HeaderMobile: React.FC = () => {
               </button>
               {resourcesDropdown && (
                 <div className={styles['mobile-dropdown']}>
-                  <Link href="/hardware" onClick={closeMenu}>
-                    Hardware
-                  </Link>
-                  <Link href="/integrations" onClick={closeMenu}>
-                    Integrations
-                  </Link>
-                  <Link href="/blog" onClick={closeMenu}>
-                    Blog
-                  </Link>
-                  <a
-                    href="https://docs.rtylr.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={closeMenu}
-                  >
-                    Documentation
-                  </a>
-                  <Link href="/support" onClick={closeMenu}>
-                    Help Center
-                  </Link>
-                  <Link href="/trust" onClick={closeMenu}>
-                    Trust Center
-                  </Link>
-                  <Link href="/legal/security" onClick={closeMenu}>
-                    Security
-                  </Link>
-                  <Link href="/legal/privacy-policy" onClick={closeMenu}>
-                    Privacy Policy
-                  </Link>
-                  <Link href="/legal/terms" onClick={closeMenu}>
-                    Terms of Use
-                  </Link>
-                  <a
-                    href={APP_URLS.status}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={closeMenu}
-                  >
-                    Status
-                  </a>
+                  {RESOURCE_LINKS.map((item) =>
+                    item.external ? (
+                      <a
+                        key={item.key}
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={closeMenu}
+                      >
+                        {t(`common.nav.resourceLinks.${item.key}`)}
+                      </a>
+                    ) : (
+                      <Link key={item.key} href={navPath(item.href, locale)} onClick={closeMenu}>
+                        {t(`common.nav.resourceLinks.${item.key}`)}
+                      </Link>
+                    )
+                  )}
                 </div>
               )}
             </div>
 
-            <Link href="/contact" onClick={closeMenu} className={styles['mobile-nav-link']}>
-              Contact <HiChevronRight />
+            <Link
+              href={navPath('/contact', locale)}
+              onClick={closeMenu}
+              className={styles['mobile-nav-link']}
+            >
+              {t('common.nav.companyLinks.contact')} <HiChevronRight />
             </Link>
           </div>
 
@@ -350,9 +316,7 @@ const HeaderMobile: React.FC = () => {
                 {t('common.nav.signUp')}
               </Button>
             </div>
-            {/* No language switcher until Phase 2 wires i18n. See the
-                note in HeaderDesktop.tsx: display:none hid it from
-                browsers and not from the markdown twins. */}
+            <LanguageSwitcher />
           </div>
           </motion.div>
         )}
