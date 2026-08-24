@@ -13,12 +13,27 @@ vi.mock('../../shared/services/flowApi', () => ({
   },
 }));
 
+// t interpolates here so the assertions can see the date itself rather than just
+// the key. Asserting the key alone would pass even if {{date}} never resolved,
+// which is precisely what ruling P3 is about.
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, opts?: Record<string, unknown>) =>
+      opts?.date ? `${key}|${String(opts.date)}` : key,
+  }),
+}));
+
+vi.mock('sonner', () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
+}));
+
 vi.mock('@voxire/api', () => ({
   unwrap: vi.fn((val) => val),
 }));
 
 import { useProjects, useCreateProject, useUpdateProject, useArchiveProject } from './useProjects';
 import { flowApi } from '../../shared/services/flowApi';
+import { toast } from 'sonner';
 
 const createWrapper = () => {
   const client = new QueryClient({
@@ -100,5 +115,35 @@ describe('useArchiveProject', () => {
     });
     await act(() => result.current.mutateAsync('p-2'));
     expect(flowApi.archiveProject).toHaveBeenCalledWith('p-2');
+  });
+
+  // Ruling P3: the archive confirmation must state the scheduled permanent
+  // deletion date explicitly. The date is only knowable after the archive,
+  // because the server stamps purge_at from the business's retention setting -
+  // which is why the confirmation carries it rather than the pre-archive dialog.
+  it('states the scheduled deletion date in the confirmation', async () => {
+    (flowApi.archiveProject as any).mockResolvedValue({
+      project: { id: 'p-2', purgeAt: '2026-09-23T00:00:00Z' },
+    });
+    const { result } = renderHook(() => useArchiveProject(), {
+      wrapper: createWrapper(),
+    });
+
+    await act(() => result.current.mutateAsync('p-2'));
+
+    expect(toast.success).toHaveBeenCalledWith('toasts.project.archivedUntil|2026-09-23');
+  });
+
+  // The response previously typed away the project, so a build that still does
+  // must not print "undefined" at the user. Undated message, no crash.
+  it('falls back to the undated message when no purge date comes back', async () => {
+    (flowApi.archiveProject as any).mockResolvedValue({ project: { id: 'p-2' } });
+    const { result } = renderHook(() => useArchiveProject(), {
+      wrapper: createWrapper(),
+    });
+
+    await act(() => result.current.mutateAsync('p-2'));
+
+    expect(toast.success).toHaveBeenCalledWith('toasts.project.archived');
   });
 });
