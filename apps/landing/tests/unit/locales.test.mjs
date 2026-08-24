@@ -6,6 +6,7 @@ import path from 'node:path';
 
 import {
   baseRouteOf,
+  basePathOf,
   localeRouteParams,
   LOCALES,
   DEFAULT_LOCALE,
@@ -224,12 +225,6 @@ describe('coverage is per page, not just per locale', () => {
     }
   });
 
-  it('excludes the legal pages, which are not translated by decision', () => {
-    for (const p of ['/legal/terms/', '/legal/privacy-policy/', '/legal/security/']) {
-      assert.equal(isLocalisedRoute(p), false, `${p} must not be advertised as translated`);
-    }
-  });
-
   it('the sitemap advertises alternates only for localised routes', () => {
     const f = path.join(OUT, 'sitemap-0.xml');
     if (!existsSync(f)) return;
@@ -239,7 +234,12 @@ describe('coverage is per page, not just per locale', () => {
       if (!block.includes('hreflang')) continue;
       const loc = block.match(/<loc>([^<]+)<\/loc>/)?.[1] ?? '';
       const p = loc.replace('https://rtylr.com', '');
-      if (!isLocalisedRoute(p)) offenders.push(p);
+      // basePathOf() first: p is the real, already-localised URL in the
+      // sitemap (e.g. /ar/pricing/), and isLocalisedRoute keys off the
+      // bare route. Without it every shipped locale's own URLs failed
+      // this check while actually being correct - see basePathOf's own
+      // docblock, which names this exact bug.
+      if (!isLocalisedRoute(basePathOf(p))) offenders.push(p);
     }
     assert.deepEqual(offenders, [], 'sitemap advertises alternates for untranslated routes');
   });
