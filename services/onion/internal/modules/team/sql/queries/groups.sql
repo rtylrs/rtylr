@@ -15,11 +15,11 @@ WHERE g.owner_id = ?
 GROUP BY g.id
 ORDER BY g.created_at DESC;
 
--- name: UpdateGroup :exec
+-- name: UpdateGroup :execresult
 UPDATE user_groups SET name = ?, description = ?, color = ?, updated_at = NOW()
 WHERE id = ? AND owner_id = ?;
 
--- name: DeleteGroup :exec
+-- name: DeleteGroup :execresult
 DELETE FROM user_groups WHERE id = ? AND owner_id = ?;
 
 -- name: UpsertGroupResourcePermission :exec

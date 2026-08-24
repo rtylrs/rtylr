@@ -897,6 +897,15 @@ func (r *Repository) ListCompanyLeads(ctx context.Context) ([]domain.Lead, error
 //
 // dynamic-query: squirrel
 func (r *Repository) ListApplications(ctx context.Context, f domain.ApplicationFilter) ([]domain.Application, int64, error) {
+	// Tenant-scope like every other application read (UpdateApplicationStatus,
+	// GetApplicationCVKey, ...): restrict to jobs whose career belongs to the
+	// authenticated admin, otherwise any recruiter token could enumerate
+	// another owner's applicants by scanning job ids.
+	ownerID, err := ownerIDFromContext(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	cols := `id, job_id, name, email, COALESCE(phone,''), COALESCE(location,''),
 	         COALESCE(salary_expectation,0), COALESCE(salary_currency,'USD'), status,
 	         COALESCE(work_history,''), COALESCE(education,''), COALESCE(experience_summary,''),
@@ -905,7 +914,9 @@ func (r *Repository) ListApplications(ctx context.Context, f domain.ApplicationF
 	         COALESCE(cv_extracted_text,''), COALESCE(cv_profile_json,''), cv_processed_at, COALESCE(review_rating,0),
 	         COALESCE(review_notes,''), COALESCE(next_step,''), reviewed_at, created_at`
 
-	base := sq.Select().From("voxire_career_applications").Where(sq.Eq{"job_id": f.JobID})
+	base := sq.Select().From("voxire_career_applications").
+		Where(sq.Eq{"job_id": f.JobID}).
+		Where("job_id IN (SELECT id FROM careers WHERE owner_id = ?)", ownerID)
 
 	if loc := strings.TrimSpace(f.Location); loc != "" {
 		base = base.Where(sq.Like{"location": "%" + loc + "%"})

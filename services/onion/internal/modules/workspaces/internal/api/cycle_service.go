@@ -115,8 +115,16 @@ func (a *CycleAPI) CreateCycle(ctx context.Context, req *flowcyclev1.CreateCycle
 		}
 		end = parsed
 	}
+	if start.IsZero() {
+		// A zero time would fail the DATETIME insert (or persist a year-0001
+		// row); default to today when only an end date is supplied.
+		start = time.Now().UTC().Truncate(24 * time.Hour)
+	}
 	if end.IsZero() {
 		end = start.AddDate(0, 0, 14)
+	}
+	if end.Before(start) {
+		return nil, onekiterrors.New(http.StatusBadRequest, "end_date cannot be before start_date")
 	}
 
 	cycle, err := a.Service.CreateCycle(ctx, domain.CycleInput{

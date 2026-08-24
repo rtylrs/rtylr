@@ -51,8 +51,10 @@ type notifier struct {
 	channels map[Channel]string
 	client   *http.Client
 
-	mu   sync.Mutex
-	bufs map[Channel][]string
+	mu       sync.Mutex
+	bufs     map[Channel][]string
+	stop     chan struct{}
+	stopOnce sync.Once
 }
 
 type postMessageResult struct {
@@ -83,11 +85,26 @@ func Init() {
 		},
 		client: &http.Client{Timeout: 10 * time.Second},
 		bufs:   make(map[Channel][]string),
+		stop:   make(chan struct{}),
 	}
 	mu.Lock()
 	global = n
 	mu.Unlock()
 	go n.loop()
+}
+
+// Shutdown stops the flush loop and delivers any buffered messages. Call it
+// from binary shutdown paths so queued alerts (including security-relevant
+// ones) survive a deploy. Safe to call multiple times; no-op when disabled.
+func Shutdown() {
+	mu.RLock()
+	n := global
+	mu.RUnlock()
+	if n == nil {
+		return
+	}
+	n.stopOnce.Do(func() { close(n.stop) })
+	n.flush()
 }
 
 // Enabled reports whether Slack logging is active.
@@ -117,8 +134,13 @@ func Post(ch Channel, text string) {
 func (n *notifier) loop() {
 	t := time.NewTicker(flushInterval)
 	defer t.Stop()
-	for range t.C {
-		n.flush()
+	for {
+		select {
+		case <-t.C:
+			n.flush()
+		case <-n.stop:
+			return
+		}
 	}
 }
 

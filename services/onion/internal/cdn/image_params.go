@@ -861,7 +861,7 @@ func padStep(raw, bg string) string {
 		return ""
 	}
 	n, err := parseDimension(splitParamList(raw)[0])
-	if err != nil || n <= 0 {
+	if err != nil || n <= 0 || n > maxTransformBorder {
 		return ""
 	}
 	if bg == "" {
@@ -877,7 +877,7 @@ func borderStep(raw, bg string) string {
 	}
 	parts := splitParamList(raw)
 	n, err := parseDimension(parts[0])
-	if err != nil || n <= 0 {
+	if err != nil || n <= 0 || n > maxTransformBorder {
 		return ""
 	}
 	color := bg

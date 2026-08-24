@@ -514,6 +514,10 @@ func (s *Service) CreatePaddlePayment(ctx context.Context, ownerID, orderID int6
 		currency = "USD"
 	}
 
+	// Bind the idempotency key to the full request body: a static per-order
+	// key would make Paddle reject (or replay) a legitimately re-issued
+	// checkout after the amount, currency, or email changed, while retries
+	// of an identical body still dedupe.
 	result, err := paddle.CreatePOSTransaction(ctx, paddle.POSPaymentRequest{
 		OwnerID:        ownerID,
 		OrderID:        orderID,
@@ -521,7 +525,7 @@ func (s *Service) CreatePaddlePayment(ctx context.Context, ownerID, orderID int6
 		Currency:       currency,
 		CustomerEmail:  customerEmail,
 		Description:    "POS order " + order.OrderNumber,
-		IdempotencyKey: fmt.Sprintf("order:%d:%d", orderID, ownerID),
+		IdempotencyKey: fmt.Sprintf("order:%d:%d:%s:%s:%s", orderID, ownerID, currency, customerEmail, strconv.FormatInt(amountMinor, 10)),
 	})
 	if err != nil {
 		return PaddlePaymentResult{}, err

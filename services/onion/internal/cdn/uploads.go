@@ -104,7 +104,13 @@ func (c *CDN) upload(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "image rejected by content policy", http.StatusUnprocessableEntity)
 			return
 		}
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		// Don't echo internal error details (storage client, DB text) to
+		// the client; log them instead.
+		logger.Ctx(r.Context()).Error("cdn: upload failed",
+			logger.String("filename", header.Filename),
+			logger.Error(err),
+		)
+		http.Error(w, "upload failed", http.StatusInternalServerError)
 		return
 	}
 

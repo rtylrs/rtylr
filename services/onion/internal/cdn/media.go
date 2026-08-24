@@ -218,6 +218,9 @@ const maxPixelArea int64 = 24_000_000
 const (
 	maxTransformDimension = 8000
 	maxTransformScale     = 4.0
+	// maxTransformBorder caps border/pad growth per step so bo_ tokens can
+	// never inflate the canvas past the pixel-area budget.
+	maxTransformBorder = 2000
 	maxBlurStrength       = 2000.0
 	maxMedianWindow       = 31
 )
@@ -293,6 +296,8 @@ func (p *Params) Validate() error {
 
 func validateTransformationChain(chain string) error {
 	maxWidth, maxHeight := 0, 0
+	borderTotal := 0
+	zScale := 1.0
 	for _, step := range strings.Split(chain, "/") {
 		for _, token := range strings.Split(step, ",") {
 			parts := strings.SplitN(token, "_", 2)
@@ -317,6 +322,19 @@ func validateTransformationChain(chain string) error {
 				if err != nil || n <= 0 || n > maxTransformScale {
 					return fmt.Errorf("chain scale must be greater than 0 and at most %.0fx", maxTransformScale)
 				}
+				if n > zScale {
+					zScale = n
+				}
+			case "bo":
+				// Border/pad widens the canvas by 2n per axis; without a cap
+				// a single bo_40000 token turns any image into a ~gigapixel
+				// allocation.
+				nStr := strings.SplitN(value, ":", 2)[0]
+				n, err := strconv.Atoi(nStr)
+				if err != nil || n <= 0 || n > maxTransformBorder {
+					return fmt.Errorf("chain border must be between 1 and %d", maxTransformBorder)
+				}
+				borderTotal += n
 			case "e":
 				effectParts := strings.SplitN(value, ":", 2)
 				if len(effectParts) != 2 {
@@ -344,7 +362,16 @@ func validateTransformationChain(chain string) error {
 			}
 		}
 	}
-	if maxWidth > 0 && maxHeight > 0 && int64(maxWidth)*int64(maxHeight) > maxPixelArea {
+	// Account for border growth and scale amplification so the declared
+	// w/h alone can't hide a much larger effective canvas.
+	if maxWidth > 0 && maxHeight > 0 {
+		effW := maxWidth + 2*borderTotal
+		effH := maxHeight + 2*borderTotal
+		area := float64(int64(effW)*int64(effH)) * zScale * zScale
+		if area > float64(maxPixelArea) {
+			return fmt.Errorf("chain dimensions exceed the %d pixel limit", maxPixelArea)
+		}
+	} else if borderTotal > 0 && zScale > 1 {
 		return fmt.Errorf("chain dimensions exceed the %d pixel limit", maxPixelArea)
 	}
 	return nil

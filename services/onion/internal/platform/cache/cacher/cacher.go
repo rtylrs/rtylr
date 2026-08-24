@@ -771,7 +771,10 @@ func (c Cache[M]) recoverMapKeys(keyVals map[string]M) map[string]M {
 }
 
 func (c Cache[M]) deleteIdentifierPrefix(s string) string {
-	return strings.ReplaceAll(s, c.getModelIdentifier()+"-", "")
+	// Strip only the leading type marker; a global replace would also mangle
+	// legitimate ids that happen to contain "<type>-" (e.g. Cache[string]
+	// holding the id "string-foo").
+	return strings.TrimPrefix(s, c.getModelIdentifier()+"-")
 }
 
 func cachePatternVariants(pattern string) []string {

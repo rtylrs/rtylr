@@ -73,7 +73,10 @@ func ConsumePendingToolApproval(ctx context.Context, id string, tool ToolDef, in
 	if item.Name != tool.Name || item.InputFingerprint != ToolCallFingerprint(tool.Name, input) || (mode != "" && item.Mode != mode) {
 		return errPendingToolApproval
 	}
-	if item.BusinessID > 0 && (businessID != item.BusinessID || userID != item.UserID) {
+	// Bind on the user id unconditionally: a caller whose business_id is
+	// unset (0) must still not be able to consume someone else's approval,
+	// so businessID is an additional check, never a gate.
+	if userID != item.UserID || (item.BusinessID > 0 && businessID != item.BusinessID) {
 		return errPendingToolApproval
 	}
 	delete(pendingToolApprovals.items, id)

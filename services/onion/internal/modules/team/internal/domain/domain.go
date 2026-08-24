@@ -11,6 +11,7 @@ var (
 	ErrTokenAlreadyUsed   = errors.New("invite token already used")
 	ErrTokenExpired       = errors.New("invite token expired")
 	ErrForbidden          = errors.New("permission denied")
+	ErrGroupNotFound      = errors.New("group not found")
 )
 
 // ValidApps is the set of recognized app identifiers.

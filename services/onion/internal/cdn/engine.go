@@ -19,6 +19,11 @@ const engineMaxJobs = 500
 // to a single-shot invocation.
 const engineJobTimeout = 55 * time.Second
 
+// engineProbeTimeout bounds the initial --serve capability probe. It has to
+// tolerate fork/exec + interpreter startup on a loaded host (the test suite
+// runs every package in parallel), while staying well under the job timeout.
+const engineProbeTimeout = 15 * time.Second
+
 // maxEngineResponse caps accepted response bodies so garbage on the wire
 // (e.g. usage text from a pre-serve binary) cannot be mistaken for framing.
 const maxEngineResponse = 4 << 20
@@ -61,7 +66,7 @@ func startEngine(ctx context.Context, path string) (*engineConn, error) {
 
 	// Any structured framed exchange proves --serve exists. Pre-serve binaries
 	// print usage and exit, surfacing as a protocol violation below.
-	probeCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	probeCtx, cancel := context.WithTimeout(ctx, engineProbeTimeout)
 	defer cancel()
 	if err := c.probe(probeCtx); err != nil {
 		c.kill()
@@ -169,9 +174,10 @@ func (c *engineConn) run(ctx context.Context, tokens []string) (string, error) {
 
 	code, msg, err := c.exchange(ctx, framedJob(tokens))
 	if err != nil {
-		_c := c.cmd // reap in the background; pipes die with the process
-		go func() { _ = _c.Wait() }()
-		c.alive = false
+		// A protocol error or ctx timeout usually means the child is hung,
+		// not dead — SIGKILL it so the pipes and process actually go away
+		// instead of waiting on finalizers.
+		c.killLocked()
 		return "", err
 	}
 	c.jobs++
@@ -184,13 +190,18 @@ func (c *engineConn) run(ctx context.Context, tokens []string) (string, error) {
 // kill terminates the resident process, ignoring shutdown errors.
 func (c *engineConn) kill() {
 	c.mu.Lock()
-	wasAlive := c.alive
+	defer c.mu.Unlock()
+	c.killLocked()
+}
+
+// killLocked terminates the resident process; c.mu must be held.
+func (c *engineConn) killLocked() {
 	c.alive = false
 	cmd := c.cmd
-	c.mu.Unlock()
-	if wasAlive && cmd.Process != nil {
+	if cmd != nil && cmd.Process != nil {
 		_ = cmd.Process.Kill()
 		go func() { _ = cmd.Wait() }()
+		c.cmd = nil
 	}
 }
 
@@ -245,10 +256,17 @@ func (p *enginePool) acquire(ctx context.Context) (*engineConn, func(), error) {
 	if err != nil {
 		p.mu.Lock()
 		p.inFlight--
-		// Old binaries exit during the probe; latch disabled rather than pay
-		// a failed spawn per request. Single-shot keeps working either way.
-		p.disabled = true
+		if ctx.Err() == nil {
+			// Old binaries exit during the probe; latch disabled rather than
+			// pay a failed spawn per request. Single-shot keeps working.
+			p.disabled = true
+		}
 		p.mu.Unlock()
+		if ctx.Err() != nil {
+			// The request went away mid-probe; nothing was learned about the
+			// binary, so leave the pool enabled for the next request.
+			return nil, nil, fmt.Errorf("%w: %v", errEngineDisabled, context.Canceled)
+		}
 		return nil, nil, fmt.Errorf("%w: %v", errEngineDisabled, err)
 	}
 	return c, func() { p.release(c) }, nil

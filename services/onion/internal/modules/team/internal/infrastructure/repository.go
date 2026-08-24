@@ -673,23 +673,43 @@ func (r *Repository) resourcePermissionsForGroups(ctx context.Context, groupIDs 
 }
 
 func (r *Repository) UpdateGroup(ctx context.Context, ownerID, groupID int64, input domain.UpdateGroupInput) error {
-	if err := r.queries.UpdateGroup(ctx, sqlc.UpdateGroupParams{
+	res, err := r.queries.UpdateGroup(ctx, sqlc.UpdateGroupParams{
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Color:       sql.NullString{String: input.Color, Valid: input.Color != ""},
 		ID:          groupID,
 		OwnerID:     ownerID,
-	}); err != nil {
+	})
+	if err != nil {
 		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	// A foreign or stale group id must never fall through to the unscoped
+	// resource-permission rewrite below.
+	if affected == 0 {
+		return domain.ErrGroupNotFound
 	}
 	return r.setGroupResourcePermissions(ctx, groupID, input.ResourcePermissions)
 }
 
 func (r *Repository) DeleteGroup(ctx context.Context, ownerID, groupID int64) error {
-	if err := r.queries.DeleteGroupResourcePermissions(ctx, groupID); err != nil {
+	// Scoped delete first: only when the caller actually owns the group may
+	// the (unscoped) resource-permission rows be removed.
+	res, err := r.queries.DeleteGroup(ctx, sqlc.DeleteGroupParams{ID: groupID, OwnerID: ownerID})
+	if err != nil {
 		return err
 	}
-	return r.queries.DeleteGroup(ctx, sqlc.DeleteGroupParams{ID: groupID, OwnerID: ownerID})
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrGroupNotFound
+	}
+	return r.queries.DeleteGroupResourcePermissions(ctx, groupID)
 }
 
 func (r *Repository) AddGroupMembers(ctx context.Context, ownerID, groupID, addedBy int64, userIDs []int64) error {

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/team/internal/application"
@@ -114,6 +115,9 @@ func (a *GroupsAPI) UpdateGroup(ctx context.Context, req *hubteamgroupsv1.Update
 		Color:               req.GetColor(),
 		ResourcePermissions: perms,
 	}); err != nil {
+		if errors.Is(err, domain.ErrGroupNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Group not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update group")
 	}
 
@@ -137,6 +141,9 @@ func (a *GroupsAPI) DeleteGroup(ctx context.Context, req *hubteamgroupsv1.Delete
 	}
 
 	if err := a.Service.DeleteGroup(ctx, ownerID, groupID); err != nil {
+		if errors.Is(err, domain.ErrGroupNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Group not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete group")
 	}
 

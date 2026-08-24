@@ -145,6 +145,9 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/cache"
+	"github.com/voxire/onion/internal/platform/cache/cacher"
+	cacheInvalidate "github.com/voxire/onion/internal/platform/cache/invalidate"
+	invalidation "github.com/voxire/onion/internal/platform/cache/invalidation"
 	platformConfig "github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/database/dbclient"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
@@ -154,6 +157,7 @@ import (
 	"github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/server/probe"
 	"github.com/voxire/onion/internal/platform/server/profiling"
+	"github.com/voxire/onion/internal/platform/slack"
 	sheetsPkg "github.com/voxire/onion/internal/platform/sheets"
 	trinoPkg "github.com/voxire/onion/internal/platform/trino"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
@@ -164,6 +168,11 @@ import (
 func loadDotEnv() {
 	platformConfig.LoadDotEnv()
 }
+
+// httpServerDrainWait must exceed the HTTP server's internal drain timeout
+// (20s in internal/platform/server/http) or SIGTERM kills requests that are
+// still being drained.
+const httpServerDrainWait = 30 * time.Second
 
 func main() {
 	loadDotEnv()
@@ -224,6 +233,9 @@ func runServer(shutdownCtx context.Context) error {
 	serverCtx, cancel := context.WithCancel(shutdownCtx)
 	defer cancel()
 
+	// Declared first so it runs last: recoverAndLog may still queue Slack
+	// alerts that the final flush must deliver.
+	defer slack.Shutdown()
 	defer recoverAndLog(serverCtx)
 	defer logger.Flush()
 
@@ -257,7 +269,7 @@ func runServer(shutdownCtx context.Context) error {
 			logger.Global().Info("API server stopped gracefully")
 
 			return nil
-		case <-time.After(10 * time.Second):
+		case <-time.After(httpServerDrainWait):
 			logger.Global().Warn("API server shutdown timeout, forcing exit")
 
 			return nil
@@ -291,6 +303,15 @@ func run(ctx context.Context) error {
 
 	emailPkg.Initialize()
 	sheetsPkg.Initialize(ctx)
+
+	// This replica serves reads out of the in-memory (BigCache) layer, so it
+	// must consume every invalidation channel: pattern-based, cache-group,
+	// and direct local-key messages published by any replica. Without these
+	// subscribers, invalidated entries keep being served stale from this
+	// process's memory until their TTL lapses.
+	go cacheInvalidate.SubscribeAsyncInvalidations(ctx)
+	go invalidation.SubscribeCacheGroupInvalidations(ctx)
+	go cacher.NewPubSub[cacher.LocalCacheInvalidationConsumer]().SubscribeContext(ctx, cacher.LocalCacheInvalidationChannel)
 
 	readyTime := time.Now()
 	startupDuration := readyTime.Sub(startTime)

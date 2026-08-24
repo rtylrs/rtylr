@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"math"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -29,7 +30,14 @@ func resolvePagination(page, limit int32) (resolvedPage, resolvedLimit int32, of
 	if limit > maxPageLimit {
 		limit = maxPageLimit
 	}
-	return page, limit, int64(page-1) * int64(limit)
+	offset = int64(page-1) * int64(limit)
+	// Repositories narrow offsets to int32 for sqlc; clamp so an extreme
+	// page number can't wrap negative and alias to a wrong page (or make the
+	// SQL server reject the query outright).
+	if offset > math.MaxInt32 {
+		offset = math.MaxInt32
+	}
+	return page, limit, offset
 }
 
 // buildPagination assembles the common.pagination.v1 response envelope from a

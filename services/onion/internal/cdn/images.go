@@ -44,15 +44,19 @@ func (c *CDN) transform(ctx context.Context, fileID int64, fileUUID, originalSto
 		return nil, 0, "", fmt.Errorf("checking transformation cache: %w", err)
 	}
 
+	// Run the shared generation on a cancellation-detached context: if the
+	// leader's client disconnects, the followers collapsed onto this call
+	// would all fail with it. Each waiter still honors its own ctx below.
+	genCtx := context.WithoutCancel(ctx)
 	resultCh := c.transformGroup.DoChan(key, func() (any, error) {
-		cached, err := c.transformationByCacheKey(ctx, key)
+		cached, err := c.transformationByCacheKey(genCtx, key)
 		if err == nil {
 			return cached.StorageKey, nil
 		}
 		if !errors.Is(err, sql.ErrNoRows) {
 			return "", fmt.Errorf("checking transformation cache: %w", err)
 		}
-		return c.generateTransformation(ctx, fileID, fileUUID, originalStorageKey, key, mimeType, p)
+		return c.generateTransformation(genCtx, fileID, fileUUID, originalStorageKey, key, mimeType, p)
 	})
 
 	var transformedKey string

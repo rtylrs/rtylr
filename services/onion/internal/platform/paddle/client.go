@@ -113,10 +113,14 @@ var paddleHTTPClient = &http.Client{Timeout: paddleRequestTimeout}
 
 // CreatePOSTransaction creates a one-off Paddle transaction for a POS order.
 // Uses the idempotency key so retries with the same key resolve to the same
-// transaction on Paddle's side.
+// transaction on Paddle's side. The key is mandatory: without it a
+// transport-level retry would silently create a duplicate charge.
 func CreatePOSTransaction(ctx context.Context, req POSPaymentRequest) (POSPaymentResult, error) {
 	if !config.IsPaddleConfigured() {
 		return POSPaymentResult{}, errors.New("paddle not configured")
+	}
+	if req.IdempotencyKey == "" {
+		return POSPaymentResult{}, errors.New("paddle idempotency key is required")
 	}
 
 	// Paddle's transaction-creation endpoint accepts an inline one-off price via
@@ -155,9 +159,7 @@ func CreatePOSTransaction(ctx context.Context, req POSPaymentRequest) (POSPaymen
 
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("Authorization", "Bearer "+config.GetPaddleAPIKey())
-	if req.IdempotencyKey != "" {
-		httpReq.Header.Set("Paddle-Idempotency-Key", req.IdempotencyKey)
-	}
+	httpReq.Header.Set("Paddle-Idempotency-Key", req.IdempotencyKey)
 
 	resp, err := paddleHTTPClient.Do(httpReq)
 	if err != nil {
