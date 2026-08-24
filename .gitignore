@@ -66,3 +66,6 @@ apps/*/.next
 .opencode/
 opencode.jsonc
 dummy-non-existing-folder/
+
+# e2e screenshots are review artefacts for PR bodies, not fixtures.
+e2e/__screenshots__/
