@@ -15,16 +15,20 @@ import {
   campaignTypeLabel,
 } from '../campaigns';
 
+// Contract field names, because that is what CampaignServiceClient returns.
+// The previous fixture used the retired REST names, so it agreed with the schema
+// and disagreed with the server, which is why the mismatch in rtylr#939 survived
+// a green suite.
 const baseCampaign = {
   id: 1,
   name: 'Summer Sale',
-  type: 'email',
+  channel: 'email',
   status: 'active',
-  audienceSegmentId: 3,
+  segmentId: 3,
   subject: 'Big summer savings',
-  body: 'Shop now',
+  content: 'Shop now',
   sentCount: 480,
-  openCount: 200,
+  openedCount: 200,
   updatedAt: '2024-06-01',
 };
 
@@ -46,12 +50,12 @@ describe('campaignSchema', () => {
 
 describe('calculateOpenRate', () => {
   it('derives the open rate as a percentage', () => {
-    const result = campaignSchema.parse({ ...baseCampaign, sentCount: 400, openCount: 100 });
+    const result = campaignSchema.parse({ ...baseCampaign, sentCount: 400, openedCount: 100 });
     expect(calculateOpenRate(result)).toBe(25);
   });
 
   it('returns 0 when nothing was sent', () => {
-    const result = campaignSchema.parse({ ...baseCampaign, sentCount: 0, openCount: 0 });
+    const result = campaignSchema.parse({ ...baseCampaign, sentCount: 0, openedCount: 0 });
     expect(calculateOpenRate(result)).toBe(0);
   });
 });
