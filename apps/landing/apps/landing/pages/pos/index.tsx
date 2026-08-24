@@ -143,7 +143,7 @@ const POSPage = (): React.JSX.Element => {
                   <span />
                   <span />
                 </span>
-                <span className={styles.receiptOrder} dir="ltr">
+                <span className={styles.receiptOrder}>
                   {t('pos.hero.receipt.order', { orderId: 'A-2048', table: 12 })}
                 </span>
                 <span className={styles.receiptLive}>

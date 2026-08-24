@@ -125,7 +125,7 @@ const TrustPage = (): React.JSX.Element => {
                 <div className={styles.statusSub}>{t('trust.status.uptimeLabel')}</div>
               </div>
               <div className={styles.statusCell}>
-                <div className={styles.statusBig} dir="ltr">{t('trust.status.breachValue')}</div>
+                <div className={styles.statusBig}>{t('trust.status.breachValue')}</div>
                 <div className={styles.statusSub}>{t('trust.status.breachLabel')}</div>
               </div>
               <div className={styles.statusCell}>
