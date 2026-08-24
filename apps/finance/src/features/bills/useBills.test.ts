@@ -24,6 +24,7 @@ const baseBill = {
   id: '1',
   ownerId: '1',
   supplierId: '1',
+  supplierName: 'Acme Corp',
   amount: 500,
   currency: 'USD',
   dueDate: '2024-06-01',
@@ -57,6 +58,29 @@ describe('useBills', () => {
     const { result } = renderHook(() => useBills(), { wrapper: createWrapper() });
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toEqual([]);
+  });
+
+  it('shows the resolved supplier name as the vendor, not the description', async () => {
+    // Deliberately different values. When description doubles as the vendor
+    // name (the create form falls back to it), both mappings agree and the
+    // assertion cannot tell them apart.
+    mockClient.listBills.mockResolvedValue({
+      bills: [{ ...baseBill, supplierName: 'Acme Corp', description: 'March hosting' }],
+    });
+    const { result } = renderHook(() => useBills(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.[0]?.vendor).toBe('Acme Corp');
+  });
+
+  it('keeps the description separate from the vendor', async () => {
+    // mark-as-paid round-trips description, so conflating the two would send
+    // the vendor name back as the description.
+    mockClient.listBills.mockResolvedValue({
+      bills: [{ ...baseBill, supplierName: 'Acme Corp', description: 'March hosting' }],
+    });
+    const { result } = renderHook(() => useBills(), { wrapper: createWrapper() });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(result.current.data?.[0]?.description).toBe('March hosting');
   });
 
   it('keeps bill id as a string', async () => {
