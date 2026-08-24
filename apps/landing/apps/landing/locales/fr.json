@@ -646,7 +646,7 @@
     },
     "directAnswer": {
       "label": "Qu’est-ce que rtylr POS\u00a0?",
-      "body": "rtylr POS est l’application de caisse de rtylr, conçue pour les restaurants et les commerces qui exploitent un établissement comme vingt. Elle gère les tickets, l’envoi des plats, le partage des additions, les pourboires, les options et les paiements par carte, et elle continue de prendre les commandes quand la connexion tombe. Comme elle écrit dans la même base de données que les stocks, les équipes et la comptabilité, une vente déplace le stock et le chiffre d’affaires sans export."
+      "body": "rtylr POS est l’application de caisse de rtylr, conçue pour les restaurants et les commerces qui exploitent aussi bien un seul établissement que vingt. Elle gère les tickets, l’envoi des plats, le partage des additions, les pourboires, les options et les paiements par carte, et elle continue de prendre les commandes quand la connexion tombe. Comme elle écrit dans la même base de données que les stocks, les équipes et la comptabilité, une vente déplace le stock et le chiffre d’affaires sans export."
     },
     "features": {
       "eyebrow": "CE QU’ELLE FAIT",
@@ -1045,7 +1045,8 @@
       "uptimeLabel": "Disponibilité sur 90 jours glissants",
       "breachLabel": "Engagement de notification des violations",
       "penTestLabel": "Test d’intrusion annuel réalisé par un tiers",
-      "breachValue": "<\u00a072\u00a0h"
+      "breachValue": "<\u00a072\u00a0h",
+      "uptimeValue": "99,99\u00a0%"
     }
   },
   "legal": {
