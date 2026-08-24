@@ -77,6 +77,87 @@ func timeValue(v sql.NullTime) time.Time {
 	return time.Time{}
 }
 
+// The narrowed worktime queries each generate a distinct Row struct even
+// though they select identical column lists; these explicit adapters let the
+// shared mappers stay single-sourced.
+
+func workDayFromGet(r sqlc.GetWorkDayRow) sqlc.FlowWorkDay {
+	return sqlc.FlowWorkDay{
+		ID: r.ID, EmployeeID: r.EmployeeID, Date: r.Date, Timezone: r.Timezone,
+		WorkMode: r.WorkMode, StartTime: r.StartTime, EndTime: r.EndTime, BreakMinutes: r.BreakMinutes,
+		Status: r.Status, LoggedBy: r.LoggedBy, ApprovedBy: r.ApprovedBy, ApprovedAt: r.ApprovedAt,
+		ReopenedBy: r.ReopenedBy, ReopenedAt: r.ReopenedAt,
+	}
+}
+
+func workDayFromGetByID(r sqlc.GetWorkDayByIDRow) sqlc.FlowWorkDay {
+	return sqlc.FlowWorkDay{
+		ID: r.ID, EmployeeID: r.EmployeeID, Date: r.Date, Timezone: r.Timezone,
+		WorkMode: r.WorkMode, StartTime: r.StartTime, EndTime: r.EndTime, BreakMinutes: r.BreakMinutes,
+		Status: r.Status, LoggedBy: r.LoggedBy, ApprovedBy: r.ApprovedBy, ApprovedAt: r.ApprovedAt,
+		ReopenedBy: r.ReopenedBy, ReopenedAt: r.ReopenedAt,
+	}
+}
+
+func lineFromList(r sqlc.ListWorkDayLinesRow) sqlc.HrTimeEntry {
+	return sqlc.HrTimeEntry{
+		ID: r.ID, WorkDayID: r.WorkDayID, ProjectID: r.ProjectID, TaskID: r.TaskID,
+		WorkTypeID: r.WorkTypeID, WorkMode: r.WorkMode, Description: r.Description,
+		DurationMinutes: r.DurationMinutes, IsBillable: r.IsBillable, Status: r.Status,
+		ClientKey: r.ClientKey, LoggedBy: r.LoggedBy, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt,
+	}
+}
+
+func workDayFromEmployeeIDs(r sqlc.ListWorkDaysByEmployeeIDsRow) sqlc.FlowWorkDay {
+	return sqlc.FlowWorkDay{
+		ID: r.ID, EmployeeID: r.EmployeeID, Date: r.Date, Timezone: r.Timezone,
+		WorkMode: r.WorkMode, StartTime: r.StartTime, EndTime: r.EndTime, BreakMinutes: r.BreakMinutes,
+		Status: r.Status, LoggedBy: r.LoggedBy, ApprovedBy: r.ApprovedBy, ApprovedAt: r.ApprovedAt,
+		ReopenedBy: r.ReopenedBy, ReopenedAt: r.ReopenedAt,
+	}
+}
+
+func workDayFromList(r sqlc.ListWorkDaysRow) sqlc.FlowWorkDay {
+	return sqlc.FlowWorkDay{
+		ID: r.ID, EmployeeID: r.EmployeeID, Date: r.Date, Timezone: r.Timezone,
+		WorkMode: r.WorkMode, StartTime: r.StartTime, EndTime: r.EndTime, BreakMinutes: r.BreakMinutes,
+		Status: r.Status, LoggedBy: r.LoggedBy, ApprovedBy: r.ApprovedBy, ApprovedAt: r.ApprovedAt,
+		ReopenedBy: r.ReopenedBy, ReopenedAt: r.ReopenedAt,
+	}
+}
+
+func lineFromGet(r sqlc.GetTimeEntryRow) sqlc.HrTimeEntry {
+	return sqlc.HrTimeEntry{
+		ID: r.ID, WorkDayID: r.WorkDayID, ProjectID: r.ProjectID, TaskID: r.TaskID,
+		WorkTypeID: r.WorkTypeID, WorkMode: r.WorkMode, Description: r.Description,
+		DurationMinutes: r.DurationMinutes, IsBillable: r.IsBillable, Status: r.Status,
+		ClientKey: r.ClientKey, LoggedBy: r.LoggedBy, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt,
+	}
+}
+
+func lineFromClientKey(r sqlc.GetTimeEntryByClientKeyRow) sqlc.HrTimeEntry {
+	return sqlc.HrTimeEntry{
+		ID: r.ID, WorkDayID: r.WorkDayID, ProjectID: r.ProjectID, TaskID: r.TaskID,
+		WorkTypeID: r.WorkTypeID, WorkMode: r.WorkMode, Description: r.Description,
+		DurationMinutes: r.DurationMinutes, IsBillable: r.IsBillable, Status: r.Status,
+		ClientKey: r.ClientKey, LoggedBy: r.LoggedBy, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt,
+	}
+}
+
+func workTypeFromGet(r sqlc.GetWorkTypeRow) sqlc.FlowWorkType {
+	return sqlc.FlowWorkType{
+		ID: r.ID, ParentID: r.ParentID, Name: r.Name, Description: r.Description,
+		HrCategoryID: r.HrCategoryID, SortOrder: r.SortOrder, Archived: r.Archived,
+	}
+}
+
+func workTypeFromList(r sqlc.ListWorkTypesRow) sqlc.FlowWorkType {
+	return sqlc.FlowWorkType{
+		ID: r.ID, ParentID: r.ParentID, Name: r.Name, Description: r.Description,
+		HrCategoryID: r.HrCategoryID, SortOrder: r.SortOrder, Archived: r.Archived,
+	}
+}
+
 func toDomainWorkDay(row sqlc.FlowWorkDay) domain.WorkDay {
 	day := domain.WorkDay{
 		ID:           row.ID,
@@ -153,7 +234,7 @@ func (r *Repository) GetWorkDay(ctx context.Context, ownerID, businessID, employ
 		logger.Ctx(ctx).Error("GetWorkDay failed", logger.Error(err))
 		return domain.WorkDay{}, false, err
 	}
-	return toDomainWorkDay(row), true, nil
+	return toDomainWorkDay(workDayFromGet(row)), true, nil
 }
 
 // UpsertWorkDay creates the day or updates it in place. A day is identified by
@@ -199,7 +280,7 @@ func (r *Repository) ListWorkDayLines(ctx context.Context, businessID, workDayID
 	}
 	lines := make([]domain.WorkDayLine, 0, len(rows))
 	for _, row := range rows {
-		lines = append(lines, toDomainLine(row))
+		lines = append(lines, toDomainLine(lineFromList(row)))
 	}
 
 	total, err := r.queries.SumWorkDayLineMinutes(ctx, sqlc.SumWorkDayLineMinutesParams{
@@ -226,7 +307,7 @@ func (r *Repository) CreateWorkDayLine(ctx context.Context, input domain.WorkDay
 			ClientKey:  nullString(input.ClientKey),
 		})
 		if err == nil {
-			return toDomainLine(existing), nil
+			return toDomainLine(lineFromClientKey(existing)), nil
 		}
 		if !errors.Is(err, sql.ErrNoRows) {
 			logger.Ctx(ctx).Error("GetTimeEntryByClientKey failed", logger.Error(err))
@@ -268,7 +349,7 @@ func (r *Repository) CreateWorkDayLine(ctx context.Context, input domain.WorkDay
 	if err != nil {
 		return domain.WorkDayLine{}, err
 	}
-	return toDomainLine(row), nil
+	return toDomainLine(lineFromGet(row)), nil
 }
 
 // UpdateWorkDayLine changes a line in place.
@@ -292,7 +373,7 @@ func (r *Repository) UpdateWorkDayLine(ctx context.Context, input domain.WorkDay
 	if err != nil {
 		return domain.WorkDayLine{}, err
 	}
-	return toDomainLine(row), nil
+	return toDomainLine(lineFromGet(row)), nil
 }
 
 // DeleteWorkDayLine removes a line. Reports whether a row was actually removed,
@@ -324,7 +405,7 @@ func (r *Repository) GetWorkDayByID(ctx context.Context, id, ownerID, businessID
 		}
 		return domain.WorkDay{}, false, err
 	}
-	return toDomainWorkDay(row), true, nil
+	return toDomainWorkDay(workDayFromGetByID(row)), true, nil
 }
 
 // ListWorkTypes returns the workspace's classification tree.
@@ -340,7 +421,7 @@ func (r *Repository) ListWorkTypes(ctx context.Context, ownerID, businessID int6
 	}
 	types := make([]domain.WorkType, 0, len(rows))
 	for _, row := range rows {
-		types = append(types, toDomainWorkType(row))
+		types = append(types, toDomainWorkType(workTypeFromList(row)))
 	}
 	return types, nil
 }
@@ -377,7 +458,7 @@ func (r *Repository) GetWorkType(ctx context.Context, id, ownerID, businessID in
 	if err != nil {
 		return domain.WorkType{}, err
 	}
-	return toDomainWorkType(row), nil
+	return toDomainWorkType(workTypeFromGet(row)), nil
 }
 
 // UpdateWorkType changes a node.
@@ -453,7 +534,7 @@ func (r *Repository) ListWorkDays(ctx context.Context, ownerID, businessID, empl
 
 	days := make([]domain.WorkDay, 0, len(rows))
 	for _, row := range rows {
-		days = append(days, toDomainWorkDay(row))
+		days = append(days, toDomainWorkDay(workDayFromList(row)))
 	}
 
 	total, err := r.queries.CountWorkDays(ctx, sqlc.CountWorkDaysParams{
@@ -538,7 +619,7 @@ func (r *Repository) ListWorkDaysByEmployeeIDs(ctx context.Context, ownerID, bus
 
 	days := make([]domain.WorkDay, 0, len(rows))
 	for _, row := range rows {
-		days = append(days, toDomainWorkDay(row))
+		days = append(days, toDomainWorkDay(workDayFromEmployeeIDs(row)))
 	}
 
 	total, err := r.queries.CountWorkDaysByEmployeeIDs(ctx, sqlc.CountWorkDaysByEmployeeIDsParams{

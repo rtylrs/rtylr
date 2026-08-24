@@ -5,12 +5,18 @@
 -- and these tables deliberately have no such default to fall back on.
 
 -- name: GetWorkDay :one
-SELECT * FROM flow_work_days
+SELECT id, employee_id, date, timezone, work_mode, start_time,
+         end_time, break_minutes, status, logged_by, approved_by,
+         approved_at, reopened_by, reopened_at, created_at, updated_at
+FROM flow_work_days
 WHERE owner_id = ? AND business_id = ? AND employee_id = ? AND date = ?
 LIMIT 1;
 
 -- name: GetWorkDayByID :one
-SELECT * FROM flow_work_days
+SELECT id, employee_id, date, timezone, work_mode, start_time,
+         end_time, break_minutes, status, logged_by, approved_by,
+         approved_at, reopened_by, reopened_at, created_at, updated_at
+FROM flow_work_days
 WHERE id = ? AND owner_id = ? AND business_id = ?
 LIMIT 1;
 
@@ -31,7 +37,10 @@ ON DUPLICATE KEY UPDATE
     updated_at = CURRENT_TIMESTAMP;
 
 -- name: ListWorkDays :many
-SELECT * FROM flow_work_days
+SELECT id, employee_id, date, timezone, work_mode, start_time,
+         end_time, break_minutes, status, logged_by, approved_by,
+         approved_at, reopened_by, reopened_at, created_at, updated_at
+FROM flow_work_days
 WHERE owner_id = ? AND business_id = ? AND employee_id = ?
   AND date >= ? AND date <= ?
 ORDER BY date DESC
@@ -59,17 +68,26 @@ INSERT INTO flow_work_day_actions (
 -- summing both stores, since the same hour can legitimately be in each.
 
 -- name: ListWorkDayLines :many
-SELECT * FROM hr_time_entries
+SELECT id, work_day_id, project_id, task_id, work_type_id,
+           work_mode, description, duration_minutes, is_billable, status,
+           client_key, logged_by, created_at, updated_at
+FROM hr_time_entries
 WHERE owner_id = ? AND business_id = ? AND work_day_id = ?
 ORDER BY id ASC;
 
 -- name: GetTimeEntryByClientKey :one
-SELECT * FROM hr_time_entries
+SELECT id, work_day_id, project_id, task_id, work_type_id,
+           work_mode, description, duration_minutes, is_billable, status,
+           client_key, logged_by, created_at, updated_at
+FROM hr_time_entries
 WHERE owner_id = ? AND business_id = ? AND client_key = ?
 LIMIT 1;
 
 -- name: GetTimeEntry :one
-SELECT * FROM hr_time_entries
+SELECT id, work_day_id, project_id, task_id, work_type_id,
+           work_mode, description, duration_minutes, is_billable, status,
+           client_key, logged_by, created_at, updated_at
+FROM hr_time_entries
 WHERE id = ? AND owner_id = ? AND business_id = ?
 LIMIT 1;
 
@@ -99,13 +117,17 @@ WHERE owner_id = ? AND business_id = ? AND work_day_id = ?;
 -- ── Work types ─────────────────────────────────────────────────────────────
 
 -- name: ListWorkTypes :many
-SELECT * FROM flow_work_types
+SELECT id, parent_id, name, description, hr_category_id,
+         sort_order, archived
+FROM flow_work_types
 WHERE owner_id = ? AND business_id = ?
   AND (archived = FALSE OR ? = TRUE)
 ORDER BY sort_order ASC, name ASC;
 
 -- name: GetWorkType :one
-SELECT * FROM flow_work_types
+SELECT id, parent_id, name, description, hr_category_id,
+         sort_order, archived
+FROM flow_work_types
 WHERE id = ? AND owner_id = ? AND business_id = ?
 LIMIT 1;
 
@@ -137,7 +159,10 @@ SELECT id, user_id FROM hr_employees
 WHERE owner_id = ? AND business_id = ? AND user_id IN (sqlc.slice('user_ids'));
 
 -- name: ListWorkDaysByEmployeeIDs :many
-SELECT * FROM flow_work_days
+SELECT id, employee_id, date, timezone, work_mode, start_time,
+         end_time, break_minutes, status, logged_by, approved_by,
+         approved_at, reopened_by, reopened_at, created_at, updated_at
+FROM flow_work_days
 WHERE owner_id = ? AND business_id = ?
   AND employee_id IN (sqlc.slice('employee_ids'))
   AND date >= ? AND date <= ?
