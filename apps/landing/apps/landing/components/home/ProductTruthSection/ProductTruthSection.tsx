@@ -59,7 +59,14 @@ const ProductTruthSection = (): React.JSX.Element => {
               <p className={styles.claimBody}>{claim.body}</p>
               {claim.check && (
                 <span className={styles.check}>
-                  {t('home.truth.checkLabel')} <code className={styles.checkCode}>{claim.check}</code>
+                  {t('home.truth.checkLabel')}{' '}
+                  {/* dir="ltr" is load-bearing under dir="rtl": a curl command or URL is
+                      not text with an inherent reading direction, and letting it inherit
+                      rtl scrambles the visual order of / and : while the DOM order stays
+                      correct - copying it still works, reading it does not. */}
+                  <code className={styles.checkCode} dir="ltr">
+                    {claim.check}
+                  </code>
                 </span>
               )}
             </div>
