@@ -4,7 +4,7 @@ import { useClickOutside } from '@voxire/utils';
 import { toast } from 'sonner';
 import { useParams } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, GripVertical, Plus, Settings2, Trash2 } from 'lucide-react';
+import { ChevronDown, GripVertical, ListChecks, Plus, Settings2, Trash2 } from 'lucide-react';
 import { useFlowStore } from '../../shared/stores/flowStore';
 import { useTasks } from '../tasks/useTasks';
 import {
@@ -31,6 +31,7 @@ import {
 import { useCurrentProject } from './useCurrentProject';
 import { useCanEditTask, useCanDeleteResource } from '../../shared/lib/currentUser';
 import BoardSettingsPanel from './components/BoardSettingsPanel';
+import StatusSettingsPanel from './components/StatusSettingsPanel';
 import type { ApiProjectColumn } from '../../shared/services/flowApi';
 import type { Task } from '../../shared/stores/flowStore';
 
@@ -189,6 +190,7 @@ const ProjectBoard: React.FC = () => {
   const [groupBy, setGroupByState] = useState<GroupKey>('none');
   const [pendingDeleteColumn, setPendingDeleteColumn] = useState<ApiProjectColumn | null>(null);
   const [boardSettingsOpen, setBoardSettingsOpen] = useState(false);
+  const [statusSettingsOpen, setStatusSettingsOpen] = useState(false);
 
   // Hydrate group-by from localStorage once the project id is known.
   useEffect(() => {
@@ -369,6 +371,15 @@ const ProjectBoard: React.FC = () => {
             <GroupByPicker groupBy={groupBy} onChange={setGroupBy} />
             <button
               type="button"
+              onClick={() => setStatusSettingsOpen(true)}
+              aria-label={t('flow.status.openSettings')}
+              className="flow-focus flex h-[44px] w-[44px] items-center justify-center rounded-md md:h-8 md:w-8"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              <ListChecks size={14} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
               onClick={() => setBoardSettingsOpen(true)}
               aria-label={t('flow.board.openSettings')}
               className="flow-focus flex h-[44px] w-[44px] items-center justify-center rounded-md md:h-8 md:w-8"
@@ -388,6 +399,13 @@ const ProjectBoard: React.FC = () => {
         canManage={canManageBoard}
         groupBy={groupBy}
         onGroupByChange={setGroupBy}
+      />
+
+      <StatusSettingsPanel
+        open={statusSettingsOpen}
+        onClose={() => setStatusSettingsOpen(false)}
+        projectId={projectId}
+        canManage={canManageBoard}
       />
 
       {/* Tightened kanban canvas - the previous p-6 / gap-4 combo wasted
