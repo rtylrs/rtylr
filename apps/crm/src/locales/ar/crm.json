@@ -115,7 +115,8 @@
     "notFoundDescription": "تعذّر تحميل هذه الشريحة.",
     "backToSegments": "العودة إلى الشرائح",
     "noCustomersTitle": "لا يوجد عملاء",
-    "noCustomersDescription": "هذه الشريحة فارغة."
+    "noCustomersDescription": "هذه الشريحة فارغة.",
+    "loadMoreCustomers": "تحميل المزيد من العملاء"
   },
   "automations": {
     "created": "Automation created",

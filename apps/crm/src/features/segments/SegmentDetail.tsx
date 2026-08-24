@@ -251,7 +251,9 @@ const SegmentDetail: React.FC = () => {
                     onClick={() => void fetchNextPage()}
                     disabled={isFetchingNextPage}
                   >
-                    {isFetchingNextPage ? 'Loading...' : 'Load more customers'}
+                    {isFetchingNextPage
+                      ? t('common.loading')
+                      : t('crm.segmentDetail.loadMoreCustomers')}
                   </Button>
                 </div>
               )}
