@@ -4,7 +4,6 @@ import { bootObservability } from '@voxire/observability';
 import { CookieBanner, privacyLinkStyle } from '@voxire/consent';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
-import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider, Trans } from 'react-i18next';
 import { CookiesProvider } from 'react-cookie';
@@ -137,21 +136,19 @@ function MyApp({ Component, pageProps }: AppProps) {
           <div
             className={`${dmSans.variable} ${plexArabic.variable} ${dmSans.className} dir-font-scope`}
           >
-            <MotionConfig reducedMotion="user">
-              {/* Opacity-only route crossfade - no transform, so fixed headers
-                  inside pages are never re-anchored mid-transition. */}
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={router.route}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0, transition: { duration: 0.15, ease: 'easeIn' } }}
-                  transition={{ duration: 0.35, ease: 'easeOut' }}
-                >
-                  <Component {...pageProps} />
-                </motion.div>
-              </AnimatePresence>
-            </MotionConfig>
+            {/* Used to render inside an AnimatePresence/motion.div opacity
+                crossfade keyed on router.route. Removed: framer-motion's
+                exit animation never actually completed for a route change
+                between two top-level pages (confirmed with router.events
+                firing routeChangeStart/routeChangeComplete normally, the
+                new page's JS chunk loading, and window.next.router.route
+                updating correctly - React itself just never unmounted the
+                outgoing motion.div), so the incoming page's Component never
+                mounted under mode="wait", and both pages' DOM coexisted
+                indefinitely under mode="sync" instead of the outgoing one
+                ever being removed. A plain <Component> has none of that
+                lifecycle to get stuck in. */}
+            <Component {...pageProps} />
             {/* Strict opt-in banner. Shows only until the visitor
                 accepts or declines - then cookies-granted unlocks the
                 PostHog init wired in bootObservability. Copy is passed
