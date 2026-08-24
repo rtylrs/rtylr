@@ -96,6 +96,18 @@ export const TaskCard: React.FC<TaskCardProps> = ({
             >
               {task.identifier}
             </span>
+            {task.statusName && (
+              <span
+                className="min-w-0 max-w-[7rem] shrink-0 truncate rounded-sm px-1.5 py-0.5 text-[10px] font-semibold"
+                style={{
+                  background: `${task.statusColor ?? '#64C5B9'}22`,
+                  color: task.statusColor ?? 'var(--accent)',
+                }}
+                title={task.statusName}
+              >
+                {task.statusName}
+              </span>
+            )}
           </div>
           <div className="flex shrink-0 items-center gap-0.5">{controls}</div>
           {showProject && (project || task.projectName) && (
