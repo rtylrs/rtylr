@@ -1,6 +1,9 @@
 package stock_core
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestMovementBusinessIDDefaultsToOwnerID(t *testing.T) {
 	if got := movementBusinessID(Movement{OwnerID: 42}); got != 42 {
@@ -11,5 +14,19 @@ func TestMovementBusinessIDDefaultsToOwnerID(t *testing.T) {
 func TestMovementBusinessIDUsesExplicitBusinessID(t *testing.T) {
 	if got := movementBusinessID(Movement{OwnerID: 42, BusinessID: 99}); got != 99 {
 		t.Fatalf("movementBusinessID() = %d, want explicit business id 99", got)
+	}
+}
+
+func TestSetTotalTxRejectsNegativeTarget(t *testing.T) {
+	_, _, err := SetTotalTx(nil, nil, Movement{LocationID: 1}, -1)
+	if !errors.Is(err, ErrInsufficientStock) {
+		t.Fatalf("SetTotalTx() error = %v, want ErrInsufficientStock", err)
+	}
+}
+
+func TestSetTotalTxRequiresLocation(t *testing.T) {
+	_, _, err := SetTotalTx(nil, nil, Movement{OwnerID: 42}, 1)
+	if err == nil || err.Error() != "stock_core: location is required for total adjustment" {
+		t.Fatalf("SetTotalTx() error = %v, want missing-location error", err)
 	}
 }

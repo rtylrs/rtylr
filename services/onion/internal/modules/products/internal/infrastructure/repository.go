@@ -275,15 +275,29 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 
 	qtx := r.queries.WithTx(tx)
 
-	currentStock, err := r.lockProductStock(ctx, qtx, ownerID, id)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return domain.ErrProductNotFound
-		}
-		return err
-	}
 	if err := validateProductReferences(ctx, qtx, ownerID, input); err != nil {
 		return err
+	}
+
+	if input.StockQuantitySet {
+		locationID, err := stock_core.DefaultLocationID(ctx, tx, ownerID)
+		if err != nil {
+			return err
+		}
+		if _, _, err := stock_core.SetTotalTx(ctx, tx, stock_core.Movement{
+			OwnerID:       ownerID,
+			LocationID:    locationID,
+			ProductID:     id,
+			EntryType:     stock_core.EntryAdjustment,
+			ReferenceType: "product",
+			Channel:       "erp",
+			Note:          "product stock edit",
+		}, input.StockQuantity); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return domain.ErrProductNotFound
+			}
+			return err
+		}
 	}
 
 	err = qtx.UpdateProduct(ctx, sqlc.UpdateProductParams{
@@ -321,12 +335,6 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 		logger.Ctx(ctx).Error("Failed to update product", logger.Error(err))
 
 		return err
-	}
-
-	if input.StockQuantitySet && input.StockQuantity != currentStock {
-		if err := r.applyProductStockTotal(ctx, tx, ownerID, id, currentStock, input.StockQuantity, stock_core.EntryAdjustment, "product stock edit"); err != nil {
-			return err
-		}
 	}
 
 	if strings.TrimSpace(input.ImageURL) != "" {

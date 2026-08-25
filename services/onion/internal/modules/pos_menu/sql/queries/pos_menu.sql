@@ -62,11 +62,10 @@ LIMIT 100;
 INSERT INTO erp_products (owner_id, business_id, name, sku, sale_price, is_active)
 VALUES (?, ?, ?, ?, ?, TRUE);
 
--- name: UpdateMenuItem :exec
+-- name: UpdateMenuItem :execresult
 UPDATE erp_products
 SET name = COALESCE(NULLIF(sqlc.arg(name), ''), name),
     sale_price = ?,
-    stock_quantity = ?,
     is_active = ?,
     updated_at = CURRENT_TIMESTAMP
 WHERE business_id = ? AND id = ?;

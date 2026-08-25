@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
 type Repository struct {
@@ -99,19 +100,57 @@ func (r *Repository) QuickCreate(ctx context.Context, ownerID, businessID int64,
 }
 
 func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.MenuItemUpdateInput) error {
-	err := r.queries.UpdateMenuItem(ctx, sqlc.UpdateMenuItemParams{
-		Name:          input.Name,
-		SalePrice:     floatToDecimal(input.SalePrice),
-		StockQuantity: floatToDecimal(input.Stock),
-		IsActive:      sql.NullBool{Bool: input.IsActive, Valid: true},
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	var ownerID int64
+	if err := tx.QueryRowContext(ctx,
+		"SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE",
+		businessID,
+	).Scan(&ownerID); err != nil {
+		return err
+	}
+
+	locationID, err := stock_core.DefaultLocationID(ctx, tx, ownerID)
+	if err != nil {
+		return err
+	}
+	if _, _, err := stock_core.SetTotalTx(ctx, tx, stock_core.Movement{
+		OwnerID:       ownerID,
 		BusinessID:    businessID,
-		ID:            id,
+		LocationID:    locationID,
+		ProductID:     id,
+		EntryType:     stock_core.EntryAdjustment,
+		ReferenceType: "pos_menu",
+		Channel:       "pos",
+		Note:          "POS menu stock edit",
+	}, input.Stock); err != nil {
+		return err
+	}
+
+	qtx := r.queries.WithTx(tx)
+	result, err := qtx.UpdateMenuItem(ctx, sqlc.UpdateMenuItemParams{
+		Name:       input.Name,
+		SalePrice:  floatToDecimal(input.SalePrice),
+		IsActive:   sql.NullBool{Bool: input.IsActive, Valid: true},
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update menu item", logger.Error(err))
 		return err
 	}
-	return nil
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return sql.ErrNoRows
+	}
+	return tx.Commit()
 }
 
 func (r *Repository) BusinessOwnerID(ctx context.Context, businessID int64) (int64, error) {

@@ -1792,12 +1792,60 @@ func (r *Repository) SetPaddleTransactionID(ctx context.Context, businessID, ord
 }
 
 func (r *Repository) MarkOrderPaidByPaddleTx(ctx context.Context, txID string) (int64, error) {
-	res, err := r.queries.MarkOrderPaidByPaddleTransaction(ctx, sql.NullString{String: txID, Valid: true})
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	committed := false
+	defer func() {
+		if !committed {
+			_ = tx.Rollback()
+		}
+	}()
+
+	var orderID, businessID int64
+	var paymentStatus string
+	if err := tx.QueryRowContext(ctx, `
+		SELECT id, business_id, payment_status
+		FROM pos_orders
+		WHERE paddle_transaction_id = ?
+		LIMIT 1
+		FOR UPDATE`, txID).Scan(&orderID, &businessID, &paymentStatus); err != nil {
+		logger.Ctx(ctx).Error("Failed to lock order for paddle payment", logger.Error(err))
+		return 0, err
+	}
+	if paymentStatus == "paid" {
+		if err := tx.Commit(); err != nil {
+			return 0, err
+		}
+		committed = true
+		return 0, nil
+	}
+
+	res, err := tx.ExecContext(ctx, `
+		UPDATE pos_orders
+		SET status = 'paid', payment_status = 'paid', paid_at = NOW()
+		WHERE paddle_transaction_id = ? AND payment_status <> 'paid'`, txID)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to mark order paid by paddle tx", logger.Error(err))
 		return 0, err
 	}
-	return res.RowsAffected()
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	if affected == 1 {
+		if err := r.deductSoldStock(ctx, tx, businessID, orderID); err != nil {
+			logger.Ctx(ctx).Error("Failed to deduct stock for paddle-paid order", logger.Error(err), logger.Any("order_id", orderID))
+			return 0, err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	committed = true
+	return affected, nil
 }
 
 func (r *Repository) IsPaddleEventProcessed(ctx context.Context, txID string) (bool, error) {
