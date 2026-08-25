@@ -58,3 +58,16 @@ func WriteEvent(w io.Writer, flush func(), event StreamEvent) error {
 	}
 	return nil
 }
+
+// WriteSSEHeartbeat keeps intermediaries from treating a quiet generation as
+// an idle connection. SSE comment frames are ignored by clients but still
+// reset proxy idle timers.
+func WriteSSEHeartbeat(w io.Writer, flush func()) error {
+	if _, err := fmt.Fprint(w, ": ping\n\n"); err != nil {
+		return err
+	}
+	if flush != nil {
+		flush()
+	}
+	return nil
+}
