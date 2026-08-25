@@ -124,6 +124,25 @@ vi.mock('@voxire/auth', () => ({
 
 vi.mock('@voxire/components', () => ({ LicenseBanner: () => null }));
 
+// Sidebar preferences use React Query in production. The account-menu and
+// appearance tests do not exercise that persistence path, so keep the shell
+// isolated from its provider and network requirements here.
+vi.mock('../shared/lib/sidebarPreferences', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../shared/lib/sidebarPreferences')>();
+  const preferences = actual.createDefaultSidebarPreferences();
+  const update = vi.fn();
+
+  return {
+    ...actual,
+    useSidebarPreferences: () => ({
+      preferences,
+      update,
+      isLoading: false,
+      isSaving: false,
+    }),
+  };
+});
+
 vi.mock('sonner', () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 
 vi.mock('../shared/components/TrialBanner', () => ({ default: () => null }));
