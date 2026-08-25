@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"math"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/domain"
@@ -137,35 +138,38 @@ func (s *Service) Match(ctx context.Context, businessID int64, input domain.Matc
 	return id, err
 }
 
-// computeSuggestions scores every (bank_txn × target) pair by amount and date
-// proximity and returns the top matches. Amounts are compared in absolute
-// value so a negative bank amount (money out) still pairs with a positive
-// expense amount.
+// computeSuggestions scores every same-currency (bank_txn × target) pair by
+// amount and date proximity and returns the top matches. Amounts are compared
+// in absolute value so a negative bank amount (money out) still pairs with a
+// positive expense amount.
 func computeSuggestions(bankTxns []domain.UnmatchedBankTransaction, invoices, expenses []domain.UnmatchedInvoice) []domain.MatchSuggestion {
 	if len(bankTxns) == 0 {
 		return nil
 	}
 	type target struct {
-		id     int64
-		kind   string
-		amount int64
-		date   int64 // unix day
+		id       int64
+		kind     string
+		amount   int64
+		currency string
+		date     int64 // unix day
 	}
 	targets := make([]target, 0, len(invoices)+len(expenses))
 	for _, inv := range invoices {
 		targets = append(targets, target{
-			id:     inv.ID,
-			kind:   domain.TargetTypeInvoice,
-			amount: inv.AmountMinorUnits,
-			date:   inv.DueDate.Unix() / 86400,
+			id:       inv.ID,
+			kind:     domain.TargetTypeInvoice,
+			amount:   inv.AmountMinorUnits,
+			currency: inv.Currency,
+			date:     inv.DueDate.Unix() / 86400,
 		})
 	}
 	for _, exp := range expenses {
 		targets = append(targets, target{
-			id:     exp.ID,
-			kind:   domain.TargetTypeExpense,
-			amount: exp.AmountMinorUnits,
-			date:   exp.IssueDate.Unix() / 86400,
+			id:       exp.ID,
+			kind:     domain.TargetTypeExpense,
+			amount:   exp.AmountMinorUnits,
+			currency: exp.Currency,
+			date:     exp.IssueDate.Unix() / 86400,
 		})
 	}
 	if len(targets) == 0 {
@@ -174,9 +178,13 @@ func computeSuggestions(bankTxns []domain.UnmatchedBankTransaction, invoices, ex
 
 	suggestions := make([]domain.MatchSuggestion, 0, len(bankTxns))
 	for _, bt := range bankTxns {
+		bankCurrency := normalizeCurrency(bt.Currency)
 		bankAmt := absInt64(bt.AmountMinorUnits)
 		bankDate := bt.OccurredAt.Unix() / 86400
 		for _, t := range targets {
+			if bankCurrency == "" || bankCurrency != normalizeCurrency(t.currency) {
+				continue
+			}
 			amountDiff := math.Abs(float64(bankAmt - absInt64(t.amount)))
 			daysApart := absInt64(bankDate - t.date)
 			score := amountDiff + float64(daysApart)*dayWeightMinorUnits
@@ -201,6 +209,10 @@ func computeSuggestions(bankTxns []domain.UnmatchedBankTransaction, invoices, ex
 		suggestions = suggestions[:maxSuggestions]
 	}
 	return suggestions
+}
+
+func normalizeCurrency(currency string) string {
+	return strings.ToUpper(strings.TrimSpace(currency))
 }
 
 func absInt64(v int64) int64 {
