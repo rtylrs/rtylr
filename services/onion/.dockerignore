@@ -1,7 +1,15 @@
 # Build artifacts
 tmp/
 bin/
+/api
+/worker
+/upload
+/license
 *.log
+
+# Source-control metadata and local checkout state
+.git
+.gitmodules
 
 # Documentation
 *.md

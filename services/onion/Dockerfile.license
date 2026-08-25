@@ -2,9 +2,9 @@
 # and verification API. No DB connection is opened by this service.
 
 # Build stage
-FROM golang:1.26-alpine AS builder
+FROM golang:1.26-alpine3.20 AS builder
 WORKDIR /app
-RUN apk add --no-cache ca-certificates curl bash git
+RUN apk add --no-cache ca-certificates curl bash
 RUN set -eux; \
     if curl --fail --location --retry 5 --retry-all-errors --retry-delay 2 \
         --output /tmp/sqlc.tar.gz \
@@ -17,15 +17,9 @@ RUN set -eux; \
     sqlc version
 COPY . .
 RUN set -eux; \
-    if [ ! -f ./voxie/go.mod ]; then \
-      git clone --depth 1 https://github.com/tryrtylr/voxie.git ./voxie; \
-    fi; \
-    if [ ! -f ./internal/platform/database/schemas/hr_core/schema.sql ]; then \
-      git clone --depth 1 https://github.com/tryrtylr/schemas.git ./internal/platform/database/schemas; \
-    fi; \
-    if [ ! -d ./internal/platform/email/templates ]; then \
-      git clone --depth 1 https://github.com/tryrtylr/email-templates.git ./internal/platform/email/templates; \
-    fi
+    test -f ./voxie/go.mod; \
+    test -f ./internal/platform/database/schemas/hr_core/schema.sql; \
+    test -d ./internal/platform/email/templates
 RUN go mod download && go mod verify
 RUN chmod +x scripts/*.sh && \
     bash scripts/generate_sqlc.sh
@@ -44,12 +38,14 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
     -o /app/license ./cmd/license
 
 # Runtime stage
-FROM alpine:latest
+FROM alpine:3.20
 RUN apk add --no-cache ca-certificates tzdata
+RUN addgroup -S onion && adduser -S -G onion onion
 WORKDIR /app
 COPY --from=builder /app/license /app/license
 ENV RUN_MODE=license
 ENV SERVICE_NAME=license
 ENV PORT=8082
 EXPOSE 8082
+USER onion
 CMD ["/app/license"]
