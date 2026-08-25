@@ -55,6 +55,9 @@
     "moveToTop": "Déplacer en haut",
     "itemActions": "Actions pour {{label}}",
     "dragHandle": "Glisser pour réorganiser",
+    "groupLabel": "Groupe",
+    "groupItemCount": "{{count}} éléments",
+    "dropHere": "Déposer ici",
     "groupActions": "Actions pour {{label}}",
     "hideGroup": "Masquer le groupe",
     "showGroup": "Afficher le groupe",
@@ -843,9 +846,6 @@
   "projectStatus": {
     "active": "Actif",
     "completed": "Terminé"
-  },
-  "sidebar": {
-    "yourReports": "Vos équipes"
   },
   "toasts": {
     "project": {

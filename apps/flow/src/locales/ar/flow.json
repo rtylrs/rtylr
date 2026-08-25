@@ -55,6 +55,9 @@
     "moveToTop": "نقل إلى الأعلى",
     "itemActions": "إجراءات {{label}}",
     "dragHandle": "اسحب لإعادة الترتيب",
+    "groupLabel": "مجموعة",
+    "groupItemCount": "{{count}} عناصر",
+    "dropHere": "أفلت هنا",
     "groupActions": "إجراءات {{label}}",
     "hideGroup": "إخفاء المجموعة",
     "showGroup": "إظهار المجموعة",
@@ -874,9 +877,6 @@
   "projectStatus": {
     "active": "نشط",
     "completed": "مكتمل"
-  },
-  "sidebar": {
-    "yourReports": "مشاريع فريقك"
   },
   "toasts": {
     "project": {
