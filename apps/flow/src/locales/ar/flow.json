@@ -77,6 +77,7 @@
     "pinItems": "تثبيت العناصر",
     "pinItemsHint": "أبقِ المشاريع التي تستخدمها كثيراً في متناولك.",
     "groupName": "اسم المجموعة",
+    "groupNameRequired": "أدخل اسماً لهذه المجموعة.",
     "internalRoute": "مسار داخل Flow",
     "externalLink": "رابط خارجي",
     "shortcutName": "اسم الاختصار",

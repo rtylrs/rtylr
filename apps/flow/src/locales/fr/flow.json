@@ -77,6 +77,7 @@
     "pinItems": "Épingler des éléments",
     "pinItemsHint": "Gardez les projets que vous utilisez le plus à portée de main.",
     "groupName": "Nom du groupe",
+    "groupNameRequired": "Saisissez un nom pour ce groupe.",
     "internalRoute": "Route Flow",
     "externalLink": "Lien externe",
     "shortcutName": "Nom du raccourci",

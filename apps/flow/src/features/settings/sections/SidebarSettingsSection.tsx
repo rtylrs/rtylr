@@ -369,6 +369,7 @@ const SidebarSettingsSection: React.FC = () => {
   const { preferences, update, isLoading } = useSidebarPreferences();
   const { data: projects = [] } = useProjects();
   const [newGroupName, setNewGroupName] = useState('');
+  const [groupError, setGroupError] = useState<string | null>(null);
   const [linkLabel, setLinkLabel] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
   const [selectedRoute, setSelectedRoute] = useState<string>(INTERNAL_ROUTES[0][0]);
@@ -381,7 +382,11 @@ const SidebarSettingsSection: React.FC = () => {
     .filter((group): group is SidebarGroupPreference => Boolean(group));
   const createGroup = (): void => {
     const label = newGroupName.trim();
-    if (!label) return;
+    if (!label) {
+      setGroupError(t('flow.sidebar.groupNameRequired'));
+      return;
+    }
+    setGroupError(null);
     update((draft) => {
       const next = updatePreferencesCopy(draft);
       const id = `custom:${crypto.randomUUID()}`;
@@ -398,6 +403,7 @@ const SidebarSettingsSection: React.FC = () => {
       return next;
     });
     setNewGroupName('');
+    setGroupError(null);
     setDialog(null);
   };
   const createLink = (): void => {
@@ -486,7 +492,10 @@ const SidebarSettingsSection: React.FC = () => {
       <div className="order-1 flex flex-wrap gap-2">
         <button
           type="button"
-          onClick={() => setDialog('group')}
+          onClick={() => {
+            setGroupError(null);
+            setDialog('group');
+          }}
           className="flex min-h-11 items-center gap-2 rounded-lg px-3 text-[12px] font-semibold"
           style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
         >
@@ -604,22 +613,51 @@ const SidebarSettingsSection: React.FC = () => {
           className="order-2 rounded-xl border p-4"
           style={{ borderColor: 'var(--accent)', background: 'var(--flow-surface)' }}
         >
-          <label
-            className="mb-2 block text-[12px] font-medium"
-            style={{ color: 'var(--flow-text)' }}
-          >
-            {t('flow.sidebar.groupName')}
-          </label>
+          <div className="mb-2 flex items-start justify-between gap-3">
+            <label
+              htmlFor="sidebar-group-name"
+              className="block text-[12px] font-medium"
+              style={{ color: 'var(--flow-text)' }}
+            >
+              {t('flow.sidebar.groupName')}
+            </label>
+            <button
+              type="button"
+              aria-label={t('common.close')}
+              onClick={() => {
+                setNewGroupName('');
+                setGroupError(null);
+                setDialog(null);
+              }}
+              className="-mt-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-md hover:bg-[var(--flow-hover)]"
+              style={{ color: 'var(--flow-text-muted)' }}
+            >
+              <X size={15} />
+            </button>
+          </div>
           <div className="flex gap-2">
             <input
+              id="sidebar-group-name"
               autoFocus
               value={newGroupName}
-              onChange={(event) => setNewGroupName(event.target.value)}
-              onKeyDown={(event) => event.key === 'Enter' && createGroup()}
+              onChange={(event) => {
+                setGroupError(null);
+                setNewGroupName(event.target.value);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') createGroup();
+                if (event.key === 'Escape') {
+                  setNewGroupName('');
+                  setGroupError(null);
+                  setDialog(null);
+                }
+              }}
+              aria-required="true"
+              aria-invalid={groupError !== null}
               className="min-h-11 min-w-0 flex-1 rounded-lg border px-3 text-[16px] outline-none"
               style={{
                 background: 'var(--flow-input-bg)',
-                borderColor: 'var(--flow-border)',
+                borderColor: groupError ? 'var(--flow-danger-fg)' : 'var(--flow-border)',
                 color: 'var(--flow-text)',
               }}
             />
@@ -632,6 +670,16 @@ const SidebarSettingsSection: React.FC = () => {
               {t('common.create')}
             </button>
           </div>
+          {groupError && (
+            <p
+              className="mt-2 flex items-center gap-1.5 text-[11px]"
+              style={{ color: 'var(--flow-danger-fg)' }}
+              role="alert"
+            >
+              <AlertCircle size={14} aria-hidden />
+              {groupError}
+            </p>
+          )}
         </div>
       )}
 
