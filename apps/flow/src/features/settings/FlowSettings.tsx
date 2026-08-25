@@ -12,6 +12,7 @@ import {
   UserPlus,
   LayoutDashboard,
   Clock,
+  PanelLeft,
 } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
 import { EmptyState } from '@voxire/ui';
@@ -68,6 +69,7 @@ import SegmentedControl from './components/SegmentedControl';
 import { useSystemDark } from './components/useSystemDark';
 import TimeSection from './sections/TimeSection';
 import BinSection from './sections/BinSection';
+import SidebarSettingsSection from './sections/SidebarSettingsSection';
 import {
   canInviteMembers,
   hasBusinessRoleBypass,
@@ -97,6 +99,7 @@ function buildSections(
       ? [{ id: 'time', label: t('flow.settings.time.section'), icon: Clock }]
       : []),
     { id: 'appearance', label: t('common.settings.appearance'), icon: Palette },
+    { id: 'sidebar', label: t('flow.sidebar.settingsSection'), icon: PanelLeft },
     { id: 'labels', label: t('common.settings.labels'), icon: Tag },
     { id: 'life', label: t('common.settings.life'), icon: Sparkles },
     { id: 'shortcuts', label: t('common.settings.shortcuts'), icon: Keyboard },
@@ -1278,6 +1281,7 @@ const SECTION_CONTENT: Record<string, React.FC> = {
   time: TimeSection,
   life: LifeRhythmSection,
   shortcuts: ShortcutsSection,
+  sidebar: SidebarSettingsSection,
 };
 
 const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => {

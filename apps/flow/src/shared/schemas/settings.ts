@@ -18,6 +18,7 @@ const SETTINGS_SECTION_IDS = [
   'labels',
   'life',
   'shortcuts',
+  'sidebar',
   'bin',
 ] as const;
 
