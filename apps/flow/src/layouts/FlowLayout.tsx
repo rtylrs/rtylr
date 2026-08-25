@@ -511,8 +511,9 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
     if (sidebarPreferencesLoading) return;
     if (lastRecentRoute.current === location.pathname) return;
     lastRecentRoute.current = location.pathname;
-    updateSidebarPreferences((draft) =>
-      recordRecentSidebarPage(draft, location.pathname, flowPageTitle)
+    updateSidebarPreferences(
+      (draft) => recordRecentSidebarPage(draft, location.pathname, flowPageTitle),
+      { showToast: false }
     );
   }, [flowPageTitle, location.pathname, sidebarPreferencesLoading, updateSidebarPreferences]);
   const caretPageContext = useMemo(

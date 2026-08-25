@@ -75,6 +75,10 @@ export interface SidebarPreferences {
   items: SidebarItemPreference[];
 }
 
+export interface SidebarPreferencesUpdateOptions {
+  showToast?: boolean;
+}
+
 export const SIDEBAR_GROUP_IDS = ['plan', 'team', 'time', 'projects'] as const;
 
 const builtinItems: SidebarItemPreference[] = [
@@ -515,7 +519,12 @@ export function useSidebarPreferences() {
   }, [settings]);
 
   const save = useMutation({
-    mutationFn: async (next: SidebarPreferences) => {
+    mutationFn: async ({
+      preferences: next,
+    }: {
+      preferences: SidebarPreferences;
+      showToast: boolean;
+    }) => {
       const latest = queryClient.getQueryData<ApiUserSettings>(sidebarSettingsQueryKey);
       return unwrap(
         flowApi.updateUserSettings({
@@ -524,20 +533,28 @@ export function useSidebarPreferences() {
         })
       );
     },
-    onSuccess: (next) => {
+    onSuccess: (next, variables) => {
       queryClient.setQueryData(sidebarSettingsQueryKey, next);
-      toast.success(t('flow.sidebar.saved'));
+      if (variables.showToast) toast.success(t('flow.sidebar.saved'));
     },
-    onError: () => toast.error(t('flow.sidebar.saveFailed')),
+    onError: (_error, variables) => {
+      if (variables.showToast) toast.error(t('flow.sidebar.saveFailed'));
+    },
   });
 
   const update = useCallback(
-    (mutator: (draft: SidebarPreferences) => SidebarPreferences) => {
+    (
+      mutator: (draft: SidebarPreferences) => SidebarPreferences,
+      options: SidebarPreferencesUpdateOptions = {}
+    ) => {
       const next = updateSidebarPreferences(preferences, mutator);
       setPreferences(next);
-      save.mutate(next, {
-        onError: () => setPreferences(preferences),
-      });
+      save.mutate(
+        { preferences: next, showToast: options.showToast !== false },
+        {
+          onError: () => setPreferences(preferences),
+        }
+      );
     },
     [preferences, save]
   );
