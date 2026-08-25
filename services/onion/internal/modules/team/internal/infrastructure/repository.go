@@ -692,16 +692,20 @@ func (r *Repository) setGroupResourcePermissions(ctx context.Context, groupID in
 	if err := r.queries.DeleteGroupResourcePermissions(ctx, groupID); err != nil {
 		return err
 	}
-	for _, p := range perms {
-		if err := r.queries.UpsertGroupResourcePermission(ctx, sqlc.UpsertGroupResourcePermissionParams{
-			GroupID:         groupID,
-			ResourceKey:     p.ResourceKey,
-			PermissionLevel: sqlc.UserGroupResourcePermissionsPermissionLevel(p.PermissionLevel),
-		}); err != nil {
-			return err
-		}
+	if len(perms) == 0 {
+		return nil
 	}
-	return nil
+
+	insert := sq.Insert("user_group_resource_permissions").Columns("group_id", "resource_key", "permission_level")
+	for _, p := range perms {
+		insert = insert.Values(groupID, p.ResourceKey, p.PermissionLevel)
+	}
+	query, args, err := insert.Suffix("ON DUPLICATE KEY UPDATE permission_level = VALUES(permission_level)").ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = r.pool.ExecContext(ctx, query, args...)
+	return err
 }
 
 func (r *Repository) GetGroup(ctx context.Context, ownerID, groupID int64) (*domain.Group, error) {
@@ -838,17 +842,20 @@ func (r *Repository) DeleteGroup(ctx context.Context, ownerID, groupID int64) er
 }
 
 func (r *Repository) AddGroupMembers(ctx context.Context, ownerID, groupID, addedBy int64, userIDs []int64) error {
-	for _, uid := range userIDs {
-		if err := r.queries.AddGroupMember(ctx, sqlc.AddGroupMemberParams{
-			GroupID: groupID,
-			UserID:  uid,
-			OwnerID: ownerID,
-			AddedBy: sql.NullInt64{Int64: addedBy, Valid: addedBy > 0},
-		}); err != nil {
-			return err
-		}
+	if len(userIDs) == 0 {
+		return nil
 	}
-	return nil
+
+	insert := sq.Insert("user_group_members").Options("IGNORE").Columns("group_id", "user_id", "owner_id", "added_by")
+	for _, uid := range userIDs {
+		insert = insert.Values(groupID, uid, ownerID, sql.NullInt64{Int64: addedBy, Valid: addedBy > 0})
+	}
+	query, args, err := insert.ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = r.pool.ExecContext(ctx, query, args...)
+	return err
 }
 
 func (r *Repository) RemoveGroupMember(ctx context.Context, groupID, userID int64) error {
