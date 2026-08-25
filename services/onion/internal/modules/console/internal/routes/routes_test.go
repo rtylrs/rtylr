@@ -82,3 +82,11 @@ func TestDecodeOptionalJSONBodyRejectsMalformedBody(t *testing.T) {
 		t.Fatalf("expected 400, got %d", w.Code)
 	}
 }
+
+func TestGetPositiveQueryIntUsesFallbackForMalformedValue(t *testing.T) {
+	r := httptest.NewRequest(http.MethodGet, "/console/resources?limit=not-a-number", nil)
+
+	if got := getPositiveQueryInt(r, "limit", 50); got != 50 {
+		t.Fatalf("expected malformed query value to use fallback, got %d", got)
+	}
+}
