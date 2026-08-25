@@ -7,7 +7,58 @@ import (
 	"log/slog"
 	"strings"
 	"testing"
+	"time"
 )
+
+type recordingHandler struct {
+	records []slog.Record
+}
+
+func (h *recordingHandler) Enabled(context.Context, slog.Level) bool { return true }
+func (h *recordingHandler) Handle(_ context.Context, record slog.Record) error {
+	h.records = append(h.records, record.Clone())
+	return nil
+}
+func (h *recordingHandler) WithAttrs([]slog.Attr) slog.Handler { return h }
+func (h *recordingHandler) WithGroup(string) slog.Handler      { return h }
+
+func TestDedupHandlerKeepsDistinctAttributedEvents(t *testing.T) {
+	inner := &recordingHandler{}
+	dedup := &dedupHandler{inner: inner, window: time.Hour}
+
+	first := slog.NewRecord(time.Now(), slog.LevelWarn, "Invalid token", 0)
+	first.AddAttrs(slog.String("remote_ip", "192.0.2.1"))
+	second := slog.NewRecord(time.Now(), slog.LevelWarn, "Invalid token", 0)
+	second.AddAttrs(slog.String("remote_ip", "192.0.2.2"))
+	repeat := slog.NewRecord(time.Now(), slog.LevelWarn, "Invalid token", 0)
+	repeat.AddAttrs(slog.String("remote_ip", "192.0.2.2"))
+
+	for _, record := range []slog.Record{first, second, repeat} {
+		if err := dedup.Handle(context.Background(), record); err != nil {
+			t.Fatalf("Handle: %v", err)
+		}
+	}
+	if len(inner.records) != 2 {
+		t.Fatalf("forwarded %d records, want 2", len(inner.records))
+	}
+}
+
+func TestDedupHandlerCleansStaleEntries(t *testing.T) {
+	inner := &recordingHandler{}
+	dedup := &dedupHandler{inner: inner, window: time.Millisecond}
+	first := slog.NewRecord(time.Now(), slog.LevelWarn, "first", 0)
+	if err := dedup.Handle(context.Background(), first); err != nil {
+		t.Fatalf("first Handle: %v", err)
+	}
+	time.Sleep(2 * time.Millisecond)
+	second := slog.NewRecord(time.Now(), slog.LevelWarn, "second", 0)
+	if err := dedup.Handle(context.Background(), second); err != nil {
+		t.Fatalf("second Handle: %v", err)
+	}
+	if len(dedup.seen) != 1 {
+		t.Fatalf("dedup map retained %d entries, want 1", len(dedup.seen))
+	}
+}
 
 func TestFieldConstructorsRoundTrip(t *testing.T) {
 	cases := []struct {
