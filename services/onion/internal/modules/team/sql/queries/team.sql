@@ -83,6 +83,11 @@ SELECT user_id, owner_id, expires_at, used_at FROM invite_tokens WHERE token = ?
 -- name: MarkInviteTokenUsed :exec
 UPDATE invite_tokens SET used_at = NOW() WHERE token = ?;
 
+-- name: ConsumeInviteToken :execresult
+UPDATE invite_tokens
+SET used_at = NOW()
+WHERE token = ? AND used_at IS NULL AND expires_at > NOW();
+
 -- name: SetPassword :exec
 UPDATE users SET password_hash = ? WHERE id = ?;
 

@@ -106,17 +106,25 @@ func (r *Repository) UpsertPermission(ctx context.Context, businessID, ownerID, 
 }
 
 func (r *Repository) DeactivateUser(ctx context.Context, ownerID, userID int64) error {
-	err := r.queries.DeactivateUser(ctx, sqlc.DeactivateUserParams{
-		OwnerID: ownerID,
-		UserID:  userID,
-	})
+	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
-		logger.Ctx(ctx).Error("Failed to deactivate user", logger.Error(err))
-
 		return err
 	}
+	defer func() { _ = tx.Rollback() }()
 
-	return nil
+	qtx := r.queries.WithTx(tx)
+	if err := qtx.DeactivateUser(ctx, sqlc.DeactivateUserParams{OwnerID: ownerID, UserID: userID}); err != nil {
+		logger.Ctx(ctx).Error("Failed to deactivate user", logger.Error(err))
+		return err
+	}
+	newCount, err := qtx.CountActiveMembers(ctx, sqlc.CountActiveMembersParams{OwnerID: ownerID, OwnerID_2: ownerID, OwnerID_3: ownerID})
+	if err != nil {
+		return err
+	}
+	if err := r.recordSeatChangeTx(ctx, qtx, ownerID, int(newCount)); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 // RevokeBusinessUserPermissions deactivates one user's permission rows in one
@@ -199,6 +207,72 @@ func (r *Repository) CreateUser(ctx context.Context, email, passwordHash, fullNa
 	}
 
 	return res.LastInsertId()
+}
+
+// CreateInviteTransaction atomically provisions the user, permission, employee,
+// invite token, and corresponding billing seat state. A failed employee or
+// billing write rolls back the entire invite instead of leaving partial access.
+func (r *Repository) CreateInviteTransaction(ctx context.Context, businessID, ownerID int64, email, passwordHash, fullName string, apps []string, role domain.Role, token string, expiresAt time.Time) (int64, error) {
+	appsJSON, err := json.Marshal(apps)
+	if err != nil {
+		return 0, err
+	}
+
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	qtx := r.queries.WithTx(tx)
+	user, err := qtx.GetUserByEmail(ctx, email)
+	var userID int64
+	if err == nil {
+		userID = user.ID
+	} else if errors.Is(err, sql.ErrNoRows) {
+		result, createErr := qtx.CreateUser(ctx, sqlc.CreateUserParams{
+			Email:        email,
+			PasswordHash: passwordHash,
+			FullName:     sql.NullString{String: fullName, Valid: fullName != ""},
+		})
+		if createErr != nil {
+			return 0, createErr
+		}
+		userID, err = result.LastInsertId()
+		if err != nil {
+			return 0, err
+		}
+	} else {
+		return 0, err
+	}
+
+	if err := qtx.UpsertPermission(ctx, sqlc.UpsertPermissionParams{
+		BusinessID: sql.NullInt64{Int64: businessID, Valid: businessID > 0},
+		OwnerID:    ownerID,
+		UserID:     userID,
+		Apps:       appsJSON,
+		Role:       sqlc.NullUserAppPermissionsRole{UserAppPermissionsRole: sqlc.UserAppPermissionsRole(role), Valid: true},
+	}); err != nil {
+		return 0, err
+	}
+	if err := qtx.EnsureEmployeeForUser(ctx, sqlc.EnsureEmployeeForUserParams{OwnerID: ownerID, ID: userID}); err != nil {
+		return 0, err
+	}
+	if err := qtx.CreateInviteToken(ctx, sqlc.CreateInviteTokenParams{UserID: userID, OwnerID: ownerID, Token: token, ExpiresAt: expiresAt}); err != nil {
+		return 0, err
+	}
+
+	newCount, err := qtx.CountActiveMembers(ctx, sqlc.CountActiveMembersParams{OwnerID: ownerID, OwnerID_2: ownerID, OwnerID_3: ownerID})
+	if err != nil {
+		return 0, err
+	}
+	if err := r.recordSeatChangeTx(ctx, qtx, ownerID, int(newCount)); err != nil {
+		return 0, err
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return userID, nil
 }
 
 func (r *Repository) EnsureEmployeeForUser(ctx context.Context, ownerID, userID int64) error {
@@ -441,6 +515,45 @@ func (r *Repository) SetPassword(ctx context.Context, userID int64, passwordHash
 		PasswordHash: passwordHash,
 		ID:           userID,
 	})
+}
+
+// SetPasswordAndConsumeInviteToken makes invite acceptance one transaction.
+// The conditional token update wins the race between concurrent accept calls;
+// only the caller that consumes the unused, unexpired token may set a password.
+func (r *Repository) SetPasswordAndConsumeInviteToken(ctx context.Context, userID int64, token, passwordHash string) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	qtx := r.queries.WithTx(tx)
+	result, err := qtx.ConsumeInviteToken(ctx, token)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows != 1 {
+		row, lookupErr := qtx.GetInviteToken(ctx, token)
+		if lookupErr != nil {
+			return lookupErr
+		}
+		if row.UsedAt.Valid {
+			return domain.ErrTokenAlreadyUsed
+		}
+		if time.Now().After(row.ExpiresAt) {
+			return domain.ErrTokenExpired
+		}
+		return domain.ErrTokenAlreadyUsed
+	}
+
+	if err := qtx.SetPassword(ctx, sqlc.SetPasswordParams{PasswordHash: passwordHash, ID: userID}); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 // GetBusinessByID returns the business name and owner ID.
@@ -829,62 +942,43 @@ func (r *Repository) GetOwnerSubscriptionInfo(ctx context.Context, ownerID int64
 // All three writes (close the active period, open a new one, update the subscription seat count)
 // run inside a single transaction so billing state can never end up partially applied.
 func (r *Repository) RecordSeatChange(ctx context.Context, ownerID int64, newCount int) error {
-	now := time.Now().UTC()
-	yesterday := now.AddDate(0, 0, -1)
-	billingMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
-
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
-	defer func() {
-		if p := recover(); p != nil {
-			_ = tx.Rollback()
-			panic(p)
-		}
-	}()
+	defer func() { _ = tx.Rollback() }()
+	if err := r.recordSeatChangeTx(ctx, r.queries.WithTx(tx), ownerID, newCount); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
 
-	qtx := r.queries.WithTx(tx)
-
-	// cross-schema read from subscriptions — approved for seat period management
+func (r *Repository) recordSeatChangeTx(ctx context.Context, qtx *sqlc.Queries, ownerID int64, newCount int) error {
+	now := time.Now().UTC()
 	sub, err := qtx.LockSubscriptionForSeatChange(ctx, ownerID)
 	if err != nil {
-		_ = tx.Rollback()
 		return err
 	}
-
-	// cross-schema write to seat_periods — approved for seat billing accuracy
 	if err := qtx.CloseActiveSeatPeriod(ctx, sqlc.CloseActiveSeatPeriodParams{
-		PeriodEnd:      sql.NullTime{Time: yesterday, Valid: true},
+		PeriodEnd:      sql.NullTime{Time: now.AddDate(0, 0, -1), Valid: true},
 		SubscriptionID: sub.ID,
 	}); err != nil {
-		_ = tx.Rollback()
 		return err
 	}
-
-	// cross-schema write to seat_periods — approved for seat billing accuracy
 	if err := qtx.OpenSeatPeriod(ctx, sqlc.OpenSeatPeriodParams{
 		SubscriptionID:    sub.ID,
 		OwnerID:           ownerID,
 		SeatCount:         int32(newCount),
 		PricePerSeatCents: sub.PricePerSeatCents,
 		PeriodStart:       now,
-		BillingMonth:      billingMonth,
+		BillingMonth:      time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC),
 	}); err != nil {
-		_ = tx.Rollback()
 		return err
 	}
-
-	// cross-schema write to subscriptions — approved for seat billing accuracy
-	if err := qtx.UpdateSubscriptionSeatCount(ctx, sqlc.UpdateSubscriptionSeatCountParams{
+	return qtx.UpdateSubscriptionSeatCount(ctx, sqlc.UpdateSubscriptionSeatCountParams{
 		SeatCount: int32(newCount),
 		OwnerID:   ownerID,
-	}); err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-
-	return tx.Commit()
+	})
 }
 
 // ─── Access Requests ──────────────────────────────────────────────────────────

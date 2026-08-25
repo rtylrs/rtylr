@@ -106,7 +106,5 @@ func (a *MembersAPI) RemoveMember(ctx context.Context, req *hubteammembersv1.Rem
 		}
 	}
 
-	recordSeatChangeAsync(ctx, a.Service, actorID, device.User.BusinessID)
-
 	return &hubteammembersv1.RemoveMemberResponse{Message: "Member deactivated"}, nil
 }
