@@ -26,6 +26,7 @@ mentions?: boolean;
 statusChanges?: boolean;
 weeklyDigest?: boolean;
 emailNotifications?: boolean;
+sidebarPreferences?: string;
 }
 
 export function decodeGetUserSettingsResponse(v: any): GetUserSettingsResponse {
@@ -37,6 +38,7 @@ mentions: v.mentions,
 statusChanges: v.status_changes,
 weeklyDigest: v.weekly_digest,
 emailNotifications: v.email_notifications,
+sidebarPreferences: v.sidebar_preferences,
 };
 }
 
@@ -48,6 +50,7 @@ if (v.mentions !== undefined) { out.mentions = v.mentions; }
 if (v.statusChanges !== undefined) { out.status_changes = v.statusChanges; }
 if (v.weeklyDigest !== undefined) { out.weekly_digest = v.weeklyDigest; }
 if (v.emailNotifications !== undefined) { out.email_notifications = v.emailNotifications; }
+if (v.sidebarPreferences !== undefined) { out.sidebar_preferences = v.sidebarPreferences; }
 return out;
 }
 
@@ -59,6 +62,7 @@ if (v.mentions !== undefined && v.mentions !== null && !(typeof v.mentions === "
 if (v.statusChanges !== undefined && v.statusChanges !== null && !(typeof v.statusChanges === "boolean")) violations.push("status_changes has invalid type");
 if (v.weeklyDigest !== undefined && v.weeklyDigest !== null && !(typeof v.weeklyDigest === "boolean")) violations.push("weekly_digest has invalid type");
 if (v.emailNotifications !== undefined && v.emailNotifications !== null && !(typeof v.emailNotifications === "boolean")) violations.push("email_notifications has invalid type");
+if (v.sidebarPreferences !== undefined && v.sidebarPreferences !== null && !(typeof v.sidebarPreferences === "string")) violations.push("sidebar_preferences has invalid type");
 return violations;
 }
 
@@ -69,6 +73,7 @@ mentions?: boolean;
 statusChanges?: boolean;
 weeklyDigest?: boolean;
 emailNotifications?: boolean;
+sidebarPreferences?: string;
 }
 
 export function decodeUpdateUserSettingsRequest(v: any): UpdateUserSettingsRequest {
@@ -80,6 +85,7 @@ mentions: v.mentions,
 statusChanges: v.status_changes,
 weeklyDigest: v.weekly_digest,
 emailNotifications: v.email_notifications,
+sidebarPreferences: v.sidebar_preferences,
 };
 }
 
@@ -91,6 +97,7 @@ if (v.mentions !== undefined) { out.mentions = v.mentions; }
 if (v.statusChanges !== undefined) { out.status_changes = v.statusChanges; }
 if (v.weeklyDigest !== undefined) { out.weekly_digest = v.weeklyDigest; }
 if (v.emailNotifications !== undefined) { out.email_notifications = v.emailNotifications; }
+if (v.sidebarPreferences !== undefined) { out.sidebar_preferences = v.sidebarPreferences; }
 return out;
 }
 
@@ -102,6 +109,7 @@ if (v.mentions !== undefined && v.mentions !== null && !(typeof v.mentions === "
 if (v.statusChanges !== undefined && v.statusChanges !== null && !(typeof v.statusChanges === "boolean")) violations.push("status_changes has invalid type");
 if (v.weeklyDigest !== undefined && v.weeklyDigest !== null && !(typeof v.weeklyDigest === "boolean")) violations.push("weekly_digest has invalid type");
 if (v.emailNotifications !== undefined && v.emailNotifications !== null && !(typeof v.emailNotifications === "boolean")) violations.push("email_notifications has invalid type");
+if (v.sidebarPreferences !== undefined && v.sidebarPreferences !== null && !(typeof v.sidebarPreferences === "string")) violations.push("sidebar_preferences has invalid type");
 return violations;
 }
 
