@@ -683,8 +683,8 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               <span
                 className="h-4 w-4 rounded-sm shrink-0 flex items-center justify-center text-[9px] font-bold"
                 style={{
-                  background: `${activeWorkspace.color}22`,
-                  color: activeWorkspace.color,
+                  background: 'var(--accent-muted)',
+                  color: 'var(--accent-fg)',
                 }}
                 aria-hidden
               >
