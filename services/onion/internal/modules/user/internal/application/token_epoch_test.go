@@ -10,6 +10,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/user/internal/domain"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
+	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 	"github.com/voxire/onion/internal/testutil"
 )
 
@@ -56,6 +57,72 @@ func TestValidateToken_RejectsTokenFromBeforePasswordChange(t *testing.T) {
 
 	if _, err := service.ValidateToken(ctx, token); !errors.Is(err, ErrInvalidCredentials) {
 		t.Errorf("token issued before password change: got err=%v, want ErrInvalidCredentials", err)
+	}
+}
+
+func TestAuthenticationRejectsInactiveMemberAndBannedUser(t *testing.T) {
+	db := testutil.OpenDB(t)
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, jwtutils.JWTSecretKey, "test-secret")
+	ctx = context.WithValue(ctx, jwtutils.JWTDurationKey, time.Hour)
+
+	service := NewService(ctx, db, "")
+	if !service.Initialize(ctx) {
+		t.Fatal("failed to initialize user service jwt helper")
+	}
+
+	password := "CorrectHorseBatteryStaple!"
+	hash, err := passwordutils.HashPassword(password)
+	if err != nil {
+		t.Fatalf("HashPassword: %v", err)
+	}
+	email := fmt.Sprintf("access-state+%d@example.com", time.Now().UnixNano())
+	userID, err := service.repo.CreateUser(ctx, &domain.User{
+		Email:        email,
+		PasswordHash: hash,
+		FullName:     "Access State",
+	})
+	if err != nil {
+		t.Fatalf("CreateUser: %v", err)
+	}
+	const businessID = int64(1)
+	_, err = db.ExecContext(ctx, `
+INSERT INTO user_app_permissions (business_id, owner_id, user_id, apps, role, is_active)
+VALUES (?, ?, ?, '[]', 'admin', TRUE)`, businessID, testutil.OwnerID, userID)
+	if err != nil {
+		t.Fatalf("insert permission: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM user_app_permissions WHERE user_id = ?", userID)
+		_ = service.repo.DeleteUser(context.Background(), userID)
+	})
+
+	if got, err := service.Authenticate(ctx, email, password); err != nil || got != userID {
+		t.Fatalf("active member should authenticate, id=%d err=%v", got, err)
+	}
+	token, err := service.JWT.CreateJWT(&AccessTokenClaims{UserID: userID, BusinessID: businessID})
+	if err != nil {
+		t.Fatalf("CreateJWT: %v", err)
+	}
+	if _, err := service.ValidateToken(ctx, token); err != nil {
+		t.Fatalf("active member token should validate: %v", err)
+	}
+
+	if _, err := db.ExecContext(ctx, "UPDATE user_app_permissions SET is_active = FALSE WHERE user_id = ?", userID); err != nil {
+		t.Fatalf("deactivate permission: %v", err)
+	}
+	if _, err := service.Authenticate(ctx, email, password); !errors.Is(err, ErrInvalidCredentials) {
+		t.Fatalf("inactive member login error = %v, want ErrInvalidCredentials", err)
+	}
+	if _, err := service.ValidateToken(ctx, token); !errors.Is(err, ErrInvalidCredentials) {
+		t.Fatalf("inactive member token error = %v, want ErrInvalidCredentials", err)
+	}
+
+	if _, err := db.ExecContext(ctx, "UPDATE users SET is_banned = TRUE WHERE id = ?", userID); err != nil {
+		t.Fatalf("ban user: %v", err)
+	}
+	if _, err := service.Authenticate(ctx, email, password); !errors.Is(err, ErrInvalidCredentials) {
+		t.Fatalf("banned user login error = %v, want ErrInvalidCredentials", err)
 	}
 }
 

@@ -9,11 +9,11 @@ INSERT INTO users (
 -- the application reads, so adding a column to the users schema can never break
 -- these queries against a database that has not been migrated yet.
 -- name: GetUserByID :one
-SELECT id, email, password_hash, full_name, signup_ip_address, signup_device_info, created_at, updated_at, is_console_admin, token_epoch
+SELECT id, business_id, email, password_hash, full_name, signup_ip_address, signup_device_info, created_at, updated_at, is_console_admin, is_banned, token_epoch
 FROM users WHERE id = ?;
 
 -- name: GetUserByEmail :one
-SELECT id, email, password_hash, full_name, signup_ip_address, signup_device_info, created_at, updated_at, is_console_admin, token_epoch
+SELECT id, business_id, email, password_hash, full_name, signup_ip_address, signup_device_info, created_at, updated_at, is_console_admin, is_banned, token_epoch
 FROM users WHERE email = ?;
 
 -- name: EmailExists :one
@@ -47,7 +47,26 @@ UPDATE users SET business_id = ? WHERE id = ?;
 SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE LIMIT 1;
 
 -- name: GetUserAppRole :one
-SELECT role FROM user_app_permissions WHERE business_id = ? AND user_id = ?;
+SELECT role FROM user_app_permissions
+WHERE business_id = ? AND user_id = ? AND COALESCE(is_active, TRUE) = TRUE;
+
+-- Read authentication state without the application cache so deactivation and
+-- bans take effect across processes without waiting for a profile-cache TTL.
+-- name: GetUserAccessState :one
+SELECT
+    EXISTS(
+        SELECT 1 FROM user_app_permissions p
+        WHERE p.user_id = u.id
+    ) AS has_permissions,
+    EXISTS(
+        SELECT 1 FROM user_app_permissions p
+        WHERE p.user_id = u.id AND COALESCE(p.is_active, TRUE) = TRUE
+    ) OR EXISTS(
+        SELECT 1 FROM businesses b
+        WHERE b.owner_id = u.id AND COALESCE(b.is_active, TRUE) = TRUE
+    ) AS has_active_access
+FROM users u
+WHERE u.id = ?;
 
 -- name: CreateBusiness :execresult
 INSERT INTO businesses (name, owner_id) VALUES (?, ?);
