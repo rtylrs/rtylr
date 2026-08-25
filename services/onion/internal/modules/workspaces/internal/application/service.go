@@ -1271,6 +1271,10 @@ func (s *Service) GetProjectTaskCounts(ctx context.Context, projectID int64) (to
 	return s.repo.GetProjectTaskCounts(ctx, projectID)
 }
 
+func (s *Service) GetProjectTaskCountsByProjectIDs(ctx context.Context, projectIDs []int64) (map[int64]domain.ProjectTaskCounts, error) {
+	return s.repo.GetProjectTaskCountsByProjectIDs(ctx, projectIDs)
+}
+
 // ─────────────────────────────────────────────
 // Project Columns
 // ─────────────────────────────────────────────
