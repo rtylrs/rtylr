@@ -941,61 +941,112 @@ func (r *Repository) InsertTimelineEntry(ctx context.Context, entry domain.Timel
 // ─── Import ──────────────────────────────────────────────────────────────────
 
 func (r *Repository) BulkCreateCustomers(ctx context.Context, businessID, ownerID int64, items []domain.CustomerImportItem, dedupe bool) (int, int, error) {
-	imported := 0
-	failed := 0
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, 0, err
+	}
+	defer tx.Rollback()
 
+	// Load the existing email set once. The input set is tracked as well so
+	// duplicate rows in the same import are not inserted twice.
+	existingEmails := make(map[string]struct{})
+	if dedupe {
+		rows, err := tx.QueryContext(ctx,
+			"SELECT email FROM crm_customers WHERE business_id = ? AND email IS NOT NULL AND email <> ''",
+			businessID,
+		)
+		if err != nil {
+			return 0, 0, err
+		}
+		for rows.Next() {
+			var email string
+			if err := rows.Scan(&email); err != nil {
+				rows.Close()
+				return 0, 0, err
+			}
+			existingEmails[normalizeImportEmail(email)] = struct{}{}
+		}
+		if err := rows.Err(); err != nil {
+			rows.Close()
+			return 0, 0, err
+		}
+		rows.Close()
+	}
+
+	insert := sq.Insert("crm_customers").Columns(
+		"owner_id", "business_id", "first_name", "last_name", "email", "phone",
+		"date_of_birth", "gender", "address", "city", "country", "tags", "notes",
+		"consent", "loyalty_tier", "is_active",
+	)
+	inserted := 0
 	for _, item := range items {
 		if dedupe && item.Email != "" {
-			var existing int
-			if err := r.pool.QueryRowContext(ctx,
-				"SELECT COUNT(*) FROM crm_customers WHERE business_id = ? AND email = ?",
-				businessID, item.Email,
-			).Scan(&existing); err != nil {
-				failed++
+			emailKey := normalizeImportEmail(item.Email)
+			if _, exists := existingEmails[emailKey]; exists {
 				continue
 			}
-			if existing > 0 {
-				continue
-			}
+			existingEmails[emailKey] = struct{}{}
 		}
+
 		var dob *time.Time
-
 		if item.DateOfBirth != "" {
-			t, err := time.Parse("2006-01-02", item.DateOfBirth)
-			if err == nil {
-				dob = &t
+			if parsed, parseErr := time.Parse("2006-01-02", item.DateOfBirth); parseErr == nil {
+				dob = &parsed
 			}
 		}
-
-		tagsJSON, err := json.Marshal(item.Tags)
-		if err != nil {
+		tagsJSON, marshalErr := json.Marshal(item.Tags)
+		if marshalErr != nil {
 			tagsJSON = []byte("[]")
 		}
 
-		_, err = r.queries.CreateCustomer(ctx, sqlc.CreateCustomerParams{
-			OwnerID:     ownerID,
-			BusinessID:  businessID,
-			FirstName:   item.FirstName,
-			LastName:    sql.NullString{String: item.LastName, Valid: item.LastName != ""},
-			Email:       sql.NullString{String: item.Email, Valid: item.Email != ""},
-			Phone:       sql.NullString{String: item.Phone, Valid: item.Phone != ""},
-			DateOfBirth: nullableTime(dob),
-			Gender:      sqlc.NullCrmCustomersGender{CrmCustomersGender: sqlc.CrmCustomersGender(item.Gender), Valid: item.Gender != ""},
-			Address:     sql.NullString{String: item.Address, Valid: item.Address != ""},
-			City:        sql.NullString{String: item.City, Valid: item.City != ""},
-			Country:     sql.NullString{String: item.Country, Valid: item.Country != ""},
-			Tags:        tagsJSON,
-			Notes:       sql.NullString{String: item.Notes, Valid: item.Notes != ""},
-		})
-		if err != nil {
-			logger.Ctx(ctx).Error("Failed to import customer", logger.Error(err))
-			failed++
-		} else {
-			imported++
-		}
+		insert = insert.Values(
+			ownerID,
+			businessID,
+			item.FirstName,
+			nullImportString(item.LastName),
+			nullImportString(item.Email),
+			nullImportString(item.Phone),
+			nullableTime(dob),
+			nullImportString(item.Gender),
+			nullImportString(item.Address),
+			nullImportString(item.City),
+			nullImportString(item.Country),
+			tagsJSON,
+			nullImportString(item.Notes),
+			nil, // preserve CreateCustomer's NULL consent for imported records
+			"bronze",
+			true,
+		)
+		inserted++
 	}
 
-	return imported, failed, nil
+	if inserted == 0 {
+		if err := tx.Commit(); err != nil {
+			return 0, 0, err
+		}
+		return 0, 0, nil
+	}
+
+	query, args, err := insert.ToSql()
+	if err != nil {
+		return 0, inserted, err
+	}
+	if _, err := tx.ExecContext(ctx, query, args...); err != nil {
+		logger.Ctx(ctx).Error("Failed to import customers", logger.Error(err))
+		return 0, inserted, nil
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, inserted, err
+	}
+	return inserted, 0, nil
+}
+
+func nullImportString(value string) sql.NullString {
+	return sql.NullString{String: value, Valid: value != ""}
+}
+
+func normalizeImportEmail(email string) string {
+	return strings.ToLower(strings.TrimSpace(email))
 }
 
 // ─── Export (GDPR) ──────────────────────────────────────────────────────────
