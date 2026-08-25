@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/modules/team/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -1042,19 +1044,30 @@ func (r *Repository) ResolveAccessRequest(ctx context.Context, id, businessID in
 }
 
 func (r *Repository) BulkCreateHubNotification(ctx context.Context, ownerID int64, userIDs []int64, title, body, notifType, link string) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
+
+	// cross-schema write to hub_notifications — approved for cross-module access request alerts
+	insert := sq.Insert("hub_notifications").Columns("owner_id", "user_id", "title", "body", "type", "link")
 	for _, uid := range userIDs {
-		// cross-schema write to hub_notifications — approved for cross-module access request alerts
-		if err := r.queries.CreateHubNotification(ctx, sqlc.CreateHubNotificationParams{
-			OwnerID: ownerID,
-			UserID:  uid,
-			Title:   title,
-			Body:    sql.NullString{String: body, Valid: body != ""},
-			Type:    notifType,
-			Link:    sql.NullString{String: link, Valid: link != ""},
-		}); err != nil {
-			logger.Ctx(ctx).Warn("failed to create hub notification",
-				logger.Int("user_id", int(uid)), logger.Error(err))
-		}
+		insert = insert.Values(
+			ownerID,
+			uid,
+			title,
+			sql.NullString{String: body, Valid: body != ""},
+			notifType,
+			sql.NullString{String: link, Valid: link != ""},
+		)
+	}
+	query, args, err := insert.ToSql()
+	if err != nil {
+		return err
+	}
+	if _, err := r.pool.ExecContext(ctx, query, args...); err != nil {
+		logger.Ctx(ctx).Warn("failed to create hub notifications",
+			logger.Int("recipient_count", len(userIDs)), logger.Error(err))
+		return err
 	}
 	return nil
 }
