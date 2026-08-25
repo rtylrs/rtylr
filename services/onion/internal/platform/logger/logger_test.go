@@ -140,13 +140,74 @@ func TestConvertFieldsHandlesAllTypes(t *testing.T) {
 	}
 }
 
-func TestFlushIsNoOp(t *testing.T) {
+func TestFlushWithoutBetterStackHandler(t *testing.T) {
 	defer func() {
 		if r := recover(); r != nil {
 			t.Fatalf("Flush panicked: %v", r)
 		}
 	}()
 	Flush()
+}
+
+func TestFlushWaitsForPendingBetterStackLogs(t *testing.T) {
+	started := make(chan struct{})
+	release := make(chan struct{})
+	h := &betterStackHandler{
+		level:    slog.LevelWarn,
+		delivery: &betterStackDelivery{},
+		send: func(context.Context, string, string, time.Duration, []byte) error {
+			close(started)
+			<-release
+			return nil
+		},
+	}
+
+	record := slog.NewRecord(time.Now(), slog.LevelWarn, "pending", 0)
+	if err := h.Handle(context.Background(), record); err != nil {
+		t.Fatalf("Handle: %v", err)
+	}
+	<-started
+
+	flushed := make(chan struct{})
+	go func() {
+		h.Flush()
+		close(flushed)
+	}()
+	select {
+	case <-flushed:
+		t.Fatal("Flush returned before pending send completed")
+	case <-time.After(10 * time.Millisecond):
+	}
+
+	close(release)
+	select {
+	case <-flushed:
+	case <-time.After(time.Second):
+		t.Fatal("Flush did not return after pending send completed")
+	}
+}
+
+func TestBetterStackHandlerPreservesGroupedAttributes(t *testing.T) {
+	h := &betterStackHandler{
+		level:    slog.LevelWarn,
+		delivery: &betterStackDelivery{},
+		send:     sendBetterStack,
+	}
+
+	grouped, ok := h.WithGroup("request").WithAttrs([]slog.Attr{slog.String("path", "/health")}).(*betterStackHandler)
+	if !ok {
+		t.Fatal("WithAttrs returned unexpected handler type")
+	}
+	if len(grouped.attrs) != 1 {
+		t.Fatalf("got %d handler attrs, want one group", len(grouped.attrs))
+	}
+	if grouped.attrs[0].Key != "request" || grouped.attrs[0].Value.Kind() != slog.KindGroup {
+		t.Fatalf("got %#v, want request group", grouped.attrs[0])
+	}
+	groupAttrs := grouped.attrs[0].Value.Group()
+	if len(groupAttrs) != 1 || groupAttrs[0].Key != "path" {
+		t.Fatalf("got grouped attrs %#v, want path attr", groupAttrs)
+	}
 }
 
 func TestBetterStackEndpoint(t *testing.T) {

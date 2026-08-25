@@ -1,11 +1,13 @@
 package logger
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"strings"
 	"sync"
@@ -52,11 +54,11 @@ func SetupLogger() {
 	}
 
 	if strings.TrimSpace(token) != "" {
-		h := slogbetterstack.Option{
-			Level:    slog.LevelWarn,
-			Token:    strings.TrimSpace(token),
-			Endpoint: betterStackEndpoint(ingestingHost),
-		}.NewBetterstackHandler()
+		endpoint := betterStackEndpoint(ingestingHost)
+		if endpoint == "" {
+			endpoint = slogbetterstack.BetterstackEndpoint
+		}
+		h := newBetterStackHandler(strings.TrimSpace(token), endpoint)
 		handlers = append(handlers, &dedupHandler{inner: h, window: 30 * time.Second})
 	}
 
@@ -113,9 +115,15 @@ func (slackErrorHandler) Handle(_ context.Context, r slog.Record) error {
 func (h slackErrorHandler) WithAttrs(_ []slog.Attr) slog.Handler { return h }
 func (h slackErrorHandler) WithGroup(_ string) slog.Handler      { return h }
 
-// Flush is retained as a shutdown hook for callers. The Better Stack slog
-// handler dispatches asynchronously and does not expose a flush operation.
-func Flush() {}
+var activeBetterStackHandler *betterStackHandler
+
+// Flush waits for Better Stack records that have already been accepted by the
+// logger. Stdout and Slack are synchronous and need no shutdown hook.
+func Flush() {
+	if activeBetterStackHandler != nil {
+		activeBetterStackHandler.Flush()
+	}
+}
 
 func betterStackEndpoint(ingestingHost string) string {
 	ingestingHost = strings.TrimSpace(ingestingHost)
@@ -165,9 +173,8 @@ func (m *multiHandler) WithGroup(name string) slog.Handler {
 	return &multiHandler{handlers: handlers}
 }
 
-// dedupHandler wraps a slog.Handler and suppresses repeated (level, message)
-// pairs within the configured window so Better Stack doesn't receive duplicate
-// bursts.
+// dedupHandler wraps a slog.Handler and suppresses repeated event fingerprints
+// within the configured window so Better Stack doesn't receive duplicate bursts.
 type dedupHandler struct {
 	inner  slog.Handler
 	window time.Duration
@@ -175,6 +182,146 @@ type dedupHandler struct {
 
 	mu   sync.Mutex
 	seen map[string]time.Time
+}
+
+type betterStackHandler struct {
+	level    slog.Level
+	token    string
+	endpoint string
+	timeout  time.Duration
+	attrs    []slog.Attr
+	groups   []string
+	delivery *betterStackDelivery
+	send     func(context.Context, string, string, time.Duration, []byte) error
+}
+
+type betterStackDelivery struct {
+	mu       sync.Mutex
+	pending  sync.WaitGroup
+	flushing bool
+}
+
+func newBetterStackHandler(token, endpoint string) *betterStackHandler {
+	h := &betterStackHandler{
+		level:    slog.LevelWarn,
+		token:    token,
+		endpoint: endpoint,
+		timeout:  10 * time.Second,
+		delivery: &betterStackDelivery{},
+	}
+	h.send = sendBetterStack
+	activeBetterStackHandler = h
+	return h
+}
+
+func (h *betterStackHandler) Enabled(_ context.Context, level slog.Level) bool {
+	return level >= h.level
+}
+
+func (h *betterStackHandler) Handle(_ context.Context, record slog.Record) error {
+	payload := slogbetterstack.DefaultConverter(false, nil, h.attrs, h.groups, &record)
+	body, err := json.Marshal([]map[string]any{payload})
+	if err != nil {
+		return err
+	}
+
+	h.delivery.mu.Lock()
+	if h.delivery.flushing {
+		h.delivery.mu.Unlock()
+		return nil
+	}
+	h.delivery.pending.Add(1)
+	h.delivery.mu.Unlock()
+	go func() {
+		defer h.delivery.pending.Done()
+		// Request contexts may be canceled as soon as the request completes. Log
+		// delivery must outlive the request so Flush can account for it.
+		_ = h.send(context.Background(), h.endpoint, h.token, h.timeout, body)
+	}()
+	return nil
+}
+
+func (h *betterStackHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	combined := appendAttrsToGroup(h.groups, h.attrs, attrs...)
+	return &betterStackHandler{
+		level:    h.level,
+		token:    h.token,
+		endpoint: h.endpoint,
+		timeout:  h.timeout,
+		attrs:    combined,
+		groups:   h.groups,
+		delivery: h.delivery,
+		send:     h.send,
+	}
+}
+
+func (h *betterStackHandler) WithGroup(name string) slog.Handler {
+	if name == "" {
+		return h
+	}
+	groups := append([]string{}, h.groups...)
+	groups = append(groups, name)
+	return &betterStackHandler{
+		level:    h.level,
+		token:    h.token,
+		endpoint: h.endpoint,
+		timeout:  h.timeout,
+		attrs:    h.attrs,
+		groups:   groups,
+		delivery: h.delivery,
+		send:     h.send,
+	}
+}
+
+func (h *betterStackHandler) Flush() {
+	h.delivery.mu.Lock()
+	h.delivery.flushing = true
+	h.delivery.mu.Unlock()
+	h.delivery.pending.Wait()
+}
+
+func appendAttrsToGroup(groups []string, existing []slog.Attr, attrs ...slog.Attr) []slog.Attr {
+	if len(groups) == 0 {
+		combined := make([]slog.Attr, 0, len(existing)+len(attrs))
+		combined = append(combined, existing...)
+		return append(combined, attrs...)
+	}
+
+	combined := append([]slog.Attr{}, existing...)
+	for i, attr := range combined {
+		if attr.Key == groups[0] && attr.Value.Kind() == slog.KindGroup {
+			combined[i] = groupAttr(groups[0], appendAttrsToGroup(groups[1:], attr.Value.Group(), attrs...))
+			return combined
+		}
+	}
+	return append(combined, groupAttr(groups[0], appendAttrsToGroup(groups[1:], nil, attrs...)))
+}
+
+func groupAttr(name string, attrs []slog.Attr) slog.Attr {
+	args := make([]any, len(attrs))
+	for i, attr := range attrs {
+		args[i] = attr
+	}
+	return slog.Group(name, args...)
+}
+
+func sendBetterStack(ctx context.Context, endpoint, token string, timeout time.Duration, body []byte) error {
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "onion")
+
+	resp, err := (&http.Client{Timeout: timeout}).Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
 }
 
 func (d *dedupHandler) Enabled(ctx context.Context, level slog.Level) bool {
