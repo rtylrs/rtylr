@@ -57,26 +57,19 @@ steps:
         # URLs to use a PAT stored in Secret Manager (Classic PAT
         # with `repo` scope on voxie; see README for provisioning).
         #
-        # NOTE: Cloud Build eats single `$` sequences at YAML-parse
-        # time. We use `$$` so bash receives a literal `$` at run
-        # time — without it you get "GITHUB_PAT is not a valid
-        # built-in substitution" before the step even starts.
-        git config --global \
+        # Keep the credential in a temporary config file. A global URL rewrite
+        # persists in the shared build workspace and can leak into later steps.
+        git_config="$(mktemp)"
+        trap 'rm -f "$git_config"' EXIT
+        git config --file "$git_config" \
           url."https://x-access-token:$${GITHUB_PAT}@github.com/".insteadOf \
           "https://github.com/"
         git submodule sync --recursive
-        git submodule update --init --recursive
-        if [ ! -f ./voxie/go.mod ]; then
-          git clone --depth 1 https://github.com/tryrtylr/voxie.git ./voxie
-        fi
-        if [ ! -f ./internal/platform/database/schemas/hr_core/schema.sql ]; then
-          git clone --depth 1 https://github.com/tryrtylr/schemas.git ./internal/platform/database/schemas
-        fi
-        if [ ! -d ./internal/platform/email/templates ]; then
-          git clone --depth 1 https://github.com/tryrtylr/email-templates.git ./internal/platform/email/templates
-        fi
-        # Scrub the URL rewrite so nothing leaks downstream.
-        git config --global --unset-all url."https://x-access-token:$${GITHUB_PAT}@github.com/".insteadOf || true
+        GIT_CONFIG_GLOBAL="$git_config" git submodule update --init --recursive
+        test -f ./voxie/go.mod
+        test -f ./internal/platform/database/schemas/hr_core/schema.sql
+        test -d ./internal/platform/email/templates
+        ./scripts/check-voxie-ref.sh
 
   - id: 'Build'
     name: 'gcr.io/cloud-builders/docker'
@@ -85,16 +78,13 @@ steps:
       - '--no-cache'
       - '-t'
       - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:$COMMIT_SHA'
-      - '-t'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:latest'
       - '.'
 
   - id: 'Push'
     name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - '--all-tags'
-      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}'
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:$COMMIT_SHA'
 
   - id: 'Deploy'
     name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
@@ -109,7 +99,7 @@ steps:
       - '--quiet'
 
 images:
-  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/${_SERVICE}:$COMMIT_SHA'
 
 options:
   logging: CLOUD_LOGGING_ONLY
