@@ -11,10 +11,8 @@ import (
 	"net/url"
 	"os"
 	"reflect"
-	"runtime"
 	"strconv"
 	"strings"
-	"sync"
 
 	"buf.build/go/protovalidate"
 	onekithttp "github.com/corezio/onekit/http"
@@ -32,60 +30,6 @@ var (
 	protoValidator            = protovalidate.GlobalValidator
 	errMultipleJSONBodyValues = stdErrors.New("request body must contain a single JSON value")
 )
-
-// registeredRoutes tracks which (method, path) pairs have already been
-// registered on each router. chi's tree silently overwrites a duplicate
-// method+pattern registration with no panic and no log line (see
-// go-chi/chi/v5 tree.go's setEndpoint) - two modules scaffolded to serve the
-// same route is invisible until one of them stops receiving traffic in
-// production. This is exactly how hr_setup shadowed hr_core's /hr/config and
-// /hr/setup/* handlers for weeks: asserting here turns that into a boot-time
-// panic instead.
-var (
-	registeredRoutesMu sync.Mutex
-	registeredRoutes   = map[*chi.Mux]map[string]string{}
-)
-
-// assertRouteNotRegistered panics if method+path was already registered on
-// router by a different call site. skip is the number of stack frames to
-// unwind past this function to reach the module's own RegisterRoutes method,
-// so the panic message names the two colliding modules instead of just the
-// route library internals.
-func assertRouteNotRegistered(router *chi.Mux, method, path string) {
-	registeredRoutesMu.Lock()
-	defer registeredRoutesMu.Unlock()
-
-	routes := registeredRoutes[router]
-	if routes == nil {
-		routes = make(map[string]string)
-		registeredRoutes[router] = routes
-	}
-
-	key := method + " " + path
-	site := callSite()
-	if existing, ok := routes[key]; ok {
-		panic(fmt.Sprintf(
-			"chi: route %s registered twice - first by %s, then by %s. "+
-				"chi silently keeps only the second handler, so the first module's "+
-				"routes would be unreachable at runtime with no error. Remove the "+
-				"duplicate registration.",
-			key, existing, site,
-		))
-	}
-	routes[key] = site
-}
-
-// callSite reports the file:line of the module's RegisterRoutes method that
-// called one of the RegisterGET/RegisterPOST/... helpers below.
-func callSite() string {
-	// 0 = callSite, 1 = assertRouteNotRegistered, 2 = the RegisterXxx helper,
-	// 3 = the module.go call site that invoked it.
-	_, file, line, ok := runtime.Caller(3)
-	if !ok {
-		return "unknown call site"
-	}
-	return fmt.Sprintf("%s:%d", file, line)
-}
 
 type MiddlewareFunc func(next http.Handler) http.Handler
 
@@ -105,14 +49,12 @@ type ValidatorFunc[Req any] interface {
 
 func RegisterGET[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodGet, path)
 		router.Get(path, wrapHandler(ctx, handler, false))
 	}
 }
 
 func RegisterGETWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodGet, path)
 		router.Get(path, wrapHandler(ctx, handler, true))
 	}
 }
@@ -130,7 +72,6 @@ func RegisterGETWithValidationAndMiddleware[Req, Res any](
 	middlewares ...MiddlewareFunc,
 ) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodGet, path)
 		var final http.Handler = wrapHandler(ctx, handler, true)
 		for i := len(middlewares) - 1; i >= 0; i-- {
 			final = middlewares[i](final)
@@ -141,14 +82,12 @@ func RegisterGETWithValidationAndMiddleware[Req, Res any](
 
 func RegisterPOST[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodPost, path)
 		router.Post(path, wrapHandler(ctx, handler, false))
 	}
 }
 
 func RegisterPOSTWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodPost, path)
 		router.Post(path, wrapHandler(ctx, handler, true))
 	}
 }
@@ -166,7 +105,6 @@ func RegisterPOSTWithValidationAndMiddleware[Req, Res any](
 	middlewares ...MiddlewareFunc,
 ) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodPost, path)
 		var final http.Handler = wrapHandler(ctx, handler, true)
 		for i := len(middlewares) - 1; i >= 0; i-- {
 			final = middlewares[i](final)
@@ -177,42 +115,36 @@ func RegisterPOSTWithValidationAndMiddleware[Req, Res any](
 
 func RegisterPATCH[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodPatch, path)
 		router.Patch(path, wrapHandler(ctx, handler, false))
 	}
 }
 
 func RegisterPATCHWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodPatch, path)
 		router.Patch(path, wrapHandler(ctx, handler, true))
 	}
 }
 
 func RegisterPUT[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodPut, path)
 		router.Put(path, wrapHandler(ctx, handler, false))
 	}
 }
 
 func RegisterPUTWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodPut, path)
 		router.Put(path, wrapHandler(ctx, handler, true))
 	}
 }
 
 func RegisterDELETE[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodDelete, path)
 		router.Delete(path, wrapHandler(ctx, handler, false))
 	}
 }
 
 func RegisterDELETEWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodDelete, path)
 		router.Delete(path, wrapHandler(ctx, handler, true))
 	}
 }
