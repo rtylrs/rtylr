@@ -16,7 +16,8 @@
   "devDependencies": {
     "@types/react": "19.2.14",
     "react": "19.2.5",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.11"
   },
   "peerDependencies": {
     "react": "^19.0.0"
