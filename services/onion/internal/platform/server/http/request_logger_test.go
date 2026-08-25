@@ -141,3 +141,10 @@ func TestResponseWriterPreservesFlusher(t *testing.T) {
 		t.Fatal("Flush was not forwarded to the wrapped response writer")
 	}
 }
+
+func TestRequestURLWithoutQuery(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/login?token=secret", nil)
+	if got := requestURLWithoutQuery(req); got != "/login" {
+		t.Fatalf("requestURLWithoutQuery = %q, want /login", got)
+	}
+}

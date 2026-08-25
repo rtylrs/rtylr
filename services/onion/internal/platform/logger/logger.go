@@ -95,6 +95,9 @@ func (slackErrorHandler) Handle(_ context.Context, r slog.Record) error {
 	b.WriteString("🔴 ")
 	b.WriteString(r.Message)
 	r.Attrs(func(a slog.Attr) bool {
+		if a.Key == "body_preview" {
+			return true
+		}
 		b.WriteString("\n• ")
 		b.WriteString(a.Key)
 		b.WriteString(": ")

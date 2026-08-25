@@ -430,7 +430,7 @@ func logRequest(ctx context.Context, r *http.Request, statusCode int, duration t
 	fields := []logger.Field{
 		logger.String("service", serviceName),
 		logger.String("method", r.Method),
-		logger.String("url", r.URL.String()),
+		logger.String("url", requestURLWithoutQuery(r)),
 		logger.Int("status", statusCode),
 		logger.String("duration", duration.String()),
 		logger.String("user_agent", truncateString(r.UserAgent(), 100)),
@@ -449,6 +449,16 @@ func logRequest(ctx context.Context, r *http.Request, statusCode int, duration t
 	}
 
 	logger.Ctx(ctx).Warn(message, fields...)
+}
+
+func requestURLWithoutQuery(r *http.Request) string {
+	if r == nil || r.URL == nil {
+		return ""
+	}
+	u := *r.URL
+	u.RawQuery = ""
+	u.ForceQuery = false
+	return u.String()
 }
 
 func routeParamsFromRequest(r *http.Request) []string {

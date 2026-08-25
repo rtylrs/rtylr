@@ -37,7 +37,6 @@ var validCadences = map[string]bool{
 
 var validChannels = map[string]bool{
 	"email": true,
-	"slack": true,
 }
 
 // ListScheduledReports returns all schedules for the owner.

@@ -141,6 +141,8 @@ func (a *AuthAPI) GoogleAuth(ctx context.Context, req *commonauthv1.GoogleAuthRe
 		switch {
 		case errors.Is(err, application.ErrGoogleOAuthNotConfigured):
 			return nil, onekithttp.NewError(http.StatusServiceUnavailable, "Google login is not configured on this server")
+		case errors.Is(err, application.ErrGoogleOAuthUnavailable):
+			return nil, onekithttp.NewError(http.StatusServiceUnavailable, "Google login is temporarily unavailable")
 		case errors.Is(err, application.ErrGoogleEmailUnverified):
 			return nil, onekithttp.NewError(http.StatusForbidden, "Your Google email is not verified")
 		case errors.Is(err, application.ErrGoogleTokenInvalid):

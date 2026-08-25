@@ -25,6 +25,12 @@ type Service struct {
 	repo repository
 }
 
+const asyncLeadTaskTimeout = 10 * time.Second
+
+func asyncLeadContext(ctx context.Context) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.WithoutCancel(ctx), asyncLeadTaskTimeout)
+}
+
 func NewService(_ context.Context, db *sql.DB) *Service {
 	return &Service{
 		repo: infrastructure.NewRepository(db),
@@ -37,9 +43,21 @@ func (s *Service) Submit(ctx context.Context, input domain.LeadInput) (int64, er
 		return 0, err
 	}
 
-	go s.sendNotification(ctx, id, input)
-	go s.sendAutoReply(ctx, input)
-	go s.logToSheets(ctx, id, input)
+	go func() {
+		taskCtx, cancel := asyncLeadContext(ctx)
+		defer cancel()
+		s.sendNotification(taskCtx, id, input)
+	}()
+	go func() {
+		taskCtx, cancel := asyncLeadContext(ctx)
+		defer cancel()
+		s.sendAutoReply(taskCtx, input)
+	}()
+	go func() {
+		taskCtx, cancel := asyncLeadContext(ctx)
+		defer cancel()
+		s.logToSheets(taskCtx, id, input)
+	}()
 
 	return id, nil
 }
