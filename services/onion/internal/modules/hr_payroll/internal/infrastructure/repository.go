@@ -220,26 +220,60 @@ func (r *Repository) CreatePayrollRunWithEntries(ctx context.Context, businessID
 }
 
 func (r *Repository) UpdatePayrollRunStatus(ctx context.Context, businessID, runID int64, status string) error {
-	return r.queries.UpdatePayrollRunStatus(ctx, sqlc.UpdatePayrollRunStatusParams{
+	result, err := r.queries.UpdatePayrollRunStatus(ctx, sqlc.UpdatePayrollRunStatusParams{
 		Status:     status,
 		BusinessID: businessID,
 		ID:         runID,
+		Column4:    status,
 	})
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected != 1 {
+		return domain.ErrPayrollRunNotApprovable
+	}
+	return nil
 }
 
 func (r *Repository) SetPayrollRunApproved(ctx context.Context, businessID, runID, approverID int64) error {
-	return r.queries.SetPayrollRunApproved(ctx, sqlc.SetPayrollRunApprovedParams{
+	result, err := r.queries.SetPayrollRunApproved(ctx, sqlc.SetPayrollRunApprovedParams{
 		ApprovedBy: sql.NullInt64{Int64: approverID, Valid: true},
 		BusinessID: businessID,
 		ID:         runID,
 	})
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected != 1 {
+		return domain.ErrPayrollRunNotApprovable
+	}
+	return nil
 }
 
 func (r *Repository) SetPayrollRunExported(ctx context.Context, businessID, runID int64) error {
-	return r.queries.SetPayrollRunExported(ctx, sqlc.SetPayrollRunExportedParams{
+	result, err := r.queries.SetPayrollRunExported(ctx, sqlc.SetPayrollRunExportedParams{
 		BusinessID: businessID,
 		ID:         runID,
 	})
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected != 1 {
+		return domain.ErrPayrollRunNotApproved
+	}
+	return nil
 }
 
 func (r *Repository) ClaimPayrollRunForExport(ctx context.Context, businessID, runID int64) error {
@@ -278,6 +312,20 @@ func (r *Repository) ReleasePayrollRunExportClaim(ctx context.Context, businessI
 	})
 }
 
+func (r *Repository) ValidatePayrollRunEmployees(ctx context.Context, businessID, runID int64) error {
+	inactiveCount, err := r.queries.CountInactivePayrollEmployees(ctx, sqlc.CountInactivePayrollEmployeesParams{
+		BusinessID:   businessID,
+		PayrollRunID: runID,
+	})
+	if err != nil {
+		return err
+	}
+	if inactiveCount > 0 {
+		return domain.ErrPayrollEmployeeInactive
+	}
+	return nil
+}
+
 // --- Payroll Entries ---
 
 func (r *Repository) ListPayrollEntries(ctx context.Context, businessID, runID int64) ([]domain.PayrollEntryRecord, error) {
@@ -299,7 +347,7 @@ func (r *Repository) ListPayrollEntries(ctx context.Context, businessID, runID i
 
 // ListPayrollRunsForEmployee lists payroll runs in which the given employee has
 // an entry, restricted to statuses that represent finalized pay (approved or
-// exported) — draft/in-review runs are not visible to self-service callers.
+// exported) — draft/pending-approval runs are not visible to self-service callers.
 func (r *Repository) ListPayrollRunsForEmployee(ctx context.Context, businessID, employeeID int64, params domain.ListPayrollRunsParams) ([]domain.PayrollRunRecord, int64, error) {
 	total, err := r.queries.CountPayrollRunsForEmployee(ctx, sqlc.CountPayrollRunsForEmployeeParams{
 		BusinessID: businessID,
@@ -408,9 +456,10 @@ func (r *Repository) ListApprovedOvertimeSummaries(ctx context.Context, ownerID 
 	summaries := make([]domain.OvertimeSummary, 0, len(rows))
 	for _, row := range rows {
 		summaries = append(summaries, domain.OvertimeSummary{
-			EmployeeID:   row.EmployeeID,
-			TotalMinutes: interfaceToInt32(row.TotalMinutes),
-			Multiplier:   interfaceToFloat64(row.AvgMultiplier),
+			EmployeeID:        row.EmployeeID,
+			TotalMinutes:      interfaceToInt32(row.TotalMinutes),
+			WeightedMinutes:   interfaceToFloat64(row.WeightedMinutes),
+			UnweightedMinutes: interfaceToFloat64(row.UnweightedMinutes),
 		})
 	}
 	return summaries, nil
