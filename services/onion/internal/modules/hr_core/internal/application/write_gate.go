@@ -108,6 +108,15 @@ func (s *Service) UpdateEmployeeForWriter(
 	return s.UpdateEmployee(ctx, ownerID, emp)
 }
 
+// DeactivateEmployeeForWriter terminates an employee without exposing the
+// full-row update path to a delete-shaped request.
+func (s *Service) DeactivateEmployeeForWriter(ctx context.Context, ownerID, callerUserID, employeeID int64) error {
+	if !canManage(ctx, s, ownerID, callerUserID, permissionManageEmployees) {
+		return domain.ErrPermissionDenied
+	}
+	return s.DeactivateEmployee(ctx, ownerID, employeeID)
+}
+
 // InviteEmployeeForWriter invites an employee once the caller is confirmed to
 // administer employee records. Inviting creates an hr_employees row, so it is
 // gated as a create rather than as a message send.
