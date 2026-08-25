@@ -26,7 +26,11 @@ export DB_NAME=<database>
 ./scripts/migrate.sh
 ```
 
-Migration order: `shared → rtylr → voxire → erp → hr → crm → finance → flow → pos → hub`
+Migration order is defined once in
+`internal/platform/database/schemas/migration_order.sh` and consumed by both
+schema migration entry points. The Onion runner applies module-owned
+`internal/modules/*/sql/migration_*.sql` files after the shared schema
+directories, so those migrations are tracked and retried consistently.
 
 ---
 
