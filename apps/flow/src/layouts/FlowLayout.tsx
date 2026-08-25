@@ -796,6 +796,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                               label={t('flow.shell.calendar')}
                             />
                             <SidebarLink to="/views" icon={Eye} label={t('flow.shell.views')} />
+                            <SidebarLink
+                              to="/archive"
+                              icon={Archive}
+                              label={t('flow.shell.archive')}
+                            />
                           </nav>
                         </SidebarCollapsible>
                       </div>
@@ -850,11 +855,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                                 label={t('flow.shell.insights')}
                               />
                             )}
-                            <SidebarLink
-                              to="/archive"
-                              icon={Archive}
-                              label={t('flow.shell.archive')}
-                            />
                           </nav>
                         </SidebarCollapsible>
                       </div>
