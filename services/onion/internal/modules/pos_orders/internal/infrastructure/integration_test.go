@@ -2,6 +2,7 @@ package infrastructure_test
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"testing"
 
@@ -9,6 +10,25 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
+
+func insertTestProduct(ctx context.Context, t *testing.T, db *sql.DB, name string, salePrice float64) int64 {
+	t.Helper()
+	result, err := db.ExecContext(ctx, `
+		INSERT INTO erp_products (owner_id, business_id, name, sku, sale_price, is_active)
+		VALUES (?, ?, ?, ?, ?, TRUE)
+	`, testutil.OwnerID, testutil.OwnerID, name, "TEST-"+name, salePrice)
+	if err != nil {
+		t.Fatalf("insert test product: %v", err)
+	}
+	productID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatalf("test product id: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, `DELETE FROM erp_products WHERE id = ?`, productID)
+	})
+	return productID
+}
 
 func TestListLocations_ReturnsFixtureRows(t *testing.T) {
 	db := testutil.OpenDB(t)
@@ -506,13 +526,14 @@ func TestCreateOrder_ReturnsPositiveID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
+	productID := insertTestProduct(ctx, t, db, "OrderPositive", 12.50)
 
 	orderNum := fmt.Sprintf("TEST-ORD-%d", 9001)
 	id, err := repo.CreateOrder(ctx, testutil.OwnerID, 4101, orderNum, domain.OrderInput{
 		SessionID: 3201,
 		Type:      domain.OrderTypeTakeaway,
 		Items: []domain.OrderItemInput{
-			{Name: "Burger", Quantity: 1, UnitPrice: 12.50},
+			{MenuItemID: productID, Quantity: 1, UnitPrice: 0},
 		},
 	})
 	if err != nil {
@@ -531,13 +552,14 @@ func TestCreateOrder_AppearsInList(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
+	productID := insertTestProduct(ctx, t, db, "OrderList", 15.00)
 
 	orderNum := fmt.Sprintf("TEST-ORD-%d", 9002)
 	id, err := repo.CreateOrder(ctx, testutil.OwnerID, 4101, orderNum, domain.OrderInput{
 		SessionID: 3201,
 		Type:      domain.OrderTypeTakeaway,
 		Items: []domain.OrderItemInput{
-			{Name: "Pizza", Quantity: 2, UnitPrice: 15.00},
+			{MenuItemID: productID, Quantity: 2, UnitPrice: 0},
 		},
 	})
 	if err != nil {
@@ -568,13 +590,14 @@ func TestUpdateOrderStatus_ChangesStatus(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
+	productID := insertTestProduct(ctx, t, db, "OrderStatus", 8.00)
 
 	orderNum := fmt.Sprintf("TEST-ORD-%d", 9003)
 	id, err := repo.CreateOrder(ctx, testutil.OwnerID, 4101, orderNum, domain.OrderInput{
 		SessionID: 3201,
 		Type:      domain.OrderTypeTakeaway,
 		Items: []domain.OrderItemInput{
-			{Name: "Salad", Quantity: 1, UnitPrice: 8.00},
+			{MenuItemID: productID, Quantity: 1, UnitPrice: 0},
 		},
 	})
 	if err != nil {
@@ -641,13 +664,14 @@ func TestUpdateOrderItemStatus_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
+	productID := insertTestProduct(ctx, t, db, "OrderItemStatus", 5.00)
 
 	orderNum := fmt.Sprintf("TEST-ORD-%d", 9004)
 	id, err := repo.CreateOrder(ctx, testutil.OwnerID, 4101, orderNum, domain.OrderInput{
 		SessionID: 3201,
 		Type:      domain.OrderTypeTakeaway,
 		Items: []domain.OrderItemInput{
-			{Name: "Fries", Quantity: 1, UnitPrice: 5.00},
+			{MenuItemID: productID, Quantity: 1, UnitPrice: 0},
 		},
 	})
 	if err != nil {
@@ -668,5 +692,46 @@ func TestUpdateOrderItemStatus_NoError(t *testing.T) {
 
 	if err := repo.UpdateOrderItemStatus(ctx, id, items[0].ID, domain.ItemStatusPreparing); err != nil {
 		t.Fatalf("UpdateOrderItemStatus: %v", err)
+	}
+}
+
+func TestCreateOrder_UsesServerPriceInsteadOfClientPrice(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+
+	productID := insertTestProduct(ctx, t, db, "ServerPriced", 15.00)
+	_, err := db.ExecContext(ctx, `UPDATE erp_products SET tax_rate = 10.00 WHERE id = ?`, productID)
+	if err != nil {
+		t.Fatalf("set test product tax rate: %v", err)
+	}
+
+	orderNum := fmt.Sprintf("TEST-ORD-PRICE-%d", 9005)
+	orderID, err := repo.CreateOrder(ctx, testutil.OwnerID, 4101, orderNum, domain.OrderInput{
+		Type: domain.OrderTypeTakeaway,
+		Items: []domain.OrderItemInput{{
+			MenuItemID: productID,
+			Quantity:   1,
+			UnitPrice:  0,
+			TaxRate:    0,
+		}},
+	})
+	if err != nil {
+		t.Fatalf("CreateOrder: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = db.ExecContext(ctx, `DELETE FROM pos_order_items WHERE order_id = ?`, orderID)
+		_, _ = db.ExecContext(ctx, `DELETE FROM pos_orders WHERE id = ?`, orderID)
+	})
+
+	order, err := repo.GetOrder(ctx, testutil.OwnerID, orderID)
+	if err != nil {
+		t.Fatalf("GetOrder: %v", err)
+	}
+	if order.Total != 16.50 {
+		t.Fatalf("order total = %.2f, want 16.50 from server price and tax", order.Total)
+	}
+	if len(order.Items) != 1 || order.Items[0].UnitPrice != 15.00 || order.Items[0].TaxRate != 10.00 {
+		t.Fatalf("stored item pricing = %+v, want unit price 15 and tax 10", order.Items)
 	}
 }

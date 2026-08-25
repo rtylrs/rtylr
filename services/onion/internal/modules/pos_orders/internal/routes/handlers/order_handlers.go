@@ -197,6 +197,8 @@ type CreateOrderHandler struct{ Service *application.Service }
 
 type CreateOrderItemInput struct {
 	MenuItemID  int64   `json:"menu_item_id"`
+	ComboID     int64   `json:"combo_id"`
+	ModifierIDs []int64 `json:"modifier_ids"`
 	Name        string  `json:"name"`
 	SKU         string  `json:"sku"`
 	Quantity    float64 `json:"quantity"`
@@ -235,16 +237,20 @@ func (h *CreateOrderHandler) Validate(_ context.Context, req *CreateOrderRequest
 	}
 
 	for _, item := range req.Items {
-		if item.Name == "" {
-			return onekiterrors.New(http.StatusBadRequest, "Each item must have a name")
-		}
-
 		if item.Quantity <= 0 {
 			return onekiterrors.New(http.StatusBadRequest, "Item quantity must be positive")
 		}
 
-		if item.UnitPrice < 0 {
-			return onekiterrors.New(http.StatusBadRequest, "Item unit price cannot be negative")
+		if item.MenuItemID <= 0 && item.ComboID <= 0 {
+			return onekiterrors.New(http.StatusBadRequest, "Each item must reference a menu item or combo")
+		}
+		if item.MenuItemID > 0 && item.ComboID > 0 {
+			return onekiterrors.New(http.StatusBadRequest, "Each item cannot reference both a menu item and combo")
+		}
+		for _, modifierID := range item.ModifierIDs {
+			if modifierID <= 0 {
+				return onekiterrors.New(http.StatusBadRequest, "Modifier ids must be positive")
+			}
 		}
 	}
 
@@ -267,6 +273,8 @@ func (h *CreateOrderHandler) Serve(ctx context.Context, req *CreateOrderRequest)
 	for _, item := range req.Items {
 		items = append(items, domain.OrderItemInput{
 			MenuItemID:  item.MenuItemID,
+			ComboID:     item.ComboID,
+			ModifierIDs: append([]int64(nil), item.ModifierIDs...),
 			Name:        item.Name,
 			SKU:         item.SKU,
 			Quantity:    item.Quantity,
@@ -290,6 +298,15 @@ func (h *CreateOrderHandler) Serve(ctx context.Context, req *CreateOrderRequest)
 		Items:         items,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrPricedItemNotFound) {
+			return CreateOrderResponse{}, onekiterrors.New(http.StatusBadRequest, "Item price could not be resolved")
+		}
+		if errors.Is(err, domain.ErrDiscountNotAllowed) {
+			return CreateOrderResponse{}, onekiterrors.New(http.StatusForbidden, "You cannot apply discounts")
+		}
+		if errors.Is(err, domain.ErrDiscountExceedsLimit) {
+			return CreateOrderResponse{}, onekiterrors.New(http.StatusBadRequest, "Discount exceeds your allowed limit")
+		}
 		return CreateOrderResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create order")
 	}
 

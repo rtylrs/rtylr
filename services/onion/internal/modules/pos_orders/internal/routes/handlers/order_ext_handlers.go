@@ -124,7 +124,9 @@ func (h *DiscountOrderHandler) Serve(ctx context.Context, req *DiscountOrderRequ
 		return DiscountOrderResponse{}, sErr
 	}
 
-	if err := h.Service.ApplyDiscount(ctx, businessID, domain.DiscountInput{
+	if err := h.Service.ApplyDiscount(ctx, businessID, user.UserID, domain.DiscountInput{
+		// Capabilities are resolved server-side from the authenticated POS user.
+		// Client-provided discount values never bypass that check.
 		OrderID:       orderID,
 		DiscountType:  req.DiscountType,
 		DiscountValue: req.DiscountValue,
@@ -132,6 +134,15 @@ func (h *DiscountOrderHandler) Serve(ctx context.Context, req *DiscountOrderRequ
 	}); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return DiscountOrderResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
+		}
+		if errors.Is(err, domain.ErrOrderCannotBeDiscounted) {
+			return DiscountOrderResponse{}, onekiterrors.New(http.StatusConflict, "Paid or refunded orders cannot be discounted")
+		}
+		if errors.Is(err, domain.ErrDiscountNotAllowed) {
+			return DiscountOrderResponse{}, onekiterrors.New(http.StatusForbidden, "You cannot apply discounts")
+		}
+		if errors.Is(err, domain.ErrDiscountExceedsLimit) {
+			return DiscountOrderResponse{}, onekiterrors.New(http.StatusBadRequest, "Discount exceeds your allowed limit")
 		}
 		return DiscountOrderResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to apply discount")
 	}

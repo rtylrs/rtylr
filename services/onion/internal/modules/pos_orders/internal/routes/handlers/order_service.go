@@ -84,6 +84,9 @@ func (a *OrderAPI) CreateOrder(ctx context.Context, req *posordersv1.CreateOrder
 
 	items := make([]domain.OrderItemInput, 0, len(req.GetItems()))
 	for _, item := range req.GetItems() {
+		if item.GetMenuItemId() <= 0 {
+			return nil, orderAPIStatusError(http.StatusBadRequest, "Each item must reference a menu item")
+		}
 		items = append(items, domain.OrderItemInput{
 			MenuItemID:  item.GetMenuItemId(),
 			Name:        item.GetName(),
@@ -109,6 +112,15 @@ func (a *OrderAPI) CreateOrder(ctx context.Context, req *posordersv1.CreateOrder
 		Items:         items,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrPricedItemNotFound) {
+			return nil, orderAPIStatusError(http.StatusBadRequest, "Item price could not be resolved")
+		}
+		if errors.Is(err, domain.ErrDiscountNotAllowed) {
+			return nil, orderAPIStatusError(http.StatusForbidden, "You cannot apply discounts")
+		}
+		if errors.Is(err, domain.ErrDiscountExceedsLimit) {
+			return nil, orderAPIStatusError(http.StatusBadRequest, "Discount exceeds your allowed limit")
+		}
 		return nil, orderAPIStatusError(http.StatusInternalServerError, "Failed to create order")
 	}
 
@@ -293,15 +305,14 @@ func validateCreateOrderRequest(req *posordersv1.CreateOrderRequest) error {
 	}
 
 	for _, item := range req.GetItems() {
-		if item.GetName() == "" {
-			return orderAPIStatusError(http.StatusBadRequest, "Each item must have a name")
-		}
 		if item.GetQuantity() <= 0 {
 			return orderAPIStatusError(http.StatusBadRequest, "Item quantity must be positive")
 		}
-		if item.GetUnitPrice() < 0 {
-			return orderAPIStatusError(http.StatusBadRequest, "Item unit price cannot be negative")
+		if item.GetMenuItemId() <= 0 {
+			return orderAPIStatusError(http.StatusBadRequest, "Each item must reference a menu item")
 		}
+		// Unit price and tax rate are accepted for wire compatibility but are
+		// resolved from the server-side product record during order creation.
 	}
 
 	return nil

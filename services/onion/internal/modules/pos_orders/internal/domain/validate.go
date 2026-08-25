@@ -43,5 +43,8 @@ func ValidateDiscountInput(input DiscountInput) error {
 	if input.DiscountType == "" {
 		return fmt.Errorf("discount type is required")
 	}
+	if input.DiscountType != "fixed" && input.DiscountType != "percentage" && input.DiscountType != "percent" && input.DiscountType != "pct" {
+		return fmt.Errorf("discount type must be fixed or percentage")
+	}
 	return nil
 }

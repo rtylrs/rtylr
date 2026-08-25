@@ -146,21 +146,21 @@ func TestHandlePaddleTransactionCompleted_RejectsEmptyTxID(t *testing.T) {
 
 func TestApplyDiscount_RejectsZeroOrderID(t *testing.T) {
 	s := &Service{}
-	if err := s.ApplyDiscount(context.Background(), 1, domain.DiscountInput{DiscountType: "pct", DiscountValue: 10}); err == nil {
+	if err := s.ApplyDiscount(context.Background(), 1, 1, domain.DiscountInput{DiscountType: "pct", DiscountValue: 10}); err == nil {
 		t.Error("expected error for zero order id")
 	}
 }
 
 func TestApplyDiscount_RejectsBlankType(t *testing.T) {
 	s := &Service{}
-	if err := s.ApplyDiscount(context.Background(), 1, domain.DiscountInput{OrderID: 1, DiscountValue: 10}); err == nil {
+	if err := s.ApplyDiscount(context.Background(), 1, 1, domain.DiscountInput{OrderID: 1, DiscountValue: 10}); err == nil {
 		t.Error("expected error for blank discount type")
 	}
 }
 
 func TestApplyDiscount_RejectsNegativeValue(t *testing.T) {
 	s := &Service{}
-	if err := s.ApplyDiscount(context.Background(), 1, domain.DiscountInput{OrderID: 1, DiscountType: "pct", DiscountValue: -5}); err == nil {
+	if err := s.ApplyDiscount(context.Background(), 1, 1, domain.DiscountInput{OrderID: 1, DiscountType: "pct", DiscountValue: -5}); err == nil {
 		t.Error("expected error for negative discount value")
 	}
 }

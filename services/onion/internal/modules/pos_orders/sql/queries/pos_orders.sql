@@ -101,8 +101,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?);
 -- name: CreateOrderItem :execresult
 INSERT INTO pos_order_items
 (order_id, menu_item_id, name, sku, quantity, unit_price,
- discount_pct, discount_amount, tax_rate, total, notes)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+ discount_pct, discount_amount, tax_rate, total, notes, modifiers, combo_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateOrderStatus :exec
 UPDATE pos_orders SET status = ? WHERE business_id = ? AND id = ?;
@@ -190,6 +190,12 @@ FROM pos_orders o
 LEFT JOIN pos_order_items i ON i.order_id = o.id AND i.status != 'cancelled'
 WHERE o.business_id = ? AND o.id = ?
 GROUP BY o.id;
+
+-- name: GetOrderForDiscount :one
+SELECT payment_status
+FROM pos_orders
+WHERE business_id = ? AND id = ?
+FOR UPDATE;
 
 -- name: ApplyDiscount :exec
 UPDATE pos_orders SET discount_amount = ?, total = ?, notes = CONCAT(COALESCE(notes,''), ?)

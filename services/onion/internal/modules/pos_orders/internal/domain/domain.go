@@ -11,6 +11,10 @@ var (
 	ErrSessionNotOpen           = errors.New("session is not open")
 	ErrOrderNotFound            = errors.New("order not found")
 	ErrOrderAlreadyPaid         = errors.New("order is already paid")
+	ErrOrderCannotBeDiscounted  = errors.New("order cannot be discounted after payment")
+	ErrDiscountNotAllowed       = errors.New("staff member cannot apply discounts")
+	ErrDiscountExceedsLimit     = errors.New("discount exceeds staff limit")
+	ErrPricedItemNotFound       = errors.New("order item is not an active menu item or combo")
 	ErrPaymentInsufficient      = errors.New("amount paid is less than total")
 	ErrOrderNotPaid             = errors.New("order has not been paid")
 	ErrRefundExceedsTotal       = errors.New("refund exceeds order total")
@@ -246,6 +250,8 @@ type OrderItem struct {
 
 type OrderItemInput struct {
 	MenuItemID  int64
+	ComboID     int64
+	ModifierIDs []int64
 	Name        string
 	SKU         string
 	Quantity    float64
