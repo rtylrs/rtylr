@@ -143,13 +143,15 @@ const SidebarItemActions: React.FC<{
       className="absolute end-1 top-full z-30 mt-1 min-w-44 rounded-lg p-1 shadow-xl"
       style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
       role="menu"
+      onClick={(event) => event.stopPropagation()}
     >
       {!item.lockedVisibility && (
         <button
           type="button"
           className="flex min-h-10 w-full items-center rounded-md px-3 text-start text-[12px] hover:bg-[var(--flow-hover)]"
           style={{ color: 'var(--flow-text)' }}
-          onClick={() => {
+          onClick={(event) => {
+            event.preventDefault();
             update((draft) => hideItem(draft, item.id));
             onClose();
           }}
@@ -171,7 +173,8 @@ const SidebarItemActions: React.FC<{
             key={group.id}
             className="flex min-h-10 w-full items-center rounded-md px-3 text-start text-[12px] hover:bg-[var(--flow-hover)]"
             style={{ color: 'var(--flow-text)' }}
-            onClick={() => {
+            onClick={(event) => {
+              event.preventDefault();
               update((draft) => moveItemBetweenGroups(draft, item.id, group.id));
               onClose();
             }}
@@ -184,7 +187,8 @@ const SidebarItemActions: React.FC<{
           type="button"
           className="flex min-h-10 w-full items-center rounded-md px-3 text-start text-[12px] hover:bg-[var(--flow-hover)]"
           style={{ color: 'var(--flow-text)' }}
-          onClick={() => {
+          onClick={(event) => {
+            event.preventDefault();
             update((draft) => moveItemBetweenGroups(draft, item.id, undefined));
             onClose();
           }}
