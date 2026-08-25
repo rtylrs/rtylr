@@ -14,10 +14,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useProjects } from '../../projects/useProjects';
-import { appearanceTokens, resolveMode } from '@voxire/utils';
 import { ACCENT_DEFAULT } from '../../../shared/lib/colorUtils';
-import { useAppearanceStore } from '../../../shared/stores/appearanceStore';
-import { tokenStyle } from '../components/AppearanceMiniature';
 import { cn } from '../../../shared/lib/utils';
 import {
   createDefaultSidebarPreferences,
@@ -365,77 +362,6 @@ const GroupEditor: React.FC<{
   );
 };
 
-const Preview: React.FC<{ preferences: SidebarPreferences; dark: boolean; mobile: boolean }> = ({
-  preferences,
-  dark,
-  mobile,
-}) => {
-  const { t } = useTranslation();
-  const appearance = useAppearanceStore();
-  const tokens = appearanceTokens(
-    { ...appearance, mode: dark ? 'dark' : 'light' },
-    { resolvedMode: resolveMode(dark ? 'dark' : 'light', dark), workspaceAccent: ACCENT_DEFAULT }
-  );
-  return (
-    <div
-      className={cn('rounded-xl border p-3 shadow-sm', mobile ? 'w-full' : 'min-h-[280px]')}
-      style={tokenStyle(tokens, {
-        background: 'var(--flow-bg)',
-        borderColor: 'var(--flow-border)',
-      })}
-    >
-      <div className="mb-3 flex items-center gap-2">
-        <PanelLeft size={15} style={{ color: 'var(--accent)' }} />
-        <span className="text-[11px] font-semibold" style={{ color: 'var(--flow-text)' }}>
-          {t('flow.sidebar.preview')}
-        </span>
-      </div>
-      <div className="space-y-1">
-        {preferences.topLevelItemIds
-          .map((id) => preferences.items.find((item) => item.id === id))
-          .filter((item): item is SidebarItemPreference => Boolean(item?.visible))
-          .map((item) => (
-            <div
-              key={item.id}
-              className="flex min-h-8 items-center gap-2 rounded-md px-2 text-[10px]"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              <GripVertical size={11} />
-              {itemName(item, t)}
-            </div>
-          ))}
-        {preferences.groupOrder
-          .map((id) => preferences.groups.find((group) => group.id === id))
-          .filter((group): group is SidebarGroupPreference => Boolean(group?.visible))
-          .map((group) => (
-            <div key={group.id} className="mt-2">
-              <div
-                className="px-2 py-1 text-[10px] font-semibold uppercase"
-                style={{ color: 'var(--flow-text-dim)' }}
-              >
-                {group.kind === 'custom' ? group.label : t(group.label)}
-              </div>
-              {!group.collapsed &&
-                group.itemIds
-                  .map((itemId) => preferences.items.find((item) => item.id === itemId))
-                  .filter((item): item is SidebarItemPreference => Boolean(item?.visible))
-                  .map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex min-h-8 items-center gap-2 rounded-md px-2 text-[10px]"
-                      style={{ color: 'var(--flow-text-muted)' }}
-                    >
-                      <GripVertical size={11} />
-                      {itemName(item, t)}
-                    </div>
-                  ))}
-            </div>
-          ))}
-      </div>
-    </div>
-  );
-};
-
 const SidebarSettingsSection: React.FC = () => {
   const { t } = useTranslation();
   const { preferences, update, isLoading } = useSidebarPreferences();
@@ -540,13 +466,6 @@ const SidebarSettingsSection: React.FC = () => {
           <RotateCcw size={14} />
           {t('flow.sidebar.reset')}
         </button>
-      </div>
-
-      <div className="grid gap-3 lg:grid-cols-2">
-        <Preview preferences={preferences} dark mobile={false} />
-        <Preview preferences={preferences} dark={false} mobile={false} />
-        <Preview preferences={preferences} dark mobile />
-        <Preview preferences={preferences} dark={false} mobile />
       </div>
 
       <div className="flex flex-wrap gap-2">
