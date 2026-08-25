@@ -75,7 +75,8 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 			// requests are blocked upstream by SecurityMiddleware and never reach here.
 			// Anonymous 401s (no token) are expected bot/scanner noise — skip them.
 			if slack.Enabled() && responseWriter.statusCode >= 400 &&
-				(responseWriter.statusCode != http.StatusUnauthorized || r.Header.Get("Authorization") != "") {
+				(responseWriter.statusCode != http.StatusUnauthorized || r.Header.Get("Authorization") != "") &&
+				rateLimiter.CanSend("request-logs") {
 				slack.Post(slack.Requests, fmt.Sprintf("`%d` %s %s · %s · %s",
 					responseWriter.statusCode, r.Method, r.URL.Path, getRemoteIP(r), duration.Round(time.Millisecond)))
 			}
@@ -103,11 +104,9 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 					return
 				}
 
-				if rateLimiter.CanSend("request-logs") {
-					go func() {
-						logRequest(ctx, r, responseWriter.statusCode, duration, sanitizedBody, sanitizedHeaders, sanitizedQuery, serviceName, count)
-					}()
-				}
+				go func() {
+					logRequest(ctx, r, responseWriter.statusCode, duration, sanitizedBody, sanitizedHeaders, sanitizedQuery, serviceName, count)
+				}()
 			}()
 		})
 	}
@@ -325,6 +324,19 @@ var sensitiveFieldParts = []string{
 	"private_key",
 	"credential",
 	"cookie",
+	"pin",
+	"cvv",
+	"cvc",
+	"ssn",
+	"tax_id",
+	"national_id",
+	"otp",
+	"card_number",
+	"expiry",
+	"passwd",
+	"pwd",
+	"x-api-key",
+	"sessionid",
 }
 
 func sanitizeMap(data map[string][]string) map[string][]string {
@@ -351,7 +363,7 @@ func sanitizeJSON(body string) string {
 
 	var data interface{}
 	if err := json.Unmarshal([]byte(body), &data); err != nil {
-		return body
+		return "[UNPARSEABLE JSON BODY REDACTED]"
 	}
 
 	sanitizeInterface(data)

@@ -2,7 +2,9 @@ package logger
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"os"
 	"strings"
@@ -169,6 +171,7 @@ func (m *multiHandler) WithGroup(name string) slog.Handler {
 type dedupHandler struct {
 	inner  slog.Handler
 	window time.Duration
+	attrs  []slog.Attr
 
 	mu   sync.Mutex
 	seen map[string]time.Time
@@ -179,7 +182,7 @@ func (d *dedupHandler) Enabled(ctx context.Context, level slog.Level) bool {
 }
 
 func (d *dedupHandler) Handle(ctx context.Context, r slog.Record) error {
-	key := r.Level.String() + "|" + r.Message
+	key := d.key(r)
 
 	d.mu.Lock()
 	if d.seen == nil {
@@ -187,6 +190,7 @@ func (d *dedupHandler) Handle(ctx context.Context, r slog.Record) error {
 	}
 	last, ok := d.seen[key]
 	now := time.Now()
+	d.cleanupLocked(now)
 	if ok && now.Sub(last) < d.window {
 		d.mu.Unlock()
 		return nil
@@ -198,11 +202,56 @@ func (d *dedupHandler) Handle(ctx context.Context, r slog.Record) error {
 }
 
 func (d *dedupHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
-	return &dedupHandler{inner: d.inner.WithAttrs(attrs), window: d.window}
+	combined := make([]slog.Attr, 0, len(d.attrs)+len(attrs))
+	combined = append(combined, d.attrs...)
+	combined = append(combined, attrs...)
+	return &dedupHandler{inner: d.inner.WithAttrs(attrs), window: d.window, attrs: combined}
 }
 
 func (d *dedupHandler) WithGroup(name string) slog.Handler {
-	return &dedupHandler{inner: d.inner.WithGroup(name), window: d.window}
+	return &dedupHandler{inner: d.inner.WithGroup(name), window: d.window, attrs: d.attrs}
+}
+
+func (d *dedupHandler) key(r slog.Record) string {
+	var fingerprint strings.Builder
+	fingerprint.WriteString(r.Level.String())
+	fingerprint.WriteByte('|')
+	fingerprint.WriteString(r.Message)
+	for _, attr := range d.attrs {
+		appendDedupAttr(&fingerprint, attr)
+	}
+	r.Attrs(func(attr slog.Attr) bool {
+		appendDedupAttr(&fingerprint, attr)
+		return true
+	})
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(fingerprint.String())))
+}
+
+func appendDedupAttr(b *strings.Builder, attr slog.Attr) {
+	b.WriteByte('|')
+	b.WriteString(attr.Key)
+	b.WriteByte('=')
+	b.WriteString(attr.Value.String())
+}
+
+func (d *dedupHandler) cleanupLocked(now time.Time) {
+	for key, lastSeen := range d.seen {
+		if now.Sub(lastSeen) >= d.window {
+			delete(d.seen, key)
+		}
+	}
+	const maxEntries = 4096
+	for len(d.seen) > maxEntries {
+		var oldestKey string
+		var oldest time.Time
+		for key, lastSeen := range d.seen {
+			if oldestKey == "" || lastSeen.Before(oldest) {
+				oldestKey = key
+				oldest = lastSeen
+			}
+		}
+		delete(d.seen, oldestKey)
+	}
 }
 
 func WithLogger(ctx context.Context, l *slog.Logger) context.Context {
