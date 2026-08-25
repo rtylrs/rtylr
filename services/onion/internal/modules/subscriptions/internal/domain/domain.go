@@ -139,6 +139,7 @@ type Repository interface {
 	GetSubscription(ctx context.Context, ownerID int64) (*Subscription, error)
 	UpsertSubscription(ctx context.Context, ownerID, planID int64, trialDays, seatCount int) error
 	GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error)
+	ExpireTrialSubscriptions(ctx context.Context) error
 	CountActiveSeats(ctx context.Context, ownerID int64) (int, error)
 	// Seat period management
 	GetPeriodsForMonth(ctx context.Context, ownerID int64, month time.Time) ([]SeatPeriod, error)

@@ -279,6 +279,10 @@ func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string,
 	return apps, nil
 }
 
+func (r *Repository) ExpireTrialSubscriptions(ctx context.Context) error {
+	return r.queries.ExpireTrialSubscriptions(ctx)
+}
+
 func (r *Repository) UpdateSeatCount(ctx context.Context, ownerID int64, seatCount int) error {
 	return r.queries.UpdateSeatCount(ctx, sqlc.UpdateSeatCountParams{
 		SeatCount: int32(seatCount),

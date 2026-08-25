@@ -108,6 +108,13 @@ func (s *Service) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, er
 	return s.repo.GetOwnerApps(ctx, ownerID)
 }
 
+// ExpireTrialSubscriptions transitions trials whose promised end date has
+// passed. The request middleware also checks the timestamp, so the nightly job
+// is durable cleanup rather than the only enforcement point.
+func (s *Service) ExpireTrialSubscriptions(ctx context.Context) error {
+	return s.repo.ExpireTrialSubscriptions(ctx)
+}
+
 // GetBillingDetail returns the current month's usage line items and totals.
 func (s *Service) GetBillingDetail(ctx context.Context, ownerID, businessID int64) (*domain.BillingDetail, error) {
 	sub, err := s.getSubscriptionOrCreateDefault(ctx, ownerID)

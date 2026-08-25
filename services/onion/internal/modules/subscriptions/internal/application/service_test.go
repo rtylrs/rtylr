@@ -86,6 +86,8 @@ func (m *mockRepo) GetOwnerApps(_ context.Context, _ int64) ([]string, error) {
 	return m.ownerApps, m.getAppsErr
 }
 
+func (m *mockRepo) ExpireTrialSubscriptions(_ context.Context) error { return nil }
+
 func (m *mockRepo) CountActiveSeats(_ context.Context, _ int64) (int, error) {
 	if m.countSeatsErr != nil {
 		return 0, m.countSeatsErr
