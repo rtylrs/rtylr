@@ -146,7 +146,7 @@ WHERE s.owner_id = ?;
 
 -- cross-schema read from subscriptions — approved for seat period management
 -- name: LockSubscriptionForSeatChange :one
-SELECT s.id, p.price_per_seat_cents
+SELECT s.id, p.price_per_seat_cents, p.max_seats
 FROM subscriptions s
 JOIN plans p ON p.id = s.plan_id
 WHERE s.owner_id = ?

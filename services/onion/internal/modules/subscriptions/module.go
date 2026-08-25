@@ -10,6 +10,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/api"
 	"github.com/voxire/onion/internal/modules/subscriptions/internal/application"
+	internaljobs "github.com/voxire/onion/internal/modules/subscriptions/internal/jobs"
+	platformjobs "github.com/voxire/onion/internal/platform/jobs"
 	hubsubscriptionv1 "github.com/voxire/voxie/gen/go/hub/subscription/v1"
 )
 
@@ -40,4 +42,8 @@ func (m *Module) GetAnonymousRoutes() []string {
 		"/hub/subscription/v1/plans",
 		"/subscriptions/paddle-webhook",
 	}
+}
+
+func (m *Module) RegisterJobs(ctx context.Context, registry *platformjobs.Registry) {
+	internaljobs.Register(ctx, registry, m.service)
 }

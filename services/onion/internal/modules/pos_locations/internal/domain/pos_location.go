@@ -5,7 +5,10 @@ import (
 	"time"
 )
 
-var ErrLocationNotFound = errors.New("location not found")
+var (
+	ErrLocationNotFound      = errors.New("location not found")
+	ErrLocationLimitExceeded = errors.New("subscription location limit exceeded")
+)
 
 type Location struct {
 	ID         int64     `json:"id"`

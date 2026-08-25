@@ -225,6 +225,13 @@ func (r *Repository) CreateInviteTransaction(ctx context.Context, businessID, ow
 	defer func() { _ = tx.Rollback() }()
 
 	qtx := r.queries.WithTx(tx)
+	// Lock the subscription before provisioning anything. This serializes
+	// concurrent invitations for the same owner and makes the limit check
+	// authoritative rather than a racy count-then-insert sequence.
+	subscription, err := qtx.LockSubscriptionForSeatChange(ctx, ownerID)
+	if err != nil {
+		return 0, err
+	}
 	user, err := qtx.GetUserByEmail(ctx, email)
 	var userID int64
 	if err == nil {
@@ -265,6 +272,9 @@ func (r *Repository) CreateInviteTransaction(ctx context.Context, businessID, ow
 	newCount, err := qtx.CountActiveMembers(ctx, sqlc.CountActiveMembersParams{OwnerID: ownerID, OwnerID_2: ownerID, OwnerID_3: ownerID})
 	if err != nil {
 		return 0, err
+	}
+	if subscription.MaxSeats.Valid && int32(newCount) > subscription.MaxSeats.Int32 {
+		return 0, domain.ErrSeatLimitExceeded
 	}
 	if err := r.recordSeatChangeTx(ctx, qtx, ownerID, int(newCount)); err != nil {
 		return 0, err

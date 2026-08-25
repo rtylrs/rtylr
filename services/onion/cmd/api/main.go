@@ -157,8 +157,8 @@ import (
 	"github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/server/probe"
 	"github.com/voxire/onion/internal/platform/server/profiling"
-	"github.com/voxire/onion/internal/platform/slack"
 	sheetsPkg "github.com/voxire/onion/internal/platform/sheets"
+	"github.com/voxire/onion/internal/platform/slack"
 	trinoPkg "github.com/voxire/onion/internal/platform/trino"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
 	"github.com/voxire/onion/internal/platform/wsbus"
@@ -805,6 +805,9 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 		http.RequestLoggerMiddleware(ctx),
 		http.GetAuthMiddlewareFunc(accessPolicy, tokenResolver),
 		authPkg.DeviceMiddleware(),
+		// Keep subscription state authoritative for every authenticated tenant
+		// request. The middleware leaves billing recovery and console routes open.
+		http.SubscriptionEnforcementMiddleware(dbclient.Pool(), accessPolicy),
 		// After auth so idempotency keys are scoped per authenticated user.
 		http.IdempotencyMiddleware,
 		// AFTER auth: gate protected API routes when a self-host license is
