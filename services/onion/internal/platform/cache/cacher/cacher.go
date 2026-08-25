@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -42,8 +43,52 @@ func OfWithNamespace[C any](namespace string) Cache[C] {
 	return Cache[C]{namespace: namespace}
 }
 
+func (c Cache[M]) marshal(val M) ([]byte, error) {
+	switch scalar := any(val).(type) {
+	case int64:
+		return []byte(strconv.FormatInt(scalar, 10)), nil
+	case string:
+		return []byte(scalar), nil
+	case bool:
+		return []byte(strconv.FormatBool(scalar)), nil
+	default:
+		return json.Marshal(val)
+	}
+}
+
 func (c Cache[M]) unmarshal(bytes []byte, model *M) error {
-	return json.Unmarshal(bytes, model)
+	switch any(*model).(type) {
+	case int64:
+		value, err := strconv.ParseInt(strings.TrimSpace(string(bytes)), 10, 64)
+		if err != nil {
+			return err
+		}
+		return setDecoded(model, value)
+	case string:
+		// Accept the old JSON representation so rolling deployments can read
+		// values written before the scalar fast path was enabled.
+		if len(bytes) > 0 && bytes[0] == '"' {
+			return json.Unmarshal(bytes, model)
+		}
+		return setDecoded(model, string(bytes))
+	case bool:
+		value, err := strconv.ParseBool(strings.TrimSpace(string(bytes)))
+		if err != nil {
+			return err
+		}
+		return setDecoded(model, value)
+	default:
+		return json.Unmarshal(bytes, model)
+	}
+}
+
+func setDecoded[M any](model *M, value any) error {
+	decoded, ok := value.(M)
+	if !ok {
+		return fmt.Errorf("cache scalar type mismatch: %T", value)
+	}
+	*model = decoded
+	return nil
 }
 
 // GetOrComputeLegacy retrieves values for the specified IDs from the cache.
@@ -206,7 +251,7 @@ func (c Cache[M]) PutMulti(ctx context.Context, keyVals map[string]M, options ..
 	cacheKeyVals := c.transformMapKeys(keyVals)
 
 	marshalledKeyVals := maputils.Map(cacheKeyVals, func(val M) []byte {
-		bytes, err := json.Marshal(val)
+		bytes, err := c.marshal(val)
 		if err != nil {
 			logger.Ctx(ctx).Warn("Error while marshalling data to put in cache",
 				logger.Error(err),
