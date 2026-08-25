@@ -30,20 +30,54 @@ func (r *Repository) Get(ctx context.Context, businessID int64) (domain.CustomDo
 	return fromRow(row), nil
 }
 
-func (r *Repository) Register(ctx context.Context, input domain.CustomDomain) (domain.CustomDomain, error) {
-	result, err := r.queries.RegisterCustomDomain(ctx, sqlc.RegisterCustomDomainParams{OwnerID: input.OwnerID, BusinessID: input.BusinessID, Domain: input.Domain, VerificationToken: input.VerificationToken})
+func (r *Repository) GetByDomain(ctx context.Context, domainName string) (domain.CustomDomain, error) {
+	row, err := r.queries.GetCustomDomainByDomain(ctx, domainName)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.CustomDomain{}, domain.ErrNotFound
+	}
 	if err != nil {
 		return domain.CustomDomain{}, err
 	}
-	if _, err := result.LastInsertId(); err != nil {
+	return fromRow(row), nil
+}
+
+func (r *Repository) Register(ctx context.Context, input domain.CustomDomain) (domain.CustomDomain, error) {
+	if current, err := r.Get(ctx, input.BusinessID); err == nil {
+		if current.Domain != input.Domain {
+			return domain.CustomDomain{}, domain.ErrConflict
+		}
+		if err := r.queries.RotateCustomDomainChallenge(ctx, sqlc.RotateCustomDomainChallengeParams{BusinessID: input.BusinessID, Domain: input.Domain, VerificationToken: input.VerificationToken}); err != nil {
+			return domain.CustomDomain{}, err
+		}
+		return r.Get(ctx, input.BusinessID)
+	} else if !errors.Is(err, domain.ErrNotFound) {
+		return domain.CustomDomain{}, err
+	}
+	result, err := r.queries.RegisterCustomDomain(ctx, sqlc.RegisterCustomDomainParams{OwnerID: input.OwnerID, BusinessID: input.BusinessID, Domain: input.Domain, VerificationToken: input.VerificationToken})
+	if err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+			return domain.CustomDomain{}, domain.ErrConflict
+		}
+		return domain.CustomDomain{}, err
+	}
+	if _, err := result.RowsAffected(); err != nil {
 		return domain.CustomDomain{}, err
 	}
 	return r.Get(ctx, input.BusinessID)
 }
 
 func (r *Repository) Verify(ctx context.Context, businessID int64, token string) error {
-	if err := r.queries.VerifyCustomDomain(ctx, sqlc.VerifyCustomDomainParams{BusinessID: businessID, VerificationToken: token}); err != nil {
+	result, err := r.queries.VerifyCustomDomain(ctx, sqlc.VerifyCustomDomainParams{BusinessID: businessID, VerificationToken: token})
+	if err != nil {
 		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrInvalidToken
 	}
 	return nil
 }
