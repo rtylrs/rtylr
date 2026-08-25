@@ -267,7 +267,103 @@ func ApplyMovementTx(ctx context.Context, tx DBTX, m Movement) (before, after fl
 	if _, _, err = applyKnown(ctx, q, m, before, after); err != nil {
 		return 0, 0, err
 	}
+	if m.EntryType == EntrySale && m.Change < 0 {
+		if err := consumeCostLayersTx(ctx, tx, m, -m.Change); err != nil {
+			return 0, 0, err
+		}
+	}
 	return before, after, nil
+}
+
+// consumeCostLayersTx depletes receipt layers in FIFO order for a sale. Stock
+// movement and valuation updates share the caller's transaction, so a failed
+// layer update rolls back the corresponding stock movement as well. Missing
+// layers are tolerated for legacy stock that predates cost-layer tracking.
+func consumeCostLayersTx(ctx context.Context, tx DBTX, m Movement, quantity float64) error {
+	if quantity <= 0 {
+		return nil
+	}
+
+	rows, err := tx.QueryContext(ctx, `
+		SELECT id, quantity_remaining
+		FROM inventory_cost_layers
+		WHERE owner_id = ?
+		  AND business_id = ?
+		  AND product_id = ?
+		  AND location_id = ?
+		  AND quantity_remaining > 0
+		ORDER BY received_at ASC, id ASC
+		FOR UPDATE`,
+		m.OwnerID, movementBusinessID(m), m.ProductID, m.LocationID,
+	)
+	if err != nil {
+		return fmt.Errorf("stock_core: lock cost layers: %w", err)
+	}
+	defer rows.Close()
+
+	type costLayer struct {
+		id        int64
+		available float64
+	}
+	layers := make([]costLayer, 0)
+	for rows.Next() {
+		var layerID int64
+		var layerQuantity string
+		if err := rows.Scan(&layerID, &layerQuantity); err != nil {
+			return fmt.Errorf("stock_core: scan cost layer: %w", err)
+		}
+		available, err := parseQty(ctx, layerQuantity)
+		if err != nil {
+			return err
+		}
+		layers = append(layers, costLayer{id: layerID, available: available})
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("stock_core: iterate cost layers: %w", err)
+	}
+	if err := rows.Close(); err != nil {
+		return fmt.Errorf("stock_core: close cost layers: %w", err)
+	}
+	available := make([]float64, len(layers))
+	for i, layer := range layers {
+		available[i] = layer.available
+	}
+	consumption := fifoLayerConsumption(available, quantity)
+	for i, consumed := range consumption {
+		if consumed <= 0 {
+			continue
+		}
+		if _, err := tx.ExecContext(ctx, `
+			UPDATE inventory_cost_layers
+			SET quantity_remaining = quantity_remaining - ?
+			WHERE id = ?`, consumed, layers[i].id); err != nil {
+			return fmt.Errorf("stock_core: deplete cost layer %d: %w", layers[i].id, err)
+		}
+	}
+	return nil
+}
+
+func fifoLayerConsumption(available []float64, quantity float64) []float64 {
+	consumption := make([]float64, len(available))
+	if quantity <= 0 {
+		return consumption
+	}
+	remaining := quantity
+	for i, layerQuantity := range available {
+		if remaining <= 0 {
+			break
+		}
+		if layerQuantity <= 0 {
+			continue
+		}
+		consumed := layerQuantity
+		if consumed > remaining {
+			consumed = remaining
+		}
+		consumption[i] = consumed
+		remaining -= consumed
+	}
+	return consumption
 }
 
 // applyKnown writes the level update, ledger row, and scalar-cache sync given a

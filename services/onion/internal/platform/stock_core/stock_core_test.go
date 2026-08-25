@@ -30,3 +30,13 @@ func TestSetTotalTxRequiresLocation(t *testing.T) {
 		t.Fatalf("SetTotalTx() error = %v, want missing-location error", err)
 	}
 }
+
+func TestFIFOLayerConsumption(t *testing.T) {
+	got := fifoLayerConsumption([]float64{2, 5, 10}, 6)
+	want := []float64{2, 4, 0}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("consumption[%d] = %v, want %v", i, got[i], want[i])
+		}
+	}
+}
