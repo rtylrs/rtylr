@@ -43,6 +43,7 @@ export interface ApiUserSettings {
   statusChanges: boolean;
   weeklyDigest: boolean;
   emailNotifications: boolean;
+  sidebarPreferences?: string;
 }
 
 export interface ApiWorkspace {
@@ -327,6 +328,7 @@ const toUserSettingsPayload = (data: ApiUserSettings) => {
     status_changes?: boolean;
     weekly_digest?: boolean;
     email_notifications?: boolean;
+    sidebar_preferences?: string;
   };
   return {
     taskAssigned: data.taskAssigned ?? source.task_assigned,
@@ -335,6 +337,7 @@ const toUserSettingsPayload = (data: ApiUserSettings) => {
     statusChanges: data.statusChanges ?? source.status_changes,
     weeklyDigest: data.weeklyDigest ?? source.weekly_digest,
     emailNotifications: data.emailNotifications ?? source.email_notifications,
+    sidebarPreferences: data.sidebarPreferences ?? source.sidebar_preferences,
   };
 };
 
