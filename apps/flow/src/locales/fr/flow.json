@@ -55,7 +55,6 @@
     "moveToTop": "Déplacer en haut",
     "itemActions": "Actions pour {{label}}",
     "dragHandle": "Glisser pour réorganiser",
-    "groupItemCount": "{{count}} éléments",
     "dropHere": "Déposer ici",
     "groupActions": "Actions pour {{label}}",
     "hideGroup": "Masquer le groupe",

@@ -55,7 +55,6 @@
     "moveToTop": "نقل إلى الأعلى",
     "itemActions": "إجراءات {{label}}",
     "dragHandle": "اسحب لإعادة الترتيب",
-    "groupItemCount": "{{count}} عناصر",
     "dropHere": "أفلت هنا",
     "groupActions": "إجراءات {{label}}",
     "hideGroup": "إخفاء المجموعة",

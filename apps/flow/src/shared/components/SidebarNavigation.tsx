@@ -392,13 +392,9 @@ const SidebarGroup: React.FC<{
       !(project.name === 'Inbox' && project.icon === '📥')
   );
   const groupLabel = group.kind === 'custom' ? group.label : t(group.label);
-  const GroupIcon = ICONS[group.icon] ?? LayoutGrid;
-  const itemCount =
-    group.id === 'projects' ? visibleProjects.length + groupItems.length : groupItems.length;
   const isGroupDragging = dragState?.kind === 'group' && dragState.id === group.id;
   const isGroupDropTarget = dropTarget?.kind === 'group' && dropTarget.id === group.id;
   const isItemDropTarget = dropTarget?.kind === 'item' && dropTarget.groupId === group.id;
-  const groupAccent = group.color ?? 'var(--accent)';
   const groupStyle = {
     background: isGroupDropTarget ? 'var(--accent-muted)' : undefined,
     opacity: isGroupDragging ? 0.5 : 1,
@@ -436,8 +432,7 @@ const SidebarGroup: React.FC<{
         onDragOver={handleGroupDragOver}
         onDrop={handleGroupDrop}
         onDragEnd={onDragEnd}
-        className="group flex min-h-11 items-center gap-1 border-b"
-        style={{ borderColor: isGroupDropTarget ? 'var(--accent-border)' : 'var(--flow-border)' }}
+        className="group flex min-h-10 items-center gap-1"
       >
         <GripVertical
           size={15}
@@ -451,23 +446,11 @@ const SidebarGroup: React.FC<{
           aria-expanded={!group.collapsed}
           className="flex min-h-10 min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-start hover:bg-[var(--flow-hover)]"
         >
-          <span className="shrink-0" style={{ color: groupAccent }} aria-hidden>
-            <GroupIcon size={15} />
-          </span>
-          <span className="flex min-w-0 flex-1 items-baseline gap-2">
-            <span
-              className="truncate text-[13px] font-bold leading-tight"
-              style={{ color: 'var(--flow-text)' }}
-            >
-              {groupLabel}
-            </span>
-            <span
-              className="shrink-0 text-[10px] font-medium tabular-nums"
-              style={{ color: 'var(--flow-text-dim)' }}
-              aria-label={t('flow.sidebar.groupItemCount', { count: itemCount })}
-            >
-              {itemCount}
-            </span>
+          <span
+            className="min-w-0 flex-1 truncate text-[13px] font-bold leading-tight"
+            style={{ color: 'var(--flow-text)' }}
+          >
+            {groupLabel}
           </span>
           <ChevronDown
             size={14}
