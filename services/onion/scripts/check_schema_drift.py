@@ -32,7 +32,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Every place a CREATE TABLE / ALTER TABLE ADD COLUMN can live.
 SCHEMA_GLOBS = [
     os.path.join(ROOT, "internal/platform/database/schemas/**/*.sql"),
-    os.path.join(ROOT, "internal/modules/*/sql/schema*.sql"),
+    # Module schemas and migrations can be directly under sql/ or nested in
+    # sql/schema/ and other module-specific directories.
+    os.path.join(ROOT, "internal/modules/*/sql/**/*.sql"),
 ]
 
 KEYWORDS = {
