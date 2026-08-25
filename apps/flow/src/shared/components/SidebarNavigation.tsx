@@ -65,7 +65,6 @@ interface SidebarNavigationProps {
   projectId?: string;
   myTasksProjectId?: string;
   onNewProject: () => void;
-  onOpenSettings: () => void;
   sidebarRef: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -629,7 +628,6 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   projectId,
   myTasksProjectId,
   onNewProject,
-  onOpenSettings,
   sidebarRef,
 }) => {
   const { t } = useTranslation();
@@ -776,15 +774,6 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
           />
         ))}
       </div>
-      <button
-        type="button"
-        onClick={onOpenSettings}
-        className="mt-1 flex min-h-10 items-center gap-2 rounded-md px-3 text-[12px] hover:bg-[var(--flow-hover)]"
-        style={{ color: 'var(--flow-text-muted)' }}
-      >
-        <Settings size={14} />
-        {t('flow.sidebar.customize')}
-      </button>
     </div>
   );
 };

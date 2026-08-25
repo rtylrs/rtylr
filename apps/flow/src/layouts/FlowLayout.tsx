@@ -734,10 +734,6 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
               setNewProjectColor('#64C5B9');
               setNewProjectOpen(true);
             }}
-            onOpenSettings={() => {
-              setMobileNavOpen(false);
-              void navigate({ to: '/settings', search: { section: 'sidebar' } });
-            }}
             sidebarRef={sidebarRef}
           />
           {false && (

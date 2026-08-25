@@ -59,7 +59,6 @@
     "groupActions": "Actions for {{label}}",
     "hideGroup": "Hide group",
     "showGroup": "Show group",
-    "customize": "Customize sidebar",
     "moveGroupUp": "Move group up",
     "moveGroupDown": "Move group down",
     "deleteGroup": "Delete group",
