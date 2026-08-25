@@ -17,6 +17,10 @@ DB_PASSWORD="${DB_PASSWORD:?DB_PASSWORD is required}"
 DB_NAME="${DB_NAME:?DB_NAME is required}"
 
 SCHEMAS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Keep this runner and onion/scripts/migrate.sh on the same schema coverage and
+# dependency order.
+# shellcheck source=migration_order.sh
+source "$SCHEMAS_DIR/migration_order.sh"
 
 APPLIED=0
 FAILED=0
@@ -34,7 +38,7 @@ mysql_cmd() {
 
 echo "Running migrations against $DB_USER@$DB_HOST:$DB_PORT/$DB_NAME"
 
-for dir in shared cdn rtylr voxire erp hr hr_core hr_attendance hr_documents hr_equipment hr_leave hr_onboarding hr_overtime hr_payroll hr_performance hr_setup hr_shifts hr_time crm crm_migrations finance flow pos _perf hub store support book hr_dashboard recruit insights oauth; do
+for dir in "${SCHEMA_MIGRATION_DIRS[@]}"; do
     schema_dir="$SCHEMAS_DIR/$dir"
     if [ ! -d "$schema_dir" ]; then
         continue
