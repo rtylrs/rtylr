@@ -12,7 +12,7 @@ SELECT COALESCE(SUM(amount_due), 0) FROM finance_invoices WHERE business_id = ? 
 
 -- cross-schema read from bills — outstanding payables.
 -- name: SumPayables :one
-SELECT COALESCE(SUM(amount), 0) FROM finance_bills WHERE business_id = ? AND status = 'pending';
+SELECT COALESCE(SUM(amount), 0) FROM finance_bills WHERE business_id = ? AND status IN ('pending', 'overdue');
 
 -- cross-schema read from invoices — paid revenue for the requested period.
 -- name: SumPaidInvoicesInRange :one
@@ -22,4 +22,4 @@ WHERE business_id = ? AND status = 'paid' AND paid_date BETWEEN ? AND ?;
 -- cross-schema read from expenses + invoices — expense totals for the requested period.
 -- name: SumExpensesInRange :one
 SELECT COALESCE(SUM(amount), 0) FROM finance_expenses
-WHERE business_id = ? AND expense_date BETWEEN ? AND ?;
+WHERE business_id = ? AND status IN ('pending', 'approved') AND expense_date BETWEEN ? AND ?;

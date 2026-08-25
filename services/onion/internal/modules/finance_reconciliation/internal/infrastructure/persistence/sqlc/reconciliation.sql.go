@@ -156,6 +156,26 @@ func (q *Queries) GetMatchForBankFeed(ctx context.Context, arg GetMatchForBankFe
 	return id, err
 }
 
+const getMatchForTarget = `-- name: GetMatchForTarget :one
+SELECT id FROM finance_reconciliation_matches
+WHERE business_id = ? AND target_type = ? AND target_id = ?
+ORDER BY id ASC
+LIMIT 1
+`
+
+type GetMatchForTargetParams struct {
+	BusinessID int64  `db:"business_id" json:"business_id"`
+	TargetType string `db:"target_type" json:"target_type"`
+	TargetID   int64  `db:"target_id" json:"target_id"`
+}
+
+func (q *Queries) GetMatchForTarget(ctx context.Context, arg GetMatchForTargetParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getMatchForTarget, arg.BusinessID, arg.TargetType, arg.TargetID)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
 const listUnmatchedBankFeeds = `-- name: ListUnmatchedBankFeeds :many
 SELECT bf.id, bf.owner_id, bf.business_id, bf.bank_account_id, bf.amount_minor_units, bf.currency,
        bf.occurred_at, bf.description, bf.external_id
@@ -339,6 +359,44 @@ type LockBankFeedForBusinessParams struct {
 
 func (q *Queries) LockBankFeedForBusiness(ctx context.Context, arg LockBankFeedForBusinessParams) (int64, error) {
 	row := q.db.QueryRowContext(ctx, lockBankFeedForBusiness, arg.ID, arg.BusinessID)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
+const lockExpenseForBusiness = `-- name: LockExpenseForBusiness :one
+SELECT id FROM finance_expenses
+WHERE id = ? AND business_id = ?
+FOR UPDATE
+`
+
+type LockExpenseForBusinessParams struct {
+	ID         int64 `db:"id" json:"id"`
+	BusinessID int64 `db:"business_id" json:"business_id"`
+}
+
+// cross-schema row lock from expenses — serialize target-side reconciliation matches.
+func (q *Queries) LockExpenseForBusiness(ctx context.Context, arg LockExpenseForBusinessParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, lockExpenseForBusiness, arg.ID, arg.BusinessID)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
+const lockInvoiceForBusiness = `-- name: LockInvoiceForBusiness :one
+SELECT id FROM finance_invoices
+WHERE id = ? AND business_id = ?
+FOR UPDATE
+`
+
+type LockInvoiceForBusinessParams struct {
+	ID         int64 `db:"id" json:"id"`
+	BusinessID int64 `db:"business_id" json:"business_id"`
+}
+
+// cross-schema row lock from invoices — serialize target-side reconciliation matches.
+func (q *Queries) LockInvoiceForBusiness(ctx context.Context, arg LockInvoiceForBusinessParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, lockInvoiceForBusiness, arg.ID, arg.BusinessID)
 	var id int64
 	err := row.Scan(&id)
 	return id, err

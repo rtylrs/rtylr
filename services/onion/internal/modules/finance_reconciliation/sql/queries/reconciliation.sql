@@ -37,9 +37,27 @@ LIMIT 1;
 SELECT id FROM finance_invoices
 WHERE id = ? AND business_id = ?;
 
+-- cross-schema row lock from invoices — serialize target-side reconciliation matches.
+-- name: LockInvoiceForBusiness :one
+SELECT id FROM finance_invoices
+WHERE id = ? AND business_id = ?
+FOR UPDATE;
+
 -- name: GetExpenseForBusiness :one
 SELECT id FROM finance_expenses
 WHERE id = ? AND business_id = ?;
+
+-- cross-schema row lock from expenses — serialize target-side reconciliation matches.
+-- name: LockExpenseForBusiness :one
+SELECT id FROM finance_expenses
+WHERE id = ? AND business_id = ?
+FOR UPDATE;
+
+-- name: GetMatchForTarget :one
+SELECT id FROM finance_reconciliation_matches
+WHERE business_id = ? AND target_type = ? AND target_id = ?
+ORDER BY id ASC
+LIMIT 1;
 
 -- name: ListUnmatchedInvoices :many
 SELECT i.id, i.invoice_number, i.client_name, i.total, i.currency, i.issue_date, i.due_date
