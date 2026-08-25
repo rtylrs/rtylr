@@ -30,7 +30,7 @@ func (a *API) GetCustomDomain(ctx context.Context, _ *hubconfigv1.GetCustomDomai
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get custom domain")
 	}
-	return &hubconfigv1.GetCustomDomainResponse{Domain: payload(item)}, nil
+	return &hubconfigv1.GetCustomDomainResponse{Domain: payload(item, false)}, nil
 }
 
 func (a *API) RegisterCustomDomain(ctx context.Context, req *hubconfigv1.RegisterCustomDomainRequest) (*hubconfigv1.RegisterCustomDomainResponse, error) {
@@ -45,7 +45,7 @@ func (a *API) RegisterCustomDomain(ctx context.Context, req *hubconfigv1.Registe
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
 	}
-	return &hubconfigv1.RegisterCustomDomainResponse{Domain: payload(item)}, nil
+	return &hubconfigv1.RegisterCustomDomainResponse{Domain: payload(item, true)}, nil
 }
 
 func (a *API) VerifyCustomDomain(ctx context.Context, req *hubconfigv1.VerifyCustomDomainRequest) (*hubconfigv1.VerifyCustomDomainResponse, error) {
@@ -60,10 +60,13 @@ func (a *API) VerifyCustomDomain(ctx context.Context, req *hubconfigv1.VerifyCus
 	if errors.Is(err, domain.ErrNotFound) {
 		return nil, onekiterrors.New(http.StatusNotFound, "Custom domain not found")
 	}
+	if errors.Is(err, domain.ErrDNSVerificationFailed) {
+		return nil, onekiterrors.New(http.StatusBadRequest, "Custom domain DNS record does not match")
+	}
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to verify custom domain")
 	}
-	return &hubconfigv1.VerifyCustomDomainResponse{Domain: payload(item)}, nil
+	return &hubconfigv1.VerifyCustomDomainResponse{Domain: payload(item, false)}, nil
 }
 
 func (a *API) RemoveCustomDomain(ctx context.Context, _ *hubconfigv1.RemoveCustomDomainRequest) (*hubconfigv1.RemoveCustomDomainResponse, error) {
@@ -94,10 +97,14 @@ func deviceBusinessID(ctx context.Context) (authPkg.Device, int64, error) {
 	return device, id, nil
 }
 
-func payload(item domain.CustomDomain) *hubconfigv1.CustomDomain {
+func payload(item domain.CustomDomain, includeVerificationToken bool) *hubconfigv1.CustomDomain {
 	var verified string
 	if item.VerifiedAt != nil {
 		verified = item.VerifiedAt.Format(time.RFC3339)
 	}
-	return &hubconfigv1.CustomDomain{Id: item.ID, BusinessId: item.BusinessID, Domain: item.Domain, Status: item.Status, VerificationToken: item.VerificationToken, SslStatus: item.SSLStatus, VerifiedAt: verified, CreatedAt: item.CreatedAt.Format(time.RFC3339), UpdatedAt: item.UpdatedAt.Format(time.RFC3339)}
+	token := ""
+	if includeVerificationToken {
+		token = item.VerificationToken
+	}
+	return &hubconfigv1.CustomDomain{Id: item.ID, BusinessId: item.BusinessID, Domain: item.Domain, Status: item.Status, VerificationToken: token, SslStatus: item.SSLStatus, VerifiedAt: verified, CreatedAt: item.CreatedAt.Format(time.RFC3339), UpdatedAt: item.UpdatedAt.Format(time.RFC3339)}
 }
