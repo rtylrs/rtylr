@@ -189,7 +189,10 @@ func (r *Repository) GetLowStockProducts(ctx context.Context, ownerID int64) ([]
 }
 
 func (r *Repository) GetValuation(ctx context.Context, ownerID int64) ([]domain.ValuationItem, error) {
-	rows, err := r.queries.GetValuation(ctx, ownerID)
+	rows, err := r.queries.GetValuation(ctx, sqlc.GetValuationParams{
+		BusinessID:   ownerID,
+		BusinessID_2: ownerID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get inventory valuation", logger.Error(err))
 

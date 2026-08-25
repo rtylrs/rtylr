@@ -77,4 +77,5 @@ WHERE business_id = ?;
 SELECT target_type, COUNT(*) AS cnt
 FROM finance_reconciliation_matches
 WHERE business_id = ?
+  AND created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
 GROUP BY target_type;

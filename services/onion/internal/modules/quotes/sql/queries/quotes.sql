@@ -36,6 +36,7 @@ WHERE id = ? AND business_id = ?;
 SELECT status, COUNT(*) AS cnt
 FROM finance_quotes
 WHERE business_id = ?
+  AND created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
 GROUP BY status;
 
 -- name: InsertInvoiceFromQuote :execresult

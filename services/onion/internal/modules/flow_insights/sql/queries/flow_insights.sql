@@ -26,11 +26,14 @@ WHERE business_id = ? AND status = 'done'
 -- name: GetTasksByStatus :many
 SELECT status, COUNT(*) AS cnt
 FROM flow_tasks WHERE business_id = ?
+  AND created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
 GROUP BY status;
 
 -- name: GetTasksByPriority :many
 SELECT priority, COUNT(*) AS cnt
-FROM flow_tasks WHERE business_id = ?
+FROM flow_tasks
+WHERE business_id = ?
+  AND created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
 GROUP BY priority;
 
 -- name: GetTeamWorkload :many
@@ -43,7 +46,9 @@ SELECT
     COUNT(CASE WHEN ft.status NOT IN ('done','cancelled') AND ft.due_date < CURDATE() THEN 1 END) AS overdue_tasks
 FROM flow_tasks ft
 LEFT JOIN users u ON ft.assignee_id = u.id
-WHERE ft.business_id = ? AND ft.assignee_id IS NOT NULL
+WHERE ft.business_id = ?
+  AND ft.created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
+  AND ft.assignee_id IS NOT NULL
 GROUP BY ft.assignee_id, u.full_name;
 
 -- name: GetRoadmapProjects :many
@@ -56,7 +61,9 @@ SELECT
     COUNT(ft.id) AS total_tasks,
     COUNT(CASE WHEN ft.status = 'done' THEN 1 END) AS done_tasks
 FROM flow_projects fp
-LEFT JOIN flow_tasks ft ON ft.project_id = fp.id AND ft.parent_task_id IS NULL
+LEFT JOIN flow_tasks ft ON ft.project_id = fp.id
+ AND ft.parent_task_id IS NULL
+ AND ft.created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
 WHERE fp.business_id = ? AND fp.status != 'archived'
 GROUP BY fp.id, fp.name, fp.status, fp.start_date, fp.due_date
 ORDER BY fp.created_at ASC;

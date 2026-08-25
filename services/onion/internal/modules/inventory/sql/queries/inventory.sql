@@ -42,7 +42,8 @@ LEFT JOIN (
     SELECT owner_id, business_id, product_id, location_id,
            SUM(quantity_remaining * unit_cost) AS total_cost
     FROM inventory_cost_layers
-    WHERE quantity_remaining > 0
+    WHERE inventory_cost_layers.business_id = ?
+      AND quantity_remaining > 0
     GROUP BY owner_id, business_id, product_id, location_id
 ) cl ON cl.owner_id = sl.owner_id
     AND cl.business_id = sl.business_id

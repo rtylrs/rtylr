@@ -85,6 +85,7 @@ WHERE business_id = ?
 SELECT status, COUNT(*) AS cnt
 FROM finance_invoices
 WHERE business_id = ?
+  AND created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
 GROUP BY status;
 
 -- name: ListOverdueInvoices :many

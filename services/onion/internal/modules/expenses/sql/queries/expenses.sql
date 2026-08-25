@@ -39,6 +39,7 @@ WHERE business_id = ?;
 SELECT COALESCE(CAST(category_id AS CHAR), 'uncategorised') AS category_key, COUNT(*) AS cnt
 FROM finance_expenses
 WHERE business_id = ?
+  AND created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
 GROUP BY category_id;
 
 -- name: ListExpensesPaginated :many
