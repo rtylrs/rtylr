@@ -25,11 +25,20 @@ func NewRepository(db *sql.DB) *Repository {
 
 func (r *Repository) SumAccountsByType(ctx context.Context, businessID int64, accountType string) (float64, error) {
 	result, err := r.queries.SumAccountsByType(ctx, sqlc.SumAccountsByTypeParams{
-		BusinessID: businessID,
-		Type:       sqlc.FinanceAccountsType(accountType),
+		BusinessID:  businessID,
+		AccountType: sqlc.FinanceAccountsType(accountType),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sum accounts by type", logger.Error(err))
+		return 0, err
+	}
+	return toFloat64FromInterface(result), nil
+}
+
+func (r *Repository) SumPostedNetIncome(ctx context.Context, businessID int64) (float64, error) {
+	result, err := r.queries.SumPostedNetIncome(ctx, businessID)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to sum posted net income", logger.Error(err))
 		return 0, err
 	}
 	return toFloat64FromInterface(result), nil

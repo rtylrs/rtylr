@@ -8,15 +8,20 @@ import (
 )
 
 type mockRepo struct {
-	byType   map[string]float64
-	cash     float64
-	recv     float64
-	pay      float64
-	inflow   float64
-	outflow  float64
-	typeErr  error
-	cashErr  error
-	rangeErr error
+	byType    map[string]float64
+	netIncome float64
+	cash      float64
+	recv      float64
+	pay       float64
+	inflow    float64
+	outflow   float64
+	typeErr   error
+	cashErr   error
+	rangeErr  error
+}
+
+func (m *mockRepo) SumPostedNetIncome(_ context.Context, _ int64) (float64, error) {
+	return m.netIncome, nil
 }
 
 func (m *mockRepo) SumAccountsByType(_ context.Context, _ int64, t string) (float64, error) {
@@ -45,24 +50,38 @@ func (m *mockRepo) SumExpensesInRange(_ context.Context, _ int64, _, _ string) (
 
 func TestGetBalanceSheet_AggregatesValues(t *testing.T) {
 	m := &mockRepo{
-		byType: map[string]float64{"asset": 1000, "liability": 200, "equity": 800},
-		cash:   500, recv: 100, pay: 50,
+		byType:    map[string]float64{"asset": 1000, "liability": 200, "equity": 800},
+		netIncome: 100, cash: 500, recv: 100, pay: 50,
 	}
 	s := &Service{repo: m}
 	bs, err := s.GetBalanceSheet(context.Background(), 1)
 	if err != nil {
 		t.Fatalf("err: %v", err)
 	}
-	// Total assets = chart_of_accounts assets (1000) + cash (500) + receivables (100).
-	if bs.TotalAssets != 1600 {
-		t.Errorf("TotalAssets = %v, want 1600", bs.TotalAssets)
+	// Totals come from posted journal balances; detail mirrors are not added again.
+	if bs.TotalAssets != 1000 {
+		t.Errorf("TotalAssets = %v, want 1000", bs.TotalAssets)
 	}
-	// Total liabilities = chart_of_accounts liabilities (200) + payables (50).
-	if bs.TotalLiabilities != 250 {
-		t.Errorf("TotalLiabilities = %v, want 250", bs.TotalLiabilities)
+	if bs.TotalLiabilities != 200 {
+		t.Errorf("TotalLiabilities = %v, want 200", bs.TotalLiabilities)
 	}
-	if bs.TotalEquity != 800 {
-		t.Errorf("TotalEquity = %v, want 800", bs.TotalEquity)
+	if bs.TotalEquity != 900 {
+		t.Errorf("TotalEquity = %v, want 900", bs.TotalEquity)
+	}
+}
+
+func TestGetBalanceSheet_AddsPostedNetIncomeToEquity(t *testing.T) {
+	m := &mockRepo{
+		byType:    map[string]float64{"equity": 250},
+		netIncome: 75,
+	}
+	s := &Service{repo: m}
+	bs, err := s.GetBalanceSheet(context.Background(), 1)
+	if err != nil {
+		t.Fatalf("err: %v", err)
+	}
+	if bs.TotalEquity != 325 {
+		t.Errorf("TotalEquity = %v, want 325", bs.TotalEquity)
 	}
 }
 
