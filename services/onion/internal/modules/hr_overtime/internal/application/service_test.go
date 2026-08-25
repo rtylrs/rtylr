@@ -34,14 +34,22 @@ func (m *mockRepo) CreateOvertimeRequest(_ context.Context, _ int64, req domain.
 func (m *mockRepo) ApproveOvertimeRequest(_ context.Context, _, _, _ int64, _ float64) error {
 	return m.err
 }
-func (m *mockRepo) AdvanceOvertimeApprovalLevel(_ context.Context, _, _ int64) error { return m.err }
-func (m *mockRepo) RejectOvertimeRequest(_ context.Context, _, _ int64) error        { return m.err }
+
+func (m *mockRepo) AdvanceOvertimeApprovalLevel(_ context.Context, _, _ int64, _ int32) error {
+	return m.err
+}
+
+func (m *mockRepo) RejectOvertimeRequest(_ context.Context, _, _ int64) error { return m.err }
 func (m *mockRepo) CreateFlaggedOvertimeRequest(_ context.Context, _, _ int64, _ string, _ int32) error {
 	return m.err
 }
 
 func (m *mockRepo) ListFlaggedForDate(_ context.Context, _ int64, _ string) ([]domain.OvertimeRequestRecord, error) {
 	return m.flagged, m.err
+}
+
+func (m *mockRepo) ListOvertimeCandidates(_ context.Context, _ int64, _ string, _ int32) ([]domain.OvertimeDetectionCandidate, error) {
+	return nil, m.err
 }
 
 func (m *mockRepo) GetOvertimeConfig(_ context.Context, businessID int64) (*domain.OvertimeConfigRecord, error) {
@@ -75,6 +83,23 @@ type mockApprovalProvider struct {
 
 func (m *mockApprovalProvider) GetApprovalChain(_ context.Context, _ int64, _ string) (*domain.ApprovalChainInfo, error) {
 	return m.chain, m.err
+}
+
+type mockPermissionProvider struct {
+	employeeID int64
+	allowed    bool
+}
+
+func (m *mockPermissionProvider) GetEmployeeIDByUserID(context.Context, int64, int64) (int64, error) {
+	return m.employeeID, nil
+}
+
+func (m *mockPermissionProvider) HasPermission(context.Context, int64, int64, string) (bool, error) {
+	return m.allowed, nil
+}
+
+func (m *mockPermissionProvider) HasRole(context.Context, int64, int64, int64) (bool, error) {
+	return m.allowed, nil
 }
 
 // ---- ListOvertimeRequests ----
@@ -148,7 +173,7 @@ func TestCreateOvertimeRequest_PropagatesRepoError(t *testing.T) {
 
 func TestApproveOvertime_PropagatesGetRequestError(t *testing.T) {
 	want := domain.ErrOvertimeRequestNotFound
-	s := &Service{repo: &mockRepo{err: want}}
+	s := &Service{repo: &mockRepo{err: want}, permissions: &mockPermissionProvider{employeeID: 2, allowed: true}}
 	err := s.ApproveOvertime(context.Background(), 1, 99, 1, 1.5)
 	if !errors.Is(err, want) {
 		t.Errorf("expected ErrOvertimeRequestNotFound, got %v", err)
@@ -160,6 +185,7 @@ func TestApproveOvertime_ApprovalChainNotConfiguredReturnsError(t *testing.T) {
 	s := &Service{
 		repo:             &mockRepo{request: req},
 		approvalProvider: &mockApprovalProvider{chain: nil},
+		permissions:      &mockPermissionProvider{employeeID: 2, allowed: true},
 	}
 	err := s.ApproveOvertime(context.Background(), 1, 1, 1, 1.5)
 	if !errors.Is(err, domain.ErrApprovalChainNotConfigured) {
@@ -168,11 +194,12 @@ func TestApproveOvertime_ApprovalChainNotConfiguredReturnsError(t *testing.T) {
 }
 
 func TestApproveOvertime_FinalLevelApproves(t *testing.T) {
-	req := &domain.OvertimeRequestRecord{ID: 1, CurrentApprovalLevel: 0}
-	chain := &domain.ApprovalChainInfo{TotalLevels: 1}
+	req := &domain.OvertimeRequestRecord{ID: 1, EmployeeID: 5, CurrentApprovalLevel: 0}
+	chain := &domain.ApprovalChainInfo{TotalLevels: 1, Levels: []domain.ApprovalLevelInfo{{LevelOrder: 1, ApproverEmployeeID: 2}}}
 	s := &Service{
 		repo:             &mockRepo{request: req, config: &domain.OvertimeConfigRecord{DefaultMultiplier: 2.0}},
 		approvalProvider: &mockApprovalProvider{chain: chain},
+		permissions:      &mockPermissionProvider{employeeID: 2, allowed: true},
 	}
 	err := s.ApproveOvertime(context.Background(), 1, 1, 1, 1.5)
 	if err != nil {
@@ -180,12 +207,44 @@ func TestApproveOvertime_FinalLevelApproves(t *testing.T) {
 	}
 }
 
+func TestApproveOvertime_RejectsSelfApproval(t *testing.T) {
+	s := &Service{
+		repo:        &mockRepo{request: &domain.OvertimeRequestRecord{ID: 1, EmployeeID: 2}},
+		permissions: &mockPermissionProvider{employeeID: 2, allowed: true},
+		approvalProvider: &mockApprovalProvider{chain: &domain.ApprovalChainInfo{
+			TotalLevels: 1,
+			Levels:      []domain.ApprovalLevelInfo{{LevelOrder: 1, ApproverEmployeeID: 2}},
+		}},
+	}
+
+	err := s.ApproveOvertime(context.Background(), 1, 1, 77, 1.5)
+	if !errors.Is(err, domain.ErrOvertimeSelfApproval) {
+		t.Fatalf("expected self-approval denial, got %v", err)
+	}
+}
+
+func TestApproveOvertime_RequiresConfiguredMultiplier(t *testing.T) {
+	s := &Service{
+		repo:        &mockRepo{request: &domain.OvertimeRequestRecord{ID: 1, EmployeeID: 5}},
+		permissions: &mockPermissionProvider{employeeID: 2, allowed: true},
+		approvalProvider: &mockApprovalProvider{chain: &domain.ApprovalChainInfo{
+			TotalLevels: 1,
+			Levels:      []domain.ApprovalLevelInfo{{LevelOrder: 1, ApproverEmployeeID: 2}},
+		}},
+	}
+
+	err := s.ApproveOvertime(context.Background(), 1, 1, 77, 0)
+	if !errors.Is(err, domain.ErrOvertimeConfigNotFound) {
+		t.Fatalf("expected missing-config error, got %v", err)
+	}
+}
+
 // ---- RejectOvertime ----
 
 func TestRejectOvertime_HappyPath(t *testing.T) {
-	req := &domain.OvertimeRequestRecord{ID: 1}
-	s := &Service{repo: &mockRepo{request: req}}
-	err := s.RejectOvertime(context.Background(), 1, 1)
+	req := &domain.OvertimeRequestRecord{ID: 1, EmployeeID: 5}
+	s := &Service{repo: &mockRepo{request: req}, approvalProvider: &mockApprovalProvider{chain: &domain.ApprovalChainInfo{TotalLevels: 1, Levels: []domain.ApprovalLevelInfo{{LevelOrder: 1, ApproverEmployeeID: 2}}}}, permissions: &mockPermissionProvider{employeeID: 2, allowed: true}}
+	err := s.RejectOvertime(context.Background(), 1, 1, 77)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -193,8 +252,8 @@ func TestRejectOvertime_HappyPath(t *testing.T) {
 
 func TestRejectOvertime_PropagatesGetRequestError(t *testing.T) {
 	want := domain.ErrOvertimeRequestNotFound
-	s := &Service{repo: &mockRepo{err: want}}
-	err := s.RejectOvertime(context.Background(), 1, 99)
+	s := &Service{repo: &mockRepo{err: want}, permissions: &mockPermissionProvider{employeeID: 2, allowed: true}}
+	err := s.RejectOvertime(context.Background(), 1, 99, 77)
 	if !errors.Is(err, want) {
 		t.Errorf("expected ErrOvertimeRequestNotFound, got %v", err)
 	}

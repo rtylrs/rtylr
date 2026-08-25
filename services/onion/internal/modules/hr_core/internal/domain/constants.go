@@ -34,6 +34,7 @@ const (
 	PermissionRequestTimeOff       = "request_time_off"
 	PermissionViewTeam             = "view_team"
 	PermissionApproveTimeOff       = "approve_time_off"
+	PermissionApproveOvertime      = "approve_overtime"
 	PermissionManageSchedules      = "manage_schedules"
 	PermissionManageEmployees      = "manage_employees"
 	PermissionManageRoles          = "manage_roles"

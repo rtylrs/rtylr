@@ -29,6 +29,12 @@ type OvertimeConfigRecord struct {
 	UpdatedAt             time.Time `json:"updated_at"`
 }
 
+type OvertimeDetectionCandidate struct {
+	EmployeeID   int64
+	Date         string
+	ExtraMinutes int32
+}
+
 type ListOvertimeRequestsParams struct {
 	Limit  int32
 	Offset int32
