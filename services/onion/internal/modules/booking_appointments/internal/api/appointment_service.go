@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -90,6 +92,15 @@ func (a *AppointmentAPI) CreateAppointment(ctx context.Context, req *bookingappo
 	}
 	id, err := a.service.Create(ctx, businessID, input)
 	if err != nil {
+		if errors.Is(err, domain.ErrTimeSlotUnavailable) {
+			return nil, onekiterrors.New(http.StatusConflict, err.Error())
+		}
+		if errors.Is(err, domain.ErrInvalidStatus) {
+			return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
+		if errors.Is(err, domain.ErrInvalidReference) {
+			return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create appointment")
 	}
 	invalidateAppointmentsCache(ctx, businessID)
@@ -110,6 +121,18 @@ func (a *AppointmentAPI) UpdateAppointment(ctx context.Context, req *bookingappo
 		return nil, errModel
 	}
 	if err := a.service.Update(ctx, businessID, req.GetId(), input); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Appointment not found")
+		}
+		if errors.Is(err, domain.ErrTimeSlotUnavailable) {
+			return nil, onekiterrors.New(http.StatusConflict, err.Error())
+		}
+		if errors.Is(err, domain.ErrInvalidStatus) {
+			return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
+		if errors.Is(err, domain.ErrInvalidReference) {
+			return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update appointment")
 	}
 	invalidateAppointmentsCache(ctx, businessID)
@@ -126,6 +149,9 @@ func (a *AppointmentAPI) DeleteAppointment(ctx context.Context, req *bookingappo
 		return nil, errModel
 	}
 	if err := a.service.Delete(ctx, businessID, req.GetId()); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Appointment not found")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to delete appointment")
 	}
 	invalidateAppointmentsCache(ctx, businessID)
