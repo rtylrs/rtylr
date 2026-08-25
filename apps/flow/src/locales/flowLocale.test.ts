@@ -90,6 +90,8 @@ describe('flow locale parity', () => {
       'settings.appearance.groups.mode',
       'settings.appearance.groups.palette',
       'settings.appearance.density.compact',
+      // A URL placeholder is intentionally identical in every locale.
+      'sidebar.externalUrlPlaceholder',
       // "Public" is the same word in French too. Its counterpart
       // visibility.private ("Privé") does differ, which is the check that this
       // is a cognate rather than an untranslated string.
