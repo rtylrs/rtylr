@@ -105,6 +105,23 @@ func (s *Service) UpdateEmployee(ctx context.Context, ownerID int64, emp domain.
 	return updated, nil
 }
 
+// DeactivateEmployee changes only the employment state and end date. The
+// existing record is loaded first so termination revocation still has the
+// linked user id without passing a zero-filled employee through UpdateEmployee.
+func (s *Service) DeactivateEmployee(ctx context.Context, ownerID, employeeID int64) error {
+	existing, err := s.repo.GetEmployee(ctx, ownerID, employeeID)
+	if err != nil {
+		return err
+	}
+	if err := s.repo.DeactivateEmployee(ctx, ownerID, employeeID, time.Now().UTC()); err != nil {
+		return err
+	}
+	existing.Status = "terminated"
+	s.revokeOnTermination(ctx, ownerID, *existing)
+	invalidateHRCoreScope(ctx, ownerID)
+	return nil
+}
+
 // --- Invites ---
 
 func (s *Service) InviteEmployee(ctx context.Context, ownerID int64, emp domain.EmployeeRecord) (string, error) {
@@ -149,12 +166,11 @@ func (s *Service) AcceptInvite(ctx context.Context, token string, userID int64) 
 		return err
 	}
 
-	_, err = s.repo.UpdateEmployee(ctx, invite.OwnerID, domain.EmployeeRecord{
-		ID:     invite.EmployeeID,
-		UserID: userID,
-		Status: "active",
-	})
-	return err
+	if err := s.repo.LinkInviteAcceptance(ctx, invite.OwnerID, invite.EmployeeID, userID); err != nil {
+		return err
+	}
+	invalidateHRCoreScope(ctx, invite.OwnerID)
+	return nil
 }
 
 // --- Locations ---

@@ -12,6 +12,8 @@ type Repository interface {
 	GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int64) (int64, error)
 	CreateEmployee(ctx context.Context, ownerID int64, emp EmployeeRecord) (*EmployeeRecord, error)
 	UpdateEmployee(ctx context.Context, ownerID int64, emp EmployeeRecord) (*EmployeeRecord, error)
+	DeactivateEmployee(ctx context.Context, ownerID, employeeID int64, endDate time.Time) error
+	LinkInviteAcceptance(ctx context.Context, ownerID, employeeID, userID int64) error
 	CreateEmployeeWithBalances(ctx context.Context, ownerID int64, emp EmployeeRecord, leaveTypeIDs []int64) (*EmployeeRecord, error)
 
 	// Invite

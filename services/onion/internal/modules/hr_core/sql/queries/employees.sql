@@ -39,6 +39,16 @@ SET user_id = ?, department_id = ?, location_id = ?, work_schedule_id = ?,
     notes = ?, updated_at = NOW()
 WHERE id = ? AND business_id = ?;
 
+-- name: DeactivateEmployee :execresult
+UPDATE hr_employees
+SET status = 'terminated', end_date = ?, updated_at = NOW()
+WHERE id = ? AND business_id = ?;
+
+-- name: LinkInviteAcceptance :execresult
+UPDATE hr_employees
+SET user_id = ?, status = 'active', updated_at = NOW()
+WHERE id = ? AND business_id = ? AND status = 'invited';
+
 -- name: CreateLeaveBalance :exec
 INSERT INTO hr_leave_balances (owner_id, business_id, employee_id, leave_type_id, year)
 VALUES (?, ?, ?, ?, ?);

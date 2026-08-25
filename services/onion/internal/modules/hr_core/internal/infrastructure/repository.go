@@ -175,6 +175,45 @@ func (r *Repository) UpdateEmployee(ctx context.Context, businessID int64, emp d
 	return &emp, nil
 }
 
+func (r *Repository) DeactivateEmployee(ctx context.Context, businessID, employeeID int64, endDate time.Time) error {
+	result, err := r.queries.DeactivateEmployee(ctx, sqlc.DeactivateEmployeeParams{
+		EndDate:    nullTime(endDate),
+		ID:         employeeID,
+		BusinessID: businessID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to deactivate employee", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
+		return err
+	}
+	if affected, err := result.RowsAffected(); err != nil {
+		return err
+	} else if affected == 0 {
+		return domain.ErrEmployeeNotFound
+	}
+	return nil
+}
+
+func (r *Repository) LinkInviteAcceptance(ctx context.Context, businessID, employeeID, userID int64) error {
+	result, err := r.queries.LinkInviteAcceptance(ctx, sqlc.LinkInviteAcceptanceParams{
+		UserID:     nullInt64(userID),
+		ID:         employeeID,
+		BusinessID: businessID,
+	})
+	if err != nil {
+		if isDuplicateUserIDError(err) {
+			return domain.ErrUserAlreadyLinked
+		}
+		logger.Ctx(ctx).Error("failed to link invite acceptance", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
+		return err
+	}
+	if affected, err := result.RowsAffected(); err != nil {
+		return err
+	} else if affected == 0 {
+		return domain.ErrEmployeeNotFound
+	}
+	return nil
+}
+
 func (r *Repository) CreateEmployeeWithBalances(ctx context.Context, businessID int64, emp domain.EmployeeRecord, leaveTypeIDs []int64) (*domain.EmployeeRecord, error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
