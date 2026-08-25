@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -20,6 +22,23 @@ type Repository struct {
 	pool    *sql.DB
 }
 
+type purchaseOrderReceiptLine struct {
+	item  sqlc.ErpPurchaseOrderItem
+	delta float64
+}
+
+type purchaseOrderInventoryLedgerEntry struct {
+	ProductID      int64
+	QuantityChange string
+	QuantityBefore string
+	QuantityAfter  string
+	OwnerID        int64
+	BusinessID     int64
+	ReferenceID    int64
+	CreatedBy      int64
+	Notes          string
+}
+
 func NewRepository(db *sql.DB) *Repository {
 	pool := db
 
@@ -27,6 +46,65 @@ func NewRepository(db *sql.DB) *Repository {
 		queries: sqlc.New(pool),
 		pool:    pool,
 	}
+}
+
+type purchaseOrderItemReceivedUpdate struct {
+	ID       int64
+	Quantity string
+}
+
+func updatePurchaseOrderItemsReceived(ctx context.Context, tx *sql.Tx, purchaseOrderID int64, updates []purchaseOrderItemReceivedUpdate) error {
+	if len(updates) == 0 {
+		return nil
+	}
+
+	caseExpr := sq.Case()
+	ids := make([]int64, 0, len(updates))
+	for _, update := range updates {
+		caseExpr = caseExpr.When(sq.Expr("id = ?", update.ID), update.Quantity)
+		ids = append(ids, update.ID)
+	}
+	query, args, err := sq.Update("erp_purchase_order_items").
+		Set("quantity_received", caseExpr).
+		Where(sq.Eq{"purchase_order_id": purchaseOrderID, "id": ids}).
+		ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = tx.ExecContext(ctx, query, args...)
+	return err
+}
+
+func insertPurchaseOrderInventoryLedger(ctx context.Context, tx *sql.Tx, entries []purchaseOrderInventoryLedgerEntry) error {
+	if len(entries) == 0 {
+		return nil
+	}
+
+	insert := sq.Insert("erp_inventory_transactions").Columns(
+		"owner_id", "business_id", "product_id", "type", "quantity_change", "quantity_before", "quantity_after",
+		"reference_id", "reference_type", "created_by", "notes",
+	)
+	for _, entry := range entries {
+		insert = insert.Values(
+			entry.OwnerID,
+			entry.BusinessID,
+			entry.ProductID,
+			sqlc.ErpInventoryTransactionsType(domain.InventoryTypePurchase),
+			entry.QuantityChange,
+			entry.QuantityBefore,
+			entry.QuantityAfter,
+			nullInt64(entry.ReferenceID),
+			nullString("purchase_order"),
+			nullInt64(entry.CreatedBy),
+			nullString(entry.Notes),
+		)
+	}
+	query, args, err := insert.ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = tx.ExecContext(ctx, query, args...)
+	return err
 }
 
 func (r *Repository) ListPurchaseOrders(ctx context.Context, businessID int64, status string, limit, offset int32) ([]domain.PurchaseOrder, error) {
@@ -382,6 +460,8 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		receivedByID[item.ID] = item.QuantityReceived
 	}
 	fullyReceived := true
+	receiptLines := make([]purchaseOrderReceiptLine, 0, len(items))
+	receivedUpdates := make([]purchaseOrderItemReceivedUpdate, 0, len(items))
 	for _, it := range items {
 		ordered, perr := strconv.ParseFloat(it.QuantityOrdered, 64)
 		if perr != nil {
@@ -411,13 +491,23 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		if delta < 0 {
 			return fmt.Errorf("received quantity for item %d cannot decrease from %v", it.ID, previous)
 		}
+		receiptLines = append(receiptLines, purchaseOrderReceiptLine{item: it, delta: delta})
+		receivedUpdates = append(receivedUpdates, purchaseOrderItemReceivedUpdate{
+			ID:       it.ID,
+			Quantity: strconv.FormatFloat(qty, 'f', -1, 64),
+		})
+	}
+	if err = updatePurchaseOrderItemsReceived(ctx, tx, poID, receivedUpdates); err != nil {
+		return err
+	}
 
-		if err = qtx.UpdatePurchaseOrderItemReceived(ctx, sqlc.UpdatePurchaseOrderItemReceivedParams{QuantityReceived: nullString(strconv.FormatFloat(qty, 'f', -1, 64)), PurchaseOrderID: poID, ID: it.ID}); err != nil {
-			return err
-		}
-		if delta == 0 {
+	legacyEntries := make([]purchaseOrderInventoryLedgerEntry, 0, len(receiptLines))
+	for _, line := range receiptLines {
+		if line.delta == 0 {
 			continue
 		}
+		it := line.item
+		delta := line.delta
 
 		before, after, merr := stock_core.ApplyMovementTx(ctx, tx, stock_core.Movement{
 			OwnerID:       businessID,
@@ -436,22 +526,17 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 			return err
 		}
 
-		// Legacy ledger row (read-compat).
-		if _, err = qtx.InsertInventoryTransactionWithRef(ctx, sqlc.InsertInventoryTransactionWithRefParams{
+		legacyEntries = append(legacyEntries, purchaseOrderInventoryLedgerEntry{
 			OwnerID:        createdBy,
 			BusinessID:     businessID,
 			ProductID:      it.ProductID,
-			Type:           sqlc.ErpInventoryTransactionsType(domain.InventoryTypePurchase),
 			QuantityChange: strconv.FormatFloat(delta, 'f', -1, 64),
 			QuantityBefore: strconv.FormatFloat(before, 'f', -1, 64),
 			QuantityAfter:  strconv.FormatFloat(after, 'f', -1, 64),
-			ReferenceID:    nullInt64(poID),
-			ReferenceType:  nullString("purchase_order"),
-			CreatedBy:      nullInt64(createdBy),
-			Notes:          nullString(fmt.Sprintf("received from purchase order %d", poID)),
-		}); err != nil {
-			return err
-		}
+			ReferenceID:    poID,
+			CreatedBy:      createdBy,
+			Notes:          fmt.Sprintf("received from purchase order %d", poID),
+		})
 
 		if _, err = tx.ExecContext(ctx, `
 			INSERT INTO inventory_cost_layers
@@ -460,6 +545,9 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 			businessID, businessID, it.ProductID, locID, delta, it.UnitCost, poID); err != nil {
 			return err
 		}
+	}
+	if err = insertPurchaseOrderInventoryLedger(ctx, tx, legacyEntries); err != nil {
+		return err
 	}
 
 	nextStatus := domain.POStatusPartial
