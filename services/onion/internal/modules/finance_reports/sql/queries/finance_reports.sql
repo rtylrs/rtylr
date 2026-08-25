@@ -1,6 +1,42 @@
 -- cross-schema read from accounts — balance-sheet account totals.
 -- name: SumAccountsByType :one
-SELECT COALESCE(SUM(balance), 0) FROM finance_accounts WHERE business_id = ? AND type = ? AND is_active = TRUE;
+SELECT COALESCE(SUM(
+    COALESCE(a.balance, 0) + CASE
+        WHEN a.type IN ('asset', 'expense') THEN COALESCE(p.debit, 0) - COALESCE(p.credit, 0)
+        ELSE COALESCE(p.credit, 0) - COALESCE(p.debit, 0)
+    END
+), 0)
+FROM finance_accounts a
+LEFT JOIN (
+    SELECT l.account_id,
+           SUM(CAST(l.debit AS DECIMAL(15,2))) AS debit,
+           SUM(CAST(l.credit AS DECIMAL(15,2))) AS credit
+    FROM finance_journal_lines l
+    JOIN finance_journal_entries e ON e.id = l.entry_id
+    WHERE e.business_id = sqlc.arg(business_id)
+      AND e.status = 'posted'
+    GROUP BY l.account_id
+) p ON p.account_id = a.id
+WHERE a.business_id = sqlc.arg(business_id)
+  AND a.type = sqlc.arg(account_type)
+  AND a.is_active = TRUE;
+
+-- cross-schema read from journal — cumulative posted revenue and expense
+-- balances become the contribution to retained earnings.
+-- name: SumPostedNetIncome :one
+SELECT COALESCE(SUM(
+    CASE
+        WHEN a.type = 'revenue' THEN CAST(l.credit AS DECIMAL(15,2)) - CAST(l.debit AS DECIMAL(15,2))
+        WHEN a.type = 'expense' THEN CAST(l.debit AS DECIMAL(15,2)) - CAST(l.credit AS DECIMAL(15,2))
+        ELSE 0
+    END
+), 0)
+FROM finance_journal_lines l
+JOIN finance_journal_entries e ON e.id = l.entry_id AND e.status = 'posted'
+JOIN finance_accounts a ON a.id = l.account_id AND a.business_id = e.business_id
+WHERE e.business_id = sqlc.arg(business_id)
+  AND a.type IN ('revenue', 'expense')
+  AND a.is_active = TRUE;
 
 -- cross-schema read from bank_accounts — current bank-account balances.
 -- name: SumBankBalances :one
