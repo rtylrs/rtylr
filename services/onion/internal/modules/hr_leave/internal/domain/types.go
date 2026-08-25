@@ -51,6 +51,14 @@ type LeaveBalanceRecord struct {
 	UpdatedAt        time.Time `json:"updated_at"`
 }
 
+// LeaveDayAllocation splits a request across calendar-year balance buckets.
+// A request crossing New Year's Eve must debit and restore each year's bucket
+// independently rather than charging everything to the start year.
+type LeaveDayAllocation struct {
+	Year int32
+	Days float64
+}
+
 type ListLeaveTypesParams struct {
 	Limit  int32
 	Offset int32

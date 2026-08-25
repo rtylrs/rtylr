@@ -13,6 +13,7 @@ var (
 	ErrApprovalChainNotConfigured = errors.New("approval chain not configured for leave requests")
 	ErrLeaveAccessDenied          = errors.New("leave access denied")
 	ErrLeaveApproverNotAllowed    = errors.New("approver is not allowed by the leave approval chain")
+	ErrLeaveSelfApproval          = errors.New("employees cannot approve their own leave requests")
 	ErrInvalidDateRange           = errors.New("start date must be before or equal to end date")
 	ErrInsufficientNotice         = errors.New("insufficient notice period for this leave type")
 )
