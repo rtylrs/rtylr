@@ -71,6 +71,8 @@ FROM erp_products p
 JOIN pos_order_items oi ON oi.menu_item_id = p.id
 JOIN pos_orders o       ON o.id = oi.order_id AND o.business_id = p.business_id
 WHERE p.business_id = ?
+  AND o.payment_status = 'paid'
+  AND oi.status <> 'cancelled'
   AND o.created_at >= ?
 GROUP BY p.id, p.name
 ORDER BY units DESC
@@ -224,6 +226,8 @@ JOIN pos_orders o        ON o.id = oi.order_id
 JOIN erp_products p      ON p.id = oi.menu_item_id AND p.business_id = o.business_id
 LEFT JOIN erp_categories c ON c.id = p.category_id AND c.business_id = p.business_id
 WHERE o.business_id = ?
+  AND o.payment_status = 'paid'
+  AND oi.status <> 'cancelled'
   AND o.created_at >= ?
   AND o.created_at <= ?
 GROUP BY c.id, c.name
