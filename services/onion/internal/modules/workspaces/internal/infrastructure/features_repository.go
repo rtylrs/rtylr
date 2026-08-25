@@ -797,18 +797,20 @@ func (r *Repository) GetUserSettings(ctx context.Context, userID int64) (domain.
 	s.StatusChanges = row.StatusChanges.Bool
 	s.WeeklyDigest = row.WeeklyDigest.Bool
 	s.EmailNotifications = row.EmailNotifications.Bool
+	s.SidebarPreferencesJSON = row.SidebarPreferencesJson.String
 	return s, nil
 }
 
 func (r *Repository) UpsertUserSettings(ctx context.Context, s domain.UserSettings) error {
 	err := r.queries.UpsertUserSettings(ctx, sqlc.UpsertUserSettingsParams{
-		UserID:             s.UserID,
-		TaskAssigned:       sql.NullBool{Bool: s.TaskAssigned, Valid: true},
-		TaskComments:       sql.NullBool{Bool: s.TaskComments, Valid: true},
-		Mentions:           sql.NullBool{Bool: s.Mentions, Valid: true},
-		StatusChanges:      sql.NullBool{Bool: s.StatusChanges, Valid: true},
-		WeeklyDigest:       sql.NullBool{Bool: s.WeeklyDigest, Valid: true},
-		EmailNotifications: sql.NullBool{Bool: s.EmailNotifications, Valid: true},
+		UserID:                 s.UserID,
+		TaskAssigned:           sql.NullBool{Bool: s.TaskAssigned, Valid: true},
+		TaskComments:           sql.NullBool{Bool: s.TaskComments, Valid: true},
+		Mentions:               sql.NullBool{Bool: s.Mentions, Valid: true},
+		StatusChanges:          sql.NullBool{Bool: s.StatusChanges, Valid: true},
+		WeeklyDigest:           sql.NullBool{Bool: s.WeeklyDigest, Valid: true},
+		EmailNotifications:     sql.NullBool{Bool: s.EmailNotifications, Valid: true},
+		SidebarPreferencesJson: sql.NullString{String: s.SidebarPreferencesJSON, Valid: s.SidebarPreferencesJSON != ""},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("UpsertUserSettings failed", logger.Error(err))

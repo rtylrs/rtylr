@@ -29,14 +29,18 @@ func (a *SettingAPI) GetUserSettings(ctx context.Context, _ *flowsettingv1.GetUs
 		return nil, workspaceInternalError(ctx, "GetUserSettings failed", err)
 	}
 
-	return &flowsettingv1.GetUserSettingsResponse{
+	response := &flowsettingv1.GetUserSettingsResponse{
 		TaskAssigned:       s.TaskAssigned,
 		TaskComments:       s.TaskComments,
 		Mentions:           s.Mentions,
 		StatusChanges:      s.StatusChanges,
 		WeeklyDigest:       s.WeeklyDigest,
 		EmailNotifications: s.EmailNotifications,
-	}, nil
+	}
+	if s.SidebarPreferencesJSON != "" {
+		response.SidebarPreferences = &s.SidebarPreferencesJSON
+	}
+	return response, nil
 }
 
 func (a *SettingAPI) UpdateUserSettings(ctx context.Context, req *flowsettingv1.UpdateUserSettingsRequest) (*flowsettingv1.UpdateUserSettingsResponse, error) {
@@ -46,13 +50,14 @@ func (a *SettingAPI) UpdateUserSettings(ctx context.Context, req *flowsettingv1.
 	}
 
 	if err := a.Service.UpdateUserSettings(ctx, domain.UserSettings{
-		UserID:             authUser.UserID,
-		TaskAssigned:       req.GetTaskAssigned(),
-		TaskComments:       req.GetTaskComments(),
-		Mentions:           req.GetMentions(),
-		StatusChanges:      req.GetStatusChanges(),
-		WeeklyDigest:       req.GetWeeklyDigest(),
-		EmailNotifications: req.GetEmailNotifications(),
+		UserID:                 authUser.UserID,
+		TaskAssigned:           req.GetTaskAssigned(),
+		TaskComments:           req.GetTaskComments(),
+		Mentions:               req.GetMentions(),
+		StatusChanges:          req.GetStatusChanges(),
+		WeeklyDigest:           req.GetWeeklyDigest(),
+		EmailNotifications:     req.GetEmailNotifications(),
+		SidebarPreferencesJSON: req.GetSidebarPreferences(),
 	}); err != nil {
 		return nil, workspaceInternalError(ctx, "UpdateUserSettings failed", err)
 	}
