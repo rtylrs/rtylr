@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -18,7 +17,10 @@ type MarginBucketPayload struct {
 
 // GetMarginDistribution returns the bucketed margin histogram.
 func (s *Service) GetMarginDistribution(ctx context.Context, businessID int64) ([]MarginBucketPayload, error) {
-	key := fmt.Sprintf("insights:%d:products:margins", businessID)
+	key, err := s.insightsCacheKey(ctx, businessID, "products:margins")
+	if err != nil {
+		return nil, err
+	}
 	type result struct {
 		Buckets []MarginBucketPayload
 	}

@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -19,7 +18,10 @@ type UtilizationPayload struct {
 // ratio as a percentage. A fresh tenant with no active staff returns 0%
 // rather than divide-by-zero.
 func (s *Service) GetUtilization(ctx context.Context, businessID int64) (UtilizationPayload, error) {
-	key := fmt.Sprintf("insights:%d:operations:utilization", businessID)
+	key, err := s.insightsCacheKey(ctx, businessID, "operations:utilization")
+	if err != nil {
+		return UtilizationPayload{}, err
+	}
 	out, err := cacher.Of[UtilizationPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (UtilizationPayload, error) {
 		row, rerr := s.repo.GetUtilization(ctx, businessID)
 		if rerr != nil {

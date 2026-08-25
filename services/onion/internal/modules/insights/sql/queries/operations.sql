@@ -26,9 +26,10 @@ SELECT COUNT(*) AS count FROM hr_employees
 
 -- name: GetHeadcountPrior :one
 SELECT COUNT(*) AS count FROM hr_employees
- WHERE business_id = ?
+WHERE business_id = ?
    AND (start_date IS NULL OR start_date <= ?)
-   AND (end_date IS NULL OR end_date > ?);
+   AND (end_date IS NULL OR end_date > ?)
+   AND status = 'active';
 
 -- name: GetShiftMetrics :one
 SELECT

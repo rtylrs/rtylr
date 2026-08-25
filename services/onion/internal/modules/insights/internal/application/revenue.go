@@ -46,7 +46,10 @@ func ResolveDateRange(fromStr, toStr string) (time.Time, time.Time, error) {
 // The cache key includes the resolved range so different callers with
 // different windows don't trample each other's entries.
 func (s *Service) GetRevenueSeries(ctx context.Context, businessID int64, from, to time.Time) ([]domain.RevenuePoint, error) {
-	key := fmt.Sprintf("insights:%d:revenue:%s:%s", businessID, from.Format("2006-01-02"), to.Format("2006-01-02"))
+	key, err := s.insightsCacheKey(ctx, businessID, fmt.Sprintf("revenue:%s:%s", from.Format("2006-01-02"), to.Format("2006-01-02")))
+	if err != nil {
+		return nil, err
+	}
 	type result struct {
 		Points []domain.RevenuePoint
 	}

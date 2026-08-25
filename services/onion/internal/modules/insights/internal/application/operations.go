@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -18,7 +17,10 @@ type OperationsKPIPayload struct {
 
 // GetOperationsKPIs returns the headline HR ops counters.
 func (s *Service) GetOperationsKPIs(ctx context.Context, businessID int64) (OperationsKPIPayload, error) {
-	key := fmt.Sprintf("insights:%d:operations:kpis", businessID)
+	key, err := s.insightsCacheKey(ctx, businessID, "operations:kpis")
+	if err != nil {
+		return OperationsKPIPayload{}, err
+	}
 	out, err := cacher.Of[OperationsKPIPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (OperationsKPIPayload, error) {
 		k, rerr := s.repo.GetOperationsKPIs(ctx, businessID)
 		if rerr != nil {

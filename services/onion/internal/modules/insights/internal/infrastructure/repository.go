@@ -18,6 +18,20 @@ type Repository struct {
 	pool    *sql.DB
 }
 
+func (r *Repository) GetInsightsGeneration(ctx context.Context, businessID int64) (time.Time, error) {
+	return r.queries.GetInsightsGeneration(ctx, sqlc.GetInsightsGenerationParams{
+		BusinessID:   businessID,
+		BusinessID_2: businessID,
+		BusinessID_3: businessID,
+		BusinessID_4: businessID,
+		BusinessID_5: businessID,
+		BusinessID_6: businessID,
+		BusinessID_7: businessID,
+		BusinessID_8: businessID,
+		BusinessID_9: businessID,
+	})
+}
+
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		queries: sqlc.New(db),
@@ -76,8 +90,7 @@ func mtdRanges(now time.Time) (thisFrom, thisTo, priorFrom, priorTo time.Time) {
 	thisFrom = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
 	thisTo = now
 	priorFrom = thisFrom.AddDate(0, -1, 0)
-	dayOffset := int(now.Sub(thisFrom).Hours() / 24)
-	priorTo = priorFrom.AddDate(0, 0, dayOffset)
+	priorTo = priorFrom.Add(now.Sub(thisFrom))
 	return thisFrom, thisTo, priorFrom, priorTo
 }
 

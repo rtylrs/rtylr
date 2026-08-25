@@ -18,9 +18,9 @@ func (r *Repository) GetRevenueByApp(ctx context.Context, businessID int64) ([]R
 
 	// cross-schema read from pos_orders — POS-tracked paid order revenue for the split donut
 	posTotal, err := r.queries.SumPosRevenueMTD(ctx, sqlc.SumPosRevenueMTDParams{
-		BusinessID:  businessID,
-		CreatedAt:   sql.NullTime{Time: thisFrom, Valid: true},
-		CreatedAt_2: sql.NullTime{Time: thisTo, Valid: true},
+		BusinessID: businessID,
+		PaidAt:     sql.NullTime{Time: thisFrom, Valid: true},
+		PaidAt_2:   sql.NullTime{Time: thisTo, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("insights: revenue by app (pos) failed", logger.Error(err))

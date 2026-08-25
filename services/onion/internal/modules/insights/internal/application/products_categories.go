@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -18,7 +17,10 @@ type CategorySalesPayload struct {
 
 // GetSalesByCategory returns MTD sales grouped by product category.
 func (s *Service) GetSalesByCategory(ctx context.Context, businessID int64) ([]CategorySalesPayload, error) {
-	key := fmt.Sprintf("insights:%d:products:categories", businessID)
+	key, err := s.insightsCacheKey(ctx, businessID, "products:categories")
+	if err != nil {
+		return nil, err
+	}
 	type result struct {
 		Rows []CategorySalesPayload
 	}

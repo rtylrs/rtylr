@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/insights/internal/domain"
@@ -19,7 +18,10 @@ const dashboardCacheTTL = 5 * time.Minute
 // GetDashboard returns the four headline cards for the given owner.
 // Result is cached per-owner under `insights:{businessID}:dashboard`.
 func (s *Service) GetDashboard(ctx context.Context, businessID int64) (domain.DashboardSnapshot, error) {
-	key := fmt.Sprintf("insights:%d:dashboard", businessID)
+	key, err := s.insightsCacheKey(ctx, businessID, "dashboard")
+	if err != nil {
+		return domain.DashboardSnapshot{}, err
+	}
 	return cacher.Of[domain.DashboardSnapshot]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (domain.DashboardSnapshot, error) {
 		return s.repo.GetDashboard(ctx, businessID, infrastructure.DashboardInput{Now: time.Now()})
 	}, cacher.WithExpiry(ctx, dashboardCacheTTL))

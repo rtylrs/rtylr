@@ -14,6 +14,7 @@ const countCustomersActive = `-- name: CountCustomersActive :one
 SELECT COUNT(DISTINCT c.id) AS count
 FROM crm_customers c
 JOIN pos_orders o ON o.customer_id = c.id AND o.business_id = c.business_id
+  AND o.payment_status = 'paid'
 WHERE c.business_id = ?
   AND o.created_at >= ?
 `
@@ -34,8 +35,8 @@ const countCustomersChurned = `-- name: CountCustomersChurned :one
 SELECT COUNT(*) AS count
 FROM crm_customers c
 WHERE c.business_id = ?
-  AND EXISTS (SELECT 1 FROM pos_orders o WHERE o.business_id = c.business_id AND o.customer_id = c.id)
-  AND NOT EXISTS (SELECT 1 FROM pos_orders o2 WHERE o2.business_id = c.business_id AND o2.customer_id = c.id AND o2.created_at >= ?)
+  AND EXISTS (SELECT 1 FROM pos_orders o WHERE o.business_id = c.business_id AND o.customer_id = c.id AND o.payment_status = 'paid')
+  AND NOT EXISTS (SELECT 1 FROM pos_orders o2 WHERE o2.business_id = c.business_id AND o2.customer_id = c.id AND o2.payment_status = 'paid' AND o2.created_at >= ?)
 `
 
 type CountCustomersChurnedParams struct {

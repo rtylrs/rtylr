@@ -81,21 +81,26 @@ func (q *Queries) SumFinanceRevenueMTD(ctx context.Context, arg SumFinanceRevenu
 
 const sumPosRevenueMTD = `-- name: SumPosRevenueMTD :one
 SELECT COALESCE(SUM(total), 0) AS total
-FROM pos_orders
-WHERE business_id = ?
-  AND payment_status = 'paid'
-  AND created_at >= ?
-  AND created_at <= ?
+FROM (
+    SELECT GREATEST(o.total - COALESCE(SUM(r.amount), 0), 0) AS total
+    FROM pos_orders o
+    LEFT JOIN pos_refunds r ON r.order_id = o.id AND r.business_id = o.business_id
+    WHERE o.business_id = ?
+      AND o.payment_status IN ('paid', 'refunded')
+      AND o.paid_at >= ?
+      AND o.paid_at <= ?
+    GROUP BY o.id, o.total
+) AS net_pos_orders
 `
 
 type SumPosRevenueMTDParams struct {
-	BusinessID  int64        `db:"business_id" json:"business_id"`
-	CreatedAt   sql.NullTime `db:"created_at" json:"created_at"`
-	CreatedAt_2 sql.NullTime `db:"created_at_2" json:"created_at_2"`
+	BusinessID int64        `db:"business_id" json:"business_id"`
+	PaidAt     sql.NullTime `db:"paid_at" json:"paid_at"`
+	PaidAt_2   sql.NullTime `db:"paid_at_2" json:"paid_at_2"`
 }
 
 func (q *Queries) SumPosRevenueMTD(ctx context.Context, arg SumPosRevenueMTDParams) (interface{}, error) {
-	row := q.db.QueryRowContext(ctx, sumPosRevenueMTD, arg.BusinessID, arg.CreatedAt, arg.CreatedAt_2)
+	row := q.db.QueryRowContext(ctx, sumPosRevenueMTD, arg.BusinessID, arg.PaidAt, arg.PaidAt_2)
 	var total interface{}
 	err := row.Scan(&total)
 	return total, err

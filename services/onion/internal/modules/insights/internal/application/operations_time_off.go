@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -16,7 +15,10 @@ type TimeOffPayload struct {
 
 // GetTimeOffSummary returns pending + approved leave request counts.
 func (s *Service) GetTimeOffSummary(ctx context.Context, businessID int64) (TimeOffPayload, error) {
-	key := fmt.Sprintf("insights:%d:operations:time-off", businessID)
+	key, err := s.insightsCacheKey(ctx, businessID, "operations:time-off")
+	if err != nil {
+		return TimeOffPayload{}, err
+	}
 	out, err := cacher.Of[TimeOffPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (TimeOffPayload, error) {
 		row, rerr := s.repo.GetTimeOffSummary(ctx, businessID)
 		if rerr != nil {
