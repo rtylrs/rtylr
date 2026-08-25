@@ -52,9 +52,10 @@ type TimesheetSummary struct {
 }
 
 type OvertimeSummary struct {
-	EmployeeID   int64
-	TotalMinutes int32
-	Multiplier   float64
+	EmployeeID        int64
+	TotalMinutes      int32
+	WeightedMinutes   float64
+	UnweightedMinutes float64
 }
 
 type EmployeePayInfo struct {
