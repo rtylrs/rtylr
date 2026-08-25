@@ -7,6 +7,49 @@ import (
 	"time"
 )
 
+func TestScalarCacheEncodingAvoidsJSONCodec(t *testing.T) {
+	cases := []struct {
+		name string
+		got  func() ([]byte, error)
+		want string
+	}{
+		{name: "int64", got: func() ([]byte, error) { return Of[int64]().marshal(-42) }, want: "-42"},
+		{name: "string", got: func() ([]byte, error) { return Of[string]().marshal("cached") }, want: "cached"},
+		{name: "bool", got: func() ([]byte, error) { return Of[bool]().marshal(true) }, want: "true"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := tc.got()
+			if err != nil {
+				t.Fatalf("marshal: %v", err)
+			}
+			if string(got) != tc.want {
+				t.Fatalf("encoded value = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestScalarCacheDecodingSupportsNewAndLegacyValues(t *testing.T) {
+	var intValue int64
+	if err := Of[int64]().unmarshal([]byte("42"), &intValue); err != nil || intValue != 42 {
+		t.Fatalf("int64 unmarshal = %d, %v; want 42, nil", intValue, err)
+	}
+
+	var stringValue string
+	if err := Of[string]().unmarshal([]byte(`"legacy"`), &stringValue); err != nil || stringValue != "legacy" {
+		t.Fatalf("legacy string unmarshal = %q, %v; want legacy, nil", stringValue, err)
+	}
+	if err := Of[string]().unmarshal([]byte("current"), &stringValue); err != nil || stringValue != "current" {
+		t.Fatalf("current string unmarshal = %q, %v; want current, nil", stringValue, err)
+	}
+
+	var boolValue bool
+	if err := Of[bool]().unmarshal([]byte("true"), &boolValue); err != nil || !boolValue {
+		t.Fatalf("bool unmarshal = %v, %v; want true, nil", boolValue, err)
+	}
+}
+
 func initTestCache(t *testing.T) context.Context {
 	t.Helper()
 	ctx := context.Background()
