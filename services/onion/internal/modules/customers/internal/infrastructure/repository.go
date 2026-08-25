@@ -233,6 +233,53 @@ func (r *Repository) CreateCustomer(ctx context.Context, input domain.CustomerIn
 }
 
 func (r *Repository) UpdateCustomer(ctx context.Context, input domain.CustomerUpdateInput) error {
+	return updateCustomer(ctx, r.queries, input)
+}
+
+// UpdateCustomerWithLoyalty keeps the customer update and tier change in one
+// transaction. The points row is locked before it is preserved, preventing a
+// concurrent earn/redeem from being overwritten by a stale read.
+func (r *Repository) UpdateCustomerWithLoyalty(ctx context.Context, input domain.CustomerUpdateInput) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	qtx := r.queries.WithTx(tx)
+	if err := updateCustomer(ctx, qtx, input); err != nil {
+		return err
+	}
+
+	var loyaltyPoints sql.NullInt64
+	if err := tx.QueryRowContext(ctx,
+		"SELECT loyalty_points FROM crm_customers WHERE id = ? AND business_id = ? FOR UPDATE",
+		input.ID, input.BusinessID,
+	).Scan(&loyaltyPoints); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrCustomerNotFound
+		}
+		return err
+	}
+	points := int64(0)
+	if loyaltyPoints.Valid {
+		points = loyaltyPoints.Int64
+	}
+	if err := qtx.UpdateCustomerLoyalty(ctx, sqlc.UpdateCustomerLoyaltyParams{
+		LoyaltyPoints: sql.NullInt32{Int32: int32(points), Valid: true},
+		LoyaltyTier: sqlc.NullCrmCustomersLoyaltyTier{
+			CrmCustomersLoyaltyTier: sqlc.CrmCustomersLoyaltyTier(input.LoyaltyTier),
+			Valid:                   true,
+		},
+		ID:         input.ID,
+		BusinessID: input.BusinessID,
+	}); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func updateCustomer(ctx context.Context, q *sqlc.Queries, input domain.CustomerUpdateInput) error {
 	tagsJSON, err := json.Marshal(input.Tags)
 	if err != nil {
 		tagsJSON = []byte("[]")
@@ -243,7 +290,7 @@ func (r *Repository) UpdateCustomer(ctx context.Context, input domain.CustomerUp
 		isActive = *input.IsActive
 	}
 
-	result, err := r.queries.UpdateCustomer(ctx, sqlc.UpdateCustomerParams{
+	result, err := q.UpdateCustomer(ctx, sqlc.UpdateCustomerParams{
 		FirstName:   input.FirstName,
 		LastName:    sql.NullString{String: input.LastName, Valid: input.LastName != ""},
 		Email:       sql.NullString{String: input.Email, Valid: input.Email != ""},
