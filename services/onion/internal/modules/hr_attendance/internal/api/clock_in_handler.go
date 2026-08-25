@@ -61,6 +61,9 @@ func (h *ClockInHandler) Validate(ctx context.Context, req *ClockInRequest) erro
 		if req.Pin == "" {
 			return onekiterrors.New(http.StatusBadRequest, "pin is required for PIN clock-in")
 		}
+		if h.Service.IsPINLocked(ctx, req.OwnerID, req.EmployeeID) {
+			return onekiterrors.New(http.StatusTooManyRequests, "Too many failed PIN attempts; try again later")
+		}
 		if err := h.Service.ValidatePIN(ctx, req.OwnerID, req.EmployeeID, req.Pin); err != nil {
 			if errors.Is(err, domain.ErrPINNotSet) {
 				return onekiterrors.New(http.StatusPreconditionFailed, "Employee has not set a clock-in PIN")

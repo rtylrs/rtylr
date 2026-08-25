@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hubfeaturev1 "github.com/voxire/voxie/gen/go/hub/feature/v1"
 )
 
@@ -144,8 +145,11 @@ func (a *FeatureAPI) UpsertTarget(ctx context.Context, req *hubfeaturev1.UpsertT
 	if key == "" {
 		return nil, badRequest("feature_key is required")
 	}
-	if req.GetOwnerId() == 0 {
+	if req.GetOwnerId() <= 0 {
 		return nil, badRequest("owner_id is required")
+	}
+	if err := requireTargetScope(ctx, req.GetOwnerId()); err != nil {
+		return nil, err
 	}
 	if err := a.Service.UpsertTarget(ctx, domain.Target{
 		FeatureKey: key,
@@ -166,8 +170,11 @@ func (a *FeatureAPI) DeleteTarget(ctx context.Context, req *hubfeaturev1.DeleteT
 	if key == "" {
 		return nil, badRequest("feature_key is required")
 	}
-	if req.GetOwnerId() == 0 {
+	if req.GetOwnerId() <= 0 {
 		return nil, badRequest("owner_id is required")
+	}
+	if err := requireTargetScope(ctx, req.GetOwnerId()); err != nil {
+		return nil, err
 	}
 	if err := a.Service.DeleteTarget(ctx, key, req.GetOwnerId()); err != nil {
 		return nil, internalError("Failed to delete feature target")
@@ -258,6 +265,30 @@ func requireAdmin(ctx context.Context) error {
 	}
 	role := strings.ToLower(user.Role)
 	if role != "owner" && role != "admin" && role != "console_admin" {
+		return onekiterrors.PermissionDenied()
+	}
+	return nil
+}
+
+// requireTargetScope gates feature-target writes: console_admin may target
+// any tenant; every other admin may only target their own business (#817).
+func requireTargetScope(ctx context.Context, requestedOwner int64) error {
+	if err := requireAdmin(ctx); err != nil {
+		return err
+	}
+	user, ok := authPkg.GetAuthUser(ctx)
+	if !ok || user == nil {
+		return onekiterrors.PermissionDenied()
+	}
+	if strings.EqualFold(user.Role, "console_admin") {
+		return nil
+	}
+	callerBusinessID, err := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if err != nil {
+		return onekiterrors.PermissionDenied()
+	}
+	targetBusinessID, err := tenant.ResolveBusinessID(ctx, 0, requestedOwner)
+	if err != nil || targetBusinessID != callerBusinessID {
 		return onekiterrors.PermissionDenied()
 	}
 	return nil
