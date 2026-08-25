@@ -57,7 +57,19 @@ func (s *Service) GoogleAuth(
 		logger.Ctx(ctx).Warn("workos code exchange failed", logger.Error(err))
 		return nil, ErrGoogleTokenInvalid
 	}
+	return s.linkGoogleUser(ctx, googleUser, businessName, signupIP, deviceInfo)
+}
 
+// linkGoogleUser verifies the provider identity and links or provisions the
+// local account. Split from GoogleAuth so the verification gate is unit-
+// testable without the WorkOS SDK (#815).
+func (s *Service) linkGoogleUser(
+	ctx context.Context,
+	googleUser *GoogleUser,
+	businessName string,
+	signupIP netip.Addr,
+	deviceInfo string,
+) (*GoogleAuthResult, error) {
 	email := strings.ToLower(strings.TrimSpace(googleUser.Email))
 	if email == "" {
 		return nil, ErrGoogleTokenInvalid

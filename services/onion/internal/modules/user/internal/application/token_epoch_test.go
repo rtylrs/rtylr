@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/netip"
 	"testing"
 	"time"
 
@@ -93,5 +94,59 @@ func TestHydrateAccessTokenClaims_ClearsStaleConsoleAdmin(t *testing.T) {
 	}
 	if claims.TokenEpoch != 0 {
 		t.Errorf("TokenEpoch = %d, want 0 for untouched user", claims.TokenEpoch)
+	}
+}
+
+// TestLinkGoogleUser_RejectsUnverifiedEmail covers issue #815: an OAuth
+// identity whose provider has not verified the email must never link to (or
+// provision) a local account, even when a same-email local user exists.
+func TestLinkGoogleUser_RejectsUnverifiedEmail(t *testing.T) {
+	db := testutil.OpenDB(t)
+
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, jwtutils.JWTSecretKey, "test-secret")
+	ctx = context.WithValue(ctx, jwtutils.JWTDurationKey, time.Hour)
+
+	service := NewService(ctx, db, "")
+	if !service.Initialize(ctx) {
+		t.Fatal("failed to initialize user service jwt helper")
+	}
+
+	victimEmail := fmt.Sprintf("oauth-victim+%d@example.com", time.Now().UnixNano())
+	victimID, err := service.repo.CreateUser(ctx, &domain.User{
+		Email:        victimEmail,
+		PasswordHash: "hash",
+		FullName:     "Victim",
+	})
+	if err != nil {
+		t.Fatalf("CreateUser: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = service.repo.DeleteUser(context.Background(), victimID)
+	})
+
+	result, err := service.linkGoogleUser(ctx, &GoogleUser{
+		Email:         victimEmail,
+		Name:          "Attacker",
+		EmailVerified: false,
+	}, "", netip.MustParseAddr("203.0.113.9"), "ua")
+	if !errors.Is(err, ErrGoogleEmailUnverified) {
+		t.Fatalf("err = %v, want ErrGoogleEmailUnverified", err)
+	}
+	if result != nil {
+		t.Fatalf("result = %+v, want nil", result)
+	}
+
+	// The verified path still links the existing local account.
+	result, err = service.linkGoogleUser(ctx, &GoogleUser{
+		Email:         victimEmail,
+		Name:          "Victim",
+		EmailVerified: true,
+	}, "", netip.MustParseAddr("203.0.113.9"), "ua")
+	if err != nil {
+		t.Fatalf("verified link failed: %v", err)
+	}
+	if result.IsNew || result.UserID != victimID {
+		t.Errorf("linked result = %+v, want existing user %d", result, victimID)
 	}
 }
