@@ -35,6 +35,7 @@ WHERE business_id = ? AND status = ?;
 SELECT status, COUNT(*) AS cnt
 FROM finance_bills
 WHERE business_id = ?
+  AND created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
 GROUP BY status;
 
 -- name: ListBillsPaginated :many

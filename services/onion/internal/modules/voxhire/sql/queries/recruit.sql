@@ -376,6 +376,7 @@ LEFT JOIN voxhire_shortlist_items i ON i.shortlist_id = s.id;
 SELECT LOWER(COALESCE(NULLIF(a.status, ''), 'new')) AS bucket, COUNT(*) AS count
 FROM voxire_career_applications a
 JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+WHERE a.created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
 GROUP BY bucket
 ORDER BY count DESC, bucket ASC;
 
@@ -385,11 +386,13 @@ FROM (
     SELECT LOWER(COALESCE(a.cv_processing_status, 'pending')) AS status
       FROM voxire_career_applications a
       JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
-     WHERE a.cv_key IS NOT NULL AND a.cv_key <> ''
+     WHERE a.created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
+       AND a.cv_key IS NOT NULL AND a.cv_key <> ''
     UNION ALL
     SELECT LOWER(COALESCE(cv_processing_status, 'pending')) AS status
       FROM voxhire_talent_applications
-     WHERE cv_key IS NOT NULL AND cv_key <> ''
+     WHERE created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
+       AND cv_key IS NOT NULL AND cv_key <> ''
 ) statuses
 GROUP BY status
 ORDER BY count DESC, status ASC;
@@ -399,18 +402,21 @@ SELECT LOWER(COALESCE(NULLIF(status, ''), 'open')) AS bucket, COUNT(*) AS count
 FROM voxhire_follow_up_tasks
 JOIN voxire_career_applications a ON a.id = voxhire_follow_up_tasks.application_id
 JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+WHERE voxhire_follow_up_tasks.created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
 GROUP BY bucket
 ORDER BY count DESC, bucket ASC;
 
 -- name: AnalyticsLeadServiceMix :many
 SELECT LOWER(COALESCE(NULLIF(service, ''), 'unsure')) AS bucket, COUNT(*) AS count
 FROM voxhire_company_leads
+WHERE created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
 GROUP BY bucket
 ORDER BY count DESC, bucket ASC;
 
 -- name: AnalyticsLeadTimelineMix :many
 SELECT LOWER(COALESCE(NULLIF(timeline, ''), 'unknown')) AS bucket, COUNT(*) AS count
 FROM voxhire_company_leads
+WHERE created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
 GROUP BY bucket
 ORDER BY count DESC, bucket ASC;
 

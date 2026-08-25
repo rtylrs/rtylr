@@ -94,6 +94,7 @@ customer_spend AS (
     ON o.business_id = c.business_id
    AND o.customer_id = c.id
    AND o.payment_status = 'paid'
+   AND o.created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
   WHERE c.business_id = ?
   GROUP BY c.id
 )

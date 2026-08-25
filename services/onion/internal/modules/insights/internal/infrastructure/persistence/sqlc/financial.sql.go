@@ -160,6 +160,7 @@ SELECT
   COALESCE(SUM(amount_due), 0) AS amount_due
 FROM finance_invoices
 WHERE business_id = ?
+  AND created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
   AND status NOT IN ('paid','cancelled','void')
   AND amount_due > 0
 GROUP BY bucket

@@ -31,7 +31,10 @@ DELETE FROM crm_leads WHERE id = ? AND business_id = ?;
 
 -- name: GetPipeline :many
 SELECT stage, COUNT(*) AS cnt, COALESCE(SUM(mrr_potential), 0) AS total_mrr
-FROM crm_leads WHERE business_id = ? GROUP BY stage;
+FROM crm_leads
+WHERE business_id = ?
+  AND created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 12 MONTH)
+GROUP BY stage;
 
 -- name: ListContacts :many
 SELECT id, owner_id, business_id, lead_id, customer_id, name, COALESCE(role,'') AS role, COALESCE(email,'') AS email,
