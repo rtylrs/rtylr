@@ -8,6 +8,8 @@ import (
 // ErrInvalidAmount is returned when an order monetary field is negative.
 var ErrInvalidAmount = errors.New("invalid amount: monetary values cannot be negative")
 
+var ErrInvalidStatus = errors.New("invalid order status transition")
+
 type StoreOrder struct {
 	ID              int64     `json:"id"`
 	OwnerID         int64     `json:"owner_id"`

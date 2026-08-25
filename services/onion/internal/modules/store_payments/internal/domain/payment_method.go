@@ -7,7 +7,7 @@ type PaymentMethod struct {
 	OwnerID    int64     `json:"owner_id"`
 	BusinessID int64     `json:"business_id"`
 	Provider   string    `json:"provider"`
-	Config     string    `json:"config"`
+	Config     string    `json:"-"`
 	IsActive   bool      `json:"is_active"`
 	CreatedAt  time.Time `json:"created_at"`
 }

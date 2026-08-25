@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -93,16 +94,20 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 	defer tx.Rollback()
 
 	qtx := r.queries.WithTx(tx)
+	input, err = r.priceOrderInput(ctx, qtx, ownerID, input)
+	if err != nil {
+		return 0, err
+	}
 	result, err := qtx.CreateStoreOrder(ctx, sqlc.CreateStoreOrderParams{
 		OwnerID:         ownerID,
 		BusinessID:      businessID,
 		CustomerEmail:   sql.NullString{String: input.CustomerEmail, Valid: input.CustomerEmail != ""},
 		CustomerName:    sql.NullString{String: input.CustomerName, Valid: input.CustomerName != ""},
 		CustomerPhone:   sql.NullString{String: input.CustomerPhone, Valid: input.CustomerPhone != ""},
-		Status:          sqlc.NullStoreOrdersStatus{StoreOrdersStatus: sqlc.StoreOrdersStatus(input.Status), Valid: input.Status != ""},
+		Status:          sqlc.NullStoreOrdersStatus{StoreOrdersStatus: sqlc.StoreOrdersStatus("pending"), Valid: true},
 		Subtotal:        strconv.FormatFloat(input.Subtotal, 'f', 2, 64),
 		Tax:             strconv.FormatFloat(input.Tax, 'f', 2, 64),
-		ShippingCost:    strconv.FormatFloat(input.ShippingCost, 'f', 2, 64),
+		ShippingCost:    "0.00",
 		Total:           strconv.FormatFloat(input.Total, 'f', 2, 64),
 		ShippingAddress: nullJSON(input.ShippingAddress),
 		Notes:           sql.NullString{String: input.Notes, Valid: input.Notes != ""},
@@ -120,15 +125,6 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 		return 0, err
 	}
 
-	var stockLocationID int64
-	deductStock := shouldDeductStoreOrderStock(input.Status) && hasProductItems(input.Items)
-	if deductStock {
-		stockLocationID, err = stock_core.DefaultLocationID(ctx, tx, ownerID)
-		if err != nil {
-			return 0, err
-		}
-	}
-
 	for _, item := range input.Items {
 		_, err := qtx.CreateStoreOrderItem(ctx, sqlc.CreateStoreOrderItemParams{
 			OrderID:   id,
@@ -142,11 +138,6 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 			logger.Ctx(ctx).Error("Failed to create store order item", logger.Error(err))
 			return 0, err
 		}
-		if deductStock && item.ProductID != 0 {
-			if err := r.deductStoreOrderItemTx(ctx, tx, qtx, ownerID, stockLocationID, id, item); err != nil {
-				return 0, err
-			}
-		}
 	}
 	if err := tx.Commit(); err != nil {
 		return 0, err
@@ -154,26 +145,8 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 	return id, nil
 }
 
-func shouldDeductStoreOrderStock(status string) bool {
-	switch strings.ToLower(strings.TrimSpace(status)) {
-	case "cancelled", "refunded":
-		return false
-	default:
-		return true
-	}
-}
-
-func hasProductItems(items []domain.OrderItemInput) bool {
-	for _, item := range items {
-		if item.ProductID != 0 {
-			return true
-		}
-	}
-	return false
-}
-
-func (r *Repository) deductStoreOrderItemTx(ctx context.Context, tx *sql.Tx, qtx *sqlc.Queries, ownerID, locationID, orderID int64, item domain.OrderItemInput) error {
-	tracked, err := r.productTracksInventory(ctx, qtx, ownerID, item.ProductID)
+func (r *Repository) applyStoreOrderItemStockTx(ctx context.Context, tx *sql.Tx, qtx *sqlc.Queries, ownerID, locationID, orderID, productID int64, quantity float64, entryType string) error {
+	tracked, err := r.productTracksInventory(ctx, qtx, ownerID, productID)
 	if err != nil {
 		return err
 	}
@@ -181,26 +154,94 @@ func (r *Repository) deductStoreOrderItemTx(ctx context.Context, tx *sql.Tx, qtx
 		return nil
 	}
 
-	_, _, err = stock_core.ApplyMovementTx(ctx, tx, stock_core.Movement{
+	movement := stock_core.Movement{
 		OwnerID:       ownerID,
 		LocationID:    locationID,
-		ProductID:     item.ProductID,
+		ProductID:     productID,
 		EntryType:     stock_core.EntrySale,
-		Change:        -float64(item.Quantity),
+		Change:        -quantity,
 		ReferenceID:   int64Ptr(orderID),
 		ReferenceType: "store_order",
 		Channel:       "store",
-		Note:          "store order sale",
-	})
+		Note:          "store order confirmation",
+	}
+	if entryType == "return" {
+		movement.EntryType = stock_core.EntryReturn
+		movement.Change = quantity
+		movement.Note = "store order cancellation/refund"
+	}
+	_, _, err = stock_core.ApplyMovementTx(ctx, tx, movement)
 	if err != nil {
-		return fmt.Errorf("deduct store order stock: %w", err)
+		return fmt.Errorf("apply store order stock movement: %w", err)
 	}
 	return nil
 }
 
+func (r *Repository) priceOrderInput(ctx context.Context, qtx *sqlc.Queries, ownerID int64, input domain.StoreOrderInput) (domain.StoreOrderInput, error) {
+	if len(input.Items) == 0 {
+		// A zero-value order is retained for existing administrative workflows;
+		// the application layer rejects non-zero client totals without catalog
+		// items before this repository method is reached.
+		input.Status = "pending"
+		return input, nil
+	}
+	var subtotalCents, taxCents int64
+	pricedItems := make([]domain.OrderItemInput, 0, len(input.Items))
+	for _, requested := range input.Items {
+		if requested.ProductID <= 0 {
+			// Keep direct repository support for legacy manual line items. Public
+			// service calls reject these because their price cannot be verified.
+			pricedItems = append(pricedItems, requested)
+			continue
+		}
+		if requested.Quantity <= 0 {
+			return domain.StoreOrderInput{}, domain.ErrInvalidAmount
+		}
+		product, err := qtx.GetStoreProductPricing(ctx, sqlc.GetStoreProductPricingParams{OwnerID: ownerID, ID: requested.ProductID})
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.StoreOrderInput{}, fmt.Errorf("store order product %d is unavailable", requested.ProductID)
+		}
+		if err != nil {
+			return domain.StoreOrderInput{}, err
+		}
+		unitCents, err := decimalCents(product.SalePrice)
+		if err != nil || unitCents < 0 {
+			return domain.StoreOrderInput{}, fmt.Errorf("invalid catalog price for product %d", requested.ProductID)
+		}
+		taxRate, err := strconv.ParseFloat(product.TaxRate, 64)
+		if err != nil || taxRate < 0 {
+			return domain.StoreOrderInput{}, fmt.Errorf("invalid catalog tax for product %d", requested.ProductID)
+		}
+		lineCents := unitCents * int64(requested.Quantity)
+		subtotalCents += lineCents
+		taxCents += int64(math.Round(float64(lineCents) * taxRate / 100))
+		pricedItems = append(pricedItems, domain.OrderItemInput{
+			ProductID: requested.ProductID,
+			Name:      product.Name,
+			Quantity:  requested.Quantity,
+			Price:     domain.CentsToFloat(unitCents),
+			Total:     domain.CentsToFloat(lineCents),
+		})
+	}
+	input.Items = pricedItems
+	input.Subtotal = domain.CentsToFloat(subtotalCents)
+	input.Tax = domain.CentsToFloat(taxCents)
+	input.ShippingCost = 0
+	input.Total = domain.CentsToFloat(subtotalCents + taxCents)
+	input.Status = "pending"
+	return input, nil
+}
+
+func decimalCents(value string) (int64, error) {
+	amount, err := strconv.ParseFloat(value, 64)
+	if err != nil || math.IsNaN(amount) || math.IsInf(amount, 0) {
+		return 0, errors.New("invalid decimal amount")
+	}
+	return int64(math.Round(amount * 100)), nil
+}
+
 func (r *Repository) productTracksInventory(ctx context.Context, qtx *sqlc.Queries, ownerID, productID int64) (bool, error) {
-	// cross-schema read from erp_products — inventory tracking flag
-	tracked, err := qtx.ProductTracksInventory(ctx, sqlc.ProductTracksInventoryParams{
+	pricing, err := qtx.GetStoreProductPricing(ctx, sqlc.GetStoreProductPricingParams{
 		OwnerID: ownerID,
 		ID:      productID,
 	})
@@ -210,7 +251,7 @@ func (r *Repository) productTracksInventory(ctx context.Context, qtx *sqlc.Queri
 	if err != nil {
 		return false, err
 	}
-	return !tracked.Valid || tracked.Bool, nil
+	return !pricing.TrackInventory.Valid || pricing.TrackInventory.Bool, nil
 }
 
 func (r *Repository) upsertOrderCustomerTx(ctx context.Context, qtx *sqlc.Queries, ownerID, businessID int64, input domain.StoreOrderInput) error {
@@ -286,15 +327,51 @@ func int64Ptr(v int64) *int64 {
 }
 
 func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.StoreOrderInput) error {
-	err := r.queries.UpdateStoreOrder(ctx, sqlc.UpdateStoreOrderParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	qtx := r.queries.WithTx(tx)
+	current, err := qtx.GetStoreOrderStatus(ctx, sqlc.GetStoreOrderStatusParams{BusinessID: businessID, ID: id})
+	if err != nil {
+		return err
+	}
+	currentStatus := string(current.Status.StoreOrdersStatus)
+	nextStatus := strings.ToLower(strings.TrimSpace(input.Status))
+	if nextStatus == "" {
+		nextStatus = currentStatus
+	}
+	if err := validateOrderStatusTransition(currentStatus, nextStatus); err != nil {
+		return err
+	}
+
+	entryType, moveStock := stockMovementForTransition(currentStatus, nextStatus)
+	if moveStock {
+		locationID, locationErr := stock_core.DefaultLocationID(ctx, tx, current.OwnerID)
+		if locationErr != nil {
+			return locationErr
+		}
+		items, listErr := qtx.ListStoreOrderItemsForUpdate(ctx, sqlc.ListStoreOrderItemsForUpdateParams{BusinessID: businessID, OrderID: id})
+		if listErr != nil {
+			return listErr
+		}
+		for _, item := range items {
+			if !item.ProductID.Valid || item.Quantity <= 0 {
+				continue
+			}
+			if moveErr := r.applyStoreOrderItemStockTx(ctx, tx, qtx, current.OwnerID, locationID, id, item.ProductID.Int64, float64(item.Quantity), entryType); moveErr != nil {
+				return moveErr
+			}
+		}
+	}
+
+	err = qtx.UpdateStoreOrder(ctx, sqlc.UpdateStoreOrderParams{
 		CustomerEmail:   sql.NullString{String: input.CustomerEmail, Valid: input.CustomerEmail != ""},
 		CustomerName:    sql.NullString{String: input.CustomerName, Valid: input.CustomerName != ""},
 		CustomerPhone:   sql.NullString{String: input.CustomerPhone, Valid: input.CustomerPhone != ""},
-		Status:          sqlc.NullStoreOrdersStatus{StoreOrdersStatus: sqlc.StoreOrdersStatus(input.Status), Valid: input.Status != ""},
-		Subtotal:        strconv.FormatFloat(input.Subtotal, 'f', 2, 64),
-		Tax:             strconv.FormatFloat(input.Tax, 'f', 2, 64),
-		ShippingCost:    strconv.FormatFloat(input.ShippingCost, 'f', 2, 64),
-		Total:           strconv.FormatFloat(input.Total, 'f', 2, 64),
+		Status:          sqlc.NullStoreOrdersStatus{StoreOrdersStatus: sqlc.StoreOrdersStatus(nextStatus), Valid: true},
 		ShippingAddress: nullJSON(input.ShippingAddress),
 		Notes:           sql.NullString{String: input.Notes, Valid: input.Notes != ""},
 		BusinessID:      businessID,
@@ -304,7 +381,37 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		logger.Ctx(ctx).Error("Failed to update store order", logger.Error(err))
 		return err
 	}
+	return tx.Commit()
+}
+
+func validateOrderStatusTransition(current, next string) error {
+	valid := map[string]bool{
+		"pending": true, "confirmed": true, "processing": true, "shipped": true,
+		"delivered": true, "cancelled": true, "refunded": true, "completed": true,
+	}
+	if !valid[next] {
+		return domain.ErrInvalidStatus
+	}
+	if current == next || next == "cancelled" || next == "refunded" {
+		return nil
+	}
+	if current == "pending" && next != "confirmed" {
+		return domain.ErrInvalidStatus
+	}
+	if (current == "cancelled" || current == "refunded") && next != "confirmed" {
+		return domain.ErrInvalidStatus
+	}
 	return nil
+}
+
+func stockMovementForTransition(current, next string) (string, bool) {
+	if next == "confirmed" && current != "confirmed" && current != "processing" && current != "shipped" && current != "delivered" && current != "completed" {
+		return "sale", true
+	}
+	if (next == "cancelled" || next == "refunded") && current != "pending" && current != "cancelled" && current != "refunded" {
+		return "return", true
+	}
+	return "", false
 }
 
 func parseMonetary(ctx context.Context, s string) float64 {
