@@ -444,7 +444,7 @@ func assignQueryParams(value reflect.Value, query url.Values) {
 		if !exists || len(values) == 0 {
 			continue
 		}
-		setQueryField(fieldValue, values)
+		setQueryField(fieldValue, values, fieldName)
 	}
 }
 
@@ -489,14 +489,14 @@ func queryValuesForField(query url.Values, fieldName string) ([]string, bool) {
 	return nil, false
 }
 
-func setQueryField(field reflect.Value, values []string) bool {
+func setQueryField(field reflect.Value, values []string, fieldName string) bool {
 	if !field.CanSet() || len(values) == 0 {
 		return false
 	}
 
 	if field.Kind() == reflect.Pointer {
 		elem := reflect.New(field.Type().Elem())
-		if !setQueryField(elem.Elem(), values) {
+		if !setQueryField(elem.Elem(), values, fieldName) {
 			return false
 		}
 		field.Set(elem)
@@ -507,7 +507,7 @@ func setQueryField(field reflect.Value, values []string) bool {
 		slice := reflect.MakeSlice(field.Type(), 0, len(values))
 		for _, value := range values {
 			elem := reflect.New(field.Type().Elem()).Elem()
-			if !setQueryField(elem, []string{value}) {
+			if !setQueryField(elem, []string{value}, fieldName) {
 				return false
 			}
 			slice = reflect.Append(slice, elem)
@@ -516,17 +516,21 @@ func setQueryField(field reflect.Value, values []string) bool {
 		return true
 	}
 
-	return setQueryScalar(field, values[0])
+	return setQueryScalar(field, values[0], fieldName)
 }
 
-func setQueryScalar(field reflect.Value, value string) bool {
+func setQueryScalar(field reflect.Value, value, fieldName string) bool {
 	if !field.CanSet() {
 		return false
 	}
 
 	if field.CanAddr() && field.Addr().CanInterface() {
 		if unmarshaler, ok := field.Addr().Interface().(encoding.TextUnmarshaler); ok {
-			return unmarshaler.UnmarshalText([]byte(value)) == nil
+			if err := unmarshaler.UnmarshalText([]byte(value)); err != nil {
+				logInvalidQueryValue(fieldName, value, err)
+				return false
+			}
+			return true
 		}
 	}
 
@@ -536,24 +540,28 @@ func setQueryScalar(field reflect.Value, value string) bool {
 	case reflect.Bool:
 		parsed, err := strconv.ParseBool(value)
 		if err != nil {
+			logInvalidQueryValue(fieldName, value, err)
 			return false
 		}
 		field.SetBool(parsed)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		parsed, err := strconv.ParseInt(value, 10, field.Type().Bits())
 		if err != nil {
+			logInvalidQueryValue(fieldName, value, err)
 			return false
 		}
 		field.SetInt(parsed)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
 		parsed, err := strconv.ParseUint(value, 10, field.Type().Bits())
 		if err != nil {
+			logInvalidQueryValue(fieldName, value, err)
 			return false
 		}
 		field.SetUint(parsed)
 	case reflect.Float32, reflect.Float64:
 		parsed, err := strconv.ParseFloat(value, field.Type().Bits())
 		if err != nil {
+			logInvalidQueryValue(fieldName, value, err)
 			return false
 		}
 		field.SetFloat(parsed)
@@ -564,6 +572,14 @@ func setQueryScalar(field reflect.Value, value string) bool {
 	}
 
 	return true
+}
+
+func logInvalidQueryValue(fieldName, value string, err error) {
+	logger.Global().Warn("invalid query parameter value",
+		logger.String("parameter", fieldName),
+		logger.String("value", value),
+		logger.Error(err),
+	)
 }
 
 func parseQueryPrimitive(value string) any {
