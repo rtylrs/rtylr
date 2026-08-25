@@ -22,7 +22,6 @@ TEST_DB="onion_test"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-SCHEMAS_DIR="$PROJECT_ROOT/internal/platform/database/schemas"
 FIXTURES_DIR="$PROJECT_ROOT/scripts/fixtures"
 
 GREEN='\033[0;32m'; BLUE='\033[0;34m'; RED='\033[0;31m'; NC='\033[0m'
@@ -31,7 +30,7 @@ ok()   { echo -e "${GREEN}[test-db]${NC} $1"; }
 die()  { echo -e "${RED}[test-db]${NC} $1" >&2; exit 1; }
 
 # mysql in the container, quiet about the password warning.
-dbq() { docker exec -i "$CONTAINER" sh -c "mysql -uroot -p${ROOT_PW} $1" 2>&1 | grep -v "Using a password" || true; }
+dbq() { docker exec -i "$CONTAINER" sh -c "mysql -uroot -p${ROOT_PW} $1" 2>&1 | sed '/Using a password/d'; }
 
 if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER}$"; then
     die "db container '${CONTAINER}' not running. Start it with: make local-env-up"
@@ -45,7 +44,7 @@ SQL
 
 info "applying schema"
 DB_HOST=127.0.0.1 DB_PORT=3306 DB_USER=root DB_PASSWORD="$ROOT_PW" DB_NAME="$TEST_DB" \
-    MYSQL_PWD="$ROOT_PW" bash "$SCHEMAS_DIR/migrate.sh" >/dev/null 2>&1 || true
+    MYSQL_PWD="$ROOT_PW" bash "$PROJECT_ROOT/scripts/migrate.sh"
 
 info "seeding fixtures"
 for f in "$FIXTURES_DIR"/*.sql; do
