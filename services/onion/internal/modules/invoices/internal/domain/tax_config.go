@@ -54,11 +54,6 @@ type TaxConfigInput struct {
 	IsDefault bool    `json:"is_default"`
 }
 
-// FloatToCents converts standard float amount to integer cents.
-func FloatToCents(amount float64) int64 {
-	return int64(amount * 100)
-}
-
 // CentsToFloat converts integer cents to standard float amount.
 func CentsToFloat(cents int64) float64 {
 	return float64(cents) / 100.0

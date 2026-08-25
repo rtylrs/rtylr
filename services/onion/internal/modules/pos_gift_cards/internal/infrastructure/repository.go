@@ -5,13 +5,15 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"strconv"
+	"math"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_gift_cards/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_gift_cards/internal/infrastructure/persistence/sqlc"
 	customersync "github.com/voxire/onion/internal/platform/customer_sync"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 type Repository struct {
@@ -72,7 +74,11 @@ func (r *Repository) create(ctx context.Context, businessID, ownerID int64, inpu
 		}
 	}
 
-	amountStr := floatToDecimal(input.InitialAmount)
+	amountCents, err := dollarsToCents(input.InitialAmount)
+	if err != nil {
+		return 0, err
+	}
+	amountStr := amountCents.String()
 
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
@@ -81,7 +87,7 @@ func (r *Repository) create(ctx context.Context, businessID, ownerID int64, inpu
 	}
 	defer tx.Rollback()
 
-	orderRef, err := lockPaidOrder(ctx, tx, businessID, input.PaidOrderID, input.InitialAmount)
+	orderRef, err := lockPaidOrder(ctx, tx, businessID, input.PaidOrderID, amountCents)
 	if err != nil {
 		return 0, err
 	}
@@ -161,7 +167,12 @@ func (r *Repository) RedeemForOrder(ctx context.Context, businessID, actorID int
 		}
 	}()
 
-	orderRef, err := lockGiftCardOrder(ctx, tx, businessID, input.OrderID, input.Amount)
+	amountCents, err := dollarsToCents(input.Amount)
+	if err != nil {
+		return nil, err
+	}
+
+	orderRef, err := lockGiftCardOrder(ctx, tx, businessID, input.OrderID, amountCents)
 	if err != nil {
 		return nil, err
 	}
@@ -196,15 +207,20 @@ func (r *Repository) RedeemForOrder(ctx context.Context, businessID, actorID int
 		_ = tx.Rollback()
 		return nil, domain.ErrGiftCardExpired
 	}
-	if gc.CurrentBalance < input.Amount {
+	balanceCents, err := decimalToCents(row.CurrentBalance)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+	if balanceCents < amountCents {
 		_ = tx.Rollback()
 		return nil, domain.ErrInsufficientBalance
 	}
 
-	newBalance := gc.CurrentBalance - input.Amount
+	newBalanceCents := balanceCents - amountCents
 
 	if err := qtx.UpdateGiftCardBalance(ctx, sqlc.UpdateGiftCardBalanceParams{
-		CurrentBalance: floatToDecimal(newBalance),
+		CurrentBalance: newBalanceCents.String(),
 		ID:             gc.ID,
 		BusinessID:     businessID,
 	}); err != nil {
@@ -218,7 +234,7 @@ func (r *Repository) RedeemForOrder(ctx context.Context, businessID, actorID int
 		INSERT INTO pos_gift_card_transactions
 			(gift_card_id, owner_id, business_id, type, order_ref, amount, balance_after, created_by)
 		VALUES (?, ?, ?, 'redeem', ?, ?, ?, ?)`,
-		gc.ID, gc.OwnerID, businessID, orderRef, floatToDecimal(input.Amount), floatToDecimal(newBalance), actorID); err != nil {
+		gc.ID, gc.OwnerID, businessID, orderRef, amountCents.String(), newBalanceCents.String(), actorID); err != nil {
 		_ = tx.Rollback()
 		return nil, err
 	}
@@ -228,11 +244,11 @@ func (r *Repository) RedeemForOrder(ctx context.Context, businessID, actorID int
 		return nil, err
 	}
 
-	gc.CurrentBalance = newBalance
+	gc.CurrentBalance = money.CentsToDollars(int64(newBalanceCents))
 	return gc, nil
 }
 
-func lockPaidOrder(ctx context.Context, tx *sql.Tx, businessID, orderID int64, amount float64) (string, error) {
+func lockPaidOrder(ctx context.Context, tx *sql.Tx, businessID, orderID int64, amount money.Amount) (string, error) {
 	var totalString, paymentStatus string
 	if err := tx.QueryRowContext(ctx, `
 		SELECT total, payment_status
@@ -243,7 +259,10 @@ func lockPaidOrder(ctx context.Context, tx *sql.Tx, businessID, orderID int64, a
 		}
 		return "", err
 	}
-	orderTotal := decimalToFloat(totalString)
+	orderTotal, err := decimalToCents(totalString)
+	if err != nil {
+		return "", err
+	}
 	if paymentStatus != "paid" || orderTotal < amount {
 		return "", domain.ErrInvalidTender
 	}
@@ -256,13 +275,17 @@ func lockPaidOrder(ctx context.Context, tx *sql.Tx, businessID, orderID int64, a
 		Scan(&issuedString); err != nil {
 		return "", err
 	}
-	if decimalToFloat(issuedString)+amount > orderTotal {
+	issued, err := decimalToCents(issuedString)
+	if err != nil {
+		return "", err
+	}
+	if issued+amount > orderTotal {
 		return "", domain.ErrInvalidTender
 	}
 	return orderRef, nil
 }
 
-func lockGiftCardOrder(ctx context.Context, tx *sql.Tx, businessID, orderID int64, amount float64) (string, error) {
+func lockGiftCardOrder(ctx context.Context, tx *sql.Tx, businessID, orderID int64, amount money.Amount) (string, error) {
 	var totalString, status string
 	if err := tx.QueryRowContext(ctx, `
 		SELECT total, status
@@ -276,7 +299,10 @@ func lockGiftCardOrder(ctx context.Context, tx *sql.Tx, businessID, orderID int6
 	if status == "cancelled" || status == "refunded" || status == "voided" {
 		return "", domain.ErrInvalidOrder
 	}
-	orderTotal := decimalToFloat(totalString)
+	orderTotal, err := decimalToCents(totalString)
+	if err != nil {
+		return "", err
+	}
 	if orderTotal <= 0 || amount > orderTotal {
 		return "", domain.ErrInvalidOrder
 	}
@@ -289,7 +315,11 @@ func lockGiftCardOrder(ctx context.Context, tx *sql.Tx, businessID, orderID int6
 		Scan(&redeemedString); err != nil {
 		return "", err
 	}
-	if decimalToFloat(redeemedString)+amount > orderTotal {
+	redeemed, err := decimalToCents(redeemedString)
+	if err != nil {
+		return "", err
+	}
+	if redeemed+amount > orderTotal {
 		return "", domain.ErrInvalidOrder
 	}
 	return orderRef, nil
@@ -329,19 +359,26 @@ func nullableInt64Value(v int64) sql.NullInt64 {
 	return sql.NullInt64{Int64: v, Valid: v != 0}
 }
 
-func decimalToFloat(s string) float64 {
-	if s == "" {
-		return 0
+func decimalToCents(s string) (money.Amount, error) {
+	if strings.TrimSpace(s) == "" {
+		return 0, nil
 	}
-	f, err := strconv.ParseFloat(s, 64)
+	return money.FromString(s)
+}
+
+func decimalToFloat(s string) float64 {
+	cents, err := decimalToCents(s)
 	if err != nil {
 		logger.Global().Warn("failed to parse gift card decimal value from database",
 			logger.String("value", s), logger.Error(err))
 		return 0
 	}
-	return f
+	return money.CentsToDollars(int64(cents))
 }
 
-func floatToDecimal(f float64) string {
-	return strconv.FormatFloat(f, 'f', 2, 64)
+func dollarsToCents(dollars float64) (money.Amount, error) {
+	if math.IsNaN(dollars) || math.IsInf(dollars, 0) {
+		return 0, money.ErrInvalidAmount
+	}
+	return money.Amount(money.DollarsToCents(dollars)), nil
 }

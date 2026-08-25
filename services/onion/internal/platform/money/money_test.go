@@ -19,6 +19,15 @@ func TestFromStringUsesMinorUnits(t *testing.T) {
 	}
 }
 
+func TestDollarsToCentsRoundsAtTheBoundary(t *testing.T) {
+	if got := DollarsToCents(10.13); got != 1013 {
+		t.Fatalf("got %d cents, want 1013", got)
+	}
+	if got := DollarsToCents(15.19); got != 1519 {
+		t.Fatalf("got %d cents, want 1519", got)
+	}
+}
+
 func TestJSONRoundTripKeepsDecimalShape(t *testing.T) {
 	value := Amount(1234)
 	data, err := json.Marshal(value)

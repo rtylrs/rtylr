@@ -135,5 +135,3 @@ func (lt *LoyaltyTier) HasDiscount() bool {
 func (lt *LoyaltyTier) IsEarned(points int) bool {
 	return points >= lt.MinPoints
 }
-
-// Money precision verified: minor integer units enforced.

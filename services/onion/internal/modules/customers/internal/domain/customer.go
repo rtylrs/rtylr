@@ -402,5 +402,3 @@ type SegmentDetail struct {
 	Segment   Segment    `json:"segment"`
 	Customers []Customer `json:"customers"`
 }
-
-// Money precision verified: minor integer units enforced.

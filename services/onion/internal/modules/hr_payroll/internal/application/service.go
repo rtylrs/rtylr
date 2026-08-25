@@ -13,6 +13,7 @@ import (
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/labourcost"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 const (
@@ -216,11 +217,10 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 
 		// The rate/salary fields are stored as integer cents; the proration
 		// and multiplier arithmetic below is unchanged from before the
-		// cents migration - it just operates on dollar amounts converted
-		// from cents at the top, and the results are converted back to
-		// cents once, at the bottom, before they're stored.
-		hourlyRateDollars := domain.CentsToDollars(emp.HourlyRateCents)
-		monthlySalaryDollars := domain.CentsToDollars(emp.MonthlySalaryCents)
+		// cents migration. Each computed pay component is rounded once
+		// before the stored integer amounts are combined.
+		hourlyRateDollars := money.CentsToDollars(emp.HourlyRateCents)
+		monthlySalaryDollars := money.CentsToDollars(emp.MonthlySalaryCents)
 
 		var basePay float64
 		switch emp.PayType {
@@ -249,13 +249,8 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 			overtimePay = calculateOvertimePay(hourlyRateDollars, overtimeWeightedMinutes, overtimeUnweightedMinutes, defaultMultiplier)
 		}
 
-		netPay := basePay + overtimePay
-		grossPay := netPay
-
-		basePayCents := domain.DollarsToCents(basePay)
-		overtimePayCents := domain.DollarsToCents(overtimePay)
-		netPayCents := domain.DollarsToCents(netPay)
-		grossPayCents := domain.DollarsToCents(grossPay)
+		basePayCents, overtimePayCents, netPayCents := calculatePayCents(basePay, overtimePay)
+		grossPayCents := netPayCents
 
 		entry := domain.PayrollEntryRecord{
 			OwnerID:          ownerID,
@@ -294,6 +289,12 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 
 func calculateOvertimePay(hourlyRateDollars, weightedMinutes, unweightedMinutes, defaultMultiplier float64) float64 {
 	return (weightedMinutes + unweightedMinutes*defaultMultiplier) / 60.0 * hourlyRateDollars
+}
+
+func calculatePayCents(basePay, overtimePay float64) (basePayCents, overtimePayCents, netPayCents int64) {
+	basePayCents = money.DollarsToCents(basePay)
+	overtimePayCents = money.DollarsToCents(overtimePay)
+	return basePayCents, overtimePayCents, basePayCents + overtimePayCents
 }
 
 // calculateMonthlyBasePay prorates a monthly salary over an inclusive calendar
@@ -427,8 +428,8 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 		RunID:       runID,
 		PeriodStart: run.PeriodStart,
 		PeriodEnd:   run.PeriodEnd,
-		TotalGross:  domain.CentsToDollars(run.TotalGrossCents),
-		TotalNet:    domain.CentsToDollars(run.TotalNetCents),
+		TotalGross:  money.CentsToDollars(run.TotalGrossCents),
+		TotalNet:    money.CentsToDollars(run.TotalNetCents),
 	}); postErr != nil {
 		if releaseErr := s.repo.ReleasePayrollRunExportClaim(ctx, ownerID, runID); releaseErr != nil {
 			logger.Ctx(ctx).Error("failed to release payroll export claim after finance error",
@@ -466,7 +467,7 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 			Payload: map[string]any{
 				"run_id":       runID,
 				"employee_id":  entry.EmployeeID,
-				"net_pay":      domain.CentsToDollars(entry.NetPayCents),
+				"net_pay":      money.CentsToDollars(entry.NetPayCents),
 				"period_start": run.PeriodStart,
 				"period_end":   run.PeriodEnd,
 			},

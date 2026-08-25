@@ -11,6 +11,18 @@ import (
 
 var ErrInvalidAmount = errors.New("invalid monetary amount")
 
+// DollarsToCents converts a float64 dollar amount from an external contract
+// into integer cents, rounding to the nearest cent.
+func DollarsToCents(dollars float64) int64 {
+	return int64(math.Round(dollars * 100))
+}
+
+// CentsToDollars converts an internally stored integer cents amount to the
+// float64 dollar shape used by existing external contracts.
+func CentsToDollars(cents int64) float64 {
+	return float64(cents) / 100
+}
+
 // Amount stores money in the smallest currency unit (normally cents).
 // Keeping the value as an integer avoids floating-point rounding drift while
 // custom JSON/SQL encodings preserve the existing decimal API shape.

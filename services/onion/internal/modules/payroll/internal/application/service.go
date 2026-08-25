@@ -143,11 +143,6 @@ func (s *Service) MarkPayrollPaid(ctx context.Context, businessID, payrollID int
 	return nil
 }
 
-// FloatToCents converts standard float amount to integer cents.
-func FloatToCents(amount float64) int64 {
-	return int64(amount * 100)
-}
-
 // roundToCents rounds a money amount to whole cents once, at the last point
 // before persistence, so accumulated float error cannot leak into DECIMAL
 // columns.

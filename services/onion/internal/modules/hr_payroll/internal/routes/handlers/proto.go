@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
+	"github.com/voxire/onion/internal/platform/money"
 	hremployeespayrollrunsv1 "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1"
 )
 
@@ -29,8 +30,8 @@ func payrollRunToProto(r domain.PayrollRunRecord) *hremployeespayrollrunsv1.Payr
 		CreatedBy:   r.CreatedBy,
 		ApprovedBy:  approvedBy,
 		ExportedAt:  exportedAt,
-		TotalGross:  domain.CentsToDollars(r.TotalGrossCents),
-		TotalNet:    domain.CentsToDollars(r.TotalNetCents),
+		TotalGross:  money.CentsToDollars(r.TotalGrossCents),
+		TotalNet:    money.CentsToDollars(r.TotalNetCents),
 		CreatedAt:   r.CreatedAt.Unix(),
 		UpdatedAt:   r.UpdatedAt.Unix(),
 	}
@@ -43,11 +44,11 @@ func payrollEntryToProto(e domain.PayrollEntryRecord) *hremployeespayrollrunsv1.
 		OwnerId:       e.OwnerID,
 		PayrollRunId:  e.PayrollRunID,
 		EmployeeId:    e.EmployeeID,
-		BasePay:       domain.CentsToDollars(e.BasePayCents),
-		OvertimePay:   domain.CentsToDollars(e.OvertimePayCents),
-		Deductions:    domain.CentsToDollars(e.DeductionsCents),
-		Bonuses:       domain.CentsToDollars(e.BonusesCents),
-		NetPay:        domain.CentsToDollars(e.NetPayCents),
+		BasePay:       money.CentsToDollars(e.BasePayCents),
+		OvertimePay:   money.CentsToDollars(e.OvertimePayCents),
+		Deductions:    money.CentsToDollars(e.DeductionsCents),
+		Bonuses:       money.CentsToDollars(e.BonusesCents),
+		NetPay:        money.CentsToDollars(e.NetPayCents),
 		HoursWorked:   e.HoursWorked,
 		OvertimeHours: e.OvertimeHours,
 		CreatedAt:     e.CreatedAt.Unix(),
