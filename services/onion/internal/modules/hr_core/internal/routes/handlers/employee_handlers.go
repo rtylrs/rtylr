@@ -14,6 +14,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	hrstaffv1 "github.com/voxire/voxie/gen/go/hr/staff/v1"
@@ -31,9 +32,9 @@ func employeeToProto(e domain.EmployeeRecord) *hrstaffv1.Staff {
 		Phone:                 e.Phone,
 		EmploymentType:        e.EmploymentType,
 		Status:                e.Status,
-		Salary:                domain.CentsToDollars(e.SalaryCents),
-		HourlyRate:            domain.CentsToDollars(e.HourlyRateCents),
-		OvertimeRate:          domain.CentsToDollars(e.OvertimeRateCents),
+		Salary:                money.CentsToDollars(e.SalaryCents),
+		HourlyRate:            money.CentsToDollars(e.HourlyRateCents),
+		OvertimeRate:          money.CentsToDollars(e.OvertimeRateCents),
 		StartDate:             e.StartDate.Format("2006-01-02"),
 		EndDate:               e.EndDate.Format("2006-01-02"),
 		Address:               e.Address,
@@ -252,9 +253,9 @@ func (h *CreateEmployeeHandler) Serve(ctx context.Context, req *CreateEmployeeRe
 		Email:             req.Email,
 		Phone:             req.Phone,
 		EmploymentType:    req.EmploymentType,
-		SalaryCents:       domain.DollarsToCents(req.Salary),
-		HourlyRateCents:   domain.DollarsToCents(req.HourlyRate),
-		OvertimeRateCents: domain.DollarsToCents(req.OvertimeRate),
+		SalaryCents:       money.DollarsToCents(req.Salary),
+		HourlyRateCents:   money.DollarsToCents(req.HourlyRate),
+		OvertimeRateCents: money.DollarsToCents(req.OvertimeRate),
 		Address:           req.Address,
 	}
 	if req.StartDate != "" {
@@ -358,9 +359,9 @@ func (h *UpdateEmployeeHandler) Serve(ctx context.Context, req *UpdateEmployeeRe
 		Phone:                 req.Phone,
 		EmploymentType:        req.EmploymentType,
 		Status:                req.Status,
-		SalaryCents:           domain.DollarsToCents(req.Salary),
-		HourlyRateCents:       domain.DollarsToCents(req.HourlyRate),
-		OvertimeRateCents:     domain.DollarsToCents(req.OvertimeRate),
+		SalaryCents:           money.DollarsToCents(req.Salary),
+		HourlyRateCents:       money.DollarsToCents(req.HourlyRate),
+		OvertimeRateCents:     money.DollarsToCents(req.OvertimeRate),
 		Address:               req.Address,
 		EmergencyContactName:  req.EmergencyContactName,
 		EmergencyContactPhone: req.EmergencyContactPhone,

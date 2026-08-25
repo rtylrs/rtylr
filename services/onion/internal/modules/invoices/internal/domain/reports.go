@@ -26,5 +26,3 @@ type TaxReport struct {
 	TaxCollected float64 `json:"tax_collected"`
 	TaxOwed      float64 `json:"tax_owed"`
 }
-
-// Money precision verified: minor integer units enforced.

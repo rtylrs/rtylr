@@ -78,5 +78,3 @@ func (i InvoiceItemInput) CalculateTotal() float64 {
 
 	return components.Base + components.Tax
 }
-
-// Money precision verified: minor integer units enforced.

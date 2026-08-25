@@ -797,11 +797,6 @@ func resolvePeriodRange(period, date string) (string, string) {
 	}
 }
 
-// FloatToCents converts standard float amount to integer cents.
-func FloatToCents(amount float64) int64 {
-	return int64(amount * 100)
-}
-
 // CentsToFloat converts integer cents to standard float amount.
 func CentsToFloat(cents int64) float64 {
 	return float64(cents) / 100.0

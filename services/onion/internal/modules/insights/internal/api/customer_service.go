@@ -120,5 +120,3 @@ func (a *CustomerAPI) GetTopCustomers(ctx context.Context, req *insightscustomer
 
 	return &insightscustomerv1.GetTopCustomersResponse{Customers: customers}, nil
 }
-
-// Money precision verified: minor integer units enforced.

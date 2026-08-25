@@ -314,6 +314,17 @@ func TestCalculateOvertimePay_UsesWeightedMinutes(t *testing.T) {
 	}
 }
 
+func TestPayrollPayCents_ComposesRoundedComponents(t *testing.T) {
+	basePayCents, overtimePayCents, netPayCents := calculatePayCents(10.13, 15.19)
+
+	if basePayCents != 1013 || overtimePayCents != 1519 {
+		t.Fatalf("component cents = %d + %d, want 1013 + 1519", basePayCents, overtimePayCents)
+	}
+	if netPayCents != 2532 {
+		t.Fatalf("net pay cents = %d, want 2532", netPayCents)
+	}
+}
+
 func TestNoopFinancePoster_IsFinanceJournalPoster(_ *testing.T) {
 	var _ domain.FinanceJournalPoster = noopFinancePoster{}
 }

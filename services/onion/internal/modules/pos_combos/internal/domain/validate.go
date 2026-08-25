@@ -26,5 +26,3 @@ func (c Combo) DiscountVsTotal(fullPrice float64) float64 {
 	}
 	return fullPrice - c.Price
 }
-
-// Money precision verified: minor integer units enforced.
