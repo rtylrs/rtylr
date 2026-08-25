@@ -49,6 +49,15 @@ func (a *SettingAPI) UpdateUserSettings(ctx context.Context, req *flowsettingv1.
 		return nil, onekiterrors.PermissionDenied()
 	}
 
+	sidebarPreferencesJSON := req.GetSidebarPreferences()
+	if req.SidebarPreferences == nil {
+		current, err := a.Service.GetUserSettings(ctx, authUser.UserID)
+		if err != nil {
+			return nil, workspaceInternalError(ctx, "GetUserSettings before update failed", err)
+		}
+		sidebarPreferencesJSON = current.SidebarPreferencesJSON
+	}
+
 	if err := a.Service.UpdateUserSettings(ctx, domain.UserSettings{
 		UserID:                 authUser.UserID,
 		TaskAssigned:           req.GetTaskAssigned(),
@@ -57,7 +66,7 @@ func (a *SettingAPI) UpdateUserSettings(ctx context.Context, req *flowsettingv1.
 		StatusChanges:          req.GetStatusChanges(),
 		WeeklyDigest:           req.GetWeeklyDigest(),
 		EmailNotifications:     req.GetEmailNotifications(),
-		SidebarPreferencesJSON: req.GetSidebarPreferences(),
+		SidebarPreferencesJSON: sidebarPreferencesJSON,
 	}); err != nil {
 		return nil, workspaceInternalError(ctx, "UpdateUserSettings failed", err)
 	}
