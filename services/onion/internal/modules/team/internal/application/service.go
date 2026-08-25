@@ -16,7 +16,6 @@ import (
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/config"
 	emailPkg "github.com/voxire/onion/internal/platform/email"
-	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
@@ -273,49 +272,19 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 
 	normalizedEmail := strings.ToLower(strings.TrimSpace(input.Email))
 
-	existingID, _, _, err := s.repo.GetUserByEmail(ctx, normalizedEmail)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return 0, "", err
-	}
-
-	userID := existingID
-
-	if userID == 0 {
-		// Hash password if provided (manual auth), otherwise empty (invite link)
-		passwordHash := ""
-		if input.Password != "" {
-			hash, hashErr := passwordutils.HashPassword(input.Password)
-			if hashErr != nil {
-				return 0, "", hashErr
-			}
-			passwordHash = hash
+	// Hash password if provided (manual auth), otherwise empty (invite link).
+	passwordHash := ""
+	if input.Password != "" {
+		hash, hashErr := passwordutils.HashPassword(input.Password)
+		if hashErr != nil {
+			return 0, "", hashErr
 		}
-
-		userID, err = s.repo.CreateUser(ctx, normalizedEmail, passwordHash, strings.TrimSpace(input.FullName))
-		if err != nil {
-			return 0, "", err
-		}
+		passwordHash = hash
 	}
 
 	apps := input.Apps
 	if apps == nil {
 		apps = []string{}
-	}
-
-	if err := s.repo.UpsertPermission(ctx, businessID, ownerID, userID, apps, role); err != nil {
-		return 0, "", err
-	}
-
-	if err := s.repo.EnsureEmployeeForUser(ctx, ownerID, userID); err != nil {
-		logger.Ctx(ctx).Error("failed to create employee record for invited user",
-			logger.Int("owner_id", int(ownerID)), logger.Int("user_id", int(userID)), logger.Error(err))
-	}
-
-	// New team member changes the business's team list cache + the new user's
-	// /me payload (apps/permissions just got attached).
-	invalidateUserScope(ctx, userID)
-	if businessID != 0 {
-		invalidateBusinessTeamScope(ctx, businessID)
 	}
 
 	// Generate invite token (32 bytes = 64 hex chars)
@@ -326,8 +295,16 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 	token := hex.EncodeToString(tokenBytes)
 
 	expiresAt := time.Now().Add(7 * 24 * time.Hour) // 7 days
-	if err := s.repo.CreateInviteToken(ctx, userID, ownerID, token, expiresAt); err != nil {
+	userID, err := s.repo.CreateInviteTransaction(ctx, businessID, ownerID, normalizedEmail, passwordHash, strings.TrimSpace(input.FullName), apps, role, token, expiresAt)
+	if err != nil {
 		return 0, "", err
+	}
+
+	// New team member changes the business's team list cache + the new user's
+	// /me payload (apps/permissions just got attached).
+	invalidateUserScope(ctx, userID)
+	if businessID != 0 {
+		invalidateBusinessTeamScope(ctx, businessID)
 	}
 
 	return userID, token, nil
@@ -370,11 +347,7 @@ func (s *Service) AcceptInvite(ctx context.Context, token, password string) (int
 		return 0, err
 	}
 
-	if err := s.repo.SetPassword(ctx, userID, hash); err != nil {
-		return 0, err
-	}
-
-	if err := s.repo.MarkInviteTokenUsed(ctx, token); err != nil {
+	if err := s.repo.SetPasswordAndConsumeInviteToken(ctx, userID, token, hash); err != nil {
 		return 0, err
 	}
 

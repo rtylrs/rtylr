@@ -96,20 +96,12 @@ func (s *Service) CreateCustomer(ctx context.Context, input domain.CustomerInput
 }
 
 func (s *Service) UpdateCustomer(ctx context.Context, input domain.CustomerUpdateInput) error {
-	if err := s.repo.UpdateCustomer(ctx, input); err != nil {
-		return err
-	}
 	if input.LoyaltyTier != "" {
-		// Preserve existing points — only update tier label
-		existing, err := s.repo.GetCustomerByID(ctx, input.BusinessID, input.ID)
-		if err != nil {
+		if err := s.repo.UpdateCustomerWithLoyalty(ctx, input); err != nil {
 			return err
 		}
-		// An invalid tier (anything outside the ENUM) previously failed the
-		// UPDATE here while the API still answered 200 with the old tier.
-		if err := s.repo.UpdateCustomerLoyalty(ctx, input.BusinessID, input.ID, existing.LoyaltyPoints, input.LoyaltyTier); err != nil {
-			return err
-		}
+	} else if err := s.repo.UpdateCustomer(ctx, input); err != nil {
+		return err
 	}
 	invalidateCustomerScope(ctx, input.BusinessID)
 	return nil

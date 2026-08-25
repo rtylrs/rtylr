@@ -60,8 +60,6 @@ func (a *InvitationsAPI) InviteUser(ctx context.Context, req *hubteaminvitations
 		}
 	}
 
-	recordSeatChangeAsync(ctx, a.Service, actorID, device.User.BusinessID)
-
 	if req.GetPassword() == "" && token != "" {
 		inviteLink := config.AuthAppURL + "/invite/" + token
 		if emailErr := a.Service.EnqueueInviteEmail(ctx, req.GetEmail(), inviteLink); emailErr != nil {
