@@ -400,13 +400,10 @@ const SidebarGroup: React.FC<{
   const isItemDropTarget = dropTarget?.kind === 'item' && dropTarget.groupId === group.id;
   const groupAccent = group.color ?? 'var(--accent)';
   const groupStyle = {
-    borderColor: isGroupDropTarget ? 'var(--accent-border)' : 'var(--flow-border)',
-    borderInlineStartColor: isGroupDropTarget ? 'var(--accent)' : groupAccent,
-    background: isGroupDropTarget ? 'var(--accent-muted)' : 'var(--flow-input-bg)',
+    background: isGroupDropTarget ? 'var(--accent-muted)' : undefined,
     opacity: isGroupDragging ? 0.5 : 1,
     transform: isGroupDragging ? 'scale(0.98)' : undefined,
-    transition:
-      'background 160ms ease, border-color 160ms ease, opacity 160ms ease, transform 160ms ease',
+    transition: 'background 160ms ease, opacity 160ms ease, transform 160ms ease',
   };
   const handleGroupDragOver = (event: React.DragEvent): void => {
     if (!dragState) return;
@@ -423,8 +420,8 @@ const SidebarGroup: React.FC<{
   return (
     <section
       className={cn(
-        'relative flex flex-col gap-1 rounded-lg border border-s-2 p-1',
-        isGroupDropTarget && 'shadow-[0_0_0_3px_var(--accent-muted)]'
+        'relative flex flex-col gap-1',
+        isGroupDropTarget && 'rounded-md shadow-[0_0_0_3px_var(--accent-muted)]'
       )}
       style={groupStyle}
       aria-label={groupLabel}
@@ -439,7 +436,8 @@ const SidebarGroup: React.FC<{
         onDragOver={handleGroupDragOver}
         onDrop={handleGroupDrop}
         onDragEnd={onDragEnd}
-        className="group flex min-h-12 items-center gap-1"
+        className="group flex min-h-11 items-center gap-1 border-b"
+        style={{ borderColor: isGroupDropTarget ? 'var(--accent-border)' : 'var(--flow-border)' }}
       >
         <GripVertical
           size={15}
@@ -451,35 +449,25 @@ const SidebarGroup: React.FC<{
           type="button"
           onClick={() => update((draft) => toggleGroup(draft, group.id))}
           aria-expanded={!group.collapsed}
-          className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-start hover:bg-[var(--flow-hover)]"
+          className="flex min-h-10 min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-start hover:bg-[var(--flow-hover)]"
         >
-          <span
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
-            style={{ background: 'var(--accent-muted)', color: groupAccent }}
-            aria-hidden
-          >
+          <span className="shrink-0" style={{ color: groupAccent }} aria-hidden>
             <GroupIcon size={15} />
           </span>
-          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="flex min-w-0 flex-1 items-baseline gap-2">
             <span
-              className="text-[9px] font-semibold uppercase tracking-[0.18em]"
-              style={{ color: groupAccent }}
-            >
-              {t('flow.sidebar.groupLabel')}
-            </span>
-            <span
-              className="truncate text-[13px] font-semibold leading-tight"
+              className="truncate text-[13px] font-bold leading-tight"
               style={{ color: 'var(--flow-text)' }}
             >
               {groupLabel}
             </span>
-          </span>
-          <span
-            className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums"
-            style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
-            aria-label={t('flow.sidebar.groupItemCount', { count: itemCount })}
-          >
-            {itemCount}
+            <span
+              className="shrink-0 text-[10px] font-medium tabular-nums"
+              style={{ color: 'var(--flow-text-dim)' }}
+              aria-label={t('flow.sidebar.groupItemCount', { count: itemCount })}
+            >
+              {itemCount}
+            </span>
           </span>
           <ChevronDown
             size={14}

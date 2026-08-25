@@ -55,7 +55,6 @@
     "moveToTop": "Move to top",
     "itemActions": "Actions for {{label}}",
     "dragHandle": "Drag to reorder",
-    "groupLabel": "Group",
     "groupItemCount": "{{count}} items",
     "dropHere": "Drop here",
     "groupActions": "Actions for {{label}}",
