@@ -29,39 +29,43 @@ var churnWindows = []int32{30, 60, 90, 180}
 // dynamic-query: squirrel
 func (r *Repository) GetChurnRates(ctx context.Context, businessID int64) ([]ChurnRateRow, error) {
 	now := nowFn()
-	out := make([]ChurnRateRow, 0, len(churnWindows))
+	// cross-schema read from crm_customers + pos_orders — rolling churn windows for the customer health panel
+	//
+	// Compute every window from one last-order aggregation. The previous
+	// implementation reran the same customer/order scan once per window.
+	inner := sq.
+		Select("c.id", "MAX(o.created_at) AS last_order_at").
+		From("crm_customers c").
+		LeftJoin("pos_orders o ON o.customer_id = c.id AND o.business_id = c.business_id").
+		Where(sq.Eq{"c.business_id": businessID}).
+		GroupBy("c.id").
+		Having("MAX(o.created_at) IS NOT NULL")
+	query := sq.Select().FromSelect(inner, "t")
 	for _, days := range churnWindows {
 		cutoff := now.AddDate(0, 0, -int(days))
-		// cross-schema read from crm_customers + pos_orders — rolling churn window for customer health panel
-		//
-		// The aggregation wraps a per-customer last-order subquery in FROM.
-		// The subquery carries its own bound argument (owner_id), so we use
-		// FromSelect to let squirrel thread the args in clause order: the two
-		// CASE-expression cutoffs (SELECT clause) first, then the subquery's
-		// owner_id (FROM clause).
-		inner := sq.
-			Select("c.id", "MAX(o.created_at) AS last_order_at").
-			From("crm_customers c").
-			LeftJoin("pos_orders o ON o.customer_id = c.id AND o.business_id = c.business_id").
-			Where(sq.Eq{"c.business_id": businessID}).
-			GroupBy("c.id").
-			Having("MAX(o.created_at) IS NOT NULL")
-		q, args, err := sq.
-			Select().
-			Column(sq.Expr("SUM(CASE WHEN last_order_at IS NULL OR last_order_at < ? THEN 1 ELSE 0 END) AS churned", cutoff)).
-			Column(sq.Expr("SUM(CASE WHEN last_order_at IS NOT NULL AND last_order_at >= ? THEN 1 ELSE 0 END) AS active", cutoff)).
-			FromSelect(inner, "t").
-			PlaceholderFormat(sq.Question).
-			ToSql()
-		if err != nil {
-			logger.Ctx(ctx).Error("insights: build churn query failed", logger.Error(err))
-			return nil, err
-		}
-		var churned, active int64
-		if err := r.pool.QueryRowContext(ctx, q, args...).Scan(&nullableInt64{&churned}, &nullableInt64{&active}); err != nil {
-			logger.Ctx(ctx).Error("insights: churn query failed", logger.Error(err))
-			return nil, err
-		}
+		query = query.
+			Column(sq.Expr("SUM(CASE WHEN last_order_at < ? THEN 1 ELSE 0 END)", cutoff)).
+			Column(sq.Expr("SUM(CASE WHEN last_order_at >= ? THEN 1 ELSE 0 END)", cutoff))
+	}
+	q, args, err := query.PlaceholderFormat(sq.Question).ToSql()
+	if err != nil {
+		logger.Ctx(ctx).Error("insights: build churn query failed", logger.Error(err))
+		return nil, err
+	}
+
+	counts := make([]int64, len(churnWindows)*2)
+	scanArgs := make([]any, len(counts))
+	for i := range counts {
+		scanArgs[i] = &nullableInt64{&counts[i]}
+	}
+	if err := r.pool.QueryRowContext(ctx, q, args...).Scan(scanArgs...); err != nil {
+		logger.Ctx(ctx).Error("insights: churn query failed", logger.Error(err))
+		return nil, err
+	}
+
+	out := make([]ChurnRateRow, 0, len(churnWindows))
+	for i, days := range churnWindows {
+		churned, active := counts[i*2], counts[i*2+1]
 		total := churned + active
 		var pct float64
 		if total > 0 {
