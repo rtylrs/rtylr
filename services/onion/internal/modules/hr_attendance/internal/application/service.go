@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -148,12 +149,24 @@ func (s *Service) SetClockInPIN(ctx context.Context, ownerID, employeeID int64, 
 // PIN lockout policy (#817): a typically-4-digit PIN brute-forced through the
 // anonymous kiosk endpoint otherwise sees only the global rate limit. Five
 // failures lock the employee's PIN for 15 minutes, tracked in Redis when
-// available; without Redis the counter degrades to per-process memory via the
-// cacher fallback and lockout is best-effort.
+// available. Without Redis, lockout is best-effort and depends on the
+// deployment's cache configuration.
 const (
 	pinMaxFailures = 5
 	pinLockoutTTL  = 15 * time.Minute
 )
+
+type pinFailureState struct {
+	count     int
+	expiresAt time.Time
+}
+
+var pinFailureFallback = struct {
+	sync.Mutex
+	entries map[string]pinFailureState
+}{
+	entries: make(map[string]pinFailureState),
+}
 
 func (s *Service) pinFailureKey(ownerID, employeeID int64) string {
 	return fmt.Sprintf("hr_attendance:pinfail:%d:%d", ownerID, employeeID)
@@ -161,37 +174,78 @@ func (s *Service) pinFailureKey(ownerID, employeeID int64) string {
 
 // IsPINLocked reports whether the employee's PIN is currently locked out.
 func (s *Service) IsPINLocked(ctx context.Context, ownerID, employeeID int64) bool {
+	key := s.pinFailureKey(ownerID, employeeID)
 	cache := cacher.GetRedisCache()
-	if cache == nil {
-		return false
+	if cache != nil {
+		raw := cache.Get(ctx, key)
+		if len(raw) > 0 {
+			count, err := strconv.Atoi(string(raw))
+			if err == nil {
+				return count >= pinMaxFailures
+			}
+		}
 	}
-	raw := cache.Get(ctx, s.pinFailureKey(ownerID, employeeID))
-	if len(raw) == 0 {
-		return false
-	}
-	count, err := strconv.Atoi(string(raw))
-	return err == nil && count >= pinMaxFailures
+	return localPINFailureCount(key) >= pinMaxFailures
 }
 
 // RegisterPINFailure records a wrong-PIN attempt.
 func (s *Service) RegisterPINFailure(ctx context.Context, ownerID, employeeID int64) {
-	cache := cacher.GetRedisCache()
-	if cache == nil {
-		return
-	}
 	key := s.pinFailureKey(ownerID, employeeID)
-	raw := cache.Get(ctx, key)
-	count, _ := strconv.Atoi(string(raw))
-	cache.Put(ctx, key, []byte(strconv.Itoa(count+1)), pinLockoutTTL)
+	cache := cacher.GetRedisCache()
+	if cache != nil {
+		// Increment is atomic in Redis; a read/modify/write sequence would let
+		// concurrent guesses overwrite one another and bypass the five-attempt cap.
+		if count := cache.Increment(ctx, key, pinLockoutTTL); count > 0 {
+			return
+		}
+	}
+	// The no-op cache is used when Redis is disabled, and Increment returns 0
+	// when Redis is unavailable. Keep the lockout effective in either case.
+	incrementLocalPINFailure(key)
 }
 
 // ClearPINFailures resets the counter after a successful validation.
 func (s *Service) ClearPINFailures(ctx context.Context, ownerID, employeeID int64) {
+	key := s.pinFailureKey(ownerID, employeeID)
 	cache := cacher.GetRedisCache()
-	if cache == nil {
-		return
+	if cache != nil {
+		cache.Delete(ctx, []string{key})
 	}
-	cache.Delete(ctx, []string{s.pinFailureKey(ownerID, employeeID)})
+	clearLocalPINFailures(key)
+}
+
+func localPINFailureCount(key string) int {
+	now := time.Now()
+	pinFailureFallback.Lock()
+	defer pinFailureFallback.Unlock()
+
+	entry, ok := pinFailureFallback.entries[key]
+	if !ok || !now.Before(entry.expiresAt) {
+		delete(pinFailureFallback.entries, key)
+		return 0
+	}
+	return entry.count
+}
+
+func incrementLocalPINFailure(key string) int {
+	now := time.Now()
+	pinFailureFallback.Lock()
+	defer pinFailureFallback.Unlock()
+
+	entry := pinFailureFallback.entries[key]
+	if !now.Before(entry.expiresAt) {
+		entry = pinFailureState{}
+	}
+	entry.count++
+	entry.expiresAt = now.Add(pinLockoutTTL)
+	pinFailureFallback.entries[key] = entry
+	return entry.count
+}
+
+func clearLocalPINFailures(key string) {
+	pinFailureFallback.Lock()
+	delete(pinFailureFallback.entries, key)
+	pinFailureFallback.Unlock()
 }
 
 func (s *Service) ValidatePIN(ctx context.Context, ownerID, employeeID int64, pin string) error {
