@@ -86,6 +86,9 @@ func (h *CompleteHandler) Serve(ctx context.Context, req *CompleteRequest) (Comp
 	if !ok {
 		return CompleteResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
+	if !authPkg.IsBusinessAdmin(authUser) {
+		return CompleteResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
