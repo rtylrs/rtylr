@@ -15,6 +15,7 @@ type User struct {
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 	IsConsoleAdmin   bool
+	IsBanned         bool
 	TokenEpoch       int64
 }
 
