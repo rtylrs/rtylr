@@ -286,6 +286,10 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 	if apps == nil {
 		apps = []string{}
 	}
+	apps, err = s.restrictAppsToPlan(ctx, ownerID, apps)
+	if err != nil {
+		return 0, "", err
+	}
 
 	// Generate invite token (32 bytes = 64 hex chars)
 	tokenBytes := make([]byte, 32)
@@ -413,6 +417,10 @@ func (s *Service) ApproveAccessRequest(ctx context.Context, actorID, businessID,
 		return err
 	}
 	apps := existing.Apps
+	apps, err = s.restrictAppsToPlan(ctx, ownerID, apps)
+	if err != nil {
+		return err
+	}
 	for _, a := range apps {
 		if a == app {
 			// already has access — just resolve the request
@@ -420,6 +428,10 @@ func (s *Service) ApproveAccessRequest(ctx context.Context, actorID, businessID,
 		}
 	}
 	apps = append(apps, app)
+	apps, err = s.restrictAppsToPlan(ctx, ownerID, apps)
+	if err != nil {
+		return err
+	}
 
 	if err := s.repo.UpsertPermission(ctx, businessID, ownerID, targetUserID, apps, existing.Role); err != nil {
 		return err
@@ -511,6 +523,10 @@ func (s *Service) UpdatePermissions(ctx context.Context, actorID, businessID int
 	}
 	if role == domain.RoleOwner && input.UserID != ownerID {
 		return domain.ErrForbidden
+	}
+	apps, err = s.restrictAppsToPlan(ctx, ownerID, apps)
+	if err != nil {
+		return err
 	}
 
 	if input.FullName != nil {
@@ -624,6 +640,27 @@ func isAssignableRole(role domain.Role) bool {
 // GetOwnerApps returns the list of apps the owner is subscribed to.
 func (s *Service) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, error) {
 	return s.repo.GetOwnerApps(ctx, ownerID)
+}
+
+// restrictAppsToPlan prevents permission rows from becoming an alternate
+// entitlement source. The subscription plan is authoritative; a stale or
+// over-privileged request can only retain apps currently present on that plan.
+func (s *Service) restrictAppsToPlan(ctx context.Context, ownerID int64, requested []string) ([]string, error) {
+	planApps, err := s.repo.GetOwnerApps(ctx, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	allowed := make(map[string]struct{}, len(planApps))
+	for _, app := range planApps {
+		allowed[app] = struct{}{}
+	}
+	filtered := make([]string, 0, len(requested))
+	for _, app := range requested {
+		if _, ok := allowed[app]; ok {
+			filtered = append(filtered, app)
+		}
+	}
+	return filtered, nil
 }
 
 // GetOwnerSubscriptionInfo returns the plan slug and status for the owner's subscription.

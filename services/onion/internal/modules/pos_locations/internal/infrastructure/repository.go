@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/infrastructure/persistence/sqlc"
@@ -47,7 +48,28 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Locat
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.LocationInput) (int64, error) {
-	result, err := r.queries.CreateLocation(ctx, sqlc.CreateLocationParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	qtx := r.queries.WithTx(tx)
+	limit, err := qtx.LockLocationPlanLimit(ctx, input.BusinessID)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return 0, err
+	}
+	if err == nil && limit.Valid {
+		count, countErr := qtx.CountLocationsByBusiness(ctx, input.BusinessID)
+		if countErr != nil {
+			return 0, countErr
+		}
+		if count >= int64(limit.Int32) {
+			return 0, domain.ErrLocationLimitExceeded
+		}
+	}
+
+	result, err := qtx.CreateLocation(ctx, sqlc.CreateLocationParams{
 		OwnerID:    input.OwnerID,
 		BusinessID: input.BusinessID,
 		Name:       input.Name,
@@ -59,7 +81,14 @@ func (r *Repository) Create(ctx context.Context, input domain.LocationInput) (in
 		logger.Ctx(ctx).Error("Failed to create location", logger.Error(err))
 		return 0, err
 	}
-	return result.LastInsertId()
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.LocationUpdateInput) error {
