@@ -78,25 +78,43 @@ const isAvailable = (item: SidebarItemPreference, showPreviewRoutes: boolean): b
 const itemLabel = (item: SidebarItemPreference, t: (key: string) => string): string =>
   item.kind === 'builtin' ? t(item.label) : item.label;
 
+type SidebarDragState = { kind: 'item'; id: string } | { kind: 'group'; id: string };
+
+type SidebarDropTarget =
+  | { kind: 'item'; id: string; groupId?: string }
+  | { kind: 'group'; id: string }
+  | { kind: 'top' };
+
 const moveItemBetweenGroups = (
   preferences: SidebarPreferences,
   itemId: string,
-  destinationGroupId: string | undefined
+  destinationGroupId: string | undefined,
+  beforeItemId?: string
 ): SidebarPreferences => {
   const next = updatePreferencesCopy(preferences);
+  const item = next.items.find((candidate) => candidate.id === itemId);
+  if (!item || item.lockedGroup) return next;
+
+  const destinationGroup = destinationGroupId
+    ? next.groups.find((candidate) => candidate.id === destinationGroupId)
+    : undefined;
+  if (destinationGroupId && (!destinationGroup || destinationGroup.lockedGroup)) return next;
+
   next.topLevelItemIds = next.topLevelItemIds.filter((id) => id !== itemId);
   next.groups = next.groups.map((group) => ({
     ...group,
     itemIds: group.itemIds.filter((id) => id !== itemId),
   }));
-  if (destinationGroupId) {
-    const group = next.groups.find((candidate) => candidate.id === destinationGroupId);
-    if (group && !group.lockedGroup) group.itemIds.push(itemId);
-  } else {
-    next.topLevelItemIds.push(itemId);
-  }
-  const item = next.items.find((candidate) => candidate.id === itemId);
-  if (item && !item.lockedGroup) item.groupId = destinationGroupId;
+
+  const destinationIds = destinationGroupId
+    ? next.groups.find((candidate) => candidate.id === destinationGroupId)?.itemIds
+    : next.topLevelItemIds;
+  if (!destinationIds) return next;
+
+  const insertionIndex = beforeItemId ? destinationIds.indexOf(beforeItemId) : -1;
+  if (insertionIndex >= 0) destinationIds.splice(insertionIndex, 0, itemId);
+  else destinationIds.push(itemId);
+  item.groupId = destinationGroupId;
   return next;
 };
 
@@ -185,20 +203,45 @@ const SidebarItemRow: React.FC<{
   badge?: number;
   update: SidebarNavigationProps['update'];
   groups: SidebarGroupPreference[];
+  isDragging: boolean;
+  isDropTarget: boolean;
   onDragStart: (itemId: string) => void;
+  onDragOver: (itemId: string) => void;
   onDrop: (itemId: string) => void;
-}> = ({ item, label, badge, update, groups, onDragStart, onDrop }) => {
+  onDragEnd: () => void;
+}> = ({
+  item,
+  label,
+  badge,
+  update,
+  groups,
+  isDragging,
+  isDropTarget,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+}) => {
   const { t } = useTranslation();
   const location = useLocation();
   const [actionsOpen, setActionsOpen] = useState(false);
   const active = item.route ? location.pathname === item.route.split('?')[0] : false;
   const Icon = ICONS[item.icon] ?? Circle;
   const commonClass = cn(
-    'group relative flex min-h-10 items-center gap-2 rounded-md px-2 text-[12px] font-medium transition-colors lg:min-h-0 lg:py-1.5',
-    active ? '' : 'hover:bg-[var(--flow-hover)]'
+    'group relative flex min-h-10 items-center gap-2 rounded-md px-2 text-[12px] font-medium transition-[background,box-shadow,opacity,transform] duration-150 lg:min-h-0 lg:py-1.5',
+    active ? '' : 'hover:bg-[var(--flow-hover)]',
+    isDragging && 'scale-[0.98] opacity-45',
+    isDropTarget && 'z-10'
   );
   const content = (
     <>
+      {isDropTarget && (
+        <span
+          className="pointer-events-none absolute -top-1 start-1 end-1 h-0.5 rounded-full"
+          style={{ background: 'var(--accent)', boxShadow: '0 0 0 3px var(--accent-muted)' }}
+          aria-hidden
+        />
+      )}
       {active && (
         <span
           className="absolute inset-0 rounded-md"
@@ -244,12 +287,30 @@ const SidebarItemRow: React.FC<{
       )}
     </>
   );
-  const style = { color: active ? 'var(--flow-text)' : 'var(--flow-text-muted)' };
+  const style = {
+    color: active ? 'var(--flow-text)' : 'var(--flow-text-muted)',
+    background: isDropTarget ? 'var(--accent-muted)' : undefined,
+    boxShadow: isDropTarget ? 'inset 0 0 0 1px var(--accent-border)' : undefined,
+  };
   const draggableProps = {
     draggable: true,
-    onDragStart: () => onDragStart(item.id),
-    onDragOver: (event: React.DragEvent) => event.preventDefault(),
-    onDrop: () => onDrop(item.id),
+    onDragStart: (event: React.DragEvent) => {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', item.id);
+      onDragStart(item.id);
+    },
+    onDragOver: (event: React.DragEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      event.dataTransfer.dropEffect = 'move';
+      onDragOver(item.id);
+    },
+    onDrop: (event: React.DragEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      onDrop(item.id);
+    },
+    onDragEnd,
   };
   if (item.url) {
     return (
@@ -281,8 +342,15 @@ const SidebarGroup: React.FC<{
   projectId?: string;
   myTasksProjectId?: string;
   onNewProject: () => void;
+  dragState?: SidebarDragState;
+  dropTarget?: SidebarDropTarget;
+  onItemDragStart: (itemId: string) => void;
+  onItemDragOver: (groupId: string, itemId?: string) => void;
+  onItemDrop: (groupId: string, itemId?: string) => void;
   onGroupDragStart: (groupId: string) => void;
+  onGroupDragOver: (groupId: string) => void;
   onGroupDrop: (groupId: string) => void;
+  onDragEnd: () => void;
 }> = ({
   group,
   preferences,
@@ -292,12 +360,18 @@ const SidebarGroup: React.FC<{
   projectId,
   myTasksProjectId,
   onNewProject,
+  dragState,
+  dropTarget,
+  onItemDragStart,
+  onItemDragOver,
+  onItemDrop,
   onGroupDragStart,
+  onGroupDragOver,
   onGroupDrop,
+  onDragEnd,
 }) => {
   const { t } = useTranslation();
   const [groupActionsOpen, setGroupActionsOpen] = useState(false);
-  const [draggedItemId, setDraggedItemId] = useState<string>();
   const itemsById = useMemo(
     () =>
       new Map<string, SidebarItemPreference>(
@@ -317,45 +391,95 @@ const SidebarGroup: React.FC<{
       !(project.name === 'My Tasks' && project.icon === '✅') &&
       !(project.name === 'Inbox' && project.icon === '📥')
   );
-  const onDrop = (itemId: string): void => {
-    if (!draggedItemId || draggedItemId === itemId) return;
-    update((draft) => {
-      const next = updatePreferencesCopy(draft);
-      const ids = next.groups.find((candidate) => candidate.id === group.id)?.itemIds ?? [];
-      const from = ids.indexOf(draggedItemId);
-      const to = ids.indexOf(itemId);
-      if (from >= 0 && to >= 0) {
-        ids.splice(from, 1);
-        ids.splice(to, 0, draggedItemId);
-      }
-      return next;
-    });
-    setDraggedItemId(undefined);
+  const groupLabel = group.kind === 'custom' ? group.label : t(group.label);
+  const GroupIcon = ICONS[group.icon] ?? LayoutGrid;
+  const itemCount =
+    group.id === 'projects' ? visibleProjects.length + groupItems.length : groupItems.length;
+  const isGroupDragging = dragState?.kind === 'group' && dragState.id === group.id;
+  const isGroupDropTarget = dropTarget?.kind === 'group' && dropTarget.id === group.id;
+  const isItemDropTarget = dropTarget?.kind === 'item' && dropTarget.groupId === group.id;
+  const groupAccent = group.color ?? 'var(--accent)';
+  const groupStyle = {
+    borderColor: isGroupDropTarget ? 'var(--accent-border)' : 'var(--flow-border)',
+    borderInlineStartColor: isGroupDropTarget ? 'var(--accent)' : groupAccent,
+    background: isGroupDropTarget ? 'var(--accent-muted)' : 'var(--flow-input-bg)',
+    opacity: isGroupDragging ? 0.5 : 1,
+    transform: isGroupDragging ? 'scale(0.98)' : undefined,
+    transition:
+      'background 160ms ease, border-color 160ms ease, opacity 160ms ease, transform 160ms ease',
+  };
+  const handleGroupDragOver = (event: React.DragEvent): void => {
+    if (!dragState) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    if (dragState.kind === 'group') onGroupDragOver(group.id);
+    else onItemDragOver(group.id);
+  };
+  const handleGroupDrop = (event: React.DragEvent): void => {
+    event.preventDefault();
+    event.stopPropagation();
+    onGroupDrop(group.id);
   };
   return (
-    <div className="relative flex flex-col gap-0">
+    <section
+      className={cn(
+        'relative flex flex-col gap-1 rounded-lg border border-s-2 p-1',
+        isGroupDropTarget && 'shadow-[0_0_0_3px_var(--accent-muted)]'
+      )}
+      style={groupStyle}
+      aria-label={groupLabel}
+    >
       <div
         draggable
-        onDragStart={() => onGroupDragStart(group.id)}
-        onDragOver={(event) => event.preventDefault()}
-        onDrop={() => onGroupDrop(group.id)}
-        className="group flex min-h-10 items-center gap-1"
+        onDragStart={(event) => {
+          event.dataTransfer.effectAllowed = 'move';
+          event.dataTransfer.setData('text/plain', group.id);
+          onGroupDragStart(group.id);
+        }}
+        onDragOver={handleGroupDragOver}
+        onDrop={handleGroupDrop}
+        onDragEnd={onDragEnd}
+        className="group flex min-h-12 items-center gap-1"
       >
         <GripVertical
-          size={14}
-          style={{ color: 'var(--flow-text-dim)' }}
+          size={15}
+          className="shrink-0"
+          style={{ color: isGroupDropTarget ? 'var(--accent)' : 'var(--flow-text-dim)' }}
           aria-label={t('flow.sidebar.dragHandle')}
         />
         <button
           type="button"
           onClick={() => update((draft) => toggleGroup(draft, group.id))}
-          className="flex min-h-10 min-w-0 flex-1 items-center justify-between gap-2 rounded-md px-2 text-start hover:bg-[var(--flow-hover)]"
+          aria-expanded={!group.collapsed}
+          className="flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-start hover:bg-[var(--flow-hover)]"
         >
           <span
-            className="truncate text-[12px] font-semibold tracking-wide"
-            style={{ color: 'var(--flow-text-muted)' }}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
+            style={{ background: 'var(--accent-muted)', color: groupAccent }}
+            aria-hidden
           >
-            {group.kind === 'custom' ? group.label : t(group.label)}
+            <GroupIcon size={15} />
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span
+              className="text-[9px] font-semibold uppercase tracking-[0.18em]"
+              style={{ color: groupAccent }}
+            >
+              {t('flow.sidebar.groupLabel')}
+            </span>
+            <span
+              className="truncate text-[13px] font-semibold leading-tight"
+              style={{ color: 'var(--flow-text)' }}
+            >
+              {groupLabel}
+            </span>
+          </span>
+          <span
+            className="rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums"
+            style={{ background: 'var(--flow-hover)', color: 'var(--flow-text-muted)' }}
+            aria-label={t('flow.sidebar.groupItemCount', { count: itemCount })}
+          >
+            {itemCount}
           </span>
           <ChevronDown
             size={14}
@@ -388,7 +512,7 @@ const SidebarGroup: React.FC<{
         </button>
         {groupActionsOpen && (
           <div
-            className="absolute end-3 z-30 mt-20 min-w-44 rounded-lg p-1 shadow-xl"
+            className="absolute end-3 top-12 z-30 min-w-44 rounded-lg p-1 shadow-xl"
             style={{ background: 'var(--flow-card)', border: '1px solid var(--flow-border)' }}
           >
             {!group.lockedVisibility && (
@@ -413,7 +537,19 @@ const SidebarGroup: React.FC<{
         )}
       </div>
       {!group.collapsed && group.id === 'projects' && (
-        <div className="flex flex-col gap-px pt-px">
+        <div
+          className={cn(
+            'ms-7 flex flex-col gap-px border-s ps-1 pt-px',
+            isGroupDropTarget && 'rounded-md border-dashed'
+          )}
+          style={{ borderInlineStartColor: 'var(--flow-border)' }}
+          onDragOver={handleGroupDragOver}
+          onDrop={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onGroupDrop(group.id);
+          }}
+        >
           {visibleProjects.map((project) => {
             const active = projectId === project.id;
             return (
@@ -446,14 +582,40 @@ const SidebarGroup: React.FC<{
               label={itemLabel(item, t)}
               groups={preferences.groups}
               update={update}
-              onDragStart={setDraggedItemId}
-              onDrop={onDrop}
+              isDragging={dragState?.kind === 'item' && dragState.id === item.id}
+              isDropTarget={
+                isItemDropTarget && dropTarget?.kind === 'item' && dropTarget.id === item.id
+              }
+              onDragStart={onItemDragStart}
+              onDragOver={(itemId) => onItemDragOver(group.id, itemId)}
+              onDrop={(itemId) => onItemDrop(group.id, itemId)}
+              onDragEnd={onDragEnd}
             />
           ))}
+          {isGroupDropTarget && (
+            <div
+              className="mx-2 my-1 flex min-h-8 items-center justify-center rounded-md border border-dashed text-[10px] font-semibold"
+              style={{ borderColor: 'var(--accent-border)', color: 'var(--accent-fg)' }}
+            >
+              {t('flow.sidebar.dropHere')}
+            </div>
+          )}
         </div>
       )}
       {!group.collapsed && group.id !== 'projects' && (
-        <nav className="flex flex-col gap-px pt-px">
+        <nav
+          className={cn(
+            'ms-7 flex flex-col gap-px border-s ps-1 pt-px',
+            isGroupDropTarget && 'rounded-md border-dashed'
+          )}
+          style={{ borderInlineStartColor: 'var(--flow-border)' }}
+          onDragOver={handleGroupDragOver}
+          onDrop={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onGroupDrop(group.id);
+          }}
+        >
           {groupItems.map((item) => (
             <SidebarItemRow
               key={item.id}
@@ -461,13 +623,27 @@ const SidebarGroup: React.FC<{
               label={itemLabel(item, t)}
               groups={preferences.groups}
               update={update}
-              onDragStart={setDraggedItemId}
-              onDrop={onDrop}
+              isDragging={dragState?.kind === 'item' && dragState.id === item.id}
+              isDropTarget={
+                isItemDropTarget && dropTarget?.kind === 'item' && dropTarget.id === item.id
+              }
+              onDragStart={onItemDragStart}
+              onDragOver={(itemId) => onItemDragOver(group.id, itemId)}
+              onDrop={(itemId) => onItemDrop(group.id, itemId)}
+              onDragEnd={onDragEnd}
             />
           ))}
+          {isGroupDropTarget && (
+            <div
+              className="mx-2 my-1 flex min-h-8 items-center justify-center rounded-md border border-dashed text-[10px] font-semibold"
+              style={{ borderColor: 'var(--accent-border)', color: 'var(--accent-fg)' }}
+            >
+              {t('flow.sidebar.dropHere')}
+            </div>
+          )}
         </nav>
       )}
-    </div>
+    </section>
   );
 };
 
@@ -486,8 +662,8 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   sidebarRef,
 }) => {
   const { t } = useTranslation();
-  const [draggedTopItemId, setDraggedTopItemId] = useState<string>();
-  const [draggedGroupId, setDraggedGroupId] = useState<string>();
+  const [dragState, setDragState] = useState<SidebarDragState>();
+  const [dropTarget, setDropTarget] = useState<SidebarDropTarget>();
   const topItems = preferences.topLevelItemIds
     .map((id) => preferences.items.find((item) => item.id === id))
     .filter((item): item is SidebarItemPreference =>
@@ -504,38 +680,90 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   const groups = preferences.groupOrder
     .map((id) => groupsById.get(id))
     .filter((group): group is SidebarGroupPreference => Boolean(group && group.visible));
-  const onTopItemDrop = (itemId: string): void => {
-    if (!draggedTopItemId || draggedTopItemId === itemId) return;
+  const clearDrag = (): void => {
+    setDragState(undefined);
+    setDropTarget(undefined);
+  };
+  const onItemDragStart = (itemId: string): void => {
+    setDragState({ kind: 'item', id: itemId });
+    setDropTarget(undefined);
+  };
+  const onItemDragOver = (groupId: string, itemId?: string): void => {
+    if (dragState?.kind !== 'item' || dragState.id === itemId) return;
+    setDropTarget(itemId ? { kind: 'item', id: itemId, groupId } : { kind: 'group', id: groupId });
+  };
+  const onItemDrop = (groupId: string, itemId?: string): void => {
+    if (dragState?.kind !== 'item' || dragState.id === itemId) {
+      clearDrag();
+      return;
+    }
     update((draft) => {
-      const next = updatePreferencesCopy(draft);
-      const from = next.topLevelItemIds.indexOf(draggedTopItemId);
-      const to = next.topLevelItemIds.indexOf(itemId);
-      if (from >= 0 && to >= 0) {
-        next.topLevelItemIds.splice(from, 1);
-        next.topLevelItemIds.splice(to, 0, draggedTopItemId);
-      }
-      return next;
+      return moveItemBetweenGroups(draft, dragState.id, groupId, itemId);
     });
-    setDraggedTopItemId(undefined);
+    clearDrag();
+  };
+  const onTopItemDragOver = (itemId?: string): void => {
+    if (dragState?.kind !== 'item' || dragState.id === itemId) return;
+    setDropTarget(itemId ? { kind: 'item', id: itemId } : { kind: 'top' });
+  };
+  const onTopItemDrop = (itemId?: string): void => {
+    if (dragState?.kind !== 'item' || dragState.id === itemId) {
+      clearDrag();
+      return;
+    }
+    update((draft) => moveItemBetweenGroups(draft, dragState.id, undefined, itemId));
+    clearDrag();
+  };
+  const onGroupDragStart = (groupId: string): void => {
+    setDragState({ kind: 'group', id: groupId });
+    setDropTarget(undefined);
+  };
+  const onGroupDragOver = (groupId: string): void => {
+    if (dragState?.kind !== 'group' || dragState.id === groupId) return;
+    setDropTarget({ kind: 'group', id: groupId });
   };
   const onGroupDrop = (groupId: string): void => {
-    if (!draggedGroupId || draggedGroupId === groupId) return;
+    if (!dragState || dragState.id === groupId) {
+      clearDrag();
+      return;
+    }
+    if (dragState.kind === 'item') {
+      update((draft) => moveItemBetweenGroups(draft, dragState.id, groupId));
+      clearDrag();
+      return;
+    }
     update((draft) => {
       const next = updatePreferencesCopy(draft);
-      const from = next.groupOrder.indexOf(draggedGroupId);
+      const from = next.groupOrder.indexOf(dragState.id);
       const to = next.groupOrder.indexOf(groupId);
       if (from >= 0 && to >= 0) {
         next.groupOrder.splice(from, 1);
-        next.groupOrder.splice(to, 0, draggedGroupId);
+        next.groupOrder.splice(to, 0, dragState.id);
       }
       return next;
     });
-    setDraggedGroupId(undefined);
+    clearDrag();
   };
 
   return (
     <div ref={sidebarRef} className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto py-2">
-      <nav className="flex flex-col gap-px">
+      <nav
+        className={cn(
+          'flex flex-col gap-px rounded-lg transition-[background,box-shadow] duration-150',
+          dropTarget?.kind === 'top' &&
+            'bg-[var(--accent-muted)] shadow-[inset_0_0_0_1px_var(--accent-border)]'
+        )}
+        onDragOver={(event) => {
+          if (dragState?.kind !== 'item') return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = 'move';
+          onTopItemDragOver();
+        }}
+        onDrop={(event) => {
+          event.preventDefault();
+          onTopItemDrop();
+        }}
+      >
         {topItems.map((item) => (
           <SidebarItemRow
             key={item.id}
@@ -544,8 +772,12 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
             badge={badges[item.id]}
             groups={preferences.groups}
             update={update}
-            onDragStart={setDraggedTopItemId}
+            isDragging={dragState?.kind === 'item' && dragState.id === item.id}
+            isDropTarget={dropTarget?.kind === 'item' && dropTarget.id === item.id}
+            onDragStart={onItemDragStart}
+            onDragOver={onTopItemDragOver}
             onDrop={onTopItemDrop}
+            onDragEnd={clearDrag}
           />
         ))}
       </nav>
@@ -561,8 +793,15 @@ export const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
             projectId={projectId}
             myTasksProjectId={myTasksProjectId}
             onNewProject={onNewProject}
-            onGroupDragStart={setDraggedGroupId}
+            dragState={dragState}
+            dropTarget={dropTarget}
+            onItemDragStart={onItemDragStart}
+            onItemDragOver={onItemDragOver}
+            onItemDrop={onItemDrop}
+            onGroupDragStart={onGroupDragStart}
+            onGroupDragOver={onGroupDragOver}
             onGroupDrop={onGroupDrop}
+            onDragEnd={clearDrag}
           />
         ))}
       </div>
