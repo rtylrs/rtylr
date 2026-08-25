@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -17,7 +16,10 @@ type InvoiceAgingBucketPayload struct {
 
 // GetInvoiceAging returns the four standard A/R aging buckets.
 func (s *Service) GetInvoiceAging(ctx context.Context, businessID int64) ([]InvoiceAgingBucketPayload, error) {
-	key := fmt.Sprintf("insights:%d:financial:invoice-aging", businessID)
+	key, err := s.insightsCacheKey(ctx, businessID, "financial:invoice-aging")
+	if err != nil {
+		return nil, err
+	}
 	type result struct {
 		Rows []InvoiceAgingBucketPayload
 	}

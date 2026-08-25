@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -18,7 +17,10 @@ type ChurnWindowPayload struct {
 
 // GetChurnRates returns all four standard windows (30/60/90/180d).
 func (s *Service) GetChurnRates(ctx context.Context, businessID int64) ([]ChurnWindowPayload, error) {
-	key := fmt.Sprintf("insights:%d:customers:churn", businessID)
+	key, err := s.insightsCacheKey(ctx, businessID, "customers:churn")
+	if err != nil {
+		return nil, err
+	}
 	type result struct {
 		Windows []ChurnWindowPayload
 	}

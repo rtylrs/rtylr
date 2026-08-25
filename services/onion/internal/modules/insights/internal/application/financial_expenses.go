@@ -18,7 +18,10 @@ type ExpenseByCategoryPayload struct {
 // GetExpensesByCategory returns expense spend grouped by category over
 // the requested window.
 func (s *Service) GetExpensesByCategory(ctx context.Context, businessID int64, from, to time.Time) ([]ExpenseByCategoryPayload, error) {
-	key := fmt.Sprintf("insights:%d:financial:expenses:%s:%s", businessID, from.Format("2006-01-02"), to.Format("2006-01-02"))
+	key, err := s.insightsCacheKey(ctx, businessID, fmt.Sprintf("financial:expenses:%s:%s", from.Format("2006-01-02"), to.Format("2006-01-02")))
+	if err != nil {
+		return nil, err
+	}
 	type result struct {
 		Rows []ExpenseByCategoryPayload
 	}

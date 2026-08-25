@@ -29,7 +29,10 @@ func (s *Service) GetTopCustomers(ctx context.Context, businessID int64, limit i
 	if limit > 100 {
 		limit = 100
 	}
-	key := fmt.Sprintf("insights:%d:customers:top:%d", businessID, limit)
+	key, err := s.insightsCacheKey(ctx, businessID, fmt.Sprintf("customers:top:%d", limit))
+	if err != nil {
+		return nil, err
+	}
 	type result struct {
 		Rows []TopCustomerPayload
 	}

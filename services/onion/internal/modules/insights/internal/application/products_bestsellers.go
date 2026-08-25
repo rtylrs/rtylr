@@ -24,7 +24,10 @@ func (s *Service) GetBestSellers(ctx context.Context, businessID int64, limit in
 	if limit > 100 {
 		limit = 100
 	}
-	key := fmt.Sprintf("insights:%d:products:bestsellers:%d", businessID, limit)
+	key, err := s.insightsCacheKey(ctx, businessID, fmt.Sprintf("products:bestsellers:%d", limit))
+	if err != nil {
+		return nil, err
+	}
 	type result struct {
 		Rows []BestSellerPayload
 	}

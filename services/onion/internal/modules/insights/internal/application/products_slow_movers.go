@@ -23,7 +23,10 @@ func (s *Service) GetSlowMovers(ctx context.Context, businessID int64, days int3
 	if days > 365 {
 		days = 365
 	}
-	key := fmt.Sprintf("insights:%d:products:slow:%d", businessID, days)
+	key, err := s.insightsCacheKey(ctx, businessID, fmt.Sprintf("products:slow:%d", days))
+	if err != nil {
+		return nil, err
+	}
 	type result struct {
 		Rows []SlowMoverPayload
 	}

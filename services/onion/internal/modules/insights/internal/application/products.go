@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -18,7 +17,10 @@ type ProductKPIPayload struct {
 
 // GetProductKPIs returns aggregate product counters for the dashboard.
 func (s *Service) GetProductKPIs(ctx context.Context, businessID int64) (ProductKPIPayload, error) {
-	key := fmt.Sprintf("insights:%d:products:kpis", businessID)
+	key, err := s.insightsCacheKey(ctx, businessID, "products:kpis")
+	if err != nil {
+		return ProductKPIPayload{}, err
+	}
 	out, err := cacher.Of[ProductKPIPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (ProductKPIPayload, error) {
 		k, rerr := s.repo.GetProductKPIs(ctx, businessID)
 		if rerr != nil {

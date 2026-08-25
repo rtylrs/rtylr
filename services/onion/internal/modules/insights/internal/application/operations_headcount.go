@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -17,7 +16,10 @@ type HeadcountPayload struct {
 
 // GetHeadcount returns current active staff + month-over-month change.
 func (s *Service) GetHeadcount(ctx context.Context, businessID int64) (HeadcountPayload, error) {
-	key := fmt.Sprintf("insights:%d:operations:headcount", businessID)
+	key, err := s.insightsCacheKey(ctx, businessID, "operations:headcount")
+	if err != nil {
+		return HeadcountPayload{}, err
+	}
 	out, err := cacher.Of[HeadcountPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (HeadcountPayload, error) {
 		snap, rerr := s.repo.GetHeadcount(ctx, businessID)
 		if rerr != nil {
