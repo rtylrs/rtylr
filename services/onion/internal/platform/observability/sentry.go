@@ -69,6 +69,7 @@ func InitSentry(ctx context.Context) (flush func()) {
 		// 20 % traces is a safe starting sample rate — enough to
 		// spot latency regressions, not enough to blow the quota.
 		TracesSampleRate: 0.2,
+		BeforeSend:       scrubRequestData,
 		// Enrich events with the runtime host — helps when a single
 		// region is misbehaving.
 		ServerName: hostname,
@@ -88,6 +89,19 @@ func InitSentry(ctx context.Context) (flush func()) {
 		// shutdown; shorter and we drop events on a crashy deploy.
 		sentry.Flush(2 * time.Second)
 	}
+}
+
+// scrubRequestData removes credentials and customer content from request
+// metadata before an event leaves the process. sentry.NewRequest already
+// omits the query from URL, but QueryString is populated when the SDK is
+// configured to capture request details, so clear both representations.
+func scrubRequestData(event *sentry.Event, _ *sentry.EventHint) *sentry.Event {
+	if event == nil || event.Request == nil {
+		return event
+	}
+	event.Request.Data = ""
+	event.Request.QueryString = ""
+	return event
 }
 
 // RecoverMiddleware turns a panic in any handler into a Sentry event

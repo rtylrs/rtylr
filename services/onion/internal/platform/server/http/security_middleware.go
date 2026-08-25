@@ -2,12 +2,14 @@ package http
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/slack"
 )
 
 type blockedRequest struct {
@@ -83,6 +85,7 @@ func (b *securityBatcher) flush() {
 			logger.Int("count", len(reqs)),
 		)
 		for _, req := range reqs {
+			slack.Post(slack.Suspicious, fmt.Sprintf("⚠️ blocked request · %s %s · %s · %s", req.Method, req.Path, req.Reason, req.IP))
 			logger.Ctx(ctx).Warn("blocked suspicious request",
 				logger.String("ip", req.IP),
 				logger.String("reason", req.Reason),
