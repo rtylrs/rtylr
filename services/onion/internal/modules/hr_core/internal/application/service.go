@@ -85,7 +85,11 @@ func (s *Service) CreateEmployee(ctx context.Context, ownerID int64, emp domain.
 		emp.EmploymentType = "full_time"
 	}
 
-	return s.repo.CreateEmployeeWithBalances(ctx, ownerID, emp, []int64{})
+	leaveTypeIDs, err := s.repo.ListActiveLeaveTypeIDs(ctx, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	return s.repo.CreateEmployeeWithBalances(ctx, ownerID, emp, leaveTypeIDs)
 }
 
 func (s *Service) UpdateEmployee(ctx context.Context, ownerID int64, emp domain.EmployeeRecord) (*domain.EmployeeRecord, error) {

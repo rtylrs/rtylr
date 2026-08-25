@@ -50,6 +50,8 @@ func (h *CreateLeaveRequestHandler) Validate(_ context.Context, req *CreateLeave
 	if _, err := time.Parse("2006-01-02", req.EndDate); err != nil {
 		return onekiterrors.New(http.StatusBadRequest, "end_date must be in YYYY-MM-DD format")
 	}
+	// Keep rejecting missing/invalid wire values for a clear API contract, but
+	// the service still recomputes the authoritative total from the dates.
 	if req.TotalDays <= 0 {
 		return onekiterrors.New(http.StatusBadRequest, "total_days must be greater than 0")
 	}
@@ -82,6 +84,9 @@ func (h *CreateLeaveRequestHandler) Serve(ctx context.Context, req *CreateLeaveR
 		}
 		if errors.Is(err, domain.ErrInsufficientLeaveBalance) {
 			return CreateLeaveRequestResponse{}, onekiterrors.New(http.StatusConflict, "Insufficient leave balance")
+		}
+		if errors.Is(err, domain.ErrLeaveBalanceNotFound) {
+			return CreateLeaveRequestResponse{}, onekiterrors.New(http.StatusConflict, "Leave balance is not configured for this employee")
 		}
 		if errors.Is(err, domain.ErrLeaveConflict) {
 			return CreateLeaveRequestResponse{}, onekiterrors.New(http.StatusConflict, "Leave request overlaps with existing leave")

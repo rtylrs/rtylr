@@ -92,6 +92,34 @@ func (r *Repository) GetEmployeeIDByUserID(ctx context.Context, businessID, user
 	return id, nil
 }
 
+// ListActiveLeaveTypeIDs is intentionally kept in hr_core because employee
+// creation owns the transaction that seeds the employee's balance rows. The
+// leave module remains independent of hr_core; this read is the small shared
+// boundary required to avoid creating employees with no balances.
+func (r *Repository) ListActiveLeaveTypeIDs(ctx context.Context, businessID int64) ([]int64, error) {
+	rows, err := r.pool.QueryContext(ctx,
+		"SELECT id FROM hr_leave_types WHERE business_id = ? AND is_active = TRUE ORDER BY id",
+		businessID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	ids := make([]int64, 0)
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return ids, nil
+}
+
 func (r *Repository) CreateEmployee(ctx context.Context, businessID int64, emp domain.EmployeeRecord) (*domain.EmployeeRecord, error) {
 	result, err := r.queries.CreateEmployee(ctx, employeeToParams(businessID, emp))
 	if err != nil {

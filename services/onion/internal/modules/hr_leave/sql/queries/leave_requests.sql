@@ -39,10 +39,10 @@ UPDATE hr_leave_requests
 SET status = 'approved', updated_at = NOW()
 WHERE id = ? AND business_id = ? AND status = 'pending';
 
--- name: AdvanceLeaveApprovalLevel :exec
+-- name: AdvanceLeaveApprovalLevel :execresult
 UPDATE hr_leave_requests
 SET current_approval_level = current_approval_level + 1, updated_at = NOW()
-WHERE id = ? AND business_id = ?;
+WHERE id = ? AND business_id = ? AND status = 'pending' AND current_approval_level = ?;
 
 -- name: RejectLeaveRequest :execresult
 UPDATE hr_leave_requests

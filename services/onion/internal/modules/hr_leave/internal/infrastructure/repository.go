@@ -221,6 +221,98 @@ func (r *Repository) CreateLeaveRequest(ctx context.Context, ownerID int64, req 
 	return &req, nil
 }
 
+// CreateLeaveRequestWithBalance makes overlap validation, balance validation,
+// request creation, and pending-day accounting one transaction. The balance
+// rows are locked first, giving concurrent requests for the same employee and
+// leave type a stable serialization point before the overlap query runs.
+func (r *Repository) CreateLeaveRequestWithBalance(ctx context.Context, ownerID int64, req domain.LeaveRequestRecord, allocations []domain.LeaveDayAllocation) (created *domain.LeaveRequestRecord, err error) {
+	startDate, parseErr := time.Parse("2006-01-02", req.StartDate)
+	if parseErr != nil {
+		return nil, parseErr
+	}
+	endDate, parseErr := time.Parse("2006-01-02", req.EndDate)
+	if parseErr != nil {
+		return nil, parseErr
+	}
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+
+	qtx := r.queries.WithTx(tx)
+	for _, allocation := range allocations {
+		row, balanceErr := qtx.GetLeaveBalanceForUpdate(ctx, sqlc.GetLeaveBalanceForUpdateParams{
+			BusinessID: ownerID, EmployeeID: req.EmployeeID, LeaveTypeID: req.LeaveTypeID, Year: allocation.Year,
+		})
+		if errors.Is(balanceErr, sql.ErrNoRows) {
+			return nil, domain.ErrLeaveBalanceNotFound
+		}
+		if balanceErr != nil {
+			return nil, balanceErr
+		}
+		balance := leaveBalanceFromRow(row)
+		if balance.EntitledDays-balance.UsedDays-balance.PendingDays < allocation.Days {
+			return nil, domain.ErrInsufficientLeaveBalance
+		}
+	}
+
+	overlapping, err := qtx.ListOverlappingLeaveRequests(ctx, sqlc.ListOverlappingLeaveRequestsParams{
+		BusinessID: ownerID,
+		EmployeeID: req.EmployeeID,
+		EndDate:    endDate,
+		StartDate:  startDate,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(overlapping) > 0 {
+		return nil, domain.ErrLeaveConflict
+	}
+
+	result, err := qtx.CreateLeaveRequest(ctx, sqlc.CreateLeaveRequestParams{
+		OwnerID: ownerID, BusinessID: ownerID, EmployeeID: req.EmployeeID, LeaveTypeID: req.LeaveTypeID,
+		StartDate: startDate, EndDate: endDate, TotalDays: fmt.Sprintf("%.2f", req.TotalDays),
+		Notes: nullString(req.Notes), Status: req.Status, CurrentApprovalLevel: req.CurrentApprovalLevel,
+	})
+	if err != nil {
+		return nil, err
+	}
+	requestID, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, allocation := range allocations {
+		result, err = qtx.AddToPendingDays(ctx, sqlc.AddToPendingDaysParams{
+			PendingDays: fmt.Sprintf("%.2f", allocation.Days), BusinessID: ownerID,
+			EmployeeID: req.EmployeeID, LeaveTypeID: req.LeaveTypeID, Year: allocation.Year,
+		})
+		if err != nil {
+			return nil, err
+		}
+		affected, affectedErr := result.RowsAffected()
+		if affectedErr != nil {
+			return nil, affectedErr
+		}
+		if affected == 0 {
+			return nil, domain.ErrLeaveBalanceNotFound
+		}
+	}
+
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	req.ID = requestID
+	req.OwnerID = ownerID
+	req.BusinessID = ownerID
+	return &req, nil
+}
+
 func (r *Repository) ApproveLeaveRequest(ctx context.Context, ownerID, requestID int64) error {
 	result, err := r.queries.ApproveLeaveRequest(ctx, sqlc.ApproveLeaveRequestParams{ID: requestID, BusinessID: ownerID})
 	if err != nil {
@@ -237,6 +329,10 @@ func (r *Repository) ApproveLeaveRequest(ctx context.Context, ownerID, requestID
 }
 
 func (r *Repository) ApproveLeaveRequestWithBalance(ctx context.Context, ownerID, requestID, employeeID, leaveTypeID int64, year int32, days float64) (err error) {
+	return r.ApproveLeaveRequestWithAllocations(ctx, ownerID, requestID, employeeID, leaveTypeID, []domain.LeaveDayAllocation{{Year: year, Days: days}})
+}
+
+func (r *Repository) ApproveLeaveRequestWithAllocations(ctx context.Context, ownerID, requestID, employeeID, leaveTypeID int64, allocations []domain.LeaveDayAllocation) (err error) {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -260,30 +356,67 @@ func (r *Repository) ApproveLeaveRequestWithBalance(ctx context.Context, ownerID
 		return domain.ErrLeaveRequestNotPending
 	}
 
-	result, err = qtx.AddToUsedDays(ctx, sqlc.AddToUsedDaysParams{
-		UsedDays:    fmt.Sprintf("%.2f", days),
-		PendingDays: fmt.Sprintf("%.2f", days),
-		BusinessID:  ownerID,
-		EmployeeID:  employeeID,
-		LeaveTypeID: leaveTypeID,
-		Year:        year,
-	})
-	if err != nil {
-		return err
-	}
-	affected, err = result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if affected == 0 {
-		return domain.ErrLeaveBalanceNotFound
+	for _, allocation := range allocations {
+		result, err = qtx.AddToUsedDays(ctx, sqlc.AddToUsedDaysParams{
+			UsedDays: fmt.Sprintf("%.2f", allocation.Days), PendingDays: fmt.Sprintf("%.2f", allocation.Days),
+			BusinessID: ownerID, EmployeeID: employeeID, LeaveTypeID: leaveTypeID, Year: allocation.Year,
+		})
+		if err != nil {
+			return err
+		}
+		affected, affectedErr := result.RowsAffected()
+		if affectedErr != nil {
+			return affectedErr
+		}
+		if affected == 0 {
+			return domain.ErrLeaveBalanceNotFound
+		}
 	}
 
 	return tx.Commit()
 }
 
-func (r *Repository) AdvanceLeaveApprovalLevel(ctx context.Context, ownerID, requestID int64) error {
-	return r.queries.AdvanceLeaveApprovalLevel(ctx, sqlc.AdvanceLeaveApprovalLevelParams{ID: requestID, BusinessID: ownerID})
+func (r *Repository) AdvanceLeaveApprovalLevel(ctx context.Context, ownerID, requestID int64, currentLevel int32) error {
+	result, err := r.queries.AdvanceLeaveApprovalLevel(ctx, sqlc.AdvanceLeaveApprovalLevelParams{ID: requestID, BusinessID: ownerID, CurrentApprovalLevel: currentLevel})
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrLeaveRequestNotPending
+	}
+	return nil
+}
+
+func (r *Repository) RejectLeaveRequestWithBalance(ctx context.Context, ownerID, requestID, employeeID, leaveTypeID int64, allocations []domain.LeaveDayAllocation, reason string) (err error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+	qtx := r.queries.WithTx(tx)
+	result, err := qtx.RejectLeaveRequest(ctx, sqlc.RejectLeaveRequestParams{RejectionReason: nullString(reason), ID: requestID, BusinessID: ownerID})
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrLeaveRequestNotPending
+	}
+	if err = subtractPendingDaysInTx(ctx, qtx, ownerID, employeeID, leaveTypeID, allocations); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 // RejectLeaveRequest reports whether the request was actually still pending
@@ -323,6 +456,54 @@ func (r *Repository) CancelLeaveRequest(ctx context.Context, ownerID, requestID 
 		return false, err
 	}
 	return rows > 0, nil
+}
+
+func (r *Repository) CancelLeaveRequestWithBalance(ctx context.Context, ownerID, requestID, employeeID, leaveTypeID int64, allocations []domain.LeaveDayAllocation) (err error) {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			_ = tx.Rollback()
+		}
+	}()
+	qtx := r.queries.WithTx(tx)
+	result, err := qtx.CancelLeaveRequest(ctx, sqlc.CancelLeaveRequestParams{ID: requestID, BusinessID: ownerID})
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrLeaveRequestNotPending
+	}
+	if err = subtractPendingDaysInTx(ctx, qtx, ownerID, employeeID, leaveTypeID, allocations); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func subtractPendingDaysInTx(ctx context.Context, qtx *sqlc.Queries, ownerID, employeeID, leaveTypeID int64, allocations []domain.LeaveDayAllocation) error {
+	for _, allocation := range allocations {
+		result, err := qtx.SubtractPendingDays(ctx, sqlc.SubtractPendingDaysParams{
+			PendingDays: fmt.Sprintf("%.2f", allocation.Days), BusinessID: ownerID,
+			EmployeeID: employeeID, LeaveTypeID: leaveTypeID, Year: allocation.Year,
+		})
+		if err != nil {
+			return err
+		}
+		affected, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if affected == 0 {
+			return domain.ErrLeaveBalanceNotFound
+		}
+	}
+	return nil
 }
 
 func (r *Repository) ListOverlappingLeaveRequests(ctx context.Context, ownerID, employeeID int64, startDate, endDate string) ([]domain.LeaveRequestRecord, error) {
@@ -459,23 +640,45 @@ func (r *Repository) AddToUsedDays(ctx context.Context, ownerID, employeeID, lea
 }
 
 func (r *Repository) AddToPendingDays(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32, days float64) error {
-	return r.queries.AddToPendingDays(ctx, sqlc.AddToPendingDaysParams{
+	result, err := r.queries.AddToPendingDays(ctx, sqlc.AddToPendingDaysParams{
 		PendingDays: fmt.Sprintf("%.2f", days),
 		BusinessID:  ownerID,
 		EmployeeID:  employeeID,
 		LeaveTypeID: leaveTypeID,
 		Year:        year,
 	})
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrLeaveBalanceNotFound
+	}
+	return nil
 }
 
 func (r *Repository) SubtractPendingDays(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32, days float64) error {
-	return r.queries.SubtractPendingDays(ctx, sqlc.SubtractPendingDaysParams{
+	result, err := r.queries.SubtractPendingDays(ctx, sqlc.SubtractPendingDaysParams{
 		PendingDays: fmt.Sprintf("%.2f", days),
 		BusinessID:  ownerID,
 		EmployeeID:  employeeID,
 		LeaveTypeID: leaveTypeID,
 		Year:        year,
 	})
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrLeaveBalanceNotFound
+	}
+	return nil
 }
 
 func (r *Repository) ListBalancesForAccrual(ctx context.Context, ownerID int64, year, currentMonth int32) ([]domain.LeaveBalanceRecord, error) {
@@ -495,14 +698,30 @@ func (r *Repository) ListBalancesForAccrual(ctx context.Context, ownerID int64, 
 }
 
 func (r *Repository) AddToEntitledDays(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32, days float64, month int32) error {
-	return r.queries.AddToEntitledDays(ctx, sqlc.AddToEntitledDaysParams{
-		EntitledDays:     fmt.Sprintf("%.2f", days),
-		LastAccrualMonth: month,
-		BusinessID:       ownerID,
-		EmployeeID:       employeeID,
-		LeaveTypeID:      leaveTypeID,
-		Year:             year,
+	result, err := r.queries.AddToEntitledDays(ctx, sqlc.AddToEntitledDaysParams{
+		EntitledDays:       fmt.Sprintf("%.2f", days),
+		LastAccrualMonth:   month,
+		BusinessID:         ownerID,
+		EmployeeID:         employeeID,
+		LeaveTypeID:        leaveTypeID,
+		Year:               year,
+		LastAccrualMonth_2: month,
 	})
+	if err != nil {
+		return err
+	}
+	// A zero-row update is an intentional no-op when another worker already
+	// applied this month's accrual. The conditional update is the concurrency
+	// guard; a missing row is not returned by ListBalancesForAccrual.
+	_, err = result.RowsAffected()
+	return err
+}
+
+func (r *Repository) ApplyYearEndCarryover(ctx context.Context, ownerID int64, previousYear, currentYear int32) error {
+	_, err := r.queries.ApplyYearEndCarryover(ctx, sqlc.ApplyYearEndCarryoverParams{
+		Year: currentYear, BusinessID: ownerID, Year_2: previousYear,
+	})
+	return err
 }
 
 // --- Helpers ---
