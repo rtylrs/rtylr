@@ -21,6 +21,10 @@ DB_NAME="${DB_NAME:?DB_NAME is required}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SCHEMAS_DIR="$PROJECT_ROOT/internal/platform/database/schemas"
+# The schemas repository owns the canonical dependency order used by both
+# migration entry points.
+# shellcheck source=../internal/platform/database/schemas/migration_order.sh
+source "$SCHEMAS_DIR/migration_order.sh"
 
 mysql_cmd() {
     MYSQL_PWD="$DB_PASSWORD" mysql \
@@ -59,43 +63,52 @@ FAILED=0
 OUTPUT_FILE="$(mktemp)"
 trap 'rm -f "$OUTPUT_FILE"' EXIT
 
-for dir in shared rtylr voxire erp hr hr_core hr_attendance hr_documents hr_leave hr_onboarding hr_overtime hr_payroll hr_performance hr_setup hr_shifts hr_time crm crm_migrations finance flow pos hub store support book hr_dashboard recruit insights oauth ai migrations; do
-    schema_dir="$SCHEMAS_DIR/$dir"
-    if [ ! -d "$schema_dir" ]; then
-        continue
+apply_file() {
+    local filename="$1"
+    local path="$2"
+
+    if already_applied "$filename"; then
+        echo "  ✓ $filename (already applied)"
+        SKIPPED=$((SKIPPED + 1))
+        return
     fi
 
+    echo "  → $filename"
+    if mysql_cmd < "$path" >"$OUTPUT_FILE" 2>&1; then
+        grep -v "Warning:" "$OUTPUT_FILE" || true
+    else
+        local status=$?
+        grep -v "Warning:" "$OUTPUT_FILE" || true
+        echo "    ✗ $filename failed; it was not recorded as applied" >&2
+        FAILED=$((FAILED + 1))
+        echo ""
+        echo "❌ Migrations stopped. Applied: $APPLIED, Skipped: $SKIPPED, Failed: $FAILED."
+        exit "$status"
+    fi
+    if ! record_applied "$filename"; then
+        echo "    ✗ could not record $filename as applied" >&2
+        FAILED=$((FAILED + 1))
+        echo ""
+        echo "❌ Migrations stopped. Applied: $APPLIED, Skipped: $SKIPPED, Failed: $FAILED."
+        exit 1
+    fi
+    APPLIED=$((APPLIED + 1))
+}
+
+for dir in "${SCHEMA_MIGRATION_DIRS[@]}"; do
+    schema_dir="$SCHEMAS_DIR/$dir"
+    [ -d "$schema_dir" ] || continue
     for f in "$schema_dir"/*.sql; do
         [ -f "$f" ] || continue
-        filename="$dir/$(basename "$f")"
-
-        if already_applied "$filename"; then
-            echo "  ✓ $filename (already applied)"
-            SKIPPED=$((SKIPPED + 1))
-            continue
-        fi
-
-        echo "  → $filename"
-        if mysql_cmd < "$f" >"$OUTPUT_FILE" 2>&1; then
-            grep -v "Warning:" "$OUTPUT_FILE" || true
-        else
-            status=$?
-            grep -v "Warning:" "$OUTPUT_FILE" || true
-            echo "    ✗ $filename failed; it was not recorded as applied" >&2
-            FAILED=$((FAILED + 1))
-            echo ""
-            echo "❌ Migrations stopped. Applied: $APPLIED, Skipped: $SKIPPED, Failed: $FAILED."
-            exit "$status"
-        fi
-        if ! record_applied "$filename"; then
-            echo "    ✗ could not record $filename as applied" >&2
-            FAILED=$((FAILED + 1))
-            echo ""
-            echo "❌ Migrations stopped. Applied: $APPLIED, Skipped: $SKIPPED, Failed: $FAILED."
-            exit 1
-        fi
-        APPLIED=$((APPLIED + 1))
+        apply_file "$dir/$(basename "$f")" "$f"
     done
+done
+
+# Module-owned migrations live beside their sqlc input. Apply them after the
+# canonical schema set so module changes can build on shared tables.
+shopt -s nullglob
+for f in "$PROJECT_ROOT"/internal/modules/*/sql/migration_*.sql; do
+    apply_file "${f#"$PROJECT_ROOT/"}" "$f"
 done
 
 echo ""
