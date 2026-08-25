@@ -462,7 +462,7 @@ const SidebarSettingsSection: React.FC = () => {
       </div>
     );
   return (
-    <div className="space-y-6 p-4 sm:p-6">
+    <div className="flex flex-col gap-6 p-4 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-[18px] font-semibold" style={{ color: 'var(--flow-text)' }}>
@@ -483,7 +483,7 @@ const SidebarSettingsSection: React.FC = () => {
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="order-1 flex flex-wrap gap-2">
         <button
           type="button"
           onClick={() => setDialog('group')}
@@ -508,7 +508,7 @@ const SidebarSettingsSection: React.FC = () => {
       </div>
 
       <section
-        className="rounded-xl border p-3"
+        className="order-3 rounded-xl border p-3"
         style={{ borderColor: 'var(--flow-border)', background: 'var(--flow-surface)' }}
       >
         <div className="mb-2 flex items-center gap-2">
@@ -558,7 +558,7 @@ const SidebarSettingsSection: React.FC = () => {
         </div>
       </section>
 
-      <div className="space-y-3">
+      <div className="order-4 space-y-3">
         {groups.map((group) => (
           <GroupEditor
             key={group.id}
@@ -571,7 +571,10 @@ const SidebarSettingsSection: React.FC = () => {
       </div>
 
       {projects.length > 0 && (
-        <section className="rounded-xl border p-4" style={{ borderColor: 'var(--flow-border)' }}>
+        <section
+          className="order-5 rounded-xl border p-4"
+          style={{ borderColor: 'var(--flow-border)' }}
+        >
           <h3 className="mb-1 text-[13px] font-semibold" style={{ color: 'var(--flow-text)' }}>
             {t('flow.sidebar.pinItems')}
           </h3>
@@ -598,7 +601,7 @@ const SidebarSettingsSection: React.FC = () => {
 
       {dialog === 'group' && (
         <div
-          className="rounded-xl border p-4"
+          className="order-2 rounded-xl border p-4"
           style={{ borderColor: 'var(--accent)', background: 'var(--flow-surface)' }}
         >
           <label
@@ -638,7 +641,7 @@ const SidebarSettingsSection: React.FC = () => {
             event.preventDefault();
             createLink();
           }}
-          className="space-y-3 rounded-xl border p-4"
+          className="order-2 space-y-3 rounded-xl border p-4"
           style={{ borderColor: 'var(--accent)', background: 'var(--flow-surface)' }}
         >
           <div className="flex items-start justify-between gap-3">
