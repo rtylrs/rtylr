@@ -36,13 +36,9 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 }
 
 func (m *Module) executeListAttendanceTool(ctx context.Context, input map[string]any) (map[string]any, error) {
-	ownerID, _, err := m.hrAttendanceToolScope(ctx)
-	if err != nil {
-		return nil, err
-	}
+	ownerID, employeeID, err := m.hrAttendanceToolScope(ctx)
 	// employee_id from the input is intentionally ignored: reads are scoped
 	// to the caller's own employee record (#817).
-	_, employeeID, err := m.hrAttendanceToolScope(ctx)
 	if err != nil {
 		return nil, err
 	}
