@@ -99,6 +99,24 @@ func TestSanitizeJSONRedactsSensitiveFieldVariants(t *testing.T) {
 	}
 }
 
+func TestSanitizeJSONDoesNotEchoMalformedSensitiveBody(t *testing.T) {
+	got := sanitizeJSON(`{"password":"secret"`)
+	if strings.Contains(got, "secret") || strings.Contains(got, "password") {
+		t.Fatalf("malformed body leaked sensitive content: %q", got)
+	}
+}
+
+func TestSanitizeMapRedactsCredentialFieldVariants(t *testing.T) {
+	for _, key := range []string{"pin", "pin_code", "cvv", "cvc", "ssn", "tax_id", "national_id", "otp", "card_number", "expiry", "passwd", "pwd", "x-api-key", "sessionid"} {
+		t.Run(key, func(t *testing.T) {
+			got := sanitizeMap(map[string][]string{key: {"secret"}})
+			if got[key][0] != "[REDACTED]" {
+				t.Fatalf("%s was not redacted: %#v", key, got)
+			}
+		})
+	}
+}
+
 func TestDuplicateDetectorCleanupLoopRemovesStaleEntries(t *testing.T) {
 	detector := newDuplicateDetector(time.Millisecond)
 	detector.requests["stale"] = &DuplicateInfo{

@@ -7,6 +7,7 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -101,6 +102,10 @@ func scrubRequestData(event *sentry.Event, _ *sentry.EventHint) *sentry.Event {
 	}
 	event.Request.Data = ""
 	event.Request.QueryString = ""
+	event.Request.Cookies = ""
+	if queryStart := strings.IndexByte(event.Request.URL, '?'); queryStart >= 0 {
+		event.Request.URL = event.Request.URL[:queryStart]
+	}
 	return event
 }
 
