@@ -11,8 +11,76 @@ import (
 	"time"
 
 	echoapp "github.com/voxire/onion/internal/modules/echo/internal/application"
+	"github.com/voxire/onion/internal/platform/aicache"
 	"github.com/voxire/onion/internal/platform/snips"
 )
+
+func TestWriteSSEHeartbeatUsesCommentFrame(t *testing.T) {
+	rec := httptest.NewRecorder()
+	if err := WriteSSEHeartbeat(rec, nil); err != nil {
+		t.Fatalf("WriteSSEHeartbeat: %v", err)
+	}
+	if got := rec.Body.String(); got != ": ping\n\n" {
+		t.Fatalf("heartbeat = %q, want SSE comment frame", got)
+	}
+}
+
+func TestDrainProviderStreamEmitsHeartbeatWhileProviderIsQuiet(t *testing.T) {
+	handler := &GenerateTextStreamHandler{}
+	rec := httptest.NewRecorder()
+	full := &strings.Builder{}
+	renderer := newStreamEventRenderer(rec, nil, "assistant-1", full)
+	tokens := make(chan snips.StreamToken, 1)
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		tokens <- snips.StreamToken{Done: true}
+	}()
+
+	if _, ok := handler.drainProviderStreamWithHeartbeat(
+		context.Background(), rec, tokens, make(chan bool), renderer,
+		cacheWritePlan{Mode: string(ModeAsk), StartedAt: time.Now()},
+		1, 2, 0, time.Millisecond,
+	); !ok {
+		t.Fatal("drainProviderStreamWithHeartbeat did not complete")
+	}
+	if !strings.Contains(rec.Body.String(), ": ping\n\n") {
+		t.Fatalf("stream body did not contain heartbeat: %q", rec.Body.String())
+	}
+}
+
+func TestStreamDirectResponsePersistsBeforeDoneEvent(t *testing.T) {
+	rec := httptest.NewRecorder()
+	memory := &detachedMemoryFake{}
+	memory.storeHook = func() {
+		if strings.Contains(rec.Body.String(), `"type":"done"`) {
+			t.Error("assistant response was persisted after the done event")
+		}
+	}
+	handler := &GenerateTextStreamHandler{MemoryService: memory}
+
+	handler.streamDirectResponse(context.Background(), rec, &GenerateTextStreamRequest{SessionID: "session-1", UserID: 7}, "answer")
+	if memory.storeCalls != 1 {
+		t.Fatalf("StoreMessage calls = %d, want 1", memory.storeCalls)
+	}
+	if !strings.Contains(rec.Body.String(), `"type":"done"`) {
+		t.Fatalf("stream did not finish: %q", rec.Body.String())
+	}
+}
+
+func TestCachedReplayDoesNotPersistAssistantHistory(t *testing.T) {
+	memory := &detachedMemoryFake{}
+	handler := &GenerateTextStreamHandler{MemoryService: memory}
+	rec := httptest.NewRecorder()
+	handler.streamCachedResponse(
+		context.Background(), rec, make(chan bool),
+		&GenerateTextStreamRequest{SessionID: "session-1", UserID: 7},
+		aicache.ExactResponse{Response: "cached answer", Provider: "test"},
+		cacheWritePlan{Key: "cache-key", Mode: string(ModeAsk)}, 1, 7,
+	)
+	if memory.storeCalls != 0 {
+		t.Fatalf("cache replay StoreMessage calls = %d, want 0", memory.storeCalls)
+	}
+}
 
 func TestGenerateTextStreamParseRejectsTrailingJSON(t *testing.T) {
 	handler := &GenerateTextStreamHandler{}

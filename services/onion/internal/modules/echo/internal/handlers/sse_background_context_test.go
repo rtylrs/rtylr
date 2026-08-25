@@ -8,6 +8,8 @@ import (
 type detachedMemoryFake struct {
 	storeContextErr     error
 	summarizeContextErr error
+	storeCalls          int
+	storeHook           func()
 }
 
 func (m *detachedMemoryFake) CreateSession(context.Context, int, string) (string, error) {
@@ -16,6 +18,10 @@ func (m *detachedMemoryFake) CreateSession(context.Context, int, string) (string
 
 func (m *detachedMemoryFake) StoreMessage(ctx context.Context, _ string, _ int, _, _ string, _ int) (any, error) {
 	m.storeContextErr = ctx.Err()
+	m.storeCalls++
+	if m.storeHook != nil {
+		m.storeHook()
+	}
 	return nil, nil
 }
 
@@ -34,7 +40,9 @@ func TestStoreAIResponseDetachedSurvivesRequestCancellation(t *testing.T) {
 	memory := &detachedMemoryFake{}
 	handler := &GenerateTextStreamHandler{MemoryService: memory}
 
-	handler.storeAIResponseDetached(context.WithoutCancel(requestCtx), "session-1", 7, "answer")
+	if err := handler.storeAIResponse(context.WithoutCancel(requestCtx), "session-1", 7, "answer"); err != nil {
+		t.Fatalf("storeAIResponse: %v", err)
+	}
 
 	if memory.storeContextErr != nil {
 		t.Fatalf("store context was canceled: %v", memory.storeContextErr)

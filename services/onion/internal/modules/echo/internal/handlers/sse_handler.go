@@ -69,6 +69,7 @@ const (
 	maxToolResultPromptBytes      = 12000
 	maxContinuationAnswerBytes    = 8000
 	unexpectedStreamClosureError  = "Response stream ended before completion"
+	sseHeartbeatInterval          = 15 * time.Second
 )
 
 var ErrInvalidRequestBody = errors.New("invalid request body")
@@ -351,11 +352,13 @@ func (h *GenerateTextStreamHandler) streamDirectResponse(ctx context.Context, w 
 	if err := renderer.AppendText(response); err != nil {
 		return
 	}
+	if err := h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String()); err != nil {
+		h.writeErrorResponse(w, "Failed to persist response")
+		return
+	}
 	if err := renderer.Finish(); err != nil {
 		return
 	}
-
-	go h.storeAIResponseDetached(context.WithoutCancel(ctx), req.SessionID, int(req.UserID), fullResponse.String())
 }
 
 // writeQuotaExceeded reports that the tenant has spent its monthly AI allowance.
@@ -505,10 +508,6 @@ func (h *GenerateTextStreamHandler) streamCachedResponse(ctx context.Context, w 
 
 	if err := renderer.Finish(); err != nil {
 		return
-	}
-
-	if cached.Response != "" {
-		go h.storeAIResponseDetached(context.WithoutCancel(ctx), req.SessionID, int(req.UserID), cached.Response)
 	}
 
 	aicache.Record(aicache.Event{
@@ -732,11 +731,15 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 					}
 				}
 			}
+			if fullResponse.Len() > 0 {
+				if err := h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String()); err != nil {
+					h.writeErrorResponse(w, "Failed to persist response")
+					settleUsage(int64(totalTokens))
+					return
+				}
+			}
 			if err := renderer.Finish(); err != nil {
 				return
-			}
-			if fullResponse.Len() > 0 {
-				go h.storeAIResponseDetached(context.WithoutCancel(ctx), req.SessionID, int(req.UserID), fullResponse.String())
 			}
 			settleUsage(int64(totalTokens))
 			h.writeExactCacheEntry(ctx, finalToken, fullResponse.String(), totalTokens, cachePlan, businessID, userID)
@@ -748,11 +751,15 @@ func (h *GenerateTextStreamHandler) streamTokensToClient(ctx context.Context, w 
 		nextTokenChan, err := h.AiService.GenerateTextStream(ctx, currentPrompt)
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to generate tool-result continuation", logger.Error(err))
+			if fullResponse.Len() > 0 {
+				if err := h.storeAIResponse(ctx, req.SessionID, int(req.UserID), fullResponse.String()); err != nil {
+					h.writeErrorResponse(w, "Failed to persist response")
+					settleUsage(int64(totalTokens))
+					return
+				}
+			}
 			if err := renderer.Finish(); err != nil {
 				return
-			}
-			if fullResponse.Len() > 0 {
-				go h.storeAIResponseDetached(context.WithoutCancel(ctx), req.SessionID, int(req.UserID), fullResponse.String())
 			}
 			settleUsage(int64(totalTokens))
 			return
@@ -781,6 +788,13 @@ func fallbackCaretResponse(grounding *analystGroundingResult, results []streamTo
 }
 
 func (h *GenerateTextStreamHandler) drainProviderStream(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, renderer *streamEventRenderer, cachePlan cacheWritePlan, businessID, userID int64, promptChars int) (snips.StreamToken, bool) {
+	return h.drainProviderStreamWithHeartbeat(ctx, w, tokenChan, clientGone, renderer, cachePlan, businessID, userID, promptChars, sseHeartbeatInterval)
+}
+
+func (h *GenerateTextStreamHandler) drainProviderStreamWithHeartbeat(ctx context.Context, w http.ResponseWriter, tokenChan <-chan snips.StreamToken, clientGone chan bool, renderer *streamEventRenderer, cachePlan cacheWritePlan, businessID, userID int64, promptChars int, heartbeatInterval time.Duration) (snips.StreamToken, bool) {
+	heartbeat := time.NewTicker(heartbeatInterval)
+	defer heartbeat.Stop()
+
 	for {
 		select {
 		case token, ok := <-tokenChan:
@@ -836,6 +850,11 @@ func (h *GenerateTextStreamHandler) drainProviderStream(ctx context.Context, w h
 
 		case <-ctx.Done():
 			return snips.StreamToken{}, false
+
+		case <-heartbeat.C:
+			if err := WriteSSEHeartbeat(w, flushResponse(w)); err != nil {
+				return snips.StreamToken{}, false
+			}
 		}
 	}
 }
@@ -1023,13 +1042,14 @@ func flushResponse(w http.ResponseWriter) func() {
 	}
 }
 
-// storeAIResponseDetached persists work after the request has ended. Callers
-// must pass a context already detached from request cancellation.
-func (h *GenerateTextStreamHandler) storeAIResponseDetached(ctx context.Context, sessionID string, userID int, response string) {
-	// Runs in its own goroutine — a panic here must not crash the API process.
+// storeAIResponse persists the completed assistant turn before the stream's
+// done event is acknowledged. The request context is still live at each call
+// site; callers that need detached work should derive that context explicitly.
+func (h *GenerateTextStreamHandler) storeAIResponse(ctx context.Context, sessionID string, userID int, response string) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			logger.Ctx(ctx).Error("panic in storeAIResponse goroutine", logger.Any("panic", r))
+			err = fmt.Errorf("store AI response panic: %v", r)
+			logger.Ctx(ctx).Error("panic while storing AI response", logger.Any("panic", r))
 		}
 	}()
 
@@ -1038,15 +1058,16 @@ func (h *GenerateTextStreamHandler) storeAIResponseDetached(ctx context.Context,
 	storeCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
-	_, err := h.MemoryService.StoreMessage(storeCtx, sessionID, userID, "assistant", response, len(response)/4)
+	_, err = h.MemoryService.StoreMessage(storeCtx, sessionID, userID, "assistant", response, len(response)/4)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to store AI response",
 			logger.Error(err),
 			logger.String("session_id", sessionID),
 			logger.Int("user_id", userID))
+		return err
 	}
 	if !h.claimSessionSummary(sessionID) {
-		return
+		return nil
 	}
 	defer h.releaseSessionSummary(sessionID)
 
@@ -1059,6 +1080,7 @@ func (h *GenerateTextStreamHandler) storeAIResponseDetached(ctx context.Context,
 			logger.String("session_id", sessionID),
 			logger.Int("user_id", userID))
 	}
+	return nil
 }
 
 func (h *GenerateTextStreamHandler) claimSessionSummary(sessionID string) bool {
