@@ -22,6 +22,17 @@ export default defineConfig(() => ({
     hmr: {
       overlay: false,
     },
+    ...(process.env.VITE_API_PROXY_TARGET
+      ? {
+          proxy: {
+            '/api': {
+              target: process.env.VITE_API_PROXY_TARGET,
+              changeOrigin: true,
+              rewrite: (requestPath: string): string => requestPath.replace(/^\/api/, ''),
+            },
+          },
+        }
+      : {}),
   },
   preview: {
     port: 5183,
