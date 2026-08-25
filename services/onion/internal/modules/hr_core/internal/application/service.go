@@ -328,12 +328,12 @@ func (s *Service) SeedDefaultRoles(ctx context.Context, ownerID int64) error {
 		})},
 		{Name: "Manager", Description: "Team manager with approval rights", IsSystem: true, Permissions: mustJSON(map[string]bool{
 			domain.PermissionViewOwnProfile: true, domain.PermissionViewOwnSchedule: true, domain.PermissionRequestTimeOff: true,
-			domain.PermissionViewTeam: true, domain.PermissionApproveTimeOff: true, domain.PermissionManageSchedules: true,
+			domain.PermissionViewTeam: true, domain.PermissionApproveTimeOff: true, domain.PermissionApproveOvertime: true, domain.PermissionManageSchedules: true,
 			domain.PermissionViewDirectory: true,
 		})},
 		{Name: "HR Admin", Description: "Full HR administration access", IsSystem: true, Permissions: mustJSON(map[string]bool{
 			domain.PermissionViewOwnProfile: true, domain.PermissionViewOwnSchedule: true, domain.PermissionRequestTimeOff: true,
-			domain.PermissionViewTeam: true, domain.PermissionApproveTimeOff: true, domain.PermissionManageSchedules: true,
+			domain.PermissionViewTeam: true, domain.PermissionApproveTimeOff: true, domain.PermissionApproveOvertime: true, domain.PermissionManageSchedules: true,
 			domain.PermissionManageEmployees: true, domain.PermissionManageRoles: true, domain.PermissionManageDepartments: true,
 			domain.PermissionManageLocations: true, domain.PermissionManageHRConfig: true, domain.PermissionViewReports: true,
 			domain.PermissionViewDirectory: true,
@@ -344,7 +344,7 @@ func (s *Service) SeedDefaultRoles(ctx context.Context, ownerID int64) error {
 			domain.PermissionViewDirectory: true,
 		})},
 		{Name: "Executive", Description: "Executive-level oversight", IsSystem: true, Permissions: mustJSON(map[string]bool{
-			domain.PermissionViewOwnProfile: true, domain.PermissionViewTeam: true, domain.PermissionApproveTimeOff: true,
+			domain.PermissionViewOwnProfile: true, domain.PermissionViewTeam: true, domain.PermissionApproveTimeOff: true, domain.PermissionApproveOvertime: true,
 			domain.PermissionManageEmployees: true, domain.PermissionManageRoles: true, domain.PermissionManageDepartments: true,
 			domain.PermissionManageLocations: true, domain.PermissionManageHRConfig: true, domain.PermissionManagePayroll: true,
 			domain.PermissionViewReports: true, domain.PermissionManageBenefits: true, domain.PermissionManageApprovalChains: true,

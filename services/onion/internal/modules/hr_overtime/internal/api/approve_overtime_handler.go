@@ -49,7 +49,7 @@ func (h *ApproveOvertimeHandler) Serve(ctx context.Context, req *ApproveOvertime
 	if req.Approved {
 		err = h.Service.ApproveOvertime(ctx, businessID, req.RequestID, device.User.UserID, req.MultiplierApplied)
 	} else {
-		err = h.Service.RejectOvertime(ctx, businessID, req.RequestID)
+		err = h.Service.RejectOvertime(ctx, businessID, req.RequestID, device.User.UserID)
 	}
 
 	if err != nil {
@@ -58,6 +58,15 @@ func (h *ApproveOvertimeHandler) Serve(ctx context.Context, req *ApproveOvertime
 		}
 		if errors.Is(err, domain.ErrApprovalChainNotConfigured) {
 			return ApproveOvertimeRequestRes{}, onekiterrors.New(http.StatusUnprocessableEntity, "Approval chain not configured for overtime requests")
+		}
+		if errors.Is(err, domain.ErrOvertimeRequestNotPending) {
+			return ApproveOvertimeRequestRes{}, onekiterrors.New(http.StatusConflict, "Overtime request has already been processed")
+		}
+		if errors.Is(err, domain.ErrOvertimeAccessDenied) || errors.Is(err, domain.ErrOvertimeApproverNotAllowed) || errors.Is(err, domain.ErrOvertimeSelfApproval) {
+			return ApproveOvertimeRequestRes{}, onekiterrors.PermissionDenied()
+		}
+		if errors.Is(err, domain.ErrOvertimeConfigNotFound) {
+			return ApproveOvertimeRequestRes{}, onekiterrors.New(http.StatusUnprocessableEntity, "Overtime configuration is required before approval")
 		}
 		logger.Ctx(ctx).Error("failed to process overtime approval", logger.Any("business_id", businessID), logger.Any("request_id", req.RequestID), logger.Error(err))
 		return ApproveOvertimeRequestRes{}, onekiterrors.New(http.StatusInternalServerError, "Failed to process overtime approval")

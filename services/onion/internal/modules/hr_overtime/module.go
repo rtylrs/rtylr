@@ -44,6 +44,18 @@ func (a *hrCoreApprovalAdapter) GetApprovalChain(ctx context.Context, ownerID in
 	}, nil
 }
 
+func (a *hrCoreApprovalAdapter) GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int64) (int64, error) {
+	return a.core.GetEmployeeIDByUserID(ctx, ownerID, userID)
+}
+
+func (a *hrCoreApprovalAdapter) HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error) {
+	return a.core.HasPermission(ctx, ownerID, employeeID, permissionKey)
+}
+
+func (a *hrCoreApprovalAdapter) HasRole(ctx context.Context, ownerID, employeeID, roleID int64) (bool, error) {
+	return a.core.HasRole(ctx, ownerID, employeeID, roleID)
+}
+
 type Module struct {
 	service *application.Service
 }
@@ -51,7 +63,7 @@ type Module struct {
 func NewModule(ctx context.Context, db *sql.DB, hrCoreModule *hrcore.Module) *Module {
 	adapter := &hrCoreApprovalAdapter{core: hrCoreModule}
 	return &Module{
-		service: application.NewService(ctx, db, adapter),
+		service: application.NewService(ctx, db, adapter, adapter),
 	}
 }
 

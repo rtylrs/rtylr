@@ -94,20 +94,34 @@ func (r *Repository) CreateOvertimeRequest(ctx context.Context, businessID int64
 }
 
 func (r *Repository) ApproveOvertimeRequest(ctx context.Context, businessID, requestID, approverID int64, multiplier float64) error {
-	return r.queries.ApproveOvertimeRequest(ctx, sqlc.ApproveOvertimeRequestParams{
+	result, err := r.queries.ApproveOvertimeRequest(ctx, sqlc.ApproveOvertimeRequestParams{
 		ApprovedBy:        sql.NullInt64{Int64: approverID, Valid: approverID != 0},
 		MultiplierApplied: nullStringFromFloat(multiplier),
 		ID:                requestID,
 		BusinessID:        businessID,
 	})
+	if err != nil {
+		return err
+	}
+	return overtimeRequestWriteResult(result)
 }
 
-func (r *Repository) AdvanceOvertimeApprovalLevel(ctx context.Context, businessID, requestID int64) error {
-	return r.queries.AdvanceOvertimeApprovalLevel(ctx, sqlc.AdvanceOvertimeApprovalLevelParams{ID: requestID, BusinessID: businessID})
+func (r *Repository) AdvanceOvertimeApprovalLevel(ctx context.Context, businessID, requestID int64, currentLevel int32) error {
+	result, err := r.queries.AdvanceOvertimeApprovalLevel(ctx, sqlc.AdvanceOvertimeApprovalLevelParams{
+		ID: requestID, BusinessID: businessID, CurrentApprovalLevel: currentLevel,
+	})
+	if err != nil {
+		return err
+	}
+	return overtimeRequestWriteResult(result)
 }
 
 func (r *Repository) RejectOvertimeRequest(ctx context.Context, businessID, requestID int64) error {
-	return r.queries.RejectOvertimeRequest(ctx, sqlc.RejectOvertimeRequestParams{ID: requestID, BusinessID: businessID})
+	result, err := r.queries.RejectOvertimeRequest(ctx, sqlc.RejectOvertimeRequestParams{ID: requestID, BusinessID: businessID})
+	if err != nil {
+		return err
+	}
+	return overtimeRequestWriteResult(result)
 }
 
 func (r *Repository) CreateFlaggedOvertimeRequest(ctx context.Context, businessID, employeeID int64, date string, extraMinutes int32) error {
@@ -121,6 +135,9 @@ func (r *Repository) CreateFlaggedOvertimeRequest(ctx context.Context, businessI
 		EmployeeID:          employeeID,
 		Date:                reqDate,
 		PlannedExtraMinutes: extraMinutes,
+		BusinessID_2:        businessID,
+		EmployeeID_2:        employeeID,
+		Date_2:              reqDate,
 	})
 	return err
 }
@@ -139,6 +156,40 @@ func (r *Repository) ListFlaggedForDate(ctx context.Context, businessID int64, d
 		requests = append(requests, overtimeRequestFromRow(row))
 	}
 	return requests, nil
+}
+
+func (r *Repository) ListOvertimeCandidates(ctx context.Context, businessID int64, date string, thresholdMinutes int32) ([]domain.OvertimeDetectionCandidate, error) {
+	d, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		return nil, err
+	}
+	rows, err := r.queries.ListOvertimeCandidates(ctx, sqlc.ListOvertimeCandidatesParams{
+		DurationMinutes:   thresholdMinutes,
+		BusinessID:        businessID,
+		Date:              d,
+		DurationMinutes_2: thresholdMinutes,
+	})
+	if err != nil {
+		return nil, err
+	}
+	candidates := make([]domain.OvertimeDetectionCandidate, 0, len(rows))
+	for _, row := range rows {
+		candidates = append(candidates, domain.OvertimeDetectionCandidate{
+			EmployeeID: row.EmployeeID, Date: row.Date.Format("2006-01-02"), ExtraMinutes: row.ExtraMinutes,
+		})
+	}
+	return candidates, nil
+}
+
+func overtimeRequestWriteResult(result sql.Result) error {
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return domain.ErrOvertimeRequestNotPending
+	}
+	return nil
 }
 
 func (r *Repository) GetOvertimeConfig(ctx context.Context, businessID int64) (*domain.OvertimeConfigRecord, error) {
