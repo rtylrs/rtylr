@@ -3,7 +3,10 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/voxire/onion/internal/modules/store_checkout/internal/domain"
@@ -36,6 +39,11 @@ func (r *Repository) Create(ctx context.Context, businessID, ownerID int64, inpu
 			_ = tx.Rollback()
 		}
 	}()
+	qtx := r.queries.WithTx(tx)
+	input, err = r.priceCheckoutInput(ctx, qtx, ownerID, input)
+	if err != nil {
+		return 0, err
+	}
 
 	if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Email: input.CustomerEmail,
@@ -44,7 +52,7 @@ func (r *Repository) Create(ctx context.Context, businessID, ownerID int64, inpu
 		return 0, err
 	}
 
-	result, err := r.queries.WithTx(tx).CreateCheckout(ctx, sqlc.CreateCheckoutParams{
+	result, err := qtx.CreateCheckout(ctx, sqlc.CreateCheckoutParams{
 		OwnerID:       ownerID,
 		BusinessID:    businessID,
 		SessionID:     sql.NullString{String: input.SessionID, Valid: input.SessionID != ""},
@@ -70,6 +78,84 @@ func (r *Repository) Create(ctx context.Context, businessID, ownerID int64, inpu
 	return id, nil
 }
 
+type checkoutItem struct {
+	ProductID int64 `json:"product_id"`
+	Quantity  int   `json:"quantity"`
+	Qty       int   `json:"qty"`
+}
+
+type pricedCheckoutItem struct {
+	ProductID int64  `json:"product_id"`
+	Quantity  int    `json:"quantity"`
+	Name      string `json:"name"`
+	Price     string `json:"price"`
+	Total     string `json:"total"`
+}
+
+func (r *Repository) priceCheckoutInput(ctx context.Context, qtx *sqlc.Queries, ownerID int64, input domain.CheckoutCreateInput) (domain.CheckoutCreateInput, error) {
+	if len([]byte(input.Items)) == 0 || input.Items == "null" || input.Items == "[]" {
+		return input, nil
+	}
+	var requested []checkoutItem
+	if err := json.Unmarshal([]byte(input.Items), &requested); err != nil {
+		return domain.CheckoutCreateInput{}, fmt.Errorf("invalid checkout items: %w", err)
+	}
+	var subtotalCents, taxCents int64
+	priced := make([]pricedCheckoutItem, 0, len(requested))
+	for _, item := range requested {
+		quantity := item.Quantity
+		if quantity == 0 {
+			quantity = item.Qty
+		}
+		if item.ProductID <= 0 || quantity <= 0 {
+			return domain.CheckoutCreateInput{}, errors.New("checkout items must reference positive catalog products and quantities")
+		}
+		product, err := qtx.GetCheckoutProductPricing(ctx, sqlc.GetCheckoutProductPricingParams{OwnerID: ownerID, ID: item.ProductID})
+		if err != nil {
+			return domain.CheckoutCreateInput{}, fmt.Errorf("load checkout product %d: %w", item.ProductID, err)
+		}
+		unitCents, err := decimalCents(product.SalePrice)
+		if err != nil || unitCents < 0 {
+			return domain.CheckoutCreateInput{}, fmt.Errorf("invalid catalog price for product %d", item.ProductID)
+		}
+		taxRate, err := strconv.ParseFloat(product.TaxRate, 64)
+		if err != nil || taxRate < 0 || math.IsNaN(taxRate) || math.IsInf(taxRate, 0) {
+			return domain.CheckoutCreateInput{}, fmt.Errorf("invalid catalog tax for product %d", item.ProductID)
+		}
+		lineCents := unitCents * int64(quantity)
+		subtotalCents += lineCents
+		taxCents += int64(math.Round(float64(lineCents) * taxRate / 100))
+		priced = append(priced, pricedCheckoutItem{
+			ProductID: item.ProductID,
+			Quantity:  quantity,
+			Name:      product.Name,
+			Price:     centsString(unitCents),
+			Total:     centsString(lineCents),
+		})
+	}
+	encoded, err := json.Marshal(priced)
+	if err != nil {
+		return domain.CheckoutCreateInput{}, err
+	}
+	input.Items = string(encoded)
+	input.Subtotal = domain.CentsToFloat(subtotalCents)
+	input.Tax = domain.CentsToFloat(taxCents)
+	input.Total = domain.CentsToFloat(subtotalCents + taxCents)
+	return input, nil
+}
+
+func decimalCents(value string) (int64, error) {
+	amount, err := strconv.ParseFloat(value, 64)
+	if err != nil || math.IsNaN(amount) || math.IsInf(amount, 0) {
+		return 0, errors.New("invalid decimal amount")
+	}
+	return int64(math.Round(amount * 100)), nil
+}
+
+func centsString(cents int64) string {
+	return strconv.FormatFloat(float64(cents)/100, 'f', 2, 64)
+}
+
 func (r *Repository) Complete(ctx context.Context, businessID, id, _ int64) error {
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
@@ -89,11 +175,14 @@ func (r *Repository) Complete(ctx context.Context, businessID, id, _ int64) erro
 		ID:         id,
 	})
 	if errors.Is(err, sql.ErrNoRows) {
-		err = nil
+		return sql.ErrNoRows
 	} else if err != nil {
 		logger.Ctx(ctx).Error("Failed to load checkout customer", logger.Error(err))
 		return err
 	} else {
+		if checkout.Status.Valid && checkout.Status.StoreCheckoutsStatus == sqlc.StoreCheckoutsStatus("completed") {
+			return nil
+		}
 		customerEmail = checkout.CustomerEmail
 		totalString = checkout.Total
 		total, parseErr := strconv.ParseFloat(totalString, 64)

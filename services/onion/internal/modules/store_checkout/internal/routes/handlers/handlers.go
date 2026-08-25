@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/store_checkout/internal/application"
 	"github.com/voxire/onion/internal/modules/store_checkout/internal/domain"
@@ -34,6 +35,9 @@ type CreateResponse struct {
 func (h *CreateHandler) Validate(_ context.Context, req *CreateRequest) error {
 	if req.SessionID == "" {
 		return onekiterrors.New(http.StatusBadRequest, "session_id is required")
+	}
+	if strings.TrimSpace(req.Items) == "" && (req.Subtotal != 0 || req.Tax != 0 || req.Total != 0) {
+		return onekiterrors.New(http.StatusBadRequest, "catalog items are required for a non-zero checkout")
 	}
 	return nil
 }
