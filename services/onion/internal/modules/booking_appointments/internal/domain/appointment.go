@@ -1,6 +1,15 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var (
+	ErrTimeSlotUnavailable = errors.New("appointment time slot is unavailable")
+	ErrInvalidStatus       = errors.New("invalid appointment status transition")
+	ErrInvalidReference    = errors.New("appointment reference is not owned by the business")
+)
 
 type Appointment struct {
 	ID            int64     `json:"id"`
