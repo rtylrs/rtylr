@@ -224,7 +224,16 @@ func (r *Repository) PostPayrollJournal(ctx context.Context, input domain.Payrol
 		_ = tx.Rollback()
 		return err
 	}
-	deductions := roundMoney(input.TotalGross - input.TotalNet)
+	gross := roundMoney(input.TotalGross)
+	net := roundMoney(input.TotalNet)
+	// Derive the deductions line from the rounded ledger values. Rounding the
+	// unrounded difference independently can leave the entry one cent short or
+	// over, which violates double-entry balance.
+	deductions := roundMoney(gross - net)
+	if deductions < 0 {
+		_ = tx.Rollback()
+		return fmt.Errorf("payroll deductions cannot be negative after rounding")
+	}
 	description := fmt.Sprintf("Payroll %d: %s to %s", input.RunID, input.PeriodStart, input.PeriodEnd)
 	result, err := tx.ExecContext(ctx, `
 		INSERT INTO finance_journal_entries
@@ -246,8 +255,8 @@ func (r *Repository) PostPayrollJournal(ctx context.Context, input domain.Payrol
 		debit     float64
 		credit    float64
 	}{
-		{accountID: expenseAccountID, debit: roundMoney(input.TotalGross)},
-		{accountID: payableAccountID, credit: roundMoney(input.TotalNet)},
+		{accountID: expenseAccountID, debit: gross},
+		{accountID: payableAccountID, credit: net},
 	}
 	if deductions > 0 {
 		deductionsAccountID, accountErr := r.lockConfiguredPayrollAccount(ctx, tx, input.BusinessID, mapping.DeductionsPayableAccountID, "liability")
@@ -260,6 +269,15 @@ func (r *Repository) PostPayrollJournal(ctx context.Context, input domain.Payrol
 			debit     float64
 			credit    float64
 		}{accountID: deductionsAccountID, credit: deductions})
+	}
+	var totalDebits, totalCredits float64
+	for _, line := range lines {
+		totalDebits += line.debit
+		totalCredits += line.credit
+	}
+	if roundMoney(totalDebits-totalCredits) != 0 {
+		_ = tx.Rollback()
+		return fmt.Errorf("payroll journal is unbalanced: debits=%0.2f credits=%0.2f", totalDebits, totalCredits)
 	}
 	for _, line := range lines {
 		if _, err := tx.ExecContext(ctx, `
