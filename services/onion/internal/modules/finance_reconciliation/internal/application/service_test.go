@@ -155,11 +155,11 @@ func TestComputeSuggestions_EmptyInputs(t *testing.T) {
 func TestComputeSuggestions_PerfectMatchSortsFirst(t *testing.T) {
 	now := time.Now().Truncate(24 * time.Hour)
 	bank := []domain.UnmatchedBankTransaction{
-		{ID: 100, AmountMinorUnits: -10000, OccurredAt: now},
+		{ID: 100, AmountMinorUnits: -10000, Currency: "usd", OccurredAt: now},
 	}
 	invoices := []domain.UnmatchedInvoice{
-		{ID: 1, AmountMinorUnits: 10000, DueDate: now}, // exact same day, exact amount → score 0
-		{ID: 2, AmountMinorUnits: 10000, DueDate: now.AddDate(0, 0, 5)},
+		{ID: 1, AmountMinorUnits: 10000, Currency: "USD", DueDate: now}, // exact same day, exact amount → score 0
+		{ID: 2, AmountMinorUnits: 10000, Currency: "USD", DueDate: now.AddDate(0, 0, 5)},
 	}
 	suggestions := computeSuggestions(bank, invoices, nil)
 	if len(suggestions) == 0 {
@@ -176,10 +176,10 @@ func TestComputeSuggestions_PerfectMatchSortsFirst(t *testing.T) {
 func TestComputeSuggestions_DropsHighScoreCandidates(t *testing.T) {
 	now := time.Now()
 	bank := []domain.UnmatchedBankTransaction{
-		{ID: 100, AmountMinorUnits: -1_000_000, OccurredAt: now},
+		{ID: 100, AmountMinorUnits: -1_000_000, Currency: "USD", OccurredAt: now},
 	}
 	invoices := []domain.UnmatchedInvoice{
-		{ID: 1, AmountMinorUnits: 10, DueDate: now.AddDate(0, 0, 365)}, // huge amount + date diff
+		{ID: 1, AmountMinorUnits: 10, Currency: "USD", DueDate: now.AddDate(0, 0, 365)}, // huge amount + date diff
 	}
 	got := computeSuggestions(bank, invoices, nil)
 	if len(got) != 0 {
@@ -190,10 +190,10 @@ func TestComputeSuggestions_DropsHighScoreCandidates(t *testing.T) {
 func TestComputeSuggestions_ExpensesAreTagged(t *testing.T) {
 	now := time.Now()
 	bank := []domain.UnmatchedBankTransaction{
-		{ID: 7, AmountMinorUnits: 5000, OccurredAt: now},
+		{ID: 7, AmountMinorUnits: 5000, Currency: "USD", OccurredAt: now},
 	}
 	expenses := []domain.UnmatchedInvoice{
-		{ID: 42, AmountMinorUnits: 5000, IssueDate: now},
+		{ID: 42, AmountMinorUnits: 5000, Currency: "USD", IssueDate: now},
 	}
 	got := computeSuggestions(bank, nil, expenses)
 	if len(got) != 1 {
@@ -204,18 +204,31 @@ func TestComputeSuggestions_ExpensesAreTagged(t *testing.T) {
 	}
 }
 
+func TestComputeSuggestions_DropsCrossCurrencyCandidates(t *testing.T) {
+	now := time.Now()
+	bank := []domain.UnmatchedBankTransaction{
+		{ID: 1, AmountMinorUnits: 10000, Currency: "USD", OccurredAt: now},
+	}
+	invoices := []domain.UnmatchedInvoice{
+		{ID: 2, AmountMinorUnits: 10000, Currency: "EUR", DueDate: now},
+	}
+	if got := computeSuggestions(bank, invoices, nil); len(got) != 0 {
+		t.Fatalf("expected no cross-currency suggestions, got %v", got)
+	}
+}
+
 func TestComputeSuggestions_CapsAtMaxSuggestions(t *testing.T) {
 	now := time.Now()
 	bank := []domain.UnmatchedBankTransaction{}
 	invoices := []domain.UnmatchedInvoice{}
 	for i := 0; i < 100; i++ {
 		bank = append(bank, domain.UnmatchedBankTransaction{
-			ID: int64(i + 1), AmountMinorUnits: 1000, OccurredAt: now,
+			ID: int64(i + 1), AmountMinorUnits: 1000, Currency: "USD", OccurredAt: now,
 		})
 	}
 	for i := 0; i < 100; i++ {
 		invoices = append(invoices, domain.UnmatchedInvoice{
-			ID: int64(i + 1000), AmountMinorUnits: 1000, DueDate: now,
+			ID: int64(i + 1000), AmountMinorUnits: 1000, Currency: "USD", DueDate: now,
 		})
 	}
 	got := computeSuggestions(bank, invoices, nil)
