@@ -121,6 +121,8 @@ func getPositiveQueryInt(r *http.Request, name string, fallback int) int {
 	}
 	value, err := strconv.Atoi(raw)
 	if err != nil || value < 0 {
+		logger.Global().Warn("invalid console query parameter",
+			logger.String("parameter", name), logger.String("value", raw))
 		return fallback
 	}
 	return value
