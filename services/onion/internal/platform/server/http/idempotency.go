@@ -5,8 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
@@ -61,6 +63,14 @@ func IdempotencyMiddleware(next http.Handler) http.Handler {
 
 		key := strings.TrimSpace(r.Header.Get(idempotencyHeader))
 		if key == "" {
+			if requiresIdempotencyKey(r) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusPreconditionRequired)
+				if _, writeErr := w.Write([]byte(`{"error":"Idempotency-Key is required for this operation"}`)); writeErr != nil {
+					logger.Ctx(r.Context()).Warn("failed to write required idempotency key response", logger.Error(writeErr))
+				}
+				return
+			}
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -158,9 +168,12 @@ func reserveIdempotencyKey(ctx context.Context, store idempotencyRedisStore, key
 }
 
 // serveIdempotentLocal is the single-replica fallback used when Redis is off:
-// dedup against the in-process cache. There is no cross-replica guarantee here
-// (there is only one replica), so a simple get-or-run is sufficient.
+// dedup against the in-process cache. The keyed reservation closes the
+// get-then-run race so concurrent retries cannot execute the handler twice.
 func serveIdempotentLocal(w http.ResponseWriter, r *http.Request, next http.Handler, cacheKey string) {
+	reservation := acquireLocalIdempotencyReservation(cacheKey)
+	defer reservation.release()
+
 	lc := cacher.GetLocalCache(r.Context())
 
 	if cached := lc.Get(r.Context(), cacheKey); cached != nil {
@@ -186,6 +199,46 @@ func serveIdempotentLocal(w http.ResponseWriter, r *http.Request, next http.Hand
 	}
 }
 
+type localIdempotencyReservation struct {
+	mu   sync.Mutex
+	refs int
+}
+
+var localIdempotencyReservations = struct {
+	sync.Mutex
+	entries map[string]*localIdempotencyReservation
+}{entries: make(map[string]*localIdempotencyReservation)}
+
+func acquireLocalIdempotencyReservation(key string) *localIdempotencyReservation {
+	localIdempotencyReservations.Lock()
+	reservation := localIdempotencyReservations.entries[key]
+	if reservation == nil {
+		reservation = &localIdempotencyReservation{}
+		localIdempotencyReservations.entries[key] = reservation
+	}
+	reservation.refs++
+	localIdempotencyReservations.Unlock()
+
+	reservation.mu.Lock()
+	return reservation
+}
+
+func (r *localIdempotencyReservation) release() {
+	r.mu.Unlock()
+
+	localIdempotencyReservations.Lock()
+	r.refs--
+	if r.refs == 0 {
+		for key, candidate := range localIdempotencyReservations.entries {
+			if candidate == r {
+				delete(localIdempotencyReservations.entries, key)
+				break
+			}
+		}
+	}
+	localIdempotencyReservations.Unlock()
+}
+
 func idempotencyCacheContext(ctx context.Context) (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.WithoutCancel(ctx), idempotencyCacheWriteTimeout)
 }
@@ -206,28 +259,54 @@ func writeIdempotentReplay(w http.ResponseWriter, rec idempotencyRecord) {
 }
 
 func buildIdempotencyKey(r *http.Request, key string) string {
-	principal := r.RemoteAddr
+	principal := anonymousIdempotencyPrincipal(r.RemoteAddr)
 	if authUser, ok := authPkg.GetAuthUser(r.Context()); ok {
 		principal = fmt.Sprintf("u%d", authUser.UserID)
 	}
 	return fmt.Sprintf("idem:%s:%s", principal, key)
 }
 
-func storeIdempotencyRecord(ctx context.Context, cacheKey string, rec *responseRecorder, persist func(context.Context, string, []byte)) {
-	body := rec.buf.Bytes()
-	if len(body) > idempotencyMaxStoredBodyBytes {
-		logger.Ctx(ctx).Warn("skipping idempotency cache for oversized response body",
-			logger.Int("bytes", len(body)),
-			logger.Int("limit", idempotencyMaxStoredBodyBytes),
-		)
-		return
+func anonymousIdempotencyPrincipal(remoteAddr string) string {
+	if host, _, err := net.SplitHostPort(remoteAddr); err == nil {
+		return host
+	}
+	if remoteAddr == "" {
+		return "anonymous"
+	}
+	return remoteAddr
+}
+
+func requiresIdempotencyKey(r *http.Request) bool {
+	path := strings.TrimSuffix(r.URL.Path, "/")
+
+	switch path {
+	case "/pos/orders/payment", "/pos/stock/v1/transfer", "/finance/invoices/payment":
+		return true
 	}
 
+	return (strings.HasPrefix(path, "/pos/orders/") && strings.HasSuffix(path, "/payment")) ||
+		(strings.HasPrefix(path, "/finance/invoices/payments/v1/invoices/") && strings.HasSuffix(path, "/payment")) ||
+		(strings.HasPrefix(path, "/finance/invoices/v1/invoices/") && strings.HasSuffix(path, "/send")) ||
+		path == "/erp/stock-transfer/v1/stock-transfers" ||
+		(strings.HasPrefix(path, "/erp/stock-transfer/v1/stock-transfers/") && strings.HasSuffix(path, "/status")) ||
+		(strings.HasPrefix(path, "/pos/orders/") && strings.HasSuffix(path, "/pay"))
+}
+
+func storeIdempotencyRecord(ctx context.Context, cacheKey string, rec *responseRecorder, persist func(context.Context, string, []byte)) {
+	body := rec.buf.Bytes()
 	entry := idempotencyRecord{
 		Status:  rec.status,
 		Headers: idempotencyHeadersForReplay(rec.Header()),
 		Body:    body,
 	}
+	if len(body) > idempotencyMaxStoredBodyBytes {
+		logger.Ctx(ctx).Warn("storing idempotency tombstone for oversized response body",
+			logger.Int("bytes", len(body)),
+			logger.Int("limit", idempotencyMaxStoredBodyBytes),
+		)
+		entry.Body = nil
+	}
+
 	payload, err := json.Marshal(entry)
 	if err != nil {
 		logger.Ctx(ctx).Warn("failed to marshal idempotency record", logger.Error(err))

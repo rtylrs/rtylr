@@ -1,7 +1,9 @@
 package http
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -110,6 +112,109 @@ func TestReserveIdempotencyKeyDoesNotProceedWithoutReservation(t *testing.T) {
 	reserved, cached := reserveIdempotencyKey(context.Background(), store, "key", []byte(`{"status":0}`))
 	if reserved || cached != nil {
 		t.Fatalf("reserved=%t cached=%q, want no reservation", reserved, cached)
+	}
+}
+
+func TestAnonymousIdempotencyPrincipalIgnoresEphemeralPort(t *testing.T) {
+	first := anonymousIdempotencyPrincipal("192.0.2.10:41000")
+	second := anonymousIdempotencyPrincipal("192.0.2.10:42000")
+	if first != second || first != "192.0.2.10" {
+		t.Fatalf("principals = %q, %q; want stable IP-only principal", first, second)
+	}
+
+	if got := anonymousIdempotencyPrincipal("[2001:db8::10]:41000"); got != "2001:db8::10" {
+		t.Fatalf("IPv6 principal = %q", got)
+	}
+}
+
+func TestLocalIdempotencyReservationSerializesSameKey(t *testing.T) {
+	first := acquireLocalIdempotencyReservation("test-key")
+	secondAcquired := make(chan struct{})
+	secondReleased := make(chan struct{})
+	go func() {
+		second := acquireLocalIdempotencyReservation("test-key")
+		close(secondAcquired)
+		second.release()
+		close(secondReleased)
+	}()
+
+	select {
+	case <-secondAcquired:
+		t.Fatal("same-key reservation acquired concurrently")
+	case <-time.After(20 * time.Millisecond):
+	}
+
+	first.release()
+	select {
+	case <-secondReleased:
+	case <-time.After(time.Second):
+		t.Fatal("same-key reservation did not release")
+	}
+}
+
+func TestStoreIdempotencyRecordUsesTombstoneForOversizedBody(t *testing.T) {
+	underlying := httptest.NewRecorder()
+	rec := &responseRecorder{ResponseWriter: underlying, status: http.StatusCreated}
+	largeBody := bytes.Repeat([]byte("x"), idempotencyMaxStoredBodyBytes+1)
+	if _, err := rec.Write(largeBody); err != nil {
+		t.Fatalf("Write: %v", err)
+	}
+
+	var payload []byte
+	storeIdempotencyRecord(context.Background(), "key", rec, func(_ context.Context, _ string, got []byte) {
+		payload = got
+	})
+	if len(payload) == 0 {
+		t.Fatal("expected oversized response tombstone to be persisted")
+	}
+
+	var entry idempotencyRecord
+	if err := json.Unmarshal(payload, &entry); err != nil {
+		t.Fatalf("unmarshal tombstone: %v", err)
+	}
+	if entry.Status != http.StatusCreated || len(entry.Body) != 0 {
+		t.Fatalf("tombstone = status %d, body %d bytes; want 201 and empty body", entry.Status, len(entry.Body))
+	}
+}
+
+func TestRequiresIdempotencyKeyForCriticalMutations(t *testing.T) {
+	tests := []struct {
+		name     string
+		method   string
+		path     string
+		required bool
+	}{
+		{name: "order payment", method: http.MethodPost, path: "/pos/orders/123/payment", required: true},
+		{name: "paddle webhook", method: http.MethodPost, path: "/pos/payments/webhook", required: false},
+		{name: "invoice send", method: http.MethodPost, path: "/finance/invoices/v1/invoices/123/send", required: true},
+		{name: "stock transfer", method: http.MethodPost, path: "/erp/stock-transfer/v1/stock-transfers", required: true},
+		{name: "ordinary update", method: http.MethodPatch, path: "/finance/invoices/v1/invoices/123/status", required: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := httptest.NewRequest(tt.method, tt.path, nil)
+			if got := requiresIdempotencyKey(r); got != tt.required {
+				t.Fatalf("requiresIdempotencyKey = %t, want %t", got, tt.required)
+			}
+		})
+	}
+}
+
+func TestIdempotencyMiddlewareRejectsCriticalMutationWithoutKey(t *testing.T) {
+	nextCalled := false
+	handler := IdempotencyMiddleware(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		nextCalled = true
+	}))
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/finance/invoices/v1/invoices/123/send", nil)
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusPreconditionRequired {
+		t.Fatalf("status = %d, want %d", rec.Code, http.StatusPreconditionRequired)
+	}
+	if nextCalled {
+		t.Fatal("critical mutation reached handler without an idempotency key")
 	}
 }
 
