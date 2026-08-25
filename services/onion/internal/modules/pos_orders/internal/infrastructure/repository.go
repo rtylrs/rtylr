@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
@@ -705,6 +706,10 @@ func (r *Repository) CreateOrder(ctx context.Context, businessID, staffID int64,
 	}()
 
 	qtx := r.queries.WithTx(tx)
+	input.Items, err = r.resolveOrderItems(ctx, qtx, businessID, staffID, input)
+	if err != nil {
+		return 0, err
+	}
 
 	// Compute per-item discount and totals once; reuse them in the insert loop
 	// below instead of recomputing the same arithmetic a second time.
@@ -754,6 +759,10 @@ func (r *Repository) CreateOrder(ctx context.Context, businessID, staffID int64,
 	}
 
 	for i, item := range input.Items {
+		modifierJSON, marshalErr := json.Marshal(item.ModifierIDs)
+		if marshalErr != nil {
+			return 0, marshalErr
+		}
 		_, err = qtx.CreateOrderItem(ctx, sqlc.CreateOrderItemParams{
 			OrderID:        orderID,
 			MenuItemID:     nullInt64(item.MenuItemID),
@@ -766,6 +775,8 @@ func (r *Repository) CreateOrder(ctx context.Context, businessID, staffID int64,
 			TaxRate:        sql.NullString{String: floatToDecimal(item.TaxRate), Valid: true},
 			Total:          floatToDecimal(itemTotals[i]),
 			Notes:          nullString(item.Notes),
+			Modifiers:      modifierJSON,
+			ComboID:        nullInt64(item.ComboID),
 		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to insert order item", logger.Error(err))
@@ -801,6 +812,133 @@ func (r *Repository) CreateOrder(ctx context.Context, businessID, staffID int64,
 	}
 
 	return orderID, nil
+}
+
+func (r *Repository) resolveOrderItems(ctx context.Context, qtx *sqlc.Queries, businessID, staffID int64, input domain.OrderInput) ([]domain.OrderItemInput, error) {
+	items := make([]domain.OrderItemInput, len(input.Items))
+	copy(items, input.Items)
+
+	needsDiscountCapability := false
+	for _, item := range items {
+		if item.DiscountPct > 0 {
+			needsDiscountCapability = true
+			break
+		}
+	}
+
+	var maxDiscountPct float64
+	var canApplyDiscount bool
+	if needsDiscountCapability {
+		capability, err := qtx.GetPOSUserCapabilities(ctx, sqlc.GetPOSUserCapabilitiesParams{
+			BusinessID:   businessID,
+			UserID:       staffID,
+			LocationID:   input.LocationID,
+			Column4:      input.LocationID,
+			LocationID_2: input.LocationID,
+		})
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, domain.ErrDiscountNotAllowed
+			}
+			return nil, err
+		}
+		canApplyDiscount = capability.CanApplyDiscount.Valid && capability.CanApplyDiscount.Bool
+		maxDiscountPct = decimalToFloat(capability.MaxDiscountPct.String)
+		if maxDiscountPct > 100 {
+			maxDiscountPct = 100
+		}
+	}
+
+	for i := range items {
+		item := &items[i]
+		if item.DiscountPct < 0 || item.DiscountPct > 100 {
+			return nil, domain.ErrDiscountExceedsLimit
+		}
+		if item.DiscountPct > 0 {
+			if !canApplyDiscount {
+				return nil, domain.ErrDiscountNotAllowed
+			}
+			if item.DiscountPct > maxDiscountPct {
+				return nil, domain.ErrDiscountExceedsLimit
+			}
+		}
+
+		modifierTotal, err := r.resolveModifierTotal(ctx, qtx, businessID, item.ModifierIDs)
+		if err != nil {
+			return nil, err
+		}
+
+		if item.ComboID > 0 {
+			if item.MenuItemID > 0 {
+				return nil, domain.ErrPricedItemNotFound
+			}
+			combo, comboErr := qtx.GetPOSComboForOrder(ctx, sqlc.GetPOSComboForOrderParams{
+				BusinessID: businessID,
+				ID:         item.ComboID,
+			})
+			if comboErr != nil {
+				if errors.Is(comboErr, sql.ErrNoRows) {
+					return nil, domain.ErrPricedItemNotFound
+				}
+				return nil, comboErr
+			}
+			item.Name = combo.Name
+			item.SKU = ""
+			item.UnitPrice = decimalToFloat(combo.Price) + modifierTotal
+			item.TaxRate = 0
+		} else {
+			if item.MenuItemID <= 0 {
+				return nil, domain.ErrPricedItemNotFound
+			}
+			product, productErr := qtx.GetPublicMenuItem(ctx, sqlc.GetPublicMenuItemParams{
+				BusinessID: businessID,
+				ID:         item.MenuItemID,
+			})
+			if productErr != nil {
+				if errors.Is(productErr, sql.ErrNoRows) {
+					return nil, domain.ErrPricedItemNotFound
+				}
+				return nil, productErr
+			}
+			item.Name = product.Name
+			item.SKU = product.Sku.String
+			item.UnitPrice = decimalToFloat(product.SalePrice) + modifierTotal
+			item.TaxRate = decimalToFloat(product.TaxRate)
+		}
+		if item.UnitPrice < 0 {
+			return nil, domain.ErrPricedItemNotFound
+		}
+	}
+
+	return items, nil
+}
+
+func (r *Repository) resolveModifierTotal(ctx context.Context, qtx *sqlc.Queries, businessID int64, modifierIDs []int64) (float64, error) {
+	if len(modifierIDs) == 0 {
+		return 0, nil
+	}
+	seen := make(map[int64]struct{}, len(modifierIDs))
+	for _, id := range modifierIDs {
+		if id <= 0 {
+			return 0, domain.ErrPricedItemNotFound
+		}
+		if _, exists := seen[id]; exists {
+			return 0, domain.ErrPricedItemNotFound
+		}
+		seen[id] = struct{}{}
+	}
+
+	row, err := qtx.GetPOSModifierTotal(ctx, sqlc.GetPOSModifierTotalParams{
+		BusinessID:  businessID,
+		ModifierIds: modifierIDs,
+	})
+	if err != nil {
+		return 0, err
+	}
+	if row.ModifierCount != int64(len(modifierIDs)) {
+		return 0, domain.ErrPricedItemNotFound
+	}
+	return interfaceToFloat(row.PriceDelta), nil
 }
 
 func (r *Repository) UpdateOrderStatus(ctx context.Context, businessID, orderID int64, status domain.OrderStatus) error {
@@ -1385,8 +1523,57 @@ func (r *Repository) SplitOrder(ctx context.Context, businessID, orderID int64, 
 	return newOrderIDs, nil
 }
 
-func (r *Repository) ApplyDiscount(ctx context.Context, businessID int64, input domain.DiscountInput) error {
-	financials, err := r.queries.GetOrderSubtotal(ctx, sqlc.GetOrderSubtotalParams{
+func (r *Repository) ApplyDiscount(ctx context.Context, businessID, staffID int64, input domain.DiscountInput) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	qtx := r.queries.WithTx(tx)
+
+	paymentStatus, err := qtx.GetOrderForDiscount(ctx, sqlc.GetOrderForDiscountParams{
+		BusinessID: businessID,
+		ID:         input.OrderID,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrOrderNotFound
+		}
+		return err
+	}
+	if paymentStatus.PosOrdersPaymentStatus == sqlc.PosOrdersPaymentStatusPaid || paymentStatus.PosOrdersPaymentStatus == sqlc.PosOrdersPaymentStatusRefunded {
+		return domain.ErrOrderCannotBeDiscounted
+	}
+
+	locationID, err := qtx.GetOrderLocationID(ctx, sqlc.GetOrderLocationIDParams{
+		BusinessID: businessID,
+		ID:         input.OrderID,
+	})
+	if err != nil {
+		return err
+	}
+	capability, err := qtx.GetPOSUserCapabilities(ctx, sqlc.GetPOSUserCapabilitiesParams{
+		BusinessID:   businessID,
+		UserID:       staffID,
+		LocationID:   locationID,
+		Column4:      locationID,
+		LocationID_2: locationID,
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrDiscountNotAllowed
+		}
+		return err
+	}
+	if !capability.CanApplyDiscount.Valid || !capability.CanApplyDiscount.Bool {
+		return domain.ErrDiscountNotAllowed
+	}
+	maxDiscountPct := decimalToFloat(capability.MaxDiscountPct.String)
+	if maxDiscountPct > 100 {
+		maxDiscountPct = 100
+	}
+
+	financials, err := qtx.GetOrderSubtotal(ctx, sqlc.GetOrderSubtotalParams{
 		BusinessID: businessID,
 		ID:         input.OrderID,
 	})
@@ -1400,10 +1587,16 @@ func (r *Repository) ApplyDiscount(ctx context.Context, businessID int64, input 
 	subtotal := interfaceToFloat(financials.Subtotal)
 	taxAmount := interfaceToFloat(financials.TaxAmount)
 	var discountAmount float64
-	if input.DiscountType == "percentage" {
+	if input.DiscountType == "percentage" || input.DiscountType == "percent" || input.DiscountType == "pct" {
+		if input.DiscountValue > maxDiscountPct {
+			return domain.ErrDiscountExceedsLimit
+		}
 		discountAmount = subtotal * input.DiscountValue / 100
 	} else {
 		discountAmount = input.DiscountValue
+		if subtotal <= 0 || discountAmount > subtotal*maxDiscountPct/100 {
+			return domain.ErrDiscountExceedsLimit
+		}
 	}
 	// Accumulate with any existing order-level discount so a second
 	// application neither erases the first from the money nor the audit.
@@ -1414,7 +1607,7 @@ func (r *Repository) ApplyDiscount(ctx context.Context, businessID int64, input 
 		newTotal = 0
 	}
 
-	err = r.queries.ApplyDiscount(ctx, sqlc.ApplyDiscountParams{
+	err = qtx.ApplyDiscount(ctx, sqlc.ApplyDiscountParams{
 		DiscountAmount: sql.NullString{String: floatToDecimal(totalDiscount), Valid: true},
 		Total:          sql.NullString{String: floatToDecimal(newTotal), Valid: true},
 		CONCAT:         fmt.Sprintf(" [Discount: %s]", input.Reason),
@@ -1425,7 +1618,7 @@ func (r *Repository) ApplyDiscount(ctx context.Context, businessID int64, input 
 		logger.Ctx(ctx).Error("Failed to apply discount", logger.Error(err))
 		return err
 	}
-	return nil
+	return tx.Commit()
 }
 
 func (r *Repository) VoidOrder(ctx context.Context, businessID, orderID int64, reason string) error {
