@@ -1057,14 +1057,35 @@ func (r *Repository) ExportCustomerData(ctx context.Context, businessID, custome
 		return domain.CustomerExport{}, err
 	}
 
-	txs, _, err := r.ListLoyaltyTransactions(ctx, businessID, customerID, 1, 100)
-	if err != nil {
-		return domain.CustomerExport{}, err
+	const exportPageSize = 100
+	txs := make([]domain.LoyaltyTransaction, 0)
+	for page := 1; ; page++ {
+		pageTxs, total, pageErr := r.ListLoyaltyTransactions(ctx, businessID, customerID, page, exportPageSize)
+		if pageErr != nil {
+			return domain.CustomerExport{}, pageErr
+		}
+		txs = append(txs, pageTxs...)
+		if len(txs) >= total || len(pageTxs) < exportPageSize {
+			break
+		}
 	}
 
-	timeline, err := r.GetCustomerTimeline(ctx, businessID, customerID)
-	if err != nil {
-		return domain.CustomerExport{}, err
+	timeline := make([]domain.TimelineEntry, 0)
+	var cursorCreatedAt *time.Time
+	var cursorID int64
+	for {
+		pageEntries, pageErr := r.ListCustomerTimelinePage(ctx, businessID, customerID, cursorCreatedAt, cursorID, exportPageSize)
+		if pageErr != nil {
+			return domain.CustomerExport{}, pageErr
+		}
+		timeline = append(timeline, pageEntries...)
+		if len(pageEntries) < exportPageSize {
+			break
+		}
+		last := pageEntries[len(pageEntries)-1]
+		lastCreatedAt := last.CreatedAt
+		cursorCreatedAt = &lastCreatedAt
+		cursorID = last.ID
 	}
 
 	return domain.CustomerExport{
