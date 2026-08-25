@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import TrialBanner from '../shared/components/TrialBanner';
-import { Link, useLocation, useParams, useRouterState } from '@tanstack/react-router';
+import { Link, useLocation, useNavigate, useParams, useRouterState } from '@tanstack/react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Inbox,
@@ -80,6 +80,8 @@ import { routeNeedsRealtime } from '../shared/lib/realtimeRouteGate';
 import { useFlowTeam } from '../shared/hooks/queries/useFlowTeam';
 import { initialsFromName } from '../shared/lib/memberUtils';
 import RealtimeConnectionIndicator from '../shared/components/RealtimeConnectionIndicator';
+import { SidebarNavigation } from '../shared/components/SidebarNavigation';
+import { recordRecentSidebarPage, useSidebarPreferences } from '../shared/lib/sidebarPreferences';
 
 /** Horizontal inset for sidebar content (single column). */
 const sx = 'px-3';
@@ -236,6 +238,7 @@ interface FlowLayoutProps {
 const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
   const search = useRouterState({ select: (s) => s.location.searchStr });
   const { workspaceId, projectId } = useParams({ strict: false });
   const showPreviewRoutes = useFeatureFlag(FLAG_KEYS.APP_FLOW_PREVIEW_ROUTES);
@@ -243,6 +246,11 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
   const { toggle: toggleSidebarSection, isCollapsed: isSidebarSectionCollapsed } =
     useSidebarSections();
   const { order: sidebarSectionOrder, moveSection: moveSidebarSection } = useSidebarSectionOrder();
+  const {
+    preferences: sidebarPreferences,
+    update: updateSidebarPreferences,
+    isLoading: sidebarPreferencesLoading,
+  } = useSidebarPreferences();
   const { prefs: lifePrefs } = useLifePreferences();
 
   const authUser = useAuthUserStore((s) => s.user);
@@ -498,6 +506,15 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
                   : location.pathname.startsWith('/settings')
                     ? t('nav.settings')
                     : t('flow.shell.workspace');
+  const lastRecentRoute = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (sidebarPreferencesLoading) return;
+    if (lastRecentRoute.current === location.pathname) return;
+    lastRecentRoute.current = location.pathname;
+    updateSidebarPreferences((draft) =>
+      recordRecentSidebarPage(draft, location.pathname, flowPageTitle)
+    );
+  }, [flowPageTitle, location.pathname, sidebarPreferencesLoading, updateSidebarPreferences]);
   const caretPageContext = useMemo(
     () =>
       buildCaretRouteContext({
@@ -701,354 +718,390 @@ const FlowLayout: React.FC<FlowLayoutProps> = ({ children }) => {
             </button>
           </div>
 
-          <div ref={sidebarRef} className={cn('flex-1 min-h-0 overflow-y-auto py-2', sx)}>
-            <div className="flex flex-col gap-2">
-              <nav className="flex flex-col gap-px">
-                <SidebarLink
-                  to="/inbox"
-                  icon={Inbox}
-                  label={t('nav.inbox')}
-                  badge={unreadNotifications}
-                />
-                <SidebarLink
-                  to="/my-issues"
-                  icon={ListTodo}
-                  label={t('flow.shell.myTasks')}
-                  badge={myIssuesCount}
-                  exact
-                />
-                <SidebarLink
-                  to="/today"
-                  icon={Sun}
-                  label={t('nav.focusToday')}
-                  badge={todayFocusCount}
-                />
-                {/* Profile and Leave moved into the account menu at the
+          <SidebarNavigation
+            preferences={sidebarPreferences}
+            update={updateSidebarPreferences}
+            showPreviewRoutes={showPreviewRoutes}
+            unreadNotifications={unreadNotifications}
+            myIssuesCount={myIssuesCount}
+            todayFocusCount={todayFocusCount}
+            projects={apiProjects ?? []}
+            projectId={projectId}
+            myTasksProjectId={myTasksProjectId}
+            onNewProject={() => {
+              setNewProjectName('');
+              setNewProjectDescription('');
+              setNewProjectColor('#64C5B9');
+              setNewProjectOpen(true);
+            }}
+            onOpenSettings={() => {
+              setMobileNavOpen(false);
+              void navigate({ to: '/settings', search: { section: 'sidebar' } });
+            }}
+            sidebarRef={sidebarRef}
+          />
+          {false && (
+            <div ref={sidebarRef} className={cn('flex-1 min-h-0 overflow-y-auto py-2', sx)}>
+              <div className="flex flex-col gap-2">
+                <nav className="flex flex-col gap-px">
+                  <SidebarLink
+                    to="/inbox"
+                    icon={Inbox}
+                    label={t('nav.inbox')}
+                    badge={unreadNotifications}
+                  />
+                  <SidebarLink
+                    to="/my-issues"
+                    icon={ListTodo}
+                    label={t('flow.shell.myTasks')}
+                    badge={myIssuesCount}
+                    exact
+                  />
+                  <SidebarLink
+                    to="/today"
+                    icon={Sun}
+                    label={t('nav.focusToday')}
+                    badge={todayFocusCount}
+                  />
+                  {/* Profile and Leave moved into the account menu at the
                     bottom (with the theme switcher and sign-out) - they are
                     account-scoped destinations, not work-item triage like
                     the entries around them. */}
-                <SidebarLink to="/projects" icon={LayoutGrid} label={t('nav.projects')} exact />
-                <SidebarLink to="/triage" icon={Eye} label={t('flow.shell.triage')} />
-                {/* Backlog is now a column inside /my-issues - no
+                  <SidebarLink to="/projects" icon={LayoutGrid} label={t('nav.projects')} exact />
+                  <SidebarLink to="/triage" icon={Eye} label={t('flow.shell.triage')} />
+                  {/* Backlog is now a column inside /my-issues - no
                     standalone sidebar entry. */}
-              </nav>
+                </nav>
 
-              <div className="flex flex-col gap-2">
-                {sidebarSectionOrder.map((sectionId) => (
-                  <React.Fragment key={sectionId}>
-                    {sectionId === 'plan' && (
-                      <div className="flex flex-col gap-0">
-                        <div className="group flex items-center gap-0 min-h-0">
-                          <div className={sidebarReorderWrapClass}>
-                            <SidebarSectionReorder
-                              id="plan"
-                              order={sidebarSectionOrder}
-                              moveSection={moveSidebarSection}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => toggleSidebarSection('plan')}
-                            className={cn(sidebarSectionHeaderClass, 'flex-1')}
-                          >
-                            <span
-                              className="text-[12px] font-semibold tracking-wide"
-                              style={{ color: 'var(--flow-text-muted)' }}
-                            >
-                              {t('flow.shell.plan')}
-                            </span>
-                            <ChevronDown
-                              size={14}
-                              strokeWidth={2}
-                              className={cn(
-                                'shrink-0 opacity-70 transition-transform duration-200 ease-out',
-                                isSidebarSectionCollapsed('plan') && '-rotate-90'
-                              )}
-                              style={{ color: 'var(--flow-text-muted)' }}
-                            />
-                          </button>
-                        </div>
-                        <SidebarCollapsible open={!isSidebarSectionCollapsed('plan')}>
-                          <nav className="flex flex-col gap-px pt-px">
-                            {showPreviewRoutes && (
-                              <SidebarLink
-                                to="/roadmap"
-                                icon={Map}
-                                label={t('flow.shell.roadmap')}
+                <div className="flex flex-col gap-2">
+                  {sidebarSectionOrder.map((sectionId) => (
+                    <React.Fragment key={sectionId}>
+                      {sectionId === 'plan' && (
+                        <div className="flex flex-col gap-0">
+                          <div className="group flex items-center gap-0 min-h-0">
+                            <div className={sidebarReorderWrapClass}>
+                              <SidebarSectionReorder
+                                id="plan"
+                                order={sidebarSectionOrder}
+                                moveSection={moveSidebarSection}
                               />
-                            )}
-                            <SidebarLink to="/cycles" icon={Timer} label={t('flow.shell.cycles')} />
-                            <SidebarLink
-                              to="/milestones"
-                              icon={Milestone}
-                              label={t('flow.shell.milestones')}
-                            />
-                            {showPreviewRoutes && (
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => toggleSidebarSection('plan')}
+                              className={cn(sidebarSectionHeaderClass, 'flex-1')}
+                            >
+                              <span
+                                className="text-[12px] font-semibold tracking-wide"
+                                style={{ color: 'var(--flow-text-muted)' }}
+                              >
+                                {t('flow.shell.plan')}
+                              </span>
+                              <ChevronDown
+                                size={14}
+                                strokeWidth={2}
+                                className={cn(
+                                  'shrink-0 opacity-70 transition-transform duration-200 ease-out',
+                                  isSidebarSectionCollapsed('plan') && '-rotate-90'
+                                )}
+                                style={{ color: 'var(--flow-text-muted)' }}
+                              />
+                            </button>
+                          </div>
+                          <SidebarCollapsible open={!isSidebarSectionCollapsed('plan')}>
+                            <nav className="flex flex-col gap-px pt-px">
+                              {showPreviewRoutes && (
+                                <SidebarLink
+                                  to="/roadmap"
+                                  icon={Map}
+                                  label={t('flow.shell.roadmap')}
+                                />
+                              )}
                               <SidebarLink
-                                to="/timeline"
+                                to="/cycles"
                                 icon={Timer}
-                                label={t('flow.shell.timeline')}
+                                label={t('flow.shell.cycles')}
                               />
-                            )}
-                            <SidebarLink
-                              to="/calendar"
-                              icon={Calendar}
-                              label={t('flow.shell.calendar')}
-                            />
-                            <SidebarLink to="/views" icon={Eye} label={t('flow.shell.views')} />
-                            <SidebarLink
-                              to="/archive"
-                              icon={Archive}
-                              label={t('flow.shell.archive')}
-                            />
-                          </nav>
-                        </SidebarCollapsible>
-                      </div>
-                    )}
-
-                    {sectionId === 'team' && (
-                      <div className="flex flex-col gap-0">
-                        <div className="group flex items-center gap-0 min-h-0">
-                          <div className={sidebarReorderWrapClass}>
-                            <SidebarSectionReorder
-                              id="team"
-                              order={sidebarSectionOrder}
-                              moveSection={moveSidebarSection}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => toggleSidebarSection('team')}
-                            className={cn(sidebarSectionHeaderClass, 'flex-1')}
-                          >
-                            <span
-                              className="text-[12px] font-semibold tracking-wide"
-                              style={{ color: 'var(--flow-text-muted)' }}
-                            >
-                              {t('flow.shell.team')}
-                            </span>
-                            <ChevronDown
-                              size={14}
-                              strokeWidth={2}
-                              className={cn(
-                                'shrink-0 opacity-70 transition-transform duration-200 ease-out',
-                                isSidebarSectionCollapsed('team') && '-rotate-90'
-                              )}
-                              style={{ color: 'var(--flow-text-muted)' }}
-                            />
-                          </button>
-                        </div>
-                        <SidebarCollapsible open={!isSidebarSectionCollapsed('team')}>
-                          <nav className="flex flex-col gap-px pt-px">
-                            {showPreviewRoutes && (
                               <SidebarLink
-                                to="/team"
+                                to="/milestones"
+                                icon={Milestone}
+                                label={t('flow.shell.milestones')}
+                              />
+                              {showPreviewRoutes && (
+                                <SidebarLink
+                                  to="/timeline"
+                                  icon={Timer}
+                                  label={t('flow.shell.timeline')}
+                                />
+                              )}
+                              <SidebarLink
+                                to="/calendar"
+                                icon={Calendar}
+                                label={t('flow.shell.calendar')}
+                              />
+                              <SidebarLink to="/views" icon={Eye} label={t('flow.shell.views')} />
+                              <SidebarLink
+                                to="/archive"
+                                icon={Archive}
+                                label={t('flow.shell.archive')}
+                              />
+                            </nav>
+                          </SidebarCollapsible>
+                        </div>
+                      )}
+
+                      {sectionId === 'team' && (
+                        <div className="flex flex-col gap-0">
+                          <div className="group flex items-center gap-0 min-h-0">
+                            <div className={sidebarReorderWrapClass}>
+                              <SidebarSectionReorder
+                                id="team"
+                                order={sidebarSectionOrder}
+                                moveSection={moveSidebarSection}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => toggleSidebarSection('team')}
+                              className={cn(sidebarSectionHeaderClass, 'flex-1')}
+                            >
+                              <span
+                                className="text-[12px] font-semibold tracking-wide"
+                                style={{ color: 'var(--flow-text-muted)' }}
+                              >
+                                {t('flow.shell.team')}
+                              </span>
+                              <ChevronDown
+                                size={14}
+                                strokeWidth={2}
+                                className={cn(
+                                  'shrink-0 opacity-70 transition-transform duration-200 ease-out',
+                                  isSidebarSectionCollapsed('team') && '-rotate-90'
+                                )}
+                                style={{ color: 'var(--flow-text-muted)' }}
+                              />
+                            </button>
+                          </div>
+                          <SidebarCollapsible open={!isSidebarSectionCollapsed('team')}>
+                            <nav className="flex flex-col gap-px pt-px">
+                              {showPreviewRoutes && (
+                                <SidebarLink
+                                  to="/team"
+                                  icon={Users}
+                                  label={t('flow.shell.workload')}
+                                />
+                              )}
+
+                              {showPreviewRoutes && (
+                                <SidebarLink
+                                  to="/insights"
+                                  icon={BarChart3}
+                                  label={t('flow.shell.insights')}
+                                />
+                              )}
+                            </nav>
+                          </SidebarCollapsible>
+                        </div>
+                      )}
+
+                      {sectionId === 'time' && (
+                        <div className="flex flex-col gap-0">
+                          <div className="group flex items-center gap-0 min-h-0">
+                            <div className={sidebarReorderWrapClass}>
+                              <SidebarSectionReorder
+                                id="time"
+                                order={sidebarSectionOrder}
+                                moveSection={moveSidebarSection}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => toggleSidebarSection('time')}
+                              className={cn(sidebarSectionHeaderClass, 'flex-1')}
+                            >
+                              <span
+                                className="text-[12px] font-semibold tracking-wide"
+                                style={{ color: 'var(--flow-text-muted)' }}
+                              >
+                                {t('flow.time.heading')}
+                              </span>
+                              <ChevronDown
+                                size={14}
+                                strokeWidth={2}
+                                className={cn(
+                                  'shrink-0 opacity-70 transition-transform duration-200 ease-out',
+                                  isSidebarSectionCollapsed('time') && '-rotate-90'
+                                )}
+                                style={{ color: 'var(--flow-text-muted)' }}
+                              />
+                            </button>
+                          </div>
+                          <SidebarCollapsible open={!isSidebarSectionCollapsed('time')}>
+                            <nav className="flex flex-col gap-px pt-px">
+                              {/* Timesheet, Review and Workload join these here
+                               * as their backends land. Team and Reports have
+                               * no client-side gate: a caller without workspace
+                               * admin still opens them and sees why, the same
+                               * disabled-with-a-reason rule as everywhere else,
+                               * just enforced by a real 403 instead of a
+                               * client-only guess. */}
+                              <SidebarLink to="/time" icon={Clock} label={t('flow.time.myDay')} />
+                              <SidebarLink
+                                to="/time/team"
                                 icon={Users}
-                                label={t('flow.shell.workload')}
+                                label={t('flow.time.team')}
                               />
-                            )}
-
-                            {showPreviewRoutes && (
                               <SidebarLink
-                                to="/insights"
+                                to="/time/reports"
                                 icon={BarChart3}
-                                label={t('flow.shell.insights')}
+                                label={t('flow.time.reports')}
                               />
-                            )}
-                          </nav>
-                        </SidebarCollapsible>
-                      </div>
-                    )}
-
-                    {sectionId === 'time' && (
-                      <div className="flex flex-col gap-0">
-                        <div className="group flex items-center gap-0 min-h-0">
-                          <div className={sidebarReorderWrapClass}>
-                            <SidebarSectionReorder
-                              id="time"
-                              order={sidebarSectionOrder}
-                              moveSection={moveSidebarSection}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => toggleSidebarSection('time')}
-                            className={cn(sidebarSectionHeaderClass, 'flex-1')}
-                          >
-                            <span
-                              className="text-[12px] font-semibold tracking-wide"
-                              style={{ color: 'var(--flow-text-muted)' }}
-                            >
-                              {t('flow.time.heading')}
-                            </span>
-                            <ChevronDown
-                              size={14}
-                              strokeWidth={2}
-                              className={cn(
-                                'shrink-0 opacity-70 transition-transform duration-200 ease-out',
-                                isSidebarSectionCollapsed('time') && '-rotate-90'
-                              )}
-                              style={{ color: 'var(--flow-text-muted)' }}
-                            />
-                          </button>
+                              <SidebarLink
+                                to="/directory"
+                                icon={Contact}
+                                label={t('flow.directory.heading')}
+                              />
+                              <SidebarLink
+                                to="/presence"
+                                icon={Radar}
+                                label={t('flow.presence.heading')}
+                              />
+                              <SidebarLink
+                                to="/settings"
+                                search={{ section: 'time' }}
+                                icon={Settings}
+                                label={t('flow.settings.time.section')}
+                              />
+                            </nav>
+                          </SidebarCollapsible>
                         </div>
-                        <SidebarCollapsible open={!isSidebarSectionCollapsed('time')}>
-                          <nav className="flex flex-col gap-px pt-px">
-                            {/* Timesheet, Review and Workload join these here
-                             * as their backends land. Team and Reports have
-                             * no client-side gate: a caller without workspace
-                             * admin still opens them and sees why, the same
-                             * disabled-with-a-reason rule as everywhere else,
-                             * just enforced by a real 403 instead of a
-                             * client-only guess. */}
-                            <SidebarLink to="/time" icon={Clock} label={t('flow.time.myDay')} />
-                            <SidebarLink to="/time/team" icon={Users} label={t('flow.time.team')} />
-                            <SidebarLink
-                              to="/time/reports"
-                              icon={BarChart3}
-                              label={t('flow.time.reports')}
-                            />
-                            <SidebarLink
-                              to="/directory"
-                              icon={Contact}
-                              label={t('flow.directory.heading')}
-                            />
-                            <SidebarLink
-                              to="/presence"
-                              icon={Radar}
-                              label={t('flow.presence.heading')}
-                            />
-                            <SidebarLink
-                              to="/settings"
-                              search={{ section: 'time' }}
-                              icon={Settings}
-                              label={t('flow.settings.time.section')}
-                            />
-                          </nav>
-                        </SidebarCollapsible>
-                      </div>
-                    )}
+                      )}
 
-                    {sectionId === 'projects' && (
-                      <div className="flex flex-col gap-0">
-                        <div className="group flex items-center gap-0 min-h-0">
-                          <div className={sidebarReorderWrapClass}>
-                            <SidebarSectionReorder
-                              id="projects"
-                              order={sidebarSectionOrder}
-                              moveSection={moveSidebarSection}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => toggleSidebarSection('projects')}
-                            className={cn(sidebarSectionHeaderClass, 'flex-1 min-w-0')}
-                          >
-                            <span
-                              className="text-[12px] font-semibold tracking-wide truncate"
-                              style={{ color: 'var(--flow-text-muted)' }}
+                      {sectionId === 'projects' && (
+                        <div className="flex flex-col gap-0">
+                          <div className="group flex items-center gap-0 min-h-0">
+                            <div className={sidebarReorderWrapClass}>
+                              <SidebarSectionReorder
+                                id="projects"
+                                order={sidebarSectionOrder}
+                                moveSection={moveSidebarSection}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => toggleSidebarSection('projects')}
+                              className={cn(sidebarSectionHeaderClass, 'flex-1 min-w-0')}
                             >
-                              {t('nav.projects')}
-                            </span>
-                            <ChevronDown
-                              size={14}
-                              strokeWidth={2}
-                              className={cn(
-                                'shrink-0 opacity-70 transition-transform duration-200 ease-out',
-                                isSidebarSectionCollapsed('projects') && '-rotate-90'
-                              )}
+                              <span
+                                className="text-[12px] font-semibold tracking-wide truncate"
+                                style={{ color: 'var(--flow-text-muted)' }}
+                              >
+                                {t('nav.projects')}
+                              </span>
+                              <ChevronDown
+                                size={14}
+                                strokeWidth={2}
+                                className={cn(
+                                  'shrink-0 opacity-70 transition-transform duration-200 ease-out',
+                                  isSidebarSectionCollapsed('projects') && '-rotate-90'
+                                )}
+                                style={{ color: 'var(--flow-text-muted)' }}
+                              />
+                            </button>
+                            <button
+                              type="button"
+                              className="h-8 w-8 shrink-0 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--flow-hover)]"
                               style={{ color: 'var(--flow-text-muted)' }}
-                            />
-                          </button>
-                          <button
-                            type="button"
-                            className="h-8 w-8 shrink-0 rounded-md flex items-center justify-center transition-colors hover:bg-[var(--flow-hover)]"
-                            style={{ color: 'var(--flow-text-muted)' }}
-                            title={t('flow.shell.newProject')}
-                            aria-label={t('flow.shell.newProject')}
-                            onClick={() => {
-                              setNewProjectName('');
-                              setNewProjectDescription('');
-                              setNewProjectColor('#64C5B9');
-                              setNewProjectOpen(true);
-                            }}
-                          >
-                            <Plus size={15} strokeWidth={2} />
-                          </button>
-                        </div>
-                        <SidebarCollapsible open={!isSidebarSectionCollapsed('projects')}>
-                          <div className="flex flex-col gap-px pt-px">
-                            {orderedSidebarProjects.map((project, index) => {
-                              const boardPath = `/p/${project.id}`;
-                              const isActive = projectId === project.id;
-                              // The heading is emitted before the first proxied
-                              // project rather than wrapping a second map, so the
-                              // row markup below stays in one place.
-                              const startsReports =
-                                reportSidebarProjects.length > 0 &&
-                                index === ownSidebarProjects.length;
-                              return (
-                                <React.Fragment key={project.id}>
-                                  {startsReports && (
-                                    <div
-                                      className="px-2 pb-px pt-2 text-[10px] font-semibold uppercase tracking-wider"
-                                      style={{ color: 'var(--flow-text-muted)' }}
-                                    >
-                                      {t('flow.sidebar.yourReports')}
-                                    </div>
-                                  )}
-                                  <Link
-                                    to={boardPath}
-                                    className={cn(
-                                      'relative flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[12px] transition-colors duration-150',
-                                      isActive ? '' : 'hover:bg-[var(--flow-hover)]'
+                              title={t('flow.shell.newProject')}
+                              aria-label={t('flow.shell.newProject')}
+                              onClick={() => {
+                                setNewProjectName('');
+                                setNewProjectDescription('');
+                                setNewProjectColor('#64C5B9');
+                                setNewProjectOpen(true);
+                              }}
+                            >
+                              <Plus size={15} strokeWidth={2} />
+                            </button>
+                          </div>
+                          <SidebarCollapsible open={!isSidebarSectionCollapsed('projects')}>
+                            <div className="flex flex-col gap-px pt-px">
+                              {orderedSidebarProjects.map((project, index) => {
+                                const boardPath = `/p/${project.id}`;
+                                const isActive = projectId === project.id;
+                                // The heading is emitted before the first proxied
+                                // project rather than wrapping a second map, so the
+                                // row markup below stays in one place.
+                                const startsReports =
+                                  reportSidebarProjects.length > 0 &&
+                                  index === ownSidebarProjects.length;
+                                return (
+                                  <React.Fragment key={project.id}>
+                                    {startsReports && (
+                                      <div
+                                        className="px-2 pb-px pt-2 text-[10px] font-semibold uppercase tracking-wider"
+                                        style={{ color: 'var(--flow-text-muted)' }}
+                                      >
+                                        {t('flow.sidebar.yourReports')}
+                                      </div>
                                     )}
-                                    style={{
-                                      color: isActive
-                                        ? 'var(--flow-text)'
-                                        : 'var(--flow-text-muted)',
-                                    }}
-                                  >
-                                    {isActive && (
-                                      <motion.span
-                                        layoutId={`project-active-${project.id}`}
-                                        className="absolute inset-0 rounded-md"
-                                        style={{ background: 'var(--flow-active)' }}
-                                        transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                                    <Link
+                                      to={boardPath}
+                                      className={cn(
+                                        'relative flex items-center gap-2.5 px-3 py-1.5 rounded-md text-[12px] transition-colors duration-150',
+                                        isActive ? '' : 'hover:bg-[var(--flow-hover)]'
+                                      )}
+                                      style={{
+                                        color: isActive
+                                          ? 'var(--flow-text)'
+                                          : 'var(--flow-text-muted)',
+                                      }}
+                                    >
+                                      {isActive && (
+                                        <motion.span
+                                          layoutId={`project-active-${project.id}`}
+                                          className="absolute inset-0 rounded-md"
+                                          style={{ background: 'var(--flow-active)' }}
+                                          transition={{
+                                            type: 'spring',
+                                            stiffness: 400,
+                                            damping: 35,
+                                          }}
+                                        />
+                                      )}
+                                      <Circle
+                                        size={8}
+                                        className="relative shrink-0 fill-current"
+                                        style={{ color: project.color }}
                                       />
-                                    )}
-                                    <Circle
-                                      size={8}
-                                      className="relative shrink-0 fill-current"
-                                      style={{ color: project.color }}
-                                    />
-                                    <span className="relative flex-1 truncate font-medium">
-                                      {project.name}
-                                    </span>
-                                    <span
-                                      className="relative text-[10px]"
-                                      style={{ color: 'var(--flow-text-dim)' }}
-                                    >
-                                      {project.taskCount - project.completedCount}
-                                    </span>
-                                  </Link>
-                                </React.Fragment>
-                              );
-                            })}
-                          </div>
-                        </SidebarCollapsible>
-                      </div>
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
+                                      <span className="relative flex-1 truncate font-medium">
+                                        {project.name}
+                                      </span>
+                                      <span
+                                        className="relative text-[10px]"
+                                        style={{ color: 'var(--flow-text-dim)' }}
+                                      >
+                                        {project.taskCount - project.completedCount}
+                                      </span>
+                                    </Link>
+                                  </React.Fragment>
+                                );
+                              })}
+                            </div>
+                          </SidebarCollapsible>
+                        </div>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
 
-              {/* The bin renders itself away when empty, so it costs nothing
+                {/* The bin renders itself away when empty, so it costs nothing
                   here. It was imported but never mounted, which left the whole
                   recycle bin unreachable from the UI. */}
-              <RecycleBinSection />
+                <RecycleBinSection />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Footer */}
           <div
