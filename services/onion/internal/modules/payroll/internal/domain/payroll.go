@@ -115,6 +115,18 @@ type PayrollRunInput struct {
 	PeriodLabel string `json:"period_label"`
 }
 
+type PayrollRecordInput struct {
+	StaffID       int64
+	PeriodStart   time.Time
+	PeriodEnd     time.Time
+	PeriodLabel   string
+	RegularHours  float64
+	OvertimeHours float64
+	BasePay       float64
+	OvertimePay   float64
+	NetPay        float64
+}
+
 type PayrollMarkPaidInput struct {
 	ID int64 `json:"id"`
 }

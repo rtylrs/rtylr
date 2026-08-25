@@ -59,6 +59,18 @@ func (m *mockRepo) GetDefaultOvertimeMultiplier(_ context.Context, _ int64) (flo
 	return m.otMultiplier, m.otConfigured, m.otErr
 }
 
+func (m *mockRepo) CreatePayrollRecords(_ context.Context, _ int64, records []domain.PayrollRecordInput) (int, error) {
+	if len(records) > 0 {
+		first := records[0]
+		m.createGot.regular = first.RegularHours
+		m.createGot.overtime = first.OvertimeHours
+		m.createGot.base = first.BasePay
+		m.createGot.ot = first.OvertimePay
+		m.createGot.net = first.NetPay
+	}
+	return len(records), m.createErr
+}
+
 func (m *mockRepo) CreatePayrollRecord(_ context.Context, _, _ int64, _, _ time.Time, _ string, regular, overtime, base, ot, net float64) (int64, error) {
 	m.createGot.regular = regular
 	m.createGot.overtime = overtime

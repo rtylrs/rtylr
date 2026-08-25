@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/payroll/internal/domain"
 	"github.com/voxire/onion/internal/modules/payroll/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -71,6 +73,46 @@ func (r *Repository) CreatePayrollRecord(ctx context.Context, businessID, staffI
 	}
 
 	return result.LastInsertId()
+}
+
+func (r *Repository) CreatePayrollRecords(ctx context.Context, businessID int64, records []domain.PayrollRecordInput) (int, error) {
+	if len(records) == 0 {
+		return 0, nil
+	}
+
+	insert := sq.Insert("hr_payroll_records").Columns(
+		"owner_id", "business_id", "staff_id", "period_start", "period_end", "period_label",
+		"regular_hours", "overtime_hours", "base_pay", "overtime_pay", "net_pay",
+	)
+	for _, record := range records {
+		insert = insert.Values(
+			businessID,
+			businessID,
+			record.StaffID,
+			record.PeriodStart,
+			record.PeriodEnd,
+			record.PeriodLabel,
+			fmt.Sprintf("%g", record.RegularHours),
+			fmt.Sprintf("%g", record.OvertimeHours),
+			fmt.Sprintf("%.2f", record.BasePay),
+			fmt.Sprintf("%.2f", record.OvertimePay),
+			fmt.Sprintf("%.2f", record.NetPay),
+		)
+	}
+	query, args, err := insert.ToSql()
+	if err != nil {
+		return 0, err
+	}
+	result, err := r.pool.ExecContext(ctx, query, args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to create payroll records", logger.Error(err))
+		return 0, err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return int(affected), nil
 }
 
 func (r *Repository) MarkPayrollPaid(ctx context.Context, businessID, payrollID int64) error {
