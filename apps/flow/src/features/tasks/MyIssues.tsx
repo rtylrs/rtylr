@@ -1,15 +1,9 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { toast } from 'sonner';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
-import { ListTodo, Plus } from 'lucide-react';
 import { HelmetContainer } from '@voxire/components';
-import { EmptyState } from '@voxire/ui';
 import { useMyIssues } from './useMyIssues';
-import { useCreateTask } from './useTasks';
-import { useMyTasksProject } from './useMyTasksProject';
 import { useFlowStore } from '../../shared/stores/flowStore';
-import { getCurrentUserId } from '../../shared/lib/currentUser';
 import { apiTaskToTask } from '../../shared/lib/taskMapper';
 import TaskCard from '../../shared/components/TaskCard';
 
@@ -30,8 +24,7 @@ const MyIssues: React.FC = () => {
   // GetMyTasks doesn't filter archived server-side, so exclude client-side
   // to match Triage/FocusToday/FlowLayout.
   const tasks = useMemo(() => rawTasks.map(apiTaskToTask).filter((t) => !t.archived), [rawTasks]);
-  const { selectedTaskIds } = useFlowStore();
-  const quickAddInputRef = useRef<HTMLInputElement>(null);
+  const { selectedTaskIds, setQuickCreateOpen } = useFlowStore();
 
   const byStatus = useMemo(() => {
     const map: Record<string, typeof tasks> = {};
@@ -61,158 +54,102 @@ const MyIssues: React.FC = () => {
         </div>
       </div>
 
-      <QuickAddRow inputRef={quickAddInputRef} />
-
-      {tasks.length === 0 && !isLoading ? (
-        <EmptyState
-          icon={ListTodo}
-          title={t('flow.myIssues.emptyTitle')}
-          description={t('flow.myIssues.emptyDescription')}
-          action={{
-            label: t('flow.myIssues.emptyCta'),
-            onClick: () => quickAddInputRef.current?.focus(),
-          }}
-        />
-      ) : (
-        <div className="flex-1 overflow-x-auto overflow-y-hidden">
-          <div className="flex gap-3 h-full p-4 min-w-max">
-            {KANBAN_COLUMNS.map((col, colIdx) => {
-              const colTasks = byStatus[col.status] ?? [];
-              return (
-                <motion.div
-                  key={col.status}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.15, delay: colIdx * 0.04 }}
-                  className="flex flex-col rounded-xl shrink-0"
-                  style={{
-                    width: 280,
-                    background: 'var(--flow-card)',
-                    border: '1px solid var(--flow-border)',
-                  }}
+      <div className="relative flex-1 overflow-x-auto overflow-y-hidden">
+        <div className="flex gap-3 h-full p-4 min-w-max">
+          {KANBAN_COLUMNS.map((col, colIdx) => {
+            const colTasks = byStatus[col.status] ?? [];
+            return (
+              <motion.div
+                key={col.status}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.15, delay: colIdx * 0.04 }}
+                className="flex flex-col rounded-xl shrink-0"
+                style={{
+                  width: 280,
+                  background: 'var(--flow-card)',
+                  border: '1px solid var(--flow-border)',
+                }}
+              >
+                {/* Column header */}
+                <div
+                  className="flex items-center gap-2 px-3 py-2.5 shrink-0"
+                  style={{ borderBottom: '1px solid var(--flow-border)' }}
                 >
-                  {/* Column header */}
-                  <div
-                    className="flex items-center gap-2 px-3 py-2.5 shrink-0"
-                    style={{ borderBottom: '1px solid var(--flow-border)' }}
+                  <span
+                    className="h-2 w-2 rounded-full shrink-0"
+                    style={{ background: col.color }}
+                  />
+                  <span
+                    className="text-[12px] font-semibold flex-1"
+                    style={{ color: 'var(--flow-text)' }}
                   >
-                    <span
-                      className="h-2 w-2 rounded-full shrink-0"
-                      style={{ background: col.color }}
-                    />
-                    <span
-                      className="text-[12px] font-semibold flex-1"
-                      style={{ color: 'var(--flow-text)' }}
-                    >
-                      {t(`flow.taskDetail.${col.labelKey}`)}
-                    </span>
-                    <span
-                      className="text-[10px] px-1.5 py-0.5 rounded-sm font-medium"
-                      style={{
-                        background: `${col.color}1a`,
-                        color: col.color,
-                      }}
-                    >
-                      {colTasks.length}
-                    </span>
-                  </div>
+                    {t(`flow.taskDetail.${col.labelKey}`)}
+                  </span>
+                  <span
+                    className="text-[10px] px-1.5 py-0.5 rounded-sm font-medium"
+                    style={{
+                      background: `${col.color}1a`,
+                      color: col.color,
+                    }}
+                  >
+                    {colTasks.length}
+                  </span>
+                </div>
 
-                  {/* Tasks */}
-                  <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
-                    {colTasks.length === 0 ? (
-                      <p
-                        className="text-center text-[11px] py-6"
-                        style={{ color: 'var(--flow-text-dim)' }}
-                      >
-                        {t('flow.myIssues.noTasks')}
-                      </p>
-                    ) : (
-                      colTasks.map((t) => (
-                        <TaskCard
-                          key={t.id}
-                          task={t}
-                          compact
-                          showProject
-                          selected={selectedTaskIds.includes(t.id)}
-                        />
-                      ))
-                    )}
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+                {/* Tasks */}
+                <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+                  {colTasks.length === 0 ? (
+                    <p
+                      className="text-center text-[11px] py-6"
+                      style={{ color: 'var(--flow-text-dim)' }}
+                    >
+                      {t('flow.myIssues.noTasks')}
+                    </p>
+                  ) : (
+                    colTasks.map((t) => (
+                      <TaskCard
+                        key={t.id}
+                        task={t}
+                        compact
+                        showProject
+                        selected={selectedTaskIds.includes(t.id)}
+                      />
+                    ))
+                  )}
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
-      )}
-    </div>
-  );
-};
 
-interface QuickAddRowProps {
-  inputRef: React.RefObject<HTMLInputElement | null>;
-}
-
-const QuickAddRow: React.FC<QuickAddRowProps> = ({ inputRef }) => {
-  const { t } = useTranslation();
-  const [title, setTitle] = useState('');
-  const createTask = useCreateTask();
-  const { data: myTasksProject } = useMyTasksProject();
-
-  const submit = (): void => {
-    const trimmed = title.trim();
-    if (!trimmed) {
-      toast.error(t('toasts.task.titleRequired'));
-      return;
-    }
-    if (!myTasksProject) {
-      toast.error(t('errors.generic'));
-      return;
-    }
-    // Personal tasks land in Backlog so the leftmost column actually
-    // collects new captures instead of jamming them into Todo.
-    createTask.mutate(
-      {
-        projectId: String(myTasksProject.projectId),
-        title: trimmed,
-        status: 'backlog',
-        assigneeId: getCurrentUserId() ?? undefined,
-      },
-      { onSuccess: () => setTitle('') }
-    );
-  };
-
-  return (
-    <div
-      className="flex items-center gap-2 px-6 py-2 shrink-0"
-      style={{ borderBottom: '1px solid var(--flow-border)' }}
-    >
-      <Plus size={12} style={{ color: 'var(--flow-text-dim)' }} />
-      <input
-        ref={inputRef}
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            submit();
-          }
-        }}
-        placeholder={t('flow.myIssues.quickAddPlaceholder')}
-        disabled={createTask.isPending}
-        className="flex-1 bg-transparent outline-none text-[13px] placeholder:opacity-50"
-        style={{ color: 'var(--flow-text)' }}
-      />
-      {title.trim().length > 0 && (
-        <button
-          type="button"
-          onClick={submit}
-          disabled={createTask.isPending}
-          className="text-[11px] font-semibold px-2.5 py-1 rounded-sm transition-opacity hover:opacity-90 disabled:opacity-50"
-          style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
-        >
-          {t('flow.myIssues.quickAddButton')}
-        </button>
-      )}
+        {tasks.length === 0 && !isLoading && (
+          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-4">
+            <div
+              className="pointer-events-auto w-full max-w-md rounded-xl px-6 py-7 text-center shadow-xl"
+              style={{
+                background: 'var(--flow-surface)',
+                border: '1px solid var(--accent-muted)',
+              }}
+            >
+              <h2 className="text-[16px] font-semibold" style={{ color: 'var(--flow-text)' }}>
+                {t('flow.myIssues.emptyTitle')}
+              </h2>
+              <p className="mt-2 text-[12px]" style={{ color: 'var(--flow-text-muted)' }}>
+                {t('flow.myIssues.emptyDescription')}
+              </p>
+              <button
+                type="button"
+                onClick={() => setQuickCreateOpen(true)}
+                className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg px-5 text-[12px] font-semibold transition-opacity hover:opacity-90"
+                style={{ background: 'var(--accent)', color: 'var(--flow-on-accent)' }}
+              >
+                {t('flow.board.addTaskLabel')}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
