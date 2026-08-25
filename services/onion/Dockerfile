@@ -1,12 +1,12 @@
 # Build stage
 # Build on the native runner arch and cross-compile to TARGETARCH — the builder
 # downloads an amd64 sqlc and runs codegen, which can't run under arm64 emulation.
-FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.26-alpine3.20 AS builder
 
 WORKDIR /app
 
 # Layer 1: system tools — cached until this line changes
-RUN apk add --no-cache curl bash git ca-certificates
+RUN apk add --no-cache curl bash ca-certificates
 
 # Layer 2: sqlc binary — use the fast release asset, with Go-module fallback
 # when GitHub's release-assets endpoint is unavailable.
@@ -21,12 +21,14 @@ RUN set -eux; \
     rm -f /tmp/sqlc.tar.gz; \
     sqlc version
 
-# Layer 3: copy source tree & resolve git submodules
+# Layer 3: copy source tree. The build context must contain the pinned
+# submodules recorded by the checkout; cloning a moving branch here would make
+# identical source commits produce different binaries.
 COPY . .
 RUN set -eux; \
-    if [ -d .git ]; then \
-      git submodule update --init --recursive; \
-    fi
+    test -f ./voxie/go.mod; \
+    test -f ./internal/platform/database/schemas/hr_core/schema.sql; \
+    test -d ./internal/platform/email/templates
 
 RUN go mod download && go mod verify
 RUN chmod +x scripts/*.sh
@@ -52,14 +54,20 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
     -o /app/api ./cmd/api
 
 # Final stage — minimal image
-FROM alpine:latest
+FROM alpine:3.20
 
 RUN apk add --no-cache ca-certificates tzdata
+RUN addgroup -S onion && adduser -S -G onion onion
 
 WORKDIR /app
 
 COPY --from=builder /app/api /app/api
 
 EXPOSE 9999
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget -q -O /dev/null http://127.0.0.1:9999/health || exit 1
+
+USER onion
 
 CMD ["/app/api"]

@@ -20,14 +20,12 @@ RUN cmake -B build -DCMAKE_BUILD_TYPE=Release && \
 # Build on the native runner arch and cross-compile to TARGETARCH — faster than
 # building under arm64 emulation. The media-engine stage above still builds for
 # the target arch (emulated for arm64).
-FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS go-builder
+FROM --platform=$BUILDPLATFORM golang:1.26-alpine3.20 AS go-builder
 WORKDIR /app
-RUN apk add --no-cache ca-certificates bash git
+RUN apk add --no-cache ca-certificates bash
 COPY . .
 RUN set -eux; \
-    if [ ! -f ./voxie/go.mod ]; then \
-      git clone --depth 1 https://github.com/tryrtylr/voxie.git ./voxie; \
-    fi
+    test -f ./voxie/go.mod
 RUN go mod download && go mod verify
 ARG VERSION=dev
 ARG COMMIT=unknown
@@ -45,6 +43,7 @@ FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates tzdata libvips42 ffmpeg \
     && rm -rf /var/lib/apt/lists/*
+RUN groupadd --system onion && useradd --system --gid onion onion
 WORKDIR /app
 COPY --from=go-builder   /app/upload                  /app/upload
 COPY --from=media-engine /build/build/media-engine    /usr/local/bin/media-engine
@@ -52,4 +51,5 @@ COPY --from=media-engine /build/build/media-engine    /usr/local/bin/media-engin
 ENV MEDIA_ENGINE_PATH=/usr/local/bin/media-engine
 ENV PORT=8080
 EXPOSE 8080
+USER onion
 CMD ["/app/upload"]

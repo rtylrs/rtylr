@@ -4,9 +4,9 @@
 # ── Build stage ──────────────────────────────────────────────────────────────
 # Build on the native runner arch and cross-compile to TARGETARCH (the builder
 # downloads an amd64 sqlc, which can't run under arm64 emulation).
-FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.26-alpine3.20 AS builder
 WORKDIR /app
-RUN apk add --no-cache ca-certificates curl bash git
+RUN apk add --no-cache ca-certificates curl bash
 # sqlc: the worker imports the email package, whose generated query code is
 # produced by scripts/generate_sqlc.sh (gitignored, regenerated per build).
 RUN set -eux; \
@@ -19,18 +19,12 @@ RUN set -eux; \
     fi; \
     rm -f /tmp/sqlc.tar.gz; \
     sqlc version
-# copy source tree & resolve git submodules if not checked out by host
+# copy source tree. The build context must contain the pinned submodules.
 COPY . .
 RUN set -eux; \
-    if [ ! -f ./voxie/go.mod ]; then \
-      git clone --depth 1 https://github.com/tryrtylr/voxie.git ./voxie; \
-    fi; \
-    if [ ! -f ./internal/platform/database/schemas/hr_core/schema.sql ]; then \
-      git clone --depth 1 https://github.com/tryrtylr/schemas.git ./internal/platform/database/schemas; \
-    fi; \
-    if [ ! -d ./internal/platform/email/templates ]; then \
-      git clone --depth 1 https://github.com/tryrtylr/email-templates.git ./internal/platform/email/templates; \
-    fi
+    test -f ./voxie/go.mod; \
+    test -f ./internal/platform/database/schemas/hr_core/schema.sql; \
+    test -d ./internal/platform/email/templates
 RUN go mod download && go mod verify
 RUN chmod +x scripts/*.sh && \
     bash scripts/generate_sqlc.sh
@@ -46,8 +40,10 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build \
     -o /app/worker ./cmd/worker
 
 # ── Runtime stage ─────────────────────────────────────────────────────────────
-FROM alpine:latest
+FROM alpine:3.20
 RUN apk add --no-cache ca-certificates tzdata
+RUN addgroup -S onion && adduser -S -G onion onion
 WORKDIR /app
 COPY --from=builder /app/worker /app/worker
+USER onion
 CMD ["/app/worker"]
