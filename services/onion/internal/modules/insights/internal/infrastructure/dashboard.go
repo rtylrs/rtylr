@@ -16,44 +16,54 @@ type DashboardInput struct {
 
 func (r *Repository) GetDashboard(ctx context.Context, businessID int64, in DashboardInput) (domain.DashboardSnapshot, error) {
 	thisFrom, thisTo, priorFrom, priorTo := mtdRanges(in.Now)
+	tx, err := r.pool.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead})
+	if err != nil {
+		return domain.DashboardSnapshot{}, err
+	}
+	defer tx.Rollback()
+	queries := r.queries.WithTx(tx)
 
-	revThis, err := r.sumPaidInvoicesMinorUnits(ctx, businessID, thisFrom, thisTo)
+	revThis, err := sumPaidInvoicesMinorUnits(ctx, queries, businessID, thisFrom, thisTo)
 	if err != nil {
 		return domain.DashboardSnapshot{}, err
 	}
-	revPrior, err := r.sumPaidInvoicesMinorUnits(ctx, businessID, priorFrom, priorTo)
-	if err != nil {
-		return domain.DashboardSnapshot{}, err
-	}
-
-	ordersThis, err := r.countPosOrders(ctx, businessID, thisFrom, thisTo)
-	if err != nil {
-		return domain.DashboardSnapshot{}, err
-	}
-	ordersPrior, err := r.countPosOrders(ctx, businessID, priorFrom, priorTo)
+	revPrior, err := sumPaidInvoicesMinorUnits(ctx, queries, businessID, priorFrom, priorTo)
 	if err != nil {
 		return domain.DashboardSnapshot{}, err
 	}
 
-	custThis, err := r.countCrmCustomersCreated(ctx, businessID, thisFrom, thisTo)
+	ordersThis, err := countPosOrders(ctx, queries, businessID, thisFrom, thisTo)
 	if err != nil {
 		return domain.DashboardSnapshot{}, err
 	}
-	custPrior, err := r.countCrmCustomersCreated(ctx, businessID, priorFrom, priorTo)
+	ordersPrior, err := countPosOrders(ctx, queries, businessID, priorFrom, priorTo)
 	if err != nil {
 		return domain.DashboardSnapshot{}, err
 	}
 
-	expThis, err := r.sumExpensesMinorUnits(ctx, businessID, thisFrom, thisTo)
+	custThis, err := countCrmCustomersCreated(ctx, queries, businessID, thisFrom, thisTo)
 	if err != nil {
 		return domain.DashboardSnapshot{}, err
 	}
-	expPrior, err := r.sumExpensesMinorUnits(ctx, businessID, priorFrom, priorTo)
+	custPrior, err := countCrmCustomersCreated(ctx, queries, businessID, priorFrom, priorTo)
+	if err != nil {
+		return domain.DashboardSnapshot{}, err
+	}
+
+	expThis, err := sumExpensesMinorUnits(ctx, queries, businessID, thisFrom, thisTo)
+	if err != nil {
+		return domain.DashboardSnapshot{}, err
+	}
+	expPrior, err := sumExpensesMinorUnits(ctx, queries, businessID, priorFrom, priorTo)
 	if err != nil {
 		return domain.DashboardSnapshot{}, err
 	}
 	marginThis := marginPct(revThis, expThis)
 	marginPrior := marginPct(revPrior, expPrior)
+
+	if err := tx.Commit(); err != nil {
+		return domain.DashboardSnapshot{}, err
+	}
 
 	return domain.DashboardSnapshot{
 		Revenue:   domain.MoneyCard{Value: revThis, DeltaPct: deltaPct(revThis, revPrior)},
@@ -70,9 +80,9 @@ func marginPct(revenueMinor, expenseMinor int64) float64 {
 	return (float64(revenueMinor-expenseMinor) / float64(revenueMinor)) * 100
 }
 
-func (r *Repository) sumPaidInvoicesMinorUnits(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
+func sumPaidInvoicesMinorUnits(ctx context.Context, queries *sqlc.Queries, businessID int64, from, to time.Time) (int64, error) {
 	// cross-schema read from finance_invoices — paid invoice revenue powers the dashboard revenue card
-	total, err := r.queries.SumPaidInvoices(ctx, sqlc.SumPaidInvoicesParams{
+	total, err := queries.SumPaidInvoices(ctx, sqlc.SumPaidInvoicesParams{
 		BusinessID: businessID,
 		PaidDate:   sql.NullTime{Time: from, Valid: true},
 		PaidDate_2: sql.NullTime{Time: to, Valid: true},
@@ -84,9 +94,9 @@ func (r *Repository) sumPaidInvoicesMinorUnits(ctx context.Context, businessID i
 	return decimalToMinorUnits(total), nil
 }
 
-func (r *Repository) countPosOrders(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
+func countPosOrders(ctx context.Context, queries *sqlc.Queries, businessID int64, from, to time.Time) (int64, error) {
 	// cross-schema read from pos_orders — order volume powers the dashboard orders card
-	n, err := r.queries.CountPosOrders(ctx, sqlc.CountPosOrdersParams{
+	n, err := queries.CountPosOrders(ctx, sqlc.CountPosOrdersParams{
 		BusinessID:  businessID,
 		CreatedAt:   sql.NullTime{Time: from, Valid: true},
 		CreatedAt_2: sql.NullTime{Time: to, Valid: true},
@@ -98,9 +108,9 @@ func (r *Repository) countPosOrders(ctx context.Context, businessID int64, from,
 	return n, nil
 }
 
-func (r *Repository) countCrmCustomersCreated(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
+func countCrmCustomersCreated(ctx context.Context, queries *sqlc.Queries, businessID int64, from, to time.Time) (int64, error) {
 	// cross-schema read from crm_customers — new customer signups for the dashboard customers card
-	n, err := r.queries.CountCrmCustomersCreated(ctx, sqlc.CountCrmCustomersCreatedParams{
+	n, err := queries.CountCrmCustomersCreated(ctx, sqlc.CountCrmCustomersCreatedParams{
 		BusinessID:  businessID,
 		CreatedAt:   sql.NullTime{Time: from, Valid: true},
 		CreatedAt_2: sql.NullTime{Time: to, Valid: true},
@@ -112,9 +122,9 @@ func (r *Repository) countCrmCustomersCreated(ctx context.Context, businessID in
 	return n, nil
 }
 
-func (r *Repository) sumExpensesMinorUnits(ctx context.Context, businessID int64, from, to time.Time) (int64, error) {
+func sumExpensesMinorUnits(ctx context.Context, queries *sqlc.Queries, businessID int64, from, to time.Time) (int64, error) {
 	// cross-schema read from finance_expenses — expense totals feed the margin card
-	total, err := r.queries.SumExpenses(ctx, sqlc.SumExpensesParams{
+	total, err := queries.SumExpenses(ctx, sqlc.SumExpensesParams{
 		BusinessID:    businessID,
 		ExpenseDate:   from,
 		ExpenseDate_2: to,
