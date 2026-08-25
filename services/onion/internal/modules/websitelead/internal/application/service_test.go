@@ -38,3 +38,19 @@ func TestSubmit_PropagatesError(t *testing.T) {
 		t.Errorf("expected sentinel, got %v", err)
 	}
 }
+
+func TestAsyncLeadContextDetachesCancellationAndPreservesValues(t *testing.T) {
+	key := struct{}{}
+	requestCtx, cancel := context.WithCancel(context.WithValue(context.Background(), key, "request-value"))
+	cancel()
+
+	taskCtx, taskCancel := asyncLeadContext(requestCtx)
+	defer taskCancel()
+
+	if err := taskCtx.Err(); err != nil {
+		t.Fatalf("detached task context is already canceled: %v", err)
+	}
+	if got := taskCtx.Value(key); got != "request-value" {
+		t.Fatalf("task context lost request value: %v", got)
+	}
+}
