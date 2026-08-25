@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hubfeaturev1 "github.com/voxire/voxie/gen/go/hub/feature/v1"
 )
 
@@ -144,7 +145,7 @@ func (a *FeatureAPI) UpsertTarget(ctx context.Context, req *hubfeaturev1.UpsertT
 	if key == "" {
 		return nil, badRequest("feature_key is required")
 	}
-	if req.GetOwnerId() == 0 {
+	if req.GetOwnerId() <= 0 {
 		return nil, badRequest("owner_id is required")
 	}
 	if err := requireTargetScope(ctx, req.GetOwnerId()); err != nil {
@@ -169,7 +170,7 @@ func (a *FeatureAPI) DeleteTarget(ctx context.Context, req *hubfeaturev1.DeleteT
 	if key == "" {
 		return nil, badRequest("feature_key is required")
 	}
-	if req.GetOwnerId() == 0 {
+	if req.GetOwnerId() <= 0 {
 		return nil, badRequest("owner_id is required")
 	}
 	if err := requireTargetScope(ctx, req.GetOwnerId()); err != nil {
@@ -282,7 +283,12 @@ func requireTargetScope(ctx context.Context, requestedOwner int64) error {
 	if strings.EqualFold(user.Role, "console_admin") {
 		return nil
 	}
-	if requestedOwner != user.BusinessID {
+	callerBusinessID, err := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if err != nil {
+		return onekiterrors.PermissionDenied()
+	}
+	targetBusinessID, err := tenant.ResolveBusinessID(ctx, 0, requestedOwner)
+	if err != nil || targetBusinessID != callerBusinessID {
 		return onekiterrors.PermissionDenied()
 	}
 	return nil
