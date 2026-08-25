@@ -3,6 +3,9 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/domain"
@@ -87,6 +90,25 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 			_ = tx.Rollback()
 		}
 	}()
+	qtx := r.queries.WithTx(tx)
+	status := normalizeAppointmentStatus(input.Status)
+	if status == "" {
+		status = "pending"
+	}
+	if !validAppointmentStatus(status) {
+		return 0, domain.ErrInvalidStatus
+	}
+	if _, err = qtx.LockBusinessForBooking(ctx, businessID); err != nil {
+		return 0, err
+	}
+	if err = ensureAppointmentReferences(ctx, qtx, businessID, input.ServiceID, input.ResourceID); err != nil {
+		return 0, err
+	}
+	if status != "cancelled" && status != "no_show" {
+		if err = ensureNoAppointmentOverlap(ctx, qtx, businessID, startTime, endTime, 0, input.ResourceID, input.StaffID); err != nil {
+			return 0, err
+		}
+	}
 
 	if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  input.CustomerName,
@@ -97,7 +119,7 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 		return 0, err
 	}
 
-	result, err := r.queries.WithTx(tx).CreateAppointment(ctx, sqlc.CreateAppointmentParams{
+	result, err := qtx.CreateAppointment(ctx, sqlc.CreateAppointmentParams{
 		OwnerID:       businessID,
 		BusinessID:    businessID,
 		ServiceID:     sql.NullInt64{Int64: input.ServiceID, Valid: input.ServiceID != 0},
@@ -107,7 +129,7 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 		CustomerEmail: sql.NullString{String: input.CustomerEmail, Valid: input.CustomerEmail != ""},
 		CustomerPhone: sql.NullString{String: input.CustomerPhone, Valid: input.CustomerPhone != ""},
 		StartTime:     startTime, EndTime: endTime,
-		Status: sqlc.NullBookingAppointmentsStatus{BookingAppointmentsStatus: sqlc.BookingAppointmentsStatus(input.Status), Valid: input.Status != ""},
+		Status: sqlc.NullBookingAppointmentsStatus{BookingAppointmentsStatus: sqlc.BookingAppointmentsStatus(status), Valid: true},
 		Notes:  sql.NullString{String: input.Notes, Valid: input.Notes != ""},
 	})
 	if err != nil {
@@ -147,6 +169,33 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 			_ = tx.Rollback()
 		}
 	}()
+	qtx := r.queries.WithTx(tx)
+	if _, err = qtx.LockBusinessForBooking(ctx, businessID); err != nil {
+		return err
+	}
+	current, err := qtx.GetAppointmentStatusForUpdate(ctx, sqlc.GetAppointmentStatusForUpdateParams{BusinessID: businessID, ID: id})
+	if err != nil {
+		return err
+	}
+	currentStatus := normalizeAppointmentStatus(string(current.BookingAppointmentsStatus))
+	if currentStatus == "" {
+		currentStatus = "pending"
+	}
+	status := normalizeAppointmentStatus(input.Status)
+	if status == "" {
+		status = currentStatus
+	}
+	if !validAppointmentStatus(status) || !validAppointmentTransition(currentStatus, status) {
+		return domain.ErrInvalidStatus
+	}
+	if err = ensureAppointmentReferences(ctx, qtx, businessID, input.ServiceID, input.ResourceID); err != nil {
+		return err
+	}
+	if status != "cancelled" && status != "no_show" {
+		if err = ensureNoAppointmentOverlap(ctx, qtx, businessID, startTime, endTime, id, input.ResourceID, input.StaffID); err != nil {
+			return err
+		}
+	}
 
 	if _, err = customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
 		Name:  input.CustomerName,
@@ -157,7 +206,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		return err
 	}
 
-	err = r.queries.WithTx(tx).UpdateAppointment(ctx, sqlc.UpdateAppointmentParams{
+	result, err := qtx.UpdateAppointment(ctx, sqlc.UpdateAppointmentParams{
 		ServiceID:     sql.NullInt64{Int64: input.ServiceID, Valid: input.ServiceID != 0},
 		ResourceID:    sql.NullInt64{Int64: input.ResourceID, Valid: input.ResourceID != 0},
 		StaffID:       sql.NullInt64{Int64: input.StaffID, Valid: input.StaffID != 0},
@@ -165,13 +214,20 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		CustomerEmail: sql.NullString{String: input.CustomerEmail, Valid: input.CustomerEmail != ""},
 		CustomerPhone: sql.NullString{String: input.CustomerPhone, Valid: input.CustomerPhone != ""},
 		StartTime:     startTime, EndTime: endTime,
-		Status:     sqlc.NullBookingAppointmentsStatus{BookingAppointmentsStatus: sqlc.BookingAppointmentsStatus(input.Status), Valid: input.Status != ""},
+		Status:     sqlc.NullBookingAppointmentsStatus{BookingAppointmentsStatus: sqlc.BookingAppointmentsStatus(status), Valid: true},
 		Notes:      sql.NullString{String: input.Notes, Valid: input.Notes != ""},
 		BusinessID: businessID, ID: id,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update appointment", logger.Error(err))
 		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
 	}
 	if err = tx.Commit(); err != nil {
 		logger.Ctx(ctx).Error("Failed to commit appointment update transaction", logger.Error(err))
@@ -180,11 +236,95 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 	return nil
 }
 
+func ensureNoAppointmentOverlap(ctx context.Context, qtx *sqlc.Queries, businessID int64, startTime, endTime time.Time, excludeID, resourceID, staffID int64) error {
+	if resourceID <= 0 && staffID <= 0 {
+		return nil
+	}
+	rows, err := qtx.LockAppointmentOverlaps(ctx, sqlc.LockAppointmentOverlapsParams{
+		BusinessID: businessID,
+		StartTime:  startTime,
+		EndTime:    endTime,
+		Column4:    excludeID,
+		ID:         excludeID,
+		Column6:    resourceID,
+		ResourceID: nullableID(resourceID),
+		Column8:    staffID,
+		StaffID:    nullableID(staffID),
+	})
+	if err != nil {
+		return fmt.Errorf("check appointment availability: %w", err)
+	}
+	if len(rows) > 0 {
+		return domain.ErrTimeSlotUnavailable
+	}
+	return nil
+}
+
+func ensureAppointmentReferences(ctx context.Context, qtx *sqlc.Queries, businessID, serviceID, resourceID int64) error {
+	if serviceID > 0 {
+		if _, err := qtx.GetBookingServiceForAppointment(ctx, sqlc.GetBookingServiceForAppointmentParams{ID: serviceID, BusinessID: businessID}); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return domain.ErrInvalidReference
+			}
+			return err
+		}
+	}
+	if resourceID > 0 {
+		if _, err := qtx.GetBookingResourceForAppointment(ctx, sqlc.GetBookingResourceForAppointmentParams{ID: resourceID, BusinessID: businessID}); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return domain.ErrInvalidReference
+			}
+			return err
+		}
+	}
+	return nil
+}
+
+func nullableID(id int64) sql.NullInt64 {
+	return sql.NullInt64{Int64: id, Valid: id > 0}
+}
+
+func normalizeAppointmentStatus(status string) string {
+	return strings.ToLower(strings.TrimSpace(status))
+}
+
+func validAppointmentStatus(status string) bool {
+	switch status {
+	case "pending", "confirmed", "in_progress", "completed", "cancelled", "no_show":
+		return true
+	default:
+		return false
+	}
+}
+
+func validAppointmentTransition(current, next string) bool {
+	if current == next {
+		return true
+	}
+	switch current {
+	case "pending":
+		return next == "confirmed" || next == "cancelled" || next == "no_show"
+	case "confirmed":
+		return next == "in_progress" || next == "cancelled" || next == "no_show"
+	case "in_progress":
+		return next == "completed" || next == "cancelled" || next == "no_show"
+	default:
+		return false
+	}
+}
+
 func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
-	err := r.queries.DeleteAppointment(ctx, sqlc.DeleteAppointmentParams{BusinessID: businessID, ID: id})
+	result, err := r.queries.DeleteAppointment(ctx, sqlc.DeleteAppointmentParams{BusinessID: businessID, ID: id})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete appointment", logger.Error(err))
 		return err
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return sql.ErrNoRows
 	}
 	return nil
 }
