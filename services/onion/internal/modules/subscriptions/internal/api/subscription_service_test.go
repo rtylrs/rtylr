@@ -15,3 +15,17 @@ func TestIsBillingCapableRole(t *testing.T) {
 		}
 	}
 }
+
+func TestIsConsoleAdminRole(t *testing.T) {
+	for _, role := range []string{"console_admin", " Console_Admin "} {
+		if !isConsoleAdminRole(role) {
+			t.Errorf("isConsoleAdminRole(%q) = false, want true", role)
+		}
+	}
+
+	for _, role := range []string{"owner", "admin", "billing", "operator", ""} {
+		if isConsoleAdminRole(role) {
+			t.Errorf("isConsoleAdminRole(%q) = true, want false", role)
+		}
+	}
+}

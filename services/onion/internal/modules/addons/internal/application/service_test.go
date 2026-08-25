@@ -10,12 +10,14 @@ import (
 )
 
 type mockRepo struct {
-	all     []domain.Addon
-	enabled []domain.BusinessAddon
-	allErr  error
-	bizErr  error
-	enErr   error
-	disErr  error
+	all      []domain.Addon
+	enabled  []domain.BusinessAddon
+	allErr   error
+	bizErr   error
+	enErr    error
+	disErr   error
+	grant    bool
+	grantErr error
 }
 
 func (m *mockRepo) ListAll(_ context.Context) ([]domain.Addon, error) {
@@ -24,6 +26,10 @@ func (m *mockRepo) ListAll(_ context.Context) ([]domain.Addon, error) {
 
 func (m *mockRepo) ListForBusiness(_ context.Context, _ int64) ([]domain.BusinessAddon, error) {
 	return m.enabled, m.bizErr
+}
+
+func (m *mockRepo) HasActiveGrant(_ context.Context, _ int64, _ string) (bool, error) {
+	return m.grant, m.grantErr
 }
 
 func (m *mockRepo) Enable(_ context.Context, _ int64, _ string) error {
@@ -124,7 +130,7 @@ func TestListForBusiness_PropagatesErrors(t *testing.T) {
 }
 
 func TestEnableDisable_Delegates(t *testing.T) {
-	s := &Service{repo: &mockRepo{}}
+	s := &Service{repo: &mockRepo{all: []domain.Addon{{ID: "x", IsFree: true}}}}
 	if err := s.Enable(context.Background(), 1, "x"); err != nil {
 		t.Errorf("unexpected: %v", err)
 	}
@@ -183,9 +189,26 @@ func TestListAll_PropagatesError(t *testing.T) {
 
 func TestEnable_PropagatesError(t *testing.T) {
 	want := errors.New("enable fail")
-	s := &Service{repo: &mockRepo{enErr: want}}
+	s := &Service{repo: &mockRepo{all: []domain.Addon{{ID: "x", IsFree: true}}, enErr: want}}
 	if err := s.Enable(context.Background(), 1, "x"); !errors.Is(err, want) {
 		t.Errorf("expected sentinel, got %v", err)
+	}
+}
+
+func TestEnable_PaidAddonRequiresActiveGrant(t *testing.T) {
+	s := &Service{repo: &mockRepo{all: []domain.Addon{{ID: "paid", Price: money.Amount(1200)}}}}
+	if err := s.Enable(context.Background(), 1, "paid"); !errors.Is(err, domain.ErrAddonNotEntitled) {
+		t.Fatalf("expected ErrAddonNotEntitled, got %v", err)
+	}
+}
+
+func TestEnable_PaidAddonWithActiveGrantDelegates(t *testing.T) {
+	s := &Service{repo: &mockRepo{
+		all:   []domain.Addon{{ID: "paid", Price: money.Amount(1200)}},
+		grant: true,
+	}}
+	if err := s.Enable(context.Background(), 1, "paid"); err != nil {
+		t.Fatalf("expected granted addon to enable, got %v", err)
 	}
 }
 

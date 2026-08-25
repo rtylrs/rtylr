@@ -70,6 +70,17 @@ func (r *Repository) ListForBusiness(ctx context.Context, businessID int64) ([]d
 	return addons, nil
 }
 
+func (r *Repository) HasActiveGrant(ctx context.Context, businessID int64, addonID string) (bool, error) {
+	count, err := r.queries.HasActiveAddonGrant(ctx, sqlc.HasActiveAddonGrantParams{
+		BusinessID: businessID,
+		AddonID:    addonID,
+	})
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
 func (r *Repository) Enable(ctx context.Context, businessID int64, addonID string) error {
 	return r.queries.EnableAddon(ctx, sqlc.EnableAddonParams{
 		BusinessID: businessID,

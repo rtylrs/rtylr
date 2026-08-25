@@ -24,6 +24,7 @@ var hiddenCatalogAddons = map[string]struct{}{
 type repository interface {
 	ListAll(ctx context.Context) ([]domain.Addon, error)
 	ListForBusiness(ctx context.Context, businessID int64) ([]domain.BusinessAddon, error)
+	HasActiveGrant(ctx context.Context, businessID int64, addonID string) (bool, error)
 	Enable(ctx context.Context, businessID int64, addonID string) error
 	Disable(ctx context.Context, businessID int64, addonID string) error
 }
@@ -129,6 +130,29 @@ func (s *Service) ListForBusiness(ctx context.Context, businessID int64) ([]doma
 }
 
 func (s *Service) Enable(ctx context.Context, businessID int64, addonID string) error {
+	addons, err := s.repo.ListAll(ctx)
+	if err != nil {
+		return err
+	}
+	var requested *domain.Addon
+	for i := range addons {
+		if addons[i].ID == addonID {
+			requested = &addons[i]
+			break
+		}
+	}
+	if requested == nil || !isVisibleCatalogAddon(addonID) {
+		return domain.ErrAddonNotFound
+	}
+	if !requested.IsFree || requested.Price > 0 {
+		entitled, grantErr := s.repo.HasActiveGrant(ctx, businessID, addonID)
+		if grantErr != nil {
+			return grantErr
+		}
+		if !entitled {
+			return domain.ErrAddonNotEntitled
+		}
+	}
 	if err := s.repo.Enable(ctx, businessID, addonID); err != nil {
 		return err
 	}
