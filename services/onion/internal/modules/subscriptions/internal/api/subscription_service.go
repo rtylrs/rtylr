@@ -86,7 +86,7 @@ func (a *SubscriptionAPI) GetBillingHistory(ctx context.Context, _ *hubsubscript
 }
 
 func (a *SubscriptionAPI) UpsertSubscription(ctx context.Context, req *hubsubscriptionv1.UpsertSubscriptionRequest) (*hubsubscriptionv1.UpsertSubscriptionResponse, error) {
-	authUser, err := billingUser(ctx)
+	authUser, err := consoleAdminUser(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -145,6 +145,17 @@ func billingUser(ctx context.Context) (*authPkg.AuthUser, error) {
 	return authUser, nil
 }
 
+// consoleAdminUser is intentionally narrower than billingUser. Plan changes
+// are entitlement writes, not a self-service preference: subscription state
+// must come from Paddle checkout/webhook processing or a console grant.
+func consoleAdminUser(ctx context.Context) (*authPkg.AuthUser, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || authUser.UserID <= 0 || !isConsoleAdminRole(authUser.Role) {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	return authUser, nil
+}
+
 func isBillingCapableRole(role string) bool {
 	switch strings.ToLower(strings.TrimSpace(role)) {
 	case "owner", "admin", "billing", "console_admin":
@@ -152,6 +163,10 @@ func isBillingCapableRole(role string) bool {
 	default:
 		return false
 	}
+}
+
+func isConsoleAdminRole(role string) bool {
+	return strings.EqualFold(strings.TrimSpace(role), "console_admin")
 }
 
 func toProtoSubscription(sub *domain.Subscription) *hubsubscriptionv1.Subscription {

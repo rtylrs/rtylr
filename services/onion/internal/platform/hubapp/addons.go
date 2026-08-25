@@ -2,7 +2,13 @@ package hubapp
 
 import (
 	"context"
+	"errors"
 	"time"
+)
+
+var (
+	ErrAddonNotFound    = errors.New("addon not found")
+	ErrAddonNotEntitled = errors.New("addon entitlement required")
 )
 
 type BusinessAddon struct {

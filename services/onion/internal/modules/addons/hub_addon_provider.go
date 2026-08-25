@@ -2,8 +2,10 @@ package addons
 
 import (
 	"context"
+	"errors"
 
 	"github.com/voxire/onion/internal/modules/addons/internal/application"
+	"github.com/voxire/onion/internal/modules/addons/internal/domain"
 	"github.com/voxire/onion/internal/platform/hubapp"
 )
 
@@ -39,7 +41,14 @@ func (p *hubAddonProvider) ListForBusiness(ctx context.Context, businessID int64
 }
 
 func (p *hubAddonProvider) Enable(ctx context.Context, businessID int64, addonID string) error {
-	return p.service.Enable(ctx, businessID, addonID)
+	err := p.service.Enable(ctx, businessID, addonID)
+	if errors.Is(err, domain.ErrAddonNotFound) {
+		return hubapp.ErrAddonNotFound
+	}
+	if errors.Is(err, domain.ErrAddonNotEntitled) {
+		return hubapp.ErrAddonNotEntitled
+	}
+	return err
 }
 
 func (p *hubAddonProvider) Disable(ctx context.Context, businessID int64, addonID string) error {
