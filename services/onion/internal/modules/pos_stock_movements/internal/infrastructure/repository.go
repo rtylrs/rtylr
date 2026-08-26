@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"strconv"
 	"strings"
 
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
@@ -41,7 +41,7 @@ func (r *Repository) ListMovements(ctx context.Context, businessID, _, branchID,
 			BranchID:   branchID,
 			ProductID:  row.ProductID,
 			Type:       posMovementType(string(row.EntryType)),
-			Quantity:   decimalToFloat(row.QuantityChange),
+			Quantity:   sqlutil.DecimalToFloat(row.QuantityChange),
 		}
 		if row.ReferenceID.Valid {
 			m.ReferenceID = &row.ReferenceID.Int64
@@ -407,7 +407,7 @@ func mapBranchInventoryRows(_ context.Context, rows []sqlc.ListBranchInventoryRo
 			BusinessID: businessID,
 			BranchID:   branchID,
 			Name:       row.Name,
-			Quantity:   decimalToFloat(row.Quantity),
+			Quantity:   sqlutil.DecimalToFloat(row.Quantity),
 		}
 		if row.Sku.Valid {
 			item.SKU = row.Sku.String
@@ -418,15 +418,15 @@ func mapBranchInventoryRows(_ context.Context, rows []sqlc.ListBranchInventoryRo
 			item.Unit = "units"
 		}
 		if row.ReorderPoint.Valid {
-			rp := decimalToFloat(row.ReorderPoint.String)
+			rp := sqlutil.DecimalToFloat(row.ReorderPoint.String)
 			item.ReorderPoint = &rp
 		}
 		if row.ReorderQuantity.Valid {
-			rq := decimalToFloat(row.ReorderQuantity.String)
+			rq := sqlutil.DecimalToFloat(row.ReorderQuantity.String)
 			item.ReorderQuantity = &rq
 		}
 		if row.LowStockThreshold.Valid {
-			threshold := decimalToFloat(row.LowStockThreshold.String)
+			threshold := sqlutil.DecimalToFloat(row.LowStockThreshold.String)
 			item.LowStockThreshold = &threshold
 		}
 		if row.UpdatedAt.Valid {
@@ -481,28 +481,6 @@ func entryTypeForMovement(movementType string) stock_core.EntryType {
 	default:
 		return stock_core.EntryAdjustment
 	}
-}
-
-func decimalToFloat(s any) float64 {
-	var str string
-	switch v := s.(type) {
-	case string:
-		str = v
-	case []byte:
-		str = string(v)
-	default:
-		return 0
-	}
-	if str == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(str, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse decimal from database",
-			logger.String("value", str), logger.Error(err))
-		return 0
-	}
-	return f
 }
 
 func stringPtrValue(s *string) string {

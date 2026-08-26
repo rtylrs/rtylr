@@ -17,6 +17,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_orders/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/searchutil"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
@@ -183,16 +184,16 @@ func (r *Repository) GetCurrentOpenSession(ctx context.Context, businessID, staf
 		LocationID:       row.LocationID.Int64,
 		StaffID:          row.StaffID,
 		Status:           domain.SessionStatus(row.Status.PosSessionsStatus),
-		OpeningCash:      decimalToFloat(row.OpeningCash.String),
-		ClosingCash:      decimalToFloat(row.ClosingCash.String),
-		ExpectedCash:     decimalToFloat(row.ExpectedCash.String),
-		CashDifference:   decimalToFloat(row.CashDifference.String),
-		TotalSales:       decimalToFloat(row.TotalSales.String),
+		OpeningCash:      sqlutil.DecimalToFloat(row.OpeningCash.String),
+		ClosingCash:      sqlutil.DecimalToFloat(row.ClosingCash.String),
+		ExpectedCash:     sqlutil.DecimalToFloat(row.ExpectedCash.String),
+		CashDifference:   sqlutil.DecimalToFloat(row.CashDifference.String),
+		TotalSales:       sqlutil.DecimalToFloat(row.TotalSales.String),
 		TotalOrders:      int(row.TotalOrders.Int32),
-		TotalCashSales:   decimalToFloat(row.TotalCashSales.String),
-		TotalCardSales:   decimalToFloat(row.TotalCardSales.String),
-		TotalOnlineSales: decimalToFloat(row.TotalOnlineSales.String),
-		TotalRefunds:     decimalToFloat(row.TotalRefunds.String),
+		TotalCashSales:   sqlutil.DecimalToFloat(row.TotalCashSales.String),
+		TotalCardSales:   sqlutil.DecimalToFloat(row.TotalCardSales.String),
+		TotalOnlineSales: sqlutil.DecimalToFloat(row.TotalOnlineSales.String),
+		TotalRefunds:     sqlutil.DecimalToFloat(row.TotalRefunds.String),
 		OpenedAt:         row.OpenedAt.Time,
 		Notes:            row.Notes.String,
 	}
@@ -426,16 +427,16 @@ func (r *Repository) GetSessionByID(ctx context.Context, businessID, sessionID i
 		LocationID:       row.LocationID.Int64,
 		StaffID:          row.StaffID,
 		Status:           domain.SessionStatus(row.Status.PosSessionsStatus),
-		OpeningCash:      decimalToFloat(row.OpeningCash.String),
-		ClosingCash:      decimalToFloat(row.ClosingCash.String),
-		ExpectedCash:     decimalToFloat(row.ExpectedCash.String),
-		CashDifference:   decimalToFloat(row.CashDifference.String),
-		TotalSales:       decimalToFloat(row.TotalSales.String),
+		OpeningCash:      sqlutil.DecimalToFloat(row.OpeningCash.String),
+		ClosingCash:      sqlutil.DecimalToFloat(row.ClosingCash.String),
+		ExpectedCash:     sqlutil.DecimalToFloat(row.ExpectedCash.String),
+		CashDifference:   sqlutil.DecimalToFloat(row.CashDifference.String),
+		TotalSales:       sqlutil.DecimalToFloat(row.TotalSales.String),
 		TotalOrders:      int(row.TotalOrders.Int32),
-		TotalCashSales:   decimalToFloat(row.TotalCashSales.String),
-		TotalCardSales:   decimalToFloat(row.TotalCardSales.String),
-		TotalOnlineSales: decimalToFloat(row.TotalOnlineSales.String),
-		TotalRefunds:     decimalToFloat(row.TotalRefunds.String),
+		TotalCashSales:   sqlutil.DecimalToFloat(row.TotalCashSales.String),
+		TotalCardSales:   sqlutil.DecimalToFloat(row.TotalCardSales.String),
+		TotalOnlineSales: sqlutil.DecimalToFloat(row.TotalOnlineSales.String),
+		TotalRefunds:     sqlutil.DecimalToFloat(row.TotalRefunds.String),
 		OpenedAt:         row.OpenedAt.Time,
 		Notes:            row.Notes.String,
 	}
@@ -559,12 +560,12 @@ func (r *Repository) loadOrderItemsForOrders(ctx context.Context, orders []domai
 			MenuItemID:     row.MenuItemID,
 			Name:           row.Name,
 			SKU:            row.Sku,
-			Quantity:       decimalToFloat(row.Quantity),
-			UnitPrice:      decimalToFloat(row.UnitPrice),
-			DiscountPct:    decimalToFloat(row.DiscountPct),
-			DiscountAmount: decimalToFloat(row.DiscountAmount),
-			TaxRate:        decimalToFloat(row.TaxRate),
-			Total:          decimalToFloat(row.Total),
+			Quantity:       sqlutil.DecimalToFloat(row.Quantity),
+			UnitPrice:      sqlutil.DecimalToFloat(row.UnitPrice),
+			DiscountPct:    sqlutil.DecimalToFloat(row.DiscountPct),
+			DiscountAmount: sqlutil.DecimalToFloat(row.DiscountAmount),
+			TaxRate:        sqlutil.DecimalToFloat(row.TaxRate),
+			Total:          sqlutil.DecimalToFloat(row.Total),
 			Notes:          row.Notes,
 			Status:         domain.ItemStatus(row.Status),
 		}
@@ -663,19 +664,19 @@ func (r *Repository) GetOrder(ctx context.Context, businessID, orderID int64) (*
 		CustomerID:     row.CustomerID.Int64,
 		CustomerName:   row.CustomerName.String,
 		StaffID:        row.StaffID.Int64,
-		Subtotal:       decimalToFloat(row.Subtotal.String),
-		DiscountAmount: decimalToFloat(row.DiscountAmount.String),
-		TaxAmount:      decimalToFloat(row.TaxAmount.String),
-		Total:          decimalToFloat(row.Total.String),
+		Subtotal:       sqlutil.DecimalToFloat(row.Subtotal.String),
+		DiscountAmount: sqlutil.DecimalToFloat(row.DiscountAmount.String),
+		TaxAmount:      sqlutil.DecimalToFloat(row.TaxAmount.String),
+		Total:          sqlutil.DecimalToFloat(row.Total.String),
 		PaymentMethod:  domain.PaymentMethod(row.PaymentMethod.PosOrdersPaymentMethod),
 		PaymentStatus:  domain.PaymentStatus(row.PaymentStatus.PosOrdersPaymentStatus),
-		AmountPaid:     decimalToFloat(row.AmountPaid.String),
-		ChangeDue:      decimalToFloat(row.ChangeDue.String),
+		AmountPaid:     sqlutil.DecimalToFloat(row.AmountPaid.String),
+		ChangeDue:      sqlutil.DecimalToFloat(row.ChangeDue.String),
 		Notes:          row.Notes.String,
 		KitchenNotes:   row.KitchenNotes.String,
 		CreatedAt:      row.CreatedAt.Time,
 		UpdatedAt:      row.UpdatedAt.Time,
-		TipAmount:      decimalToFloat(row.TipAmount.String),
+		TipAmount:      sqlutil.DecimalToFloat(row.TipAmount.String),
 		TerminalID:     row.TerminalID.Int64,
 		BranchID:       row.BranchID.Int64,
 	}
@@ -843,7 +844,7 @@ func (r *Repository) resolveOrderItems(ctx context.Context, qtx *sqlc.Queries, b
 			return nil, err
 		}
 		canApplyDiscount = capability.CanApplyDiscount.Valid && capability.CanApplyDiscount.Bool
-		maxDiscountPct = decimalToFloat(capability.MaxDiscountPct.String)
+		maxDiscountPct = sqlutil.DecimalToFloat(capability.MaxDiscountPct.String)
 		if maxDiscountPct > 100 {
 			maxDiscountPct = 100
 		}
@@ -884,7 +885,7 @@ func (r *Repository) resolveOrderItems(ctx context.Context, qtx *sqlc.Queries, b
 			}
 			item.Name = combo.Name
 			item.SKU = ""
-			item.UnitPrice = decimalToFloat(combo.Price) + modifierTotal
+			item.UnitPrice = sqlutil.DecimalToFloat(combo.Price) + modifierTotal
 			item.TaxRate = 0
 		} else {
 			if item.MenuItemID <= 0 {
@@ -902,8 +903,8 @@ func (r *Repository) resolveOrderItems(ctx context.Context, qtx *sqlc.Queries, b
 			}
 			item.Name = product.Name
 			item.SKU = product.Sku.String
-			item.UnitPrice = decimalToFloat(product.SalePrice) + modifierTotal
-			item.TaxRate = decimalToFloat(product.TaxRate)
+			item.UnitPrice = sqlutil.DecimalToFloat(product.SalePrice) + modifierTotal
+			item.TaxRate = sqlutil.DecimalToFloat(product.TaxRate)
 		}
 		if item.UnitPrice < 0 {
 			return nil, domain.ErrPricedItemNotFound
@@ -982,12 +983,12 @@ func (r *Repository) GetOrderItems(ctx context.Context, orderID int64) ([]domain
 			MenuItemID:     row.MenuItemID.Int64,
 			Name:           row.Name,
 			SKU:            row.Sku.String,
-			Quantity:       decimalToFloat(row.Quantity),
-			UnitPrice:      decimalToFloat(row.UnitPrice),
-			DiscountPct:    decimalToFloat(row.DiscountPct.String),
-			DiscountAmount: decimalToFloat(row.DiscountAmount.String),
-			TaxRate:        decimalToFloat(row.TaxRate.String),
-			Total:          decimalToFloat(row.Total),
+			Quantity:       sqlutil.DecimalToFloat(row.Quantity),
+			UnitPrice:      sqlutil.DecimalToFloat(row.UnitPrice),
+			DiscountPct:    sqlutil.DecimalToFloat(row.DiscountPct.String),
+			DiscountAmount: sqlutil.DecimalToFloat(row.DiscountAmount.String),
+			TaxRate:        sqlutil.DecimalToFloat(row.TaxRate.String),
+			Total:          sqlutil.DecimalToFloat(row.Total),
 			Notes:          row.Notes.String,
 			Status:         domain.ItemStatus(row.Status.PosOrderItemsStatus),
 			CreatedAt:      row.CreatedAt.Time,
@@ -1027,7 +1028,7 @@ func (r *Repository) ProcessPayment(ctx context.Context, businessID, orderID int
 		return domain.ErrOrderAlreadyPaid
 	}
 
-	total := decimalToFloat(paymentRow.Total.String)
+	total := sqlutil.DecimalToFloat(paymentRow.Total.String)
 	change, err := domain.ComputeChange(total, input.AmountPaid)
 	if err != nil {
 		return err
@@ -1207,7 +1208,7 @@ func (r *Repository) CreateRefund(ctx context.Context, businessID, orderID, refu
 		logger.Ctx(ctx).Error("Failed to sum prior refunds", logger.Error(err))
 		return 0, err
 	}
-	if interfaceToFloat(prevRefunds)+amount > decimalToFloat(order.Total.String) {
+	if interfaceToFloat(prevRefunds)+amount > sqlutil.DecimalToFloat(order.Total.String) {
 		err = domain.ErrRefundExceedsTotal
 		return 0, err
 	}
@@ -1568,7 +1569,7 @@ func (r *Repository) ApplyDiscount(ctx context.Context, businessID, staffID int6
 	if !capability.CanApplyDiscount.Valid || !capability.CanApplyDiscount.Bool {
 		return domain.ErrDiscountNotAllowed
 	}
-	maxDiscountPct := decimalToFloat(capability.MaxDiscountPct.String)
+	maxDiscountPct := sqlutil.DecimalToFloat(capability.MaxDiscountPct.String)
 	if maxDiscountPct > 100 {
 		maxDiscountPct = 100
 	}
@@ -1600,7 +1601,7 @@ func (r *Repository) ApplyDiscount(ctx context.Context, businessID, staffID int6
 	}
 	// Accumulate with any existing order-level discount so a second
 	// application neither erases the first from the money nor the audit.
-	totalDiscount := decimalToFloat(financials.ExistingDiscount) + discountAmount
+	totalDiscount := sqlutil.DecimalToFloat(financials.ExistingDiscount) + discountAmount
 
 	newTotal := subtotal + taxAmount - totalDiscount
 	if newTotal < 0 {
@@ -1685,21 +1686,6 @@ func nullString(s string) sql.NullString {
 
 func nullInt64(v int64) sql.NullInt64 {
 	return sql.NullInt64{Int64: v, Valid: v != 0}
-}
-
-func decimalToFloat(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse decimal from database",
-			logger.String("value", s),
-			logger.Error(err),
-		)
-		return 0
-	}
-	return f
 }
 
 func floatToDecimal(f float64) string {
@@ -1897,8 +1883,8 @@ func (r *Repository) GetPublicMenuItem(ctx context.Context, businessID, menuItem
 		MenuItemID: row.ID,
 		Name:       row.Name,
 		SKU:        row.Sku.String,
-		UnitPrice:  decimalToFloat(row.SalePrice),
-		TaxRate:    decimalToFloat(row.TaxRate),
+		UnitPrice:  sqlutil.DecimalToFloat(row.SalePrice),
+		TaxRate:    sqlutil.DecimalToFloat(row.TaxRate),
 	}
 	return item, nil
 }
