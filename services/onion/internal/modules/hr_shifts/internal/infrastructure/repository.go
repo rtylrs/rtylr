@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/domain"
@@ -380,10 +379,10 @@ func shiftFromRow(row sqlc.HrShift) domain.ShiftRecord {
 		s.ClockOutAt = row.ClockOutAt.Time
 	}
 	if row.HoursWorked.Valid {
-		s.HoursWorked = parseDecimal(row.HoursWorked.String)
+		s.HoursWorked = sqlutil.ParseDecimal(row.HoursWorked.String)
 	}
 	if row.OvertimeHours.Valid {
-		s.OvertimeHours = parseDecimal(row.OvertimeHours.String)
+		s.OvertimeHours = sqlutil.ParseDecimal(row.OvertimeHours.String)
 	}
 	if row.Notes.Valid {
 		s.Notes = row.Notes.String
@@ -453,15 +452,3 @@ func nullDate(s string) sql.NullTime {
 
 // parseDecimal reads a DECIMAL column, which the MySQL driver returns as a
 // string. A corrupt value logs and reads as zero rather than failing the row.
-func parseDecimal(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse shift decimal value from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}

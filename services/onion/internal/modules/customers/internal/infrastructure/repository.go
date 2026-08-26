@@ -20,6 +20,7 @@ import (
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/searchutil"
 	"github.com/voxire/onion/internal/platform/segmentrules"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -559,12 +560,12 @@ func (r *Repository) GetLoyaltyConfig(ctx context.Context, businessID int64) (do
 		return domain.LoyaltyConfig{}, err
 	}
 
-	ppcu := parseDecimal(row.PointsPerCurrencyUnit.String)
-	cpp := parseDecimal(row.CurrencyPerPoint.String)
-	bdp := parseDecimal(row.BronzeDiscountPct.String)
-	sdp := parseDecimal(row.SilverDiscountPct.String)
-	gdp := parseDecimal(row.GoldDiscountPct.String)
-	pdp := parseDecimal(row.PlatinumDiscountPct.String)
+	ppcu := sqlutil.ParseDecimal(row.PointsPerCurrencyUnit.String)
+	cpp := sqlutil.ParseDecimal(row.CurrencyPerPoint.String)
+	bdp := sqlutil.ParseDecimal(row.BronzeDiscountPct.String)
+	sdp := sqlutil.ParseDecimal(row.SilverDiscountPct.String)
+	gdp := sqlutil.ParseDecimal(row.GoldDiscountPct.String)
+	pdp := sqlutil.ParseDecimal(row.PlatinumDiscountPct.String)
 
 	return domain.LoyaltyConfig{
 		ID:                    row.ID,
@@ -829,7 +830,7 @@ func (r *Repository) GetDashboardStats(ctx context.Context, businessID int64) (d
 		TopCustomers:         make([]domain.TopCustomer, 0, len(topRows)),
 	}
 	for _, row := range topRows {
-		spent := parseDecimal(row.TotalSpent.String)
+		spent := sqlutil.ParseDecimal(row.TotalSpent.String)
 		stats.TopCustomers = append(stats.TopCustomers, domain.TopCustomer{
 			ID:            row.ID,
 			FirstName:     row.FirstName,
@@ -1223,7 +1224,7 @@ func (r *Repository) ListLoyaltyTiers(ctx context.Context, businessID int64) ([]
 	tiers := make([]domain.LoyaltyTier, 0, len(rows))
 
 	for _, row := range rows {
-		dp := parseDecimal(row.DiscountPct.String)
+		dp := sqlutil.ParseDecimal(row.DiscountPct.String)
 
 		t := domain.LoyaltyTier{
 			ID:          row.ID,
@@ -1492,7 +1493,7 @@ func customerFromRow(row sqlc.CrmCustomer) domain.Customer {
 		c.Consent = append([]byte(nil), row.Consent...)
 	}
 
-	spent := parseDecimal(row.TotalSpent.String)
+	spent := sqlutil.ParseDecimal(row.TotalSpent.String)
 	c.TotalSpent = spent
 
 	if row.DateOfBirth.Valid {
@@ -1644,15 +1645,3 @@ func toInt(v interface{}) (int, bool) {
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt
 // values instead of silently coercing them to 0.
-func parseDecimal(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse customer decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}

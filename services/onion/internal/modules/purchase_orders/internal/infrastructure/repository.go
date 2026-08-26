@@ -14,6 +14,7 @@ import (
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
@@ -174,12 +175,12 @@ func (r *Repository) GetPurchaseOrderItems(ctx context.Context, purchaseOrderID 
 		item.ID = row.ID
 		item.PurchaseOrderID = row.PurchaseOrderID
 		item.ProductID = row.ProductID
-		item.QuantityOrdered = parseDecimal(row.QuantityOrdered)
-		item.UnitCost = parseDecimal(row.UnitCost)
-		item.TotalCost = parseDecimal(row.TotalCost)
+		item.QuantityOrdered = sqlutil.ParseDecimal(row.QuantityOrdered)
+		item.UnitCost = sqlutil.ParseDecimal(row.UnitCost)
+		item.TotalCost = sqlutil.ParseDecimal(row.TotalCost)
 
 		if row.QuantityReceived.Valid {
-			item.QuantityReceived = parseDecimal(row.QuantityReceived.String)
+			item.QuantityReceived = sqlutil.ParseDecimal(row.QuantityReceived.String)
 		}
 
 		items = append(items, item)
@@ -579,15 +580,15 @@ func purchaseOrderFromRow(row sqlc.ErpPurchaseOrder) domain.PurchaseOrder {
 	}
 
 	if row.Subtotal.Valid {
-		po.Subtotal = parseDecimal(row.Subtotal.String)
+		po.Subtotal = sqlutil.ParseDecimal(row.Subtotal.String)
 	}
 
 	if row.TaxAmount.Valid {
-		po.TaxAmount = parseDecimal(row.TaxAmount.String)
+		po.TaxAmount = sqlutil.ParseDecimal(row.TaxAmount.String)
 	}
 
 	if row.Total.Valid {
-		po.Total = parseDecimal(row.Total.String)
+		po.Total = sqlutil.ParseDecimal(row.Total.String)
 	}
 
 	if row.ExpectedDelivery.Valid {
@@ -627,15 +628,3 @@ func nullInt64(v int64) sql.NullInt64 {
 
 // parseDecimal converts a DB decimal string to float64, logging (rather than
 // silently swallowing) corrupt values so bad money/quantity data surfaces.
-func parseDecimal(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse purchase-order decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}

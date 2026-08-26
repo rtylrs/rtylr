@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/expenses/internal/domain"
 	"github.com/voxire/onion/internal/modules/expenses/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -231,9 +232,9 @@ func interfaceToFloat(v interface{}) float64 {
 	case int64:
 		return float64(val)
 	case []byte:
-		return parseDecimal(string(val))
+		return sqlutil.ParseDecimal(string(val))
 	case string:
-		return parseDecimal(val)
+		return sqlutil.ParseDecimal(val)
 	default:
 		return 0
 	}
@@ -359,19 +360,6 @@ func nullEnumStr[T ~string](value T, valid bool, fallback string) string {
 }
 
 func parseFloat(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	v, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse expense decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return v
-}
-
-func parseDecimal(s string) float64 {
 	if s == "" {
 		return 0
 	}

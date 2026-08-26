@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
@@ -109,9 +110,9 @@ func (r *Repository) getStockTakeItemsBatch(ctx context.Context, stockTakes []do
 			ID:          row.ID,
 			StockTakeID: row.StockTakeID,
 			ProductID:   row.ProductID,
-			ExpectedQty: parseDecimal(row.ExpectedQty),
-			CountedQty:  parseDecimal(row.CountedQty),
-			Variance:    parseDecimal(row.Variance),
+			ExpectedQty: sqlutil.ParseDecimal(row.ExpectedQty),
+			CountedQty:  sqlutil.ParseDecimal(row.CountedQty),
+			Variance:    sqlutil.ParseDecimal(row.Variance),
 		}
 		if row.CreatedAt.Valid {
 			item.CreatedAt = row.CreatedAt.Time.Format("2006-01-02T15:04:05Z07:00")
@@ -395,15 +396,3 @@ func nullInt64(v int64) sql.NullInt64 {
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt
 // values instead of silently coercing them to 0.
-func parseDecimal(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse stock-take decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}
