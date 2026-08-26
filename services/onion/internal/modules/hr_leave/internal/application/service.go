@@ -21,9 +21,7 @@ const (
 )
 
 func invalidateHRLeaveScope(ctx context.Context, ownerID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrLeaveScope, ownerID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrLeaveScope, ownerID))
 }
 
 type Service struct {
