@@ -101,14 +101,14 @@ CREATE TABLE IF NOT EXISTS pos_orders (
     INDEX idx_pos_orders_owner_session (owner_id, session_id),
     INDEX idx_pos_orders_owner_location (owner_id, location_id),
     INDEX idx_pos_orders_owner_created (owner_id, created_at),
-    INDEX idx_pos_orders_business_status_created (business_id, status, created_at),
-    INDEX idx_pos_orders_business_session_created (business_id, session_id, created_at),
-    INDEX idx_pos_orders_business_created (business_id, created_at),
+    -- idx_pos_orders_business_status_created / _business_session_created /
+    -- _business_created and the FULLTEXT search index are added by
+    -- zz_pos_order_search_indexes.sql; declaring them here as well fails a
+    -- fresh migration run with duplicate-key errors.
     INDEX idx_pos_orders_business_order_number (business_id, order_number),
     INDEX idx_pos_orders_business_paid_at (business_id, payment_status, paid_at),
     INDEX idx_pos_orders_business_customer_payment (business_id, customer_id, payment_status),
     INDEX idx_pos_orders_session_payment (session_id, payment_status),
-    FULLTEXT INDEX idx_pos_orders_search (order_number, customer_name, customer_phone),
     INDEX idx_pos_orders_paddle_transaction (paddle_transaction_id),
     INDEX idx_pos_orders_customer (customer_id),
     INDEX idx_pos_orders_staff (staff_id)

@@ -63,15 +63,15 @@ CREATE TABLE IF NOT EXISTS erp_products (
     lead_time_days INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_erp_products_business_name (business_id, name),
-    INDEX idx_erp_products_business_category_name (business_id, category_id, name),
+    -- idx_erp_products_business_name / _business_category_name / _business_active
+    -- and the FULLTEXT search index are added by
+    -- zz_erp_product_search_indexes.sql; declaring them here as well fails a
+    -- fresh migration run with duplicate-key errors.
     INDEX idx_erp_products_business_brand (business_id, brand_id),
-    INDEX idx_erp_products_business_active (business_id, is_active, track_inventory),
     INDEX idx_erp_products_business_sku (business_id, sku),
     INDEX idx_erp_products_business_barcode (business_id, barcode),
     INDEX idx_erp_products_business_inventory_name (business_id, is_active, track_inventory, name),
-    INDEX idx_erp_products_business_inventory_stock (business_id, is_active, track_inventory, stock_quantity),
-    FULLTEXT INDEX idx_erp_products_search (name, sku, barcode)
+    INDEX idx_erp_products_business_inventory_stock (business_id, is_active, track_inventory, stock_quantity)
 );
 
 CREATE TABLE IF NOT EXISTS erp_inventory_transactions (

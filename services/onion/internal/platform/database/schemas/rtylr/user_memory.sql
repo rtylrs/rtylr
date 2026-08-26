@@ -13,4 +13,5 @@ CREATE TABLE IF NOT EXISTS user_memory (
 
 CREATE INDEX idx_user_memory_user_id ON user_memory(user_id);
 CREATE INDEX idx_user_memory_key ON user_memory(`key`);
-CREATE FULLTEXT INDEX idx_user_memory_search ON user_memory(`key`, value, memory_type);
+-- idx_user_memory_search is added by zz_user_memory_search_indexes.sql; adding
+-- it here too fails a fresh migration run with a duplicate-key error.
