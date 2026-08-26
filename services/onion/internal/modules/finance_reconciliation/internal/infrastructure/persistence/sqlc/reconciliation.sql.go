@@ -113,6 +113,7 @@ type GetExpenseForBusinessParams struct {
 	BusinessID int64 `db:"business_id" json:"business_id"`
 }
 
+// cross-schema read from expenses — verify the reconciliation target belongs to the business.
 func (q *Queries) GetExpenseForBusiness(ctx context.Context, arg GetExpenseForBusinessParams) (int64, error) {
 	row := q.db.QueryRowContext(ctx, getExpenseForBusiness, arg.ID, arg.BusinessID)
 	var id int64
@@ -130,6 +131,7 @@ type GetInvoiceForBusinessParams struct {
 	BusinessID int64 `db:"business_id" json:"business_id"`
 }
 
+// cross-schema read from invoices — verify the reconciliation target belongs to the business.
 func (q *Queries) GetInvoiceForBusiness(ctx context.Context, arg GetInvoiceForBusinessParams) (int64, error) {
 	row := q.db.QueryRowContext(ctx, getInvoiceForBusiness, arg.ID, arg.BusinessID)
 	var id int64
@@ -204,6 +206,7 @@ type ListUnmatchedBankFeedsRow struct {
 	ExternalID       string         `db:"external_id" json:"external_id"`
 }
 
+// cross-schema read from bank_feeds — reconciliation suggestions consume imported bank transactions.
 func (q *Queries) ListUnmatchedBankFeeds(ctx context.Context, businessID int64) ([]ListUnmatchedBankFeedsRow, error) {
 	rows, err := q.db.QueryContext(ctx, listUnmatchedBankFeeds, businessID)
 	if err != nil {
@@ -260,6 +263,7 @@ type ListUnmatchedExpensesRow struct {
 	ExpenseDate time.Time      `db:"expense_date" json:"expense_date"`
 }
 
+// cross-schema read from expenses — reconciliation suggestions list eligible expense targets.
 func (q *Queries) ListUnmatchedExpenses(ctx context.Context, businessID int64) ([]ListUnmatchedExpensesRow, error) {
 	rows, err := q.db.QueryContext(ctx, listUnmatchedExpenses, businessID)
 	if err != nil {
@@ -315,6 +319,7 @@ type ListUnmatchedInvoicesRow struct {
 	DueDate       time.Time      `db:"due_date" json:"due_date"`
 }
 
+// cross-schema read from invoices — reconciliation suggestions list eligible invoice targets.
 func (q *Queries) ListUnmatchedInvoices(ctx context.Context, businessID int64) ([]ListUnmatchedInvoicesRow, error) {
 	rows, err := q.db.QueryContext(ctx, listUnmatchedInvoices, businessID)
 	if err != nil {
