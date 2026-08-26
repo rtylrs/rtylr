@@ -67,5 +67,5 @@ func (s *Service) DeleteVariant(ctx context.Context, businessID, id int64) error
 }
 
 func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
-	cacher.Of[[]domain.Variant]().DeleteByPattern(ctx, []string{fmt.Sprintf("variants:%d:*", businessID)})
+	cacher.InvalidateTypedScope[[]domain.Variant](ctx, fmt.Sprintf("variants:%d:*", businessID))
 }

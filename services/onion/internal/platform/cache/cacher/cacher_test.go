@@ -199,3 +199,25 @@ func TestInvalidateScopeClearsLocalCache(t *testing.T) {
 		t.Fatalf("expected local cache miss after scope invalidation, got %q", got)
 	}
 }
+
+func TestInvalidateTypedScopeClearsTypedLocalCache(t *testing.T) {
+	type typedScopeValue struct {
+		Value string
+	}
+
+	ctx := initTestCache(t)
+	cache := Of[typedScopeValue]()
+	key := "cache:typed-scope:11:page"
+
+	cache.Put(ctx, key, typedScopeValue{Value: "cached"}, MemoryOnly(), WithExpiry(ctx, time.Minute))
+	if _, ok := cache.Get(ctx, key, MemoryOnly()); !ok {
+		t.Fatal("expected typed cache entry before scope invalidation")
+	}
+
+	if deleted := InvalidateTypedScope[typedScopeValue](ctx, "cache:typed-scope:11:*"); deleted == 0 {
+		t.Fatal("expected typed scope invalidation to remove the local entry")
+	}
+	if got, ok := cache.Get(ctx, key, MemoryOnly()); ok {
+		t.Fatalf("expected typed cache miss after scope invalidation, got %#v", got)
+	}
+}

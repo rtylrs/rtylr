@@ -36,5 +36,5 @@ func (s *Service) GetActiveCareers(ctx context.Context) ([]domain.Career, error)
 // the voxhire module) can invalidate it without needing careers' internal
 // domain/cache types.
 func InvalidateActiveCareersCache(ctx context.Context) {
-	cacher.Of[[]domain.Career]().DeleteByPattern(ctx, []string{careersCatalogKey})
+	cacher.InvalidateTypedScope[[]domain.Career](ctx, careersCatalogKey)
 }
