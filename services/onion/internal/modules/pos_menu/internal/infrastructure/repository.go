@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
@@ -175,9 +176,7 @@ func decimalToFloat(s string) float64 {
 	return f
 }
 
-func floatToDecimal(f float64) string {
-	return strconv.FormatFloat(f, 'f', 2, 64)
-}
+var floatToDecimal = sqlutil.FloatToDecimal
 
 // stockToFloat converts the value returned by the COALESCE(pst.total_quantity, p.stock_quantity)
 // aggregate (sqlc emits interface{} for a DECIMAL sourced from the product_stock_total view) into

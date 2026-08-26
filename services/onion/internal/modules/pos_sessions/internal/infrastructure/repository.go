@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -187,6 +188,4 @@ func decimalToFloat(s string) float64 {
 	return f
 }
 
-func floatToDecimal(f float64) string {
-	return fmt.Sprintf("%.2f", f)
-}
+var floatToDecimal = sqlutil.FloatToDecimal
