@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"math"
 	"context"
 	"errors"
 	"net/http"
@@ -94,6 +95,11 @@ func (h *CreateContractHandler) Validate(_ context.Context, req *CreateContractR
 	}
 	if req.MRR < 0 {
 		return onekiterrors.New(http.StatusBadRequest, "mrr must not be negative")
+	}
+	// The repository stores seats as INT; larger values wrap negative (#836).
+	// Zero stays allowed until the product decides seats are mandatory.
+	if req.Seats < 0 || req.Seats > math.MaxInt32 {
+		return onekiterrors.New(http.StatusBadRequest, "seats must be between 0 and 2147483647")
 	}
 	return nil
 }
@@ -204,6 +210,11 @@ func (h *UpdateContractHandler) Validate(_ context.Context, req *UpdateContractR
 	}
 	if req.MRR < 0 {
 		return onekiterrors.New(http.StatusBadRequest, "mrr must not be negative")
+	}
+	// The repository stores seats as INT; larger values wrap negative (#836).
+	// Zero stays allowed until the product decides seats are mandatory.
+	if req.Seats < 0 || req.Seats > math.MaxInt32 {
+		return onekiterrors.New(http.StatusBadRequest, "seats must be between 0 and 2147483647")
 	}
 	return nil
 }

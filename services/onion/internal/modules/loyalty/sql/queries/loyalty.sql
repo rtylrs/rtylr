@@ -45,7 +45,7 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO crm_loyalty_rewards (owner_id, business_id, name, description, category, points_cost, stock, icon, active)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: UpdateReward :exec
+-- name: UpdateReward :execresult
 UPDATE crm_loyalty_rewards
 SET name = ?, description = ?, category = ?, points_cost = ?, stock = ?, icon = ?, active = ?
 WHERE id = ? AND business_id = ?;

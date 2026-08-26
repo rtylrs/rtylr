@@ -134,7 +134,7 @@ ON DUPLICATE KEY UPDATE
 SELECT
     COALESCE(SUM(CASE WHEN status = 'bounced' THEN 1 ELSE 0 END), 0) AS bounced_count,
     COALESCE(SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END), 0) AS failed_count
-FROM crm_campaign_sends WHERE campaign_id = ?;
+FROM crm_campaign_sends WHERE campaign_id = ? AND business_id = ?;
 
 -- name: GetCustomerTimeline :many
 SELECT id, owner_id, business_id, customer_id, type, description, metadata, created_at

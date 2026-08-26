@@ -1365,7 +1365,13 @@ func (r *Repository) GetCampaignStats(ctx context.Context, businessID, campaignI
 	stats.OpenedCount = campaign.OpenedCount
 	stats.ClickedCount = campaign.ClickedCount
 
-	sendStats, err := r.queries.GetCampaignSendStats(ctx, campaignID)
+	// Filter by business too: reachable only through the scoped campaign
+	// lookup today, but a bare campaign_id here is one future caller away from
+	// a cross-tenant read (#844).
+	sendStats, err := r.queries.GetCampaignSendStats(ctx, sqlc.GetCampaignSendStatsParams{
+		CampaignID: campaignID,
+		BusinessID: businessID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get campaign send stats", logger.Error(err))
 	} else {
