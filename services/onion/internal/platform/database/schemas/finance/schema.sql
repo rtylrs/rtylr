@@ -57,11 +57,13 @@ CREATE TABLE IF NOT EXISTS finance_invoices (
     terms TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_finance_invoices_business_created (business_id, created_at),
-    INDEX idx_finance_invoices_business_status_created (business_id, status, created_at),
-    INDEX idx_finance_invoices_business_status_reporting_date (business_id, status, reporting_date),
-    UNIQUE KEY uq_finance_invoices_business_number (business_id, invoice_number),
-    FULLTEXT INDEX idx_finance_invoices_search (invoice_number, client_name, client_email)
+    -- idx_finance_invoices_business_created / _business_status_created and the
+    -- FULLTEXT search index are added by zz_finance_search_indexes.sql;
+    -- declaring them here as well fails a fresh migration run with
+    -- duplicate-key errors. The same applies to uq_finance_invoices_business_number
+    -- and _business_status_reporting_date: zz_finance_invoice_number_unique.sql
+    -- and zz_finance_reporting_date_live_repair.sql own those.
+    INDEX idx_finance_invoices_business_status_reporting_date (business_id, status, reporting_date)
 );
 
 CREATE TABLE IF NOT EXISTS finance_invoice_items (
@@ -118,10 +120,11 @@ CREATE TABLE IF NOT EXISTS finance_expenses (
     notes TEXT,
     status VARCHAR(50) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_finance_expenses_business_date (business_id, expense_date),
-    INDEX idx_finance_expenses_business_category_date (business_id, category_id, expense_date),
-    FULLTEXT INDEX idx_finance_expenses_search (description, vendor)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    -- idx_finance_expenses_business_date / _business_category_date and the
+    -- FULLTEXT search index are added by zz_finance_search_indexes.sql;
+    -- declaring them here as well fails a fresh migration run with
+    -- duplicate-key errors.
 );
 
 CREATE TABLE IF NOT EXISTS finance_tax_config (

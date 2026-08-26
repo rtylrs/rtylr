@@ -41,7 +41,8 @@ CREATE TABLE IF NOT EXISTS hr_staff (
     bio TEXT NULL COMMENT 'What the staff member says about themselves, shown on their profile',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FULLTEXT INDEX idx_hr_staff_search (first_name, last_name, email, role),
+    -- idx_hr_staff_search is added by zz_hr_staff_search_indexes.sql; declaring
+    -- it here as well fails a fresh migration run with a duplicate-key error.
     INDEX idx_hr_staff_employee (owner_id, employee_id)
 );
 

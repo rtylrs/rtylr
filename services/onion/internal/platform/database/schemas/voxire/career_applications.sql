@@ -16,8 +16,10 @@ CREATE TABLE IF NOT EXISTS voxire_career_applications (
     created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_career_apps_job (job_id),
     INDEX idx_career_apps_job_created (job_id, created_at),
-    INDEX idx_career_apps_status (status),
-    INDEX idx_career_apps_job_status (job_id, status)
+    INDEX idx_career_apps_status (status)
+    -- idx_career_apps_job_status is added by
+    -- zz_voxhire_application_job_status_index.sql; declaring it here as well
+    -- fails a fresh migration run with a duplicate-key error.
 );
 
 -- VoxHire admin accounts — self-contained login for the
