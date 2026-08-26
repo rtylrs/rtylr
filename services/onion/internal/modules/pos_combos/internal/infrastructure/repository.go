@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"strconv"
 
 	"github.com/voxire/onion/internal/modules/pos_combos/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_combos/internal/infrastructure/persistence/sqlc"
@@ -40,7 +39,7 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Combo
 			BusinessID:  row.BusinessID,
 			Name:        row.Name,
 			Description: row.Description.String,
-			Price:       decimalToFloat(row.Price),
+			Price:       sqlutil.DecimalToFloat(row.Price),
 			Items:       string(row.Items),
 			IsActive:    row.IsActive.Bool,
 			CreatedAt:   row.CreatedAt.Time,
@@ -56,7 +55,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 		BusinessID:  businessID,
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
-		Price:       floatToDecimal(input.Price),
+		Price:       sqlutil.FloatToDecimal(input.Price),
 		Items:       itemsToJSON(input.Items),
 		IsActive:    sql.NullBool{Bool: input.IsActive, Valid: true},
 	})
@@ -71,7 +70,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 	result, err := r.queries.UpdateCombo(ctx, sqlc.UpdateComboParams{
 		Name:        input.Name,
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
-		Price:       floatToDecimal(input.Price),
+		Price:       sqlutil.FloatToDecimal(input.Price),
 		Items:       itemsToJSON(input.Items),
 		IsActive:    sql.NullBool{Bool: input.IsActive, Valid: true},
 		ID:          id,
@@ -109,21 +108,6 @@ func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
 	}
 	return nil
 }
-
-func decimalToFloat(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse combo decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}
-
-var floatToDecimal = sqlutil.FloatToDecimal
 
 func itemsToJSON(s string) json.RawMessage {
 	if s == "" {

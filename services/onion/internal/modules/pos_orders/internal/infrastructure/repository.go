@@ -298,7 +298,7 @@ func (r *Repository) OpenSession(ctx context.Context, businessID, staffID, locat
 	}
 	res, err := tx.ExecContext(ctx, `
 		INSERT INTO pos_sessions (owner_id, business_id, location_id, staff_id, status, opening_cash)
-		VALUES (?, ?, ?, ?, 'open', ?)`, businessID, businessID, locationID, staffID, floatToDecimal(openingCash))
+		VALUES (?, ?, ?, ?, 'open', ?)`, businessID, businessID, locationID, staffID, sqlutil.FloatToDecimal(openingCash))
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to open pos session", logger.Error(err))
 		return 0, err
@@ -318,7 +318,7 @@ func (r *Repository) CloseSessionForStaff(ctx context.Context, businessID, staff
 		UPDATE pos_sessions
 		SET status = 'closed', closing_cash = ?, expected_cash = ?, cash_difference = ?, closed_at = NOW(), notes = ?
 		WHERE business_id = ? AND id = ? AND staff_id = ? AND status = 'open'`,
-		floatToDecimal(closingCash), floatToDecimal(expectedCash), floatToDecimal(cashDiff), notes, businessID, sessionID, staffID)
+		sqlutil.FloatToDecimal(closingCash), sqlutil.FloatToDecimal(expectedCash), sqlutil.FloatToDecimal(cashDiff), notes, businessID, sessionID, staffID)
 	if err != nil {
 		return err
 	}
@@ -334,9 +334,9 @@ func (r *Repository) CloseSessionForStaff(ctx context.Context, businessID, staff
 
 func (r *Repository) CloseSession(ctx context.Context, businessID, sessionID int64, closingCash, expectedCash, cashDiff float64, notes string) error {
 	err := r.queries.CloseSession(ctx, sqlc.CloseSessionParams{
-		ClosingCash:    sql.NullString{String: floatToDecimal(closingCash), Valid: true},
-		ExpectedCash:   sql.NullString{String: floatToDecimal(expectedCash), Valid: true},
-		CashDifference: sql.NullString{String: floatToDecimal(cashDiff), Valid: true},
+		ClosingCash:    sql.NullString{String: sqlutil.FloatToDecimal(closingCash), Valid: true},
+		ExpectedCash:   sql.NullString{String: sqlutil.FloatToDecimal(expectedCash), Valid: true},
+		CashDifference: sql.NullString{String: sqlutil.FloatToDecimal(cashDiff), Valid: true},
 		Notes:          nullString(notes),
 		BusinessID:     businessID,
 		ID:             sessionID,
@@ -394,10 +394,10 @@ func (r *Repository) GetSessionCashAdjustments(ctx context.Context, businessID, 
 
 func (r *Repository) UpdateSessionTotals(ctx context.Context, sessionID int64, totalSales, cashSales, cardSales, onlineSales float64, totalOrders int) error {
 	err := r.queries.UpdateSessionTotals(ctx, sqlc.UpdateSessionTotalsParams{
-		TotalSales:       sql.NullString{String: floatToDecimal(totalSales), Valid: true},
-		TotalCashSales:   sql.NullString{String: floatToDecimal(cashSales), Valid: true},
-		TotalCardSales:   sql.NullString{String: floatToDecimal(cardSales), Valid: true},
-		TotalOnlineSales: sql.NullString{String: floatToDecimal(onlineSales), Valid: true},
+		TotalSales:       sql.NullString{String: sqlutil.FloatToDecimal(totalSales), Valid: true},
+		TotalCashSales:   sql.NullString{String: sqlutil.FloatToDecimal(cashSales), Valid: true},
+		TotalCardSales:   sql.NullString{String: sqlutil.FloatToDecimal(cardSales), Valid: true},
+		TotalOnlineSales: sql.NullString{String: sqlutil.FloatToDecimal(onlineSales), Valid: true},
 		TotalOrders:      sql.NullInt32{Int32: int32(totalOrders), Valid: true},
 		ID:               sessionID,
 	})
@@ -448,7 +448,7 @@ func (r *Repository) GetSessionByID(ctx context.Context, businessID, sessionID i
 
 func (r *Repository) UpdateSessionRefundTotals(ctx context.Context, sessionID int64, refundAmount float64) error {
 	err := r.queries.UpdateSessionRefundTotals(ctx, sqlc.UpdateSessionRefundTotalsParams{
-		TotalRefunds: sql.NullString{String: floatToDecimal(refundAmount), Valid: true},
+		TotalRefunds: sql.NullString{String: sqlutil.FloatToDecimal(refundAmount), Valid: true},
 		ID:           sessionID,
 	})
 	if err != nil {
@@ -742,9 +742,9 @@ func (r *Repository) CreateOrder(ctx context.Context, businessID, staffID int64,
 		CustomerID:    nullInt64(input.CustomerID),
 		CustomerName:  nullString(input.CustomerName),
 		StaffID:       nullInt64(staffID),
-		Subtotal:      sql.NullString{String: floatToDecimal(subtotal), Valid: true},
-		TaxAmount:     sql.NullString{String: floatToDecimal(taxAmount), Valid: true},
-		Total:         sql.NullString{String: floatToDecimal(total), Valid: true},
+		Subtotal:      sql.NullString{String: sqlutil.FloatToDecimal(subtotal), Valid: true},
+		TaxAmount:     sql.NullString{String: sqlutil.FloatToDecimal(taxAmount), Valid: true},
+		Total:         sql.NullString{String: sqlutil.FloatToDecimal(total), Valid: true},
 		PaymentMethod: sqlc.NullPosOrdersPaymentMethod{PosOrdersPaymentMethod: sqlc.PosOrdersPaymentMethod(input.PaymentMethod), Valid: input.PaymentMethod != ""},
 		Notes:         nullString(input.Notes),
 		KitchenNotes:  nullString(input.KitchenNotes),
@@ -770,11 +770,11 @@ func (r *Repository) CreateOrder(ctx context.Context, businessID, staffID int64,
 			Name:           item.Name,
 			Sku:            nullString(item.SKU),
 			Quantity:       floatToDecimal3(item.Quantity),
-			UnitPrice:      floatToDecimal(item.UnitPrice),
-			DiscountPct:    sql.NullString{String: floatToDecimal(item.DiscountPct), Valid: true},
-			DiscountAmount: sql.NullString{String: floatToDecimal(discAmts[i]), Valid: true},
-			TaxRate:        sql.NullString{String: floatToDecimal(item.TaxRate), Valid: true},
-			Total:          floatToDecimal(itemTotals[i]),
+			UnitPrice:      sqlutil.FloatToDecimal(item.UnitPrice),
+			DiscountPct:    sql.NullString{String: sqlutil.FloatToDecimal(item.DiscountPct), Valid: true},
+			DiscountAmount: sql.NullString{String: sqlutil.FloatToDecimal(discAmts[i]), Valid: true},
+			TaxRate:        sql.NullString{String: sqlutil.FloatToDecimal(item.TaxRate), Valid: true},
+			Total:          sqlutil.FloatToDecimal(itemTotals[i]),
 			Notes:          nullString(item.Notes),
 			Modifiers:      modifierJSON,
 			ComboID:        nullInt64(item.ComboID),
@@ -1039,8 +1039,8 @@ func (r *Repository) ProcessPayment(ctx context.Context, businessID, orderID int
 
 	markResult, err := qtx.MarkOrderPaid(ctx, sqlc.MarkOrderPaidParams{
 		PaymentMethod: sqlc.NullPosOrdersPaymentMethod{PosOrdersPaymentMethod: sqlc.PosOrdersPaymentMethod(input.PaymentMethod), Valid: true},
-		AmountPaid:    sql.NullString{String: floatToDecimal(input.AmountPaid), Valid: true},
-		ChangeDue:     sql.NullString{String: floatToDecimal(changeDue), Valid: true},
+		AmountPaid:    sql.NullString{String: sqlutil.FloatToDecimal(input.AmountPaid), Valid: true},
+		ChangeDue:     sql.NullString{String: sqlutil.FloatToDecimal(changeDue), Valid: true},
 		PaidAt:        sql.NullTime{Time: now, Valid: true},
 		BusinessID:    businessID,
 		ID:            orderID,
@@ -1217,7 +1217,7 @@ func (r *Repository) CreateRefund(ctx context.Context, businessID, orderID, refu
 		OwnerID:    businessID,
 		BusinessID: businessID,
 		OrderID:    orderID,
-		Amount:     floatToDecimal(amount),
+		Amount:     sqlutil.FloatToDecimal(amount),
 		Reason:     nullString(reason),
 		RefundedBy: nullInt64(refundedBy),
 	})
@@ -1609,8 +1609,8 @@ func (r *Repository) ApplyDiscount(ctx context.Context, businessID, staffID int6
 	}
 
 	err = qtx.ApplyDiscount(ctx, sqlc.ApplyDiscountParams{
-		DiscountAmount: sql.NullString{String: floatToDecimal(totalDiscount), Valid: true},
-		Total:          sql.NullString{String: floatToDecimal(newTotal), Valid: true},
+		DiscountAmount: sql.NullString{String: sqlutil.FloatToDecimal(totalDiscount), Valid: true},
+		Total:          sql.NullString{String: sqlutil.FloatToDecimal(newTotal), Valid: true},
 		CONCAT:         fmt.Sprintf(" [Discount: %s]", input.Reason),
 		ID:             input.OrderID,
 		BusinessID:     businessID,
@@ -1686,10 +1686,6 @@ func nullString(s string) sql.NullString {
 
 func nullInt64(v int64) sql.NullInt64 {
 	return sql.NullInt64{Int64: v, Valid: v != 0}
-}
-
-func floatToDecimal(f float64) string {
-	return strconv.FormatFloat(f, 'f', 2, 64)
 }
 
 func floatToDecimal3(f float64) string {
@@ -1916,9 +1912,9 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, or
 		CustomerID:    sql.NullInt64{},
 		CustomerName:  nullString(customerName),
 		CustomerPhone: nullString(customerPhone),
-		Subtotal:      sql.NullString{String: floatToDecimal(totals.Subtotal), Valid: true},
-		TaxAmount:     sql.NullString{String: floatToDecimal(totals.TaxAmount), Valid: true},
-		Total:         sql.NullString{String: floatToDecimal(totals.Total), Valid: true},
+		Subtotal:      sql.NullString{String: sqlutil.FloatToDecimal(totals.Subtotal), Valid: true},
+		TaxAmount:     sql.NullString{String: sqlutil.FloatToDecimal(totals.TaxAmount), Valid: true},
+		Total:         sql.NullString{String: sqlutil.FloatToDecimal(totals.Total), Valid: true},
 		Notes:         nullString(notes),
 	})
 	if err != nil {
@@ -1938,8 +1934,8 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, or
 			MenuItemID: sql.NullInt64{Int64: item.MenuItemID, Valid: item.MenuItemID != 0},
 			Name:       item.Name,
 			Quantity:   floatToDecimal3(item.Quantity),
-			UnitPrice:  floatToDecimal(item.UnitPrice),
-			Total:      floatToDecimal(itemTotal),
+			UnitPrice:  sqlutil.FloatToDecimal(item.UnitPrice),
+			Total:      sqlutil.FloatToDecimal(itemTotal),
 			Notes:      nullString(item.Notes),
 		}); err != nil {
 			logger.Ctx(ctx).Error("Failed to insert public order item", logger.Error(err))

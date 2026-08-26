@@ -38,8 +38,8 @@ func (r *Repository) GetConfig(ctx context.Context, businessID int64) (domain.Lo
 		ID:              row.ID,
 		BusinessID:      row.BusinessID,
 		IsEnabled:       row.IsEnabled.Bool,
-		PointsPerDollar: decimalToFloat(row.PointsPerDollar.String),
-		RedemptionRate:  decimalToFloat(row.RedemptionRate.String),
+		PointsPerDollar: sqlutil.DecimalToFloat(row.PointsPerDollar.String),
+		RedemptionRate:  sqlutil.DecimalToFloat(row.RedemptionRate.String),
 		MinRedeemPoints: row.MinRedeemPoints.Int32,
 		CreatedAt:       row.CreatedAt.Time,
 		UpdatedAt:       row.UpdatedAt.Time,
@@ -50,7 +50,7 @@ func (r *Repository) UpsertConfig(ctx context.Context, input domain.UpdateLoyalt
 	_, err := r.queries.UpsertLoyaltyConfig(ctx, sqlc.UpsertLoyaltyConfigParams{
 		BusinessID:      input.BusinessID,
 		IsEnabled:       sql.NullBool{Bool: input.IsEnabled, Valid: true},
-		PointsPerDollar: sql.NullString{String: floatToDecimal(input.PointsPerDollar), Valid: true},
+		PointsPerDollar: sql.NullString{String: sqlutil.FloatToDecimal(input.PointsPerDollar), Valid: true},
 		RedemptionRate:  sql.NullString{String: fmt.Sprintf("%.4f", input.RedemptionRate), Valid: true},
 		MinRedeemPoints: sql.NullInt32{Int32: input.MinRedeemPoints, Valid: true},
 	})
@@ -118,7 +118,7 @@ func (r *Repository) GetPaidOrderTotal(ctx context.Context, businessID, customer
 	if err != nil {
 		return 0, err
 	}
-	return decimalToFloat(total), nil
+	return sqlutil.DecimalToFloat(total), nil
 }
 
 // CreateBalanceTransaction serializes the balance read/modify/write with a
@@ -214,21 +214,6 @@ func nullInt64Ptr(v *int64) sql.NullInt64 {
 	}
 	return sql.NullInt64{Int64: *v, Valid: true}
 }
-
-func decimalToFloat(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse loyalty decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}
-
-var floatToDecimal = sqlutil.FloatToDecimal
 
 func interfaceToInt(v any) int64 {
 	if v == nil {

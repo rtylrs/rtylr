@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"strconv"
 
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/infrastructure/persistence/sqlc"
@@ -43,9 +42,9 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.MenuI
 			OwnerID:    row.OwnerID,
 			BusinessID: row.BusinessID,
 			Name:       row.Name,
-			SalePrice:  decimalToFloat(row.SalePrice),
-			CostPrice:  decimalToFloat(row.CostPrice),
-			TaxRate:    decimalToFloat(row.TaxRate),
+			SalePrice:  sqlutil.DecimalToFloat(row.SalePrice),
+			CostPrice:  sqlutil.DecimalToFloat(row.CostPrice),
+			TaxRate:    sqlutil.DecimalToFloat(row.TaxRate),
 			Stock:      stockToFloat(row.StockQuantity),
 			IsActive:   row.IsActive.Valid && row.IsActive.Bool,
 			Category:   row.CategoryName,
@@ -91,7 +90,7 @@ func (r *Repository) QuickCreate(ctx context.Context, ownerID, businessID int64,
 		BusinessID: businessID,
 		Name:       input.Name,
 		Sku:        sql.NullString{String: input.SKU, Valid: input.SKU != ""},
-		SalePrice:  floatToDecimal(input.SalePrice),
+		SalePrice:  sqlutil.FloatToDecimal(input.SalePrice),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to quick-create menu item", logger.Error(err))
@@ -135,7 +134,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 	qtx := r.queries.WithTx(tx)
 	result, err := qtx.UpdateMenuItem(ctx, sqlc.UpdateMenuItemParams{
 		Name:       input.Name,
-		SalePrice:  floatToDecimal(input.SalePrice),
+		SalePrice:  sqlutil.FloatToDecimal(input.SalePrice),
 		IsActive:   sql.NullBool{Bool: input.IsActive, Valid: true},
 		BusinessID: businessID,
 		ID:         id,
@@ -163,21 +162,6 @@ func (r *Repository) BusinessOwnerID(ctx context.Context, businessID int64) (int
 	return ownerID, nil
 }
 
-func decimalToFloat(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse menu decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}
-
-var floatToDecimal = sqlutil.FloatToDecimal
-
 // stockToFloat converts the value returned by the COALESCE(pst.total_quantity, p.stock_quantity)
 // aggregate (sqlc emits interface{} for a DECIMAL sourced from the product_stock_total view) into
 // a float64, handling the driver representations MySQL may return for a DECIMAL column.
@@ -193,10 +177,10 @@ func stockToFloat(v interface{}) float64 {
 	case int64:
 		return float64(val)
 	case []byte:
-		return decimalToFloat(string(val))
+		return sqlutil.DecimalToFloat(string(val))
 	case string:
-		return decimalToFloat(val)
+		return sqlutil.DecimalToFloat(val)
 	default:
-		return decimalToFloat(fmt.Sprintf("%v", val))
+		return sqlutil.DecimalToFloat(fmt.Sprintf("%v", val))
 	}
 }
