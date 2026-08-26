@@ -4,6 +4,7 @@ WITH brand_page AS (
     FROM erp_brands b
     WHERE b.business_id = ?
 ), product_counts AS (
+    -- cross-schema read from erp_products (products module) — include the number of products assigned to each brand.
     SELECT p.brand_id, COUNT(*) AS product_count
     FROM erp_products p FORCE INDEX (idx_erp_products_business_brand)
     JOIN brand_page b ON b.id = p.brand_id AND b.business_id = p.business_id
@@ -36,6 +37,7 @@ WITH brand_page AS (
     ORDER BY b.name ASC, b.id ASC
     LIMIT ? OFFSET ?
 ), product_counts AS (
+    -- cross-schema read from erp_products (products module) — include the number of products assigned to each brand.
     SELECT p.brand_id, COUNT(*) AS product_count
     FROM erp_products p FORCE INDEX (idx_erp_products_business_brand)
     JOIN brand_page b ON b.id = p.brand_id AND b.business_id = p.business_id
