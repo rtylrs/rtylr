@@ -15,11 +15,14 @@ interface AppGuardProps {
   children: React.ReactNode;
   loader?: React.ReactNode;
   denied?: React.ReactNode;
+  error?: (retry: () => void) => React.ReactNode;
 }
 
 function DefaultLoader(): React.JSX.Element {
   return (
     <div
+      role="status"
+      aria-label="Loading"
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -90,6 +93,10 @@ function DefaultDenied({ appId }: { appId: AppId }): React.JSX.Element {
  *
  * It also hydrates the shared `useUserStore` from the `/user/me` response.
  *
+ * The loading and denied states accept a `React.ReactNode` override; the
+ * error state accepts a render prop receiving the retry callback so apps can
+ * translate or replace the default session-error UI (#42).
+ *
  * Usage:
  * ```tsx
  * <AppGuard appId="flow" fetchUser={() => api.get('/user/me').then(r => r.data)}>
@@ -139,6 +146,7 @@ export function AppGuard({
   children,
   loader,
   denied,
+  error,
 }: AppGuardProps): React.JSX.Element {
   const [status, setStatus] = useState<'loading' | 'allowed' | 'denied' | 'error'>('loading');
   const [attempt, setAttempt] = useState(0);
@@ -217,7 +225,9 @@ export function AppGuard({
   if (status === 'loading') return loader ? <>{loader}</> : <DefaultLoader />;
   if (status === 'denied') return denied ? <>{denied}</> : <DefaultDenied appId={appId} />;
   if (status === 'error') {
-    return <DefaultError onRetry={() => setAttempt((n) => n + 1)} />;
+    const retry = (): void => setAttempt((n) => n + 1);
+    if (error) return <>{error(retry)}</>;
+    return <DefaultError onRetry={retry} />;
   }
   return <>{children}</>;
 }
