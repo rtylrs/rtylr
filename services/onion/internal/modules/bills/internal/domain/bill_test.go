@@ -1,9 +1,23 @@
 package domain
 
 import (
+	"errors"
 	"testing"
 	"time"
 )
+
+func TestValidateBillStatusTransition(t *testing.T) {
+	allowed := [][2]string{{"pending", "overdue"}, {"pending", "paid"}, {"overdue", "paid"}, {"paid", "paid"}}
+	for _, transition := range allowed {
+		if err := ValidateBillStatusTransition(transition[0], transition[1]); err != nil {
+			t.Errorf("%s -> %s: unexpected error: %v", transition[0], transition[1], err)
+		}
+	}
+
+	if err := ValidateBillStatusTransition("paid", "pending"); !errors.Is(err, ErrInvalidStatusTransition) {
+		t.Fatalf("paid -> pending error = %v, want ErrInvalidStatusTransition", err)
+	}
+}
 
 func TestIsPaid_TrueWhenStatusPaid(t *testing.T) {
 	b := &Bill{Status: "paid"}

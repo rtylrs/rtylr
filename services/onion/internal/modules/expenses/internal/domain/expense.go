@@ -6,9 +6,24 @@ import (
 )
 
 var (
-	ErrExpenseNotFound  = errors.New("expense not found")
-	ErrCategoryNotFound = errors.New("expense category not found")
+	ErrExpenseNotFound          = errors.New("expense not found")
+	ErrCategoryNotFound         = errors.New("expense category not found")
+	ErrInvalidStatusTransition  = errors.New("invalid expense status transition")
+	ErrApprovedExpenseImmutable = errors.New("approved expense is immutable")
 )
+
+// ValidateExpenseStatusTransition allows pending expenses to be approved or
+// rejected. Approved and rejected are terminal review outcomes; they may be
+// repeated idempotently but cannot be changed into another outcome.
+func ValidateExpenseStatusTransition(current, next string) error {
+	if current == next {
+		return nil
+	}
+	if current == "pending" && (next == "approved" || next == "rejected") {
+		return nil
+	}
+	return ErrInvalidStatusTransition
+}
 
 type Expense struct {
 	ID              int64     `json:"id"`
