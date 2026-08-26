@@ -401,3 +401,18 @@ func (q *Queries) LockInvoiceForBusiness(ctx context.Context, arg LockInvoiceFor
 	err := row.Scan(&id)
 	return id, err
 }
+
+const reserveReconciliationTarget = `-- name: ReserveReconciliationTarget :execresult
+INSERT IGNORE INTO finance_reconciliation_targets (business_id, target_type, target_id)
+VALUES (?, ?, ?)
+`
+
+type ReserveReconciliationTargetParams struct {
+	BusinessID int64  `db:"business_id" json:"business_id"`
+	TargetType string `db:"target_type" json:"target_type"`
+	TargetID   int64  `db:"target_id" json:"target_id"`
+}
+
+func (q *Queries) ReserveReconciliationTarget(ctx context.Context, arg ReserveReconciliationTargetParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, reserveReconciliationTarget, arg.BusinessID, arg.TargetType, arg.TargetID)
+}
