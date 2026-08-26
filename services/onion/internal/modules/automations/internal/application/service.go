@@ -34,9 +34,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateAutomationsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(automationsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(automationsScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Automation, error) {
