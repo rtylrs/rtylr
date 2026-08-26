@@ -37,6 +37,7 @@ FROM businesses
 WHERE slug = ? AND is_active = TRUE
 LIMIT 1;
 
+-- cross-schema read from hr_core — expose active HR locations in the public business profile.
 -- name: ListPublicLocationsByOwner :many
 SELECT id, name, COALESCE(slug, '') AS slug, COALESCE(address, '') AS address,
        COALESCE(timezone, '') AS timezone, is_active
