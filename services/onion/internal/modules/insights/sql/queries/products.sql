@@ -1,9 +1,12 @@
+-- cross-schema read from erp — count all product SKUs for insight totals.
 -- name: CountProductSKUsTotal :one
 SELECT COUNT(*) AS count FROM erp_products WHERE business_id = ?;
 
+-- cross-schema read from erp — count active product SKUs for insight totals.
 -- name: CountProductSKUsActive :one
 SELECT COUNT(*) AS count FROM erp_products WHERE business_id = ? AND is_active = TRUE;
 
+-- cross-schema read from erp — count tracked products with no stock.
 -- name: CountProductSKUsOutOfStock :one
 SELECT COUNT(*) AS count
  FROM erp_products
@@ -11,6 +14,7 @@ SELECT COUNT(*) AS count
    AND track_inventory = TRUE
    AND stock_quantity <= 0;
 
+-- cross-schema read from erp — calculate the active product margin average.
 -- name: AvgProductMarginPct :one
 SELECT COALESCE(AVG((sale_price - cost_price) / sale_price * 100), 0) AS margin_pct
  FROM erp_products
@@ -18,6 +22,7 @@ SELECT COALESCE(AVG((sale_price - cost_price) / sale_price * 100), 0) AS margin_
    AND is_active = TRUE
    AND sale_price > 0;
 
+-- cross-schema read from erp and pos — combine products with paid order volume.
 -- name: GetBestSellers :many
 SELECT p.id,
        p.name,
@@ -34,6 +39,7 @@ GROUP BY p.id, p.name
 ORDER BY units DESC
 LIMIT ?;
 
+-- cross-schema read from erp and pos — aggregate paid order volume by product category.
 -- name: GetSalesByCategory :many
 SELECT COALESCE(c.id, 0) AS category_id,
        COALESCE(c.name, 'Uncategorised') AS category_name,
@@ -51,6 +57,7 @@ WHERE o.business_id = ?
 GROUP BY c.id, c.name
 ORDER BY revenue DESC;
 
+-- cross-schema read from erp — calculate margin distribution buckets for active products.
 -- name: GetProductMarginDistribution :one
 SELECT
   CAST(COALESCE(SUM(margin_pct >= -1000 AND margin_pct < 0), 0) AS SIGNED) AS below_zero_count,
@@ -67,6 +74,7 @@ FROM (
     AND sale_price > 0
 ) AS active_product_margins;
 
+-- cross-schema read from erp and pos — find active products without recent sales.
 -- name: GetSlowMovers :many
 SELECT p.id, p.name, p.stock_quantity,
        FALSE AS recent_sale
@@ -83,6 +91,7 @@ WHERE p.business_id = ?
 ORDER BY p.name ASC
 LIMIT 500;
 
+-- cross-schema read from erp and pos — combine product costs with all-time sales volume.
 -- name: GetProductMarginRows :many
 -- Per-product margin rows (#853): joins sales volume to cost price so the
 -- response carries per-item economics alongside the distribution buckets.
