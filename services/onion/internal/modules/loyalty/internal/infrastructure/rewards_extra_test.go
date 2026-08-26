@@ -16,6 +16,7 @@ func TestUpsertReward_NameIsStored(t *testing.T) {
 
 	id, err := repo.UpsertReward(ctx, domain.LoyaltyReward{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		Name:       "Free Dessert",
 		Category:   "food",
 		PointsCost: 300,
@@ -25,7 +26,7 @@ func TestUpsertReward_NameIsStored(t *testing.T) {
 		t.Fatalf("UpsertReward: %v", err)
 	}
 
-	rewards, err := repo.ListRewards(ctx, testutil.OwnerID, false)
+	rewards, err := repo.ListRewards(ctx, testutil.BusinessID, false)
 	if err != nil {
 		t.Fatalf("ListRewards: %v", err)
 	}
@@ -47,6 +48,7 @@ func TestUpsertReward_PointsCostIsStored(t *testing.T) {
 
 	id, err := repo.UpsertReward(ctx, domain.LoyaltyReward{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		Name:       "Points Cost Reward",
 		Category:   "general",
 		PointsCost: 750,
@@ -56,7 +58,7 @@ func TestUpsertReward_PointsCostIsStored(t *testing.T) {
 		t.Fatalf("UpsertReward: %v", err)
 	}
 
-	rewards, err := repo.ListRewards(ctx, testutil.OwnerID, false)
+	rewards, err := repo.ListRewards(ctx, testutil.BusinessID, false)
 	if err != nil {
 		t.Fatalf("ListRewards: %v", err)
 	}
@@ -78,6 +80,7 @@ func TestUpsertReward_InactiveNotReturnedByActiveOnly(t *testing.T) {
 
 	id, err := repo.UpsertReward(ctx, domain.LoyaltyReward{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		Name:       "Inactive Reward",
 		Category:   "general",
 		PointsCost: 100,
@@ -87,7 +90,7 @@ func TestUpsertReward_InactiveNotReturnedByActiveOnly(t *testing.T) {
 		t.Fatalf("UpsertReward: %v", err)
 	}
 
-	active, err := repo.ListRewards(ctx, testutil.OwnerID, true)
+	active, err := repo.ListRewards(ctx, testutil.BusinessID, true)
 	if err != nil {
 		t.Fatalf("ListRewards activeOnly=true: %v", err)
 	}
@@ -105,6 +108,7 @@ func TestUpsertReward_UpdateChangesPointsCost(t *testing.T) {
 
 	id, err := repo.UpsertReward(ctx, domain.LoyaltyReward{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		Name:       "Changeable Cost Reward",
 		Category:   "general",
 		PointsCost: 100,
@@ -117,6 +121,7 @@ func TestUpsertReward_UpdateChangesPointsCost(t *testing.T) {
 	_, err = repo.UpsertReward(ctx, domain.LoyaltyReward{
 		ID:         id,
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		Name:       "Changeable Cost Reward",
 		Category:   "general",
 		PointsCost: 500,
@@ -126,7 +131,7 @@ func TestUpsertReward_UpdateChangesPointsCost(t *testing.T) {
 		t.Fatalf("UpsertReward update: %v", err)
 	}
 
-	rewards, err := repo.ListRewards(ctx, testutil.OwnerID, false)
+	rewards, err := repo.ListRewards(ctx, testutil.BusinessID, false)
 	if err != nil {
 		t.Fatalf("ListRewards: %v", err)
 	}
@@ -148,13 +153,14 @@ func TestListRewards_AllBelongToOwner(t *testing.T) {
 
 	_, _ = repo.UpsertReward(ctx, domain.LoyaltyReward{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		Name:       "Owner Check Reward",
 		Category:   "general",
 		PointsCost: 50,
 		Active:     true,
 	})
 
-	rewards, err := repo.ListRewards(ctx, testutil.OwnerID, false)
+	rewards, err := repo.ListRewards(ctx, testutil.BusinessID, false)
 	if err != nil {
 		t.Fatalf("ListRewards: %v", err)
 	}
