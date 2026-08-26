@@ -27,15 +27,11 @@ const (
 var defaultFreePlanApps = []string{"dash", "pos", "erp", "hr", "crm", "finance", "flow", "insights"}
 
 func invalidateUserScope(ctx context.Context, userID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(userID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.UserPrefix(userID))
 }
 
 func invalidateBusinessTeamScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.BusinessPrefix(businessID))
 }
 
 type Service struct {

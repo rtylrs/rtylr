@@ -29,9 +29,7 @@ const (
 )
 
 func invalidateUserScope(ctx context.Context, userID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(userID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.UserPrefix(userID))
 }
 
 var (
