@@ -2,5 +2,6 @@
   "emptyNoTablesTitle": "لم يتم العثور على طاولات",
   "emptyTryAnotherSearch": "جرّب بحثًا آخر.",
   "emptyNoQrCodesYet": "لا توجد رموز استجابة سريعة بعد.",
-  "createQrCode": "رمز استجابة سريعة"
+  "createQrCode": "رمز استجابة سريعة",
+  "tableQrComingSoon": "روابط رموز الاستجابة السريعة للطاولات غير متوفرة بعد — استخدم المولّد المخصص أعلاه في هذه الأثناء."
 }

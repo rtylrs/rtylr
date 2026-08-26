@@ -376,6 +376,7 @@ function toCustomerMutationPayload(data: Partial<Customer>): CustomerMutationPay
 
 interface ImportCustomersPayload {
   customers: Record<string, unknown>[];
+  dedupe?: boolean;
 }
 
 interface LoyaltyPointsPayload {
@@ -686,9 +687,11 @@ export const crmApi = {
   recordVisit: (customerId: number) =>
     compatResult<unknown>(() => crmCompatibilityClient.recordVisit(flat({ customerId }))),
 
-  importCustomers: (customers: Record<string, unknown>[], _dedupe?: boolean) =>
+  importCustomers: (customers: Record<string, unknown>[], dedupe?: boolean) =>
     compatResult<unknown>(() =>
-      crmCompatibilityClient.importCustomers(flat({ customers } satisfies ImportCustomersPayload))
+      crmCompatibilityClient.importCustomers(
+        flat({ customers, dedupe } satisfies ImportCustomersPayload)
+      )
     ),
 
   mergeCustomers: (primaryId: number, secondaryId: number) =>

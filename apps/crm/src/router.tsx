@@ -233,20 +233,43 @@ const settingsRoute = createRoute({
 const appClient = createOneKitClient(AppServiceClient, 'crm');
 
 function SalesAddonGuard({ children }: { children: React.ReactNode }): React.JSX.Element {
-  const { data, isLoading } = useQuery({
+  // A failed addons query must not read as "sales disabled": swallowing the
+  // error and caching the empty result for 5 minutes made Sales vanish with
+  // no explanation and no retry (#941). Let the query throw so errors are
+  // never cached, and render an explicit, retryable state.
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['crm-addons'],
     queryFn: async () => {
-      try {
-        const res = await appClient.listAddons({});
-        return res.addons ?? [];
-      } catch {
-        return [];
-      }
+      const res = await appClient.listAddons({});
+      return res.addons ?? [];
     },
     staleTime: 5 * 60 * 1000,
+    retry: 1,
   });
 
   if (isLoading) return <FullScreenLoader />;
+
+  if (isError) {
+    return (
+      <div
+        className="flex h-[60vh] flex-col items-center justify-center gap-3"
+        style={{ color: 'var(--crm-text, #111)' }}
+      >
+        <p className="text-sm font-medium">Could not load your add-ons.</p>
+        <p className="text-xs" style={{ opacity: 0.7 }}>
+          Check your connection and try again. Sales stays unavailable until the add-on list loads.
+        </p>
+        <button
+          type="button"
+          onClick={() => void refetch()}
+          className="mt-2 rounded-lg border px-4 py-2 text-sm transition-colors hover:bg-black/5"
+          style={{ borderColor: 'var(--crm-border, #e5e5e5)' }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   const isEnabled = (data ?? []).some((a: Addon) => a.id === 'sales_pipeline' && a.isEnabled);
   if (!isEnabled) {

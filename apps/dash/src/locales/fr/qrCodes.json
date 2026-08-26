@@ -2,5 +2,6 @@
   "emptyNoTablesTitle": "Aucune table trouvée",
   "emptyTryAnotherSearch": "Essayez une autre recherche.",
   "emptyNoQrCodesYet": "Aucun code QR pour l'instant.",
-  "createQrCode": "Code QR"
+  "createQrCode": "Code QR",
+  "tableQrComingSoon": "Les liens QR imprimables pour les tables ne sont pas encore disponibles — utilisez le générateur personnalisé ci-dessus en attendant."
 }
