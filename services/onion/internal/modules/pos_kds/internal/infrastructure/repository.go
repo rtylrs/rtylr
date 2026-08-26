@@ -3,11 +3,11 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"strconv"
 
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_kds/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -81,7 +81,7 @@ func (r *Repository) getItemsForOrders(ctx context.Context, orderIDs []int64) (m
 			ID:       row.ID,
 			OrderID:  row.OrderID,
 			Name:     row.Name,
-			Quantity: decimalToFloat(row.Quantity),
+			Quantity: sqlutil.DecimalToFloat(row.Quantity),
 			Notes:    row.Notes.String,
 			Status:   string(row.Status.PosOrderItemsStatus),
 		})
@@ -115,17 +115,4 @@ func (r *Repository) UpdateItemStatusByItemID(ctx context.Context, businessID, i
 		return err
 	}
 	return nil
-}
-
-func decimalToFloat(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse KDS decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
 }

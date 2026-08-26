@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_receipts/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -45,7 +45,7 @@ func (r *Repository) List(ctx context.Context, businessID int64, dateFrom, dateT
 				ID:            row.ID,
 				OrderNumber:   row.OrderNumber,
 				CustomerName:  row.CustomerName.String,
-				Total:         decimalToFloat(row.Total.String),
+				Total:         sqlutil.DecimalToFloat(row.Total.String),
 				PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
 				PaidAt:        row.PaidAt.Time,
 				BusinessID:    row.BusinessID,
@@ -66,7 +66,7 @@ func (r *Repository) List(ctx context.Context, businessID int64, dateFrom, dateT
 				ID:            row.ID,
 				OrderNumber:   row.OrderNumber,
 				CustomerName:  row.CustomerName.String,
-				Total:         decimalToFloat(row.Total.String),
+				Total:         sqlutil.DecimalToFloat(row.Total.String),
 				PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
 				PaidAt:        row.PaidAt.Time,
 				BusinessID:    row.BusinessID,
@@ -84,7 +84,7 @@ func (r *Repository) List(ctx context.Context, businessID int64, dateFrom, dateT
 				ID:            row.ID,
 				OrderNumber:   row.OrderNumber,
 				CustomerName:  row.CustomerName.String,
-				Total:         decimalToFloat(row.Total.String),
+				Total:         sqlutil.DecimalToFloat(row.Total.String),
 				PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
 				PaidAt:        row.PaidAt.Time,
 				BusinessID:    row.BusinessID,
@@ -111,24 +111,11 @@ func (r *Repository) Get(ctx context.Context, businessID, id int64) (*domain.Rec
 		ID:            row.ID,
 		OrderNumber:   row.OrderNumber,
 		CustomerName:  row.CustomerName.String,
-		Total:         decimalToFloat(row.Total.String),
+		Total:         sqlutil.DecimalToFloat(row.Total.String),
 		PaymentMethod: string(row.PaymentMethod.PosOrdersPaymentMethod),
 		PaidAt:        row.PaidAt.Time,
 		BusinessID:    row.BusinessID,
 	}, nil
-}
-
-func decimalToFloat(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse receipt decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
 }
 
 func parseTime(s string) time.Time {
