@@ -247,9 +247,7 @@ func resolveBookingUser(ctx context.Context) (*authPkg.AuthUser, int64, error) {
 }
 
 func invalidateAppointmentsCache(ctx context.Context, ownerID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(appointmentsCacheScope, ownerID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(appointmentsCacheScope, ownerID))
 }
 
 func newAppointments(items []domain.Appointment) []*bookingappointmentv1.Appointment {

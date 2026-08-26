@@ -506,7 +506,5 @@ func appointmentToolFormatTime(value time.Time) string {
 }
 
 func invalidateAppointmentToolCache(ctx context.Context, ownerID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(appointmentCacheScope, ownerID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(appointmentCacheScope, ownerID))
 }

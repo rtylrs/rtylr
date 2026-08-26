@@ -28,9 +28,7 @@ const publicCareersCacheScope = "careers_public"
 // owner. Call from every careers/customization/section create/update/delete
 // so the public site reflects changes within the TTL window at worst.
 func invalidatePublicCareersCache(ctx context.Context, ownerID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(publicCareersCacheScope, ownerID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(publicCareersCacheScope, ownerID))
 }
 
 // The "public" handlers power the candidate-facing site at

@@ -131,9 +131,7 @@ func (s *Service) Match(ctx context.Context, businessID int64, input domain.Matc
 
 	id, err := s.repo.CreateMatch(ctx, businessID, input)
 	if err == nil {
-		if cache := cacher.GetRedisCache(); cache != nil {
-			cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(financeReconScope, businessID))
-		}
+		cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(financeReconScope, businessID))
 	}
 	return id, err
 }

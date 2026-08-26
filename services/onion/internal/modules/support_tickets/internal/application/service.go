@@ -94,8 +94,6 @@ func (s *Service) CreateMessage(ctx context.Context, input domain.MessageInput) 
 	if err != nil {
 		return 0, err
 	}
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix("support_ticket_messages", input.TicketID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix("support_ticket_messages", input.TicketID))
 	return id, nil
 }

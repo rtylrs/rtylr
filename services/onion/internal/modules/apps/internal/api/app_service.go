@@ -18,9 +18,7 @@ import (
 const addonsCacheScope = "addons"
 
 func invalidateAddonsCache(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(addonsCacheScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(addonsCacheScope, businessID))
 }
 
 type AppAPI struct {
