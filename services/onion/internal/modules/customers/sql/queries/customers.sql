@@ -42,6 +42,11 @@ ORDER BY created_at DESC LIMIT ? OFFSET ?;
 -- name: CountActiveCustomers :one
 SELECT COUNT(*) FROM crm_customers WHERE business_id = ? AND is_active = TRUE;
 
+-- name: GetBusinessTimezone :one
+SELECT COALESCE(timezone, 'UTC') AS timezone
+FROM businesses
+WHERE id = ? AND is_active = TRUE;
+
 -- name: CountNewCustomersThisMonth :one
 SELECT COUNT(*) FROM crm_customers
 WHERE business_id = ?
