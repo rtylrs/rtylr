@@ -25,6 +25,7 @@ type CountCrmCustomersCreatedParams struct {
 	CreatedAt_2 sql.NullTime `db:"created_at_2" json:"created_at_2"`
 }
 
+// cross-schema read from crm — count customers created in the dashboard period.
 func (q *Queries) CountCrmCustomersCreated(ctx context.Context, arg CountCrmCustomersCreatedParams) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countCrmCustomersCreated, arg.BusinessID, arg.CreatedAt, arg.CreatedAt_2)
 	var count int64
@@ -46,6 +47,7 @@ type CountPosOrdersParams struct {
 	CreatedAt_2 sql.NullTime `db:"created_at_2" json:"created_at_2"`
 }
 
+// cross-schema read from pos — count orders for the dashboard period.
 func (q *Queries) CountPosOrders(ctx context.Context, arg CountPosOrdersParams) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countPosOrders, arg.BusinessID, arg.CreatedAt, arg.CreatedAt_2)
 	var count int64
@@ -67,6 +69,7 @@ type SumExpensesParams struct {
 	ExpenseDate_2 time.Time `db:"expense_date_2" json:"expense_date_2"`
 }
 
+// cross-schema read from finance — total expenses for the dashboard period.
 func (q *Queries) SumExpenses(ctx context.Context, arg SumExpensesParams) (interface{}, error) {
 	row := q.db.QueryRowContext(ctx, sumExpenses, arg.BusinessID, arg.ExpenseDate, arg.ExpenseDate_2)
 	var total interface{}
@@ -89,6 +92,7 @@ type SumPaidInvoicesParams struct {
 	PaidDate_2 sql.NullTime `db:"paid_date_2" json:"paid_date_2"`
 }
 
+// cross-schema read from finance — total paid invoices for the dashboard period.
 func (q *Queries) SumPaidInvoices(ctx context.Context, arg SumPaidInvoicesParams) (interface{}, error) {
 	row := q.db.QueryRowContext(ctx, sumPaidInvoices, arg.BusinessID, arg.PaidDate, arg.PaidDate_2)
 	var total interface{}

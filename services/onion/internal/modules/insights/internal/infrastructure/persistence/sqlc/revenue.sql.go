@@ -34,6 +34,7 @@ type GetRevenueSeriesRow struct {
 	Amount interface{}  `db:"amount" json:"amount"`
 }
 
+// cross-schema read from finance — build the paid-invoice revenue series.
 func (q *Queries) GetRevenueSeries(ctx context.Context, arg GetRevenueSeriesParams) ([]GetRevenueSeriesRow, error) {
 	rows, err := q.db.QueryContext(ctx, getRevenueSeries, arg.BusinessID, arg.ReportingDate, arg.ReportingDate_2)
 	if err != nil {
@@ -72,6 +73,7 @@ type SumFinanceRevenueMTDParams struct {
 	ReportingDate_2 sql.NullTime `db:"reporting_date_2" json:"reporting_date_2"`
 }
 
+// cross-schema read from finance — calculate month-to-date invoice revenue.
 func (q *Queries) SumFinanceRevenueMTD(ctx context.Context, arg SumFinanceRevenueMTDParams) (interface{}, error) {
 	row := q.db.QueryRowContext(ctx, sumFinanceRevenueMTD, arg.BusinessID, arg.ReportingDate, arg.ReportingDate_2)
 	var total interface{}
@@ -99,6 +101,7 @@ type SumPosRevenueMTDParams struct {
 	PaidAt_2   sql.NullTime `db:"paid_at_2" json:"paid_at_2"`
 }
 
+// cross-schema read from pos — calculate net POS revenue after refunds.
 func (q *Queries) SumPosRevenueMTD(ctx context.Context, arg SumPosRevenueMTDParams) (interface{}, error) {
 	row := q.db.QueryRowContext(ctx, sumPosRevenueMTD, arg.BusinessID, arg.PaidAt, arg.PaidAt_2)
 	var total interface{}

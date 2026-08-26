@@ -31,6 +31,7 @@ type GetDailyExpensesRow struct {
 	Amount interface{} `db:"amount" json:"amount"`
 }
 
+// cross-schema read from finance — aggregate expenses by day.
 func (q *Queries) GetDailyExpenses(ctx context.Context, arg GetDailyExpensesParams) ([]GetDailyExpensesRow, error) {
 	rows, err := q.db.QueryContext(ctx, getDailyExpenses, arg.BusinessID, arg.FromExpenseDate, arg.ToExpenseDate)
 	if err != nil {
@@ -77,6 +78,7 @@ type GetDailyPaidInvoicesRow struct {
 	Amount interface{}  `db:"amount" json:"amount"`
 }
 
+// cross-schema read from finance — aggregate paid invoices by reporting day.
 func (q *Queries) GetDailyPaidInvoices(ctx context.Context, arg GetDailyPaidInvoicesParams) ([]GetDailyPaidInvoicesRow, error) {
 	rows, err := q.db.QueryContext(ctx, getDailyPaidInvoices, arg.BusinessID, arg.ReportingDate, arg.ReportingDate_2)
 	if err != nil {
@@ -124,6 +126,7 @@ type GetExpensesByCategoryRow struct {
 	Amount  interface{} `db:"amount" json:"amount"`
 }
 
+// cross-schema read from finance — aggregate expenses by finance category.
 func (q *Queries) GetExpensesByCategory(ctx context.Context, arg GetExpensesByCategoryParams) ([]GetExpensesByCategoryRow, error) {
 	rows, err := q.db.QueryContext(ctx, getExpensesByCategory, arg.BusinessID, arg.FromExpenseDate, arg.ToExpenseDate)
 	if err != nil {
@@ -172,6 +175,7 @@ type GetInvoiceAgingRow struct {
 	AmountDue    interface{} `db:"amount_due" json:"amount_due"`
 }
 
+// cross-schema read from finance — bucket outstanding invoices by due-date age.
 func (q *Queries) GetInvoiceAging(ctx context.Context, businessID int64) ([]GetInvoiceAgingRow, error) {
 	rows, err := q.db.QueryContext(ctx, getInvoiceAging, businessID)
 	if err != nil {
