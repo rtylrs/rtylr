@@ -15,6 +15,7 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/searchutil"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
@@ -688,9 +689,7 @@ func (r *Repository) ReplaceProductAttributes(ctx context.Context, ownerID, prod
 	return nil
 }
 
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
-}
+var nullString = sqlutil.NullString
 
 // defaultStr returns def when s is empty — for NOT NULL columns with a sensible
 // default (currency, units) where the caller may not supply a value.
@@ -701,9 +700,7 @@ func defaultStr(s, def string) string {
 	return s
 }
 
-func nullInt64(v int64) sql.NullInt64 {
-	return sql.NullInt64{Int64: v, Valid: v != 0}
-}
+var nullInt64 = sqlutil.NullInt64
 
 func int64Ptr(v int64) *int64 {
 	return &v
