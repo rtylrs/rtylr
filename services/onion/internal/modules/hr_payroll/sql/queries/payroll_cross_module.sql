@@ -2,6 +2,7 @@
 -- business, so it stays unpaginated by design - bounded by the same generous
 -- hard LIMIT used for the other per-employee reports in this HR domain (see
 -- hr_reports's AttendanceSummaryReport).
+-- cross-schema read from hr_time — include approved timesheets in payroll periods.
 -- name: ListApprovedTimesheetSummaries :many
 SELECT employee_id,
        ROUND(SUM(
@@ -24,6 +25,7 @@ LIMIT 5001;
 -- ListApprovedOvertimeSummaries returns one row per employee for a single
 -- business, so it stays unpaginated by design - bounded by the same generous
 -- hard LIMIT as ListApprovedTimesheetSummaries above.
+-- cross-schema read from hr_overtime — include approved overtime requests in payroll periods.
 -- name: ListApprovedOvertimeSummaries :many
 SELECT employee_id,
        SUM(planned_extra_minutes) AS total_minutes,
@@ -38,6 +40,7 @@ LIMIT 5001;
 -- ListEmployeePayInfo returns one row per active employee for a single
 -- business, so it stays unpaginated by design - bounded by the same generous
 -- hard LIMIT as the summaries above.
+-- cross-schema read from hr_core — resolve active employee compensation data for payroll.
 -- name: ListEmployeePayInfo :many
 SELECT id, owner_id, business_id, salary, hourly_rate
 FROM hr_employees
@@ -56,6 +59,7 @@ WHERE e.business_id = ?
   AND e.payroll_run_id = ?
   AND (emp.id IS NULL OR emp.status <> 'active');
 
+-- cross-schema read from hr_overtime — apply the configured payroll overtime multiplier.
 -- name: GetOvertimeConfigForPayroll :one
 SELECT default_multiplier, auto_detect_enabled
 FROM hr_overtime_config
