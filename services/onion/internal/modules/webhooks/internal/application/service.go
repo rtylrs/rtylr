@@ -38,9 +38,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateWebhooksScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(webhooksScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(webhooksScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Webhook, error) {
