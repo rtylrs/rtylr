@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_shifts/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 // The three safety limits below bound queries that have no caller-supplied
@@ -411,17 +412,13 @@ func assignmentFromRow(row sqlc.HrShiftAssignment) domain.ShiftAssignmentRecord 
 	}
 }
 
-func nullInt64(v int64) sql.NullInt64 {
-	return sql.NullInt64{Int64: v, Valid: v != 0}
-}
+var nullInt64 = sqlutil.NullInt64
 
 func nullInt32(v int32) sql.NullInt32 {
 	return sql.NullInt32{Int32: v, Valid: v != 0}
 }
 
-func nullString(v string) sql.NullString {
-	return sql.NullString{String: v, Valid: v != ""}
-}
+var nullString = sqlutil.NullString
 
 func nullStatus(v string) sqlc.NullHrShiftsStatus {
 	return sqlc.NullHrShiftsStatus{
