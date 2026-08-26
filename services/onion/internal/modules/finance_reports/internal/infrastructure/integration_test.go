@@ -22,6 +22,138 @@ func TestSumAccountsByType_AssetTypeNoError(t *testing.T) {
 	}
 }
 
+func TestCurrencyScopedReportsExcludeForeignCurrency(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	const (
+		businessID = int64(9982601)
+		ownerID    = int64(9982602)
+	)
+
+	cleanup := func() {
+		for _, query := range []string{
+			"DELETE FROM finance_expenses WHERE business_id = ?",
+			"DELETE FROM finance_bills WHERE business_id = ?",
+			"DELETE FROM finance_invoices WHERE business_id = ?",
+			"DELETE FROM finance_bank_accounts WHERE business_id = ?",
+			"DELETE FROM finance_accounts WHERE business_id = ?",
+			"DELETE FROM businesses WHERE id = ?",
+		} {
+			if _, err := db.ExecContext(ctx, query, businessID); err != nil {
+				t.Errorf("cleanup %q: %v", query, err)
+			}
+		}
+	}
+	t.Cleanup(cleanup)
+
+	statements := []struct {
+		query string
+		args  []any
+	}{
+		{
+			query: "INSERT INTO businesses (id, name, owner_id, currency) VALUES (?, ?, ?, 'USD')",
+			args:  []any{businessID, "Currency Scope Test Business", ownerID},
+		},
+		{
+			query: "INSERT INTO finance_accounts (id, owner_id, business_id, name, type, currency, balance) VALUES (?, ?, ?, 'USD Cash', 'asset', 'USD', 125.00)",
+			args:  []any{int64(99826011), ownerID, businessID},
+		},
+		{
+			query: "INSERT INTO finance_accounts (id, owner_id, business_id, name, type, currency, balance) VALUES (?, ?, ?, 'EUR Cash', 'asset', 'EUR', 875.00)",
+			args:  []any{int64(99826012), ownerID, businessID},
+		},
+		{
+			query: "INSERT INTO finance_bank_accounts (id, owner_id, business_id, name, balance, currency) VALUES (?, ?, ?, 'USD Bank', 100.00, 'USD')",
+			args:  []any{int64(99826021), ownerID, businessID},
+		},
+		{
+			query: "INSERT INTO finance_bank_accounts (id, owner_id, business_id, name, balance, currency) VALUES (?, ?, ?, 'EUR Bank', 900.00, 'EUR')",
+			args:  []any{int64(99826022), ownerID, businessID},
+		},
+		{
+			query: "INSERT INTO finance_invoices (id, owner_id, business_id, invoice_number, client_name, status, issue_date, due_date, currency, total, amount_due) VALUES (?, ?, ?, 'USD-RECEIVABLE', 'USD Client', 'sent', '2026-01-01', '2026-01-31', 'USD', 50.00, 50.00)",
+			args:  []any{int64(99826031), ownerID, businessID},
+		},
+		{
+			query: "INSERT INTO finance_invoices (id, owner_id, business_id, invoice_number, client_name, status, issue_date, due_date, currency, total, amount_due) VALUES (?, ?, ?, 'EUR-RECEIVABLE', 'EUR Client', 'sent', '2026-01-01', '2026-01-31', 'EUR', 950.00, 950.00)",
+			args:  []any{int64(99826032), ownerID, businessID},
+		},
+		{
+			query: "INSERT INTO finance_invoices (id, owner_id, business_id, invoice_number, client_name, status, issue_date, due_date, paid_date, currency, total, amount_due) VALUES (?, ?, ?, 'USD-PAID', 'USD Paid Client', 'paid', '2026-01-01', '2026-01-31', '2026-01-15', 'USD', 300.00, 0.00)",
+			args:  []any{int64(99826033), ownerID, businessID},
+		},
+		{
+			query: "INSERT INTO finance_invoices (id, owner_id, business_id, invoice_number, client_name, status, issue_date, due_date, paid_date, currency, total, amount_due) VALUES (?, ?, ?, 'EUR-PAID', 'EUR Paid Client', 'paid', '2026-01-01', '2026-01-31', '2026-01-15', 'EUR', 700.00, 0.00)",
+			args:  []any{int64(99826034), ownerID, businessID},
+		},
+		{
+			query: "INSERT INTO finance_bills (id, owner_id, business_id, supplier_name, amount, currency, due_date, status) VALUES (?, ?, ?, 'USD Supplier', 60.00, 'USD', '2026-01-31', 'pending')",
+			args:  []any{int64(99826041), ownerID, businessID},
+		},
+		{
+			query: "INSERT INTO finance_bills (id, owner_id, business_id, supplier_name, amount, currency, due_date, status) VALUES (?, ?, ?, 'EUR Supplier', 940.00, 'EUR', '2026-01-31', 'pending')",
+			args:  []any{int64(99826042), ownerID, businessID},
+		},
+		{
+			query: "INSERT INTO finance_expenses (id, owner_id, business_id, description, amount, currency, expense_date, status) VALUES (?, ?, ?, 'USD Expense', 40.00, 'USD', '2026-01-15', 'approved')",
+			args:  []any{int64(99826051), ownerID, businessID},
+		},
+		{
+			query: "INSERT INTO finance_expenses (id, owner_id, business_id, description, amount, currency, expense_date, status) VALUES (?, ?, ?, 'EUR Expense', 960.00, 'EUR', '2026-01-15', 'approved')",
+			args:  []any{int64(99826052), ownerID, businessID},
+		},
+	}
+	for _, statement := range statements {
+		if _, err := db.ExecContext(ctx, statement.query, statement.args...); err != nil {
+			t.Fatalf("seed %q: %v", statement.query, err)
+		}
+	}
+
+	assertAmount := func(name string, got, want float64) {
+		t.Helper()
+		if got != want {
+			t.Errorf("%s = %.2f, want %.2f in the business currency", name, got, want)
+		}
+	}
+
+	accounts, err := repo.SumAccountsByType(ctx, businessID, "asset")
+	if err != nil {
+		t.Fatalf("SumAccountsByType: %v", err)
+	}
+	assertAmount("accounts", accounts, 125)
+
+	bank, err := repo.SumBankBalances(ctx, businessID)
+	if err != nil {
+		t.Fatalf("SumBankBalances: %v", err)
+	}
+	assertAmount("bank", bank, 100)
+
+	receivables, err := repo.SumReceivables(ctx, businessID)
+	if err != nil {
+		t.Fatalf("SumReceivables: %v", err)
+	}
+	assertAmount("receivables", receivables, 50)
+
+	payables, err := repo.SumPayables(ctx, businessID)
+	if err != nil {
+		t.Fatalf("SumPayables: %v", err)
+	}
+	assertAmount("payables", payables, 60)
+
+	paid, err := repo.SumPaidInvoicesInRange(ctx, businessID, "2026-01-01", "2026-01-31")
+	if err != nil {
+		t.Fatalf("SumPaidInvoicesInRange: %v", err)
+	}
+	assertAmount("paid invoices", paid, 300)
+
+	expenses, err := repo.SumExpensesInRange(ctx, businessID, "2026-01-01", "2026-01-31")
+	if err != nil {
+		t.Fatalf("SumExpensesInRange: %v", err)
+	}
+	assertAmount("expenses", expenses, 40)
+}
+
 func TestSumAccountsByType_LiabilityTypeNoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
