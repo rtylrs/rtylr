@@ -33,9 +33,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidatePriceListsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(priceListsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(priceListsScope, businessID))
 }
 
 func (s *Service) ListPriceLists(ctx context.Context, businessID int64) ([]domain.PriceList, error) {
