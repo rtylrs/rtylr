@@ -139,6 +139,7 @@ SELECT id, owner_id, business_id, invoice_id, amount, currency, payment_date, me
 FROM finance_payments
 WHERE business_id = ? AND invoice_id = ? AND reference = ?;
 
+-- cross-schema read from expenses — include tenant expenses in invoice reporting.
 -- name: ListExpensesByOwner :many
 SELECT id, owner_id, business_id, category_id, description, amount, currency, expense_date, vendor,
        payment_method, receipt_url, is_tax_deductible, tax_amount, notes, status, created_at, updated_at
@@ -147,21 +148,25 @@ WHERE business_id = ?
 ORDER BY expense_date DESC
 LIMIT ? OFFSET ?;
 
+-- cross-schema read from expenses — count tenant expenses for invoice reporting.
 -- name: CountExpensesByOwner :one
 SELECT COUNT(*) FROM finance_expenses WHERE business_id = ?;
 
+-- cross-schema read from expenses — resolve an expense referenced by invoice reporting.
 -- name: GetExpenseByID :one
 SELECT id, owner_id, business_id, category_id, description, amount, currency, expense_date, vendor,
        payment_method, receipt_url, is_tax_deductible, tax_amount, notes, status, created_at, updated_at
 FROM finance_expenses
 WHERE id = ? AND business_id = ?;
 
+-- cross-schema write to expenses — create expense data exposed by invoice flows.
 -- name: CreateExpense :execresult
 INSERT INTO finance_expenses
   (owner_id, business_id, category_id, description, amount, currency, expense_date, vendor,
    payment_method, receipt_url, is_tax_deductible, tax_amount, notes)
 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?);
 
+-- cross-schema write to expenses — update expense data exposed by invoice flows.
 -- name: UpdateExpense :exec
 UPDATE finance_expenses SET
   category_id = ?, description = ?, amount = ?, currency = ?, expense_date = ?,
@@ -169,9 +174,11 @@ UPDATE finance_expenses SET
   tax_amount = ?, notes = ?
 WHERE id = ? AND business_id = ?;
 
+-- cross-schema write to expenses — remove expense data exposed by invoice flows.
 -- name: DeleteExpense :exec
 DELETE FROM finance_expenses WHERE id = ? AND business_id = ?;
 
+-- cross-schema read from expenses — expose expense categories for invoice forms.
 -- name: ListExpenseCategories :many
 SELECT id, owner_id, business_id, name, color, icon, created_at
 FROM finance_expense_categories
@@ -179,10 +186,12 @@ WHERE business_id = ?
 ORDER BY name ASC
 LIMIT 200;
 
+-- cross-schema write to expenses — persist an invoice-form expense category.
 -- name: CreateExpenseCategory :execresult
 INSERT INTO finance_expense_categories (owner_id, business_id, name, color, icon)
 VALUES (?,?,?,?,?);
 
+-- cross-schema read from tax — expose tax configurations for invoice forms.
 -- name: ListTaxConfigs :many
 SELECT id, owner_id, business_id, name, rate, type, is_default, is_active, created_at
 FROM finance_tax_config
@@ -190,6 +199,7 @@ WHERE business_id = ?
 ORDER BY is_default DESC, name ASC
 LIMIT 200;
 
+-- cross-schema write to tax — persist an invoice-form tax configuration.
 -- name: CreateTaxConfig :execresult
 INSERT INTO finance_tax_config (owner_id, business_id, name, rate, type, is_default, is_active)
 VALUES (?,?,?,?,?,?,?);
@@ -197,6 +207,7 @@ VALUES (?,?,?,?,?,?,?);
 -- name: SumPaidInvoices :one
 SELECT COALESCE(SUM(total),0) FROM finance_invoices WHERE business_id = ? AND status = 'paid' AND paid_date BETWEEN ? AND ?;
 
+-- cross-schema read from expenses — include expense totals in invoice reporting.
 -- name: SumExpenses :one
 SELECT COALESCE(SUM(amount),0) FROM finance_expenses WHERE business_id = ? AND expense_date BETWEEN ? AND ?;
 
@@ -209,6 +220,7 @@ SELECT COALESCE(SUM(amount_due),0) FROM finance_invoices WHERE business_id = ? A
 -- name: SumTaxCollected :one
 SELECT COALESCE(SUM(tax_amount),0) FROM finance_invoices WHERE business_id = ? AND status = 'paid' AND paid_date BETWEEN ? AND ?;
 
+-- cross-schema read from expenses — calculate deductible expense tax in reporting.
 -- name: SumTaxOwed :one
 SELECT COALESCE(SUM(tax_amount),0) FROM finance_expenses WHERE business_id = ? AND is_tax_deductible = TRUE AND expense_date BETWEEN ? AND ?;
 
