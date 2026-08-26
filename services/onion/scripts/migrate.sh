@@ -27,7 +27,11 @@ SCHEMAS_DIR="$PROJECT_ROOT/internal/platform/database/schemas"
 source "$SCHEMAS_DIR/migration_order.sh"
 
 mysql_cmd() {
+    # --default-character-set=utf8mb4: the CLI otherwise negotiates latin1,
+    # which cannot represent the emoji defaults used by flow/schema.sql and
+    # others, failing their CREATE TABLE with "Invalid default value" (1067).
     MYSQL_PWD="$DB_PASSWORD" mysql \
+        --default-character-set=utf8mb4 \
         --host="$DB_HOST" \
         --port="$DB_PORT" \
         --user="$DB_USER" \
