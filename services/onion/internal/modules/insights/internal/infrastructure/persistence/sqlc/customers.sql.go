@@ -24,6 +24,7 @@ type CountCustomersActiveParams struct {
 	CreatedAt  sql.NullTime `db:"created_at" json:"created_at"`
 }
 
+// cross-schema read from crm and pos — count customers with recent paid orders.
 func (q *Queries) CountCustomersActive(ctx context.Context, arg CountCustomersActiveParams) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countCustomersActive, arg.BusinessID, arg.CreatedAt)
 	var count int64
@@ -44,6 +45,7 @@ type CountCustomersChurnedParams struct {
 	CreatedAt  sql.NullTime `db:"created_at" json:"created_at"`
 }
 
+// cross-schema read from crm and pos — identify customers without recent paid orders.
 func (q *Queries) CountCustomersChurned(ctx context.Context, arg CountCustomersChurnedParams) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countCustomersChurned, arg.BusinessID, arg.CreatedAt)
 	var count int64
@@ -60,6 +62,7 @@ type CountCustomersNewThisMonthParams struct {
 	CreatedAt  sql.NullTime `db:"created_at" json:"created_at"`
 }
 
+// cross-schema read from crm — count recently created customers.
 func (q *Queries) CountCustomersNewThisMonth(ctx context.Context, arg CountCustomersNewThisMonthParams) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countCustomersNewThisMonth, arg.BusinessID, arg.CreatedAt)
 	var count int64
@@ -71,6 +74,7 @@ const countCustomersTotal = `-- name: CountCustomersTotal :one
 SELECT COUNT(*) AS count FROM crm_customers WHERE business_id = ?
 `
 
+// cross-schema read from crm — count customers for insight totals.
 func (q *Queries) CountCustomersTotal(ctx context.Context, businessID int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countCustomersTotal, businessID)
 	var count int64
@@ -114,6 +118,7 @@ type GetLTVDistributionRow struct {
 	CustomerCount   int64  `db:"customer_count" json:"customer_count"`
 }
 
+// cross-schema read from crm and pos — bucket customer spend over the trailing year.
 func (q *Queries) GetLTVDistribution(ctx context.Context, businessID int64) ([]GetLTVDistributionRow, error) {
 	rows, err := q.db.QueryContext(ctx, getLTVDistribution, businessID)
 	if err != nil {
@@ -172,6 +177,7 @@ type GetTopCustomersRow struct {
 	Orders    int64       `db:"orders" json:"orders"`
 }
 
+// cross-schema read from crm and pos — rank customers by paid order spend.
 func (q *Queries) GetTopCustomers(ctx context.Context, arg GetTopCustomersParams) ([]GetTopCustomersRow, error) {
 	rows, err := q.db.QueryContext(ctx, getTopCustomers, arg.BusinessID, arg.Limit)
 	if err != nil {
