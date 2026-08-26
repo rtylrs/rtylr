@@ -19,6 +19,11 @@ CREATE TABLE IF NOT EXISTS self_host_licenses (
     UNIQUE KEY uq_self_host_licenses_owner_email (owner_email),
     UNIQUE KEY uq_self_host_licenses_key_hash (key_hash),
     INDEX idx_self_host_licenses_status (status),
-    INDEX idx_self_host_licenses_created_at (created_at),
-    FULLTEXT INDEX idx_self_host_licenses_search (owner_email, customer_name)
+    INDEX idx_self_host_licenses_created_at (created_at)
 );
+
+-- The FULLTEXT search index is added by zz_self_host_license_search_indexes.sql
+-- rather than inline: MySQL has no ADD INDEX IF NOT EXISTS, so declaring it here
+-- as well makes the zz migration fail on a fresh database with a duplicate key
+-- error and stops the whole migration run. Every other zz_* search-index
+-- migration in this repo owns its index the same way.
