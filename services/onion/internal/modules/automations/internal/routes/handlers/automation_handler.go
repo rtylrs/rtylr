@@ -25,9 +25,7 @@ import (
 const automationsCacheScope = "automations"
 
 func invalidateAutomationsCache(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(automationsCacheScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(automationsCacheScope, businessID))
 }
 
 func AutomationListRoutes() []string {

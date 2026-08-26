@@ -31,9 +31,7 @@ const (
 var ErrChatSessionNotFound = infrastructure.ErrChatSessionNotFound
 
 func invalidateMemoryScope(ctx context.Context, userID int) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(int64(userID)))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.UserPrefix(int64(userID)))
 }
 
 var ErrAIClientNotAvailable = errors.New("AI client not available for summarization")

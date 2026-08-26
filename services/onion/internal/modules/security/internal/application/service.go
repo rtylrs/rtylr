@@ -32,9 +32,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateSecurityScope(ctx context.Context, userID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(userID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.UserPrefix(userID))
 }
 
 func (s *Service) GetSettings(ctx context.Context, userID int64) (domain.SecuritySettings, error) {

@@ -20,9 +20,7 @@ const (
 )
 
 func invalidateHRCoreScope(ctx context.Context, ownerID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrCoreScope, ownerID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrCoreScope, ownerID))
 }
 
 type Service struct {
