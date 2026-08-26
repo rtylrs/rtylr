@@ -190,6 +190,7 @@ WHERE ar.business_id = ?
   AND ar.status = 'pending'
 ORDER BY ar.created_at DESC;
 
+-- cross-schema write to hub — deliver team access notifications through the hub module.
 -- name: CreateHubNotification :exec
 INSERT INTO hub_notifications (owner_id, user_id, title, body, type, link)
 VALUES (?, ?, ?, ?, ?, ?);
@@ -205,6 +206,7 @@ FROM users u
 WHERE u.id = ?
   AND NOT EXISTS (SELECT 1 FROM hr_employees e WHERE e.user_id = u.id);
 
+-- cross-schema read from hr_core — revoke access when the employee is terminated.
 -- name: RevokeBusinessUserPermissions :execrows
 -- Employment-driven revocation (#834): one business, one user. The join to
 -- hr_employees keeps the decision inside this module's SQL while the
@@ -220,6 +222,7 @@ WHERE p.business_id = sqlc.arg('business_id')
   AND p.is_active = TRUE
   AND e.status = 'terminated';
 
+-- cross-schema read from hr_core — sweep permissions for terminated employees.
 -- name: ReconcileTerminatedEmployeeAccess :execrows
 -- Daily sweep: every still-active permission row whose user is a terminated
 -- employee of that same business is deactivated. Catches anything the
