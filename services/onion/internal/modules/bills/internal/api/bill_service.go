@@ -85,7 +85,7 @@ func (a *BillAPI) CreateBill(ctx context.Context, req *financebillv1.CreateBillR
 	if req.PurchaseOrderId != nil {
 		input.PurchaseOrderID = req.PurchaseOrderId
 	}
-	if validationErr := domain.ValidateBillInput(input); validationErr != nil {
+	if validationErr := domain.ValidateBillCreateInput(input); validationErr != nil {
 		return nil, billStatusError(http.StatusBadRequest, validationErr.Error())
 	}
 	id, createErr := a.Service.Create(ctx, businessID, input)
@@ -127,8 +127,11 @@ func (a *BillAPI) UpdateBill(ctx context.Context, req *financebillv1.UpdateBillR
 	}
 	updateErr := a.Service.Update(ctx, businessID, req.GetId(), input)
 	if updateErr != nil {
-		if errors.Is(updateErr, domain.ErrBillNotFound) {
+		switch {
+		case errors.Is(updateErr, domain.ErrBillNotFound):
 			return nil, billStatusError(http.StatusNotFound, "Bill not found")
+		case errors.Is(updateErr, domain.ErrInvalidStatusTransition), errors.Is(updateErr, domain.ErrPaidBillImmutable):
+			return nil, billStatusError(http.StatusConflict, "Paid bills cannot be changed and bill status transitions are one-way")
 		}
 		logger.Ctx(ctx).Error("failed to update bill", logger.Any("bill_id", req.GetId()), logger.Error(updateErr))
 		return nil, billStatusError(http.StatusInternalServerError, "Failed to update bill")
@@ -159,8 +162,11 @@ func (a *BillAPI) DeleteBill(ctx context.Context, req *financebillv1.DeleteBillR
 	}
 	deleteErr := a.Service.DeleteBill(ctx, businessID, req.GetId())
 	if deleteErr != nil {
-		if errors.Is(deleteErr, domain.ErrBillNotFound) {
+		switch {
+		case errors.Is(deleteErr, domain.ErrBillNotFound):
 			return nil, billStatusError(http.StatusNotFound, "Bill not found")
+		case errors.Is(deleteErr, domain.ErrPaidBillImmutable):
+			return nil, billStatusError(http.StatusConflict, "Paid bills cannot be deleted")
 		}
 		logger.Ctx(ctx).Error("failed to delete bill", logger.Any("bill_id", req.GetId()), logger.Error(deleteErr))
 		return nil, billStatusError(http.StatusInternalServerError, "Failed to delete bill")

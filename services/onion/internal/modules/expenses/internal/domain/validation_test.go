@@ -75,3 +75,18 @@ func TestValidatCategoryInput_EmptyName(t *testing.T) {
 		t.Fatal("expected error for empty category name")
 	}
 }
+
+func TestValidateExpenseStatusTransition(t *testing.T) {
+	allowed := [][2]string{{"pending", "approved"}, {"pending", "rejected"}, {"approved", "approved"}}
+	for _, transition := range allowed {
+		if err := ValidateExpenseStatusTransition(transition[0], transition[1]); err != nil {
+			t.Errorf("%s -> %s: unexpected error: %v", transition[0], transition[1], err)
+		}
+	}
+	if err := ValidateExpenseStatusTransition("approved", "rejected"); err == nil {
+		t.Fatal("expected approved -> rejected to be rejected")
+	}
+	if err := ValidateExpenseStatusTransition("rejected", "approved"); err == nil {
+		t.Fatal("expected rejected -> approved to be rejected")
+	}
+}

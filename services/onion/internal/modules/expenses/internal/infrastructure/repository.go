@@ -99,6 +99,14 @@ func (r *Repository) Create(ctx context.Context, input domain.ExpenseInput) (int
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.ExpenseUpdateInput) error {
+	current, err := r.GetByID(ctx, input.BusinessID, input.ID)
+	if err != nil {
+		return err
+	}
+	if current.Status == "approved" {
+		return domain.ErrApprovedExpenseImmutable
+	}
+
 	result, err := r.queries.UpdateExpense(ctx, sqlc.UpdateExpenseParams{
 		CategoryID:      nullableInt64Ptr(input.CategoryID),
 		Amount:          fmtFloat(input.Amount),
@@ -129,6 +137,14 @@ func (r *Repository) Update(ctx context.Context, input domain.ExpenseUpdateInput
 }
 
 func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
+	current, err := r.GetByID(ctx, businessID, id)
+	if err != nil {
+		return err
+	}
+	if current.Status == "approved" {
+		return domain.ErrApprovedExpenseImmutable
+	}
+
 	result, err := r.queries.DeleteExpense(ctx, sqlc.DeleteExpenseParams{
 		ID:         id,
 		BusinessID: businessID,
@@ -148,10 +164,19 @@ func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
 }
 
 func (r *Repository) UpdateStatus(ctx context.Context, businessID, id int64, status string) error {
+	current, err := r.GetByID(ctx, businessID, id)
+	if err != nil {
+		return err
+	}
+	if err := domain.ValidateExpenseStatusTransition(current.Status, status); err != nil {
+		return err
+	}
+
 	result, err := r.queries.UpdateExpenseStatus(ctx, sqlc.UpdateExpenseStatusParams{
-		Status:     sql.NullString{String: status, Valid: true},
-		ID:         id,
-		BusinessID: businessID,
+		Status:        sql.NullString{String: status, Valid: true},
+		ID:            id,
+		BusinessID:    businessID,
+		CurrentStatus: sql.NullString{String: current.Status, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update expense status", logger.Error(err))

@@ -8,7 +8,11 @@ import (
 	"github.com/voxire/onion/internal/platform/money"
 )
 
-var ErrBillNotFound = errors.New("bill not found")
+var (
+	ErrBillNotFound            = errors.New("bill not found")
+	ErrInvalidStatusTransition = errors.New("invalid bill status transition")
+	ErrPaidBillImmutable       = errors.New("paid bill is immutable")
+)
 
 type Bill struct {
 	ID              int64        `json:"id"`
@@ -72,6 +76,22 @@ type BillInput struct {
 // IsPaid reports whether the bill has been fully paid.
 func (b *Bill) IsPaid() bool {
 	return b.Status == "paid"
+}
+
+// ValidateBillStatusTransition enforces the bill lifecycle. Bills start
+// pending, may become overdue or paid, and overdue bills may subsequently be
+// marked paid. Paid is terminal.
+func ValidateBillStatusTransition(current, next string) error {
+	if current == next {
+		return nil
+	}
+	if current == "pending" && (next == "overdue" || next == "paid") {
+		return nil
+	}
+	if current == "overdue" && next == "paid" {
+		return nil
+	}
+	return ErrInvalidStatusTransition
 }
 
 // IsOverdue reports whether the bill is past its due date and not paid.
