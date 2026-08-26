@@ -21,9 +21,7 @@ const (
 )
 
 func invalidatePosUsersScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posUsersScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(posUsersScope, businessID))
 }
 
 var ErrInvalidInput = errors.New("invalid input")
