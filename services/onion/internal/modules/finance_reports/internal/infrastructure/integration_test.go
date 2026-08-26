@@ -96,12 +96,28 @@ func TestCurrencyScopedReportsExcludeForeignCurrency(t *testing.T) {
 			args:  []any{int64(99826042), ownerID, businessID},
 		},
 		{
+			query: "INSERT INTO finance_bills (id, owner_id, business_id, supplier_name, amount, currency, due_date, status) VALUES (?, ?, ?, 'USD Overdue Supplier', 25.00, 'USD', '2025-12-31', 'overdue')",
+			args:  []any{int64(99826043), ownerID, businessID},
+		},
+		{
+			query: "INSERT INTO finance_bills (id, owner_id, business_id, supplier_name, amount, currency, due_date, status) VALUES (?, ?, ?, 'EUR Overdue Supplier', 950.00, 'EUR', '2025-12-31', 'overdue')",
+			args:  []any{int64(99826044), ownerID, businessID},
+		},
+		{
 			query: "INSERT INTO finance_expenses (id, owner_id, business_id, description, amount, currency, expense_date, status) VALUES (?, ?, ?, 'USD Expense', 40.00, 'USD', '2026-01-15', 'approved')",
 			args:  []any{int64(99826051), ownerID, businessID},
 		},
 		{
 			query: "INSERT INTO finance_expenses (id, owner_id, business_id, description, amount, currency, expense_date, status) VALUES (?, ?, ?, 'EUR Expense', 960.00, 'EUR', '2026-01-15', 'approved')",
 			args:  []any{int64(99826052), ownerID, businessID},
+		},
+		{
+			query: "INSERT INTO finance_expenses (id, owner_id, business_id, description, amount, currency, expense_date, status) VALUES (?, ?, ?, 'USD Pending Expense', 999.00, 'USD', '2026-01-15', 'pending')",
+			args:  []any{int64(99826053), ownerID, businessID},
+		},
+		{
+			query: "INSERT INTO finance_expenses (id, owner_id, business_id, description, amount, currency, expense_date, status) VALUES (?, ?, ?, 'USD Rejected Expense', 888.00, 'USD', '2026-01-15', 'rejected')",
+			args:  []any{int64(99826054), ownerID, businessID},
 		},
 	}
 	for _, statement := range statements {
@@ -139,7 +155,7 @@ func TestCurrencyScopedReportsExcludeForeignCurrency(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SumPayables: %v", err)
 	}
-	assertAmount("payables", payables, 60)
+	assertAmount("payables", payables, 85)
 
 	paid, err := repo.SumPaidInvoicesInRange(ctx, businessID, "2026-01-01", "2026-01-31")
 	if err != nil {

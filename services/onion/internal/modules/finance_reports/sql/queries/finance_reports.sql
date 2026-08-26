@@ -78,12 +78,12 @@ WHERE i.business_id = ?
   AND i.paid_date BETWEEN ? AND ?
   AND COALESCE(NULLIF(i.currency, ''), 'USD') = COALESCE(NULLIF(b.currency, ''), 'USD');
 
--- cross-schema read from expenses + invoices — expense totals for the requested period.
+-- cross-schema read from expenses + invoices — approved expense totals for the requested period.
 -- name: SumExpensesInRange :one
 SELECT COALESCE(SUM(e.amount), 0)
 FROM finance_expenses e
 JOIN businesses b ON b.id = e.business_id
 WHERE e.business_id = ?
-  AND e.status IN ('pending', 'approved')
+  AND e.status = 'approved'
   AND e.expense_date BETWEEN ? AND ?
   AND COALESCE(NULLIF(e.currency, ''), 'USD') = COALESCE(NULLIF(b.currency, ''), 'USD');
