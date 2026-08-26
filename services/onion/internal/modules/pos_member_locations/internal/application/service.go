@@ -27,9 +27,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidatePosMemberLocsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posMemberLocsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(posMemberLocsScope, businessID))
 }
 
 func (s *Service) ListForUser(ctx context.Context, businessID, userID int64) ([]domain.MemberLocation, error) {
