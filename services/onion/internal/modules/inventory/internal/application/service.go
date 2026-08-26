@@ -34,9 +34,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 // Inventory views live under the product namespace because they are derived
 // from product stock — wiping ProductPrefix covers every inventory view too.
 func invalidateInventoryScope(ctx context.Context, ownerID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ProductPrefix(ownerID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ProductPrefix(ownerID))
 }
 
 func (s *Service) AdjustInventory(ctx context.Context, ownerID int64, input domain.InventoryAdjustInput) error {

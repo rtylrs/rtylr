@@ -40,10 +40,10 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateProductScope(ctx context.Context, ownerID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ProductPrefix(ownerID))
-		cache.DeleteByPattern(ctx, cacheKeys.MenuPrefix(ownerID))
-	}
+	cacher.InvalidateScope(ctx,
+		cacheKeys.ProductPrefix(ownerID),
+		cacheKeys.MenuPrefix(ownerID),
+	)
 }
 
 func normalizeProductPagination(page, pageSize int64) (int64, int64, int, int) {
