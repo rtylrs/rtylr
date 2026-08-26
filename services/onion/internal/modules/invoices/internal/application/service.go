@@ -29,9 +29,7 @@ var invoicePagePolicy = pagination.Policy{
 }
 
 func invalidateInvoicesScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(invoicesScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(invoicesScope, businessID))
 }
 
 type repository interface {
