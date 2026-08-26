@@ -182,6 +182,22 @@ func (r *Repository) CreateMatch(ctx context.Context, businessID int64, input do
 		return 0, err
 	}
 
+	reservation, err := queries.ReserveReconciliationTarget(ctx, sqlc.ReserveReconciliationTargetParams{
+		BusinessID: businessID,
+		TargetType: input.TargetType,
+		TargetID:   input.TargetID,
+	})
+	if err != nil {
+		return 0, err
+	}
+	reserved, err := reservation.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	if reserved == 0 {
+		return 0, domain.ErrAlreadyMatched
+	}
+
 	matchedBy := sql.NullInt64{}
 	if input.MatchedBy > 0 {
 		matchedBy = sql.NullInt64{Int64: input.MatchedBy, Valid: true}

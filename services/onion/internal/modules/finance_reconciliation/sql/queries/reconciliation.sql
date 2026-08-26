@@ -18,6 +18,10 @@ INSERT INTO finance_reconciliation_matches (
     owner_id, business_id, bank_feed_id, target_type, target_id, matched_by
 ) VALUES (?, ?, ?, ?, ?, ?);
 
+-- name: ReserveReconciliationTarget :execresult
+INSERT IGNORE INTO finance_reconciliation_targets (business_id, target_type, target_id)
+VALUES (?, ?, ?);
+
 -- name: GetBankFeedForOwner :one
 SELECT id FROM finance_bank_feeds
 WHERE id = ? AND business_id = ?;
