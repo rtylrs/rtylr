@@ -22,9 +22,7 @@ const (
 )
 
 func invalidateHRPayrollScope(ctx context.Context, ownerID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrPayrollScope, ownerID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrPayrollScope, ownerID))
 }
 
 type Service struct {

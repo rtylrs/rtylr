@@ -35,9 +35,7 @@ func (s *Service) ResolveEmployeeID(ctx context.Context, businessID, userID int6
 }
 
 func invalidateBenefitEnrollmentsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(benefitEnrollmentsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(benefitEnrollmentsScope, businessID))
 }
 
 // Enroll enrolls one employee in one plan. employeeID is resolved from the auth

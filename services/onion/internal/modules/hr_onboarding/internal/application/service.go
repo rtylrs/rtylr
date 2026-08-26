@@ -46,9 +46,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateHROnboardingScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrOnboardingScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrOnboardingScope, businessID))
 }
 
 type onboardingListResult[T any] struct {
