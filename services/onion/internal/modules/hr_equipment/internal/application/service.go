@@ -30,9 +30,7 @@ func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalC
 }
 
 func invalidateHREquipmentScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrEquipmentScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrEquipmentScope, businessID))
 }
 
 func (s *Service) CreateEquipmentRequest(ctx context.Context, businessID int64, params domain.CreateEquipmentRequestParams) (*domain.EquipmentRequestRecord, error) {

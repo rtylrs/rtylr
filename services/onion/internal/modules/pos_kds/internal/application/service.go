@@ -36,9 +36,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateKDSScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(kdsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(kdsScope, businessID))
 }
 
 func (s *Service) ListActiveOrders(ctx context.Context, businessID int64) ([]domain.KDSOrder, error) {

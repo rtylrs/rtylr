@@ -20,9 +20,7 @@ const (
 )
 
 func invalidateHROvertimeScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrOvertimeScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrOvertimeScope, businessID))
 }
 
 type repository interface {

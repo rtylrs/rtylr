@@ -32,9 +32,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateDepartmentsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(departmentsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(departmentsScope, businessID))
 }
 
 func (s *Service) ListDepartments(ctx context.Context, businessID int64) ([]domain.Department, error) {
