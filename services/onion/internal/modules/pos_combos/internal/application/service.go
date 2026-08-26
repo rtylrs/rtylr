@@ -32,9 +32,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidatePosCombosScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posCombosScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(posCombosScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Combo, error) {
