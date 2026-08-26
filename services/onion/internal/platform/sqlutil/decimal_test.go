@@ -16,3 +16,23 @@ func TestFloatToDecimal(t *testing.T) {
 		}
 	}
 }
+
+func TestDecimalToFloat(t *testing.T) {
+	for _, test := range []struct {
+		name  string
+		value any
+		want  float64
+	}{
+		{name: "string", value: "12.35", want: 12.35},
+		{name: "bytes", value: []byte("7.5"), want: 7.5},
+		{name: "empty", value: "", want: 0},
+		{name: "malformed", value: "not-a-number", want: 0},
+		{name: "unsupported", value: int64(7), want: 0},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := DecimalToFloat(test.value); got != test.want {
+				t.Errorf("DecimalToFloat(%v) = %v, want %v", test.value, got, test.want)
+			}
+		})
+	}
+}
