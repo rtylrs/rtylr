@@ -64,8 +64,8 @@ func (r *Repository) CreateLocation(ctx context.Context, ownerID int64, input do
 		OwnerID:    ownerID,
 		BusinessID: ownerID,
 		Name:       input.Name,
-		Address:    nullString(input.Address),
-		Phone:      nullString(input.Phone),
+		Address:    sqlutil.NullString(input.Address),
+		Phone:      sqlutil.NullString(input.Phone),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create pos location", logger.Error(err))
@@ -110,10 +110,10 @@ func (r *Repository) CreateTable(ctx context.Context, businessID int64, input do
 	res, err := r.queries.CreatePosTable(ctx, sqlc.CreatePosTableParams{
 		OwnerID:    businessID,
 		BusinessID: businessID,
-		LocationID: nullInt64(input.LocationID),
+		LocationID: sqlutil.NullInt64(input.LocationID),
 		Name:       input.Name,
 		Capacity:   sql.NullInt32{Int32: int32(input.Capacity), Valid: true},
-		QrCodeUrl:  nullString(input.QRCodeURL),
+		QrCodeUrl:  sqlutil.NullString(input.QRCodeURL),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create pos table", logger.Error(err))
@@ -124,10 +124,10 @@ func (r *Repository) CreateTable(ctx context.Context, businessID int64, input do
 
 func (r *Repository) UpdateTable(ctx context.Context, businessID int64, input domain.TableInput) error {
 	err := r.queries.UpdatePosTable(ctx, sqlc.UpdatePosTableParams{
-		LocationID: nullInt64(input.LocationID),
+		LocationID: sqlutil.NullInt64(input.LocationID),
 		Name:       input.Name,
 		Capacity:   sql.NullInt32{Int32: int32(input.Capacity), Valid: true},
-		QrCodeUrl:  nullString(input.QRCodeURL),
+		QrCodeUrl:  sqlutil.NullString(input.QRCodeURL),
 		BusinessID: businessID,
 		ID:         input.ID,
 	})
@@ -337,7 +337,7 @@ func (r *Repository) CloseSession(ctx context.Context, businessID, sessionID int
 		ClosingCash:    sql.NullString{String: sqlutil.FloatToDecimal(closingCash), Valid: true},
 		ExpectedCash:   sql.NullString{String: sqlutil.FloatToDecimal(expectedCash), Valid: true},
 		CashDifference: sql.NullString{String: sqlutil.FloatToDecimal(cashDiff), Valid: true},
-		Notes:          nullString(notes),
+		Notes:          sqlutil.NullString(notes),
 		BusinessID:     businessID,
 		ID:             sessionID,
 	})
@@ -734,20 +734,20 @@ func (r *Repository) CreateOrder(ctx context.Context, businessID, staffID int64,
 	res, err := qtx.CreateOrder(ctx, sqlc.CreateOrderParams{
 		OwnerID:       businessID,
 		BusinessID:    businessID,
-		SessionID:     nullInt64(input.SessionID),
-		TableID:       nullInt64(input.TableID),
-		LocationID:    nullInt64(input.LocationID),
+		SessionID:     sqlutil.NullInt64(input.SessionID),
+		TableID:       sqlutil.NullInt64(input.TableID),
+		LocationID:    sqlutil.NullInt64(input.LocationID),
 		OrderNumber:   orderNumber,
 		Type:          sqlc.NullPosOrdersType{PosOrdersType: sqlc.PosOrdersType(input.Type), Valid: true},
-		CustomerID:    nullInt64(input.CustomerID),
-		CustomerName:  nullString(input.CustomerName),
-		StaffID:       nullInt64(staffID),
+		CustomerID:    sqlutil.NullInt64(input.CustomerID),
+		CustomerName:  sqlutil.NullString(input.CustomerName),
+		StaffID:       sqlutil.NullInt64(staffID),
 		Subtotal:      sql.NullString{String: sqlutil.FloatToDecimal(subtotal), Valid: true},
 		TaxAmount:     sql.NullString{String: sqlutil.FloatToDecimal(taxAmount), Valid: true},
 		Total:         sql.NullString{String: sqlutil.FloatToDecimal(total), Valid: true},
 		PaymentMethod: sqlc.NullPosOrdersPaymentMethod{PosOrdersPaymentMethod: sqlc.PosOrdersPaymentMethod(input.PaymentMethod), Valid: input.PaymentMethod != ""},
-		Notes:         nullString(input.Notes),
-		KitchenNotes:  nullString(input.KitchenNotes),
+		Notes:         sqlutil.NullString(input.Notes),
+		KitchenNotes:  sqlutil.NullString(input.KitchenNotes),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert pos order", logger.Error(err))
@@ -766,18 +766,18 @@ func (r *Repository) CreateOrder(ctx context.Context, businessID, staffID int64,
 		}
 		_, err = qtx.CreateOrderItem(ctx, sqlc.CreateOrderItemParams{
 			OrderID:        orderID,
-			MenuItemID:     nullInt64(item.MenuItemID),
+			MenuItemID:     sqlutil.NullInt64(item.MenuItemID),
 			Name:           item.Name,
-			Sku:            nullString(item.SKU),
+			Sku:            sqlutil.NullString(item.SKU),
 			Quantity:       floatToDecimal3(item.Quantity),
 			UnitPrice:      sqlutil.FloatToDecimal(item.UnitPrice),
 			DiscountPct:    sql.NullString{String: sqlutil.FloatToDecimal(item.DiscountPct), Valid: true},
 			DiscountAmount: sql.NullString{String: sqlutil.FloatToDecimal(discAmts[i]), Valid: true},
 			TaxRate:        sql.NullString{String: sqlutil.FloatToDecimal(item.TaxRate), Valid: true},
 			Total:          sqlutil.FloatToDecimal(itemTotals[i]),
-			Notes:          nullString(item.Notes),
+			Notes:          sqlutil.NullString(item.Notes),
 			Modifiers:      modifierJSON,
-			ComboID:        nullInt64(item.ComboID),
+			ComboID:        sqlutil.NullInt64(item.ComboID),
 		})
 		if err != nil {
 			logger.Ctx(ctx).Error("Failed to insert order item", logger.Error(err))
@@ -1218,8 +1218,8 @@ func (r *Repository) CreateRefund(ctx context.Context, businessID, orderID, refu
 		BusinessID: businessID,
 		OrderID:    orderID,
 		Amount:     sqlutil.FloatToDecimal(amount),
-		Reason:     nullString(reason),
-		RefundedBy: nullInt64(refundedBy),
+		Reason:     sqlutil.NullString(reason),
+		RefundedBy: sqlutil.NullInt64(refundedBy),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert refund", logger.Error(err))
@@ -1452,20 +1452,20 @@ func (r *Repository) SplitOrder(ctx context.Context, businessID, orderID int64, 
 		res, insertErr := qtx.CreateOrder(ctx, sqlc.CreateOrderParams{
 			OwnerID:       businessID,
 			BusinessID:    businessID,
-			SessionID:     nullInt64(order.SessionID),
-			TableID:       nullInt64(order.TableID),
-			LocationID:    nullInt64(order.LocationID),
+			SessionID:     sqlutil.NullInt64(order.SessionID),
+			TableID:       sqlutil.NullInt64(order.TableID),
+			LocationID:    sqlutil.NullInt64(order.LocationID),
 			OrderNumber:   orderNum,
 			Type:          sqlc.NullPosOrdersType{PosOrdersType: sqlc.PosOrdersType(order.Type), Valid: true},
-			CustomerID:    nullInt64(order.CustomerID),
-			CustomerName:  nullString(order.CustomerName),
-			StaffID:       nullInt64(order.StaffID),
+			CustomerID:    sqlutil.NullInt64(order.CustomerID),
+			CustomerName:  sqlutil.NullString(order.CustomerName),
+			StaffID:       sqlutil.NullInt64(order.StaffID),
 			Subtotal:      sql.NullString{String: "0", Valid: true},
 			TaxAmount:     sql.NullString{String: "0", Valid: true},
 			Total:         sql.NullString{String: "0", Valid: true},
 			PaymentMethod: sqlc.NullPosOrdersPaymentMethod{PosOrdersPaymentMethod: sqlc.PosOrdersPaymentMethod(order.PaymentMethod), Valid: true},
-			Notes:         nullString(order.Notes),
-			KitchenNotes:  nullString(order.KitchenNotes),
+			Notes:         sqlutil.NullString(order.Notes),
+			KitchenNotes:  sqlutil.NullString(order.KitchenNotes),
 		})
 		if insertErr != nil {
 			txErr = insertErr
@@ -1679,14 +1679,6 @@ func (r *Repository) GenerateOrderNumber(ctx context.Context, businessID int64) 
 }
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
-
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
-}
-
-func nullInt64(v int64) sql.NullInt64 {
-	return sql.NullInt64{Int64: v, Valid: v != 0}
-}
 
 func floatToDecimal3(f float64) string {
 	return strconv.FormatFloat(f, 'f', 3, 64)
@@ -1910,12 +1902,12 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, or
 		BusinessID:    businessID,
 		OrderNumber:   orderNumber,
 		CustomerID:    sql.NullInt64{},
-		CustomerName:  nullString(customerName),
-		CustomerPhone: nullString(customerPhone),
+		CustomerName:  sqlutil.NullString(customerName),
+		CustomerPhone: sqlutil.NullString(customerPhone),
 		Subtotal:      sql.NullString{String: sqlutil.FloatToDecimal(totals.Subtotal), Valid: true},
 		TaxAmount:     sql.NullString{String: sqlutil.FloatToDecimal(totals.TaxAmount), Valid: true},
 		Total:         sql.NullString{String: sqlutil.FloatToDecimal(totals.Total), Valid: true},
-		Notes:         nullString(notes),
+		Notes:         sqlutil.NullString(notes),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert public order", logger.Error(err))
@@ -1936,7 +1928,7 @@ func (r *Repository) CreatePublicOrder(ctx context.Context, businessID int64, or
 			Quantity:   floatToDecimal3(item.Quantity),
 			UnitPrice:  sqlutil.FloatToDecimal(item.UnitPrice),
 			Total:      sqlutil.FloatToDecimal(itemTotal),
-			Notes:      nullString(item.Notes),
+			Notes:      sqlutil.NullString(item.Notes),
 		}); err != nil {
 			logger.Ctx(ctx).Error("Failed to insert public order item", logger.Error(err))
 			return 0, err

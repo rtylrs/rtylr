@@ -145,8 +145,8 @@ func (r *Repository) CreateStockTake(ctx context.Context, businessID int64, inpu
 	res, err := qtx.InsertStockTake(ctx, sqlc.InsertStockTakeParams{
 		OwnerID:     businessID,
 		BusinessID:  businessID,
-		WarehouseID: nullInt64(input.WarehouseID),
-		Notes:       nullString(input.Notes),
+		WarehouseID: sqlutil.NullInt64(input.WarehouseID),
+		Notes:       sqlutil.NullString(input.Notes),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create stock take", logger.Error(err))
@@ -246,21 +246,21 @@ func (r *Repository) UpdateStockTake(ctx context.Context, businessID int64, inpu
 	case domain.StockTakeStatusInProgress:
 		err = qtx.UpdateStockTakeStatusInProgress(ctx, sqlc.UpdateStockTakeStatusInProgressParams{
 			Status:     statusVal,
-			Notes:      nullString(input.Notes),
+			Notes:      sqlutil.NullString(input.Notes),
 			BusinessID: businessID,
 			ID:         input.ID,
 		})
 	case domain.StockTakeStatusCompleted:
 		err = qtx.UpdateStockTakeStatusCompleted(ctx, sqlc.UpdateStockTakeStatusCompletedParams{
 			Status:     statusVal,
-			Notes:      nullString(input.Notes),
+			Notes:      sqlutil.NullString(input.Notes),
 			BusinessID: businessID,
 			ID:         input.ID,
 		})
 	default:
 		err = qtx.UpdateStockTakeStatus(ctx, sqlc.UpdateStockTakeStatusParams{
 			Status:     statusVal,
-			Notes:      nullString(input.Notes),
+			Notes:      sqlutil.NullString(input.Notes),
 			BusinessID: businessID,
 			ID:         input.ID,
 		})
@@ -384,14 +384,6 @@ func (r *Repository) reconcileStockTake(ctx context.Context, tx *sql.Tx, qtx *sq
 	}
 
 	return nil
-}
-
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
-}
-
-func nullInt64(v int64) sql.NullInt64 {
-	return sql.NullInt64{Int64: v, Valid: v != 0}
 }
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt

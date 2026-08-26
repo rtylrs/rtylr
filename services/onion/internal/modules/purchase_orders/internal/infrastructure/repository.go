@@ -94,10 +94,10 @@ func insertPurchaseOrderInventoryLedger(ctx context.Context, tx *sql.Tx, entries
 			entry.QuantityChange,
 			entry.QuantityBefore,
 			entry.QuantityAfter,
-			nullInt64(entry.ReferenceID),
-			nullString("purchase_order"),
-			nullInt64(entry.CreatedBy),
-			nullString(entry.Notes),
+			sqlutil.NullInt64(entry.ReferenceID),
+			sqlutil.NullString("purchase_order"),
+			sqlutil.NullInt64(entry.CreatedBy),
+			sqlutil.NullString(entry.Notes),
 		)
 	}
 	query, args, err := insert.ToSql()
@@ -231,8 +231,8 @@ func (r *Repository) CreatePurchaseOrder(ctx context.Context, businessID int64, 
 		TaxAmount:        sql.NullString{String: strconv.FormatFloat(input.TaxAmount, 'f', 2, 64), Valid: true},
 		Total:            sql.NullString{String: strconv.FormatFloat(total, 'f', 2, 64), Valid: true},
 		ExpectedDelivery: expectedDelivery,
-		Notes:            nullString(input.Notes),
-		CreatedBy:        nullInt64(createdBy),
+		Notes:            sqlutil.NullString(input.Notes),
+		CreatedBy:        sqlutil.NullInt64(createdBy),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert purchase order", logger.Error(err))
@@ -616,14 +616,6 @@ func purchaseOrderFromRow(row sqlc.ErpPurchaseOrder) domain.PurchaseOrder {
 	}
 
 	return po
-}
-
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
-}
-
-func nullInt64(v int64) sql.NullInt64 {
-	return sql.NullInt64{Int64: v, Valid: v != 0}
 }
 
 // parseDecimal converts a DB decimal string to float64, logging (rather than

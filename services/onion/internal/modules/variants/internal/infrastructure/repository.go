@@ -60,8 +60,8 @@ func (r *Repository) CreateVariant(ctx context.Context, businessID int64, input 
 		BusinessID:    businessID,
 		ProductID:     input.ProductID,
 		Name:          input.Name,
-		Sku:           nullString(input.SKU),
-		Barcode:       nullString(input.Barcode),
+		Sku:           sqlutil.NullString(input.SKU),
+		Barcode:       sqlutil.NullString(input.Barcode),
 		CostPrice:     strconv.FormatFloat(input.CostPrice, 'f', -1, 64),
 		SalePrice:     strconv.FormatFloat(input.SalePrice, 'f', -1, 64),
 		StockQuantity: strconv.FormatFloat(input.StockQuantity, 'f', -1, 64),
@@ -86,8 +86,8 @@ func (r *Repository) UpdateVariant(ctx context.Context, businessID, id int64, in
 	err := r.queries.UpdateVariant(ctx, sqlc.UpdateVariantParams{
 		ProductID:     input.ProductID,
 		Name:          input.Name,
-		Sku:           nullString(input.SKU),
-		Barcode:       nullString(input.Barcode),
+		Sku:           sqlutil.NullString(input.SKU),
+		Barcode:       sqlutil.NullString(input.Barcode),
 		CostPrice:     strconv.FormatFloat(input.CostPrice, 'f', -1, 64),
 		SalePrice:     strconv.FormatFloat(input.SalePrice, 'f', -1, 64),
 		StockQuantity: strconv.FormatFloat(input.StockQuantity, 'f', -1, 64),
@@ -182,10 +182,6 @@ func variantFromRow(row sqlc.ErpProductVariant) domain.Variant {
 	}
 
 	return v
-}
-
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
 }
 
 func nullJSON(s string) json.RawMessage {

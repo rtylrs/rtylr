@@ -171,7 +171,7 @@ func (r *Repository) CreateStockTransfer(ctx context.Context, businessID int64, 
 		BusinessID:      businessID,
 		FromWarehouseID: input.FromWarehouseID,
 		ToWarehouseID:   input.ToWarehouseID,
-		Notes:           nullString(input.Notes),
+		Notes:           sqlutil.NullString(input.Notes),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create stock transfer", logger.Error(err))
@@ -379,10 +379,6 @@ func (r *Repository) receiveTransfer(ctx context.Context, businessID, id int64) 
 	}
 
 	return tx.Commit()
-}
-
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
 }
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt

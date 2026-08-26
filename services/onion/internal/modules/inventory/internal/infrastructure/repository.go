@@ -86,7 +86,7 @@ func (r *Repository) AdjustInventory(ctx context.Context, ownerID, productID int
 		QuantityChange: strconv.FormatFloat(change, 'f', -1, 64),
 		QuantityBefore: strconv.FormatFloat(before, 'f', -1, 64),
 		QuantityAfter:  strconv.FormatFloat(after, 'f', -1, 64),
-		Notes:          nullString(notes),
+		Notes:          sqlutil.NullString(notes),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert inventory transaction", logger.Error(err))
@@ -230,10 +230,6 @@ func (r *Repository) GetValuation(ctx context.Context, ownerID int64) ([]domain.
 	}
 
 	return items, nil
-}
-
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
 }
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt

@@ -11,6 +11,22 @@ import (
 func DecimalToFloat(value any) float64 {
 	var text string
 	switch typed := value.(type) {
+	case float64:
+		return typed
+	case float32:
+		return float64(typed)
+	case int:
+		return float64(typed)
+	case int32:
+		return float64(typed)
+	case int64:
+		return float64(typed)
+	case uint:
+		return float64(typed)
+	case uint32:
+		return float64(typed)
+	case uint64:
+		return float64(typed)
 	case string:
 		text = typed
 	case []byte:

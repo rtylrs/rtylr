@@ -14,6 +14,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_performance/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -285,8 +286,8 @@ func (r *Repository) ListPerformanceReviewsByEmployee(ctx context.Context, busin
 
 func (r *Repository) UpdateReviewSubmission(ctx context.Context, businessID, id int64, rating, narrative string) error {
 	return r.queries.UpdateReviewSubmission(ctx, sqlc.UpdateReviewSubmissionParams{
-		OverallRating: nullString(rating),
-		Narrative:     nullString(narrative),
+		OverallRating: sqlutil.NullString(rating),
+		Narrative:     sqlutil.NullString(narrative),
 		BusinessID:    businessID,
 		ID:            id,
 	})
@@ -316,9 +317,9 @@ func (r *Repository) CreateGoal(ctx context.Context, businessID int64, params do
 		EmployeeID:      params.EmployeeID,
 		ReviewCycleID:   params.ReviewCycleID,
 		Title:           params.Title,
-		Description:     nullString(params.Description),
+		Description:     sqlutil.NullString(params.Description),
 		Weight:          nullFloat64String(params.Weight),
-		SuccessCriteria: nullString(params.SuccessCriteria),
+		SuccessCriteria: sqlutil.NullString(params.SuccessCriteria),
 	})
 	if err != nil {
 		return nil, err
@@ -350,9 +351,9 @@ func (r *Repository) GetGoal(ctx context.Context, businessID, id int64) (*domain
 func (r *Repository) UpdateGoal(ctx context.Context, businessID, id int64, params domain.UpdateGoalParams) error {
 	return r.queries.UpdateReviewGoal(ctx, sqlc.UpdateReviewGoalParams{
 		Title:           params.Title,
-		Description:     nullString(params.Description),
+		Description:     sqlutil.NullString(params.Description),
 		Weight:          nullFloat64String(params.Weight),
-		SuccessCriteria: nullString(params.SuccessCriteria),
+		SuccessCriteria: sqlutil.NullString(params.SuccessCriteria),
 		Status:          params.Status,
 		BusinessID:      businessID,
 		ID:              id,
@@ -475,10 +476,6 @@ func goalFromRow(row sqlc.HrPerformanceReviewGoal) domain.ReviewGoalRecord {
 		CreatedAt:       row.CreatedAt,
 		UpdatedAt:       row.UpdatedAt,
 	}
-}
-
-func nullString(v string) sql.NullString {
-	return sql.NullString{String: v, Valid: v != ""}
 }
 
 func nullFloat64String(v float64) sql.NullString {

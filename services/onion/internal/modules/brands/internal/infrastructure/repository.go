@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/brands/internal/domain"
 	"github.com/voxire/onion/internal/modules/brands/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -136,8 +137,8 @@ func (r *Repository) CreateBrand(ctx context.Context, businessID int64, input do
 		OwnerID:     businessID,
 		BusinessID:  businessID,
 		Name:        input.Name,
-		LogoUrl:     nullString(input.LogoURL),
-		Description: nullString(input.Description),
+		LogoUrl:     sqlutil.NullString(input.LogoURL),
+		Description: sqlutil.NullString(input.Description),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create brand", logger.Error(err))
@@ -156,8 +157,8 @@ func (r *Repository) CreateBrand(ctx context.Context, businessID int64, input do
 func (r *Repository) UpdateBrand(ctx context.Context, businessID, id int64, input domain.BrandInput) error {
 	err := r.queries.UpdateBrand(ctx, sqlc.UpdateBrandParams{
 		Name:        input.Name,
-		LogoUrl:     nullString(input.LogoURL),
-		Description: nullString(input.Description),
+		LogoUrl:     sqlutil.NullString(input.LogoURL),
+		Description: sqlutil.NullString(input.Description),
 		BusinessID:  businessID,
 		ID:          id,
 	})
@@ -182,8 +183,4 @@ func (r *Repository) DeleteBrand(ctx context.Context, businessID, id int64) erro
 	}
 
 	return nil
-}
-
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
 }
