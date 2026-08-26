@@ -101,12 +101,6 @@ WHERE business_id = ?
 ORDER BY created_at DESC
 LIMIT ? OFFSET ?;
 
--- name: CreateLoyaltyTransaction :exec
-INSERT INTO crm_loyalty_transactions
-  (owner_id, business_id, customer_id, type, points, balance_before, balance_after,
-   description, reference_id, reference_type)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-
 -- name: GetLoyaltyConfig :one
 SELECT id, owner_id, business_id, is_enabled, points_per_currency_unit, currency_per_point,
        bronze_min, silver_min, gold_min, platinum_min,

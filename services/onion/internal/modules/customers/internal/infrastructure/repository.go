@@ -403,28 +403,6 @@ func (r *Repository) RecordVisit(ctx context.Context, businessID, customerID int
 	return err
 }
 
-// ─── Loyalty Transactions ─────────────────────────────────────────────────────
-
-func (r *Repository) CreateLoyaltyTransaction(ctx context.Context, tx domain.LoyaltyTransaction) error {
-	err := r.queries.CreateLoyaltyTransaction(ctx, sqlc.CreateLoyaltyTransactionParams{
-		OwnerID:       tx.OwnerID,
-		BusinessID:    tx.BusinessID,
-		CustomerID:    tx.CustomerID,
-		Type:          sqlc.CrmLoyaltyTransactionsType(tx.Type),
-		Points:        int32(tx.Points),
-		BalanceBefore: int32(tx.BalanceBefore),
-		BalanceAfter:  int32(tx.BalanceAfter),
-		Description:   sql.NullString{String: tx.Description, Valid: tx.Description != ""},
-		ReferenceID:   nullInt64FromPtr(tx.ReferenceID),
-		ReferenceType: sql.NullString{String: tx.ReferenceType, Valid: tx.ReferenceType != ""},
-	})
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to create loyalty transaction", logger.Error(err))
-	}
-
-	return err
-}
-
 // ApplyLoyaltyDelta serializes the balance update and audit insert in one
 // transaction. The customer row lock prevents concurrent awards/redeems from
 // calculating from the same stale balance. onCommitted runs only after the
