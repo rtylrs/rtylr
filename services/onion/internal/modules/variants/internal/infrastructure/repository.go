@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/variants/internal/domain"
 	"github.com/voxire/onion/internal/modules/variants/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -160,9 +161,9 @@ func variantFromRow(row sqlc.ErpProductVariant) domain.Variant {
 		v.Barcode = row.Barcode.String
 	}
 
-	v.CostPrice = parseDecimal(row.CostPrice)
-	v.SalePrice = parseDecimal(row.SalePrice)
-	v.StockQuantity = parseDecimal(row.StockQuantity)
+	v.CostPrice = sqlutil.ParseDecimal(row.CostPrice)
+	v.SalePrice = sqlutil.ParseDecimal(row.SalePrice)
+	v.StockQuantity = sqlutil.ParseDecimal(row.StockQuantity)
 
 	if row.Attributes != nil {
 		v.Attributes = string(row.Attributes)
@@ -197,15 +198,3 @@ func nullJSON(s string) json.RawMessage {
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt
 // values instead of silently coercing them to 0.
-func parseDecimal(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse product decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}

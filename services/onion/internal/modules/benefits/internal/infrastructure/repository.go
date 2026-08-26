@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/benefits/internal/domain"
 	"github.com/voxire/onion/internal/modules/benefits/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -45,10 +46,10 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Benef
 			item.Provider = row.Provider.String
 		}
 		if row.CostEmployer.Valid {
-			item.CostEmployer = parseDecimal(row.CostEmployer.String)
+			item.CostEmployer = sqlutil.ParseDecimal(row.CostEmployer.String)
 		}
 		if row.CostEmployee.Valid {
-			item.CostEmployee = parseDecimal(row.CostEmployee.String)
+			item.CostEmployee = sqlutil.ParseDecimal(row.CostEmployee.String)
 		}
 		if row.IsActive.Valid {
 			item.IsActive = row.IsActive.Bool
@@ -86,15 +87,3 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt
 // values instead of silently coercing them to 0.
-func parseDecimal(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse benefit decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}

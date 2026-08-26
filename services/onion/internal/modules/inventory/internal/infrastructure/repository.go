@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/inventory/internal/domain"
 	"github.com/voxire/onion/internal/modules/inventory/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
@@ -125,18 +126,18 @@ func (r *Repository) GetInventoryReport(ctx context.Context, ownerID int64) ([]d
 			item.Unit = row.Unit.String
 		}
 
-		item.StockQuantity = parseDecimal(row.StockQuantity)
-		item.CostPrice = parseDecimal(row.CostPrice)
-		item.SalePrice = parseDecimal(row.SalePrice)
-		item.StockValue = parseDecimal(row.StockValue)
+		item.StockQuantity = sqlutil.ParseDecimal(row.StockQuantity)
+		item.CostPrice = sqlutil.ParseDecimal(row.CostPrice)
+		item.SalePrice = sqlutil.ParseDecimal(row.SalePrice)
+		item.StockValue = sqlutil.ParseDecimal(row.StockValue)
 		item.IsLowStock = row.IsLowStock != 0
 
 		if row.LowStockThreshold.Valid {
-			item.LowStockThreshold = parseDecimal(row.LowStockThreshold.String)
+			item.LowStockThreshold = sqlutil.ParseDecimal(row.LowStockThreshold.String)
 		}
 
 		if row.ReorderQuantity.Valid {
-			item.ReorderQuantity = parseDecimal(row.ReorderQuantity.String)
+			item.ReorderQuantity = sqlutil.ParseDecimal(row.ReorderQuantity.String)
 		}
 
 		report = append(report, item)
@@ -168,18 +169,18 @@ func (r *Repository) GetLowStockProducts(ctx context.Context, ownerID int64) ([]
 			item.Unit = row.Unit.String
 		}
 
-		item.StockQuantity = parseDecimal(row.StockQuantity)
-		item.CostPrice = parseDecimal(row.CostPrice)
-		item.SalePrice = parseDecimal(row.SalePrice)
-		item.StockValue = parseDecimal(row.StockValue)
+		item.StockQuantity = sqlutil.ParseDecimal(row.StockQuantity)
+		item.CostPrice = sqlutil.ParseDecimal(row.CostPrice)
+		item.SalePrice = sqlutil.ParseDecimal(row.SalePrice)
+		item.StockValue = sqlutil.ParseDecimal(row.StockValue)
 		item.IsLowStock = row.IsLowStock != 0
 
 		if row.LowStockThreshold.Valid {
-			item.LowStockThreshold = parseDecimal(row.LowStockThreshold.String)
+			item.LowStockThreshold = sqlutil.ParseDecimal(row.LowStockThreshold.String)
 		}
 
 		if row.ReorderQuantity.Valid {
-			item.ReorderQuantity = parseDecimal(row.ReorderQuantity.String)
+			item.ReorderQuantity = sqlutil.ParseDecimal(row.ReorderQuantity.String)
 		}
 
 		report = append(report, item)
@@ -212,7 +213,7 @@ func (r *Repository) GetValuation(ctx context.Context, ownerID int64) ([]domain.
 			case float64:
 				item.TotalValue = v
 			case []byte:
-				item.TotalValue = parseDecimal(string(v))
+				item.TotalValue = sqlutil.ParseDecimal(string(v))
 			}
 		}
 
@@ -221,7 +222,7 @@ func (r *Repository) GetValuation(ctx context.Context, ownerID int64) ([]domain.
 			case float64:
 				item.TotalCost = v
 			case []byte:
-				item.TotalCost = parseDecimal(string(v))
+				item.TotalCost = sqlutil.ParseDecimal(string(v))
 			}
 		}
 
@@ -237,15 +238,3 @@ func nullString(s string) sql.NullString {
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt
 // values instead of silently coercing them to 0.
-func parseDecimal(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse inventory decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}
