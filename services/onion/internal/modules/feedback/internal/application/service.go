@@ -40,9 +40,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateFeedbackScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(feedbackScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(feedbackScope, businessID))
 }
 
 type feedbackListResult struct {
