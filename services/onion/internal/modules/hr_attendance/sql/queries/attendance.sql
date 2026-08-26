@@ -60,6 +60,7 @@ FROM hr_attendance_config
 WHERE business_id = ?;
 
 
+-- cross-schema read from hr_core — verify the employee's attendance PIN.
 -- name: GetEmployeePINHash :one
 SELECT clock_in_pin_hash
 FROM hr_employees
@@ -70,6 +71,7 @@ UPDATE hr_employees
 SET clock_in_pin_hash = ?, updated_at = NOW()
 WHERE id = ? AND business_id = ?;
 
+-- cross-schema read from hr_core — resolve the attendance location's geofence coordinates.
 -- name: GetLocationCoordinates :one
 SELECT latitude, longitude
 FROM hr_locations
