@@ -1,3 +1,4 @@
+-- cross-schema read from hr_core — headcount uses employee, department, and location records.
 -- name: HeadcountReport :many
 SELECT COALESCE(d.name, 'Unassigned') AS department,
        COALESCE(l.name, 'Unassigned') AS location,
@@ -17,6 +18,7 @@ GROUP BY d.name, l.name, e.employment_type, e.status
 ORDER BY department, location
 LIMIT 5001;
 
+-- cross-schema read from hr_core and hr_attendance — summarize employee attendance by period.
 -- name: AttendanceSummaryReport :many
 SELECT e.id AS employee_id,
        CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
@@ -38,6 +40,7 @@ GROUP BY e.id, e.first_name, e.last_name, d.name
 ORDER BY employee_name
 LIMIT 5001;
 
+-- cross-schema read from hr_core and hr_leave — summarize leave balances and requests.
 -- name: LeaveSummaryReport :many
 SELECT e.id AS employee_id,
        CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
@@ -70,6 +73,7 @@ GROUP BY e.id, e.first_name, e.last_name, d.name, lt.id, lt.name, lb.entitled_da
 ORDER BY employee_name, leave_type
 LIMIT 5001;
 
+-- cross-schema read from hr_core and hr_payroll — summarize payroll entries by employee.
 -- name: PayrollSummaryReport :many
 SELECT e.id AS employee_id,
        CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
@@ -95,6 +99,7 @@ GROUP BY e.id, e.first_name, e.last_name, d.name
 ORDER BY employee_name
 LIMIT 5001;
 
+-- cross-schema read from hr_core and hr_overtime — summarize overtime requests by period.
 -- name: OvertimeSummaryReport :many
 SELECT e.id AS employee_id,
        CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
@@ -117,6 +122,7 @@ GROUP BY e.id, e.first_name, e.last_name, d.name
 ORDER BY employee_name
 LIMIT 5001;
 
+-- cross-schema read from hr_core and hr_time — summarize timesheets by period.
 -- name: TimesheetSummaryReport :many
 SELECT e.id AS employee_id,
        CONCAT(e.first_name, ' ', e.last_name) AS employee_name,
