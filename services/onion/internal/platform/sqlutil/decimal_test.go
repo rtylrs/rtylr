@@ -36,3 +36,21 @@ func TestDecimalToFloat(t *testing.T) {
 		})
 	}
 }
+
+func TestParseDecimal(t *testing.T) {
+	for _, test := range []struct {
+		name  string
+		value string
+		want  float64
+	}{
+		{name: "decimal", value: "18.625", want: 18.625},
+		{name: "empty", value: "", want: 0},
+		{name: "malformed", value: "invalid", want: 0},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := ParseDecimal(test.value); got != test.want {
+				t.Errorf("ParseDecimal(%q) = %v, want %v", test.value, got, test.want)
+			}
+		})
+	}
+}

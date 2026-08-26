@@ -28,6 +28,12 @@ func DecimalToFloat(value any) float64 {
 	return parsed
 }
 
+// ParseDecimal parses the string representation used by non-POS DECIMAL
+// columns. Invalid or empty values retain the repository zero-value fallback.
+func ParseDecimal(value string) float64 {
+	return DecimalToFloat(value)
+}
+
 // FloatToDecimal formats a floating-point amount for a DECIMAL(…,2) database
 // column using the same two-place representation as the POS repositories.
 func FloatToDecimal(value float64) string {
