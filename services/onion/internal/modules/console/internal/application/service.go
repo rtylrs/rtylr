@@ -35,23 +35,21 @@ func consoleKey(detail string) string {
 }
 
 func invalidateConsoleScope(ctx context.Context) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, "cache:console:*")
-	}
+	cacher.InvalidateScope(ctx, "cache:console:*")
 }
 
 func invalidateOwnerSubscriptionScope(ctx context.Context, ownerID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.SubscriptionPrefix(ownerID))
-		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(ownerID))
-	}
+	cacher.InvalidateScope(ctx,
+		cacheKeys.SubscriptionPrefix(ownerID),
+		cacheKeys.UserPrefix(ownerID),
+	)
 }
 
 func invalidateBusinessAddonScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix("addons", businessID))
-		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(businessID))
-	}
+	cacher.InvalidateScope(ctx,
+		cacheKeys.ScopedPrefix("addons", businessID),
+		cacheKeys.BusinessPrefix(businessID),
+	)
 }
 
 type Service struct {

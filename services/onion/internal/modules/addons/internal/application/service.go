@@ -40,11 +40,11 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateAddonsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(addonsScope, businessID))
-		// Apps visibility depends on enabled addons.
-		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(businessID))
-	}
+	// Apps visibility depends on enabled addons.
+	cacher.InvalidateScope(ctx,
+		cacheKeys.ScopedPrefix(addonsScope, businessID),
+		cacheKeys.BusinessPrefix(businessID),
+	)
 }
 
 func isVisibleCatalogAddon(addonID string) bool {

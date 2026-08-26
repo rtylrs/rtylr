@@ -102,9 +102,7 @@ func featureSupportCacheOptions(ctx context.Context) []cacher.ClientOption {
 }
 
 func invalidateFeatureSupportCache(ctx context.Context) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(featureSupportCacheScope, 0))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(featureSupportCacheScope, 0))
 }
 
 func invalidateFeatureSupportCacheForOwner(ctx context.Context, ownerID int64) {
@@ -112,9 +110,7 @@ func invalidateFeatureSupportCacheForOwner(ctx context.Context, ownerID int64) {
 	if ownerID == 0 {
 		return
 	}
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(featureSupportCacheScope, ownerID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(featureSupportCacheScope, ownerID))
 }
 
 // bucketOf maps (salt, subject) to a stable bucket in [0,100). The salt mixes

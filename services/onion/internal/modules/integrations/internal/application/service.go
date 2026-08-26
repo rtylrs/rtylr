@@ -35,9 +35,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateIntegrationsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(integrationsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(integrationsScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Integration, error) {

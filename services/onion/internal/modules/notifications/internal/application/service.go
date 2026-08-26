@@ -57,10 +57,10 @@ func notificationsKey(businessID, userID int64, limit int32, cursorID *int64) st
 }
 
 func invalidateNotificationsScope(ctx context.Context, businessID, userID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(userID))
-		cache.DeleteByPattern(ctx, cacheKeys.Scoped("notifications", businessID, fmt.Sprintf("user:%d*", userID)))
-	}
+	cacher.InvalidateScope(ctx,
+		cacheKeys.UserPrefix(userID),
+		cacheKeys.Scoped("notifications", businessID, fmt.Sprintf("user:%d*", userID)),
+	)
 }
 
 func (s *Service) List(ctx context.Context, businessID, userID int64) ([]domain.Notification, error) {

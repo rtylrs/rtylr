@@ -50,9 +50,7 @@ const (
 )
 
 func invalidateWorkspacesScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(workspacesScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(workspacesScope, businessID))
 }
 
 // invalidateUserScope clears the per-user cache bucket, `cache:user:<id>:*`.
@@ -70,9 +68,7 @@ func invalidateUserScope(ctx context.Context, userID int64) {
 	if userID == 0 {
 		return
 	}
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(userID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.UserPrefix(userID))
 }
 
 // assigneeID flattens an optional assignee to a plain id, 0 meaning unassigned,

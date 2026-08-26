@@ -39,9 +39,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateLoyaltyScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(loyaltyScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(loyaltyScope, businessID))
 }
 
 type loyaltyTxResult struct {

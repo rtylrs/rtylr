@@ -35,12 +35,12 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateRolesScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(rolesScope, businessID))
-		// Role changes affect every user's effective permissions, so wipe
-		// the whole business scope (cached /me, team, etc.).
-		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(businessID))
-	}
+	// Role changes affect every user's effective permissions, so wipe
+	// the whole business scope (cached /me, team, etc.).
+	cacher.InvalidateScope(ctx,
+		cacheKeys.ScopedPrefix(rolesScope, businessID),
+		cacheKeys.BusinessPrefix(businessID),
+	)
 }
 
 func (s *Service) ListRoles(ctx context.Context, ownerID int64) ([]domain.Role, error) {
