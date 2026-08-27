@@ -135,7 +135,7 @@ func TestStoreOrders_Update_ChangesStatus(t *testing.T) {
 	}
 
 	if err := repo.Update(context.Background(), testutil.BusinessID, id, domain.StoreOrderInput{
-		Status: "shipped", Subtotal: 5.0, Total: 5.0,
+		Status: "confirmed", Subtotal: 5.0, Total: 5.0,
 	}); err != nil {
 		t.Fatalf("Update: %v", err)
 	}
@@ -144,8 +144,8 @@ func TestStoreOrders_Update_ChangesStatus(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetDetail after Update: %v", err)
 	}
-	if detail.Order.Status != "shipped" {
-		t.Errorf("expected status shipped, got %s", detail.Order.Status)
+	if detail.Order.Status != "confirmed" {
+		t.Errorf("expected status confirmed, got %s", detail.Order.Status)
 	}
 }
 
@@ -273,10 +273,10 @@ func TestStoreOrders_Create_CustomerNameStored(t *testing.T) {
 	}
 }
 
-func TestStoreOrders_Create_StatusIsStored(t *testing.T) {
+func TestStoreOrders_Create_StatusStartsPending(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	const want = "processing"
+	const want = "pending"
 	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.BusinessID, domain.StoreOrderInput{
 		Status: want, Total: 8.0,
 	})
@@ -373,7 +373,7 @@ func TestStoreOrders_Update_NoError(t *testing.T) {
 	}
 
 	err = repo.Update(context.Background(), testutil.BusinessID, id, domain.StoreOrderInput{
-		Status: "completed", Total: 3.0,
+		Status: "confirmed", Total: 3.0,
 	})
 	if err != nil {
 		t.Fatalf("Update: %v", err)
