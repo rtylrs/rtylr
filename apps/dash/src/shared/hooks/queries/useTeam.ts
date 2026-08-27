@@ -9,13 +9,21 @@ import type {
   StaffUserPayload,
   StaffUserWithGroups,
 } from '@voxire/voxie/hub/team/members/v1/types';
+import type { AppRoleAssignment as ApiAppRoleAssignment } from '@voxire/voxie/hub/user/v1/types';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import i18next from 'i18next';
+import { parseEffectiveAccess } from '@voxire/auth';
+import type { EffectiveAccess } from '@voxire/types';
 import { teamMemberSchema } from '../../schemas/team';
 
-export type { TeamMember } from '../../schemas/team';
-type TeamMember = z.infer<typeof teamMemberSchema> & { status: string };
+export type TeamMember = z.infer<typeof teamMemberSchema> & {
+  status: string;
+  dashRole?: string;
+  appAssignments?: ApiAppRoleAssignment[];
+  effectiveAccess?: EffectiveAccess;
+  groupIds?: number[];
+};
 
 const membersClient = createOneKitClient(MembersServiceClient, 'dash');
 const permissionsClient = createOneKitClient(PermissionsServiceClient, 'dash');
@@ -36,6 +44,7 @@ export interface TeamListResult {
 
 function fromApiMember(u: StaffUserPayload | StaffUserWithGroups): TeamMember {
   const email = u.email ?? '';
+  const effectiveAccess = parseEffectiveAccess(u.effectiveAccess);
   return {
     id: u.id ?? '',
     fullName: u.fullName,
@@ -45,6 +54,9 @@ function fromApiMember(u: StaffUserPayload | StaffUserWithGroups): TeamMember {
     apps: u.apps ?? [],
     isActive: u.isActive ?? false,
     status: u.isActive ? 'active' : 'inactive',
+    dashRole: u.dashRole ?? effectiveAccess?.dashRole ?? undefined,
+    appAssignments: u.appAssignments,
+    effectiveAccess: effectiveAccess ?? undefined,
     createdAt: u.createdAt ?? '',
     groups:
       'groups' in u
@@ -122,7 +134,12 @@ interface InviteMemberPayload {
   role: TeamMember['role'];
   apps: string[];
   groupId?: number;
-  password?: string;
+  username?: string;
+  temporaryPassword?: string;
+  dashRole?: string;
+  appAssignments?: ApiAppRoleAssignment[];
+  groupIds?: number[];
+  provisioningMode?: 'invitation' | 'direct_credentials';
 }
 
 export const useInviteMember = () => {
@@ -134,8 +151,13 @@ export const useInviteMember = () => {
         fullName: payload.fullName,
         role: payload.role,
         apps: payload.apps,
-        ...(payload.groupId ? { groupId: String(payload.groupId) } : {}),
-        ...(payload.password ? { password: payload.password } : {}),
+        ...(payload.dashRole ? { dashRole: payload.dashRole } : {}),
+        ...(payload.appAssignments ? { appAssignments: payload.appAssignments } : {}),
+        ...(payload.groupIds ? { groupIds: payload.groupIds.map(String) } : {}),
+        ...(payload.provisioningMode ? { provisioningMode: payload.provisioningMode } : {}),
+        ...(payload.groupId ? { groupIds: [String(payload.groupId)] } : {}),
+        ...(payload.username ? { username: payload.username } : {}),
+        ...(payload.temporaryPassword ? { temporaryPassword: payload.temporaryPassword } : {}),
       });
     },
     onSuccess: () => {
@@ -161,6 +183,9 @@ export const useUpdateMember = () => {
         ...(patch.fullName || patch.name ? { fullName: patch.fullName ?? patch.name } : {}),
         apps: patch.apps ?? [],
         role: patch.role ?? 'staff',
+        ...(patch.dashRole ? { dashRole: patch.dashRole } : {}),
+        ...(patch.appAssignments ? { appAssignments: patch.appAssignments } : {}),
+        ...(patch.groupIds ? { groupIds: patch.groupIds.map(String) } : {}),
       });
     },
     onSuccess: (_data, { id, patch }) => {

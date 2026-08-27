@@ -39,7 +39,7 @@ import {
   computeSeatProration,
 } from '../../shared/hooks/queries/useSubscription';
 import { useGroups, useAddGroupMembers } from '../../shared/hooks/queries/useGroups';
-import { isAddonEnabled, useAddons } from '../../shared/hooks/queries/useAddons';
+import { legacyRoleToDashRole } from './authorizationDraft';
 
 const APP_ICONS: Record<
   string,
@@ -77,8 +77,6 @@ const Team: React.FC = (): React.JSX.Element => {
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [confirm, setConfirm] = useState<TeamMember | null>(null);
   const { data: sub } = useMySubscription();
-  const { data: addonsData = [] } = useAddons();
-  const menuAddonEnabled = isAddonEnabled(addonsData, 'menu');
 
   const [menuOpen, setMenuOpen] = useState<string | null>(null);
 
@@ -100,7 +98,8 @@ const Team: React.FC = (): React.JSX.Element => {
         !query.trim() ||
         (m.name || '').toLowerCase().includes(query.toLowerCase()) ||
         (m.email || '').toLowerCase().includes(query.toLowerCase());
-      const matchesRole = roleFilter === 'all' || m.role === roleFilter;
+      const matchesRole =
+        roleFilter === 'all' || (m.dashRole ?? legacyRoleToDashRole(m.role)) === roleFilter;
       return matchesQuery && matchesRole;
     });
   }, [members, query, roleFilter]);
@@ -278,10 +277,8 @@ const Team: React.FC = (): React.JSX.Element => {
             {[
               { id: 'all', label: 'All' },
               { id: 'admin', label: 'Admin' },
-              { id: 'operator', label: 'Operator' },
-              { id: 'billing', label: 'Billing' },
-              ...(menuAddonEnabled ? [{ id: 'menu_manager', label: 'Menu' }] : []),
-              { id: 'staff', label: 'Staff' },
+              { id: 'manager', label: 'Manager' },
+              { id: 'member', label: 'Member' },
               { id: 'viewer', label: 'Viewer' },
             ].map((r) => (
               <button
@@ -408,7 +405,7 @@ const Team: React.FC = (): React.JSX.Element => {
 
                         {/* Role */}
                         <div className="col-span-2">
-                          <RoleBadge role={m.role} />
+                          <RoleBadge role={m.dashRole ?? legacyRoleToDashRole(m.role)} />
                         </div>
 
                         {/* App licenses */}

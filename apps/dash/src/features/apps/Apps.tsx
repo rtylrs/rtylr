@@ -27,8 +27,15 @@ const Apps: React.FC = () => {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string>('all');
 
-  const userApps: string[] = user?.apps ?? [];
-  const isOwner = user?.role === 'owner' || user?.role === 'admin';
+  const userApps: string[] =
+    user?.effectiveAccess?.apps
+      .filter((app) => app.licensed && app.hasAccess)
+      .map((app) => app.appId) ??
+    user?.apps ??
+    [];
+  const isOwner = user?.effectiveAccess
+    ? user.effectiveAccess.isOwner || user.effectiveAccess.isAdmin
+    : user?.role === 'owner' || user?.role === 'admin';
 
   const filtered = useMemo(() => {
     return apps

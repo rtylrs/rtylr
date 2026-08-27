@@ -98,7 +98,7 @@ describe('BusinessRoute', () => {
     });
   });
 
-  it('renders Outlet for a non-owner operator on an unscoped route (full route access)', async () => {
+  it('renders StaffView for a non-owner operator without normalized management access', async () => {
     mockGetMe.mockResolvedValue({
       id: 3,
       email: 'op@example.com',
@@ -112,7 +112,7 @@ describe('BusinessRoute', () => {
     render(<BusinessRoute />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('outlet')).toBeTruthy();
+      expect(screen.getByText(/Welcome/i)).toBeTruthy();
     });
   });
 

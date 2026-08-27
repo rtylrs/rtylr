@@ -15,6 +15,7 @@ const COLORS: Record<string, { bg: string; fg: string; border: string }> = {
   },
   admin: { bg: 'var(--accent-muted)', fg: 'var(--accent)', border: 'var(--accent-border)' },
   operator: { bg: 'rgba(139,92,246,0.14)', fg: 'var(--app-crm)', border: 'rgba(139,92,246,0.3)' },
+  manager: { bg: 'rgba(139,92,246,0.14)', fg: 'var(--app-crm)', border: 'rgba(139,92,246,0.3)' },
   billing: {
     bg: 'var(--status-trial-bg)',
     fg: 'var(--status-trial)',
@@ -31,6 +32,11 @@ const COLORS: Record<string, { bg: string; fg: string; border: string }> = {
     border: 'color-mix(in srgb, var(--app-pos) 30%, transparent)',
   },
   staff: {
+    bg: 'var(--status-active-bg)',
+    fg: 'var(--status-active)',
+    border: 'var(--status-active-bg)',
+  },
+  member: {
     bg: 'var(--status-active-bg)',
     fg: 'var(--status-active)',
     border: 'var(--status-active-bg)',

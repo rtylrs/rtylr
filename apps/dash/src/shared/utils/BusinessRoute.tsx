@@ -1,7 +1,9 @@
 import { Outlet, useRouterState } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { APP_URLS, getAvatarUrl, resolveAuthUrl } from '@voxire/config';
 import { signOut } from '@voxire/auth';
+import { parseEffectiveAccess } from '@voxire/auth';
 import CreateBusinessOnboarding from '../../features/onboarding/CreateBusinessOnboarding';
 import {
   MonitorSpeaker,
@@ -106,7 +108,12 @@ const ROLE_SCOPED_PATHS: Record<string, string[]> = {
 };
 
 function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
-  const userApps: string[] = user?.apps ?? [];
+  const userApps: string[] =
+    user.effectiveAccess?.apps
+      .filter((app) => app.licensed && app.hasAccess)
+      .map((app) => app.appId) ??
+    user.apps ??
+    [];
   const businessName = user?.businessName || '';
   const fullName = user?.fullName || user?.email || '';
   const [requested, setRequested] = useState<Set<string>>(new Set());
@@ -385,6 +392,38 @@ function StaffView({ user }: { user: StoredUser }): React.JSX.Element {
   );
 }
 
+function MFAAccessGate({ enrollmentRequired }: { enrollmentRequired: boolean }): React.JSX.Element {
+  const { t } = useTranslation('common');
+
+  return (
+    <div
+      className="flex min-h-screen items-center justify-center p-6"
+      style={{ background: 'var(--dash-bg)' }}
+    >
+      <main
+        className="w-full max-w-md rounded-2xl border p-6 text-center shadow-sm"
+        style={{ background: 'var(--dash-surface)', borderColor: 'var(--dash-border)' }}
+      >
+        <h1 className="text-xl font-semibold" style={{ color: 'var(--dash-text)' }}>
+          {enrollmentRequired ? t('mfaGate.enrollmentTitle') : t('mfaGate.verificationTitle')}
+        </h1>
+        <p className="mt-2 text-sm" style={{ color: 'var(--dash-text-muted)' }}>
+          {enrollmentRequired
+            ? t('mfaGate.enrollmentDescription')
+            : t('mfaGate.verificationDescription')}
+        </p>
+        <a
+          href="/security"
+          className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg px-4 text-sm font-semibold"
+          style={{ background: 'var(--accent)', color: 'var(--accent-contrast, #fff)' }}
+        >
+          {enrollmentRequired ? t('mfaGate.openSetup') : t('mfaGate.openVerification')}
+        </a>
+      </main>
+    </div>
+  );
+}
+
 function BusinessRoute(): React.JSX.Element | null {
   const token = getCookieToken();
   const { user, setUser, setToken } = useUserStore();
@@ -406,7 +445,24 @@ function BusinessRoute(): React.JSX.Element | null {
     userClient
       .getMe({})
       .then((res) => {
-        setUser(res as StoredUser);
+        const effectiveAccess = parseEffectiveAccess(res.effectiveAccess);
+        setUser({
+          ...res,
+          dashRole: res.dashRole ?? effectiveAccess?.dashRole ?? undefined,
+          effectiveAccess: effectiveAccess ?? undefined,
+          provisioningStatus: res.provisioningStatus
+            ? {
+                mode: res.provisioningStatus.mode ?? 'invitation',
+                state: res.provisioningStatus.state ?? 'pending_activation',
+                emailVerified: res.provisioningStatus.emailVerified ?? false,
+                passwordChangeRequired: res.provisioningStatus.passwordChangeRequired ?? false,
+                mfaRequired: res.provisioningStatus.mfaRequired ?? false,
+                mfaEnrolled: res.provisioningStatus.mfaEnrolled ?? false,
+                mfaVerified: res.provisioningStatus.mfaVerified ?? false,
+                recoveryAvailable: res.provisioningStatus.recoveryAvailable ?? false,
+              }
+            : undefined,
+        } as StoredUser);
         configClient
           .getConfig({})
           .then((configRes) => {
@@ -475,18 +531,31 @@ function BusinessRoute(): React.JSX.Element | null {
     return <CreateBusinessOnboarding />;
   }
 
-  // Non-owner staff without a management role, and without a path scoped to
-  // their role, see the app cards launcher. Everyone else reaches the route.
+  const provisioningStatus = user?.provisioningStatus;
+  if (
+    user &&
+    provisioningStatus?.mfaRequired &&
+    !provisioningStatus.mfaVerified &&
+    pathname !== '/security'
+  ) {
+    return <MFAAccessGate enrollmentRequired={!provisioningStatus.mfaEnrolled} />;
+  }
+
+  // The normalized access document is authoritative when present. Legacy role
+  // routing remains only for the migration window when the server did not send
+  // that document.
   const role = (user?.role ?? '').toLowerCase();
-  // 'operator' (not the never-assigned 'manager') gets full route access,
-  // same as admin: its stated scope ("day-to-day operations across assigned
-  // apps") includes hub:team and hub:activity per matrix.ts, wider than any
-  // single path group below.
-  // store_manager is intentionally excluded: its elevated powers are
-  // POS-location-scoped (see the store_manager comment in matrix.ts), not
-  // global to Dash, so it falls through to the same launcher as staff/viewer.
-  const hasManagementRole = ['admin', 'operator'].includes(role);
-  const staffAllowedPaths = ['/settings/account', ...(ROLE_SCOPED_PATHS[role] ?? [])];
+  const hasManagementRole = user?.effectiveAccess
+    ? user.effectiveAccess.dashPermissions.some(
+        (permission) =>
+          permission === 'hub:team:edit' ||
+          permission === 'hub:roles:view' ||
+          permission === 'hub:licenses:manage'
+      )
+    : role === 'admin';
+  const staffAllowedPaths = user?.effectiveAccess
+    ? ['/settings/account']
+    : ['/settings/account', ...(ROLE_SCOPED_PATHS[role] ?? [])];
 
   if (
     user &&

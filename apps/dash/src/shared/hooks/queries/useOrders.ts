@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { unwrap } from '@voxire/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { safe } from '../../lib/api';
+import { rest } from '../../lib/clients';
 import { dashOrderSchema } from '../../schemas/orders';
 
 export type { HubOrder } from '../../schemas/orders';
@@ -25,7 +25,7 @@ export const useOrders = (params: UseOrdersParams = {}) => {
       if (status && status !== 'all') {
         searchParams.set('status', status);
       }
-      const res = await unwrap(safe.get(`/pos/orders/v1/orders?${searchParams.toString()}`));
+      const res = await unwrap(rest.get(`/pos/orders/v1/orders?${searchParams.toString()}`));
       const raw = res?.orders ?? res;
       return z.array(dashOrderSchema).parse(Array.isArray(raw) ? raw : []);
     },
@@ -37,7 +37,7 @@ export const useUpdateOrderStatus = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      return unwrap(safe.put(`/pos/orders/v1/orders/${id}/status`, { status }));
+      return unwrap(rest.put(`/pos/orders/v1/orders/${id}/status`, { status }));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dash-orders'] });

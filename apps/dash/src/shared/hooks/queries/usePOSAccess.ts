@@ -110,12 +110,3 @@ export const useMemberLocations = (userId: string | number | undefined, enabled:
     enabled: enabled && !!userId,
     staleTime: 30_000,
   });
-
-// store_manager manages its assigned locations; everyone else gets plain access.
-// The backend re-derives capabilities, so this only seeds the management flags.
-export const locationFlagsForRole = (
-  role: string
-): { canManagePosUsers: boolean; canManageTerminals: boolean; canViewReports: boolean } =>
-  role === 'store_manager'
-    ? { canManagePosUsers: true, canManageTerminals: true, canViewReports: true }
-    : { canManagePosUsers: false, canManageTerminals: false, canViewReports: false };

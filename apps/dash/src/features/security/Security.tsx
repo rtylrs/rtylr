@@ -1,16 +1,8 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { HelmetContainer } from '@voxire/components';
-import {
-  Shield,
-  Smartphone,
-  Laptop,
-  LogOut,
-  CheckCircle2,
-  QrCode,
-  Key,
-  Copy,
-  Check,
-} from 'lucide-react';
+import { QRCode } from 'react-qrcode-logo';
+import { Shield, Smartphone, Laptop, LogOut, CheckCircle2, Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Button,
@@ -31,9 +23,14 @@ import {
 import {
   useSecurity,
   useToggleTwoFactor,
+  useBeginMFAEnrollment,
+  useCompleteMFAEnrollment,
+  useVerifyMFA,
+  useMFARecoveryCode,
   useRevokeSession,
   type Session,
 } from '../../shared/hooks/queries/useSecurity';
+import { useUserStore } from '../../shared/stores/userStore';
 
 function formatRelative(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -89,30 +86,55 @@ const SessionRow: React.FC<{ session: Session; onRevoke: (id: string) => void }>
 };
 
 const Security: React.FC = () => {
+  const { t } = useTranslation('common');
   const { data, isLoading } = useSecurity();
+  const currentUser = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
   const toggle2fa = useToggleTwoFactor();
+  const beginMFA = useBeginMFAEnrollment();
+  const completeMFA = useCompleteMFAEnrollment();
+  const verifyMFA = useVerifyMFA();
+  const recoveryMFA = useMFARecoveryCode();
   const revoke = useRevokeSession();
 
   const [setupModalOpen, setSetupModalOpen] = useState(false);
   const [disableConfirmOpen, setDisableConfirmOpen] = useState(false);
+  const [recoveryModalOpen, setRecoveryModalOpen] = useState(false);
   const [step, setStep] = useState<'qr' | 'verify' | 'backup'>('qr');
   const [verificationCode, setVerificationCode] = useState('');
+  const [challengeCode, setChallengeCode] = useState('');
+  const [recoveryCode, setRecoveryCode] = useState('');
+  const [enrollment, setEnrollment] = useState<{
+    secret: string;
+    otpauthUri: string;
+  } | null>(null);
+  const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
   const [copiedSecret, setCopiedSecret] = useState(false);
+  const mfaEnabled = data?.mfaEnrolled || data?.twoFactorEnabled;
+  const needsMFAChallenge =
+    data?.mfaRequired && data.mfaEnrolled && currentUser?.provisioningStatus?.mfaVerified !== true;
 
-  const sampleSecret = 'JBSWY3DPEHPK3PXP';
-  const sampleBackupCodes = [
-    'a1b2-c3d4-e5f6',
-    'f6e5-d4c3-b2a1',
-    '9876-5432-10fe',
-    'fe01-2345-6789',
-    '4321-8765-dcba',
-    'abcd-1234-ef56',
-  ];
+  const markMFAVerified = (enrolled = true) => {
+    if (!currentUser) return;
+    setUser({
+      ...currentUser,
+      provisioningStatus: currentUser.provisioningStatus
+        ? { ...currentUser.provisioningStatus, mfaEnrolled: enrolled, mfaVerified: true }
+        : undefined,
+    });
+  };
 
-  const handleStartEnable = () => {
+  const handleStartEnable = async () => {
     setStep('qr');
     setVerificationCode('');
-    setSetupModalOpen(true);
+    setRecoveryCodes([]);
+    try {
+      const nextEnrollment = await beginMFA.mutateAsync();
+      setEnrollment(nextEnrollment);
+      setSetupModalOpen(true);
+    } catch {
+      toast.error('Failed to start MFA enrollment.');
+    }
   };
 
   const handleVerifyCode = async () => {
@@ -121,11 +143,13 @@ const Security: React.FC = () => {
       return;
     }
     try {
-      await toggle2fa.mutateAsync(true);
+      const codes = await completeMFA.mutateAsync(verificationCode);
+      setRecoveryCodes(codes);
       setStep('backup');
-      toast.success('2FA verified and enabled successfully!');
+      markMFAVerified();
+      toast.success('MFA verified and enabled successfully.');
     } catch {
-      toast.error('Failed to enable 2FA.');
+      toast.error('The MFA code is invalid or enrollment has expired.');
     }
   };
 
@@ -140,6 +164,37 @@ const Security: React.FC = () => {
       toast.success('2FA disabled');
     } catch {
       toast.error('Failed to disable 2FA');
+    }
+  };
+
+  const handleRecoveryCode = async () => {
+    if (!recoveryCode.trim()) {
+      toast.error('Enter a recovery code.');
+      return;
+    }
+    try {
+      await recoveryMFA.mutateAsync(recoveryCode.trim());
+      setRecoveryCode('');
+      setRecoveryModalOpen(false);
+      markMFAVerified();
+      toast.success('Recovery code accepted for this session.');
+    } catch {
+      toast.error('The recovery code is invalid or has already been used.');
+    }
+  };
+
+  const handleMFAChallenge = async () => {
+    if (challengeCode.length !== 6) {
+      toast.error(t('mfaChallenge.invalidCode'));
+      return;
+    }
+    try {
+      await verifyMFA.mutateAsync(challengeCode);
+      setChallengeCode('');
+      markMFAVerified();
+      toast.success(t('mfaChallenge.verified'));
+    } catch {
+      toast.error(t('mfaChallenge.invalidCode'));
     }
   };
 
@@ -178,17 +233,17 @@ const Security: React.FC = () => {
           footer={
             <Button
               size="sm"
-              variant={data.twoFactorEnabled ? 'secondary' : 'default'}
+              variant={mfaEnabled ? 'secondary' : 'default'}
               onClick={() => {
-                if (data.twoFactorEnabled) {
+                if (mfaEnabled) {
                   setDisableConfirmOpen(true);
                 } else {
                   handleStartEnable();
                 }
               }}
-              disabled={toggle2fa.isPending}
+              disabled={toggle2fa.isPending || beginMFA.isPending}
             >
-              {data.twoFactorEnabled ? 'Disable 2FA' : 'Enable 2FA'}
+              {mfaEnabled ? 'Disable MFA' : 'Enable MFA'}
             </Button>
           }
         >
@@ -196,20 +251,18 @@ const Security: React.FC = () => {
             <div
               className="h-10 w-10 rounded-lg flex items-center justify-center"
               style={{
-                background: data.twoFactorEnabled
-                  ? 'rgba(16,185,129,0.15)'
-                  : 'rgba(239,68,68,0.15)',
+                background: mfaEnabled ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
               }}
             >
-              <Shield size={16} style={{ color: data.twoFactorEnabled ? '#10b981' : '#ef4444' }} />
+              <Shield size={16} style={{ color: mfaEnabled ? '#10b981' : '#ef4444' }} />
             </div>
             <div>
               <p className="text-sm font-semibold" style={{ color: 'var(--dash-text)' }}>
-                {data.twoFactorEnabled ? 'Enabled' : 'Not enabled'}
+                {mfaEnabled ? 'Enabled' : 'Not enabled'}
               </p>
               <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
-                {data.twoFactorEnabled
-                  ? `Using ${data.twoFactorMethod === 'sms' ? 'SMS codes' : 'authenticator app'}`
+                {mfaEnabled
+                  ? 'Using an authenticator app with one-time recovery codes'
                   : 'Protect your account against password theft.'}
               </p>
             </div>
@@ -236,9 +289,15 @@ const Security: React.FC = () => {
                   className="flex flex-col items-center justify-center p-6 border rounded-xl"
                   style={{ background: 'var(--dash-bg)', borderColor: 'var(--dash-border)' }}
                 >
-                  <div className="h-36 w-36 bg-white p-2 rounded-lg flex items-center justify-center shadow-sm">
-                    <QrCode size={120} className="text-black" />
-                  </div>
+                  {enrollment?.otpauthUri ? (
+                    <QRCode value={enrollment.otpauthUri} size={176} quietZone={8} />
+                  ) : (
+                    <div className="h-36 w-36 flex items-center justify-center">
+                      <span className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+                        Preparing secure enrollment…
+                      </span>
+                    </div>
+                  )}
                   <p className="text-xs mt-3 font-medium" style={{ color: 'var(--dash-text-dim)' }}>
                     Scan QR code with your authenticator app
                   </p>
@@ -254,7 +313,7 @@ const Security: React.FC = () => {
                   <div className="flex gap-2">
                     <Input
                       id="totp-secret"
-                      value={sampleSecret}
+                      value={enrollment?.secret ?? ''}
                       readOnly
                       className="font-mono text-xs"
                     />
@@ -262,7 +321,7 @@ const Security: React.FC = () => {
                       size="sm"
                       variant="outline"
                       onClick={() => {
-                        navigator.clipboard.writeText(sampleSecret);
+                        if (enrollment?.secret) navigator.clipboard.writeText(enrollment.secret);
                         setCopiedSecret(true);
                         setTimeout(() => setCopiedSecret(false), 2000);
                       }}
@@ -302,7 +361,7 @@ const Security: React.FC = () => {
                   className="grid grid-cols-2 gap-2 p-3 border rounded-xl font-mono text-xs text-center"
                   style={{ background: 'var(--dash-bg)', borderColor: 'var(--dash-border)' }}
                 >
-                  {sampleBackupCodes.map((code) => (
+                  {recoveryCodes.map((code) => (
                     <div
                       key={code}
                       className="p-1.5 rounded"
@@ -324,12 +383,90 @@ const Security: React.FC = () => {
                   <Button variant="outline" onClick={() => setStep('qr')}>
                     Back
                   </Button>
-                  <Button onClick={handleVerifyCode} disabled={toggle2fa.isPending}>
-                    {toggle2fa.isPending ? 'Verifying...' : 'Verify & Enable'}
+                  <Button onClick={handleVerifyCode} disabled={completeMFA.isPending}>
+                    {completeMFA.isPending ? 'Verifying...' : 'Verify & Enable'}
                   </Button>
                 </div>
               )}
               {step === 'backup' && <Button onClick={handleFinishSetup}>Done</Button>}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {needsMFAChallenge && (
+          <SettingSection
+            title={t('mfaChallenge.title')}
+            description={t('mfaChallenge.description')}
+            footer={
+              <Button size="sm" onClick={handleMFAChallenge} disabled={verifyMFA.isPending}>
+                {verifyMFA.isPending ? t('mfaChallenge.verifying') : t('mfaChallenge.verify')}
+              </Button>
+            }
+          >
+            <label
+              htmlFor="mfa-challenge-code"
+              className="text-xs font-semibold"
+              style={{ color: 'var(--dash-text-muted)' }}
+            >
+              {t('mfaChallenge.codeLabel')}
+            </label>
+            <Input
+              id="mfa-challenge-code"
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              placeholder={t('mfaChallenge.codePlaceholder')}
+              value={challengeCode}
+              onChange={(event) => setChallengeCode(event.target.value.replace(/\D/g, ''))}
+              className="mt-2 font-mono text-center tracking-widest text-lg"
+              autoFocus
+            />
+          </SettingSection>
+        )}
+
+        {mfaEnabled && (
+          <SettingSection
+            title="Recovery codes"
+            description="Use one single-use code when your authenticator is unavailable."
+            footer={
+              <Button size="sm" variant="secondary" onClick={() => setRecoveryModalOpen(true)}>
+                Use recovery code
+              </Button>
+            }
+          >
+            <p className="text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+              Each code can be used once and is invalidated immediately after use.
+            </p>
+          </SettingSection>
+        )}
+
+        <Dialog open={recoveryModalOpen} onOpenChange={setRecoveryModalOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Use a recovery code</DialogTitle>
+              <DialogDescription>
+                Enter one of the single-use recovery codes saved during MFA enrollment.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-3">
+              <label htmlFor="mfa-recovery-code" className="text-xs font-semibold">
+                Recovery code
+              </label>
+              <Input
+                id="mfa-recovery-code"
+                value={recoveryCode}
+                onChange={(event) => setRecoveryCode(event.target.value)}
+                autoFocus
+                className="mt-2 font-mono"
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setRecoveryModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleRecoveryCode} disabled={recoveryMFA.isPending}>
+                {recoveryMFA.isPending ? 'Verifying...' : 'Verify code'}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

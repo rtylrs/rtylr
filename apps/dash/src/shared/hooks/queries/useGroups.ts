@@ -8,6 +8,7 @@ import type {
   Group as ApiGroup,
   GroupDetail as ApiGroupDetail,
 } from '@voxire/voxie/hub/team/groups/v1/types';
+import type { AppRoleAssignment } from '@voxire/voxie/hub/user/v1/types';
 
 const invitationsClient = createOneKitClient(InvitationsServiceClient, 'dash');
 
@@ -247,7 +248,15 @@ export const useBulkInvite = (): ReturnType<
   typeof useMutation<
     { results: BulkResult[]; message: string },
     Error,
-    { emails: string[]; role: string; apps: string[]; groupId?: number }
+    {
+      emails: string[];
+      role: string;
+      apps: string[];
+      groupId?: number;
+      dashRole?: string;
+      appAssignments?: AppRoleAssignment[];
+      groupIds?: number[];
+    }
   >
 > => {
   const qc = useQueryClient();
@@ -257,11 +266,17 @@ export const useBulkInvite = (): ReturnType<
       role: string;
       apps: string[];
       groupId?: number;
+      dashRole?: string;
+      appAssignments?: AppRoleAssignment[];
+      groupIds?: number[];
     }) => {
       const res = await invitationsClient.bulkInvite({
         emails: payload.emails,
         role: payload.role,
         apps: payload.apps,
+        ...(payload.dashRole ? { dashRole: payload.dashRole } : {}),
+        ...(payload.appAssignments ? { appAssignments: payload.appAssignments } : {}),
+        ...(payload.groupIds ? { groupIds: payload.groupIds.map(String) } : {}),
         ...(payload.groupId ? { groupId: String(payload.groupId) } : {}),
       });
       return {
