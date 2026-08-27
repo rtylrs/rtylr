@@ -16,14 +16,15 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   // Real dev servers are flakier than jsdom - two retries covers the
   // common "port warmed up mid-test" race without masking real bugs.
   retries: process.env.CI ? 2 : 0,
-  // Single worker in CI because all specs share the same dev servers
-  // and port contention is worse than sequential runtime.
-  workers: process.env.CI ? 1 : undefined,
+  // All specs share the same dev servers, so a single worker is required for
+  // deterministic release-gate runs. Parallel workers tear down a server
+  // while another spec is still using its port.
+  workers: 1,
   reporter: process.env.CI ? 'github' : 'html',
   // 60s ceiling is generous - a slow dev server boot can eat 20s by
   // itself, and a spec that visits 3 pages with hydration each needs
@@ -64,6 +65,16 @@ export default defineConfig({
           : {}),
       },
     },
+    {
+      name: 'chromium-390',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 390, height: 844 },
+        ...(process.env.PLAYWRIGHT_CHROMIUM_PATH
+          ? { launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH } }
+          : {}),
+      },
+    },
   ],
 
   webServer: [
@@ -78,6 +89,7 @@ export default defineConfig({
     {
       command: 'pnpm --filter @rtylr/erp dev',
       url: 'http://localhost:5179',
+      env: { VITE_API_URL: 'http://localhost:9999/' },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
@@ -86,6 +98,7 @@ export default defineConfig({
     {
       command: 'pnpm --filter @rtylr/finance dev',
       url: 'http://localhost:5182',
+      env: { VITE_API_URL: 'https://api.voxire.com/' },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
@@ -94,6 +107,7 @@ export default defineConfig({
     {
       command: 'pnpm --filter @rtylr/crm dev',
       url: 'http://localhost:5181',
+      env: { VITE_API_URL: 'http://localhost:9999/' },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
@@ -102,6 +116,7 @@ export default defineConfig({
     {
       command: 'pnpm --filter @rtylr/auth dev',
       url: 'http://localhost:5176',
+      env: { VITE_API_URL: 'http://localhost:9999/' },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
@@ -110,6 +125,7 @@ export default defineConfig({
     {
       command: 'pnpm --filter dash dev',
       url: 'http://localhost:5175',
+      env: { VITE_API_URL: 'http://localhost:9999/' },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
@@ -126,6 +142,7 @@ export default defineConfig({
     {
       command: 'pnpm --filter @rtylr/hr dev',
       url: 'http://localhost:5180',
+      env: { VITE_API_URL: 'http://localhost:9999/' },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
@@ -148,6 +165,7 @@ export default defineConfig({
     {
       command: 'pnpm --filter @rtylr/insights dev',
       url: 'http://localhost:5187',
+      env: { VITE_API_URL: 'http://localhost:9999/' },
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
       stdout: 'pipe',
