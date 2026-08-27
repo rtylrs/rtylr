@@ -180,7 +180,7 @@ func (a *DiscountAPI) DiscountOrder(ctx context.Context, req *posordersdiscounts
 		return nil, orderAPIStatusError(http.StatusBadRequest, "Discount value must be positive")
 	}
 
-	if err := a.Service.ApplyDiscount(ctx, businessID, domain.DiscountInput{
+	if err := a.Service.ApplyDiscount(ctx, businessID, user.UserID, domain.DiscountInput{
 		OrderID:       orderID,
 		DiscountType:  req.GetDiscountType(),
 		DiscountValue: req.GetDiscountValue(),
@@ -188,6 +188,15 @@ func (a *DiscountAPI) DiscountOrder(ctx context.Context, req *posordersdiscounts
 	}); err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return nil, orderAPIStatusError(http.StatusNotFound, "Order not found")
+		}
+		if errors.Is(err, domain.ErrOrderCannotBeDiscounted) {
+			return nil, orderAPIStatusError(http.StatusConflict, "Paid or refunded orders cannot be discounted")
+		}
+		if errors.Is(err, domain.ErrDiscountNotAllowed) {
+			return nil, orderAPIStatusError(http.StatusForbidden, "You cannot apply discounts")
+		}
+		if errors.Is(err, domain.ErrDiscountExceedsLimit) {
+			return nil, orderAPIStatusError(http.StatusBadRequest, "Discount exceeds your allowed limit")
 		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to apply discount")
 	}

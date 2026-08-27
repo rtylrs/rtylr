@@ -36,3 +36,13 @@ func ValidateBillInput(input BillInput) error {
 
 	return nil
 }
+
+// ValidateBillCreateInput requires every new bill to enter the workflow as
+// pending. Overdue is assigned by aging workflows, and paid must follow a
+// payment transition.
+func ValidateBillCreateInput(input BillInput) error {
+	if input.Status != "" && input.Status != "pending" {
+		return fmt.Errorf("new bills must start with pending status")
+	}
+	return ValidateBillInput(input)
+}

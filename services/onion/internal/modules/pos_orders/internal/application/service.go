@@ -395,11 +395,11 @@ func (s *Service) SplitOrder(ctx context.Context, ownerID, orderID int64, splits
 	return ids, nil
 }
 
-func (s *Service) ApplyDiscount(ctx context.Context, ownerID int64, input domain.DiscountInput) error {
+func (s *Service) ApplyDiscount(ctx context.Context, ownerID, staffID int64, input domain.DiscountInput) error {
 	if err := domain.ValidateDiscountInput(input); err != nil {
 		return err
 	}
-	if err := s.repo.ApplyDiscount(ctx, ownerID, input); err != nil {
+	if err := s.repo.ApplyDiscount(ctx, ownerID, staffID, input); err != nil {
 		return err
 	}
 	invalidateOrderScope(ctx, ownerID)

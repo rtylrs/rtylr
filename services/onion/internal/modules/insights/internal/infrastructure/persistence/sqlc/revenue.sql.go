@@ -34,6 +34,7 @@ type GetRevenueSeriesRow struct {
 	Amount interface{}  `db:"amount" json:"amount"`
 }
 
+// cross-schema read from finance — build the paid-invoice revenue series.
 func (q *Queries) GetRevenueSeries(ctx context.Context, arg GetRevenueSeriesParams) ([]GetRevenueSeriesRow, error) {
 	rows, err := q.db.QueryContext(ctx, getRevenueSeries, arg.BusinessID, arg.ReportingDate, arg.ReportingDate_2)
 	if err != nil {
@@ -72,6 +73,7 @@ type SumFinanceRevenueMTDParams struct {
 	ReportingDate_2 sql.NullTime `db:"reporting_date_2" json:"reporting_date_2"`
 }
 
+// cross-schema read from finance — calculate month-to-date invoice revenue.
 func (q *Queries) SumFinanceRevenueMTD(ctx context.Context, arg SumFinanceRevenueMTDParams) (interface{}, error) {
 	row := q.db.QueryRowContext(ctx, sumFinanceRevenueMTD, arg.BusinessID, arg.ReportingDate, arg.ReportingDate_2)
 	var total interface{}
@@ -81,21 +83,27 @@ func (q *Queries) SumFinanceRevenueMTD(ctx context.Context, arg SumFinanceRevenu
 
 const sumPosRevenueMTD = `-- name: SumPosRevenueMTD :one
 SELECT COALESCE(SUM(total), 0) AS total
-FROM pos_orders
-WHERE business_id = ?
-  AND payment_status = 'paid'
-  AND created_at >= ?
-  AND created_at <= ?
+FROM (
+    SELECT GREATEST(o.total - COALESCE(SUM(r.amount), 0), 0) AS total
+    FROM pos_orders o
+    LEFT JOIN pos_refunds r ON r.order_id = o.id AND r.business_id = o.business_id
+    WHERE o.business_id = ?
+      AND o.payment_status IN ('paid', 'refunded')
+      AND o.paid_at >= ?
+      AND o.paid_at <= ?
+    GROUP BY o.id, o.total
+) AS net_pos_orders
 `
 
 type SumPosRevenueMTDParams struct {
-	BusinessID  int64        `db:"business_id" json:"business_id"`
-	CreatedAt   sql.NullTime `db:"created_at" json:"created_at"`
-	CreatedAt_2 sql.NullTime `db:"created_at_2" json:"created_at_2"`
+	BusinessID int64        `db:"business_id" json:"business_id"`
+	PaidAt     sql.NullTime `db:"paid_at" json:"paid_at"`
+	PaidAt_2   sql.NullTime `db:"paid_at_2" json:"paid_at_2"`
 }
 
+// cross-schema read from pos — calculate net POS revenue after refunds.
 func (q *Queries) SumPosRevenueMTD(ctx context.Context, arg SumPosRevenueMTDParams) (interface{}, error) {
-	row := q.db.QueryRowContext(ctx, sumPosRevenueMTD, arg.BusinessID, arg.CreatedAt, arg.CreatedAt_2)
+	row := q.db.QueryRowContext(ctx, sumPosRevenueMTD, arg.BusinessID, arg.PaidAt, arg.PaidAt_2)
 	var total interface{}
 	err := row.Scan(&total)
 	return total, err

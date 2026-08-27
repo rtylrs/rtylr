@@ -2,12 +2,47 @@ package infrastructure_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/domain"
 	"github.com/voxire/onion/internal/modules/booking_appointments/internal/infrastructure"
 	"github.com/voxire/onion/internal/testutil"
 )
+
+func TestCreateAppointment_RejectsOverlappingResource(t *testing.T) {
+	db := testutil.OpenDB(t)
+	repo := infrastructure.NewRepository(db)
+	ctx := context.Background()
+	result, err := db.ExecContext(ctx, `
+INSERT INTO booking_resources (owner_id, business_id, name, type, capacity, is_active)
+VALUES (?, ?, 'Overlap Test Room', 'room', 1, TRUE)`, testutil.OwnerID, testutil.BusinessID)
+	if err != nil {
+		t.Fatalf("create resource: %v", err)
+	}
+	resourceID, err := result.LastInsertId()
+	if err != nil {
+		t.Fatalf("resource id: %v", err)
+	}
+	var firstID int64
+	t.Cleanup(func() {
+		if firstID != 0 {
+			_, _ = db.ExecContext(context.Background(), "DELETE FROM booking_appointments WHERE id = ?", firstID)
+		}
+		_, _ = db.ExecContext(context.Background(), "DELETE FROM booking_resources WHERE id = ?", resourceID)
+	})
+
+	input := baseAppointmentInput()
+	input.ResourceID = resourceID
+	firstID, err = repo.Create(ctx, testutil.BusinessID, input)
+	if err != nil {
+		t.Fatalf("create first appointment: %v", err)
+	}
+	_, err = repo.Create(ctx, testutil.BusinessID, input)
+	if !errors.Is(err, domain.ErrTimeSlotUnavailable) {
+		t.Fatalf("overlapping appointment error = %v, want ErrTimeSlotUnavailable", err)
+	}
+}
 
 const (
 	apptStartTime = "2026-06-01T09:00:00Z"

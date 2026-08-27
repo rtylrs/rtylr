@@ -52,6 +52,11 @@ type Project struct {
 	Code           string // e.g. "FLW" — used to build Task.Identifier ("FLW-42")
 }
 
+type ProjectTaskCounts struct {
+	Total int
+	Done  int
+}
+
 type ProjectMember struct {
 	ID        int64
 	ProjectID int64

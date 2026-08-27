@@ -22,7 +22,7 @@ import (
 // userFromRow maps the explicit columns selected by GetUserByEmail/GetUserByID
 // into a domain.User. Both queries select the same column set, so they share
 // this mapper.
-func userFromRow(id int64, email, passwordHash string, fullName, signupIP, deviceInfo sql.NullString, createdAt, updatedAt sql.NullTime, isConsoleAdmin bool, tokenEpoch int64) *domain.User {
+func userFromRow(id int64, businessID sql.NullInt64, email, passwordHash string, fullName, signupIP, deviceInfo sql.NullString, createdAt, updatedAt sql.NullTime, isConsoleAdmin, isBanned bool, tokenEpoch int64) *domain.User {
 	u := &domain.User{
 		ID:               id,
 		Email:            email,
@@ -30,7 +30,11 @@ func userFromRow(id int64, email, passwordHash string, fullName, signupIP, devic
 		FullName:         convert.ToString(fullName),
 		SignupDeviceInfo: convert.ToString(deviceInfo),
 		IsConsoleAdmin:   isConsoleAdmin,
+		IsBanned:         isBanned,
 		TokenEpoch:       tokenEpoch,
+	}
+	if businessID.Valid {
+		u.BusinessID = businessID.Int64
 	}
 	if signupIP.Valid {
 		u.SignupIPAddress = signupIP.String
@@ -89,10 +93,10 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*domain.
 	}
 
 	return userFromRow(
-		row.ID, row.Email, row.PasswordHash,
+		row.ID, row.BusinessID, row.Email, row.PasswordHash,
 		row.FullName, row.SignupIpAddress, row.SignupDeviceInfo,
 		row.CreatedAt, row.UpdatedAt,
-		row.IsConsoleAdmin,
+		row.IsConsoleAdmin, row.IsBanned,
 		row.TokenEpoch,
 	), nil
 }
@@ -215,12 +219,31 @@ func (r *Repository) GetUserByID(ctx context.Context, id int64) (*domain.User, e
 	}
 
 	return userFromRow(
-		row.ID, row.Email, row.PasswordHash,
+		row.ID, row.BusinessID, row.Email, row.PasswordHash,
 		row.FullName, row.SignupIpAddress, row.SignupDeviceInfo,
 		row.CreatedAt, row.UpdatedAt,
-		row.IsConsoleAdmin,
+		row.IsConsoleAdmin, row.IsBanned,
 		row.TokenEpoch,
 	), nil
+}
+
+// UserAccessState is intentionally read without the application cache so
+// deactivation and bans take effect across processes without waiting for a
+// profile-cache TTL.
+type UserAccessState struct {
+	HasPermissions  bool
+	HasActiveAccess bool
+}
+
+func (r *Repository) GetUserAccessState(ctx context.Context, userID int64) (UserAccessState, error) {
+	row, err := r.queries.GetUserAccessState(ctx, userID)
+	if err != nil {
+		return UserAccessState{}, err
+	}
+	return UserAccessState{
+		HasPermissions:  row.HasPermissions,
+		HasActiveAccess: row.HasActiveAccess.Valid && row.HasActiveAccess.Bool,
+	}, nil
 }
 
 func (r *Repository) UpdateUser(ctx context.Context, user *domain.User) error {

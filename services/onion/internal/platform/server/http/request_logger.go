@@ -75,7 +75,8 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 			// requests are blocked upstream by SecurityMiddleware and never reach here.
 			// Anonymous 401s (no token) are expected bot/scanner noise — skip them.
 			if slack.Enabled() && responseWriter.statusCode >= 400 &&
-				(responseWriter.statusCode != http.StatusUnauthorized || r.Header.Get("Authorization") != "") {
+				(responseWriter.statusCode != http.StatusUnauthorized || r.Header.Get("Authorization") != "") &&
+				rateLimiter.CanSend("request-logs") {
 				slack.Post(slack.Requests, fmt.Sprintf("`%d` %s %s · %s · %s",
 					responseWriter.statusCode, r.Method, r.URL.Path, getRemoteIP(r), duration.Round(time.Millisecond)))
 			}
@@ -103,11 +104,9 @@ func RequestLoggerMiddleware(ctx context.Context) func(next http.Handler) http.H
 					return
 				}
 
-				if rateLimiter.CanSend("request-logs") {
-					go func() {
-						logRequest(ctx, r, responseWriter.statusCode, duration, sanitizedBody, sanitizedHeaders, sanitizedQuery, serviceName, count)
-					}()
-				}
+				go func() {
+					logRequest(ctx, r, responseWriter.statusCode, duration, sanitizedBody, sanitizedHeaders, sanitizedQuery, serviceName, count)
+				}()
 			}()
 		})
 	}
@@ -325,6 +324,19 @@ var sensitiveFieldParts = []string{
 	"private_key",
 	"credential",
 	"cookie",
+	"pin",
+	"cvv",
+	"cvc",
+	"ssn",
+	"tax_id",
+	"national_id",
+	"otp",
+	"card_number",
+	"expiry",
+	"passwd",
+	"pwd",
+	"x-api-key",
+	"sessionid",
 }
 
 func sanitizeMap(data map[string][]string) map[string][]string {
@@ -351,7 +363,7 @@ func sanitizeJSON(body string) string {
 
 	var data json.RawMessage
 	if err := json.Unmarshal([]byte(body), &data); err != nil {
-		return body
+		return "[UNPARSEABLE JSON BODY REDACTED]"
 	}
 
 	data = sanitizeJSONValue(data)
@@ -438,7 +450,7 @@ func logRequest(ctx context.Context, r *http.Request, statusCode int, duration t
 	fields := []logger.Field{
 		logger.String("service", serviceName),
 		logger.String("method", r.Method),
-		logger.String("url", r.URL.String()),
+		logger.String("url", requestURLWithoutQuery(r)),
 		logger.Int("status", statusCode),
 		logger.String("duration", duration.String()),
 		logger.String("user_agent", truncateString(r.UserAgent(), 100)),
@@ -457,6 +469,16 @@ func logRequest(ctx context.Context, r *http.Request, statusCode int, duration t
 	}
 
 	logger.Ctx(ctx).Warn(message, fields...)
+}
+
+func requestURLWithoutQuery(r *http.Request) string {
+	if r == nil || r.URL == nil {
+		return ""
+	}
+	u := *r.URL
+	u.RawQuery = ""
+	u.ForceQuery = false
+	return u.String()
 }
 
 func routeParamsFromRequest(r *http.Request) []string {

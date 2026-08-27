@@ -195,6 +195,14 @@ func Subscription(ownerID int64) string {
 	return fmt.Sprintf("%ssubscription:%d", Namespace, ownerID)
 }
 
+// SubscriptionAccess is the short-lived entitlement decision used by the
+// request middleware. Keep it under the subscription prefix so billing and
+// console mutations invalidate it with the rest of the owner's subscription
+// state.
+func SubscriptionAccess(ownerID int64) string {
+	return fmt.Sprintf("%ssubscription:%d:access", Namespace, ownerID)
+}
+
 func SubscriptionPrefix(ownerID int64) string {
 	return fmt.Sprintf("%ssubscription:%d*", Namespace, ownerID)
 }

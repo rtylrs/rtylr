@@ -1,3 +1,4 @@
+-- cross-schema read from subscriptions + plans — load subscription and plan details for console administration.
 -- name: GetSubscriptionByID :one
 SELECT s.id, s.owner_id, COALESCE(u.full_name, '') AS owner_name, s.plan_id, p.name AS plan_name,
        s.status, s.seat_count, s.trial_ends_at, s.next_billing_date, s.current_period_ends_at,
@@ -11,6 +12,7 @@ WHERE s.id = ?
 ORDER BY s.id ASC
 LIMIT 1;
 
+-- cross-schema read from subscriptions + plans — load the owner's subscription and plan details.
 -- name: GetSubscriptionByOwner :one
 SELECT s.id, s.owner_id, COALESCE(u.full_name, '') AS owner_name, s.plan_id, p.name AS plan_name,
        s.status, s.seat_count, s.trial_ends_at, s.next_billing_date, s.current_period_ends_at,
@@ -24,6 +26,7 @@ WHERE s.owner_id = ?
 ORDER BY s.owner_id ASC
 LIMIT 1;
 
+-- cross-schema write to subscriptions — create or update console-managed subscription state.
 -- name: UpsertSubscription :exec
 INSERT INTO subscriptions (
     owner_id, plan_id, status, seat_count, trial_ends_at, next_billing_date,
@@ -40,6 +43,7 @@ ON DUPLICATE KEY UPDATE
     paddle_customer_id = VALUES(paddle_customer_id),
     updated_at = NOW();
 
+-- cross-schema write to subscriptions — update console-managed subscription state.
 -- name: UpdateSubscription :exec
 UPDATE subscriptions
 SET plan_id = ?, status = ?, seat_count = ?, trial_ends_at = ?, next_billing_date = ?,
@@ -47,6 +51,7 @@ SET plan_id = ?, status = ?, seat_count = ?, trial_ends_at = ?, next_billing_dat
     updated_at = NOW()
 WHERE id = ?;
 
+-- cross-schema write to subscriptions — remove console-managed subscription state.
 -- name: DeleteSubscription :exec
 DELETE FROM subscriptions WHERE id = ?;
 

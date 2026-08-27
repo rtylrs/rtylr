@@ -10,16 +10,13 @@ FROM alpine:3.20
 
 # mariadb-client provides the `mysql` CLI used by migrate.sh; bash is required
 # because the script uses bash-only syntax.
-RUN apk add --no-cache bash mariadb-client ca-certificates git
+RUN apk add --no-cache bash mariadb-client ca-certificates
+RUN addgroup -S onion && adduser -S -G onion onion
 
 WORKDIR /app
 
 COPY scripts/migrate.sh /app/scripts/migrate.sh
-COPY . /app/
-RUN set -eux; \
-    if [ ! -f /app/internal/platform/database/schemas/hr_core/schema.sql ]; then \
-      git clone --depth 1 https://github.com/tryrtylr/schemas.git /app/internal/platform/database/schemas; \
-    fi
+COPY internal/platform/database/schemas /app/internal/platform/database/schemas
 
 RUN chmod +x /app/scripts/migrate.sh
 

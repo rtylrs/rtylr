@@ -20,9 +20,7 @@ const (
 )
 
 func invalidatePayrollScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(payrollScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(payrollScope, businessID))
 }
 
 type repository interface {
@@ -31,7 +29,7 @@ type repository interface {
 	GetStaffPayRates(ctx context.Context, businessID, staffID int64) (domain.StaffPayRates, error)
 	GetStaffPayRatesByIDs(ctx context.Context, businessID int64, staffIDs []int64) (map[int64]domain.StaffPayRates, error)
 	GetDefaultOvertimeMultiplier(ctx context.Context, businessID int64) (float64, bool, error)
-	CreatePayrollRecord(ctx context.Context, businessID, staffID int64, periodStart, periodEnd time.Time, periodLabel string, regularHours, overtimeHours, basePay, overtimePay, netPay float64) (int64, error)
+	CreatePayrollRecords(ctx context.Context, businessID int64, records []domain.PayrollRecordInput) (int, error)
 	MarkPayrollPaid(ctx context.Context, businessID, payrollID int64) error
 }
 
@@ -69,7 +67,7 @@ func (s *Service) RunPayroll(ctx context.Context, businessID int64, input domain
 		return 0, err
 	}
 
-	createdCount := 0
+	records := make([]domain.PayrollRecordInput, 0, len(summaries))
 
 	// Batch-load pay rates for all staff in the period in one query instead of
 	// issuing GetStaffPayRates per summary (N+1).
@@ -119,16 +117,23 @@ func (s *Service) RunPayroll(ctx context.Context, businessID int64, input domain
 
 		netPay := roundToCents(basePay + overtimePay)
 
-		_, createErr := s.repo.CreatePayrollRecord(ctx, businessID, summary.StaffID, periodStart, periodEnd,
-			input.PeriodLabel, regularHours, summary.TotalOvertimeHours, basePay, overtimePay, netPay)
-		if createErr != nil {
-			logger.Ctx(ctx).Error("Failed to create payroll record", logger.Error(createErr), logger.Any("staffId", summary.StaffID))
-			continue
-		}
-
-		createdCount++
+		records = append(records, domain.PayrollRecordInput{
+			StaffID:       summary.StaffID,
+			PeriodStart:   periodStart,
+			PeriodEnd:     periodEnd,
+			PeriodLabel:   input.PeriodLabel,
+			RegularHours:  regularHours,
+			OvertimeHours: summary.TotalOvertimeHours,
+			BasePay:       basePay,
+			OvertimePay:   overtimePay,
+			NetPay:        netPay,
+		})
 	}
 
+	createdCount, err := s.repo.CreatePayrollRecords(ctx, businessID, records)
+	if err != nil {
+		return 0, err
+	}
 	if createdCount > 0 {
 		invalidatePayrollScope(ctx, businessID)
 	}
@@ -141,11 +146,6 @@ func (s *Service) MarkPayrollPaid(ctx context.Context, businessID, payrollID int
 	}
 	invalidatePayrollScope(ctx, businessID)
 	return nil
-}
-
-// FloatToCents converts standard float amount to integer cents.
-func FloatToCents(amount float64) int64 {
-	return int64(amount * 100)
 }
 
 // roundToCents rounds a money amount to whole cents once, at the last point

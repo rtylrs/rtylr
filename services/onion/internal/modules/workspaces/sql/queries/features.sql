@@ -277,6 +277,16 @@ SELECT
 FROM flow_tasks
 WHERE project_id = ? AND parent_task_id IS NULL;
 
+-- name: GetProjectTaskCountsByProjectIDs :many
+SELECT
+    project_id,
+    COUNT(*) AS total,
+    COALESCE(SUM(status = 'done'), 0) AS done
+FROM flow_tasks
+WHERE project_id IN (sqlc.slice('project_ids'))
+  AND parent_task_id IS NULL
+GROUP BY project_id;
+
 -- ── v2: business/project-scoped replacements ─────────────────────────────
 
 -- name: ListCyclesV2 :many

@@ -31,9 +31,7 @@ const (
 var ErrChatSessionNotFound = infrastructure.ErrChatSessionNotFound
 
 func invalidateMemoryScope(ctx context.Context, userID int) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(int64(userID)))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.UserPrefix(int64(userID)))
 }
 
 var ErrAIClientNotAvailable = errors.New("AI client not available for summarization")
@@ -514,11 +512,6 @@ type MemoryItem struct {
 	Key        string  `json:"key"`
 	Value      string  `json:"value"`
 	Confidence float64 `json:"confidence"`
-}
-
-// FloatToCents converts standard float amount to integer cents.
-func FloatToCents(amount float64) int64 {
-	return int64(amount * 100)
 }
 
 // CentsToFloat converts integer cents to standard float amount.

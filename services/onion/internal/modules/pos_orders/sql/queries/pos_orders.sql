@@ -101,8 +101,8 @@ VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?);
 -- name: CreateOrderItem :execresult
 INSERT INTO pos_order_items
 (order_id, menu_item_id, name, sku, quantity, unit_price,
- discount_pct, discount_amount, tax_rate, total, notes)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+ discount_pct, discount_amount, tax_rate, total, notes, modifiers, combo_id)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateOrderStatus :exec
 UPDATE pos_orders SET status = ? WHERE business_id = ? AND id = ?;
@@ -191,6 +191,12 @@ LEFT JOIN pos_order_items i ON i.order_id = o.id AND i.status != 'cancelled'
 WHERE o.business_id = ? AND o.id = ?
 GROUP BY o.id;
 
+-- name: GetOrderForDiscount :one
+SELECT payment_status
+FROM pos_orders
+WHERE business_id = ? AND id = ?
+FOR UPDATE;
+
 -- name: ApplyDiscount :exec
 UPDATE pos_orders SET discount_amount = ?, total = ?, notes = CONCAT(COALESCE(notes,''), ?)
 WHERE id = ? AND business_id = ?;
@@ -239,6 +245,7 @@ SET subtotal = sqlc.arg(subtotal),
 WHERE id = ? AND business_id = ?;
 
 -- name: IsOnlineOrderingEnabled :one
+-- cross-schema read from business_addons (addons module) — gate online ordering on the business add-on entitlement.
 SELECT COUNT(*) FROM business_addons WHERE business_id = ? AND addon_id = 'online_ordering' AND is_enabled = TRUE;
 
 -- name: GetPublicOrderNumberStatus :one

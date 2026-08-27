@@ -1836,6 +1836,13 @@ type FinanceReconciliationMatch struct {
 	CreatedAt  sql.NullTime  `db:"created_at" json:"created_at"`
 }
 
+type FinanceReconciliationTarget struct {
+	BusinessID int64        `db:"business_id" json:"business_id"`
+	TargetType string       `db:"target_type" json:"target_type"`
+	TargetID   int64        `db:"target_id" json:"target_id"`
+	CreatedAt  sql.NullTime `db:"created_at" json:"created_at"`
+}
+
 type FinanceRecurringInvoice struct {
 	ID                int64                             `db:"id" json:"id"`
 	OwnerID           int64                             `db:"owner_id" json:"owner_id"`

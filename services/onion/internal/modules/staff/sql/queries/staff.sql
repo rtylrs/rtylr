@@ -28,12 +28,15 @@ UPDATE hr_staff SET status = 'terminated', updated_at = NOW() WHERE id = ? AND b
 -- name: CountActiveStaff :one
 SELECT COUNT(*) FROM hr_staff WHERE business_id = ? AND status = 'active';
 
+-- cross-schema read from hr_shifts — show staff currently assigned to a shift.
 -- name: CountOnShiftToday :one
 SELECT COUNT(*) FROM hr_shifts WHERE business_id = ? AND date = CURDATE() AND status IN ('scheduled','in_progress');
 
+-- cross-schema read from hr_time_off_requests — show pending time-off requests in staff dashboard counts.
 -- name: CountPendingTimeOff :one
 SELECT COUNT(*) FROM hr_time_off_requests WHERE business_id = ? AND status = 'pending';
 
+-- cross-schema read from hr_payroll_records — show draft payroll records in staff dashboard counts.
 -- name: CountDraftPayroll :one
 SELECT COUNT(*) FROM hr_payroll_records WHERE business_id = ? AND status = 'draft';
 
@@ -48,6 +51,7 @@ UPDATE hr_shifts SET clock_out_at = NOW(), status = 'completed',
 WHERE business_id = ? AND staff_id = ? AND date = CURDATE() AND clock_in_at IS NOT NULL AND clock_out_at IS NULL
 ORDER BY start_time ASC LIMIT 1;
 
+-- cross-schema read from hr_departments — resolve department-managed reports for Flow visibility.
 -- name: ListManagedUserIDs :many
 -- Users reporting to a manager, for the Flow dept-manager visibility proxy (M3).
 -- The relationship lives on hr_departments.manager_staff_id, so this joins back

@@ -27,9 +27,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateTemplatesScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(templatesScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(templatesScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Template, error) {

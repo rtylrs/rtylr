@@ -28,9 +28,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateSupportTicketsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(supportTicketsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(supportTicketsScope, businessID))
 }
 
 type ticketsListResult struct {
@@ -96,8 +94,6 @@ func (s *Service) CreateMessage(ctx context.Context, input domain.MessageInput) 
 	if err != nil {
 		return 0, err
 	}
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix("support_ticket_messages", input.TicketID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix("support_ticket_messages", input.TicketID))
 	return id, nil
 }

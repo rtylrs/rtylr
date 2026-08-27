@@ -151,10 +151,17 @@ func (a *InsightsAPI) GetRoadmap(ctx context.Context, req *flowinsightsv1.GetRoa
 	}
 
 	payloads := make([]*flowinsightsv1.RoadmapProject, 0, len(projects))
-	// One GetProjectTaskCounts call per project on this page - bounded by the
-	// outer pagination (at most `limit` projects), not by its own cap.
+	projectIDs := make([]int64, 0, len(projects))
 	for _, p := range projects {
-		taskCount, done := a.Service.GetProjectTaskCounts(ctx, p.ID)
+		projectIDs = append(projectIDs, p.ID)
+	}
+	taskCounts, err := a.Service.GetProjectTaskCountsByProjectIDs(ctx, projectIDs)
+	if err != nil {
+		return nil, workspaceInternalError(ctx, "GetRoadmap task counts failed", err)
+	}
+	for _, p := range projects {
+		counts := taskCounts[p.ID]
+		taskCount, done := counts.Total, counts.Done
 		progress := int32(0)
 		if taskCount > 0 {
 			progress = int32(float64(done) / float64(taskCount) * 100)

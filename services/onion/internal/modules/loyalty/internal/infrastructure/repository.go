@@ -331,7 +331,7 @@ func (r *Repository) UpsertReward(ctx context.Context, rw domain.LoyaltyReward) 
 		}
 		return id, nil
 	}
-	err := r.queries.UpdateReward(ctx, sqlc.UpdateRewardParams{
+	res, err := r.queries.UpdateReward(ctx, sqlc.UpdateRewardParams{
 		Name:        rw.Name,
 		Description: sql.NullString{String: rw.Description, Valid: true},
 		Category:    sql.NullString{String: rw.Category, Valid: true},
@@ -345,6 +345,16 @@ func (r *Repository) UpsertReward(ctx context.Context, rw domain.LoyaltyReward) 
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update loyalty reward", logger.Error(err))
 		return 0, err
+	}
+	// A stale or foreign id used to answer 200 "Reward updated" without
+	// touching any row (and allowed cross-tenant id probing); report it as a
+	// miss instead (#836).
+	rows, rowsErr := res.RowsAffected()
+	if rowsErr != nil {
+		return 0, rowsErr
+	}
+	if rows == 0 {
+		return 0, domain.ErrRewardNotFound
 	}
 	return rw.ID, nil
 }

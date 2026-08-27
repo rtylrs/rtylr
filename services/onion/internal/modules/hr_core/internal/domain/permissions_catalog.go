@@ -15,6 +15,7 @@ func AllPermissions() []PermissionRecord {
 		{Key: PermissionRequestTimeOff, Label: "Request time off", Description: "Submit time-off requests", Category: "time_off"},
 		{Key: PermissionViewTeam, Label: "View team", Description: "See other employees on the team", Category: "employees"},
 		{Key: PermissionApproveTimeOff, Label: "Approve time off", Description: "Approve or reject time-off requests", Category: "time_off"},
+		{Key: PermissionApproveOvertime, Label: "Approve overtime", Description: "Approve or reject overtime requests", Category: "payroll"},
 		{Key: PermissionManageSchedules, Label: "Manage schedules", Description: "Create and edit work schedules", Category: "scheduling"},
 		{Key: PermissionManageEmployees, Label: "Manage employees", Description: "Create and edit employee records", Category: "employees"},
 		{Key: PermissionManageRoles, Label: "Manage roles", Description: "Create and edit roles and what they can do", Category: "administration"},

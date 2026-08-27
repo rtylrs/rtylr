@@ -140,6 +140,18 @@ func TestStoreOrder_Create_PropagatesError(t *testing.T) {
 	}
 }
 
+func TestValidateOrder_RejectsClientTotalWithoutCatalogItems(t *testing.T) {
+	if err := validateOrder(domain.StoreOrderInput{Total: 99}); !errors.Is(err, domain.ErrInvalidAmount) {
+		t.Fatalf("validateOrder error = %v, want ErrInvalidAmount", err)
+	}
+}
+
+func TestValidateOrder_RejectsClientPricedLineItems(t *testing.T) {
+	if err := validateOrder(domain.StoreOrderInput{Items: []domain.OrderItemInput{{Quantity: 1, Price: 1, Total: 1}}}); !errors.Is(err, domain.ErrInvalidAmount) {
+		t.Fatalf("validateOrder error = %v, want ErrInvalidAmount", err)
+	}
+}
+
 func TestStoreOrder_Update_HappyPath(t *testing.T) {
 	s := &orderTestService{repo: &mockOrderRepo{}}
 	if err := s.Update(context.Background(), 1, 5, domain.StoreOrderInput{}); err != nil {

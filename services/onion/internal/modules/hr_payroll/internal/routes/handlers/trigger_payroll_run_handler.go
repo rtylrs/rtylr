@@ -77,6 +77,9 @@ func (h *TriggerPayrollRunHandler) Serve(ctx context.Context, req *TriggerPayrol
 		if errors.Is(err, domain.ErrOvertimeConfigMissing) {
 			return TriggerPayrollRunResponse{}, onekiterrors.New(http.StatusUnprocessableEntity, "Overtime is enabled but overtime rates are not configured")
 		}
+		if errors.Is(err, domain.ErrOvertimeRateMissing) {
+			return TriggerPayrollRunResponse{}, onekiterrors.New(http.StatusUnprocessableEntity, "Approved overtime requires an hourly rate for every employee")
+		}
 		if errors.Is(err, domain.ErrInvalidDateRange) {
 			return TriggerPayrollRunResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid date range")
 		}

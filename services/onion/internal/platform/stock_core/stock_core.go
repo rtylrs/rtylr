@@ -267,7 +267,103 @@ func ApplyMovementTx(ctx context.Context, tx DBTX, m Movement) (before, after fl
 	if _, _, err = applyKnown(ctx, q, m, before, after); err != nil {
 		return 0, 0, err
 	}
+	if m.EntryType == EntrySale && m.Change < 0 {
+		if err := consumeCostLayersTx(ctx, tx, m, -m.Change); err != nil {
+			return 0, 0, err
+		}
+	}
 	return before, after, nil
+}
+
+// consumeCostLayersTx depletes receipt layers in FIFO order for a sale. Stock
+// movement and valuation updates share the caller's transaction, so a failed
+// layer update rolls back the corresponding stock movement as well. Missing
+// layers are tolerated for legacy stock that predates cost-layer tracking.
+func consumeCostLayersTx(ctx context.Context, tx DBTX, m Movement, quantity float64) error {
+	if quantity <= 0 {
+		return nil
+	}
+
+	rows, err := tx.QueryContext(ctx, `
+		SELECT id, quantity_remaining
+		FROM inventory_cost_layers
+		WHERE owner_id = ?
+		  AND business_id = ?
+		  AND product_id = ?
+		  AND location_id = ?
+		  AND quantity_remaining > 0
+		ORDER BY received_at ASC, id ASC
+		FOR UPDATE`,
+		m.OwnerID, movementBusinessID(m), m.ProductID, m.LocationID,
+	)
+	if err != nil {
+		return fmt.Errorf("stock_core: lock cost layers: %w", err)
+	}
+	defer rows.Close()
+
+	type costLayer struct {
+		id        int64
+		available float64
+	}
+	layers := make([]costLayer, 0)
+	for rows.Next() {
+		var layerID int64
+		var layerQuantity string
+		if err := rows.Scan(&layerID, &layerQuantity); err != nil {
+			return fmt.Errorf("stock_core: scan cost layer: %w", err)
+		}
+		available, err := parseQty(ctx, layerQuantity)
+		if err != nil {
+			return err
+		}
+		layers = append(layers, costLayer{id: layerID, available: available})
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("stock_core: iterate cost layers: %w", err)
+	}
+	if err := rows.Close(); err != nil {
+		return fmt.Errorf("stock_core: close cost layers: %w", err)
+	}
+	available := make([]float64, len(layers))
+	for i, layer := range layers {
+		available[i] = layer.available
+	}
+	consumption := fifoLayerConsumption(available, quantity)
+	for i, consumed := range consumption {
+		if consumed <= 0 {
+			continue
+		}
+		if _, err := tx.ExecContext(ctx, `
+			UPDATE inventory_cost_layers
+			SET quantity_remaining = quantity_remaining - ?
+			WHERE id = ?`, consumed, layers[i].id); err != nil {
+			return fmt.Errorf("stock_core: deplete cost layer %d: %w", layers[i].id, err)
+		}
+	}
+	return nil
+}
+
+func fifoLayerConsumption(available []float64, quantity float64) []float64 {
+	consumption := make([]float64, len(available))
+	if quantity <= 0 {
+		return consumption
+	}
+	remaining := quantity
+	for i, layerQuantity := range available {
+		if remaining <= 0 {
+			break
+		}
+		if layerQuantity <= 0 {
+			continue
+		}
+		consumed := layerQuantity
+		if consumed > remaining {
+			consumed = remaining
+		}
+		consumption[i] = consumed
+		remaining -= consumed
+	}
+	return consumption
 }
 
 // applyKnown writes the level update, ledger row, and scalar-cache sync given a
@@ -359,6 +455,87 @@ func SetLevelTx(ctx context.Context, tx DBTX, m Movement, target float64) (befor
 	delta = target - before
 	m.Change = delta
 	if _, _, err = applyKnown(ctx, q, m, before, target); err != nil {
+		return before, 0, err
+	}
+	return before, delta, nil
+}
+
+// SetTotalTx sets the product's owner-wide stock total to target by applying
+// the variance to one location. Every stock-level row for the product is
+// locked in location order before the product scalar is updated, which keeps
+// absolute stock edits from clobbering concurrent movements or acquiring locks
+// in the opposite order from ApplyMovementTx.
+func SetTotalTx(ctx context.Context, tx DBTX, m Movement, target float64) (before, delta float64, err error) {
+	if target < 0 && !m.AllowNegative {
+		return 0, 0, ErrInsufficientStock
+	}
+	if m.LocationID <= 0 {
+		return 0, 0, fmt.Errorf("stock_core: location is required for total adjustment")
+	}
+
+	if _, err = tx.ExecContext(ctx, `
+		INSERT INTO stock_levels (owner_id, business_id, location_id, product_id, on_hand)
+		VALUES (?, ?, ?, ?, 0)
+		ON DUPLICATE KEY UPDATE on_hand = on_hand`,
+		m.OwnerID, movementBusinessID(m), m.LocationID, m.ProductID,
+	); err != nil {
+		return 0, 0, fmt.Errorf("stock_core: ensure total level row: %w", err)
+	}
+
+	rows, err := tx.QueryContext(ctx, `
+		SELECT location_id, on_hand
+		FROM stock_levels
+		WHERE owner_id = ? AND product_id = ?
+		ORDER BY location_id
+		FOR UPDATE`, m.OwnerID, m.ProductID)
+	if err != nil {
+		return 0, 0, fmt.Errorf("stock_core: lock total levels: %w", err)
+	}
+	defer rows.Close()
+
+	var currentLocation float64
+	locationFound := false
+	for rows.Next() {
+		var locationID int64
+		var onHand string
+		if err := rows.Scan(&locationID, &onHand); err != nil {
+			return 0, 0, fmt.Errorf("stock_core: scan total level: %w", err)
+		}
+		quantity, parseErr := parseQty(ctx, onHand)
+		if parseErr != nil {
+			return 0, 0, parseErr
+		}
+		before += quantity
+		if locationID == m.LocationID {
+			currentLocation = quantity
+			locationFound = true
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return 0, 0, fmt.Errorf("stock_core: iterate total levels: %w", err)
+	}
+	if !locationFound {
+		return 0, 0, fmt.Errorf("stock_core: total adjustment location %d was not created", m.LocationID)
+	}
+
+	// Confirm the product exists before inserting a ledger entry. This query is
+	// intentionally after the level locks so all stock writers use level →
+	// product lock order.
+	var productID int64
+	if err := tx.QueryRowContext(ctx,
+		"SELECT id FROM erp_products WHERE owner_id = ? AND id = ? FOR UPDATE",
+		m.OwnerID, m.ProductID,
+	).Scan(&productID); err != nil {
+		return 0, 0, fmt.Errorf("stock_core: lock product for total adjustment: %w", err)
+	}
+
+	delta = target - before
+	if delta == 0 {
+		return before, 0, nil
+	}
+
+	m.Change = delta
+	if _, _, err = applyKnown(ctx, queries(tx), m, currentLocation, currentLocation+delta); err != nil {
 		return before, 0, err
 	}
 	return before, delta, nil

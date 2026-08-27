@@ -6,6 +6,7 @@ SELECT COUNT(*) FROM hr_staff WHERE business_id = ? AND status = 'active';
 -- name: CountCustomers :one
 SELECT COUNT(*) FROM crm_customers WHERE business_id = ?;
 
+-- cross-schema read from products — intentional KPI projection; count low-stock catalog products without importing product repository internals.
 -- name: CountLowStockProducts :one
 SELECT COUNT(*) FROM erp_products
 WHERE business_id = ? AND is_active = TRUE AND track_inventory = TRUE

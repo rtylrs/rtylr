@@ -15,6 +15,7 @@ import (
 	hrtime "github.com/voxire/onion/internal/modules/hr_time"
 	"github.com/voxire/onion/internal/modules/journal"
 	recurringinvoices "github.com/voxire/onion/internal/modules/recurring_invoices"
+	"github.com/voxire/onion/internal/modules/subscriptions"
 	"github.com/voxire/onion/internal/modules/voxhire"
 	"github.com/voxire/onion/internal/modules/workspaces"
 	platformcache "github.com/voxire/onion/internal/platform/cache"
@@ -123,6 +124,7 @@ type jobModules struct {
 	Workspaces        *workspaces.Module
 	Voxhire           *voxhire.Module
 	RecurringInvoices *recurringinvoices.Module
+	Subscriptions     *subscriptions.Module
 }
 
 func initializeJobModules(ctx context.Context) *jobModules {
@@ -146,5 +148,6 @@ func initializeJobModules(ctx context.Context) *jobModules {
 		Workspaces:        workspacesModule,
 		Voxhire:           voxhire.NewModule(ctx, db),
 		RecurringInvoices: recurringinvoices.NewModule(ctx, db),
+		Subscriptions:     subscriptions.NewModule(ctx, db),
 	}
 }

@@ -18,6 +18,7 @@ ON DUPLICATE KEY UPDATE
 -- name: RemoveMemberFromLocation :exec
 DELETE FROM pos_member_locations WHERE business_id = ? AND id = ?;
 
+-- cross-schema read from pos_locations — enrich member assignments with POS location details.
 -- name: GetMyLocations :many
 SELECT ml.location_id, l.name, l.address, l.phone
 FROM pos_member_locations ml
@@ -25,6 +26,7 @@ JOIN pos_locations l ON l.id = ml.location_id
 WHERE ml.business_id = ? AND ml.user_id = ?
 ORDER BY l.name ASC;
 
+-- cross-schema read from pos_locations — list active locations belonging to the selected business.
 -- name: ListBusinessLocations :many
 SELECT l.id AS location_id, l.name, l.address, l.phone
 FROM pos_locations l
@@ -32,6 +34,7 @@ JOIN businesses b ON b.owner_id = l.owner_id
 WHERE b.id = ? AND l.is_active = TRUE
 ORDER BY l.name ASC;
 
+-- cross-schema read from pos_users — enrich the location roster with operator PIN and role state.
 -- name: GetLocationRoster :many
 -- The operator sign-in roster for a location: every assigned team member, their
 -- display name (from users), whether they already hold a PIN here, and their
@@ -57,6 +60,7 @@ SELECT EXISTS (
     WHERE id = ? AND business_id = ?
 );
 
+-- cross-schema read from pos_locations — validate that the requested location belongs to the business.
 -- name: LocationBelongsToBusiness :one
 SELECT EXISTS (
     SELECT 1

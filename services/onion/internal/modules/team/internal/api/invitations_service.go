@@ -64,6 +64,8 @@ func (a *InvitationsAPI) InviteUser(ctx context.Context, req *hubteaminvitations
 	})
 	if err != nil {
 		switch {
+		case errors.Is(err, domain.ErrSeatLimitExceeded):
+			return nil, onekiterrors.New(http.StatusPaymentRequired, "Your plan's seat limit has been reached")
 		case errors.Is(err, domain.ErrForbidden):
 			return nil, onekiterrors.PermissionDenied()
 		case errors.Is(err, domain.ErrUserNotFound):

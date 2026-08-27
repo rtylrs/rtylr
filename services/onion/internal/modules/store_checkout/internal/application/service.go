@@ -24,10 +24,10 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 // store_checkout is write-only — no cached reads here. Mutations still wipe
 // the order/customer scopes upstream so derived caches stay fresh.
 func invalidateCheckoutScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.OrderPrefix(businessID))
-		cache.DeleteByPattern(ctx, cacheKeys.CustomerPrefix(businessID))
-	}
+	cacher.InvalidateScope(ctx,
+		cacheKeys.OrderPrefix(businessID),
+		cacheKeys.CustomerPrefix(businessID),
+	)
 }
 
 func (s *Service) Create(ctx context.Context, businessID, ownerID int64, input domain.CheckoutCreateInput) (int64, error) {

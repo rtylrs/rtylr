@@ -655,26 +655,37 @@ func isOptionalAnalyticsSchemaError(err error) bool {
 
 func (r *Repository) analyticsProfileFunctions(ctx context.Context, ownerID int64) ([]domain.AnalyticsBucket, error) {
 	functions := []string{"Operations", "Sales", "Customer Support", "Finance", "HR", "Marketing", "Product", "Design", "Engineering", "Data", "Healthcare", "Retail", "Logistics"}
-	buckets := make([]domain.AnalyticsBucket, 0, len(functions))
+	selects := make([]string, 0, len(functions))
+	args := make([]any, 0, len(functions)+1)
 	for _, fn := range functions {
-		pattern := `%"` + fn + `"%`
-		var count int64
-		// cross-schema read from careers — profile function counts across career + talent applications
-		if err := r.db.QueryRowContext(ctx, `
-			SELECT COUNT(*)
-			  FROM (
-			        SELECT COALESCE(a.cv_profile_json, '') AS profile_json
-			          FROM voxire_career_applications a
-			          JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
-			        UNION ALL
-			        SELECT COALESCE(cv_profile_json, '') AS profile_json
-			          FROM voxhire_talent_applications
-			       ) profiles
-				 WHERE profile_json LIKE ?`, ownerID, pattern).Scan(&count); err != nil {
-			return nil, err
-		}
-		if count > 0 {
-			buckets = append(buckets, domain.AnalyticsBucket{Key: strings.ToLower(strings.ReplaceAll(fn, " ", "_")), Count: count})
+		selects = append(selects, "COALESCE(SUM(profile_json LIKE ?), 0)")
+		args = append(args, `%"`+fn+`"%`)
+	}
+	// cross-schema read from careers — profile function counts across career + talent applications
+	args = append(args, ownerID)
+	query := fmt.Sprintf(`
+		SELECT %s
+		  FROM (
+		        SELECT COALESCE(a.cv_profile_json, '') AS profile_json
+		          FROM voxire_career_applications a
+		          JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+		        UNION ALL
+		        SELECT COALESCE(cv_profile_json, '') AS profile_json
+		          FROM voxhire_talent_applications
+		       ) profiles`, strings.Join(selects, ", "))
+	counts := make([]int64, len(functions))
+	countArgs := make([]any, len(counts))
+	for i := range counts {
+		countArgs[i] = &counts[i]
+	}
+	if err := r.db.QueryRowContext(ctx, query, args...).Scan(countArgs...); err != nil {
+		return nil, err
+	}
+
+	buckets := make([]domain.AnalyticsBucket, 0, len(functions))
+	for i, fn := range functions {
+		if counts[i] > 0 {
+			buckets = append(buckets, domain.AnalyticsBucket{Key: strings.ToLower(strings.ReplaceAll(fn, " ", "_")), Count: counts[i]})
 		}
 	}
 	sort.SliceStable(buckets, func(i, j int) bool {

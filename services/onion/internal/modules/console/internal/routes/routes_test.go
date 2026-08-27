@@ -5,6 +5,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/go-playground/validator/v10"
 )
 
 func TestDecodeJSONBodyAcceptsSingleObject(t *testing.T) {
@@ -80,5 +82,27 @@ func TestDecodeOptionalJSONBodyRejectsMalformedBody(t *testing.T) {
 	}
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400, got %d", w.Code)
+	}
+}
+
+func TestGetPositiveQueryIntUsesFallbackForMalformedValue(t *testing.T) {
+	r := httptest.NewRequest(http.MethodGet, "/console/resources?limit=not-a-number", nil)
+
+	if got := getPositiveQueryInt(r, "limit", 50); got != 50 {
+		t.Fatalf("expected malformed query value to use fallback, got %d", got)
+	}
+}
+
+func TestUpdateResourceRowRequestRequiresValues(t *testing.T) {
+	validate := validator.New()
+
+	if err := validate.Struct(&updateResourceRowRequest{}); err == nil {
+		t.Fatal("expected missing values to fail validation")
+	}
+	if err := validate.Struct(&updateResourceRowRequest{Values: map[string]any{}}); err == nil {
+		t.Fatal("expected empty values to fail validation")
+	}
+	if err := validate.Struct(&updateResourceRowRequest{Values: map[string]any{"name": "updated"}}); err != nil {
+		t.Fatalf("expected writable values to pass validation: %v", err)
 	}
 }

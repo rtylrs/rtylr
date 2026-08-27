@@ -29,9 +29,11 @@ INSERT INTO erp_stock_transfers (owner_id, business_id, from_warehouse_id, to_wa
 VALUES (?, ?, ?, ?, 'draft', ?);
 
 -- name: GetWarehouseReference :one
+-- cross-schema read from erp_warehouses (warehouses module) — validate both warehouse references for the tenant.
 SELECT id FROM erp_warehouses WHERE business_id = ? AND id = ?;
 
 -- name: GetProductReference :one
+-- cross-schema read from erp_products (products module) — validate the stock-transfer product reference for the tenant.
 SELECT id FROM erp_products WHERE business_id = ? AND id = ?;
 
 -- name: InsertStockTransferItem :execresult
@@ -57,4 +59,3 @@ FROM erp_stock_transfer_items
 WHERE transfer_id IN (sqlc.slice('transfer_ids'))
 ORDER BY id ASC
 LIMIT 200;
-

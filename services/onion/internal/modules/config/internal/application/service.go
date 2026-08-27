@@ -78,9 +78,7 @@ func (s *Service) UpdateConfig(ctx context.Context, ownerID string, input domain
 	if err != nil {
 		return err
 	}
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.BusinessPrefix(idN))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.BusinessPrefix(idN))
 	return nil
 }
 

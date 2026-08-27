@@ -153,7 +153,7 @@ func (r *Repository) GetUserBusinessIDAndRole(ctx context.Context, userID int64)
 	// cross-schema read from shared users table and user_app_permissions — for JWT claims population
 	row, err := r.queries.GetUserBusinessIDAndRole(ctx, userID)
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, "", nil
+		return 0, "", domain.ErrUserNotFound
 	}
 	if err != nil {
 		return 0, "", err

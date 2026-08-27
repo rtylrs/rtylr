@@ -75,5 +75,3 @@ type PaymentInput struct {
 	Reference   string  `json:"reference"`
 	Notes       string  `json:"notes"`
 }
-
-// Money precision verified: minor integer units enforced.

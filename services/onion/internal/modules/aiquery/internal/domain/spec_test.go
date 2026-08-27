@@ -185,8 +185,22 @@ func TestBuildSQL_RejectsUnsafeColumnComparisonFilters(t *testing.T) {
 
 func TestSchema_ExposesViewsWithoutOwnerID(t *testing.T) {
 	s := Schema()
-	if len(s) != 7 {
-		t.Errorf("expected 7 views, got %d", len(s))
+	wantViews := map[string]struct{}{
+		"ai_products":   {},
+		"ai_customers":  {},
+		"ai_invoices":   {},
+		"ai_expenses":   {},
+		"ai_pos_orders": {},
+		"ai_employees":  {},
+		"ai_tasks":      {},
+	}
+	if len(s) != len(wantViews) {
+		t.Errorf("expected %d views, got %d", len(wantViews), len(s))
+	}
+	for view := range wantViews {
+		if _, ok := s[view]; !ok {
+			t.Errorf("expected allowlisted view %q", view)
+		}
 	}
 	for view, cols := range s {
 		for _, c := range cols {

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -150,6 +151,9 @@ func (h *UpsertRewardHandler) Validate(_ context.Context, req *UpsertRewardReque
 	if req.PointsCost < 0 {
 		return onekiterrors.New(http.StatusBadRequest, "Points cost cannot be negative")
 	}
+	if req.Stock != nil && *req.Stock < 0 {
+		return onekiterrors.New(http.StatusBadRequest, "Stock cannot be negative")
+	}
 	return nil
 }
 
@@ -185,6 +189,9 @@ func (h *UpsertRewardHandler) Serve(ctx context.Context, req *UpsertRewardReques
 		Active:      active,
 	})
 	if err != nil {
+		if errors.Is(err, domain.ErrRewardNotFound) {
+			return UpsertRewardResponse{}, onekiterrors.New(http.StatusNotFound, "Reward not found")
+		}
 		return UpsertRewardResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to save reward")
 	}
 	msg := "Reward created"

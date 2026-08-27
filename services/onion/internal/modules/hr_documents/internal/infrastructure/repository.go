@@ -8,6 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_documents/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -31,8 +32,8 @@ func (r *Repository) CreateDocument(ctx context.Context, businessID int64, param
 		DocumentType: params.DocumentType,
 		Title:        params.Title,
 		StorageMode:  params.StorageMode,
-		FileUrl:      nullString(params.FileURL),
-		ExternalUrl:  nullString(params.ExternalURL),
+		FileUrl:      sqlutil.NullString(params.FileURL),
+		ExternalUrl:  sqlutil.NullString(params.ExternalURL),
 		UploadedBy:   params.UploadedBy,
 	})
 	if err != nil {
@@ -147,8 +148,4 @@ func (r *Repository) ListExpiringDocuments(ctx context.Context, businessID int64
 	}
 
 	return records, total, nil
-}
-
-func nullString(v string) sql.NullString {
-	return sql.NullString{String: v, Valid: v != ""}
 }

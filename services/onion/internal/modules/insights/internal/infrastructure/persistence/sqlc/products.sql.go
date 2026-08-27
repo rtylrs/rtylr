@@ -18,6 +18,7 @@ SELECT COALESCE(AVG((sale_price - cost_price) / sale_price * 100), 0) AS margin_
    AND sale_price > 0
 `
 
+// cross-schema read from erp — calculate the active product margin average.
 func (q *Queries) AvgProductMarginPct(ctx context.Context, businessID int64) (interface{}, error) {
 	row := q.db.QueryRowContext(ctx, avgProductMarginPct, businessID)
 	var margin_pct interface{}
@@ -29,6 +30,7 @@ const countProductSKUsActive = `-- name: CountProductSKUsActive :one
 SELECT COUNT(*) AS count FROM erp_products WHERE business_id = ? AND is_active = TRUE
 `
 
+// cross-schema read from erp — count active product SKUs for insight totals.
 func (q *Queries) CountProductSKUsActive(ctx context.Context, businessID int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countProductSKUsActive, businessID)
 	var count int64
@@ -44,6 +46,7 @@ SELECT COUNT(*) AS count
    AND stock_quantity <= 0
 `
 
+// cross-schema read from erp — count tracked products with no stock.
 func (q *Queries) CountProductSKUsOutOfStock(ctx context.Context, businessID int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countProductSKUsOutOfStock, businessID)
 	var count int64
@@ -55,6 +58,7 @@ const countProductSKUsTotal = `-- name: CountProductSKUsTotal :one
 SELECT COUNT(*) AS count FROM erp_products WHERE business_id = ?
 `
 
+// cross-schema read from erp — count all product SKUs for insight totals.
 func (q *Queries) CountProductSKUsTotal(ctx context.Context, businessID int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countProductSKUsTotal, businessID)
 	var count int64
@@ -71,6 +75,8 @@ FROM erp_products p
 JOIN pos_order_items oi ON oi.menu_item_id = p.id
 JOIN pos_orders o       ON o.id = oi.order_id AND o.business_id = p.business_id
 WHERE p.business_id = ?
+  AND o.payment_status = 'paid'
+  AND oi.status <> 'cancelled'
   AND o.created_at >= ?
 GROUP BY p.id, p.name
 ORDER BY units DESC
@@ -90,6 +96,7 @@ type GetBestSellersRow struct {
 	Revenue interface{} `db:"revenue" json:"revenue"`
 }
 
+// cross-schema read from erp and pos — combine products with paid order volume.
 func (q *Queries) GetBestSellers(ctx context.Context, arg GetBestSellersParams) ([]GetBestSellersRow, error) {
 	rows, err := q.db.QueryContext(ctx, getBestSellers, arg.BusinessID, arg.CreatedAt, arg.Limit)
 	if err != nil {
@@ -144,6 +151,7 @@ type GetProductMarginDistributionRow struct {
 	SeventyFivePlusCount    int64 `db:"seventy_five_plus_count" json:"seventy_five_plus_count"`
 }
 
+// cross-schema read from erp — calculate margin distribution buckets for active products.
 func (q *Queries) GetProductMarginDistribution(ctx context.Context, businessID int64) (GetProductMarginDistributionRow, error) {
 	row := q.db.QueryRowContext(ctx, getProductMarginDistribution, businessID)
 	var i GetProductMarginDistributionRow
@@ -182,6 +190,7 @@ type GetProductMarginRowsRow struct {
 	CostMinorUnitsX100    int64       `db:"cost_minor_units_x100" json:"cost_minor_units_x100"`
 }
 
+// cross-schema read from erp and pos — combine product costs with all-time sales volume.
 // Per-product margin rows (#853): joins sales volume to cost price so the
 // response carries per-item economics alongside the distribution buckets.
 // All-time window; the request message carries no date params.
@@ -224,6 +233,8 @@ JOIN pos_orders o        ON o.id = oi.order_id
 JOIN erp_products p      ON p.id = oi.menu_item_id AND p.business_id = o.business_id
 LEFT JOIN erp_categories c ON c.id = p.category_id AND c.business_id = p.business_id
 WHERE o.business_id = ?
+  AND o.payment_status = 'paid'
+  AND oi.status <> 'cancelled'
   AND o.created_at >= ?
   AND o.created_at <= ?
 GROUP BY c.id, c.name
@@ -243,6 +254,7 @@ type GetSalesByCategoryRow struct {
 	Revenue      interface{} `db:"revenue" json:"revenue"`
 }
 
+// cross-schema read from erp and pos — aggregate paid order volume by product category.
 func (q *Queries) GetSalesByCategory(ctx context.Context, arg GetSalesByCategoryParams) ([]GetSalesByCategoryRow, error) {
 	rows, err := q.db.QueryContext(ctx, getSalesByCategory, arg.BusinessID, arg.CreatedAt, arg.CreatedAt_2)
 	if err != nil {
@@ -301,6 +313,7 @@ type GetSlowMoversRow struct {
 	RecentSale    int32  `db:"recent_sale" json:"recent_sale"`
 }
 
+// cross-schema read from erp and pos — find active products without recent sales.
 func (q *Queries) GetSlowMovers(ctx context.Context, arg GetSlowMoversParams) ([]GetSlowMoversRow, error) {
 	rows, err := q.db.QueryContext(ctx, getSlowMovers, arg.BusinessID, arg.CreatedAt, arg.BusinessID_2)
 	if err != nil {

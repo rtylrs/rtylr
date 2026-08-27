@@ -29,9 +29,7 @@ var invoicePagePolicy = pagination.Policy{
 }
 
 func invalidateInvoicesScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(invoicesScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(invoicesScope, businessID))
 }
 
 type repository interface {
@@ -795,11 +793,6 @@ func resolvePeriodRange(period, date string) (string, string) {
 
 		return from.Format("2006-01-02"), to.Format("2006-01-02")
 	}
-}
-
-// FloatToCents converts standard float amount to integer cents.
-func FloatToCents(amount float64) int64 {
-	return int64(amount * 100)
 }
 
 // CentsToFloat converts integer cents to standard float amount.

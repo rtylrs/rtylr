@@ -96,5 +96,5 @@ func (s *Service) UpdateStockTake(ctx context.Context, businessID int64, input d
 }
 
 func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
-	cacher.Of[stockTakesPageResult]().DeleteByPattern(ctx, []string{cacheKeys.ScopedPrefix("stock_takes", businessID)})
+	cacher.InvalidateTypedScope[stockTakesPageResult](ctx, cacheKeys.ScopedPrefix("stock_takes", businessID))
 }

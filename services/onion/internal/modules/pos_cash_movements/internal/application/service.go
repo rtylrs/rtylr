@@ -26,9 +26,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidatePosCashMovementsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posCashMovementsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(posCashMovementsScope, businessID))
 }
 
 func (s *Service) ListBySession(ctx context.Context, businessID, sessionID int64) ([]domain.CashMovement, error) {

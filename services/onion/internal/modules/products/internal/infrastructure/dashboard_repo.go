@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	"github.com/voxire/onion/internal/modules/products/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 // GetDashboard aggregates the counts + recent records used by the ERP
@@ -121,8 +122,8 @@ func (r *Repository) topLowStockItems(ctx context.Context, ownerID int64, limit 
 			ProductID:     row.ID,
 			Name:          row.Name,
 			SKU:           row.Sku,
-			CurrentStock:  parseDecimal(row.StockQuantity),
-			ReorderPoint:  parseDecimal(row.LowStockThreshold),
+			CurrentStock:  sqlutil.ParseDecimal(row.StockQuantity),
+			ReorderPoint:  sqlutil.ParseDecimal(row.LowStockThreshold),
 			WarehouseName: "",
 		})
 	}
@@ -146,7 +147,7 @@ func (r *Repository) recentPurchaseOrders(ctx context.Context, ownerID int64, li
 			ID:           row.ID,
 			PONumber:     row.PoNumber,
 			SupplierName: row.SupplierName,
-			Total:        parseDecimal(row.Total.String),
+			Total:        sqlutil.ParseDecimal(row.Total.String),
 		}
 		if row.Status.Valid {
 			p.Status = string(row.Status.ErpPurchaseOrdersStatus)
@@ -201,9 +202,9 @@ func (r *Repository) ListReorderSuggestions(ctx context.Context, ownerID int64) 
 			ProductID:    row.ID,
 			Name:         row.Name,
 			SKU:          row.Sku,
-			CurrentStock: parseDecimal(row.StockQuantity),
-			ReorderPoint: parseDecimal(row.LowStockThreshold),
-			SuggestedQty: parseDecimal(row.ReorderQuantity),
+			CurrentStock: sqlutil.ParseDecimal(row.StockQuantity),
+			ReorderPoint: sqlutil.ParseDecimal(row.LowStockThreshold),
+			SuggestedQty: sqlutil.ParseDecimal(row.ReorderQuantity),
 		}
 		if s.SuggestedQty == 0 {
 			s.SuggestedQty = s.ReorderPoint * 2

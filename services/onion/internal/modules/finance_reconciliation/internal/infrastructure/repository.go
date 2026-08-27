@@ -169,12 +169,33 @@ func (r *Repository) CreateMatch(ctx context.Context, businessID int64, input do
 		return 0, err
 	}
 
-	targetExists, err := targetExists(ctx, queries, businessID, input)
+	if err := lockTarget(ctx, queries, businessID, input); err != nil {
+		return 0, err
+	}
+	if _, err := queries.GetMatchForTarget(ctx, sqlc.GetMatchForTargetParams{
+		BusinessID: businessID,
+		TargetType: input.TargetType,
+		TargetID:   input.TargetID,
+	}); err == nil {
+		return 0, domain.ErrAlreadyMatched
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		return 0, err
+	}
+
+	reservation, err := queries.ReserveReconciliationTarget(ctx, sqlc.ReserveReconciliationTargetParams{
+		BusinessID: businessID,
+		TargetType: input.TargetType,
+		TargetID:   input.TargetID,
+	})
 	if err != nil {
 		return 0, err
 	}
-	if !targetExists {
-		return 0, domain.ErrTargetNotFound
+	reserved, err := reservation.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	if reserved == 0 {
+		return 0, domain.ErrAlreadyMatched
 	}
 
 	matchedBy := sql.NullInt64{}
@@ -211,6 +232,26 @@ func (r *Repository) CreateMatch(ctx context.Context, businessID int64, input do
 		return 0, err
 	}
 	return id, nil
+}
+
+func lockTarget(ctx context.Context, queries *sqlc.Queries, businessID int64, input domain.MatchInput) error {
+	var err error
+	switch input.TargetType {
+	case domain.TargetTypeInvoice:
+		_, err = queries.LockInvoiceForBusiness(ctx, sqlc.LockInvoiceForBusinessParams{
+			ID: input.TargetID, BusinessID: businessID,
+		})
+	case domain.TargetTypeExpense:
+		_, err = queries.LockExpenseForBusiness(ctx, sqlc.LockExpenseForBusinessParams{
+			ID: input.TargetID, BusinessID: businessID,
+		})
+	default:
+		return domain.ErrInvalidTarget
+	}
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.ErrTargetNotFound
+	}
+	return err
 }
 
 // CountMatches returns the total number of reconciliation matches created for

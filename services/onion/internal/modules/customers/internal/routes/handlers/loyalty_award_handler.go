@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"math"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
@@ -39,6 +40,11 @@ func (h *AwardPointsHandler) Validate(_ context.Context, req *AwardPointsRequest
 
 	if req.Points <= 0 {
 		return onekiterrors.New(http.StatusBadRequest, "Points must be greater than zero")
+	}
+	// The ledger write casts to int32; anything above MaxInt32 would wrap
+	// negative before the merge path's clamp ever sees it (#844).
+	if req.Points > math.MaxInt32 {
+		return onekiterrors.New(http.StatusBadRequest, "Points exceed the maximum allowed value")
 	}
 
 	return nil

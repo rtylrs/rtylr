@@ -4,13 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/timesheets/internal/domain"
 	"github.com/voxire/onion/internal/modules/timesheets/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 var errWeekStartNotMonday = errors.New("week start must be a Monday")
@@ -83,9 +82,9 @@ func (r *Repository) GetTimesheets(ctx context.Context, businessID int64, weekSt
 			StaffID:       staffID,
 			StaffName:     row.staffName,
 			WeekStart:     formatWeekStart(row.weekStart),
-			TotalHours:    parseDecimal(row.totalHours),
-			RegularHours:  parseDecimal(row.regularHours),
-			OvertimeHours: parseDecimal(row.overtimeHours),
+			TotalHours:    sqlutil.DecimalToFloat(row.totalHours),
+			RegularHours:  sqlutil.DecimalToFloat(row.regularHours),
+			OvertimeHours: sqlutil.DecimalToFloat(row.overtimeHours),
 		})
 	}
 	return entries, nil
@@ -107,32 +106,4 @@ func timesheetWeekRange(value string) (time.Time, time.Time, error) {
 
 func formatWeekStart(t time.Time) string {
 	return t.Format("2006-01-02")
-}
-
-func parseDecimal(v any) float64 {
-	switch val := v.(type) {
-	case nil:
-		return 0
-	case float64:
-		return val
-	case []byte:
-		return parseDecimalString(string(val))
-	case string:
-		return parseDecimalString(val)
-	default:
-		return parseDecimalString(fmt.Sprintf("%v", val))
-	}
-}
-
-func parseDecimalString(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse timesheet decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
 }

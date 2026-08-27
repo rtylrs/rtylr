@@ -46,8 +46,10 @@ VALUES
     (3702, 1001, 1003, 3001, FALSE, FALSE, FALSE)
 ON DUPLICATE KEY UPDATE location_id = VALUES(location_id);
 
-INSERT INTO pos_users (id, owner_id, business_id, user_id, location_id, name, pin_hash, role, is_active)
+-- pin_hash, not the dropped plaintext pin: POS PINs are bcrypt hashes
+-- (zz_pos_users_remove_plaintext_pin.sql removed the legacy column).
+INSERT INTO pos_users (id, owner_id, business_id, user_id, location_id, name, role, is_active)
 VALUES
-    (3601, 1001, 1001, 1002, 3001, 'Cashier A', '$2a$12$b0fgrfA59f6iBCpscj2UaefgmdeuVImcjF5FxsJeCrwr/TtIFMh42', 'cashier', TRUE), -- nosemgrep: generic.secrets.security.detected-bcrypt-hash.detected-bcrypt-hash
-    (3602, 1001, 1001, 1003, 3001, 'Server B',  '$2a$12$//vilMqfH5/MmBd.AwGe3O7z08dZN8NjqfWBIM3IKC.h1Gn3atkgW', 'server',  TRUE) -- nosemgrep: generic.secrets.security.detected-bcrypt-hash.detected-bcrypt-hash
-ON DUPLICATE KEY UPDATE name = VALUES(name);
+    (3601, 1001, 1001, 1002, 3001, 'Cashier A', 'cashier', TRUE),
+    (3602, 1001, 1001, 1003, 3001, 'Server B',  'server',  TRUE)
+ON DUPLICATE KEY UPDATE name = VALUES(name), business_id = VALUES(business_id);

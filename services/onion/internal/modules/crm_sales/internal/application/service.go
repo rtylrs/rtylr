@@ -18,9 +18,7 @@ const (
 )
 
 func invalidateCRMSalesScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(crmSalesScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(crmSalesScope, businessID))
 }
 
 type repository interface {

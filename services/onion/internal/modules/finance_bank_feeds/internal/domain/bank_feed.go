@@ -49,5 +49,3 @@ func (t *BankFeedTransaction) IsCredit() bool {
 func (t *BankFeedTransaction) IsDebit() bool {
 	return t.AmountMinorUnits < 0
 }
-
-// Money precision verified: minor integer units enforced.

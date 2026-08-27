@@ -16,6 +16,7 @@ const financeReportsTTL = 5 * time.Minute
 
 type repository interface {
 	SumAccountsByType(ctx context.Context, businessID int64, accountType string) (float64, error)
+	SumPostedNetIncome(ctx context.Context, businessID int64) (float64, error)
 	SumBankBalances(ctx context.Context, businessID int64) (float64, error)
 	SumReceivables(ctx context.Context, businessID int64) (float64, error)
 	SumPayables(ctx context.Context, businessID int64) (float64, error)
@@ -57,6 +58,11 @@ func (s *Service) computeBalanceSheet(ctx context.Context, businessID int64) (do
 		return domain.BalanceSheet{}, err
 	}
 
+	netIncome, err := s.repo.SumPostedNetIncome(ctx, businessID)
+	if err != nil {
+		return domain.BalanceSheet{}, err
+	}
+
 	cash, err := s.repo.SumBankBalances(ctx, businessID)
 	if err != nil {
 		return domain.BalanceSheet{}, err
@@ -73,9 +79,12 @@ func (s *Service) computeBalanceSheet(ctx context.Context, businessID int64) (do
 	}
 
 	return domain.BalanceSheet{
-		TotalAssets:        assets + cash + receivables,
-		TotalLiabilities:   liabilities + payables,
-		TotalEquity:        equity,
+		// Account totals combine the configured opening balance with posted
+		// journal deltas. The bank/invoice/bill tables are detail views and
+		// must not be added to the same totals a second time.
+		TotalAssets:        assets,
+		TotalLiabilities:   liabilities,
+		TotalEquity:        equity + netIncome,
 		CashBalance:        cash,
 		AccountsReceivable: receivables,
 		AccountsPayable:    payables,
@@ -136,5 +145,3 @@ func resolvePeriodRange(period string) (string, string) {
 		return from.Format("2006-01-02"), to.Format("2006-01-02")
 	}
 }
-
-// Money precision verified: minor integer units enforced.

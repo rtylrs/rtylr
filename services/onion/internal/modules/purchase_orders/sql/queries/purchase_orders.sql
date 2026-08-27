@@ -32,9 +32,11 @@ INSERT INTO erp_purchase_orders
 VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?, ?);
 
 -- name: GetSupplierReference :one
+-- cross-schema read from erp_suppliers (suppliers module) — validate the purchase order’s supplier reference for the tenant.
 SELECT id FROM erp_suppliers WHERE business_id = ? AND id = ?;
 
 -- name: GetProductReference :one
+-- cross-schema read from erp_products (products module) — validate the purchase order item’s product reference for the tenant.
 SELECT id FROM erp_products WHERE business_id = ? AND id = ?;
 
 -- name: InsertPurchaseOrderItem :execresult
@@ -73,12 +75,14 @@ UPDATE erp_purchase_order_items SET quantity_received = ?
 WHERE purchase_order_id = ? AND id = ?;
 
 -- name: InsertInventoryTransactionWithRef :execresult
+-- cross-schema write to erp_inventory_transactions (inventory module) — record a received purchase quantity in the inventory ledger with its purchase-order reference.
 INSERT INTO erp_inventory_transactions
 (owner_id, business_id, product_id, type, quantity_change, quantity_before, quantity_after,
  reference_id, reference_type, created_by, notes)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: InsertInventoryTransaction :execresult
+-- cross-schema write to erp_inventory_transactions (inventory module) — record a received purchase quantity in the inventory ledger.
 INSERT INTO erp_inventory_transactions
 (owner_id, business_id, product_id, type, quantity_change, quantity_before, quantity_after, notes)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);

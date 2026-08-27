@@ -200,7 +200,7 @@ func CreateAdminHandler(svc *application.Service) http.HandlerFunc {
 func ListOpeningsHandler(svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
-		page, err := svc.ListOpeningsPage(r.Context(), parseInt32(q.Get("limit")), parseInt32(q.Get("offset")))
+		page, err := svc.ListOpeningsPage(r.Context(), parseInt32(r.Context(), "limit", q.Get("limit")), parseInt32(r.Context(), "offset", q.Get("offset")))
 		if err != nil {
 			logger.Ctx(r.Context()).Error("voxhire list openings failed", logger.Error(err))
 			writeApplyError(w, http.StatusInternalServerError, "Failed to list openings")
@@ -357,8 +357,8 @@ func ListApplicationsHandler(svc *application.Service) http.HandlerFunc {
 			Sort:     strings.TrimSpace(q.Get("sort")),
 			Location: strings.TrimSpace(q.Get("location")),
 			Query:    strings.TrimSpace(q.Get("q")),
-			Limit:    parseInt32(q.Get("limit")),
-			Offset:   parseInt32(q.Get("offset")),
+			Limit:    parseInt32(r.Context(), "limit", q.Get("limit")),
+			Offset:   parseInt32(r.Context(), "offset", q.Get("offset")),
 		}
 
 		apps, total, err := svc.ListApplications(r.Context(), filter)
@@ -500,8 +500,8 @@ func ListCandidatesHandler(svc *application.Service) http.HandlerFunc {
 			Query:    strings.TrimSpace(q.Get("q")),
 			Source:   strings.TrimSpace(q.Get("source")),
 			CVStatus: strings.TrimSpace(q.Get("cv_status")),
-			Limit:    parseInt32(q.Get("limit")),
-			Offset:   parseInt32(q.Get("offset")),
+			Limit:    parseInt32(r.Context(), "limit", q.Get("limit")),
+			Offset:   parseInt32(r.Context(), "offset", q.Get("offset")),
 		}
 		candidates, total, err := svc.ListCandidates(r.Context(), filter)
 		if err != nil {
@@ -525,7 +525,7 @@ func ListCVJobsHandler(svc *application.Service) http.HandlerFunc {
 			Query:    strings.TrimSpace(q.Get("q")),
 			Source:   strings.TrimSpace(q.Get("source")),
 			CVStatus: strings.TrimSpace(q.Get("cv_status")),
-			Limit:    parseInt32(q.Get("limit")),
+			Limit:    parseInt32(r.Context(), "limit", q.Get("limit")),
 		}
 		jobs, err := svc.ListCVJobs(r.Context(), filter)
 		if err != nil {
@@ -759,12 +759,14 @@ func writeJSON(w http.ResponseWriter, code int, v any) {
 	}
 }
 
-func parseInt32(s string) int32 {
+func parseInt32(ctx context.Context, name, s string) int32 {
 	if s == "" {
 		return 0
 	}
 	n, err := strconv.ParseInt(s, 10, 32)
 	if err != nil {
+		logger.Ctx(ctx).Warn("invalid voxhire query parameter",
+			logger.String("parameter", name), logger.String("value", s), logger.Error(err))
 		return 0
 	}
 	return int32(n)

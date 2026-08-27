@@ -40,9 +40,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateJournalScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(journalScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(journalScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID, page, pageSize int64) ([]domain.JournalEntry, bool, error) {

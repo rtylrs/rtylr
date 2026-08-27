@@ -14,14 +14,13 @@ import (
 )
 
 const (
-	hrOvertimeScope = "hr_overtime"
-	hrOvertimeTTL   = 2 * time.Minute
+	hrOvertimeScope           = "hr_overtime"
+	hrOvertimeTTL             = 2 * time.Minute
+	permissionApproveOvertime = "approve_overtime"
 )
 
 func invalidateHROvertimeScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrOvertimeScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrOvertimeScope, businessID))
 }
 
 type repository interface {
@@ -29,10 +28,11 @@ type repository interface {
 	GetOvertimeRequest(ctx context.Context, businessID, requestID int64) (*domain.OvertimeRequestRecord, error)
 	CreateOvertimeRequest(ctx context.Context, businessID int64, req domain.OvertimeRequestRecord) (*domain.OvertimeRequestRecord, error)
 	ApproveOvertimeRequest(ctx context.Context, businessID, requestID, approverID int64, multiplier float64) error
-	AdvanceOvertimeApprovalLevel(ctx context.Context, businessID, requestID int64) error
+	AdvanceOvertimeApprovalLevel(ctx context.Context, businessID, requestID int64, currentLevel int32) error
 	RejectOvertimeRequest(ctx context.Context, businessID, requestID int64) error
 	CreateFlaggedOvertimeRequest(ctx context.Context, businessID, employeeID int64, date string, extraMinutes int32) error
 	ListFlaggedForDate(ctx context.Context, businessID int64, date string) ([]domain.OvertimeRequestRecord, error)
+	ListOvertimeCandidates(ctx context.Context, businessID int64, date string, thresholdMinutes int32) ([]domain.OvertimeDetectionCandidate, error)
 	GetOvertimeConfig(ctx context.Context, businessID int64) (*domain.OvertimeConfigRecord, error)
 	UpsertOvertimeConfig(ctx context.Context, businessID int64, cfg domain.OvertimeConfigRecord) error
 	ListAllConfiguredOwnerIDs(ctx context.Context, limit, offset int32) ([]int64, error)
@@ -41,12 +41,14 @@ type repository interface {
 type Service struct {
 	repo             repository
 	approvalProvider domain.ApprovalChainProvider
+	permissions      domain.PermissionProvider
 }
 
-func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider) *Service {
+func NewService(_ context.Context, db *sql.DB, approvalProvider domain.ApprovalChainProvider, permissions domain.PermissionProvider) *Service {
 	return &Service{
 		repo:             infrastructure.NewRepository(db),
 		approvalProvider: approvalProvider,
+		permissions:      permissions,
 	}
 }
 
@@ -83,41 +85,35 @@ func (s *Service) CreateOvertimeRequest(ctx context.Context, businessID int64, r
 }
 
 func (s *Service) ApproveOvertime(ctx context.Context, businessID, requestID, approverID int64, multiplier float64) error {
-	req, err := s.repo.GetOvertimeRequest(ctx, businessID, requestID)
+	req, approverEmployeeID, chain, err := s.authorizedOvertimeDecision(ctx, businessID, requestID, approverID)
 	if err != nil {
 		return err
 	}
 
-	chain, chainErr := s.approvalProvider.GetApprovalChain(ctx, businessID, "overtime")
-	if chainErr != nil {
-		return chainErr
-	}
-	if chain == nil {
-		return domain.ErrApprovalChainNotConfigured
-	}
-
 	if req.CurrentApprovalLevel+1 < chain.TotalLevels {
-		return s.repo.AdvanceOvertimeApprovalLevel(ctx, businessID, requestID)
+		return s.repo.AdvanceOvertimeApprovalLevel(ctx, businessID, requestID, req.CurrentApprovalLevel)
 	}
 
 	if multiplier <= 0 {
 		cfg, cfgErr := s.repo.GetOvertimeConfig(ctx, businessID)
-		if cfgErr == nil && cfg != nil {
-			multiplier = cfg.DefaultMultiplier
-		} else {
-			multiplier = 1.5
+		if cfgErr != nil {
+			return cfgErr
 		}
+		if cfg == nil || cfg.DefaultMultiplier <= 0 {
+			return domain.ErrOvertimeConfigNotFound
+		}
+		multiplier = cfg.DefaultMultiplier
 	}
 
-	if err := s.repo.ApproveOvertimeRequest(ctx, businessID, requestID, approverID, multiplier); err != nil {
+	if err := s.repo.ApproveOvertimeRequest(ctx, businessID, requestID, approverEmployeeID, multiplier); err != nil {
 		return err
 	}
 	invalidateHROvertimeScope(ctx, businessID)
 	return nil
 }
 
-func (s *Service) RejectOvertime(ctx context.Context, businessID, requestID int64) error {
-	if _, err := s.repo.GetOvertimeRequest(ctx, businessID, requestID); err != nil {
+func (s *Service) RejectOvertime(ctx context.Context, businessID, requestID, approverID int64) error {
+	if _, _, _, err := s.authorizedOvertimeDecision(ctx, businessID, requestID, approverID); err != nil {
 		return err
 	}
 	if err := s.repo.RejectOvertimeRequest(ctx, businessID, requestID); err != nil {
@@ -167,17 +163,95 @@ func (s *Service) DetectAndFlagOvertime(ctx context.Context, businessID int64, d
 	if err != nil {
 		return err
 	}
-	if len(existing) > 0 {
-		logger.Ctx(ctx).Debug("overtime auto-detect: already flagged for date, skipping",
-			logger.Any("business_id", businessID), logger.Any("date", date))
-		return nil
+	existingByEmployee := make(map[int64]struct{}, len(existing))
+	for _, request := range existing {
+		existingByEmployee[request.EmployeeID] = struct{}{}
 	}
 
-	logger.Ctx(ctx).Info("overtime auto-detect: would scan timesheets for date",
-		logger.Any("business_id", businessID), logger.Any("date", date),
-		logger.Any("threshold_minutes", cfg.DailyThresholdMinutes))
+	candidates, err := s.repo.ListOvertimeCandidates(ctx, businessID, date, cfg.DailyThresholdMinutes)
+	if err != nil {
+		return err
+	}
+	for _, candidate := range candidates {
+		if _, alreadyExists := existingByEmployee[candidate.EmployeeID]; alreadyExists {
+			continue
+		}
+		if err := s.repo.CreateFlaggedOvertimeRequest(ctx, businessID, candidate.EmployeeID, candidate.Date, candidate.ExtraMinutes); err != nil {
+			return err
+		}
+	}
+	if len(candidates) > 0 {
+		invalidateHROvertimeScope(ctx, businessID)
+	}
 
 	return nil
+}
+
+func (s *Service) authorizedOvertimeDecision(ctx context.Context, businessID, requestID, approverUserID int64) (*domain.OvertimeRequestRecord, int64, *domain.ApprovalChainInfo, error) {
+	if s.permissions == nil || approverUserID <= 0 {
+		return nil, 0, nil, domain.ErrOvertimeAccessDenied
+	}
+	approverEmployeeID, err := s.permissions.GetEmployeeIDByUserID(ctx, businessID, approverUserID)
+	if err != nil || approverEmployeeID <= 0 {
+		return nil, 0, nil, domain.ErrOvertimeAccessDenied
+	}
+	allowed, err := s.permissions.HasPermission(ctx, businessID, approverEmployeeID, permissionApproveOvertime)
+	if err != nil {
+		return nil, 0, nil, err
+	}
+	if !allowed {
+		return nil, 0, nil, domain.ErrOvertimeApproverNotAllowed
+	}
+	req, err := s.repo.GetOvertimeRequest(ctx, businessID, requestID)
+	if err != nil {
+		return nil, 0, nil, err
+	}
+	if req.EmployeeID == approverEmployeeID {
+		return nil, 0, nil, domain.ErrOvertimeSelfApproval
+	}
+	if s.approvalProvider == nil {
+		return nil, 0, nil, domain.ErrApprovalChainNotConfigured
+	}
+	chain, err := s.approvalProvider.GetApprovalChain(ctx, businessID, "overtime")
+	if err != nil {
+		return nil, 0, nil, err
+	}
+	if chain == nil || chain.TotalLevels <= 0 || len(chain.Levels) == 0 {
+		return nil, 0, nil, domain.ErrApprovalChainNotConfigured
+	}
+	matched, err := s.approverMatchesChain(ctx, businessID, approverEmployeeID, req.CurrentApprovalLevel, chain.Levels)
+	if err != nil {
+		return nil, 0, nil, err
+	}
+	if !matched {
+		return nil, 0, nil, domain.ErrOvertimeApproverNotAllowed
+	}
+	return req, approverEmployeeID, chain, nil
+}
+
+func (s *Service) approverMatchesChain(ctx context.Context, businessID, employeeID int64, currentLevel int32, levels []domain.ApprovalLevelInfo) (bool, error) {
+	targetLevel := currentLevel + 1
+	levelIndex := -1
+	for index, level := range levels {
+		if level.LevelOrder == targetLevel {
+			levelIndex = index
+			break
+		}
+	}
+	if levelIndex < 0 && currentLevel >= 0 && int(currentLevel) < len(levels) {
+		levelIndex = int(currentLevel)
+	}
+	if levelIndex < 0 {
+		return false, nil
+	}
+	level := levels[levelIndex]
+	if level.ApproverEmployeeID > 0 {
+		return level.ApproverEmployeeID == employeeID, nil
+	}
+	if level.ApproverRoleID <= 0 {
+		return false, nil
+	}
+	return s.permissions.HasRole(ctx, businessID, employeeID, level.ApproverRoleID)
 }
 
 func (s *Service) RunDailyDetection(ctx context.Context) error {

@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/variants/internal/domain"
 	"github.com/voxire/onion/internal/modules/variants/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -59,8 +60,8 @@ func (r *Repository) CreateVariant(ctx context.Context, businessID int64, input 
 		BusinessID:    businessID,
 		ProductID:     input.ProductID,
 		Name:          input.Name,
-		Sku:           nullString(input.SKU),
-		Barcode:       nullString(input.Barcode),
+		Sku:           sqlutil.NullString(input.SKU),
+		Barcode:       sqlutil.NullString(input.Barcode),
 		CostPrice:     strconv.FormatFloat(input.CostPrice, 'f', -1, 64),
 		SalePrice:     strconv.FormatFloat(input.SalePrice, 'f', -1, 64),
 		StockQuantity: strconv.FormatFloat(input.StockQuantity, 'f', -1, 64),
@@ -85,8 +86,8 @@ func (r *Repository) UpdateVariant(ctx context.Context, businessID, id int64, in
 	err := r.queries.UpdateVariant(ctx, sqlc.UpdateVariantParams{
 		ProductID:     input.ProductID,
 		Name:          input.Name,
-		Sku:           nullString(input.SKU),
-		Barcode:       nullString(input.Barcode),
+		Sku:           sqlutil.NullString(input.SKU),
+		Barcode:       sqlutil.NullString(input.Barcode),
 		CostPrice:     strconv.FormatFloat(input.CostPrice, 'f', -1, 64),
 		SalePrice:     strconv.FormatFloat(input.SalePrice, 'f', -1, 64),
 		StockQuantity: strconv.FormatFloat(input.StockQuantity, 'f', -1, 64),
@@ -160,9 +161,9 @@ func variantFromRow(row sqlc.ErpProductVariant) domain.Variant {
 		v.Barcode = row.Barcode.String
 	}
 
-	v.CostPrice = parseDecimal(row.CostPrice)
-	v.SalePrice = parseDecimal(row.SalePrice)
-	v.StockQuantity = parseDecimal(row.StockQuantity)
+	v.CostPrice = sqlutil.ParseDecimal(row.CostPrice)
+	v.SalePrice = sqlutil.ParseDecimal(row.SalePrice)
+	v.StockQuantity = sqlutil.ParseDecimal(row.StockQuantity)
 
 	if row.Attributes != nil {
 		v.Attributes = string(row.Attributes)
@@ -183,10 +184,6 @@ func variantFromRow(row sqlc.ErpProductVariant) domain.Variant {
 	return v
 }
 
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
-}
-
 func nullJSON(s string) json.RawMessage {
 	if s == "" {
 		return nil
@@ -197,15 +194,3 @@ func nullJSON(s string) json.RawMessage {
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt
 // values instead of silently coercing them to 0.
-func parseDecimal(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse product decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}

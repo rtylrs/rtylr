@@ -20,9 +20,7 @@ const (
 )
 
 func invalidateHRCoreScope(ctx context.Context, ownerID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrCoreScope, ownerID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrCoreScope, ownerID))
 }
 
 type Service struct {
@@ -85,7 +83,11 @@ func (s *Service) CreateEmployee(ctx context.Context, ownerID int64, emp domain.
 		emp.EmploymentType = "full_time"
 	}
 
-	return s.repo.CreateEmployeeWithBalances(ctx, ownerID, emp, []int64{})
+	leaveTypeIDs, err := s.repo.ListActiveLeaveTypeIDs(ctx, ownerID)
+	if err != nil {
+		return nil, err
+	}
+	return s.repo.CreateEmployeeWithBalances(ctx, ownerID, emp, leaveTypeIDs)
 }
 
 func (s *Service) UpdateEmployee(ctx context.Context, ownerID int64, emp domain.EmployeeRecord) (*domain.EmployeeRecord, error) {
@@ -99,6 +101,23 @@ func (s *Service) UpdateEmployee(ctx context.Context, ownerID int64, emp domain.
 	// reconciliation job is the durability guarantee (#834).
 	s.revokeOnTermination(ctx, ownerID, emp)
 	return updated, nil
+}
+
+// DeactivateEmployee changes only the employment state and end date. The
+// existing record is loaded first so termination revocation still has the
+// linked user id without passing a zero-filled employee through UpdateEmployee.
+func (s *Service) DeactivateEmployee(ctx context.Context, ownerID, employeeID int64) error {
+	existing, err := s.repo.GetEmployee(ctx, ownerID, employeeID)
+	if err != nil {
+		return err
+	}
+	if err := s.repo.DeactivateEmployee(ctx, ownerID, employeeID, time.Now().UTC()); err != nil {
+		return err
+	}
+	existing.Status = "terminated"
+	s.revokeOnTermination(ctx, ownerID, *existing)
+	invalidateHRCoreScope(ctx, ownerID)
+	return nil
 }
 
 // --- Invites ---
@@ -145,12 +164,11 @@ func (s *Service) AcceptInvite(ctx context.Context, token string, userID int64) 
 		return err
 	}
 
-	_, err = s.repo.UpdateEmployee(ctx, invite.OwnerID, domain.EmployeeRecord{
-		ID:     invite.EmployeeID,
-		UserID: userID,
-		Status: "active",
-	})
-	return err
+	if err := s.repo.LinkInviteAcceptance(ctx, invite.OwnerID, invite.EmployeeID, userID); err != nil {
+		return err
+	}
+	invalidateHRCoreScope(ctx, invite.OwnerID)
+	return nil
 }
 
 // --- Locations ---
@@ -324,12 +342,12 @@ func (s *Service) SeedDefaultRoles(ctx context.Context, ownerID int64) error {
 		})},
 		{Name: "Manager", Description: "Team manager with approval rights", IsSystem: true, Permissions: mustJSON(map[string]bool{
 			domain.PermissionViewOwnProfile: true, domain.PermissionViewOwnSchedule: true, domain.PermissionRequestTimeOff: true,
-			domain.PermissionViewTeam: true, domain.PermissionApproveTimeOff: true, domain.PermissionManageSchedules: true,
+			domain.PermissionViewTeam: true, domain.PermissionApproveTimeOff: true, domain.PermissionApproveOvertime: true, domain.PermissionManageSchedules: true,
 			domain.PermissionViewDirectory: true,
 		})},
 		{Name: "HR Admin", Description: "Full HR administration access", IsSystem: true, Permissions: mustJSON(map[string]bool{
 			domain.PermissionViewOwnProfile: true, domain.PermissionViewOwnSchedule: true, domain.PermissionRequestTimeOff: true,
-			domain.PermissionViewTeam: true, domain.PermissionApproveTimeOff: true, domain.PermissionManageSchedules: true,
+			domain.PermissionViewTeam: true, domain.PermissionApproveTimeOff: true, domain.PermissionApproveOvertime: true, domain.PermissionManageSchedules: true,
 			domain.PermissionManageEmployees: true, domain.PermissionManageRoles: true, domain.PermissionManageDepartments: true,
 			domain.PermissionManageLocations: true, domain.PermissionManageHRConfig: true, domain.PermissionViewReports: true,
 			domain.PermissionViewDirectory: true,
@@ -340,7 +358,7 @@ func (s *Service) SeedDefaultRoles(ctx context.Context, ownerID int64) error {
 			domain.PermissionViewDirectory: true,
 		})},
 		{Name: "Executive", Description: "Executive-level oversight", IsSystem: true, Permissions: mustJSON(map[string]bool{
-			domain.PermissionViewOwnProfile: true, domain.PermissionViewTeam: true, domain.PermissionApproveTimeOff: true,
+			domain.PermissionViewOwnProfile: true, domain.PermissionViewTeam: true, domain.PermissionApproveTimeOff: true, domain.PermissionApproveOvertime: true,
 			domain.PermissionManageEmployees: true, domain.PermissionManageRoles: true, domain.PermissionManageDepartments: true,
 			domain.PermissionManageLocations: true, domain.PermissionManageHRConfig: true, domain.PermissionManagePayroll: true,
 			domain.PermissionViewReports: true, domain.PermissionManageBenefits: true, domain.PermissionManageApprovalChains: true,

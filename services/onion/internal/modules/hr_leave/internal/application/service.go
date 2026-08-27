@@ -21,9 +21,7 @@ const (
 )
 
 func invalidateHRLeaveScope(ctx context.Context, ownerID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrLeaveScope, ownerID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrLeaveScope, ownerID))
 }
 
 type Service struct {
@@ -133,39 +131,15 @@ func (s *Service) CreateLeaveRequest(ctx context.Context, ownerID, callerUserID 
 		}
 	}
 
-	// Check for date overlap with existing approved/pending leave
-	overlapping, err := s.repo.ListOverlappingLeaveRequests(ctx, ownerID, req.EmployeeID, req.StartDate, req.EndDate)
-	if err != nil {
-		return nil, err
-	}
-	if len(overlapping) > 0 {
-		return nil, domain.ErrLeaveConflict
-	}
-
-	// Check balance
-	year := int32(startDate.Year()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-	balance, err := s.repo.GetLeaveBalance(ctx, ownerID, req.EmployeeID, req.LeaveTypeID, year)
-	if err != nil {
-		return nil, err
-	}
-	remaining := balance.EntitledDays - balance.UsedDays - balance.PendingDays
-	if req.TotalDays > remaining {
-		return nil, domain.ErrInsufficientLeaveBalance
-	}
+	allocations := leaveDayAllocations(startDate, endDate)
+	req.TotalDays = totalAllocatedDays(allocations)
 
 	req.Status = "pending"
 	req.CurrentApprovalLevel = 0
 
-	created, err := s.repo.CreateLeaveRequest(ctx, ownerID, req)
+	created, err := s.repo.CreateLeaveRequestWithBalance(ctx, ownerID, req, allocations)
 	if err != nil {
 		return nil, err
-	}
-
-	// Add to pending days
-	addErr := s.repo.AddToPendingDays(ctx, ownerID, req.EmployeeID, req.LeaveTypeID, year, req.TotalDays)
-	if addErr != nil {
-		logger.Ctx(ctx).Error("failed to add pending days after creating leave request",
-			logger.Any("owner_id", ownerID), logger.Any("employee_id", req.EmployeeID), logger.Error(addErr))
 	}
 
 	invalidateHRLeaveScope(ctx, ownerID)
@@ -216,7 +190,7 @@ func (s *Service) ApproveLeave(ctx context.Context, ownerID, requestID, approver
 		}
 
 		if req.CurrentApprovalLevel+1 < chain.TotalLevels {
-			if err := s.repo.AdvanceLeaveApprovalLevel(ctx, ownerID, requestID); err != nil {
+			if err := s.repo.AdvanceLeaveApprovalLevel(ctx, ownerID, requestID, req.CurrentApprovalLevel); err != nil {
 				return err
 			}
 			invalidateHRLeaveScope(ctx, ownerID)
@@ -228,11 +202,14 @@ func (s *Service) ApproveLeave(ctx context.Context, ownerID, requestID, approver
 	if parseErr != nil {
 		return parseErr
 	}
-	year := int32(startDate.Year()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+	endDate, parseErr := time.Parse("2006-01-02", req.EndDate)
+	if parseErr != nil {
+		return parseErr
+	}
 
 	// Final approval atomically moves the request from pending to approved and
-	// moves its days from the balance's pending bucket to the used bucket.
-	if err := s.repo.ApproveLeaveRequestWithBalance(ctx, ownerID, requestID, req.EmployeeID, req.LeaveTypeID, year, req.TotalDays); err != nil {
+	// moves every year's allocation from pending to used.
+	if err := s.repo.ApproveLeaveRequestWithAllocations(ctx, ownerID, requestID, req.EmployeeID, req.LeaveTypeID, leaveDayAllocations(startDate, endDate)); err != nil {
 		return err
 	}
 
@@ -246,28 +223,16 @@ func (s *Service) RejectLeave(ctx context.Context, ownerID, requestID, approverU
 		return err
 	}
 
-	stillPending, err := s.repo.RejectLeaveRequest(ctx, ownerID, requestID, reason)
-	if err != nil {
-		return err
-	}
-	// The request was approved/rejected/canceled between the read and this
-	// write; its days no longer sit in the pending bucket, so touching the
-	// balance here would corrupt it.
-	if !stillPending {
-		return domain.ErrLeaveRequestNotPending
-	}
-
-	// Remove pending days
 	startDate, parseErr := time.Parse("2006-01-02", req.StartDate)
 	if parseErr != nil {
 		return parseErr
 	}
-	year := int32(startDate.Year()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-
-	subErr := s.repo.SubtractPendingDays(ctx, ownerID, req.EmployeeID, req.LeaveTypeID, year, req.TotalDays)
-	if subErr != nil {
-		logger.Ctx(ctx).Error("failed to subtract pending days after rejection",
-			logger.Any("owner_id", ownerID), logger.Any("request_id", requestID), logger.Error(subErr))
+	endDate, parseErr := time.Parse("2006-01-02", req.EndDate)
+	if parseErr != nil {
+		return parseErr
+	}
+	if err := s.repo.RejectLeaveRequestWithBalance(ctx, ownerID, requestID, req.EmployeeID, req.LeaveTypeID, leaveDayAllocations(startDate, endDate), reason); err != nil {
+		return err
 	}
 
 	invalidateHRLeaveScope(ctx, ownerID)
@@ -302,24 +267,16 @@ func (s *Service) CancelLeaveRequest(ctx context.Context, ownerID, callerUserID,
 		return domain.ErrLeaveRequestNotPending
 	}
 
-	canceled, err := s.repo.CancelLeaveRequest(ctx, ownerID, requestID)
-	if err != nil {
-		return err
-	}
-	if !canceled {
-		// Approved, rejected, or canceled by something else between the read
-		// above and this write - not a failure, just no longer pending.
-		return domain.ErrLeaveRequestNotPending
-	}
-
 	startDate, parseErr := time.Parse("2006-01-02", req.StartDate)
 	if parseErr != nil {
 		return parseErr
 	}
-	year := int32(startDate.Year()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-	if subErr := s.repo.SubtractPendingDays(ctx, ownerID, req.EmployeeID, req.LeaveTypeID, year, req.TotalDays); subErr != nil {
-		logger.Ctx(ctx).Error("failed to subtract pending days after cancellation",
-			logger.Any("owner_id", ownerID), logger.Any("request_id", requestID), logger.Error(subErr))
+	endDate, parseErr := time.Parse("2006-01-02", req.EndDate)
+	if parseErr != nil {
+		return parseErr
+	}
+	if err := s.repo.CancelLeaveRequestWithBalance(ctx, ownerID, requestID, req.EmployeeID, req.LeaveTypeID, leaveDayAllocations(startDate, endDate)); err != nil {
+		return err
 	}
 
 	invalidateHRLeaveScope(ctx, ownerID)
@@ -396,6 +353,9 @@ func (s *Service) authorizedLeaveDecision(ctx context.Context, ownerID, requestI
 	req, err := s.repo.GetLeaveRequest(ctx, ownerID, requestID)
 	if err != nil {
 		return nil, nil, err
+	}
+	if req.EmployeeID == employeeID {
+		return nil, nil, domain.ErrLeaveSelfApproval
 	}
 	lt, err := s.repo.GetLeaveType(ctx, ownerID, req.LeaveTypeID)
 	if err != nil {
@@ -485,7 +445,7 @@ func (s *Service) GetLeaveBalances(ctx context.Context, ownerID, callerUserID, e
 
 func (s *Service) fetchBalances(ctx context.Context, ownerID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, error) {
 	if year == 0 {
-		year = int32(time.Now().UTC().Year()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		year = int32(time.Now().UTC().Year())
 	}
 	return s.repo.ListLeaveBalances(ctx, ownerID, employeeID, year)
 }
@@ -504,8 +464,8 @@ func (s *Service) GetLeaveCalendar(ctx context.Context, ownerID int64, params do
 
 func (s *Service) RunMonthlyAccrual(ctx context.Context) error {
 	now := time.Now().UTC()
-	currentMonth := int32(now.Month()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
-	currentYear := int32(now.Year())   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+	currentMonth := int32(now.Month())
+	currentYear := int32(now.Year())
 
 	ownerIDs, err := s.repo.ListDistinctOwnerIDs(ctx)
 	if err != nil {
@@ -524,6 +484,11 @@ func (s *Service) RunMonthlyAccrual(ctx context.Context) error {
 }
 
 func (s *Service) accrueForOwner(ctx context.Context, ownerID int64, year, month int32) error {
+	if month == 1 {
+		if err := s.repo.ApplyYearEndCarryover(ctx, ownerID, year-1, year); err != nil {
+			return err
+		}
+	}
 	leaveTypes, err := s.repo.ListAllActiveLeaveTypesForOwner(ctx, ownerID)
 	if err != nil {
 		return err
@@ -563,6 +528,32 @@ func (s *Service) accrueForOwner(ctx context.Context, ownerID int64, year, month
 	}
 
 	return nil
+}
+
+// leaveDayAllocations computes the authoritative whole-calendar-day count
+// from the dates. The current API has no half-day or work-calendar fields, so
+// a client-supplied total is deliberately ignored rather than trusted.
+func leaveDayAllocations(start, end time.Time) []domain.LeaveDayAllocation {
+	allocations := make([]domain.LeaveDayAllocation, 0, 2)
+	for current := start; !current.After(end); {
+		yearEnd := time.Date(current.Year(), time.December, 31, 0, 0, 0, 0, time.UTC)
+		segmentEnd := yearEnd
+		if end.Before(segmentEnd) {
+			segmentEnd = end
+		}
+		days := float64(int(segmentEnd.Sub(current).Hours()/24) + 1)
+		allocations = append(allocations, domain.LeaveDayAllocation{Year: int32(current.Year()), Days: days})
+		current = segmentEnd.AddDate(0, 0, 1)
+	}
+	return allocations
+}
+
+func totalAllocatedDays(allocations []domain.LeaveDayAllocation) float64 {
+	var total float64
+	for _, allocation := range allocations {
+		total += allocation.Days
+	}
+	return total
 }
 
 func derefStr(v *string) string {

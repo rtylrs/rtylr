@@ -65,30 +65,12 @@ func TestCreateLocation_RejectsEmptyName(t *testing.T) {
 	}
 }
 
-func TestCreateLocation_AcceptsValidName(t *testing.T) {
-	// With a nil repo this panics after the guard — guard should not fire.
-	// We only test that the validation check does not reject valid names.
-	input := domain.LocationInput{Name: "Main Branch"}
-	if input.Name == "" {
-		t.Error("name should not be empty")
-	}
-}
-
 // ─── CreateTable input guards ─────────────────────────────────────────────────
 
 func TestCreateTable_RejectsEmptyName(t *testing.T) {
 	s := &Service{}
 	if _, err := s.CreateTable(context.Background(), 1, domain.TableInput{}); err == nil {
 		t.Error("expected error for empty table name")
-	}
-}
-
-func TestCreateTable_DefaultsCapacityToFour(t *testing.T) {
-	// Service sets default capacity = 4 when <= 0.
-	// We can verify the guard runs without hitting a repo.
-	input := domain.TableInput{Name: "T1"}
-	if input.Name == "" {
-		t.Error("table name should be set")
 	}
 }
 
@@ -164,21 +146,21 @@ func TestHandlePaddleTransactionCompleted_RejectsEmptyTxID(t *testing.T) {
 
 func TestApplyDiscount_RejectsZeroOrderID(t *testing.T) {
 	s := &Service{}
-	if err := s.ApplyDiscount(context.Background(), 1, domain.DiscountInput{DiscountType: "pct", DiscountValue: 10}); err == nil {
+	if err := s.ApplyDiscount(context.Background(), 1, 1, domain.DiscountInput{DiscountType: "pct", DiscountValue: 10}); err == nil {
 		t.Error("expected error for zero order id")
 	}
 }
 
 func TestApplyDiscount_RejectsBlankType(t *testing.T) {
 	s := &Service{}
-	if err := s.ApplyDiscount(context.Background(), 1, domain.DiscountInput{OrderID: 1, DiscountValue: 10}); err == nil {
+	if err := s.ApplyDiscount(context.Background(), 1, 1, domain.DiscountInput{OrderID: 1, DiscountValue: 10}); err == nil {
 		t.Error("expected error for blank discount type")
 	}
 }
 
 func TestApplyDiscount_RejectsNegativeValue(t *testing.T) {
 	s := &Service{}
-	if err := s.ApplyDiscount(context.Background(), 1, domain.DiscountInput{OrderID: 1, DiscountType: "pct", DiscountValue: -5}); err == nil {
+	if err := s.ApplyDiscount(context.Background(), 1, 1, domain.DiscountInput{OrderID: 1, DiscountType: "pct", DiscountValue: -5}); err == nil {
 		t.Error("expected error for negative discount value")
 	}
 }

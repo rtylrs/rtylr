@@ -36,9 +36,7 @@ func NewService(_ context.Context, db *sql.DB, employees domain.EmployeeDirector
 }
 
 func invalidateBenefitsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(benefitsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(benefitsScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.BenefitPlan, error) {

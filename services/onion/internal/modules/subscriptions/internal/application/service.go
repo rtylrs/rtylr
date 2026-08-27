@@ -23,10 +23,10 @@ const (
 // invalidateSubscriptionScope clears every subscription + user-scoped cache
 // entry for the owner. Called by every mutation that changes plan/seat/state.
 func invalidateSubscriptionScope(ctx context.Context, ownerID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.SubscriptionPrefix(ownerID))
-		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(ownerID))
-	}
+	cacher.InvalidateScope(ctx,
+		cacheKeys.SubscriptionPrefix(ownerID),
+		cacheKeys.UserPrefix(ownerID),
+	)
 }
 
 type Service struct {
@@ -106,6 +106,13 @@ func (s *Service) GetOwnerApps(ctx context.Context, ownerID int64) ([]string, er
 		return nil, createErr
 	}
 	return s.repo.GetOwnerApps(ctx, ownerID)
+}
+
+// ExpireTrialSubscriptions transitions trials whose promised end date has
+// passed. The request middleware also checks the timestamp, so the nightly job
+// is durable cleanup rather than the only enforcement point.
+func (s *Service) ExpireTrialSubscriptions(ctx context.Context) error {
+	return s.repo.ExpireTrialSubscriptions(ctx)
 }
 
 // GetBillingDetail returns the current month's usage line items and totals.

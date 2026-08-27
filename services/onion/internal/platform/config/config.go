@@ -26,7 +26,6 @@ const (
 	// DefaultJWTDuration is used when JWT_DURATION is not configured. Access
 	// tokens must always have a bounded lifetime.
 	DefaultJWTDuration = 24 * time.Hour
-	MinJWTSecretLength = 32
 )
 
 const (
@@ -419,10 +418,6 @@ func LoadAndValidate() (*AppConfig, error) {
 			missing = append(missing, "JWT_SECRET")
 		}
 	}
-	if cfg.JWTSecret != "" && len(cfg.JWTSecret) < MinJWTSecretLength {
-		return nil, fmt.Errorf("JWT_SECRET must be at least %d characters", MinJWTSecretLength)
-	}
-
 	if len(missing) > 0 {
 		return nil, fmt.Errorf("missing critical environment variable(s): %s", strings.Join(missing, ", "))
 	}

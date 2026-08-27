@@ -10,19 +10,14 @@ import (
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
-	"github.com/voxire/onion/internal/platform/tenant"
 	hrattendancev1 "github.com/voxire/voxie/gen/go/hr/attendance/v1"
 )
 
 func GetAttendanceRoutes() []string { return []string{"/hr/attendance"} }
 
-type EmployeeBusinessResolver interface {
-	GetEmployeeBusinessID(ctx context.Context, ownerID, employeeID int64) (int64, error)
-}
-
 type GetAttendanceHandler struct {
-	Service                  *application.Service
-	EmployeeBusinessResolver EmployeeBusinessResolver
+	Service *application.Service
+	Resolve func(ctx context.Context) (businessID, employeeID int64, err error)
 }
 
 type GetAttendanceRequest struct {
@@ -42,22 +37,21 @@ type GetAttendanceResponse struct {
 }
 
 func (h *GetAttendanceHandler) Serve(ctx context.Context, req *GetAttendanceRequest) (GetAttendanceResponse, error) {
+	if h.Resolve == nil {
+		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
+	}
 	device := authPkg.DeviceCtx(ctx)
-	if device.IsAnonymous || device.User == nil || req.OwnerID <= 0 || req.EmployeeID <= 0 {
+	if device.IsAnonymous || device.User == nil {
 		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
 	}
 	if !authPkg.HasAppPermission(device.User, authorization.AppHR, "hr:employees:view") {
 		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
 	}
-	businessID, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
-	if err != nil || businessID != req.OwnerID {
+	businessID, employeeID, err := h.Resolve(ctx)
+	if err != nil {
 		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
 	}
-	if h.EmployeeBusinessResolver == nil {
-		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
-	}
-	employeeBusinessID, err := h.EmployeeBusinessResolver.GetEmployeeBusinessID(ctx, businessID, req.EmployeeID)
-	if err != nil || employeeBusinessID != businessID {
+	if req.OwnerID <= 0 || req.EmployeeID <= 0 || req.OwnerID != businessID || req.EmployeeID != employeeID {
 		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
 	}
 
@@ -66,14 +60,14 @@ func (h *GetAttendanceHandler) Serve(ctx context.Context, req *GetAttendanceRequ
 		limit = 50
 	}
 
-	records, total, err := h.Service.GetMyAttendance(ctx, businessID, req.EmployeeID, domain.ListAttendanceParams{
+	records, total, err := h.Service.GetMyAttendance(ctx, businessID, employeeID, domain.ListAttendanceParams{
 		DateFrom: req.DateFrom,
 		DateTo:   req.DateTo,
 		Limit:    limit,
 		Offset:   req.Offset,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to get attendance", logger.Any("owner_id", req.OwnerID), logger.Any("employee_id", req.EmployeeID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to get attendance", logger.Any("owner_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
 		return GetAttendanceResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get attendance")
 	}
 

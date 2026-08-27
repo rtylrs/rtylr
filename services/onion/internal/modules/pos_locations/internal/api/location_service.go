@@ -64,6 +64,9 @@ func (a *LocationAPI) CreateLocation(ctx context.Context, req *poslocationv1.Cre
 		IsActive:   isActive,
 	})
 	if createErr != nil {
+		if errors.Is(createErr, domain.ErrLocationLimitExceeded) {
+			return nil, onekiterrors.New(http.StatusPaymentRequired, "Your plan's location limit has been reached")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create location")
 	}
 	return &poslocationv1.CreateLocationResponse{LocationId: id, Message: "Location created successfully"}, nil

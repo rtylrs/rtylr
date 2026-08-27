@@ -78,6 +78,13 @@ FROM subscriptions s
 JOIN plans p ON p.id = s.plan_id
 WHERE s.owner_id = ?;
 
+-- name: ExpireTrialSubscriptions :exec
+UPDATE subscriptions
+SET status = 'expired', updated_at = CURRENT_TIMESTAMP
+WHERE status = 'trial'
+  AND trial_ends_at IS NOT NULL
+  AND trial_ends_at <= CURRENT_TIMESTAMP;
+
 -- name: UpdateSeatCount :exec
 UPDATE subscriptions SET seat_count = ?, updated_at = CURRENT_TIMESTAMP WHERE owner_id = ?;
 

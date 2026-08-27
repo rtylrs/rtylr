@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"strconv"
 
 	"github.com/voxire/onion/internal/modules/kpis/internal/domain"
 	"github.com/voxire/onion/internal/modules/kpis/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -65,31 +65,8 @@ func (r *Repository) GetKPIs(ctx context.Context, businessID int64) (domain.KPIS
 			logger.Ctx(ctx).Error("Failed to get revenue", logger.Error(err))
 		}
 	} else {
-		kpi.Revenue = parseDecimal(revenue)
+		kpi.Revenue = sqlutil.DecimalToFloat(revenue)
 	}
 
 	return kpi, nil
-}
-
-func parseDecimal(v interface{}) float64 {
-	switch n := v.(type) {
-	case float64:
-		return n
-	case []byte:
-		f, err := strconv.ParseFloat(string(n), 64)
-		if err != nil {
-			logger.Global().Warn("failed to parse KPI decimal from database", logger.Error(err))
-			return 0
-		}
-		return f
-	case string:
-		f, err := strconv.ParseFloat(n, 64)
-		if err != nil {
-			logger.Global().Warn("failed to parse KPI decimal from database", logger.Error(err))
-			return 0
-		}
-		return f
-	default:
-		return 0
-	}
 }

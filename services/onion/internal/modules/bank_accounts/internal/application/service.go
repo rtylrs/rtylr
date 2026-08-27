@@ -7,9 +7,9 @@ import (
 
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/domain"
 	"github.com/voxire/onion/internal/modules/bank_accounts/internal/infrastructure"
-	"github.com/voxire/onion/internal/platform/money"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 const (
@@ -33,9 +33,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateBankAccountsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(bankAccountsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(bankAccountsScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.BankAccount, error) {

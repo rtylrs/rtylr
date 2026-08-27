@@ -13,6 +13,7 @@ var (
 	ErrTokenAlreadyUsed   = errors.New("invite token already used")
 	ErrTokenExpired       = errors.New("invite token expired")
 	ErrForbidden          = errors.New("permission denied")
+	ErrSeatLimitExceeded  = errors.New("subscription seat limit exceeded")
 	ErrGroupNotFound      = errors.New("group not found")
 	ErrDelegationCeiling  = errors.New("authorization exceeds delegation ceiling")
 )

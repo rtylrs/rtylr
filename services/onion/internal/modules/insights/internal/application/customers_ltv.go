@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -18,7 +17,10 @@ type LTVBucketPayload struct {
 
 // GetLTVDistribution returns the bucketed LTV histogram for the owner.
 func (s *Service) GetLTVDistribution(ctx context.Context, businessID int64) ([]LTVBucketPayload, error) {
-	key := fmt.Sprintf("insights:%d:customers:ltv", businessID)
+	key, err := s.insightsCacheKey(ctx, businessID, "customers:ltv")
+	if err != nil {
+		return nil, err
+	}
 	type result struct {
 		Buckets []LTVBucketPayload
 	}

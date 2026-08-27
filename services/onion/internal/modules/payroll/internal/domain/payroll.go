@@ -115,6 +115,18 @@ type PayrollRunInput struct {
 	PeriodLabel string `json:"period_label"`
 }
 
+type PayrollRecordInput struct {
+	StaffID       int64
+	PeriodStart   time.Time
+	PeriodEnd     time.Time
+	PeriodLabel   string
+	RegularHours  float64
+	OvertimeHours float64
+	BasePay       float64
+	OvertimePay   float64
+	NetPay        float64
+}
+
 type PayrollMarkPaidInput struct {
 	ID int64 `json:"id"`
 }
@@ -138,11 +150,6 @@ type StaffPayRates struct {
 	Salary       float64
 	HourlyRate   float64
 	OvertimeRate float64
-}
-
-// FloatToCents converts standard float amount to integer cents.
-func FloatToCents(amount float64) int64 {
-	return int64(amount * 100)
 }
 
 // CentsToFloat converts integer cents to standard float amount.

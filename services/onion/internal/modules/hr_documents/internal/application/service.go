@@ -28,9 +28,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateHRDocumentsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrDocumentsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrDocumentsScope, businessID))
 }
 
 func (s *Service) UploadDocument(ctx context.Context, businessID int64, params domain.CreateDocumentParams) (*domain.EmployeeDocumentRecord, error) {

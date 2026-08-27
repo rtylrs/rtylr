@@ -1,4 +1,5 @@
 -- name: ListGrants :many
+-- cross-schema read from plans (subscriptions module) — include plan names in console access-grant results.
 SELECT g.id, g.user_id, COALESCE(u.full_name, '') AS user_name, g.plan_id, p.name AS plan_name,
        g.granted_by, adm.full_name AS granter_name, g.note, g.expires_at, g.revoked_at, g.created_at,
        u.email AS user_email, b.id AS business_id, b.name AS business_name

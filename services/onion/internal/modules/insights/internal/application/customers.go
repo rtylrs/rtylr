@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -18,7 +17,10 @@ type CustomerKPIPayload struct {
 
 // GetCustomerKPIs returns aggregate customer counters for the owner.
 func (s *Service) GetCustomerKPIs(ctx context.Context, businessID int64) (CustomerKPIPayload, error) {
-	key := fmt.Sprintf("insights:%d:customers:kpis", businessID)
+	key, err := s.insightsCacheKey(ctx, businessID, "customers:kpis")
+	if err != nil {
+		return CustomerKPIPayload{}, err
+	}
 	out, err := cacher.Of[CustomerKPIPayload]().GetOrComputeSingle(ctx, key, func(ctx context.Context) (CustomerKPIPayload, error) {
 		k, rerr := s.repo.GetCustomerKPIs(ctx, businessID)
 		if rerr != nil {

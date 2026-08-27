@@ -18,7 +18,10 @@ type CashFlowPointPayload struct {
 // GetCashFlowSeries returns the daily (inflow, outflow) series for the
 // given window.
 func (s *Service) GetCashFlowSeries(ctx context.Context, businessID int64, from, to time.Time) ([]CashFlowPointPayload, error) {
-	key := fmt.Sprintf("insights:%d:financial:cashflow:%s:%s", businessID, from.Format("2006-01-02"), to.Format("2006-01-02"))
+	key, err := s.insightsCacheKey(ctx, businessID, fmt.Sprintf("financial:cashflow:%s:%s", from.Format("2006-01-02"), to.Format("2006-01-02")))
+	if err != nil {
+		return nil, err
+	}
 	type result struct {
 		Points []CashFlowPointPayload
 	}

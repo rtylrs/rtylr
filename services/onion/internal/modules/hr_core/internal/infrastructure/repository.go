@@ -16,6 +16,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 // isDuplicateUserIDError reports whether err is a MySQL duplicate-entry error
@@ -92,6 +93,34 @@ func (r *Repository) GetEmployeeIDByUserID(ctx context.Context, businessID, user
 	return id, nil
 }
 
+// ListActiveLeaveTypeIDs is intentionally kept in hr_core because employee
+// creation owns the transaction that seeds the employee's balance rows. The
+// leave module remains independent of hr_core; this read is the small shared
+// boundary required to avoid creating employees with no balances.
+func (r *Repository) ListActiveLeaveTypeIDs(ctx context.Context, businessID int64) ([]int64, error) {
+	rows, err := r.pool.QueryContext(ctx,
+		"SELECT id FROM hr_leave_types WHERE business_id = ? AND is_active = TRUE ORDER BY id",
+		businessID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	ids := make([]int64, 0)
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return ids, nil
+}
+
 func (r *Repository) CreateEmployee(ctx context.Context, businessID int64, emp domain.EmployeeRecord) (*domain.EmployeeRecord, error) {
 	result, err := r.queries.CreateEmployee(ctx, employeeToParams(businessID, emp))
 	if err != nil {
@@ -113,14 +142,14 @@ func (r *Repository) CreateEmployee(ctx context.Context, businessID int64, emp d
 
 func (r *Repository) UpdateEmployee(ctx context.Context, businessID int64, emp domain.EmployeeRecord) (*domain.EmployeeRecord, error) {
 	err := r.queries.UpdateEmployee(ctx, sqlc.UpdateEmployeeParams{
-		UserID:                nullInt64(emp.UserID),
-		DepartmentID:          nullInt64(emp.DepartmentID),
-		LocationID:            nullInt64(emp.LocationID),
-		WorkScheduleID:        nullInt64(emp.WorkScheduleID),
+		UserID:                sqlutil.NullInt64(emp.UserID),
+		DepartmentID:          sqlutil.NullInt64(emp.DepartmentID),
+		LocationID:            sqlutil.NullInt64(emp.LocationID),
+		WorkScheduleID:        sqlutil.NullInt64(emp.WorkScheduleID),
 		FirstName:             emp.FirstName,
 		LastName:              emp.LastName,
 		Email:                 emp.Email,
-		Phone:                 nullString(emp.Phone),
+		Phone:                 sqlutil.NullString(emp.Phone),
 		EmploymentType:        emp.EmploymentType,
 		Status:                emp.Status,
 		Salary:                centsToNullDecimalString(emp.SalaryCents),
@@ -128,10 +157,10 @@ func (r *Repository) UpdateEmployee(ctx context.Context, businessID int64, emp d
 		OvertimeRate:          centsToNullDecimalString(emp.OvertimeRateCents),
 		StartDate:             nullTime(emp.StartDate),
 		EndDate:               nullTime(emp.EndDate),
-		Address:               nullString(emp.Address),
-		EmergencyContactName:  nullString(emp.EmergencyContactName),
-		EmergencyContactPhone: nullString(emp.EmergencyContactPhone),
-		Notes:                 nullString(emp.Notes),
+		Address:               sqlutil.NullString(emp.Address),
+		EmergencyContactName:  sqlutil.NullString(emp.EmergencyContactName),
+		EmergencyContactPhone: sqlutil.NullString(emp.EmergencyContactPhone),
+		Notes:                 sqlutil.NullString(emp.Notes),
 		ID:                    emp.ID,
 		BusinessID:            businessID,
 	})
@@ -145,6 +174,45 @@ func (r *Repository) UpdateEmployee(ctx context.Context, businessID int64, emp d
 	emp.OwnerID = businessID
 	emp.BusinessID = businessID
 	return &emp, nil
+}
+
+func (r *Repository) DeactivateEmployee(ctx context.Context, businessID, employeeID int64, endDate time.Time) error {
+	result, err := r.queries.DeactivateEmployee(ctx, sqlc.DeactivateEmployeeParams{
+		EndDate:    nullTime(endDate),
+		ID:         employeeID,
+		BusinessID: businessID,
+	})
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to deactivate employee", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
+		return err
+	}
+	if affected, err := result.RowsAffected(); err != nil {
+		return err
+	} else if affected == 0 {
+		return domain.ErrEmployeeNotFound
+	}
+	return nil
+}
+
+func (r *Repository) LinkInviteAcceptance(ctx context.Context, businessID, employeeID, userID int64) error {
+	result, err := r.queries.LinkInviteAcceptance(ctx, sqlc.LinkInviteAcceptanceParams{
+		UserID:     sqlutil.NullInt64(userID),
+		ID:         employeeID,
+		BusinessID: businessID,
+	})
+	if err != nil {
+		if isDuplicateUserIDError(err) {
+			return domain.ErrUserAlreadyLinked
+		}
+		logger.Ctx(ctx).Error("failed to link invite acceptance", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(err))
+		return err
+	}
+	if affected, err := result.RowsAffected(); err != nil {
+		return err
+	} else if affected == 0 {
+		return domain.ErrEmployeeNotFound
+	}
+	return nil
 }
 
 func (r *Repository) CreateEmployeeWithBalances(ctx context.Context, businessID int64, emp domain.EmployeeRecord, leaveTypeIDs []int64) (*domain.EmployeeRecord, error) {
@@ -276,10 +344,10 @@ func (r *Repository) CreateLocation(ctx context.Context, businessID int64, loc d
 		OwnerID:    businessID,
 		BusinessID: businessID,
 		Name:       loc.Name,
-		Address:    nullString(loc.Address),
-		City:       nullString(loc.City),
-		Country:    nullString(loc.Country),
-		Timezone:   nullString(loc.Timezone),
+		Address:    sqlutil.NullString(loc.Address),
+		City:       sqlutil.NullString(loc.City),
+		Country:    sqlutil.NullString(loc.Country),
+		Timezone:   sqlutil.NullString(loc.Timezone),
 		Latitude:   nullFloat64(loc.Latitude),
 		Longitude:  nullFloat64(loc.Longitude),
 		IsDefault:  loc.IsDefault,
@@ -301,10 +369,10 @@ func (r *Repository) CreateLocation(ctx context.Context, businessID int64, loc d
 func (r *Repository) UpdateLocation(ctx context.Context, businessID int64, loc domain.LocationRecord) (*domain.LocationRecord, error) {
 	err := r.queries.UpdateLocation(ctx, sqlc.UpdateLocationParams{
 		Name:       loc.Name,
-		Address:    nullString(loc.Address),
-		City:       nullString(loc.City),
-		Country:    nullString(loc.Country),
-		Timezone:   nullString(loc.Timezone),
+		Address:    sqlutil.NullString(loc.Address),
+		City:       sqlutil.NullString(loc.City),
+		Country:    sqlutil.NullString(loc.Country),
+		Timezone:   sqlutil.NullString(loc.Timezone),
 		Latitude:   nullFloat64(loc.Latitude),
 		Longitude:  nullFloat64(loc.Longitude),
 		IsDefault:  loc.IsDefault,
@@ -340,9 +408,9 @@ func (r *Repository) CreateDepartment(ctx context.Context, businessID int64, dep
 		OwnerID:               businessID,
 		BusinessID:            businessID,
 		LocationID:            dept.LocationID,
-		ParentDepartmentID:    nullInt64(dept.ParentDepartmentID),
+		ParentDepartmentID:    sqlutil.NullInt64(dept.ParentDepartmentID),
 		Name:                  dept.Name,
-		DefaultWorkScheduleID: nullInt64(dept.DefaultWorkScheduleID),
+		DefaultWorkScheduleID: sqlutil.NullInt64(dept.DefaultWorkScheduleID),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to create department", logger.Any("business_id", businessID), logger.Error(err))
@@ -361,9 +429,9 @@ func (r *Repository) CreateDepartment(ctx context.Context, businessID int64, dep
 func (r *Repository) UpdateDepartment(ctx context.Context, businessID int64, dept domain.DepartmentRecord) (*domain.DepartmentRecord, error) {
 	err := r.queries.UpdateHRDepartment(ctx, sqlc.UpdateHRDepartmentParams{
 		LocationID:            dept.LocationID,
-		ParentDepartmentID:    nullInt64(dept.ParentDepartmentID),
+		ParentDepartmentID:    sqlutil.NullInt64(dept.ParentDepartmentID),
 		Name:                  dept.Name,
-		DefaultWorkScheduleID: nullInt64(dept.DefaultWorkScheduleID),
+		DefaultWorkScheduleID: sqlutil.NullInt64(dept.DefaultWorkScheduleID),
 		ID:                    dept.ID,
 		BusinessID:            businessID,
 	})
@@ -486,7 +554,7 @@ func (r *Repository) CreateRole(ctx context.Context, businessID int64, role doma
 		OwnerID:     businessID,
 		BusinessID:  businessID,
 		Name:        role.Name,
-		Description: nullString(role.Description),
+		Description: sqlutil.NullString(role.Description),
 		Permissions: json.RawMessage(role.Permissions),
 		IsSystem:    role.IsSystem,
 	})
@@ -507,7 +575,7 @@ func (r *Repository) CreateRole(ctx context.Context, businessID int64, role doma
 func (r *Repository) UpdateRole(ctx context.Context, businessID int64, role domain.RoleRecord) (*domain.RoleRecord, error) {
 	err := r.queries.UpdateRole(ctx, sqlc.UpdateRoleParams{
 		Name:        role.Name,
-		Description: nullString(role.Description),
+		Description: sqlutil.NullString(role.Description),
 		Permissions: json.RawMessage(role.Permissions),
 		ID:          role.ID,
 		BusinessID:  businessID,
@@ -631,7 +699,7 @@ func (r *Repository) UpsertHRConfig(ctx context.Context, businessID int64, cfg d
 		FiscalYearStartMonth:  cfg.FiscalYearStartMonth,
 		DefaultCurrency:       cfg.DefaultCurrency,
 		DefaultTimezone:       cfg.DefaultTimezone,
-		DefaultWorkScheduleID: nullInt64(cfg.DefaultWorkScheduleID),
+		DefaultWorkScheduleID: sqlutil.NullInt64(cfg.DefaultWorkScheduleID),
 		OvertimeEnabled:       cfg.OvertimeEnabled,
 		OvertimeMultiplier:    strconv.FormatFloat(cfg.OvertimeMultiplier, 'f', 2, 64),
 		DirectoryEnabled:      cfg.DirectoryEnabled,
@@ -653,7 +721,7 @@ func (r *Repository) SeedDefaultRoles(ctx context.Context, businessID int64, rol
 			OwnerID:     businessID,
 			BusinessID:  businessID,
 			Name:        role.Name,
-			Description: nullString(role.Description),
+			Description: sqlutil.NullString(role.Description),
 			Permissions: json.RawMessage(role.Permissions),
 			IsSystem:    role.IsSystem,
 		})
@@ -772,8 +840,8 @@ func (r *Repository) UpsertApprovalChain(ctx context.Context, businessID int64, 
 			ApprovalChainID:    chainID,
 			LevelOrder:         level.LevelOrder,
 			ApproverType:       level.ApproverType,
-			ApproverRoleID:     nullInt64(level.ApproverRoleID),
-			ApproverEmployeeID: nullInt64(level.ApproverEmployeeID),
+			ApproverRoleID:     sqlutil.NullInt64(level.ApproverRoleID),
+			ApproverEmployeeID: sqlutil.NullInt64(level.ApproverEmployeeID),
 		})
 		if err != nil {
 			_ = tx.Rollback()
@@ -823,14 +891,14 @@ func employeeToParams(businessID int64, emp domain.EmployeeRecord) sqlc.CreateEm
 	return sqlc.CreateEmployeeParams{
 		OwnerID:               businessID,
 		BusinessID:            businessID,
-		UserID:                nullInt64(emp.UserID),
-		DepartmentID:          nullInt64(emp.DepartmentID),
-		LocationID:            nullInt64(emp.LocationID),
-		WorkScheduleID:        nullInt64(emp.WorkScheduleID),
+		UserID:                sqlutil.NullInt64(emp.UserID),
+		DepartmentID:          sqlutil.NullInt64(emp.DepartmentID),
+		LocationID:            sqlutil.NullInt64(emp.LocationID),
+		WorkScheduleID:        sqlutil.NullInt64(emp.WorkScheduleID),
 		FirstName:             emp.FirstName,
 		LastName:              emp.LastName,
 		Email:                 emp.Email,
-		Phone:                 nullString(emp.Phone),
+		Phone:                 sqlutil.NullString(emp.Phone),
 		EmploymentType:        emp.EmploymentType,
 		Status:                emp.Status,
 		Salary:                centsToNullDecimalString(emp.SalaryCents),
@@ -838,10 +906,10 @@ func employeeToParams(businessID int64, emp domain.EmployeeRecord) sqlc.CreateEm
 		OvertimeRate:          centsToNullDecimalString(emp.OvertimeRateCents),
 		StartDate:             nullTime(emp.StartDate),
 		EndDate:               nullTime(emp.EndDate),
-		Address:               nullString(emp.Address),
-		EmergencyContactName:  nullString(emp.EmergencyContactName),
-		EmergencyContactPhone: nullString(emp.EmergencyContactPhone),
-		Notes:                 nullString(emp.Notes),
+		Address:               sqlutil.NullString(emp.Address),
+		EmergencyContactName:  sqlutil.NullString(emp.EmergencyContactName),
+		EmergencyContactPhone: sqlutil.NullString(emp.EmergencyContactPhone),
+		Notes:                 sqlutil.NullString(emp.Notes),
 	}
 }
 
@@ -916,14 +984,6 @@ func setupStepFromRow(row sqlc.HrSetupStep) domain.SetupStepRecord {
 		CreatedAt:   row.CreatedAt,
 		UpdatedAt:   row.UpdatedAt,
 	}
-}
-
-func nullInt64(v int64) sql.NullInt64 {
-	return sql.NullInt64{Int64: v, Valid: v != 0}
-}
-
-func nullString(v string) sql.NullString {
-	return sql.NullString{String: v, Valid: v != ""}
 }
 
 // centsToNullDecimalString renders an integer cents amount as the DECIMAL(10,2)

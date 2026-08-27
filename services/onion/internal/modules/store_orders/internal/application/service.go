@@ -103,8 +103,11 @@ func validateOrder(input domain.StoreOrderInput) error {
 	if input.Subtotal < 0 || input.Tax < 0 || input.ShippingCost < 0 || input.Total < 0 {
 		return domain.ErrInvalidAmount
 	}
+	if len(input.Items) == 0 && (input.Subtotal != 0 || input.Tax != 0 || input.ShippingCost != 0 || input.Total != 0) {
+		return domain.ErrInvalidAmount
+	}
 	for _, item := range input.Items {
-		if item.Quantity <= 0 || item.Price < 0 || item.Total < 0 {
+		if item.ProductID <= 0 || item.Quantity <= 0 || item.Price < 0 || item.Total < 0 {
 			return domain.ErrInvalidAmount
 		}
 	}

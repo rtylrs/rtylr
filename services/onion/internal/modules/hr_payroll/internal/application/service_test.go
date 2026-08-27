@@ -278,6 +278,53 @@ func TestApproverMatchesChain_RejectsUnmatchedApprover(t *testing.T) {
 	}
 }
 
+func TestApproverMatchesChain_RejectsMultiLevelChainWithoutPersistedCursor(t *testing.T) {
+	s := &Service{permissions: fakePermissionProvider{allowed: true}}
+	allowed, err := s.approverMatchesChain(context.Background(), 1001, 4101, []domain.ApprovalLevelInfo{
+		{LevelOrder: 1, ApproverRoleID: 7},
+		{LevelOrder: 2, ApproverRoleID: 8},
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if allowed {
+		t.Fatal("expected multi-level chain to fail closed")
+	}
+}
+
+func TestApproverMatchesChain_RejectsNonFirstLevel(t *testing.T) {
+	s := &Service{permissions: fakePermissionProvider{allowed: true}}
+	allowed, err := s.approverMatchesChain(context.Background(), 1001, 4101, []domain.ApprovalLevelInfo{
+		{LevelOrder: 2, ApproverEmployeeID: 4101},
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if allowed {
+		t.Fatal("expected non-first approval level to be rejected")
+	}
+}
+
+func TestCalculateOvertimePay_UsesWeightedMinutes(t *testing.T) {
+	// 60 minutes at 2x plus 60 minutes at 1.5x equals 210 weighted minutes,
+	// not 120 minutes multiplied by an unweighted average in a later step.
+	got := calculateOvertimePay(60, 210, 0, 1.5)
+	if got != 210 {
+		t.Fatalf("overtime pay = %.2f, want 210.00", got)
+	}
+}
+
+func TestPayrollPayCents_ComposesRoundedComponents(t *testing.T) {
+	basePayCents, overtimePayCents, netPayCents := calculatePayCents(10.13, 15.19)
+
+	if basePayCents != 1013 || overtimePayCents != 1519 {
+		t.Fatalf("component cents = %d + %d, want 1013 + 1519", basePayCents, overtimePayCents)
+	}
+	if netPayCents != 2532 {
+		t.Fatalf("net pay cents = %d, want 2532", netPayCents)
+	}
+}
+
 func TestNoopFinancePoster_IsFinanceJournalPoster(_ *testing.T) {
 	var _ domain.FinanceJournalPoster = noopFinancePoster{}
 }

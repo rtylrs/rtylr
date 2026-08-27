@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
@@ -132,7 +133,7 @@ func (r *Repository) getTransferItemsBatch(ctx context.Context, transfers []doma
 			ID:         row.ID,
 			TransferID: row.TransferID,
 			ProductID:  row.ProductID,
-			Quantity:   parseDecimal(row.Quantity),
+			Quantity:   sqlutil.ParseDecimal(row.Quantity),
 		}
 		if row.CreatedAt.Valid {
 			item.CreatedAt = row.CreatedAt.Time
@@ -170,7 +171,7 @@ func (r *Repository) CreateStockTransfer(ctx context.Context, businessID int64, 
 		BusinessID:      businessID,
 		FromWarehouseID: input.FromWarehouseID,
 		ToWarehouseID:   input.ToWarehouseID,
-		Notes:           nullString(input.Notes),
+		Notes:           sqlutil.NullString(input.Notes),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create stock transfer", logger.Error(err))
@@ -380,21 +381,5 @@ func (r *Repository) receiveTransfer(ctx context.Context, businessID, id int64) 
 	return tx.Commit()
 }
 
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
-}
-
 // parseDecimal converts a DB decimal string to float64, logging corrupt
 // values instead of silently coercing them to 0.
-func parseDecimal(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse stock-transfer decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}

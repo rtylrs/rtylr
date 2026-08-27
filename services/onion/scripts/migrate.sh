@@ -21,9 +21,16 @@ DB_NAME="${DB_NAME:?DB_NAME is required}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SCHEMAS_DIR="$PROJECT_ROOT/internal/platform/database/schemas"
+# The schemas repository owns the canonical dependency order used by both
+# migration entry points.
+# shellcheck source=../internal/platform/database/schemas/migration_order.sh
+source "$SCHEMAS_DIR/migration_order.sh"
 
 mysql_cmd() {
+    # The CLI otherwise negotiates latin1, which cannot represent the emoji
+    # defaults used by flow/schema.sql and other schemas.
     MYSQL_PWD="$DB_PASSWORD" mysql \
+        --default-character-set=utf8mb4 \
         --host="$DB_HOST" \
         --port="$DB_PORT" \
         --user="$DB_USER" \
@@ -50,7 +57,7 @@ already_applied() {
 
 record_applied() {
     local filename="$1"
-    mysql_cmd -e "INSERT INTO schema_migrations (filename) VALUES ('$filename');" 2>/dev/null
+    mysql_cmd -e "INSERT IGNORE INTO schema_migrations (filename) VALUES ('$filename');" 2>/dev/null
 }
 
 APPLIED=0
@@ -109,7 +116,7 @@ apply_migration() {
     APPLIED=$((APPLIED + 1))
 }
 
-for dir in shared rtylr voxire erp hr hr_core hr_attendance hr_documents hr_leave hr_onboarding hr_overtime hr_payroll hr_performance hr_setup hr_shifts hr_time crm crm_migrations finance flow pos hub store support book hr_dashboard recruit insights oauth ai migrations; do
+for dir in "${SCHEMA_MIGRATION_DIRS[@]}"; do
     schema_dir="$SCHEMAS_DIR/$dir"
     if [ ! -d "$schema_dir" ]; then
         continue
@@ -125,6 +132,13 @@ for dir in shared rtylr voxire erp hr hr_core hr_attendance hr_documents hr_leav
 
         apply_migration "$filename" "$f"
     done
+done
+
+# Module-owned migrations live beside their sqlc input. Apply them after the
+# canonical schema set so module changes can build on shared tables.
+shopt -s nullglob
+for f in "$PROJECT_ROOT"/internal/modules/*/sql/migration_*.sql; do
+    apply_migration "${f#"$PROJECT_ROOT/"}" "$f"
 done
 
 # Apply cross-schema migrations after all owning schemas exist. Their

@@ -13,11 +13,21 @@ type Repository interface {
 	ListLeaveRequests(ctx context.Context, ownerID int64, params ListLeaveRequestsParams) ([]LeaveRequestRecord, int64, error)
 	GetLeaveRequest(ctx context.Context, ownerID, requestID int64) (*LeaveRequestRecord, error)
 	CreateLeaveRequest(ctx context.Context, ownerID int64, req LeaveRequestRecord) (*LeaveRequestRecord, error)
+	CreateLeaveRequestWithBalance(ctx context.Context, ownerID int64, req LeaveRequestRecord, allocations []LeaveDayAllocation) (*LeaveRequestRecord, error)
 	ApproveLeaveRequest(ctx context.Context, ownerID, requestID int64) error
 	ApproveLeaveRequestWithBalance(ctx context.Context, ownerID, requestID, employeeID, leaveTypeID int64, year int32, days float64) error
-	AdvanceLeaveApprovalLevel(ctx context.Context, ownerID, requestID int64) error
+	ApproveLeaveRequestWithAllocations(ctx context.Context, ownerID, requestID, employeeID, leaveTypeID int64, allocations []LeaveDayAllocation) error
+	AdvanceLeaveApprovalLevel(ctx context.Context, ownerID, requestID, currentLevel int32) error
 	RejectLeaveRequest(ctx context.Context, ownerID, requestID int64, reason string) (bool, error)
+	RejectLeaveRequestWithBalance(
+		ctx context.Context,
+		ownerID, requestID int64,
+		employeeID, leaveTypeID int64,
+		allocations []LeaveDayAllocation,
+		reason string,
+	) error
 	CancelLeaveRequest(ctx context.Context, ownerID, requestID int64) (bool, error)
+	CancelLeaveRequestWithBalance(ctx context.Context, ownerID, requestID, employeeID, leaveTypeID int64, allocations []LeaveDayAllocation) error
 	ListOverlappingLeaveRequests(ctx context.Context, ownerID, employeeID int64, startDate, endDate string) ([]LeaveRequestRecord, error)
 	ListLeaveCalendar(ctx context.Context, ownerID int64, dateFrom, dateTo string) ([]LeaveRequestRecord, error)
 
@@ -34,6 +44,7 @@ type Repository interface {
 	ListAllActiveLeaveTypesForOwner(ctx context.Context, ownerID int64) ([]LeaveTypeRecord, error)
 	ListBalancesForAccrual(ctx context.Context, ownerID int64, year, currentMonth int32) ([]LeaveBalanceRecord, error)
 	AddToEntitledDays(ctx context.Context, ownerID, employeeID, leaveTypeID int64, year int32, days float64, month int32) error
+	ApplyYearEndCarryover(ctx context.Context, ownerID int64, previousYear, currentYear int32) error
 }
 
 type ApprovalChainProvider interface {

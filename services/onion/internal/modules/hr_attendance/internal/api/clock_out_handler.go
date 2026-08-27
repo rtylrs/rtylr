@@ -10,6 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrattendancev1 "github.com/voxire/voxie/gen/go/hr/attendance/v1"
 )
 
@@ -38,12 +39,19 @@ func (h *ClockOutHandler) Serve(ctx context.Context, req *ClockOutRequest) (Cloc
 		return ClockOutResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	updated, err := h.Service.ClockOut(ctx, device.User.UserID, req.EmployeeID)
+	// Derive the tenant scope from the JWT; the sibling clock-in handler
+	// historically treated the user id as an owner id (#817).
+	businessID, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if err != nil {
+		return ClockOutResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	updated, err := h.Service.ClockOut(ctx, businessID, req.EmployeeID)
 	if err != nil {
 		if errors.Is(err, domain.ErrNotClockedIn) {
 			return ClockOutResponse{}, onekiterrors.New(http.StatusConflict, "Not currently clocked in")
 		}
-		logger.Ctx(ctx).Error("failed to clock out", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", req.EmployeeID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to clock out", logger.Any("owner_id", businessID), logger.Any("employee_id", req.EmployeeID), logger.Error(err))
 		return ClockOutResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to clock out")
 	}
 

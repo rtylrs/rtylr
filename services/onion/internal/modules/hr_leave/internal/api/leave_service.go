@@ -24,8 +24,8 @@ func (s *LeaveService) ListLeaveRequests(ctx context.Context, req *hrleavev1.Lis
 		Status:     req.GetStatus(),
 		FromDate:   req.FromDate,
 		ToDate:     req.ToDate,
-		Limit:      int32(req.GetLimit()),
-		Offset:     int32(req.GetOffset()),
+		Limit:      req.GetLimit(),
+		Offset:     req.GetOffset(),
 	})
 	if err != nil {
 		return nil, err

@@ -8,6 +8,8 @@ import (
 // ErrInvalidAmount is returned when an order monetary field is negative.
 var ErrInvalidAmount = errors.New("invalid amount: monetary values cannot be negative")
 
+var ErrInvalidStatus = errors.New("invalid order status transition")
+
 type StoreOrder struct {
 	ID              int64     `json:"id"`
 	OwnerID         int64     `json:"owner_id"`
@@ -71,11 +73,6 @@ type OrderItemInput struct {
 type StoreOrderDetail struct {
 	Order StoreOrder       `json:"order"`
 	Items []StoreOrderItem `json:"items"`
-}
-
-// FloatToCents converts standard float amount to integer cents.
-func FloatToCents(amount float64) int64 {
-	return int64(amount * 100)
 }
 
 // CentsToFloat converts integer cents to standard float amount.

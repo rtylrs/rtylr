@@ -16,6 +16,7 @@ func TestUpsertConfig_MinRedemptionPoints_IsStored(t *testing.T) {
 
 	if err := repo.UpsertConfig(ctx, domain.LoyaltyConfigInput{
 		OwnerID:             testutil.OwnerID,
+		BusinessID:          testutil.BusinessID,
 		MinRedemptionPoints: 250,
 		PointsPerDollar:     1.0,
 		IsActive:            true,
@@ -23,7 +24,7 @@ func TestUpsertConfig_MinRedemptionPoints_IsStored(t *testing.T) {
 		t.Fatalf("UpsertConfig: %v", err)
 	}
 
-	cfg, err := repo.GetConfig(ctx, testutil.OwnerID)
+	cfg, err := repo.GetConfig(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetConfig: %v", err)
 	}
@@ -39,13 +40,14 @@ func TestUpsertConfig_PointsValue_IsStored(t *testing.T) {
 
 	if err := repo.UpsertConfig(ctx, domain.LoyaltyConfigInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		PointsValue: 0.025,
 		IsActive:    true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig: %v", err)
 	}
 
-	cfg, err := repo.GetConfig(ctx, testutil.OwnerID)
+	cfg, err := repo.GetConfig(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetConfig: %v", err)
 	}
@@ -61,6 +63,7 @@ func TestUpsertConfig_Idempotent(t *testing.T) {
 
 	input := domain.LoyaltyConfigInput{
 		OwnerID:         testutil.OwnerID,
+		BusinessID:      testutil.BusinessID,
 		PointsPerDollar: 3.0,
 		IsActive:        true,
 	}

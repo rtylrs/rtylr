@@ -64,3 +64,10 @@ func TestValidateBillInput_EmptyStatusIsAccepted(t *testing.T) {
 		t.Errorf("unexpected error for empty status: %v", err)
 	}
 }
+
+func TestValidateBillCreateInput_RejectsPaidStatus(t *testing.T) {
+	input := BillInput{Amount: 100, DueDate: "2026-12-31", Status: "paid"}
+	if err := ValidateBillCreateInput(input); err == nil {
+		t.Fatal("expected paid bill creation to be rejected")
+	}
+}

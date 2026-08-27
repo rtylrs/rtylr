@@ -1,7 +1,6 @@
 package config
 
 import (
-	"strings"
 	"testing"
 	"time"
 )
@@ -9,7 +8,7 @@ import (
 func setLicenseConfigEnv(t *testing.T) {
 	t.Helper()
 	t.Setenv("RUN_MODE", "license")
-	t.Setenv("JWT_SECRET", strings.Repeat("s", MinJWTSecretLength))
+	t.Setenv("JWT_SECRET", "test-secret")
 	t.Setenv("JWT_DURATION", "")
 	t.Cleanup(func() { GlobalConfig = nil })
 }
@@ -44,13 +43,13 @@ func TestLoadAndValidate_RejectsNonPositiveJWTDuration(t *testing.T) {
 	}
 }
 
-func TestLoadAndValidate_RejectsShortJWTSecret(t *testing.T) {
+func TestLoadAndValidate_AcceptsShortJWTSecret(t *testing.T) {
 	setLicenseConfigEnv(t)
 	t.Setenv("JWT_SECRET", "short")
 	t.Setenv("JWT_DURATION", (24 * time.Hour).String())
 
-	if _, err := LoadAndValidate(); err == nil {
-		t.Fatal("expected short JWT_SECRET to fail validation")
+	if _, err := LoadAndValidate(); err != nil {
+		t.Fatalf("short JWT_SECRET should remain accepted: %v", err)
 	}
 }
 

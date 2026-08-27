@@ -29,9 +29,7 @@ const (
 )
 
 func invalidateUserScope(ctx context.Context, userID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(userID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.UserPrefix(userID))
 }
 
 var (
@@ -186,6 +184,9 @@ func (s *Service) Authenticate(ctx context.Context, identifier, password string)
 	if !passwordutils.CheckPasswordHash(password, user.PasswordHash) {
 		return 0, ErrInvalidCredentials
 	}
+	if !s.hasActiveAccountAccess(ctx, user) {
+		return 0, ErrInvalidCredentials
+	}
 
 	return user.ID, nil
 }
@@ -268,7 +269,10 @@ func (s *Service) hydrateAccessTokenClaims(ctx context.Context, claims *AccessTo
 		return nil
 	}
 
-	user, err := s.GetUserByID(ctx, claims.UserID)
+	// Authentication state must bypass the profile cache. Otherwise a ban or
+	// deactivation performed by another process can leave a valid token alive
+	// for the cache TTL.
+	user, err := s.repo.GetUserByID(ctx, claims.UserID)
 	if err == nil && user != nil {
 		// The epoch is the revocation anchor: tokens whose embedded epoch is
 		// behind the stored one were issued before a password change or
@@ -285,7 +289,7 @@ func (s *Service) hydrateAccessTokenClaims(ctx context.Context, claims *AccessTo
 	if claims.BusinessID > 0 {
 		// Re-read the role on every validation instead of trusting the JWT:
 		// a demoted member must not keep "admin" until the token expires.
-		if role, err := s.getUserBusinessRole(ctx, claims.BusinessID, claims.UserID); err == nil {
+		if role, err := s.repo.GetUserRole(ctx, claims.BusinessID, claims.UserID); err == nil {
 			claims.Role = role
 		}
 	}
@@ -319,11 +323,30 @@ func (s *Service) ValidateToken(ctx context.Context, tokenString string) (*Acces
 
 	// Deleted or missing users never validate, closing the deleted-token hole
 	// alongside epoch-based revocation.
-	if user == nil || tokenEpoch != user.TokenEpoch {
+	if user == nil || tokenEpoch != user.TokenEpoch || !s.hasActiveAccountAccess(ctx, user) {
 		return nil, ErrInvalidCredentials
 	}
 
 	return claims, nil
+}
+
+func (s *Service) hasActiveAccountAccess(ctx context.Context, user *domain.User) bool {
+	if user == nil || user.IsBanned {
+		return false
+	}
+	if user.IsConsoleAdmin {
+		return true
+	}
+
+	state, err := s.repo.GetUserAccessState(ctx, user.ID)
+	if err != nil {
+		// Fail closed when the database cannot confirm current access.
+		return false
+	}
+	// Users without a permission row are allowed through onboarding. Once an
+	// account has been provisioned into a business, at least one active access
+	// path must remain before it can authenticate.
+	return !state.HasPermissions || state.HasActiveAccess
 }
 
 func (s *Service) RefreshToken(ctx context.Context, userID int64) (string, error) {

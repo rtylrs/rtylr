@@ -31,9 +31,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidatePosLocationsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posLocationsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(posLocationsScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Location, error) {

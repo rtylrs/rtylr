@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -17,9 +18,7 @@ import (
 const addonsCacheScope = "addons"
 
 func invalidateAddonsCache(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(addonsCacheScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(addonsCacheScope, businessID))
 }
 
 type AppAPI struct {
@@ -113,6 +112,12 @@ func (a *AppAPI) EnableAddon(ctx context.Context, req *hubappv1.EnableAddonReque
 	}
 
 	if err := a.AddonsService.Enable(ctx, authUser.BusinessID, addonID); err != nil {
+		if errors.Is(err, hubapp.ErrAddonNotFound) {
+			return nil, onekiterrors.New(http.StatusNotFound, "Addon not found")
+		}
+		if errors.Is(err, hubapp.ErrAddonNotEntitled) {
+			return nil, onekiterrors.New(http.StatusForbidden, "Addon requires an active entitlement")
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to enable addon")
 	}
 

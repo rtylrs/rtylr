@@ -127,8 +127,11 @@ func (a *ExpensesAPI) UpdateExpense(ctx context.Context, req *financeexpensesv1.
 		Notes:           body.GetNotes(),
 		ExpenseDate:     expenseDate,
 	}); updateErr != nil {
-		if errors.Is(updateErr, domain.ErrExpenseNotFound) {
+		switch {
+		case errors.Is(updateErr, domain.ErrExpenseNotFound):
 			return nil, expenseStatusError(http.StatusNotFound, "Expense not found")
+		case errors.Is(updateErr, domain.ErrApprovedExpenseImmutable):
+			return nil, expenseStatusError(http.StatusConflict, "Approved expenses cannot be edited")
 		}
 		return nil, expenseStatusError(http.StatusInternalServerError, "Failed to update expense")
 	}
@@ -144,8 +147,11 @@ func (a *ExpensesAPI) DeleteExpense(ctx context.Context, req *financeexpensesv1.
 		return nil, err
 	}
 	if deleteErr := a.Service.Delete(ctx, businessID, req.GetId()); deleteErr != nil {
-		if errors.Is(deleteErr, domain.ErrExpenseNotFound) {
+		switch {
+		case errors.Is(deleteErr, domain.ErrExpenseNotFound):
 			return nil, expenseStatusError(http.StatusNotFound, "Expense not found")
+		case errors.Is(deleteErr, domain.ErrApprovedExpenseImmutable):
+			return nil, expenseStatusError(http.StatusConflict, "Approved expenses cannot be deleted")
 		}
 		return nil, expenseStatusError(http.StatusInternalServerError, "Failed to delete expense")
 	}
@@ -186,8 +192,11 @@ func (a *ExpensesAPI) UpdateExpenseStatus(ctx context.Context, req *financeexpen
 		return nil, expenseStatusError(http.StatusBadRequest, "Invalid expense status")
 	}
 	if updateErr := a.Service.UpdateStatus(ctx, businessID, req.GetId(), body.GetStatus()); updateErr != nil {
-		if errors.Is(updateErr, domain.ErrExpenseNotFound) {
+		switch {
+		case errors.Is(updateErr, domain.ErrExpenseNotFound):
 			return nil, expenseStatusError(http.StatusNotFound, "Expense not found")
+		case errors.Is(updateErr, domain.ErrInvalidStatusTransition):
+			return nil, expenseStatusError(http.StatusConflict, "Expense review status transitions are one-way")
 		}
 		return nil, expenseStatusError(http.StatusInternalServerError, "Failed to update expense status")
 	}

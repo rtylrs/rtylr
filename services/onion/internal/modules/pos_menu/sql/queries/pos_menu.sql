@@ -1,4 +1,5 @@
 -- name: ListMenuItemsWithDetails :many
+-- cross-schema read from erp_products + erp_categories + erp_product_images + product_stock_total (products, categories, and stock_core modules) — compose the menu view with category, image, and current stock details.
 SELECT
     p.id,
     p.owner_id,
@@ -51,6 +52,7 @@ LIMIT 100;
 SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE;
 
 -- name: ListMenuItems :many
+-- cross-schema read from erp_products (products module) — list active products available to the POS menu.
 SELECT id, owner_id, business_id, category_id, name, sku, barcode,
        sale_price, tax_rate, is_active, created_at, updated_at
 FROM erp_products
@@ -59,14 +61,15 @@ ORDER BY name
 LIMIT 100;
 
 -- name: QuickCreateMenuItem :execresult
+-- cross-schema write to erp_products (products module) — create a product from the POS menu workflow.
 INSERT INTO erp_products (owner_id, business_id, name, sku, sale_price, is_active)
 VALUES (?, ?, ?, ?, ?, TRUE);
 
--- name: UpdateMenuItem :exec
+-- name: UpdateMenuItem :execresult
+-- cross-schema write to erp_products (products module) — update product details from the POS menu workflow.
 UPDATE erp_products
 SET name = COALESCE(NULLIF(sqlc.arg(name), ''), name),
     sale_price = ?,
-    stock_quantity = ?,
     is_active = ?,
     updated_at = CURRENT_TIMESTAMP
 WHERE business_id = ? AND id = ?;

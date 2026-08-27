@@ -21,11 +21,11 @@ func (r *Repository) GetRevenueComparison(ctx context.Context, businessID int64,
 	priorTo := from.AddDate(0, 0, -1)
 	priorFrom := priorTo.AddDate(0, 0, -windowDays)
 
-	thisAmt, err := r.sumPaidInvoicesMinorUnits(ctx, businessID, from, to)
+	thisAmt, err := sumPaidInvoicesMinorUnits(ctx, r.queries, businessID, from, to)
 	if err != nil {
 		return RevenueComparisonRow{}, err
 	}
-	lastAmt, err := r.sumPaidInvoicesMinorUnits(ctx, businessID, priorFrom, priorTo)
+	lastAmt, err := sumPaidInvoicesMinorUnits(ctx, r.queries, businessID, priorFrom, priorTo)
 	if err != nil {
 		return RevenueComparisonRow{}, err
 	}

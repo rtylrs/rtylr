@@ -63,9 +63,9 @@ func (s *Service) Sync(ctx context.Context, businessID int64) (int, error) {
 		return 0, err
 	}
 
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(bankFeedsScope, businessID))
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(bankAccountsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx,
+		cacheKeys.ScopedPrefix(bankFeedsScope, businessID),
+		cacheKeys.ScopedPrefix(bankAccountsScope, businessID),
+	)
 	return imported, nil
 }

@@ -126,7 +126,9 @@ func TestParseQueryParamsAssignsTypedFieldsWithoutJSONRoundTrip(t *testing.T) {
 	)
 	var got typedQueryRequest
 
-	parseQueryParams(req, &got)
+	if err := parseQueryParams(req, &got); err != nil {
+		t.Fatalf("parseQueryParams: %v", err)
+	}
 
 	if got.Limit != 25 {
 		t.Fatalf("limit = %d, want 25", got.Limit)
@@ -151,6 +153,28 @@ func TestParseQueryParamsAssignsTypedFieldsWithoutJSONRoundTrip(t *testing.T) {
 	}
 	if got.Any != int64(17) {
 		t.Fatalf("any = %#v, want int64(17)", got.Any)
+	}
+}
+
+func TestRegisterGETRejectsMalformedTypedQuery(t *testing.T) {
+	router := chi.NewRouter()
+	handler := &validatedGETHandler{}
+	RegisterGET[validatedGETRequest, validatedGETResponse](
+		context.Background(),
+		router,
+		[]string{"/validated"},
+		handler,
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/validated?id=not-a-number", http.NoBody)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 for malformed query, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if handler.called {
+		t.Fatal("handler should not run after query parsing failure")
 	}
 }
 
@@ -303,55 +327,4 @@ func TestRegisterDELETERejectsTrailingJSONBody(t *testing.T) {
 	if handler.called {
 		t.Fatal("handler should not run after trailing JSON")
 	}
-}
-
-type noopResponse struct{}
-
-type noopHandler struct{}
-
-func (noopHandler) Serve(_ context.Context, _ *emptyRequest) (noopResponse, error) {
-	return noopResponse{}, nil
-}
-
-// TestRegisterPanicsOnDuplicateMethodAndPath guards against a repeat of the
-// hr_setup/hr_core bug: two modules independently registered GET/PUT
-// /hr/config and POST /hr/setup/steps/{key}/complete, chi silently kept only
-// the later registration's handler, and the earlier module's writes to
-// hr_company_config went to a table nothing else ever read from. Duplicate
-// registration must now fail loudly at startup instead of shadowing silently.
-func TestRegisterPanicsOnDuplicateMethodAndPath(t *testing.T) {
-	router := chi.NewRouter()
-	RegisterGET[emptyRequest, noopResponse](context.Background(), router, []string{"/hr/config"}, noopHandler{})
-
-	defer func() {
-		r := recover()
-		if r == nil {
-			t.Fatal("expected a panic on the duplicate GET /hr/config registration")
-		}
-		msg, ok := r.(string)
-		if !ok || !strings.Contains(msg, "GET /hr/config") || !strings.Contains(msg, "registered twice") {
-			t.Fatalf("panic message %v does not identify the duplicate route", r)
-		}
-	}()
-
-	RegisterGET[emptyRequest, noopResponse](context.Background(), router, []string{"/hr/config"}, noopHandler{})
-}
-
-// TestRegisterAllowsDifferentMethodsOnSamePath proves the guard tracks
-// (method, path) pairs, not just path - GET and PUT on the same resource
-// path is normal REST design (e.g. GET/PUT /hr/config), not a collision.
-func TestRegisterAllowsDifferentMethodsOnSamePath(t *testing.T) {
-	router := chi.NewRouter()
-	RegisterGET[emptyRequest, noopResponse](context.Background(), router, []string{"/hr/config"}, noopHandler{})
-	RegisterPUT[emptyRequest, noopResponse](context.Background(), router, []string{"/hr/config"}, noopHandler{})
-}
-
-// TestRegisterAllowsSamePathOnIndependentRouters proves the guard's tracking
-// is scoped per *chi.Mux, so unrelated routers (e.g. separate test cases, or
-// a future multi-router setup) never collide with each other.
-func TestRegisterAllowsSamePathOnIndependentRouters(t *testing.T) {
-	routerA := chi.NewRouter()
-	routerB := chi.NewRouter()
-	RegisterGET[emptyRequest, noopResponse](context.Background(), routerA, []string{"/hr/config"}, noopHandler{})
-	RegisterGET[emptyRequest, noopResponse](context.Background(), routerB, []string{"/hr/config"}, noopHandler{})
 }

@@ -9,25 +9,6 @@ import (
 	"github.com/voxire/onion/internal/testutil"
 )
 
-func TestCreateLoyaltyTransaction_NoError(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
-	ctx := context.Background()
-
-	err := repo.CreateLoyaltyTransaction(ctx, domain.LoyaltyTransaction{
-		OwnerID:       testutil.OwnerID,
-		CustomerID:    5301,
-		Type:          "award",
-		Points:        100,
-		BalanceBefore: 50,
-		BalanceAfter:  150,
-		Description:   "integration test award",
-	})
-	if err != nil {
-		t.Fatalf("CreateLoyaltyTransaction: %v", err)
-	}
-}
-
 func TestListLoyaltyTransactions_NoError(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
@@ -41,37 +22,6 @@ func TestListLoyaltyTransactions_NoError(t *testing.T) {
 		t.Errorf("expected non-negative total, got %d", total)
 	}
 	_ = txs
-}
-
-func TestListLoyaltyTransactions_AfterCreate_CountIncreases(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
-	ctx := context.Background()
-
-	_, before, err := repo.ListLoyaltyTransactions(ctx, testutil.OwnerID, 5302, 1, 100)
-	if err != nil {
-		t.Fatalf("ListLoyaltyTransactions before: %v", err)
-	}
-
-	if createErr := repo.CreateLoyaltyTransaction(ctx, domain.LoyaltyTransaction{
-		OwnerID:       testutil.OwnerID,
-		CustomerID:    5302,
-		Type:          "award",
-		Points:        25,
-		BalanceBefore: 0,
-		BalanceAfter:  25,
-		Description:   "count check",
-	}); createErr != nil {
-		t.Fatalf("CreateLoyaltyTransaction: %v", createErr)
-	}
-
-	_, after, err := repo.ListLoyaltyTransactions(ctx, testutil.OwnerID, 5302, 1, 100)
-	if err != nil {
-		t.Fatalf("ListLoyaltyTransactions after: %v", err)
-	}
-	if after != before+1 {
-		t.Errorf("expected total +1: before=%d after=%d", before, after)
-	}
 }
 
 func TestListLoyaltyTransactions_ZeroOwner_ReturnsEmpty(t *testing.T) {

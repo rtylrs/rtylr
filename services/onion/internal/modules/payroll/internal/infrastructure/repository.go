@@ -9,9 +9,12 @@ import (
 	"strings"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/payroll/internal/domain"
 	"github.com/voxire/onion/internal/modules/payroll/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -71,6 +74,46 @@ func (r *Repository) CreatePayrollRecord(ctx context.Context, businessID, staffI
 	}
 
 	return result.LastInsertId()
+}
+
+func (r *Repository) CreatePayrollRecords(ctx context.Context, businessID int64, records []domain.PayrollRecordInput) (int, error) {
+	if len(records) == 0 {
+		return 0, nil
+	}
+
+	insert := sq.Insert("hr_payroll_records").Columns(
+		"owner_id", "business_id", "staff_id", "period_start", "period_end", "period_label",
+		"regular_hours", "overtime_hours", "base_pay", "overtime_pay", "net_pay",
+	)
+	for _, record := range records {
+		insert = insert.Values(
+			businessID,
+			businessID,
+			record.StaffID,
+			record.PeriodStart,
+			record.PeriodEnd,
+			record.PeriodLabel,
+			fmt.Sprintf("%g", record.RegularHours),
+			fmt.Sprintf("%g", record.OvertimeHours),
+			fmt.Sprintf("%.2f", record.BasePay),
+			fmt.Sprintf("%.2f", record.OvertimePay),
+			fmt.Sprintf("%.2f", record.NetPay),
+		)
+	}
+	query, args, err := insert.ToSql()
+	if err != nil {
+		return 0, err
+	}
+	result, err := r.pool.ExecContext(ctx, query, args...)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to create payroll records", logger.Error(err))
+		return 0, err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return int(affected), nil
 }
 
 func (r *Repository) MarkPayrollPaid(ctx context.Context, businessID, payrollID int64) error {
@@ -167,13 +210,13 @@ func (r *Repository) GetStaffPayRates(ctx context.Context, businessID, staffID i
 
 	var rates domain.StaffPayRates
 	if row.Salary.Valid {
-		rates.Salary = parseDecimal(row.Salary.String)
+		rates.Salary = sqlutil.ParseDecimal(row.Salary.String)
 	}
 	if row.HourlyRate.Valid {
-		rates.HourlyRate = parseDecimal(row.HourlyRate.String)
+		rates.HourlyRate = sqlutil.ParseDecimal(row.HourlyRate.String)
 	}
 	if row.OvertimeRate.Valid {
-		rates.OvertimeRate = parseDecimal(row.OvertimeRate.String)
+		rates.OvertimeRate = sqlutil.ParseDecimal(row.OvertimeRate.String)
 	}
 
 	return rates, nil
@@ -200,13 +243,13 @@ func (r *Repository) GetStaffPayRatesByIDs(ctx context.Context, businessID int64
 	for _, row := range rows {
 		var rates domain.StaffPayRates
 		if row.Salary.Valid {
-			rates.Salary = parseDecimal(row.Salary.String)
+			rates.Salary = sqlutil.ParseDecimal(row.Salary.String)
 		}
 		if row.HourlyRate.Valid {
-			rates.HourlyRate = parseDecimal(row.HourlyRate.String)
+			rates.HourlyRate = sqlutil.ParseDecimal(row.HourlyRate.String)
 		}
 		if row.OvertimeRate.Valid {
-			rates.OvertimeRate = parseDecimal(row.OvertimeRate.String)
+			rates.OvertimeRate = sqlutil.ParseDecimal(row.OvertimeRate.String)
 		}
 		out[row.ID] = rates
 	}
@@ -243,25 +286,25 @@ func payrollRecordFromRow(row sqlc.HrPayrollRecord) domain.PayrollRecord {
 	p.PeriodEnd = row.PeriodEnd
 	p.PeriodLabel = row.PeriodLabel
 	if row.RegularHours.Valid {
-		p.RegularHours = parseDecimal(row.RegularHours.String)
+		p.RegularHours = sqlutil.ParseDecimal(row.RegularHours.String)
 	}
 	if row.OvertimeHours.Valid {
-		p.OvertimeHours = parseDecimal(row.OvertimeHours.String)
+		p.OvertimeHours = sqlutil.ParseDecimal(row.OvertimeHours.String)
 	}
-	p.BasePay = parseDecimal(row.BasePay)
+	p.BasePay = sqlutil.ParseDecimal(row.BasePay)
 	if row.OvertimePay.Valid {
-		p.OvertimePay = parseDecimal(row.OvertimePay.String)
+		p.OvertimePay = sqlutil.ParseDecimal(row.OvertimePay.String)
 	}
 	if row.Bonuses.Valid {
-		p.Bonuses = parseDecimal(row.Bonuses.String)
+		p.Bonuses = sqlutil.ParseDecimal(row.Bonuses.String)
 	}
 	if row.Deductions.Valid {
-		p.Deductions = parseDecimal(row.Deductions.String)
+		p.Deductions = sqlutil.ParseDecimal(row.Deductions.String)
 	}
 	if row.TaxWithheld.Valid {
-		p.TaxWithheld = parseDecimal(row.TaxWithheld.String)
+		p.TaxWithheld = sqlutil.ParseDecimal(row.TaxWithheld.String)
 	}
-	p.NetPay = parseDecimal(row.NetPay)
+	p.NetPay = sqlutil.ParseDecimal(row.NetPay)
 	p.Status = string(row.Status.HrPayrollRecordsStatus)
 	if row.PaidAt.Valid {
 		p.PaidAt = row.PaidAt.Time
@@ -277,15 +320,3 @@ func payrollRecordFromRow(row sqlc.HrPayrollRecord) domain.PayrollRecord {
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt
 // values instead of silently coercing pay figures to 0.
-func parseDecimal(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse payroll decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}

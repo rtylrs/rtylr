@@ -20,9 +20,7 @@ const (
 )
 
 func invalidateHRShiftsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrShiftsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrShiftsScope, businessID))
 }
 
 type repository interface {

@@ -109,5 +109,3 @@ type ExpenseInput struct {
 	TaxAmount       float64 `json:"tax_amount"`
 	Notes           string  `json:"notes"`
 }
-
-// Money precision verified: minor integer units enforced.

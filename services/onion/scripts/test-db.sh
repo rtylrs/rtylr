@@ -51,7 +51,7 @@ SQL
 
 info "applying schema"
 DB_HOST=127.0.0.1 DB_PORT=3306 DB_USER=root DB_PASSWORD="$ROOT_PW" DB_NAME="$TEST_DB" \
-    MYSQL_PWD="$ROOT_PW" bash "$SCHEMAS_DIR/migrate.sh"
+    MYSQL_PWD="$ROOT_PW" bash "$PROJECT_ROOT/scripts/migrate.sh"
 
 info "seeding fixtures"
 for f in "$FIXTURES_DIR"/*.sql; do

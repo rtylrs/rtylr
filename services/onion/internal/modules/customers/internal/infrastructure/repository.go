@@ -243,6 +243,60 @@ func (r *Repository) UpdateCustomer(ctx context.Context, input domain.CustomerUp
 	if businessID == 0 {
 		businessID = input.OwnerID
 	}
+	input.BusinessID = businessID
+	return updateCustomer(ctx, r.queries, input)
+}
+
+// UpdateCustomerWithLoyalty keeps the customer update and tier change in one
+// transaction. The points row is locked before it is preserved, preventing a
+// concurrent earn/redeem from being overwritten by a stale read.
+func (r *Repository) UpdateCustomerWithLoyalty(ctx context.Context, input domain.CustomerUpdateInput) error {
+	businessID := input.BusinessID
+	if businessID == 0 {
+		businessID = input.OwnerID
+	}
+	input.BusinessID = businessID
+
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	qtx := r.queries.WithTx(tx)
+	if err := updateCustomer(ctx, qtx, input); err != nil {
+		return err
+	}
+
+	var loyaltyPoints sql.NullInt64
+	if err := tx.QueryRowContext(ctx,
+		"SELECT loyalty_points FROM crm_customers WHERE id = ? AND business_id = ? FOR UPDATE",
+		input.ID, businessID,
+	).Scan(&loyaltyPoints); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.ErrCustomerNotFound
+		}
+		return err
+	}
+	points := int64(0)
+	if loyaltyPoints.Valid {
+		points = loyaltyPoints.Int64
+	}
+	if err := qtx.UpdateCustomerLoyalty(ctx, sqlc.UpdateCustomerLoyaltyParams{
+		LoyaltyPoints: sql.NullInt32{Int32: int32(points), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated database field width.
+		LoyaltyTier: sqlc.NullCrmCustomersLoyaltyTier{
+			CrmCustomersLoyaltyTier: sqlc.CrmCustomersLoyaltyTier(input.LoyaltyTier),
+			Valid:                   true,
+		},
+		ID:         input.ID,
+		BusinessID: businessID,
+	}); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+func updateCustomer(ctx context.Context, q *sqlc.Queries, input domain.CustomerUpdateInput) error {
 
 	tagsJSON, err := json.Marshal(input.Tags)
 	if err != nil {
@@ -269,7 +323,7 @@ func (r *Repository) UpdateCustomer(ctx context.Context, input domain.CustomerUp
 		Consent:     input.Consent,
 		IsActive:    sql.NullBool{Bool: isActive, Valid: true},
 		ID:          input.ID,
-		BusinessID:  businessID,
+		BusinessID:  input.BusinessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update customer", logger.Error(err))

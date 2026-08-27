@@ -7,6 +7,49 @@ import (
 	"time"
 )
 
+func TestScalarCacheEncodingAvoidsJSONCodec(t *testing.T) {
+	cases := []struct {
+		name string
+		got  func() ([]byte, error)
+		want string
+	}{
+		{name: "int64", got: func() ([]byte, error) { return Of[int64]().marshal(-42) }, want: "-42"},
+		{name: "string", got: func() ([]byte, error) { return Of[string]().marshal("cached") }, want: "cached"},
+		{name: "bool", got: func() ([]byte, error) { return Of[bool]().marshal(true) }, want: "true"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := tc.got()
+			if err != nil {
+				t.Fatalf("marshal: %v", err)
+			}
+			if string(got) != tc.want {
+				t.Fatalf("encoded value = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestScalarCacheDecodingSupportsNewAndLegacyValues(t *testing.T) {
+	var intValue int64
+	if err := Of[int64]().unmarshal([]byte("42"), &intValue); err != nil || intValue != 42 {
+		t.Fatalf("int64 unmarshal = %d, %v; want 42, nil", intValue, err)
+	}
+
+	var stringValue string
+	if err := Of[string]().unmarshal([]byte(`"legacy"`), &stringValue); err != nil || stringValue != "legacy" {
+		t.Fatalf("legacy string unmarshal = %q, %v; want legacy, nil", stringValue, err)
+	}
+	if err := Of[string]().unmarshal([]byte("current"), &stringValue); err != nil || stringValue != "current" {
+		t.Fatalf("current string unmarshal = %q, %v; want current, nil", stringValue, err)
+	}
+
+	var boolValue bool
+	if err := Of[bool]().unmarshal([]byte("true"), &boolValue); err != nil || !boolValue {
+		t.Fatalf("bool unmarshal = %v, %v; want true, nil", boolValue, err)
+	}
+}
+
 func initTestCache(t *testing.T) context.Context {
 	t.Helper()
 	ctx := context.Background()
@@ -136,5 +179,45 @@ func TestRawDeleteByPatternClearsTypedLocalCache(t *testing.T) {
 	}
 	if got, ok := cache.Get(ctx, key, MemoryOnly()); ok {
 		t.Fatalf("expected local cache miss after raw pattern delete, got %q", got)
+	}
+}
+
+func TestInvalidateScopeClearsLocalCache(t *testing.T) {
+	ctx := initTestCache(t)
+	cache := OfWithNamespace[string]("test-scope-invalidation")
+	key := "cache:business:11:team"
+
+	cache.Put(ctx, key, "cached", MemoryOnly(), WithExpiry(ctx, time.Minute))
+	if _, ok := cache.Get(ctx, key, MemoryOnly()); !ok {
+		t.Fatal("expected local cache entry before scope invalidation")
+	}
+
+	if deleted := InvalidateScope(ctx, "cache:business:11:*"); deleted == 0 {
+		t.Fatal("expected scope invalidation to remove the local entry")
+	}
+	if got, ok := cache.Get(ctx, key, MemoryOnly()); ok {
+		t.Fatalf("expected local cache miss after scope invalidation, got %q", got)
+	}
+}
+
+func TestInvalidateTypedScopeClearsTypedLocalCache(t *testing.T) {
+	type typedScopeValue struct {
+		Value string
+	}
+
+	ctx := initTestCache(t)
+	cache := Of[typedScopeValue]()
+	key := "cache:typed-scope:11:page"
+
+	cache.Put(ctx, key, typedScopeValue{Value: "cached"}, MemoryOnly(), WithExpiry(ctx, time.Minute))
+	if _, ok := cache.Get(ctx, key, MemoryOnly()); !ok {
+		t.Fatal("expected typed cache entry before scope invalidation")
+	}
+
+	if deleted := InvalidateTypedScope[typedScopeValue](ctx, "cache:typed-scope:11:*"); deleted == 0 {
+		t.Fatal("expected typed scope invalidation to remove the local entry")
+	}
+	if got, ok := cache.Get(ctx, key, MemoryOnly()); ok {
+		t.Fatalf("expected typed cache miss after scope invalidation, got %#v", got)
 	}
 }

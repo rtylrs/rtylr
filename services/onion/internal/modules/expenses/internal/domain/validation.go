@@ -47,5 +47,3 @@ func ValidateCategoryInput(name string) error {
 
 	return nil
 }
-
-// Money precision verified: minor integer units enforced.

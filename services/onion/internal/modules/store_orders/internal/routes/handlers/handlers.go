@@ -194,6 +194,9 @@ func (h *UpdateHandler) Serve(ctx context.Context, req *UpdateRequest) (UpdateRe
 	if !ok {
 		return UpdateResponse{}, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
 	}
+	if !authPkg.IsBusinessAdmin(authUser) {
+		return UpdateResponse{}, onekiterrors.PermissionDenied()
+	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
 		return UpdateResponse{}, onekiterrors.PermissionDenied()

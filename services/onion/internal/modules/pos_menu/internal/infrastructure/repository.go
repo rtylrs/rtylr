@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"strconv"
 
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
+	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
 type Repository struct {
@@ -41,9 +42,9 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.MenuI
 			OwnerID:    row.OwnerID,
 			BusinessID: row.BusinessID,
 			Name:       row.Name,
-			SalePrice:  decimalToFloat(row.SalePrice),
-			CostPrice:  decimalToFloat(row.CostPrice),
-			TaxRate:    decimalToFloat(row.TaxRate),
+			SalePrice:  sqlutil.DecimalToFloat(row.SalePrice),
+			CostPrice:  sqlutil.DecimalToFloat(row.CostPrice),
+			TaxRate:    sqlutil.DecimalToFloat(row.TaxRate),
 			Stock:      stockToFloat(row.StockQuantity),
 			IsActive:   row.IsActive.Valid && row.IsActive.Bool,
 			Category:   row.CategoryName,
@@ -89,7 +90,7 @@ func (r *Repository) QuickCreate(ctx context.Context, ownerID, businessID int64,
 		BusinessID: businessID,
 		Name:       input.Name,
 		Sku:        sql.NullString{String: input.SKU, Valid: input.SKU != ""},
-		SalePrice:  floatToDecimal(input.SalePrice),
+		SalePrice:  sqlutil.FloatToDecimal(input.SalePrice),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to quick-create menu item", logger.Error(err))
@@ -99,19 +100,57 @@ func (r *Repository) QuickCreate(ctx context.Context, ownerID, businessID int64,
 }
 
 func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.MenuItemUpdateInput) error {
-	err := r.queries.UpdateMenuItem(ctx, sqlc.UpdateMenuItemParams{
-		Name:          input.Name,
-		SalePrice:     floatToDecimal(input.SalePrice),
-		StockQuantity: floatToDecimal(input.Stock),
-		IsActive:      sql.NullBool{Bool: input.IsActive, Valid: true},
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	var ownerID int64
+	if err := tx.QueryRowContext(ctx,
+		"SELECT owner_id FROM businesses WHERE id = ? AND is_active = TRUE",
+		businessID,
+	).Scan(&ownerID); err != nil {
+		return err
+	}
+
+	locationID, err := stock_core.DefaultLocationID(ctx, tx, ownerID)
+	if err != nil {
+		return err
+	}
+	if _, _, err := stock_core.SetTotalTx(ctx, tx, stock_core.Movement{
+		OwnerID:       ownerID,
 		BusinessID:    businessID,
-		ID:            id,
+		LocationID:    locationID,
+		ProductID:     id,
+		EntryType:     stock_core.EntryAdjustment,
+		ReferenceType: "pos_menu",
+		Channel:       "pos",
+		Note:          "POS menu stock edit",
+	}, input.Stock); err != nil {
+		return err
+	}
+
+	qtx := r.queries.WithTx(tx)
+	result, err := qtx.UpdateMenuItem(ctx, sqlc.UpdateMenuItemParams{
+		Name:       input.Name,
+		SalePrice:  sqlutil.FloatToDecimal(input.SalePrice),
+		IsActive:   sql.NullBool{Bool: input.IsActive, Valid: true},
+		BusinessID: businessID,
+		ID:         id,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update menu item", logger.Error(err))
 		return err
 	}
-	return nil
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return sql.ErrNoRows
+	}
+	return tx.Commit()
 }
 
 func (r *Repository) BusinessOwnerID(ctx context.Context, businessID int64) (int64, error) {
@@ -121,23 +160,6 @@ func (r *Repository) BusinessOwnerID(ctx context.Context, businessID int64) (int
 		return 0, err
 	}
 	return ownerID, nil
-}
-
-func decimalToFloat(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse menu decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}
-
-func floatToDecimal(f float64) string {
-	return strconv.FormatFloat(f, 'f', 2, 64)
 }
 
 // stockToFloat converts the value returned by the COALESCE(pst.total_quantity, p.stock_quantity)
@@ -155,10 +177,10 @@ func stockToFloat(v interface{}) float64 {
 	case int64:
 		return float64(val)
 	case []byte:
-		return decimalToFloat(string(val))
+		return sqlutil.DecimalToFloat(string(val))
 	case string:
-		return decimalToFloat(val)
+		return sqlutil.DecimalToFloat(val)
 	default:
-		return decimalToFloat(fmt.Sprintf("%v", val))
+		return sqlutil.DecimalToFloat(fmt.Sprintf("%v", val))
 	}
 }

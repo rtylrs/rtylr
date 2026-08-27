@@ -64,6 +64,15 @@ func (h *ApprovePayrollRunHandler) Serve(ctx context.Context, _ *ApprovePayrollR
 		if errors.Is(err, domain.ErrApprovalChainNotConfigured) {
 			return ApprovePayrollRunResponse{}, onekiterrors.New(http.StatusUnprocessableEntity, "Approval chain not configured for payroll")
 		}
+		if errors.Is(err, domain.ErrPayrollApprovalChainInvalid) {
+			return ApprovePayrollRunResponse{}, onekiterrors.New(http.StatusUnprocessableEntity, "Payroll approval requires exactly one configured approval level")
+		}
+		if errors.Is(err, domain.ErrPayrollEmployeeInactive) {
+			return ApprovePayrollRunResponse{}, onekiterrors.New(http.StatusConflict, "Payroll contains an inactive or missing employee")
+		}
+		if errors.Is(err, domain.ErrPayrollRunNotApprovable) {
+			return ApprovePayrollRunResponse{}, onekiterrors.New(http.StatusConflict, "Payroll run is no longer approvable")
+		}
 		if errors.Is(err, domain.ErrPayrollSelfApproval) || errors.Is(err, domain.ErrPayrollApproverNotAllowed) {
 			return ApprovePayrollRunResponse{}, onekiterrors.New(http.StatusForbidden, err.Error())
 		}

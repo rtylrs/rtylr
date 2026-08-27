@@ -38,7 +38,10 @@ func (f fakePermissionProvider) HasRole(context.Context, int64, int64, int64) (b
 type fakeApprovalChainProvider struct{}
 
 func (fakeApprovalChainProvider) GetApprovalChain(context.Context, int64, string) (*domain.ApprovalChainInfo, error) {
-	return &domain.ApprovalChainInfo{TotalLevels: 1}, nil
+	return &domain.ApprovalChainInfo{
+		TotalLevels: 1,
+		Levels:      []domain.ApprovalLevelInfo{{ApproverEmployeeID: 4101, LevelOrder: 1}},
+	}, nil
 }
 
 func deviceContext(userID int64) context.Context {

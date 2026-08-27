@@ -52,6 +52,9 @@ func (a *OauthAPI) Issue(ctx context.Context, req *commonoauthv1.IssueRequest) (
 	)
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to issue auth code")
+		if errors.Is(err, domain.ErrPKCERequired) {
+			return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+		}
 		return nil, onekiterrors.New(http.StatusInternalServerError, "failed to issue authorization code")
 	}
 
@@ -210,7 +213,10 @@ func oauthTokenError(err error) error {
 	code := http.StatusBadRequest
 	if errors.Is(err, domain.ErrCodeNotFound) ||
 		errors.Is(err, domain.ErrTokenNotFound) ||
-		errors.Is(err, domain.ErrCodeVerifierFailed) {
+		errors.Is(err, domain.ErrCodeVerifierFailed) ||
+		errors.Is(err, domain.ErrClientAuthenticationRequired) ||
+		errors.Is(err, domain.ErrClientNotFound) ||
+		errors.Is(err, domain.ErrUserNotFound) {
 		code = http.StatusUnauthorized
 	}
 	return onekiterrors.New(code, err.Error())

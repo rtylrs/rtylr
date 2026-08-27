@@ -808,6 +808,9 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 		http.RequestLoggerMiddleware(ctx),
 		http.GetAuthMiddlewareFunc(accessPolicy, tokenResolver, teamSvc),
 		authPkg.DeviceMiddleware(),
+		// Keep subscription state authoritative for every authenticated tenant
+		// request. The middleware leaves billing recovery and console routes open.
+		http.SubscriptionEnforcementMiddleware(dbclient.Pool(), accessPolicy),
 		// After auth so idempotency keys are scoped per authenticated user.
 		http.IdempotencyMiddleware,
 		// AFTER auth: gate protected API routes when a self-host license is

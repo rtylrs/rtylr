@@ -2,6 +2,8 @@ package application
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"strings"
 
@@ -58,10 +60,16 @@ func (p *WorkOSProvider) GetAuthorizationURL(provider string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	stateBytes := make([]byte, 32)
+	if _, err := rand.Read(stateBytes); err != nil {
+		return "", err
+	}
+	state := base64.RawURLEncoding.EncodeToString(stateBytes)
 	url, err := p.client.GetAuthorizationURL(usermanagement.GetAuthorizationURLOpts{
 		ClientID:    p.clientID,
 		RedirectURI: p.redirectURI,
 		Provider:    providerID,
+		State:       state,
 	})
 	if err != nil {
 		return "", err

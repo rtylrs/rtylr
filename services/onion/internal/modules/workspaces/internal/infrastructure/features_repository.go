@@ -831,6 +831,26 @@ func (r *Repository) GetProjectTaskCounts(ctx context.Context, projectID int64) 
 	return int(row.Total), int(countIfaceToInt64(row.Done))
 }
 
+func (r *Repository) GetProjectTaskCountsByProjectIDs(ctx context.Context, projectIDs []int64) (map[int64]domain.ProjectTaskCounts, error) {
+	counts := make(map[int64]domain.ProjectTaskCounts, len(projectIDs))
+	if len(projectIDs) == 0 {
+		return counts, nil
+	}
+
+	rows, err := r.queries.GetProjectTaskCountsByProjectIDs(ctx, projectIDs)
+	if err != nil {
+		logger.Ctx(ctx).Warn("GetProjectTaskCountsByProjectIDs failed", logger.Error(err))
+		return nil, err
+	}
+	for _, row := range rows {
+		counts[row.ProjectID] = domain.ProjectTaskCounts{
+			Total: int(row.Total),
+			Done:  int(countIfaceToInt64(row.Done)),
+		}
+	}
+	return counts, nil
+}
+
 func countIfaceToInt64(v interface{}) int64 {
 	if v == nil {
 		return 0

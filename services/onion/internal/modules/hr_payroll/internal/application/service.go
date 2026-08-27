@@ -13,6 +13,7 @@ import (
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/labourcost"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 const (
@@ -21,9 +22,7 @@ const (
 )
 
 func invalidateHRPayrollScope(ctx context.Context, ownerID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrPayrollScope, ownerID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrPayrollScope, ownerID))
 }
 
 type Service struct {
@@ -204,23 +203,22 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 	for _, emp := range employees {
 		hoursWorked := float64(tsMap[emp.EmployeeID]) / 60.0
 		overtimeMinutes := int32(0)
-		multiplier := defaultMultiplier
+		overtimeWeightedMinutes := float64(0)
+		overtimeUnweightedMinutes := float64(0)
 
 		if ot, ok := otMap[emp.EmployeeID]; ok {
 			overtimeMinutes = ot.TotalMinutes
-			if ot.Multiplier > 0 {
-				multiplier = ot.Multiplier
-			}
+			overtimeWeightedMinutes = ot.WeightedMinutes
+			overtimeUnweightedMinutes = ot.UnweightedMinutes
 		}
 		overtimeHours := float64(overtimeMinutes) / 60.0
 
 		// The rate/salary fields are stored as integer cents; the proration
 		// and multiplier arithmetic below is unchanged from before the
-		// cents migration - it just operates on dollar amounts converted
-		// from cents at the top, and the results are converted back to
-		// cents once, at the bottom, before they're stored.
-		hourlyRateDollars := domain.CentsToDollars(emp.HourlyRateCents)
-		monthlySalaryDollars := domain.CentsToDollars(emp.MonthlySalaryCents)
+		// cents migration. Each computed pay component is rounded once
+		// before the stored integer amounts are combined.
+		hourlyRateDollars := money.CentsToDollars(emp.HourlyRateCents)
+		monthlySalaryDollars := money.CentsToDollars(emp.MonthlySalaryCents)
 
 		var basePay float64
 		switch emp.PayType {
@@ -239,17 +237,18 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 		}
 
 		overtimePay := 0.0
-		if cfg.OvertimeEnabled && overtimeHours > 0 && hourlyRateDollars > 0 {
-			overtimePay = overtimeHours * hourlyRateDollars * multiplier
+		if cfg.OvertimeEnabled && overtimeHours > 0 {
+			if hourlyRateDollars <= 0 {
+				return nil, nil, domain.ErrOvertimeRateMissing
+			}
+			// The repository returns minutes weighted by each request's own
+			// multiplier. This avoids applying an unweighted average rate to
+			// the aggregate overtime duration.
+			overtimePay = calculateOvertimePay(hourlyRateDollars, overtimeWeightedMinutes, overtimeUnweightedMinutes, defaultMultiplier)
 		}
 
-		netPay := basePay + overtimePay
-		grossPay := netPay
-
-		basePayCents := domain.DollarsToCents(basePay)
-		overtimePayCents := domain.DollarsToCents(overtimePay)
-		netPayCents := domain.DollarsToCents(netPay)
-		grossPayCents := domain.DollarsToCents(grossPay)
+		basePayCents, overtimePayCents, netPayCents := calculatePayCents(basePay, overtimePay)
+		grossPayCents := netPayCents
 
 		entry := domain.PayrollEntryRecord{
 			OwnerID:          ownerID,
@@ -286,6 +285,16 @@ func (s *Service) TriggerPayrollRun(ctx context.Context, ownerID, createdBy int6
 	return createdRun, createdEntries, nil
 }
 
+func calculateOvertimePay(hourlyRateDollars, weightedMinutes, unweightedMinutes, defaultMultiplier float64) float64 {
+	return (weightedMinutes + unweightedMinutes*defaultMultiplier) / 60.0 * hourlyRateDollars
+}
+
+func calculatePayCents(basePay, overtimePay float64) (basePayCents, overtimePayCents, netPayCents int64) {
+	basePayCents = money.DollarsToCents(basePay)
+	overtimePayCents = money.DollarsToCents(overtimePay)
+	return basePayCents, overtimePayCents, basePayCents + overtimePayCents
+}
+
 // calculateMonthlyBasePay prorates a monthly salary over an inclusive calendar
 // date range. Each calendar month contributes its salary fraction using that
 // month's actual number of days, so a complete calendar month always pays the
@@ -318,7 +327,13 @@ func (s *Service) ApprovePayrollRun(ctx context.Context, ownerID, runID, approve
 	if err != nil {
 		return err
 	}
+	if run.Status != domain.PayrollStatusDraft && run.Status != domain.PayrollStatusPendingApproval {
+		return domain.ErrPayrollRunNotApprovable
+	}
 	if err := validatePayrollApprover(run, approverID); err != nil {
+		return err
+	}
+	if err := s.repo.ValidatePayrollRunEmployees(ctx, ownerID, runID); err != nil {
 		return err
 	}
 
@@ -326,25 +341,26 @@ func (s *Service) ApprovePayrollRun(ctx context.Context, ownerID, runID, approve
 	if err != nil {
 		return err
 	}
-	if chain == nil {
-		return domain.ErrApprovalChainNotConfigured
+	if chain == nil || len(chain.Levels) == 0 || len(chain.Levels) != int(chain.TotalLevels) || len(chain.Levels) != 1 {
+		if chain == nil {
+			return domain.ErrApprovalChainNotConfigured
+		}
+		return domain.ErrPayrollApprovalChainInvalid
 	}
-	if len(chain.Levels) > 0 {
-		employeeID, err := s.permissions.GetEmployeeIDByUserID(ctx, ownerID, approverID)
-		if err != nil {
-			return err
-		}
-		allowed, err := s.approverMatchesChain(ctx, ownerID, employeeID, chain.Levels)
-		if err != nil {
-			return err
-		}
-		if !allowed {
-			return domain.ErrPayrollApproverNotAllowed
-		}
+	employeeID, err := s.permissions.GetEmployeeIDByUserID(ctx, ownerID, approverID)
+	if err != nil {
+		return err
+	}
+	allowed, err := s.approverMatchesChain(ctx, ownerID, employeeID, chain.Levels)
+	if err != nil {
+		return err
+	}
+	if !allowed {
+		return domain.ErrPayrollApproverNotAllowed
 	}
 
-	if run.Status == "draft" {
-		if err := s.repo.UpdatePayrollRunStatus(ctx, ownerID, runID, "in_review"); err != nil {
+	if run.Status == domain.PayrollStatusDraft {
+		if err := s.repo.UpdatePayrollRunStatus(ctx, ownerID, runID, domain.PayrollStatusPendingApproval); err != nil {
 			return err
 		}
 	}
@@ -360,22 +376,20 @@ func validatePayrollApprover(run *domain.PayrollRunRecord, approverID int64) err
 }
 
 func (s *Service) approverMatchesChain(ctx context.Context, ownerID, employeeID int64, levels []domain.ApprovalLevelInfo) (bool, error) {
-	for _, level := range levels {
-		if level.ApproverEmployeeID > 0 && level.ApproverEmployeeID == employeeID {
-			return true, nil
-		}
-		if level.ApproverRoleID <= 0 {
-			continue
-		}
-		allowed, err := s.permissions.HasRole(ctx, ownerID, employeeID, level.ApproverRoleID)
-		if err != nil {
-			return false, err
-		}
-		if allowed {
-			return true, nil
-		}
+	if len(levels) != 1 {
+		return false, nil
 	}
-	return false, nil
+	level := levels[0]
+	if level.LevelOrder > 0 && level.LevelOrder != 1 {
+		return false, nil
+	}
+	if level.ApproverEmployeeID > 0 && level.ApproverEmployeeID == employeeID {
+		return true, nil
+	}
+	if level.ApproverRoleID <= 0 {
+		return false, nil
+	}
+	return s.permissions.HasRole(ctx, ownerID, employeeID, level.ApproverRoleID)
 }
 
 func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int64) error {
@@ -384,8 +398,18 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 	if err != nil {
 		return err
 	}
+	if err := s.repo.ValidatePayrollRunEmployees(ctx, ownerID, runID); err != nil {
+		return err
+	}
 
 	if err := s.repo.ClaimPayrollRunForExport(ctx, ownerID, runID); err != nil {
+		return err
+	}
+	if err := s.repo.ValidatePayrollRunEmployees(ctx, ownerID, runID); err != nil {
+		if releaseErr := s.repo.ReleasePayrollRunExportClaim(ctx, ownerID, runID); releaseErr != nil {
+			logger.Ctx(ctx).Error("failed to release payroll export claim after employee validation failure",
+				logger.Any("owner_id", ownerID), logger.Any("run_id", runID), logger.Error(releaseErr))
+		}
 		return err
 	}
 	if s.financePoster == nil {
@@ -402,8 +426,8 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 		RunID:       runID,
 		PeriodStart: run.PeriodStart,
 		PeriodEnd:   run.PeriodEnd,
-		TotalGross:  domain.CentsToDollars(run.TotalGrossCents),
-		TotalNet:    domain.CentsToDollars(run.TotalNetCents),
+		TotalGross:  money.CentsToDollars(run.TotalGrossCents),
+		TotalNet:    money.CentsToDollars(run.TotalNetCents),
 	}); postErr != nil {
 		if releaseErr := s.repo.ReleasePayrollRunExportClaim(ctx, ownerID, runID); releaseErr != nil {
 			logger.Ctx(ctx).Error("failed to release payroll export claim after finance error",
@@ -441,7 +465,7 @@ func (s *Service) ExportPayrollToFinance(ctx context.Context, ownerID, runID int
 			Payload: map[string]any{
 				"run_id":       runID,
 				"employee_id":  entry.EmployeeID,
-				"net_pay":      domain.CentsToDollars(entry.NetPayCents),
+				"net_pay":      money.CentsToDollars(entry.NetPayCents),
 				"period_start": run.PeriodStart,
 				"period_end":   run.PeriodEnd,
 			},

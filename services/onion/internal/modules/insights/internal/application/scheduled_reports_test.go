@@ -63,7 +63,7 @@ func TestValidCadencesAndChannelsHaveExpectedKeys(t *testing.T) {
 			t.Errorf("expected cadence %q to be valid", c)
 		}
 	}
-	for _, c := range []string{"email", "slack"} {
+	for _, c := range []string{"email"} {
 		if !validChannels[c] {
 			t.Errorf("expected channel %q to be valid", c)
 		}
@@ -118,7 +118,7 @@ func TestValidateScheduledReport_AllFieldsPresent(t *testing.T) {
 	p := ScheduledReportPayload{
 		TemplateID: "quarterly_revenue",
 		Cadence:    "monthly",
-		Channel:    "slack",
+		Channel:    "email",
 		Recipient:  "alerts@company.com",
 		IsActive:   true,
 	}
@@ -149,9 +149,11 @@ func TestValidCadences_DoesNotContainYearly(t *testing.T) {
 	}
 }
 
-func TestValidChannels_DoesNotContainSMS(t *testing.T) {
-	if validChannels["sms"] {
-		t.Error("sms should not be a valid channel")
+func TestValidChannels_DoesNotContainUnsupportedDeliveryChannels(t *testing.T) {
+	for _, channel := range []string{"sms", "slack"} {
+		if validChannels[channel] {
+			t.Errorf("%s should not be a valid channel without a delivery worker", channel)
+		}
 	}
 }
 

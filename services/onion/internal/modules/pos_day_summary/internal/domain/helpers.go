@@ -38,5 +38,3 @@ func (d DaySummary) CardSales() float64 {
 	}
 	return d.PaymentBreakdown["card"]
 }
-
-// Money precision verified: minor integer units enforced.

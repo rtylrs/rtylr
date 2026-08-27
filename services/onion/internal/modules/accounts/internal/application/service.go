@@ -39,9 +39,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateAccountsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(accountsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(accountsScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID, page, pageSize int64) ([]domain.Account, bool, error) {

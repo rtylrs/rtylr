@@ -16,6 +16,7 @@ func TestCreateTransaction_TypeIsStored(t *testing.T) {
 
 	if err := repo.CreateTransaction(ctx, domain.AwardInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		CustomerID:  5301,
 		Points:      75,
 		Description: "type check",
@@ -23,7 +24,7 @@ func TestCreateTransaction_TypeIsStored(t *testing.T) {
 		t.Fatalf("CreateTransaction: %v", err)
 	}
 
-	txs, _, err := repo.ListTransactions(ctx, testutil.OwnerID, 5301, 1, 50)
+	txs, _, err := repo.ListTransactions(ctx, testutil.BusinessID, 5301, 1, 50)
 	if err != nil {
 		t.Fatalf("ListTransactions: %v", err)
 	}
@@ -47,13 +48,14 @@ func TestCreateTransaction_PointsAreStored(t *testing.T) {
 
 	if err := repo.CreateTransaction(ctx, domain.AwardInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5302,
 		Points:     333,
 	}, "award"); err != nil {
 		t.Fatalf("CreateTransaction: %v", err)
 	}
 
-	txs, _, err := repo.ListTransactions(ctx, testutil.OwnerID, 5302, 1, 100)
+	txs, _, err := repo.ListTransactions(ctx, testutil.BusinessID, 5302, 1, 100)
 	if err != nil {
 		t.Fatalf("ListTransactions: %v", err)
 	}
@@ -77,6 +79,7 @@ func TestCreateRedeemTransaction_NoError(t *testing.T) {
 
 	err := repo.CreateRedeemTransaction(ctx, domain.RedeemInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		CustomerID:  5301,
 		Points:      50,
 		Description: "redeem test",
@@ -95,12 +98,13 @@ func TestListTransactions_Pagination_LimitWorks(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		_ = repo.CreateTransaction(ctx, domain.AwardInput{
 			OwnerID:    testutil.OwnerID,
+			BusinessID: testutil.BusinessID,
 			CustomerID: 5301,
 			Points:     10,
 		}, "award")
 	}
 
-	txs, _, err := repo.ListTransactions(ctx, testutil.OwnerID, 5301, 1, 2)
+	txs, _, err := repo.ListTransactions(ctx, testutil.BusinessID, 5301, 1, 2)
 	if err != nil {
 		t.Fatalf("ListTransactions pageSize=2: %v", err)
 	}
@@ -116,11 +120,12 @@ func TestListTransactions_AllBelongToOwner(t *testing.T) {
 
 	_ = repo.CreateTransaction(ctx, domain.AwardInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5301,
 		Points:     20,
 	}, "award")
 
-	txs, _, err := repo.ListTransactions(ctx, testutil.OwnerID, 0, 1, 50)
+	txs, _, err := repo.ListTransactions(ctx, testutil.BusinessID, 0, 1, 50)
 	if err != nil {
 		t.Fatalf("ListTransactions: %v", err)
 	}
@@ -138,11 +143,12 @@ func TestListTransactions_FilterByCustomer_OnlyThatCustomer(t *testing.T) {
 
 	_ = repo.CreateTransaction(ctx, domain.AwardInput{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		CustomerID: 5301,
 		Points:     10,
 	}, "award")
 
-	txs, _, err := repo.ListTransactions(ctx, testutil.OwnerID, 5301, 1, 50)
+	txs, _, err := repo.ListTransactions(ctx, testutil.BusinessID, 5301, 1, 50)
 	if err != nil {
 		t.Fatalf("ListTransactions for customer: %v", err)
 	}

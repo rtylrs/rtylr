@@ -87,6 +87,9 @@ func (s *Service) Login(ctx context.Context, email, password string) (int64, err
 
 // IssueAuthCode creates and stores a new authorization code.
 func (s *Service) IssueAuthCode(ctx context.Context, clientID string, userID int64, redirectURI, scope, codeChallenge, codeChallengeMethod string) (string, error) {
+	if codeChallenge == "" || codeChallengeMethod != "S256" {
+		return "", domain.ErrPKCERequired
+	}
 	raw := make([]byte, 32)
 	if _, err := rand.Read(raw); err != nil {
 		return "", err
@@ -113,6 +116,9 @@ func (s *Service) IssueAuthCode(ctx context.Context, clientID string, userID int
 
 // ExchangeCode exchanges an authorization code for access+refresh tokens.
 func (s *Service) ExchangeCode(ctx context.Context, clientID, code, codeVerifier, redirectURI string) (accessToken, refreshToken string, expiresIn int, err error) {
+	if err := s.validateTokenClient(ctx, clientID); err != nil {
+		return "", "", 0, err
+	}
 	authCode, err := s.repo.GetAuthCode(ctx, code)
 	if err != nil {
 		return "", "", 0, domain.ErrCodeNotFound
@@ -143,7 +149,10 @@ func (s *Service) ExchangeCode(ctx context.Context, clientID, code, codeVerifier
 		return "", "", 0, err
 	}
 
-	businessID, role, _ := s.repo.GetUserBusinessIDAndRole(ctx, authCode.UserID)
+	businessID, role, err := s.repo.GetUserBusinessIDAndRole(ctx, authCode.UserID)
+	if err != nil {
+		return "", "", 0, err
+	}
 
 	claims := &OAuthTokenClaims{
 		UserID:     authCode.UserID,
@@ -180,6 +189,9 @@ func (s *Service) ExchangeCode(ctx context.Context, clientID, code, codeVerifier
 
 // RefreshTokens exchanges a refresh token for a new access token.
 func (s *Service) RefreshTokens(ctx context.Context, clientID, refreshToken string) (accessToken, newRefreshToken string, expiresIn int, err error) {
+	if err := s.validateTokenClient(ctx, clientID); err != nil {
+		return "", "", 0, err
+	}
 	token, err := s.repo.GetTokenByRefresh(ctx, refreshToken)
 	if err != nil {
 		return "", "", 0, domain.ErrTokenNotFound
@@ -201,7 +213,10 @@ func (s *Service) RefreshTokens(ctx context.Context, clientID, refreshToken stri
 		return "", "", 0, err
 	}
 
-	businessID, role, _ := s.repo.GetUserBusinessIDAndRole(ctx, token.UserID)
+	businessID, role, err := s.repo.GetUserBusinessIDAndRole(ctx, token.UserID)
+	if err != nil {
+		return "", "", 0, err
+	}
 
 	claims := &OAuthTokenClaims{
 		UserID:     token.UserID,
@@ -282,13 +297,25 @@ func isScopeAllowed(clientScopes []string, requested string) bool {
 }
 
 func verifyPKCE(verifier, challenge, method string) bool {
-	if method == "S256" {
-		h := sha256.Sum256([]byte(verifier))
-		computed := base64.RawURLEncoding.EncodeToString(h[:])
-		return computed == challenge
+	if verifier == "" || challenge == "" || method != "S256" {
+		return false
 	}
-	// plain method (not recommended, but support it)
-	return verifier == challenge
+	h := sha256.Sum256([]byte(verifier))
+	computed := base64.RawURLEncoding.EncodeToString(h[:])
+	return computed == challenge
+}
+
+func (s *Service) validateTokenClient(ctx context.Context, clientID string) error {
+	client, err := s.repo.GetClient(ctx, clientID)
+	if err != nil {
+		return err
+	}
+	// The schema has no client-secret credential yet. Refuse private clients
+	// instead of treating an unauthenticated client_id as authentication.
+	if client == nil || !client.IsPublic {
+		return domain.ErrClientAuthenticationRequired
+	}
+	return nil
 }
 
 func generateRefreshToken() (string, error) {

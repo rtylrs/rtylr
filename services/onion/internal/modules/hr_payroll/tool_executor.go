@@ -11,6 +11,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/money"
 )
 
 const (
@@ -241,8 +242,8 @@ func hrPayrollRunToolPayload(run domain.PayrollRunRecord) map[string]any {
 		"created_by":   run.CreatedBy,
 		"approved_by":  run.ApprovedBy,
 		"exported_at":  run.ExportedAt,
-		"total_gross":  domain.CentsToDollars(run.TotalGrossCents),
-		"total_net":    domain.CentsToDollars(run.TotalNetCents),
+		"total_gross":  money.CentsToDollars(run.TotalGrossCents),
+		"total_net":    money.CentsToDollars(run.TotalNetCents),
 	}
 }
 
@@ -254,10 +255,10 @@ func hrPayrollEntryToolPayload(entry domain.PayrollEntryRecord) map[string]any {
 		"employee_id":    entry.EmployeeID,
 		"hours_worked":   entry.HoursWorked,
 		"overtime_hours": entry.OvertimeHours,
-		"base_pay":       domain.CentsToDollars(entry.BasePayCents),
-		"overtime_pay":   domain.CentsToDollars(entry.OvertimePayCents),
-		"bonuses":        domain.CentsToDollars(entry.BonusesCents),
-		"deductions":     domain.CentsToDollars(entry.DeductionsCents),
-		"net_pay":        domain.CentsToDollars(entry.NetPayCents),
+		"base_pay":       money.CentsToDollars(entry.BasePayCents),
+		"overtime_pay":   money.CentsToDollars(entry.OvertimePayCents),
+		"bonuses":        money.CentsToDollars(entry.BonusesCents),
+		"deductions":     money.CentsToDollars(entry.DeductionsCents),
+		"net_pay":        money.CentsToDollars(entry.NetPayCents),
 	}
 }

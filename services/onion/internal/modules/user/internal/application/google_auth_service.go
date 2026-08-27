@@ -8,6 +8,8 @@ import (
 	"net/netip"
 	"strings"
 
+	"github.com/workos/workos-go/v4/pkg/workos_errors"
+
 	"github.com/voxire/onion/internal/modules/user/internal/domain"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
@@ -26,6 +28,7 @@ type GoogleAuthResult struct {
 var (
 	ErrGoogleOAuthNotConfigured = errors.New("google oauth not configured")
 	ErrGoogleTokenInvalid       = errors.New("google token invalid")
+	ErrGoogleOAuthUnavailable   = errors.New("google oauth provider unavailable")
 	ErrGoogleEmailUnverified    = errors.New("google email unverified")
 )
 
@@ -55,9 +58,68 @@ func (s *Service) GoogleAuth(
 	googleUser, err := s.workOSProvider.AuthenticateWithCode(ctx, code)
 	if err != nil {
 		logger.Ctx(ctx).Warn("workos code exchange failed", logger.Error(err))
+		if isWorkOSUnavailable(err) {
+			return nil, ErrGoogleOAuthUnavailable
+		}
 		return nil, ErrGoogleTokenInvalid
 	}
+	return s.linkGoogleUser(ctx, googleUser, businessName, signupIP, deviceInfo)
+}
 
+func isWorkOSUnavailable(err error) bool {
+	status, isHTTPError := workOSHTTPStatus(err)
+	if isHTTPError {
+		return status == 429 || status >= 500
+	}
+	return true
+}
+
+func workOSHTTPStatus(err error) (int, bool) {
+	var httpErr workos_errors.HTTPError
+	if errors.As(err, &httpErr) {
+		return httpErr.Code, true
+	}
+
+	// WorkOS uses structured authentication errors for some 4xx responses;
+	// each embeds the HTTP status but has its own Error implementation.
+	var emailVerification *workos_errors.EmailVerificationRequiredError
+	if errors.As(err, &emailVerification) {
+		return emailVerification.HTTPError.Code, true
+	}
+	var mfaEnrollment *workos_errors.MFAEnrollmentError
+	if errors.As(err, &mfaEnrollment) {
+		return mfaEnrollment.HTTPError.Code, true
+	}
+	var mfaChallenge *workos_errors.MFAChallengeError
+	if errors.As(err, &mfaChallenge) {
+		return mfaChallenge.HTTPError.Code, true
+	}
+	var organizationSelection *workos_errors.OrganizationSelectionRequiredError
+	if errors.As(err, &organizationSelection) {
+		return organizationSelection.HTTPError.Code, true
+	}
+	var ssoRequired *workos_errors.SSORequiredError
+	if errors.As(err, &ssoRequired) {
+		return ssoRequired.HTTPError.Code, true
+	}
+	var organizationMethods *workos_errors.OrganizationAuthenticationMethodsRequiredError
+	if errors.As(err, &organizationMethods) {
+		return organizationMethods.HTTPError.Code, true
+	}
+
+	return 0, false
+}
+
+// linkGoogleUser verifies the provider identity and links or provisions the
+// local account. Split from GoogleAuth so the verification gate is unit-
+// testable without the WorkOS SDK (#815).
+func (s *Service) linkGoogleUser(
+	ctx context.Context,
+	googleUser *GoogleUser,
+	businessName string,
+	signupIP netip.Addr,
+	deviceInfo string,
+) (*GoogleAuthResult, error) {
 	email := strings.ToLower(strings.TrimSpace(googleUser.Email))
 	if email == "" {
 		return nil, ErrGoogleTokenInvalid

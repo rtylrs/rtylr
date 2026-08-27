@@ -43,6 +43,26 @@ SELECT id, name, sku, sale_price, tax_rate
 FROM erp_products
 WHERE business_id = ? AND id = ? AND is_active = TRUE;
 
+-- name: GetPOSComboForOrder :one
+SELECT name, price
+FROM pos_combos
+WHERE business_id = ? AND id = ? AND is_active = TRUE;
+
+-- name: GetPOSModifierTotal :one
+SELECT COALESCE(SUM(price_delta), 0) AS price_delta, COUNT(*) AS modifier_count
+FROM pos_modifiers
+WHERE business_id = ? AND id IN (sqlc.slice('modifier_ids'));
+
+-- name: GetPOSUserCapabilities :one
+SELECT can_apply_discount, max_discount_pct
+FROM pos_users
+WHERE business_id = ?
+  AND user_id = ?
+  AND is_active = TRUE
+  AND (location_id = ? OR ? = 0)
+ORDER BY CASE WHEN location_id = ? THEN 0 ELSE 1 END, id
+LIMIT 1;
+
 -- name: CreatePublicOrder :execresult
 INSERT INTO pos_orders
 (owner_id, business_id, order_number, type, status, customer_id, customer_name, customer_phone,

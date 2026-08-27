@@ -107,5 +107,3 @@ func (j *JournalEntry) TotalCredits() float64 {
 	}
 	return total
 }
-
-// Money precision verified: minor integer units enforced.

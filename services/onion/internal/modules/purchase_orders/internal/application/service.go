@@ -160,5 +160,5 @@ func (s *Service) UpdatePurchaseOrderStatus(ctx context.Context, businessID, id 
 }
 
 func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
-	cacher.Of[[]domain.PurchaseOrder]().DeleteByPattern(ctx, []string{fmt.Sprintf("purchase_orders:%d:*", businessID)})
+	cacher.InvalidateTypedScope[[]domain.PurchaseOrder](ctx, fmt.Sprintf("purchase_orders:%d:*", businessID))
 }

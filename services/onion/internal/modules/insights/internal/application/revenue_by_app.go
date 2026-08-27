@@ -2,7 +2,6 @@ package application
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/voxire/onion/internal/platform/cache/cacher"
@@ -19,7 +18,10 @@ type AppRevenueShare struct {
 // GetRevenueByApp splits MTD revenue across app surfaces (POS, Finance,
 // ERP, CRM) and computes each surface's share of the total.
 func (s *Service) GetRevenueByApp(ctx context.Context, businessID int64) ([]AppRevenueShare, error) {
-	key := fmt.Sprintf("insights:%d:revenue:by-app", businessID)
+	key, err := s.insightsCacheKey(ctx, businessID, "revenue:by-app")
+	if err != nil {
+		return nil, err
+	}
 	type result struct {
 		Shares []AppRevenueShare
 	}

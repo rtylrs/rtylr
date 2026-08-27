@@ -12,10 +12,8 @@ import (
 	"net/url"
 	"os"
 	"reflect"
-	"runtime"
 	"strconv"
 	"strings"
-	"sync"
 
 	"buf.build/go/protovalidate"
 	onekithttp "github.com/corezio/onekit/http"
@@ -33,60 +31,6 @@ var (
 	protoValidator            = protovalidate.GlobalValidator
 	errMultipleJSONBodyValues = stdErrors.New("request body must contain a single JSON value")
 )
-
-// registeredRoutes tracks which (method, path) pairs have already been
-// registered on each router. chi's tree silently overwrites a duplicate
-// method+pattern registration with no panic and no log line (see
-// go-chi/chi/v5 tree.go's setEndpoint) - two modules scaffolded to serve the
-// same route is invisible until one of them stops receiving traffic in
-// production. This is exactly how hr_setup shadowed hr_core's /hr/config and
-// /hr/setup/* handlers for weeks: asserting here turns that into a boot-time
-// panic instead.
-var (
-	registeredRoutesMu sync.Mutex
-	registeredRoutes   = map[*chi.Mux]map[string]string{}
-)
-
-// assertRouteNotRegistered panics if method+path was already registered on
-// router by a different call site. skip is the number of stack frames to
-// unwind past this function to reach the module's own RegisterRoutes method,
-// so the panic message names the two colliding modules instead of just the
-// route library internals.
-func assertRouteNotRegistered(router *chi.Mux, method, path string) {
-	registeredRoutesMu.Lock()
-	defer registeredRoutesMu.Unlock()
-
-	routes := registeredRoutes[router]
-	if routes == nil {
-		routes = make(map[string]string)
-		registeredRoutes[router] = routes
-	}
-
-	key := method + " " + path
-	site := callSite()
-	if existing, ok := routes[key]; ok {
-		panic(fmt.Sprintf(
-			"chi: route %s registered twice - first by %s, then by %s. "+
-				"chi silently keeps only the second handler, so the first module's "+
-				"routes would be unreachable at runtime with no error. Remove the "+
-				"duplicate registration.",
-			key, existing, site,
-		))
-	}
-	routes[key] = site
-}
-
-// callSite reports the file:line of the module's RegisterRoutes method that
-// called one of the RegisterGET/RegisterPOST/... helpers below.
-func callSite() string {
-	// 0 = callSite, 1 = assertRouteNotRegistered, 2 = the RegisterXxx helper,
-	// 3 = the module.go call site that invoked it.
-	_, file, line, ok := runtime.Caller(3)
-	if !ok {
-		return "unknown call site"
-	}
-	return fmt.Sprintf("%s:%d", file, line)
-}
 
 type MiddlewareFunc func(next http.Handler) http.Handler
 
@@ -106,14 +50,12 @@ type ValidatorFunc[Req any] interface {
 
 func RegisterGET[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodGet, path)
 		router.Get(path, wrapHandler(ctx, handler, false))
 	}
 }
 
 func RegisterGETWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodGet, path)
 		router.Get(path, wrapHandler(ctx, handler, true))
 	}
 }
@@ -131,7 +73,6 @@ func RegisterGETWithValidationAndMiddleware[Req, Res any](
 	middlewares ...MiddlewareFunc,
 ) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodGet, path)
 		var final http.Handler = wrapHandler(ctx, handler, true)
 		for i := len(middlewares) - 1; i >= 0; i-- {
 			final = middlewares[i](final)
@@ -142,14 +83,12 @@ func RegisterGETWithValidationAndMiddleware[Req, Res any](
 
 func RegisterPOST[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodPost, path)
 		router.Post(path, wrapHandler(ctx, handler, false))
 	}
 }
 
 func RegisterPOSTWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodPost, path)
 		router.Post(path, wrapHandler(ctx, handler, true))
 	}
 }
@@ -167,7 +106,6 @@ func RegisterPOSTWithValidationAndMiddleware[Req, Res any](
 	middlewares ...MiddlewareFunc,
 ) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodPost, path)
 		var final http.Handler = wrapHandler(ctx, handler, true)
 		for i := len(middlewares) - 1; i >= 0; i-- {
 			final = middlewares[i](final)
@@ -178,42 +116,36 @@ func RegisterPOSTWithValidationAndMiddleware[Req, Res any](
 
 func RegisterPATCH[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodPatch, path)
 		router.Patch(path, wrapHandler(ctx, handler, false))
 	}
 }
 
 func RegisterPATCHWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodPatch, path)
 		router.Patch(path, wrapHandler(ctx, handler, true))
 	}
 }
 
 func RegisterPUT[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodPut, path)
 		router.Put(path, wrapHandler(ctx, handler, false))
 	}
 }
 
 func RegisterPUTWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodPut, path)
 		router.Put(path, wrapHandler(ctx, handler, true))
 	}
 }
 
 func RegisterDELETE[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodDelete, path)
 		router.Delete(path, wrapHandler(ctx, handler, false))
 	}
 }
 
 func RegisterDELETEWithValidation[Req, Res any](ctx context.Context, router *chi.Mux, paths []string, handler HandlerFunc[Req, Res]) {
 	for _, path := range paths {
-		assertRouteNotRegistered(router, http.MethodDelete, path)
 		router.Delete(path, wrapHandler(ctx, handler, true))
 	}
 }
@@ -240,10 +172,16 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 					return
 				}
 			} else {
-				parseQueryParams(r, &req)
+				if err := parseQueryParams(r, &req); err != nil {
+					WriteOneKitError(r.Context(), w, onekiterrors.New(http.StatusBadRequest, err.Error()))
+					return
+				}
 			}
 		case "GET":
-			parseQueryParams(r, &req)
+			if err := parseQueryParams(r, &req); err != nil {
+				WriteOneKitError(r.Context(), w, onekiterrors.New(http.StatusBadRequest, err.Error()))
+				return
+			}
 		}
 
 		reqCtx := r.Context()
@@ -460,35 +398,35 @@ func walkProtoMessages(value reflect.Value, seen map[uintptr]struct{}) error {
 	return nil
 }
 
-func parseQueryParams[Req any](r *http.Request, req *Req) {
+func parseQueryParams[Req any](r *http.Request, req *Req) error {
 	if r == nil || r.URL == nil || req == nil {
-		return
+		return nil
 	}
 
 	query := r.URL.Query()
 	if len(query) == 0 {
-		return
+		return nil
 	}
 
 	target := reflect.ValueOf(req)
 	if target.Kind() != reflect.Pointer || target.IsNil() {
-		return
+		return nil
 	}
-	assignQueryParams(target.Elem(), query)
+	return assignQueryParams(target.Elem(), query)
 }
 
-func assignQueryParams(value reflect.Value, query url.Values) {
+func assignQueryParams(value reflect.Value, query url.Values) error {
 	if value.Kind() == reflect.Pointer {
 		if value.IsNil() {
 			if !value.CanSet() {
-				return
+				return nil
 			}
 			value.Set(reflect.New(value.Type().Elem()))
 		}
 		value = value.Elem()
 	}
 	if value.Kind() != reflect.Struct {
-		return
+		return nil
 	}
 
 	valueType := value.Type()
@@ -505,7 +443,9 @@ func assignQueryParams(value reflect.Value, query url.Values) {
 		}
 
 		if structField.Anonymous && fieldName == "" {
-			assignQueryParams(fieldValue, query)
+			if err := assignQueryParams(fieldValue, query); err != nil {
+				return err
+			}
 			continue
 		}
 
@@ -513,8 +453,12 @@ func assignQueryParams(value reflect.Value, query url.Values) {
 		if !exists || len(values) == 0 {
 			continue
 		}
-		setQueryField(fieldValue, values)
+		if err := setQueryField(fieldValue, values, fieldName); err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
 func queryParamFieldName(field reflect.StructField) (string, bool) {
@@ -558,44 +502,48 @@ func queryValuesForField(query url.Values, fieldName string) ([]string, bool) {
 	return nil, false
 }
 
-func setQueryField(field reflect.Value, values []string) bool {
+func setQueryField(field reflect.Value, values []string, fieldName string) error {
 	if !field.CanSet() || len(values) == 0 {
-		return false
+		return nil
 	}
 
 	if field.Kind() == reflect.Pointer {
 		elem := reflect.New(field.Type().Elem())
-		if !setQueryField(elem.Elem(), values) {
-			return false
+		if err := setQueryField(elem.Elem(), values, fieldName); err != nil {
+			return err
 		}
 		field.Set(elem)
-		return true
+		return nil
 	}
 
 	if field.Kind() == reflect.Slice {
 		slice := reflect.MakeSlice(field.Type(), 0, len(values))
 		for _, value := range values {
 			elem := reflect.New(field.Type().Elem()).Elem()
-			if !setQueryField(elem, []string{value}) {
-				return false
+			if err := setQueryField(elem, []string{value}, fieldName); err != nil {
+				return err
 			}
 			slice = reflect.Append(slice, elem)
 		}
 		field.Set(slice)
-		return true
+		return nil
 	}
 
-	return setQueryScalar(field, values[0])
+	return setQueryScalar(field, values[0], fieldName)
 }
 
-func setQueryScalar(field reflect.Value, value string) bool {
+func setQueryScalar(field reflect.Value, value, fieldName string) error {
 	if !field.CanSet() {
-		return false
+		return nil
 	}
 
 	if field.CanAddr() && field.Addr().CanInterface() {
 		if unmarshaler, ok := field.Addr().Interface().(encoding.TextUnmarshaler); ok {
-			return unmarshaler.UnmarshalText([]byte(value)) == nil
+			if err := unmarshaler.UnmarshalText([]byte(value)); err != nil {
+				logInvalidQueryValue(fieldName, value, err)
+				return fmt.Errorf("invalid query parameter %q: %w", fieldName, err)
+			}
+			return nil
 		}
 	}
 
@@ -605,34 +553,46 @@ func setQueryScalar(field reflect.Value, value string) bool {
 	case reflect.Bool:
 		parsed, err := strconv.ParseBool(value)
 		if err != nil {
-			return false
+			logInvalidQueryValue(fieldName, value, err)
+			return fmt.Errorf("invalid query parameter %q: %w", fieldName, err)
 		}
 		field.SetBool(parsed)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		parsed, err := strconv.ParseInt(value, 10, field.Type().Bits())
 		if err != nil {
-			return false
+			logInvalidQueryValue(fieldName, value, err)
+			return fmt.Errorf("invalid query parameter %q: %w", fieldName, err)
 		}
 		field.SetInt(parsed)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
 		parsed, err := strconv.ParseUint(value, 10, field.Type().Bits())
 		if err != nil {
-			return false
+			logInvalidQueryValue(fieldName, value, err)
+			return fmt.Errorf("invalid query parameter %q: %w", fieldName, err)
 		}
 		field.SetUint(parsed)
 	case reflect.Float32, reflect.Float64:
 		parsed, err := strconv.ParseFloat(value, field.Type().Bits())
 		if err != nil {
-			return false
+			logInvalidQueryValue(fieldName, value, err)
+			return fmt.Errorf("invalid query parameter %q: %w", fieldName, err)
 		}
 		field.SetFloat(parsed)
 	case reflect.Interface:
 		field.Set(reflect.ValueOf(parseQueryPrimitive(value)))
 	default:
-		return false
+		return fmt.Errorf("unsupported query parameter %q", fieldName)
 	}
 
-	return true
+	return nil
+}
+
+func logInvalidQueryValue(fieldName, value string, err error) {
+	logger.Global().Warn("invalid query parameter value",
+		logger.String("parameter", fieldName),
+		logger.String("value", value),
+		logger.Error(err),
+	)
 }
 
 func parseQueryPrimitive(value string) any {

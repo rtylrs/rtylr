@@ -83,6 +83,11 @@ SELECT user_id, owner_id, expires_at, used_at FROM invite_tokens WHERE token = ?
 -- name: MarkInviteTokenUsed :exec
 UPDATE invite_tokens SET used_at = NOW() WHERE token = ?;
 
+-- name: ConsumeInviteToken :execresult
+UPDATE invite_tokens
+SET used_at = NOW()
+WHERE token = ? AND used_at IS NULL AND expires_at > NOW();
+
 -- name: SetPassword :exec
 UPDATE users SET password_hash = ? WHERE id = ?;
 
@@ -141,7 +146,7 @@ WHERE s.owner_id = ?;
 
 -- cross-schema read from subscriptions — approved for seat period management
 -- name: LockSubscriptionForSeatChange :one
-SELECT s.id, p.price_per_seat_cents
+SELECT s.id, p.price_per_seat_cents, p.max_seats
 FROM subscriptions s
 JOIN plans p ON p.id = s.plan_id
 WHERE s.owner_id = ?
@@ -185,6 +190,7 @@ WHERE ar.business_id = ?
   AND ar.status = 'pending'
 ORDER BY ar.created_at DESC;
 
+-- cross-schema write to hub — deliver team access notifications through the hub module.
 -- name: CreateHubNotification :exec
 INSERT INTO hub_notifications (owner_id, user_id, title, body, type, link)
 VALUES (?, ?, ?, ?, ?, ?);
@@ -200,6 +206,7 @@ FROM users u
 WHERE u.id = ?
   AND NOT EXISTS (SELECT 1 FROM hr_employees e WHERE e.user_id = u.id);
 
+-- cross-schema read from hr_core — revoke access when the employee is terminated.
 -- name: RevokeBusinessUserPermissions :execrows
 -- Employment-driven revocation (#834): one business, one user. The join to
 -- hr_employees keeps the decision inside this module's SQL while the
@@ -215,6 +222,7 @@ WHERE p.business_id = sqlc.arg('business_id')
   AND p.is_active = TRUE
   AND e.status = 'terminated';
 
+-- cross-schema read from hr_core — sweep permissions for terminated employees.
 -- name: ReconcileTerminatedEmployeeAccess :execrows
 -- Daily sweep: every still-active permission row whose user is a terminated
 -- employee of that same business is deactivated. Catches anything the

@@ -34,9 +34,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateSegmentsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(segmentsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(segmentsScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Segment, error) {

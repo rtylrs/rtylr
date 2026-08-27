@@ -5,6 +5,7 @@ sql:
     schema:
       - "../../../../internal/platform/database/schemas/shared"
       - "../../../../internal/platform/database/schemas/hr_overtime"
+      - "../../../../internal/platform/database/schemas/hr_time"
     gen:
       go:
         package: "sqlc"

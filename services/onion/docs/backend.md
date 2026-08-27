@@ -42,6 +42,23 @@ infrastructure/ (SQL via squirrel)
 MySQL
 ```
 
+### Intentional SQL-construction exception: AI query compiler
+
+`internal/modules/aiquery/internal/domain/spec.go` is an intentional exception
+to the rule that SQL belongs in infrastructure. It does not execute SQL or
+accept caller-provided SQL. Instead, it compiles a structured `QuerySpec` into
+a read-only, parameterized statement for the AI query feature. Every view,
+column, aggregate, operator, grouping key, and ordering key is selected from an
+explicit allowlist; `owner_id` is always injected as a bound tenant filter; and
+the result limit is capped at `MaxRows`. The infrastructure executor remains
+responsible for database access and runs the compiled query on the read-only
+pool.
+
+Keep this exception narrow. Changes to the AI query surface must preserve the
+allowlist and tenant-binding tests in `internal/modules/aiquery/internal/domain`.
+Do not generalize this pattern to ordinary module repositories; new SQL-backed
+features still belong in `internal/infrastructure`.
+
 ---
 
 ## Handler Pattern
