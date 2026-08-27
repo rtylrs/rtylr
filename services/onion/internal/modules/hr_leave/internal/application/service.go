@@ -445,7 +445,7 @@ func (s *Service) GetLeaveBalances(ctx context.Context, ownerID, callerUserID, e
 
 func (s *Service) fetchBalances(ctx context.Context, ownerID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, error) {
 	if year == 0 {
-		year = int32(time.Now().UTC().Year())
+		year = int32(time.Now().UTC().Year()) // #nosec G115 -- calendar years returned by the application clock fit the int32 contract field.
 	}
 	return s.repo.ListLeaveBalances(ctx, ownerID, employeeID, year)
 }
@@ -464,8 +464,8 @@ func (s *Service) GetLeaveCalendar(ctx context.Context, ownerID int64, params do
 
 func (s *Service) RunMonthlyAccrual(ctx context.Context) error {
 	now := time.Now().UTC()
-	currentMonth := int32(now.Month())
-	currentYear := int32(now.Year())
+	currentMonth := int32(now.Month()) // #nosec G115 -- time.Month is bounded to the twelve calendar months.
+	currentYear := int32(now.Year())   // #nosec G115 -- calendar years returned by the application clock fit the int32 contract field.
 
 	ownerIDs, err := s.repo.ListDistinctOwnerIDs(ctx)
 	if err != nil {
@@ -542,7 +542,7 @@ func leaveDayAllocations(start, end time.Time) []domain.LeaveDayAllocation {
 			segmentEnd = end
 		}
 		days := float64(int(segmentEnd.Sub(current).Hours()/24) + 1)
-		allocations = append(allocations, domain.LeaveDayAllocation{Year: int32(current.Year()), Days: days})
+		allocations = append(allocations, domain.LeaveDayAllocation{Year: int32(current.Year()), Days: days}) // #nosec G115 -- leave dates are validated application dates and fit the int32 contract field.
 		current = segmentEnd.AddDate(0, 0, 1)
 	}
 	return allocations

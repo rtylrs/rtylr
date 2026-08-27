@@ -663,8 +663,8 @@ func (r *Repository) analyticsProfileFunctions(ctx context.Context, ownerID int6
 	}
 	// cross-schema read from careers — profile function counts across career + talent applications
 	args = append(args, ownerID)
-	query := fmt.Sprintf(`
-		SELECT %s
+	query := `
+		SELECT ` + strings.Join(selects, ", ") + `
 		  FROM (
 		        SELECT COALESCE(a.cv_profile_json, '') AS profile_json
 		          FROM voxire_career_applications a
@@ -672,7 +672,7 @@ func (r *Repository) analyticsProfileFunctions(ctx context.Context, ownerID int6
 		        UNION ALL
 		        SELECT COALESCE(cv_profile_json, '') AS profile_json
 		          FROM voxhire_talent_applications
-		       ) profiles`, strings.Join(selects, ", "))
+		       ) profiles`
 	counts := make([]int64, len(functions))
 	countArgs := make([]any, len(counts))
 	for i := range counts {
