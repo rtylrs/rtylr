@@ -11,8 +11,7 @@ export interface SupportEngagement {
   lastTicketAt?: string;
 }
 
-export const SUPPORT_ENGAGEMENT_KEY = (email: string) =>
-  ['support', 'engagement', email] as const;
+export const SUPPORT_ENGAGEMENT_KEY = (email: string) => ['support', 'engagement', email] as const;
 
 /**
  * Support ticket count and last-ticket date for one customer, matched by
@@ -33,7 +32,7 @@ export function useSupportEngagement(email?: string | null) {
         const res = await supportCustomerClient.listCustomers({ page: 1, pageSize: 500 });
         if (res === null || res === undefined) return null;
         const match = (res.customers ?? []).find(
-          (c) => c.email?.toLowerCase() === email.toLowerCase(),
+          (c) => c.email?.toLowerCase() === email.toLowerCase()
         );
         if (!match) return null;
         return {

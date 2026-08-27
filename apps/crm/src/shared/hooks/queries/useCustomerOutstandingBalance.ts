@@ -37,7 +37,7 @@ export function useCustomerOutstandingBalance(customerId?: string) {
         if (res === null || res === undefined) return null;
         const invoices = res.invoices ?? [];
         const billable = invoices.filter(
-          (inv) => inv.status !== 'draft' && inv.status !== 'void' && inv.status !== 'cancelled',
+          (inv) => inv.status !== 'draft' && inv.status !== 'void' && inv.status !== 'cancelled'
         );
         if (!billable.length) return { totalOutstanding: 0, invoiceCount: 0 };
         const totalOutstanding = billable.reduce((sum, inv) => sum + (inv.amountDue ?? 0), 0);
