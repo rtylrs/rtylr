@@ -308,7 +308,7 @@ func updateCustomer(ctx context.Context, q *sqlc.Queries, input domain.CustomerU
 		isActive = *input.IsActive
 	}
 
-	result, err := r.queries.UpdateCustomer(ctx, sqlc.UpdateCustomerParams{
+	result, err := q.UpdateCustomer(ctx, sqlc.UpdateCustomerParams{
 		FirstName:   input.FirstName,
 		LastName:    sql.NullString{String: input.LastName, Valid: input.LastName != ""},
 		Email:       sql.NullString{String: input.Email, Valid: input.Email != ""},
