@@ -16,8 +16,10 @@ ON DUPLICATE KEY UPDATE
   is_default = TRUE,
   is_active = VALUES(is_active);
 
+-- cross-schema read from invoices — calculate paid invoice totals for tax reporting.
 -- name: SumPaidInvoicesTotal :one
 SELECT COALESCE(SUM(total), 0) FROM finance_invoices WHERE business_id = ? AND status = 'paid';
 
+-- cross-schema read from expenses — calculate the expense base for tax reporting.
 -- name: SumAllExpensesAmount :one
 SELECT COALESCE(SUM(amount), 0) FROM finance_expenses WHERE business_id = ?;

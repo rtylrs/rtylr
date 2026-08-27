@@ -1,8 +1,10 @@
+-- cross-schema write to inventory — record inventory movement in the shared inventory ledger.
 -- name: InsertInventoryTransaction :execresult
 INSERT INTO erp_inventory_transactions
 (owner_id, business_id, product_id, type, quantity_change, quantity_before, quantity_after, notes)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
+-- cross-schema read from products — build the inventory report from catalog product data.
 -- name: GetInventoryReport :many
 SELECT id, business_id, name, sku, unit, stock_quantity, low_stock_threshold,
        reorder_quantity, cost_price, sale_price,
@@ -13,6 +15,7 @@ WHERE business_id = ? AND track_inventory = TRUE AND is_active = TRUE
 ORDER BY name ASC
 LIMIT 100;
 
+-- cross-schema read from products — project catalog products that have crossed their low-stock threshold.
 -- name: GetLowStockProducts :many
 SELECT id, business_id, name, sku, unit, stock_quantity, low_stock_threshold,
        reorder_quantity, cost_price, sale_price,
@@ -25,6 +28,7 @@ WHERE business_id = ? AND track_inventory = TRUE AND is_active = TRUE
 ORDER BY stock_quantity ASC
 LIMIT 100;
 
+-- cross-schema read from stock_core and products — combine warehouse balances, cost layers, and catalog metadata for valuation.
 -- name: GetValuation :many
 SELECT
     COALESCE(c.name, 'Uncategorized') AS category_name,
