@@ -18,10 +18,11 @@ const API_HOST = 'http://localhost:9999';
 const FAKE_USER = {
   id: 'u1',
   email: 'owner@acme.test',
-  fullName: 'Acme Owner',
+  full_name: 'Acme Owner',
+  business_id: '1',
   role: 'owner',
   apps: ['flow'],
-  planSlug: 'pro',
+  plan_slug: 'pro',
 };
 
 const FAKE_WORKSPACE = {
@@ -41,6 +42,23 @@ function fakeProject(overrides: Record<string, unknown> = {}): Record<string, un
     completedCount: 1,
     memberAvatars: [],
     ...overrides,
+  };
+}
+
+function wireProject(project: Record<string, unknown>): Record<string, unknown> {
+  return {
+    id: project.id,
+    name: project.name,
+    description: project.description ?? '',
+    icon: project.icon ?? 'folder',
+    color: project.color,
+    status: project.status ?? 'active',
+    visibility: project.visibility ?? 'private',
+    task_count: project.taskCount ?? 0,
+    completed_count: project.completedCount ?? 0,
+    member_count: project.memberCount ?? 0,
+    start_date: project.startDate ?? '',
+    due_date: project.dueDate ?? '',
   };
 }
 
@@ -67,6 +85,31 @@ function fakeTask(overrides: Record<string, unknown> = {}): Record<string, unkno
   };
 }
 
+function wireTask(task: Record<string, unknown>): Record<string, unknown> {
+  return {
+    id: task.id,
+    project_id: task.projectId,
+    owner_id: task.ownerId ?? 'u1',
+    title: task.title,
+    description: task.description ?? '',
+    status: task.status,
+    priority: task.priority,
+    assignee_id: task.assigneeId ?? 'u1',
+    assignee_name: task.assignee ?? '',
+    assignee_initials: task.assigneeInitials ?? 'AO',
+    due_date: task.dueDate ?? '',
+    start_date: task.startDate ?? '',
+    subtask_count: task.subtaskCount ?? 0,
+    project_name: task.projectName ?? 'Alpha Project',
+    identifier: task.identifier ?? String(task.id),
+    created_at: task.createdAt ?? new Date().toISOString(),
+    updated_at: task.updatedAt ?? new Date().toISOString(),
+    labels: task.labels ?? [],
+    section_id: task.sectionId,
+    archived: task.archived ?? false,
+  };
+}
+
 function fakeNotification(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     id: 'n1',
@@ -84,11 +127,27 @@ function fakeNotification(overrides: Record<string, unknown> = {}): Record<strin
   };
 }
 
+function wireNotification(notification: Record<string, unknown>): Record<string, unknown> {
+  return {
+    id: notification.id,
+    type: notification.type,
+    title: notification.title,
+    description: notification.description,
+    task_id: notification.taskId,
+    task_title: notification.taskTitle,
+    actor_initials: notification.actorInitials,
+    project: notification.project,
+    project_color: notification.projectColor,
+    read: notification.read,
+    timestamp: notification.timestamp,
+  };
+}
+
 // ── Auth helpers ───────────────────────────────────────────────────────────
 
 async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {
   // Three base64url segments so getToken()'s JWT shape check passes.
-  const fakeJwt = 'eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMSJ9.fake_sig';
+  const fakeJwt = 'e2e-test-token';
   await context.addCookies([
     {
       name: 'token',
@@ -227,7 +286,7 @@ async function installFlowStubs(
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ notifications }),
+      body: JSON.stringify({ notifications: notifications.map(wireNotification) }),
     })
   );
 
@@ -239,7 +298,7 @@ async function installFlowStubs(
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ tasks: filtered }),
+      body: JSON.stringify({ tasks: filtered.map(wireTask) }),
     });
   });
 
@@ -247,7 +306,7 @@ async function installFlowStubs(
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ tasks }),
+      body: JSON.stringify({ tasks: tasks.map(wireTask) }),
     })
   );
 
@@ -258,7 +317,7 @@ async function installFlowStubs(
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ projects }),
+        body: JSON.stringify({ projects: projects.map(wireProject) }),
       });
       return;
     }
@@ -276,7 +335,7 @@ async function installFlowStubs(
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ project: created }),
+        body: JSON.stringify({ project: wireProject(created) }),
       });
       return;
     }
@@ -290,6 +349,54 @@ async function installFlowStubs(
       contentType: 'application/json',
       body: JSON.stringify({ columns: [] }),
     })
+  );
+
+  // Current Flow screens use the v2 business-scoped clients. Keep these
+  // responses in contract wire format so the generated decoders exercise the
+  // same boundary as production.
+  await page.route(/localhost:9999\/flow\/project\/v2\/projects(\?.*)?$/, (route: Route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        projects: projects.map(wireProject),
+        pagination: { total: projects.length },
+      }),
+    })
+  );
+
+  await page.route(/localhost:9999\/flow\/project\/v2\/projects\/columns(\?.*)?$/, (route: Route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ columns: [] }),
+    })
+  );
+
+  await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/my(\?.*)?$/, (route: Route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ tasks: tasks.map(wireTask) }),
+    })
+  );
+
+  await page.route(/localhost:9999\/flow\/task\/v2\/tasks(\?.*)?$/, (route: Route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ tasks: tasks.map(wireTask) }),
+    })
+  );
+
+  await page.route(
+    /localhost:9999\/flow\/notification\/v1\/notifications(\?.*)?$/,
+    (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ notifications: notifications.map(wireNotification) }),
+      })
   );
 
   return { captured };

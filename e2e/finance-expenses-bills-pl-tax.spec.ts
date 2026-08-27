@@ -41,6 +41,7 @@ async function seedAuth(page: import('@playwright/test').Page): Promise<void> {
         id: 1,
         email: 'qa@example.com',
         full_name: 'QA',
+        business_id: '1',
         role: 'owner',
         apps: ['finance'],
       }),
@@ -198,12 +199,13 @@ test.describe('Finance - Bills list', () => {
           bills: [
             {
               id: 'BILL-3001',
-              supplier_id: 'supplier-1',
+              supplier_id: '1',
+              supplier_name: 'Acme Suppliers',
               amount: 4500,
               currency: 'USD',
               status: 'unpaid',
               due_date: '2026-05-20',
-              description: 'Acme Suppliers',
+              description: 'May office supplies',
             },
           ],
         }),
@@ -306,11 +308,7 @@ test.describe('Finance - Tax rates screen', () => {
     await seedAuth(page);
   });
 
-  // The config-panel flow still targets an unsupported legacy response shape;
-  // keep that one case documented and skipped while reviving the page smoke test.
-  test.skip('renders Standard VAT rate name and 15% after opening config panel', async ({
-    page,
-  }) => {
+  test('renders Standard VAT rate name and 15% after opening config panel', async ({ page }) => {
     await page.route(`${API_URL}/finance/report/v1/tax-config`, async (route) => {
       if (route.request().method() !== 'GET') {
         await route.continue();
@@ -340,9 +338,11 @@ test.describe('Finance - Tax rates screen', () => {
     await page.getByRole('button', { name: /Tax Rates/i }).click();
 
     // The panel should now show the name and the rate value.
-    await expect(page.getByDisplayValue('Standard VAT')).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator('input[value="Standard VAT"]')).toBeVisible({ timeout: 15_000 });
     // Rate input should show 15.
-    await expect(page.getByDisplayValue('15')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('input[type="number"][value="15"]')).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test('Tax page heading is visible without config panel', async ({ page }) => {

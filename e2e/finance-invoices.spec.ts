@@ -101,6 +101,7 @@ async function stubFinanceAPI(
         id: 1,
         email: 'qa@example.com',
         full_name: 'QA',
+        business_id: '1',
         role: 'owner',
         apps: ['finance'],
       }),

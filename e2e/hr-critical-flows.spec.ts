@@ -6,10 +6,11 @@ const API = 'http://localhost:9999';
 const USER = {
   id: 1,
   email: 'hr-admin@acme.test',
-  fullName: 'HR Admin',
-  role: 'hr_admin',
+  full_name: 'HR Admin',
+  business_id: '1',
+  role: 'admin',
   apps: ['hr'],
-  planSlug: 'pro',
+  plan_slug: 'pro',
 };
 
 async function installStubs(page: Page): Promise<void> {
@@ -33,7 +34,7 @@ async function installStubs(page: Page): Promise<void> {
       body: JSON.stringify({
         config: {
           id: 1,
-          setup_completed_at: '2026-01-01T00:00:00Z',
+          setup_completed_at: '1767225600',
           currency: 'USD',
           weekly_hours: 40,
           payroll_enabled: true,
@@ -58,7 +59,14 @@ async function installStubs(page: Page): Promise<void> {
       }),
     })
   );
-  await page.route(`${API}/hr/payroll/runs`, (route: Route) =>
+  await page.route(/localhost:9999\/hr\/employees\/me(\?.*)?$/, (route: Route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ employee: { id: '42' } }),
+    })
+  );
+  await page.route(/localhost:9999\/hr\/payroll\/runs(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -78,7 +86,7 @@ async function installStubs(page: Page): Promise<void> {
       }),
     })
   );
-  await page.route(`${API}/hr/leave/v1/balances`, (route: Route) =>
+  await page.route(/localhost:9999\/hr\/leave\/v1\/balances(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -115,7 +123,7 @@ async function installStubs(page: Page): Promise<void> {
       }),
     })
   );
-  await page.route(`${API}/hr/timesheets`, (route: Route) =>
+  await page.route(/localhost:9999\/hr\/timesheets(\?.*)?$/, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -146,7 +154,7 @@ test.describe('HR critical staff flows', () => {
     await installStubs(page);
     await page.goto(`${HR_URL}/payroll`);
     await expect(page.getByText('2026-08-01, 2026-08-31')).toBeVisible();
-    await expect(page.getByText('$9,600.00')).toBeVisible();
+    await expect(page.getByText('$9,600.00', { exact: true }).first()).toBeVisible();
   });
 
   test('leave balances show remaining and used days', async ({ page }) => {

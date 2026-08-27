@@ -22,6 +22,7 @@ const CRM_URL = process.env.CRM_URL ?? 'http://localhost:5181';
 // does in production.
 const FAKE_USER = {
   id: 1,
+  business_id: '1',
   full_name: 'CRM Tester',
   email: 'tester@example.com',
   role: 'owner',
@@ -31,12 +32,16 @@ const FAKE_USER = {
 
 const FAKE_CUSTOMER = {
   id: 101,
+  first_name: 'Jamie',
+  last_name: 'Doe',
   name: 'Jamie Doe',
   email: 'jamie@example.com',
   phone: '+1 555-000-0000',
   total_spent: 240,
-  visits: 3,
+  visit_count: 3,
   loyalty_points: 120,
+  last_visit_at: '2 days ago',
+  visits: 3,
   last_visit: '2 days ago',
   initials: 'JD',
   tags: ['vip'],
@@ -77,7 +82,7 @@ async function stubCrmAPI(page: Page): Promise<void> {
   );
 
   // /hub/user/v1/users/me is called by AppGuard to confirm the user has CRM access.
-  await page.route(/\/user\/me$/, async (route: Route) => {
+  await page.route(/\/users\/me$/, async (route: Route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -114,103 +119,156 @@ async function stubCrmAPI(page: Page): Promise<void> {
     route.fulfill({ status: 200, contentType: 'application/json', body: emptyList('campaigns') })
   );
 
-  // Customer list / create / update / delete - the single POST endpoint
-  // disambiguates action via `_action` in the body, matching the real
-  // Go handler contract in `onion/crm/customers`.
-  await page.route(/\/crm\/customers/, async (route: Route) => {
-    const req = route.request();
-    const url = new URL(req.url());
-    const path = url.pathname;
+  // Customer list / create / update / delete. Canonical customer operations
+  // use the generated customer/v1 paths; legacy detail helpers remain on the
+  // compatibility routes.
+  await page.route(
+    /\/crm\/(?:customers|customer\/v1\/customers)(?:\/|\?|$)/,
+    async (route: Route) => {
+      const req = route.request();
+      const url = new URL(req.url());
+      const path = url.pathname;
+      const isCanonicalCollection = path.endsWith('/crm/customer/v1/customers');
+      const isCanonicalDetail = path.startsWith('/crm/customer/v1/customers/');
 
-    // /crm/customers/detail?id=101
-    if (path.endsWith('/crm/customers/detail')) {
-      const id = Number(url.searchParams.get('id'));
-      const found = customers.find((c) => c.id === id);
-      if (!found) {
-        await route.fulfill({ status: 404, body: '{}' });
-        return;
-      }
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(found),
-      });
-      return;
-    }
-
-    if (path.endsWith('/crm/customers/timeline')) {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ entries: [] }),
-      });
-      return;
-    }
-
-    if (path.endsWith('/crm/customers')) {
-      if (req.method() === 'GET') {
+      if (req.method() === 'DELETE' && isCanonicalDetail) {
+        const id = Number(path.split('/').pop());
+        lastDeletePayload = { id };
+        customers = customers.filter((c) => c.id !== id);
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ customers }),
+          body: JSON.stringify({ message: 'Customer deleted' }),
         });
         return;
       }
 
-      if (req.method() === 'POST') {
+      if (req.method() === 'PUT' && isCanonicalDetail) {
+        const id = Number(path.split('/').pop());
         const body = (req.postDataJSON() ?? {}) as Record<string, unknown>;
-        if (body._action === 'delete') {
-          lastDeletePayload = body;
-          customers = customers.filter((c) => c.id !== body.id);
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify({ ok: true }),
-          });
-          return;
-        }
-        if (typeof body.id === 'number') {
-          lastUpdatePayload = body;
-          customers = customers.map((c) => (c.id === body.id ? { ...c, ...body } : c));
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(customers.find((c) => c.id === body.id) ?? {}),
-          });
-          return;
-        }
-
-        lastCreatePayload = body;
-        const created = {
-          ...FAKE_CUSTOMER,
-          ...body,
-          id: FAKE_CUSTOMER.id,
-          total_spent: 0,
-          visits: 0,
-          loyalty_points: 0,
-          last_visit: 'Never',
-          tags: [],
-        };
-        customers = [...customers, created];
+        lastUpdatePayload = { id, ...body };
+        customers = customers.map((customer) =>
+          customer.id === id ? { ...customer, ...body } : customer
+        );
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify(created),
+          body: JSON.stringify({ message: 'Customer updated' }),
         });
         return;
       }
-    }
 
-    // Any other /crm/customers/* endpoint we haven't explicitly mocked.
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: '{}',
-    });
-  });
+      // /crm/customers/detail?id=101
+      if (
+        path.endsWith('/crm/customers/detail') ||
+        path.endsWith('/crm/customers/detail/full') ||
+        (isCanonicalDetail && req.method() === 'GET')
+      ) {
+        const id = Number(url.searchParams.get('id'));
+        const canonicalId = isCanonicalDetail ? Number(path.split('/').pop()) : id;
+        const found = customers.find((c) => c.id === (isCanonicalDetail ? canonicalId : id));
+        if (!found) {
+          await route.fulfill({ status: 404, body: '{}' });
+          return;
+        }
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(
+            isCanonicalDetail || path.endsWith('/crm/customers/detail/full')
+              ? { customer: found }
+              : found
+          ),
+        });
+        return;
+      }
+
+      if (path.endsWith('/crm/customers/timeline')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ entries: [] }),
+        });
+        return;
+      }
+
+      if (path.endsWith('/crm/customers') || isCanonicalCollection) {
+        if (req.method() === 'GET') {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              customers,
+              total: String(customers.length),
+              page: '1',
+              page_size: '100',
+            }),
+          });
+          return;
+        }
+
+        if (req.method() === 'POST') {
+          const body = (req.postDataJSON() ?? {}) as Record<string, unknown>;
+          if (body._action === 'delete') {
+            lastDeletePayload = body;
+            customers = customers.filter((c) => c.id !== body.id);
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify({ ok: true }),
+            });
+            return;
+          }
+          if (typeof body.id === 'number') {
+            lastUpdatePayload = body;
+            customers = customers.map((c) => (c.id === body.id ? { ...c, ...body } : c));
+            await route.fulfill({
+              status: 200,
+              contentType: 'application/json',
+              body: JSON.stringify(customers.find((c) => c.id === body.id) ?? {}),
+            });
+            return;
+          }
+
+          lastCreatePayload = {
+            ...body,
+            name: [body.first_name, body.last_name].filter(Boolean).join(' '),
+          };
+          const created = {
+            ...FAKE_CUSTOMER,
+            ...body,
+            id: FAKE_CUSTOMER.id,
+            total_spent: 0,
+            visits: 0,
+            loyalty_points: 0,
+            last_visit: 'Never',
+            tags: [],
+          };
+          customers = [...customers, created];
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(
+              isCanonicalCollection
+                ? { customer_id: String(created.id), message: 'Customer created' }
+                : created
+            ),
+          });
+          return;
+        }
+      }
+
+      // Any other /crm/customers/* endpoint we haven't explicitly mocked.
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: '{}',
+      });
+    }
+  );
 }
 
-test.describe.skip('CRM customers flow', () => {
+test.describe('CRM customers flow', () => {
   test.beforeEach(async ({ page }) => {
     customers = [];
     lastCreatePayload = null;
@@ -311,6 +369,6 @@ test.describe.skip('CRM customers flow', () => {
     await deleteButtons.last().click();
 
     await expect(page).toHaveURL(/\/customers$/, { timeout: 10_000 });
-    expect(lastDeletePayload).toMatchObject({ id: FAKE_CUSTOMER.id, _action: 'delete' });
+    expect(lastDeletePayload).toMatchObject({ id: FAKE_CUSTOMER.id });
   });
 });

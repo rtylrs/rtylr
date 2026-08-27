@@ -10,7 +10,8 @@ const API_HOST = 'http://localhost:9999';
 const FAKE_USER = {
   id: '1001',
   email: 'owner@test.local',
-  fullName: 'Test Owner',
+  full_name: 'Test Owner',
+  business_id: '1',
   role: 'owner',
   apps: ['flow'],
 };
@@ -31,8 +32,24 @@ const FAKE_NOTIFICATIONS = [
   },
 ];
 
+const FAKE_TASK = {
+  id: '101',
+  project_id: '1',
+  owner_id: '1001',
+  title: 'Implement SSO Auth Flow',
+  description: '',
+  status: 'in_progress',
+  priority: 'high',
+  assignee_id: '1001',
+  assignee_name: 'Test Owner',
+  assignee_initials: 'TO',
+  project_name: 'Alpha Project',
+  identifier: 'AP-101',
+  archived: false,
+};
+
 async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {
-  const fakeJwt = 'eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMTAwMSJ9.fake_sig';
+  const fakeJwt = 'e2e-test-token';
   await context.addCookies([
     {
       name: 'token',
@@ -50,6 +67,15 @@ test.describe('Flow - Inbox & Features Sweep', () => {
   test.beforeEach(async ({ context, page }) => {
     await primeAuthCookie(context);
 
+    await page.route(/localhost:9999\//, (route: Route) => {
+      const method = route.request().method();
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(method === 'GET' ? {} : { success: true }),
+      });
+    });
+
     await page.route(`${API_HOST}/hub/user/v1/users/me`, (route: Route) =>
       route.fulfill({
         status: 200,
@@ -58,19 +84,43 @@ test.describe('Flow - Inbox & Features Sweep', () => {
       })
     );
 
-    await page.route(/localhost:9999\/flow\/notification\/v1\/notifications/, (route: Route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ notifications: FAKE_NOTIFICATIONS }),
-      })
+    await page.route(
+      /localhost:9999\/flow\/notification\/v1\/notifications(\?.*)?$/,
+      (route: Route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            notifications: FAKE_NOTIFICATIONS.map((notification) => ({
+              id: notification.id,
+              type: notification.type,
+              title: notification.title,
+              description: notification.description,
+              task_id: notification.taskId,
+              task_title: notification.taskTitle,
+              actor_initials: notification.actorInitials,
+              project: notification.project,
+              project_color: notification.projectColor,
+              read: notification.read,
+              timestamp: notification.timestamp,
+            })),
+          }),
+        })
     );
 
-    await page.route(/localhost:9999\/flow\/view\/v1\/views/, (route: Route) =>
+    await page.route(/localhost:9999\/flow\/view\/v2\/views(\?.*)?$/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ views: [] }),
+      })
+    );
+
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/my(\?.*)?$/, (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ tasks: [FAKE_TASK] }),
       })
     );
 

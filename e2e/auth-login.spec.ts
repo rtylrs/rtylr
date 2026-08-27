@@ -9,7 +9,7 @@ import { test, expect } from './fixtures';
 const AUTH_URL = process.env.AUTH_URL ?? 'http://localhost:5176';
 
 async function stubAuth(page: import('@playwright/test').Page): Promise<void> {
-  await page.route('**/auth/login', async (route) => {
+  await page.route('**/common/auth/v1/login', async (route) => {
     const body = route.request().postDataJSON() as { email?: string; password?: string };
     if (body.password === 'wrong') {
       await route.fulfill({
@@ -33,7 +33,7 @@ async function stubAuth(page: import('@playwright/test').Page): Promise<void> {
   });
 
   // Google auth stub - never hit Firebase/Google in CI.
-  await page.route('**/auth/register/google', (route) =>
+  await page.route('**/common/auth/v1/register/google', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -48,7 +48,7 @@ async function stubAuth(page: import('@playwright/test').Page): Promise<void> {
   );
 
   // Register endpoint - keeps the /register spec path self-contained.
-  await page.route('**/auth/register', (route) =>
+  await page.route('**/common/auth/v1/register', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',

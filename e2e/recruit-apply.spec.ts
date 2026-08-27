@@ -89,6 +89,17 @@ async function stubRecruitAPI(page: import('@playwright/test').Page) {
 
   // Shape-match the GET /recruit/public/careers?slug=... response.
   await page.route('**/recruit/public/careers*', async (route) => {
+    const requestUrl = new URL(route.request().url());
+    const requestedSlug =
+      requestUrl.searchParams.get('slug') ?? requestUrl.searchParams.get('business_slug');
+    if (requestedSlug === 'does-not-exist') {
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Careers page not found' }),
+      });
+      return;
+    }
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -146,6 +157,14 @@ test.describe('Recruit apply flow', () => {
     await page.getByRole('textbox', { name: /full name/i }).fill('Jamie Doe');
     await page.getByRole('textbox', { name: /^email/i }).fill('jamie@example.com');
 
+    // The public app shows the consent dialog on a fresh browser context. This
+    // flow does not require optional analytics, so decline it before submitting
+    // and keep the test focused on the application operation.
+    const cookieConsent = page.getByRole('dialog', { name: 'Cookie consent' });
+    if (await cookieConsent.isVisible()) {
+      await cookieConsent.getByRole('button', { name: 'Decline' }).click();
+    }
+
     await page.getByRole('button', { name: /submit application/i }).click();
 
     // Inline success block replaces the form.
@@ -164,14 +183,6 @@ test.describe('Recruit apply flow', () => {
   });
 
   test('404 renders when the slug is unknown', async ({ page }) => {
-    // Re-route to return 404 - simulates a mistyped business slug.
-    await page.route('**/recruit/public/careers*', (route) =>
-      route.fulfill({
-        status: 404,
-        contentType: 'application/json',
-        body: JSON.stringify({ message: 'Careers page not found' }),
-      })
-    );
     await page.goto(`${RECRUIT_URL}/does-not-exist`);
     await expect(page.getByText(/404 · Not found/i)).toBeVisible();
   });

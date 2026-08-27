@@ -38,6 +38,7 @@ async function stubBackend(
       contentType: 'application/json',
       body: JSON.stringify({
         user_id: 1,
+        business_id: '1',
         email: 'staff@example.com',
         full_name: 'Staff User',
         business_name: 'Example Co',

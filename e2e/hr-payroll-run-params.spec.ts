@@ -16,10 +16,11 @@ const API = 'http://localhost:9999';
 const FAKE_USER = {
   id: 1,
   email: 'hr-admin@acme.test',
-  fullName: 'HR Admin',
-  role: 'hr_admin',
+  full_name: 'HR Admin',
+  business_id: '1',
+  role: 'admin',
   apps: ['hr'],
-  planSlug: 'pro',
+  plan_slug: 'pro',
 };
 
 const RUNS = [
@@ -120,7 +121,7 @@ async function installStubs(page: Page, requested: string[]): Promise<void> {
       body: JSON.stringify({
         config: {
           id: 1,
-          setup_completed_at: '2026-01-01T00:00:00Z',
+          setup_completed_at: '1767225600',
           work_week_start: 'Monday',
           currency: 'USD',
           weekly_hours: 40,
@@ -206,7 +207,7 @@ test.describe('payroll run typed path param', () => {
       // The route must still render its own component - not the error
       // boundary. The "back to payroll runs" link only exists in the
       // feature's not-found state.
-      await expect(page.getByRole('link', { name: /back to payroll runs/i })).toBeVisible({
+      await expect(page.getByRole('button', { name: /back to payroll runs/i })).toBeVisible({
         timeout: 15_000,
       });
       expect(requested).toHaveLength(0);

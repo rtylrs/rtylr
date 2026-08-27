@@ -10,7 +10,8 @@ const API_HOST = 'http://localhost:9999';
 const FAKE_USER = {
   id: '1001',
   email: 'owner@test.local',
-  fullName: 'Test Owner',
+  full_name: 'Test Owner',
+  business_id: '1',
   role: 'owner',
   apps: ['flow'],
 };
@@ -26,9 +27,9 @@ const FAKE_PROJECT = {
 };
 
 const FAKE_COLUMNS = [
-  { id: 'col-1', name: 'Todo', color: '#6366f1', sortOrder: 0 },
-  { id: 'col-2', name: 'In Progress', color: '#3b82f6', sortOrder: 1 },
-  { id: 'col-3', name: 'Done', color: '#22c55e', sortOrder: 2 },
+  { id: '1', name: 'Todo', color: '#6366f1', sortOrder: 0 },
+  { id: '2', name: 'In Progress', color: '#3b82f6', sortOrder: 1 },
+  { id: '3', name: 'Done', color: '#22c55e', sortOrder: 2 },
 ];
 
 const FAKE_TASKS = [
@@ -39,7 +40,7 @@ const FAKE_TASKS = [
     title: 'Implement SSO Auth Flow',
     status: 'in_progress',
     priority: 'urgent',
-    sectionId: 'col-2',
+    sectionId: '2',
     assignee: 'Test Owner',
   },
   {
@@ -49,13 +50,13 @@ const FAKE_TASKS = [
     title: 'Fix navigation dropdown bug',
     status: 'todo',
     priority: 'high',
-    sectionId: 'col-1',
+    sectionId: '1',
     assignee: 'Test Admin',
   },
 ];
 
 async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {
-  const fakeJwt = 'eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMTAwMSJ9.fake_sig';
+  const fakeJwt = 'e2e-test-token';
   await context.addCookies([
     {
       name: 'token',
@@ -138,7 +139,19 @@ test.describe('Flow - Project Board', () => {
       route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ project: FAKE_PROJECT }),
+        body: JSON.stringify({
+          project: {
+            id: '1',
+            name: 'Alpha Project',
+            description: '',
+            icon: 'folder',
+            color: '#64C5B9',
+            status: 'active',
+            visibility: 'private',
+            task_count: 3,
+            completed_count: 1,
+          },
+        }),
       })
     );
 
@@ -146,7 +159,69 @@ test.describe('Flow - Project Board', () => {
       route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ projects: [FAKE_PROJECT], pagination: { total: 1 } }),
+        body: JSON.stringify({
+          projects: [
+            {
+              id: '1',
+              name: 'Alpha Project',
+              description: '',
+              icon: 'folder',
+              color: '#64C5B9',
+              status: 'active',
+              visibility: 'private',
+              task_count: 3,
+              completed_count: 1,
+            },
+          ],
+          pagination: { total: 1 },
+        }),
+      })
+    );
+
+    await page.route(
+      /localhost:9999\/flow\/project\/v2\/projects\/members(\?.*)?$/,
+      (route: Route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            members: [
+              {
+                id: '1',
+                project_id: '1',
+                user_id: '1001',
+                name: 'Test Owner',
+                email: 'owner@test.local',
+                role: 'admin',
+              },
+            ],
+            pagination: { total: 1 },
+          }),
+        })
+    );
+
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks(\?.*)?$/, (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          tasks: FAKE_TASKS.map((task) => ({
+            id: task.id,
+            project_id: task.projectId,
+            owner_id: '1001',
+            title: task.title,
+            description: '',
+            status: task.status,
+            priority: task.priority,
+            assignee_id: '1001',
+            assignee_name: task.assignee,
+            assignee_initials: 'TO',
+            project_name: 'Alpha Project',
+            identifier: String(task.id),
+            section_id: task.sectionId,
+            archived: false,
+          })),
+        }),
       })
     );
   });
@@ -195,7 +270,7 @@ test.describe('Flow - Project Board', () => {
     await menu.getByRole('menuitem', { name: /Done/ }).click();
 
     await expect.poll(() => movePayload, { timeout: 10_000 }).not.toBeNull();
-    expect(movePayload).toContain('col-3');
+    expect(movePayload).toContain('"column_id":"3"');
   });
 
   test('kanban board renders columns and task cards', async ({ page }) => {

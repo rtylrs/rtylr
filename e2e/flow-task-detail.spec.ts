@@ -10,7 +10,8 @@ const API_HOST = 'http://localhost:9999';
 const FAKE_USER = {
   id: '1001',
   email: 'owner@test.local',
-  fullName: 'Test Owner',
+  full_name: 'Test Owner',
+  business_id: '1',
   role: 'owner',
   apps: ['flow'],
 };
@@ -60,8 +61,51 @@ const FAKE_TASK_DETAIL = {
   ],
 };
 
+function wireTaskDetail(): Record<string, unknown> {
+  const task = FAKE_TASK_DETAIL.task;
+  return {
+    task: {
+      id: task.id,
+      project_id: task.projectId,
+      owner_id: task.ownerId,
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      priority: task.priority,
+      assignee_id: task.assigneeId,
+      assignee_name: task.assignee,
+      assignee_initials: task.assigneeInitials,
+      reporter_id: task.reporterId,
+      due_date: task.dueDate,
+      start_date: task.startDate,
+      estimated_hours: task.estimatedHours,
+      actual_hours: task.actualHours,
+      archived: task.archived,
+      labels: task.labels.map(String),
+      identifier: task.identifier,
+      created_at: task.createdAt,
+      updated_at: task.updatedAt,
+    },
+    comments: FAKE_TASK_DETAIL.comments.map((comment) => ({
+      id: comment.id,
+      task_id: comment.taskId,
+      user_id: comment.userId,
+      content: comment.content,
+      is_edited: comment.isEdited,
+      created_at: comment.createdAt,
+    })),
+    subtasks: FAKE_TASK_DETAIL.subtasks.map((subtask) => ({
+      id: subtask.id,
+      project_id: '1',
+      title: subtask.title,
+      status: subtask.status,
+    })),
+    activity: [],
+  };
+}
+
 async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {
-  const fakeJwt = 'eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMTAwMSJ9.fake_sig';
+  const fakeJwt = 'e2e-test-token';
   await context.addCookies([
     {
       name: 'token',
@@ -92,6 +136,38 @@ test.describe('Flow - Task Detail', () => {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify(FAKE_TASK_DETAIL),
+      })
+    );
+
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/101$/, (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(wireTaskDetail()),
+      })
+    );
+
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/101\/activity$/, (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ activity: [] }),
+      })
+    );
+
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/101\/time-logs$/, (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ time_logs: [] }),
+      })
+    );
+
+    await page.route(/localhost:9999\/flow\/task\/v2\/tasks\/101\/attachments$/, (route: Route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ attachments: [] }),
       })
     );
 

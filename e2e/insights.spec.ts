@@ -7,6 +7,7 @@ import { test, expect } from './fixtures';
  */
 
 const INSIGHTS_URL = process.env.INSIGHTS_URL ?? 'http://localhost:5187';
+const API_URL = 'http://localhost:9999';
 
 async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {
   await context.addCookies([
@@ -23,7 +24,7 @@ async function primeAuthCookie(context: import('@playwright/test').BrowserContex
 }
 
 async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<void> {
-  await page.route(/.*\/insights\/dashboard.*/, (route) =>
+  await page.route(`${API_URL}/insights/dashboard/**`, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -36,7 +37,7 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
     })
   );
 
-  await page.route(/.*\/insights\/revenue.*/, (route) =>
+  await page.route(`${API_URL}/insights/revenue/**`, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -44,7 +45,7 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
     })
   );
 
-  await page.route(/.*\/insights\/customer.*/, (route) =>
+  await page.route(`${API_URL}/insights/customer/**`, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -52,7 +53,7 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
     })
   );
 
-  await page.route(/.*\/insights\/product.*/, (route) =>
+  await page.route(`${API_URL}/insights/product/**`, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -60,7 +61,7 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
     })
   );
 
-  await page.route(/.*\/insights\/financial.*/, (route) =>
+  await page.route(`${API_URL}/insights/financial/**`, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -68,7 +69,7 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
     })
   );
 
-  await page.route(/.*\/insights\/operation.*/, (route) =>
+  await page.route(`${API_URL}/insights/operation/**`, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -76,7 +77,7 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
     })
   );
 
-  await page.route(/.*\/insights\/report.*/, (route) =>
+  await page.route(`${API_URL}/insights/report/**`, (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -90,7 +91,7 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
     })
   );
 
-  await page.route(/.*\/insights\/setting.*/, (route) => {
+  await page.route(`${API_URL}/insights/setting/**`, (route) => {
     if (route.request().method() === 'PUT') {
       route.fulfill({
         status: 200,
@@ -118,16 +119,19 @@ async function stubInsightsAPIs(page: import('@playwright/test').Page): Promise<
     });
   });
 
-  await page.route(
-    /.*(\/hub\/user\/v1\/users\/me|\/user\/me|\/get-configs|\/business\/me|\/account).*/,
-    (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          user: { id: 1, name: 'Test User', email: 'test@example.com' },
-        }),
-      })
+  await page.route(`${API_URL}/hub/user/v1/users/me`, (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        id: '1',
+        email: 'test@example.com',
+        full_name: 'Test User',
+        business_id: '1',
+        role: 'owner',
+        apps: ['insights'],
+      }),
+    })
   );
 }
 

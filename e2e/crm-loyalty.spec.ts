@@ -15,6 +15,7 @@ const CRM_URL = process.env.CRM_URL ?? 'http://localhost:5181';
 
 const FAKE_USER = {
   id: 1,
+  business_id: '1',
   full_name: 'CRM Tester',
   email: 'tester@example.com',
   role: 'owner',
@@ -26,39 +27,38 @@ const FAKE_USER = {
 
 const FAKE_TIERS = [
   {
-    id: 1,
+    id: '1',
     name: 'Bronze',
-    threshold: 0,
-    multiplier: 1,
-    perks: ['Birthday bonus', 'Early access'],
-    color: '#b45309',
+    min_points: '0',
+    discount_pct: 1,
+    perks: '["Birthday bonus","Early access"]',
+    sort_order: '1',
   },
   {
-    id: 2,
+    id: '2',
     name: 'Gold',
-    threshold: 500,
-    multiplier: 2,
-    perks: ['Free shipping', 'Priority support', '2× points'],
-    color: '#f59e0b',
+    min_points: '500',
+    discount_pct: 2,
+    perks: '["Free shipping","Priority support","2× points"]',
+    sort_order: '2',
   },
 ];
 
 const FAKE_CAMPAIGN = {
-  id: 10,
+  id: '10',
   name: 'Spring Promo 2026',
   description: 'Limited-time spring deals for all members.',
-  channel: 'Email',
-  status: 'Active',
-  audience: 1200,
-  sent: 1100,
-  open_rate: '38%',
-  click_rate: '9%',
-  revenue: '$4,800',
+  channel: 'email',
+  status: 'active',
+  subject: 'Limited-time spring deals for all members.',
+  audience_count: '1200',
+  sent_count: '1100',
+  opened_count: '418',
   updated_at: '2 days ago',
 };
 
 const FAKE_SEGMENT = {
-  id: 5,
+  id: '5',
   name: 'VIP Customers',
   description: 'Top spenders with 10+ visits.',
   customer_count: 45,
@@ -88,7 +88,7 @@ async function stubBaseRoutes(page: Page): Promise<void> {
   );
 
   // AppGuard calls /hub/user/v1/users/me to validate CRM access.
-  await page.route(/\/user\/me$/, (route: Route) =>
+  await page.route(/\/users\/me$/, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -117,7 +117,7 @@ async function stubBaseRoutes(page: Page): Promise<void> {
   );
 
   // Customers list - empty, not under test here.
-  await page.route(/\/crm\/customers(\?|$)/, (route: Route) =>
+  await page.route(/\/crm\/(?:customers|customer\/v1\/customers)(?:\?|$)/, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -128,14 +128,14 @@ async function stubBaseRoutes(page: Page): Promise<void> {
 
 // ── Loyalty tiers ─────────────────────────────────────────────────────────────
 
-test.describe.skip('CRM loyalty tiers flow', () => {
+test.describe('CRM loyalty tiers flow', () => {
   test.beforeEach(async ({ page }) => {
     await seedAuth(page);
     await stubBaseRoutes(page);
 
     // Stub all loyalty sub-endpoints that DefaultLayout or the Loyalty screen
     // may prefetch before we reach /loyalty.
-    await page.route(/\/crm\/loyalty\/config$/, (route: Route) =>
+    await page.route(/localhost:9999\/crm\/loyalty(?:\/v1)?\/config$/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -147,28 +147,28 @@ test.describe.skip('CRM loyalty tiers flow', () => {
         }),
       })
     );
-    await page.route(/\/crm\/loyalty\/transactions$/, (route: Route) =>
+    await page.route(/localhost:9999\/crm\/loyalty(?:\/v1)?\/transactions$/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ transactions: [] }),
       })
     );
-    await page.route(/\/crm\/loyalty\/members$/, (route: Route) =>
+    await page.route(/localhost:9999\/crm\/loyalty(?:\/v1)?\/members$/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ members: [] }),
       })
     );
-    await page.route(/\/crm\/loyalty\/rewards$/, (route: Route) =>
+    await page.route(/localhost:9999\/crm\/loyalty(?:\/v1)?\/rewards$/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ rewards: [] }),
       })
     );
-    await page.route(/\/crm\/loyalty\/tiers$/, (route: Route) =>
+    await page.route(/localhost:9999\/crm\/loyalty(?:\/v1)?\/tiers$/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -177,14 +177,14 @@ test.describe.skip('CRM loyalty tiers flow', () => {
     );
 
     // Segments and campaigns are prefetched by the sidebar.
-    await page.route(/\/crm\/segments(\?|$)/, (route: Route) =>
+    await page.route(/\/crm\/(?:segments|segment\/v1\/segments)(?:\?|$)/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ segments: [] }),
       })
     );
-    await page.route(/\/crm\/campaigns(\?|$)/, (route: Route) =>
+    await page.route(/\/crm\/(?:campaigns|campaign\/v1\/campaigns)(?:\?|$)/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -205,7 +205,7 @@ test.describe.skip('CRM loyalty tiers flow', () => {
     await page.goto(`${CRM_URL}/loyalty`);
 
     // Bronze is the starting tier (threshold === 0).
-    await expect(page.getByText(/Starting tier/i)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/Starting tier/i).first()).toBeVisible({ timeout: 15_000 });
 
     // Gold starts at 500 points.
     await expect(page.getByText(/500/)).toBeVisible({ timeout: 10_000 });
@@ -222,18 +222,18 @@ test.describe.skip('CRM loyalty tiers flow', () => {
 
 // ── Campaigns list ────────────────────────────────────────────────────────────
 
-test.describe.skip('CRM campaigns list flow', () => {
+test.describe('CRM campaigns list flow', () => {
   test.beforeEach(async ({ page }) => {
     await seedAuth(page);
     await stubBaseRoutes(page);
 
     // Loyalty sub-endpoints: empty for these tests.
-    await page.route(/\/crm\/loyalty\//, (route: Route) =>
+    await page.route(/localhost:9999\/crm\/loyalty(?:\/v1)?\//, (route: Route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
     );
 
     // Segments sidebar prefetch.
-    await page.route(/\/crm\/segments(\?|$)/, (route: Route) =>
+    await page.route(/\/crm\/(?:segments|segment\/v1\/segments)(?:\?|$)/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -242,7 +242,7 @@ test.describe.skip('CRM campaigns list flow', () => {
     );
 
     // Campaigns list returns one active campaign.
-    await page.route(/\/crm\/campaigns(\?|$)/, (route: Route) =>
+    await page.route(/\/crm\/(?:campaigns|campaign\/v1\/campaigns)(?:\?|$)/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -261,7 +261,7 @@ test.describe.skip('CRM campaigns list flow', () => {
     await page.goto(`${CRM_URL}/campaigns`);
 
     // The StatusBadge component renders the status text directly.
-    await expect(page.getByText('Active')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Active', { exact: true })).toBeVisible({ timeout: 15_000 });
   });
 
   test('active campaign count is shown in the page subtitle', async ({ page }) => {
@@ -274,18 +274,18 @@ test.describe.skip('CRM campaigns list flow', () => {
 
 // ── Segments list ─────────────────────────────────────────────────────────────
 
-test.describe.skip('CRM segments list flow', () => {
+test.describe('CRM segments list flow', () => {
   test.beforeEach(async ({ page }) => {
     await seedAuth(page);
     await stubBaseRoutes(page);
 
     // Loyalty sub-endpoints: empty.
-    await page.route(/\/crm\/loyalty\//, (route: Route) =>
+    await page.route(/localhost:9999\/crm\/loyalty(?:\/v1)?\//, (route: Route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
     );
 
     // Campaigns sidebar prefetch: empty.
-    await page.route(/\/crm\/campaigns(\?|$)/, (route: Route) =>
+    await page.route(/\/crm\/(?:campaigns|campaign\/v1\/campaigns)(?:\?|$)/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -294,7 +294,7 @@ test.describe.skip('CRM segments list flow', () => {
     );
 
     // Segments list - returns our VIP Customers segment.
-    await page.route(/\/crm\/segments(\?|$)/, (route: Route) =>
+    await page.route(/\/crm\/(?:segments|segment\/v1\/segments)(?:\?|$)/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -313,7 +313,7 @@ test.describe.skip('CRM segments list flow', () => {
     await page.goto(`${CRM_URL}/segments`);
 
     // Segments.tsx renders customerCount.toLocaleString() inside the card.
-    await expect(page.getByText('45')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('45', { exact: true })).toBeVisible({ timeout: 15_000 });
   });
 
   test('segments page shows aggregate customer total', async ({ page }) => {
@@ -326,23 +326,23 @@ test.describe.skip('CRM segments list flow', () => {
 
 // ── Customer import UI ────────────────────────────────────────────────────────
 
-test.describe.skip('CRM customer import UI', () => {
+test.describe('CRM customer import UI', () => {
   test.beforeEach(async ({ page }) => {
     await seedAuth(page);
     await stubBaseRoutes(page);
 
     // Loyalty, campaigns, segments: empty stubs so sidebar is quiet.
-    await page.route(/\/crm\/loyalty\//, (route: Route) =>
+    await page.route(/localhost:9999\/crm\/loyalty(?:\/v1)?\//, (route: Route) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: '{}' })
     );
-    await page.route(/\/crm\/campaigns(\?|$)/, (route: Route) =>
+    await page.route(/\/crm\/(?:campaigns|campaign\/v1\/campaigns)(?:\?|$)/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ campaigns: [] }),
       })
     );
-    await page.route(/\/crm\/segments(\?|$)/, (route: Route) =>
+    await page.route(/\/crm\/(?:segments|segment\/v1\/segments)(?:\?|$)/, (route: Route) =>
       route.fulfill({
         status: 200,
         contentType: 'application/json',

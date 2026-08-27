@@ -32,20 +32,77 @@ interface StubProduct {
 }
 
 const FAKE_USER = {
-  id: 1,
+  id: '1',
   email: 'owner@acme.test',
-  fullName: 'Acme Owner',
+  full_name: 'Acme Owner',
+  business_id: '1',
   role: 'owner',
   apps: ['erp'],
-  planSlug: 'pro',
+  plan_slug: 'pro',
 };
 
 const FAKE_CATEGORIES = [
-  { id: 1, name: 'Beverages', description: 'Drinks', productCount: 0, sortOrder: 1 },
-  { id: 2, name: 'Snacks', description: 'Bites', productCount: 0, sortOrder: 2 },
+  { id: '1', name: 'Beverages', description: 'Drinks' },
+  { id: '2', name: 'Snacks', description: 'Bites' },
 ];
 
-const FAKE_BRANDS = [{ id: 1, name: 'Acme', description: 'House brand', productCount: 0 }];
+const FAKE_BRANDS = [{ id: '1', name: 'Acme', description: 'House brand' }];
+
+const FAKE_SUPPLIERS = [
+  {
+    id: '1',
+    name: 'Global Grains Co.',
+    email: 'alice@globalgrains.test',
+    phone: '+1 555 0001',
+    city: 'Chicago',
+    country: 'US',
+    is_active: true,
+  },
+  {
+    id: '2',
+    name: 'Dairy Direct Ltd.',
+    email: 'bob@dairydirect.test',
+    phone: '+1 555 0002',
+    city: 'Boston',
+    country: 'US',
+    is_active: true,
+  },
+  {
+    id: '3',
+    name: 'FreshFarms',
+    email: 'freshfarms@example.test',
+    phone: '+1 555 0003',
+    city: 'Austin',
+    country: 'US',
+    is_active: true,
+  },
+];
+
+function categoryIdForName(name: string): string {
+  return FAKE_CATEGORIES.find((category) => category.name === name)?.id ?? '0';
+}
+
+function toWireProduct(product: StubProduct): Record<string, unknown> {
+  return {
+    id: String(product.id),
+    name: product.name,
+    sku: product.sku,
+    category_id: categoryIdForName(product.category),
+    supplier_id: '1',
+    unit: product.unit,
+    cost_price: product.costPrice,
+    sale_price: product.salePrice,
+    stock_quantity: product.stock,
+    low_stock_threshold: product.lowStock,
+    reorder_quantity: 0,
+    is_active: true,
+    track_inventory: true,
+    description: 'Test product',
+    barcode: `${product.sku}-BARCODE`,
+    brand_id: '0',
+    currency: 'USD',
+  };
+}
 
 /**
  * Installs stub handlers for every backend endpoint the Products list +
@@ -109,14 +166,21 @@ async function installProductStubs(
   );
 
   // (4) Categories + brands feed the filter drawer + quick-add dropdown.
-  await page.route(`${apiHost}/erp/category/v1/categories`, (route: Route) =>
+  await page.route(`${apiHost}/erp/category/v1/categories**`, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ categories: FAKE_CATEGORIES }),
     })
   );
-  await page.route(`${apiHost}/erp/brand/v1/brands`, (route: Route) =>
+  await page.route(`${apiHost}/erp/supplier/v1/suppliers**`, (route: Route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ suppliers: FAKE_SUPPLIERS, has_more: false }),
+    })
+  );
+  await page.route(`${apiHost}/erp/brand/v1/brands**`, (route: Route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -124,62 +188,34 @@ async function installProductStubs(
     })
   );
 
-  // (5) Products: list (GET), create/update/delete multiplex (POST).
-  //
-  // The ERP API multiplexes create/update/delete through POST /erp/products
-  // with an `_action` discriminator - see shared/services/erpApi.ts. We
-  // mirror that here so the handlers stay faithful to production.
-  await page.route(`${apiHost}/erp/product/v1/products`, async (route: Route) => {
+  // (5) Products use the generated OneKit paths and snake_case wire payloads.
+  await page.route(`${apiHost}/erp/product/v1/products**`, async (route: Route) => {
     const req = route.request();
-    const url = new URL(req.url());
     if (req.method() === 'GET') {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ products: state.products }),
+        body: JSON.stringify({
+          products: state.products.map(toWireProduct),
+          total: state.products.length,
+          has_more: false,
+        }),
       });
       return;
     }
     if (req.method() === 'POST') {
       const body = (req.postDataJSON() ?? {}) as Record<string, unknown>;
       captured.lastPost = body;
-
-      // Delete path: POST /erp/products { id, _action: 'delete' }
-      if (body._action === 'delete' && typeof body.id === 'number') {
-        state.products = state.products.filter((p) => p.id !== body.id);
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ success: true }),
-        });
-        return;
-      }
-
-      // Update path: POST /erp/products { id: <existing>, ...fields }
-      if (typeof body.id === 'number') {
-        const idx = state.products.findIndex((p) => p.id === body.id);
-        if (idx >= 0) {
-          const merged = { ...state.products[idx], ...(body as Partial<StubProduct>) };
-          state.products[idx] = merged;
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(merged),
-          });
-          return;
-        }
-      }
-
-      // Create path: POST /erp/products { ...fields, no id }
       const created: StubProduct = {
         id: state.nextId++,
         name: String(body.name ?? ''),
         sku: String(body.sku ?? ''),
-        category: String(body.category ?? ''),
-        stock: Number(body.stock ?? 0),
-        lowStock: Number(body.lowStock ?? 10),
-        costPrice: Number(body.costPrice ?? 0),
-        salePrice: Number(body.salePrice ?? 0),
+        category:
+          FAKE_CATEGORIES.find((category) => category.id === String(body.category_id))?.name ?? '',
+        stock: Number(body.stock_quantity ?? 0),
+        lowStock: Number(body.low_stock_threshold ?? 10),
+        costPrice: Number(body.cost_price ?? 0),
+        salePrice: Number(body.sale_price ?? 0),
         status: 'In Stock',
         brand: null,
         unit: String(body.unit ?? 'pcs'),
@@ -188,45 +224,98 @@ async function installProductStubs(
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify(created),
+        body: JSON.stringify({ product_id: String(created.id), message: 'created' }),
       });
       return;
     }
-
     await route.fulfill({
       status: 500,
       contentType: 'application/json',
-      body: JSON.stringify({ message: `unhandled ${req.method()} ${url.pathname}` }),
+      body: JSON.stringify({ message: `unhandled ${req.method()}` }),
     });
   });
 
   // (6) Barcode lookup - registered BEFORE the by-id handler so the
   // /products/barcode/* path doesn't get mis-parsed as /products/<id>.
-  await page.route(`${apiHost}/erp/product/v1/products/barcode/**`, (route: Route) =>
+  await page.route(`${apiHost}/erp/product/v1/barcodes/**`, (route: Route) =>
     route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
   );
 
-  // (7) Most-specific: product-by-id detail GET. Registered LAST so it
-  // wins the match against any of the earlier wider patterns.
-  await page.route(/localhost:9999\/erp\/products\/\d+(\?.*)?$/, async (route: Route) => {
-    const url = new URL(route.request().url());
-    const idStr = url.pathname.split('/').pop() ?? '';
-    const id = Number(idStr);
-    const product = state.products.find((p) => p.id === id);
-    if (!product) {
-      await route.fulfill({
-        status: 404,
-        contentType: 'application/json',
-        body: JSON.stringify({ message: 'not found' }),
-      });
-      return;
+  // (7) Most-specific: product-by-id and full-product handlers. Registered
+  // LAST so they win the match against the list handler above.
+  await page.route(
+    /localhost:9999\/erp\/product\/v1\/products\/(\d+)(\/full)?(?:\?.*)?$/,
+    async (route: Route) => {
+      const match = route
+        .request()
+        .url()
+        .match(/\/erp\/product\/v1\/products\/(\d+)(\/full)?(?:\?.*)?$/);
+      const id = Number(match?.[1] ?? 0);
+      const product = state.products.find((item) => item.id === id);
+      if (!product) {
+        await route.fulfill({
+          status: 404,
+          contentType: 'application/json',
+          body: JSON.stringify({ message: 'not found' }),
+        });
+        return;
+      }
+
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ product: toWireProduct(product) }),
+        });
+        return;
+      }
+
+      if (route.request().method() === 'PUT') {
+        const body = (route.request().postDataJSON() ?? {}) as Record<string, unknown>;
+        captured.lastPost = { id, ...body };
+        const categoryName = FAKE_CATEGORIES.find(
+          (category) => category.id === String(body.category_id)
+        )?.name;
+        state.products = state.products.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                name: typeof body.name === 'string' ? body.name : item.name,
+                sku: typeof body.sku === 'string' ? body.sku : item.sku,
+                category: categoryName ?? item.category,
+                stock: typeof body.stock_quantity === 'number' ? body.stock_quantity : item.stock,
+                lowStock:
+                  typeof body.low_stock_threshold === 'number'
+                    ? body.low_stock_threshold
+                    : item.lowStock,
+                costPrice: typeof body.cost_price === 'number' ? body.cost_price : item.costPrice,
+                salePrice: typeof body.sale_price === 'number' ? body.sale_price : item.salePrice,
+                unit: typeof body.unit === 'string' ? body.unit : item.unit,
+              }
+            : item
+        );
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ message: 'updated' }),
+        });
+        return;
+      }
+
+      if (route.request().method() === 'DELETE') {
+        state.products = state.products.filter((item) => item.id !== id);
+        captured.lastPost = { id, _action: 'delete' };
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ message: 'deleted' }),
+        });
+        return;
+      }
+
+      await route.fulfill({ status: 405, body: '' });
     }
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(product),
-    });
-  });
+  );
 
   return { captured };
 }
@@ -310,32 +399,34 @@ async function installSupplierStubs(
   );
 
   // (4) Suppliers list + create (POST).
-  await page.route(`${apiHost}/erp/supplier/v1/suppliers`, async (route: Route) => {
+  await page.route(`${apiHost}/erp/supplier/v1/suppliers**`, async (route: Route) => {
     const req = route.request();
     if (req.method() === 'GET') {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ suppliers: state.suppliers }),
+        body: JSON.stringify({
+          suppliers: state.suppliers.map((supplier) => ({
+            id: String(supplier.id),
+            name: supplier.name,
+            email: supplier.email,
+            phone: supplier.phone,
+            city: 'Chicago',
+            country: 'US',
+            is_active: supplier.status === 'Active',
+          })),
+          has_more: false,
+        }),
       });
       return;
     }
     if (req.method() === 'POST') {
       const body = (req.postDataJSON() ?? {}) as Record<string, unknown>;
       captured.lastPost = body;
-      if (body._action === 'delete' && typeof body.id === 'number') {
-        state.suppliers = state.suppliers.filter((s) => s.id !== body.id);
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ success: true }),
-        });
-        return;
-      }
       const created: StubSupplier = {
         id: state.nextId++,
         name: String(body.name ?? ''),
-        contact_name: String(body.contact_name ?? body.contactName ?? ''),
+        contact_name: '',
         email: String(body.email ?? ''),
         phone: String(body.phone ?? ''),
         product_count: 0,
@@ -346,7 +437,7 @@ async function installSupplierStubs(
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify(created),
+        body: JSON.stringify({ supplier_id: String(created.id), message: 'created' }),
       });
     }
   });
@@ -396,13 +487,41 @@ async function installPurchaseOrderStubs(
     })
   );
 
-  await page.route(`${apiHost}/erp/purchase-order/v1/purchase-orders`, async (route: Route) => {
+  await page.route(`${apiHost}/erp/supplier/v1/suppliers**`, (route: Route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ suppliers: FAKE_SUPPLIERS, has_more: false }),
+    })
+  );
+
+  await page.route(`${apiHost}/erp/purchase-order/v1/purchase-orders**`, async (route: Route) => {
     const req = route.request();
     if (req.method() === 'GET') {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ purchase_orders: state.orders }),
+        body: JSON.stringify({
+          purchase_orders: state.orders.map((order) => ({
+            id: String(order.id),
+            supplier_id: String(order.supplier_id),
+            po_number: `PO-${order.id}`,
+            status: order.status === 'Pending Approval' ? 'sent' : order.status.toLowerCase(),
+            subtotal: Number(order.total.replace(/[^0-9.]/g, '')),
+            tax_amount: 0,
+            total: Number(order.total.replace(/[^0-9.]/g, '')),
+            expected_delivery: order.expected_date,
+            items: Array.from({ length: order.items }, (_, index) => ({
+              id: String(index + 1),
+              product_id: '1',
+              quantity_ordered: 1,
+              quantity_received: 0,
+              unit_cost: 0,
+              total_cost: 0,
+            })),
+          })),
+          has_more: false,
+        }),
       });
       return;
     }
@@ -411,11 +530,11 @@ async function installPurchaseOrderStubs(
       captured.lastPost = body;
       const created: StubPurchaseOrder = {
         id: state.nextId++,
-        supplier: String(body.supplier ?? ''),
-        supplier_id: Number(body.supplier_id ?? body.supplierId ?? 0),
+        supplier: '',
+        supplier_id: Number(body.supplier_id ?? 0),
         date: new Date().toISOString().slice(0, 10),
-        expected_date: new Date().toISOString().slice(0, 10),
-        items: 0,
+        expected_date: String(body.expected_delivery ?? new Date().toISOString().slice(0, 10)),
+        items: Array.isArray(body.items) ? body.items.length : 0,
         total: '$0.00',
         status: 'Draft',
       };
@@ -423,27 +542,30 @@ async function installPurchaseOrderStubs(
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify(created),
+        body: JSON.stringify({ purchase_order_id: String(created.id), message: 'created' }),
       });
     }
   });
 
   // Approve endpoint.
-  await page.route(/localhost:9999\/erp\/purchase-orders\/\d+\/approve/, async (route: Route) => {
-    const url = new URL(route.request().url());
-    const parts = url.pathname.split('/');
-    const id = Number(parts[parts.indexOf('purchase-orders') + 1]);
-    const order = state.orders.find((o) => o.id === id);
-    if (order) {
-      order.status = 'Approved';
+  await page.route(
+    /localhost:9999\/erp\/purchase-order\/v1\/purchase-orders\/(\d+)\/approve/,
+    async (route: Route) => {
+      const url = new URL(route.request().url());
+      const parts = url.pathname.split('/');
+      const id = Number(parts[parts.indexOf('purchase-orders') + 1]);
+      const order = state.orders.find((o) => o.id === id);
+      if (order) {
+        order.status = 'Approved';
+      }
+      captured.lastPost = { id, action: 'approve' };
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'approved' }),
+      });
     }
-    captured.lastPost = { id, action: 'approve' };
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ success: true }),
-    });
-  });
+  );
 
   return { captured };
 }
@@ -490,47 +612,27 @@ async function installCategoryStubs(
     })
   );
 
-  await page.route(`${apiHost}/erp/category/v1/categories`, async (route: Route) => {
+  await page.route(`${apiHost}/erp/category/v1/categories**`, async (route: Route) => {
     const req = route.request();
     if (req.method() === 'GET') {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ categories: state.categories }),
+        body: JSON.stringify({
+          categories: state.categories.map((category) => ({
+            id: String(category.id),
+            name: category.name,
+            description: category.description ?? '',
+          })),
+          has_more: false,
+          total: state.categories.length,
+        }),
       });
       return;
     }
     if (req.method() === 'POST') {
       const body = (req.postDataJSON() ?? {}) as Record<string, unknown>;
       captured.lastPost = body;
-
-      if (body._action === 'update' && typeof body.id === 'number') {
-        const idx = state.categories.findIndex((c) => c.id === body.id);
-        if (idx >= 0) {
-          state.categories[idx] = {
-            ...state.categories[idx],
-            name: String(body.name ?? state.categories[idx].name),
-          };
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(state.categories[idx]),
-          });
-          return;
-        }
-      }
-
-      if (body._action === 'delete' && typeof body.id === 'number') {
-        state.categories = state.categories.filter((c) => c.id !== body.id);
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ success: true }),
-        });
-        return;
-      }
-
-      // Create
       const created: StubCategory = {
         id: state.nextId++,
         name: String(body.name ?? ''),
@@ -541,7 +643,40 @@ async function installCategoryStubs(
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify(created),
+        body: JSON.stringify({ category_id: String(created.id), message: 'created' }),
+      });
+      return;
+    }
+
+    const id = Number(req.url().match(/\/categories\/(\d+)(?:\?.*)?$/)?.[1] ?? 0);
+    if (req.method() === 'PUT') {
+      const body = (req.postDataJSON() ?? {}) as Record<string, unknown>;
+      captured.lastPost = { id, ...body, _action: 'update' };
+      state.categories = state.categories.map((category) =>
+        category.id === id
+          ? {
+              ...category,
+              name: typeof body.name === 'string' ? body.name : category.name,
+              description:
+                typeof body.description === 'string' ? body.description : category.description,
+            }
+          : category
+      );
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'updated' }),
+      });
+      return;
+    }
+
+    if (req.method() === 'DELETE') {
+      state.categories = state.categories.filter((category) => category.id !== id);
+      captured.lastPost = { id, _action: 'delete' };
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'deleted' }),
       });
     }
   });
@@ -569,7 +704,7 @@ test.describe('ERP inventory flow', () => {
     await installProductStubs(page, []);
     await page.goto(`${ERP_URL}/products`);
     await expect(page.getByText(/No products found/i)).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByTestId('products-empty-create-button')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Create Product' })).toBeVisible();
   });
 
   test('create a product via the New Product button', async ({ page }) => {
@@ -586,6 +721,9 @@ test.describe('ERP inventory flow', () => {
     await page.getByTestId('qap-name').fill('Arabica Coffee');
     await page.getByTestId('qap-sku').fill('BEV-001');
     await page.getByTestId('qap-category').selectOption({ label: 'Beverages' });
+    await page.getByLabel('Supplier').selectOption({ label: 'Global Grains Co.' });
+    await page.getByLabel(/barcode/i).fill('BEV-001-BARCODE');
+    await page.getByLabel(/description/i).fill('Arabica coffee beans');
 
     await page.getByTestId('qap-submit').click();
 
@@ -596,7 +734,8 @@ test.describe('ERP inventory flow', () => {
     expect(captured.lastPost).toMatchObject({
       name: 'Arabica Coffee',
       sku: 'BEV-001',
-      category: 'Beverages',
+      category_id: '1',
+      barcode: 'BEV-001-BARCODE',
     });
   });
 
@@ -672,7 +811,7 @@ test.describe('ERP inventory flow', () => {
 
     // Redirects back to /products and shows the empty state because the
     // single product has been removed from the stub state.
-    await expect(page).toHaveURL(/\/products$/, { timeout: 5_000 });
+    await expect(page).toHaveURL(/\/inventory$/, { timeout: 5_000 });
     await expect(page.getByText(/No products found/i)).toBeVisible({ timeout: 5_000 });
 
     // Backend saw the delete payload.
@@ -729,6 +868,9 @@ test.describe('ERP suppliers flow', () => {
     // Fill in the Company name field (first input rendered in the modal).
     const inputs = page.locator('input[placeholder="Company name"]');
     await inputs.first().fill('Fresh Farms Inc.');
+    await page.locator('input[placeholder="Email"]').fill('freshfarms@example.test');
+    await page.locator('input[placeholder="City"]').fill('Austin');
+    await page.locator('input[placeholder="Country"]').fill('US');
 
     // Submit - the modal's "Create" button is the last enabled button.
     await page.getByRole('button', { name: /^Create$/i }).click();
@@ -860,10 +1002,10 @@ test.describe('ERP categories flow', () => {
     await editInput.press('Enter');
 
     // The updated name must appear in the row.
-    await expect(page.getByText('Fresh Produce')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText('Fresh Produce', { exact: true })).toBeVisible({ timeout: 5_000 });
 
     // Backend received the update action.
-    expect(captured.lastPost).toMatchObject({ id: 10, name: 'Fresh Produce', _action: 'update' });
+    expect(captured.lastPost).toMatchObject({ name: 'Fresh Produce' });
   });
 });
 
@@ -898,7 +1040,9 @@ test.describe('ERP inventory low-stock indicator', () => {
     await expect(page.getByText('Oat Milk')).toBeVisible({ timeout: 10_000 });
 
     // The status badge cell should contain "Low Stock".
-    await expect(page.getByText('Low Stock')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText('Low Stock', { exact: true }).last()).toBeVisible({
+      timeout: 5_000,
+    });
 
     // The stock count cell is rendered with the amber colour when stock < lowStock.
     // We verify via text content that the value "2" is present in the table.

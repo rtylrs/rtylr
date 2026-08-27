@@ -30,7 +30,7 @@ const FAKE_USER = {
 };
 
 async function primeAuthCookie(context: import('@playwright/test').BrowserContext): Promise<void> {
-  const fakeJwt = 'eyJhbGciOiJub25lIn0.eyJ1c2VyX2lkIjoiMTAwMSJ9.fake_sig';
+  const fakeJwt = 'e2e-test-token';
   await context.addCookies([
     {
       name: 'token',
@@ -156,7 +156,7 @@ test.describe('Flow - Appearance panel', () => {
   }) => {
     const cards = page.getByRole('group', { name: /palette/i }).getByRole('button');
     const count = await cards.count();
-    test.skip(count < 2, 'needs at least two palettes in the active mode');
+    expect(count, 'the active mode must expose at least two palettes').toBeGreaterThanOrEqual(2);
 
     const applied = await paneToken(page, '--flow-bg');
     expect(applied).not.toBe('');
@@ -179,8 +179,12 @@ test.describe('Flow - Appearance panel', () => {
       'no palette card changed the preview, so this test cannot observe an audition'
     ).toBeGreaterThanOrEqual(0);
 
-    // A neighbour to travel towards, preferring the one to the right.
+    // A neighbour to travel towards, preferring the one to the right when the
+    // responsive grid is horizontal and the one below when it is stacked.
     const neighbour = auditioned + 1 < count ? auditioned + 1 : auditioned - 1;
+    // Keep both cards and their gap in the viewport. At 390px the palette is
+    // stacked, and the first two cards can otherwise straddle the bottom edge.
+    await cards.nth(neighbour).scrollIntoViewIfNeeded();
     const a = await cards.nth(auditioned).boundingBox();
     const b = await cards.nth(neighbour).boundingBox();
     expect(a && b).toBeTruthy();
@@ -189,11 +193,18 @@ test.describe('Flow - Appearance panel', () => {
     expect(await paneToken(page, '--flow-bg'), 'audition did not take effect').toBe(hoveredValue);
 
     // Land in unhovered space between the two cards. This is the moment a
-    // per-card clear reverts and a per-grid clear does not.
-    const [left, right] = a!.x <= b!.x ? [a!, b!] : [b!, a!];
-    const gapStart = left.x + left.width;
-    const gapX = gapStart + Math.max(1, (right.x - gapStart) / 2);
-    await page.mouse.move(gapX, left.y + left.height / 2);
+    // per-card clear reverts and a per-grid clear does not. The cards are a
+    // single column at 390px, so the travel axis must follow their geometry.
+    const horizontal = Math.abs(a!.x - b!.x) >= Math.abs(a!.y - b!.y);
+    const first = horizontal ? (a!.x <= b!.x ? a! : b!) : a!.y <= b!.y ? a! : b!;
+    const second = first === a! ? b! : a!;
+    const gapStart = horizontal ? first.x + first.width : first.y + first.height;
+    const gapEnd = horizontal ? second.x : second.y;
+    const gapMiddle = gapStart + Math.max(1, (gapEnd - gapStart) / 2);
+    await page.mouse.move(
+      horizontal ? gapMiddle : first.x + first.width / 2,
+      horizontal ? first.y + first.height / 2 : gapMiddle
+    );
 
     expect(
       await paneToken(page, '--flow-bg'),
@@ -207,7 +218,10 @@ test.describe('Flow - Appearance panel', () => {
 
   test('commits on click and leaves the root token changed', async ({ page }) => {
     const cards = page.getByRole('group', { name: /palette/i }).getByRole('button');
-    test.skip((await cards.count()) < 2, 'needs at least two palettes');
+    expect(
+      await cards.count(),
+      'the appearance panel must expose at least two palettes'
+    ).toBeGreaterThanOrEqual(2);
 
     const before = await rootToken(page, '--flow-bg');
     await cards.nth(1).click();
