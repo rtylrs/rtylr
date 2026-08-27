@@ -100,7 +100,7 @@ func newVariantProto(v domain.Variant) *erpvariantv1.Variant {
 		Id:            v.ID,
 		OwnerId:       v.OwnerID,
 		BusinessId:    v.BusinessID,
-		ProductId:     v.ProductID,
+		ProductId:     &v.ProductID,
 		Name:          v.Name,
 		Sku:           v.SKU,
 		Barcode:       v.Barcode,

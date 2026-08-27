@@ -111,10 +111,10 @@ func (r *Repository) GetUserByIdentifier(ctx context.Context, identifier string)
 	}
 
 	return userFromRow(
-		row.ID, row.Email, row.PasswordHash,
+		row.ID, sql.NullInt64{}, row.Email, row.PasswordHash,
 		row.FullName, row.SignupIpAddress, row.SignupDeviceInfo,
 		row.CreatedAt, row.UpdatedAt,
-		row.IsConsoleAdmin,
+		row.IsConsoleAdmin, false,
 		row.TokenEpoch,
 	), nil
 }

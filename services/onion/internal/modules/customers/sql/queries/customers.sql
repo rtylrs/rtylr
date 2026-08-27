@@ -22,6 +22,11 @@ DELETE FROM crm_customers WHERE id = ? AND business_id = ?;
 -- name: UpdateCustomerLoyalty :exec
 UPDATE crm_customers SET loyalty_points = ?, loyalty_tier = ? WHERE id = ? AND business_id = ?;
 
+-- name: CreateLoyaltyTransaction :exec
+INSERT INTO crm_loyalty_transactions
+  (owner_id, business_id, customer_id, type, points, balance_before, balance_after, description, reference_id, reference_type)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
 -- name: RecordVisit :exec
 UPDATE crm_customers
 SET visit_count = visit_count + 1,

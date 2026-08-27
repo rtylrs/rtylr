@@ -806,6 +806,21 @@ func (r *Repository) GetDashboardStats(ctx context.Context, businessID int64) (d
 		topRows        []sqlc.ListTopCustomersRow
 	)
 
+	timezone, err := r.queries.GetBusinessTimezone(ctx, businessID)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		logger.Ctx(ctx).Error("Failed to get business timezone", logger.Error(err))
+		return domain.DashboardStats{}, err
+	}
+	location := time.UTC
+	if timezone != "" {
+		loaded, loadErr := time.LoadLocation(timezone)
+		if loadErr != nil {
+			logger.Ctx(ctx).Warn("Invalid business timezone; falling back to UTC", logger.Error(loadErr))
+		} else {
+			location = loaded
+		}
+	}
+
 	group, groupCtx := errgroup.WithContext(ctx)
 	group.Go(func() error {
 		var err error
@@ -817,7 +832,7 @@ func (r *Repository) GetDashboardStats(ctx context.Context, businessID int64) (d
 	})
 	group.Go(func() error {
 		var err error
-		monthStart, monthEnd := customerMonthBounds(time.Now().UTC())
+		monthStart, monthEnd := customerMonthBounds(time.Now(), location)
 		newThisMonth, err = r.queries.CountNewCustomersThisMonth(groupCtx, sqlc.CountNewCustomersThisMonthParams{
 			BusinessID:     businessID,
 			CreatedAtStart: sql.NullTime{Time: monthStart, Valid: true},
@@ -870,10 +885,10 @@ func (r *Repository) GetDashboardStats(ctx context.Context, businessID int64) (d
 	return stats, nil
 }
 
-func customerMonthBounds(now time.Time) (time.Time, time.Time) {
-	utc := now.UTC()
-	start := time.Date(utc.Year(), utc.Month(), 1, 0, 0, 0, 0, time.UTC)
-	return start, start.AddDate(0, 1, 0)
+func customerMonthBounds(now time.Time, location *time.Location) (time.Time, time.Time) {
+	localNow := now.In(location)
+	start := time.Date(localNow.Year(), localNow.Month(), 1, 0, 0, 0, 0, location)
+	return start.UTC(), start.AddDate(0, 1, 0).UTC()
 }
 
 // ─── Timeline ─────────────────────────────────────────────────────────────────
@@ -1322,7 +1337,10 @@ func (r *Repository) GetCampaignStats(ctx context.Context, businessID, campaignI
 	stats.OpenedCount = campaign.OpenedCount
 	stats.ClickedCount = campaign.ClickedCount
 
-	sendStats, err := r.queries.GetCampaignSendStats(ctx, campaignID)
+	sendStats, err := r.queries.GetCampaignSendStats(ctx, sqlc.GetCampaignSendStatsParams{
+		CampaignID: campaignID,
+		BusinessID: businessID,
+	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to get campaign send stats", logger.Error(err))
 	} else {

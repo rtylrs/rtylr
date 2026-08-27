@@ -43,9 +43,9 @@ func ApproveTimeOffRoutes() []string { return []string{"/hr/time-off/approve"} }
 
 func newTimeOffPayload(t domain.TimeOffRequest) *hrtimeoffv1.TimeOffRequest {
 	return &hrtimeoffv1.TimeOffRequest{
-		Id: t.ID, OwnerId: t.OwnerID, StaffId: t.StaffID, Type: t.Type,
+		Id: &t.ID, OwnerId: &t.OwnerID, StaffId: &t.StaffID, Type: t.Type,
 		StartDate: t.StartDate.Format("2006-01-02"), EndDate: t.EndDate.Format("2006-01-02"),
-		DaysCount: t.DaysCount, Status: t.Status, Reason: t.Reason,
+		DaysCount: &t.DaysCount, Status: t.Status, Reason: t.Reason,
 		ApprovedBy: t.ApprovedBy,
 		ApprovedAt: t.ApprovedAt.Format("2006-01-02T15:04:05Z"),
 		Notes:      t.Notes,
