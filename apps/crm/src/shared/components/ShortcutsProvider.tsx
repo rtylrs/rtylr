@@ -19,7 +19,15 @@ export const ShortcutsProvider: React.FC<React.PropsWithChildren> = ({ children 
   useEffect(() => {
     const isTyping = () => {
       const el = document.activeElement as HTMLElement | null;
-      return el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable);
+      // A focused <select> is mid-choice: a letter shortcut would navigate
+      // away from the open dropdown, so treat it like a text field (#943).
+      return (
+        el &&
+        (el.tagName === 'INPUT' ||
+          el.tagName === 'TEXTAREA' ||
+          el.tagName === 'SELECT' ||
+          el.isContentEditable)
+      );
     };
     const handler = (e: KeyboardEvent) => {
       // cmd+k / ctrl+k opens palette (always works)

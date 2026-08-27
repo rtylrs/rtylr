@@ -52,6 +52,9 @@ const restPut = (path: (id: string) => string) => (req: { id: string; body?: unk
 const restDelete = (path: (id: string) => string) => (req: { id: string }) =>
   unwrap(rest.delete<unknown>(path(req.id)));
 
+const restGetById = (path: (id: string) => string) => (req: { id: string }) =>
+  unwrap(safe.get<unknown>(path(req.id)));
+
 /**
  * c6e4ce609 routed 62 of this app's calls through a single
  * `@voxire/voxie/crm/compat/v1` client. That module has never existed at any
@@ -163,7 +166,7 @@ export const crmCompatibilityClient = {
 
   // ── Automations: no contract ─────────────────────────────────────────────
   listAutomations: restGet('/crm/automations'),
-  getAutomation: restGet('/crm/automations'),
+  getAutomation: restGetById((id) => `/crm/automations/${id}`),
   createAutomation: restPost('/crm/automations'),
   updateAutomation: restPut((id) => `/crm/automations/${id}`),
   deleteAutomation: restDelete((id) => `/crm/automations/${id}`),
@@ -175,12 +178,12 @@ export const crmCompatibilityClient = {
   deleteContact: restDelete((id) => `/crm/sales/contacts/${id}`),
 
   listContracts: restGet('/crm/sales/contracts'),
-  getContract: restGet('/crm/sales/contracts'),
+  getContract: restGetById((id) => `/crm/sales/contracts/${id}`),
   createContract: restPost('/crm/sales/contracts'),
   updateContract: restPut((id) => `/crm/sales/contracts/${id}`),
 
   listLeads: restGet('/crm/sales/leads'),
-  getLead: restGet('/crm/sales/leads'),
+  getLead: restGetById((id) => `/crm/sales/leads/${id}`),
   createLead: restPost('/crm/sales/leads'),
   updateLead: restPut((id) => `/crm/sales/leads/${id}`),
   deleteLead: restDelete((id) => `/crm/sales/leads/${id}`),

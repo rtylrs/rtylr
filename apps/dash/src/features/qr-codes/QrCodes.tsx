@@ -2,9 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { HelmetContainer } from '@voxire/components';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from '@tanstack/react-router';
-import { Copy, ExternalLink, Plus, QrCode as QrCodeIcon, Search } from 'lucide-react';
+import { Plus, QrCode as QrCodeIcon, Search } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
 import { EmptyState } from '@voxire/ui';
 import { Badge, Button } from '../../shared/components/ui';
 import { tableClient } from '../../shared/lib/clients';
@@ -14,7 +13,6 @@ interface QrTable {
   name: string;
   capacity: number;
   status: string;
-  qrCodeUrl: string;
 }
 
 const useQrTables = () =>
@@ -27,8 +25,6 @@ const useQrTables = () =>
         name: table.label ?? '',
         capacity: table.seats ?? 0,
         status: table.status ?? '',
-        // The canonical Table contract does not expose a QR URL yet.
-        qrCodeUrl: '',
       }));
     },
   });
@@ -56,9 +52,7 @@ const QrCodes: React.FC = () => {
     [normalizedSearch, tables]
   );
 
-  const readyTables = tables.filter((table) => Boolean(table.qrCodeUrl)).length;
   const totalCapacity = tables.reduce((sum, table) => sum + (table.capacity || 0), 0);
-
   return (
     <>
       <HelmetContainer title="QR codes · rtylr" />
@@ -103,12 +97,11 @@ const QrCodes: React.FC = () => {
         </div>
 
         <div
-          className="grid overflow-hidden rounded-lg border sm:grid-cols-3"
+          className="grid overflow-hidden rounded-lg border sm:grid-cols-2"
           style={{ borderColor: 'var(--dash-border)', background: 'var(--dash-surface)' }}
         >
           {[
             ['Tables', String(tables.length)],
-            ['Ready', String(readyTables)],
             ['Seats', String(totalCapacity)],
           ].map(([label, value], index) => (
             <div
@@ -137,7 +130,7 @@ const QrCodes: React.FC = () => {
           style={{ borderColor: 'var(--dash-border)', background: 'var(--dash-surface)' }}
         >
           <div
-            className="hidden px-4 py-2.5 text-[11px] font-semibold uppercase md:grid md:grid-cols-[minmax(0,1fr)_100px_140px_120px] md:items-center"
+            className="hidden px-4 py-2.5 text-[11px] font-semibold uppercase md:grid md:grid-cols-[minmax(0,1fr)_100px_140px] md:items-center"
             style={{
               color: 'var(--dash-text-dim)',
               borderBottom: '1px solid var(--dash-border)',
@@ -147,7 +140,6 @@ const QrCodes: React.FC = () => {
             <span>Table</span>
             <span>Seats</span>
             <span>Status</span>
-            <span className="text-right">Actions</span>
           </div>
 
           {isLoading ? (
@@ -155,7 +147,7 @@ const QrCodes: React.FC = () => {
               {[0, 1, 2, 3].map((row) => (
                 <div
                   key={row}
-                  className="grid gap-3 px-4 py-4 md:grid-cols-[minmax(0,1fr)_100px_140px_120px] md:items-center"
+                  className="grid gap-3 px-4 py-4 md:grid-cols-[minmax(0,1fr)_100px_140px] md:items-center"
                   style={{ borderBottom: row === 3 ? undefined : '1px solid var(--dash-border)' }}
                 >
                   <div
@@ -168,10 +160,6 @@ const QrCodes: React.FC = () => {
                   />
                   <div
                     className="h-6 w-24 animate-pulse rounded-full"
-                    style={{ background: 'var(--dash-hover)' }}
-                  />
-                  <div
-                    className="ml-auto h-7 w-16 animate-pulse rounded-md"
                     style={{ background: 'var(--dash-hover)' }}
                   />
                 </div>
@@ -196,11 +184,10 @@ const QrCodes: React.FC = () => {
           ) : (
             <div>
               {filteredTables.map((table, index) => {
-                const hasQrCode = Boolean(table.qrCodeUrl);
                 return (
                   <div
                     key={table.id}
-                    className="grid gap-3 px-4 py-4 transition-colors hover:bg-[var(--dash-hover)] md:grid-cols-[minmax(0,1fr)_100px_140px_120px] md:items-center"
+                    className="grid gap-3 px-4 py-4 transition-colors hover:bg-[var(--dash-hover)] md:grid-cols-[minmax(0,1fr)_100px_140px] md:items-center"
                     style={{
                       borderBottom:
                         index === filteredTables.length - 1
@@ -215,12 +202,6 @@ const QrCodes: React.FC = () => {
                       >
                         {table.name}
                       </p>
-                      <p
-                        className="mt-0.5 truncate text-xs"
-                        style={{ color: 'var(--dash-text-dim)' }}
-                      >
-                        {hasQrCode ? 'QR ready' : 'Needs QR code'}
-                      </p>
                     </div>
                     <p className="text-sm" style={{ color: 'var(--dash-text-muted)' }}>
                       {table.capacity || 0}
@@ -230,46 +211,16 @@ const QrCodes: React.FC = () => {
                         {formatStatus(table.status || 'unknown')}
                       </Badge>
                     </div>
-                    <div className="flex justify-start gap-2 md:justify-end">
-                      <button
-                        type="button"
-                        className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-[var(--dash-hover)] disabled:pointer-events-none disabled:opacity-35"
-                        style={{
-                          color: 'var(--dash-text-muted)',
-                          border: '1px solid var(--dash-border)',
-                        }}
-                        aria-label="Copy QR URL"
-                        title="Copy QR URL"
-                        disabled={!hasQrCode}
-                        onClick={() => {
-                          void navigator.clipboard.writeText(table.qrCodeUrl);
-                          toast.success('URL copied');
-                        }}
-                      >
-                        <Copy size={14} />
-                      </button>
-                      <a
-                        href={table.qrCodeUrl || undefined}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-[var(--dash-hover)] aria-disabled:pointer-events-none aria-disabled:opacity-35"
-                        style={{
-                          color: 'var(--dash-text-muted)',
-                          border: '1px solid var(--dash-border)',
-                        }}
-                        aria-label="Open QR URL"
-                        aria-disabled={!hasQrCode}
-                        title="Open QR URL"
-                      >
-                        <ExternalLink size={14} />
-                      </a>
-                    </div>
                   </div>
                 );
               })}
             </div>
           )}
         </section>
+
+        <p className="px-1 text-xs" style={{ color: 'var(--dash-text-dim)' }}>
+          {t('qrCodes.tableQrComingSoon')}
+        </p>
       </div>
     </>
   );

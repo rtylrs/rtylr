@@ -46,18 +46,19 @@ const appClient = createOneKitClient(AppServiceClient, 'crm');
 const userClient = createOneKitClient(UserServiceClient, 'crm');
 
 function useAddonEnabled(addonId: string): boolean {
-  const { data } = useQuery<Addon[]>({
+  // Errors propagate (never cached as a result) and read as "enabled": hiding
+  // the nav entry on a network blip made Sales disappear with no explanation
+  // (#941). Clicking through lands on the guard's retryable error state.
+  const { data, isError } = useQuery<Addon[]>({
     queryKey: ['crm-addons'],
     queryFn: async (): Promise<Addon[]> => {
-      try {
-        const res = await appClient.listAddons({});
-        return res.addons ?? [];
-      } catch {
-        return [];
-      }
+      const res = await appClient.listAddons({});
+      return res.addons ?? [];
     },
     staleTime: 5 * 60 * 1000,
+    retry: 1,
   });
+  if (isError) return true;
   return (data ?? []).some((a) => a.id === addonId && a.isEnabled);
 }
 
