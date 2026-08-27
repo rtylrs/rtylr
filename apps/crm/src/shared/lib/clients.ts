@@ -53,7 +53,7 @@ const restDelete = (path: (id: string) => string) => (req: { id: string }) =>
   unwrap(rest.delete<unknown>(path(req.id)));
 
 const restGetById = (path: (id: string) => string) => (req: { id: string }) =>
-  unwrap(safe.get<unknown>(path(req.id)));
+  unwrap(rest.get<unknown>(path(req.id)));
 
 /**
  * c6e4ce609 routed 62 of this app's calls through a single
