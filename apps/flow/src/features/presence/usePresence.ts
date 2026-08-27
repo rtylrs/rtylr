@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
-import { safe } from '../../shared/lib/api';
+import { rest } from '../../shared/lib/clients';
 import { presenceResponseSchema } from '../../shared/schemas/presence';
 
 /**
@@ -14,7 +14,7 @@ export function usePresence() {
     queryFn: async () => {
       // /flow/presence/today has no .onk definition, so there is no generated
       // client for it. Parsed at the boundary below (#894).
-      const res = await unwrap(safe.get<unknown>('/flow/presence/today'));
+      const res = await unwrap(rest.get<unknown>('/flow/presence/today'));
       return presenceResponseSchema.parse(res);
     },
   });

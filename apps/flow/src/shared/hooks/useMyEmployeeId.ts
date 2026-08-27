@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { unwrap } from '@voxire/api';
-import { safe } from '../lib/api';
+import { rest } from '../lib/clients';
 import { myEmployeeSchema } from '../schemas/employee';
 
 /**
@@ -14,7 +14,7 @@ export function useMyEmployeeId() {
     queryKey: ['my-employee-id'],
     queryFn: async () => {
       // /hr/employees/me has no .onk definition (#894).
-      const res = await unwrap(safe.get<unknown>('/hr/employees/me'));
+      const res = await unwrap(rest.get<unknown>('/hr/employees/me'));
       const parsed = myEmployeeSchema.parse((res as { employee: unknown }).employee);
       return parsed.id;
     },

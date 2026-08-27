@@ -1,4 +1,5 @@
-import { createOneKitClient } from '@voxire/api';
+import { createOneKitClient, createRestRouteClient } from '@voxire/api';
+import { LicenseServiceClient } from '@voxire/voxie/license/v1/client';
 import { BusinessServiceClient } from '@voxire/voxie/hub/business/v1/client';
 import { UserServiceClient } from '@voxire/voxie/hub/user/v1/client';
 import { NotificationServiceClient } from '@voxire/voxie/flow/notification/v1/client';
@@ -33,8 +34,9 @@ export const insightsV2 = createOneKitClient(InsightsServiceV2, 'flow');
 export const timeV2 = createOneKitClient(TimeServiceV2, 'flow');
 export const profileClient = createOneKitClient(ProfileClient, 'flow');
 export const statusClient = createOneKitClient(StatusServiceClient, 'flow');
+export const licenseClient = createOneKitClient(LicenseServiceClient, 'flow');
+export const rest = createRestRouteClient('flow');
 
-// license, flow presence and hr compat are deliberately absent. Those three
-// contracts do not exist in voxie and never have, so no client can be generated
-// for them; importing them broke `vite build` for this app. Their call sites use
-// the REST transport in ./api instead. See #894.
+// License, Flow presence, and HR self-lookup remain explicit REST fallbacks
+// because those endpoints do not yet have generated contracts. All other
+// endpoints above use their generated OneKit clients.

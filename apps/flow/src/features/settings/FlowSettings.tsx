@@ -8,8 +8,6 @@ import {
   Tag,
   Trash2,
   Users,
-  UserMinus,
-  UserPlus,
   LayoutDashboard,
   Clock,
   PanelLeft,
@@ -21,16 +19,7 @@ import { unwrap } from '@voxire/api';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useFeatureFlag, FLAG_KEYS } from '@voxire/config';
-import {
-  useFlowTeam,
-  useFlowGrantAccess,
-  useFlowDeactivateMember,
-} from '../../shared/hooks/queries/useFlowTeam';
-import {
-  useFlowSubscription,
-  centsToDisplay,
-  computeSeatProration,
-} from '../../shared/hooks/queries/useFlowSubscription';
+import { useFlowTeam } from '../../shared/hooks/queries/useFlowTeam';
 import {
   ACCENT_DEFAULT,
   ACCENT_SWATCHES,
@@ -54,7 +43,7 @@ import { cn } from '../../shared/lib/utils';
 import { useLifePreferences } from '../../shared/lib/lifePreferences';
 import { flowApi } from '../../shared/services/flowApi';
 import type { ApiUserSettings } from '../../shared/services/flowApi';
-import { getCookie } from '@voxire/auth';
+import { useUserStore as useAuthUserStore } from '@voxire/auth';
 import { getRouteApi } from '@tanstack/react-router';
 import type { SettingsSectionId } from '../../shared/schemas/settings';
 import { useFlowStore } from '../../shared/stores/flowStore';
@@ -70,11 +59,7 @@ import { useSystemDark } from './components/useSystemDark';
 import TimeSection from './sections/TimeSection';
 import BinSection from './sections/BinSection';
 import SidebarSettingsSection from './sections/SidebarSettingsSection';
-import {
-  canInviteMembers,
-  hasBusinessRoleBypass,
-  toFlowMemberRole,
-} from '../../shared/lib/roleUtils';
+import { hasFlowPermission } from '../../shared/lib/roleUtils';
 
 interface SettingsSection {
   id: string;
@@ -103,10 +88,8 @@ function buildSections(
     { id: 'labels', label: t('common.settings.labels'), icon: Tag },
     { id: 'life', label: t('common.settings.life'), icon: Sparkles },
     { id: 'shortcuts', label: t('common.settings.shortcuts'), icon: Keyboard },
-    // Business-wide recycle bin. Gated on the owner/admin/operator bypass
-    // rather than MANAGE_WORKSPACE_ROLES because that same bypass is what
-    // makes listArchivedProjects return the whole business instead of only
-    // the caller's own archived projects.
+    // Business-wide recycle bin. Gated on the central Flow settings
+    // permission, which is also enforced by the server.
     ...(canManageBin ? [{ id: 'bin', label: t('flow.settings.bin.section'), icon: Trash2 }] : []),
   ];
   if (canManageWorkspaces) {
@@ -1030,55 +1013,18 @@ export const LabelsSection: React.FC = () => {
 
 // ── Team Section ─────────────────────────────────────────────────────────────
 
-// Exported (only) so its own canInviteMembers gate - the defense-in-depth
-// check described above - can be unit-tested directly, independent of the
+// Exported so its own central permission gate can be unit-tested directly,
+// independent of the
 // buildSections-level gate that normally keeps a non-privileged role from
 // ever mounting this component at all.
 export const TeamSection: React.FC = () => {
   const { t } = useTranslation();
   const { data: allMembers = [], isLoading, refetch: refetchMembers } = useFlowTeam();
-  const grant = useFlowGrantAccess();
-  const deactivate = useFlowDeactivateMember();
-  const { data: sub } = useFlowSubscription();
 
-  // buildSections already keeps a non-privileged role from ever selecting this
-  // tab, but that gate lives one component up. Re-checking here means a stale
-  // `activeSection` (or a future caller that renders this section directly)
-  // still can't grant or revoke Flow access - the mutations stay closed even
-  // if the outer gate is ever bypassed.
-  const token = getCookie('token');
-  const role = useMemo(() => getRoleFromToken(token), [token]);
-  const canManageTeam = canInviteMembers(toFlowMemberRole(role));
-
-  // The /team/members endpoint returns the entire business team. Flow
-  // is one of several apps a member can have access to; we split here
-  // so the visible list and the grant picker stay in sync.
+  // The /team/members endpoint returns the entire business team. Flow only
+  // displays the licensed members here. Role and license changes are owned by
+  // Dash and are not mutated from this surface.
   const flowMembers = allMembers.filter((m) => m.apps?.includes('flow'));
-  const candidates = allMembers.filter((m) => !m.apps?.includes('flow'));
-
-  const [selectedUserId, setSelectedUserId] = useState('');
-  const [showInvite, setShowInvite] = useState(false);
-
-  const inputStyle = {
-    background: 'var(--flow-input-bg)',
-    border: '1px solid var(--flow-border)',
-    color: 'var(--flow-text)',
-  };
-
-  const handleGrant = (): void => {
-    if (!canManageTeam) return;
-    const member = candidates.find((m) => String(m.id) === selectedUserId);
-    if (!member) return;
-    grant.mutate(
-      { userId: member.id, apps: member.apps ?? [], role: member.role ?? 'member' },
-      {
-        onSuccess: () => {
-          setSelectedUserId('');
-          setShowInvite(false);
-        },
-      }
-    );
-  };
 
   return (
     <div className="space-y-6">
@@ -1090,109 +1036,6 @@ export const TeamSection: React.FC = () => {
           {t('flow.settings.team.subtitle')}
         </p>
       </div>
-
-      {!canManageTeam && <GateNotice reason={t('flow.settings.team.gateReason')} />}
-
-      {/* Grant Flow access to an existing business member */}
-      {canManageTeam && showInvite ? (
-        <div
-          className="rounded-xl p-4 space-y-3"
-          style={{ border: '1px solid var(--flow-border)', background: 'var(--flow-card)' }}
-        >
-          <div>
-            <h3 className="text-[13px] font-semibold mb-1" style={{ color: 'var(--flow-text)' }}>
-              {t('flow.settings.team.grantAccess')}
-            </h3>
-            <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-              {t('flow.settings.team.grantAccessHint')}
-            </p>
-          </div>
-          <div>
-            <label
-              className="block text-[11px] font-medium mb-1"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              {t('flow.settings.team.teamMember')}
-            </label>
-            {candidates.length === 0 ? (
-              <p
-                className="rounded-lg px-3 py-2 text-[12px]"
-                style={{ ...inputStyle, color: 'var(--flow-text-muted)' }}
-              >
-                {t('flow.settings.team.everyoneHasAccess')}
-              </p>
-            ) : (
-              <select
-                value={selectedUserId}
-                onChange={(e) => setSelectedUserId(e.target.value)}
-                className="w-full rounded-lg px-3 py-2 text-[13px] outline-none"
-                style={inputStyle}
-              >
-                <option value="">{t('flow.settings.team.selectMember')}</option>
-                {candidates.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name === m.email ? m.email : `${m.name} - ${m.email}`}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-          {sub &&
-            sub.pricePerSeatCents > 0 &&
-            (() => {
-              const { daysRemaining, daysInMonth, proratedCents, nextMonthName } =
-                computeSeatProration(sub.pricePerSeatCents);
-              return (
-                <p className="text-[11px]" style={{ color: 'var(--flow-text-muted)' }}>
-                  {t('flow.settings.team.seatCostNote', {
-                    amount: centsToDisplay(proratedCents),
-                    daysRemaining,
-                    daysInMonth,
-                    monthlyAmount: `${centsToDisplay(sub.pricePerSeatCents)}/mo`,
-                    nextMonth: nextMonthName,
-                  })}
-                </p>
-              );
-            })()}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={!selectedUserId || grant.isPending}
-              onClick={handleGrant}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold disabled:opacity-40"
-              style={{ background: 'var(--accent)', color: '#0a0a0a' }}
-            >
-              <UserPlus size={12} />
-              {grant.isPending
-                ? t('flow.settings.team.granting')
-                : t('flow.settings.team.grantAccessAction')}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowInvite(false);
-                setSelectedUserId('');
-              }}
-              className="px-3 py-1.5 rounded-lg text-[12px] font-medium"
-              style={{ color: 'var(--flow-text-muted)' }}
-            >
-              {t('common.cancel')}
-            </button>
-          </div>
-        </div>
-      ) : (
-        canManageTeam && (
-          <button
-            type="button"
-            onClick={() => setShowInvite(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold"
-            style={{ background: 'var(--accent)', color: '#0a0a0a' }}
-          >
-            <UserPlus size={12} />
-            {t('flow.settings.team.addMember')}
-          </button>
-        )
-      )}
 
       {/* Members list */}
       {isLoading ? (
@@ -1209,11 +1052,10 @@ export const TeamSection: React.FC = () => {
         <EmptyState
           icon={Users}
           title={t('flow.settings.team.noMembersYet')}
-          action={
-            canManageTeam
-              ? { label: t('flow.settings.team.addMember'), onClick: () => setShowInvite(true) }
-              : { label: t('flow.settings.team.refreshCta'), onClick: () => void refetchMembers() }
-          }
+          action={{
+            label: t('flow.settings.team.refreshCta'),
+            onClick: () => void refetchMembers(),
+          }}
           size="compact"
         />
       ) : (
@@ -1249,19 +1091,6 @@ export const TeamSection: React.FC = () => {
               >
                 {m.role}
               </span>
-              <button
-                type="button"
-                aria-label={t('flow.settings.team.removeMemberLabel', { name: m.name })}
-                onClick={() => {
-                  if (!canManageTeam) return;
-                  deactivate.mutate(m.id);
-                }}
-                disabled={!canManageTeam}
-                className="h-7 w-7 flex items-center justify-center rounded-sm hover:bg-[var(--flow-hover)] transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ color: 'var(--flow-text-dim)' }}
-              >
-                <UserMinus size={13} />
-              </button>
             </div>
           ))}
         </div>
@@ -1299,32 +1128,15 @@ const PlaceholderSection: React.FC<{ id: string }> = ({ id }) => {
   );
 };
 
-function getRoleFromToken(token: string | null): string {
-  if (!token) return '';
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return (payload.role as string) || '';
-  } catch {
-    return '';
-  }
-}
-
-// 'manager' isn't a role Flow (or any business type) actually issues - dead
-// entry, kept out so this set matches the real role vocabulary.
-const MANAGE_WORKSPACE_ROLES = new Set(['owner', 'admin']);
-
 // getRouteApi takes a route id, which for a top-level route is its path.
 const settingsRouteApi = getRouteApi('/settings');
 
 const FlowSettings: React.FC = () => {
   const { t } = useTranslation();
-  const token = getCookie('token');
-  const role = useMemo(() => getRoleFromToken(token), [token]);
-  const canManageWorkspaces = MANAGE_WORKSPACE_ROLES.has(role);
-  // canInviteMembers expects Flow's own Member['role'] vocabulary, not the raw
-  // business-wide role string a non-Flow business type can hand back.
-  const canManageTeam = canInviteMembers(toFlowMemberRole(role));
-  const canManageBin = hasBusinessRoleBypass(role);
+  const effectiveAccess = useAuthUserStore((s) => s.effectiveAccess);
+  const canManageWorkspaces = hasFlowPermission(effectiveAccess, 'flow:settings:manage');
+  const canManageTeam = hasFlowPermission(effectiveAccess, 'flow:team:manage');
+  const canManageBin = canManageWorkspaces;
   const sections = useMemo(
     () => buildSections(t, canManageWorkspaces, canManageTeam, canManageBin),
     [t, canManageWorkspaces, canManageTeam, canManageBin]

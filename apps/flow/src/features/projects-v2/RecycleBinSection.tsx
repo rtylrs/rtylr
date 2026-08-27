@@ -15,7 +15,7 @@ export const RecycleBinSection: React.FC = () => {
   const restore = useRestoreProject();
   const purge = usePurgeProject();
   const userId = useUserStore((s) => s.userId);
-  const role = useUserStore((s) => s.role);
+  const effectiveAccess = useUserStore((s) => s.effectiveAccess);
 
   const { data } = useArchivedProjects(1, 10);
   const projects = data?.projects ?? [];
@@ -74,7 +74,7 @@ export const RecycleBinSection: React.FC = () => {
               >
                 <RotateCcw size={12} aria-hidden />
               </button>
-              {canPurgeProject(p, userId, role) && (
+              {canPurgeProject(p, userId, effectiveAccess) && (
                 <button
                   type="button"
                   onClick={() => setPendingPurge(p)}
