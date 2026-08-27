@@ -62,9 +62,8 @@ func NewClient(ctx context.Context) (*Client, error) {
 		cooldownUntil: make(map[string]time.Time),
 	}
 
-	// Default priority: DeepSeek, then NVIDIA NIM (both OpenAI-compatible), then
-	// Gemini and OpenAI as fallbacks. AI_PRIMARY_PROVIDER can promote deepseek or
-	// nvidia to the front when both are configured. Any unconfigured provider is
+	// Default priority: DeepSeek, NVIDIA NIM, Gemini, OpenAI, then OpenCode Zen.
+	// AI_PRIMARY_PROVIDER can swap the first two. Unconfigured providers are
 	// skipped; the first registered becomes primary (used for streaming).
 	register := func(p Provider) {
 		client.providers = append(client.providers, p)
@@ -105,6 +104,12 @@ func NewClient(ctx context.Context) (*Client, error) {
 
 	if config.IsOpenAIConfigured() {
 		if p, err := NewOpenAIProvider(); err == nil {
+			register(p)
+		}
+	}
+
+	if config.IsOpenCodeConfigured() {
+		if p, err := NewOpenCodeProvider(); err == nil {
 			register(p)
 		}
 	}

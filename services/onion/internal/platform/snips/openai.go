@@ -18,12 +18,12 @@ var (
 	ErrOpenAINotConfigured    = errors.New("OpenAI is not configured. Please set OPENAI_API_KEY environment variable")
 	ErrDeepSeekNotConfigured  = errors.New("DeepSeek is not configured. Please set DEEPSEEK_API_KEY environment variable")
 	ErrNvidiaNIMNotConfigured = errors.New("NVIDIA NIM is not configured. Please set NVIDIA_NIM_API_KEY environment variable")
+	ErrOpenCodeNotConfigured  = errors.New("OpenCode Zen is not configured. Please set OPENCODE_API_KEY environment variable")
 	ErrOpenAINoChoices        = errors.New("no response choices received from provider")
 )
 
-// OpenAIProvider speaks the OpenAI chat-completions API. DeepSeek is wire
-// compatible, so the same provider drives it by pointing at a different base URL
-// and model — the only differences are name/model/base URL, all injected here.
+// OpenAIProvider speaks the OpenAI chat-completions API, also used by DeepSeek,
+// NVIDIA NIM and OpenCode Zen with provider-specific base URLs and models.
 type OpenAIProvider struct {
 	client    openai.Client
 	name      string
@@ -86,6 +86,20 @@ func NewNvidiaNIMProvider() (*OpenAIProvider, error) {
 		config.GetNvidiaNIMAPIKey(),
 		config.GetNvidiaNIMBaseURL(),
 		config.GetNvidiaNIMModel(),
+		"",
+	), nil
+}
+
+// NewOpenCodeProvider builds the final OpenCode Zen fallback provider.
+func NewOpenCodeProvider() (*OpenAIProvider, error) {
+	if !config.IsOpenCodeConfigured() {
+		return nil, ErrOpenCodeNotConfigured
+	}
+	return newOpenAICompatProvider(
+		"opencode",
+		config.GetOpenCodeAPIKey(),
+		config.GetOpenCodeBaseURL(),
+		config.GetOpenCodeModel(),
 		"",
 	), nil
 }

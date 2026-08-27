@@ -13,6 +13,40 @@ func setLicenseConfigEnv(t *testing.T) {
 	t.Cleanup(func() { GlobalConfig = nil })
 }
 
+func TestOpenCodeConfiguration(t *testing.T) {
+	setLicenseConfigEnv(t)
+	GlobalConfig = nil
+	for _, key := range []string{DeepSeekAPIKeyEnvVar, NvidiaNIMAPIKeyEnvVar, GeminiAPIKeyEnvVar, OpenAIAPIKeyEnvVar, OpenCodeAPIKeyEnvVar} {
+		t.Setenv(key, "")
+	}
+	if IsAnyAIConfigured() {
+		t.Fatal("AI must remain disabled without a provider key")
+	}
+	t.Setenv(OpenCodeAPIKeyEnvVar, " \t")
+	if IsOpenCodeConfigured() {
+		t.Fatal("whitespace is not a configured API key")
+	}
+	t.Setenv(OpenCodeAPIKeyEnvVar, " test-zen-key ")
+	if !IsAnyAIConfigured() || GetOpenCodeAPIKey() != "test-zen-key" {
+		t.Fatal("OpenCode should work as the only configured provider")
+	}
+	cfg, err := LoadAndValidate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.OpenCodeAPIKey != "test-zen-key" || !IsOpenCodeConfigured() {
+		t.Fatal("startup did not load the OpenCode key")
+	}
+	t.Setenv(OpenCodeAPIKeyEnvVar, "different-key")
+	if GetOpenCodeAPIKey() != "test-zen-key" {
+		t.Fatal("loaded configuration must take precedence over the environment")
+	}
+	GlobalConfig = &AppConfig{}
+	if IsAnyAIConfigured() {
+		t.Fatal("an empty loaded configuration must keep AI disabled")
+	}
+}
+
 func TestLoadAndValidate_DefaultsJWTDuration(t *testing.T) {
 	setLicenseConfigEnv(t)
 

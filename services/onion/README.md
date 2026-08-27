@@ -57,6 +57,23 @@ make setup
 make run
 ```
 
+### Optional AI fallback
+
+Set `OPENCODE_API_KEY` to an [OpenCode Zen](https://opencode.ai/docs/zen/)
+API key and restart the API to enable the final AI fallback. The default order
+is DeepSeek → NVIDIA NIM → Gemini → OpenAI → OpenCode Zen; providers without
+keys are skipped. OpenCode can also run as the only configured AI provider.
+
+The integration uses Zen's hosted chat-completions API with `minimax-m2.7`, not
+the local OpenCode CLI or its saved credentials. It supports ordinary and JSON
+completions, streaming failover, token accounting, provider cooldowns, and the
+existing request timeout. Streaming switches providers only before response
+text has been emitted.
+
+The provider stays disabled when the key is empty. Configure Zen billing and
+usage limits before enabling it; no deployment or secret provisioning is
+performed by this repository change.
+
 ## 🗄️ Database Management
 
 ```bash
