@@ -126,13 +126,13 @@ BEGIN
       can_view_reports = VALUES(can_view_reports);
 
     INSERT INTO pos_users (
-      owner_id, business_id, user_id, location_id, name, pin, pin_hash, role,
+      owner_id, business_id, user_id, location_id, name, pin_hash, role,
       is_active, hourly_rate, max_discount_pct, can_void, can_refund,
       can_open_drawer, can_apply_discount, created_by
     )
     VALUES (
       @owner_id, @business_id, uid, @location_id, CONCAT('Prelaunch Staff ', i),
-      '', CONCAT('prelaunch-hash-', i),
+      CONCAT('prelaunch-hash-', i),
       CASE WHEN i <= 5 THEN 'manager' ELSE 'cashier' END,
       TRUE, 15.00, CASE WHEN i <= 5 THEN 100 ELSE 10 END,
       i <= 5, i <= 5, i <= 10, i <= 10, @owner_id
