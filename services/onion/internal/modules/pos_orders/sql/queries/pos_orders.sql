@@ -245,6 +245,7 @@ SET subtotal = sqlc.arg(subtotal),
 WHERE id = ? AND business_id = ?;
 
 -- name: IsOnlineOrderingEnabled :one
+-- cross-schema read from business_addons (addons module) — gate online ordering on the business add-on entitlement.
 SELECT COUNT(*) FROM business_addons WHERE business_id = ? AND addon_id = 'online_ordering' AND is_enabled = TRUE;
 
 -- name: GetPublicOrderNumberStatus :one
