@@ -15,6 +15,7 @@ import DefaultLayout from './layouts/DefaultLayout';
 
 const Dashboard = React.lazy(() => import('./features/dashboard/Dashboard'));
 const Inventory = React.lazy(() => import('./features/inventory/Inventory'));
+const Products = React.lazy(() => import('./features/products/Products'));
 const Purchasing = React.lazy(() => import('./features/purchasing/Purchasing'));
 const Suppliers = React.lazy(() => import('./features/suppliers/Suppliers'));
 const ProductDetail = React.lazy(() => import('./features/products/ProductDetail'));
@@ -41,14 +42,6 @@ function CatchAllRedirect(): null {
   const navigate = useNavigate();
   React.useEffect(() => {
     void navigate({ to: '/', replace: true });
-  }, [navigate]);
-  return null;
-}
-
-function ProductsRedirect(): null {
-  const navigate = useNavigate();
-  React.useEffect(() => {
-    void navigate({ to: '/inventory', replace: true });
   }, [navigate]);
   return null;
 }
@@ -91,7 +84,7 @@ const inventoryRoute = createRoute({
 const productsRoute = createRoute({
   getParentRoute: () => layoutRoute,
   path: '/products',
-  component: ProductsRedirect,
+  component: wrap(<Products />),
 });
 
 const productDetailRoute = createRoute({

@@ -226,7 +226,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
   };
 
   const handleSubmit = (): void => {
-    if (!name || !sku || !categoryId || !barcode || !description || !unit) {
+    if (!name || !sku || !categoryId || !supplierId || !barcode || !description || !unit) {
       toast.error(t('erp.products.validation.requiredFields'));
       return;
     }
@@ -243,7 +243,7 @@ const QuickAddProductModal: React.FC<QuickAddProductModalProps> = ({
       name,
       sku,
       categoryId,
-      supplierId: supplierId || '0',
+      supplierId,
       barcode,
       description,
       unit,

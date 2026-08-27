@@ -60,14 +60,13 @@ const SupplierBillHistory: React.FC<SupplierBillHistoryProps> = ({ supplier }) =
                 {bill.status}
               </span>
               <span>
-                {bill.currency ?? ''}{(bill.amount ?? 0).toFixed(2)}
+                {bill.currency ?? ''}
+                {(bill.amount ?? 0).toFixed(2)}
               </span>
             </div>
           ))}
           {bills.length > 10 && (
-            <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>
-              +{bills.length - 10}
-            </div>
+            <div style={{ fontSize: 11, color: 'var(--hub-text-dim)' }}>+{bills.length - 10}</div>
           )}
         </div>
       )}

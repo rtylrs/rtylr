@@ -10,8 +10,8 @@ const mockGet = vi.fn();
 const mockPost = vi.fn();
 const mockPatch = vi.fn();
 
-vi.mock('../../lib/api', () => ({
-  safe: {
+vi.mock('../../lib/clients', () => ({
+  rest: {
     get: (...args: unknown[]) => mockGet(...args),
     post: (...args: unknown[]) => mockPost(...args),
     patch: (...args: unknown[]) => mockPatch(...args),
