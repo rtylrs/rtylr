@@ -41,7 +41,7 @@ func (h *DeleteCustomerHandler) Serve(ctx context.Context, req *DeleteCustomerRe
 	if device.User == nil {
 		return DeleteCustomerResponse{}, onekiterrors.PermissionDenied()
 	}
-	if err := requireCRMManager(ctx); err != nil {
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:delete"); err != nil {
 		return DeleteCustomerResponse{}, err
 	}
 

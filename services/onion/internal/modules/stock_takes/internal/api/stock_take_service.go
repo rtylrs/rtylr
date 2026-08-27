@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/application"
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	erpstocktakev1 "github.com/voxire/voxie/gen/go/erp/stock_take/v1"
@@ -22,7 +23,7 @@ func NewStockTakeAPI(service *application.Service) *StockTakeAPI {
 }
 
 func (a *StockTakeAPI) ListStockTakes(ctx context.Context, req *erpstocktakev1.ListStockTakesRequest) (*erpstocktakev1.ListStockTakesResponse, error) {
-	ownerID, err := stockTakeOwnerID(ctx)
+	ownerID, err := stockTakeOwnerID(ctx, "erp:inventory:view")
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +52,7 @@ func (a *StockTakeAPI) ListStockTakes(ctx context.Context, req *erpstocktakev1.L
 }
 
 func (a *StockTakeAPI) CreateStockTake(ctx context.Context, req *erpstocktakev1.CreateStockTakeRequest) (*erpstocktakev1.CreateStockTakeResponse, error) {
-	ownerID, err := stockTakeOwnerID(ctx)
+	ownerID, err := stockTakeOwnerID(ctx, "erp:inventory:adjust")
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +82,7 @@ func (a *StockTakeAPI) CreateStockTake(ctx context.Context, req *erpstocktakev1.
 }
 
 func (a *StockTakeAPI) UpdateStockTake(ctx context.Context, req *erpstocktakev1.UpdateStockTakeRequest) (*erpstocktakev1.UpdateStockTakeResponse, error) {
-	ownerID, err := stockTakeOwnerID(ctx)
+	ownerID, err := stockTakeOwnerID(ctx, "erp:inventory:approve")
 	if err != nil {
 		return nil, err
 	}
@@ -143,10 +144,10 @@ func newStockTakeProto(s domain.StockTake) *erpstocktakev1.StockTake {
 	}
 }
 
-func stockTakeOwnerID(ctx context.Context) (int64, error) {
+func stockTakeOwnerID(ctx context.Context, permission string) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return 0, stockTakeStatusError(http.StatusUnauthorized, "unauthorized")
+	if !ok || authUser == nil || !authPkg.HasAppPermission(authUser, authorization.AppERP, permission) {
+		return 0, onekiterrors.PermissionDenied()
 	}
 	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {

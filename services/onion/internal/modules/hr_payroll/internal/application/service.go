@@ -538,7 +538,7 @@ func (s *Service) NotifyPayrollPeriodOpen(ctx context.Context) error {
 		return err
 	}
 
-	today := int32(time.Now().Day())
+	today := int32(time.Now().Day()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	for _, cfg := range configs {
 		if today != cfg.PayDayOfMonth {
 			continue

@@ -8,7 +8,9 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	poscashv1 "github.com/voxire/voxie/gen/go/pos/cash/v1"
 )
 
@@ -21,12 +23,16 @@ func NewCashAPI(service *application.Service) *CashAPI {
 }
 
 func (a *CashAPI) ListCashMovements(ctx context.Context, req *poscashv1.ListCashMovementsRequest) (*poscashv1.ListCashMovementsResponse, error) {
-	user, err := authenticatedCashUser(ctx)
+	user, err := requireCashPermission(ctx, "pos:cash:view")
 	if err != nil {
 		return nil, err
 	}
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if businessErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
-	movements, listErr := a.Service.ListBySession(ctx, user.BusinessID, req.GetSessionId())
+	movements, listErr := a.Service.ListBySession(ctx, businessID, req.GetSessionId())
 	if listErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list cash movements")
 	}
@@ -40,12 +46,16 @@ func (a *CashAPI) ListCashMovements(ctx context.Context, req *poscashv1.ListCash
 }
 
 func (a *CashAPI) CashDrop(ctx context.Context, req *poscashv1.CashDropRequest) (*poscashv1.CashDropResponse, error) {
-	user, err := authenticatedCashUser(ctx)
+	user, err := requireCashPermission(ctx, "pos:cash:drop")
 	if err != nil {
 		return nil, err
 	}
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if businessErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
-	id, createErr := a.Service.CashDrop(ctx, cashMovementInput(user.BusinessID, req.GetBranchId(), req.GetTerminalId(), req.GetSessionId(), user.UserID, req.GetAmount(), req.GetReason()))
+	id, createErr := a.Service.CashDrop(ctx, cashMovementInput(businessID, req.GetBranchId(), req.GetTerminalId(), req.GetSessionId(), user.UserID, req.GetAmount(), req.GetReason()))
 	if createErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create cash drop")
 	}
@@ -54,12 +64,16 @@ func (a *CashAPI) CashDrop(ctx context.Context, req *poscashv1.CashDropRequest) 
 }
 
 func (a *CashAPI) CashPickup(ctx context.Context, req *poscashv1.CashPickupRequest) (*poscashv1.CashPickupResponse, error) {
-	user, err := authenticatedCashUser(ctx)
+	user, err := requireCashPermission(ctx, "pos:cash:pickup")
 	if err != nil {
 		return nil, err
 	}
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if businessErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
-	id, createErr := a.Service.CashPickup(ctx, cashMovementInput(user.BusinessID, req.GetBranchId(), req.GetTerminalId(), req.GetSessionId(), user.UserID, req.GetAmount(), req.GetReason()))
+	id, createErr := a.Service.CashPickup(ctx, cashMovementInput(businessID, req.GetBranchId(), req.GetTerminalId(), req.GetSessionId(), user.UserID, req.GetAmount(), req.GetReason()))
 	if createErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create cash pickup")
 	}
@@ -68,18 +82,19 @@ func (a *CashAPI) CashPickup(ctx context.Context, req *poscashv1.CashPickupReque
 }
 
 func (a *CashAPI) CashAdjust(ctx context.Context, req *poscashv1.CashAdjustRequest) (*poscashv1.CashAdjustResponse, error) {
-	user, err := authenticatedCashUser(ctx)
+	user, err := requireCashPermission(ctx, "pos:cash:approve")
 	if err != nil {
 		return nil, err
+	}
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if businessErr != nil {
+		return nil, onekiterrors.PermissionDenied()
 	}
 	if strings.TrimSpace(req.GetReason()) == "" {
 		return nil, onekiterrors.New(http.StatusBadRequest, "reason is required for adjustments")
 	}
-	if authUser, ok := authPkg.GetAuthUser(ctx); !ok || !authPkg.HasAnyRole(authUser, "owner", "admin", "console_admin", "pos_manager") {
-		return nil, onekiterrors.PermissionDenied()
-	}
 
-	input := cashMovementInput(user.BusinessID, req.GetBranchId(), req.GetTerminalId(), req.GetSessionId(), user.UserID, req.GetAmount(), req.GetReason())
+	input := cashMovementInput(businessID, req.GetBranchId(), req.GetTerminalId(), req.GetSessionId(), user.UserID, req.GetAmount(), req.GetReason())
 	input.ApprovedBy = &user.UserID
 	id, createErr := a.Service.CashAdjust(ctx, input)
 	if createErr != nil {
@@ -89,9 +104,9 @@ func (a *CashAPI) CashAdjust(ctx context.Context, req *poscashv1.CashAdjustReque
 	return &poscashv1.CashAdjustResponse{MovementId: id, Message: "Cash adjustment recorded successfully"}, nil
 }
 
-func authenticatedCashUser(ctx context.Context) (*authPkg.AuthUser, error) {
+func requireCashPermission(ctx context.Context, permission string) (*authPkg.AuthUser, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.User == nil || !authPkg.HasAppPermission(device.User, authorization.AppPOS, permission) || !authPkg.HasAnyAppScope(device.User, authorization.AppPOS) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	return device.User, nil

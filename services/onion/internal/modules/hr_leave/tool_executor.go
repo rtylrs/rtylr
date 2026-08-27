@@ -120,7 +120,7 @@ func (m *Module) executeGetLeaveBalancesTool(ctx context.Context, input map[stri
 		return nil, fmt.Errorf("invalid year: %w", err)
 	}
 	if year == 0 {
-		year = int32(time.Now().UTC().Year())
+		year = int32(time.Now().UTC().Year()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 
 	balances, err := m.service.GetLeaveBalances(ctx, ownerID, ownerID, employeeID, year)
@@ -222,7 +222,7 @@ func hrLeaveToolPagination(input map[string]any) (int32, int32, error) {
 		return 0, 0, errors.New("offset is too large")
 	}
 
-	return int32(limit), int32(offset), nil
+	return int32(limit), int32(offset), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func firstHRLeaveToolValue(input map[string]any, keys ...string) any {
@@ -283,7 +283,7 @@ func hrLeaveToolInt32(value any) (int32, error) {
 	if parsed > math.MaxInt32 {
 		return 0, errors.New("value is too large")
 	}
-	return int32(parsed), nil
+	return int32(parsed), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func hrLeaveToolInt64(value any) (int64, error) {

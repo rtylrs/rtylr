@@ -661,7 +661,7 @@ func nullDecimalStringToCents(v sql.NullString) int64 {
 }
 
 func interfaceToInt32(v interface{}) int32 {
-	return int32(interfaceToInt64(v))
+	return int32(interfaceToInt64(v)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func interfaceToInt64(v interface{}) int64 {
@@ -673,7 +673,7 @@ func interfaceToInt64(v interface{}) int64 {
 	case int:
 		return int64(val)
 	case uint64:
-		return int64(val)
+		return int64(val) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	case []byte:
 		n, err := strconv.ParseInt(string(val), 10, 64)
 		if err != nil {

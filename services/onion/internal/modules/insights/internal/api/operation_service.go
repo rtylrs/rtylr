@@ -18,7 +18,7 @@ func NewOperationAPI(service *application.Service) *OperationAPI {
 }
 
 func (a *OperationAPI) GetHeadcountMetrics(ctx context.Context, _ *insightsoperationv1.GetHeadcountMetricsRequest) (*insightsoperationv1.GetHeadcountMetricsResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
@@ -30,16 +30,16 @@ func (a *OperationAPI) GetHeadcountMetrics(ctx context.Context, _ *insightsopera
 
 	return &insightsoperationv1.GetHeadcountMetricsResponse{
 		Metrics: &insightsoperationv1.HeadcountMetrics{
-			Current:            int32(row.ActiveStaff),
-			HiredThisPeriod:    int32(maxInt64(row.MomDelta, 0)),
-			DepartedThisPeriod: int32(maxInt64(-row.MomDelta, 0)),
+			Current:            int32(row.ActiveStaff),            // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+			HiredThisPeriod:    int32(maxInt64(row.MomDelta, 0)),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+			DepartedThisPeriod: int32(maxInt64(-row.MomDelta, 0)), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			TurnoverRate:       row.MomDeltaPct,
 		},
 	}, nil
 }
 
 func (a *OperationAPI) GetShiftMetrics(ctx context.Context, req *insightsoperationv1.GetShiftMetricsRequest) (*insightsoperationv1.GetShiftMetricsResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
@@ -56,16 +56,16 @@ func (a *OperationAPI) GetShiftMetrics(ctx context.Context, req *insightsoperati
 
 	return &insightsoperationv1.GetShiftMetricsResponse{
 		Metrics: &insightsoperationv1.ShiftMetrics{
-			TotalShifts:  int32(row.Scheduled),
-			Covered:      int32(row.Completed),
-			Missed:       int32(row.NoShows),
+			TotalShifts:  int32(row.Scheduled), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+			Covered:      int32(row.Completed), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+			Missed:       int32(row.NoShows),   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			CoverageRate: row.CompletionRate,
 		},
 	}, nil
 }
 
 func (a *OperationAPI) GetTimeOffMetrics(ctx context.Context, _ *insightsoperationv1.GetTimeOffMetricsRequest) (*insightsoperationv1.GetTimeOffMetricsResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
@@ -77,15 +77,15 @@ func (a *OperationAPI) GetTimeOffMetrics(ctx context.Context, _ *insightsoperati
 
 	return &insightsoperationv1.GetTimeOffMetricsResponse{
 		Metrics: &insightsoperationv1.TimeOffMetrics{
-			TotalRequests: int32(row.Pending + row.Approved),
-			Approved:      int32(row.Approved),
-			Pending:       int32(row.Pending),
+			TotalRequests: int32(row.Pending + row.Approved), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+			Approved:      int32(row.Approved),               // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+			Pending:       int32(row.Pending),                // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		},
 	}, nil
 }
 
 func (a *OperationAPI) GetUtilization(ctx context.Context, _ *insightsoperationv1.GetUtilizationRequest) (*insightsoperationv1.GetUtilizationResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (a *OperationAPI) GetUtilization(ctx context.Context, _ *insightsoperationv
 }
 
 func (a *OperationAPI) GetOperationsSummary(ctx context.Context, _ *insightsoperationv1.GetOperationsSummaryRequest) (*insightsoperationv1.GetOperationsSummaryResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}

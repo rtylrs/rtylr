@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	possessionv1 "github.com/voxire/voxie/gen/go/pos/session/v1"
@@ -22,7 +23,7 @@ func NewSessionAPI(service *application.Service) *SessionAPI {
 }
 
 func (a *SessionAPI) ListSessions(ctx context.Context, _ *possessionv1.ListSessionsRequest) (*possessionv1.ListSessionsResponse, error) {
-	businessID, err := authenticatedSessionBusinessID(ctx)
+	businessID, err := requireSessionPermission(ctx, "pos:orders:view")
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +41,7 @@ func (a *SessionAPI) ListSessions(ctx context.Context, _ *possessionv1.ListSessi
 }
 
 func (a *SessionAPI) GetCurrentSession(ctx context.Context, _ *possessionv1.GetCurrentSessionRequest) (*possessionv1.GetCurrentSessionResponse, error) {
-	businessID, err := authenticatedSessionBusinessID(ctx)
+	businessID, err := requireSessionPermission(ctx, "pos:orders:view")
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +64,7 @@ func (a *SessionAPI) GetCurrentSession(ctx context.Context, _ *possessionv1.GetC
 }
 
 func (a *SessionAPI) GetSession(ctx context.Context, req *possessionv1.GetSessionRequest) (*possessionv1.GetSessionResponse, error) {
-	businessID, err := authenticatedSessionBusinessID(ctx)
+	businessID, err := requireSessionPermission(ctx, "pos:orders:view")
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +83,7 @@ func (a *SessionAPI) GetSession(ctx context.Context, req *possessionv1.GetSessio
 }
 
 func (a *SessionAPI) OpenSession(ctx context.Context, req *possessionv1.OpenSessionRequest) (*possessionv1.OpenSessionResponse, error) {
-	businessID, err := authenticatedSessionBusinessID(ctx)
+	businessID, err := requireSessionPermission(ctx, "pos:orders:create")
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +107,7 @@ func (a *SessionAPI) OpenSession(ctx context.Context, req *possessionv1.OpenSess
 }
 
 func (a *SessionAPI) CloseSession(ctx context.Context, req *possessionv1.CloseSessionRequest) (*possessionv1.CloseSessionResponse, error) {
-	businessID, err := authenticatedSessionBusinessID(ctx)
+	businessID, err := requireSessionPermission(ctx, "pos:orders:create")
 	if err != nil {
 		return nil, err
 	}
@@ -127,9 +128,9 @@ func (a *SessionAPI) CloseSession(ctx context.Context, req *possessionv1.CloseSe
 	return &possessionv1.CloseSessionResponse{Message: "Session closed successfully"}, nil
 }
 
-func authenticatedSessionBusinessID(ctx context.Context) (int64, error) {
+func requireSessionPermission(ctx context.Context, permission string) (int64, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.User == nil || !authPkg.HasAppPermission(device.User, authorization.AppPOS, permission) {
 		return 0, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)

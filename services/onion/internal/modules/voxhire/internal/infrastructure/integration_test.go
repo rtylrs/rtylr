@@ -4,7 +4,6 @@ import (
 	"context"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/voxire/onion/internal/modules/voxhire/internal/domain"
 	"github.com/voxire/onion/internal/modules/voxhire/internal/infrastructure"
@@ -172,8 +171,15 @@ func TestVoxhire_AutoMigrate_TablesExist(t *testing.T) {
 func TestVoxhire_ListApplications_SearchesExtractedCVText(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
-	ctx := context.Background()
-	jobID := time.Now().UnixNano()
+	ctx := domain.WithOwnerID(context.Background(), testutil.OwnerID)
+	opening, err := repo.CreateCareer(ctx, domain.CareerInput{
+		Title:  "CV Search Role",
+		Details: "Integration test opening for CV search",
+	})
+	if err != nil {
+		t.Fatalf("CreateCareer: %v", err)
+	}
+	jobID := opening.ID
 
 	id, err := repo.CreateCareerApplication(ctx, domain.CareerApplicationInput{
 		JobID:             jobID,
@@ -197,7 +203,7 @@ func TestVoxhire_ListApplications_SearchesExtractedCVText(t *testing.T) {
 		t.Fatalf("seed extracted cv text: %v", err)
 	}
 
-	apps, total, err := repo.ListApplications(ctx, domain.ApplicationFilter{
+	apps, total, err := repo.ListApplications(domain.WithOwnerID(ctx, testutil.OwnerID), domain.ApplicationFilter{
 		JobID: jobID,
 		Query: "oncology insurance",
 		Limit: 20,

@@ -30,7 +30,7 @@ type PayOrderResponse struct {
 }
 
 func (h *PayOrderHandler) Serve(ctx context.Context, req *PayOrderRequest) (PayOrderResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return PayOrderResponse{}, authErr
 	}

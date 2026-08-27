@@ -78,7 +78,7 @@ func (r *Repository) ListTables(ctx context.Context, businessID, locationID int6
 	rows, err := r.queries.ListTablesByOwner(ctx, sqlc.ListTablesByOwnerParams{
 		BusinessID: businessID,
 		LocationID: sql.NullInt64{Int64: locationID, Valid: true},
-		Status:     sqlc.NullPosTablesStatus{PosTablesStatus: sqlc.PosTablesStatus(status), Valid: status != ""},
+		Status:     sqlc.NullPosTablesStatus{PosTablesStatus: sqlc.PosTablesStatus(status), Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list pos tables", logger.Error(err))
@@ -110,7 +110,7 @@ func (r *Repository) CreateTable(ctx context.Context, businessID int64, input do
 		BusinessID: businessID,
 		LocationID: nullInt64(input.LocationID),
 		Name:       input.Name,
-		Capacity:   sql.NullInt32{Int32: int32(input.Capacity), Valid: true},
+		Capacity:   sql.NullInt32{Int32: int32(input.Capacity), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		QrCodeUrl:  nullString(input.QRCodeURL),
 	})
 	if err != nil {
@@ -124,7 +124,7 @@ func (r *Repository) UpdateTable(ctx context.Context, businessID int64, input do
 	err := r.queries.UpdatePosTable(ctx, sqlc.UpdatePosTableParams{
 		LocationID: nullInt64(input.LocationID),
 		Name:       input.Name,
-		Capacity:   sql.NullInt32{Int32: int32(input.Capacity), Valid: true},
+		Capacity:   sql.NullInt32{Int32: int32(input.Capacity), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		QrCodeUrl:  nullString(input.QRCodeURL),
 		BusinessID: businessID,
 		ID:         input.ID,
@@ -396,7 +396,7 @@ func (r *Repository) UpdateSessionTotals(ctx context.Context, sessionID int64, t
 		TotalCashSales:   sql.NullString{String: floatToDecimal(cashSales), Valid: true},
 		TotalCardSales:   sql.NullString{String: floatToDecimal(cardSales), Valid: true},
 		TotalOnlineSales: sql.NullString{String: floatToDecimal(onlineSales), Valid: true},
-		TotalOrders:      sql.NullInt32{Int32: int32(totalOrders), Valid: true},
+		TotalOrders:      sql.NullInt32{Int32: int32(totalOrders), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		ID:               sessionID,
 	})
 	if err != nil {
@@ -494,8 +494,8 @@ func (r *Repository) listOrdersRows(ctx context.Context, businessID, sessionID i
 
 	query, args, err := builder.
 		OrderBy("o.created_at DESC").
-		Limit(uint64(limit + 1)).
-		Offset(uint64(offset)).
+		Limit(uint64(limit + 1)). // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset(uint64(offset)).   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {

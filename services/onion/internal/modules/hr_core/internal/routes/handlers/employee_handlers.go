@@ -13,14 +13,15 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_core/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_core/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	hrstaffv1 "github.com/voxire/voxie/gen/go/hr/staff/v1"
 )
 
-func employeeToProto(e domain.EmployeeRecord) *hrstaffv1.Staff {
-	return &hrstaffv1.Staff{
+func employeeToProto(e domain.EmployeeRecord, includeSensitive bool) *hrstaffv1.Staff {
+	staff := &hrstaffv1.Staff{
 		Id:                    e.ID,
 		OwnerId:               e.OwnerID,
 		UserId:                e.UserID,
@@ -31,9 +32,6 @@ func employeeToProto(e domain.EmployeeRecord) *hrstaffv1.Staff {
 		Phone:                 e.Phone,
 		EmploymentType:        e.EmploymentType,
 		Status:                e.Status,
-		Salary:                domain.CentsToDollars(e.SalaryCents),
-		HourlyRate:            domain.CentsToDollars(e.HourlyRateCents),
-		OvertimeRate:          domain.CentsToDollars(e.OvertimeRateCents),
 		StartDate:             e.StartDate.Format("2006-01-02"),
 		EndDate:               e.EndDate.Format("2006-01-02"),
 		Address:               e.Address,
@@ -43,6 +41,12 @@ func employeeToProto(e domain.EmployeeRecord) *hrstaffv1.Staff {
 		CreatedAt:             e.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:             e.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
+	if includeSensitive {
+		staff.Salary = domain.CentsToDollars(e.SalaryCents)
+		staff.HourlyRate = domain.CentsToDollars(e.HourlyRateCents)
+		staff.OvertimeRate = domain.CentsToDollars(e.OvertimeRateCents)
+	}
+	return staff
 }
 
 // --- List Employees ---
@@ -68,6 +72,10 @@ func (h *ListEmployeesHandler) Serve(ctx context.Context, req *ListEmployeesRequ
 	if device.IsAnonymous || device.User == nil {
 		return ListEmployeesResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireHRPermission(ctx, "hr:employees:view"); err != nil {
+		return ListEmployeesResponse{}, err
+	}
+	includeSensitive := authPkg.HasAppPermission(device.User, authorization.AppHR, "hr:employees:sensitive_view")
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return ListEmployeesResponse{}, onekiterrors.PermissionDenied()
@@ -95,7 +103,7 @@ func (h *ListEmployeesHandler) Serve(ctx context.Context, req *ListEmployeesRequ
 
 	payloads := make([]*hrstaffv1.Staff, 0, len(employees))
 	for _, e := range employees {
-		payloads = append(payloads, employeeToProto(e))
+		payloads = append(payloads, employeeToProto(e, includeSensitive))
 	}
 
 	return ListEmployeesResponse{Employees: payloads, Total: total, Limit: limit, Offset: offset}, nil
@@ -118,6 +126,10 @@ func (h *GetEmployeeHandler) Serve(ctx context.Context, _ *GetEmployeeRequest) (
 	if device.IsAnonymous || device.User == nil {
 		return GetEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireHRPermission(ctx, "hr:employees:view"); err != nil {
+		return GetEmployeeResponse{}, err
+	}
+	includeSensitive := authPkg.HasAppPermission(device.User, authorization.AppHR, "hr:employees:sensitive_view")
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
@@ -138,7 +150,7 @@ func (h *GetEmployeeHandler) Serve(ctx context.Context, _ *GetEmployeeRequest) (
 		return GetEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get employee")
 	}
 
-	return GetEmployeeResponse{Employee: employeeToProto(*emp)}, nil
+	return GetEmployeeResponse{Employee: employeeToProto(*emp, includeSensitive)}, nil
 }
 
 // --- Get My Employee ---
@@ -165,6 +177,7 @@ func (h *GetMyEmployeeHandler) Serve(ctx context.Context, _ *GetMyEmployeeReques
 	if device.IsAnonymous || device.User == nil {
 		return GetMyEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
+	includeSensitive := authPkg.HasAppPermission(device.User, authorization.AppHR, "hr:employees:sensitive_view")
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return GetMyEmployeeResponse{}, onekiterrors.New(http.StatusNotFound, "No employee record is linked to this account")
@@ -184,7 +197,7 @@ func (h *GetMyEmployeeHandler) Serve(ctx context.Context, _ *GetMyEmployeeReques
 		return GetMyEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get employee record")
 	}
 
-	return GetMyEmployeeResponse{Employee: employeeToProto(*emp)}, nil
+	return GetMyEmployeeResponse{Employee: employeeToProto(*emp, includeSensitive)}, nil
 }
 
 // --- Create Employee ---
@@ -237,6 +250,10 @@ func (h *CreateEmployeeHandler) Serve(ctx context.Context, req *CreateEmployeeRe
 	if device.IsAnonymous || device.User == nil {
 		return CreateEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireHRPermission(ctx, "hr:employees:manage"); err != nil {
+		return CreateEmployeeResponse{}, err
+	}
+	includeSensitive := authPkg.HasAppPermission(device.User, authorization.AppHR, "hr:employees:sensitive_view")
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return CreateEmployeeResponse{}, onekiterrors.PermissionDenied()
@@ -275,7 +292,7 @@ func (h *CreateEmployeeHandler) Serve(ctx context.Context, req *CreateEmployeeRe
 		return CreateEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to create employee")
 	}
 
-	return CreateEmployeeResponse{Employee: employeeToProto(*created)}, nil
+	return CreateEmployeeResponse{Employee: employeeToProto(*created, includeSensitive)}, nil
 }
 
 // --- Update Employee ---
@@ -335,6 +352,10 @@ func (h *UpdateEmployeeHandler) Serve(ctx context.Context, req *UpdateEmployeeRe
 	if device.IsAnonymous || device.User == nil {
 		return UpdateEmployeeResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireHRPermission(ctx, "hr:employees:manage"); err != nil {
+		return UpdateEmployeeResponse{}, err
+	}
+	includeSensitive := authPkg.HasAppPermission(device.User, authorization.AppHR, "hr:employees:sensitive_view")
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return UpdateEmployeeResponse{}, onekiterrors.PermissionDenied()
@@ -392,7 +413,7 @@ func (h *UpdateEmployeeHandler) Serve(ctx context.Context, req *UpdateEmployeeRe
 		return UpdateEmployeeResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update employee")
 	}
 
-	return UpdateEmployeeResponse{Employee: employeeToProto(*updated)}, nil
+	return UpdateEmployeeResponse{Employee: employeeToProto(*updated, includeSensitive)}, nil
 }
 
 // --- Delete Employee ---
@@ -411,6 +432,9 @@ func (h *DeleteEmployeeHandler) Serve(ctx context.Context, _ *DeleteEmployeeRequ
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return DeleteEmployeeResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireHRPermission(ctx, "hr:employees:manage"); err != nil {
+		return DeleteEmployeeResponse{}, err
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

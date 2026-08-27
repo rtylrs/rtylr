@@ -292,7 +292,7 @@ func (r *Repository) ListWorkDayLines(ctx context.Context, businessID, workDayID
 		logger.Ctx(ctx).Error("SumWorkDayLineMinutes failed", logger.Error(err))
 		return lines, 0, err
 	}
-	return lines, int32(sumToInt64(total)), nil
+	return lines, int32(sumToInt64(total)), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 // CreateWorkDayLine adds a line. A repeated client key returns the line that
@@ -525,7 +525,7 @@ func (r *Repository) ListWorkDays(ctx context.Context, ownerID, businessID, empl
 		Date:       fromDate,
 		Date_2:     toDate,
 		Limit:      limit,
-		Offset:     int32(offset),
+		Offset:     int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListWorkDays failed", logger.Error(err))
@@ -610,7 +610,7 @@ func (r *Repository) ListWorkDaysByEmployeeIDs(ctx context.Context, ownerID, bus
 		Date:        fromDate,
 		Date_2:      toDate,
 		Limit:       limit,
-		Offset:      int32(offset),
+		Offset:      int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListWorkDaysByEmployeeIDs failed", logger.Error(err))

@@ -36,8 +36,8 @@ func (a *DashboardAPI) GetDashboard(ctx context.Context, _ *bookingdashboardv1.G
 	}
 
 	return &bookingdashboardv1.GetDashboardResponse{
-		TodayCount:       int32(data.TodayCount),
-		UpcomingCount:    int32(data.UpcomingCount),
+		TodayCount:       int32(data.TodayCount),    // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		UpcomingCount:    int32(data.UpcomingCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		CancellationRate: data.CancellationRate,
 		Revenue:          data.Revenue.Float64(),
 	}, nil

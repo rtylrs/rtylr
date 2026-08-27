@@ -235,7 +235,7 @@ func (h *DeleteSegmentHandler) Serve(ctx context.Context, req *DeleteSegmentRequ
 	if device.User == nil {
 		return DeleteSegmentResponse{}, onekiterrors.PermissionDenied()
 	}
-	if err := requireCRMManager(ctx); err != nil {
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:edit"); err != nil {
 		return DeleteSegmentResponse{}, err
 	}
 

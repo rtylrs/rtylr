@@ -190,16 +190,22 @@ func (a *AuthAPI) ResetPasswordConfirm(ctx context.Context, req *commonauthv1.Re
 	return &commonauthv1.ResetPasswordConfirmResponse{Message: "Password reset successfully."}, nil
 }
 
-func (a *AuthAPI) VerifyEmail(_ context.Context, req *commonauthv1.VerifyEmailRequest) (*commonauthv1.VerifyEmailResponse, error) {
+func (a *AuthAPI) VerifyEmail(ctx context.Context, req *commonauthv1.VerifyEmailRequest) (*commonauthv1.VerifyEmailResponse, error) {
 	if strings.TrimSpace(req.GetToken()) == "" {
 		return nil, onekithttp.NewError(http.StatusBadRequest, "token is required")
+	}
+	if err := a.UserService.VerifyEmailCode(ctx, req.GetToken()); err != nil {
+		return nil, onekithttp.NewError(http.StatusBadRequest, "Invalid or expired email verification code")
 	}
 	return &commonauthv1.VerifyEmailResponse{Verified: true, Message: "Email verified"}, nil
 }
 
-func (a *AuthAPI) ResendVerification(_ context.Context, req *commonauthv1.ResendVerificationRequest) (*commonauthv1.ResendVerificationResponse, error) {
+func (a *AuthAPI) ResendVerification(ctx context.Context, req *commonauthv1.ResendVerificationRequest) (*commonauthv1.ResendVerificationResponse, error) {
 	if strings.TrimSpace(req.GetEmail()) == "" {
 		return nil, onekithttp.NewError(http.StatusBadRequest, "email is required")
+	}
+	if err := a.UserService.IssueEmailVerificationCode(ctx, req.GetEmail()); err != nil {
+		logger.Ctx(ctx).Warn("email verification code could not be issued", logger.Error(err))
 	}
 	return &commonauthv1.ResendVerificationResponse{
 		Ok:      true,

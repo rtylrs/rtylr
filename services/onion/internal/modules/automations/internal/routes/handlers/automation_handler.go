@@ -99,6 +99,9 @@ func (h *ListAutomationsHandler) Serve(ctx context.Context, _ *ListAutomationsRe
 	if device.User == nil {
 		return ListAutomationsResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireAutomationManager(ctx); err != nil {
+		return ListAutomationsResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

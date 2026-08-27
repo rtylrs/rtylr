@@ -55,13 +55,13 @@ func (r *Repository) List(ctx context.Context, businessID int64, status string, 
 			BusinessID: businessID,
 			Status:     sqlc.NullSupportTicketsStatus{SupportTicketsStatus: sqlc.SupportTicketsStatus(status), Valid: true},
 			Limit:      int32(pageSize),
-			Offset:     int32(offset),
+			Offset:     int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		})
 	} else {
 		rows, err = r.queries.ListTickets(ctx, sqlc.ListTicketsParams{
 			BusinessID: businessID,
 			Limit:      int32(pageSize),
-			Offset:     int32(offset),
+			Offset:     int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		})
 	}
 	if err != nil {

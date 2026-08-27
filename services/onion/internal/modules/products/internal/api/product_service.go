@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/application"
 	"github.com/voxire/onion/internal/modules/products/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	erpproductv1 "github.com/voxire/voxie/gen/go/erp/product/v1"
@@ -23,7 +24,7 @@ func NewProductAPI(service *application.Service) *ProductAPI {
 }
 
 func (a *ProductAPI) ListProducts(ctx context.Context, req *erpproductv1.ListProductsRequest) (*erpproductv1.ListProductsResponse, error) {
-	ownerID, err := productOwnerID(ctx)
+	ownerID, err := productOwnerID(ctx, "erp:products:view")
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +61,7 @@ func (a *ProductAPI) ListProducts(ctx context.Context, req *erpproductv1.ListPro
 }
 
 func (a *ProductAPI) CreateProduct(ctx context.Context, req *erpproductv1.CreateProductRequest) (*erpproductv1.CreateProductResponse, error) {
-	ownerID, err := productOwnerID(ctx)
+	ownerID, err := productOwnerID(ctx, "erp:products:create")
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +105,7 @@ func (a *ProductAPI) CreateProduct(ctx context.Context, req *erpproductv1.Create
 }
 
 func (a *ProductAPI) UpdateProduct(ctx context.Context, req *erpproductv1.UpdateProductRequest) (*erpproductv1.UpdateProductResponse, error) {
-	ownerID, err := productOwnerID(ctx)
+	ownerID, err := productOwnerID(ctx, "erp:products:edit")
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +153,7 @@ func (a *ProductAPI) UpdateProduct(ctx context.Context, req *erpproductv1.Update
 }
 
 func (a *ProductAPI) DeleteProduct(ctx context.Context, req *erpproductv1.DeleteProductRequest) (*erpproductv1.DeleteProductResponse, error) {
-	ownerID, err := productOwnerID(ctx)
+	ownerID, err := productOwnerID(ctx, "erp:products:delete")
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +164,7 @@ func (a *ProductAPI) DeleteProduct(ctx context.Context, req *erpproductv1.Delete
 }
 
 func (a *ProductAPI) GetProduct(ctx context.Context, req *erpproductv1.GetProductRequest) (*erpproductv1.GetProductResponse, error) {
-	ownerID, err := productOwnerID(ctx)
+	ownerID, err := productOwnerID(ctx, "erp:products:view")
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +176,7 @@ func (a *ProductAPI) GetProduct(ctx context.Context, req *erpproductv1.GetProduc
 }
 
 func (a *ProductAPI) GetProductByBarcode(ctx context.Context, req *erpproductv1.GetProductByBarcodeRequest) (*erpproductv1.GetProductByBarcodeResponse, error) {
-	ownerID, err := productOwnerID(ctx)
+	ownerID, err := productOwnerID(ctx, "erp:products:view")
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +188,7 @@ func (a *ProductAPI) GetProductByBarcode(ctx context.Context, req *erpproductv1.
 }
 
 func (a *ProductAPI) GetProductFull(ctx context.Context, req *erpproductv1.GetProductFullRequest) (*erpproductv1.GetProductFullResponse, error) {
-	ownerID, err := productOwnerID(ctx)
+	ownerID, err := productOwnerID(ctx, "erp:products:view")
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +200,7 @@ func (a *ProductAPI) GetProductFull(ctx context.Context, req *erpproductv1.GetPr
 }
 
 func (a *ProductAPI) ListProductAttributes(ctx context.Context, req *erpproductv1.ListProductAttributesRequest) (*erpproductv1.ListProductAttributesResponse, error) {
-	ownerID, err := productOwnerID(ctx)
+	ownerID, err := productOwnerID(ctx, "erp:products:view")
 	if err != nil {
 		return nil, err
 	}
@@ -213,14 +214,14 @@ func (a *ProductAPI) ListProductAttributes(ctx context.Context, req *erpproductv
 			Id:       attr.ID,
 			Name:     attr.Name,
 			Value:    attr.Value,
-			Position: int32(attr.Position),
+			Position: int32(attr.Position), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		})
 	}
 	return &erpproductv1.ListProductAttributesResponse{Attributes: out}, nil
 }
 
 func (a *ProductAPI) GetDashboard(ctx context.Context, _ *erpproductv1.GetDashboardRequest) (*erpproductv1.GetDashboardResponse, error) {
-	ownerID, err := productOwnerID(ctx)
+	ownerID, err := productOwnerID(ctx, "erp:products:view")
 	if err != nil {
 		return nil, err
 	}
@@ -254,14 +255,14 @@ func (a *ProductAPI) GetDashboard(ctx context.Context, _ *erpproductv1.GetDashbo
 	for _, c := range stats.TopCategories {
 		topCats = append(topCats, &erpproductv1.DashboardTopCategory{
 			Name:         c.Name,
-			ProductCount: int32(c.ProductCount),
+			ProductCount: int32(c.ProductCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		})
 	}
 	return &erpproductv1.GetDashboardResponse{
-		TotalProducts:  int32(stats.TotalProducts),
-		LowStockCount:  int32(stats.LowStockCount),
-		PendingOrders:  int32(stats.PendingOrders),
-		TotalSuppliers: int32(stats.TotalSuppliers),
+		TotalProducts:  int32(stats.TotalProducts),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		LowStockCount:  int32(stats.LowStockCount),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		PendingOrders:  int32(stats.PendingOrders),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		TotalSuppliers: int32(stats.TotalSuppliers), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		InventoryValue: stats.InventoryValue,
 		LowStockItems:  lowStock,
 		RecentOrders:   recent,
@@ -270,7 +271,7 @@ func (a *ProductAPI) GetDashboard(ctx context.Context, _ *erpproductv1.GetDashbo
 }
 
 func (a *ProductAPI) ListReorderSuggestions(ctx context.Context, _ *erpproductv1.ListReorderSuggestionsRequest) (*erpproductv1.ListReorderSuggestionsResponse, error) {
-	ownerID, err := productOwnerID(ctx)
+	ownerID, err := productOwnerID(ctx, "erp:products:view")
 	if err != nil {
 		return nil, err
 	}
@@ -288,7 +289,7 @@ func (a *ProductAPI) ListReorderSuggestions(ctx context.Context, _ *erpproductv1
 			ReorderPoint:      s.ReorderPoint,
 			SuggestedQuantity: s.SuggestedQty,
 			AvgDailySales:     s.AvgDailySales,
-			LeadTimeDays:      int32(s.LeadTimeDays),
+			LeadTimeDays:      int32(s.LeadTimeDays), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			Confidence:        s.Confidence,
 		})
 	}
@@ -296,7 +297,7 @@ func (a *ProductAPI) ListReorderSuggestions(ctx context.Context, _ *erpproductv1
 }
 
 func (a *ProductAPI) ListExpiringItems(ctx context.Context, req *erpproductv1.ListExpiringItemsRequest) (*erpproductv1.ListExpiringItemsResponse, error) {
-	ownerID, err := productOwnerID(ctx)
+	ownerID, err := productOwnerID(ctx, "erp:products:view")
 	if err != nil {
 		return nil, err
 	}
@@ -319,10 +320,10 @@ func (a *ProductAPI) ListExpiringItems(ctx context.Context, req *erpproductv1.Li
 	return &erpproductv1.ListExpiringItemsResponse{Items: out}, nil
 }
 
-func productOwnerID(ctx context.Context) (int64, error) {
+func productOwnerID(ctx context.Context, permission string) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return 0, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
+	if !ok || authUser == nil || !authPkg.HasAppPermission(authUser, authorization.AppERP, permission) {
+		return 0, onekiterrors.PermissionDenied()
 	}
 	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {

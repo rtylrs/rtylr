@@ -44,7 +44,7 @@ SELECT email, COALESCE(full_name,'') AS full_name, is_console_admin FROM users W
 SELECT business_id FROM users WHERE id = ?;
 
 -- name: CreateUser :execresult
-INSERT INTO users (email, password_hash, full_name) VALUES (?, ?, ?);
+INSERT INTO users (email, username, password_hash, full_name) VALUES (?, ?, ?, ?);
 
 -- name: ListStaffUsers :many
 SELECT u.id, u.email, COALESCE(u.full_name,'') AS full_name, u.created_at,

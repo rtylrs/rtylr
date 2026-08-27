@@ -206,7 +206,7 @@ func (r *Repository) CreateConfig(ctx context.Context, input domain.ConfigInput)
 	}
 
 	err = r.queries.CreateConfig(ctx, sqlc.CreateConfigParams{
-		OwnerID:                   int32(businessIDInt),
+		OwnerID:                   int32(businessIDInt), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		BusinessID:                businessIDInt,
 		SiteName:                  sql.NullString{String: input.SiteName, Valid: input.SiteName != ""},
 		LogoUrl:                   sql.NullString{String: input.LogoUrl, Valid: input.LogoUrl != ""},

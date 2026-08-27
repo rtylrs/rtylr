@@ -42,6 +42,7 @@ var (
 	ErrBusinessAccessDenied = errors.New("business access denied")
 	ErrBusinessNameRequired = errors.New("business name is required")
 	ErrBusinessNameTaken    = errors.New("business name already taken")
+	ErrInvalidEmailCode     = errors.New("invalid or expired email verification code")
 )
 
 type Service struct {
@@ -168,8 +169,8 @@ func (s *Service) RegisterLegacy(ctx context.Context, email, password, fullName 
 	})
 }
 
-func (s *Service) Authenticate(ctx context.Context, email, password string) (int64, error) {
-	user, err := s.repo.GetUserByEmail(ctx, strings.ToLower(email))
+func (s *Service) Authenticate(ctx context.Context, identifier, password string) (int64, error) {
+	user, err := s.repo.GetUserByIdentifier(ctx, strings.ToLower(strings.TrimSpace(identifier)))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			// Burn the same bcrypt time as the hash-compare branch below so
@@ -187,6 +188,27 @@ func (s *Service) Authenticate(ctx context.Context, email, password string) (int
 	}
 
 	return user.ID, nil
+}
+
+func (s *Service) IssueEmailVerificationCode(ctx context.Context, emailAddress string) error {
+	code, err := s.repo.CreateEmailVerificationCode(ctx, emailAddress)
+	if err != nil {
+		return err
+	}
+	_, err = email.Send(ctx, email.SendParams{
+		To:      []string{strings.ToLower(strings.TrimSpace(emailAddress))},
+		Subject: "Your rtylr email verification code",
+		HTML:    fmt.Sprintf("<p>Your rtylr email verification code is <strong>%s</strong>.</p><p>This code expires in 10 minutes and can only be used once.</p>", code),
+		Text:    fmt.Sprintf("Your rtylr email verification code is %s. It expires in 10 minutes and can only be used once.", code),
+	})
+	return err
+}
+
+func (s *Service) VerifyEmailCode(ctx context.Context, code string) error {
+	if err := s.repo.ConsumeEmailVerificationCode(ctx, code); err != nil {
+		return ErrInvalidEmailCode
+	}
+	return nil
 }
 
 // CreateBusinessForUser creates a new business and assigns the user as owner.

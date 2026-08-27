@@ -4,10 +4,13 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/pos_users/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_users/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
+	"github.com/voxire/onion/internal/platform/config"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
@@ -23,6 +26,9 @@ func NewUserAPI(service *application.Service) *UserAPI {
 }
 
 func (a *UserAPI) ListPOSUsers(ctx context.Context, req *posuserv1.ListPOSUsersRequest) (*posuserv1.ListPOSUsersResponse, error) {
+	if !hasPOSUserManagement(ctx) {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	businessID, err := authenticatedPOSUserBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -51,22 +57,26 @@ func (a *UserAPI) ListPOSUsers(ctx context.Context, req *posuserv1.ListPOSUsersR
 }
 
 func (a *UserAPI) CreatePOSUser(ctx context.Context, req *posuserv1.CreatePOSUserRequest) (*posuserv1.CreatePOSUserResponse, error) {
+	if !hasPOSUserManagement(ctx) {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	device, businessID, err := authenticatedPOSUserDevice(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	id, createErr := a.Service.Create(ctx, businessID, device.User.UserID, domain.CreatePOSUserInput{
+		UserID:           req.GetUserId(),
 		LocationID:       req.GetLocationId(),
 		Name:             req.GetName(),
 		PIN:              req.GetPin(),
-		Role:             domain.POSUserRole(req.GetRole()),
+		Role:             domain.RoleCashier,
 		HourlyRate:       req.GetHourlyRate(),
-		MaxDiscountPct:   req.GetMaxDiscountPct(),
-		CanVoid:          req.GetCanVoid(),
-		CanRefund:        req.GetCanRefund(),
-		CanOpenDrawer:    req.GetCanOpenDrawer(),
-		CanApplyDiscount: req.GetCanApplyDiscount(),
+		MaxDiscountPct:   domain.DefaultCapabilities(domain.RoleCashier).MaxDiscountPct,
+		CanVoid:          domain.DefaultCapabilities(domain.RoleCashier).CanVoid,
+		CanRefund:        domain.DefaultCapabilities(domain.RoleCashier).CanRefund,
+		CanOpenDrawer:    domain.DefaultCapabilities(domain.RoleCashier).CanOpenDrawer,
+		CanApplyDiscount: domain.DefaultCapabilities(domain.RoleCashier).CanApplyDiscount,
 	})
 	if createErr != nil {
 		if errors.Is(createErr, application.ErrInvalidInput) {
@@ -78,10 +88,13 @@ func (a *UserAPI) CreatePOSUser(ctx context.Context, req *posuserv1.CreatePOSUse
 		)
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to create POS user")
 	}
-	return &posuserv1.CreatePOSUserResponse{Id: id}, nil
+	return &posuserv1.CreatePOSUserResponse{Id: id, RoleManagement: roleManagementManagedInDash()}, nil
 }
 
 func (a *UserAPI) UpdatePOSUser(ctx context.Context, req *posuserv1.UpdatePOSUserRequest) (*posuserv1.UpdatePOSUserResponse, error) {
+	if !hasPOSUserManagement(ctx) {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	businessID, err := authenticatedPOSUserBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -91,16 +104,10 @@ func (a *UserAPI) UpdatePOSUser(ctx context.Context, req *posuserv1.UpdatePOSUse
 	}
 
 	updateErr := a.Service.Update(ctx, businessID, req.GetId(), domain.UpdatePOSUserInput{
-		Name:             req.GetName(),
-		PIN:              req.GetPin(),
-		Role:             domain.POSUserRole(req.GetRole()),
-		IsActive:         req.GetIsActive(),
-		HourlyRate:       req.GetHourlyRate(),
-		MaxDiscountPct:   req.GetMaxDiscountPct(),
-		CanVoid:          req.GetCanVoid(),
-		CanRefund:        req.GetCanRefund(),
-		CanOpenDrawer:    req.GetCanOpenDrawer(),
-		CanApplyDiscount: req.GetCanApplyDiscount(),
+		Name:       req.GetName(),
+		PIN:        req.GetPin(),
+		IsActive:   req.GetIsActive(),
+		HourlyRate: req.GetHourlyRate(),
 	})
 	if updateErr != nil {
 		logger.Ctx(ctx).Error("failed to update pos_user",
@@ -110,10 +117,13 @@ func (a *UserAPI) UpdatePOSUser(ctx context.Context, req *posuserv1.UpdatePOSUse
 		)
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update POS user")
 	}
-	return &posuserv1.UpdatePOSUserResponse{Success: true}, nil
+	return &posuserv1.UpdatePOSUserResponse{Success: true, RoleManagement: roleManagementManagedInDash()}, nil
 }
 
 func (a *UserAPI) DeactivatePOSUser(ctx context.Context, req *posuserv1.DeactivatePOSUserRequest) (*posuserv1.DeactivatePOSUserResponse, error) {
+	if !hasPOSUserManagement(ctx) {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	businessID, err := authenticatedPOSUserBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -140,9 +150,10 @@ func (a *UserAPI) SetPIN(ctx context.Context, req *posuserv1.SetPINRequest) (*po
 	}
 
 	setErr := a.Service.SetPIN(ctx, businessID, application.SetPINActor{
-		UserID:   device.User.UserID,
-		IsOwner:  device.User.UserID == businessID,
-		TeamRole: device.User.Role,
+		UserID:          device.User.UserID,
+		IsOwner:         device.User.UserID == businessID,
+		TeamRole:        device.User.Role,
+		EffectiveAccess: device.User.EffectiveAccess,
 	}, domain.SetPINInput{
 		UserID:     req.GetUserId(),
 		LocationID: req.GetLocationId(),
@@ -170,6 +181,9 @@ func (a *UserAPI) SetPIN(ctx context.Context, req *posuserv1.SetPINRequest) (*po
 }
 
 func (a *UserAPI) VerifyPOSUserPIN(ctx context.Context, req *posuserv1.VerifyPOSUserPINRequest) (*posuserv1.VerifyPOSUserPINResponse, error) {
+	if !hasPOSOrderAccess(ctx) {
+		return nil, onekiterrors.PermissionDenied()
+	}
 	businessID, err := authenticatedPOSUserBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -189,22 +203,49 @@ func (a *UserAPI) VerifyPOSUserPIN(ctx context.Context, req *posuserv1.VerifyPOS
 	}
 
 	return &posuserv1.VerifyPOSUserPINResponse{
-		UserId:           result.UserID,
-		PosUserId:        result.POSUserID,
-		LocationId:       result.LocationID,
-		Role:             string(result.Role),
-		DisplayName:      result.DisplayName,
-		CanVoid:          result.CanVoid,
-		CanRefund:        result.CanRefund,
-		CanOpenDrawer:    result.CanOpenDrawer,
-		CanApplyDiscount: result.CanApplyDiscount,
-		MaxDiscountPct:   result.MaxDiscountPct,
+		UserId:               result.UserID,
+		PosUserId:            result.POSUserID,
+		LocationId:           result.LocationID,
+		Role:                 string(result.Role),
+		DisplayName:          result.DisplayName,
+		CanVoid:              result.CanVoid,
+		CanRefund:            result.CanRefund,
+		CanOpenDrawer:        result.CanOpenDrawer,
+		CanApplyDiscount:     result.CanApplyDiscount,
+		MaxDiscountPct:       result.MaxDiscountPct,
+		AuthorizationVersion: result.AuthorizationVersion,
+		RoleManagement:       roleManagementManagedInDash(),
 	}, nil
+}
+
+func roleManagementManagedInDash() *posuserv1.RoleManagementManagedInDash {
+	return &posuserv1.RoleManagementManagedInDash{
+		Code:    "ROLE_MANAGEMENT_MANAGED_IN_DASH",
+		DashUrl: strings.TrimRight(config.HubAppURL, "/") + "/team",
+	}
 }
 
 func authenticatedPOSUserBusinessID(ctx context.Context) (int64, error) {
 	_, businessID, err := authenticatedPOSUserDevice(ctx)
 	return businessID, err
+}
+
+func hasPOSUserManagement(ctx context.Context) bool {
+	device := authPkg.DeviceCtx(ctx)
+	return device.User != nil && authPkg.HasAppPermission(
+		device.User,
+		authorization.AppPOS,
+		"pos:employees:manage",
+	) && authPkg.HasAnyAppScope(device.User, authorization.AppPOS)
+}
+
+func hasPOSOrderAccess(ctx context.Context) bool {
+	device := authPkg.DeviceCtx(ctx)
+	return device.User != nil && authPkg.HasAppPermission(
+		device.User,
+		authorization.AppPOS,
+		"pos:orders:view",
+	) && authPkg.HasAnyAppScope(device.User, authorization.AppPOS)
 }
 
 func authenticatedPOSUserDevice(ctx context.Context) (authPkg.Device, int64, error) {
@@ -232,5 +273,6 @@ func toProtoPOSUser(u domain.POSUser) *posuserv1.POSUser {
 		CanRefund:        u.CanRefund,
 		CanOpenDrawer:    u.CanOpenDrawer,
 		CanApplyDiscount: u.CanApplyDiscount,
+		RoleManagement:   roleManagementManagedInDash(),
 	}
 }

@@ -171,19 +171,21 @@ func TestSearchCustomers_ContainsBothFixtureCustomers(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	customers, err := repo.Search(ctx, testutil.OwnerID, "")
-	if err != nil {
-		t.Fatalf("Search error: %v", err)
-	}
+	for _, query := range []string{"Jamie", "Alex"} {
+		customers, err := repo.Search(ctx, testutil.OwnerID, query)
+		if err != nil {
+			t.Fatalf("Search(%q) error: %v", query, err)
+		}
 
-	ids := make(map[int64]bool, len(customers))
-	for _, c := range customers {
-		ids[c.ID] = true
-	}
-
-	for _, want := range []int64{5301, 5302} {
-		if !ids[want] {
-			t.Errorf("fixture customer id=%d not found in results", want)
+		found := false
+		for _, customer := range customers {
+			if (query == "Jamie" && customer.ID == 5301) || (query == "Alex" && customer.ID == 5302) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("fixture customer for query %q not found in results", query)
 		}
 	}
 }

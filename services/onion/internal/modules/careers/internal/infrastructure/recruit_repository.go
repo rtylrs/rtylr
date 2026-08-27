@@ -87,6 +87,11 @@ func (r *Repository) CreateCareer(ctx context.Context, in domain.RecruitCareerIn
 }
 
 func (r *Repository) UpdateCareer(ctx context.Context, in domain.RecruitCareerInput) error {
+	businessID := in.BusinessID
+	if businessID == 0 {
+		businessID = in.OwnerID
+	}
+
 	return r.queries.UpdateRecruitCareer(ctx, sqlc.UpdateRecruitCareerParams{
 		Slug:           in.Slug,
 		Title:          in.Title,
@@ -102,7 +107,7 @@ func (r *Repository) UpdateCareer(ctx context.Context, in domain.RecruitCareerIn
 		SalaryCurrency: nullStr(in.SalaryCurrency),
 		IsPublished:    in.IsPublished,
 		ID:             in.ID,
-		BusinessID:     in.BusinessID,
+		BusinessID:     businessID,
 	})
 }
 

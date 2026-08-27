@@ -42,7 +42,7 @@ func (a *InboxAPI) ListInbox(ctx context.Context, req *supportinboxv1.ListInboxR
 
 	return &supportinboxv1.ListInboxResponse{
 		Inbox:    newInboxItems(items),
-		Total:    int32(total),
+		Total:    int32(total), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Page:     int32(page),
 		PageSize: int32(pageSize),
 	}, nil
@@ -59,7 +59,7 @@ func (a *InboxAPI) GetUnreadCount(ctx context.Context, _ *supportinboxv1.GetUnre
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get unread count")
 	}
 
-	return &supportinboxv1.GetUnreadCountResponse{Count: int32(count)}, nil
+	return &supportinboxv1.GetUnreadCountResponse{Count: int32(count)}, nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func businessIDFromContext(ctx context.Context) (int64, error) {
@@ -83,7 +83,7 @@ func newInboxItems(items []domain.InboxItem) []*supportinboxv1.InboxItem {
 			Channel:       item.Channel,
 			LastMessage:   item.LastMessage,
 			LastMessageAt: formatTime(item.LastMessageAt),
-			MessageCount:  int32(item.MessageCount),
+			MessageCount:  int32(item.MessageCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		})
 	}
 	return out

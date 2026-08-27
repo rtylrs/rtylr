@@ -30,18 +30,18 @@ func (a *ReceiptAPI) ListReceipts(ctx context.Context, req *posreceiptv1.ListRec
 	}
 
 	const dateLayout = "2006-01-02"
-	if from := req.GetFrom(); from != "" {
+	if from := req.GetFromDate(); from != "" {
 		if _, parseErr := time.Parse(dateLayout, from); parseErr != nil {
 			return nil, onekiterrors.New(http.StatusBadRequest, "from must be a valid date in YYYY-MM-DD format")
 		}
 	}
-	if to := req.GetTo(); to != "" {
+	if to := req.GetToDate(); to != "" {
 		if _, parseErr := time.Parse(dateLayout, to); parseErr != nil {
 			return nil, onekiterrors.New(http.StatusBadRequest, "to must be a valid date in YYYY-MM-DD format")
 		}
 	}
 
-	receipts, listErr := a.Service.List(ctx, businessID, req.GetFrom(), req.GetTo())
+	receipts, listErr := a.Service.List(ctx, businessID, req.GetFromDate(), req.GetToDate())
 	if listErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list receipts")
 	}

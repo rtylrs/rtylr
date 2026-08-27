@@ -30,8 +30,8 @@ func NewRepository(db *sql.DB) *Repository {
 func (r *Repository) ListStockTakes(ctx context.Context, businessID int64, limit, offset int) ([]domain.StockTake, bool, error) {
 	rows, err := r.queries.ListStockTakesPaged(ctx, sqlc.ListStockTakesPagedParams{
 		BusinessID: businessID,
-		Limit:      int32(limit + 1),
-		Offset:     int32(offset),
+		Limit:      int32(limit + 1), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset:     int32(offset),    // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list stock takes", logger.Error(err))

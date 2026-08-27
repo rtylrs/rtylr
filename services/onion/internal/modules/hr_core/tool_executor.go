@@ -479,8 +479,8 @@ func parseListEmployeesToolInput(input map[string]any) (listEmployeesToolInput, 
 
 	return listEmployeesToolInput{
 		Limit:  int32(limit),
-		Offset: int32(offset),
-		Page:   int32(offset/limit) + 1,
+		Offset: int32(offset),           // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Page:   int32(offset/limit) + 1, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}, nil
 }
 

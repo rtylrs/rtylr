@@ -146,18 +146,23 @@ func (r *Repository) Open(ctx context.Context, input domain.OpenSessionInput) (i
 }
 
 func (r *Repository) Close(ctx context.Context, input domain.CloseSessionInput) error {
+	businessID := input.BusinessID
+	if businessID == 0 {
+		businessID = input.OwnerID
+	}
+
 	var result sql.Result
 	var err error
 	if input.StaffID != 0 {
 		result, err = r.pool.ExecContext(ctx, `
 			UPDATE pos_sessions SET closing_cash = ?, status = 'closed', closed_at = NOW()
 			WHERE id = ? AND business_id = ? AND staff_id = ? AND status = 'open'`,
-			floatToDecimal(input.ClosingFloat), input.ID, input.BusinessID, input.StaffID)
+			floatToDecimal(input.ClosingFloat), input.ID, businessID, input.StaffID)
 	} else {
 		result, err = r.queries.CloseSession(ctx, sqlc.CloseSessionParams{
 			ClosingCash: sql.NullString{String: floatToDecimal(input.ClosingFloat), Valid: true},
 			ID:          input.ID,
-			BusinessID:  input.BusinessID,
+			BusinessID:  businessID,
 		})
 	}
 	if err != nil {

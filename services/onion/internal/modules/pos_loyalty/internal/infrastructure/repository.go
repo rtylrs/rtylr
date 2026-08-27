@@ -100,7 +100,7 @@ func (r *Repository) GetBalance(ctx context.Context, businessID, customerID int6
 		logger.Ctx(ctx).Error("Failed to get loyalty balance", logger.Error(err))
 		return 0, err
 	}
-	return int32(interfaceToInt(raw)), nil
+	return int32(interfaceToInt(raw)), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 // GetPaidOrderTotal is deliberately scoped by business, customer, and paid

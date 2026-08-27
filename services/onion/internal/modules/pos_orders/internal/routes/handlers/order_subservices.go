@@ -26,7 +26,7 @@ func NewPaymentAPI(service *application.Service) *PaymentAPI {
 }
 
 func (a *PaymentAPI) ProcessPayment(ctx context.Context, req *posorderspaymentsv1.ProcessPaymentRequest) (*posorderspaymentsv1.ProcessPaymentResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -72,7 +72,7 @@ func NewRefundAPI(service *application.Service) *RefundAPI {
 }
 
 func (a *RefundAPI) ProcessRefund(ctx context.Context, req *posordersrefundsv1.ProcessRefundRequest) (*posordersrefundsv1.ProcessRefundResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:refund")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -119,7 +119,7 @@ func NewSplitAPI(service *application.Service) *SplitAPI {
 }
 
 func (a *SplitAPI) SplitOrder(ctx context.Context, req *posorderssplitv1.SplitOrderRequest) (*posorderssplitv1.SplitOrderResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -163,7 +163,7 @@ func NewDiscountAPI(service *application.Service) *DiscountAPI {
 }
 
 func (a *DiscountAPI) DiscountOrder(ctx context.Context, req *posordersdiscountsv1.DiscountOrderRequest) (*posordersdiscountsv1.DiscountOrderResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:discount")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -204,7 +204,7 @@ func NewHoldAPI(service *application.Service) *HoldAPI {
 }
 
 func (a *HoldAPI) HoldOrder(ctx context.Context, req *posordersholdsv1.HoldOrderRequest) (*posordersholdsv1.HoldOrderResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -229,7 +229,7 @@ func (a *HoldAPI) HoldOrder(ctx context.Context, req *posordersholdsv1.HoldOrder
 }
 
 func (a *HoldAPI) ListHeldOrders(ctx context.Context, _ *posordersholdsv1.ListHeldOrdersRequest) (*posordersholdsv1.ListHeldOrdersResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:view")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -260,7 +260,7 @@ func NewItemAPI(service *application.Service) *ItemAPI {
 }
 
 func (a *ItemAPI) UpdateOrderItemStatus(ctx context.Context, req *posordersitemsv1.UpdateOrderItemStatusRequest) (*posordersitemsv1.UpdateOrderItemStatusResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -291,7 +291,7 @@ func (a *ItemAPI) UpdateOrderItemStatus(ctx context.Context, req *posordersitems
 }
 
 func (a *ItemAPI) VoidOrderItem(ctx context.Context, req *posordersitemsv1.VoidOrderItemRequest) (*posordersitemsv1.VoidOrderItemResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:void")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}

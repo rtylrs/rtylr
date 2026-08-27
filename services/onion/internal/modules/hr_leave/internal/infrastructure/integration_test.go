@@ -194,6 +194,7 @@ func TestCreateLeaveRequest_PersistsAndReturnsID(t *testing.T) {
 		t.Fatalf("CreateLeaveType: %v", err)
 	}
 	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_leave_requests WHERE leave_type_id = ?", lt.ID)
 		db.ExecContext(context.Background(), "DELETE FROM hr_leave_types WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Leave For Request Test")
 	})
 
@@ -227,6 +228,7 @@ func TestCreateLeaveRequest_EmployeeIDIsStored(t *testing.T) {
 		t.Fatalf("CreateLeaveType: %v", err)
 	}
 	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_leave_requests WHERE leave_type_id = ?", lt.ID)
 		db.ExecContext(context.Background(), "DELETE FROM hr_leave_types WHERE owner_id = ? AND name = ?", testutil.OwnerID, "EmpID Check Leave")
 	})
 
@@ -260,6 +262,7 @@ func TestCreateLeaveRequest_StatusIsPending(t *testing.T) {
 		t.Fatalf("CreateLeaveType: %v", err)
 	}
 	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_leave_requests WHERE leave_type_id = ?", lt.ID)
 		db.ExecContext(context.Background(), "DELETE FROM hr_leave_types WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Status Check Leave")
 	})
 
@@ -313,6 +316,7 @@ func TestApproveLeaveRequest_ChangesStatus(t *testing.T) {
 		t.Fatalf("CreateLeaveType: %v", err)
 	}
 	t.Cleanup(func() {
+		db.ExecContext(context.Background(), "DELETE FROM hr_leave_requests WHERE leave_type_id = ?", lt.ID)
 		db.ExecContext(context.Background(), "DELETE FROM hr_leave_types WHERE owner_id = ? AND name = ?", testutil.OwnerID, "Approve Test Leave")
 	})
 

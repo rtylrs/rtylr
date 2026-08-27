@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	flowsettingv1 "github.com/voxire/voxie/gen/go/flow/setting/v1"
 )
 
@@ -46,6 +47,12 @@ func (a *SettingAPI) GetUserSettings(ctx context.Context, _ *flowsettingv1.GetUs
 func (a *SettingAPI) UpdateUserSettings(ctx context.Context, req *flowsettingv1.UpdateUserSettingsRequest) (*flowsettingv1.UpdateUserSettingsResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if err := requireFlowPermission(ctx, "flow:settings:manage"); err != nil {
+		return nil, err
+	}
+	if _, businessErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID); businessErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 

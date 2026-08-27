@@ -46,5 +46,5 @@ LEFT JOIN businesses b ON b.id = u.business_id
 LEFT JOIN user_app_permissions uap ON uap.user_id = u.id
     AND (uap.business_id = u.business_id OR (uap.business_id IS NULL AND uap.owner_id = b.owner_id))
 WHERE u.id = ?
-ORDER BY id ASC
+ORDER BY u.id ASC
 LIMIT 1;

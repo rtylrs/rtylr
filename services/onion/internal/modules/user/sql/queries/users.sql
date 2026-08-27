@@ -16,6 +16,13 @@ FROM users WHERE id = ?;
 SELECT id, email, password_hash, full_name, signup_ip_address, signup_device_info, created_at, updated_at, is_console_admin, token_epoch
 FROM users WHERE email = ?;
 
+-- name: GetUserByIdentifier :one
+SELECT id, email, password_hash, full_name, signup_ip_address, signup_device_info, created_at, updated_at, is_console_admin, token_epoch
+FROM users
+WHERE email = ? OR LOWER(username) = LOWER(?)
+ORDER BY id ASC
+LIMIT 1;
+
 -- name: EmailExists :one
 SELECT EXISTS(SELECT 1 FROM users WHERE email = ?);
 

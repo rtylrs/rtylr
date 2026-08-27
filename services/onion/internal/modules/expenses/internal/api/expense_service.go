@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/expenses/internal/application"
 	"github.com/voxire/onion/internal/modules/expenses/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	financeexpensesv1 "github.com/voxire/voxie/gen/go/finance/expenses/v1"
@@ -29,6 +30,9 @@ func NewExpensesAPI(service *application.Service) *ExpensesAPI {
 }
 
 func (a *ExpensesAPI) ListExpenses(ctx context.Context, _ *financeexpensesv1.ListExpensesRequest) (*financeexpensesv1.ListExpensesResponse, error) {
+	if err := requireExpensePermission(ctx, "finance:expenses:view"); err != nil {
+		return nil, err
+	}
 	businessID, err := expenseBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -45,11 +49,11 @@ func (a *ExpensesAPI) ListExpenses(ctx context.Context, _ *financeexpensesv1.Lis
 }
 
 func (a *ExpensesAPI) CreateExpense(ctx context.Context, req *financeexpensesv1.CreateExpenseRequest) (*financeexpensesv1.CreateExpenseResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return nil, onekiterrors.PermissionDenied()
+	user, permissionErr := requireExpenseUserPermission(ctx, "finance:expenses:create")
+	if permissionErr != nil {
+		return nil, permissionErr
 	}
-	businessID, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, err := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
 	if err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -64,7 +68,7 @@ func (a *ExpensesAPI) CreateExpense(ctx context.Context, req *financeexpensesv1.
 		return nil, expenseStatusError(http.StatusBadRequest, validationErr.Error())
 	}
 	id, createErr := a.Service.Create(ctx, domain.ExpenseInput{
-		OwnerID:         device.User.UserID,
+		OwnerID:         user.UserID,
 		BusinessID:      businessID,
 		CategoryID:      req.CategoryId,
 		Amount:          req.GetAmount(),
@@ -85,11 +89,11 @@ func (a *ExpensesAPI) CreateExpense(ctx context.Context, req *financeexpensesv1.
 }
 
 func (a *ExpensesAPI) UpdateExpense(ctx context.Context, req *financeexpensesv1.UpdateExpenseRequest) (*financeexpensesv1.UpdateExpenseResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return nil, onekiterrors.PermissionDenied()
+	user, permissionErr := requireExpenseUserPermission(ctx, "finance:expenses:create")
+	if permissionErr != nil {
+		return nil, permissionErr
 	}
-	businessID, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	businessID, err := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
 	if err != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
@@ -109,7 +113,7 @@ func (a *ExpensesAPI) UpdateExpense(ctx context.Context, req *financeexpensesv1.
 	}
 	if updateErr := a.Service.Update(ctx, domain.ExpenseUpdateInput{
 		ID:              req.GetId(),
-		OwnerID:         device.User.UserID,
+		OwnerID:         user.UserID,
 		BusinessID:      businessID,
 		CategoryID:      body.CategoryId,
 		Amount:          body.GetAmount(),
@@ -132,6 +136,9 @@ func (a *ExpensesAPI) UpdateExpense(ctx context.Context, req *financeexpensesv1.
 }
 
 func (a *ExpensesAPI) DeleteExpense(ctx context.Context, req *financeexpensesv1.DeleteExpenseRequest) (*financeexpensesv1.DeleteExpenseResponse, error) {
+	if err := requireExpensePermission(ctx, "finance:expenses:create"); err != nil {
+		return nil, err
+	}
 	businessID, err := expenseBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -146,6 +153,9 @@ func (a *ExpensesAPI) DeleteExpense(ctx context.Context, req *financeexpensesv1.
 }
 
 func (a *ExpensesAPI) GetExpense(ctx context.Context, req *financeexpensesv1.GetExpenseRequest) (*financeexpensesv1.GetExpenseResponse, error) {
+	if err := requireExpensePermission(ctx, "finance:expenses:view"); err != nil {
+		return nil, err
+	}
 	businessID, err := expenseBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -161,6 +171,9 @@ func (a *ExpensesAPI) GetExpense(ctx context.Context, req *financeexpensesv1.Get
 }
 
 func (a *ExpensesAPI) UpdateExpenseStatus(ctx context.Context, req *financeexpensesv1.UpdateExpenseStatusRequest) (*financeexpensesv1.UpdateExpenseStatusResponse, error) {
+	if err := requireExpensePermission(ctx, "finance:expenses:approve"); err != nil {
+		return nil, err
+	}
 	businessID, err := expenseBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -182,6 +195,9 @@ func (a *ExpensesAPI) UpdateExpenseStatus(ctx context.Context, req *financeexpen
 }
 
 func (a *ExpensesAPI) ListExpenseCategories(ctx context.Context, _ *financeexpensesv1.ListExpenseCategoriesRequest) (*financeexpensesv1.ListExpenseCategoriesResponse, error) {
+	if err := requireExpensePermission(ctx, "finance:expenses:view"); err != nil {
+		return nil, err
+	}
 	businessID, err := expenseBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -245,6 +261,19 @@ func expenseBusinessID(ctx context.Context) (int64, error) {
 		return 0, onekiterrors.PermissionDenied()
 	}
 	return businessID, nil
+}
+
+func requireExpensePermission(ctx context.Context, permission string) error {
+	_, err := requireExpenseUserPermission(ctx, permission)
+	return err
+}
+
+func requireExpenseUserPermission(ctx context.Context, permission string) (*authPkg.AuthUser, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil || !authPkg.HasAppPermission(device.User, authorization.AppFinance, permission) {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	return device.User, nil
 }
 
 func expenseStatusError(code int, message string) error {

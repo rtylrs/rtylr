@@ -12,6 +12,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/modules/team/internal/infrastructure"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/config"
@@ -25,7 +27,7 @@ const (
 	teamCacheTTL = 5 * time.Minute
 )
 
-var defaultFreePlanApps = []string{"dash", "pos", "erp", "hr", "crm", "finance", "flow", "insights"}
+var defaultFreePlanApps = []string{"dash", "pos", "erp", "hr", "crm", "finance", "flow", "insights", "menu", "recruit"}
 
 func invalidateUserScope(ctx context.Context, userID int64) {
 	if cache := cacher.GetRedisCache(); cache != nil {
@@ -89,7 +91,7 @@ func (s *Service) EnqueueAccessRequestEmail(ctx context.Context, businessID int6
 
 func (s *Service) ListStaffUsers(ctx context.Context, ownerID, page, pageSize int64) ([]domain.StaffUser, bool, error) {
 	limit, offset := paginateTeam(page, pageSize)
-	rows, err := s.repo.ListStaffUsers(ctx, ownerID, int32(limit+1), int32(offset))
+	rows, err := s.repo.ListStaffUsers(ctx, ownerID, int32(limit+1), int32(offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	if err != nil {
 		return nil, false, err
 	}
@@ -111,7 +113,7 @@ func (s *Service) ListStaffUsersByBusiness(ctx context.Context, businessID, page
 		ctx,
 		key,
 		func(ctx context.Context) ([]domain.StaffUser, error) {
-			return s.repo.ListStaffUsersByBusinessID(ctx, businessID, int32(limit+1), int32(offset))
+			return s.repo.ListStaffUsersByBusinessID(ctx, businessID, int32(limit+1), int32(offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		},
 		cacher.WithExpiry(ctx, teamCacheTTL),
 	)
@@ -155,6 +157,45 @@ func (s *Service) GetMyProfile(ctx context.Context, userID, businessID int64) (d
 		},
 		cacher.WithExpiry(ctx, meCacheTTL),
 	)
+}
+
+// GetEffectiveAccess is the middleware-facing authorization boundary. A nil
+// result means the normalized member row is not available yet, so callers may
+// remain on the legacy read path during the additive migration.
+func (s *Service) GetEffectiveAccess(ctx context.Context, businessID, userID int64) (*authorization.EffectiveAccess, error) {
+	if authPkg.LegacyAuthorizationMode() {
+		_, _, _, apps, role, err := s.GetMeByBusiness(ctx, businessID, userID)
+		if err != nil {
+			return nil, err
+		}
+		legacy := authorization.LegacyAccess(businessID, apps, string(role))
+		return &legacy, nil
+	}
+	profile, err := s.GetMyProfile(ctx, userID, businessID)
+	if err != nil {
+		return nil, err
+	}
+	return profile.EffectiveAccess, nil
+}
+
+func (s *Service) GetProvisioningStatus(ctx context.Context, userID int64) (*authorization.ProvisioningStatus, error) {
+	status, found, err := s.repo.GetProvisioningStatus(ctx, userID)
+	if err != nil || !found {
+		return nil, err
+	}
+	return status, nil
+}
+
+func (s *Service) IsMFAVerified(ctx context.Context, userID int64) (bool, error) {
+	return s.repo.IsMFAVerified(ctx, userID)
+}
+
+func (s *Service) MarkPasswordChanged(ctx context.Context, userID int64) error {
+	if err := s.repo.MarkPasswordChanged(ctx, userID); err != nil {
+		return err
+	}
+	invalidateUserScope(ctx, userID)
+	return nil
 }
 
 func (s *Service) resolveProfileBusinessID(ctx context.Context, userID, businessID int64) (int64, error) {
@@ -215,6 +256,27 @@ func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64
 		}
 	}
 
+	var effectiveAccess *authorization.EffectiveAccess
+	if snapshot, found, snapshotErr := s.repo.GetAuthorizationSnapshot(ctx, businessID, userID, apps); snapshotErr == nil && found {
+		resolved := authorization.Resolve(snapshot)
+		effectiveAccess = &resolved
+		if resolved.DashRole != "" {
+			role = domain.Role(resolved.DashRole)
+		}
+		isOwner = isOwner || resolved.IsOwner
+		if len(resolved.SubscribedApps) > 0 {
+			apps = make([]string, 0, len(resolved.SubscribedApps)+1)
+			apps = append(apps, "dash")
+			for _, appID := range resolved.SubscribedApps {
+				apps = append(apps, string(appID))
+			}
+		}
+	}
+	var provisioningStatus *authorization.ProvisioningStatus
+	if status, found, statusErr := s.repo.GetProvisioningStatus(ctx, userID); statusErr == nil && found {
+		provisioningStatus = status
+	}
+
 	return domain.MyProfile{
 		ID:                 userID,
 		Email:              email,
@@ -229,6 +291,8 @@ func (s *Service) computeMyProfile(ctx context.Context, userID, businessID int64
 		PlanSlug:           planSlug,
 		SubscriptionStatus: subscriptionStatus,
 		EffectiveResources: effectiveResources,
+		EffectiveAccess:    effectiveAccess,
+		ProvisioningStatus: provisioningStatus,
 	}, nil
 }
 
@@ -265,6 +329,38 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 	if role == domain.RoleOwner {
 		return 0, "", domain.ErrForbidden
 	}
+	provisioningMode := input.ProvisioningMode
+	if provisioningMode == "" {
+		provisioningMode = "invitation"
+		if input.Password != "" {
+			provisioningMode = "direct_credentials"
+		}
+	}
+	if provisioningMode != "invitation" && provisioningMode != "direct_credentials" {
+		return 0, "", errors.New("invalid provisioning mode")
+	}
+	username := strings.ToLower(strings.TrimSpace(input.Username))
+	if provisioningMode == "direct_credentials" {
+		if input.Password == "" {
+			return 0, "", errors.New("password is required for direct credentials")
+		}
+		if username == "" {
+			return 0, "", errors.New("username is required for direct credentials")
+		}
+		if len(username) < 3 || len(username) > 64 {
+			return 0, "", errors.New("username must be between 3 and 64 characters")
+		}
+		for _, character := range username {
+			if (character < 'a' || character > 'z') && (character < '0' || character > '9') && character != '.' && character != '_' && character != '-' {
+				return 0, "", errors.New("username contains invalid characters")
+			}
+		}
+	}
+	if input.Password != "" {
+		if err := passwordutils.ValidateStrength(input.Password); err != nil {
+			return 0, "", err
+		}
+	}
 
 	ownerID, err := s.requireTeamManager(ctx, ownerID, businessID)
 	if err != nil {
@@ -291,10 +387,13 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 			passwordHash = hash
 		}
 
-		userID, err = s.repo.CreateUser(ctx, normalizedEmail, passwordHash, strings.TrimSpace(input.FullName))
+		userID, err = s.repo.CreateUser(ctx, normalizedEmail, username, passwordHash, strings.TrimSpace(input.FullName))
 		if err != nil {
 			return 0, "", err
 		}
+	}
+	if userID != 0 && existingID != 0 && input.Password != "" {
+		return 0, "", errors.New("direct credentials require a new user")
 	}
 
 	apps := input.Apps
@@ -303,6 +402,21 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 	}
 
 	if err := s.repo.UpsertPermission(ctx, businessID, ownerID, userID, apps, role); err != nil {
+		return 0, "", err
+	}
+	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, ownerID, userID, apps, role, input.DashRole, input.AppAssignments, input.GroupIDs); err != nil {
+		return 0, "", err
+	}
+	if err := s.repo.SetNormalizedAuthorizationPending(ctx, businessID, userID); err != nil {
+		return 0, "", err
+	}
+	provisioningState := "pending_invitation"
+	passwordChangeRequired := false
+	if provisioningMode == "direct_credentials" {
+		provisioningState = "pending_activation"
+		passwordChangeRequired = true
+	}
+	if err := s.repo.UpsertProvisioningState(ctx, userID, businessID, provisioningMode, provisioningState, false, passwordChangeRequired); err != nil {
 		return 0, "", err
 	}
 
@@ -316,6 +430,10 @@ func (s *Service) InviteUser(ctx context.Context, ownerID, businessID int64, inp
 	invalidateUserScope(ctx, userID)
 	if businessID != 0 {
 		invalidateBusinessTeamScope(ctx, businessID)
+	}
+
+	if provisioningMode == "direct_credentials" {
+		return userID, "", nil
 	}
 
 	// Generate invite token (32 bytes = 64 hex chars)
@@ -360,7 +478,7 @@ func (s *Service) AcceptInvite(ctx context.Context, token, password string) (int
 		return 0, err
 	}
 
-	userID, _, _, err := s.repo.GetInviteToken(ctx, token)
+	userID, ownerID, _, err := s.repo.GetInviteToken(ctx, token)
 	if err != nil {
 		return 0, err
 	}
@@ -377,6 +495,15 @@ func (s *Service) AcceptInvite(ctx context.Context, token, password string) (int
 	if err := s.repo.MarkInviteTokenUsed(ctx, token); err != nil {
 		return 0, err
 	}
+	if businessID, businessErr := s.repo.GetBusinessIDByOwnerID(ctx, ownerID); businessErr == nil {
+		if stateErr := s.repo.UpsertProvisioningState(ctx, userID, businessID, "invitation", "active", true, false); stateErr != nil {
+			return 0, stateErr
+		}
+		if activateErr := s.repo.ActivateNormalizedAuthorization(ctx, businessID, userID); activateErr != nil {
+			return 0, activateErr
+		}
+	}
+	invalidateUserScope(ctx, userID)
 
 	return userID, nil
 }
@@ -430,6 +557,9 @@ func (s *Service) ListAccessRequests(ctx context.Context, actorID, businessID in
 
 // ApproveAccessRequest grants the requested app to the user and marks the request resolved.
 func (s *Service) ApproveAccessRequest(ctx context.Context, actorID, businessID, requestID, targetUserID int64, app string) error {
+	if _, ok := domain.ValidApps[app]; !ok {
+		return domain.ErrPermissionNotFound
+	}
 	ownerID, err := s.requireTeamManager(ctx, actorID, businessID)
 	if err != nil {
 		return domain.ErrForbidden
@@ -449,6 +579,9 @@ func (s *Service) ApproveAccessRequest(ctx context.Context, actorID, businessID,
 	apps = append(apps, app)
 
 	if err := s.repo.UpsertPermission(ctx, businessID, ownerID, targetUserID, apps, existing.Role); err != nil {
+		return err
+	}
+	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, ownerID, targetUserID, apps, existing.Role, "", nil, nil); err != nil {
 		return err
 	}
 	invalidateUserScope(ctx, targetUserID)
@@ -512,6 +645,9 @@ func (s *Service) UpdatePermissions(ctx context.Context, actorID, businessID int
 	if err != nil {
 		return err
 	}
+	if err := s.enforceAuthorizationDelegation(ctx, actorID, ownerID, businessID, input); err != nil {
+		return err
+	}
 
 	role := input.Role
 	apps := []string{}
@@ -528,6 +664,13 @@ func (s *Service) UpdatePermissions(ctx context.Context, actorID, businessID int
 		}
 		if role == "" {
 			role = existing.Role
+		}
+	}
+	if len(apps) == 0 && len(input.AppAssignments) > 0 {
+		for _, assignment := range input.AppAssignments {
+			if assignment.AppID != "" {
+				apps = appendUniqueString(apps, assignment.AppID)
+			}
 		}
 	}
 	if role == "" {
@@ -547,6 +690,9 @@ func (s *Service) UpdatePermissions(ctx context.Context, actorID, businessID int
 	}
 
 	if err := s.repo.UpsertPermission(ctx, businessID, ownerID, input.UserID, apps, role); err != nil {
+		return err
+	}
+	if err := s.repo.UpsertNormalizedAuthorization(ctx, businessID, ownerID, input.UserID, apps, role, input.DashRole, input.AppAssignments, input.GroupIDs); err != nil {
 		return err
 	}
 
@@ -605,6 +751,12 @@ func (s *Service) CanAccessOwner(ctx context.Context, userID, ownerID int64) boo
 	if userID == ownerID {
 		return true
 	}
+	if businessID, businessErr := s.repo.GetBusinessIDByOwnerID(ctx, ownerID); businessErr == nil && businessID > 0 {
+		apps, _ := s.GetOwnerApps(ctx, ownerID)
+		if snapshot, found, snapshotErr := s.repo.GetAuthorizationSnapshot(ctx, businessID, userID, apps); snapshotErr == nil && found {
+			return authorization.Resolve(snapshot).Apps != nil && snapshot.MembershipActive
+		}
+	}
 	perm, err := s.repo.GetPermission(ctx, ownerID, userID)
 	if err != nil {
 		return false
@@ -627,6 +779,15 @@ func (s *Service) requireTeamManager(ctx context.Context, actorID, businessID in
 	if businessID == 0 {
 		return 0, domain.ErrForbidden
 	}
+	if apps, appsErr := s.GetOwnerApps(ctx, ownerID); appsErr == nil {
+		if snapshot, found, snapshotErr := s.repo.GetAuthorizationSnapshot(ctx, businessID, actorID, apps); snapshotErr == nil && found {
+			resolved := authorization.Resolve(snapshot)
+			if resolved.IsOwner || resolved.IsAdmin || containsString(resolved.DashPermissions, "hub:team:edit") {
+				return ownerID, nil
+			}
+			return 0, domain.ErrForbidden
+		}
+	}
 
 	perm, err := s.repo.GetPermissionByBusiness(ctx, businessID, actorID)
 	if err != nil {
@@ -637,6 +798,90 @@ func (s *Service) requireTeamManager(ctx context.Context, actorID, businessID in
 	}
 
 	return 0, domain.ErrForbidden
+}
+
+func (s *Service) enforceAuthorizationDelegation(ctx context.Context, actorID, ownerID, businessID int64, input domain.UpdatePermissionsInput) error {
+	if actorID == ownerID {
+		return nil
+	}
+	if businessID <= 0 {
+		return domain.ErrForbidden
+	}
+
+	apps, err := s.GetOwnerApps(ctx, ownerID)
+	if err != nil {
+		return domain.ErrForbidden
+	}
+	snapshot, found, err := s.repo.GetAuthorizationSnapshot(ctx, businessID, actorID, apps)
+	if err != nil || !found {
+		// Do not allow a legacy fallback actor to submit normalized role,
+		// license, group, or Dash-role fields during the migration window.
+		if input.DashRole != "" || input.Apps != nil || input.Role != "" || input.AppAssignments != nil || input.GroupIDs != nil {
+			return domain.ErrDelegationCeiling
+		}
+		return nil
+	}
+	access := authorization.Resolve(snapshot)
+	if access.IsOwner || access.IsAdmin {
+		return nil
+	}
+
+	hasRoleEdit := containsString(access.DashPermissions, "hub:roles:edit")
+	hasTeamEdit := containsString(access.DashPermissions, "hub:team:edit")
+	hasLicenseManage := containsString(access.DashPermissions, "hub:licenses:manage")
+	if input.DashRole != "" {
+		if !hasRoleEdit || !authorization.CanAssignDashboardRole(&access, input.DashRole) {
+			return domain.ErrDelegationCeiling
+		}
+	}
+	if input.Role != "" && !hasRoleEdit {
+		return domain.ErrDelegationCeiling
+	}
+	if input.Apps != nil && !hasLicenseManage {
+		return domain.ErrDelegationCeiling
+	}
+	if input.GroupIDs != nil && !hasTeamEdit {
+		return domain.ErrDelegationCeiling
+	}
+	if len(input.AppAssignments) == 0 {
+		return nil
+	}
+	if !hasRoleEdit {
+		return domain.ErrDelegationCeiling
+	}
+	for _, assignment := range input.AppAssignments {
+		if assignment.Source == string(authorization.SourceDashDefault) || assignment.Source == string(authorization.SourceSystem) {
+			return domain.ErrDelegationCeiling
+		}
+		if len(assignment.RoleIDs) == 0 {
+			return domain.ErrDelegationCeiling
+		}
+		for _, roleID := range assignment.RoleIDs {
+			grant, grantErr := s.repo.GetAuthorizationRoleGrant(ctx, businessID, roleID)
+			if grantErr != nil || grant.AppID != assignment.AppID || !authorization.CanDelegatePermissions(&access, authorization.AppID(grant.AppID), grant.Permissions) {
+				return domain.ErrDelegationCeiling
+			}
+		}
+	}
+	return nil
+}
+
+func appendUniqueString(values []string, value string) []string {
+	for _, existing := range values {
+		if existing == value {
+			return values
+		}
+	}
+	return append(values, value)
+}
+
+func containsString(values []string, target string) bool {
+	for _, value := range values {
+		if value == target {
+			return true
+		}
+	}
+	return false
 }
 
 func isAssignableRole(role domain.Role) bool {
@@ -785,20 +1030,28 @@ func (s *Service) BulkInvite(ctx context.Context, ownerID, businessID int64, inp
 			continue
 		}
 		userID, token, err := s.InviteUser(ctx, ownerID, businessID, domain.InviteUserInput{
-			Email: email,
-			Apps:  input.Apps,
-			Role:  input.Role,
+			Email:          email,
+			Apps:           input.Apps,
+			Role:           input.Role,
+			DashRole:       input.DashRole,
+			AppAssignments: input.AppAssignments,
+			GroupIDs:       append(append([]int64{}, input.GroupIDs...), input.GroupID),
 		})
 		if err != nil {
+			message := err.Error()
+			if len(positiveInt64s(append(append([]int64{}, input.GroupIDs...), input.GroupID))) > 0 && strings.Contains(strings.ToLower(message), "group") {
+				message = fmt.Sprintf("group assignment failed: %v", err)
+			}
 			results = append(results, domain.BulkInviteResult{
 				Email:   email,
 				Status:  "error",
-				Message: err.Error(),
+				Message: message,
 			})
 			continue
 		}
-		if input.GroupID > 0 {
-			if groupErr := s.AddGroupMembers(ctx, ownerID, input.GroupID, ownerID, []int64{userID}); groupErr != nil {
+		groupAssignmentFailed := false
+		for _, groupID := range positiveInt64s(append(append([]int64{}, input.GroupIDs...), input.GroupID)) {
+			if groupErr := s.AddGroupMembers(ctx, ownerID, groupID, ownerID, []int64{userID}); groupErr != nil {
 				results = append(results, domain.BulkInviteResult{
 					Email:   email,
 					UserID:  userID,
@@ -806,8 +1059,12 @@ func (s *Service) BulkInvite(ctx context.Context, ownerID, businessID int64, inp
 					Status:  "error",
 					Message: fmt.Sprintf("group assignment failed: %v", groupErr),
 				})
-				continue
+				groupAssignmentFailed = true
+				break
 			}
+		}
+		if groupAssignmentFailed {
+			continue
 		}
 		status := "invited"
 		if token == "" {
@@ -822,6 +1079,22 @@ func (s *Service) BulkInvite(ctx context.Context, ownerID, businessID int64, inp
 		})
 	}
 	return results, nil
+}
+
+func positiveInt64s(values []int64) []int64 {
+	result := make([]int64, 0, len(values))
+	seen := make(map[int64]struct{}, len(values))
+	for _, value := range values {
+		if value <= 0 {
+			continue
+		}
+		if _, ok := seen[value]; ok {
+			continue
+		}
+		seen[value] = struct{}{}
+		result = append(result, value)
+	}
+	return result
 }
 
 func (s *Service) GetMe(ctx context.Context, ownerID, userID int64) (string, string, []string, domain.Role, error) {

@@ -177,7 +177,7 @@ func parseClock(value string) (int32, bool) {
 	if !ok || minutes > 59 {
 		return 0, false
 	}
-	return int32(hours)*60 + int32(minutes), true
+	return int32(hours)*60 + int32(minutes), true // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func atoi2(value string) (int, bool) {

@@ -49,7 +49,7 @@ func (h *MergeCustomersHandler) Serve(ctx context.Context, req *MergeCustomersRe
 	if device.User == nil {
 		return MergeCustomersResponse{}, onekiterrors.PermissionDenied()
 	}
-	if err := requireCRMManager(ctx); err != nil {
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:delete"); err != nil {
 		return MergeCustomersResponse{}, err
 	}
 

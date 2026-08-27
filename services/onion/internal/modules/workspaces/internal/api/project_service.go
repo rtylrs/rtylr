@@ -86,6 +86,9 @@ func (a *ProjectAPI) resolveWorkspaceID(ctx context.Context, userID, businessID,
 }
 
 func (a *ProjectAPI) ListProjects(ctx context.Context, req *flowprojectv1.ListProjectsRequest) (*flowprojectv1.ListProjectsResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:view"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -113,6 +116,9 @@ func (a *ProjectAPI) ListProjects(ctx context.Context, req *flowprojectv1.ListPr
 }
 
 func (a *ProjectAPI) CreateProject(ctx context.Context, req *flowprojectv1.CreateProjectRequest) (*flowprojectv1.CreateProjectResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:create"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -154,6 +160,9 @@ func (a *ProjectAPI) CreateProject(ctx context.Context, req *flowprojectv1.Creat
 }
 
 func (a *ProjectAPI) UpdateProject(ctx context.Context, req *flowprojectv1.UpdateProjectRequest) (*flowprojectv1.UpdateProjectResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:edit"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -198,6 +207,9 @@ func (a *ProjectAPI) UpdateProject(ctx context.Context, req *flowprojectv1.Updat
 }
 
 func (a *ProjectAPI) DeleteProject(ctx context.Context, req *flowprojectv1.DeleteProjectRequest) (*flowprojectv1.DeleteProjectResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:edit"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err

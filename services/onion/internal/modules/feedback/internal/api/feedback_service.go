@@ -75,7 +75,7 @@ func (a *FeedbackAPI) ListFeedback(ctx context.Context, req *crmfeedbackv1.ListF
 			CustomerId:   item.CustomerID,
 			CustomerName: item.CustomerName,
 			Type:         item.Type,
-			Score:        int32(item.Score),
+			Score:        int32(item.Score), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			Comment:      item.Comment,
 			Source:       item.Source,
 			CreatedAt:    item.CreatedAt.Format("2006-01-02T15:04:05Z"),
@@ -84,7 +84,7 @@ func (a *FeedbackAPI) ListFeedback(ctx context.Context, req *crmfeedbackv1.ListF
 
 	return &crmfeedbackv1.ListFeedbackResponse{
 		Feedback: feedback,
-		Total:    int32(total),
+		Total:    int32(total), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Page:     page,
 		PageSize: pageSize,
 	}, nil

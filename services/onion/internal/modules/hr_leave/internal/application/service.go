@@ -143,7 +143,7 @@ func (s *Service) CreateLeaveRequest(ctx context.Context, ownerID, callerUserID 
 	}
 
 	// Check balance
-	year := int32(startDate.Year())
+	year := int32(startDate.Year()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	balance, err := s.repo.GetLeaveBalance(ctx, ownerID, req.EmployeeID, req.LeaveTypeID, year)
 	if err != nil {
 		return nil, err
@@ -228,7 +228,7 @@ func (s *Service) ApproveLeave(ctx context.Context, ownerID, requestID, approver
 	if parseErr != nil {
 		return parseErr
 	}
-	year := int32(startDate.Year())
+	year := int32(startDate.Year()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 
 	// Final approval atomically moves the request from pending to approved and
 	// moves its days from the balance's pending bucket to the used bucket.
@@ -262,7 +262,7 @@ func (s *Service) RejectLeave(ctx context.Context, ownerID, requestID, approverU
 	if parseErr != nil {
 		return parseErr
 	}
-	year := int32(startDate.Year())
+	year := int32(startDate.Year()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 
 	subErr := s.repo.SubtractPendingDays(ctx, ownerID, req.EmployeeID, req.LeaveTypeID, year, req.TotalDays)
 	if subErr != nil {
@@ -316,7 +316,7 @@ func (s *Service) CancelLeaveRequest(ctx context.Context, ownerID, callerUserID,
 	if parseErr != nil {
 		return parseErr
 	}
-	year := int32(startDate.Year())
+	year := int32(startDate.Year()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	if subErr := s.repo.SubtractPendingDays(ctx, ownerID, req.EmployeeID, req.LeaveTypeID, year, req.TotalDays); subErr != nil {
 		logger.Ctx(ctx).Error("failed to subtract pending days after cancellation",
 			logger.Any("owner_id", ownerID), logger.Any("request_id", requestID), logger.Error(subErr))
@@ -485,7 +485,7 @@ func (s *Service) GetLeaveBalances(ctx context.Context, ownerID, callerUserID, e
 
 func (s *Service) fetchBalances(ctx context.Context, ownerID, employeeID int64, year int32) ([]domain.LeaveBalanceRecord, error) {
 	if year == 0 {
-		year = int32(time.Now().UTC().Year())
+		year = int32(time.Now().UTC().Year()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 	return s.repo.ListLeaveBalances(ctx, ownerID, employeeID, year)
 }
@@ -504,8 +504,8 @@ func (s *Service) GetLeaveCalendar(ctx context.Context, ownerID int64, params do
 
 func (s *Service) RunMonthlyAccrual(ctx context.Context) error {
 	now := time.Now().UTC()
-	currentMonth := int32(now.Month())
-	currentYear := int32(now.Year())
+	currentMonth := int32(now.Month()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+	currentYear := int32(now.Year())   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 
 	ownerIDs, err := s.repo.ListDistinctOwnerIDs(ctx)
 	if err != nil {

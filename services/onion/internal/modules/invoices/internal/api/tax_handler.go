@@ -63,6 +63,9 @@ func (h *ListTaxConfigHandler) Serve(ctx context.Context, _ *ListTaxConfigReques
 	if device.User == nil {
 		return ListTaxConfigResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireFinancePermission(ctx, "finance:tax:configure"); err != nil {
+		return ListTaxConfigResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -123,6 +126,9 @@ func (h *CreateTaxConfigHandler) Serve(ctx context.Context, req *CreateTaxConfig
 	if device.User == nil {
 		return CreateTaxConfigResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireFinancePermission(ctx, "finance:tax:configure"); err != nil {
+		return CreateTaxConfigResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -172,6 +178,9 @@ func (h *TaxReportHandler) Serve(ctx context.Context, req *TaxReportRequest) (Ta
 
 	if device.User == nil {
 		return TaxReportResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireFinancePermission(ctx, "finance:reports:view"); err != nil {
+		return TaxReportResponse{}, err
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)

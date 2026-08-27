@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_locations/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	poslocationv1 "github.com/voxire/voxie/gen/go/pos/location/v1"
@@ -23,7 +24,7 @@ func NewLocationAPI(service *application.Service) *LocationAPI {
 }
 
 func (a *LocationAPI) ListLocations(ctx context.Context, _ *poslocationv1.ListLocationsRequest) (*poslocationv1.ListLocationsResponse, error) {
-	businessID, err := authenticatedLocationBusinessID(ctx)
+	businessID, err := requireLocationPermission(ctx, "pos:orders:view")
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +42,7 @@ func (a *LocationAPI) ListLocations(ctx context.Context, _ *poslocationv1.ListLo
 }
 
 func (a *LocationAPI) CreateLocation(ctx context.Context, req *poslocationv1.CreateLocationRequest) (*poslocationv1.CreateLocationResponse, error) {
-	device, businessID, err := authenticatedLocationDevice(ctx)
+	device, businessID, err := requireLocationDevice(ctx, "pos:employees:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +70,7 @@ func (a *LocationAPI) CreateLocation(ctx context.Context, req *poslocationv1.Cre
 }
 
 func (a *LocationAPI) UpdateLocation(ctx context.Context, req *poslocationv1.UpdateLocationRequest) (*poslocationv1.UpdateLocationResponse, error) {
-	device, businessID, err := authenticatedLocationDevice(ctx)
+	device, businessID, err := requireLocationDevice(ctx, "pos:employees:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -104,14 +105,14 @@ func (a *LocationAPI) UpdateLocation(ctx context.Context, req *poslocationv1.Upd
 	return &poslocationv1.UpdateLocationResponse{Message: "Location updated successfully"}, nil
 }
 
-func authenticatedLocationBusinessID(ctx context.Context) (int64, error) {
-	_, businessID, err := authenticatedLocationDevice(ctx)
+func requireLocationPermission(ctx context.Context, permission string) (int64, error) {
+	_, businessID, err := requireLocationDevice(ctx, permission)
 	return businessID, err
 }
 
-func authenticatedLocationDevice(ctx context.Context) (authPkg.Device, int64, error) {
+func requireLocationDevice(ctx context.Context, permission string) (authPkg.Device, int64, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.User == nil || !authPkg.HasAppPermission(device.User, authorization.AppPOS, permission) {
 		return device, 0, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)

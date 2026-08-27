@@ -30,7 +30,7 @@ func (a *EquipmentAPI) ListAssets(ctx context.Context, req *hrequipmentv1.ListAs
 	return &hrequipmentv1.ListAssetsResponse{
 		Assets: result.Assets,
 		Total:  int64(len(result.Assets)),
-		Limit:  int32(len(result.Assets)),
+		Limit:  int32(len(result.Assets)), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}, nil
 }
 

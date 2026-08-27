@@ -9,6 +9,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func UpsertPayrollConfigRoutes() []string { return []string{"/hr/payroll/config"} }
@@ -40,6 +41,13 @@ func (h *UpsertPayrollConfigHandler) Serve(ctx context.Context, req *UpsertPayro
 	if device.IsAnonymous || device.User == nil {
 		return UpsertPayrollConfigResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requirePayrollPermission(ctx, "hr:payroll:manage"); err != nil {
+		return UpsertPayrollConfigResponse{}, err
+	}
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if businessErr != nil {
+		return UpsertPayrollConfigResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	cfg := domain.PayrollConfigRecord{
 		PeriodType:      req.PeriodType,
@@ -47,9 +55,9 @@ func (h *UpsertPayrollConfigHandler) Serve(ctx context.Context, req *UpsertPayro
 		OvertimeEnabled: req.OvertimeEnabled,
 	}
 
-	err := h.Service.UpsertPayrollConfig(ctx, device.User.UserID, cfg)
+	err := h.Service.UpsertPayrollConfig(ctx, businessID, cfg)
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to upsert payroll config", logger.Any("owner_id", device.User.UserID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to upsert payroll config", logger.Any("business_id", businessID), logger.Error(err))
 		return UpsertPayrollConfigResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update payroll config")
 	}
 

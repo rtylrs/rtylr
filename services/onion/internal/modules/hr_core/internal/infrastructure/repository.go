@@ -177,7 +177,7 @@ func (r *Repository) CreateEmployeeWithBalances(ctx context.Context, businessID 
 		return nil, err
 	}
 
-	currentYear := int32(time.Now().Year())
+	currentYear := int32(time.Now().Year()) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	for _, leaveTypeID := range leaveTypeIDs {
 		err := qtx.CreateLeaveBalance(ctx, sqlc.CreateLeaveBalanceParams{
 			OwnerID:     businessID,

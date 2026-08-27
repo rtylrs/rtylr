@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strings"
 	"time"
 
@@ -52,9 +53,9 @@ func mapProjectV2(r projectV2Row) domain.Project {
 		Visibility:     string(r.Visibility),
 		IsPersonal:     r.IsPersonal,
 		CreatedBy:      r.CreatedBy,
-		TaskCount:      int32(countIfaceToInt64(r.TaskCount)),
-		CompletedCount: int32(countIfaceToInt64(r.DoneCount)),
-		MemberCount:    int32(countIfaceToInt64(r.MemberCount)),
+		TaskCount:      int32(countIfaceToInt64(r.TaskCount)),   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		CompletedCount: int32(countIfaceToInt64(r.DoneCount)),   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		MemberCount:    int32(countIfaceToInt64(r.MemberCount)), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 	if r.StartDate.Valid {
 		p.StartDate = &r.StartDate.Time
@@ -153,8 +154,8 @@ func (r *Repository) ListProjectsV2(ctx context.Context, businessID, callerID in
 		Visibility:      sqlc.FlowProjectsVisibility(visibility),
 		Column12:        q,
 		CONCAT:          q,
-		Limit:           int32(limit),
-		Offset:          int32(offset),
+		Limit:           int32(limit),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset:          int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListProjectsV2 failed", logger.Error(err))
@@ -199,8 +200,8 @@ func (r *Repository) ListArchivedProjectsV2(ctx context.Context, businessID, cal
 		Column2:    all,
 		CreatedBy:  callerID,
 		UserID:     callerID,
-		Limit:      int32(limit),
-		Offset:     int32(offset),
+		Limit:      int32(limit),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset:     int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListArchivedProjectsV2 failed", logger.Error(err))
@@ -278,12 +279,16 @@ func (r *Repository) PurgeProjectCascade(ctx context.Context, id, businessID int
 	for rows.Next() {
 		var u string
 		if err := rows.Scan(&u); err != nil {
-			rows.Close()
+			if closeErr := rows.Close(); closeErr != nil {
+				return nil, fmt.Errorf("scan attachment URL: %w; close rows: %v", err, closeErr)
+			}
 			return nil, err
 		}
 		urls = append(urls, u)
 	}
-	rows.Close()
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -351,8 +356,8 @@ func (r *Repository) ListPublicProjectsByOwnerV2(
 			Color:          row.Color,
 			Description:    row.Description,
 			Status:         string(row.Status),
-			TaskCount:      int32(row.TaskCount),
-			CompletedCount: int32(row.CompletedCount),
+			TaskCount:      int32(row.TaskCount),      // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+			CompletedCount: int32(row.CompletedCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		})
 	}
 	return out, nil

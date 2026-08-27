@@ -135,6 +135,11 @@ func (r *Repository) Create(ctx context.Context, input domain.CampaignInput) (in
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.CampaignUpdateInput) error {
+	businessID := input.BusinessID
+	if businessID == 0 {
+		businessID = input.OwnerID
+	}
+
 	var segmentID sql.NullInt64
 	if input.AudienceSegmentID != nil {
 		segmentID = sql.NullInt64{Int64: *input.AudienceSegmentID, Valid: true}
@@ -149,7 +154,7 @@ func (r *Repository) Update(ctx context.Context, input domain.CampaignUpdateInpu
 		Content:     input.Body,
 		ScheduledAt: nullableTime(input.ScheduledAt),
 		ID:          input.ID,
-		BusinessID:  input.BusinessID,
+		BusinessID:  businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update campaign", logger.Error(err))

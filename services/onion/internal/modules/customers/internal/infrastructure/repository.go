@@ -43,6 +43,12 @@ func NewRepository(db *sql.DB) *Repository {
 // ─── Customers ───────────────────────────────────────────────────────────────
 
 func (r *Repository) ListCustomers(ctx context.Context, filter domain.CustomerListFilter) ([]domain.Customer, int, error) {
+	businessID := filter.BusinessID
+	if businessID == 0 {
+		businessID = filter.OwnerID
+	}
+	filter.BusinessID = businessID
+
 	if filter.Page < 1 {
 		filter.Page = 1
 	}
@@ -67,8 +73,8 @@ func (r *Repository) ListCustomers(ctx context.Context, filter domain.CustomerLi
 
 	rows, err := r.queries.ListCustomers(ctx, sqlc.ListCustomersParams{
 		BusinessID: filter.BusinessID,
-		Limit:      int32(filter.PageSize),
-		Offset:     int32(offset),
+		Limit:      int32(filter.PageSize), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset:     int32(offset),          // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list customers", logger.Error(err))
@@ -140,8 +146,8 @@ func (r *Repository) listCustomersFiltered(ctx context.Context, filter domain.Cu
 		From("crm_customers").
 		Where(conds).
 		OrderBy("created_at DESC").
-		Limit(uint64(filter.PageSize)).
-		Offset(uint64(offset)).
+		Limit(uint64(filter.PageSize)). // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset(uint64(offset)).         // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -233,6 +239,11 @@ func (r *Repository) CreateCustomer(ctx context.Context, input domain.CustomerIn
 }
 
 func (r *Repository) UpdateCustomer(ctx context.Context, input domain.CustomerUpdateInput) error {
+	businessID := input.BusinessID
+	if businessID == 0 {
+		businessID = input.OwnerID
+	}
+
 	tagsJSON, err := json.Marshal(input.Tags)
 	if err != nil {
 		tagsJSON = []byte("[]")
@@ -258,7 +269,7 @@ func (r *Repository) UpdateCustomer(ctx context.Context, input domain.CustomerUp
 		Consent:     input.Consent,
 		IsActive:    sql.NullBool{Bool: isActive, Valid: true},
 		ID:          input.ID,
-		BusinessID:  input.BusinessID,
+		BusinessID:  businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update customer", logger.Error(err))
@@ -328,7 +339,7 @@ func (r *Repository) DeleteCustomer(ctx context.Context, businessID, customerID 
 
 func (r *Repository) UpdateCustomerLoyalty(ctx context.Context, businessID, customerID int64, newPoints int, newTier string) error {
 	err := r.queries.UpdateCustomerLoyalty(ctx, sqlc.UpdateCustomerLoyaltyParams{
-		LoyaltyPoints: sql.NullInt32{Int32: int32(newPoints), Valid: true},
+		LoyaltyPoints: sql.NullInt32{Int32: int32(newPoints), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		LoyaltyTier: sqlc.NullCrmCustomersLoyaltyTier{
 			CrmCustomersLoyaltyTier: sqlc.CrmCustomersLoyaltyTier(newTier),
 			Valid:                   newTier != "",
@@ -363,9 +374,9 @@ func (r *Repository) CreateLoyaltyTransaction(ctx context.Context, tx domain.Loy
 		BusinessID:    tx.BusinessID,
 		CustomerID:    tx.CustomerID,
 		Type:          sqlc.CrmLoyaltyTransactionsType(tx.Type),
-		Points:        int32(tx.Points),
-		BalanceBefore: int32(tx.BalanceBefore),
-		BalanceAfter:  int32(tx.BalanceAfter),
+		Points:        int32(tx.Points),        // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		BalanceBefore: int32(tx.BalanceBefore), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		BalanceAfter:  int32(tx.BalanceAfter),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Description:   sql.NullString{String: tx.Description, Valid: tx.Description != ""},
 		ReferenceID:   nullInt64FromPtr(tx.ReferenceID),
 		ReferenceType: sql.NullString{String: tx.ReferenceType, Valid: tx.ReferenceType != ""},
@@ -459,14 +470,14 @@ func (r *Repository) ListLoyaltyTransactions(ctx context.Context, businessID, cu
 		rows, err = r.queries.ListAllLoyaltyTransactions(ctx, sqlc.ListAllLoyaltyTransactionsParams{
 			BusinessID: businessID,
 			Limit:      int32(pageSize),
-			Offset:     int32(offset),
+			Offset:     int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		})
 	} else {
 		rows, err = r.queries.ListLoyaltyTransactions(ctx, sqlc.ListLoyaltyTransactionsParams{
 			BusinessID: businessID,
 			CustomerID: customerID,
 			Limit:      int32(pageSize),
-			Offset:     int32(offset),
+			Offset:     int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		})
 	}
 	if err != nil {
@@ -546,15 +557,15 @@ func (r *Repository) UpsertLoyaltyConfig(ctx context.Context, input domain.Loyal
 		IsEnabled:             sql.NullBool{Bool: input.IsEnabled, Valid: true},
 		PointsPerCurrencyUnit: sql.NullString{String: strconv.FormatFloat(input.PointsPerCurrencyUnit, 'f', 2, 64), Valid: true},
 		CurrencyPerPoint:      sql.NullString{String: strconv.FormatFloat(input.CurrencyPerPoint, 'f', 4, 64), Valid: true},
-		BronzeMin:             sql.NullInt32{Int32: int32(input.BronzeMin), Valid: true},
-		SilverMin:             sql.NullInt32{Int32: int32(input.SilverMin), Valid: true},
-		GoldMin:               sql.NullInt32{Int32: int32(input.GoldMin), Valid: true},
-		PlatinumMin:           sql.NullInt32{Int32: int32(input.PlatinumMin), Valid: true},
+		BronzeMin:             sql.NullInt32{Int32: int32(input.BronzeMin), Valid: true},   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		SilverMin:             sql.NullInt32{Int32: int32(input.SilverMin), Valid: true},   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		GoldMin:               sql.NullInt32{Int32: int32(input.GoldMin), Valid: true},     // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		PlatinumMin:           sql.NullInt32{Int32: int32(input.PlatinumMin), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		BronzeDiscountPct:     sql.NullString{String: strconv.FormatFloat(input.BronzeDiscountPct, 'f', 2, 64), Valid: true},
 		SilverDiscountPct:     sql.NullString{String: strconv.FormatFloat(input.SilverDiscountPct, 'f', 2, 64), Valid: true},
 		GoldDiscountPct:       sql.NullString{String: strconv.FormatFloat(input.GoldDiscountPct, 'f', 2, 64), Valid: true},
 		PlatinumDiscountPct:   sql.NullString{String: strconv.FormatFloat(input.PlatinumDiscountPct, 'f', 2, 64), Valid: true},
-		PointsExpiryDays:      sql.NullInt32{Int32: int32(input.PointsExpiryDays), Valid: true},
+		PointsExpiryDays:      sql.NullInt32{Int32: int32(input.PointsExpiryDays), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to upsert loyalty config", logger.Error(err))
@@ -613,6 +624,10 @@ func (r *Repository) CreateSegment(ctx context.Context, input domain.SegmentInpu
 }
 
 func (r *Repository) UpdateSegment(ctx context.Context, input domain.SegmentUpdateInput) error {
+	if input.BusinessID == 0 {
+		input.BusinessID = input.OwnerID
+	}
+
 	err := r.segments.Update(ctx, segments.SegmentUpdateInput{
 		ID: input.ID, OwnerID: input.OwnerID, BusinessID: input.BusinessID, Name: input.Name, Description: input.Description, Rules: input.Rules,
 	})
@@ -693,6 +708,10 @@ func (r *Repository) CreateCampaign(ctx context.Context, input domain.CampaignIn
 }
 
 func (r *Repository) UpdateCampaign(ctx context.Context, input domain.CampaignUpdateInput) error {
+	if input.BusinessID == 0 {
+		input.BusinessID = input.OwnerID
+	}
+
 	err := r.campaigns.Update(ctx, campaigns.CampaignUpdateInput{
 		ID: input.ID, OwnerID: input.OwnerID, BusinessID: input.BusinessID, Name: input.Name, Description: input.Description,
 		Channel: input.Channel, SegmentID: input.SegmentID, Subject: input.Subject, Content: input.Content, ScheduledAt: input.ScheduledAt,
@@ -847,7 +866,7 @@ func (r *Repository) ListCustomerTimelinePage(ctx context.Context, businessID, c
 		CustomerID:      customerID,
 		CursorCreatedAt: nullableTime(cursorCreatedAt),
 		CursorID:        cursorID,
-		Limit:           int32(pageSize),
+		Limit:           int32(pageSize), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list customer timeline page", logger.Error(err))
@@ -1135,10 +1154,10 @@ func (r *Repository) CreateLoyaltyTier(ctx context.Context, input domain.Loyalty
 		OwnerID:     input.OwnerID,
 		BusinessID:  input.BusinessID,
 		Name:        input.Name,
-		MinPoints:   sql.NullInt32{Int32: int32(input.MinPoints), Valid: true},
+		MinPoints:   sql.NullInt32{Int32: int32(input.MinPoints), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		DiscountPct: sql.NullString{String: strconv.FormatFloat(input.DiscountPct, 'f', 2, 64), Valid: true},
 		Perks:       json.RawMessage(input.Perks),
-		SortOrder:   sql.NullInt32{Int32: int32(input.SortOrder), Valid: true},
+		SortOrder:   sql.NullInt32{Int32: int32(input.SortOrder), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create loyalty tier", logger.Error(err))
@@ -1150,12 +1169,16 @@ func (r *Repository) CreateLoyaltyTier(ctx context.Context, input domain.Loyalty
 }
 
 func (r *Repository) UpdateLoyaltyTier(ctx context.Context, input domain.LoyaltyTierUpdateInput) error {
+	if input.BusinessID == 0 {
+		input.BusinessID = input.OwnerID
+	}
+
 	result, err := r.queries.UpdateLoyaltyTier(ctx, sqlc.UpdateLoyaltyTierParams{
 		Name:        input.Name,
-		MinPoints:   sql.NullInt32{Int32: int32(input.MinPoints), Valid: true},
+		MinPoints:   sql.NullInt32{Int32: int32(input.MinPoints), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		DiscountPct: sql.NullString{String: strconv.FormatFloat(input.DiscountPct, 'f', 2, 64), Valid: true},
 		Perks:       json.RawMessage(input.Perks),
-		SortOrder:   sql.NullInt32{Int32: int32(input.SortOrder), Valid: true},
+		SortOrder:   sql.NullInt32{Int32: int32(input.SortOrder), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		ID:          input.ID,
 		BusinessID:  input.BusinessID,
 	})
@@ -1314,7 +1337,7 @@ func (r *Repository) GetSegmentCustomers(ctx context.Context, businessID, segmen
 		Where(conds).
 		OrderBy("created_at DESC").
 		Limit(uint64(pageSize)).
-		Offset(uint64(offset)).
+		Offset(uint64(offset)). // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {

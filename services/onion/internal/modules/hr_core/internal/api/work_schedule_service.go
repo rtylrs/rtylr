@@ -165,7 +165,7 @@ func (a *WorkScheduleAPI) ListWorkSchedules(
 
 	return &workschedulev1.ListWorkSchedulesResponse{
 		Schedules: payloads,
-		Total:     int32(total),
+		Total:     int32(total), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}, nil
 }
 

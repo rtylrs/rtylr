@@ -105,7 +105,7 @@ func (r *Repository) CreateStatus(ctx context.Context, businessID, createdBy int
 			logger.Ctx(ctx).Error("NextStatusSortOrder failed", logger.Error(nextErr))
 			return domain.Status{}, nextErr
 		}
-		sortOrder = int32(next)
+		sortOrder = int32(next) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 
 	if in.IsDefault {

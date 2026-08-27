@@ -60,7 +60,7 @@ func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search str
 		Where(squirrel.Eq{"p.business_id": ownerID})
 
 	qb = applyProductListFilters(qb, search, categoryID)
-	qb = qb.OrderBy("p.name ASC").Limit(uint64(limit + 1)).Offset(uint64(offset))
+	qb = qb.OrderBy("p.name ASC").Limit(uint64(limit + 1)).Offset(uint64(offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 
 	query, args, err := qb.PlaceholderFormat(squirrel.Question).ToSql()
 	if err != nil {
@@ -228,7 +228,7 @@ func (r *Repository) CreateProduct(ctx context.Context, ownerID int64, input dom
 		CountryOfOrigin:   nullString(input.CountryOfOrigin),
 		HsCode:            nullString(input.HSCode),
 		AllowBackorder:    input.AllowBackorder,
-		LeadTimeDays:      int32(input.LeadTimeDays),
+		LeadTimeDays:      int32(input.LeadTimeDays), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		LowStockThreshold: nullStringFromFloat(input.LowStockThreshold),
 		ReorderQuantity:   nullStringFromFloat(input.ReorderQuantity),
 		IsActive:          sql.NullBool{Bool: input.IsActive, Valid: true},
@@ -309,7 +309,7 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 		CountryOfOrigin:   nullString(input.CountryOfOrigin),
 		HsCode:            nullString(input.HSCode),
 		AllowBackorder:    input.AllowBackorder,
-		LeadTimeDays:      int32(input.LeadTimeDays),
+		LeadTimeDays:      int32(input.LeadTimeDays), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		LowStockThreshold: nullStringFromFloat(input.LowStockThreshold),
 		ReorderQuantity:   nullStringFromFloat(input.ReorderQuantity),
 		IsActive:          sql.NullBool{Bool: input.IsActive, Valid: true},

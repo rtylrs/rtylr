@@ -54,7 +54,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		ImageUrl:    sql.NullString{String: input.ImageURL, Valid: input.ImageURL != ""},
 		ParentID:    sql.NullInt64{Int64: input.ParentID, Valid: input.ParentID != 0},
-		SortOrder:   sql.NullInt32{Int32: int32(input.SortOrder), Valid: true},
+		SortOrder:   sql.NullInt32{Int32: int32(input.SortOrder), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create store category", logger.Error(err))
@@ -70,7 +70,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		ImageUrl:    sql.NullString{String: input.ImageURL, Valid: input.ImageURL != ""},
 		ParentID:    sql.NullInt64{Int64: input.ParentID, Valid: input.ParentID != 0},
-		SortOrder:   sql.NullInt32{Int32: int32(input.SortOrder), Valid: true},
+		SortOrder:   sql.NullInt32{Int32: int32(input.SortOrder), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		BusinessID:  businessID,
 		ID:          id,
 	})

@@ -231,14 +231,20 @@ func TestGetLoginHistory_EachEntryHasEmail(t *testing.T) {
 	}
 }
 
-func TestSetTwoFactor_ReturnsDatabaseError(t *testing.T) {
+func TestSetTwoFactor_Persists(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	// A persistence failure must reach the caller instead of being reported as success.
 	err := repo.SetTwoFactor(ctx, testutil.OwnerID, true)
-	if err == nil {
-		t.Fatal("SetTwoFactor: expected database error")
+	if err != nil {
+		t.Fatalf("SetTwoFactor: %v", err)
+	}
+	settings, err := repo.GetSecuritySettings(ctx, testutil.OwnerID)
+	if err != nil {
+		t.Fatalf("GetSecuritySettings after SetTwoFactor: %v", err)
+	}
+	if !settings.TwoFactorEnabled {
+		t.Fatal("expected two-factor authentication to be enabled")
 	}
 }

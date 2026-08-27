@@ -18,7 +18,7 @@ func NewDashboardAPI(service *application.Service) *DashboardAPI {
 }
 
 func (a *DashboardAPI) Dashboard(ctx context.Context, _ *posdashboardv1.DashboardRequest) (*posdashboardv1.DashboardResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:reports:view")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -35,7 +35,7 @@ func (a *DashboardAPI) Dashboard(ctx context.Context, _ *posdashboardv1.Dashboar
 
 	return &posdashboardv1.DashboardResponse{
 		TotalSales:    stats.TotalSales,
-		OrderCount:    int32(stats.OrderCount),
+		OrderCount:    int32(stats.OrderCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		AvgOrder:      stats.AvgOrder,
 		TableTurnover: stats.TableTurnover,
 	}, nil

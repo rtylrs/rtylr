@@ -40,6 +40,9 @@ func (h *DeleteInvoiceHandler) Serve(ctx context.Context, req *DeleteInvoiceRequ
 	if device.User == nil {
 		return DeleteInvoiceResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireFinancePermission(ctx, "finance:invoices:create"); err != nil {
+		return DeleteInvoiceResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

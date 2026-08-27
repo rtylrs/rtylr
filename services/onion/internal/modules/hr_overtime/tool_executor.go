@@ -115,7 +115,7 @@ func hrOvertimeToolPagination(input map[string]any) (int32, int32, error) {
 	if offset > math.MaxInt32 {
 		return 0, 0, errors.New("offset is too large")
 	}
-	return int32(limit), int32(offset), nil
+	return int32(limit), int32(offset), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func firstHROvertimeToolValue(input map[string]any, keys ...string) any {

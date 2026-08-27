@@ -1,7 +1,7 @@
 -- name: GetCustomerByID :one
 SELECT id, owner_id, business_id, first_name, last_name, email, phone, date_of_birth, gender,
        address, city, country, loyalty_points, total_spent, visit_count, last_visit_at,
-	       loyalty_tier, tags, notes, consent, is_active, created_at, updated_at
+       loyalty_tier, tags, notes, COALESCE(consent, JSON_OBJECT()) AS consent, is_active, created_at, updated_at
 FROM crm_customers WHERE id = ? AND business_id = ?;
 
 -- name: CreateCustomer :execresult
@@ -35,7 +35,7 @@ SELECT COUNT(*) FROM crm_customers WHERE business_id = ?;
 -- name: ListCustomers :many
 SELECT id, owner_id, business_id, first_name, last_name, email, phone, date_of_birth, gender,
        address, city, country, loyalty_points, total_spent, visit_count, last_visit_at,
-	       loyalty_tier, tags, notes, consent, is_active, created_at, updated_at
+       loyalty_tier, tags, notes, COALESCE(consent, JSON_OBJECT()) AS consent, is_active, created_at, updated_at
 FROM crm_customers WHERE business_id = ?
 ORDER BY created_at DESC LIMIT ? OFFSET ?;
 
@@ -59,7 +59,7 @@ ORDER BY total_spent DESC LIMIT 10;
 -- name: ListActiveCustomers :many
 SELECT id, owner_id, business_id, first_name, last_name, email, phone, date_of_birth, gender,
        address, city, country, loyalty_points, total_spent, visit_count, last_visit_at,
-	       loyalty_tier, tags, notes, consent, is_active, created_at, updated_at
+       loyalty_tier, tags, notes, COALESCE(consent, JSON_OBJECT()) AS consent, is_active, created_at, updated_at
 FROM crm_customers WHERE business_id = ? AND is_active = TRUE
 ORDER BY created_at DESC LIMIT ? OFFSET ?;
 
@@ -137,14 +137,14 @@ SELECT
 FROM crm_campaign_sends WHERE campaign_id = ?;
 
 -- name: GetCustomerTimeline :many
-SELECT id, owner_id, business_id, customer_id, type, description, metadata, created_at
+SELECT id, owner_id, business_id, customer_id, type, description, COALESCE(metadata, JSON_OBJECT()) AS metadata, created_at
 FROM crm_customer_timeline
 WHERE business_id = ? AND customer_id = ?
 ORDER BY created_at DESC
 LIMIT 100;
 
 -- name: ListCustomerTimelinePage :many
-SELECT id, owner_id, business_id, customer_id, type, description, metadata, created_at
+SELECT id, owner_id, business_id, customer_id, type, description, COALESCE(metadata, JSON_OBJECT()) AS metadata, created_at
 FROM crm_customer_timeline
 WHERE business_id = sqlc.arg(business_id)
   AND customer_id = sqlc.arg(customer_id)

@@ -140,7 +140,7 @@ func (a *StatusAPIV2) DeleteStatus(ctx context.Context, req *flowstatusv2.Delete
 	}
 	return &flowstatusv2.DeleteStatusResponse{
 		Message:             "Status deleted",
-		ReassignedTaskCount: int32(moved),
+		ReassignedTaskCount: int32(moved), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}, nil
 }
 

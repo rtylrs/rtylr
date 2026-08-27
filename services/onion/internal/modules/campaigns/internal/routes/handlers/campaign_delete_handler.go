@@ -30,7 +30,7 @@ func (h *DeleteCampaignHandler) Serve(ctx context.Context, _ *DeleteCampaignRequ
 	if device.User == nil {
 		return DeleteCampaignResponse{}, onekiterrors.PermissionDenied()
 	}
-	if err := requireCampaignManager(ctx); err != nil {
+	if err := requireCampaignPermission(ctx, "crm:campaigns:create"); err != nil {
 		return DeleteCampaignResponse{}, err
 	}
 	idStr := chi.URLParamFromCtx(ctx, "id")

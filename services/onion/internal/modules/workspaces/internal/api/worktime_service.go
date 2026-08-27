@@ -250,7 +250,7 @@ func (a *WorkTimeAPI) ListWorkDays(ctx context.Context, req *flowtimev1.ListWork
 	}
 
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
-	days, total, err := a.Service.ListWorkDays(ctx, ownerID, businessID, employeeID, req.GetFrom(), req.GetTo(), limit, offset)
+	days, total, err := a.Service.ListWorkDays(ctx, ownerID, businessID, employeeID, req.GetFromDate(), req.GetToDate(), limit, offset)
 	if err != nil {
 		return nil, mapServiceError(ctx, err)
 	}
@@ -279,7 +279,7 @@ func (a *WorkTimeAPI) ListWorkDaysForWorkspace(ctx context.Context, req *flowtim
 
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	days, total, err := a.Service.ListWorkDaysForWorkspace(
-		ctx, callerID, req.GetWorkspaceId(), ownerID, businessID, req.GetFrom(), req.GetTo(), limit, offset,
+		ctx, callerID, req.GetWorkspaceId(), ownerID, businessID, req.GetFromDate(), req.GetToDate(), limit, offset,
 	)
 	if err != nil {
 		return nil, mapServiceError(ctx, err)

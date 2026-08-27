@@ -49,7 +49,7 @@ func (h *AwardPointsHandler) Serve(ctx context.Context, req *AwardPointsRequest)
 	if device.User == nil {
 		return AwardPointsResponse{}, onekiterrors.PermissionDenied()
 	}
-	if err := requireCRMManager(ctx); err != nil {
+	if err := requireCRMFeaturePermission(ctx, "crm:loyalty:manage"); err != nil {
 		return AwardPointsResponse{}, err
 	}
 

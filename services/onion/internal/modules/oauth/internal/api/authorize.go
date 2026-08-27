@@ -39,7 +39,12 @@ func (h *AuthorizeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
+	if u.Scheme != "http" && u.Scheme != "https" || u.Host == "" || u.User != nil {
+		http.Error(w, "invalid auth frontend configuration", http.StatusInternalServerError)
+		return
+	}
 	u.RawQuery = q.Encode()
 
-	http.Redirect(w, r, u.String(), http.StatusFound)
+	w.Header().Set("Location", u.String())
+	w.WriteHeader(http.StatusFound)
 }

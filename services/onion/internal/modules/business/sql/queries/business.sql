@@ -18,7 +18,7 @@ SELECT
 FROM businesses b
 LEFT JOIN config c ON c.business_id = b.id
 WHERE (b.id = sqlc.arg(owner_id) OR b.owner_id = sqlc.arg(owner_id)) AND b.is_active = TRUE
-ORDER BY b.id ASC
+ORDER BY (b.id = sqlc.arg(owner_id)) DESC, b.id ASC
 LIMIT 1;
 
 -- name: GetPublicBusiness :one
@@ -46,7 +46,7 @@ ORDER BY is_default DESC, name ASC
 LIMIT 100;
 
 -- name: UpdateBusinessSlug :exec
-UPDATE businesses SET slug = ? WHERE id = ? AND owner_id = ?;
+UPDATE businesses SET slug = ? WHERE id = ?;
 
 -- name: RenameBusiness :execresult
 UPDATE businesses

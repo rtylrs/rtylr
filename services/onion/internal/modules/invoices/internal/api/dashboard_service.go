@@ -18,6 +18,9 @@ func NewDashboardAPI(service *application.Service) *DashboardAPI {
 }
 
 func (a *DashboardAPI) GetFinanceDashboard(ctx context.Context, _ *financedashboardv1.GetFinanceDashboardRequest) (*financedashboardv1.GetFinanceDashboardResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:reports:view"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := invoiceBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel

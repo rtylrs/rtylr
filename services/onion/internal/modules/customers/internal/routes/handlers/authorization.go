@@ -2,24 +2,16 @@ package handlers
 
 import (
 	"context"
-	"strings"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
 
-// requireCRMManager protects destructive and policy-changing CRM actions.
-// Authentication alone is not sufficient for deleting/exporting PII or
-// changing loyalty rules.
-func requireCRMManager(ctx context.Context) error {
+func requireCRMFeaturePermission(ctx context.Context, permission string) error {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.User == nil || !authPkg.HasAppPermission(device.User, authorization.AppCRM, permission) {
 		return onekiterrors.PermissionDenied()
 	}
-	switch strings.ToLower(strings.TrimSpace(device.User.Role)) {
-	case "owner", "admin", "console_admin":
-		return nil
-	default:
-		return onekiterrors.PermissionDenied()
-	}
+	return nil
 }

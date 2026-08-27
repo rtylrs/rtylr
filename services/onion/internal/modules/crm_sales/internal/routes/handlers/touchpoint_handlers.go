@@ -49,6 +49,9 @@ func (h *CreateTouchpointHandler) Serve(ctx context.Context, req *CreateTouchpoi
 	if device.User == nil {
 		return CreateTouchpointResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:edit"); err != nil {
+		return CreateTouchpointResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -95,6 +98,9 @@ func (h *DeleteTouchpointHandler) Serve(ctx context.Context, _ *DeleteTouchpoint
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return DeleteTouchpointResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:delete"); err != nil {
+		return DeleteTouchpointResponse{}, err
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")

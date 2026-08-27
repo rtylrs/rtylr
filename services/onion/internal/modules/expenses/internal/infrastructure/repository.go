@@ -76,9 +76,14 @@ func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (domain.
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.ExpenseInput) (int64, error) {
+	businessID := input.BusinessID
+	if businessID == 0 {
+		businessID = input.OwnerID
+	}
+
 	result, err := r.queries.CreateExpense(ctx, sqlc.CreateExpenseParams{
 		OwnerID:         input.OwnerID,
-		BusinessID:      input.BusinessID,
+		BusinessID:      businessID,
 		CategoryID:      nullableInt64Ptr(input.CategoryID),
 		Amount:          fmtFloat(input.Amount),
 		Currency:        nullableString(input.Currency),
@@ -223,7 +228,16 @@ func (r *Repository) CountByCategory(ctx context.Context, businessID int64) (map
 
 	counts := make(map[string]int64, len(rows))
 	for _, row := range rows {
-		counts[fmt.Sprint(row.CategoryKey)] = row.Cnt
+		key := ""
+		switch value := row.CategoryKey.(type) {
+		case []byte:
+			key = string(value)
+		case string:
+			key = value
+		default:
+			key = fmt.Sprint(value)
+		}
+		counts[key] = row.Cnt
 	}
 	return counts, nil
 }

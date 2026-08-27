@@ -202,8 +202,8 @@ func (r *Repository) ListStaffDirectory(ctx context.Context, businessID, limit, 
 		LeftJoin("hr_departments d ON d.id = s.department_id AND d.business_id = s.business_id").
 		Where(sq.Eq{"s.business_id": businessID}).
 		OrderBy("s.last_name ASC", "s.first_name ASC").
-		Limit(uint64(limit)).
-		Offset(uint64(offset)).
+		Limit(uint64(limit)).   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset(uint64(offset)). // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/finance_bank_feeds/internal/application"
 	"github.com/voxire/onion/internal/modules/finance_bank_feeds/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -62,11 +63,26 @@ func toPayload(t domain.BankFeedTransaction) BankFeedTransactionPayload {
 	}
 }
 
+func toViewerPayload(t domain.BankFeedTransaction, includeSensitive bool) BankFeedTransactionPayload {
+	payload := toPayload(t)
+	if !includeSensitive {
+		payload.BankAccountID = 0
+		payload.ExternalID = ""
+		payload.MatchedExpenseID = nil
+		payload.MatchedInvoiceID = nil
+	}
+	return payload
+}
+
 func (h *ListHandler) Serve(ctx context.Context, req *ListRequest) (ListResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return ListResponse{}, onekiterrors.PermissionDenied()
 	}
+	if !authPkg.HasAppPermission(device.User, authorization.AppFinance, "finance:bank_feeds:view") {
+		return ListResponse{}, onekiterrors.PermissionDenied()
+	}
+	includeSensitive := authPkg.HasAppPermission(device.User, authorization.AppFinance, "finance:bank_feeds:sensitive_view")
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -92,7 +108,7 @@ func (h *ListHandler) Serve(ctx context.Context, req *ListRequest) (ListResponse
 
 	payloads := make([]BankFeedTransactionPayload, 0, len(items))
 	for _, t := range items {
-		payloads = append(payloads, toPayload(t))
+		payloads = append(payloads, toViewerPayload(t, includeSensitive))
 	}
 	return ListResponse{Transactions: payloads, Total: total, Limit: limit, Offset: offset}, nil
 }
@@ -114,6 +130,9 @@ type (
 func (h *SyncHandler) Serve(ctx context.Context, _ *SyncRequest) (SyncResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
+		return SyncResponse{}, onekiterrors.PermissionDenied()
+	}
+	if !authPkg.HasAppPermission(device.User, authorization.AppFinance, "finance:bank_feeds:view") {
 		return SyncResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)

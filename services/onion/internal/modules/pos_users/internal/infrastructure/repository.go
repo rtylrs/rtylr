@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/voxire/onion/internal/modules/pos_users/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_users/internal/infrastructure/persistence/sqlc"
@@ -86,17 +87,11 @@ func (r *Repository) Create(ctx context.Context, businessID, createdBy int64, in
 func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.UpdatePOSUserInput) error {
 	q := sqlc.New(r.pool)
 	return q.UpdatePOSUser(ctx, sqlc.UpdatePOSUserParams{
-		Name:             input.Name,
-		Role:             sqlc.NullPosUsersRole{PosUsersRole: sqlc.PosUsersRole(input.Role), Valid: true},
-		IsActive:         sql.NullBool{Bool: input.IsActive, Valid: true},
-		HourlyRate:       sql.NullString{String: fmt.Sprintf("%.2f", input.HourlyRate), Valid: true},
-		MaxDiscountPct:   sql.NullString{String: fmt.Sprintf("%.2f", input.MaxDiscountPct), Valid: true},
-		CanVoid:          sql.NullBool{Bool: input.CanVoid, Valid: true},
-		CanRefund:        sql.NullBool{Bool: input.CanRefund, Valid: true},
-		CanOpenDrawer:    sql.NullBool{Bool: input.CanOpenDrawer, Valid: true},
-		CanApplyDiscount: sql.NullBool{Bool: input.CanApplyDiscount, Valid: true},
-		BusinessID:       businessID,
-		ID:               id,
+		Name:       input.Name,
+		IsActive:   sql.NullBool{Bool: input.IsActive, Valid: true},
+		HourlyRate: sql.NullString{String: fmt.Sprintf("%.2f", input.HourlyRate), Valid: true},
+		BusinessID: businessID,
+		ID:         id,
 	})
 }
 
@@ -144,6 +139,26 @@ func (r *Repository) GetPINHash(ctx context.Context, businessID, id int64) (stri
 		return "", err
 	}
 	return hash.String, nil
+}
+
+// GetAuthorizationVersion reads the Dash-owned membership version that was
+// current when a POS operator authenticated. A missing legacy authorization
+// schema is treated as version zero so older installations remain usable, but
+// any other database error is returned to the caller.
+func (r *Repository) GetAuthorizationVersion(ctx context.Context, businessID, userID int64) (int64, error) {
+	var version int64
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT authorization_version
+		FROM authorization_business_members
+		WHERE business_id = ? AND user_id = ? AND status = 'active'
+		ORDER BY id DESC LIMIT 1`, businessID, userID).Scan(&version)
+	if errors.Is(err, sql.ErrNoRows) || authorizationVersionUnavailable(err) {
+		return 0, nil
+	}
+	if err != nil {
+		return 0, err
+	}
+	return version, nil
 }
 
 // FindByUserAndLocation returns a member's POS-user row at a location
@@ -257,4 +272,10 @@ func parseFloat(s string) float64 {
 		return 0
 	}
 	return f
+}
+
+func authorizationVersionUnavailable(err error) bool {
+	message := strings.ToLower(err.Error())
+	return strings.Contains(message, "authorization_business_members") ||
+		strings.Contains(message, "authorization_version")
 }

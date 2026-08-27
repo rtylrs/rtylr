@@ -43,6 +43,9 @@ func (h *ListContractsHandler) Serve(ctx context.Context, req *ListContractsRequ
 	if device.User == nil {
 		return ListContractsResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:view"); err != nil {
+		return ListContractsResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -103,6 +106,9 @@ func (h *CreateContractHandler) Serve(ctx context.Context, req *CreateContractRe
 	if device.User == nil {
 		return CreateContractResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:create"); err != nil {
+		return CreateContractResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -151,6 +157,9 @@ func (h *GetContractHandler) Serve(ctx context.Context, _ *GetContractRequest) (
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return GetContractResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:view"); err != nil {
+		return GetContractResponse{}, err
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
@@ -212,6 +221,9 @@ func (h *UpdateContractHandler) Serve(ctx context.Context, req *UpdateContractRe
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return UpdateContractResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:edit"); err != nil {
+		return UpdateContractResponse{}, err
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")

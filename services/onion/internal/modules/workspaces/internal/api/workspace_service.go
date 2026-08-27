@@ -151,6 +151,9 @@ func (a *WorkspaceAPI) DeleteWorkspace(ctx context.Context, req *flowworkspacev1
 }
 
 func (a *WorkspaceAPI) AddWorkspaceMember(ctx context.Context, req *flowworkspacev1.AddWorkspaceMemberRequest) (*flowworkspacev1.AddWorkspaceMemberResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:team:manage"); err != nil {
+		return nil, err
+	}
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -185,6 +188,9 @@ func (a *WorkspaceAPI) AddWorkspaceMember(ctx context.Context, req *flowworkspac
 }
 
 func (a *WorkspaceAPI) RemoveWorkspaceMember(ctx context.Context, req *flowworkspacev1.RemoveWorkspaceMemberRequest) (*flowworkspacev1.RemoveWorkspaceMemberResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:team:manage"); err != nil {
+		return nil, err
+	}
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -278,6 +284,9 @@ func (a *WorkspaceAPI) ListWorkspaceMembers(ctx context.Context, req *flowworksp
 }
 
 func (a *WorkspaceAPI) UpdateWorkspaceMemberRole(ctx context.Context, req *flowworkspacev1.UpdateWorkspaceMemberRoleRequest) (*flowworkspacev1.UpdateWorkspaceMemberRoleResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:managers:manage"); err != nil {
+		return nil, err
+	}
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()

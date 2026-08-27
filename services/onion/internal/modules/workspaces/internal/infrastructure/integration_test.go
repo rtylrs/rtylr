@@ -443,21 +443,22 @@ func TestWorkspaces_CountWorkspacesByOwner_IncreasesOnCreate(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
+	const countTestBusinessID int64 = 881001
 
-	before, err := repo.CountWorkspacesByOwner(ctx, testutil.BusinessID)
+	before, err := repo.CountWorkspacesByOwner(ctx, countTestBusinessID)
 	if err != nil {
 		t.Fatalf("count before: %v", err)
 	}
 
 	id, err := repo.CreateWorkspace(ctx, domain.WorkspaceInput{
-		OwnerID: testutil.OwnerID, BusinessID: testutil.BusinessID, Name: "Count Increase WS", CreatedBy: testutil.OwnerID,
+		OwnerID: testutil.OwnerID, BusinessID: countTestBusinessID, Name: "Count Increase WS", CreatedBy: testutil.OwnerID,
 	}, false)
 	if err != nil {
 		t.Fatalf("CreateWorkspace: %v", err)
 	}
-	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, id, testutil.BusinessID) })
+	t.Cleanup(func() { _ = repo.DeleteWorkspace(ctx, id, countTestBusinessID) })
 
-	after, err := repo.CountWorkspacesByOwner(ctx, testutil.BusinessID)
+	after, err := repo.CountWorkspacesByOwner(ctx, countTestBusinessID)
 	if err != nil {
 		t.Fatalf("count after: %v", err)
 	}

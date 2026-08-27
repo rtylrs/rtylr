@@ -100,7 +100,7 @@ func (s *Service) ListPage(ctx context.Context, businessID, userID int64, limit 
 				return NotificationPage{}, err
 			}
 			page := NotificationPage{Notifications: rows}
-			if int32(len(rows)) > limit {
+			if int32(len(rows)) > limit { // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 				last := rows[limit-1]
 				page.Notifications = rows[:limit]
 				page.NextCursor = cursor.EncodeCreatedAtID(cursor.CreatedAtID{CreatedAt: last.CreatedAt, ID: last.ID})

@@ -108,7 +108,7 @@ func (r *Repository) inventoryValue(ctx context.Context, ownerID int64) (float64
 func (r *Repository) topLowStockItems(ctx context.Context, ownerID int64, limit int) ([]domain.LowStockItem, error) {
 	rows, err := r.queries.ListTopLowStockItems(ctx, sqlc.ListTopLowStockItemsParams{
 		BusinessID: ownerID,
-		Limit:      int32(limit),
+		Limit:      int32(limit), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list low stock items", logger.Error(err))
@@ -133,7 +133,7 @@ func (r *Repository) recentPurchaseOrders(ctx context.Context, ownerID int64, li
 	// cross-schema read from erp_suppliers — join for display name
 	rows, err := r.queries.ListRecentPurchaseOrders(ctx, sqlc.ListRecentPurchaseOrdersParams{
 		BusinessID: ownerID,
-		Limit:      int32(limit),
+		Limit:      int32(limit), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list recent POs", logger.Error(err))
@@ -163,7 +163,7 @@ func (r *Repository) topCategories(ctx context.Context, ownerID int64, limit int
 	// cross-schema read from erp_categories — join for display name
 	rows, err := r.queries.ListTopCategories(ctx, sqlc.ListTopCategoriesParams{
 		BusinessID: ownerID,
-		Limit:      int32(limit),
+		Limit:      int32(limit), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list top categories", logger.Error(err))

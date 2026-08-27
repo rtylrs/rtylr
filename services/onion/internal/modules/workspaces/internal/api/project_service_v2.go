@@ -113,6 +113,9 @@ func (a *ProjectAPIV2) resolveBusinessID(ctx context.Context) (int64, *authPkg.A
 }
 
 func (a *ProjectAPIV2) GetProject(ctx context.Context, req *flowprojectv2.GetProjectRequest) (*flowprojectv2.GetProjectResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:view"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -132,6 +135,9 @@ func (a *ProjectAPIV2) GetProject(ctx context.Context, req *flowprojectv2.GetPro
 }
 
 func (a *ProjectAPIV2) ListProjects(ctx context.Context, req *flowprojectv2.ListProjectsRequest) (*flowprojectv2.ListProjectsResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:view"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -158,6 +164,9 @@ func (a *ProjectAPIV2) ListProjects(ctx context.Context, req *flowprojectv2.List
 }
 
 func (a *ProjectAPIV2) CreateProject(ctx context.Context, req *flowprojectv2.CreateProjectRequest) (*flowprojectv2.CreateProjectResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:create"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -203,6 +212,9 @@ func (a *ProjectAPIV2) CreateProject(ctx context.Context, req *flowprojectv2.Cre
 }
 
 func (a *ProjectAPIV2) UpdateProject(ctx context.Context, req *flowprojectv2.UpdateProjectRequest) (*flowprojectv2.UpdateProjectResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:edit"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -248,6 +260,9 @@ func (a *ProjectAPIV2) UpdateProject(ctx context.Context, req *flowprojectv2.Upd
 }
 
 func (a *ProjectAPIV2) ArchiveProject(ctx context.Context, req *flowprojectv2.ArchiveProjectRequest) (*flowprojectv2.ArchiveProjectResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:edit"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -270,6 +285,9 @@ func (a *ProjectAPIV2) ArchiveProject(ctx context.Context, req *flowprojectv2.Ar
 }
 
 func (a *ProjectAPIV2) SetProjectVisibility(ctx context.Context, req *flowprojectv2.SetProjectVisibilityRequest) (*flowprojectv2.SetProjectVisibilityResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:edit"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -288,6 +306,9 @@ func (a *ProjectAPIV2) SetProjectVisibility(ctx context.Context, req *flowprojec
 }
 
 func (a *ProjectAPIV2) ListArchivedProjects(ctx context.Context, req *flowprojectv2.ListArchivedProjectsRequest) (*flowprojectv2.ListArchivedProjectsResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:view"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -310,6 +331,9 @@ func (a *ProjectAPIV2) ListArchivedProjects(ctx context.Context, req *flowprojec
 }
 
 func (a *ProjectAPIV2) RestoreProject(ctx context.Context, req *flowprojectv2.RestoreProjectRequest) (*flowprojectv2.RestoreProjectResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:edit"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -328,6 +352,9 @@ func (a *ProjectAPIV2) RestoreProject(ctx context.Context, req *flowprojectv2.Re
 }
 
 func (a *ProjectAPIV2) PurgeProject(ctx context.Context, req *flowprojectv2.PurgeProjectRequest) (*flowprojectv2.PurgeProjectResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:edit"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -360,7 +387,7 @@ func toProjectColumnV2(c domain.ProjectColumn) *flowprojectv2.ProjectColumn {
 		ProjectId: c.ProjectID,
 		Name:      c.Name,
 		Color:     c.Color,
-		SortOrder: int32(c.SortOrder),
+		SortOrder: int32(c.SortOrder), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		CreatedAt: c.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt: c.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
@@ -387,6 +414,9 @@ func toProjectMemberV2(m domain.ProjectMember) *flowprojectv2.ProjectMember {
 }
 
 func (a *ProjectAPIV2) ListProjectColumns(ctx context.Context, req *flowprojectv2.ListProjectColumnsRequest) (*flowprojectv2.ListProjectColumnsResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:view"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -411,6 +441,9 @@ func (a *ProjectAPIV2) ListProjectColumns(ctx context.Context, req *flowprojectv
 }
 
 func (a *ProjectAPIV2) CreateProjectColumn(ctx context.Context, req *flowprojectv2.CreateProjectColumnRequest) (*flowprojectv2.CreateProjectColumnResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:edit"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -445,6 +478,9 @@ func (a *ProjectAPIV2) CreateProjectColumn(ctx context.Context, req *flowproject
 }
 
 func (a *ProjectAPIV2) UpdateProjectColumn(ctx context.Context, req *flowprojectv2.UpdateProjectColumnRequest) (*flowprojectv2.UpdateProjectColumnResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:edit"); err != nil {
+		return nil, err
+	}
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -473,6 +509,9 @@ func (a *ProjectAPIV2) UpdateProjectColumn(ctx context.Context, req *flowproject
 }
 
 func (a *ProjectAPIV2) DeleteProjectColumn(ctx context.Context, req *flowprojectv2.DeleteProjectColumnRequest) (*flowprojectv2.DeleteProjectColumnResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:edit"); err != nil {
+		return nil, err
+	}
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -520,6 +559,9 @@ func (a *ProjectAPIV2) MoveTaskToColumn(ctx context.Context, req *flowprojectv2.
 }
 
 func (a *ProjectAPIV2) ListProjectMembers(ctx context.Context, req *flowprojectv2.ListProjectMembersRequest) (*flowprojectv2.ListProjectMembersResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:view"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -544,6 +586,9 @@ func (a *ProjectAPIV2) ListProjectMembers(ctx context.Context, req *flowprojectv
 }
 
 func (a *ProjectAPIV2) AddProjectMember(ctx context.Context, req *flowprojectv2.AddProjectMemberRequest) (*flowprojectv2.AddProjectMemberResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:assign"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -572,6 +617,9 @@ func (a *ProjectAPIV2) AddProjectMember(ctx context.Context, req *flowprojectv2.
 }
 
 func (a *ProjectAPIV2) RemoveProjectMember(ctx context.Context, req *flowprojectv2.RemoveProjectMemberRequest) (*flowprojectv2.RemoveProjectMemberResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:assign"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -590,6 +638,9 @@ func (a *ProjectAPIV2) RemoveProjectMember(ctx context.Context, req *flowproject
 }
 
 func (a *ProjectAPIV2) UpdateProjectMemberRole(ctx context.Context, req *flowprojectv2.UpdateProjectMemberRoleRequest) (*flowprojectv2.UpdateProjectMemberRoleResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:assign"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err

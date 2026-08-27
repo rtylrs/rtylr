@@ -136,7 +136,7 @@ func newBookingServices(items []domain.BookingService) []*bookingservicev1.Booki
 			BusinessId:      item.BusinessID,
 			Name:            item.Name,
 			Description:     item.Description,
-			DurationMinutes: int32(item.DurationMinutes),
+			DurationMinutes: int32(item.DurationMinutes), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			Price:           item.Price.Float64(),
 			Color:           item.Color,
 			IsActive:        item.IsActive,

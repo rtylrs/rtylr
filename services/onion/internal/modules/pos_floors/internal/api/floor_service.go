@@ -110,7 +110,7 @@ func toProtoFloor(f domain.Floor) *posfloorv1.Floor {
 		BusinessId: f.BusinessID,
 		BranchId:   f.BranchID,
 		Name:       f.Name,
-		SortOrder:  int32(f.SortOrder),
+		SortOrder:  int32(f.SortOrder), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		IsActive:   f.IsActive,
 		CreatedAt:  f.CreatedAt.Format("2006-01-02T15:04:05Z"),
 	}

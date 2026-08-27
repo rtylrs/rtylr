@@ -26,7 +26,7 @@ func (a *OrderAPI) ListOrders(ctx context.Context, req *posordersv1.ListOrdersRe
 		return nil, err
 	}
 
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:view")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -72,7 +72,7 @@ func (a *OrderAPI) CreateOrder(ctx context.Context, req *posordersv1.CreateOrder
 		return nil, err
 	}
 
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -195,7 +195,7 @@ func (a *OrderAPI) GetPublicOrderStatus(ctx context.Context, req *posordersv1.Ge
 }
 
 func (a *OrderAPI) GetOrderDetail(ctx context.Context, req *posordersv1.GetOrderDetailRequest) (*posordersv1.GetOrderDetailResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:view")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -217,7 +217,7 @@ func (a *OrderAPI) GetOrderDetail(ctx context.Context, req *posordersv1.GetOrder
 }
 
 func (a *OrderAPI) UpdateOrderStatus(ctx context.Context, req *posordersv1.UpdateOrderStatusRequest) (*posordersv1.UpdateOrderStatusResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -240,7 +240,7 @@ func (a *OrderAPI) UpdateOrderStatus(ctx context.Context, req *posordersv1.Updat
 }
 
 func (a *OrderAPI) VoidOrder(ctx context.Context, req *posordersv1.VoidOrderRequest) (*posordersv1.VoidOrderResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:void")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -375,7 +375,7 @@ func formatOrderTimePtr(t *time.Time) string {
 }
 
 func (a *OrderAPI) SendToKitchen(ctx context.Context, req *posordersv1.SendToKitchenRequest) (*posordersv1.SendToKitchenResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}
@@ -399,7 +399,7 @@ func (a *OrderAPI) SendToKitchen(ctx context.Context, req *posordersv1.SendToKit
 }
 
 func (a *OrderAPI) TransferTable(ctx context.Context, req *posordersv1.TransferTableRequest) (*posordersv1.TransferTableResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return nil, orderAPIError(authErr)
 	}

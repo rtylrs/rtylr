@@ -305,7 +305,7 @@ func (a *ConfigAPI) SendTestEmail(ctx context.Context, req *hubconfigv1.SendTest
 	if !authPkg.IsBusinessAdmin(device.User) {
 		return nil, onekiterrors.PermissionDenied()
 	}
-	if strings.TrimSpace(req.GetTo()) == "" {
+	if strings.TrimSpace(req.GetRecipient()) == "" {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Recipient is required")
 	}
 	businessID, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
@@ -323,7 +323,7 @@ func (a *ConfigAPI) SendTestEmail(ctx context.Context, req *hubconfigv1.SendTest
 	if cfg.SenderName != "" && from != "" {
 		from = cfg.SenderName + " <" + from + ">"
 	}
-	if err := emailqueue.Enqueue(ctx, a.ConfigService.DB(), emailqueue.Job{Priority: emailqueue.PriorityHigh, To: req.GetTo(), Subject: "Email settings test", HTML: "<p>Your tenant email settings are working.</p>", From: from, ReplyTo: cfg.ReplyToEmail}); err != nil {
+	if err := emailqueue.Enqueue(ctx, a.ConfigService.DB(), emailqueue.Job{Priority: emailqueue.PriorityHigh, To: req.GetRecipient(), Subject: "Email settings test", HTML: "<p>Your tenant email settings are working.</p>", From: from, ReplyTo: cfg.ReplyToEmail}); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to queue test email")
 	}
 	return &hubconfigv1.SendTestEmailResponse{Message: "Test email queued", Queued: true}, nil

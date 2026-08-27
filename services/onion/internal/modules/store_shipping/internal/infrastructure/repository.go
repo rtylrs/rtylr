@@ -37,7 +37,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 	result, err := r.queries.CreateShippingMethod(ctx, sqlc.CreateShippingMethodParams{
 		OwnerID: ownerID, BusinessID: businessID, Name: input.Name,
 		Price:         strconv.FormatFloat(input.Price, 'f', 2, 64),
-		EstimatedDays: sql.NullInt32{Int32: int32(input.EstimatedDays), Valid: true},
+		EstimatedDays: sql.NullInt32{Int32: int32(input.EstimatedDays), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		IsActive:      sql.NullBool{Bool: input.IsActive, Valid: true},
 	})
 	if err != nil {
@@ -50,7 +50,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.ShippingMethodInput) error {
 	err := r.queries.UpdateShippingMethod(ctx, sqlc.UpdateShippingMethodParams{
 		Name: input.Name, Price: strconv.FormatFloat(input.Price, 'f', 2, 64),
-		EstimatedDays: sql.NullInt32{Int32: int32(input.EstimatedDays), Valid: true},
+		EstimatedDays: sql.NullInt32{Int32: int32(input.EstimatedDays), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		IsActive:      sql.NullBool{Bool: input.IsActive, Valid: true},
 		BusinessID:    businessID, ID: id,
 	})

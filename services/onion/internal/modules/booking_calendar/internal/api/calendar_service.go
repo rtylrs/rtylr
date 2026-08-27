@@ -22,8 +22,8 @@ func NewCalendarAPI(service *application.Service) *CalendarAPI {
 }
 
 func (a *CalendarAPI) GetCalendar(ctx context.Context, req *bookingcalendarv1.GetCalendarRequest) (*bookingcalendarv1.GetCalendarResponse, error) {
-	from := strings.TrimSpace(req.GetFrom())
-	to := strings.TrimSpace(req.GetTo())
+	from := strings.TrimSpace(req.GetFromDate())
+	to := strings.TrimSpace(req.GetToDate())
 	if from == "" {
 		return nil, onekiterrors.New(http.StatusBadRequest, "from is required")
 	}

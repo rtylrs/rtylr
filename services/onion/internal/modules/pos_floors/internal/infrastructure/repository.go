@@ -52,7 +52,7 @@ func (r *Repository) Create(ctx context.Context, input domain.FloorInput) (int64
 		BusinessID: input.BusinessID,
 		BranchID:   input.BranchID,
 		Name:       input.Name,
-		SortOrder:  sql.NullInt32{Int32: int32(input.SortOrder), Valid: true},
+		SortOrder:  sql.NullInt32{Int32: int32(input.SortOrder), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create floor", logger.Error(err))
@@ -64,7 +64,7 @@ func (r *Repository) Create(ctx context.Context, input domain.FloorInput) (int64
 func (r *Repository) Update(ctx context.Context, input domain.FloorUpdateInput) error {
 	err := r.queries.UpdateFloor(ctx, sqlc.UpdateFloorParams{
 		Name:       input.Name,
-		SortOrder:  sql.NullInt32{Int32: int32(input.SortOrder), Valid: true},
+		SortOrder:  sql.NullInt32{Int32: int32(input.SortOrder), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		ID:         input.ID,
 		BusinessID: input.BusinessID,
 	})

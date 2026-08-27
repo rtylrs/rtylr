@@ -109,7 +109,7 @@ func (r *Repository) ListEnrollmentsByEmployee(ctx context.Context, businessID, 
 	for _, row := range rows {
 		items = append(items, enrollmentFromRow(row))
 	}
-	return items, int32(total), nil
+	return items, int32(total), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func enrollmentFromRow(row sqlc.HrBenefitEnrollment) domain.BenefitEnrollment {

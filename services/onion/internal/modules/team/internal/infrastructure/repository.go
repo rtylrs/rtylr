@@ -5,11 +5,13 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
 	"github.com/voxire/onion/internal/modules/team/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/logger"
 	sqlnull "github.com/voxire/onion/internal/platform/utils/queries"
 )
@@ -105,17 +107,468 @@ func (r *Repository) UpsertPermission(ctx context.Context, businessID, ownerID, 
 	return nil
 }
 
-func (r *Repository) DeactivateUser(ctx context.Context, ownerID, userID int64) error {
-	err := r.queries.DeactivateUser(ctx, sqlc.DeactivateUserParams{
-		OwnerID: ownerID,
-		UserID:  userID,
-	})
-	if err != nil {
-		logger.Ctx(ctx).Error("Failed to deactivate user", logger.Error(err))
-
-		return err
+// GetAuthorizationRoleGrant returns the canonical app and permissions for a
+// role that may be assigned in this business. Keeping this lookup in the
+// repository prevents the application layer from making authorization
+// decisions from client-supplied role metadata.
+func (r *Repository) GetAuthorizationRoleGrant(ctx context.Context, businessID, roleID int64) (domain.AuthorizationRoleGrant, error) {
+	var grant domain.AuthorizationRoleGrant
+	if err := r.pool.QueryRowContext(ctx, `
+		SELECT app_id
+		FROM authorization_roles
+		WHERE id = ? AND business_id IN (0, ?)
+		  AND lifecycle = 'active' AND is_archived = FALSE
+		LIMIT 1`, roleID, businessID).Scan(&grant.AppID); err != nil {
+		return domain.AuthorizationRoleGrant{}, err
 	}
 
+	rows, err := r.pool.QueryContext(ctx, `
+		SELECT permission_key
+		FROM authorization_role_permissions
+		WHERE role_id = ?
+		ORDER BY permission_key`, roleID)
+	if err != nil {
+		return domain.AuthorizationRoleGrant{}, err
+	}
+	defer rows.Close()
+	grant.Permissions = make([]string, 0)
+	for rows.Next() {
+		var permission string
+		if err := rows.Scan(&permission); err != nil {
+			return domain.AuthorizationRoleGrant{}, err
+		}
+		grant.Permissions = append(grant.Permissions, permission)
+	}
+	if err := rows.Err(); err != nil {
+		return domain.AuthorizationRoleGrant{}, err
+	}
+	return grant, nil
+}
+
+// UpsertNormalizedAuthorization dual-writes a member's normalized role,
+// licenses, scopes, and audit event. Legacy rows remain updated by
+// UpsertPermission during the migration window.
+func (r *Repository) UpsertNormalizedAuthorization(ctx context.Context, businessID, actorID, userID int64, apps []string, legacyRole domain.Role, dashRole string, assignments []domain.AppRoleAssignmentInput, groupIDs []int64) error {
+	if businessID <= 0 || userID <= 0 {
+		return nil
+	}
+	if dashRole == "" {
+		dashRole = legacyDashRole(legacyRole)
+	}
+	dashRole = strings.TrimPrefix(dashRole, "dash.")
+	if !isDashRole(dashRole) {
+		return errors.New("invalid dash role")
+	}
+
+	appIDs := uniqueAuthorizationApps(apps)
+	for _, assignment := range assignments {
+		if assignment.AppID != "" {
+			appIDs = appendUniqueAuthorizationApp(appIDs, assignment.AppID)
+		}
+	}
+
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	rollback := func(cause error) error {
+		_ = tx.Rollback()
+		if authorizationSchemaUnavailable(cause) {
+			return nil
+		}
+		return cause
+	}
+
+	var dashRoleID int64
+	err = tx.QueryRowContext(ctx, `
+		SELECT id
+		FROM authorization_roles
+		WHERE business_id = 0 AND app_id = 'dash' AND role_key = ?
+		  AND lifecycle = 'active' AND is_archived = FALSE
+		LIMIT 1`, "dash."+dashRole).Scan(&dashRoleID)
+	if err != nil {
+		return rollback(err)
+	}
+	if groupIDs != nil {
+		if err = r.replaceUserGroupMemberships(ctx, tx, businessID, actorID, userID, groupIDs); err != nil {
+			return rollback(err)
+		}
+	}
+
+	_, err = tx.ExecContext(ctx, `
+		INSERT INTO authorization_business_members
+			(business_id, user_id, dash_role_id, dash_role_key, status, authorization_version)
+		VALUES (?, ?, ?, ?, 'active', 1)
+		ON DUPLICATE KEY UPDATE
+			dash_role_id = VALUES(dash_role_id),
+			dash_role_key = VALUES(dash_role_key),
+			status = 'active',
+			authorization_version = authorization_version + 1,
+			updated_at = NOW()`,
+		businessID, userID, dashRoleID, dashRole,
+	)
+	if err != nil {
+		return rollback(err)
+	}
+
+	if _, err = tx.ExecContext(ctx, `
+		UPDATE authorization_license_assignments
+		SET status = 'revoked', revoked_by = ?, revoked_at = NOW()
+		WHERE business_id = ? AND user_id = ? AND group_id IS NULL AND status = 'active'`, actorID, businessID, userID); err != nil {
+		return rollback(err)
+	}
+	if _, err = tx.ExecContext(ctx, `
+		UPDATE authorization_role_assignments
+		SET status = 'revoked', revoked_by = ?, revoked_at = NOW()
+		WHERE business_id = ? AND user_id = ? AND group_id IS NULL AND status = 'active'`, actorID, businessID, userID); err != nil {
+		return rollback(err)
+	}
+
+	for _, appID := range appIDs {
+		if appID == "" || appID == "dash" {
+			continue
+		}
+		if !isTenantAppID(appID) {
+			return rollback(fmt.Errorf("invalid app id: %s", appID))
+		}
+		if err = r.insertLicenseAssignments(ctx, tx, businessID, actorID, userID, appID, assignments); err != nil {
+			return rollback(err)
+		}
+
+		appAssignments := assignmentsForApp(assignments, appID)
+		if len(appAssignments) == 0 {
+			roleKey := appRoleKey(appID, legacyRole)
+			roleID, roleErr := r.lookupAuthorizationRoleID(ctx, tx, businessID, appID, roleKey)
+			if roleErr != nil {
+				return rollback(roleErr)
+			}
+			appAssignments = []domain.AppRoleAssignmentInput{{
+				AppID:         appID,
+				RoleIDs:       []int64{roleID},
+				PrimaryRoleID: &roleID,
+				Source:        "explicit",
+				Status:        "active",
+			}}
+		}
+
+		for index, assignment := range appAssignments {
+			if assignment.Status != "" && assignment.Status != "active" {
+				continue
+			}
+			roleIDs := assignment.RoleIDs
+			if len(roleIDs) == 0 {
+				roleKey := appRoleKey(appID, legacyRole)
+				roleID, roleErr := r.lookupAuthorizationRoleID(ctx, tx, businessID, appID, roleKey)
+				if roleErr != nil {
+					return rollback(roleErr)
+				}
+				roleIDs = []int64{roleID}
+			}
+			for roleIndex, roleID := range roleIDs {
+				if err = r.validateAuthorizationRoleID(ctx, tx, businessID, appID, roleID); err != nil {
+					return rollback(err)
+				}
+				isPrimary := roleIndex == 0 && index == 0
+				if assignment.PrimaryRoleID != nil {
+					isPrimary = *assignment.PrimaryRoleID == roleID
+				}
+				var assignmentID int64
+				// Assignment source is server-owned metadata. Browser input may
+				// request an explicit or group assignment, but cannot manufacture a
+				// system or Dash-default grant.
+				source := authorization.SourceExplicit
+				assignmentUserID := sql.NullInt64{Int64: userID, Valid: true}
+				groupID := sql.NullInt64{}
+				if assignment.GroupID != nil || source == authorization.SourceGroup {
+					if assignment.GroupID == nil {
+						return rollback(errors.New("group role assignment requires a group id"))
+					}
+					var validGroupID int64
+					if err := tx.QueryRowContext(ctx, `
+						SELECT id FROM user_groups
+						WHERE id = ? AND (business_id = ? OR business_id = 0)
+						LIMIT 1`, *assignment.GroupID, businessID).Scan(&validGroupID); err != nil {
+						return rollback(fmt.Errorf("group role assignment is not valid: %w", err))
+					}
+					source = authorization.SourceGroup
+					assignmentUserID = sql.NullInt64{}
+					groupID = sql.NullInt64{Int64: *assignment.GroupID, Valid: true}
+				}
+				result, insertErr := tx.ExecContext(ctx, `
+					INSERT INTO authorization_role_assignments
+						(business_id, user_id, group_id, app_id, role_id, source, status, is_primary, granted_by)
+					VALUES (?, ?, ?, ?, ?, ?, 'active', ?, ?)`,
+					businessID, assignmentUserID, groupID, appID, roleID, source, isPrimary, actorID,
+				)
+				if insertErr != nil {
+					return rollback(insertErr)
+				}
+				assignmentID, err = result.LastInsertId()
+				if err != nil {
+					return rollback(err)
+				}
+				for _, scope := range assignment.Scopes {
+					if _, err = tx.ExecContext(ctx, `
+						INSERT INTO authorization_role_assignment_scopes
+							(assignment_id, scope_type, scope_id)
+						VALUES (?, ?, ?)`, assignmentID, scope.Type, scope.ID); err != nil {
+						return rollback(err)
+					}
+				}
+			}
+		}
+	}
+
+	auditAfter, err := json.Marshal(struct {
+		DashRole  string   `json:"dash_role"`
+		Apps      []string `json:"apps"`
+		RoleCount int      `json:"role_count"`
+	}{DashRole: dashRole, Apps: appIDs, RoleCount: len(assignments)})
+	if err != nil {
+		return rollback(err)
+	}
+	if _, err = tx.ExecContext(ctx, `
+		INSERT INTO authorization_audit_events
+			(business_id, actor_user_id, target_user_id, action, before_json, after_json, source_client)
+		VALUES (?, ?, ?, 'member.authorization.updated', NULL, ?, 'dash')`,
+		businessID, actorID, userID, auditAfter); err != nil {
+		return rollback(err)
+	}
+
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *Repository) replaceUserGroupMemberships(ctx context.Context, tx *sql.Tx, businessID, ownerID, userID int64, groupIDs []int64) error {
+	if _, err := tx.ExecContext(ctx, `
+		DELETE FROM user_group_members
+		WHERE user_id = ? AND owner_id = ? AND (business_id = ? OR business_id = 0)`, userID, ownerID, businessID); err != nil {
+		return err
+	}
+	for _, groupID := range uniqueInt64(groupIDs) {
+		var found int
+		if err := tx.QueryRowContext(ctx, `
+			SELECT 1
+			FROM user_groups
+			WHERE id = ? AND owner_id = ? AND (business_id = ? OR business_id = 0)
+			LIMIT 1`, groupID, ownerID, businessID).Scan(&found); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return fmt.Errorf("group %d does not belong to this business", groupID)
+			}
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `
+			INSERT INTO user_group_members (group_id, user_id, owner_id, business_id, added_by)
+			VALUES (?, ?, ?, ?, ?)
+			ON DUPLICATE KEY UPDATE business_id = VALUES(business_id), added_by = VALUES(added_by)`,
+			groupID, userID, ownerID, businessID, ownerID); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *Repository) insertLicenseAssignments(ctx context.Context, tx *sql.Tx, businessID, actorID, userID int64, appID string, assignments []domain.AppRoleAssignmentInput) error {
+	matched := false
+	for _, assignment := range assignmentsForApp(assignments, appID) {
+		if assignment.Status != "" && assignment.Status != "active" {
+			continue
+		}
+		source := authorization.SourceExplicit
+		if assignment.GroupID == nil && source != authorization.SourceGroup {
+			continue
+		}
+		if assignment.GroupID == nil {
+			return errors.New("group license assignment requires a group id")
+		}
+		var validGroupID int64
+		if err := tx.QueryRowContext(ctx, `
+			SELECT id FROM user_groups
+			WHERE id = ? AND (business_id = ? OR business_id = 0)
+			LIMIT 1`, *assignment.GroupID, businessID).Scan(&validGroupID); err != nil {
+			return fmt.Errorf("group license assignment is not valid: %w", err)
+		}
+		matched = true
+		if _, err := tx.ExecContext(ctx, `
+			INSERT INTO authorization_license_assignments
+				(business_id, user_id, group_id, app_id, source, status, granted_by)
+			VALUES (?, NULL, ?, ?, ?, 'active', ?)`, businessID, *assignment.GroupID, appID, source, actorID); err != nil {
+			return err
+		}
+	}
+	if matched {
+		return nil
+	}
+	_, err := tx.ExecContext(ctx, `
+		INSERT INTO authorization_license_assignments
+			(business_id, user_id, app_id, source, status, granted_by)
+		VALUES (?, ?, ?, 'explicit', 'active', ?)`, businessID, userID, appID, actorID)
+	return err
+}
+
+func uniqueInt64(values []int64) []int64 {
+	result := make([]int64, 0, len(values))
+	for _, value := range values {
+		if value <= 0 {
+			continue
+		}
+		found := false
+		for _, existing := range result {
+			if existing == value {
+				found = true
+				break
+			}
+		}
+		if !found {
+			result = append(result, value)
+		}
+	}
+	return result
+}
+
+func (r *Repository) lookupAuthorizationRoleID(ctx context.Context, tx *sql.Tx, businessID int64, appID, roleKey string) (int64, error) {
+	var roleID int64
+	err := tx.QueryRowContext(ctx, `
+		SELECT id
+		FROM authorization_roles
+		WHERE business_id IN (0, ?) AND app_id = ? AND role_key = ?
+		  AND lifecycle = 'active' AND is_archived = FALSE
+		ORDER BY business_id DESC
+		LIMIT 1`, businessID, appID, roleKey).Scan(&roleID)
+	return roleID, err
+}
+
+func (r *Repository) validateAuthorizationRoleID(ctx context.Context, tx *sql.Tx, businessID int64, appID string, roleID int64) error {
+	var found int
+	return tx.QueryRowContext(ctx, `
+		SELECT 1
+		FROM authorization_roles
+		WHERE id = ? AND business_id IN (0, ?) AND app_id = ?
+		  AND lifecycle = 'active' AND is_archived = FALSE
+		LIMIT 1`, roleID, businessID, appID).Scan(&found)
+}
+
+func assignmentsForApp(values []domain.AppRoleAssignmentInput, appID string) []domain.AppRoleAssignmentInput {
+	result := make([]domain.AppRoleAssignmentInput, 0)
+	for _, value := range values {
+		if value.AppID == appID {
+			result = append(result, value)
+		}
+	}
+	return result
+}
+
+func uniqueAuthorizationApps(values []string) []string {
+	result := make([]string, 0, len(values))
+	for _, value := range values {
+		result = appendUniqueAuthorizationApp(result, value)
+	}
+	return result
+}
+
+func appendUniqueAuthorizationApp(values []string, value string) []string {
+	for _, existing := range values {
+		if existing == value {
+			return values
+		}
+	}
+	return append(values, value)
+}
+
+func isTenantAppID(appID string) bool {
+	switch appID {
+	case "pos", "erp", "hr", "crm", "finance", "flow", "insights", "menu", "recruit":
+		return true
+	default:
+		return false
+	}
+}
+
+func isDashRole(role string) bool {
+	switch role {
+	case "owner", "admin", "manager", "member", "viewer":
+		return true
+	default:
+		return false
+	}
+}
+
+func legacyDashRole(role domain.Role) string {
+	switch role {
+	case domain.RoleOwner:
+		return "owner"
+	case domain.RoleAdmin:
+		return "admin"
+	case domain.RoleOperator, domain.RoleBilling, domain.RoleMenuManager, domain.RoleStoreManager:
+		return "manager"
+	case domain.RoleViewer:
+		return "viewer"
+	default:
+		return "member"
+	}
+}
+
+func appRoleKey(appID string, role domain.Role) string {
+	suffix := "viewer"
+	switch role {
+	case domain.RoleOwner, domain.RoleAdmin:
+		suffix = "admin"
+	case domain.RoleOperator, domain.RoleStoreManager, domain.RoleMenuManager:
+		suffix = "manager"
+	case domain.RoleStaff:
+		switch appID {
+		case "pos":
+			suffix = "cashier"
+		case "flow":
+			suffix = "contributor"
+		case "hr":
+			suffix = "employee"
+		}
+	}
+	if appID == "pos" && (role == domain.RoleOperator || role == domain.RoleStoreManager) {
+		suffix = "location_manager"
+	}
+	return appID + "." + suffix
+}
+
+func (r *Repository) DeactivateUser(ctx context.Context, ownerID, userID int64) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("Failed to deactivate user", logger.Error(err))
+		return err
+	}
+	if err := sqlc.New(tx).DeactivateUser(ctx, sqlc.DeactivateUserParams{OwnerID: ownerID, UserID: userID}); err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE authorization_business_members
+		SET status = 'revoked', authorization_version = authorization_version + 1, updated_at = NOW()
+		WHERE business_id IN (SELECT id FROM businesses WHERE owner_id = ?) AND user_id = ? AND status <> 'revoked'`, ownerID, userID); err != nil && !authorizationSchemaUnavailable(err) {
+		_ = tx.Rollback()
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE authorization_license_assignments l
+		JOIN businesses b ON b.id = l.business_id
+		SET l.status = 'revoked', l.revoked_at = NOW()
+		WHERE b.owner_id = ? AND l.user_id = ? AND l.status = 'active'`, ownerID, userID); err != nil && !authorizationSchemaUnavailable(err) {
+		_ = tx.Rollback()
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE authorization_role_assignments a
+		JOIN businesses b ON b.id = a.business_id
+		SET a.status = 'revoked', a.revoked_at = NOW()
+		WHERE b.owner_id = ? AND a.user_id = ? AND a.status = 'active'`, ownerID, userID); err != nil && !authorizationSchemaUnavailable(err) {
+		_ = tx.Rollback()
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -123,13 +576,61 @@ func (r *Repository) DeactivateUser(ctx context.Context, ownerID, userID int64) 
 // business when hr_core marks that user's employee record terminated. The
 // employment decision stays in hr_employees; this module only owns the write.
 func (r *Repository) RevokeBusinessUserPermissions(ctx context.Context, businessID, userID int64) (int64, error) {
-	rows, err := r.queries.RevokeBusinessUserPermissions(ctx, sqlc.RevokeBusinessUserPermissionsParams{
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		logger.Ctx(ctx).Error("failed to revoke permissions for terminated employee",
+			logger.Any("business_id", businessID), logger.Any("user_id", userID), logger.Error(err))
+		return 0, err
+	}
+	rollback := func(cause error) (int64, error) {
+		_ = tx.Rollback()
+		if authorizationSchemaUnavailable(cause) {
+			rows, legacyErr := r.queries.RevokeBusinessUserPermissions(ctx, sqlc.RevokeBusinessUserPermissionsParams{
+				BusinessID: nullBusinessID(businessID),
+				UserID:     userID,
+			})
+			return rows, legacyErr
+		}
+		return 0, cause
+	}
+	rows, err := sqlc.New(tx).RevokeBusinessUserPermissions(ctx, sqlc.RevokeBusinessUserPermissionsParams{
 		BusinessID: nullBusinessID(businessID),
 		UserID:     userID,
 	})
 	if err != nil {
-		logger.Ctx(ctx).Error("failed to revoke permissions for terminated employee",
-			logger.Any("business_id", businessID), logger.Any("user_id", userID), logger.Error(err))
+		return rollback(err)
+	}
+	if result, normalizedErr := tx.ExecContext(ctx, `
+		UPDATE authorization_business_members
+		SET status = 'revoked', authorization_version = authorization_version + 1, updated_at = NOW()
+		WHERE business_id = ? AND user_id = ? AND status <> 'revoked'`, businessID, userID); normalizedErr != nil {
+		return rollback(normalizedErr)
+	} else if affected, countErr := result.RowsAffected(); countErr == nil {
+		rows += affected
+	}
+	if result, normalizedErr := tx.ExecContext(ctx, `
+		UPDATE authorization_license_assignments
+		SET status = 'revoked', revoked_at = NOW()
+		WHERE business_id = ? AND user_id = ? AND status = 'active'`, businessID, userID); normalizedErr != nil {
+		return rollback(normalizedErr)
+	} else if affected, countErr := result.RowsAffected(); countErr == nil {
+		rows += affected
+	}
+	if result, normalizedErr := tx.ExecContext(ctx, `
+		UPDATE authorization_role_assignments
+		SET status = 'revoked', revoked_at = NOW()
+		WHERE business_id = ? AND user_id = ? AND status = 'active'`, businessID, userID); normalizedErr != nil {
+		return rollback(normalizedErr)
+	} else if affected, countErr := result.RowsAffected(); countErr == nil {
+		rows += affected
+	}
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO authorization_audit_events
+			(business_id, target_user_id, action, reason, source_client)
+		VALUES (?, ?, 'member.authorization.revoked.termination', 'HR employee terminated', 'app')`, businessID, userID); err != nil {
+		return rollback(err)
+	}
+	if err := tx.Commit(); err != nil {
 		return 0, err
 	}
 	return rows, nil
@@ -143,6 +644,13 @@ func (r *Repository) ReconcileTerminatedEmployeeAccess(ctx context.Context) (int
 	rows, err := r.queries.ReconcileTerminatedEmployeeAccess(ctx)
 	if err != nil {
 		logger.Ctx(ctx).Error("terminated-employee access reconciliation failed", logger.Error(err))
+		return 0, err
+	}
+	if _, err := r.pool.ExecContext(ctx, `
+		UPDATE authorization_business_members m
+		JOIN hr_employees e ON e.user_id = m.user_id AND e.business_id = m.business_id
+		SET m.status = 'revoked', m.authorization_version = m.authorization_version + 1, m.updated_at = NOW()
+		WHERE e.status = 'terminated' AND m.status <> 'revoked'`); err != nil && !authorizationSchemaUnavailable(err) {
 		return 0, err
 	}
 	return rows, nil
@@ -186,9 +694,10 @@ func (r *Repository) GetUserBusinessID(ctx context.Context, id int64) (int64, er
 	return businessID.Int64, nil
 }
 
-func (r *Repository) CreateUser(ctx context.Context, email, passwordHash, fullName string) (int64, error) {
+func (r *Repository) CreateUser(ctx context.Context, email, username, passwordHash, fullName string) (int64, error) {
 	res, err := r.queries.CreateUser(ctx, sqlc.CreateUserParams{
 		Email:        email,
+		Username:     sql.NullString{String: username, Valid: username != ""},
 		PasswordHash: passwordHash,
 		FullName:     sql.NullString{String: fullName, Valid: fullName != ""},
 	})
@@ -811,6 +1320,539 @@ func (r *Repository) GetOwnerApps(ctx context.Context, ownerID int64) ([]string,
 	return apps, nil
 }
 
+// GetAuthorizationSnapshot loads only normalized authorization rows for a
+// member. The bool is false during the dual-read migration window when no
+// normalized member row exists, allowing the caller to use the legacy profile.
+// SQL stays in this repository so the application layer receives a persistence
+// independent snapshot for the pure resolver.
+func (r *Repository) GetAuthorizationSnapshot(ctx context.Context, businessID, userID int64, subscribedApps []string) (authorization.Snapshot, bool, error) {
+	if businessID <= 0 || userID <= 0 {
+		return authorization.Snapshot{}, false, nil
+	}
+
+	var (
+		dashRoleID           sql.NullInt64
+		dashRoleKey          string
+		status               string
+		authorizationVersion int64
+	)
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT dash_role_id, dash_role_key, status, authorization_version
+		FROM authorization_business_members
+		WHERE business_id = ? AND user_id = ?
+		LIMIT 1`, businessID, userID).Scan(&dashRoleID, &dashRoleKey, &status, &authorizationVersion)
+	if errors.Is(err, sql.ErrNoRows) {
+		return authorization.Snapshot{}, false, nil
+	}
+	if err != nil {
+		if authorizationSchemaUnavailable(err) {
+			return authorization.Snapshot{}, false, nil
+		}
+		return authorization.Snapshot{}, false, err
+	}
+
+	roles, err := r.loadAuthorizationRoles(ctx, businessID)
+	if err != nil {
+		return authorization.Snapshot{}, false, err
+	}
+	if err := r.loadAuthorizationRolePermissions(ctx, businessID, roles); err != nil {
+		return authorization.Snapshot{}, false, err
+	}
+
+	roleID := nullInt64Pointer(dashRoleID)
+	if dashRoleKey == "" {
+		dashRoleKey = "member"
+	}
+	if !strings.HasPrefix(dashRoleKey, "dash.") {
+		dashRoleKey = "dash." + dashRoleKey
+	}
+	if !dashRoleID.Valid {
+		for _, role := range roles {
+			if role.AppID == nil && role.Key == dashRoleKey {
+				roleID = &role.ID
+				break
+			}
+		}
+	}
+
+	dashPermissions := []string{}
+	if roleID != nil {
+		dashPermissions = authorization.PermissionsForRole(*roleID, roles)
+	}
+	allPermissions, err := r.loadAuthorizationCatalog(ctx)
+	if err != nil {
+		return authorization.Snapshot{}, false, err
+	}
+
+	licenses, err := r.loadAuthorizationLicenses(ctx, businessID, userID)
+	if err != nil {
+		return authorization.Snapshot{}, false, err
+	}
+	assignments, err := r.loadAuthorizationRoleAssignments(ctx, businessID, userID)
+	if err != nil {
+		return authorization.Snapshot{}, false, err
+	}
+
+	apps := make([]authorization.AppID, 0, len(subscribedApps))
+	for _, app := range subscribedApps {
+		if app == "" || app == "dash" {
+			continue
+		}
+		apps = append(apps, authorization.AppID(app))
+	}
+
+	return authorization.Snapshot{
+		BusinessID:           businessID,
+		DashRole:             strings.TrimPrefix(dashRoleKey, "dash."),
+		DashRoleID:           roleID,
+		MembershipActive:     status == "active",
+		SubscribedApps:       apps,
+		DashPermissions:      dashPermissions,
+		Licenses:             licenses,
+		Assignments:          assignments,
+		Roles:                roles,
+		AllPermissions:       allPermissions,
+		AuthorizationVersion: authorizationVersion,
+	}, true, nil
+}
+
+func (r *Repository) loadAuthorizationRoles(ctx context.Context, businessID int64) ([]authorization.Role, error) {
+	rows, err := r.pool.QueryContext(ctx, `
+		SELECT id, app_id, role_key, display_name, description, level,
+		       parent_role_id, is_archived, is_system, assignment_mode
+		FROM authorization_roles
+		WHERE business_id IN (0, ?)
+		  AND lifecycle = 'active'
+		ORDER BY business_id, app_id, level, id`, businessID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	roles := make([]authorization.Role, 0)
+	for rows.Next() {
+		var (
+			role                 authorization.Role
+			appID                string
+			description          sql.NullString
+			parentRoleID         sql.NullInt64
+			isArchived, isSystem bool
+		)
+		if err := rows.Scan(
+			&role.ID,
+			&appID,
+			&role.Key,
+			&role.DisplayName,
+			&description,
+			&role.Level,
+			&parentRoleID,
+			&isArchived,
+			&isSystem,
+			&role.AssignmentMode,
+		); err != nil {
+			return nil, err
+		}
+		role.AppID = authorizationAppPointer(appID)
+		role.ParentRoleID = nullInt64Pointer(parentRoleID)
+		role.IsArchived = isArchived
+		role.IsSystem = isSystem
+		if description.Valid {
+			role.Description = description.String
+		}
+		roles = append(roles, role)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return roles, nil
+}
+
+func (r *Repository) loadAuthorizationRolePermissions(ctx context.Context, businessID int64, roles []authorization.Role) error {
+	rows, err := r.pool.QueryContext(ctx, `
+		SELECT rp.role_id, rp.permission_key
+		FROM authorization_role_permissions rp
+		JOIN authorization_roles r ON r.id = rp.role_id
+		WHERE r.business_id IN (0, ?) AND r.lifecycle = 'active'`, businessID)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	permissionsByRole := make(map[int64][]string, len(roles))
+	for rows.Next() {
+		var roleID int64
+		var permission string
+		if err := rows.Scan(&roleID, &permission); err != nil {
+			return err
+		}
+		permissionsByRole[roleID] = append(permissionsByRole[roleID], permission)
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	for index := range roles {
+		roles[index].Permissions = append([]string{}, permissionsByRole[roles[index].ID]...)
+	}
+	return nil
+}
+
+func (r *Repository) loadAuthorizationCatalog(ctx context.Context) ([]string, error) {
+	rows, err := r.pool.QueryContext(ctx, `
+		SELECT permission_key
+		FROM authorization_permission_catalog
+		ORDER BY permission_key`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	permissions := make([]string, 0)
+	for rows.Next() {
+		var permission string
+		if err := rows.Scan(&permission); err != nil {
+			return nil, err
+		}
+		permissions = append(permissions, permission)
+	}
+	return permissions, rows.Err()
+}
+
+func (r *Repository) loadAuthorizationLicenses(ctx context.Context, businessID, userID int64) ([]authorization.License, error) {
+	rows, err := r.pool.QueryContext(ctx, `
+		SELECT app_id, source, status, group_id, granted_at, revoked_at
+		FROM authorization_license_assignments
+		WHERE business_id = ?
+		  AND status = 'active'
+		  AND (user_id = ? OR group_id IN (
+			SELECT group_id
+			FROM user_group_members
+			WHERE business_id = ? AND user_id = ?
+		  ))`, businessID, userID, businessID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	licenses := make([]authorization.License, 0)
+	for rows.Next() {
+		var (
+			appID, source, status string
+			groupID               sql.NullInt64
+			grantedAt, revokedAt  sql.NullTime
+		)
+		if err := rows.Scan(&appID, &source, &status, &groupID, &grantedAt, &revokedAt); err != nil {
+			return nil, err
+		}
+		license := authorization.License{
+			AppID:     authorization.AppID(appID),
+			Source:    authorization.AssignmentSource(source),
+			Active:    status == "active",
+			GroupID:   nullInt64Pointer(groupID),
+			GrantedAt: time.Time{}.Format(time.RFC3339),
+		}
+		if grantedAt.Valid {
+			license.GrantedAt = grantedAt.Time.UTC().Format(time.RFC3339)
+		}
+		if revokedAt.Valid {
+			value := revokedAt.Time.UTC().Format(time.RFC3339)
+			license.RevokedAt = &value
+		}
+		licenses = append(licenses, license)
+	}
+	return licenses, rows.Err()
+}
+
+func (r *Repository) loadAuthorizationRoleAssignments(ctx context.Context, businessID, userID int64) ([]authorization.RoleAssignment, error) {
+	rows, err := r.pool.QueryContext(ctx, `
+		SELECT a.id, a.app_id, a.group_id, a.role_id, a.source, a.is_primary,
+		       s.scope_type, s.scope_id
+		FROM authorization_role_assignments a
+		LEFT JOIN authorization_role_assignment_scopes s ON s.assignment_id = a.id
+		WHERE a.business_id = ?
+		  AND a.status = 'active'
+		  AND (a.user_id = ? OR a.group_id IN (
+			SELECT group_id
+			FROM user_group_members
+			WHERE business_id = ? AND user_id = ?
+		  ))
+		ORDER BY a.id`, businessID, userID, businessID, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	type assignmentRow struct {
+		assignment authorization.RoleAssignment
+		seen       bool
+	}
+	byID := make(map[int64]*assignmentRow)
+	order := make([]int64, 0)
+	for rows.Next() {
+		var (
+			assignmentID int64
+			appID        string
+			groupID      sql.NullInt64
+			roleID       int64
+			source       string
+			isPrimary    bool
+			scopeType    sql.NullString
+			scopeID      sql.NullString
+		)
+		if err := rows.Scan(&assignmentID, &appID, &groupID, &roleID, &source, &isPrimary, &scopeType, &scopeID); err != nil {
+			return nil, err
+		}
+		entry, ok := byID[assignmentID]
+		if !ok {
+			entry = &assignmentRow{assignment: authorization.RoleAssignment{
+				AppID:   authorization.AppID(appID),
+				GroupID: nullInt64Pointer(groupID),
+				Source:  authorization.AssignmentSource(source),
+				RoleIDs: []int64{},
+				Scopes:  []authorization.Scope{},
+				Active:  true,
+			}}
+			byID[assignmentID] = entry
+			order = append(order, assignmentID)
+		}
+		entry.assignment.RoleIDs = appendUniqueInt64(entry.assignment.RoleIDs, roleID)
+		if isPrimary {
+			primaryRoleID := roleID
+			entry.assignment.PrimaryRoleID = &primaryRoleID
+		}
+		if scopeType.Valid && scopeID.Valid {
+			entry.assignment.Scopes = appendUniqueAuthorizationScope(entry.assignment.Scopes, authorization.Scope{
+				Type: scopeType.String,
+				ID:   scopeID.String,
+			})
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	assignments := make([]authorization.RoleAssignment, 0, len(order))
+	for _, assignmentID := range order {
+		assignments = append(assignments, byID[assignmentID].assignment)
+	}
+	return assignments, nil
+}
+
+func authorizationSchemaUnavailable(err error) bool {
+	if err == nil {
+		return false
+	}
+	message := strings.ToLower(err.Error())
+	return strings.Contains(message, "authorization_") &&
+		(strings.Contains(message, "doesn't exist") || strings.Contains(message, "no such table"))
+}
+
+func authorizationAppPointer(appID string) *authorization.AppID {
+	if appID == "" || appID == "dash" {
+		return nil
+	}
+	value := authorization.AppID(appID)
+	return &value
+}
+
+func nullInt64Pointer(value sql.NullInt64) *int64 {
+	if !value.Valid {
+		return nil
+	}
+	result := value.Int64
+	return &result
+}
+
+func appendUniqueInt64(values []int64, value int64) []int64 {
+	for _, existing := range values {
+		if existing == value {
+			return values
+		}
+	}
+	return append(values, value)
+}
+
+func appendUniqueAuthorizationScope(values []authorization.Scope, value authorization.Scope) []authorization.Scope {
+	for _, existing := range values {
+		if existing == value {
+			return values
+		}
+	}
+	return append(values, value)
+}
+
+func (r *Repository) UpsertProvisioningState(ctx context.Context, userID, businessID int64, mode, state string, emailVerified, passwordChangeRequired bool) error {
+	_, err := r.pool.ExecContext(ctx, `
+		INSERT INTO user_provisioning_states
+			(user_id, business_id, mode, state, email_verified, password_change_required)
+		VALUES (?, ?, ?, ?, ?, ?)
+		ON DUPLICATE KEY UPDATE
+			business_id = VALUES(business_id),
+			mode = VALUES(mode),
+			state = VALUES(state),
+			email_verified = VALUES(email_verified),
+			password_change_required = VALUES(password_change_required),
+			updated_at = NOW()`,
+		userID, businessID, mode, state, emailVerified, passwordChangeRequired,
+	)
+	if err != nil && authorizationSchemaUnavailable(err) {
+		return nil
+	}
+	return err
+}
+
+func (r *Repository) GetProvisioningStatus(ctx context.Context, userID int64) (*authorization.ProvisioningStatus, bool, error) {
+	var (
+		mode, state                                 string
+		emailVerified, passwordChangeRequired       bool
+		mfaRequired, mfaEnrolled, recoveryAvailable bool
+		lastMFAVerified                             sql.NullTime
+	)
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT mode, state, email_verified, password_change_required,
+		       mfa_required, mfa_enrolled, recovery_available, last_mfa_verified_at
+		FROM user_provisioning_states
+		WHERE user_id = ?`, userID).Scan(
+		&mode, &state, &emailVerified, &passwordChangeRequired,
+		&mfaRequired, &mfaEnrolled, &recoveryAvailable, &lastMFAVerified,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, false, nil
+	}
+	if err != nil {
+		if authorizationSchemaUnavailable(err) {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+	mfaVerified := !mfaRequired || (mfaEnrolled && lastMFAVerified.Valid && time.Since(lastMFAVerified.Time) <= 5*time.Minute)
+	return &authorization.ProvisioningStatus{
+		Mode:                   authorization.ProvisioningMode(mode),
+		State:                  authorization.ProvisioningState(state),
+		EmailVerified:          emailVerified,
+		PasswordChangeRequired: passwordChangeRequired,
+		MFARequired:            mfaRequired,
+		MFAEnrolled:            mfaEnrolled,
+		MFAVerified:            mfaVerified,
+		RecoveryAvailable:      recoveryAvailable,
+	}, true, nil
+}
+
+func (r *Repository) IsMFAVerified(ctx context.Context, userID int64) (bool, error) {
+	var required, enrolled bool
+	var lastVerified sql.NullTime
+	err := r.pool.QueryRowContext(ctx, `
+		SELECT mfa_required, mfa_enrolled, last_mfa_verified_at
+		FROM user_provisioning_states
+		WHERE user_id = ?`, userID).Scan(&required, &enrolled, &lastVerified)
+	if errors.Is(err, sql.ErrNoRows) || authorizationSchemaUnavailable(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	if !required {
+		return true, nil
+	}
+	return enrolled && lastVerified.Valid && time.Since(lastVerified.Time) <= 5*time.Minute, nil
+}
+
+func (r *Repository) MarkPasswordChanged(ctx context.Context, userID int64) error {
+	var businessID int64
+	if err := r.pool.QueryRowContext(ctx, `
+		SELECT business_id FROM user_provisioning_states WHERE user_id = ?`, userID).Scan(&businessID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) || authorizationSchemaUnavailable(err) {
+			return nil
+		}
+		return err
+	}
+	_, err := r.pool.ExecContext(ctx, `
+		UPDATE user_provisioning_states
+		SET password_change_required = FALSE,
+		    state = CASE WHEN email_verified THEN 'active' ELSE 'pending_activation' END,
+		    password_changed_at = NOW(),
+		    updated_at = NOW()
+		WHERE user_id = ?`, userID)
+	if err != nil && authorizationSchemaUnavailable(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	return r.ActivateNormalizedAuthorization(ctx, businessID, userID)
+}
+
+func (r *Repository) SetNormalizedAuthorizationPending(ctx context.Context, businessID, userID int64) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	rollback := func(cause error) error {
+		_ = tx.Rollback()
+		if authorizationSchemaUnavailable(cause) {
+			return nil
+		}
+		return cause
+	}
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE authorization_business_members
+		SET status = 'pending', authorization_version = authorization_version + 1, updated_at = NOW()
+		WHERE business_id = ? AND user_id = ?`, businessID, userID); err != nil {
+		return rollback(err)
+	}
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE authorization_license_assignments
+		SET status = 'pending'
+		WHERE business_id = ? AND user_id = ? AND status = 'active'`, businessID, userID); err != nil {
+		return rollback(err)
+	}
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE authorization_role_assignments
+		SET status = 'pending'
+		WHERE business_id = ? AND user_id = ? AND status = 'active'`, businessID, userID); err != nil {
+		return rollback(err)
+	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *Repository) ActivateNormalizedAuthorization(ctx context.Context, businessID, userID int64) error {
+	tx, err := r.pool.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	rollback := func(cause error) error {
+		_ = tx.Rollback()
+		if authorizationSchemaUnavailable(cause) {
+			return nil
+		}
+		return cause
+	}
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE authorization_business_members
+		SET status = 'active', authorization_version = authorization_version + 1, updated_at = NOW()
+		WHERE business_id = ? AND user_id = ? AND status = 'pending'`, businessID, userID); err != nil {
+		return rollback(err)
+	}
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE authorization_license_assignments
+		SET status = 'active'
+		WHERE business_id = ? AND user_id = ? AND status = 'pending'`, businessID, userID); err != nil {
+		return rollback(err)
+	}
+	if _, err := tx.ExecContext(ctx, `
+		UPDATE authorization_role_assignments
+		SET status = 'active'
+		WHERE business_id = ? AND user_id = ? AND status = 'pending'`, businessID, userID); err != nil {
+		return rollback(err)
+	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	return nil
+}
+
 // GetOwnerSubscriptionInfo returns the plan slug and status for the owner's subscription.
 func (r *Repository) GetOwnerSubscriptionInfo(ctx context.Context, ownerID int64) (string, string, error) {
 	// cross-schema read from subscriptions + plans — approved for owner subscription info
@@ -866,7 +1908,7 @@ func (r *Repository) RecordSeatChange(ctx context.Context, ownerID int64, newCou
 	if err := qtx.OpenSeatPeriod(ctx, sqlc.OpenSeatPeriodParams{
 		SubscriptionID:    sub.ID,
 		OwnerID:           ownerID,
-		SeatCount:         int32(newCount),
+		SeatCount:         int32(newCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		PricePerSeatCents: sub.PricePerSeatCents,
 		PeriodStart:       now,
 		BillingMonth:      billingMonth,
@@ -877,7 +1919,7 @@ func (r *Repository) RecordSeatChange(ctx context.Context, ownerID int64, newCou
 
 	// cross-schema write to subscriptions — approved for seat billing accuracy
 	if err := qtx.UpdateSubscriptionSeatCount(ctx, sqlc.UpdateSubscriptionSeatCountParams{
-		SeatCount: int32(newCount),
+		SeatCount: int32(newCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		OwnerID:   ownerID,
 	}); err != nil {
 		_ = tx.Rollback()

@@ -64,6 +64,9 @@ func (h *ListInvoicesHandler) Serve(ctx context.Context, req *ListInvoicesReques
 	if device.User == nil {
 		return ListInvoicesResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireFinancePermission(ctx, "finance:invoices:view"); err != nil {
+		return ListInvoicesResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

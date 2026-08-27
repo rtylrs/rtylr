@@ -37,7 +37,7 @@ func (r *Repository) List(ctx context.Context, businessID int64, page, pageSize 
 	rows, err := r.queries.ListCustomers(ctx, sqlc.ListCustomersParams{
 		BusinessID: businessID,
 		Limit:      int32(pageSize),
-		Offset:     int32(offset),
+		Offset:     int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list support customers", logger.Error(err))

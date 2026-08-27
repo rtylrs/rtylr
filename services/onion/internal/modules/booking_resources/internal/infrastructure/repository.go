@@ -36,7 +36,7 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 	result, err := r.queries.CreateResource(ctx, sqlc.CreateResourceParams{
 		OwnerID: businessID, BusinessID: businessID, Name: input.Name,
 		Type:     sqlc.NullBookingResourcesType{BookingResourcesType: sqlc.BookingResourcesType(input.Type), Valid: input.Type != ""},
-		Capacity: sql.NullInt32{Int32: int32(input.Capacity), Valid: true},
+		Capacity: sql.NullInt32{Int32: int32(input.Capacity), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		IsActive: sql.NullBool{Bool: input.IsActive, Valid: true},
 	})
 	if err != nil {
@@ -55,7 +55,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 	err := r.queries.UpdateResource(ctx, sqlc.UpdateResourceParams{
 		Name:       input.Name,
 		Type:       sqlc.NullBookingResourcesType{BookingResourcesType: sqlc.BookingResourcesType(input.Type), Valid: input.Type != ""},
-		Capacity:   sql.NullInt32{Int32: int32(input.Capacity), Valid: true},
+		Capacity:   sql.NullInt32{Int32: int32(input.Capacity), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		IsActive:   sql.NullBool{Bool: input.IsActive, Valid: true},
 		BusinessID: businessID, ID: id,
 	})

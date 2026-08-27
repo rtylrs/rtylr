@@ -62,6 +62,9 @@ func (h *UpdateInvoiceStatusHandler) Serve(ctx context.Context, req *UpdateInvoi
 	if device.User == nil {
 		return UpdateInvoiceStatusResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireFinancePermission(ctx, "finance:invoices:create"); err != nil {
+		return UpdateInvoiceStatusResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

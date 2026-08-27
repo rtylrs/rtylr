@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"image/color"
+	"io"
 	"net/http"
 	"strings"
 
@@ -79,7 +80,9 @@ func PublicOGHandler(careersService *application.Service) http.HandlerFunc {
 		w.Header().Set("Content-Type", "image/png")
 		w.Header().Set("Cache-Control", "public, max-age=3600, s-maxage=86400")
 		w.Header().Set("ETag", etag)
-		_, _ = w.Write(png)
+		if _, writeErr := io.Copy(w, bytes.NewReader(png)); writeErr != nil {
+			return
+		}
 	}
 }
 

@@ -32,7 +32,7 @@ func toProjectColumn(c domain.ProjectColumn) *flowprojectv1.ProjectColumn {
 		WorkspaceId: c.WorkspaceID,
 		Name:        c.Name,
 		Color:       c.Color,
-		SortOrder:   int32(c.SortOrder),
+		SortOrder:   int32(c.SortOrder), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		CreatedAt:   c.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:   c.UpdatedAt.Format("2006-01-02T15:04:05Z"),
 	}
@@ -59,6 +59,9 @@ func toProjectMember(m domain.ProjectMember) *flowprojectv1.ProjectMember {
 }
 
 func (a *ProjectAPI) ListProjectColumns(ctx context.Context, req *flowprojectv1.ListProjectColumnsRequest) (*flowprojectv1.ListProjectColumnsResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:view"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -83,6 +86,9 @@ func (a *ProjectAPI) ListProjectColumns(ctx context.Context, req *flowprojectv1.
 }
 
 func (a *ProjectAPI) CreateProjectColumn(ctx context.Context, req *flowprojectv1.CreateProjectColumnRequest) (*flowprojectv1.CreateProjectColumnResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:edit"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -116,6 +122,9 @@ func (a *ProjectAPI) CreateProjectColumn(ctx context.Context, req *flowprojectv1
 }
 
 func (a *ProjectAPI) UpdateProjectColumn(ctx context.Context, req *flowprojectv1.UpdateProjectColumnRequest) (*flowprojectv1.UpdateProjectColumnResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:edit"); err != nil {
+		return nil, err
+	}
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -144,6 +153,9 @@ func (a *ProjectAPI) UpdateProjectColumn(ctx context.Context, req *flowprojectv1
 }
 
 func (a *ProjectAPI) DeleteProjectColumn(ctx context.Context, req *flowprojectv1.DeleteProjectColumnRequest) (*flowprojectv1.DeleteProjectColumnResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:edit"); err != nil {
+		return nil, err
+	}
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -178,6 +190,9 @@ func (a *ProjectAPI) MoveTaskToColumn(ctx context.Context, req *flowprojectv1.Mo
 }
 
 func (a *ProjectAPI) ListProjectMembers(ctx context.Context, req *flowprojectv1.ListProjectMembersRequest) (*flowprojectv1.ListProjectMembersResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:view"); err != nil {
+		return nil, err
+	}
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -202,6 +217,9 @@ func (a *ProjectAPI) ListProjectMembers(ctx context.Context, req *flowprojectv1.
 }
 
 func (a *ProjectAPI) AddProjectMember(ctx context.Context, req *flowprojectv1.AddProjectMemberRequest) (*flowprojectv1.AddProjectMemberResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:assign"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -230,6 +248,9 @@ func (a *ProjectAPI) AddProjectMember(ctx context.Context, req *flowprojectv1.Ad
 }
 
 func (a *ProjectAPI) RemoveProjectMember(ctx context.Context, req *flowprojectv1.RemoveProjectMemberRequest) (*flowprojectv1.RemoveProjectMemberResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:assign"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -248,6 +269,9 @@ func (a *ProjectAPI) RemoveProjectMember(ctx context.Context, req *flowprojectv1
 }
 
 func (a *ProjectAPI) UpdateProjectMemberRole(ctx context.Context, req *flowprojectv1.UpdateProjectMemberRoleRequest) (*flowprojectv1.UpdateProjectMemberRoleResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:assign"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err
@@ -271,6 +295,9 @@ func (a *ProjectAPI) UpdateProjectMemberRole(ctx context.Context, req *flowproje
 }
 
 func (a *ProjectAPI) InviteProjectMember(ctx context.Context, req *flowprojectv1.InviteProjectMemberRequest) (*flowprojectv1.InviteProjectMemberResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:projects:assign"); err != nil {
+		return nil, err
+	}
 	businessID, authUser, err := a.resolveBusinessID(ctx)
 	if err != nil {
 		return nil, err

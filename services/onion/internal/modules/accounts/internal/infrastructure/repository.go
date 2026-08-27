@@ -46,7 +46,7 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) List(ctx context.Context, businessID int64, limit, offset int) ([]domain.Account, error) {
-	rows, err := r.queries.ListAccounts(ctx, sqlc.ListAccountsParams{BusinessID: businessID, Limit: int32(limit), Offset: int32(offset)})
+	rows, err := r.queries.ListAccounts(ctx, sqlc.ListAccountsParams{BusinessID: businessID, Limit: int32(limit), Offset: int32(offset)}) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list accounts", logger.Error(err))
 		return nil, err

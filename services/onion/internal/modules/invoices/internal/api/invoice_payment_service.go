@@ -22,6 +22,9 @@ func NewInvoicePaymentAPI(service *application.Service) *InvoicePaymentAPI {
 }
 
 func (a *InvoicePaymentAPI) RecordPayment(ctx context.Context, req *financeinvoicespaymentsv1.RecordPaymentRequest) (*financeinvoicespaymentsv1.RecordPaymentResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:invoices:create"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := invoiceBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel

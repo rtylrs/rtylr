@@ -16,6 +16,7 @@ import (
 const (
 	apiKeysScope = "api_keys"
 	apiKeysTTL   = 5 * time.Minute
+	// #nosec G101 -- This is a public display prefix for generated API keys, not a secret.
 	apiKeyPrefix = "rtylr_api_k1_"
 )
 

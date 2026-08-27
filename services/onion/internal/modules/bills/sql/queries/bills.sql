@@ -26,7 +26,7 @@ SET supplier_id = ?, supplier_name = ?, purchase_order_id = ?, amount = ?, curre
 WHERE id = ? AND business_id = ?;
 
 -- name: SumBillsByStatus :one
-SELECT COALESCE(SUM(CAST(amount AS REAL)), 0) AS total
+SELECT COALESCE(SUM(CAST(amount AS DECIMAL(14,2))), 0) AS total
 FROM finance_bills
 WHERE business_id = ? AND status = ?;
 

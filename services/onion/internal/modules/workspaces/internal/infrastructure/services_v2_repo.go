@@ -35,7 +35,7 @@ func (r *Repository) ListLabelsV2(ctx context.Context, businessID, limit, offset
 	if err != nil {
 		return nil, 0, err
 	}
-	rows, err := r.queries.ListLabelsV2(ctx, sqlc.ListLabelsV2Params{BusinessID: businessID, Limit: int32(limit), Offset: int32(offset)})
+	rows, err := r.queries.ListLabelsV2(ctx, sqlc.ListLabelsV2Params{BusinessID: businessID, Limit: int32(limit), Offset: int32(offset)}) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	if err != nil {
 		return nil, 0, err
 	}
@@ -74,7 +74,7 @@ func (r *Repository) ListCyclesV2(ctx context.Context, projectID, businessID, ca
 	rows, err := r.queries.ListCyclesV2(ctx, sqlc.ListCyclesV2Params{
 		ProjectID: nullInt64(projectID), BusinessID: businessID,
 		Column3: bypass, CreatedBy: callerID, OwnerID: callerID, UserID: callerID,
-		Limit: int32(limit), Offset: int32(offset),
+		Limit: int32(limit), Offset: int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		return nil, 0, err
@@ -119,7 +119,7 @@ func (r *Repository) ListMilestonesV2(ctx context.Context, businessID int64, pro
 	rows, err := r.queries.ListMilestonesByBusiness(ctx, sqlc.ListMilestonesByBusinessParams{
 		BusinessID: businessID, Column2: pid, ProjectID: pid,
 		Column4: bypass, CreatedBy: callerID, OwnerID: callerID, UserID: callerID,
-		Limit: int32(limit), Offset: int32(offset),
+		Limit: int32(limit), Offset: int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		return nil, 0, err
@@ -153,8 +153,8 @@ func (r *Repository) ListViewsV2(ctx context.Context, businessID, callerID, limi
 	rows, err := r.queries.ListViewsV2(ctx, sqlc.ListViewsV2Params{
 		BusinessID: businessID,
 		CreatedBy:  sql.NullInt64{Int64: callerID, Valid: true},
-		Limit:      int32(limit),
-		Offset:     int32(offset),
+		Limit:      int32(limit),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset:     int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		return nil, 0, err

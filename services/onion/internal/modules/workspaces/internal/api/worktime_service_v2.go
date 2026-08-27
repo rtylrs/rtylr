@@ -62,7 +62,7 @@ func (a *WorkTimeAPIV2) ListTeamWorkDays(ctx context.Context, req *flowtimev2.Li
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
 	days, total, err := a.Service.ListTeamWorkDays(
 		ctx, authUser.UserID, businessID,
-		req.GetFrom(), req.GetTo(), int64(limit), offset,
+		req.GetFromDate(), req.GetToDate(), int64(limit), offset,
 	)
 	if err != nil {
 		if err == domain.ErrUnauthorized {
@@ -197,7 +197,7 @@ func (a *WorkTimeAPIV2) ListWorkDays(ctx context.Context, req *flowtimev2.ListWo
 	}
 
 	page, limit, offset := resolvePagination(req.GetPage(), req.GetLimit())
-	days, total, err := a.Service.ListWorkDays(ctx, ownerID, businessID, employeeID, req.GetFrom(), req.GetTo(), limit, offset)
+	days, total, err := a.Service.ListWorkDays(ctx, ownerID, businessID, employeeID, req.GetFromDate(), req.GetToDate(), limit, offset)
 	if err != nil {
 		return nil, mapServiceError(ctx, err)
 	}

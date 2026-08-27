@@ -12,9 +12,11 @@ UPDATE finance_tax_config SET is_default = FALSE WHERE business_id = ?;
 INSERT INTO finance_tax_config (owner_id, business_id, name, rate, type, is_default, is_active, is_inclusive)
 VALUES (?, ?, ?, ?, ?, TRUE, ?, ?)
 ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
   rate = VALUES(rate),
   is_default = TRUE,
-  is_active = VALUES(is_active);
+  is_active = VALUES(is_active),
+  is_inclusive = VALUES(is_inclusive);
 
 -- name: SumPaidInvoicesTotal :one
 SELECT COALESCE(SUM(total), 0) FROM finance_invoices WHERE business_id = ? AND status = 'paid';

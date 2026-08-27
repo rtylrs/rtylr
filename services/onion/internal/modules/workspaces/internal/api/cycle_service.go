@@ -30,8 +30,8 @@ func toCycle(c domain.Cycle) *flowcyclev1.Cycle {
 		StartDate:   c.StartDate.Format("2006-01-02"),
 		EndDate:     c.EndDate.Format("2006-01-02"),
 		Status:      c.Status,
-		Scope:       int32(c.Scope),
-		Completed:   int32(c.Completed),
+		Scope:       int32(c.Scope),     // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Completed:   int32(c.Completed), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 }
 

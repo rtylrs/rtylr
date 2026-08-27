@@ -45,7 +45,7 @@ func newLocationPayload(loc domain.Location) LocationPayload {
 }
 
 func (h *ListLocationsHandler) Serve(ctx context.Context, _ *ListLocationsRequest) (ListLocationsResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:view")
 	if authErr != nil {
 		return ListLocationsResponse{}, authErr
 	}
@@ -92,7 +92,7 @@ func (h *CreateLocationHandler) Validate(_ context.Context, req *CreateLocationR
 }
 
 func (h *CreateLocationHandler) Serve(ctx context.Context, req *CreateLocationRequest) (CreateLocationResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:employees:manage")
 	if authErr != nil {
 		return CreateLocationResponse{}, authErr
 	}
@@ -130,7 +130,7 @@ type DashboardResponse struct {
 }
 
 func (h *DashboardHandler) Serve(ctx context.Context, _ *DashboardRequest) (DashboardResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:reports:view")
 	if authErr != nil {
 		return DashboardResponse{}, authErr
 	}

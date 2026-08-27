@@ -246,7 +246,7 @@ func (s *Service) resolveOne(f domain.Flag, rules []domain.Rule, attrs map[strin
 		}
 		if rule.RolloutPercentage > 0 && subject != "" {
 			salt := f.Key + ":rule:" + strconv.FormatInt(rule.ID, 10)
-			if int32(bucketOf(salt, subject)) < rule.RolloutPercentage {
+			if int32(bucketOf(salt, subject)) < rule.RolloutPercentage { // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 				return domain.Resolution{Key: f.Key, Enabled: true, Variant: onVariant}
 			}
 		}
@@ -261,7 +261,7 @@ func (s *Service) resolveOne(f domain.Flag, rules []domain.Rule, attrs map[strin
 	if f.RolloutPercentage <= 0 || subject == "" {
 		return domain.Resolution{Key: f.Key, Enabled: false, Variant: f.VariantOff}
 	}
-	if int32(bucketOf(f.Key, subject)) < f.RolloutPercentage {
+	if int32(bucketOf(f.Key, subject)) < f.RolloutPercentage { // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		return domain.Resolution{Key: f.Key, Enabled: true, Variant: f.VariantOn}
 	}
 	return domain.Resolution{Key: f.Key, Enabled: false, Variant: f.VariantOff}

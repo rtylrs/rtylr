@@ -25,6 +25,7 @@ func (r *Repository) Get(ctx context.Context, businessID int64) (domain.Settings
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Settings{
+				OwnerID:        businessID,
 				BusinessID:     businessID,
 				DefaultConsent: true,
 				Timezone:       "UTC",

@@ -46,7 +46,8 @@ func (a *AttendanceAPI) ListAttendance(ctx context.Context, req *hrattendancev1.
 		return nil, err
 	}
 	date := req.GetDate()
-	result, err := (&GetAttendanceHandler{Service: a.Service}).Serve(ctx, &GetAttendanceRequest{
+	scopeResolver, _ := a.EmployeeResolver.(EmployeeBusinessResolver)
+	result, err := (&GetAttendanceHandler{Service: a.Service, EmployeeBusinessResolver: scopeResolver}).Serve(ctx, &GetAttendanceRequest{
 		OwnerID:    ownerID,
 		EmployeeID: employeeID,
 		DateFrom:   date,

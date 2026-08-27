@@ -33,7 +33,7 @@ func (s *Service) ListPurchaseOrders(ctx context.Context, businessID int64, stat
 	cacheKey := fmt.Sprintf("purchase_orders:%d:%s|p=%d|ps=%d", businessID, status, page, pageSize)
 
 	rows, err := cacher.Of[[]domain.PurchaseOrder]().GetOrComputeSingle(ctx, cacheKey, func(ctx context.Context) ([]domain.PurchaseOrder, error) {
-		return s.repo.ListPurchaseOrders(ctx, businessID, status, int32(limit+1), int32(offset))
+		return s.repo.ListPurchaseOrders(ctx, businessID, status, int32(limit+1), int32(offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}, cacher.WithExpiry(ctx, poCacheTTL))
 	if err != nil {
 		return nil, false, err

@@ -10,11 +10,22 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hubteamaccessv1 "github.com/voxire/voxie/gen/go/hub/team/access/v1"
 )
 
 type AccessAPI struct {
 	Service *application.Service
+}
+
+type ListHierarchyRequest struct {
+	Page     int64 `json:"page"`
+	PageSize int64 `json:"page_size"`
+}
+
+type ListHierarchyResponse struct {
+	Members []domain.StaffUser `json:"members"`
+	HasMore bool               `json:"has_more"`
 }
 
 func NewAccessAPI(service *application.Service) *AccessAPI {
@@ -46,12 +57,12 @@ func (a *AccessAPI) RequestAccess(ctx context.Context, req *hubteamaccessv1.Requ
 }
 
 func (a *AccessAPI) ListAccessRequests(ctx context.Context, _ *hubteamaccessv1.ListAccessRequestsRequest) (*hubteamaccessv1.ListAccessRequestsResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return nil, onekiterrors.PermissionDenied()
+	device, permissionErr := requireHubPermission(ctx, "hub:team:view")
+	if permissionErr != nil {
+		return nil, permissionErr
 	}
 
-	reqs, err := a.Service.ListAccessRequests(ctx, device.User.UserID, device.User.BusinessID)
+	reqs, err := a.Service.ListAccessRequests(ctx, device.UserID, device.BusinessID)
 	if err != nil {
 		if errors.Is(err, domain.ErrForbidden) {
 			return nil, onekiterrors.PermissionDenied()
@@ -75,9 +86,9 @@ func (a *AccessAPI) ListAccessRequests(ctx context.Context, _ *hubteamaccessv1.L
 }
 
 func (a *AccessAPI) ApproveAccessRequest(ctx context.Context, req *hubteamaccessv1.ApproveAccessRequestRequest) (*hubteamaccessv1.ApproveAccessRequestResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return nil, onekiterrors.PermissionDenied()
+	device, permissionErr := requireHubPermission(ctx, "hub:team:edit")
+	if permissionErr != nil {
+		return nil, permissionErr
 	}
 
 	requestID := req.GetId()
@@ -90,7 +101,7 @@ func (a *AccessAPI) ApproveAccessRequest(ctx context.Context, req *hubteamaccess
 		return nil, onekiterrors.New(http.StatusBadRequest, "user_id and app are required")
 	}
 
-	if err := a.Service.ApproveAccessRequest(ctx, device.User.UserID, device.User.BusinessID, requestID, userID, app); err != nil {
+	if err := a.Service.ApproveAccessRequest(ctx, device.UserID, device.BusinessID, requestID, userID, app); err != nil {
 		if errors.Is(err, domain.ErrForbidden) {
 			return nil, onekiterrors.PermissionDenied()
 		}
@@ -98,4 +109,33 @@ func (a *AccessAPI) ApproveAccessRequest(ctx context.Context, req *hubteamaccess
 	}
 
 	return &hubteamaccessv1.ApproveAccessRequestResponse{Message: "Access granted"}, nil
+}
+
+func (a *AccessAPI) ListHierarchy(ctx context.Context, req *ListHierarchyRequest) (ListHierarchyResponse, error) {
+	device, permissionErr := requireHubPermission(ctx, "hub:hierarchy:manage")
+	if permissionErr != nil {
+		return ListHierarchyResponse{}, permissionErr
+	}
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, device.BusinessID, device.UserID)
+	if businessErr != nil {
+		return ListHierarchyResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	page := req.Page
+	if page < 1 {
+		page = 1
+	}
+	pageSize := req.PageSize
+	if pageSize < 1 {
+		pageSize = 50
+	}
+	if pageSize > 200 {
+		pageSize = 200
+	}
+
+	members, hasMore, err := a.Service.ListStaffUsersByBusiness(ctx, businessID, page, pageSize)
+	if err != nil {
+		return ListHierarchyResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to list hierarchy")
+	}
+	return ListHierarchyResponse{Members: members, HasMore: hasMore}, nil
 }

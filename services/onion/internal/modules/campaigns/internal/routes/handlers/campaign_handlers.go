@@ -79,10 +79,10 @@ type (
 )
 
 func (h *ListCampaignsHandler) Serve(ctx context.Context, req *ListCampaignsRequest) (ListCampaignsResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return ListCampaignsResponse{}, onekiterrors.PermissionDenied()
+	if err := requireCampaignPermission(ctx, "crm:campaigns:view"); err != nil {
+		return ListCampaignsResponse{}, err
 	}
+	device := authPkg.DeviceCtx(ctx)
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return ListCampaignsResponse{}, onekiterrors.PermissionDenied()
@@ -123,10 +123,10 @@ type (
 )
 
 func (h *GetCampaignHandler) Serve(ctx context.Context, _ *GetCampaignRequest) (GetCampaignResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return GetCampaignResponse{}, onekiterrors.PermissionDenied()
+	if err := requireCampaignPermission(ctx, "crm:campaigns:view"); err != nil {
+		return GetCampaignResponse{}, err
 	}
+	device := authPkg.DeviceCtx(ctx)
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil || id <= 0 {
@@ -177,15 +177,12 @@ func (h *CreateCampaignHandler) Validate(_ context.Context, req *CreateCampaignR
 }
 
 func (h *CreateCampaignHandler) Serve(ctx context.Context, req *CreateCampaignRequest) (CreateCampaignResponse, error) {
-	if err := requireCampaignManager(ctx); err != nil {
+	if err := requireCampaignPermission(ctx, "crm:campaigns:create"); err != nil {
 		return CreateCampaignResponse{}, err
 	}
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return CreateCampaignResponse{}, onekiterrors.PermissionDenied()
-	}
-	if err := requireCampaignManager(ctx); err != nil {
-		return CreateCampaignResponse{}, err
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -244,15 +241,12 @@ func (h *UpdateCampaignHandler) Validate(_ context.Context, req *UpdateCampaignR
 }
 
 func (h *UpdateCampaignHandler) Serve(ctx context.Context, req *UpdateCampaignRequest) (UpdateCampaignResponse, error) {
-	if err := requireCampaignManager(ctx); err != nil {
+	if err := requireCampaignPermission(ctx, "crm:campaigns:create"); err != nil {
 		return UpdateCampaignResponse{}, err
 	}
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return UpdateCampaignResponse{}, onekiterrors.PermissionDenied()
-	}
-	if err := requireCampaignManager(ctx); err != nil {
-		return UpdateCampaignResponse{}, err
 	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -309,11 +303,8 @@ func (h *UpdateCampaignStatusHandler) Validate(_ context.Context, req *UpdateCam
 
 func (h *UpdateCampaignStatusHandler) Serve(ctx context.Context, req *UpdateCampaignStatusRequest) (UpdateCampaignStatusResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.IsAnonymous || device.User == nil {
 		return UpdateCampaignStatusResponse{}, onekiterrors.PermissionDenied()
-	}
-	if err := requireCampaignManager(ctx); err != nil {
-		return UpdateCampaignStatusResponse{}, err
 	}
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -326,7 +317,11 @@ func (h *UpdateCampaignStatusHandler) Serve(ctx context.Context, req *UpdateCamp
 	default:
 		return UpdateCampaignStatusResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid campaign status")
 	}
-	if err := requireCampaignManager(ctx); err != nil {
+	permission := "crm:campaigns:create"
+	if status == "active" || status == "sent" {
+		permission = "crm:campaigns:send"
+	}
+	if err := requireCampaignPermission(ctx, permission); err != nil {
 		return UpdateCampaignStatusResponse{}, err
 	}
 

@@ -134,7 +134,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 			OrderID:   id,
 			ProductID: sql.NullInt64{Int64: item.ProductID, Valid: item.ProductID != 0},
 			Name:      item.Name,
-			Quantity:  int32(item.Quantity),
+			Quantity:  int32(item.Quantity), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			Price:     strconv.FormatFloat(item.Price, 'f', 2, 64),
 			Total:     strconv.FormatFloat(item.Total, 'f', 2, 64),
 		})

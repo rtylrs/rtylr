@@ -12,11 +12,13 @@ import (
 
 type Repository struct {
 	queries *sqlc.Queries
+	pool    *sql.DB
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		queries: sqlc.New(db),
+		pool:    db,
 	}
 }
 

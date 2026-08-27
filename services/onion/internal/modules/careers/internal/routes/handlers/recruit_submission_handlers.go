@@ -1,13 +1,17 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
+	"encoding/csv"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -18,6 +22,7 @@ import (
 
 func ListSubmissionsRoutes() []string        { return []string{"/recruit/submissions"} }
 func UpdateSubmissionStatusRoutes() []string { return []string{"/recruit/submissions/status"} }
+func ExportSubmissionsRoutes() []string      { return []string{"/recruit/submissions/export"} }
 
 // ─────────────────────────────────────────────
 // Shared payload
@@ -75,9 +80,9 @@ type ListSubmissionsResponse struct {
 }
 
 func (h *ListSubmissionsHandler) Serve(ctx context.Context, req *ListSubmissionsRequest) (ListSubmissionsResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return ListSubmissionsResponse{}, onekiterrors.PermissionDenied()
+	authUser, err := requireRecruitPermission(ctx, "recruit:candidates:view")
+	if err != nil {
+		return ListSubmissionsResponse{}, err
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
@@ -91,7 +96,14 @@ func (h *ListSubmissionsHandler) Serve(ctx context.Context, req *ListSubmissions
 
 	payloads := make([]*SubmissionPayload, 0, len(submissions))
 	for _, s := range submissions {
-		payloads = append(payloads, toSubmissionPayload(s))
+		payload := toSubmissionPayload(s)
+		if !authPkg.HasAppPermission(authUser, authorization.AppRecruit, "recruit:candidates:sensitive_view") {
+			payload.Email = ""
+			payload.Phone = ""
+			payload.ResumeURL = ""
+			payload.AnswersJSON = ""
+		}
+		payloads = append(payloads, payload)
 	}
 	return ListSubmissionsResponse{Submissions: payloads}, nil
 }
@@ -124,9 +136,9 @@ func (h *UpdateSubmissionStatusHandler) Validate(_ context.Context, req *UpdateS
 }
 
 func (h *UpdateSubmissionStatusHandler) Serve(ctx context.Context, req *UpdateSubmissionStatusRequest) (UpdateSubmissionStatusResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return UpdateSubmissionStatusResponse{}, onekiterrors.PermissionDenied()
+	authUser, err := requireRecruitPermission(ctx, "recruit:candidates:edit")
+	if err != nil {
+		return UpdateSubmissionStatusResponse{}, err
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
@@ -137,4 +149,62 @@ func (h *UpdateSubmissionStatusHandler) Serve(ctx context.Context, req *UpdateSu
 		return UpdateSubmissionStatusResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update submission status")
 	}
 	return UpdateSubmissionStatusResponse{Message: "Submission updated"}, nil
+}
+
+type ExportSubmissionsHandler struct {
+	CareersService *application.Service
+}
+
+type ExportSubmissionsRequest struct {
+	Status string `json:"status"`
+}
+
+type ExportSubmissionsResponse struct {
+	Filename    string `json:"filename"`
+	ContentType string `json:"content_type"`
+	CSV         string `json:"csv"`
+}
+
+func (h *ExportSubmissionsHandler) Serve(ctx context.Context, req *ExportSubmissionsRequest) (ExportSubmissionsResponse, error) {
+	authUser, err := requireRecruitPermission(ctx, "recruit:candidates:export")
+	if err != nil {
+		return ExportSubmissionsResponse{}, err
+	}
+	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
+	if bizErr != nil {
+		return ExportSubmissionsResponse{}, onekiterrors.PermissionDenied()
+	}
+	status := ""
+	if req != nil {
+		status = req.Status
+	}
+	submissions, err := h.CareersService.ListSubmissions(ctx, businessID, status)
+	if err != nil {
+		return ExportSubmissionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to export submissions")
+	}
+
+	var body bytes.Buffer
+	w := csv.NewWriter(&body)
+	if err := w.Write([]string{"id", "career_id", "candidate_name", "email", "phone", "resume_url", "status", "created_at"}); err != nil {
+		return ExportSubmissionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to export submissions")
+	}
+	for _, submission := range submissions {
+		if err := w.Write([]string{
+			strconv.FormatInt(submission.ID, 10),
+			strconv.FormatInt(submission.CareerID, 10),
+			submission.CandidateName,
+			submission.Email,
+			submission.Phone,
+			submission.ResumeURL,
+			submission.Status,
+			submission.CreatedAt.Format(time.RFC3339),
+		}); err != nil {
+			return ExportSubmissionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to export submissions")
+		}
+	}
+	w.Flush()
+	if err := w.Error(); err != nil {
+		return ExportSubmissionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to export submissions")
+	}
+	return ExportSubmissionsResponse{Filename: "recruit_candidates.csv", ContentType: "text/csv", CSV: body.String()}, nil
 }

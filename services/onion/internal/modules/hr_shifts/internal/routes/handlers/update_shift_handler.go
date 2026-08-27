@@ -52,6 +52,9 @@ func (h *UpdateShiftHandler) Serve(ctx context.Context, req *UpdateShiftRequest)
 	if device.IsAnonymous || device.User == nil {
 		return UpdateShiftResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireShiftPermission(ctx); err != nil {
+		return UpdateShiftResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

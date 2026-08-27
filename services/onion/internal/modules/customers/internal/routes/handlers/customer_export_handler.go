@@ -46,7 +46,7 @@ func (h *ExportCustomerHandler) Serve(ctx context.Context, req *ExportCustomerRe
 	if device.User == nil {
 		return ExportCustomerResponse{}, onekiterrors.PermissionDenied()
 	}
-	if err := requireCRMManager(ctx); err != nil {
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:export"); err != nil {
 		return ExportCustomerResponse{}, err
 	}
 

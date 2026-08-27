@@ -156,7 +156,7 @@ func (h *ListOrdersHandler) Validate(_ context.Context, req *ListOrdersRequest) 
 }
 
 func (h *ListOrdersHandler) Serve(ctx context.Context, req *ListOrdersRequest) (ListOrdersResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:view")
 	if authErr != nil {
 		return ListOrdersResponse{}, authErr
 	}
@@ -252,7 +252,7 @@ func (h *CreateOrderHandler) Validate(_ context.Context, req *CreateOrderRequest
 }
 
 func (h *CreateOrderHandler) Serve(ctx context.Context, req *CreateOrderRequest) (CreateOrderResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return CreateOrderResponse{}, authErr
 	}
@@ -316,7 +316,7 @@ type GetOrderDetailResponse struct {
 }
 
 func (h *GetOrderDetailHandler) Serve(ctx context.Context, req *GetOrderDetailRequest) (GetOrderDetailResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:view")
 	if authErr != nil {
 		return GetOrderDetailResponse{}, authErr
 	}
@@ -379,7 +379,7 @@ func (h *UpdateOrderStatusHandler) Validate(ctx context.Context, req *UpdateOrde
 }
 
 func (h *UpdateOrderStatusHandler) Serve(ctx context.Context, req *UpdateOrderStatusRequest) (UpdateOrderStatusResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return UpdateOrderStatusResponse{}, authErr
 	}
@@ -434,7 +434,7 @@ func (h *UpdateOrderItemStatusHandler) Validate(_ context.Context, req *UpdateOr
 }
 
 func (h *UpdateOrderItemStatusHandler) Serve(ctx context.Context, req *UpdateOrderItemStatusRequest) (UpdateOrderItemStatusResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return UpdateOrderItemStatusResponse{}, authErr
 	}
@@ -481,7 +481,7 @@ func (h *ProcessPaymentHandler) Validate(ctx context.Context, req *ProcessPaymen
 }
 
 func (h *ProcessPaymentHandler) Serve(ctx context.Context, req *ProcessPaymentRequest) (ProcessPaymentResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return ProcessPaymentResponse{}, authErr
 	}
@@ -551,7 +551,7 @@ func (h *ProcessRefundHandler) Validate(ctx context.Context, req *ProcessRefundR
 }
 
 func (h *ProcessRefundHandler) Serve(ctx context.Context, req *ProcessRefundRequest) (ProcessRefundResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:refund")
 	if authErr != nil {
 		return ProcessRefundResponse{}, authErr
 	}
@@ -589,5 +589,84 @@ func (h *ProcessRefundHandler) Serve(ctx context.Context, req *ProcessRefundRequ
 		}
 	}
 
+	return ProcessRefundResponse{RefundID: refundID, Message: "Refund processed"}, nil
+}
+
+type ApproveRefundOrderHandler struct{ Service *application.Service }
+
+func ApproveRefundOrderRoutes() []string {
+	return []string{"/pos/orders/{id}/refund/approve"}
+}
+
+func (h *ApproveRefundOrderHandler) Validate(ctx context.Context, req *ProcessRefundRequest) error {
+	if req.OrderID == 0 && chi.URLParamFromCtx(ctx, "id") == "" {
+		return onekiterrors.New(http.StatusBadRequest, "Order id is required")
+	}
+	return nil
+}
+
+func (h *ApproveRefundOrderHandler) Serve(ctx context.Context, req *ProcessRefundRequest) (ProcessRefundResponse, error) {
+	user, authErr := requirePOSPermission(ctx, "pos:orders:refund:approve")
+	if authErr != nil {
+		return ProcessRefundResponse{}, authErr
+	}
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return ProcessRefundResponse{}, bizErr
+	}
+	orderID := req.OrderID
+	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
+		parsed, err := strconv.ParseInt(raw, 10, 64)
+		if err != nil || parsed <= 0 {
+			return ProcessRefundResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid order id")
+		}
+		orderID = parsed
+	}
+	refundID, err := h.Service.ProcessRefund(ctx, businessID, user.UserID, domain.RefundInput{
+		OrderID: orderID,
+		Amount:  req.Amount,
+		Reason:  req.Reason,
+	})
+	if err != nil {
+		return ProcessRefundResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to process refund")
+	}
+	return ProcessRefundResponse{RefundID: refundID, Message: "Refund processed"}, nil
+}
+
+type OverrideRefundOrderHandler struct{ Service *application.Service }
+
+func OverrideRefundOrderRoutes() []string {
+	return []string{"/pos/orders/{id}/refund/override"}
+}
+
+func (h *OverrideRefundOrderHandler) Validate(ctx context.Context, req *ProcessRefundRequest) error {
+	return (&ApproveRefundOrderHandler{}).Validate(ctx, req)
+}
+
+func (h *OverrideRefundOrderHandler) Serve(ctx context.Context, req *ProcessRefundRequest) (ProcessRefundResponse, error) {
+	user, authErr := requirePOSPermission(ctx, "pos:orders:refund:override")
+	if authErr != nil {
+		return ProcessRefundResponse{}, authErr
+	}
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return ProcessRefundResponse{}, bizErr
+	}
+	orderID := req.OrderID
+	if raw := chi.URLParamFromCtx(ctx, "id"); raw != "" {
+		parsed, err := strconv.ParseInt(raw, 10, 64)
+		if err != nil || parsed <= 0 {
+			return ProcessRefundResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid order id")
+		}
+		orderID = parsed
+	}
+	refundID, err := h.Service.ProcessRefund(ctx, businessID, user.UserID, domain.RefundInput{
+		OrderID: orderID,
+		Amount:  req.Amount,
+		Reason:  req.Reason,
+	})
+	if err != nil {
+		return ProcessRefundResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to process refund")
+	}
 	return ProcessRefundResponse{RefundID: refundID, Message: "Refund processed"}, nil
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/testutil"
 	flowlabelv1 "github.com/voxire/voxie/gen/go/flow/label/v1"
@@ -127,6 +128,22 @@ func ctxAs(userID int64) context.Context {
 	return authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
 		UserID:     userID,
 		BusinessID: testutil.BusinessID,
+		EffectiveAccess: &authorization.EffectiveAccess{
+			BusinessID: testutil.BusinessID,
+			Apps: []authorization.EffectiveAppAccess{{
+				AppID:     authorization.AppFlow,
+				Licensed:  true,
+				HasAccess: true,
+				Permissions: []string{
+					"flow:projects:view", "flow:projects:create", "flow:projects:edit",
+					"flow:projects:assign", "flow:tasks:view", "flow:tasks:create",
+					"flow:tasks:edit", "flow:tasks:assign", "flow:team:manage",
+					"flow:managers:manage", "flow:settings:manage",
+				},
+			}},
+			IsOwner: userID == roleOwnerID,
+			IsAdmin: userID == roleManagerID,
+		},
 	})
 }
 

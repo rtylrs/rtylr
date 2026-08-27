@@ -43,19 +43,19 @@ func TestRequireProjectRole_HubBypass(t *testing.T) {
 		wantBypass bool
 	}{
 		{
-			name:       "owner bypasses with no project/workspace role at all",
+			name:       "owner does not bypass project scope",
 			resolver:   fakeHubProfileResolver{profile: hubprofile.Profile{IsOwner: true}},
-			wantBypass: true,
+			wantBypass: false,
 		},
 		{
-			name:       "admin role bypasses",
+			name:       "admin does not bypass project scope",
 			resolver:   fakeHubProfileResolver{profile: hubprofile.Profile{Role: "admin"}},
-			wantBypass: true,
+			wantBypass: false,
 		},
 		{
-			name:       "operator role bypasses",
+			name:       "operator does not bypass project scope",
 			resolver:   fakeHubProfileResolver{profile: hubprofile.Profile{Role: "operator"}},
-			wantBypass: true,
+			wantBypass: false,
 		},
 		{
 			name:       "staff role does not bypass, falls through",
@@ -101,19 +101,19 @@ func TestRequireWorkspaceRole_HubBypass(t *testing.T) {
 		wantBypass bool
 	}{
 		{
-			name:       "owner bypasses with no workspace role at all",
+			name:       "owner does not bypass workspace scope",
 			resolver:   fakeHubProfileResolver{profile: hubprofile.Profile{IsOwner: true}},
-			wantBypass: true,
+			wantBypass: false,
 		},
 		{
-			name:       "admin role bypasses",
+			name:       "admin does not bypass workspace scope",
 			resolver:   fakeHubProfileResolver{profile: hubprofile.Profile{Role: "admin"}},
-			wantBypass: true,
+			wantBypass: false,
 		},
 		{
-			name:       "operator role bypasses",
+			name:       "operator does not bypass workspace scope",
 			resolver:   fakeHubProfileResolver{profile: hubprofile.Profile{Role: "operator"}},
-			wantBypass: true,
+			wantBypass: false,
 		},
 		{
 			name:       "staff role does not bypass, falls through",
@@ -149,19 +149,19 @@ func TestRequireTaskRole_HubBypass(t *testing.T) {
 		wantBypass bool
 	}{
 		{
-			name:       "owner bypasses even with taskID 0 (no task, no role)",
+			name:       "owner does not bypass task scope",
 			resolver:   fakeHubProfileResolver{profile: hubprofile.Profile{IsOwner: true}},
-			wantBypass: true,
+			wantBypass: false,
 		},
 		{
-			name:       "admin role bypasses",
+			name:       "admin does not bypass task scope",
 			resolver:   fakeHubProfileResolver{profile: hubprofile.Profile{Role: "admin"}},
-			wantBypass: true,
+			wantBypass: false,
 		},
 		{
-			name:       "operator role bypasses",
+			name:       "operator does not bypass task scope",
 			resolver:   fakeHubProfileResolver{profile: hubprofile.Profile{Role: "operator"}},
-			wantBypass: true,
+			wantBypass: false,
 		},
 		{
 			name:       "viewer role does not bypass, falls through",

@@ -18,7 +18,7 @@ func NewProductAPI(service *application.Service) *ProductAPI {
 }
 
 func (a *ProductAPI) GetBestSellers(ctx context.Context, req *insightsproductv1.GetBestSellersRequest) (*insightsproductv1.GetBestSellersResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (a *ProductAPI) GetBestSellers(ctx context.Context, req *insightsproductv1.
 }
 
 func (a *ProductAPI) GetCategoryPerformance(ctx context.Context, _ *insightsproductv1.GetCategoryPerformanceRequest) (*insightsproductv1.GetCategoryPerformanceResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (a *ProductAPI) GetCategoryPerformance(ctx context.Context, _ *insightsprod
 }
 
 func (a *ProductAPI) GetProductMargins(ctx context.Context, _ *insightsproductv1.GetProductMarginsRequest) (*insightsproductv1.GetProductMarginsResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +110,7 @@ func (a *ProductAPI) GetProductMargins(ctx context.Context, _ *insightsproductv1
 }
 
 func (a *ProductAPI) GetSlowMovers(ctx context.Context, req *insightsproductv1.GetSlowMoversRequest) (*insightsproductv1.GetSlowMoversResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func (a *ProductAPI) GetSlowMovers(ctx context.Context, req *insightsproductv1.G
 }
 
 func (a *ProductAPI) GetProductPerformance(ctx context.Context, _ *insightsproductv1.GetProductPerformanceRequest) (*insightsproductv1.GetProductPerformanceResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}

@@ -25,6 +25,7 @@ type Module struct {
 	tokenValidator      authPkg.TokenValidator
 	ProvisionerResolver authPkg.PlatformProvisionerResolver
 	ProfileResolver     hubprofile.Resolver
+	ProvisioningStore   authPkg.ProvisioningStateStore
 	inviteAccepter      api.InviteAccepter
 }
 
@@ -102,9 +103,14 @@ func (m *Module) WithInviteAccepter(accepter api.InviteAccepter) *Module {
 	return m
 }
 
+func (m *Module) WithProvisioningStore(store authPkg.ProvisioningStateStore) *Module {
+	m.ProvisioningStore = store
+	return m
+}
+
 func (m *Module) RegisterAPI(mux *http.ServeMux) {
 	if err := hubuserv1.RegisterUserServiceServer(
-		api.NewUserAPI(m.UserService, m.ProfileResolver),
+		api.NewUserAPI(m.UserService, m.ProfileResolver, m.ProvisioningStore),
 		hubuserv1.WithMux(mux),
 	); err != nil {
 		panic(fmt.Errorf("register hub user service: %w", err))

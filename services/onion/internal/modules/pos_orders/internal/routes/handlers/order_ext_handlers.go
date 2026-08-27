@@ -56,7 +56,7 @@ func (h *SplitOrderHandler) Validate(ctx context.Context, req *SplitOrderRequest
 }
 
 func (h *SplitOrderHandler) Serve(ctx context.Context, req *SplitOrderRequest) (SplitOrderResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return SplitOrderResponse{}, authErr
 	}
@@ -110,7 +110,7 @@ func (h *DiscountOrderHandler) Validate(ctx context.Context, req *DiscountOrderR
 }
 
 func (h *DiscountOrderHandler) Serve(ctx context.Context, req *DiscountOrderRequest) (DiscountOrderResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:discount")
 	if authErr != nil {
 		return DiscountOrderResponse{}, authErr
 	}
@@ -164,7 +164,7 @@ func (h *VoidOrderHandler) Validate(ctx context.Context, req *VoidOrderRequest) 
 }
 
 func (h *VoidOrderHandler) Serve(ctx context.Context, req *VoidOrderRequest) (VoidOrderResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:void")
 	if authErr != nil {
 		return VoidOrderResponse{}, authErr
 	}
@@ -185,6 +185,71 @@ func (h *VoidOrderHandler) Serve(ctx context.Context, req *VoidOrderRequest) (Vo
 		return VoidOrderResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to void order")
 	}
 	return VoidOrderResponse{Message: "Order voided successfully"}, nil
+}
+
+type VoidOrderApprovalRequest struct {
+	OrderID int64  `json:"order_id"`
+	Reason  string `json:"reason"`
+}
+
+type VoidOrderApprovalResponse struct {
+	Message string `json:"message"`
+}
+
+func (r *VoidOrderApprovalRequest) orderID(ctx context.Context) (int64, error) {
+	return resolveOrderID(ctx, r.OrderID)
+}
+
+func serveVoidOrderWithPermission(ctx context.Context, req *VoidOrderApprovalRequest, service *application.Service, permission string) (VoidOrderApprovalResponse, error) {
+	user, authErr := requirePOSPermission(ctx, permission)
+	if authErr != nil {
+		return VoidOrderApprovalResponse{}, authErr
+	}
+	businessID, bizErr := resolveBusinessID(ctx, user)
+	if bizErr != nil {
+		return VoidOrderApprovalResponse{}, bizErr
+	}
+	orderID, orderErr := req.orderID(ctx)
+	if orderErr != nil {
+		return VoidOrderApprovalResponse{}, orderErr
+	}
+	if err := service.VoidOrder(ctx, businessID, orderID, req.Reason); err != nil {
+		if errors.Is(err, domain.ErrOrderNotFound) {
+			return VoidOrderApprovalResponse{}, onekiterrors.New(http.StatusNotFound, "Order not found")
+		}
+		return VoidOrderApprovalResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to void order")
+	}
+	return VoidOrderApprovalResponse{Message: "Order voided successfully"}, nil
+}
+
+type ApproveVoidOrderHandler struct{ Service *application.Service }
+
+func ApproveVoidOrderRoutes() []string {
+	return []string{"/pos/orders/{id}/void/approve"}
+}
+
+func (h *ApproveVoidOrderHandler) Validate(ctx context.Context, req *VoidOrderApprovalRequest) error {
+	_, err := req.orderID(ctx)
+	return err
+}
+
+func (h *ApproveVoidOrderHandler) Serve(ctx context.Context, req *VoidOrderApprovalRequest) (VoidOrderApprovalResponse, error) {
+	return serveVoidOrderWithPermission(ctx, req, h.Service, "pos:orders:void:approve")
+}
+
+type OverrideVoidOrderHandler struct{ Service *application.Service }
+
+func OverrideVoidOrderRoutes() []string {
+	return []string{"/pos/orders/{id}/void/override"}
+}
+
+func (h *OverrideVoidOrderHandler) Validate(ctx context.Context, req *VoidOrderApprovalRequest) error {
+	_, err := req.orderID(ctx)
+	return err
+}
+
+func (h *OverrideVoidOrderHandler) Serve(ctx context.Context, req *VoidOrderApprovalRequest) (VoidOrderApprovalResponse, error) {
+	return serveVoidOrderWithPermission(ctx, req, h.Service, "pos:orders:void:override")
 }
 
 // ---- Hold Order ----
@@ -210,7 +275,7 @@ func (h *HoldOrderHandler) Validate(ctx context.Context, req *HoldOrderRequest) 
 }
 
 func (h *HoldOrderHandler) Serve(ctx context.Context, req *HoldOrderRequest) (HoldOrderResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return HoldOrderResponse{}, authErr
 	}
@@ -257,7 +322,7 @@ func (h *SendToKitchenHandler) Validate(ctx context.Context, req *SendToKitchenR
 }
 
 func (h *SendToKitchenHandler) Serve(ctx context.Context, req *SendToKitchenRequest) (SendToKitchenResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return SendToKitchenResponse{}, authErr
 	}
@@ -305,7 +370,7 @@ func (h *VoidOrderItemHandler) Validate(ctx context.Context, _ *VoidOrderItemReq
 }
 
 func (h *VoidOrderItemHandler) Serve(ctx context.Context, _ *VoidOrderItemRequest) (VoidOrderItemResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:void")
 	if authErr != nil {
 		return VoidOrderItemResponse{}, authErr
 	}
@@ -362,7 +427,7 @@ func (h *TransferTableHandler) Validate(ctx context.Context, req *TransferTableR
 }
 
 func (h *TransferTableHandler) Serve(ctx context.Context, req *TransferTableRequest) (TransferTableResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return TransferTableResponse{}, authErr
 	}
@@ -401,7 +466,7 @@ type ListHeldOrdersResponse struct {
 }
 
 func (h *ListHeldOrdersHandler) Serve(ctx context.Context, _ *ListHeldOrdersRequest) (ListHeldOrdersResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:view")
 	if authErr != nil {
 		return ListHeldOrdersResponse{}, authErr
 	}

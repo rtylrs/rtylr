@@ -21,8 +21,8 @@ func NewDashboardAPI(service *application.Service) *DashboardAPI {
 
 func (a *DashboardAPI) GetKPIs(ctx context.Context, _ *hubdashboardv1.GetKPIsRequest) (*hubdashboardv1.GetKPIsResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return nil, onekiterrors.PermissionDenied()
+	if err := requireDashboardPermission(ctx); err != nil {
+		return nil, err
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)

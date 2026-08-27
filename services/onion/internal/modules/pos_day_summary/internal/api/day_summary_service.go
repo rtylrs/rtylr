@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_day_summary/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	possummaryv1 "github.com/voxire/voxie/gen/go/pos/day_summary/v1"
@@ -28,7 +29,7 @@ func (a *DaySummaryAPI) DaySummary(ctx context.Context, req *possummaryv1.DaySum
 	}
 
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.User == nil || !authPkg.HasAppPermission(device.User, authorization.AppPOS, "pos:reports:view") || !authPkg.HasAnyAppScope(device.User, authorization.AppPOS) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
@@ -46,7 +47,7 @@ func (a *DaySummaryAPI) DaySummary(ctx context.Context, req *possummaryv1.DaySum
 		TotalTax:         summary.TotalTax,
 		TotalTips:        summary.TotalTips,
 		TotalRefunds:     summary.TotalRefunds,
-		TotalOrders:      int32(summary.TotalOrders),
+		TotalOrders:      int32(summary.TotalOrders), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		PaymentBreakdown: summary.PaymentBreakdown,
 	}, nil
 }

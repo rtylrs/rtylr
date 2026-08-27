@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/application"
 	"github.com/voxire/onion/internal/modules/stock_transfers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	erpstocktransferv1 "github.com/voxire/voxie/gen/go/erp/stock_transfer/v1"
@@ -22,7 +23,7 @@ func NewStockTransferAPI(service *application.Service) *StockTransferAPI {
 }
 
 func (a *StockTransferAPI) ListStockTransfers(ctx context.Context, req *erpstocktransferv1.ListStockTransfersRequest) (*erpstocktransferv1.ListStockTransfersResponse, error) {
-	ownerID, err := stockTransferOwnerID(ctx)
+	ownerID, err := stockTransferOwnerID(ctx, "erp:inventory:view")
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +52,7 @@ func (a *StockTransferAPI) ListStockTransfers(ctx context.Context, req *erpstock
 }
 
 func (a *StockTransferAPI) CreateStockTransfer(ctx context.Context, req *erpstocktransferv1.CreateStockTransferRequest) (*erpstocktransferv1.CreateStockTransferResponse, error) {
-	ownerID, err := stockTransferOwnerID(ctx)
+	ownerID, err := stockTransferOwnerID(ctx, "erp:inventory:transfer")
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func (a *StockTransferAPI) CreateStockTransfer(ctx context.Context, req *erpstoc
 }
 
 func (a *StockTransferAPI) UpdateStockTransferStatus(ctx context.Context, req *erpstocktransferv1.UpdateStockTransferStatusRequest) (*erpstocktransferv1.UpdateStockTransferStatusResponse, error) {
-	ownerID, err := stockTransferOwnerID(ctx)
+	ownerID, err := stockTransferOwnerID(ctx, "erp:inventory:transfer")
 	if err != nil {
 		return nil, err
 	}
@@ -132,10 +133,10 @@ func newStockTransferProto(t domain.StockTransfer) *erpstocktransferv1.StockTran
 	}
 }
 
-func stockTransferOwnerID(ctx context.Context) (int64, error) {
+func stockTransferOwnerID(ctx context.Context, permission string) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return 0, stockTransferStatusError(http.StatusUnauthorized, "unauthorized")
+	if !ok || authUser == nil || !authPkg.HasAppPermission(authUser, authorization.AppERP, permission) {
+		return 0, onekiterrors.PermissionDenied()
 	}
 	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {

@@ -42,6 +42,9 @@ func (h *PublishRosterHandler) Serve(ctx context.Context, req *PublishRosterRequ
 	if device.IsAnonymous || device.User == nil {
 		return PublishRosterResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireShiftPermission(ctx); err != nil {
+		return PublishRosterResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

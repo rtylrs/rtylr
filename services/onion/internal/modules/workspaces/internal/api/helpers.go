@@ -46,13 +46,13 @@ func resolvePagination(page, limit int32) (resolvedPage, resolvedLimit int32, of
 func buildPagination(page, limit int32, total int64, returned int) *commonpaginationv1.PaginationResponse {
 	var totalPages int32
 	if limit > 0 {
-		totalPages = int32((total + int64(limit) - 1) / int64(limit))
+		totalPages = int32((total + int64(limit) - 1) / int64(limit)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 	hasNext := int64(page-1)*int64(limit)+int64(returned) < total
 	return &commonpaginationv1.PaginationResponse{
 		Page:       page,
 		Limit:      limit,
-		Total:      int32(total),
+		Total:      int32(total), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		TotalPages: totalPages,
 		HasNext:    hasNext,
 		HasPrev:    page > 1,

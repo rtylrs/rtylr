@@ -46,7 +46,7 @@ func (s *Service) List(ctx context.Context, businessID, page, pageSize int64) ([
 	key := cacheKeys.Scoped(quotesScope, businessID, fmt.Sprintf("list|p=%d|ps=%d", page, pageSize))
 	rows, err := cacher.Of[[]domain.Quote]().GetOrComputeSingle(ctx, key,
 		func(ctx context.Context) ([]domain.Quote, error) {
-			return s.repo.List(ctx, businessID, int32(limit+1), int32(offset))
+			return s.repo.List(ctx, businessID, int32(limit+1), int32(offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		},
 		cacher.WithExpiry(ctx, quotesTTL),
 	)

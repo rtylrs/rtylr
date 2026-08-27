@@ -50,7 +50,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 	}
 	defer tx.Rollback()
 
-	productID, err := syncCatalogProduct(ctx, r.queries.WithTx(tx), businessID, input.ProductID, input)
+	productID, err := syncCatalogProduct(ctx, r.queries.WithTx(tx), ownerID, businessID, input.ProductID, input)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sync catalog product for storefront", logger.Error(err))
 		return 0, err
@@ -67,7 +67,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 		Price:          strconv.FormatFloat(input.Price, 'f', 2, 64),
 		CompareAtPrice: nullDecimal(input.CompareAtPrice),
 		IsPublished:    sql.NullBool{Bool: input.IsPublished, Valid: true},
-		SortOrder:      sql.NullInt32{Int32: int32(input.SortOrder), Valid: true},
+		SortOrder:      sql.NullInt32{Int32: int32(input.SortOrder), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create store product", logger.Error(err))
@@ -108,7 +108,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		}
 	}
 
-	productID, err = syncCatalogProduct(ctx, r.queries.WithTx(tx), businessID, productID, input)
+	productID, err = syncCatalogProduct(ctx, r.queries.WithTx(tx), businessID, businessID, productID, input)
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to sync catalog product for storefront", logger.Error(err))
 		return err
@@ -123,7 +123,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		Price:          strconv.FormatFloat(input.Price, 'f', 2, 64),
 		CompareAtPrice: nullDecimal(input.CompareAtPrice),
 		IsPublished:    sql.NullBool{Bool: input.IsPublished, Valid: true},
-		SortOrder:      sql.NullInt32{Int32: int32(input.SortOrder), Valid: true},
+		SortOrder:      sql.NullInt32{Int32: int32(input.SortOrder), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		BusinessID:     businessID,
 		ID:             id,
 	})
@@ -194,7 +194,7 @@ func storeProductFromCatalogRow(ctx context.Context, row sqlc.ListStoreProductsW
 	return p, nil
 }
 
-func syncCatalogProduct(ctx context.Context, q *sqlc.Queries, businessID, productID int64, input domain.StoreProductInput) (int64, error) {
+func syncCatalogProduct(ctx context.Context, q *sqlc.Queries, ownerID, businessID, productID int64, input domain.StoreProductInput) (int64, error) {
 	if productID != 0 {
 		_, err := q.GetCatalogProductByID(ctx, sqlc.GetCatalogProductByIDParams{
 			BusinessID: businessID,
@@ -215,13 +215,14 @@ func syncCatalogProduct(ctx context.Context, q *sqlc.Queries, businessID, produc
 		if err != nil {
 			return 0, err
 		}
-		if err := syncCatalogImages(ctx, q, businessID, productID, input.Images); err != nil {
+		if err := syncCatalogImages(ctx, q, ownerID, businessID, productID, input.Images); err != nil {
 			return 0, err
 		}
 		return productID, nil
 	}
 
 	result, err := q.InsertCatalogProduct(ctx, sqlc.InsertCatalogProductParams{
+		OwnerID:        ownerID,
 		BusinessID:     businessID,
 		Name:           input.Title,
 		Description:    sql.NullString{String: input.Description, Valid: input.Description != ""},
@@ -235,7 +236,7 @@ func syncCatalogProduct(ctx context.Context, q *sqlc.Queries, businessID, produc
 	if err != nil {
 		return 0, err
 	}
-	if err := syncCatalogImages(ctx, q, businessID, productID, input.Images); err != nil {
+	if err := syncCatalogImages(ctx, q, ownerID, businessID, productID, input.Images); err != nil {
 		return 0, err
 	}
 	return productID, nil
@@ -246,7 +247,7 @@ type productImageInput struct {
 	Alt string `json:"alt"`
 }
 
-func syncCatalogImages(ctx context.Context, q *sqlc.Queries, businessID, productID int64, imagesJSON string) error {
+func syncCatalogImages(ctx context.Context, q *sqlc.Queries, ownerID, businessID, productID int64, imagesJSON string) error {
 	if err := q.DeleteCatalogProductImages(ctx, sqlc.DeleteCatalogProductImagesParams{
 		BusinessID: businessID,
 		ProductID:  productID,
@@ -262,6 +263,7 @@ func syncCatalogImages(ctx context.Context, q *sqlc.Queries, businessID, product
 		}
 		alt := strings.TrimSpace(image.Alt)
 		err := q.InsertCatalogProductImage(ctx, sqlc.InsertCatalogProductImageParams{
+			OwnerID:    ownerID,
 			BusinessID: businessID,
 			ProductID:  productID,
 			Url:        url,

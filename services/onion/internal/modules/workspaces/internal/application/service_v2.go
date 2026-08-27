@@ -21,13 +21,9 @@ const DefaultBinRetentionDays = 30
 var ErrNotFound = errors.New("flow project not found")
 
 // canSeeProject reports whether callerID may READ projectID under the curation
-// rule: creator, member, or hub bypass. Public visibility never widens read
-// access here - public projects surface as metadata on profiles, not as
-// openable boards.
+// rule: creator, member, or manager visibility through the reporting line.
+// Public visibility never widens read access here.
 func (s *Service) canSeeProject(ctx context.Context, p domain.Project, callerID, businessID int64) bool {
-	if s.hubProfileBypasses(ctx, callerID, businessID) {
-		return true
-	}
 	if p.CreatedBy == callerID || p.OwnerID == callerID {
 		return true
 	}
@@ -93,8 +89,8 @@ func (s *Service) GetProjectV2(ctx context.Context, projectID, callerID, busines
 // callers see the whole business; everyone else sees created + member.
 func (s *Service) ListProjectsV2(ctx context.Context, callerID, businessID int64, status, visibility, q string, limit, offset int64) ([]domain.Project, int64, error) {
 	// Ruling P8: this listing is curated for EVERYONE, bypass roles included.
-	// A hub Owner/Admin/Operator holds access to every project, but access is not
-	// listing: their sidebar shows what they created or belong to, like anyone
+	// A central Flow manager holds business-wide management permission, but
+	// access is not listing: their sidebar shows what they created or belong to, like anyone
 	// else's. Passing the bypass through here put every private project in the
 	// business into an admin's sidebar, which is the precise thing P8 forbids.
 	//
@@ -229,9 +225,6 @@ func binPurgeDeadline(now time.Time) time.Time {
 // IsProjectMemberOrBypass is the v2 read gate for project-scoped subresources:
 // hub bypass, creator, owner, or explicit membership.
 func (s *Service) IsProjectMemberOrBypass(ctx context.Context, userID, businessID, projectID int64) bool {
-	if s.hubProfileBypasses(ctx, userID, businessID) {
-		return true
-	}
 	p, err := s.repo.GetProjectV2ByID(ctx, projectID, businessID)
 	if err != nil {
 		return false
@@ -246,16 +239,14 @@ func (s *Service) IsProjectMemberOrBypass(ctx context.Context, userID, businessI
 // narrowed to one project. Visibility is enforced row-by-row via the parent
 // project clause unless a hub bypass applies.
 func (s *Service) ListTasksV2(ctx context.Context, callerID, businessID int64, filter domain.ListTasksFilter) ([]domain.Task, int64, error) {
-	includeAll := s.hubProfileBypasses(ctx, callerID, businessID)
 	filter.BusinessID = businessID
-	return s.repo.GetTasksByBusinessV2(ctx, filter, callerID, includeAll)
+	return s.repo.GetTasksByBusinessV2(ctx, filter, callerID, false)
 }
 
 // SearchTasksV2 is business-wide fulltext search under the same visibility
 // clause as listing.
 func (s *Service) SearchTasksV2(ctx context.Context, callerID, businessID int64, q string, limit, offset int64) ([]domain.Task, int64, error) {
-	includeAll := s.hubProfileBypasses(ctx, callerID, businessID)
-	return s.repo.SearchTasksV2(ctx, businessID, callerID, includeAll, q, limit, offset)
+	return s.repo.SearchTasksV2(ctx, businessID, callerID, false, q, limit, offset)
 }
 
 // EnsureAssigneeMembership implements ruling T1: assigning work to someone
@@ -288,9 +279,6 @@ func (s *Service) EnsureAssigneeMembership(ctx context.Context, projectID, busin
 		if _, profileErr := s.hubProfiles.GetProfile(ctx, assigneeID, businessID); profileErr != nil {
 			return fmt.Errorf("assignee is not a member of this business")
 		}
-	}
-	if s.hubProfileBypasses(ctx, assigneeID, businessID) {
-		return nil
 	}
 	if p.CreatedBy == assigneeID || p.OwnerID == assigneeID {
 		return nil
@@ -374,8 +362,7 @@ func (s *Service) CreateLabelV2(ctx context.Context, businessID int64, name, col
 }
 
 func (s *Service) ListCyclesV2(ctx context.Context, projectID, businessID, callerID, limit, offset int64) ([]domain.Cycle, int64, error) {
-	includeAll := s.hubProfileBypasses(ctx, callerID, businessID)
-	return s.repo.ListCyclesV2(ctx, projectID, businessID, callerID, includeAll, limit, offset)
+	return s.repo.ListCyclesV2(ctx, projectID, businessID, callerID, false, limit, offset)
 }
 
 // ErrInvalidCycleDates reports a start/end pair a cycle cannot be created from.
@@ -446,8 +433,7 @@ func (s *Service) CreateCycleV2(ctx context.Context, businessID, projectID int64
 }
 
 func (s *Service) ListMilestonesV2(ctx context.Context, businessID int64, projectID *int64, callerID, limit, offset int64) ([]domain.Milestone, int64, error) {
-	includeAll := s.hubProfileBypasses(ctx, callerID, businessID)
-	return s.repo.ListMilestonesV2(ctx, businessID, projectID, callerID, includeAll, limit, offset)
+	return s.repo.ListMilestonesV2(ctx, businessID, projectID, callerID, false, limit, offset)
 }
 
 func (s *Service) CreateMilestoneV2(ctx context.Context, businessID, projectID int64, name, description, targetDate string) (domain.Milestone, error) {

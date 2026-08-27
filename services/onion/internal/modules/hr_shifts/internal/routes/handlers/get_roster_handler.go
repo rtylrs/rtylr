@@ -32,6 +32,9 @@ func (h *GetRosterHandler) Serve(ctx context.Context, req *GetRosterRequest) (Ge
 	if device.IsAnonymous || device.User == nil {
 		return GetRosterResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireShiftPermission(ctx); err != nil {
+		return GetRosterResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

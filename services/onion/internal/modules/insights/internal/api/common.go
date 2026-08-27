@@ -8,6 +8,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -22,6 +23,14 @@ func resolveBusinessID(ctx context.Context) (int64, error) {
 		return 0, onekiterrors.PermissionDenied()
 	}
 	return businessID, nil
+}
+
+func resolveBusinessIDFor(ctx context.Context, permission string) (int64, error) {
+	device := authPkg.DeviceCtx(ctx)
+	if device.User == nil || !authPkg.HasAppPermission(device.User, authorization.AppInsights, permission) {
+		return 0, onekiterrors.PermissionDenied()
+	}
+	return resolveBusinessID(ctx)
 }
 
 func resolvePeriodRange(period string) (string, string, error) {

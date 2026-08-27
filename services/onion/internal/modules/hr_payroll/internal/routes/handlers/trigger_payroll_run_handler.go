@@ -11,6 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hremployeespayrollrunsv1 "github.com/voxire/voxie/gen/go/hr/employees/payroll/runs/v1"
 )
 
@@ -46,22 +47,29 @@ func (h *TriggerPayrollRunHandler) Serve(ctx context.Context, req *TriggerPayrol
 	if device.IsAnonymous || device.User == nil {
 		return TriggerPayrollRunResponse{}, onekiterrors.PermissionDenied()
 	}
-
-	employeeID, empErr := h.Service.GetEmployeeIDByUserID(ctx, device.User.UserID, device.User.UserID)
-	if empErr != nil {
-		logger.Ctx(ctx).Warn("failed to resolve employee for payroll permission check", logger.Any("owner_id", device.User.UserID), logger.Error(empErr))
+	if err := requirePayrollPermission(ctx, "hr:payroll:execute"); err != nil {
+		return TriggerPayrollRunResponse{}, err
+	}
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if businessErr != nil {
 		return TriggerPayrollRunResponse{}, onekiterrors.PermissionDenied()
 	}
-	allowed, permErr := h.Service.HasPermission(ctx, device.User.UserID, employeeID, "manage_payroll")
+
+	employeeID, empErr := h.Service.GetEmployeeIDByUserID(ctx, businessID, device.User.UserID)
+	if empErr != nil {
+		logger.Ctx(ctx).Warn("failed to resolve employee for payroll permission check", logger.Any("business_id", businessID), logger.Error(empErr))
+		return TriggerPayrollRunResponse{}, onekiterrors.PermissionDenied()
+	}
+	allowed, permErr := h.Service.HasPermission(ctx, businessID, employeeID, "manage_payroll")
 	if permErr != nil {
-		logger.Ctx(ctx).Error("failed to check manage_payroll permission", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", employeeID), logger.Error(permErr))
+		logger.Ctx(ctx).Error("failed to check manage_payroll permission", logger.Any("business_id", businessID), logger.Any("employee_id", employeeID), logger.Error(permErr))
 		return TriggerPayrollRunResponse{}, onekiterrors.PermissionDenied()
 	}
 	if !allowed {
 		return TriggerPayrollRunResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	run, entries, err := h.Service.TriggerPayrollRun(ctx, device.User.UserID, device.User.UserID, req.PeriodStart, req.PeriodEnd)
+	run, entries, err := h.Service.TriggerPayrollRun(ctx, businessID, device.User.UserID, req.PeriodStart, req.PeriodEnd)
 	if err != nil {
 		if errors.Is(err, domain.ErrPayrollNotConfigured) {
 			return TriggerPayrollRunResponse{}, onekiterrors.New(http.StatusUnprocessableEntity, "Payroll not configured for this company")
