@@ -16,11 +16,9 @@ vi.mock('@voxire/api', () => ({
   getOneKitErrorMessage: (_error: unknown, fallback: string) => fallback,
   unwrap: (val: unknown) => Promise.resolve(val),
   oneKitResult: (op: () => Promise<unknown>) => op(),
-  // clients.ts reaches @voxire/api through shared/lib/api for the six calls no
-  // contract declares, so the mock has to cover the REST path as well as the
-  // generated one.
-  createApiClient: () => ({}),
-  safeFetch: () => ({
+  // clients.ts uses the explicit REST fallback for the few calls no contract
+  // declares, so the mock covers that transport as well as the generated one.
+  createRestRouteClient: () => ({
     get: vi.fn(),
     post: vi.fn(),
     put: vi.fn(),
