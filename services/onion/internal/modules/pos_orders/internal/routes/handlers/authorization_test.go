@@ -58,7 +58,7 @@ func TestPOSOrderOperationsRequireExactPermissionBeforeServiceAccess(t *testing.
 		}},
 		{"canonical create", "pos:orders:create", func(ctx context.Context) error {
 			_, err := (&OrderAPI{}).CreateOrder(ctx, &posordersv1.CreateOrderRequest{
-				Items: []*posordersv1.CreateOrderItemInput{{Name: "item", Quantity: 1}},
+				Items: []*posordersv1.CreateOrderItemInput{{MenuItemId: 1, Name: "item", Quantity: 1}},
 			})
 			return err
 		}},
