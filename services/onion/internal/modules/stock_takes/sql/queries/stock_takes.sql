@@ -28,9 +28,11 @@ INSERT INTO erp_stock_takes (owner_id, business_id, warehouse_id, status, notes)
 VALUES (?, ?, ?, 'draft', ?);
 
 -- name: GetWarehouseReference :one
+-- cross-schema read from erp_warehouses (warehouses module) — validate the stock-take warehouse reference for the tenant.
 SELECT id FROM erp_warehouses WHERE business_id = ? AND id = ?;
 
 -- name: GetProductReference :one
+-- cross-schema read from erp_products (products module) — validate the stock-take product reference for the tenant.
 SELECT id FROM erp_products WHERE business_id = ? AND id = ?;
 
 -- name: InsertStockTakeItem :execresult
@@ -62,6 +64,7 @@ WHERE business_id = ? AND id = ?
 FOR UPDATE;
 
 -- name: InsertInventoryTransactionWithRef :execresult
+-- cross-schema write to erp_inventory_transactions (inventory module) — record a stock-take adjustment in the inventory ledger with its stock-take reference.
 INSERT INTO erp_inventory_transactions
 (owner_id, business_id, product_id, type, quantity_change, quantity_before, quantity_after,
  reference_id, reference_type, created_by, notes)
