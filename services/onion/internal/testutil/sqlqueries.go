@@ -63,6 +63,7 @@ func (q SQLQuery) Exempt() bool { return strings.Contains(q.Text, UnboundedMarke
 func ParseSQLQueries(t *testing.T, path string) []SQLQuery {
 	t.Helper()
 
+	// #nosec G304 -- Tests read only repository SQL fixture paths supplied by the test suite.
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("read %s: %v", path, err)
