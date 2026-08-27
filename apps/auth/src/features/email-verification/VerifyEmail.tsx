@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useRouterState } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { Mail, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 
 import Logo from '../../shared/components/Logo';
@@ -11,11 +12,14 @@ type Status = 'loading' | 'success' | 'error';
 
 const VerifyEmail: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
   const params = new URLSearchParams(searchStr);
   const verifyMutation = useEmailVerification();
   const resendMutation = useResendVerificationEmail();
   const [status, setStatus] = useState<Status>('loading');
+  const [verificationCode, setVerificationCode] = useState('');
+  const hasLinkToken = Boolean(params.get('token'));
 
   useEffect(() => {
     const token = params.get('token');
@@ -61,6 +65,22 @@ const VerifyEmail: React.FC = () => {
     );
   };
 
+  const handleVerifyCode = (): void => {
+    const code = verificationCode.trim();
+    if (!/^\d{6}$/.test(code)) {
+      setStatus('error');
+      return;
+    }
+    setStatus('loading');
+    verifyMutation.mutate(
+      { token: code },
+      {
+        onSuccess: (data) => setStatus(data?.verified === false ? 'error' : 'success'),
+        onError: () => setStatus('error'),
+      }
+    );
+  };
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-sm text-center">
@@ -74,7 +94,7 @@ const VerifyEmail: React.FC = () => {
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 border border-blue-200 mx-auto">
               <Loader2 className="h-8 w-8 text-[#4583C4] animate-spin" />
             </div>
-            <p className="mt-4 text-sm text-[#666]">Checking your token...</p>
+            <p className="mt-4 text-sm text-[#666]">{t('verify.verifying')}</p>
           </>
         )}
         {status === 'success' && (
@@ -82,7 +102,7 @@ const VerifyEmail: React.FC = () => {
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-green-50 border border-green-200 mx-auto">
               <CheckCircle2 className="h-8 w-8 text-green-600" />
             </div>
-            <p className="mt-4 text-base font-semibold text-[#111]">Email verified</p>
+            <p className="mt-4 text-base font-semibold text-[#111]">{t('verify.success')}</p>
             <div className="mt-6">
               <Button
                 type="button"
@@ -102,8 +122,35 @@ const VerifyEmail: React.FC = () => {
               <AlertCircle className="h-8 w-8 text-red-500" />
             </div>
             <p className="mt-4 text-sm text-red-600">
-              This verification link is invalid or has expired.
+              {hasLinkToken ? t('verify.failed') : t('verify.codeInvalid')}
             </p>
+            {!hasLinkToken && (
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  handleVerifyCode();
+                }}
+                className="mt-6 space-y-3"
+              >
+                <label htmlFor="verification-code" className="sr-only">
+                  {t('verify.codeLabel')}
+                </label>
+                <input
+                  id="verification-code"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  placeholder={t('verify.codePlaceholder')}
+                  value={verificationCode}
+                  onChange={(event) => setVerificationCode(event.target.value.replace(/\D/g, ''))}
+                  className="w-full h-11 rounded-lg border border-[#e5e5e5] bg-white px-3 text-base text-[#111] text-center tracking-[0.35em] outline-none focus:border-[#4583C4]"
+                />
+                <Button type="submit" variant="primary" fullWidth height={44}>
+                  {t('verify.verifyCode')}
+                </Button>
+              </form>
+            )}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -113,7 +160,7 @@ const VerifyEmail: React.FC = () => {
             >
               <input
                 type="email"
-                placeholder="Enter your email address"
+                placeholder={t('common.email')}
                 value={resendEmail}
                 onChange={(e) => setResendEmail(e.target.value)}
                 required
@@ -128,7 +175,7 @@ const VerifyEmail: React.FC = () => {
               >
                 <span className="inline-flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  Resend verification email
+                  {t('verify.resend')}
                 </span>
               </Button>
             </form>
