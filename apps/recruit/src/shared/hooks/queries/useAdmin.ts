@@ -1,7 +1,7 @@
 import { unwrap } from '@voxire/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { safe } from '../../lib/api';
+import { rest } from '../../lib/clients';
 import type { Customization, FormField, RecruitCareer, Section, Submission } from '../../lib/types';
 
 // Admin hooks - require auth. Every mutation invalidates the matching
@@ -14,7 +14,7 @@ interface ListCareersResponse {
 export function useAdminCareers() {
   return useQuery({
     queryKey: ['recruit', 'admin', 'careers'],
-    queryFn: () => unwrap(safe.get<ListCareersResponse>('/recruit/careers')),
+    queryFn: () => unwrap(rest.get<ListCareersResponse>('/recruit/careers')),
   });
 }
 
@@ -44,7 +44,7 @@ export function useCreateCareer() {
   return useMutation({
     mutationFn: (body: CareerBody) => {
       const { id: _id, ...payload } = body;
-      return unwrap(safe.post<CreateCareerResponse>('/recruit/careers', payload));
+      return unwrap(rest.post<CreateCareerResponse>('/recruit/careers', payload));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'careers'] }),
     onError: () => toast.error('Failed to create career'),
@@ -55,7 +55,7 @@ export function useUpdateCareer() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: CareerBody) =>
-      unwrap(safe.put<{ message: string }>('/recruit/careers', body)),
+      unwrap(rest.put<{ message: string }>('/recruit/careers', body)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'careers'] }),
     onError: () => toast.error('Failed to update career'),
   });
@@ -65,7 +65,7 @@ export function useDeleteCareer() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) =>
-      unwrap(safe.delete<{ message: string }>('/recruit/careers', { data: { id } })),
+      unwrap(rest.delete<{ message: string }>('/recruit/careers', { data: { id } })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'careers'] }),
     onError: () => toast.error('Failed to delete career'),
   });
@@ -78,7 +78,7 @@ interface GetCustomizationResponse {
 export function useAdminCustomization() {
   return useQuery({
     queryKey: ['recruit', 'admin', 'customization'],
-    queryFn: () => unwrap(safe.get<GetCustomizationResponse>('/recruit/customization')),
+    queryFn: () => unwrap(rest.get<GetCustomizationResponse>('/recruit/customization')),
   });
 }
 
@@ -113,7 +113,7 @@ export function useUpsertCustomization() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: CustomizationBody) =>
-      unwrap(safe.put<{ message: string }>('/recruit/customization', body)),
+      unwrap(rest.put<{ message: string }>('/recruit/customization', body)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'customization'] }),
     onError: () => toast.error('Failed to update customization'),
   });
@@ -128,7 +128,7 @@ export function useAdminSubmissions(status?: string, limit: number = 20, offset:
     queryKey: ['recruit', 'admin', 'submissions', status ?? '', limit, offset],
     queryFn: () =>
       unwrap(
-        safe.get<ListSubmissionsResponse>('/recruit/submissions', {
+        rest.get<ListSubmissionsResponse>('/recruit/submissions', {
           params: {
             ...(status ? { status } : {}),
             limit,
@@ -143,7 +143,7 @@ export function useUpdateSubmissionStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: { id: number; status: string }) =>
-      unwrap(safe.put<{ message: string }>('/recruit/submissions/status', body)),
+      unwrap(rest.put<{ message: string }>('/recruit/submissions/status', body)),
     onSuccess: () =>
       qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'submissions'], exact: false }),
     onError: () => toast.error('Failed to update submission status'),
@@ -160,7 +160,7 @@ interface ResumeDownloadResponse {
 
 export async function fetchResumeURL(submissionId: number): Promise<string> {
   const res = await unwrap(
-    safe.get<ResumeDownloadResponse>('/recruit/submissions/resume-url', {
+    rest.get<ResumeDownloadResponse>('/recruit/submissions/resume-url', {
       params: { submission_id: submissionId },
     })
   );
@@ -176,7 +176,7 @@ interface ListSectionsResponse {
 export function useAdminSections() {
   return useQuery({
     queryKey: ['recruit', 'admin', 'sections'],
-    queryFn: () => unwrap(safe.get<ListSectionsResponse>('/recruit/sections')),
+    queryFn: () => unwrap(rest.get<ListSectionsResponse>('/recruit/sections')),
   });
 }
 
@@ -196,7 +196,7 @@ export function useCreateSection() {
   return useMutation({
     mutationFn: (body: SectionBody) => {
       const { id: _id, ...payload } = body;
-      return unwrap(safe.post<{ section: Section }>('/recruit/sections', payload));
+      return unwrap(rest.post<{ section: Section }>('/recruit/sections', payload));
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
     onError: () => toast.error('Failed to create section'),
@@ -207,7 +207,7 @@ export function useUpdateSection() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: SectionBody) =>
-      unwrap(safe.put<{ message: string }>('/recruit/sections', body)),
+      unwrap(rest.put<{ message: string }>('/recruit/sections', body)),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
     onError: () => toast.error('Failed to update section'),
   });
@@ -217,7 +217,7 @@ export function useDeleteSection() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) =>
-      unwrap(safe.delete<{ message: string }>('/recruit/sections', { data: { id } })),
+      unwrap(rest.delete<{ message: string }>('/recruit/sections', { data: { id } })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
     onError: () => toast.error('Failed to delete section'),
   });
@@ -227,7 +227,7 @@ export function useReorderSections() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (orderedIds: number[]) =>
-      unwrap(safe.put<{ message: string }>('/recruit/sections/reorder', { orderedIds })),
+      unwrap(rest.put<{ message: string }>('/recruit/sections/reorder', { orderedIds })),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'sections'] }),
     onError: () => toast.error('Failed to reorder sections'),
   });
@@ -245,7 +245,7 @@ export function useAdminFormFields(careerId: number | undefined) {
     enabled: !!careerId,
     queryFn: () =>
       unwrap(
-        safe.get<ListFormFieldsResponse>('/recruit/form-fields', {
+        rest.get<ListFormFieldsResponse>('/recruit/form-fields', {
           params: { career_id: careerId },
         })
       ),
@@ -268,7 +268,7 @@ export function useCreateFormField() {
   return useMutation({
     mutationFn: (body: FormFieldBody) => {
       const { id: _id, ...payload } = body;
-      return unwrap(safe.post<{ field: FormField }>('/recruit/form-fields', payload));
+      return unwrap(rest.post<{ field: FormField }>('/recruit/form-fields', payload));
     },
     onSuccess: (_, vars) =>
       qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', vars.careerId] }),
@@ -280,7 +280,7 @@ export function useUpdateFormField() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (body: FormFieldBody) =>
-      unwrap(safe.put<{ message: string }>('/recruit/form-fields', body)),
+      unwrap(rest.put<{ message: string }>('/recruit/form-fields', body)),
     onSuccess: (_, vars) =>
       qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', vars.careerId] }),
     onError: () => toast.error('Failed to update form field'),
@@ -292,7 +292,7 @@ export function useDeleteFormField() {
   return useMutation({
     mutationFn: (payload: { id: number; careerId: number }) =>
       unwrap(
-        safe.delete<{ message: string }>('/recruit/form-fields', { data: { id: payload.id } })
+        rest.delete<{ message: string }>('/recruit/form-fields', { data: { id: payload.id } })
       ),
     onSuccess: (_, vars) =>
       qc.invalidateQueries({ queryKey: ['recruit', 'admin', 'form-fields', vars.careerId] }),

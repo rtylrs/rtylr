@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, Outlet, useLocation } from '@tanstack/react-router';
 import { Briefcase, Inbox, Palette, LayoutGrid, Menu, X, LogOut } from 'lucide-react';
 import { signOut, useUserStore } from '@voxire/auth';
+import { canEffectiveAccess } from '@voxire/permissions';
 
 /**
  * AdminLayout - wraps the authenticated admin routes under /admin.
@@ -10,10 +11,16 @@ import { signOut, useUserStore } from '@voxire/auth';
  */
 const AdminLayout: React.FC = (): React.JSX.Element => {
   const user = useUserStore((s) => s.user);
-  const isOwnerOrAdmin = user?.role === 'owner' || user?.role === 'admin';
+  const effectiveAccess = user?.effectiveAccess;
+  const canRecruit = (permission: string): boolean =>
+    effectiveAccess ? canEffectiveAccess(effectiveAccess, permission) : false;
+  const canAdministerRecruit =
+    canRecruit('recruit:jobs:view') ||
+    canRecruit('recruit:jobs:manage') ||
+    canRecruit('recruit:candidates:view');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  if (user && !isOwnerOrAdmin) {
+  if (user && !canAdministerRecruit) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--recruit-admin-bg)] p-6 text-center text-white/70">
         <h2 className="text-xl font-semibold text-white">Access Denied</h2>
@@ -25,11 +32,31 @@ const AdminLayout: React.FC = (): React.JSX.Element => {
   }
 
   const navItems = [
-    { to: '/admin/careers', icon: <Briefcase className="h-4 w-4" />, label: 'Careers' },
-    { to: '/admin/submissions', icon: <Inbox className="h-4 w-4" />, label: 'Submissions' },
-    { to: '/admin/sections', icon: <LayoutGrid className="h-4 w-4" />, label: 'Page sections' },
-    { to: '/admin/customization', icon: <Palette className="h-4 w-4" />, label: 'Page branding' },
-  ];
+    {
+      to: '/admin/careers',
+      icon: <Briefcase className="h-4 w-4" />,
+      label: 'Careers',
+      visible: canRecruit('recruit:jobs:view') || canRecruit('recruit:jobs:manage'),
+    },
+    {
+      to: '/admin/submissions',
+      icon: <Inbox className="h-4 w-4" />,
+      label: 'Submissions',
+      visible: canRecruit('recruit:candidates:view'),
+    },
+    {
+      to: '/admin/sections',
+      icon: <LayoutGrid className="h-4 w-4" />,
+      label: 'Page sections',
+      visible: canRecruit('recruit:jobs:manage'),
+    },
+    {
+      to: '/admin/customization',
+      icon: <Palette className="h-4 w-4" />,
+      label: 'Page branding',
+      visible: canRecruit('recruit:jobs:manage'),
+    },
+  ].filter((item) => item.visible);
 
   return (
     <div

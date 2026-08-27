@@ -6,6 +6,10 @@ import { applyBrand, resolveIndex } from '../../templates/resolver';
 import { applySEO, loadAnalytics } from '../../shared/lib/seo';
 import NotFound from './NotFound';
 
+function isNotFoundError(error: Error | null): boolean {
+  return typeof error === 'object' && error !== null && 'status' in error && error.status === 404;
+}
+
 /**
  * CareersIndex - the list page at recruit.rtylr.com/:slug.
  *
@@ -36,6 +40,10 @@ const CareersIndex: React.FC = (): React.JSX.Element => {
         />
       </div>
     );
+  }
+
+  if (error && !data && isNotFoundError(error)) {
+    return <NotFound />;
   }
 
   if (error && !data) {
