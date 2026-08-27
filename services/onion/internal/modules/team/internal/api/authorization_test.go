@@ -6,6 +6,7 @@ import (
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/authorization"
+	"github.com/voxire/onion/internal/testutil"
 	hubteamaccessv1 "github.com/voxire/voxie/gen/go/hub/team/access/v1"
 	hubteamgroupsv1 "github.com/voxire/voxie/gen/go/hub/team/groups/v1"
 	hubteaminvitationsv1 "github.com/voxire/voxie/gen/go/hub/team/invitations/v1"
@@ -87,7 +88,7 @@ func TestTeamAPIsRequireTheirCanonicalDashPermissionBeforeServiceAccess(t *testi
 			return err
 		}},
 		{name: "approve access request", permission: "hub:team:edit", call: func(ctx context.Context) error {
-			_, err := (&AccessAPI{}).ApproveAccessRequest(ctx, &hubteamaccessv1.ApproveAccessRequestRequest{Id: 1, UserId: 2, App: "crm"})
+			_, err := (&AccessAPI{}).ApproveAccessRequest(ctx, &hubteamaccessv1.ApproveAccessRequestRequest{Id: 1, UserId: testutil.Int64Ptr(2), App: "crm"})
 			return err
 		}},
 	}

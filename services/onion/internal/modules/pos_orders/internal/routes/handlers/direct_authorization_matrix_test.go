@@ -34,7 +34,7 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			return response, err
 		}},
 		{Name: "pos orders refund", App: authorization.AppPOS, Permission: "pos:orders:refund", Call: func(ctx context.Context) (any, error) {
-			response, err := NewRefundAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).ProcessRefund(ctx, &posordersrefundsv1.ProcessRefundRequest{OrderId: 7213, Amount: 1, Reason: "authorization probe"})
+			response, err := NewRefundAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).ProcessRefund(ctx, &posordersrefundsv1.ProcessRefundRequest{OrderId: 7213, Amount: testutil.Float64Ptr(1), Reason: "authorization probe"})
 			return response, err
 		}},
 		{Name: "pos orders refund approve", App: authorization.AppPOS, Permission: "pos:orders:refund:approve", Call: func(ctx context.Context) (any, error) {
@@ -50,7 +50,7 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			return response, err
 		}},
 		{Name: "pos orders discount", App: authorization.AppPOS, Permission: "pos:orders:discount", Call: func(ctx context.Context) (any, error) {
-			response, err := NewDiscountAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).DiscountOrder(ctx, &posordersdiscountsv1.DiscountOrderRequest{OrderId: 7217, DiscountType: "percentage", DiscountValue: 5, Reason: "authorization probe"})
+			response, err := NewDiscountAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).DiscountOrder(ctx, &posordersdiscountsv1.DiscountOrderRequest{OrderId: 7217, DiscountType: "percentage", DiscountValue: testutil.Float64Ptr(5), Reason: "authorization probe"})
 			return response, err
 		}},
 	}

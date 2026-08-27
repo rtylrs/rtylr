@@ -30,7 +30,7 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			return response, err
 		}},
 		{Name: "flow projects assign", App: authorization.AppFlow, Permission: "flow:projects:assign", Call: func(ctx context.Context) (any, error) {
-			response, err := NewProjectAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).AddProjectMember(ctx, &flowprojectv1.AddProjectMemberRequest{ProjectId: 1, UserId: assignedUserID})
+			response, err := NewProjectAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).AddProjectMember(ctx, &flowprojectv1.AddProjectMemberRequest{ProjectId: testutil.Int64Ptr(1), UserId: testutil.Int64Ptr(assignedUserID)})
 			return response, err
 		}},
 		{Name: "flow tasks view", App: authorization.AppFlow, Permission: "flow:tasks:view", Call: func(ctx context.Context) (any, error) {
@@ -50,11 +50,11 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			return response, err
 		}},
 		{Name: "flow team manage", App: authorization.AppFlow, Permission: "flow:team:manage", Call: func(ctx context.Context) (any, error) {
-			response, err := NewWorkspaceAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).AddWorkspaceMember(ctx, &flowworkspacev1.AddWorkspaceMemberRequest{WorkspaceId: 1, UserId: assignedUserID, Role: "member"})
+			response, err := NewWorkspaceAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).AddWorkspaceMember(ctx, &flowworkspacev1.AddWorkspaceMemberRequest{WorkspaceId: testutil.Int64Ptr(1), UserId: testutil.Int64Ptr(assignedUserID), Role: "member"})
 			return response, err
 		}},
 		{Name: "flow managers manage", App: authorization.AppFlow, Permission: "flow:managers:manage", Call: func(ctx context.Context) (any, error) {
-			response, err := NewWorkspaceAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).UpdateWorkspaceMemberRole(ctx, &flowworkspacev1.UpdateWorkspaceMemberRoleRequest{WorkspaceId: 1, UserId: assignedUserID, Role: "admin"})
+			response, err := NewWorkspaceAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).UpdateWorkspaceMemberRole(ctx, &flowworkspacev1.UpdateWorkspaceMemberRoleRequest{WorkspaceId: testutil.Int64Ptr(1), UserId: testutil.Int64Ptr(assignedUserID), Role: "admin"})
 			return response, err
 		}},
 		{Name: "flow settings manage", App: authorization.AppFlow, Permission: "flow:settings:manage", Call: func(ctx context.Context) (any, error) {

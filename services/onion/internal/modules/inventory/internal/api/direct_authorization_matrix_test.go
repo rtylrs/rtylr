@@ -19,7 +19,7 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			return response, err
 		}},
 		{Name: "erp inventory adjust", App: authorization.AppERP, Permission: "erp:inventory:adjust", Call: func(ctx context.Context) (any, error) {
-			response, err := NewInventoryAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).AdjustInventory(ctx, &erpinventoryv1.AdjustInventoryRequest{ProductId: 5201, Change: 1, Type: "adjustment"})
+			response, err := NewInventoryAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).AdjustInventory(ctx, &erpinventoryv1.AdjustInventoryRequest{ProductId: testutil.Int64Ptr(5201), Change: testutil.Float64Ptr(1), Type: "adjustment"})
 			return response, err
 		}},
 	}

@@ -102,7 +102,7 @@ func TestEnrollInBenefit_ReturnsEnrollmentForCallingEmployee(t *testing.T) {
 	api, _ := newTestAPI(t)
 	planID := newPlanViaAPI(t, api, userAlice, "API Enroll Plan")
 
-	res, err := api.EnrollInBenefit(ctxFor(userAlice), &hrbenefitv1.EnrollInBenefitRequest{PlanId: planID})
+	res, err := api.EnrollInBenefit(ctxFor(userAlice), &hrbenefitv1.EnrollInBenefitRequest{PlanId: testutil.Int64Ptr(planID)})
 	if err != nil {
 		t.Fatalf("EnrollInBenefit: %v", err)
 	}
@@ -132,7 +132,7 @@ func TestListMyBenefitEnrollments_ReturnsOwnEnrollment(t *testing.T) {
 	api, _ := newTestAPI(t)
 	planID := newPlanViaAPI(t, api, userAlice, "API List Plan")
 
-	if _, err := api.EnrollInBenefit(ctxFor(userAlice), &hrbenefitv1.EnrollInBenefitRequest{PlanId: planID}); err != nil {
+	if _, err := api.EnrollInBenefit(ctxFor(userAlice), &hrbenefitv1.EnrollInBenefitRequest{PlanId: testutil.Int64Ptr(planID)}); err != nil {
 		t.Fatalf("EnrollInBenefit: %v", err)
 	}
 
@@ -156,7 +156,7 @@ func TestListMyBenefitEnrollments_SecondEmployeeSeesNone(t *testing.T) {
 	api, _ := newTestAPI(t)
 	planID := newPlanViaAPI(t, api, userAlice, "API Scoping Plan")
 
-	if _, err := api.EnrollInBenefit(ctxFor(userAlice), &hrbenefitv1.EnrollInBenefitRequest{PlanId: planID}); err != nil {
+	if _, err := api.EnrollInBenefit(ctxFor(userAlice), &hrbenefitv1.EnrollInBenefitRequest{PlanId: testutil.Int64Ptr(planID)}); err != nil {
 		t.Fatalf("EnrollInBenefit as alice: %v", err)
 	}
 
@@ -176,11 +176,11 @@ func TestEnrollInBenefit_DuplicateReturnsConflict(t *testing.T) {
 	api, _ := newTestAPI(t)
 	planID := newPlanViaAPI(t, api, userAlice, "API Duplicate Plan")
 
-	if _, err := api.EnrollInBenefit(ctxFor(userAlice), &hrbenefitv1.EnrollInBenefitRequest{PlanId: planID}); err != nil {
+	if _, err := api.EnrollInBenefit(ctxFor(userAlice), &hrbenefitv1.EnrollInBenefitRequest{PlanId: testutil.Int64Ptr(planID)}); err != nil {
 		t.Fatalf("first EnrollInBenefit: %v", err)
 	}
 
-	_, err := api.EnrollInBenefit(ctxFor(userAlice), &hrbenefitv1.EnrollInBenefitRequest{PlanId: planID})
+	_, err := api.EnrollInBenefit(ctxFor(userAlice), &hrbenefitv1.EnrollInBenefitRequest{PlanId: testutil.Int64Ptr(planID)})
 	if err == nil {
 		t.Fatal("expected the duplicate enrollment to fail")
 	}
@@ -192,7 +192,7 @@ func TestEnrollInBenefit_DuplicateReturnsConflict(t *testing.T) {
 func TestEnrollInBenefit_UnknownPlanReturnsNotFound(t *testing.T) {
 	api, _ := newTestAPI(t)
 
-	_, err := api.EnrollInBenefit(ctxFor(userAlice), &hrbenefitv1.EnrollInBenefitRequest{PlanId: 999999999})
+	_, err := api.EnrollInBenefit(ctxFor(userAlice), &hrbenefitv1.EnrollInBenefitRequest{PlanId: testutil.Int64Ptr(999999999)})
 	if err == nil {
 		t.Fatal("expected enrolling in an unknown plan to fail")
 	}
@@ -216,7 +216,7 @@ func TestEnrollInBenefit_MissingPlanIDReturnsBadRequest(t *testing.T) {
 func TestEnrollInBenefit_AnonymousIsDenied(t *testing.T) {
 	api, _ := newTestAPI(t)
 
-	_, err := api.EnrollInBenefit(context.Background(), &hrbenefitv1.EnrollInBenefitRequest{PlanId: 1})
+	_, err := api.EnrollInBenefit(context.Background(), &hrbenefitv1.EnrollInBenefitRequest{PlanId: testutil.Int64Ptr(1)})
 	if err == nil {
 		t.Fatal("expected an anonymous caller to be denied")
 	}
@@ -243,7 +243,7 @@ func TestEnrollInBenefit_UserWithoutEmployeeRecordIsDenied(t *testing.T) {
 	planID := newPlanViaAPI(t, api, userAlice, "API Unmapped Plan")
 
 	const unmappedUser int64 = 5999
-	_, err := api.EnrollInBenefit(ctxFor(unmappedUser), &hrbenefitv1.EnrollInBenefitRequest{PlanId: planID})
+	_, err := api.EnrollInBenefit(ctxFor(unmappedUser), &hrbenefitv1.EnrollInBenefitRequest{PlanId: testutil.Int64Ptr(planID)})
 	if err == nil {
 		t.Fatal("expected a user with no employee record to be denied")
 	}

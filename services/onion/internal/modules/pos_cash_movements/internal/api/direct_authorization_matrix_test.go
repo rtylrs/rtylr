@@ -19,15 +19,15 @@ func TestDirectAuthorizationMatrix(t *testing.T) {
 			return response, err
 		}},
 		{Name: "pos cash drop", App: authorization.AppPOS, Permission: "pos:cash:drop", Call: func(ctx context.Context) (any, error) {
-			response, err := NewCashAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).CashDrop(ctx, &poscashv1.CashDropRequest{BranchId: 3001, TerminalId: 1, SessionId: 7210, Amount: 1, Reason: "authorization probe"})
+			response, err := NewCashAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).CashDrop(ctx, &poscashv1.CashDropRequest{BranchId: testutil.Int64Ptr(3001), TerminalId: testutil.Int64Ptr(1), SessionId: testutil.Int64Ptr(7210), Amount: testutil.Float64Ptr(1), Reason: "authorization probe"})
 			return response, err
 		}},
 		{Name: "pos cash pickup", App: authorization.AppPOS, Permission: "pos:cash:pickup", Call: func(ctx context.Context) (any, error) {
-			response, err := NewCashAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).CashPickup(ctx, &poscashv1.CashPickupRequest{BranchId: 3001, TerminalId: 1, SessionId: 7210, Amount: 1, Reason: "authorization probe"})
+			response, err := NewCashAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).CashPickup(ctx, &poscashv1.CashPickupRequest{BranchId: testutil.Int64Ptr(3001), TerminalId: testutil.Int64Ptr(1), SessionId: testutil.Int64Ptr(7210), Amount: testutil.Float64Ptr(1), Reason: "authorization probe"})
 			return response, err
 		}},
 		{Name: "pos cash approve", App: authorization.AppPOS, Permission: "pos:cash:approve", Call: func(ctx context.Context) (any, error) {
-			response, err := NewCashAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).CashAdjust(ctx, &poscashv1.CashAdjustRequest{BranchId: 3001, TerminalId: 1, SessionId: 7210, Amount: 1, Reason: "authorization probe"})
+			response, err := NewCashAPI(application.NewService(ctx, testutil.DirectAuthorizationDB(ctx))).CashAdjust(ctx, &poscashv1.CashAdjustRequest{BranchId: testutil.Int64Ptr(3001), TerminalId: testutil.Int64Ptr(1), SessionId: testutil.Int64Ptr(7210), Amount: testutil.Float64Ptr(1), Reason: "authorization probe"})
 			return response, err
 		}},
 	}
