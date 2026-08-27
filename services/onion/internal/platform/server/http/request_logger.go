@@ -349,36 +349,44 @@ func sanitizeJSON(body string) string {
 		return body
 	}
 
-	var data interface{}
+	var data json.RawMessage
 	if err := json.Unmarshal([]byte(body), &data); err != nil {
 		return body
 	}
 
-	sanitizeInterface(data)
+	data = sanitizeJSONValue(data)
 
-	result, err := json.Marshal(data)
-	if err != nil {
-		return truncateString(body, maxLoggedBodyPreviewBytes)
-	}
-
-	return truncateString(string(result), maxLoggedBodyPreviewBytes)
+	return truncateString(string(data), maxLoggedBodyPreviewBytes)
 }
 
-func sanitizeInterface(v interface{}) {
-	switch val := v.(type) {
-	case map[string]interface{}:
-		for k, v2 := range val {
-			if isSensitiveField(k) {
-				val[k] = "[REDACTED]"
-			} else {
-				sanitizeInterface(v2)
+func sanitizeJSONValue(raw json.RawMessage) json.RawMessage {
+	var object map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &object); err == nil && object != nil {
+		for key, value := range object {
+			if isSensitiveField(key) {
+				object[key] = json.RawMessage(`"[REDACTED]"`)
+				continue
 			}
+			object[key] = sanitizeJSONValue(value)
 		}
-	case []interface{}:
-		for _, item := range val {
-			sanitizeInterface(item)
+		result, err := json.Marshal(object)
+		if err == nil {
+			return result
 		}
 	}
+
+	var array []json.RawMessage
+	if err := json.Unmarshal(raw, &array); err == nil && array != nil {
+		for index, value := range array {
+			array[index] = sanitizeJSONValue(value)
+		}
+		result, err := json.Marshal(array)
+		if err == nil {
+			return result
+		}
+	}
+
+	return raw
 }
 
 func isSensitiveField(key string) bool {

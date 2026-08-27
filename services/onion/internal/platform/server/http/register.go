@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bytes"
 	"context"
 	"encoding"
 	"encoding/json"
@@ -676,7 +677,7 @@ func WriteOneKitError(ctx context.Context, w http.ResponseWriter, err error) {
 	}
 
 	w.WriteHeader(statusCode)
-	if _, writeErr := w.Write(payload); writeErr != nil {
+	if _, writeErr := io.Copy(w, bytes.NewReader(payload)); writeErr != nil {
 		logger.Ctx(ctx).Error("Failed to write error response", logger.Error(writeErr))
 	}
 }

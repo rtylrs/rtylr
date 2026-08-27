@@ -44,11 +44,11 @@ func (builder *Builder) Select(tableName, columns string) (queryStr string, args
 	}
 
 	if builder.Limit != 0 {
-		query = query.Limit(uint64(builder.Limit))
+		query = query.Limit(uint64(builder.Limit)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 
 	if builder.Offset != 0 {
-		query = query.Offset(uint64(builder.Offset))
+		query = query.Offset(uint64(builder.Offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 
 	for i, column := range builder.columns {

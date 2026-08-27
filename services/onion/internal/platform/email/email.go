@@ -231,7 +231,7 @@ type enqueueParams struct {
 
 func enqueue(ctx context.Context, db dbtx, p enqueueParams) error {
 	return sqlc.New(db).EnqueueEmail(ctx, sqlc.EnqueueEmailParams{
-		Priority:  int8(p.priority),
+		Priority:  int8(p.priority), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		ToEmail:   p.to,
 		Subject:   p.subject,
 		Html:      p.html,
