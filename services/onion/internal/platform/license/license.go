@@ -25,12 +25,14 @@ const (
 	StatusInvalid = "invalid"
 	StatusRevoked = "revoked"
 
+	// #nosec G101 -- This is a public token format prefix, not a credential.
 	tokenPrefix = "rtylr_license_v1"
 )
 
 var (
 	// VendorPublicKey is injected into released binaries with -ldflags. It is
 	// intentionally not read from customer-controlled runtime configuration.
+	// #nosec G101 -- This is a public verification key placeholder populated at build time.
 	VendorPublicKey string
 	// BuildDeploymentMode is injected into released binaries with -ldflags so
 	// deployment mode cannot be changed by flipping an environment variable.
@@ -272,6 +274,7 @@ func configuredKey(cfg *platformconfig.AppConfig) (string, error) {
 }
 
 func readLicenseFile(path string) (string, error) {
+	// #nosec G304 G703 -- this path is deployment configuration, never request data; hosted builds do not accept it from clients.
 	contents, err := os.ReadFile(path)
 	if err != nil {
 		return "", err

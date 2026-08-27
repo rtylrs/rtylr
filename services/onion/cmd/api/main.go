@@ -157,8 +157,8 @@ import (
 	"github.com/voxire/onion/internal/platform/server/http"
 	"github.com/voxire/onion/internal/platform/server/probe"
 	"github.com/voxire/onion/internal/platform/server/profiling"
-	"github.com/voxire/onion/internal/platform/slack"
 	sheetsPkg "github.com/voxire/onion/internal/platform/sheets"
+	"github.com/voxire/onion/internal/platform/slack"
 	trinoPkg "github.com/voxire/onion/internal/platform/trino"
 	"github.com/voxire/onion/internal/platform/utils/jwtutils"
 	"github.com/voxire/onion/internal/platform/wsbus"
@@ -294,7 +294,9 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("cache initialization failed: %w", err)
 	}
 
-	trinoPkg.Connect(ctx)
+	if err := trinoPkg.Connect(ctx); err != nil {
+		return fmt.Errorf("trino initialization failed: %w", err)
+	}
 
 	ctx, err = jwtutils.InitializeJWT(ctx)
 	if err != nil {
@@ -748,6 +750,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	)
 	modules.User.ProvisionerResolver = provisionerResolver
 	modules.User.ProfileResolver = team.NewHubProfileResolver(modules.Team.Service())
+	modules.User.WithProvisioningStore(teamSvc)
 	modules.User.WithInviteAccepter(modules.Team.Service())
 	// A business-wide Owner/Admin/Operator has no path through Flow's own
 	// project/workspace membership tables, so RequireProjectRole/
@@ -803,7 +806,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 		http.SecurityMiddleware(),
 		jwtutils.JWTMiddleware(),
 		http.RequestLoggerMiddleware(ctx),
-		http.GetAuthMiddlewareFunc(accessPolicy, tokenResolver),
+		http.GetAuthMiddlewareFunc(accessPolicy, tokenResolver, teamSvc),
 		authPkg.DeviceMiddleware(),
 		// After auth so idempotency keys are scoped per authenticated user.
 		http.IdempotencyMiddleware,
