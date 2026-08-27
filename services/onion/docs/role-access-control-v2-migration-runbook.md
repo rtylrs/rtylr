@@ -58,14 +58,14 @@ not mark the file applied manually. Restore the disposable database from its
 pre-migration dump, correct the failing migration, and rerun. Production
 recovery requires the normal database backup and change-control procedure.
 
-## Release-gate evidence recorded on 2026-08-26
+## Release-gate evidence recorded on 2026-08-27
 
-The disposable fresh database `rtylr_gate_runner_release_20260826` completed
-with `Applied: 170, Skipped: 0, Failed: 0`. Post-migration counts were:
+The disposable fresh database completed with `Applied: 184, Skipped: 0,
+Failed: 0`. Post-migration counts were:
 
 | Check | Count |
 | --- | ---: |
-| `schema_migrations` | 170 |
+| `schema_migrations` | 184 |
 | permissions | 104 |
 | roles | 37 |
 | role_permissions | 393 |
@@ -74,11 +74,11 @@ with `Applied: 170, Skipped: 0, Failed: 0`. Post-migration counts were:
 | assignments | 0 |
 | audit_events | 0 |
 
-The exact six-file RBAC ordering completed with `Applied: 170, Skipped: 0,
+The complete migration ordering completed with `Applied: 184, Skipped: 0,
 Failed: 0` and no numeric warnings. A second run completed with
-`Applied: 0, Skipped: 170, Failed: 0`. A fresh dump restored into a separate
-database also completed with `Applied: 0, Skipped: 170, Failed: 0`, retaining
-the expected 170 migration rows, 104 permissions, 37 roles, and 393 role
+`Applied: 0, Skipped: 184, Failed: 0`. A fresh dump restored into a separate
+database also completed with `Applied: 0, Skipped: 184, Failed: 0`, retaining
+the expected 184 migration rows, 104 permissions, 37 roles, and 393 role
 permissions.
 
 Disposable preflight tests rejected orphaned, duplicate-active, invalid-target,
@@ -88,8 +88,6 @@ inserted only after disabling the exact constraint needed for each test, then
 `role_access_v2_integrity_abort`. The migration did not silently repair any of
 those rows.
 
-The full repository DB fixture harness is a separate gate. Its migration and
-seeding phase passes, but the current `make test-db` run still exposes unrelated
-fixture and schema drift in legacy integration packages. Treat those failures as
-release blockers until the fixture suite is repaired; do not convert them into
-migration success.
+The full repository DB fixture harness completed successfully after the
+booking-overlap, checkout-idempotence, catalog-fixture, order-state, and
+quote-pagination corrections recorded in the backend PR.
