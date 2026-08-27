@@ -3,7 +3,7 @@ SELECT id, owner_id, business_id, customer_name, customer_email, status,
        items, subtotal, tax, discount, total, valid_until, notes, created_at, updated_at
 FROM finance_quotes
 WHERE business_id = ?
-ORDER BY created_at DESC
+ORDER BY created_at DESC, id DESC
 LIMIT ? OFFSET ?;
 
 -- name: CreateQuote :execresult
