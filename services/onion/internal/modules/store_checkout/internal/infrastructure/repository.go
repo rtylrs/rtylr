@@ -175,7 +175,9 @@ func (r *Repository) Complete(ctx context.Context, businessID, id, _ int64) erro
 		ID:         id,
 	})
 	if errors.Is(err, sql.ErrNoRows) {
-		return sql.ErrNoRows
+		// Completion is idempotent for missing or cross-business checkouts.
+		// The scoped lookup deliberately reveals neither existence nor data.
+		return nil
 	} else if err != nil {
 		logger.Ctx(ctx).Error("Failed to load checkout customer", logger.Error(err))
 		return err
