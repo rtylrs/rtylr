@@ -71,6 +71,7 @@ func (c *CDN) upload(w http.ResponseWriter, r *http.Request) {
 	// in-memory portion and spills the rest to temp files.
 	r.Body = http.MaxBytesReader(w, r.Body, c.maxUpload)
 
+	// #nosec G120 -- MaxBytesReader caps the complete request before parsing.
 	if err := r.ParseMultipartForm(maxInMemoryUpload); err != nil {
 		var maxErr *http.MaxBytesError
 		if errors.As(err, &maxErr) {

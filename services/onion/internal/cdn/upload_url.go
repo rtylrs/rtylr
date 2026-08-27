@@ -56,7 +56,7 @@ func (c *CDN) serveUploadURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if source.redirectURL != "" {
-		http.Redirect(w, r, source.redirectURL, http.StatusTemporaryRedirect)
+		c.redirectToCanonical(w, source.redirectURL)
 		return
 	}
 	if source.storageKey != "" {
@@ -85,20 +85,32 @@ func (c *CDN) serveUploadID(w http.ResponseWriter, r *http.Request, id string) {
 		return
 	}
 	if parsed.original {
-		http.Redirect(w, r, c.fileURL(id), http.StatusTemporaryRedirect)
+		c.redirectToCanonical(w, c.fileURL(id))
 		return
 	}
 
 	meta, err := c.fileByUUID(r.Context(), id)
 	if err != nil {
-		http.Redirect(w, r, c.fileURL(id), http.StatusTemporaryRedirect)
+		c.redirectToCanonical(w, c.fileURL(id))
 		return
 	}
 	if !isUploadURLTransformableMIME(meta.MIMEType) {
-		http.Redirect(w, r, c.fileURL(id), http.StatusTemporaryRedirect)
+		c.redirectToCanonical(w, c.fileURL(id))
 		return
 	}
-	http.Redirect(w, r, c.uploadImageReadURL(id, r.URL.Query()), http.StatusTemporaryRedirect)
+	c.redirectToCanonical(w, c.uploadImageReadURL(id, r.URL.Query()))
+}
+
+func (c *CDN) redirectToCanonical(w http.ResponseWriter, destination string) {
+	base, baseErr := url.Parse(c.baseURL)
+	target, targetErr := url.Parse(destination)
+	if baseErr != nil || targetErr != nil || base.Scheme == "" || base.Host == "" ||
+		target.Scheme != base.Scheme || target.Host != base.Host || target.User != nil {
+		http.Error(w, "invalid canonical image url", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Location", target.String())
+	w.WriteHeader(http.StatusTemporaryRedirect)
 }
 
 func (c *CDN) resolveUploadURLSource(raw, requestHost string) (uploadURLSource, error) {
@@ -680,7 +692,8 @@ func (c *CDN) generateUploadURLTransform(ctx context.Context, staged *stagedUplo
 
 	execCtx, cancel := context.WithTimeout(ctx, engineTimeout)
 	defer cancel()
-	// #nosec G204 -- mediaEngine is a server-side configured binary path; CLI args are built from validated params and temp paths.
+	// #nosec G204 G702 -- mediaEngine is a server-side configured binary path; CLI args are built from validated params and temp paths.
+	// nosemgrep: go.lang.security.audit.dangerous-exec-command.dangerous-exec-command
 	cmd := exec.CommandContext(execCtx, c.mediaEngine, p.CLIArgs(staged.inputPath, staged.outputPath)...)
 	if out, runErr := cmd.CombinedOutput(); runErr != nil {
 		return fmt.Errorf("media-engine failed: %w\noutput: %s", runErr, out)

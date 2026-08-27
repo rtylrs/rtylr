@@ -52,14 +52,19 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
     -o /app/api ./cmd/api
 
 # Final stage — minimal image
-FROM alpine:latest
+FROM alpine:3.22
 
 RUN apk add --no-cache ca-certificates tzdata
+RUN addgroup -S app && adduser -S -G app app
 
 WORKDIR /app
 
 COPY --from=builder /app/api /app/api
 
 EXPOSE 9999
+
+USER app
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["wget", "--spider", "--quiet", "http://127.0.0.1:9999/health"]
 
 CMD ["/app/api"]
