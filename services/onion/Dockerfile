@@ -1,7 +1,7 @@
 # Build stage
 # Build on the native runner arch and cross-compile to TARGETARCH — the builder
 # downloads an amd64 sqlc and runs codegen, which can't run under arm64 emulation.
-FROM --platform=$BUILDPLATFORM golang:1.26-alpine3.20 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.26-alpine3.22 AS builder
 
 WORKDIR /app
 
