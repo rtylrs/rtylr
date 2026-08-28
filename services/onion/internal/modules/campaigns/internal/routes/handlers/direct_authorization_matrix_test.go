@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/voxire/onion/internal/modules/campaigns/internal/application"
-
 	"github.com/go-chi/chi/v5"
+
+	"github.com/voxire/onion/internal/modules/campaigns/internal/application"
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
 )

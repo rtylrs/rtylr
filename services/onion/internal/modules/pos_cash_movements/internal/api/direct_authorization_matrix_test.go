@@ -4,12 +4,10 @@ import (
 	"context"
 	"testing"
 
-	poscashv1 "github.com/voxire/voxie/gen/go/pos/cash/v1"
-
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/application"
-
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
+	poscashv1 "github.com/voxire/voxie/gen/go/pos/cash/v1"
 )
 
 func TestDirectAuthorizationMatrix(t *testing.T) {

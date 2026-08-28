@@ -6,7 +6,6 @@ import (
 
 	"github.com/voxire/onion/internal/modules/api_keys/internal/application"
 	"github.com/voxire/onion/internal/modules/api_keys/internal/domain"
-
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/hubdeveloper"
 	"github.com/voxire/onion/internal/testutil"

@@ -270,7 +270,7 @@ func extractPDFText(raw []byte) (string, error) {
 
 	if _, err := tmp.Write(raw); err != nil {
 		if closeErr := tmp.Close(); closeErr != nil {
-			return "", fmt.Errorf("write temporary CV: %w; close file: %v", err, closeErr)
+			return "", fmt.Errorf("write temporary CV: %w; close file: %w", err, closeErr)
 		}
 		return "", err
 	}

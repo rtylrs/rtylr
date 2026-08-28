@@ -173,7 +173,7 @@ func TestVoxhire_ListApplications_SearchesExtractedCVText(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := domain.WithOwnerID(context.Background(), testutil.OwnerID)
 	opening, err := repo.CreateCareer(ctx, domain.CareerInput{
-		Title:  "CV Search Role",
+		Title:   "CV Search Role",
 		Details: "Integration test opening for CV search",
 	})
 	if err != nil {

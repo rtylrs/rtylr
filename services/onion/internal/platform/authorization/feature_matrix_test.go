@@ -136,7 +136,6 @@ func TestFeatureMatrixPermissionsEnforceAppLicenseAndExactPermission(t *testing.
 	t.Setenv("AUTHORIZATION_V2_MODE", "v2")
 
 	for _, entry := range featureMatrixPermissions {
-		entry := entry
 		t.Run(entry.permission, func(t *testing.T) {
 			active := featureMatrixUser(entry, true, true, []string{entry.permission})
 			if !authPkg.HasAppPermission(active, entry.app, entry.permission) {
@@ -147,7 +146,7 @@ func TestFeatureMatrixPermissionsEnforceAppLicenseAndExactPermission(t *testing.
 				"missing license":    featureMatrixUser(entry, false, false, []string{entry.permission}),
 				"missing permission": featureMatrixUser(entry, true, true, nil),
 				"wrong app":          featureMatrixUser(matrixPermission{app: differentApp(entry.app), permission: entry.permission}, true, true, []string{entry.permission}),
-				"stale session":      &authPkg.AuthUser{UserID: 7, BusinessID: 9},
+				"stale session":      {UserID: 7, BusinessID: 9},
 			} {
 				if authPkg.HasAppPermission(user, entry.app, entry.permission) {
 					t.Errorf("%s unexpectedly retained %s", name, entry.permission)
@@ -168,7 +167,6 @@ func TestFeatureMatrixPermissionsEnforceAppLicenseAndExactPermission(t *testing.
 
 func TestFeatureMatrixPermissionsFailClosedForLifecycleAndGroupStates(t *testing.T) {
 	for _, entry := range featureMatrixPermissions {
-		entry := entry
 		t.Run(entry.permission, func(t *testing.T) {
 			cases := map[string]authorization.Snapshot{
 				"revoked assignment":   featureMatrixSnapshot(entry, true, false, true, true, false, false),
@@ -190,7 +188,6 @@ func TestFeatureMatrixPermissionsFailClosedForLifecycleAndGroupStates(t *testing
 
 func TestFeatureMatrixDelegationCeiling(t *testing.T) {
 	for _, entry := range featureMatrixPermissions {
-		entry := entry
 		t.Run(entry.permission, func(t *testing.T) {
 			access := featureMatrixUser(entry, true, true, []string{entry.permission}).EffectiveAccess
 			if !authorization.CanDelegatePermissions(access, entry.app, []string{entry.permission}) {

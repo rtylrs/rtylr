@@ -6,8 +6,7 @@ import (
 	"crypto/cipher"
 	"crypto/hmac"
 	"crypto/rand"
-	// #nosec G505 -- RFC 6238 TOTP interoperability requires the SHA-1 default.
-	"crypto/sha1"
+	"crypto/sha1" // #nosec G505 -- RFC 6238 TOTP interoperability requires SHA-1.
 	"crypto/sha256"
 	"encoding/base32"
 	"encoding/base64"
@@ -24,8 +23,10 @@ import (
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
 )
 
-var ErrMFAInvalidCode = errors.New("invalid MFA code")
-var ErrMFAEnrollmentMissing = errors.New("MFA enrollment is not pending")
+var (
+	ErrMFAInvalidCode       = errors.New("invalid MFA code")
+	ErrMFAEnrollmentMissing = errors.New("MFA enrollment is not pending")
+)
 
 const mfaSecretPrefix = "enc:v1:"
 

@@ -31,8 +31,10 @@ type DirectAuthorizationCase struct {
 
 type directAuthorizationProbeContextKey struct{}
 
-var directAuthorizationProbeTables []string
-var directAuthorizationProbeUpdatedTables map[string]bool
+var (
+	directAuthorizationProbeTables        []string
+	directAuthorizationProbeUpdatedTables map[string]bool
+)
 
 const (
 	directAuthorizationUserID     int64 = 1001
@@ -67,7 +69,7 @@ func RunDirectAuthorizationCases(t *testing.T, cases []DirectAuthorizationCase) 
 			caseCtx := context.WithValue(context.Background(), directAuthorizationProbeContextKey{}, db)
 			deniedPermissions := append([]string{}, tc.Extra...)
 			deniedCtx := authpkg.WithAuthUser(caseCtx, directAuthorizationUser(tc.App, tc.Role, deniedPermissions...))
-			runDeniedDirectAuthorizationVariant(t, db, tc.Call, deniedCtx, "missing permission", tc.Permission)
+			runDeniedDirectAuthorizationVariant(deniedCtx, t, db, tc.Call, "missing permission", tc.Permission)
 			allowedPermissions := append([]string{}, tc.Extra...)
 			allowedPermissions = append(allowedPermissions, tc.Permission)
 
@@ -82,7 +84,7 @@ func RunDirectAuthorizationCases(t *testing.T, cases []DirectAuthorizationCase) 
 					{name: "resolved no-access state", user: directAuthorizationUserWithAppState(tc.App, tc.Role, true, false, deniedPermissionsWith(tc.Extra, tc.Permission)...)},
 				} {
 					t.Run(variant.name, func(t *testing.T) {
-						runDeniedDirectAuthorizationVariant(t, db, tc.Call, authpkg.WithAuthUser(caseCtx, variant.user), variant.name, tc.Permission)
+						runDeniedDirectAuthorizationVariant(authpkg.WithAuthUser(caseCtx, variant.user), t, db, tc.Call, variant.name, tc.Permission)
 					})
 				}
 			}
@@ -114,26 +116,26 @@ func RunDirectAuthorizationCases(t *testing.T, cases []DirectAuthorizationCase) 
 				}{{name: "resource scope denial", user: directAuthorizationUserInBusiness(tc.App, tc.Role, 5100, allowedPermissions...)}}, lifecycleVariants...)
 			}
 			for _, variant := range lifecycleVariants {
-				runDeniedDirectAuthorizationVariant(t, db, tc.Call, authpkg.WithAuthUser(caseCtx, variant.user), variant.name, tc.Permission)
+				runDeniedDirectAuthorizationVariant(authpkg.WithAuthUser(caseCtx, variant.user), t, db, tc.Call, variant.name, tc.Permission)
 			}
 
 			t.Run("wrong tenant or cross-business target", func(t *testing.T) {
-				runDeniedDirectAuthorizationVariant(t, db, tc.Call, authpkg.WithAuthUser(caseCtx, directAuthorizationUserInBusiness(tc.App, tc.Role, 5100, allowedPermissions...)), "wrong tenant or cross-business target", tc.Permission)
+				runDeniedDirectAuthorizationVariant(authpkg.WithAuthUser(caseCtx, directAuthorizationUserInBusiness(tc.App, tc.Role, 5100, allowedPermissions...)), t, db, tc.Call, "wrong tenant or cross-business target", tc.Permission)
 			})
 
 			t.Run("stale authorization version", func(t *testing.T) {
-				runDeniedDirectAuthorizationVariant(t, db, tc.Call, authpkg.WithAuthUser(caseCtx, directAuthorizationUserWithProvisioningState(tc.App, tc.Role, authorization.ProvisioningRevoked, allowedPermissions...)), "stale authorization version", tc.Permission)
-				runDeniedDirectAuthorizationVariant(t, db, tc.Call, authpkg.WithAuthUser(caseCtx, directAuthorizationUserWithProvisioningState(tc.App, tc.Role, authorization.ProvisioningPendingActivation, allowedPermissions...)), "stale session", tc.Permission)
+				runDeniedDirectAuthorizationVariant(authpkg.WithAuthUser(caseCtx, directAuthorizationUserWithProvisioningState(tc.App, tc.Role, authorization.ProvisioningRevoked, allowedPermissions...)), t, db, tc.Call, "stale authorization version", tc.Permission)
+				runDeniedDirectAuthorizationVariant(authpkg.WithAuthUser(caseCtx, directAuthorizationUserWithProvisioningState(tc.App, tc.Role, authorization.ProvisioningPendingActivation, allowedPermissions...)), t, db, tc.Call, "stale session", tc.Permission)
 			})
 
 			if tc.DelegationUserID > 0 {
 				t.Run("delegation ceiling", func(t *testing.T) {
-					runDeniedDirectAuthorizationVariant(t, db, tc.Call, authpkg.WithAuthUser(caseCtx, directAuthorizationUserWithID(tc.App, "member", tc.DelegationUserID, allowedPermissions...)), "delegation ceiling", tc.Permission)
+					runDeniedDirectAuthorizationVariant(authpkg.WithAuthUser(caseCtx, directAuthorizationUserWithID(tc.App, "member", tc.DelegationUserID, allowedPermissions...)), t, db, tc.Call, "delegation ceiling", tc.Permission)
 				})
 			}
 
 			allowedCtx := authpkg.WithAuthUser(caseCtx, directAuthorizationUser(tc.App, tc.Role, allowedPermissions...))
-			allowedResponse, allowedErr := callDirectAuthorizationCase(tc.Call, allowedCtx)
+			allowedResponse, allowedErr := callDirectAuthorizationCase(allowedCtx, tc.Call)
 			if got := directAuthorizationStatus(allowedErr); got == 403 {
 				t.Fatalf("granted %s was denied at the concrete handler boundary: %v", tc.Permission, allowedErr)
 			}
@@ -165,10 +167,10 @@ func assertAllowedDirectAuthorizationResponse(t *testing.T, response any, permis
 	}
 }
 
-func runDeniedDirectAuthorizationVariant(t *testing.T, db *sql.DB, call func(context.Context) (any, error), ctx context.Context, variant, permission string) {
+func runDeniedDirectAuthorizationVariant(ctx context.Context, t *testing.T, db *sql.DB, call func(context.Context) (any, error), variant, permission string) {
 	t.Helper()
 	t.Run(variant, func(t *testing.T) {
-		response, err := callDeniedDirectAuthorizationCase(t, db, call, ctx)
+		response, err := callDeniedDirectAuthorizationCase(ctx, t, db, call)
 		status := directAuthorizationStatus(err)
 		if status != 403 && status != 404 {
 			t.Fatalf("%s for %s returned status %d, want 403 or 404 (err=%v)", variant, permission, status, err)
@@ -229,7 +231,7 @@ func directAuthorizationUserWithNoScope(app authorization.AppID, role string, pe
 	return user
 }
 
-func directAuthorizationUserWithNoPermission(app authorization.AppID, role string, permissions ...string) *authpkg.AuthUser {
+func directAuthorizationUserWithNoPermission(app authorization.AppID, role string) *authpkg.AuthUser {
 	user := directAuthorizationUser(app, role)
 	if user.EffectiveAccess != nil && len(user.EffectiveAccess.Apps) > 0 {
 		user.EffectiveAccess.Apps[0].Licensed = true
@@ -289,7 +291,7 @@ func wrongDirectAuthorizationApp(app authorization.AppID) authorization.AppID {
 	return authorization.AppERP
 }
 
-func callDirectAuthorizationCase(call func(context.Context) (any, error), ctx context.Context) (response any, err error) {
+func callDirectAuthorizationCase(ctx context.Context, call func(context.Context) (any, error)) (response any, err error) {
 	defer func() {
 		if recovered := recover(); recovered != nil {
 			err = fmt.Errorf("direct operation panicked: %v", recovered)
@@ -298,10 +300,10 @@ func callDirectAuthorizationCase(call func(context.Context) (any, error), ctx co
 	return call(ctx)
 }
 
-func callDeniedDirectAuthorizationCase(t *testing.T, db *sql.DB, call func(context.Context) (any, error), ctx context.Context) (any, error) {
+func callDeniedDirectAuthorizationCase(ctx context.Context, t *testing.T, db *sql.DB, call func(context.Context) (any, error)) (any, error) {
 	t.Helper()
 	before := directDatabaseSnapshot(t, db)
-	response, err := callDirectAuthorizationCase(call, ctx)
+	response, err := callDirectAuthorizationCase(ctx, call)
 	after := directDatabaseSnapshot(t, db)
 	if len(before) != len(after) {
 		t.Fatalf("denied operation changed the database table set")

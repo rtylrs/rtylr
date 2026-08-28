@@ -280,7 +280,7 @@ func (r *Repository) PurgeProjectCascade(ctx context.Context, id, businessID int
 		var u string
 		if err := rows.Scan(&u); err != nil {
 			if closeErr := rows.Close(); closeErr != nil {
-				return nil, fmt.Errorf("scan attachment URL: %w; close rows: %v", err, closeErr)
+				return nil, fmt.Errorf("scan attachment URL: %w; close rows: %w", err, closeErr)
 			}
 			return nil, err
 		}

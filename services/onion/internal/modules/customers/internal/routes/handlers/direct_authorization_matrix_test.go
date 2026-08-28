@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/customers/internal/application"
-
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
 )

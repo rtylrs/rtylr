@@ -4,12 +4,10 @@ import (
 	"context"
 	"testing"
 
-	hubpermissionv1 "github.com/voxire/voxie/gen/go/hub/permission/v1"
-
 	"github.com/voxire/onion/internal/modules/roles/internal/application"
-
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
+	hubpermissionv1 "github.com/voxire/voxie/gen/go/hub/permission/v1"
 )
 
 func TestDirectAuthorizationMatrix(t *testing.T) {

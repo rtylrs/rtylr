@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	onkithttp "github.com/corezio/onekit/http"
+
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/authorization"
 	erpproductv1 "github.com/voxire/voxie/gen/go/erp/product/v1"

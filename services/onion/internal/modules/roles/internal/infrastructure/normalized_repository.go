@@ -646,7 +646,8 @@ func (r *Repository) getAssignment(ctx context.Context, businessID, assignmentID
 
 func scanNormalizedRole(scanner interface {
 	Scan(dest ...interface{}) error
-}) (domain.Role, error) {
+},
+) (domain.Role, error) {
 	var role domain.Role
 	var scopeJSON sql.NullString
 	var parentRoleID sql.NullInt64
@@ -677,7 +678,8 @@ func scanNormalizedRole(scanner interface {
 
 func validateRolePermissions(ctx context.Context, executor interface {
 	QueryRowContext(context.Context, string, ...interface{}) *sql.Row
-}, appID string, permissions []string) error {
+}, appID string, permissions []string,
+) error {
 	for _, permission := range permissions {
 		var catalogApp string
 		err := executor.QueryRowContext(ctx, `SELECT app_id FROM authorization_permission_catalog WHERE permission_key = ? LIMIT 1`, permission).Scan(&catalogApp)

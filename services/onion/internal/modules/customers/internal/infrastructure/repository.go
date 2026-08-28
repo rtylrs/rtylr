@@ -297,7 +297,6 @@ func (r *Repository) UpdateCustomerWithLoyalty(ctx context.Context, input domain
 }
 
 func updateCustomer(ctx context.Context, q *sqlc.Queries, input domain.CustomerUpdateInput) error {
-
 	tagsJSON, err := json.Marshal(input.Tags)
 	if err != nil {
 		tagsJSON = []byte("[]")

@@ -3,10 +3,9 @@ package api_test
 import (
 	"testing"
 
-	flowlabelv2 "github.com/voxire/voxie/gen/go/flow/label/v2"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/api"
 	"github.com/voxire/onion/internal/testutil"
+	flowlabelv2 "github.com/voxire/voxie/gen/go/flow/label/v2"
 )
 
 // SetTaskLabels mutates a task through the label service, so it takes the same

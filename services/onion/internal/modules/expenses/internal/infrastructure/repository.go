@@ -254,7 +254,7 @@ func (r *Repository) CountByCategory(ctx context.Context, businessID int64) (map
 
 	counts := make(map[string]int64, len(rows))
 	for _, row := range rows {
-		key := ""
+		var key string
 		switch value := row.CategoryKey.(type) {
 		case []byte:
 			key = string(value)

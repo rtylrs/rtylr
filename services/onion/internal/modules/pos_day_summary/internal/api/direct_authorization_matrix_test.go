@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/pos_day_summary/internal/application"
-
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
 	possummaryv1 "github.com/voxire/voxie/gen/go/pos/day_summary/v1"

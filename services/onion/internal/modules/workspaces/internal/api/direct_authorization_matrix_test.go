@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/workspaces/internal/application"
-
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
 	flowprojectv1 "github.com/voxire/voxie/gen/go/flow/project/v1"

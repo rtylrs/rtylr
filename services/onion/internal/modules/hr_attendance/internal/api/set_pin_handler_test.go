@@ -86,8 +86,8 @@ func TestSetClockInPIN_DeniesWithoutBusinessScope(t *testing.T) {
 
 // The PIN write targets hr_core's table from this module's repository; seed the
 // row the update is scoped by with only the NOT NULL columns set.
-func seedAttendanceEmployee(t testing.TB, db *sql.DB, id, businessID, userID int64) {
-	t.Helper()
+func seedAttendanceEmployee(tb testing.TB, db *sql.DB, id, businessID, userID int64) {
+	tb.Helper()
 
 	_, err := db.Exec(
 		`INSERT INTO hr_employees (id, owner_id, business_id, user_id, first_name, last_name, email)
@@ -95,9 +95,9 @@ func seedAttendanceEmployee(t testing.TB, db *sql.DB, id, businessID, userID int
 		id, businessID, businessID, userID, "pin-test@example.invalid",
 	)
 	if err != nil {
-		t.Fatalf("seed hr_employees row (%d): %v", id, err)
+		tb.Fatalf("seed hr_employees row (%d): %v", id, err)
 	}
-	t.Cleanup(func() {
+	tb.Cleanup(func() {
 		_, _ = db.Exec(`DELETE FROM hr_employees WHERE id = ?`, id)
 	})
 }

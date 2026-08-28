@@ -96,10 +96,7 @@ func (r *Repository) BeginMFAEnrollment(ctx context.Context, userID int64, encry
 		VALUES (?, 'totp', ?, FALSE)`, userID, encryptedSecret); err != nil {
 		return rollback(err)
 	}
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-	return nil
+	return tx.Commit()
 }
 
 func (r *Repository) GetMFASecret(ctx context.Context, userID int64, active bool) ([]byte, error) {

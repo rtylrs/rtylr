@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"math"
 	"context"
 	"errors"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"

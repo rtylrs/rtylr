@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/application"
-
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
 	erppurchaseorderv1 "github.com/voxire/voxie/gen/go/erp/purchase_order/v1"

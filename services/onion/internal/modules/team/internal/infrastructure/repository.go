@@ -335,10 +335,7 @@ func (r *Repository) UpsertNormalizedAuthorization(ctx context.Context, business
 		return rollback(err)
 	}
 
-	if err = tx.Commit(); err != nil {
-		return err
-	}
-	return nil
+	return tx.Commit()
 }
 
 func (r *Repository) replaceUserGroupMemberships(ctx context.Context, tx *sql.Tx, businessID, ownerID, userID int64, groupIDs []int64) error {
@@ -566,10 +563,7 @@ func (r *Repository) DeactivateUser(ctx context.Context, ownerID, userID int64) 
 		_ = tx.Rollback()
 		return err
 	}
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-	return nil
+	return tx.Commit()
 }
 
 // RevokeBusinessUserPermissions deactivates one user's permission rows in one
@@ -1583,7 +1577,6 @@ func (r *Repository) loadAuthorizationRoleAssignments(ctx context.Context, busin
 
 	type assignmentRow struct {
 		assignment authorization.RoleAssignment
-		seen       bool
 	}
 	byID := make(map[int64]*assignmentRow)
 	order := make([]int64, 0)
@@ -1811,10 +1804,7 @@ func (r *Repository) SetNormalizedAuthorizationPending(ctx context.Context, busi
 		WHERE business_id = ? AND user_id = ? AND status = 'active'`, businessID, userID); err != nil {
 		return rollback(err)
 	}
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-	return nil
+	return tx.Commit()
 }
 
 func (r *Repository) ActivateNormalizedAuthorization(ctx context.Context, businessID, userID int64) error {
@@ -1847,10 +1837,7 @@ func (r *Repository) ActivateNormalizedAuthorization(ctx context.Context, busine
 		WHERE business_id = ? AND user_id = ? AND status = 'pending'`, businessID, userID); err != nil {
 		return rollback(err)
 	}
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-	return nil
+	return tx.Commit()
 }
 
 // GetOwnerSubscriptionInfo returns the plan slug and status for the owner's subscription.

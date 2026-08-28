@@ -8,12 +8,12 @@ import (
 
 func TestEmployeeToProtoRedactsCompensationWithoutSensitivePermission(t *testing.T) {
 	employee := domain.EmployeeRecord{
-		ID:                 41,
-		FirstName:          "Ada",
-		LastName:           "Lovelace",
-		SalaryCents:        125000,
-		HourlyRateCents:    2500,
-		OvertimeRateCents:  3750,
+		ID:                41,
+		FirstName:         "Ada",
+		LastName:          "Lovelace",
+		SalaryCents:       125000,
+		HourlyRateCents:   2500,
+		OvertimeRateCents: 3750,
 	}
 
 	public := employeeToProto(employee, false)

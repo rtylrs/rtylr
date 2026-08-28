@@ -4,12 +4,10 @@ import (
 	"context"
 	"testing"
 
-	erpinventoryv1 "github.com/voxire/voxie/gen/go/erp/inventory/v1"
-
 	"github.com/voxire/onion/internal/modules/inventory/internal/application"
-
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
+	erpinventoryv1 "github.com/voxire/voxie/gen/go/erp/inventory/v1"
 )
 
 func TestDirectAuthorizationMatrix(t *testing.T) {

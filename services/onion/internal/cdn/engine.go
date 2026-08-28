@@ -53,9 +53,11 @@ func (c *engineConn) isAlive() bool {
 // startEngine spawns a resident engine. It fails (nil, err) when the binary
 // predates --serve support or cannot start at all.
 func startEngine(ctx context.Context, path string) (*engineConn, error) {
+	// The resident process is owned by the engine pool and is terminated by
+	// engineConn.kill, so it must outlive the request that starts it.
 	// #nosec G204 G702 -- configured server-side path only; the path is validated at startup.
 	// nosemgrep: go.lang.security.audit.dangerous-exec-command.dangerous-exec-command
-	cmd := exec.Command(path, "--serve")
+	cmd := exec.CommandContext(context.Background(), path, "--serve")
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, fmt.Errorf("engine stdin pipe: %w", err)

@@ -4,12 +4,10 @@ import (
 	"context"
 	"testing"
 
-	financeinvoicesv1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
-
 	"github.com/voxire/onion/internal/modules/invoices/internal/application"
-
 	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
+	financeinvoicesv1 "github.com/voxire/voxie/gen/go/finance/invoices/v1"
 )
 
 func TestDirectAuthorizationMatrix(t *testing.T) {
