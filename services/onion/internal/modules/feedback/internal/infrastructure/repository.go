@@ -90,7 +90,7 @@ func (r *Repository) List(ctx context.Context, businessID int64, filters domain.
 		Where(feedbackWhereConds("f.", businessID, filters)).
 		OrderBy("f.created_at DESC").
 		Limit(uint64(pageSize)).
-		Offset(uint64(offset)).
+		Offset(uint64(offset)). // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		PlaceholderFormat(squirrel.Question).
 		ToSql()
 	if err != nil {
@@ -198,7 +198,7 @@ func (r *Repository) Create(ctx context.Context, input domain.FeedbackInput) (in
 		BusinessID: input.BusinessID,
 		CustomerID: input.CustomerID,
 		Type:       sqlc.CrmFeedbackType(input.Type),
-		Score:      sql.NullInt32{Int32: int32(input.Score), Valid: true},
+		Score:      sql.NullInt32{Int32: int32(input.Score), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Comment:    sql.NullString{String: input.Comment, Valid: input.Comment != ""},
 		Source:     sql.NullString{String: input.Source, Valid: input.Source != ""},
 	})

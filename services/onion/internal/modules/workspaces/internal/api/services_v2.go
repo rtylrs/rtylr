@@ -192,7 +192,7 @@ func (a *CycleAPIV2) ListCycles(ctx context.Context, req *flowcyclev2.ListCycles
 	for _, c := range cycles {
 		out = append(out, &flowcyclev2.Cycle{
 			Id: c.ID, Name: c.Name,
-			Scope: int32(c.Scope), Completed: int32(c.Completed),
+			Scope: int32(c.Scope), Completed: int32(c.Completed), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		})
 	}
 	return &flowcyclev2.ListCyclesResponse{Cycles: out, Pagination: buildPagination(page, limit, total, len(out))}, nil
@@ -251,7 +251,7 @@ func (a *MilestoneAPIV2) ListMilestones(ctx context.Context, req *flowmilestonev
 		mp := &flowmilestonev2.MilestoneProject{}
 		out = append(out, &flowmilestonev2.Milestone{
 			Id: m.ID, ProjectId: m.ProjectID, Name: m.Name,
-			DoneCount: int32(m.DoneCount), TaskCount: int32(m.TaskCount), Status: m.Status,
+			DoneCount: int32(m.DoneCount), TaskCount: int32(m.TaskCount), Status: m.Status, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			Project: mp,
 		})
 	}

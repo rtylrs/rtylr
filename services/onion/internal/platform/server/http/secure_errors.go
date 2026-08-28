@@ -38,10 +38,8 @@ func SecureErrorMiddleware() func(http.Handler) http.Handler {
 						Status:  "error",
 					}
 
-					if jsonBytes, err := json.Marshal(response); err == nil {
-						if _, writeErr := w.Write(jsonBytes); writeErr != nil {
-							logger.Ctx(ctx).Error("Failed to write error response", logger.Error(writeErr))
-						}
+					if err := json.NewEncoder(w).Encode(response); err != nil {
+						logger.Ctx(ctx).Error("Failed to write error response", logger.Error(err))
 					}
 				}
 			}()

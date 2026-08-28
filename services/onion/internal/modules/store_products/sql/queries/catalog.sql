@@ -77,6 +77,7 @@ WHERE business_id = ? AND id = ?;
 -- cross-schema write to erp_products — create catalog product from storefront
 -- name: InsertCatalogProduct :execresult
 INSERT INTO erp_products (
+    owner_id,
     business_id,
     name,
     description,
@@ -84,7 +85,7 @@ INSERT INTO erp_products (
     compare_at_price,
     is_active,
     track_inventory
-) VALUES (?, ?, ?, ?, ?, TRUE, TRUE);
+) VALUES (?, ?, ?, ?, ?, ?, TRUE, TRUE);
 
 -- cross-schema read from store_products — linked product id for update flow
 -- name: GetStoreProductLinkedID :one
@@ -102,10 +103,11 @@ WHERE business_id = ? AND product_id = ?;
 -- cross-schema write to erp_product_images — insert synced catalog image
 -- name: InsertCatalogProductImage :exec
 INSERT INTO erp_product_images (
+    owner_id,
     business_id,
     product_id,
     url,
     alt,
     position,
     is_primary
-) VALUES (?, ?, ?, ?, ?, ?);
+) VALUES (?, ?, ?, ?, ?, ?, ?);

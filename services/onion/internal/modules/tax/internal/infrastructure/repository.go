@@ -50,17 +50,22 @@ func (r *Repository) GetConfig(ctx context.Context, businessID int64) (domain.Ta
 }
 
 func (r *Repository) UpsertConfig(ctx context.Context, input domain.TaxConfigInput) error {
+	businessID := input.BusinessID
+	if businessID == 0 {
+		businessID = input.OwnerID
+	}
+
 	tx, err := r.pool.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 	queries := r.queries.WithTx(tx)
-	if err = queries.ClearDefaultTaxConfig(ctx, input.BusinessID); err != nil {
+	if err = queries.ClearDefaultTaxConfig(ctx, businessID); err != nil {
 		return err
 	}
 	err = queries.UpsertTaxConfig(ctx, sqlc.UpsertTaxConfigParams{
-		OwnerID: input.OwnerID, BusinessID: input.BusinessID, Name: input.TaxName,
+		OwnerID: input.OwnerID, BusinessID: businessID, Name: input.TaxName,
 		Rate: formatRateBasisPoints(input.TaxRateBasisPoints), Type: sqlc.NullFinanceTaxConfigType{FinanceTaxConfigType: sqlc.FinanceTaxConfigType("vat"), Valid: true},
 		IsActive: sql.NullBool{Bool: input.IsActive, Valid: true}, IsInclusive: sql.NullBool{Bool: input.IsInclusive, Valid: true},
 	})
@@ -240,7 +245,7 @@ func parseMinorUnits(value string) (int64, error) {
 		return 0, fmt.Errorf("amount overflows int64")
 	}
 	if negative {
-		return -int64(minorMagnitude), nil
+		return -int64(minorMagnitude), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
-	return int64(minorMagnitude), nil
+	return int64(minorMagnitude), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }

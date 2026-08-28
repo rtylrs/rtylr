@@ -58,6 +58,11 @@ func (r *Repository) Create(ctx context.Context, input domain.TemplateInput) (in
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.TemplateUpdateInput) error {
+	businessID := input.BusinessID
+	if businessID == 0 {
+		businessID = input.OwnerID
+	}
+
 	result, err := r.queries.UpdateTemplate(ctx, sqlc.UpdateTemplateParams{
 		Name:       input.Name,
 		Type:       sqlc.CrmTemplatesType(input.Type),
@@ -66,7 +71,7 @@ func (r *Repository) Update(ctx context.Context, input domain.TemplateUpdateInpu
 		Variables:  json.RawMessage(input.Variables),
 		IsActive:   sql.NullBool{Bool: input.IsActive, Valid: true},
 		ID:         input.ID,
-		BusinessID: input.BusinessID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update template", logger.Error(err))

@@ -4,6 +4,8 @@ import "time"
 
 type SecuritySettings struct {
 	TwoFactorEnabled bool            `json:"two_factor_enabled"`
+	MFARequired      bool            `json:"mfa_required"`
+	MFAEnrolled      bool            `json:"mfa_enrolled"`
 	ActiveSessions   []ActiveSession `json:"active_sessions"`
 }
 

@@ -34,9 +34,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidatePosTerminalsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posTerminalsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(posTerminalsScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Terminal, error) {

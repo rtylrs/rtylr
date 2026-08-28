@@ -26,6 +26,7 @@ func NewClockGuard(path string) *ClockGuard {
 	if path == "" {
 		return guard
 	}
+	// #nosec G304 -- the high-water-mark path is deployment configuration and is never derived from a request.
 	contents, err := os.ReadFile(path)
 	if err != nil {
 		return guard

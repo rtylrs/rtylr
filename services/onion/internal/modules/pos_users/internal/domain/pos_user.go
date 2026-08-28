@@ -59,11 +59,12 @@ type POSUser struct {
 }
 
 type VerifiedPOSUser struct {
-	UserID      int64
-	POSUserID   int64
-	LocationID  int64
-	Role        POSUserRole
-	DisplayName string
+	UserID               int64
+	POSUserID            int64
+	LocationID           int64
+	Role                 POSUserRole
+	DisplayName          string
+	AuthorizationVersion int64
 	Capabilities
 }
 

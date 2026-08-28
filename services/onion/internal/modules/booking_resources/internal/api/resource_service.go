@@ -123,7 +123,7 @@ func newResources(items []domain.Resource) []*bookingresourcev1.Resource {
 			BusinessId: item.BusinessID,
 			Name:       item.Name,
 			Type:       item.Type,
-			Capacity:   int32(item.Capacity),
+			Capacity:   int32(item.Capacity), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			IsActive:   item.IsActive,
 			CreatedAt:  formatTime(item.CreatedAt),
 		})

@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_audit/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/cursor"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	posauditv1 "github.com/voxire/voxie/gen/go/pos/audit/v1"
@@ -24,7 +25,7 @@ func NewAuditAPI(service *application.Service) *AuditAPI {
 }
 
 func (a *AuditAPI) ListAudit(ctx context.Context, req *posauditv1.ListAuditRequest) (*posauditv1.ListAuditResponse, error) {
-	user, err := authenticatedAuditUser(ctx)
+	user, err := requireAuditPermission(ctx, "pos:reports:view")
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +106,7 @@ func (a *AuditAPI) ListAudit(ctx context.Context, req *posauditv1.ListAuditReque
 }
 
 func (a *AuditAPI) CreateAudit(ctx context.Context, req *posauditv1.CreateAuditRequest) (*posauditv1.CreateAuditResponse, error) {
-	user, err := authenticatedAuditUser(ctx)
+	user, err := requireAuditPermission(ctx, "pos:reports:view")
 	if err != nil {
 		return nil, err
 	}
@@ -164,9 +165,9 @@ func (a *AuditAPI) CreateAudit(ctx context.Context, req *posauditv1.CreateAuditR
 	return &posauditv1.CreateAuditResponse{AuditLogId: id, Message: "Audit log created successfully"}, nil
 }
 
-func authenticatedAuditUser(ctx context.Context) (*authPkg.AuthUser, error) {
+func requireAuditPermission(ctx context.Context, permission string) (*authPkg.AuthUser, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.User == nil || !authPkg.HasAppPermission(device.User, authorization.AppPOS, permission) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	return device.User, nil

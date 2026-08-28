@@ -59,6 +59,10 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, careersService *applic
 		ctx, router, handlers.UpdateSubmissionStatusRoutes(),
 		&handlers.UpdateSubmissionStatusHandler{CareersService: careersService},
 	)
+	serverHttp.RegisterGET[handlers.ExportSubmissionsRequest, handlers.ExportSubmissionsResponse](
+		ctx, router, handlers.ExportSubmissionsRoutes(),
+		&handlers.ExportSubmissionsHandler{CareersService: careersService},
+	)
 
 	// Recruit public — anonymous, powers the candidate-facing site.
 	serverHttp.RegisterGETWithValidation[handlers.GetPublicBrandingRequest, handlers.GetPublicBrandingResponse](

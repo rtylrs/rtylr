@@ -17,9 +17,9 @@ INSERT INTO pos_users (owner_id, business_id, user_id, location_id, name, pin_ha
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdatePOSUser :exec
-UPDATE pos_users SET name = ?, role = ?, is_active = ?,
-    hourly_rate = ?, max_discount_pct = ?, can_void = ?, can_refund = ?,
-    can_open_drawer = ?, can_apply_discount = ?
+-- Role and capability fields are projected from Dash authorization and are
+-- intentionally excluded from this POS-owned roster mutation.
+UPDATE pos_users SET name = ?, is_active = ?, hourly_rate = ?
 WHERE business_id = ? AND id = ?;
 
 -- name: UpdatePOSUserPINHash :exec

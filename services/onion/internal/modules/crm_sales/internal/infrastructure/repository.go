@@ -3,9 +3,9 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"strings"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/crm_sales/internal/domain"
@@ -155,6 +155,7 @@ func (r *Repository) DeleteLead(ctx context.Context, id, businessID int64) error
 		return err
 	}
 	for _, table := range []string{"crm_touchpoints", "crm_contacts", "crm_contracts"} {
+		// #nosec G202 -- This table list is a package-fixed set of tenant-owned dependent tables; values remain bound.
 		if _, err := tx.ExecContext(ctx, "DELETE FROM "+table+" WHERE lead_id = ? AND business_id = ?", id, businessID); err != nil {
 			return err
 		}
@@ -309,31 +310,29 @@ func (r *Repository) UpdateContact(ctx context.Context, id, businessID int64, re
 	}()
 
 	qtx := r.queries.WithTx(tx)
-	if _, err := qtx.GetContact(ctx, sqlc.GetContactParams{ID: id, BusinessID: businessID}); err != nil {
+	existingContact, err := qtx.GetContact(ctx, sqlc.GetContactParams{ID: id, BusinessID: businessID})
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.Contact{}, domain.ErrContactNotFound
 		}
 		return domain.Contact{}, err
 	}
 
-	// Name-only updates cannot match an existing customer (the sync lookup
-	// requires a non-empty email or phone) and would mint a junk
-	// crm_customers row per edit. Keep the existing linkage instead.
-	if strings.TrimSpace(req.Email) == "" && strings.TrimSpace(req.Phone) == "" {
-		return r.GetContact(ctx, id, businessID)
-	}
-
-	customerID, err := customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
-		Name:  req.Name,
-		Email: req.Email,
-		Phone: req.Phone,
-	})
-	if err != nil {
-		return domain.Contact{}, err
+	customerID := existingContact.CustomerID
+	if strings.TrimSpace(req.Email) != "" || strings.TrimSpace(req.Phone) != "" {
+		resolvedCustomerID, syncErr := customersync.UpsertCRMCustomer(ctx, tx, businessID, customersync.Contact{
+			Name:  req.Name,
+			Email: req.Email,
+			Phone: req.Phone,
+		})
+		if syncErr != nil {
+			return domain.Contact{}, syncErr
+		}
+		customerID = nullableInt64Value(resolvedCustomerID)
 	}
 
 	err = qtx.UpdateContact(ctx, sqlc.UpdateContactParams{
-		CustomerID: nullableInt64Value(customerID),
+		CustomerID: customerID,
 		Name:       req.Name,
 		Role:       nullableString(req.Role),
 		Email:      nullableString(req.Email),

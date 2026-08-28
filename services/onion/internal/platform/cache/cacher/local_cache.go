@@ -77,7 +77,7 @@ func (c *LocalCache) get(ctx context.Context, key string) []byte {
 		return nil
 	}
 
-	expiresAt := int64(binary.BigEndian.Uint64(result[:expiryBytesLen]))
+	expiresAt := int64(binary.BigEndian.Uint64(result[:expiryBytesLen])) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	if time.Now().UnixNano() > expiresAt {
 		err = c.cache.Delete(key)
 

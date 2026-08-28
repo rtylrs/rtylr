@@ -7,8 +7,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/team/internal/application"
 	"github.com/voxire/onion/internal/modules/team/internal/domain"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hubteamgroupsv1 "github.com/voxire/voxie/gen/go/hub/team/groups/v1"
 	hubteammembersv1 "github.com/voxire/voxie/gen/go/hub/team/members/v1"
 )
@@ -22,12 +22,16 @@ func NewMembersAPI(service *application.Service) *MembersAPI {
 }
 
 func (a *MembersAPI) ListTeam(ctx context.Context, _ *hubteammembersv1.ListTeamRequest) (*hubteammembersv1.ListTeamResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	device, permissionErr := requireHubPermission(ctx, "hub:team:view")
+	if permissionErr != nil {
+		return nil, permissionErr
+	}
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, device.BusinessID, device.UserID)
+	if businessErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	users, _, err := a.Service.ListStaffUsersByBusiness(ctx, device.User.BusinessID, 1, 50)
+	users, _, err := a.Service.ListStaffUsersByBusiness(ctx, businessID, 1, 50)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list users")
 	}
@@ -41,9 +45,9 @@ func (a *MembersAPI) ListTeam(ctx context.Context, _ *hubteammembersv1.ListTeamR
 }
 
 func (a *MembersAPI) GetMember(ctx context.Context, req *hubteammembersv1.GetMemberRequest) (*hubteammembersv1.GetMemberResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return nil, onekiterrors.PermissionDenied()
+	device, permissionErr := requireHubPermission(ctx, "hub:team:view")
+	if permissionErr != nil {
+		return nil, permissionErr
 	}
 
 	memberID := req.GetUserId()
@@ -51,7 +55,7 @@ func (a *MembersAPI) GetMember(ctx context.Context, req *hubteammembersv1.GetMem
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid member id")
 	}
 
-	member, err := a.Service.GetStaffUserByID(ctx, device.User.UserID, device.User.BusinessID, memberID)
+	member, err := a.Service.GetStaffUserByID(ctx, device.UserID, device.BusinessID, memberID)
 	if err != nil {
 		if errors.Is(err, domain.ErrUserNotFound) {
 			return nil, onekiterrors.New(http.StatusNotFound, "Member not found")
@@ -84,9 +88,9 @@ func (a *MembersAPI) GetMember(ctx context.Context, req *hubteammembersv1.GetMem
 }
 
 func (a *MembersAPI) RemoveMember(ctx context.Context, req *hubteammembersv1.RemoveMemberRequest) (*hubteammembersv1.RemoveMemberResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return nil, onekiterrors.PermissionDenied()
+	device, permissionErr := requireHubPermission(ctx, "hub:team:deactivate")
+	if permissionErr != nil {
+		return nil, permissionErr
 	}
 
 	memberID := req.GetUserId()
@@ -94,8 +98,8 @@ func (a *MembersAPI) RemoveMember(ctx context.Context, req *hubteammembersv1.Rem
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid member id")
 	}
 
-	actorID := device.User.UserID
-	if err := a.Service.DeactivateUser(ctx, actorID, device.User.BusinessID, memberID); err != nil {
+	actorID := device.UserID
+	if err := a.Service.DeactivateUser(ctx, actorID, device.BusinessID, memberID); err != nil {
 		switch {
 		case errors.Is(err, domain.ErrForbidden):
 			return nil, onekiterrors.PermissionDenied()
@@ -105,6 +109,8 @@ func (a *MembersAPI) RemoveMember(ctx context.Context, req *hubteammembersv1.Rem
 			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to deactivate member")
 		}
 	}
+
+	recordSeatChangeAsync(ctx, a.Service, actorID, device.BusinessID)
 
 	return &hubteammembersv1.RemoveMemberResponse{Message: "Member deactivated"}, nil
 }

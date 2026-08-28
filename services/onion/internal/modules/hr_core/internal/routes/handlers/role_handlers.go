@@ -54,6 +54,9 @@ func (h *ListRolesHandler) Serve(ctx context.Context, _ *ListRolesRequest) (List
 	if device.IsAnonymous || device.User == nil {
 		return ListRolesResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireHRPermission(ctx, "hr:roles:manage"); err != nil {
+		return ListRolesResponse{}, err
+	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return ListRolesResponse{}, onekiterrors.PermissionDenied()
@@ -101,6 +104,9 @@ func (h *CreateRoleHandler) Serve(ctx context.Context, req *CreateRoleRequest) (
 	if device.IsAnonymous || device.User == nil {
 		return CreateRoleResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireHRPermission(ctx, "hr:roles:manage"); err != nil {
+		return CreateRoleResponse{}, err
+	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return CreateRoleResponse{}, onekiterrors.PermissionDenied()
@@ -147,6 +153,9 @@ func (h *UpdateRoleHandler) Serve(ctx context.Context, req *UpdateRoleRequest) (
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return UpdateRoleResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireHRPermission(ctx, "hr:roles:manage"); err != nil {
+		return UpdateRoleResponse{}, err
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -199,6 +208,9 @@ func (h *AssignRoleHandler) Serve(ctx context.Context, req *AssignRoleRequest) (
 	if device.IsAnonymous || device.User == nil {
 		return AssignRoleResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireHRPermission(ctx, "hr:roles:manage"); err != nil {
+		return AssignRoleResponse{}, err
+	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
 		return AssignRoleResponse{}, onekiterrors.PermissionDenied()
@@ -245,6 +257,9 @@ func (h *ListPermissionCatalogHandler) Serve(ctx context.Context, _ *ListPermiss
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
 		return ListPermissionCatalogResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireHRPermission(ctx, "hr:roles:manage"); err != nil {
+		return ListPermissionCatalogResponse{}, err
 	}
 
 	catalog := h.Service.ListPermissionCatalog()

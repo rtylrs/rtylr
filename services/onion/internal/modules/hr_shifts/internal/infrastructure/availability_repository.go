@@ -56,7 +56,7 @@ func nullDayOfWeek(day int32) sql.NullInt16 {
 	if day == domain.NoDayOfWeek {
 		return sql.NullInt16{}
 	}
-	return sql.NullInt16{Int16: int16(day), Valid: true}
+	return sql.NullInt16{Int16: int16(day), Valid: true} // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func (r *Repository) ListAvailability(ctx context.Context, businessID int64, params domain.ListAvailabilityParams) ([]domain.AvailabilityRecord, int64, error) {
@@ -66,7 +66,7 @@ func (r *Repository) ListAvailability(ctx context.Context, businessID int64, par
 	}
 	dayFilter := sql.NullInt16{}
 	if params.DayOfWeek != nil {
-		dayFilter = sql.NullInt16{Int16: int16(*params.DayOfWeek), Valid: true}
+		dayFilter = sql.NullInt16{Int16: int16(*params.DayOfWeek), Valid: true} // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 
 	total, err := r.queries.CountStaffAvailability(ctx, sqlc.CountStaffAvailabilityParams{

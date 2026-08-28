@@ -9,6 +9,7 @@ import (
 	"time"
 
 	customersyncsqlc "github.com/voxire/onion/internal/platform/customer_sync/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type DBTX interface {
@@ -52,7 +53,7 @@ func UpsertCRMCustomer(ctx context.Context, db DBTX, businessID int64, contact C
 	customerID, err := queries.FindCRMCustomerByContact(ctx, customersyncsqlc.FindCRMCustomerByContactParams{
 		BusinessID: businessID,
 		Email:      email,
-		PhoneInput: nullString(phone),
+		PhoneInput: sqlutil.NullString(phone),
 	})
 	if errors.Is(err, sql.ErrNoRows) {
 		ownerID, lookupErr := queries.GetActiveBusinessOwnerID(ctx, businessID)
@@ -64,9 +65,9 @@ func UpsertCRMCustomer(ctx context.Context, db DBTX, businessID int64, contact C
 			OwnerID:     ownerID,
 			BusinessID:  businessID,
 			FirstName:   firstName,
-			LastName:    nullString(lastName),
-			Email:       nullString(email),
-			Phone:       nullString(phone),
+			LastName:    sqlutil.NullString(lastName),
+			Email:       sqlutil.NullString(email),
+			Phone:       sqlutil.NullString(phone),
 			TotalSpent:  sql.NullString{String: totalSpent, Valid: true},
 			VisitCount:  sql.NullInt32{Int32: visitCount, Valid: true},
 			LastVisitAt: lastVisit,
@@ -87,9 +88,9 @@ func UpsertCRMCustomer(ctx context.Context, db DBTX, businessID int64, contact C
 
 	err = queries.UpdateCRMCustomerFromSync(ctx, customersyncsqlc.UpdateCRMCustomerFromSyncParams{
 		FirstName:       firstName,
-		LastName:        nullString(lastName),
-		Email:           nullString(email),
-		Phone:           nullString(phone),
+		LastName:        sqlutil.NullString(lastName),
+		Email:           sqlutil.NullString(email),
+		Phone:           sqlutil.NullString(phone),
 		TotalSpentDelta: sql.NullString{String: totalSpent, Valid: true},
 		VisitCountDelta: sql.NullInt32{Int32: visitCount, Valid: true},
 		LastVisitAt:     updateLastVisit,
@@ -121,8 +122,4 @@ func splitCustomerName(name, email, phone string) (string, string) {
 		return parts[0], ""
 	}
 	return parts[0], strings.Join(parts[1:], " ")
-}
-
-func nullString(value string) sql.NullString {
-	return sql.NullString{String: value, Valid: value != ""}
 }

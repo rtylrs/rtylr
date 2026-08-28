@@ -23,16 +23,18 @@ func (r *hubProfileResolver) GetProfile(ctx context.Context, userID, businessID 
 	}
 
 	return hubprofile.Profile{
-		ID:             profile.ID,
-		Email:          profile.Email,
-		FullName:       profile.FullName,
-		Apps:           profile.Apps,
-		Role:           profile.Role,
-		BusinessID:     profile.BusinessID,
-		BusinessName:   profile.BusinessName,
-		IsOwner:        profile.IsOwner,
-		IsConsoleAdmin: profile.IsConsoleAdmin,
-		Onboarded:      profile.Onboarded,
+		ID:                 profile.ID,
+		Email:              profile.Email,
+		FullName:           profile.FullName,
+		Apps:               profile.Apps,
+		Role:               profile.Role,
+		BusinessID:         profile.BusinessID,
+		BusinessName:       profile.BusinessName,
+		IsOwner:            profile.IsOwner,
+		IsConsoleAdmin:     profile.IsConsoleAdmin,
+		Onboarded:          profile.Onboarded,
+		EffectiveAccess:    profile.EffectiveAccess,
+		ProvisioningStatus: profile.ProvisioningStatus,
 	}, nil
 }
 

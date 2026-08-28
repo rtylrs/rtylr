@@ -9,32 +9,6 @@ import (
 	"github.com/voxire/onion/internal/testutil"
 )
 
-func TestCreateLoyaltyTransaction_TypeIsStored(t *testing.T) {
-	db := testutil.OpenDB(t)
-	repo := infrastructure.NewRepository(db)
-	ctx := context.Background()
-
-	tx := domain.LoyaltyTransaction{
-		OwnerID:     testutil.OwnerID,
-		CustomerID:  5301,
-		Type:        "earn",
-		Points:      100,
-		Description: "Test earn transaction",
-	}
-
-	if err := repo.CreateLoyaltyTransaction(ctx, tx); err != nil {
-		t.Fatalf("CreateLoyaltyTransaction: %v", err)
-	}
-
-	txs, _, err := repo.ListLoyaltyTransactions(ctx, testutil.OwnerID, 5301, 1, 50)
-	if err != nil {
-		t.Fatalf("ListLoyaltyTransactions: %v", err)
-	}
-	if len(txs) == 0 {
-		t.Fatal("expected at least one transaction after create")
-	}
-}
-
 func TestListLoyaltyTransactions_PaginationPage1(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)

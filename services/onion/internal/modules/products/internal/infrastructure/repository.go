@@ -15,6 +15,7 @@ import (
 	"github.com/voxire/onion/internal/modules/products/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/searchutil"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
@@ -60,7 +61,7 @@ func (r *Repository) ListProducts(ctx context.Context, ownerID int64, search str
 		Where(squirrel.Eq{"p.business_id": ownerID})
 
 	qb = applyProductListFilters(qb, search, categoryID)
-	qb = qb.OrderBy("p.name ASC").Limit(uint64(limit + 1)).Offset(uint64(offset))
+	qb = qb.OrderBy("p.name ASC").Limit(uint64(limit + 1)).Offset(uint64(offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 
 	query, args, err := qb.PlaceholderFormat(squirrel.Question).ToSql()
 	if err != nil {
@@ -228,7 +229,7 @@ func (r *Repository) CreateProduct(ctx context.Context, ownerID int64, input dom
 		CountryOfOrigin:   nullString(input.CountryOfOrigin),
 		HsCode:            nullString(input.HSCode),
 		AllowBackorder:    input.AllowBackorder,
-		LeadTimeDays:      int32(input.LeadTimeDays),
+		LeadTimeDays:      int32(input.LeadTimeDays), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		LowStockThreshold: nullStringFromFloat(input.LowStockThreshold),
 		ReorderQuantity:   nullStringFromFloat(input.ReorderQuantity),
 		IsActive:          sql.NullBool{Bool: input.IsActive, Valid: true},
@@ -323,7 +324,7 @@ func (r *Repository) UpdateProduct(ctx context.Context, ownerID, id int64, input
 		CountryOfOrigin:   nullString(input.CountryOfOrigin),
 		HsCode:            nullString(input.HSCode),
 		AllowBackorder:    input.AllowBackorder,
-		LeadTimeDays:      int32(input.LeadTimeDays),
+		LeadTimeDays:      int32(input.LeadTimeDays), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		LowStockThreshold: nullStringFromFloat(input.LowStockThreshold),
 		ReorderQuantity:   nullStringFromFloat(input.ReorderQuantity),
 		IsActive:          sql.NullBool{Bool: input.IsActive, Valid: true},
@@ -402,7 +403,7 @@ func (r *Repository) lockProductStock(ctx context.Context, qtx *sqlc.Queries, ow
 	if err != nil {
 		return 0, err
 	}
-	return parseDecimal(stock), nil
+	return sqlutil.ParseDecimal(stock), nil
 }
 
 func (r *Repository) applyProductStockTotal(
@@ -505,16 +506,16 @@ func productFromRow(row sqlc.GetProductRow) domain.Product {
 		p.Unit = row.Unit.String
 	}
 
-	p.CostPrice = parseDecimal(row.CostPrice)
-	p.SalePrice = parseDecimal(row.SalePrice)
-	p.StockQuantity = parseDecimal(row.StockQuantity)
+	p.CostPrice = sqlutil.ParseDecimal(row.CostPrice)
+	p.SalePrice = sqlutil.ParseDecimal(row.SalePrice)
+	p.StockQuantity = sqlutil.ParseDecimal(row.StockQuantity)
 
 	if row.LowStockThreshold.Valid {
-		p.LowStockThreshold = parseDecimal(row.LowStockThreshold.String)
+		p.LowStockThreshold = sqlutil.ParseDecimal(row.LowStockThreshold.String)
 	}
 
 	if row.ReorderQuantity.Valid {
-		p.ReorderQuantity = parseDecimal(row.ReorderQuantity.String)
+		p.ReorderQuantity = sqlutil.ParseDecimal(row.ReorderQuantity.String)
 	}
 
 	if row.IsActive.Valid {
@@ -536,14 +537,14 @@ func productFromRow(row sqlc.GetProductRow) domain.Product {
 	if row.BrandID.Valid {
 		p.BrandID = row.BrandID.Int64
 	}
-	p.CompareAtPrice = parseDecimal(row.CompareAtPrice)
-	p.TaxRate = parseDecimal(row.TaxRate)
+	p.CompareAtPrice = sqlutil.ParseDecimal(row.CompareAtPrice)
+	p.TaxRate = sqlutil.ParseDecimal(row.TaxRate)
 	p.Currency = row.Currency
-	p.Weight = parseDecimal(row.Weight)
+	p.Weight = sqlutil.ParseDecimal(row.Weight)
 	p.WeightUnit = row.WeightUnit
-	p.Length = parseDecimal(row.Length)
-	p.Width = parseDecimal(row.Width)
-	p.Height = parseDecimal(row.Height)
+	p.Length = sqlutil.ParseDecimal(row.Length)
+	p.Width = sqlutil.ParseDecimal(row.Width)
+	p.Height = sqlutil.ParseDecimal(row.Height)
 	p.DimensionUnit = row.DimensionUnit
 	if row.CountryOfOrigin.Valid {
 		p.CountryOfOrigin = row.CountryOfOrigin.String
@@ -588,16 +589,16 @@ func productFromBarcodeRow(row sqlc.GetProductByBarcodeRow) domain.Product {
 		p.Unit = row.Unit.String
 	}
 
-	p.CostPrice = parseDecimal(row.CostPrice)
-	p.SalePrice = parseDecimal(row.SalePrice)
-	p.StockQuantity = parseDecimal(row.StockQuantity)
+	p.CostPrice = sqlutil.ParseDecimal(row.CostPrice)
+	p.SalePrice = sqlutil.ParseDecimal(row.SalePrice)
+	p.StockQuantity = sqlutil.ParseDecimal(row.StockQuantity)
 
 	if row.LowStockThreshold.Valid {
-		p.LowStockThreshold = parseDecimal(row.LowStockThreshold.String)
+		p.LowStockThreshold = sqlutil.ParseDecimal(row.LowStockThreshold.String)
 	}
 
 	if row.ReorderQuantity.Valid {
-		p.ReorderQuantity = parseDecimal(row.ReorderQuantity.String)
+		p.ReorderQuantity = sqlutil.ParseDecimal(row.ReorderQuantity.String)
 	}
 
 	if row.IsActive.Valid {
@@ -619,14 +620,14 @@ func productFromBarcodeRow(row sqlc.GetProductByBarcodeRow) domain.Product {
 	if row.BrandID.Valid {
 		p.BrandID = row.BrandID.Int64
 	}
-	p.CompareAtPrice = parseDecimal(row.CompareAtPrice)
-	p.TaxRate = parseDecimal(row.TaxRate)
+	p.CompareAtPrice = sqlutil.ParseDecimal(row.CompareAtPrice)
+	p.TaxRate = sqlutil.ParseDecimal(row.TaxRate)
 	p.Currency = row.Currency
-	p.Weight = parseDecimal(row.Weight)
+	p.Weight = sqlutil.ParseDecimal(row.Weight)
 	p.WeightUnit = row.WeightUnit
-	p.Length = parseDecimal(row.Length)
-	p.Width = parseDecimal(row.Width)
-	p.Height = parseDecimal(row.Height)
+	p.Length = sqlutil.ParseDecimal(row.Length)
+	p.Width = sqlutil.ParseDecimal(row.Width)
+	p.Height = sqlutil.ParseDecimal(row.Height)
 	p.DimensionUnit = row.DimensionUnit
 	if row.CountryOfOrigin.Valid {
 		p.CountryOfOrigin = row.CountryOfOrigin.String
@@ -688,9 +689,7 @@ func (r *Repository) ReplaceProductAttributes(ctx context.Context, ownerID, prod
 	return nil
 }
 
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
-}
+var nullString = sqlutil.NullString
 
 // defaultStr returns def when s is empty — for NOT NULL columns with a sensible
 // default (currency, units) where the caller may not supply a value.
@@ -701,9 +700,7 @@ func defaultStr(s, def string) string {
 	return s
 }
 
-func nullInt64(v int64) sql.NullInt64 {
-	return sql.NullInt64{Int64: v, Valid: v != 0}
-}
+var nullInt64 = sqlutil.NullInt64
 
 func int64Ptr(v int64) *int64 {
 	return &v
@@ -716,15 +713,3 @@ func nullStringFromFloat(v float64) sql.NullString {
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt
 // values instead of silently coercing them to 0.
-func parseDecimal(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse product decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}

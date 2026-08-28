@@ -294,7 +294,9 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("cache initialization failed: %w", err)
 	}
 
-	trinoPkg.Connect(ctx)
+	if err := trinoPkg.Connect(ctx); err != nil {
+		return fmt.Errorf("trino initialization failed: %w", err)
+	}
 
 	ctx, err = jwtutils.InitializeJWT(ctx)
 	if err != nil {
@@ -748,6 +750,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 	)
 	modules.User.ProvisionerResolver = provisionerResolver
 	modules.User.ProfileResolver = team.NewHubProfileResolver(modules.Team.Service())
+	modules.User.WithProvisioningStore(teamSvc)
 	modules.User.WithInviteAccepter(modules.Team.Service())
 	// A business-wide Owner/Admin/Operator has no path through Flow's own
 	// project/workspace membership tables, so RequireProjectRole/
@@ -803,7 +806,7 @@ func setupRoutes(ctx context.Context, r *chi.Mux) {
 		http.SecurityMiddleware(),
 		jwtutils.JWTMiddleware(),
 		http.RequestLoggerMiddleware(ctx),
-		http.GetAuthMiddlewareFunc(accessPolicy, tokenResolver),
+		http.GetAuthMiddlewareFunc(accessPolicy, tokenResolver, teamSvc),
 		authPkg.DeviceMiddleware(),
 		// Keep subscription state authoritative for every authenticated tenant
 		// request. The middleware leaves billing recovery and console routes open.

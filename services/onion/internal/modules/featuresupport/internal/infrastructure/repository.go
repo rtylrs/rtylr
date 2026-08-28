@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/domain"
 	"github.com/voxire/onion/internal/modules/featuresupport/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
@@ -259,16 +261,9 @@ func (r *Repository) CreateRule(ctx context.Context, rule domain.Rule) (int64, e
 	if err != nil {
 		return 0, err
 	}
-	for _, c := range rule.Conditions {
-		if _, cerr := r.queries.CreateRuleCondition(ctx, sqlc.CreateRuleConditionParams{
-			RuleID:    id,
-			Attribute: c.Attribute,
-			Operator:  c.Operator,
-			Value:     c.Value,
-		}); cerr != nil {
-			logger.Ctx(ctx).Error("Failed to create rule condition", logger.Error(cerr))
-			return 0, cerr
-		}
+	if err := insertRuleConditions(ctx, r.pool, id, rule.Conditions); err != nil {
+		logger.Ctx(ctx).Error("Failed to create rule conditions", logger.Error(err))
+		return 0, err
 	}
 	return id, nil
 }
@@ -292,19 +287,33 @@ func (r *Repository) ReplaceRuleConditions(ctx context.Context, ruleID int64, co
 		logger.Ctx(ctx).Error("Failed to clear rule conditions", logger.Error(err))
 		return err
 	}
-	for _, c := range conditions {
-		if _, cerr := qtx.CreateRuleCondition(ctx, sqlc.CreateRuleConditionParams{
-			RuleID:    ruleID,
-			Attribute: c.Attribute,
-			Operator:  c.Operator,
-			Value:     c.Value,
-		}); cerr != nil {
-			_ = tx.Rollback()
-			logger.Ctx(ctx).Error("Failed to insert rule condition", logger.Error(cerr))
-			return cerr
-		}
+	if err := insertRuleConditions(ctx, tx, ruleID, conditions); err != nil {
+		_ = tx.Rollback()
+		logger.Ctx(ctx).Error("Failed to insert rule conditions", logger.Error(err))
+		return err
 	}
 	return tx.Commit()
+}
+
+type ruleConditionExecer interface {
+	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
+}
+
+func insertRuleConditions(ctx context.Context, execer ruleConditionExecer, ruleID int64, conditions []domain.Condition) error {
+	if len(conditions) == 0 {
+		return nil
+	}
+
+	insert := sq.Insert("feature_rule_conditions").Columns("rule_id", "attribute", "operator", "value")
+	for _, condition := range conditions {
+		insert = insert.Values(ruleID, condition.Attribute, condition.Operator, condition.Value)
+	}
+	query, args, err := insert.ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = execer.ExecContext(ctx, query, args...)
+	return err
 }
 
 func (r *Repository) UpdateRule(ctx context.Context, rule domain.Rule) error {

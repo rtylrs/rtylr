@@ -39,6 +39,9 @@ func (h *PLReportHandler) Serve(ctx context.Context, req *PLReportRequest) (PLRe
 	if device.User == nil {
 		return PLReportResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireFinancePermission(ctx, "finance:reports:view"); err != nil {
+		return PLReportResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

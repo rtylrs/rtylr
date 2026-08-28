@@ -38,14 +38,15 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
     -o /app/license ./cmd/license
 
 # Runtime stage
-FROM alpine:3.20
+FROM alpine:3.22
 RUN apk add --no-cache ca-certificates tzdata
-RUN addgroup -S onion && adduser -S -G onion onion
+RUN addgroup -S app && adduser -S -G app app
 WORKDIR /app
 COPY --from=builder /app/license /app/license
 ENV RUN_MODE=license
 ENV SERVICE_NAME=license
 ENV PORT=8082
 EXPOSE 8082
-USER onion
+USER app
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["wget", "--spider", "--quiet", "http://127.0.0.1:8082/health"]
 CMD ["/app/license"]

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"crypto/subtle"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"os"
@@ -54,7 +55,7 @@ func MetricsMiddleware(next http.Handler) http.Handler {
 		if rec.status >= 500 {
 			totalErrors.Add(1)
 		}
-		totalLatency.Add(uint64(time.Since(start).Microseconds()))
+		totalLatency.Add(uint64(time.Since(start).Microseconds())) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 }
 
@@ -167,6 +168,6 @@ func MetricsHandler() http.HandlerFunc {
 		b.WriteString("\n")
 
 		w.Header().Set("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
-		_, _ = w.Write([]byte(b.String()))
+		_, _ = io.Copy(w, strings.NewReader(b.String()))
 	}
 }

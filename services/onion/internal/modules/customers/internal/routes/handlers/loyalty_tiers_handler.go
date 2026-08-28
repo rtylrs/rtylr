@@ -123,7 +123,7 @@ func (h *CreateLoyaltyTierHandler) Serve(ctx context.Context, req *CreateLoyalty
 	if device.User == nil {
 		return CreateLoyaltyTierResponse{}, onekiterrors.PermissionDenied()
 	}
-	if err := requireCRMManager(ctx); err != nil {
+	if err := requireCRMFeaturePermission(ctx, "crm:loyalty:manage"); err != nil {
 		return CreateLoyaltyTierResponse{}, err
 	}
 
@@ -197,7 +197,7 @@ func (h *UpdateLoyaltyTierHandler) Serve(ctx context.Context, req *UpdateLoyalty
 	if device.User == nil {
 		return UpdateLoyaltyTierResponse{}, onekiterrors.PermissionDenied()
 	}
-	if err := requireCRMManager(ctx); err != nil {
+	if err := requireCRMFeaturePermission(ctx, "crm:loyalty:manage"); err != nil {
 		return UpdateLoyaltyTierResponse{}, err
 	}
 
@@ -248,7 +248,7 @@ func (h *DeleteLoyaltyTierHandler) Serve(ctx context.Context, _ *DeleteLoyaltyTi
 	if device.User == nil {
 		return DeleteLoyaltyTierResponse{}, onekiterrors.PermissionDenied()
 	}
-	if err := requireCRMManager(ctx); err != nil {
+	if err := requireCRMFeaturePermission(ctx, "crm:loyalty:manage"); err != nil {
 		return DeleteLoyaltyTierResponse{}, err
 	}
 

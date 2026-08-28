@@ -53,6 +53,9 @@ func (h *CreateShiftAssignmentHandler) Serve(ctx context.Context, req *CreateShi
 	if device.IsAnonymous || device.User == nil {
 		return CreateShiftAssignmentResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireShiftPermission(ctx); err != nil {
+		return CreateShiftAssignmentResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

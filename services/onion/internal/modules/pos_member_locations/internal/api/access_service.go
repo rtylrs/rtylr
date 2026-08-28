@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_member_locations/internal/infrastructure"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	posaccessv1 "github.com/voxire/voxie/gen/go/pos/access/v1"
@@ -166,15 +167,8 @@ func authenticatedAccessUser(ctx context.Context) (*authPkg.AuthUser, int64, err
 	return authUser, businessID, nil
 }
 
-func isOwnerOrAdmin(u *authPkg.AuthUser) bool {
-	return u.Role == "owner" || u.Role == "admin" || u.Role == "console_admin"
-}
-
 func hasBusinessWidePOSAccess(u *authPkg.AuthUser) bool {
-	if u == nil {
-		return false
-	}
-	return isOwnerOrAdmin(u)
+	return authPkg.HasAppPermission(u, authorization.AppPOS, "pos:employees:manage")
 }
 
 func toProtoMyLocation(l infrastructure.MyLocation) *posaccessv1.MyLocation {

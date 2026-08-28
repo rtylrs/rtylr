@@ -97,6 +97,358 @@ func (ns NullAiQuotaSettingsMode) Value() (driver.Value, error) {
 	return string(ns.AiQuotaSettingsMode), nil
 }
 
+type AuthorizationAuditEventsSourceClient string
+
+const (
+	AuthorizationAuditEventsSourceClientDash   AuthorizationAuditEventsSourceClient = "dash"
+	AuthorizationAuditEventsSourceClientPos    AuthorizationAuditEventsSourceClient = "pos"
+	AuthorizationAuditEventsSourceClientMobile AuthorizationAuditEventsSourceClient = "mobile"
+	AuthorizationAuditEventsSourceClientApp    AuthorizationAuditEventsSourceClient = "app"
+	AuthorizationAuditEventsSourceClientApi    AuthorizationAuditEventsSourceClient = "api"
+)
+
+func (e *AuthorizationAuditEventsSourceClient) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuthorizationAuditEventsSourceClient(s)
+	case string:
+		*e = AuthorizationAuditEventsSourceClient(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuthorizationAuditEventsSourceClient: %T", src)
+	}
+	return nil
+}
+
+type NullAuthorizationAuditEventsSourceClient struct {
+	AuthorizationAuditEventsSourceClient AuthorizationAuditEventsSourceClient `json:"authorization_audit_events_source_client"`
+	Valid                                bool                                 `json:"valid"` // Valid is true if AuthorizationAuditEventsSourceClient is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuthorizationAuditEventsSourceClient) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuthorizationAuditEventsSourceClient, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuthorizationAuditEventsSourceClient.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuthorizationAuditEventsSourceClient) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuthorizationAuditEventsSourceClient), nil
+}
+
+type AuthorizationBusinessMembersStatus string
+
+const (
+	AuthorizationBusinessMembersStatusPending   AuthorizationBusinessMembersStatus = "pending"
+	AuthorizationBusinessMembersStatusActive    AuthorizationBusinessMembersStatus = "active"
+	AuthorizationBusinessMembersStatusSuspended AuthorizationBusinessMembersStatus = "suspended"
+	AuthorizationBusinessMembersStatusRevoked   AuthorizationBusinessMembersStatus = "revoked"
+)
+
+func (e *AuthorizationBusinessMembersStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuthorizationBusinessMembersStatus(s)
+	case string:
+		*e = AuthorizationBusinessMembersStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuthorizationBusinessMembersStatus: %T", src)
+	}
+	return nil
+}
+
+type NullAuthorizationBusinessMembersStatus struct {
+	AuthorizationBusinessMembersStatus AuthorizationBusinessMembersStatus `json:"authorization_business_members_status"`
+	Valid                              bool                               `json:"valid"` // Valid is true if AuthorizationBusinessMembersStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuthorizationBusinessMembersStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuthorizationBusinessMembersStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuthorizationBusinessMembersStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuthorizationBusinessMembersStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuthorizationBusinessMembersStatus), nil
+}
+
+type AuthorizationLicenseAssignmentsSource string
+
+const (
+	AuthorizationLicenseAssignmentsSourceExplicit    AuthorizationLicenseAssignmentsSource = "explicit"
+	AuthorizationLicenseAssignmentsSourceDashDefault AuthorizationLicenseAssignmentsSource = "dash_default"
+	AuthorizationLicenseAssignmentsSourceGroup       AuthorizationLicenseAssignmentsSource = "group"
+	AuthorizationLicenseAssignmentsSourceSystem      AuthorizationLicenseAssignmentsSource = "system"
+)
+
+func (e *AuthorizationLicenseAssignmentsSource) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuthorizationLicenseAssignmentsSource(s)
+	case string:
+		*e = AuthorizationLicenseAssignmentsSource(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuthorizationLicenseAssignmentsSource: %T", src)
+	}
+	return nil
+}
+
+type NullAuthorizationLicenseAssignmentsSource struct {
+	AuthorizationLicenseAssignmentsSource AuthorizationLicenseAssignmentsSource `json:"authorization_license_assignments_source"`
+	Valid                                 bool                                  `json:"valid"` // Valid is true if AuthorizationLicenseAssignmentsSource is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuthorizationLicenseAssignmentsSource) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuthorizationLicenseAssignmentsSource, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuthorizationLicenseAssignmentsSource.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuthorizationLicenseAssignmentsSource) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuthorizationLicenseAssignmentsSource), nil
+}
+
+type AuthorizationLicenseAssignmentsStatus string
+
+const (
+	AuthorizationLicenseAssignmentsStatusPending  AuthorizationLicenseAssignmentsStatus = "pending"
+	AuthorizationLicenseAssignmentsStatusActive   AuthorizationLicenseAssignmentsStatus = "active"
+	AuthorizationLicenseAssignmentsStatusRevoked  AuthorizationLicenseAssignmentsStatus = "revoked"
+	AuthorizationLicenseAssignmentsStatusArchived AuthorizationLicenseAssignmentsStatus = "archived"
+)
+
+func (e *AuthorizationLicenseAssignmentsStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuthorizationLicenseAssignmentsStatus(s)
+	case string:
+		*e = AuthorizationLicenseAssignmentsStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuthorizationLicenseAssignmentsStatus: %T", src)
+	}
+	return nil
+}
+
+type NullAuthorizationLicenseAssignmentsStatus struct {
+	AuthorizationLicenseAssignmentsStatus AuthorizationLicenseAssignmentsStatus `json:"authorization_license_assignments_status"`
+	Valid                                 bool                                  `json:"valid"` // Valid is true if AuthorizationLicenseAssignmentsStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuthorizationLicenseAssignmentsStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuthorizationLicenseAssignmentsStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuthorizationLicenseAssignmentsStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuthorizationLicenseAssignmentsStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuthorizationLicenseAssignmentsStatus), nil
+}
+
+type AuthorizationRoleAssignmentsSource string
+
+const (
+	AuthorizationRoleAssignmentsSourceExplicit    AuthorizationRoleAssignmentsSource = "explicit"
+	AuthorizationRoleAssignmentsSourceDashDefault AuthorizationRoleAssignmentsSource = "dash_default"
+	AuthorizationRoleAssignmentsSourceGroup       AuthorizationRoleAssignmentsSource = "group"
+	AuthorizationRoleAssignmentsSourceSystem      AuthorizationRoleAssignmentsSource = "system"
+)
+
+func (e *AuthorizationRoleAssignmentsSource) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuthorizationRoleAssignmentsSource(s)
+	case string:
+		*e = AuthorizationRoleAssignmentsSource(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuthorizationRoleAssignmentsSource: %T", src)
+	}
+	return nil
+}
+
+type NullAuthorizationRoleAssignmentsSource struct {
+	AuthorizationRoleAssignmentsSource AuthorizationRoleAssignmentsSource `json:"authorization_role_assignments_source"`
+	Valid                              bool                               `json:"valid"` // Valid is true if AuthorizationRoleAssignmentsSource is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuthorizationRoleAssignmentsSource) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuthorizationRoleAssignmentsSource, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuthorizationRoleAssignmentsSource.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuthorizationRoleAssignmentsSource) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuthorizationRoleAssignmentsSource), nil
+}
+
+type AuthorizationRoleAssignmentsStatus string
+
+const (
+	AuthorizationRoleAssignmentsStatusPending  AuthorizationRoleAssignmentsStatus = "pending"
+	AuthorizationRoleAssignmentsStatusActive   AuthorizationRoleAssignmentsStatus = "active"
+	AuthorizationRoleAssignmentsStatusRevoked  AuthorizationRoleAssignmentsStatus = "revoked"
+	AuthorizationRoleAssignmentsStatusArchived AuthorizationRoleAssignmentsStatus = "archived"
+)
+
+func (e *AuthorizationRoleAssignmentsStatus) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuthorizationRoleAssignmentsStatus(s)
+	case string:
+		*e = AuthorizationRoleAssignmentsStatus(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuthorizationRoleAssignmentsStatus: %T", src)
+	}
+	return nil
+}
+
+type NullAuthorizationRoleAssignmentsStatus struct {
+	AuthorizationRoleAssignmentsStatus AuthorizationRoleAssignmentsStatus `json:"authorization_role_assignments_status"`
+	Valid                              bool                               `json:"valid"` // Valid is true if AuthorizationRoleAssignmentsStatus is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuthorizationRoleAssignmentsStatus) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuthorizationRoleAssignmentsStatus, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuthorizationRoleAssignmentsStatus.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuthorizationRoleAssignmentsStatus) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuthorizationRoleAssignmentsStatus), nil
+}
+
+type AuthorizationRolesAssignmentMode string
+
+const (
+	AuthorizationRolesAssignmentModeMany              AuthorizationRolesAssignmentMode = "many"
+	AuthorizationRolesAssignmentModeOne               AuthorizationRolesAssignmentMode = "one"
+	AuthorizationRolesAssignmentModePrimaryPlusAddons AuthorizationRolesAssignmentMode = "primary_plus_addons"
+)
+
+func (e *AuthorizationRolesAssignmentMode) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuthorizationRolesAssignmentMode(s)
+	case string:
+		*e = AuthorizationRolesAssignmentMode(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuthorizationRolesAssignmentMode: %T", src)
+	}
+	return nil
+}
+
+type NullAuthorizationRolesAssignmentMode struct {
+	AuthorizationRolesAssignmentMode AuthorizationRolesAssignmentMode `json:"authorization_roles_assignment_mode"`
+	Valid                            bool                             `json:"valid"` // Valid is true if AuthorizationRolesAssignmentMode is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuthorizationRolesAssignmentMode) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuthorizationRolesAssignmentMode, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuthorizationRolesAssignmentMode.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuthorizationRolesAssignmentMode) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuthorizationRolesAssignmentMode), nil
+}
+
+type AuthorizationRolesLifecycle string
+
+const (
+	AuthorizationRolesLifecycleDraft    AuthorizationRolesLifecycle = "draft"
+	AuthorizationRolesLifecycleActive   AuthorizationRolesLifecycle = "active"
+	AuthorizationRolesLifecycleArchived AuthorizationRolesLifecycle = "archived"
+	AuthorizationRolesLifecycleReplaced AuthorizationRolesLifecycle = "replaced"
+)
+
+func (e *AuthorizationRolesLifecycle) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuthorizationRolesLifecycle(s)
+	case string:
+		*e = AuthorizationRolesLifecycle(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuthorizationRolesLifecycle: %T", src)
+	}
+	return nil
+}
+
+type NullAuthorizationRolesLifecycle struct {
+	AuthorizationRolesLifecycle AuthorizationRolesLifecycle `json:"authorization_roles_lifecycle"`
+	Valid                       bool                        `json:"valid"` // Valid is true if AuthorizationRolesLifecycle is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuthorizationRolesLifecycle) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuthorizationRolesLifecycle, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuthorizationRolesLifecycle.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuthorizationRolesLifecycle) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuthorizationRolesLifecycle), nil
+}
+
 type EmailJobsStatus string
 
 const (
@@ -678,6 +1030,49 @@ func (ns NullUserAppPermissionsRole) Value() (driver.Value, error) {
 	return string(ns.UserAppPermissionsRole), nil
 }
 
+type UserBusinessAccessRole string
+
+const (
+	UserBusinessAccessRoleOwner  UserBusinessAccessRole = "owner"
+	UserBusinessAccessRoleAdmin  UserBusinessAccessRole = "admin"
+	UserBusinessAccessRoleViewer UserBusinessAccessRole = "viewer"
+)
+
+func (e *UserBusinessAccessRole) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = UserBusinessAccessRole(s)
+	case string:
+		*e = UserBusinessAccessRole(s)
+	default:
+		return fmt.Errorf("unsupported scan type for UserBusinessAccessRole: %T", src)
+	}
+	return nil
+}
+
+type NullUserBusinessAccessRole struct {
+	UserBusinessAccessRole UserBusinessAccessRole `json:"user_business_access_role"`
+	Valid                  bool                   `json:"valid"` // Valid is true if UserBusinessAccessRole is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullUserBusinessAccessRole) Scan(value interface{}) error {
+	if value == nil {
+		ns.UserBusinessAccessRole, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.UserBusinessAccessRole.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullUserBusinessAccessRole) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.UserBusinessAccessRole), nil
+}
+
 type UserGroupAppPermissionsPermissionLevel string
 
 const (
@@ -763,6 +1158,136 @@ func (ns NullUserGroupResourcePermissionsPermissionLevel) Value() (driver.Value,
 	return string(ns.UserGroupResourcePermissionsPermissionLevel), nil
 }
 
+type UserMfaEnrollmentsMethod string
+
+const (
+	UserMfaEnrollmentsMethodTotp         UserMfaEnrollmentsMethod = "totp"
+	UserMfaEnrollmentsMethodWebauthn     UserMfaEnrollmentsMethod = "webauthn"
+	UserMfaEnrollmentsMethodRecoveryCode UserMfaEnrollmentsMethod = "recovery_code"
+)
+
+func (e *UserMfaEnrollmentsMethod) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = UserMfaEnrollmentsMethod(s)
+	case string:
+		*e = UserMfaEnrollmentsMethod(s)
+	default:
+		return fmt.Errorf("unsupported scan type for UserMfaEnrollmentsMethod: %T", src)
+	}
+	return nil
+}
+
+type NullUserMfaEnrollmentsMethod struct {
+	UserMfaEnrollmentsMethod UserMfaEnrollmentsMethod `json:"user_mfa_enrollments_method"`
+	Valid                    bool                     `json:"valid"` // Valid is true if UserMfaEnrollmentsMethod is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullUserMfaEnrollmentsMethod) Scan(value interface{}) error {
+	if value == nil {
+		ns.UserMfaEnrollmentsMethod, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.UserMfaEnrollmentsMethod.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullUserMfaEnrollmentsMethod) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.UserMfaEnrollmentsMethod), nil
+}
+
+type UserProvisioningStatesMode string
+
+const (
+	UserProvisioningStatesModeInvitation        UserProvisioningStatesMode = "invitation"
+	UserProvisioningStatesModeDirectCredentials UserProvisioningStatesMode = "direct_credentials"
+)
+
+func (e *UserProvisioningStatesMode) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = UserProvisioningStatesMode(s)
+	case string:
+		*e = UserProvisioningStatesMode(s)
+	default:
+		return fmt.Errorf("unsupported scan type for UserProvisioningStatesMode: %T", src)
+	}
+	return nil
+}
+
+type NullUserProvisioningStatesMode struct {
+	UserProvisioningStatesMode UserProvisioningStatesMode `json:"user_provisioning_states_mode"`
+	Valid                      bool                       `json:"valid"` // Valid is true if UserProvisioningStatesMode is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullUserProvisioningStatesMode) Scan(value interface{}) error {
+	if value == nil {
+		ns.UserProvisioningStatesMode, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.UserProvisioningStatesMode.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullUserProvisioningStatesMode) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.UserProvisioningStatesMode), nil
+}
+
+type UserProvisioningStatesState string
+
+const (
+	UserProvisioningStatesStatePendingInvitation UserProvisioningStatesState = "pending_invitation"
+	UserProvisioningStatesStatePendingActivation UserProvisioningStatesState = "pending_activation"
+	UserProvisioningStatesStateActive            UserProvisioningStatesState = "active"
+	UserProvisioningStatesStateSuspended         UserProvisioningStatesState = "suspended"
+	UserProvisioningStatesStateRevoked           UserProvisioningStatesState = "revoked"
+)
+
+func (e *UserProvisioningStatesState) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = UserProvisioningStatesState(s)
+	case string:
+		*e = UserProvisioningStatesState(s)
+	default:
+		return fmt.Errorf("unsupported scan type for UserProvisioningStatesState: %T", src)
+	}
+	return nil
+}
+
+type NullUserProvisioningStatesState struct {
+	UserProvisioningStatesState UserProvisioningStatesState `json:"user_provisioning_states_state"`
+	Valid                       bool                        `json:"valid"` // Valid is true if UserProvisioningStatesState is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullUserProvisioningStatesState) Scan(value interface{}) error {
+	if value == nil {
+		ns.UserProvisioningStatesState, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.UserProvisioningStatesState.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullUserProvisioningStatesState) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.UserProvisioningStatesState), nil
+}
+
 type AccessRequest struct {
 	ID         int64                    `db:"id" json:"id"`
 	BusinessID int64                    `db:"business_id" json:"business_id"`
@@ -837,6 +1362,118 @@ type AiUsageMonthly struct {
 	Requests   int32        `db:"requests" json:"requests"`
 	CreatedAt  sql.NullTime `db:"created_at" json:"created_at"`
 	UpdatedAt  sql.NullTime `db:"updated_at" json:"updated_at"`
+}
+
+type AuthorizationAuditEvent struct {
+	ID            int64                                `db:"id" json:"id"`
+	BusinessID    int64                                `db:"business_id" json:"business_id"`
+	ActorUserID   sql.NullInt64                        `db:"actor_user_id" json:"actor_user_id"`
+	TargetUserID  sql.NullInt64                        `db:"target_user_id" json:"target_user_id"`
+	TargetGroupID sql.NullInt64                        `db:"target_group_id" json:"target_group_id"`
+	Action        string                               `db:"action" json:"action"`
+	AppID         sql.NullString                       `db:"app_id" json:"app_id"`
+	RoleID        sql.NullInt64                        `db:"role_id" json:"role_id"`
+	BeforeJson    json.RawMessage                      `db:"before_json" json:"before_json"`
+	AfterJson     json.RawMessage                      `db:"after_json" json:"after_json"`
+	Reason        sql.NullString                       `db:"reason" json:"reason"`
+	ApprovalRef   sql.NullString                       `db:"approval_ref" json:"approval_ref"`
+	RequestID     sql.NullString                       `db:"request_id" json:"request_id"`
+	CorrelationID sql.NullString                       `db:"correlation_id" json:"correlation_id"`
+	SourceClient  AuthorizationAuditEventsSourceClient `db:"source_client" json:"source_client"`
+	CreatedAt     sql.NullTime                         `db:"created_at" json:"created_at"`
+}
+
+type AuthorizationBusinessMember struct {
+	ID                   int64                              `db:"id" json:"id"`
+	BusinessID           int64                              `db:"business_id" json:"business_id"`
+	UserID               int64                              `db:"user_id" json:"user_id"`
+	DashRoleID           sql.NullInt64                      `db:"dash_role_id" json:"dash_role_id"`
+	DashRoleKey          string                             `db:"dash_role_key" json:"dash_role_key"`
+	Status               AuthorizationBusinessMembersStatus `db:"status" json:"status"`
+	AuthorizationVersion int64                              `db:"authorization_version" json:"authorization_version"`
+	CreatedAt            sql.NullTime                       `db:"created_at" json:"created_at"`
+	UpdatedAt            sql.NullTime                       `db:"updated_at" json:"updated_at"`
+}
+
+type AuthorizationDashAppDefault struct {
+	DashRoleID     int64         `db:"dash_role_id" json:"dash_role_id"`
+	AppID          string        `db:"app_id" json:"app_id"`
+	DefaultRoleID  sql.NullInt64 `db:"default_role_id" json:"default_role_id"`
+	DefaultEnabled bool          `db:"default_enabled" json:"default_enabled"`
+	CreatedAt      sql.NullTime  `db:"created_at" json:"created_at"`
+}
+
+type AuthorizationLicenseAssignment struct {
+	ID         int64                                 `db:"id" json:"id"`
+	BusinessID int64                                 `db:"business_id" json:"business_id"`
+	UserID     sql.NullInt64                         `db:"user_id" json:"user_id"`
+	GroupID    sql.NullInt64                         `db:"group_id" json:"group_id"`
+	AppID      string                                `db:"app_id" json:"app_id"`
+	Source     AuthorizationLicenseAssignmentsSource `db:"source" json:"source"`
+	Status     AuthorizationLicenseAssignmentsStatus `db:"status" json:"status"`
+	GrantedBy  sql.NullInt64                         `db:"granted_by" json:"granted_by"`
+	GrantedAt  sql.NullTime                          `db:"granted_at" json:"granted_at"`
+	RevokedBy  sql.NullInt64                         `db:"revoked_by" json:"revoked_by"`
+	RevokedAt  sql.NullTime                          `db:"revoked_at" json:"revoked_at"`
+}
+
+type AuthorizationPermissionCatalog struct {
+	PermissionKey string       `db:"permission_key" json:"permission_key"`
+	AppID         string       `db:"app_id" json:"app_id"`
+	Action        string       `db:"action" json:"action"`
+	IsSensitive   bool         `db:"is_sensitive" json:"is_sensitive"`
+	IsHighRisk    bool         `db:"is_high_risk" json:"is_high_risk"`
+	CreatedAt     sql.NullTime `db:"created_at" json:"created_at"`
+}
+
+type AuthorizationRole struct {
+	ID int64 `db:"id" json:"id"`
+	// 0 means a global system role
+	BusinessID     int64                            `db:"business_id" json:"business_id"`
+	AppID          string                           `db:"app_id" json:"app_id"`
+	RoleKey        string                           `db:"role_key" json:"role_key"`
+	DisplayName    string                           `db:"display_name" json:"display_name"`
+	Description    sql.NullString                   `db:"description" json:"description"`
+	ScopeRules     json.RawMessage                  `db:"scope_rules" json:"scope_rules"`
+	Level          int32                            `db:"level" json:"level"`
+	ParentRoleID   sql.NullInt64                    `db:"parent_role_id" json:"parent_role_id"`
+	AssignmentMode AuthorizationRolesAssignmentMode `db:"assignment_mode" json:"assignment_mode"`
+	IsSystem       bool                             `db:"is_system" json:"is_system"`
+	IsArchived     bool                             `db:"is_archived" json:"is_archived"`
+	Lifecycle      AuthorizationRolesLifecycle      `db:"lifecycle" json:"lifecycle"`
+	Version        int64                            `db:"version" json:"version"`
+	CreatedBy      sql.NullInt64                    `db:"created_by" json:"created_by"`
+	CreatedAt      sql.NullTime                     `db:"created_at" json:"created_at"`
+	UpdatedAt      sql.NullTime                     `db:"updated_at" json:"updated_at"`
+}
+
+type AuthorizationRoleAssignment struct {
+	ID         int64                              `db:"id" json:"id"`
+	BusinessID int64                              `db:"business_id" json:"business_id"`
+	UserID     sql.NullInt64                      `db:"user_id" json:"user_id"`
+	GroupID    sql.NullInt64                      `db:"group_id" json:"group_id"`
+	AppID      string                             `db:"app_id" json:"app_id"`
+	RoleID     int64                              `db:"role_id" json:"role_id"`
+	Source     AuthorizationRoleAssignmentsSource `db:"source" json:"source"`
+	Status     AuthorizationRoleAssignmentsStatus `db:"status" json:"status"`
+	IsPrimary  bool                               `db:"is_primary" json:"is_primary"`
+	GrantedBy  sql.NullInt64                      `db:"granted_by" json:"granted_by"`
+	GrantedAt  sql.NullTime                       `db:"granted_at" json:"granted_at"`
+	RevokedBy  sql.NullInt64                      `db:"revoked_by" json:"revoked_by"`
+	RevokedAt  sql.NullTime                       `db:"revoked_at" json:"revoked_at"`
+}
+
+type AuthorizationRoleAssignmentScope struct {
+	AssignmentID int64        `db:"assignment_id" json:"assignment_id"`
+	ScopeType    string       `db:"scope_type" json:"scope_type"`
+	ScopeID      string       `db:"scope_id" json:"scope_id"`
+	CreatedAt    sql.NullTime `db:"created_at" json:"created_at"`
+}
+
+type AuthorizationRolePermission struct {
+	RoleID        int64        `db:"role_id" json:"role_id"`
+	PermissionKey string       `db:"permission_key" json:"permission_key"`
+	CreatedAt     sql.NullTime `db:"created_at" json:"created_at"`
 }
 
 type Business struct {
@@ -1199,6 +1836,13 @@ type FinanceReconciliationMatch struct {
 	CreatedAt  sql.NullTime  `db:"created_at" json:"created_at"`
 }
 
+type FinanceReconciliationTarget struct {
+	BusinessID int64        `db:"business_id" json:"business_id"`
+	TargetType string       `db:"target_type" json:"target_type"`
+	TargetID   int64        `db:"target_id" json:"target_id"`
+	CreatedAt  sql.NullTime `db:"created_at" json:"created_at"`
+}
+
 type FinanceRecurringInvoice struct {
 	ID                int64                             `db:"id" json:"id"`
 	OwnerID           int64                             `db:"owner_id" json:"owner_id"`
@@ -1400,6 +2044,7 @@ type User struct {
 	ID               int64          `db:"id" json:"id"`
 	BusinessID       sql.NullInt64  `db:"business_id" json:"business_id"`
 	Email            string         `db:"email" json:"email"`
+	Username         sql.NullString `db:"username" json:"username"`
 	PasswordHash     string         `db:"password_hash" json:"password_hash"`
 	FullName         sql.NullString `db:"full_name" json:"full_name"`
 	SignupIpAddress  sql.NullString `db:"signup_ip_address" json:"signup_ip_address"`
@@ -1427,6 +2072,23 @@ type UserAppPermission struct {
 	IsActive  sql.NullBool               `db:"is_active" json:"is_active"`
 	CreatedAt sql.NullTime               `db:"created_at" json:"created_at"`
 	UpdatedAt sql.NullTime               `db:"updated_at" json:"updated_at"`
+}
+
+type UserBusinessAccess struct {
+	ID         int64                  `db:"id" json:"id"`
+	UserID     int64                  `db:"user_id" json:"user_id"`
+	BusinessID int64                  `db:"business_id" json:"business_id"`
+	Role       UserBusinessAccessRole `db:"role" json:"role"`
+	CreatedAt  sql.NullTime           `db:"created_at" json:"created_at"`
+}
+
+type UserEmailVerificationToken struct {
+	ID         int64        `db:"id" json:"id"`
+	UserID     int64        `db:"user_id" json:"user_id"`
+	TokenHash  string       `db:"token_hash" json:"token_hash"`
+	ExpiresAt  time.Time    `db:"expires_at" json:"expires_at"`
+	ConsumedAt sql.NullTime `db:"consumed_at" json:"consumed_at"`
+	CreatedAt  time.Time    `db:"created_at" json:"created_at"`
 }
 
 type UserGroup struct {
@@ -1459,6 +2121,36 @@ type UserGroupResourcePermission struct {
 	GroupID         int64                                       `db:"group_id" json:"group_id"`
 	ResourceKey     string                                      `db:"resource_key" json:"resource_key"`
 	PermissionLevel UserGroupResourcePermissionsPermissionLevel `db:"permission_level" json:"permission_level"`
+}
+
+type UserMfaEnrollment struct {
+	ID               int64                    `db:"id" json:"id"`
+	UserID           int64                    `db:"user_id" json:"user_id"`
+	Method           UserMfaEnrollmentsMethod `db:"method" json:"method"`
+	SecretCiphertext sql.NullString           `db:"secret_ciphertext" json:"secret_ciphertext"`
+	CredentialID     sql.NullString           `db:"credential_id" json:"credential_id"`
+	RecoveryCodeHash sql.NullString           `db:"recovery_code_hash" json:"recovery_code_hash"`
+	IsActive         bool                     `db:"is_active" json:"is_active"`
+	EnrolledAt       sql.NullTime             `db:"enrolled_at" json:"enrolled_at"`
+	RevokedAt        sql.NullTime             `db:"revoked_at" json:"revoked_at"`
+}
+
+type UserProvisioningState struct {
+	UserID                   int64                       `db:"user_id" json:"user_id"`
+	BusinessID               int64                       `db:"business_id" json:"business_id"`
+	Mode                     UserProvisioningStatesMode  `db:"mode" json:"mode"`
+	State                    UserProvisioningStatesState `db:"state" json:"state"`
+	EmailVerified            bool                        `db:"email_verified" json:"email_verified"`
+	PasswordChangeRequired   bool                        `db:"password_change_required" json:"password_change_required"`
+	MfaRequired              bool                        `db:"mfa_required" json:"mfa_required"`
+	MfaEnrolled              bool                        `db:"mfa_enrolled" json:"mfa_enrolled"`
+	RecoveryAvailable        bool                        `db:"recovery_available" json:"recovery_available"`
+	ActivationTokenHash      sql.NullString              `db:"activation_token_hash" json:"activation_token_hash"`
+	ActivationTokenExpiresAt sql.NullTime                `db:"activation_token_expires_at" json:"activation_token_expires_at"`
+	PasswordChangedAt        sql.NullTime                `db:"password_changed_at" json:"password_changed_at"`
+	LastMfaVerifiedAt        sql.NullTime                `db:"last_mfa_verified_at" json:"last_mfa_verified_at"`
+	CreatedAt                sql.NullTime                `db:"created_at" json:"created_at"`
+	UpdatedAt                sql.NullTime                `db:"updated_at" json:"updated_at"`
 }
 
 type UserSession struct {

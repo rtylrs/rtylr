@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_time/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_time/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -508,13 +509,9 @@ func timesheetFromRow(row sqlc.HrTimesheet) domain.TimesheetRecord {
 	}
 }
 
-func nullInt64(v int64) sql.NullInt64 {
-	return sql.NullInt64{Int64: v, Valid: v != 0}
-}
+var nullInt64 = sqlutil.NullInt64
 
-func nullString(v string) sql.NullString {
-	return sql.NullString{String: v, Valid: v != ""}
-}
+var nullString = sqlutil.NullString
 
 // MarkEntriesInvoiced stamps each listed entry with the settling invoice id
 // inside ONE transaction: the whole batch lands or none of it does, so a

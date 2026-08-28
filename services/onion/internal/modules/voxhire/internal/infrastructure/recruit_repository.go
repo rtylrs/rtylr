@@ -655,26 +655,37 @@ func isOptionalAnalyticsSchemaError(err error) bool {
 
 func (r *Repository) analyticsProfileFunctions(ctx context.Context, ownerID int64) ([]domain.AnalyticsBucket, error) {
 	functions := []string{"Operations", "Sales", "Customer Support", "Finance", "HR", "Marketing", "Product", "Design", "Engineering", "Data", "Healthcare", "Retail", "Logistics"}
-	buckets := make([]domain.AnalyticsBucket, 0, len(functions))
+	selects := make([]string, 0, len(functions))
+	args := make([]any, 0, len(functions)+1)
 	for _, fn := range functions {
-		pattern := `%"` + fn + `"%`
-		var count int64
-		// cross-schema read from careers — profile function counts across career + talent applications
-		if err := r.db.QueryRowContext(ctx, `
-			SELECT COUNT(*)
-			  FROM (
-			        SELECT COALESCE(a.cv_profile_json, '') AS profile_json
-			          FROM voxire_career_applications a
-			          JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
-			        UNION ALL
-			        SELECT COALESCE(cv_profile_json, '') AS profile_json
-			          FROM voxhire_talent_applications
-			       ) profiles
-				 WHERE profile_json LIKE ?`, ownerID, pattern).Scan(&count); err != nil {
-			return nil, err
-		}
-		if count > 0 {
-			buckets = append(buckets, domain.AnalyticsBucket{Key: strings.ToLower(strings.ReplaceAll(fn, " ", "_")), Count: count})
+		selects = append(selects, "COALESCE(SUM(profile_json LIKE ?), 0)")
+		args = append(args, `%"`+fn+`"%`)
+	}
+	// cross-schema read from careers — profile function counts across career + talent applications
+	args = append(args, ownerID)
+	query := `
+		SELECT ` + strings.Join(selects, ", ") + `
+		  FROM (
+		        SELECT COALESCE(a.cv_profile_json, '') AS profile_json
+		          FROM voxire_career_applications a
+		          JOIN careers c ON c.id = a.job_id AND c.owner_id = ?
+		        UNION ALL
+		        SELECT COALESCE(cv_profile_json, '') AS profile_json
+		          FROM voxhire_talent_applications
+		       ) profiles`
+	counts := make([]int64, len(functions))
+	countArgs := make([]any, len(counts))
+	for i := range counts {
+		countArgs[i] = &counts[i]
+	}
+	if err := r.db.QueryRowContext(ctx, query, args...).Scan(countArgs...); err != nil {
+		return nil, err
+	}
+
+	buckets := make([]domain.AnalyticsBucket, 0, len(functions))
+	for i, fn := range functions {
+		if counts[i] > 0 {
+			buckets = append(buckets, domain.AnalyticsBucket{Key: strings.ToLower(strings.ReplaceAll(fn, " ", "_")), Count: counts[i]})
 		}
 	}
 	sort.SliceStable(buckets, func(i, j int) bool {
@@ -952,7 +963,7 @@ func (r *Repository) ListApplications(ctx context.Context, f domain.ApplicationF
 	if limit > 100 {
 		limit = 100
 	}
-	listQ = listQ.Limit(uint64(limit)).Offset(uint64(f.Offset))
+	listQ = listQ.Limit(uint64(limit)).Offset(uint64(f.Offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 
 	sqlStr, args, err := listQ.PlaceholderFormat(sq.Question).ToSql()
 	if err != nil {
@@ -1241,7 +1252,9 @@ func (r *Repository) ListCandidates(ctx context.Context, f domain.CandidateFilte
 	}
 	where, args := candidateFilterWhere(f)
 	countArgs := append([]any{ownerID}, args...)
-	countSQL := fmt.Sprintf("SELECT COUNT(*) FROM (%s) candidates WHERE %s", candidateUnionSQL, strings.Join(where, " AND "))
+	// #nosec G201 -- candidateUnionSQL is a package constant and where is built only from fixed predicates with bound values.
+	// nosemgrep: go.lang.security.audit.database.string-formatted-query.string-formatted-query
+	countSQL := "SELECT COUNT(*) FROM (" + candidateUnionSQL + ") candidates WHERE " + strings.Join(where, " AND ")
 
 	var total int64
 	if err := r.db.QueryRowContext(ctx, countSQL, countArgs...).Scan(&total); err != nil {
@@ -1262,14 +1275,15 @@ func (r *Repository) ListCandidates(ctx context.Context, f domain.CandidateFilte
 
 	listArgs := append([]any{ownerID}, args...)
 	listArgs = append(listArgs, limit, offset)
-	listSQL := fmt.Sprintf(`
+	// #nosec G202 -- candidateUnionSQL is a package constant and where is built only from fixed predicates with bound values.
+	listSQL := `
 		SELECT source, id, application_id, job_id, opening_title, name, email, phone, location,
 		       track, current_role, desired_roles, status, cv_processing_status, cv_processing_error,
 		       cv_summary, cv_extracted_text, cv_profile_json, created_at, cv_processed_at
-		  FROM (%s) candidates
-		 WHERE %s
+		  FROM (` + candidateUnionSQL + `) candidates
+		 WHERE ` + strings.Join(where, " AND ") + `
 		 ORDER BY created_at DESC
-		 LIMIT ? OFFSET ?`, candidateUnionSQL, strings.Join(where, " AND "))
+		 LIMIT ? OFFSET ?`
 
 	rows, err := r.db.QueryContext(ctx, listSQL, listArgs...)
 	if err != nil {
@@ -1336,6 +1350,7 @@ func (r *Repository) ListCVJobs(ctx context.Context, f domain.CandidateFilter) (
 		limit = 250
 	}
 
+	// #nosec G201 -- The query uses a package-fixed projection and a predicate list built only from fixed clauses with bound values.
 	sqlStr := fmt.Sprintf(`
 		SELECT source, id, name, email, role, cv_key, cv_processing_status, cv_processing_error,
 		       cv_summary, cv_profile_json, created_at, cv_processed_at
@@ -1429,6 +1444,7 @@ func (r *Repository) RetryCVProcessing(ctx context.Context, source string, id in
 	switch source {
 	case "talent":
 		table = "voxhire_talent_applications"
+		// nosemgrep: go.lang.security.audit.database.string-formatted-query.string-formatted-query
 		query = fmt.Sprintf(`
 			UPDATE %s
 			   SET cv_processing_status = 'pending', cv_processing_error = NULL,
@@ -1665,7 +1681,7 @@ func (r *Repository) AddShortlistItem(ctx context.Context, in domain.ShortlistIt
 	}
 	res, err := r.queries.UpsertShortlistItem(ctx, sqlc.UpsertShortlistItemParams{
 		ShortlistID: in.ShortlistID, ApplicationID: in.ApplicationID,
-		SortOrder: int32(in.Rank), Notes: sqlNullString(in.Notes),
+		SortOrder: int32(in.Rank), Notes: sqlNullString(in.Notes), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		return nil, err

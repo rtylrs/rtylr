@@ -16,13 +16,17 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending');
 
 -- name: UpdateExpense :execresult
 UPDATE finance_expenses SET category_id = ?, description = ?, amount = ?, currency = ?, expense_date = ?, vendor = ?, payment_method = ?, receipt_url = ?, is_tax_deductible = ?, tax_amount = ?, notes = ?
-WHERE id = ? AND business_id = ?;
+WHERE id = ? AND business_id = ? AND status <> 'approved';
 
 -- name: DeleteExpense :execresult
-DELETE FROM finance_expenses WHERE id = ? AND business_id = ?;
+DELETE FROM finance_expenses WHERE id = ? AND business_id = ? AND status <> 'approved';
 
 -- name: UpdateExpenseStatus :execresult
-UPDATE finance_expenses SET status = ? WHERE id = ? AND business_id = ?;
+UPDATE finance_expenses
+SET status = sqlc.arg(status)
+WHERE id = sqlc.arg(id)
+  AND business_id = sqlc.arg(business_id)
+  AND status = sqlc.arg(current_status);
 
 -- name: ListExpenseCategories :many
 SELECT id, owner_id, business_id, name, color, created_at

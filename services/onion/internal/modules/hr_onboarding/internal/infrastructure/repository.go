@@ -9,6 +9,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_onboarding/internal/infrastructure/persistence/sqlc"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -30,7 +31,7 @@ func (r *Repository) CreateTemplate(ctx context.Context, businessID int64, param
 		BusinessID:  businessID,
 		Name:        params.Name,
 		TriggerType: params.TriggerType,
-		RoleID:      nullInt64(params.RoleID),
+		RoleID:      sqlutil.NullInt64(params.RoleID),
 	})
 	if err != nil {
 		return nil, err
@@ -100,7 +101,7 @@ func (r *Repository) UpdateTemplate(ctx context.Context, businessID, id int64, p
 	return r.queries.UpdateChecklistTemplate(ctx, sqlc.UpdateChecklistTemplateParams{
 		Name:        params.Name,
 		TriggerType: params.TriggerType,
-		RoleID:      nullInt64(params.RoleID),
+		RoleID:      sqlutil.NullInt64(params.RoleID),
 		BusinessID:  businessID,
 		ID:          id,
 	})
@@ -112,7 +113,7 @@ func (r *Repository) CreateTemplateItem(ctx context.Context, businessID, templat
 		BusinessID:         businessID,
 		TemplateID:         templateID,
 		Title:              params.Title,
-		Description:        nullString(params.Description),
+		Description:        sqlutil.NullString(params.Description),
 		AssigneeRole:       params.AssigneeRole,
 		DueOffsetDays:      params.DueOffsetDays,
 		RequiresAttachment: params.RequiresAttachment,
@@ -423,12 +424,4 @@ func employeeChecklistItemFromRow(row sqlc.HrOnboardingEmployeeChecklistItem) do
 		CreatedAt:            row.CreatedAt,
 		UpdatedAt:            row.UpdatedAt,
 	}
-}
-
-func nullInt64(v int64) sql.NullInt64 {
-	return sql.NullInt64{Int64: v, Valid: v != 0}
-}
-
-func nullString(v string) sql.NullString {
-	return sql.NullString{String: v, Valid: v != ""}
 }

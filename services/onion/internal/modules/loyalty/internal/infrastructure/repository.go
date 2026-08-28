@@ -53,7 +53,7 @@ func (r *Repository) ListTransactions(ctx context.Context, businessID, customerI
 			BusinessID: businessID,
 			CustomerID: customerID,
 			Limit:      int32(pageSize),
-			Offset:     int32(offset),
+			Offset:     int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		})
 		if qErr != nil {
 			logger.Ctx(ctx).Error("Failed to list loyalty transactions", logger.Error(qErr))
@@ -83,7 +83,7 @@ func (r *Repository) ListTransactions(ctx context.Context, businessID, customerI
 	rows, err := r.queries.ListTransactions(ctx, sqlc.ListTransactionsParams{
 		BusinessID: businessID,
 		Limit:      int32(pageSize),
-		Offset:     int32(offset),
+		Offset:     int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list loyalty transactions", logger.Error(err))
@@ -114,7 +114,7 @@ func (r *Repository) CreateTransaction(ctx context.Context, input domain.AwardIn
 		OwnerID:       input.OwnerID,
 		BusinessID:    input.BusinessID,
 		CustomerID:    input.CustomerID,
-		Points:        int32(input.Points),
+		Points:        int32(input.Points), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Type:          sqlc.CrmLoyaltyTransactionsType(txType),
 		Description:   sql.NullString{String: input.Description, Valid: input.Description != ""},
 		ReferenceID:   nullInt64FromPtr(input.ReferenceID),
@@ -132,7 +132,7 @@ func (r *Repository) CreateRedeemTransaction(ctx context.Context, input domain.R
 		OwnerID:       input.OwnerID,
 		BusinessID:    input.BusinessID,
 		CustomerID:    input.CustomerID,
-		Points:        int32(input.Points),
+		Points:        int32(input.Points), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Description:   sql.NullString{String: input.Description, Valid: input.Description != ""},
 		ReferenceID:   nullInt64FromPtr(input.ReferenceID),
 		ReferenceType: sql.NullString{String: input.ReferenceType, Valid: input.ReferenceType != ""},
@@ -199,7 +199,7 @@ func (r *Repository) UpsertConfig(ctx context.Context, input domain.LoyaltyConfi
 		BusinessID:            input.BusinessID,
 		PointsPerCurrencyUnit: sql.NullString{String: strconv.FormatFloat(input.PointsPerDollar, 'f', 2, 64), Valid: true},
 		CurrencyPerPoint:      sql.NullString{String: strconv.FormatFloat(input.PointsValue, 'f', 4, 64), Valid: true},
-		MinRedemptionPoints:   sql.NullInt32{Int32: int32(input.MinRedemptionPoints), Valid: true},
+		MinRedemptionPoints:   sql.NullInt32{Int32: int32(input.MinRedemptionPoints), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		IsEnabled:             sql.NullBool{Bool: input.IsActive, Valid: true},
 	})
 	if err != nil {
@@ -300,18 +300,23 @@ func (r *Repository) ListRewards(ctx context.Context, businessID int64, activeOn
 
 // UpsertReward creates or updates a reward. ID=0 → insert; ID>0 → update.
 func (r *Repository) UpsertReward(ctx context.Context, rw domain.LoyaltyReward) (int64, error) {
+	businessID := rw.BusinessID
+	if businessID == 0 {
+		businessID = rw.OwnerID
+	}
+
 	var stock sql.NullInt32
 	if rw.Stock != nil {
-		stock = sql.NullInt32{Int32: int32(*rw.Stock), Valid: true}
+		stock = sql.NullInt32{Int32: int32(*rw.Stock), Valid: true} // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 	if rw.ID == 0 {
 		res, err := r.queries.CreateReward(ctx, sqlc.CreateRewardParams{
 			OwnerID:     rw.OwnerID,
-			BusinessID:  rw.BusinessID,
+			BusinessID:  businessID,
 			Name:        rw.Name,
 			Description: sql.NullString{String: rw.Description, Valid: true},
 			Category:    sql.NullString{String: rw.Category, Valid: true},
-			PointsCost:  int32(rw.PointsCost),
+			PointsCost:  int32(rw.PointsCost), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			Stock:       stock,
 			Icon:        sql.NullString{String: rw.Icon, Valid: true},
 			Active:      sql.NullBool{Bool: rw.Active, Valid: true},
@@ -326,20 +331,30 @@ func (r *Repository) UpsertReward(ctx context.Context, rw domain.LoyaltyReward) 
 		}
 		return id, nil
 	}
-	err := r.queries.UpdateReward(ctx, sqlc.UpdateRewardParams{
+	res, err := r.queries.UpdateReward(ctx, sqlc.UpdateRewardParams{
 		Name:        rw.Name,
 		Description: sql.NullString{String: rw.Description, Valid: true},
 		Category:    sql.NullString{String: rw.Category, Valid: true},
-		PointsCost:  int32(rw.PointsCost),
+		PointsCost:  int32(rw.PointsCost), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Stock:       stock,
 		Icon:        sql.NullString{String: rw.Icon, Valid: true},
 		Active:      sql.NullBool{Bool: rw.Active, Valid: true},
 		ID:          rw.ID,
-		BusinessID:  rw.BusinessID,
+		BusinessID:  businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update loyalty reward", logger.Error(err))
 		return 0, err
+	}
+	// A stale or foreign id used to answer 200 "Reward updated" without
+	// touching any row (and allowed cross-tenant id probing); report it as a
+	// miss instead (#836).
+	rows, rowsErr := res.RowsAffected()
+	if rowsErr != nil {
+		return 0, rowsErr
+	}
+	if rows == 0 {
+		return 0, domain.ErrRewardNotFound
 	}
 	return rw.ID, nil
 }

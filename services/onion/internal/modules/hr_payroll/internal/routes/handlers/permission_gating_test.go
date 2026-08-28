@@ -14,6 +14,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_payroll/internal/infrastructure"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/testutil"
 )
 
@@ -44,7 +45,20 @@ func (fakeApprovalChainProvider) GetApprovalChain(context.Context, int64, string
 }
 
 func deviceContext(userID int64) context.Context {
-	device := &authPkg.Device{User: &authPkg.AuthUser{UserID: userID}}
+	device := &authPkg.Device{User: &authPkg.AuthUser{
+		UserID:     userID,
+		BusinessID: testutil.BusinessID,
+		EffectiveAccess: &authorization.EffectiveAccess{Apps: []authorization.EffectiveAppAccess{{
+			AppID:     authorization.AppHR,
+			Licensed:  true,
+			HasAccess: true,
+			Permissions: []string{
+				"hr:payroll:view",
+				"hr:payroll:manage",
+				"hr:payroll:execute",
+			},
+		}}},
+	}}
 	return device.Ctx(context.Background())
 }
 

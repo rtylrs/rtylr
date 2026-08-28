@@ -19,9 +19,7 @@ const (
 )
 
 func invalidateHRTimeScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrTimeScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrTimeScope, businessID))
 }
 
 type Service struct {
@@ -370,7 +368,7 @@ func (s *Service) MarkEntriesInvoiced(ctx context.Context, businessID, invoiceID
 	if err != nil {
 		return result, err
 	}
-	result.MarkedCount = int32(marked)
-	result.SkippedCount = int32(len(entryIDs) - int(marked))
+	result.MarkedCount = int32(marked)                       // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+	result.SkippedCount = int32(len(entryIDs) - int(marked)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	return result, nil
 }

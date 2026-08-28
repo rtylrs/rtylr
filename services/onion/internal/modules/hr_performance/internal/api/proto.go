@@ -7,7 +7,7 @@ import (
 
 func cycleToProto(c domain.ReviewCycleRecord) *hrperformancev1.ReviewCyclePayload {
 	return &hrperformancev1.ReviewCyclePayload{
-		Id:          c.ID,
+		Id:          &c.ID,
 		OwnerId:     c.OwnerID,
 		Name:        c.Name,
 		Type:        c.CycleType,
@@ -34,7 +34,7 @@ func reviewToProto(r domain.PerformanceReviewRecord) *hrperformancev1.Performanc
 		sharedAt = &v
 	}
 	return &hrperformancev1.PerformanceReviewPayload{
-		Id:                   r.ID,
+		Id:                   &r.ID,
 		OwnerId:              r.OwnerID,
 		EmployeeId:           r.EmployeeID,
 		ReviewCycleId:        r.ReviewCycleID,

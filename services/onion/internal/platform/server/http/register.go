@@ -1,6 +1,7 @@
 package http
 
 import (
+	"bytes"
 	"context"
 	"encoding"
 	"encoding/json"
@@ -171,10 +172,16 @@ func wrapHandler[Req, Res any](ctx context.Context, handler HandlerFunc[Req, Res
 					return
 				}
 			} else {
-				parseQueryParams(r, &req)
+				if err := parseQueryParams(r, &req); err != nil {
+					WriteOneKitError(r.Context(), w, onekiterrors.New(http.StatusBadRequest, err.Error()))
+					return
+				}
 			}
 		case "GET":
-			parseQueryParams(r, &req)
+			if err := parseQueryParams(r, &req); err != nil {
+				WriteOneKitError(r.Context(), w, onekiterrors.New(http.StatusBadRequest, err.Error()))
+				return
+			}
 		}
 
 		reqCtx := r.Context()
@@ -391,35 +398,35 @@ func walkProtoMessages(value reflect.Value, seen map[uintptr]struct{}) error {
 	return nil
 }
 
-func parseQueryParams[Req any](r *http.Request, req *Req) {
+func parseQueryParams[Req any](r *http.Request, req *Req) error {
 	if r == nil || r.URL == nil || req == nil {
-		return
+		return nil
 	}
 
 	query := r.URL.Query()
 	if len(query) == 0 {
-		return
+		return nil
 	}
 
 	target := reflect.ValueOf(req)
 	if target.Kind() != reflect.Pointer || target.IsNil() {
-		return
+		return nil
 	}
-	assignQueryParams(target.Elem(), query)
+	return assignQueryParams(target.Elem(), query)
 }
 
-func assignQueryParams(value reflect.Value, query url.Values) {
+func assignQueryParams(value reflect.Value, query url.Values) error {
 	if value.Kind() == reflect.Pointer {
 		if value.IsNil() {
 			if !value.CanSet() {
-				return
+				return nil
 			}
 			value.Set(reflect.New(value.Type().Elem()))
 		}
 		value = value.Elem()
 	}
 	if value.Kind() != reflect.Struct {
-		return
+		return nil
 	}
 
 	valueType := value.Type()
@@ -436,7 +443,9 @@ func assignQueryParams(value reflect.Value, query url.Values) {
 		}
 
 		if structField.Anonymous && fieldName == "" {
-			assignQueryParams(fieldValue, query)
+			if err := assignQueryParams(fieldValue, query); err != nil {
+				return err
+			}
 			continue
 		}
 
@@ -444,8 +453,12 @@ func assignQueryParams(value reflect.Value, query url.Values) {
 		if !exists || len(values) == 0 {
 			continue
 		}
-		setQueryField(fieldValue, values, fieldName)
+		if err := setQueryField(fieldValue, values, fieldName); err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
 func queryParamFieldName(field reflect.StructField) (string, bool) {
@@ -489,48 +502,48 @@ func queryValuesForField(query url.Values, fieldName string) ([]string, bool) {
 	return nil, false
 }
 
-func setQueryField(field reflect.Value, values []string, fieldName string) bool {
+func setQueryField(field reflect.Value, values []string, fieldName string) error {
 	if !field.CanSet() || len(values) == 0 {
-		return false
+		return nil
 	}
 
 	if field.Kind() == reflect.Pointer {
 		elem := reflect.New(field.Type().Elem())
-		if !setQueryField(elem.Elem(), values, fieldName) {
-			return false
+		if err := setQueryField(elem.Elem(), values, fieldName); err != nil {
+			return err
 		}
 		field.Set(elem)
-		return true
+		return nil
 	}
 
 	if field.Kind() == reflect.Slice {
 		slice := reflect.MakeSlice(field.Type(), 0, len(values))
 		for _, value := range values {
 			elem := reflect.New(field.Type().Elem()).Elem()
-			if !setQueryField(elem, []string{value}, fieldName) {
-				return false
+			if err := setQueryField(elem, []string{value}, fieldName); err != nil {
+				return err
 			}
 			slice = reflect.Append(slice, elem)
 		}
 		field.Set(slice)
-		return true
+		return nil
 	}
 
 	return setQueryScalar(field, values[0], fieldName)
 }
 
-func setQueryScalar(field reflect.Value, value, fieldName string) bool {
+func setQueryScalar(field reflect.Value, value, fieldName string) error {
 	if !field.CanSet() {
-		return false
+		return nil
 	}
 
 	if field.CanAddr() && field.Addr().CanInterface() {
 		if unmarshaler, ok := field.Addr().Interface().(encoding.TextUnmarshaler); ok {
 			if err := unmarshaler.UnmarshalText([]byte(value)); err != nil {
 				logInvalidQueryValue(fieldName, value, err)
-				return false
+				return fmt.Errorf("invalid query parameter %q: %w", fieldName, err)
 			}
-			return true
+			return nil
 		}
 	}
 
@@ -541,37 +554,37 @@ func setQueryScalar(field reflect.Value, value, fieldName string) bool {
 		parsed, err := strconv.ParseBool(value)
 		if err != nil {
 			logInvalidQueryValue(fieldName, value, err)
-			return false
+			return fmt.Errorf("invalid query parameter %q: %w", fieldName, err)
 		}
 		field.SetBool(parsed)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		parsed, err := strconv.ParseInt(value, 10, field.Type().Bits())
 		if err != nil {
 			logInvalidQueryValue(fieldName, value, err)
-			return false
+			return fmt.Errorf("invalid query parameter %q: %w", fieldName, err)
 		}
 		field.SetInt(parsed)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
 		parsed, err := strconv.ParseUint(value, 10, field.Type().Bits())
 		if err != nil {
 			logInvalidQueryValue(fieldName, value, err)
-			return false
+			return fmt.Errorf("invalid query parameter %q: %w", fieldName, err)
 		}
 		field.SetUint(parsed)
 	case reflect.Float32, reflect.Float64:
 		parsed, err := strconv.ParseFloat(value, field.Type().Bits())
 		if err != nil {
 			logInvalidQueryValue(fieldName, value, err)
-			return false
+			return fmt.Errorf("invalid query parameter %q: %w", fieldName, err)
 		}
 		field.SetFloat(parsed)
 	case reflect.Interface:
 		field.Set(reflect.ValueOf(parseQueryPrimitive(value)))
 	default:
-		return false
+		return fmt.Errorf("unsupported query parameter %q", fieldName)
 	}
 
-	return true
+	return nil
 }
 
 func logInvalidQueryValue(fieldName, value string, err error) {
@@ -624,7 +637,7 @@ func WriteOneKitError(ctx context.Context, w http.ResponseWriter, err error) {
 	}
 
 	w.WriteHeader(statusCode)
-	if _, writeErr := w.Write(payload); writeErr != nil {
+	if _, writeErr := io.Copy(w, bytes.NewReader(payload)); writeErr != nil {
 		logger.Ctx(ctx).Error("Failed to write error response", logger.Error(writeErr))
 	}
 }

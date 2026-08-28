@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"errors"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -42,6 +43,9 @@ func (h *ListContractsHandler) Serve(ctx context.Context, req *ListContractsRequ
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return ListContractsResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:view"); err != nil {
+		return ListContractsResponse{}, err
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
@@ -95,6 +99,11 @@ func (h *CreateContractHandler) Validate(_ context.Context, req *CreateContractR
 	if req.MRR < 0 {
 		return onekiterrors.New(http.StatusBadRequest, "mrr must not be negative")
 	}
+	// The repository stores seats as INT; larger values wrap negative (#836).
+	// Zero stays allowed until the product decides seats are mandatory.
+	if req.Seats < 0 || req.Seats > math.MaxInt32 {
+		return onekiterrors.New(http.StatusBadRequest, "seats must be between 0 and 2147483647")
+	}
 	return nil
 }
 
@@ -102,6 +111,9 @@ func (h *CreateContractHandler) Serve(ctx context.Context, req *CreateContractRe
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return CreateContractResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:create"); err != nil {
+		return CreateContractResponse{}, err
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
@@ -151,6 +163,9 @@ func (h *GetContractHandler) Serve(ctx context.Context, _ *GetContractRequest) (
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return GetContractResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:view"); err != nil {
+		return GetContractResponse{}, err
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
@@ -205,6 +220,11 @@ func (h *UpdateContractHandler) Validate(_ context.Context, req *UpdateContractR
 	if req.MRR < 0 {
 		return onekiterrors.New(http.StatusBadRequest, "mrr must not be negative")
 	}
+	// The repository stores seats as INT; larger values wrap negative (#836).
+	// Zero stays allowed until the product decides seats are mandatory.
+	if req.Seats < 0 || req.Seats > math.MaxInt32 {
+		return onekiterrors.New(http.StatusBadRequest, "seats must be between 0 and 2147483647")
+	}
 	return nil
 }
 
@@ -212,6 +232,9 @@ func (h *UpdateContractHandler) Serve(ctx context.Context, req *UpdateContractRe
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return UpdateContractResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:edit"); err != nil {
+		return UpdateContractResponse{}, err
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")

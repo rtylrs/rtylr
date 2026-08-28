@@ -62,8 +62,8 @@ func (r *Repository) ListSelfHostLicenses(ctx context.Context, limit, offset int
 	listQ := sq.Select(selfHostLicenseColumns).
 		From("self_host_licenses").
 		OrderBy("created_at DESC", "id DESC").
-		Limit(uint64(limit)).
-		Offset(uint64(offset))
+		Limit(uint64(limit)).  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset(uint64(offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	countQ := sq.Select("COUNT(*)").From("self_host_licenses")
 
 	if email = strings.TrimSpace(strings.ToLower(email)); email != "" {

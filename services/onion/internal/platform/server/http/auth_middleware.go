@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 )
@@ -72,7 +73,11 @@ func authSuccessLogsEnabled() bool {
 	return envFlag("AUTH_SUCCESS_LOGS") || envFlag("AUTH_REQUEST_LOGS")
 }
 
-func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolver authPkg.TokenValidatorResolver) MiddlewareFunc {
+func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolver authPkg.TokenValidatorResolver, accessResolvers ...authPkg.EffectiveAccessResolver) MiddlewareFunc {
+	var accessResolver authPkg.EffectiveAccessResolver
+	if len(accessResolvers) > 0 {
+		accessResolver = accessResolvers[0]
+	}
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			path := r.URL.Path
@@ -114,9 +119,120 @@ func GetAuthMiddlewareFunc(accessPolicy *RouteAccessPolicy, tokenValidatorResolv
 
 				return
 			}
+			if accessResolver != nil {
+				effectiveAccess, accessErr := accessResolver.GetEffectiveAccess(ctx, authUser.BusinessID, authUser.UserID)
+				if accessErr != nil {
+					logger.Ctx(ctx).Warn("Effective authorization resolution failed", logger.Error(accessErr), logger.String("path", path))
+					writeUnauthorizedResponse(ctx, w, "Authorization unavailable")
+					return
+				}
+				authUser.EffectiveAccess = effectiveAccess
+				if appID, isAppPath := appForPath(path); isAppPath && !authPkg.HasAppAccess(authUser, appID) {
+					WriteOneKitError(ctx, w, onekiterrors.PermissionDenied())
+					return
+				}
+				if appID, permission, isFeaturePath := featurePermissionForRequest(r.Method, path); isFeaturePath && !hasFeaturePermission(authUser, appID, permission) {
+					WriteOneKitError(ctx, w, onekiterrors.PermissionDenied())
+					return
+				}
+				if statusResolver, ok := accessResolver.(authPkg.ProvisioningStatusResolver); ok {
+					status, statusErr := statusResolver.GetProvisioningStatus(ctx, authUser.UserID)
+					if statusErr != nil {
+						logger.Ctx(ctx).Warn("Provisioning status resolution failed", logger.Error(statusErr), logger.String("path", path))
+						writeUnauthorizedResponse(ctx, w, "Authorization unavailable")
+						return
+					}
+					authUser.ProvisioningStatus = status
+					if status != nil && !isProvisioningPath(path) {
+						if !status.EmailVerified {
+							writeUnauthorizedResponse(ctx, w, "Email verification required")
+							return
+						}
+						if status.PasswordChangeRequired {
+							writeUnauthorizedResponse(ctx, w, "Account activation required")
+							return
+						}
+						if status.MFARequired {
+							if !status.MFAEnrolled && !isMFAPath(path) {
+								writeUnauthorizedResponse(ctx, w, "MFA enrollment required")
+								return
+							}
+							if status.MFAEnrolled && !isMFAPath(path) {
+								mfaResolver, ok := accessResolver.(authPkg.MFAVerifiedResolver)
+								if !ok {
+									writeUnauthorizedResponse(ctx, w, "MFA verification unavailable")
+									return
+								}
+								verified, verifyErr := mfaResolver.IsMFAVerified(ctx, authUser.UserID)
+								if verifyErr != nil || !verified {
+									writeUnauthorizedResponse(ctx, w, "MFA verification required")
+									return
+								}
+							}
+						}
+					}
+				}
+			}
 
 			newCtx := context.WithValue(ctx, authPkg.AuthUserKey, authUser)
 			next.ServeHTTP(w, r.WithContext(newCtx))
 		})
+	}
+}
+
+func hasFeaturePermission(user *authPkg.AuthUser, appID authorization.AppID, permission string) bool {
+	if appID == authorization.AppHub {
+		return authPkg.HasDashboardPermission(user, permission)
+	}
+	return authPkg.HasAppPermission(user, appID, permission)
+}
+
+func appForPath(path string) (authorization.AppID, bool) {
+	normalized := strings.ToLower(strings.TrimRight(path, "/"))
+	if normalized == "/hub/menu" || strings.HasPrefix(normalized, "/hub/menu/") {
+		return authorization.AppMenu, true
+	}
+	for _, app := range []authorization.AppID{
+		authorization.AppPOS,
+		authorization.AppERP,
+		authorization.AppHR,
+		authorization.AppCRM,
+		authorization.AppFinance,
+		authorization.AppFlow,
+		authorization.AppInsights,
+		authorization.AppMenu,
+		authorization.AppRecruit,
+	} {
+		prefix := "/" + string(app)
+		if normalized == prefix || strings.HasPrefix(normalized, prefix+"/") {
+			return app, true
+		}
+	}
+	return "", false
+}
+
+func isMFAPath(path string) bool {
+	switch strings.ToLower(strings.TrimRight(path, "/")) {
+	case "/hub/security/v1/state",
+		"/hub/security/v1/2fa",
+		"/hub/security/v1/mfa/enroll",
+		"/hub/security/v1/mfa/enroll/confirm",
+		"/hub/security/v1/mfa/verify",
+		"/hub/security/v1/mfa/recovery":
+		return true
+	default:
+		return false
+	}
+}
+
+func isProvisioningPath(path string) bool {
+	switch strings.ToLower(strings.TrimRight(path, "/")) {
+	case "/hub/user/v1/users/me",
+		"/hub/user/v1/users/password",
+		"/common/auth/v1/verify-email",
+		"/common/auth/v1/resend-verification":
+		return true
+	default:
+		return false
 	}
 }

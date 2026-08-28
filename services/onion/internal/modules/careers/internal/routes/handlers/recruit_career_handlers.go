@@ -9,8 +9,9 @@ import (
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
 	"github.com/voxire/onion/internal/modules/careers/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
-	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/money"
+	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -89,9 +90,9 @@ type ListRecruitCareersResponse struct {
 }
 
 func (h *ListRecruitCareersHandler) Serve(ctx context.Context, req *ListRecruitCareersRequest) (ListRecruitCareersResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return ListRecruitCareersResponse{}, onekiterrors.PermissionDenied()
+	authUser, err := requireRecruitPermission(ctx, "recruit:jobs:view")
+	if err != nil {
+		return ListRecruitCareersResponse{}, err
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
@@ -149,9 +150,9 @@ func (h *CreateRecruitCareerHandler) Validate(_ context.Context, req *CreateRecr
 }
 
 func (h *CreateRecruitCareerHandler) Serve(ctx context.Context, req *CreateRecruitCareerRequest) (CreateRecruitCareerResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return CreateRecruitCareerResponse{}, onekiterrors.PermissionDenied()
+	authUser, err := requireRecruitPermission(ctx, "recruit:jobs:manage")
+	if err != nil {
+		return CreateRecruitCareerResponse{}, err
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
@@ -238,8 +239,11 @@ func (h *UpdateRecruitCareerHandler) Validate(_ context.Context, req *UpdateRecr
 }
 
 func (h *UpdateRecruitCareerHandler) Serve(ctx context.Context, req *UpdateRecruitCareerRequest) (UpdateRecruitCareerResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
+	authUser, err := requireRecruitPermission(ctx, "recruit:jobs:manage")
+	if err != nil {
+		return UpdateRecruitCareerResponse{}, err
+	}
+	if req.IsPublished && !authPkg.HasAppPermission(authUser, authorization.AppRecruit, "recruit:jobs:publish") {
 		return UpdateRecruitCareerResponse{}, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
@@ -302,9 +306,9 @@ func (h *DeleteRecruitCareerHandler) Validate(_ context.Context, req *DeleteRecr
 }
 
 func (h *DeleteRecruitCareerHandler) Serve(ctx context.Context, req *DeleteRecruitCareerRequest) (DeleteRecruitCareerResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return DeleteRecruitCareerResponse{}, onekiterrors.PermissionDenied()
+	authUser, err := requireRecruitPermission(ctx, "recruit:jobs:manage")
+	if err != nil {
+		return DeleteRecruitCareerResponse{}, err
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
@@ -321,7 +325,6 @@ func (h *DeleteRecruitCareerHandler) Serve(ctx context.Context, req *DeleteRecru
 	return DeleteRecruitCareerResponse{Message: "Career archived"}, nil
 }
 
- 
 func recruitSalaryAmounts(min, max float64) (money.Amount, money.Amount, error) {
 	salaryMin, err := money.FromFloat64(min)
 	if err != nil {

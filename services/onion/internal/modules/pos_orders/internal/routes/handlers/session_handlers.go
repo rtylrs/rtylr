@@ -70,7 +70,7 @@ type GetCurrentSessionResponse struct {
 }
 
 func (h *GetCurrentSessionHandler) Serve(ctx context.Context, _ *GetCurrentSessionRequest) (GetCurrentSessionResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:view")
 	if authErr != nil {
 		return GetCurrentSessionResponse{}, authErr
 	}
@@ -120,7 +120,7 @@ func (h *OpenSessionHandler) Validate(_ context.Context, req *OpenSessionRequest
 }
 
 func (h *OpenSessionHandler) Serve(ctx context.Context, req *OpenSessionRequest) (OpenSessionResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return OpenSessionResponse{}, authErr
 	}
@@ -171,7 +171,7 @@ func (h *CloseSessionHandler) Validate(_ context.Context, req *CloseSessionReque
 }
 
 func (h *CloseSessionHandler) Serve(ctx context.Context, req *CloseSessionRequest) (CloseSessionResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:create")
 	if authErr != nil {
 		return CloseSessionResponse{}, authErr
 	}
@@ -232,7 +232,7 @@ func (h *ListSessionsHandler) Validate(_ context.Context, req *ListSessionsReque
 }
 
 func (h *ListSessionsHandler) Serve(ctx context.Context, req *ListSessionsRequest) (ListSessionsResponse, error) {
-	user, authErr := authenticatedPOSUser(ctx)
+	user, authErr := requirePOSPermission(ctx, "pos:orders:view")
 	if authErr != nil {
 		return ListSessionsResponse{}, authErr
 	}

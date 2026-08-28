@@ -20,9 +20,7 @@ const (
 )
 
 func invalidateHROvertimeScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrOvertimeScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrOvertimeScope, businessID))
 }
 
 type repository interface {
@@ -272,7 +270,7 @@ func (s *Service) RunDailyDetection(ctx context.Context) error {
 			return err
 		}
 		businessIDs = append(businessIDs, ids...)
-		if int32(len(ids)) < pageSize {
+		if int32(len(ids)) < pageSize { // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			break
 		}
 	}

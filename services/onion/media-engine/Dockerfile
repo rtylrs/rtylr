@@ -32,6 +32,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
+RUN useradd --system --no-create-home --shell /usr/sbin/nologin app
+
 COPY --from=builder /build/build/media-engine /usr/local/bin/media-engine
 
+USER app
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["/bin/sh", "-c", "kill -0 1"]
 ENTRYPOINT ["media-engine"]

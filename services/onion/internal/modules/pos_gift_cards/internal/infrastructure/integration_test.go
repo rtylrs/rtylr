@@ -94,6 +94,7 @@ func TestCreateGiftCard_InsertsRow(t *testing.T) {
 	}
 
 	input := domain.GiftCardInput{
+		PaidOrderID:   3301,
 		Code:          "INTTEST-001",
 		InitialAmount: 50.00,
 		CustomerName:  "Test Customer",
@@ -107,6 +108,7 @@ func TestCreateGiftCard_InsertsRow(t *testing.T) {
 		t.Fatal("expected non-zero ID")
 	}
 	t.Cleanup(func() {
+		db.ExecContext(ctx, "DELETE FROM pos_gift_card_transactions WHERE gift_card_id = ?", id)
 		db.ExecContext(ctx, "DELETE FROM pos_gift_cards WHERE id = ?", id)
 	})
 
@@ -125,6 +127,7 @@ func TestGetByCode_ReturnsCard(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.GiftCardInput{
+		PaidOrderID:   3301,
 		Code:          "INTTEST-002",
 		InitialAmount: 100.00,
 	}
@@ -133,6 +136,7 @@ func TestGetByCode_ReturnsCard(t *testing.T) {
 		t.Fatalf("Create error: %v", err)
 	}
 	t.Cleanup(func() {
+		db.ExecContext(ctx, "DELETE FROM pos_gift_card_transactions WHERE gift_card_id = ?", id)
 		db.ExecContext(ctx, "DELETE FROM pos_gift_cards WHERE id = ?", id)
 	})
 
@@ -165,6 +169,7 @@ func TestRedeem_ReducesBalance(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.GiftCardInput{
+		PaidOrderID:   3301,
 		Code:          "INTTEST-003",
 		InitialAmount: 75.00,
 	}
@@ -173,10 +178,12 @@ func TestRedeem_ReducesBalance(t *testing.T) {
 		t.Fatalf("Create error: %v", err)
 	}
 	t.Cleanup(func() {
+		db.ExecContext(ctx, "DELETE FROM pos_gift_card_transactions WHERE gift_card_id = ?", id)
 		db.ExecContext(ctx, "DELETE FROM pos_gift_cards WHERE id = ?", id)
 	})
 
 	updated, err := repo.RedeemForOrder(ctx, testutil.BusinessID, testutil.OwnerID, domain.RedeemInput{
+		OrderID: 3301,
 		Code:   "INTTEST-003",
 		Amount: 25.00,
 	})
@@ -195,6 +202,7 @@ func TestRedeem_InsufficientBalanceErrors(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.GiftCardInput{
+		PaidOrderID:   3301,
 		Code:          "INTTEST-004",
 		InitialAmount: 10.00,
 	}
@@ -203,12 +211,14 @@ func TestRedeem_InsufficientBalanceErrors(t *testing.T) {
 		t.Fatalf("Create error: %v", err)
 	}
 	t.Cleanup(func() {
+		db.ExecContext(ctx, "DELETE FROM pos_gift_card_transactions WHERE gift_card_id = ?", id)
 		db.ExecContext(ctx, "DELETE FROM pos_gift_cards WHERE id = ?", id)
 	})
 
 	_, err = repo.RedeemForOrder(ctx, testutil.BusinessID, testutil.OwnerID, domain.RedeemInput{
+		OrderID: 3301,
 		Code:   "INTTEST-004",
-		Amount: 999.00,
+		Amount: 100.00,
 	})
 	if !errors.Is(err, domain.ErrInsufficientBalance) {
 		t.Errorf("expected ErrInsufficientBalance, got %v", err)
@@ -239,6 +249,7 @@ func TestCreateGiftCard_WithExpiry_Persisted(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.GiftCardInput{
+		PaidOrderID:   3301,
 		Code:          "INTTEST-005",
 		InitialAmount: 20.00,
 		ExpiresAt:     "2030-12-31",
@@ -248,6 +259,7 @@ func TestCreateGiftCard_WithExpiry_Persisted(t *testing.T) {
 		t.Fatalf("Create error: %v", err)
 	}
 	t.Cleanup(func() {
+		db.ExecContext(ctx, "DELETE FROM pos_gift_card_transactions WHERE gift_card_id = ?", id)
 		db.ExecContext(ctx, "DELETE FROM pos_gift_cards WHERE id = ?", id)
 	})
 
@@ -266,6 +278,7 @@ func TestListGiftCards_InitialAmountEqualsCurrentBalance_ForNew(t *testing.T) {
 	ctx := context.Background()
 
 	input := domain.GiftCardInput{
+		PaidOrderID:   3301,
 		Code:          "INTTEST-006",
 		InitialAmount: 60.00,
 	}
@@ -274,6 +287,7 @@ func TestListGiftCards_InitialAmountEqualsCurrentBalance_ForNew(t *testing.T) {
 		t.Fatalf("Create error: %v", err)
 	}
 	t.Cleanup(func() {
+		db.ExecContext(ctx, "DELETE FROM pos_gift_card_transactions WHERE gift_card_id = ?", id)
 		db.ExecContext(ctx, "DELETE FROM pos_gift_cards WHERE id = ?", id)
 	})
 

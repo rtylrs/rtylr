@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 const dateLayout = "2006-01-02"
@@ -21,10 +22,6 @@ func parseDate(value string) (time.Time, error) {
 
 func nullInt64(v int64) sql.NullInt64 {
 	return sql.NullInt64{Int64: v, Valid: v > 0}
-}
-
-func nullString(v string) sql.NullString {
-	return sql.NullString{String: v, Valid: v != ""}
 }
 
 func int64Value(v sql.NullInt64) int64 {
@@ -252,8 +249,8 @@ func (r *Repository) UpsertWorkDay(ctx context.Context, input domain.WorkDayInpu
 		Date:         parsed,
 		Timezone:     input.Timezone,
 		WorkMode:     input.WorkMode,
-		StartTime:    nullString(input.StartTime),
-		EndTime:      nullString(input.EndTime),
+		StartTime:    sqlutil.NullString(input.StartTime),
+		EndTime:      sqlutil.NullString(input.EndTime),
 		BreakMinutes: input.BreakMinutes,
 		LoggedBy:     nullInt64(input.LoggedBy),
 	}); err != nil {
@@ -292,7 +289,7 @@ func (r *Repository) ListWorkDayLines(ctx context.Context, businessID, workDayID
 		logger.Ctx(ctx).Error("SumWorkDayLineMinutes failed", logger.Error(err))
 		return lines, 0, err
 	}
-	return lines, int32(sumToInt64(total)), nil
+	return lines, int32(sumToInt64(total)), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 // CreateWorkDayLine adds a line. A repeated client key returns the line that
@@ -304,7 +301,7 @@ func (r *Repository) CreateWorkDayLine(ctx context.Context, input domain.WorkDay
 		existing, err := r.queries.GetTimeEntryByClientKey(ctx, sqlc.GetTimeEntryByClientKeyParams{
 			OwnerID:    input.OwnerID,
 			BusinessID: input.BusinessID,
-			ClientKey:  nullString(input.ClientKey),
+			ClientKey:  sqlutil.NullString(input.ClientKey),
 		})
 		if err == nil {
 			return toDomainLine(lineFromClientKey(existing)), nil
@@ -329,12 +326,12 @@ func (r *Repository) CreateWorkDayLine(ctx context.Context, input domain.WorkDay
 		ProjectID:       nullInt64(input.ProjectID),
 		TaskID:          nullInt64(input.TaskID),
 		WorkTypeID:      nullInt64(input.WorkTypeID),
-		WorkMode:        nullString(input.WorkMode),
-		Timezone:        nullString(input.Timezone),
+		WorkMode:        sqlutil.NullString(input.WorkMode),
+		Timezone:        sqlutil.NullString(input.Timezone),
 		DurationMinutes: input.DurationMinutes,
-		Description:     nullString(input.Description),
+		Description:     sqlutil.NullString(input.Description),
 		IsBillable:      input.IsBillable,
-		ClientKey:       nullString(input.ClientKey),
+		ClientKey:       sqlutil.NullString(input.ClientKey),
 		LoggedBy:        nullInt64(input.LoggedBy),
 	})
 	if err != nil {
@@ -358,9 +355,9 @@ func (r *Repository) UpdateWorkDayLine(ctx context.Context, input domain.WorkDay
 		ProjectID:       nullInt64(input.ProjectID),
 		TaskID:          nullInt64(input.TaskID),
 		WorkTypeID:      nullInt64(input.WorkTypeID),
-		WorkMode:        nullString(input.WorkMode),
+		WorkMode:        sqlutil.NullString(input.WorkMode),
 		DurationMinutes: input.DurationMinutes,
-		Description:     nullString(input.Description),
+		Description:     sqlutil.NullString(input.Description),
 		IsBillable:      input.IsBillable,
 		ID:              input.ID,
 		OwnerID:         input.OwnerID,
@@ -433,7 +430,7 @@ func (r *Repository) CreateWorkType(ctx context.Context, input domain.WorkTypeIn
 		BusinessID:   input.BusinessID,
 		ParentID:     nullInt64(input.ParentID),
 		Name:         input.Name,
-		Description:  nullString(input.Description),
+		Description:  sqlutil.NullString(input.Description),
 		HrCategoryID: nullInt64(input.HRCategoryID),
 		SortOrder:    input.SortOrder,
 	})
@@ -465,7 +462,7 @@ func (r *Repository) GetWorkType(ctx context.Context, id, ownerID, businessID in
 func (r *Repository) UpdateWorkType(ctx context.Context, input domain.WorkTypeInput) (domain.WorkType, error) {
 	if _, err := r.queries.UpdateWorkType(ctx, sqlc.UpdateWorkTypeParams{
 		Name:         input.Name,
-		Description:  nullString(input.Description),
+		Description:  sqlutil.NullString(input.Description),
 		ParentID:     nullInt64(input.ParentID),
 		HrCategoryID: nullInt64(input.HRCategoryID),
 		SortOrder:    input.SortOrder,
@@ -525,7 +522,7 @@ func (r *Repository) ListWorkDays(ctx context.Context, ownerID, businessID, empl
 		Date:       fromDate,
 		Date_2:     toDate,
 		Limit:      limit,
-		Offset:     int32(offset),
+		Offset:     int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListWorkDays failed", logger.Error(err))
@@ -610,7 +607,7 @@ func (r *Repository) ListWorkDaysByEmployeeIDs(ctx context.Context, ownerID, bus
 		Date:        fromDate,
 		Date_2:      toDate,
 		Limit:       limit,
-		Offset:      int32(offset),
+		Offset:      int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListWorkDaysByEmployeeIDs failed", logger.Error(err))

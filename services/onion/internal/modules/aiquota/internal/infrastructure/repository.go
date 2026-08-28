@@ -116,9 +116,11 @@ func (r *Repository) AddUsage(ctx context.Context, ownerID, bucketUserID int64, 
 // Reserve atomically adds the estimate to the usage bucket only when the
 // result stays within allowance, returning false when the bucket is exhausted.
 func (r *Repository) Reserve(ctx context.Context, ownerID, bucketUserID int64, month time.Time, estimate, allowance int64) (bool, error) {
-	r.queries.EnsureUsageRow(ctx, sqlc.EnsureUsageRowParams{
+	if err := r.queries.EnsureUsageRow(ctx, sqlc.EnsureUsageRowParams{
 		OwnerID: ownerID, UserID: bucketUserID, BillingMonth: month,
-	})
+	}); err != nil {
+		return false, err
+	}
 	res, err := r.queries.ReserveMonthlyTokens(ctx, sqlc.ReserveMonthlyTokensParams{
 		TokensUsed: estimate,
 		OwnerID:    ownerID, UserID: bucketUserID, BillingMonth: month,

@@ -26,7 +26,10 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	router.Get("/console/resources/{table}/rows", rawListResourceRows(ctx, service))
 	router.Post("/console/resources/{table}/rows", rawCreateResourceRow(ctx, service))
 	router.Get("/console/resources/{table}/rows/{id}", rawGetResourceRow(ctx, service))
-	router.Put("/console/resources/{table}/rows/{id}", rawUpdateResourceRow(ctx, service))
+	serverHttp.RegisterPUTWithValidation[updateResourceRowRequest, updateResourceRowResponse](
+		ctx, router, []string{"/console/resources/{table}/rows/{id}"},
+		&updateResourceRowHandler{Service: service},
+	)
 	router.Delete("/console/resources/{table}/rows/{id}", rawDeleteResourceRow(ctx, service))
 
 	// AI cache analytics has not moved to the generated console contract yet.
@@ -114,6 +117,29 @@ func getIDParam(r *http.Request, param string) (int64, bool) {
 	return id, err == nil && id > 0
 }
 
+type updateResourceRowRequest struct {
+	Values map[string]any `json:"values" validate:"required,min=1"`
+}
+
+type updateResourceRowResponse struct {
+	Message string `json:"message"`
+}
+
+type updateResourceRowHandler struct {
+	Service *application.Service
+}
+
+func (h *updateResourceRowHandler) Serve(ctx context.Context, req *updateResourceRowRequest) (updateResourceRowResponse, error) {
+	user, ok := authPkg.GetAuthUser(ctx)
+	if !ok || user.Role != "console_admin" {
+		return updateResourceRowResponse{}, onekiterrors.New(http.StatusForbidden, "Console admin access required")
+	}
+	if err := h.Service.UpdateResourceRow(ctx, chi.URLParamFromCtx(ctx, "table"), chi.URLParamFromCtx(ctx, "id"), req.Values); err != nil {
+		return updateResourceRowResponse{}, onekiterrors.New(http.StatusBadRequest, err.Error())
+	}
+	return updateResourceRowResponse{Message: "Resource row updated"}, nil
+}
+
 func getPositiveQueryInt(r *http.Request, name string, fallback int) int {
 	raw := r.URL.Query().Get(name)
 	if raw == "" {
@@ -121,6 +147,8 @@ func getPositiveQueryInt(r *http.Request, name string, fallback int) int {
 	}
 	value, err := strconv.Atoi(raw)
 	if err != nil || value < 0 {
+		logger.Global().Warn("invalid console query parameter",
+			logger.String("parameter", name), logger.String("value", raw))
 		return fallback
 	}
 	return value
@@ -222,30 +250,6 @@ func rawCreateResourceRow(_ context.Context, svc *application.Service) http.Hand
 			return
 		}
 		writeJSON(w, http.StatusCreated, map[string]any{"id": id, "message": "Resource row created"})
-	}
-}
-
-func rawUpdateResourceRow(_ context.Context, svc *application.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if _, ok := checkAdmin(r); !ok {
-			writeError(w, http.StatusForbidden, "Console admin access required")
-			return
-		}
-		var req struct {
-			Values map[string]any `json:"values"`
-		}
-		if !decodeJSONBody(w, r, &req) {
-			return
-		}
-		if req.Values == nil {
-			writeError(w, http.StatusBadRequest, "values are required")
-			return
-		}
-		if err := svc.UpdateResourceRow(r.Context(), chi.URLParam(r, "table"), chi.URLParam(r, "id"), req.Values); err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
-			return
-		}
-		writeJSON(w, http.StatusOK, map[string]string{"message": "Resource row updated"})
 	}
 }
 

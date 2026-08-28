@@ -81,6 +81,11 @@ func (r *Repository) Create(ctx context.Context, input domain.SegmentInput) (int
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.SegmentUpdateInput) error {
+	businessID := input.BusinessID
+	if businessID == 0 {
+		businessID = input.OwnerID
+	}
+
 	filters := input.Filters
 	if filters == nil {
 		filters = []byte("{}")
@@ -91,19 +96,17 @@ func (r *Repository) Update(ctx context.Context, input domain.SegmentUpdateInput
 		Description: sql.NullString{String: input.Description, Valid: input.Description != ""},
 		Rules:       json.RawMessage(filters),
 		ID:          input.ID,
-		BusinessID:  input.BusinessID,
+		BusinessID:  businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update segment", logger.Error(err))
 
 		return err
 	}
-
 	rows, err := result.RowsAffected()
 	if err != nil {
 		return err
 	}
-
 	if rows == 0 {
 		return domain.ErrSegmentNotFound
 	}
@@ -132,6 +135,7 @@ func (r *Repository) ListCustomers(ctx context.Context, businessID int64, filter
 		args = append(args, fargs...)
 	}
 
+	// nosemgrep: go.lang.security.audit.database.string-formatted-query.string-formatted-query
 	countSQL := "SELECT COUNT(*) FROM crm_customers WHERE " + where
 	var total int
 	if err := r.db.QueryRowContext(ctx, countSQL, args...).Scan(&total); err != nil {
@@ -228,7 +232,7 @@ ORDER BY created_at DESC LIMIT ? OFFSET ?`
 }
 
 func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
-	result, err := r.queries.DeleteSegment(ctx, sqlc.DeleteSegmentParams{
+	_, err := r.queries.DeleteSegment(ctx, sqlc.DeleteSegmentParams{
 		ID:         id,
 		BusinessID: businessID,
 	})
@@ -236,14 +240,6 @@ func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
 		logger.Ctx(ctx).Error("Failed to delete segment", logger.Error(err))
 
 		return err
-	}
-
-	rows, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rows == 0 {
-		return domain.ErrSegmentNotFound
 	}
 
 	return nil

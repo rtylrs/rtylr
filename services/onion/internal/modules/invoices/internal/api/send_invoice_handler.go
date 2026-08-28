@@ -40,6 +40,9 @@ func (h *SendInvoiceHandler) Serve(ctx context.Context, req *SendInvoiceRequest)
 	if device.User == nil {
 		return SendInvoiceResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireFinancePermission(ctx, "finance:invoices:send"); err != nil {
+		return SendInvoiceResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

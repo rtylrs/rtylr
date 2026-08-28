@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_sessions/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -38,9 +38,9 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Sessi
 			ID:           row.ID,
 			OwnerID:      row.OwnerID,
 			BusinessID:   row.BusinessID,
-			OpeningFloat: decimalToFloat(row.OpeningCash.String),
-			ClosingFloat: decimalToFloat(row.ClosingCash.String),
-			TotalSales:   decimalToFloat(row.TotalSales.String),
+			OpeningFloat: sqlutil.DecimalToFloat(row.OpeningCash.String),
+			ClosingFloat: sqlutil.DecimalToFloat(row.ClosingCash.String),
+			TotalSales:   sqlutil.DecimalToFloat(row.TotalSales.String),
 			Status:       string(row.Status.PosSessionsStatus),
 			OpenedAt:     row.OpenedAt.Time,
 			CreatedAt:    row.OpenedAt.Time,
@@ -73,9 +73,9 @@ func (r *Repository) Get(ctx context.Context, businessID, id int64) (*domain.Ses
 		ID:           row.ID,
 		OwnerID:      row.OwnerID,
 		BusinessID:   row.BusinessID,
-		OpeningFloat: decimalToFloat(row.OpeningCash.String),
-		ClosingFloat: decimalToFloat(row.ClosingCash.String),
-		TotalSales:   decimalToFloat(row.TotalSales.String),
+		OpeningFloat: sqlutil.DecimalToFloat(row.OpeningCash.String),
+		ClosingFloat: sqlutil.DecimalToFloat(row.ClosingCash.String),
+		TotalSales:   sqlutil.DecimalToFloat(row.TotalSales.String),
 		Status:       string(row.Status.PosSessionsStatus),
 		OpenedAt:     row.OpenedAt.Time,
 		CreatedAt:    row.OpenedAt.Time,
@@ -130,7 +130,7 @@ func (r *Repository) Open(ctx context.Context, input domain.OpenSessionInput) (i
 	}
 	result, err := tx.ExecContext(ctx, `
 		INSERT INTO pos_sessions (owner_id, business_id, location_id, staff_id, opening_cash, status, opened_at)
-		VALUES (?, ?, ?, ?, ?, 'open', NOW())`, input.OwnerID, input.BusinessID, locationID, staffID, floatToDecimal(input.OpeningFloat))
+		VALUES (?, ?, ?, ?, ?, 'open', NOW())`, input.OwnerID, input.BusinessID, locationID, staffID, sqlutil.FloatToDecimal(input.OpeningFloat))
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to open session", logger.Error(err))
 		return 0, err
@@ -146,18 +146,23 @@ func (r *Repository) Open(ctx context.Context, input domain.OpenSessionInput) (i
 }
 
 func (r *Repository) Close(ctx context.Context, input domain.CloseSessionInput) error {
+	businessID := input.BusinessID
+	if businessID == 0 {
+		businessID = input.OwnerID
+	}
+
 	var result sql.Result
 	var err error
 	if input.StaffID != 0 {
 		result, err = r.pool.ExecContext(ctx, `
 			UPDATE pos_sessions SET closing_cash = ?, status = 'closed', closed_at = NOW()
 			WHERE id = ? AND business_id = ? AND staff_id = ? AND status = 'open'`,
-			floatToDecimal(input.ClosingFloat), input.ID, input.BusinessID, input.StaffID)
+			sqlutil.FloatToDecimal(input.ClosingFloat), input.ID, businessID, input.StaffID)
 	} else {
 		result, err = r.queries.CloseSession(ctx, sqlc.CloseSessionParams{
-			ClosingCash: sql.NullString{String: floatToDecimal(input.ClosingFloat), Valid: true},
+			ClosingCash: sql.NullString{String: sqlutil.FloatToDecimal(input.ClosingFloat), Valid: true},
 			ID:          input.ID,
-			BusinessID:  input.BusinessID,
+			BusinessID:  businessID,
 		})
 	}
 	if err != nil {
@@ -172,21 +177,4 @@ func (r *Repository) Close(ctx context.Context, input domain.CloseSessionInput) 
 		return domain.ErrSessionNotFound
 	}
 	return nil
-}
-
-func decimalToFloat(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse session decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}
-
-func floatToDecimal(f float64) string {
-	return fmt.Sprintf("%.2f", f)
 }

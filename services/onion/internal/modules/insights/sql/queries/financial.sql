@@ -1,3 +1,4 @@
+-- cross-schema read from finance — aggregate expenses by finance category.
 -- name: GetExpensesByCategory :many
 SELECT COALESCE(c.id, 0) AS cat_id,
        COALESCE(c.name, 'Uncategorised') AS cat_name,
@@ -9,6 +10,7 @@ WHERE e.business_id = ?
 GROUP BY c.id, c.name
 ORDER BY SUM(e.amount) DESC;
 
+-- cross-schema read from finance — bucket outstanding invoices by due-date age.
 -- name: GetInvoiceAging :many
 SELECT
   CASE
@@ -27,6 +29,7 @@ WHERE business_id = ?
   AND amount_due > 0
 GROUP BY bucket;
 
+-- cross-schema read from finance — aggregate paid invoices by reporting day.
 -- name: GetDailyPaidInvoices :many
 SELECT reporting_date AS day,
        COALESCE(SUM(total), 0) AS amount
@@ -38,6 +41,7 @@ WHERE business_id = ?
 GROUP BY day
 LIMIT 200;
 
+-- cross-schema read from finance — aggregate expenses by day.
 -- name: GetDailyExpenses :many
 SELECT DATE(expense_date) AS day,
        COALESCE(SUM(amount), 0) AS amount

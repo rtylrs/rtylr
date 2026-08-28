@@ -10,6 +10,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func SetClockInPINRoutes() []string { return []string{"/hr/employees/me/pin"} }
@@ -46,12 +47,22 @@ func (h *SetClockInPINHandler) Serve(ctx context.Context, req *SetClockInPINRequ
 		return SetClockInPINResponse{}, onekiterrors.PermissionDenied()
 	}
 
-	err := h.Service.SetClockInPIN(ctx, device.User.UserID, req.EmployeeID, req.Pin)
+	// Resolve the tenant scope from the JWT. Passing the raw user id as the
+	// owner argument scoped the UPDATE by a value that is not
+	// hr_employees.business_id, so any employee whose user id is not itself a
+	// business id matched zero rows (#938). The sibling clock-in/clock-out
+	// handlers resolve the same way.
+	businessID, err := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if err != nil {
+		return SetClockInPINResponse{}, onekiterrors.PermissionDenied()
+	}
+
+	err = h.Service.SetClockInPIN(ctx, businessID, req.EmployeeID, req.Pin)
 	if err != nil {
 		if errors.Is(err, domain.ErrAttendanceNotFound) {
 			return SetClockInPINResponse{}, onekiterrors.New(http.StatusNotFound, "Employee not found")
 		}
-		logger.Ctx(ctx).Error("failed to set clock-in PIN", logger.Any("owner_id", device.User.UserID), logger.Any("employee_id", req.EmployeeID), logger.Error(err))
+		logger.Ctx(ctx).Error("failed to set clock-in PIN", logger.Any("business_id", businessID), logger.Any("employee_id", req.EmployeeID), logger.Error(err))
 		return SetClockInPINResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to set PIN")
 	}
 

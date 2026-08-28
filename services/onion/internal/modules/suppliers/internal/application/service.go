@@ -101,7 +101,5 @@ func (s *Service) DeleteSupplier(ctx context.Context, businessID, id int64) erro
 }
 
 func (s *Service) invalidateCache(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, fmt.Sprintf("*suppliers:%d*", businessID))
-	}
+	cacher.InvalidateScope(ctx, fmt.Sprintf("*suppliers:%d*", businessID))
 }

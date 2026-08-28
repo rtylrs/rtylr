@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/inventory/internal/application"
 	"github.com/voxire/onion/internal/modules/inventory/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	erpinventoryv1 "github.com/voxire/voxie/gen/go/erp/inventory/v1"
@@ -21,7 +22,7 @@ func NewInventoryAPI(service *application.Service) *InventoryAPI {
 }
 
 func (a *InventoryAPI) GetInventoryReport(ctx context.Context, _ *erpinventoryv1.GetInventoryReportRequest) (*erpinventoryv1.GetInventoryReportResponse, error) {
-	ownerID, err := inventoryOwnerID(ctx)
+	ownerID, err := inventoryOwnerID(ctx, "erp:inventory:view")
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +40,7 @@ func (a *InventoryAPI) GetInventoryReport(ctx context.Context, _ *erpinventoryv1
 }
 
 func (a *InventoryAPI) GetLowStock(ctx context.Context, _ *erpinventoryv1.GetLowStockRequest) (*erpinventoryv1.GetLowStockResponse, error) {
-	ownerID, err := inventoryOwnerID(ctx)
+	ownerID, err := inventoryOwnerID(ctx, "erp:inventory:view")
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +56,7 @@ func (a *InventoryAPI) GetLowStock(ctx context.Context, _ *erpinventoryv1.GetLow
 }
 
 func (a *InventoryAPI) GetValuation(ctx context.Context, _ *erpinventoryv1.GetValuationRequest) (*erpinventoryv1.GetValuationResponse, error) {
-	ownerID, err := inventoryOwnerID(ctx)
+	ownerID, err := inventoryOwnerID(ctx, "erp:inventory:view")
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +74,7 @@ func (a *InventoryAPI) GetValuation(ctx context.Context, _ *erpinventoryv1.GetVa
 }
 
 func (a *InventoryAPI) AdjustInventory(ctx context.Context, req *erpinventoryv1.AdjustInventoryRequest) (*erpinventoryv1.AdjustInventoryResponse, error) {
-	ownerID, err := inventoryOwnerID(ctx)
+	ownerID, err := inventoryOwnerID(ctx, "erp:inventory:adjust")
 	if err != nil {
 		return nil, err
 	}
@@ -102,10 +103,10 @@ func (a *InventoryAPI) AdjustInventory(ctx context.Context, req *erpinventoryv1.
 	return &erpinventoryv1.AdjustInventoryResponse{Message: "Inventory adjusted successfully"}, nil
 }
 
-func inventoryOwnerID(ctx context.Context) (int64, error) {
+func inventoryOwnerID(ctx context.Context, permission string) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return 0, inventoryStatusError(http.StatusUnauthorized, "unauthorized")
+	if !ok || authUser == nil || !authPkg.HasAppPermission(authUser, authorization.AppERP, permission) {
+		return 0, onekiterrors.PermissionDenied()
 	}
 	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {

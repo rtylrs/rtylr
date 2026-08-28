@@ -65,7 +65,7 @@ func (a *PayrollAPI) RunPayroll(ctx context.Context, req *hrpayrollv1.RunPayroll
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to run payroll: "+err.Error())
 	}
 
-	return &hrpayrollv1.RunPayrollResponse{RecordsCreated: int32(count)}, nil
+	return &hrpayrollv1.RunPayrollResponse{RecordsCreated: int32(count)}, nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func (a *PayrollAPI) MarkPayrollPaid(ctx context.Context, req *hrpayrollv1.MarkPayrollPaidRequest) (*hrpayrollv1.MarkPayrollPaidResponse, error) {

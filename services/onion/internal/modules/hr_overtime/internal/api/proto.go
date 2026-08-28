@@ -17,7 +17,7 @@ func overtimeRequestToProto(r domain.OvertimeRequestRecord) *hrovertimev1.Overti
 	}
 
 	return &hrovertimev1.OvertimeRequestPayload{
-		Id:                   r.ID,
+		Id:                   &r.ID,
 		OwnerId:              r.OwnerID,
 		EmployeeId:           r.EmployeeID,
 		Date:                 r.Date,

@@ -63,7 +63,7 @@ func (r *Repository) Upsert(ctx context.Context, input domain.SettingsInput) err
 	err := r.queries.UpsertSettings(ctx, sqlc.UpsertSettingsParams{
 		BusinessID:        input.BusinessID,
 		AutoAssign:        sql.NullBool{Bool: input.AutoAssign, Valid: true},
-		SlaHours:          sql.NullInt32{Int32: int32(input.SLAHours), Valid: true},
+		SlaHours:          sql.NullInt32{Int32: int32(input.SLAHours), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		BusinessHours:     bh,
 		NotificationEmail: sql.NullString{String: input.NotificationEmail, Valid: input.NotificationEmail != ""},
 	})

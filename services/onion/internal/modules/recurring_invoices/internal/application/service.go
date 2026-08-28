@@ -33,9 +33,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateRecurringInvoicesScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(recurringInvoicesScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(recurringInvoicesScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.RecurringInvoice, error) {

@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_overtime/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -75,7 +76,7 @@ func (r *Repository) CreateOvertimeRequest(ctx context.Context, businessID int64
 		EmployeeID:           req.EmployeeID,
 		Date:                 reqDate,
 		PlannedExtraMinutes:  req.PlannedExtraMinutes,
-		Reason:               nullString(req.Reason),
+		Reason:               sqlutil.NullString(req.Reason),
 		Status:               req.Status,
 		CurrentApprovalLevel: req.CurrentApprovalLevel,
 	})
@@ -263,10 +264,6 @@ func parseFloat(s string) float64 {
 		return 0
 	}
 	return f
-}
-
-func nullString(v string) sql.NullString {
-	return sql.NullString{String: v, Valid: v != ""}
 }
 
 func nullStringFromFloat(f float64) sql.NullString {

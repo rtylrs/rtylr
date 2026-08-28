@@ -6,6 +6,8 @@ import (
 
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/application"
 	"github.com/voxire/onion/internal/modules/hr_attendance/internal/domain"
+	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	hrattendancev1 "github.com/voxire/voxie/gen/go/hr/attendance/v1"
@@ -13,10 +15,6 @@ import (
 
 func GetAttendanceRoutes() []string { return []string{"/hr/attendance"} }
 
-// GetAttendanceHandler serves attendance history. Identity is resolved
-// server-side from the JWT — client-supplied owner/employee ids are ignored,
-// since trusting them let any authenticated tenant read any other tenant's
-// payroll-sensitive attendance (#817).
 type GetAttendanceHandler struct {
 	Service *application.Service
 	Resolve func(ctx context.Context) (businessID, employeeID int64, err error)
@@ -42,12 +40,20 @@ func (h *GetAttendanceHandler) Serve(ctx context.Context, req *GetAttendanceRequ
 	if h.Resolve == nil {
 		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
 	}
+	device := authPkg.DeviceCtx(ctx)
+	if device.IsAnonymous || device.User == nil {
+		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
+	}
+	if !authPkg.HasAppPermission(device.User, authorization.AppHR, "hr:employees:view") {
+		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
+	}
 	businessID, employeeID, err := h.Resolve(ctx)
 	if err != nil {
 		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
 	}
-	_ = req.OwnerID
-	_ = req.EmployeeID
+	if req.OwnerID <= 0 || req.EmployeeID <= 0 || req.OwnerID != businessID || req.EmployeeID != employeeID {
+		return GetAttendanceResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	limit := req.Limit
 	if limit <= 0 || limit > 100 {

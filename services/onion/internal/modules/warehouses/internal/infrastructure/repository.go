@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/warehouses/internal/domain"
 	"github.com/voxire/onion/internal/modules/warehouses/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -88,11 +89,11 @@ func (r *Repository) CreateWarehouse(ctx context.Context, businessID int64, inpu
 		OwnerID:     businessID,
 		BusinessID:  businessID,
 		Name:        input.Name,
-		Address:     nullString(input.Address),
-		City:        nullString(input.City),
-		Country:     nullString(input.Country),
-		ManagerName: nullString(input.ManagerName),
-		Capacity:    nullInt64(input.Capacity),
+		Address:     sqlutil.NullString(input.Address),
+		City:        sqlutil.NullString(input.City),
+		Country:     sqlutil.NullString(input.Country),
+		ManagerName: sqlutil.NullString(input.ManagerName),
+		Capacity:    sqlutil.NullInt64(input.Capacity),
 		IsDefault:   sql.NullBool{Bool: input.IsDefault, Valid: true},
 		IsActive:    sql.NullBool{Bool: input.IsActive, Valid: true},
 	})
@@ -113,11 +114,11 @@ func (r *Repository) CreateWarehouse(ctx context.Context, businessID int64, inpu
 func (r *Repository) UpdateWarehouse(ctx context.Context, businessID, id int64, input domain.WarehouseInput) error {
 	err := r.queries.UpdateWarehouse(ctx, sqlc.UpdateWarehouseParams{
 		Name:        input.Name,
-		Address:     nullString(input.Address),
-		City:        nullString(input.City),
-		Country:     nullString(input.Country),
-		ManagerName: nullString(input.ManagerName),
-		Capacity:    nullInt64(input.Capacity),
+		Address:     sqlutil.NullString(input.Address),
+		City:        sqlutil.NullString(input.City),
+		Country:     sqlutil.NullString(input.Country),
+		ManagerName: sqlutil.NullString(input.ManagerName),
+		Capacity:    sqlutil.NullInt64(input.Capacity),
 		IsDefault:   sql.NullBool{Bool: input.IsDefault, Valid: true},
 		IsActive:    sql.NullBool{Bool: input.IsActive, Valid: true},
 		BusinessID:  businessID,
@@ -216,12 +217,4 @@ func (r *Repository) GetWarehouseByID(ctx context.Context, businessID, id int64)
 	}
 
 	return w, nil
-}
-
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
-}
-
-func nullInt64(v int64) sql.NullInt64 {
-	return sql.NullInt64{Int64: v, Valid: v != 0}
 }

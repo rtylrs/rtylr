@@ -34,6 +34,9 @@ func (h *GetPayrollRunHandler) Serve(ctx context.Context, _ *GetPayrollRunReques
 	if device.IsAnonymous || device.User == nil {
 		return GetPayrollRunResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requirePayrollPermission(ctx, "hr:payroll:view"); err != nil {
+		return GetPayrollRunResponse{}, err
+	}
 
 	employeeID, empErr := h.Service.GetEmployeeIDByUserID(ctx, device.User.UserID, device.User.UserID)
 	if empErr != nil {

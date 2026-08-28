@@ -73,9 +73,6 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, url,
 }
 
 func (r *Repository) Delete(ctx context.Context, businessID, webhookID int64) error {
-	if !r.WebhookExistsInBusiness(ctx, businessID, webhookID) {
-		return domain.ErrWebhookNotFound
-	}
 	err := r.queries.DeleteWebhook(ctx, sqlc.DeleteWebhookParams{
 		ID:         webhookID,
 		BusinessID: businessID,

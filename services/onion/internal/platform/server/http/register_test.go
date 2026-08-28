@@ -126,7 +126,9 @@ func TestParseQueryParamsAssignsTypedFieldsWithoutJSONRoundTrip(t *testing.T) {
 	)
 	var got typedQueryRequest
 
-	parseQueryParams(req, &got)
+	if err := parseQueryParams(req, &got); err != nil {
+		t.Fatalf("parseQueryParams: %v", err)
+	}
 
 	if got.Limit != 25 {
 		t.Fatalf("limit = %d, want 25", got.Limit)
@@ -151,6 +153,28 @@ func TestParseQueryParamsAssignsTypedFieldsWithoutJSONRoundTrip(t *testing.T) {
 	}
 	if got.Any != int64(17) {
 		t.Fatalf("any = %#v, want int64(17)", got.Any)
+	}
+}
+
+func TestRegisterGETRejectsMalformedTypedQuery(t *testing.T) {
+	router := chi.NewRouter()
+	handler := &validatedGETHandler{}
+	RegisterGET[validatedGETRequest, validatedGETResponse](
+		context.Background(),
+		router,
+		[]string{"/validated"},
+		handler,
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/validated?id=not-a-number", http.NoBody)
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 for malformed query, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if handler.called {
+		t.Fatal("handler should not run after query parsing failure")
 	}
 }
 

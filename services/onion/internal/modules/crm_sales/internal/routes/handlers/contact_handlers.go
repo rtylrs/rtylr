@@ -43,6 +43,9 @@ func (h *ListContactsHandler) Serve(ctx context.Context, req *ListContactsReques
 	if device.User == nil {
 		return ListContactsResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:view"); err != nil {
+		return ListContactsResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -83,6 +86,9 @@ func (h *ListLeadTouchpointsHandler) Serve(ctx context.Context, _ *ListLeadTouch
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return ListLeadTouchpointsResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:view"); err != nil {
+		return ListLeadTouchpointsResponse{}, err
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
@@ -142,6 +148,9 @@ func (h *CreateContactHandler) Serve(ctx context.Context, req *CreateContactRequ
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return CreateContactResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:create"); err != nil {
+		return CreateContactResponse{}, err
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
@@ -204,6 +213,9 @@ func (h *UpdateContactHandler) Serve(ctx context.Context, req *UpdateContactRequ
 	if device.User == nil {
 		return UpdateContactResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:edit"); err != nil {
+		return UpdateContactResponse{}, err
+	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	id, parseErr := strconv.ParseInt(idStr, 10, 64)
@@ -254,6 +266,9 @@ func (h *DeleteContactHandler) Serve(ctx context.Context, _ *DeleteContactReques
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return DeleteContactResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:delete"); err != nil {
+		return DeleteContactResponse{}, err
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")

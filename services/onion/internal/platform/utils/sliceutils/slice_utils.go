@@ -1,8 +1,9 @@
 package sliceutils
 
 import (
+	cryptorand "crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"strconv"
 	"strings"
 )
@@ -257,7 +258,11 @@ func Index[V comparable](source []V, target V) (int, bool) {
 
 func Shuffle[S any](slice []S) {
 	for i := 1; i < len(slice); i++ {
-		r := rand.Intn(i + 1) //nolint:gosec // Used for shuffling, not cryptographic purposes.
+		randomIndex, err := cryptorand.Int(cryptorand.Reader, big.NewInt(int64(i+1)))
+		if err != nil {
+			continue
+		}
+		r := int(randomIndex.Int64())
 		if i != r {
 			slice[r], slice[i] = slice[i], slice[r]
 		}

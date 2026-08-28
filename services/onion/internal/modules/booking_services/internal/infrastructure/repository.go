@@ -37,7 +37,7 @@ func (r *Repository) Create(ctx context.Context, ownerID int64, input domain.Boo
 	result, err := r.queries.CreateBookingService(ctx, sqlc.CreateBookingServiceParams{
 		OwnerID: ownerID, BusinessID: ownerID, Name: input.Name,
 		Description:     sql.NullString{String: input.Description, Valid: input.Description != ""},
-		DurationMinutes: int32(input.DurationMinutes),
+		DurationMinutes: int32(input.DurationMinutes), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Price:           input.Price.String(),
 		Color:           sql.NullString{String: input.Color, Valid: input.Color != ""},
 		IsActive:        sql.NullBool{Bool: input.IsActive, Valid: true},
@@ -58,7 +58,7 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 	err := r.queries.UpdateBookingService(ctx, sqlc.UpdateBookingServiceParams{
 		Name:            input.Name,
 		Description:     sql.NullString{String: input.Description, Valid: input.Description != ""},
-		DurationMinutes: int32(input.DurationMinutes),
+		DurationMinutes: int32(input.DurationMinutes), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Price:           input.Price.String(),
 		Color:           sql.NullString{String: input.Color, Valid: input.Color != ""},
 		IsActive:        sql.NullBool{Bool: input.IsActive, Valid: true},

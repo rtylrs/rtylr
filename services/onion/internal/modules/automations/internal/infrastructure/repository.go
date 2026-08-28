@@ -57,6 +57,11 @@ func (r *Repository) Create(ctx context.Context, input domain.AutomationInput) (
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.AutomationUpdateInput) error {
+	businessID := input.BusinessID
+	if businessID == 0 {
+		businessID = input.OwnerID
+	}
+
 	result, err := r.queries.UpdateAutomation(ctx, sqlc.UpdateAutomationParams{
 		Name:          input.Name,
 		TriggerType:   input.TriggerType,
@@ -64,7 +69,7 @@ func (r *Repository) Update(ctx context.Context, input domain.AutomationUpdateIn
 		Actions:       json.RawMessage(input.Actions),
 		IsActive:      sql.NullBool{Bool: input.IsActive, Valid: true},
 		ID:            input.ID,
-		BusinessID:    input.BusinessID,
+		BusinessID:    businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update automation", logger.Error(err))

@@ -21,8 +21,11 @@ func NewActivityAPI(service *application.Service) *ActivityAPI {
 
 func (a *ActivityAPI) ListActivity(ctx context.Context, req *hubactivityv1.ListActivityRequest) (*hubactivityv1.ListActivityResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
+	if !ok || authUser == nil {
 		return nil, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
+	}
+	if !authPkg.HasDashboardPermission(authUser, "hub:audit:view") {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)

@@ -1,9 +1,12 @@
+-- cross-schema read from crm — count customers for insight totals.
 -- name: CountCustomersTotal :one
 SELECT COUNT(*) AS count FROM crm_customers WHERE business_id = ?;
 
+-- cross-schema read from crm — count recently created customers.
 -- name: CountCustomersNewThisMonth :one
 SELECT COUNT(*) AS count FROM crm_customers WHERE business_id = ? AND created_at >= ?;
 
+-- cross-schema read from crm and pos — count customers with recent paid orders.
 -- name: CountCustomersActive :one
 SELECT COUNT(DISTINCT c.id) AS count
 FROM crm_customers c
@@ -12,6 +15,7 @@ JOIN pos_orders o ON o.customer_id = c.id AND o.business_id = c.business_id
 WHERE c.business_id = ?
   AND o.created_at >= ?;
 
+-- cross-schema read from crm and pos — identify customers without recent paid orders.
 -- name: CountCustomersChurned :one
 SELECT COUNT(*) AS count
 FROM crm_customers c
@@ -19,6 +23,7 @@ WHERE c.business_id = ?
   AND EXISTS (SELECT 1 FROM pos_orders o WHERE o.business_id = c.business_id AND o.customer_id = c.id AND o.payment_status = 'paid')
   AND NOT EXISTS (SELECT 1 FROM pos_orders o2 WHERE o2.business_id = c.business_id AND o2.customer_id = c.id AND o2.payment_status = 'paid' AND o2.created_at >= ?);
 
+-- cross-schema read from crm and pos — bucket customer spend over the trailing year.
 -- name: GetLTVDistribution :many
 WITH buckets AS (
   SELECT 0 AS bucket_order, '0-100' AS label, 0 AS lower_minor_units, 10000 AS upper_minor_units
@@ -47,6 +52,7 @@ LEFT JOIN customer_spend cs
 GROUP BY b.bucket_order, b.label, b.lower_minor_units, b.upper_minor_units
 ORDER BY b.bucket_order;
 
+-- cross-schema read from crm and pos — rank customers by paid order spend.
 -- name: GetTopCustomers :many
 SELECT
   c.id,

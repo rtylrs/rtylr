@@ -27,4 +27,5 @@ JOIN hr_employees emp
  AND emp.business_id = ?
 WHERE e.business_id = ?
   AND e.project_id = ?
-  AND e.is_billable = TRUE;
+  AND e.is_billable = TRUE
+GROUP BY e.business_id, e.project_id;

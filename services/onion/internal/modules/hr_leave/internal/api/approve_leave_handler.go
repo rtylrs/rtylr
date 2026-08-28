@@ -11,6 +11,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func ApproveLeaveRoutes() []string { return []string{"/hr/leave/requests/{id}/approve"} }
@@ -42,12 +43,19 @@ func (h *ApproveLeaveHandler) Serve(ctx context.Context, req *ApproveLeaveReques
 	if device.IsAnonymous || device.User == nil {
 		return ApproveLeaveResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireLeavePermission(ctx, "hr:time_off:approve"); err != nil {
+		return ApproveLeaveResponse{}, err
+	}
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if businessErr != nil {
+		return ApproveLeaveResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	var err error
 	if req.Approved {
-		err = h.Service.ApproveLeave(ctx, device.User.UserID, req.RequestID, device.User.UserID)
+		err = h.Service.ApproveLeave(ctx, businessID, req.RequestID, device.User.UserID)
 	} else {
-		err = h.Service.RejectLeave(ctx, device.User.UserID, req.RequestID, device.User.UserID, req.RejectionReason)
+		err = h.Service.RejectLeave(ctx, businessID, req.RequestID, device.User.UserID, req.RejectionReason)
 	}
 
 	if err != nil {

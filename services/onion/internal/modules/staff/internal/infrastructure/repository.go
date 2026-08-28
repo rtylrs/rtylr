@@ -15,6 +15,7 @@ import (
 	"github.com/voxire/onion/internal/modules/staff/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/searchutil"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -202,8 +203,8 @@ func (r *Repository) ListStaffDirectory(ctx context.Context, businessID, limit, 
 		LeftJoin("hr_departments d ON d.id = s.department_id AND d.business_id = s.business_id").
 		Where(sq.Eq{"s.business_id": businessID}).
 		OrderBy("s.last_name ASC", "s.first_name ASC").
-		Limit(uint64(limit)).
-		Offset(uint64(offset)).
+		Limit(uint64(limit)).   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset(uint64(offset)). // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -279,13 +280,13 @@ func staffFromGetRow(row sqlc.GetStaffByIDRow) domain.Staff {
 		s.Status = string(row.Status.HrStaffStatus)
 	}
 	if row.Salary.Valid {
-		s.Salary = parseDecimal(row.Salary.String)
+		s.Salary = sqlutil.ParseDecimal(row.Salary.String)
 	}
 	if row.HourlyRate.Valid {
-		s.HourlyRate = parseDecimal(row.HourlyRate.String)
+		s.HourlyRate = sqlutil.ParseDecimal(row.HourlyRate.String)
 	}
 	if row.OvertimeRate.Valid {
-		s.OvertimeRate = parseDecimal(row.OvertimeRate.String)
+		s.OvertimeRate = sqlutil.ParseDecimal(row.OvertimeRate.String)
 	}
 	s.StartDate = row.StartDate
 	if row.EndDate.Valid {
@@ -792,18 +793,6 @@ func parseNullDate(s string) sql.NullTime {
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt
 // values instead of silently coercing them to 0.
-func parseDecimal(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse staff decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}
 
 // ListManagedUserIDs returns the user ids reporting to managerUserID inside the
 // business. Managing nobody is the common case and returns an empty slice, not

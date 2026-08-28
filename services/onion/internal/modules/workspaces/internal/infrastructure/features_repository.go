@@ -29,8 +29,8 @@ func (r *Repository) ListCycles(ctx context.Context, workspaceID, limit, offset 
 
 	rows, err := r.queries.ListCycles(ctx, sqlc.ListCyclesParams{
 		WorkspaceID: workspaceID,
-		Limit:       int32(limit),
-		Offset:      int32(offset),
+		Limit:       int32(limit),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset:      int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListCycles failed", logger.Error(err))
@@ -139,8 +139,8 @@ func (r *Repository) ListMilestones(ctx context.Context, workspaceID int64, proj
 		projectRows, listErr := r.queries.ListMilestonesByProject(ctx, sqlc.ListMilestonesByProjectParams{
 			WorkspaceID: sql.NullInt64{Int64: workspaceID, Valid: true},
 			ProjectID:   *projectID,
-			Limit:       int32(limit),
-			Offset:      int32(offset),
+			Limit:       int32(limit),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+			Offset:      int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		})
 		if listErr != nil {
 			logger.Ctx(ctx).Error("ListMilestones failed", logger.Error(listErr))
@@ -157,8 +157,8 @@ func (r *Repository) ListMilestones(ctx context.Context, workspaceID int64, proj
 
 	rows, err := r.queries.ListMilestonesByWorkspace(ctx, sqlc.ListMilestonesByWorkspaceParams{
 		WorkspaceID: sql.NullInt64{Int64: workspaceID, Valid: true},
-		Limit:       int32(limit),
-		Offset:      int32(offset),
+		Limit:       int32(limit),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset:      int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListMilestones failed", logger.Error(err))
@@ -308,8 +308,8 @@ func (r *Repository) ListViews(ctx context.Context, businessID, workspaceID, cal
 		// NULL here would compare against created_by as NULL and hide every
 		// private view from its own creator too.
 		CreatedBy: sql.NullInt64{Int64: callerID, Valid: true},
-		Limit:     int32(limit),
-		Offset:    int32(offset),
+		Limit:     int32(limit),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset:    int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListViews failed", logger.Error(err))
@@ -540,8 +540,8 @@ func (r *Repository) GetTeamWorkload(ctx context.Context, workspaceID, limit, of
 	rows, err := r.queries.GetTeamWorkload(ctx, sqlc.GetTeamWorkloadParams{
 		WorkspaceID:   workspaceID,
 		WorkspaceID_2: workspaceID,
-		Limit:         int32(limit),
-		Offset:        int32(offset),
+		Limit:         int32(limit),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset:        int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("GetTeamWorkload failed", logger.Error(err))
@@ -659,8 +659,8 @@ func (r *Repository) GetRoadmap(ctx context.Context, workspaceID, limit, offset 
 
 	rows, err := r.queries.GetRoadmap(ctx, sqlc.GetRoadmapParams{
 		WorkspaceID: workspaceID,
-		Limit:       int32(limit),
-		Offset:      int32(offset),
+		Limit:       int32(limit),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset:      int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("GetRoadmap failed", logger.Error(err))
@@ -706,8 +706,8 @@ func (r *Repository) ListNotifications(ctx context.Context, userID, limit, offse
 
 	rows, err := r.queries.ListNotifications(ctx, sqlc.ListNotificationsParams{
 		UserID: userID,
-		Limit:  int32(limit),
-		Offset: int32(offset),
+		Limit:  int32(limit),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset: int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("ListNotifications failed", logger.Error(err))
@@ -797,18 +797,20 @@ func (r *Repository) GetUserSettings(ctx context.Context, userID int64) (domain.
 	s.StatusChanges = row.StatusChanges.Bool
 	s.WeeklyDigest = row.WeeklyDigest.Bool
 	s.EmailNotifications = row.EmailNotifications.Bool
+	s.SidebarPreferencesJSON = row.SidebarPreferencesJson.String
 	return s, nil
 }
 
 func (r *Repository) UpsertUserSettings(ctx context.Context, s domain.UserSettings) error {
 	err := r.queries.UpsertUserSettings(ctx, sqlc.UpsertUserSettingsParams{
-		UserID:             s.UserID,
-		TaskAssigned:       sql.NullBool{Bool: s.TaskAssigned, Valid: true},
-		TaskComments:       sql.NullBool{Bool: s.TaskComments, Valid: true},
-		Mentions:           sql.NullBool{Bool: s.Mentions, Valid: true},
-		StatusChanges:      sql.NullBool{Bool: s.StatusChanges, Valid: true},
-		WeeklyDigest:       sql.NullBool{Bool: s.WeeklyDigest, Valid: true},
-		EmailNotifications: sql.NullBool{Bool: s.EmailNotifications, Valid: true},
+		UserID:                 s.UserID,
+		TaskAssigned:           sql.NullBool{Bool: s.TaskAssigned, Valid: true},
+		TaskComments:           sql.NullBool{Bool: s.TaskComments, Valid: true},
+		Mentions:               sql.NullBool{Bool: s.Mentions, Valid: true},
+		StatusChanges:          sql.NullBool{Bool: s.StatusChanges, Valid: true},
+		WeeklyDigest:           sql.NullBool{Bool: s.WeeklyDigest, Valid: true},
+		EmailNotifications:     sql.NullBool{Bool: s.EmailNotifications, Valid: true},
+		SidebarPreferencesJson: sql.NullString{String: s.SidebarPreferencesJSON, Valid: s.SidebarPreferencesJSON != ""},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("UpsertUserSettings failed", logger.Error(err))

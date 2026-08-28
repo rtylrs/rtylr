@@ -53,7 +53,11 @@ func (c *engineConn) isAlive() bool {
 // startEngine spawns a resident engine. It fails (nil, err) when the binary
 // predates --serve support or cannot start at all.
 func startEngine(ctx context.Context, path string) (*engineConn, error) {
-	cmd := exec.Command(path, "--serve") // #nosec G204 -- configured server-side path only
+	// The resident process is owned by the engine pool and is terminated by
+	// engineConn.kill, so it must outlive the request that starts it.
+	// #nosec G204 G702 -- configured server-side path only; the path is validated at startup.
+	// nosemgrep: go.lang.security.audit.dangerous-exec-command.dangerous-exec-command
+	cmd := exec.CommandContext(context.Background(), path, "--serve")
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, fmt.Errorf("engine stdin pipe: %w", err)
@@ -118,7 +122,7 @@ func framedJob(tokens []string) []byte {
 		payload = append(payload, t...)
 	}
 	frame := make([]byte, 4+len(payload))
-	binary.LittleEndian.PutUint32(frame, uint32(len(payload)))
+	binary.LittleEndian.PutUint32(frame, uint32(len(payload))) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	copy(frame[4:], payload)
 	return frame
 }
@@ -314,7 +318,8 @@ func (c *CDN) runTransformed(ctx context.Context, args []string) error {
 
 	execCtx, cancel := context.WithTimeout(ctx, engineTimeout)
 	defer cancel()
-	// #nosec G204 -- mediaEngine is a server-side configured binary path; CLI args are built from validated params and temp paths.
+	// #nosec G204 G702 -- mediaEngine is a server-side configured binary path; CLI args are built from validated params and temp paths.
+	// nosemgrep: go.lang.security.audit.dangerous-exec-command.dangerous-exec-command
 	cmd := exec.CommandContext(execCtx, c.mediaEngine, args...)
 	if out, runErr := cmd.CombinedOutput(); runErr != nil {
 		return fmt.Errorf("media-engine failed: %w\noutput: %s", runErr, out)

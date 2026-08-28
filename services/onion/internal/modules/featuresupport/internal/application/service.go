@@ -102,9 +102,7 @@ func featureSupportCacheOptions(ctx context.Context) []cacher.ClientOption {
 }
 
 func invalidateFeatureSupportCache(ctx context.Context) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(featureSupportCacheScope, 0))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(featureSupportCacheScope, 0))
 }
 
 func invalidateFeatureSupportCacheForOwner(ctx context.Context, ownerID int64) {
@@ -112,9 +110,7 @@ func invalidateFeatureSupportCacheForOwner(ctx context.Context, ownerID int64) {
 	if ownerID == 0 {
 		return
 	}
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(featureSupportCacheScope, ownerID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(featureSupportCacheScope, ownerID))
 }
 
 // bucketOf maps (salt, subject) to a stable bucket in [0,100). The salt mixes
@@ -246,7 +242,7 @@ func (s *Service) resolveOne(f domain.Flag, rules []domain.Rule, attrs map[strin
 		}
 		if rule.RolloutPercentage > 0 && subject != "" {
 			salt := f.Key + ":rule:" + strconv.FormatInt(rule.ID, 10)
-			if int32(bucketOf(salt, subject)) < rule.RolloutPercentage {
+			if int32(bucketOf(salt, subject)) < rule.RolloutPercentage { // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 				return domain.Resolution{Key: f.Key, Enabled: true, Variant: onVariant}
 			}
 		}
@@ -261,7 +257,7 @@ func (s *Service) resolveOne(f domain.Flag, rules []domain.Rule, attrs map[strin
 	if f.RolloutPercentage <= 0 || subject == "" {
 		return domain.Resolution{Key: f.Key, Enabled: false, Variant: f.VariantOff}
 	}
-	if int32(bucketOf(f.Key, subject)) < f.RolloutPercentage {
+	if int32(bucketOf(f.Key, subject)) < f.RolloutPercentage { // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		return domain.Resolution{Key: f.Key, Enabled: true, Variant: f.VariantOn}
 	}
 	return domain.Resolution{Key: f.Key, Enabled: false, Variant: f.VariantOff}

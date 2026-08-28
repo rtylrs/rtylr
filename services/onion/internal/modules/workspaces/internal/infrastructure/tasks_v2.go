@@ -45,8 +45,8 @@ func (r *Repository) GetTasksByBusinessV2(ctx context.Context, filter domain.Lis
 	builder := enrichedTaskSelectForList(filter.Compact).
 		Where(conds).
 		OrderBy("t.sort_order ASC", "t.created_at ASC").
-		Limit(uint64(filter.Limit)).
-		Offset(uint64(filter.Offset))
+		Limit(uint64(filter.Limit)).  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset(uint64(filter.Offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 
 	tasks, err := r.listEnrichedTasks(ctx, builder)
 	if err != nil {

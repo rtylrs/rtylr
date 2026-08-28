@@ -9,12 +9,16 @@ import (
 )
 
 const (
-	OpenAIAPIKeyEnvVar  = "OPENAI_API_KEY"
-	OpenAIOrgIDEnvVar   = "OPENAI_ORG_ID"
+	// #nosec G101 -- These are environment variable names, not secret values.
+	OpenAIAPIKeyEnvVar = "OPENAI_API_KEY"
+	// #nosec G101 -- This is an environment variable name, not a secret value.
+	OpenAIOrgIDEnvVar = "OPENAI_ORG_ID"
+	// #nosec G101 -- This is an environment variable name, not a secret value.
 	OpenAIBaseURLEnvVar = "OPENAI_BASE_URL"
 )
 
 const (
+	// #nosec G101 -- This is an environment variable name, not a secret value.
 	GeminiAPIKeyEnvVar = "GEMINI_API_KEY"
 )
 
@@ -27,7 +31,8 @@ const (
 const (
 	// DeepSeek is the primary LLM provider. Only the API key is an env secret
 	// (set DEEPSEEK_API_KEY on AWS / in .env); the base URL and model are fixed
-	// here on purpose — the product chooses the model internally, users never do.
+	// here on purpose. The product chooses the model internally, users never do.
+	// #nosec G101 -- This is an environment variable name, not a secret value.
 	DeepSeekAPIKeyEnvVar = "DEEPSEEK_API_KEY"
 	// DeepSeekBaseURL is DeepSeek's OpenAI-compatible endpoint, so we drive it
 	// through the OpenAI SDK with this base URL.
@@ -41,6 +46,7 @@ const (
 	// NVIDIA NIM is an OpenAI-compatible provider (hosted catalog or self-hosted).
 	// Only the API key is an env secret (NVIDIA_NIM_API_KEY); base URL + model are
 	// fixed here. Point NvidiaNIMBaseURL at a self-hosted NIM if/when we run one.
+	// #nosec G101 -- This is an environment variable name, not a secret value.
 	NvidiaNIMAPIKeyEnvVar = "NVIDIA_NIM_API_KEY"
 	NvidiaNIMBaseURL      = "https://integrate.api.nvidia.com/v1"
 	NvidiaNIMModel        = "meta/llama-3.1-8b-instruct"

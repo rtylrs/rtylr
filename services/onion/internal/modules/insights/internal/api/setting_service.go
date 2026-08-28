@@ -27,7 +27,7 @@ func settingsToProto(payload application.SettingsPayload) *insightssettingv1.Ins
 }
 
 func (a *SettingAPI) GetInsightsSettings(ctx context.Context, _ *insightssettingv1.GetInsightsSettingsRequest) (*insightssettingv1.GetInsightsSettingsResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (a *SettingAPI) GetInsightsSettings(ctx context.Context, _ *insightssetting
 }
 
 func (a *SettingAPI) UpdateInsightsSettings(ctx context.Context, req *insightssettingv1.UpdateInsightsSettingsRequest) (*insightssettingv1.UpdateInsightsSettingsResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func NewDashboardAPI(service *application.Service, flow FlowReader) *DashboardAP
 }
 
 func (a *DashboardAPI) GetDashboardSummary(ctx context.Context, _ *insightsdashboardv1.GetDashboardSummaryRequest) (*insightsdashboardv1.GetDashboardSummaryResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (a *DashboardAPI) GetDashboardSummary(ctx context.Context, _ *insightsdashb
 // burndown and throughput series. This one is the owner-dashboard projection:
 // four task counts, a cycle time and a week-over-week velocity delta.
 func (a *DashboardAPI) GetInsights(ctx context.Context, _ *insightsdashboardv1.GetInsightsRequest) (*insightsdashboardv1.GetInsightsResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func (a *DashboardAPI) GetInsights(ctx context.Context, _ *insightsdashboardv1.G
 // status and explicit task counts. Milestones are not in this shape at all, so
 // they are summed into the counts rather than dropped silently.
 func (a *DashboardAPI) GetRoadmap(ctx context.Context, _ *insightsdashboardv1.GetRoadmapRequest) (*insightsdashboardv1.GetRoadmapResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +163,7 @@ func (a *DashboardAPI) GetRoadmap(ctx context.Context, _ *insightsdashboardv1.Ge
 // WorkloadEntry has no name field, so this returns user ids only. A caller that
 // wants to show people rather than numbers needs a separate identity lookup.
 func (a *DashboardAPI) GetWorkload(ctx context.Context, _ *insightsdashboardv1.GetWorkloadRequest) (*insightsdashboardv1.GetWorkloadResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}

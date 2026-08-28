@@ -15,7 +15,7 @@ func TestGetConfig_NotFoundOrPresent(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	cfg, err := repo.GetConfig(ctx, testutil.OwnerID)
+	cfg, err := repo.GetConfig(ctx, testutil.BusinessID)
 	if err != nil && !errors.Is(err, domain.ErrLoyaltyConfigNotFound) {
 		t.Fatalf("GetConfig unexpected error: %v", err)
 	}
@@ -29,6 +29,7 @@ func TestUpsertConfig_NoError(t *testing.T) {
 
 	err := repo.UpsertConfig(ctx, domain.LoyaltyConfigInput{
 		OwnerID:         testutil.OwnerID,
+		BusinessID:      testutil.BusinessID,
 		PointsPerDollar: 1.0,
 		PointsValue:     0.01,
 		IsActive:        true,
@@ -45,6 +46,7 @@ func TestUpsertConfig_ThenGetConfig(t *testing.T) {
 
 	if err := repo.UpsertConfig(ctx, domain.LoyaltyConfigInput{
 		OwnerID:         testutil.OwnerID,
+		BusinessID:      testutil.BusinessID,
 		PointsPerDollar: 2.0,
 		PointsValue:     0.005,
 		IsActive:        true,
@@ -52,7 +54,7 @@ func TestUpsertConfig_ThenGetConfig(t *testing.T) {
 		t.Fatalf("UpsertConfig: %v", err)
 	}
 
-	cfg, err := repo.GetConfig(ctx, testutil.OwnerID)
+	cfg, err := repo.GetConfig(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetConfig after upsert: %v", err)
 	}
@@ -160,7 +162,7 @@ func TestListRewards_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	rewards, err := repo.ListRewards(ctx, testutil.OwnerID, false)
+	rewards, err := repo.ListRewards(ctx, testutil.BusinessID, false)
 	if err != nil {
 		t.Fatalf("ListRewards: %v", err)
 	}
@@ -174,6 +176,7 @@ func TestUpsertReward_Create_NoError(t *testing.T) {
 
 	id, err := repo.UpsertReward(ctx, domain.LoyaltyReward{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		Name:        "Test Reward",
 		Description: "Integration test reward",
 		Category:    "general",
@@ -210,6 +213,7 @@ func TestUpsertConfig_PointsPerDollarRoundTrip(t *testing.T) {
 
 	if err := repo.UpsertConfig(ctx, domain.LoyaltyConfigInput{
 		OwnerID:         testutil.OwnerID,
+		BusinessID:      testutil.BusinessID,
 		PointsPerDollar: 5.0,
 		PointsValue:     0.01,
 		IsActive:        true,
@@ -217,7 +221,7 @@ func TestUpsertConfig_PointsPerDollarRoundTrip(t *testing.T) {
 		t.Fatalf("UpsertConfig: %v", err)
 	}
 
-	cfg, err := repo.GetConfig(ctx, testutil.OwnerID)
+	cfg, err := repo.GetConfig(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetConfig: %v", err)
 	}
@@ -232,13 +236,14 @@ func TestUpsertConfig_IsActiveRoundTrip(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.UpsertConfig(ctx, domain.LoyaltyConfigInput{
-		OwnerID:  testutil.OwnerID,
-		IsActive: false,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		IsActive:   false,
 	}); err != nil {
 		t.Fatalf("UpsertConfig IsActive=false: %v", err)
 	}
 
-	cfg, err := repo.GetConfig(ctx, testutil.OwnerID)
+	cfg, err := repo.GetConfig(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetConfig: %v", err)
 	}
@@ -253,13 +258,14 @@ func TestGetConfig_OwnerIDIsSet(t *testing.T) {
 	ctx := context.Background()
 
 	if err := repo.UpsertConfig(ctx, domain.LoyaltyConfigInput{
-		OwnerID:  testutil.OwnerID,
-		IsActive: true,
+		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
+		IsActive:   true,
 	}); err != nil {
 		t.Fatalf("UpsertConfig: %v", err)
 	}
 
-	cfg, err := repo.GetConfig(ctx, testutil.OwnerID)
+	cfg, err := repo.GetConfig(ctx, testutil.BusinessID)
 	if err != nil {
 		t.Fatalf("GetConfig: %v", err)
 	}
@@ -273,12 +279,13 @@ func TestListTransactions_ZeroOwner_ReturnsEmpty(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	txs, total, err := repo.ListTransactions(ctx, 0, 0, 1, 20)
+	txs, total, err := repo.ListTransactions(ctx, testutil.OtherBusinessID, 0, 1, 20)
 	if err != nil {
-		t.Fatalf("ListTransactions(ownerID=0): %v", err)
+		t.Fatalf("ListTransactions(business=%d): %v", testutil.OtherBusinessID, err)
 	}
 	if total != 0 || len(txs) != 0 {
-		t.Fatalf("expected 0 transactions for ownerID=0, got total=%d len=%d", total, len(txs))
+		t.Fatalf("expected 0 transactions for business %d, got total=%d len=%d",
+			testutil.OtherBusinessID, total, len(txs))
 	}
 }
 
@@ -305,6 +312,7 @@ func TestCreateTransaction_AppearsInList(t *testing.T) {
 
 	if err := repo.CreateTransaction(ctx, domain.AwardInput{
 		OwnerID:     testutil.OwnerID,
+		BusinessID:  testutil.BusinessID,
 		CustomerID:  5302,
 		Points:      50,
 		Description: "list check award",
@@ -312,7 +320,7 @@ func TestCreateTransaction_AppearsInList(t *testing.T) {
 		t.Fatalf("CreateTransaction: %v", err)
 	}
 
-	txs, total, err := repo.ListTransactions(ctx, testutil.OwnerID, 5302, 1, 50)
+	txs, total, err := repo.ListTransactions(ctx, testutil.BusinessID, 5302, 1, 50)
 	if err != nil {
 		t.Fatalf("ListTransactions: %v", err)
 	}
@@ -326,7 +334,7 @@ func TestListRewards_ActiveOnly_NoError(t *testing.T) {
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	rewards, err := repo.ListRewards(ctx, testutil.OwnerID, true)
+	rewards, err := repo.ListRewards(ctx, testutil.BusinessID, true)
 	if err != nil {
 		t.Fatalf("ListRewards(activeOnly=true): %v", err)
 	}
@@ -340,6 +348,7 @@ func TestUpsertReward_Update_NoError(t *testing.T) {
 
 	id, err := repo.UpsertReward(ctx, domain.LoyaltyReward{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		Name:       "Update Test Reward",
 		Category:   "general",
 		PointsCost: 200,
@@ -352,6 +361,7 @@ func TestUpsertReward_Update_NoError(t *testing.T) {
 	_, err = repo.UpsertReward(ctx, domain.LoyaltyReward{
 		ID:         id,
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		Name:       "Updated Reward Name",
 		Category:   "general",
 		PointsCost: 300,
@@ -362,17 +372,19 @@ func TestUpsertReward_Update_NoError(t *testing.T) {
 	}
 }
 
-func TestListRewards_ZeroOwner_ReturnsEmpty(t *testing.T) {
+func TestListRewards_UnknownBusiness_ReturnsEmpty(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	ctx := context.Background()
 
-	rewards, err := repo.ListRewards(ctx, 0, false)
+	// Rewards are scoped by business; a business nothing has seeded must
+	// list empty even though rows exist for other businesses.
+	rewards, err := repo.ListRewards(ctx, testutil.OtherBusinessID, false)
 	if err != nil {
-		t.Fatalf("ListRewards(ownerID=0): %v", err)
+		t.Fatalf("ListRewards(business=%d): %v", testutil.OtherBusinessID, err)
 	}
 	if len(rewards) != 0 {
-		t.Fatalf("expected 0 rewards for ownerID=0, got %d", len(rewards))
+		t.Fatalf("expected 0 rewards for business %d, got %d", testutil.OtherBusinessID, len(rewards))
 	}
 }
 
@@ -383,6 +395,7 @@ func TestUpsertReward_AppearsInList(t *testing.T) {
 
 	id, err := repo.UpsertReward(ctx, domain.LoyaltyReward{
 		OwnerID:    testutil.OwnerID,
+		BusinessID: testutil.BusinessID,
 		Name:       "Listed Reward",
 		Category:   "general",
 		PointsCost: 150,
@@ -392,7 +405,7 @@ func TestUpsertReward_AppearsInList(t *testing.T) {
 		t.Fatalf("UpsertReward: %v", err)
 	}
 
-	rewards, err := repo.ListRewards(ctx, testutil.OwnerID, false)
+	rewards, err := repo.ListRewards(ctx, testutil.BusinessID, false)
 	if err != nil {
 		t.Fatalf("ListRewards: %v", err)
 	}

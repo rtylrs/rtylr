@@ -12,6 +12,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hrleavev1 "github.com/voxire/voxie/gen/go/hr/leave/v1"
 )
 
@@ -63,8 +64,15 @@ func (h *CreateLeaveRequestHandler) Serve(ctx context.Context, req *CreateLeaveR
 	if device.IsAnonymous || device.User == nil {
 		return CreateLeaveRequestResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireLeavePermission(ctx, "hr:time_off:request"); err != nil {
+		return CreateLeaveRequestResponse{}, err
+	}
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if businessErr != nil {
+		return CreateLeaveRequestResponse{}, onekiterrors.PermissionDenied()
+	}
 
-	created, err := h.Service.CreateLeaveRequest(ctx, device.User.UserID, device.User.UserID, domain.LeaveRequestRecord{
+	created, err := h.Service.CreateLeaveRequest(ctx, businessID, device.User.UserID, domain.LeaveRequestRecord{
 		EmployeeID:  req.EmployeeID,
 		LeaveTypeID: req.LeaveTypeID,
 		StartDate:   req.StartDate,

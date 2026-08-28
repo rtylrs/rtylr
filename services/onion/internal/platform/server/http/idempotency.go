@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"strings"
@@ -253,7 +254,7 @@ func writeIdempotentReplay(w http.ResponseWriter, rec idempotencyRecord) {
 	}
 	w.Header().Set("Idempotent-Replayed", "true")
 	w.WriteHeader(rec.Status)
-	if _, writeErr := w.Write(rec.Body); writeErr != nil {
+	if _, writeErr := io.Copy(w, bytes.NewReader(rec.Body)); writeErr != nil {
 		logger.Global().Warn("failed to write idempotent replay body", logger.Error(writeErr))
 	}
 }

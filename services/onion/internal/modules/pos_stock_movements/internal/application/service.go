@@ -25,9 +25,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateStockMovementsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ProductPrefix(businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ProductPrefix(businessID))
 }
 
 func (s *Service) ListMovements(ctx context.Context, businessID, ownerID, branchID, productID int64) ([]domain.StockMovement, error) {

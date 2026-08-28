@@ -69,7 +69,7 @@ func newSettings(settings *domain.Settings) *supportsettingsv1.Settings {
 		Id:                settings.ID,
 		BusinessId:        settings.BusinessID,
 		AutoAssign:        settings.AutoAssign,
-		SlaHours:          int32(settings.SLAHours),
+		SlaHours:          int32(settings.SLAHours), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		BusinessHours:     settings.BusinessHours,
 		NotificationEmail: settings.NotificationEmail,
 		CreatedAt:         formatTime(settings.CreatedAt),

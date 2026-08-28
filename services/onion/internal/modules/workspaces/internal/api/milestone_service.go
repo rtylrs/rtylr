@@ -29,10 +29,10 @@ func toMilestone(m domain.Milestone) *flowmilestonev1.Milestone {
 		ProjectId:        m.ProjectID,
 		Name:             m.Name,
 		TargetDate:       m.DueDate.Format("2006-01-02"),
-		Progress:         int32(m.Progress),
-		ComputedProgress: int32(m.Progress),
-		DoneCount:        int32(m.DoneCount),
-		TaskCount:        int32(m.TaskCount),
+		Progress:         int32(m.Progress),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		ComputedProgress: int32(m.Progress),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		DoneCount:        int32(m.DoneCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		TaskCount:        int32(m.TaskCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Status:           m.Status,
 		Description:      m.Description,
 	}

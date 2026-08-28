@@ -105,6 +105,7 @@ func (c *CDN) generateTransformation(ctx context.Context, fileID int64, fileUUID
 		return "", err
 	}
 
+	// #nosec G304 -- tmpOut is created by the server in its private temporary directory.
 	resultFile, err := os.Open(tmpOut)
 	if err != nil {
 		return "", fmt.Errorf("opening media-engine result: %w", err)

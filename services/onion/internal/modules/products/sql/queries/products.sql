@@ -17,12 +17,15 @@ INSERT INTO erp_products
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: GetCategoryReference :one
+-- cross-schema read from erp_categories (categories module) — validate the product’s category reference for the tenant.
 SELECT id FROM erp_categories WHERE business_id = ? AND id = ?;
 
 -- name: GetSupplierReference :one
+-- cross-schema read from erp_suppliers (suppliers module) — validate the product’s supplier reference for the tenant.
 SELECT id FROM erp_suppliers WHERE business_id = ? AND id = ?;
 
 -- name: GetBrandReference :one
+-- cross-schema read from erp_brands (brands module) — validate the product’s brand reference for the tenant.
 SELECT id FROM erp_brands WHERE business_id = ? AND id = ?;
 
 -- name: UpdateProduct :exec
@@ -59,10 +62,12 @@ WHERE business_id = ? AND is_active = TRUE
   AND stock_quantity <= low_stock_threshold;
 
 -- name: CountPendingPurchaseOrders :one
+-- cross-schema read from erp_purchase_orders (purchase-orders module) — count open purchase orders for the product dashboard.
 SELECT COUNT(*) FROM erp_purchase_orders
 WHERE business_id = ? AND status IN ('draft','sent','partial');
 
 -- name: CountActiveSuppliers :one
+-- cross-schema read from erp_suppliers (suppliers module) — count active suppliers for the product dashboard.
 SELECT COUNT(*) FROM erp_suppliers WHERE business_id = ? AND is_active = TRUE;
 
 -- name: ListProductAttributes :many

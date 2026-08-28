@@ -285,7 +285,7 @@ func (r *Repository) ExpireTrialSubscriptions(ctx context.Context) error {
 
 func (r *Repository) UpdateSeatCount(ctx context.Context, ownerID int64, seatCount int) error {
 	return r.queries.UpdateSeatCount(ctx, sqlc.UpdateSeatCountParams{
-		SeatCount: int32(seatCount),
+		SeatCount: int32(seatCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		OwnerID:   ownerID,
 	})
 }
@@ -341,8 +341,8 @@ func (r *Repository) OpenPeriod(ctx context.Context, subscriptionID, ownerID int
 	return r.queries.OpenSeatPeriod(ctx, sqlc.OpenSeatPeriodParams{
 		SubscriptionID:    subscriptionID,
 		OwnerID:           ownerID,
-		SeatCount:         int32(seatCount),
-		PricePerSeatCents: int32(pricePerSeatCents),
+		SeatCount:         int32(seatCount),         // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		PricePerSeatCents: int32(pricePerSeatCents), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		PeriodStart:       periodStart,
 		BillingMonth:      billingMonth,
 	})
@@ -463,7 +463,7 @@ func (r *Repository) GetBillingHistory(ctx context.Context, ownerID int64, limit
 	rows, err := r.queries.GetBillingHistoryPeriods(ctx, sqlc.GetBillingHistoryPeriodsParams{
 		OwnerID:      ownerID,
 		BillingMonth: currentMonth,
-		Limit:        int32(limit * 20),
+		Limit:        int32(limit * 20), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		return nil, err

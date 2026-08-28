@@ -47,9 +47,11 @@ RUN groupadd --system onion && useradd --system --gid onion onion
 WORKDIR /app
 COPY --from=go-builder   /app/upload                  /app/upload
 COPY --from=media-engine /build/build/media-engine    /usr/local/bin/media-engine
+RUN useradd --system --no-create-home --shell /usr/sbin/nologin app
 # Point the Go binary at the media-engine installed on PATH.
 ENV MEDIA_ENGINE_PATH=/usr/local/bin/media-engine
 ENV PORT=8080
 EXPOSE 8080
-USER onion
+USER app
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["/bin/sh", "-c", "kill -0 1"]
 CMD ["/app/upload"]

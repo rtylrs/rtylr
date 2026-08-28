@@ -26,9 +26,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidatePosLoyaltyScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posLoyaltyScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(posLoyaltyScope, businessID))
 }
 
 func (s *Service) GetConfig(ctx context.Context, businessID int64) (domain.LoyaltyConfig, error) {

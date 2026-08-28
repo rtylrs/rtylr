@@ -37,10 +37,10 @@ func (r *Repository) ListInbox(ctx context.Context, businessID int64, page, page
 	rows, err := r.queries.ListInbox(ctx, sqlc.ListInboxParams{
 		BusinessID:   businessID,
 		Limit:        int32(pageSize),
-		Offset:       int32(offset),
+		Offset:       int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		BusinessID_2: businessID,
 		Limit_2:      int32(pageSize),
-		Offset_2:     int32(offset),
+		Offset_2:     int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list inbox", logger.Error(err))

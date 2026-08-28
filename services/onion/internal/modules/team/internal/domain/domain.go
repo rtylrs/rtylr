@@ -3,6 +3,8 @@ package domain
 import (
 	"errors"
 	"time"
+
+	"github.com/voxire/onion/internal/platform/authorization"
 )
 
 var (
@@ -13,35 +15,41 @@ var (
 	ErrForbidden          = errors.New("permission denied")
 	ErrSeatLimitExceeded  = errors.New("subscription seat limit exceeded")
 	ErrGroupNotFound      = errors.New("group not found")
+	ErrDelegationCeiling  = errors.New("authorization exceeds delegation ceiling")
 )
 
 // ValidApps is the set of recognized app identifiers.
 var ValidApps = map[string]struct{}{
-	"pos":     {},
-	"erp":     {},
-	"hr":      {},
-	"crm":     {},
-	"finance": {},
-	"flow":    {},
+	"pos":      {},
+	"erp":      {},
+	"hr":       {},
+	"crm":      {},
+	"finance":  {},
+	"flow":     {},
+	"insights": {},
+	"menu":     {},
+	"recruit":  {},
 }
 
 // MyProfile is the composite /user/me payload that the team service builds
 // from several sub-queries. Lives in domain so it can be cached as a single
 // blob keyed by user id.
 type MyProfile struct {
-	ID                 int64             `json:"id"`
-	Email              string            `json:"email"`
-	FullName           string            `json:"full_name"`
-	Apps               []string          `json:"apps"`
-	Role               string            `json:"role"`
-	BusinessID         int64             `json:"business_id"`
-	BusinessName       string            `json:"business_name"`
-	IsOwner            bool              `json:"is_owner"`
-	IsConsoleAdmin     bool              `json:"is_console_admin"`
-	Onboarded          bool              `json:"onboarded"`
-	PlanSlug           string            `json:"plan_slug"`
-	SubscriptionStatus string            `json:"subscription_status"`
-	EffectiveResources map[string]string `json:"effective_resources"`
+	ID                 int64                             `json:"id"`
+	Email              string                            `json:"email"`
+	FullName           string                            `json:"full_name"`
+	Apps               []string                          `json:"apps"`
+	Role               string                            `json:"role"`
+	BusinessID         int64                             `json:"business_id"`
+	BusinessName       string                            `json:"business_name"`
+	IsOwner            bool                              `json:"is_owner"`
+	IsConsoleAdmin     bool                              `json:"is_console_admin"`
+	Onboarded          bool                              `json:"onboarded"`
+	PlanSlug           string                            `json:"plan_slug"`
+	SubscriptionStatus string                            `json:"subscription_status"`
+	EffectiveResources map[string]string                 `json:"effective_resources"`
+	EffectiveAccess    *authorization.EffectiveAccess    `json:"effective_access,omitempty"`
+	ProvisioningStatus *authorization.ProvisioningStatus `json:"provisioning_status,omitempty"`
 }
 
 type Role string
@@ -82,18 +90,41 @@ type StaffUser struct {
 }
 
 type InviteUserInput struct {
-	Email    string
-	FullName string
-	Password string
-	Apps     []string
-	Role     Role
+	Email            string
+	Username         string
+	FullName         string
+	Password         string
+	Apps             []string
+	Role             Role
+	ProvisioningMode string
+	DashRole         string
+	AppAssignments   []AppRoleAssignmentInput
+	GroupIDs         []int64
+}
+
+type AppRoleAssignmentInput struct {
+	AppID         string
+	RoleIDs       []int64
+	PrimaryRoleID *int64
+	Source        string
+	Status        string
+	Scopes        []authorization.Scope
+	GroupID       *int64
+}
+
+type AuthorizationRoleGrant struct {
+	AppID       string
+	Permissions []string
 }
 
 type UpdatePermissionsInput struct {
-	UserID   int64
-	FullName *string
-	Apps     *[]string
-	Role     Role
+	UserID         int64
+	FullName       *string
+	Apps           *[]string
+	Role           Role
+	DashRole       string
+	AppAssignments []AppRoleAssignmentInput
+	GroupIDs       []int64
 }
 
 type PermissionLevel string
@@ -153,10 +184,13 @@ type UpdateGroupInput struct {
 }
 
 type BulkInviteInput struct {
-	Emails  []string
-	Role    Role
-	Apps    []string
-	GroupID int64
+	Emails         []string
+	Role           Role
+	Apps           []string
+	DashRole       string
+	AppAssignments []AppRoleAssignmentInput
+	GroupIDs       []int64
+	GroupID        int64
 }
 
 type BulkInviteResult struct {

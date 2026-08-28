@@ -21,6 +21,9 @@ func NewReportAPI(service *application.Service) *ReportAPI {
 }
 
 func (a *ReportAPI) GetPLReport(ctx context.Context, req *financereportv1.GetPLReportRequest) (*financereportv1.GetPLReportResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:reports:view"); err != nil {
+		return nil, err
+	}
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return nil, onekiterrors.PermissionDenied()
@@ -53,6 +56,9 @@ func (a *ReportAPI) GetPLReport(ctx context.Context, req *financereportv1.GetPLR
 }
 
 func (a *ReportAPI) GetTaxReport(ctx context.Context, req *financereportv1.GetTaxReportRequest) (*financereportv1.GetTaxReportResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:reports:view"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := invoiceBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -76,6 +82,9 @@ func (a *ReportAPI) GetTaxReport(ctx context.Context, req *financereportv1.GetTa
 }
 
 func (a *ReportAPI) ListExpenseCategoryDetails(ctx context.Context, _ *financereportv1.ListExpenseCategoryDetailsRequest) (*financereportv1.ListExpenseCategoryDetailsResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:expenses:view"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := invoiceBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -95,6 +104,9 @@ func (a *ReportAPI) ListExpenseCategoryDetails(ctx context.Context, _ *financere
 }
 
 func (a *ReportAPI) CreateExpenseCategoryDetail(ctx context.Context, req *financereportv1.CreateExpenseCategoryDetailRequest) (*financereportv1.CreateExpenseCategoryDetailResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:expenses:create"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := invoiceBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -117,6 +129,9 @@ func (a *ReportAPI) CreateExpenseCategoryDetail(ctx context.Context, req *financ
 }
 
 func (a *ReportAPI) ListTaxConfig(ctx context.Context, _ *financereportv1.ListTaxConfigRequest) (*financereportv1.ListTaxConfigResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:tax:configure"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := invoiceBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -136,6 +151,9 @@ func (a *ReportAPI) ListTaxConfig(ctx context.Context, _ *financereportv1.ListTa
 }
 
 func (a *ReportAPI) CreateTaxConfig(ctx context.Context, req *financereportv1.CreateTaxConfigRequest) (*financereportv1.CreateTaxConfigResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:tax:configure"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := invoiceBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel

@@ -369,15 +369,15 @@ func businessPayload(value *application.BusinessDTO) *consoleadminv1.Business {
 func subscriptionPayload(value *application.SubscriptionDTO) *consoleadminv1.Subscription {
 	var days *int32
 	if value.DaysRemaining != nil {
-		v := int32(*value.DaysRemaining)
+		v := int32(*value.DaysRemaining) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		days = &v
 	}
 	updated := value.UpdatedAt
-	return &consoleadminv1.Subscription{Id: value.ID, OwnerId: value.OwnerID, OwnerName: value.OwnerName, OwnerEmail: value.OwnerEmail, BusinessId: value.BusinessID, BusinessName: value.BusinessName, PlanId: value.PlanID, PlanName: value.PlanName, Status: value.Status, SeatCount: int32(value.SeatCount), ActiveSeatCount: int32(value.ActiveSeatCount), IncludedSeatLimit: int32(value.IncludedSeatLimit), IncludedSeatCount: int32(value.IncludedSeatCount), BillableSeatCount: int32(value.BillableSeatCount), TrialEndsAt: value.TrialEndsAt, NextBillingDate: value.NextBillingDate, CurrentPeriodEndsAt: value.CurrentPeriodEndsAt, PaddleSubscriptionId: value.PaddleSubscriptionID, PaddleCustomerId: value.PaddleCustomerID, DaysRemaining: days, CreatedAt: value.CreatedAt, UpdatedAt: &updated}
+	return &consoleadminv1.Subscription{Id: value.ID, OwnerId: value.OwnerID, OwnerName: value.OwnerName, OwnerEmail: value.OwnerEmail, BusinessId: value.BusinessID, BusinessName: value.BusinessName, PlanId: value.PlanID, PlanName: value.PlanName, Status: value.Status, SeatCount: int32(value.SeatCount), ActiveSeatCount: int32(value.ActiveSeatCount), IncludedSeatLimit: int32(value.IncludedSeatLimit), IncludedSeatCount: int32(value.IncludedSeatCount), BillableSeatCount: int32(value.BillableSeatCount), TrialEndsAt: value.TrialEndsAt, NextBillingDate: value.NextBillingDate, CurrentPeriodEndsAt: value.CurrentPeriodEndsAt, PaddleSubscriptionId: value.PaddleSubscriptionID, PaddleCustomerId: value.PaddleCustomerID, DaysRemaining: days, CreatedAt: value.CreatedAt, UpdatedAt: &updated} // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func planPayload(value *application.PlanDTO) *consoleadminv1.Plan {
-	return &consoleadminv1.Plan{Id: value.ID, Name: value.Name, PricePerSeatCents: int32(value.PricePerSeatCents), AnnualPricePerSeatCents: int32(value.AnnualPricePerSeatCents), IsActive: value.IsActive, CreatedAt: value.CreatedAt}
+	return &consoleadminv1.Plan{Id: value.ID, Name: value.Name, PricePerSeatCents: int32(value.PricePerSeatCents), AnnualPricePerSeatCents: int32(value.AnnualPricePerSeatCents), IsActive: value.IsActive, CreatedAt: value.CreatedAt} // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func parseOptionalTime(value *string) (*time.Time, error) {

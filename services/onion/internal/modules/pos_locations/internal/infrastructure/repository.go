@@ -92,6 +92,11 @@ func (r *Repository) Create(ctx context.Context, input domain.LocationInput) (in
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.LocationUpdateInput) error {
+	businessID := input.BusinessID
+	if businessID == 0 {
+		businessID = input.OwnerID
+	}
+
 	isActive := sql.NullBool{}
 	if input.IsActive != nil {
 		isActive = sql.NullBool{Bool: *input.IsActive, Valid: true}
@@ -102,7 +107,7 @@ func (r *Repository) Update(ctx context.Context, input domain.LocationUpdateInpu
 		Phone:      sql.NullString{String: input.Phone, Valid: input.Phone != ""},
 		IsActive:   isActive,
 		ID:         input.ID,
-		BusinessID: input.BusinessID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update location", logger.Error(err))

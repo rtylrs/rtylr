@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/application"
 	"github.com/voxire/onion/internal/modules/finance_reconciliation/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	financereconciliationv1 "github.com/voxire/voxie/gen/go/finance/reconciliation/v1"
@@ -24,8 +25,11 @@ func NewReconciliationAPI(service *application.Service) *ReconciliationAPI {
 
 func (a *ReconciliationAPI) GetOverview(ctx context.Context, _ *financereconciliationv1.GetOverviewRequest) (*financereconciliationv1.GetOverviewResponse, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
+	if !ok || authUser == nil {
 		return nil, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
+	}
+	if !authPkg.HasAppPermission(authUser, authorization.AppFinance, "finance:reconciliation:manage") {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
@@ -53,8 +57,11 @@ func (a *ReconciliationAPI) Match(ctx context.Context, req *financereconciliatio
 	}
 
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
+	if !ok || authUser == nil {
 		return nil, onekiterrors.New(http.StatusUnauthorized, "unauthorized")
+	}
+	if !authPkg.HasAppPermission(authUser, authorization.AppFinance, "finance:reconciliation:manage") {
+		return nil, onekiterrors.PermissionDenied()
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
@@ -120,7 +127,7 @@ func newOverviewResponse(overview domain.ReconciliationOverview) *financereconci
 			TargetType:       suggestion.TargetType,
 			TargetId:         suggestion.TargetID,
 			AmountMinorUnits: suggestion.AmountMinorUnits,
-			DaysApart:        int32(suggestion.DaysApart),
+			DaysApart:        int32(suggestion.DaysApart), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			Score:            suggestion.Score,
 		})
 	}
@@ -132,7 +139,7 @@ func newOverviewResponse(overview domain.ReconciliationOverview) *financereconci
 		BankTxnsTruncated: overview.BankTxnsTruncated,
 		InvoicesTruncated: overview.InvoicesTruncated,
 		ExpensesTruncated: overview.ExpensesTruncated,
-		PreviewLimit:      int32(overview.PreviewLimit),
+		PreviewLimit:      int32(overview.PreviewLimit), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 }
 

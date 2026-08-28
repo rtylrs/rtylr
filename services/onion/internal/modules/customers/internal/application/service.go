@@ -26,9 +26,7 @@ const (
 // invalidateCustomerScope wipes every customer-related cache entry for the
 // business. Called by every mutation (create/update/delete/loyalty change).
 func invalidateCustomerScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.CustomerPrefix(businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.CustomerPrefix(businessID))
 }
 
 type Service struct {

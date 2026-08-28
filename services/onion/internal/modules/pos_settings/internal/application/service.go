@@ -59,7 +59,5 @@ func (s *Service) UpdateSettings(ctx context.Context, input domain.UpdateSetting
 }
 
 func invalidatePOSSettings(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posSettingsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(posSettingsScope, businessID))
 }

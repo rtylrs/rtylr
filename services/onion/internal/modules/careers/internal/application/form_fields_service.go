@@ -24,7 +24,7 @@ func (s *Service) CreateFormField(ctx context.Context, in domain.FormFieldInput)
 	if in.Position == 0 {
 		existing, err := s.repo.ListFormFields(ctx, in.BusinessID, in.CareerID)
 		if err == nil {
-			in.Position = int32(len(existing))
+			in.Position = int32(len(existing)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		}
 	}
 	return s.repo.CreateFormField(ctx, in)

@@ -65,6 +65,9 @@ func (h *CreateExpenseHandler) Serve(ctx context.Context, req *CreateExpenseRequ
 	if device.User == nil {
 		return CreateExpenseResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireFinancePermission(ctx, "finance:expenses:create"); err != nil {
+		return CreateExpenseResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

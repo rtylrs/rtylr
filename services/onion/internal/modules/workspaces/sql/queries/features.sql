@@ -254,20 +254,21 @@ SET is_read = TRUE
 WHERE user_id = ?;
 
 -- name: GetUserSettings :one
-SELECT task_assigned, task_comments, mentions, status_changes, weekly_digest, email_notifications
+SELECT task_assigned, task_comments, mentions, status_changes, weekly_digest, email_notifications, sidebar_preferences_json
 FROM flow_user_settings
 WHERE user_id = ?;
 
 -- name: UpsertUserSettings :exec
-INSERT INTO flow_user_settings (user_id, task_assigned, task_comments, mentions, status_changes, weekly_digest, email_notifications)
-VALUES (?, ?, ?, ?, ?, ?, ?)
+INSERT INTO flow_user_settings (user_id, task_assigned, task_comments, mentions, status_changes, weekly_digest, email_notifications, sidebar_preferences_json)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
     task_assigned = VALUES(task_assigned),
     task_comments = VALUES(task_comments),
     mentions = VALUES(mentions),
     status_changes = VALUES(status_changes),
     weekly_digest = VALUES(weekly_digest),
-    email_notifications = VALUES(email_notifications);
+    email_notifications = VALUES(email_notifications),
+    sidebar_preferences_json = VALUES(sidebar_preferences_json);
 
 -- name: GetProjectTaskCounts :one
 SELECT

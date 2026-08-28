@@ -15,6 +15,7 @@ const countActiveEmployeesUtilization = `-- name: CountActiveEmployeesUtilizatio
 SELECT COUNT(*) AS count FROM hr_employees WHERE business_id = ? AND status = 'active'
 `
 
+// cross-schema read from hr_core — count employees used in utilization insights.
 func (q *Queries) CountActiveEmployeesUtilization(ctx context.Context, businessID int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countActiveEmployeesUtilization, businessID)
 	var count int64
@@ -26,6 +27,7 @@ const countActiveStaffOps = `-- name: CountActiveStaffOps :one
 SELECT COUNT(*) AS count FROM hr_employees WHERE business_id = ? AND status = 'active'
 `
 
+// cross-schema read from hr_core — count active employees for operations insights.
 func (q *Queries) CountActiveStaffOps(ctx context.Context, businessID int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countActiveStaffOps, businessID)
 	var count int64
@@ -37,6 +39,7 @@ const countApprovedTimeOff = `-- name: CountApprovedTimeOff :one
 SELECT COUNT(*) AS count FROM hr_leave_requests WHERE business_id = ? AND status = 'approved'
 `
 
+// cross-schema read from hr_leave — count approved time-off requests.
 func (q *Queries) CountApprovedTimeOff(ctx context.Context, businessID int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countApprovedTimeOff, businessID)
 	var count int64
@@ -51,6 +54,7 @@ SELECT COUNT(*) AS count
    AND status NOT IN ('rejected','cancelled','completed')
 `
 
+// cross-schema read from hr_leave — count non-terminal leave requests.
 func (q *Queries) CountOpenLeaveRequests(ctx context.Context, businessID int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countOpenLeaveRequests, businessID)
 	var count int64
@@ -62,6 +66,7 @@ const countPendingLeaveOps = `-- name: CountPendingLeaveOps :one
 SELECT COUNT(*) AS count FROM hr_leave_requests WHERE business_id = ? AND status = 'pending'
 `
 
+// cross-schema read from hr_leave — count pending leave requests for operations insights.
 func (q *Queries) CountPendingLeaveOps(ctx context.Context, businessID int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countPendingLeaveOps, businessID)
 	var count int64
@@ -73,6 +78,7 @@ const countPendingTimeOff = `-- name: CountPendingTimeOff :one
 SELECT COUNT(*) AS count FROM hr_leave_requests WHERE business_id = ? AND status = 'pending'
 `
 
+// cross-schema read from hr_leave — count approved-workflow requests pending action.
 func (q *Queries) CountPendingTimeOff(ctx context.Context, businessID int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countPendingTimeOff, businessID)
 	var count int64
@@ -88,6 +94,7 @@ SELECT COUNT(*) AS count
    AND date <  DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 7 DAY)
 `
 
+// cross-schema read from hr_shifts — count scheduled assignments for the current week.
 func (q *Queries) CountShiftsThisWeek(ctx context.Context, businessID int64) (int64, error) {
 	row := q.db.QueryRowContext(ctx, countShiftsThisWeek, businessID)
 	var count int64
@@ -109,6 +116,7 @@ type GetHeadcountNowParams struct {
 	EndDate    sql.NullTime `db:"end_date" json:"end_date"`
 }
 
+// cross-schema read from hr_core — calculate current active headcount.
 func (q *Queries) GetHeadcountNow(ctx context.Context, arg GetHeadcountNowParams) (int64, error) {
 	row := q.db.QueryRowContext(ctx, getHeadcountNow, arg.BusinessID, arg.StartDate, arg.EndDate)
 	var count int64
@@ -130,6 +138,7 @@ type GetHeadcountPriorParams struct {
 	EndDate    sql.NullTime `db:"end_date" json:"end_date"`
 }
 
+// cross-schema read from hr_core — calculate prior-period active headcount.
 func (q *Queries) GetHeadcountPrior(ctx context.Context, arg GetHeadcountPriorParams) (int64, error) {
 	row := q.db.QueryRowContext(ctx, getHeadcountPrior, arg.BusinessID, arg.StartDate, arg.EndDate)
 	var count int64
@@ -159,6 +168,7 @@ type GetShiftMetricsRow struct {
 	NoShows   interface{} `db:"no_shows" json:"no_shows"`
 }
 
+// cross-schema read from hr_shifts — summarize assignment statuses for a date range.
 func (q *Queries) GetShiftMetrics(ctx context.Context, arg GetShiftMetricsParams) (GetShiftMetricsRow, error) {
 	row := q.db.QueryRowContext(ctx, getShiftMetrics, arg.BusinessID, arg.FromDate, arg.ToDate)
 	var i GetShiftMetricsRow
@@ -178,6 +188,7 @@ WHERE a.business_id = ?
   AND a.date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
 `
 
+// cross-schema read from hr_shifts — sum scheduled hours for the next seven days.
 func (q *Queries) SumScheduledHoursNext7Days(ctx context.Context, businessID int64) (interface{}, error) {
 	row := q.db.QueryRowContext(ctx, sumScheduledHoursNext7Days, businessID)
 	var scheduled_hours interface{}

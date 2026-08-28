@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/expenses/internal/domain"
 	"github.com/voxire/onion/internal/modules/expenses/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -76,9 +77,14 @@ func (r *Repository) GetByID(ctx context.Context, businessID, id int64) (domain.
 }
 
 func (r *Repository) Create(ctx context.Context, input domain.ExpenseInput) (int64, error) {
+	businessID := input.BusinessID
+	if businessID == 0 {
+		businessID = input.OwnerID
+	}
+
 	result, err := r.queries.CreateExpense(ctx, sqlc.CreateExpenseParams{
 		OwnerID:         input.OwnerID,
-		BusinessID:      input.BusinessID,
+		BusinessID:      businessID,
 		CategoryID:      nullableInt64Ptr(input.CategoryID),
 		Amount:          fmtFloat(input.Amount),
 		Currency:        nullableString(input.Currency),
@@ -99,6 +105,14 @@ func (r *Repository) Create(ctx context.Context, input domain.ExpenseInput) (int
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.ExpenseUpdateInput) error {
+	current, err := r.GetByID(ctx, input.BusinessID, input.ID)
+	if err != nil {
+		return err
+	}
+	if current.Status == "approved" {
+		return domain.ErrApprovedExpenseImmutable
+	}
+
 	result, err := r.queries.UpdateExpense(ctx, sqlc.UpdateExpenseParams{
 		CategoryID:      nullableInt64Ptr(input.CategoryID),
 		Amount:          fmtFloat(input.Amount),
@@ -129,6 +143,14 @@ func (r *Repository) Update(ctx context.Context, input domain.ExpenseUpdateInput
 }
 
 func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
+	current, err := r.GetByID(ctx, businessID, id)
+	if err != nil {
+		return err
+	}
+	if current.Status == "approved" {
+		return domain.ErrApprovedExpenseImmutable
+	}
+
 	result, err := r.queries.DeleteExpense(ctx, sqlc.DeleteExpenseParams{
 		ID:         id,
 		BusinessID: businessID,
@@ -148,10 +170,19 @@ func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
 }
 
 func (r *Repository) UpdateStatus(ctx context.Context, businessID, id int64, status string) error {
+	current, err := r.GetByID(ctx, businessID, id)
+	if err != nil {
+		return err
+	}
+	if err := domain.ValidateExpenseStatusTransition(current.Status, status); err != nil {
+		return err
+	}
+
 	result, err := r.queries.UpdateExpenseStatus(ctx, sqlc.UpdateExpenseStatusParams{
-		Status:     sql.NullString{String: status, Valid: true},
-		ID:         id,
-		BusinessID: businessID,
+		Status:        sql.NullString{String: status, Valid: true},
+		ID:            id,
+		BusinessID:    businessID,
+		CurrentStatus: sql.NullString{String: current.Status, Valid: true},
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update expense status", logger.Error(err))
@@ -206,9 +237,9 @@ func interfaceToFloat(v interface{}) float64 {
 	case int64:
 		return float64(val)
 	case []byte:
-		return parseDecimal(string(val))
+		return sqlutil.ParseDecimal(string(val))
 	case string:
-		return parseDecimal(val)
+		return sqlutil.ParseDecimal(val)
 	default:
 		return 0
 	}
@@ -223,7 +254,16 @@ func (r *Repository) CountByCategory(ctx context.Context, businessID int64) (map
 
 	counts := make(map[string]int64, len(rows))
 	for _, row := range rows {
-		counts[fmt.Sprint(row.CategoryKey)] = row.Cnt
+		var key string
+		switch value := row.CategoryKey.(type) {
+		case []byte:
+			key = string(value)
+		case string:
+			key = value
+		default:
+			key = fmt.Sprint(value)
+		}
+		counts[key] = row.Cnt
 	}
 	return counts, nil
 }
@@ -334,19 +374,6 @@ func nullEnumStr[T ~string](value T, valid bool, fallback string) string {
 }
 
 func parseFloat(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	v, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse expense decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return v
-}
-
-func parseDecimal(s string) float64 {
 	if s == "" {
 		return 0
 	}

@@ -242,8 +242,11 @@ func ensureNoAppointmentOverlap(ctx context.Context, qtx *sqlc.Queries, business
 	}
 	rows, err := qtx.LockAppointmentOverlaps(ctx, sqlc.LockAppointmentOverlapsParams{
 		BusinessID: businessID,
-		StartTime:  startTime,
-		EndTime:    endTime,
+		// sqlc binds these fields to the placeholders in the overlap predicates:
+		// start_time < ? receives the requested end, and end_time > ? receives
+		// the requested start.
+		StartTime:  endTime,
+		EndTime:    startTime,
 		Column4:    excludeID,
 		ID:         excludeID,
 		Column6:    resourceID,

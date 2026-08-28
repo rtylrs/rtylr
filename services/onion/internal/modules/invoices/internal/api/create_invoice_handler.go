@@ -138,6 +138,9 @@ func (h *CreateInvoiceHandler) Serve(ctx context.Context, req *CreateInvoiceRequ
 	if device.User == nil {
 		return CreateInvoiceResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireFinancePermission(ctx, "finance:invoices:create"); err != nil {
+		return CreateInvoiceResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

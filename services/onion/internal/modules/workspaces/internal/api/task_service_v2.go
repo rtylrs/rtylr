@@ -174,6 +174,9 @@ func tasksToProtoV2(tasks []domain.Task) []*flowtaskv2.FlowTask {
 }
 
 func (a *TaskAPIV2) ListTasks(ctx context.Context, req *flowtaskv2.ListTasksRequest) (*flowtaskv2.ListTasksResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:tasks:view"); err != nil {
+		return nil, err
+	}
 	caller, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
@@ -204,6 +207,9 @@ func (a *TaskAPIV2) ListTasks(ctx context.Context, req *flowtaskv2.ListTasksRequ
 }
 
 func (a *TaskAPIV2) GetMyTasks(ctx context.Context, req *flowtaskv2.GetMyTasksRequest) (*flowtaskv2.GetMyTasksResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:tasks:view"); err != nil {
+		return nil, err
+	}
 	caller, _, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
@@ -248,6 +254,14 @@ func (a *TaskAPIV2) SearchTasks(ctx context.Context, req *flowtaskv2.SearchTasks
 }
 
 func (a *TaskAPIV2) CreateTask(ctx context.Context, req *flowtaskv2.CreateTaskRequest) (*flowtaskv2.CreateTaskResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:tasks:create"); err != nil {
+		return nil, err
+	}
+	if req.AssigneeId != nil {
+		if err := requireFlowPermission(ctx, "flow:tasks:assign"); err != nil {
+			return nil, err
+		}
+	}
 	caller, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
@@ -300,6 +314,9 @@ func (a *TaskAPIV2) CreateTask(ctx context.Context, req *flowtaskv2.CreateTaskRe
 }
 
 func (a *TaskAPIV2) GetTaskDetail(ctx context.Context, req *flowtaskv2.GetTaskDetailRequest) (*flowtaskv2.GetTaskDetailResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:tasks:view"); err != nil {
+		return nil, err
+	}
 	caller, _, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
@@ -330,6 +347,9 @@ func (a *TaskAPIV2) GetTaskDetail(ctx context.Context, req *flowtaskv2.GetTaskDe
 }
 
 func (a *TaskAPIV2) UpdateTask(ctx context.Context, req *flowtaskv2.UpdateTaskRequest) (*flowtaskv2.UpdateTaskResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:tasks:edit"); err != nil {
+		return nil, err
+	}
 	caller, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
@@ -341,6 +361,11 @@ func (a *TaskAPIV2) UpdateTask(ctx context.Context, req *flowtaskv2.UpdateTaskRe
 	body := req.GetBody()
 	if body == nil {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Missing update body")
+	}
+	if body.AssigneeId != nil {
+		if err := requireFlowPermission(ctx, "flow:tasks:assign"); err != nil {
+			return nil, err
+		}
 	}
 
 	dueDate, err := parseTaskDate(body.GetDueDate())
@@ -382,6 +407,9 @@ func (a *TaskAPIV2) UpdateTask(ctx context.Context, req *flowtaskv2.UpdateTaskRe
 }
 
 func (a *TaskAPIV2) UpdateTaskStatus(ctx context.Context, req *flowtaskv2.UpdateTaskStatusRequest) (*flowtaskv2.UpdateTaskStatusResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:tasks:edit"); err != nil {
+		return nil, err
+	}
 	caller, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
@@ -413,6 +441,9 @@ func (a *TaskAPIV2) UpdateTaskStatus(ctx context.Context, req *flowtaskv2.Update
 }
 
 func (a *TaskAPIV2) DeleteTask(ctx context.Context, req *flowtaskv2.DeleteTaskRequest) (*flowtaskv2.DeleteTaskResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:tasks:edit"); err != nil {
+		return nil, err
+	}
 	caller, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err
@@ -433,6 +464,9 @@ func (a *TaskAPIV2) DeleteTask(ctx context.Context, req *flowtaskv2.DeleteTaskRe
 }
 
 func (a *TaskAPIV2) CreateSubtask(ctx context.Context, req *flowtaskv2.CreateSubtaskRequest) (*flowtaskv2.CreateSubtaskResponse, error) {
+	if err := requireFlowPermission(ctx, "flow:tasks:create"); err != nil {
+		return nil, err
+	}
 	caller, businessID, err := a.resolveAuth(ctx)
 	if err != nil {
 		return nil, err

@@ -57,10 +57,10 @@ func notificationsKey(businessID, userID int64, limit int32, cursorID *int64) st
 }
 
 func invalidateNotificationsScope(ctx context.Context, businessID, userID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.UserPrefix(userID))
-		cache.DeleteByPattern(ctx, cacheKeys.Scoped("notifications", businessID, fmt.Sprintf("user:%d*", userID)))
-	}
+	cacher.InvalidateScope(ctx,
+		cacheKeys.UserPrefix(userID),
+		cacheKeys.Scoped("notifications", businessID, fmt.Sprintf("user:%d*", userID)),
+	)
 }
 
 func (s *Service) List(ctx context.Context, businessID, userID int64) ([]domain.Notification, error) {
@@ -100,7 +100,7 @@ func (s *Service) ListPage(ctx context.Context, businessID, userID int64, limit 
 				return NotificationPage{}, err
 			}
 			page := NotificationPage{Notifications: rows}
-			if int32(len(rows)) > limit {
+			if int32(len(rows)) > limit { // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 				last := rows[limit-1]
 				page.Notifications = rows[:limit]
 				page.NextCursor = cursor.EncodeCreatedAtID(cursor.CreatedAtID{CreatedAt: last.CreatedAt, ID: last.ID})

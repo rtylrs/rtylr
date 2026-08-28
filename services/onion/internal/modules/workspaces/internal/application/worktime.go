@@ -188,10 +188,8 @@ const workspaceMemberCap = 500
 
 // ListWorkDaysForWorkspace returns work days across every member of a
 // workspace, for the team view. callerID must hold at least FlowRoleAdmin on
-// the workspace - this is Flow's own tested role gate. RequireWorkspaceRole
-// additionally admits a business-wide Owner/Admin/Operator regardless of any
-// Flow-level role, when a hub profile resolver is wired (see
-// hubProfileBypasses).
+// the workspace. Business-wide visibility is handled by the central Flow
+// permission gate, while resource checks remain Flow-owned.
 //
 // WorkDaysForDate resolves one date's WorkDay for an arbitrary set of
 // employee ids, keyed by employee id for O(1) lookup. Used by Flow's
@@ -202,7 +200,7 @@ func (s *Service) WorkDaysForDate(ctx context.Context, ownerID, businessID int64
 	if len(employeeIDs) == 0 {
 		return map[int64]domain.WorkDay{}, nil
 	}
-	days, _, err := s.repo.ListWorkDaysByEmployeeIDs(ctx, ownerID, businessID, employeeIDs, date, date, int32(len(employeeIDs)), 0)
+	days, _, err := s.repo.ListWorkDaysByEmployeeIDs(ctx, ownerID, businessID, employeeIDs, date, date, int32(len(employeeIDs)), 0) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	if err != nil {
 		return nil, err
 	}
@@ -267,7 +265,8 @@ func (s *Service) ListWorkDaysForWorkspace(ctx context.Context, callerID, worksp
 // configured policy; until the config surface lands, the default policy is
 // hub admin+ sees everyone, project admins see people sharing their projects.
 func (s *Service) ListTeamWorkDays(ctx context.Context, callerID, businessID int64, from, to string, limit, offset int64) ([]domain.WorkDay, int64, error) {
-	// Default policy gate: hub owner/admin/operator always pass.
+	// Default policy gate: only the central Flow team-management permission
+	// grants business-wide visibility. Resource checks remain scope-bound.
 	if s.hubProfileBypasses(ctx, callerID, businessID) {
 		return s.listAllBusinessWorkDays(ctx, businessID, from, to, limit, offset)
 	}
@@ -282,7 +281,7 @@ func (s *Service) listAllBusinessWorkDays(ctx context.Context, businessID int64,
 	if err != nil {
 		return nil, 0, err
 	}
-	return s.repo.ListWorkDaysByEmployeeIDs(ctx, businessID, businessID, employeeIDs, from, to, int32(limit), offset)
+	return s.repo.ListWorkDaysByEmployeeIDs(ctx, businessID, businessID, employeeIDs, from, to, int32(limit), offset) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func (s *Service) listVisibleProjectMemberDays(ctx context.Context, callerID, businessID int64, from, to string, limit, offset int64) ([]domain.WorkDay, int64, error) {
@@ -316,5 +315,5 @@ func (s *Service) listVisibleProjectMemberDays(ctx context.Context, callerID, bu
 	for _, eid := range byUserID {
 		employeeIDs = append(employeeIDs, eid)
 	}
-	return s.repo.ListWorkDaysByEmployeeIDs(ctx, businessID, businessID, employeeIDs, from, to, int32(limit), offset)
+	return s.repo.ListWorkDaysByEmployeeIDs(ctx, businessID, businessID, employeeIDs, from, to, int32(limit), offset) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }

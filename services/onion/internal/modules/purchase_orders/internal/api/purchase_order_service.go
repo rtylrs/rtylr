@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/application"
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	erppurchaseorderv1 "github.com/voxire/voxie/gen/go/erp/purchase_order/v1"
@@ -24,7 +25,7 @@ func NewPurchaseOrderAPI(service *application.Service) *PurchaseOrderAPI {
 }
 
 func (a *PurchaseOrderAPI) ListPurchaseOrders(ctx context.Context, req *erppurchaseorderv1.ListPurchaseOrdersRequest) (*erppurchaseorderv1.ListPurchaseOrdersResponse, error) {
-	ownerID, err := purchaseOrderOwnerID(ctx)
+	ownerID, err := purchaseOrderOwnerID(ctx, "erp:purchasing:view")
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +58,7 @@ func (a *PurchaseOrderAPI) ListPurchaseOrders(ctx context.Context, req *erppurch
 }
 
 func (a *PurchaseOrderAPI) CreatePurchaseOrder(ctx context.Context, req *erppurchaseorderv1.CreatePurchaseOrderRequest) (*erppurchaseorderv1.CreatePurchaseOrderResponse, error) {
-	ownerID, err := purchaseOrderOwnerID(ctx)
+	ownerID, err := purchaseOrderOwnerID(ctx, "erp:purchasing:create")
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +100,7 @@ func (a *PurchaseOrderAPI) CreatePurchaseOrder(ctx context.Context, req *erppurc
 }
 
 func (a *PurchaseOrderAPI) GetPurchaseOrder(ctx context.Context, req *erppurchaseorderv1.GetPurchaseOrderRequest) (*erppurchaseorderv1.GetPurchaseOrderResponse, error) {
-	ownerID, err := purchaseOrderOwnerID(ctx)
+	ownerID, err := purchaseOrderOwnerID(ctx, "erp:purchasing:view")
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +115,7 @@ func (a *PurchaseOrderAPI) GetPurchaseOrder(ctx context.Context, req *erppurchas
 }
 
 func (a *PurchaseOrderAPI) UpdatePurchaseOrderStatus(ctx context.Context, req *erppurchaseorderv1.UpdatePurchaseOrderStatusRequest) (*erppurchaseorderv1.UpdatePurchaseOrderStatusResponse, error) {
-	ownerID, err := purchaseOrderOwnerID(ctx)
+	ownerID, err := purchaseOrderOwnerID(ctx, "erp:purchasing:create")
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +169,7 @@ func (a *PurchaseOrderAPI) ApprovePurchaseOrder(ctx context.Context, req *erppur
 	if !ok || authUser == nil || authUser.UserID <= 0 {
 		return nil, purchaseOrderStatusError(http.StatusUnauthorized, "unauthorized")
 	}
-	ownerID, err := purchaseOrderOwnerID(ctx)
+	ownerID, err := purchaseOrderOwnerID(ctx, "erp:purchasing:approve")
 	if err != nil {
 		return nil, err
 	}
@@ -196,10 +197,10 @@ func (a *PurchaseOrderAPI) ApprovePurchaseOrder(ctx context.Context, req *erppur
 	return &erppurchaseorderv1.ApprovePurchaseOrderResponse{Message: "Purchase order approved successfully"}, nil
 }
 
-func purchaseOrderOwnerID(ctx context.Context) (int64, error) {
+func purchaseOrderOwnerID(ctx context.Context, permission string) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return 0, purchaseOrderStatusError(http.StatusUnauthorized, "unauthorized")
+	if !ok || authUser == nil || !authPkg.HasAppPermission(authUser, authorization.AppERP, permission) {
+		return 0, onekiterrors.PermissionDenied()
 	}
 	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {

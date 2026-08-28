@@ -147,6 +147,16 @@ func (m *Module) GetEmployeeIDByUserID(ctx context.Context, ownerID, userID int6
 	return m.service.GetEmployeeIDByUserID(ctx, ownerID, userID)
 }
 
+// GetEmployeeBusinessID verifies that an employee belongs to the requested
+// business before another module reads employee-owned data.
+func (m *Module) GetEmployeeBusinessID(ctx context.Context, ownerID, employeeID int64) (int64, error) {
+	employee, err := m.service.GetEmployee(ctx, ownerID, employeeID)
+	if err != nil || employee == nil {
+		return 0, err
+	}
+	return employee.BusinessID, nil
+}
+
 func (m *Module) HasPermission(ctx context.Context, ownerID, employeeID int64, permissionKey string) (bool, error) {
 	return m.service.HasPermission(ctx, ownerID, employeeID, permissionKey)
 }
@@ -229,7 +239,7 @@ func (m *Module) GetApprovalChain(ctx context.Context, ownerID int64, requestTyp
 		ID:          chain.ID,
 		RequestType: chain.RequestType,
 		Name:        chain.Name,
-		TotalLevels: int32(len(chain.Levels)),
+		TotalLevels: int32(len(chain.Levels)), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Levels:      levels,
 	}, nil
 }

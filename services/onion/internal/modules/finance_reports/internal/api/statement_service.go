@@ -7,6 +7,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/finance_reports/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	financestatementv1 "github.com/voxire/voxie/gen/go/finance/statement/v1"
@@ -23,6 +24,9 @@ func NewStatementAPI(service *application.Service) *StatementAPI {
 func (a *StatementAPI) GetBalanceSheet(ctx context.Context, _ *financestatementv1.GetBalanceSheetRequest) (*financestatementv1.GetBalanceSheetResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if !authPkg.HasAppPermission(device.User, authorization.AppFinance, "finance:reports:view") {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
@@ -49,6 +53,9 @@ func (a *StatementAPI) GetBalanceSheet(ctx context.Context, _ *financestatementv
 func (a *StatementAPI) GetCashFlow(ctx context.Context, req *financestatementv1.GetCashFlowRequest) (*financestatementv1.GetCashFlowResponse, error) {
 	device := authPkg.DeviceCtx(ctx)
 	if device.IsAnonymous || device.User == nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if !authPkg.HasAppPermission(device.User, authorization.AppFinance, "finance:reports:view") {
 		return nil, onekiterrors.PermissionDenied()
 	}
 

@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	fixtureBusinessID int64 = 1
+	fixtureBusinessID int64 = testutil.BusinessID
 	fixtureBranchID   int64 = 3001
 	fixtureSessionID  int64 = 3201
 	fixtureEmployeeID int64 = 3601

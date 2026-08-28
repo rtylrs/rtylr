@@ -9,6 +9,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	"github.com/voxire/onion/internal/modules/workspaces/internal/infrastructure"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/testutil"
 	flowlabelv1 "github.com/voxire/voxie/gen/go/flow/label/v1"
@@ -127,6 +128,22 @@ func ctxAs(userID int64) context.Context {
 	return authPkg.WithAuthUser(context.Background(), &authPkg.AuthUser{
 		UserID:     userID,
 		BusinessID: testutil.BusinessID,
+		EffectiveAccess: &authorization.EffectiveAccess{
+			BusinessID: testutil.BusinessID,
+			Apps: []authorization.EffectiveAppAccess{{
+				AppID:     authorization.AppFlow,
+				Licensed:  true,
+				HasAccess: true,
+				Permissions: []string{
+					"flow:projects:view", "flow:projects:create", "flow:projects:edit",
+					"flow:projects:assign", "flow:tasks:view", "flow:tasks:create",
+					"flow:tasks:edit", "flow:tasks:assign", "flow:team:manage",
+					"flow:managers:manage", "flow:settings:manage",
+				},
+			}},
+			IsOwner: userID == roleOwnerID,
+			IsAdmin: userID == roleManagerID,
+		},
 	})
 }
 
@@ -265,7 +282,7 @@ func TestTaskRole_ViewerBlockedFromEveryTaskMutation(t *testing.T) {
 	}{
 		{"CreateTask", func() error {
 			_, e := f.taskAPI.CreateTask(viewer, &flowtaskv1.CreateTaskRequest{
-				ProjectId: f.projID, WorkspaceId: f.wsID, Title: "viewer task",
+				ProjectId: testutil.Int64Ptr(f.projID), WorkspaceId: testutil.Int64Ptr(f.wsID), Title: "viewer task",
 			})
 			return e
 		}},
@@ -277,7 +294,7 @@ func TestTaskRole_ViewerBlockedFromEveryTaskMutation(t *testing.T) {
 		}},
 		{"CreateSubtask", func() error {
 			_, e := f.taskAPI.CreateSubtask(viewer, &flowtaskv1.CreateSubtaskRequest{
-				ParentTaskId: taskID, ProjectId: f.projID, WorkspaceId: f.wsID, Title: "viewer subtask",
+				ParentTaskId: testutil.Int64Ptr(taskID), ProjectId: testutil.Int64Ptr(f.projID), WorkspaceId: testutil.Int64Ptr(f.wsID), Title: "viewer subtask",
 			})
 			return e
 		}},
@@ -303,7 +320,7 @@ func TestTaskRole_ViewerBlockedFromEveryTaskMutation(t *testing.T) {
 		}},
 		{"CreateTimeLog", func() error {
 			_, e := f.taskAPI.CreateTimeLog(viewer, &flowtaskv1.CreateTimeLogRequest{
-				TaskId: taskID, DurationMinutes: 15,
+				TaskId: taskID, DurationMinutes: testutil.Int64Ptr(15),
 			})
 			return e
 		}},
@@ -333,7 +350,7 @@ func TestTaskRole_MemberAllowedOnWriteTierMutations(t *testing.T) {
 		t.Errorf("member AddComment: expected success, got %v", err)
 	}
 	if _, err := f.taskAPI.CreateTimeLog(member, &flowtaskv1.CreateTimeLogRequest{
-		TaskId: taskID, DurationMinutes: 15,
+		TaskId: taskID, DurationMinutes: testutil.Int64Ptr(15),
 	}); err != nil {
 		t.Errorf("member CreateTimeLog: expected success, got %v", err)
 	}
@@ -353,7 +370,7 @@ func TestTaskRole_MemberAllowedOnWriteTierMutations(t *testing.T) {
 // as a denial — which would let these tests pass without proving anything.
 func (f *roleFixture) setTaskLabelsAs(userID, taskID int64) error {
 	_, err := f.labelAPI.SetTaskLabels(ctxAs(userID), &flowlabelv1.SetTaskLabelsRequest{
-		TaskId: taskID, LabelIds: []int64{101, 102},
+		TaskId: testutil.Int64Ptr(taskID), LabelIds: []int64{101, 102},
 	})
 	return err
 }

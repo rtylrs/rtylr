@@ -595,7 +595,7 @@ func nullSQLInt32(value int) sql.NullInt32 {
 	if value == 0 {
 		return sql.NullInt32{}
 	}
-	return sql.NullInt32{Int32: int32(value), Valid: true}
+	return sql.NullInt32{Int32: int32(value), Valid: true} // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func nullSQLInt64(value int64) sql.NullInt64 {

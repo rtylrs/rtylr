@@ -18,7 +18,7 @@ func NewFinancialAPI(service *application.Service) *FinancialAPI {
 }
 
 func (a *FinancialAPI) GetCashFlowAnalytics(ctx context.Context, req *insightsfinancialv1.GetCashFlowAnalyticsRequest) (*insightsfinancialv1.GetCashFlowAnalyticsResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:financial:view")
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (a *FinancialAPI) GetCashFlowAnalytics(ctx context.Context, req *insightsfi
 }
 
 func (a *FinancialAPI) GetExpenseAnalytics(ctx context.Context, req *insightsfinancialv1.GetExpenseAnalyticsRequest) (*insightsfinancialv1.GetExpenseAnalyticsResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:financial:view")
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (a *FinancialAPI) GetExpenseAnalytics(ctx context.Context, req *insightsfin
 }
 
 func (a *FinancialAPI) GetInvoiceAging(ctx context.Context, _ *insightsfinancialv1.GetInvoiceAgingRequest) (*insightsfinancialv1.GetInvoiceAgingResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:financial:view")
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (a *FinancialAPI) GetInvoiceAging(ctx context.Context, _ *insightsfinancial
 		totalOutstanding += row.AmountMinorUnits
 		buckets = append(buckets, &insightsfinancialv1.InvoiceAgingBucket{
 			Bucket: row.Bucket,
-			Count:  int32(row.InvoiceCount),
+			Count:  int32(row.InvoiceCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			Amount: minorToMajor(row.AmountMinorUnits),
 		})
 	}

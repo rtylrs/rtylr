@@ -37,6 +37,9 @@ func (h *DeleteShiftHandler) Serve(ctx context.Context, req *DeleteShiftRequest)
 	if device.IsAnonymous || device.User == nil {
 		return DeleteShiftResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireShiftPermission(ctx); err != nil {
+		return DeleteShiftResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

@@ -10,9 +10,9 @@ import (
 	"github.com/voxire/onion/internal/testutil"
 )
 
-// Fixture IDs: businesses.id=1 (owner_id=1001), pos_locations.id=3001, erp_products.id=5201.
+// Fixture IDs: business_id=1001, pos_locations.id=3001, erp_products.id=5201.
 const (
-	fixtureBusinessID int64 = 1
+	fixtureBusinessID int64 = testutil.BusinessID
 	fixtureOwnerID    int64 = 1001
 	fixtureBranchID   int64 = 3001
 	fixtureProductID  int64 = 5201

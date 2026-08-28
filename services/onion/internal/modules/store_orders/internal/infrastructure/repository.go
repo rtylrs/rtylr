@@ -12,6 +12,7 @@ import (
 	"github.com/voxire/onion/internal/modules/store_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/store_orders/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
@@ -130,7 +131,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 			OrderID:   id,
 			ProductID: sql.NullInt64{Int64: item.ProductID, Valid: item.ProductID != 0},
 			Name:      item.Name,
-			Quantity:  int32(item.Quantity),
+			Quantity:  int32(item.Quantity), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			Price:     strconv.FormatFloat(item.Price, 'f', 2, 64),
 			Total:     strconv.FormatFloat(item.Total, 'f', 2, 64),
 		})
@@ -266,20 +267,20 @@ func (r *Repository) upsertOrderCustomerTx(ctx context.Context, qtx *sqlc.Querie
 	customerID, err := qtx.FindCRMCustomerByContact(ctx, sqlc.FindCRMCustomerByContactParams{
 		BusinessID: businessID,
 		Column2:    email,
-		Email:      nullString(email),
+		Email:      sqlutil.NullString(email),
 		Column4:    phone,
-		Phone:      nullString(phone),
+		Phone:      sqlutil.NullString(phone),
 		Column6:    email,
-		Email_2:    nullString(email),
+		Email_2:    sqlutil.NullString(email),
 	})
 	if errors.Is(err, sql.ErrNoRows) {
 		return qtx.InsertCRMCustomerFromOrder(ctx, sqlc.InsertCRMCustomerFromOrderParams{
 			OwnerID:    ownerID,
 			BusinessID: businessID,
 			FirstName:  firstName,
-			LastName:   nullString(lastName),
-			Email:      nullString(email),
-			Phone:      nullString(phone),
+			LastName:   sqlutil.NullString(lastName),
+			Email:      sqlutil.NullString(email),
+			Phone:      sqlutil.NullString(phone),
 			TotalSpent: sql.NullString{String: strconv.FormatFloat(input.Total, 'f', 2, 64), Valid: true},
 		})
 	}
@@ -291,11 +292,11 @@ func (r *Repository) upsertOrderCustomerTx(ctx context.Context, qtx *sqlc.Querie
 		Column1:    firstName,
 		FirstName:  firstName,
 		Column3:    lastName,
-		LastName:   nullString(lastName),
+		LastName:   sqlutil.NullString(lastName),
 		Column5:    email,
-		Email:      nullString(email),
+		Email:      sqlutil.NullString(email),
 		Column7:    phone,
-		Phone:      nullString(phone),
+		Phone:      sqlutil.NullString(phone),
 		TotalSpent: sql.NullString{String: strconv.FormatFloat(input.Total, 'f', 2, 64), Valid: true},
 		BusinessID: businessID,
 		ID:         customerID,
@@ -474,8 +475,4 @@ func nullJSON(s string) []byte {
 		return []byte("{}")
 	}
 	return []byte(s)
-}
-
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
 }

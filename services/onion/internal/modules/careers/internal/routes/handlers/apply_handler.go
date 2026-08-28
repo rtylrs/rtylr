@@ -35,6 +35,7 @@ func ApplyRoutes() []string { return []string{"/careers/apply"} }
 func ApplyHandler(_ interface{ Done() <-chan struct{} }, svc *application.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		r.Body = http.MaxBytesReader(w, r.Body, maxApplicationMultipartBytes)
+		// #nosec G120 -- MaxBytesReader caps the complete request before parsing.
 		if err := r.ParseMultipartForm(maxResumeUploadBytes); err != nil {
 			var maxErr *http.MaxBytesError
 			if errors.As(err, &maxErr) {

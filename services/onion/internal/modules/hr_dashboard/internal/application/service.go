@@ -32,9 +32,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateHRDashboardScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrDashboardScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrDashboardScope, businessID))
 }
 
 func (s *Service) GetWidgets(ctx context.Context, businessID int64) ([]*domain.DashboardWidget, error) {

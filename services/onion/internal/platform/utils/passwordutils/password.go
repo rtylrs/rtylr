@@ -30,6 +30,8 @@ func HashPassword(password string) (string, error) {
 // credential branches burn the same KDF time and response latency cannot
 // reveal whether an account exists. Generated once out-of-band; never
 // matches a real login.
+// #nosec G101 -- This is a deliberately fixed bcrypt timing-equalization hash, not a credential.
+// nosemgrep: generic.secrets.security.detected-bcrypt-hash.detected-bcrypt-hash
 const dummyPasswordHash = "$2a$12$9mHPQjAD8j.dUXOXOABTqeClV/Y5CECeAWtmq91Wsgc0NQM.eUksK"
 
 // CheckDummyHash runs a bcrypt comparison against the dummy hash to equalize

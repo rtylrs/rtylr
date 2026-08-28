@@ -3,6 +3,7 @@ package audit
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"testing"
 
 	"github.com/voxire/onion/internal/platform/auth"
@@ -65,7 +66,14 @@ func TestAppend_PersistsTenantActorAndSnapshots(t *testing.T) {
 	if gotBusinessID != businessID || gotUserID != 7654321 || gotEntityType != "product" || gotAction != "updated" {
 		t.Fatalf("audit identity = business %d user %d entity %q action %q", gotBusinessID, gotUserID, gotEntityType, gotAction)
 	}
-	if gotOld.String != `{"name":"old"}` || gotNew.String != `{"name":"new"}` || gotIP.String != "203.0.113.7" {
+	var oldValues, newValues map[string]string
+	if err := json.Unmarshal([]byte(gotOld.String), &oldValues); err != nil {
+		t.Fatalf("decode old audit snapshot: %v", err)
+	}
+	if err := json.Unmarshal([]byte(gotNew.String), &newValues); err != nil {
+		t.Fatalf("decode new audit snapshot: %v", err)
+	}
+	if oldValues["name"] != "old" || newValues["name"] != "new" || gotIP.String != "203.0.113.7" {
 		t.Fatalf("audit snapshots = old %q new %q ip %q", gotOld.String, gotNew.String, gotIP.String)
 	}
 }

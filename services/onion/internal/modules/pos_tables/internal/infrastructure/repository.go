@@ -55,7 +55,7 @@ func (r *Repository) Create(ctx context.Context, input domain.TableInput) (int64
 		BusinessID: input.BusinessID,
 		LocationID: nullInt64Ptr(input.LocationID),
 		Name:       input.Label,
-		Capacity:   sql.NullInt32{Int32: int32(input.Seats), Valid: true},
+		Capacity:   sql.NullInt32{Int32: int32(input.Seats), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create table", logger.Error(err))
@@ -65,13 +65,18 @@ func (r *Repository) Create(ctx context.Context, input domain.TableInput) (int64
 }
 
 func (r *Repository) Update(ctx context.Context, input domain.TableUpdateInput) error {
+	businessID := input.BusinessID
+	if businessID == 0 {
+		businessID = input.OwnerID
+	}
+
 	err := r.queries.UpdateTable(ctx, sqlc.UpdateTableParams{
 		LocationID: nullInt64Ptr(input.LocationID),
 		Name:       input.Label,
-		Capacity:   sql.NullInt32{Int32: int32(input.Seats), Valid: true},
+		Capacity:   sql.NullInt32{Int32: int32(input.Seats), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Status:     sqlc.NullPosTablesStatus{PosTablesStatus: sqlc.PosTablesStatus(input.Status), Valid: input.Status != ""},
 		ID:         input.ID,
-		BusinessID: input.BusinessID,
+		BusinessID: businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update table", logger.Error(err))

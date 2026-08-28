@@ -82,7 +82,7 @@ func (r *Repository) ListInvoices(ctx context.Context, businessID int64, status,
 		qb = qb.Where(squirrel.LtOrEq{"issue_date": dateTo})
 	}
 
-	qb = qb.OrderBy("created_at DESC, id DESC").Limit(uint64(limit)).Offset(uint64(offset))
+	qb = qb.OrderBy("created_at DESC, id DESC").Limit(uint64(limit)).Offset(uint64(offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 
 	rows, err := qb.PlaceholderFormat(squirrel.Question).RunWith(r.pool).QueryContext(ctx)
 	if err != nil {
@@ -213,7 +213,7 @@ func createInvoiceItems(ctx context.Context, db squirrel.BaseRunner, invoiceID i
 			sqlNullString(fmtFloat(item.TaxRate)),
 			sqlNullString(fmtFloat(item.DiscountPct)),
 			fmtFloat(item.Total),
-			sql.NullInt32{Int32: int32(item.SortOrder), Valid: true},
+			sql.NullInt32{Int32: int32(item.SortOrder), Valid: true}, // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		)
 	}
 
@@ -606,7 +606,7 @@ func (r *Repository) GetPaymentsByInvoice(ctx context.Context, invoiceID int64) 
 func (r *Repository) ListExpenses(ctx context.Context, businessID, categoryID int64, search, dateFrom, dateTo string, limit, offset int) ([]domain.Expense, error) {
 	qb := squirrel.Select(
 		"id", "owner_id", "business_id", "category_id", "description", "amount", "currency", "expense_date", "vendor",
-		"payment_method", "receipt_url", "is_tax_deductible", "tax_amount", "notes", "created_at", "updated_at",
+		"payment_method", "receipt_url", "is_tax_deductible", "tax_amount", "notes", "status", "created_at", "updated_at",
 	).
 		From("finance_expenses").
 		Where(squirrel.Eq{"business_id": businessID})
@@ -636,7 +636,7 @@ func (r *Repository) ListExpenses(ctx context.Context, businessID, categoryID in
 		qb = qb.Where(squirrel.LtOrEq{"expense_date": dateTo})
 	}
 
-	qb = qb.OrderBy("expense_date DESC").Limit(uint64(limit)).Offset(uint64(offset))
+	qb = qb.OrderBy("expense_date DESC").Limit(uint64(limit)).Offset(uint64(offset)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 
 	rows, err := qb.PlaceholderFormat(squirrel.Question).RunWith(r.pool).QueryContext(ctx)
 	if err != nil {
@@ -1310,8 +1310,8 @@ func (r *Repository) ListInvoicesByCustomer(ctx context.Context, businessID, cus
 	rows, err := r.queries.ListInvoicesByCustomer(ctx, sqlc.ListInvoicesByCustomerParams{
 		BusinessID: businessID,
 		CustomerID: sql.NullInt64{Int64: customerID, Valid: true},
-		Limit:      int32(limit),
-		Offset:     int32(offset),
+		Limit:      int32(limit),  // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset:     int32(offset), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("failed to list invoices by customer", logger.Any("business_id", businessID), logger.Any("customer_id", customerID), logger.Error(err))

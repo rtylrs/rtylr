@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/categories/internal/domain"
 	"github.com/voxire/onion/internal/modules/categories/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -93,7 +94,7 @@ func (r *Repository) CreateCategory(ctx context.Context, businessID int64, input
 		OwnerID:     businessID,
 		BusinessID:  businessID,
 		Name:        input.Name,
-		Description: nullString(input.Description),
+		Description: sqlutil.NullString(input.Description),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create category", logger.Error(err))
@@ -112,7 +113,7 @@ func (r *Repository) CreateCategory(ctx context.Context, businessID int64, input
 func (r *Repository) UpdateCategory(ctx context.Context, businessID, id int64, input domain.CategoryInput) error {
 	err := r.queries.UpdateCategory(ctx, sqlc.UpdateCategoryParams{
 		Name:        input.Name,
-		Description: nullString(input.Description),
+		Description: sqlutil.NullString(input.Description),
 		BusinessID:  businessID,
 		ID:          id,
 	})
@@ -137,8 +138,4 @@ func (r *Repository) DeleteCategory(ctx context.Context, businessID, id int64) e
 	}
 
 	return nil
-}
-
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
 }

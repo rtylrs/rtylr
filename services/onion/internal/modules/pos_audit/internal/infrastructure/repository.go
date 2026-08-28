@@ -25,6 +25,11 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) List(ctx context.Context, filter domain.AuditLogFilter) ([]domain.AuditLog, error) {
+	limit := filter.Limit
+	if limit <= 0 {
+		limit = 100
+	}
+
 	rows, err := r.queries.ListAuditLogs(ctx, sqlc.ListAuditLogsParams{
 		BusinessID:      filter.BusinessID,
 		Action:          nullStringPtr(filter.Action),
@@ -34,7 +39,7 @@ func (r *Repository) List(ctx context.Context, filter domain.AuditLogFilter) ([]
 		EndDate:         nullTimePtr(filter.EndDate),
 		CursorCreatedAt: nullTime(filter.CursorCreatedAt),
 		CursorID:        nullInt64Ptr(filter.CursorID),
-		Limit:           filter.Limit,
+		Limit:           limit,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list audit logs", logger.Error(err))

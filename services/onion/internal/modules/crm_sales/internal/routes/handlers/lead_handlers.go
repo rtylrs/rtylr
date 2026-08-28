@@ -37,6 +37,9 @@ func (h *GetPipelineHandler) Serve(ctx context.Context, _ *GetPipelineRequest) (
 	if device.User == nil {
 		return GetPipelineResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:view"); err != nil {
+		return GetPipelineResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -76,6 +79,9 @@ func (h *ListLeadsHandler) Serve(ctx context.Context, req *ListLeadsRequest) (Li
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return ListLeadsResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:view"); err != nil {
+		return ListLeadsResponse{}, err
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
@@ -127,6 +133,9 @@ func (h *CreateLeadHandler) Serve(ctx context.Context, req *CreateLeadRequest) (
 	if device.User == nil {
 		return CreateLeadResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:create"); err != nil {
+		return CreateLeadResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -175,6 +184,9 @@ func (h *GetLeadHandler) Serve(ctx context.Context, _ *GetLeadRequest) (GetLeadR
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return GetLeadResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:view"); err != nil {
+		return GetLeadResponse{}, err
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
@@ -234,6 +246,9 @@ func (h *UpdateLeadHandler) Serve(ctx context.Context, req *UpdateLeadRequest) (
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return UpdateLeadResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:edit"); err != nil {
+		return UpdateLeadResponse{}, err
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
@@ -295,6 +310,9 @@ func (h *DeleteLeadHandler) Serve(ctx context.Context, _ *DeleteLeadRequest) (De
 	device := authPkg.DeviceCtx(ctx)
 	if device.User == nil {
 		return DeleteLeadResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:delete"); err != nil {
+		return DeleteLeadResponse{}, err
 	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")

@@ -18,7 +18,7 @@ SELECT
 FROM businesses b
 LEFT JOIN config c ON c.business_id = b.id
 WHERE (b.id = sqlc.arg(owner_id) OR b.owner_id = sqlc.arg(owner_id)) AND b.is_active = TRUE
-ORDER BY b.id ASC
+ORDER BY (b.id = sqlc.arg(owner_id)) DESC, b.id ASC
 LIMIT 1;
 
 -- name: GetPublicBusiness :one
@@ -37,6 +37,7 @@ FROM businesses
 WHERE slug = ? AND is_active = TRUE
 LIMIT 1;
 
+-- cross-schema read from hr_core — expose active HR locations in the public business profile.
 -- name: ListPublicLocationsByOwner :many
 SELECT id, name, COALESCE(slug, '') AS slug, COALESCE(address, '') AS address,
        COALESCE(timezone, '') AS timezone, is_active
@@ -46,7 +47,7 @@ ORDER BY is_default DESC, name ASC
 LIMIT 100;
 
 -- name: UpdateBusinessSlug :exec
-UPDATE businesses SET slug = ? WHERE id = ? AND owner_id = ?;
+UPDATE businesses SET slug = ? WHERE id = ?;
 
 -- name: RenameBusiness :execresult
 UPDATE businesses

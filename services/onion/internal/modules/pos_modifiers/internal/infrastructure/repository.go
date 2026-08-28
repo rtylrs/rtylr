@@ -3,11 +3,11 @@ package infrastructure
 import (
 	"context"
 	"database/sql"
-	"strconv"
 
 	"github.com/voxire/onion/internal/modules/pos_modifiers/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_modifiers/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -37,7 +37,7 @@ func (r *Repository) List(ctx context.Context, businessID int64) ([]domain.Modif
 			OwnerID:    row.OwnerID,
 			BusinessID: row.BusinessID,
 			Name:       row.Name,
-			PriceDelta: decimalToFloat(row.PriceDelta),
+			PriceDelta: sqlutil.DecimalToFloat(row.PriceDelta),
 			GroupName:  row.GroupName.String,
 			IsRequired: row.IsRequired.Bool,
 			CreatedAt:  row.CreatedAt.Time,
@@ -52,7 +52,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 		OwnerID:    ownerID,
 		BusinessID: businessID,
 		Name:       input.Name,
-		PriceDelta: floatToDecimal(input.PriceDelta),
+		PriceDelta: sqlutil.FloatToDecimal(input.PriceDelta),
 		GroupName:  sql.NullString{String: input.GroupName, Valid: input.GroupName != ""},
 		IsRequired: sql.NullBool{Bool: input.IsRequired, Valid: true},
 	})
@@ -66,7 +66,7 @@ func (r *Repository) Create(ctx context.Context, ownerID, businessID int64, inpu
 func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.ModifierInput) error {
 	result, err := r.queries.UpdateModifier(ctx, sqlc.UpdateModifierParams{
 		Name:       input.Name,
-		PriceDelta: floatToDecimal(input.PriceDelta),
+		PriceDelta: sqlutil.FloatToDecimal(input.PriceDelta),
 		GroupName:  sql.NullString{String: input.GroupName, Valid: input.GroupName != ""},
 		IsRequired: sql.NullBool{Bool: input.IsRequired, Valid: true},
 		ID:         id,
@@ -103,21 +103,4 @@ func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
 		return domain.ErrModifierNotFound
 	}
 	return nil
-}
-
-func decimalToFloat(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse modifier decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}
-
-func floatToDecimal(f float64) string {
-	return strconv.FormatFloat(f, 'f', 2, 64)
 }

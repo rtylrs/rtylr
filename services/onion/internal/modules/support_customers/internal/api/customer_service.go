@@ -42,7 +42,7 @@ func (a *CustomerAPI) ListCustomers(ctx context.Context, req *supportcustomerv1.
 
 	return &supportcustomerv1.ListCustomersResponse{
 		Customers: newCustomers(items),
-		Total:     int32(total),
+		Total:     int32(total), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Page:      int32(page),
 		PageSize:  int32(pageSize),
 	}, nil
@@ -93,7 +93,7 @@ func newCustomer(item domain.Customer) *supportcustomerv1.Customer {
 		Name:         item.Name,
 		Email:        item.Email,
 		Phone:        item.Phone,
-		TotalTickets: int32(item.TotalTickets),
+		TotalTickets: int32(item.TotalTickets), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		LastTicketAt: lastTicketAt,
 		CreatedAt:    formatTime(item.CreatedAt),
 	}

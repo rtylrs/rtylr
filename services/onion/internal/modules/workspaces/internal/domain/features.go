@@ -223,11 +223,12 @@ type TeamMemberWorkload struct {
 // ─────────────────────────────────────────────
 
 type UserSettings struct {
-	UserID             int64
-	TaskAssigned       bool
-	TaskComments       bool
-	Mentions           bool
-	StatusChanges      bool
-	WeeklyDigest       bool
-	EmailNotifications bool
+	UserID                 int64
+	TaskAssigned           bool
+	TaskComments           bool
+	Mentions               bool
+	StatusChanges          bool
+	WeeklyDigest           bool
+	EmailNotifications     bool
+	SidebarPreferencesJSON string
 }

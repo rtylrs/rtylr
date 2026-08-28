@@ -38,6 +38,7 @@ var (
 	clientInstance *Client
 	clientOnce     sync.Once
 	httpOnce       sync.Once
+	httpClientErr  error
 )
 
 // Client wraps a Trino sql.DB pool.
@@ -63,7 +64,10 @@ func Connect(ctx context.Context) error {
 		return nil
 	}
 
-	registerHTTPClient()
+	if err := registerHTTPClient(); err != nil {
+		logger.Ctx(ctx).Warn("failed to register trino HTTP client; analytics queries disabled", logger.Error(err))
+		return nil
+	}
 
 	db, err := openDB(ctx)
 	if err != nil {
@@ -89,7 +93,7 @@ func getClient() *Client {
 	return clientInstance
 }
 
-func registerHTTPClient() {
+func registerHTTPClient() error {
 	httpOnce.Do(func() {
 		httpClient := &http.Client{
 			Transport: &http.Transport{
@@ -105,8 +109,9 @@ func registerHTTPClient() {
 				ResponseHeaderTimeout: defaultQueryTimeout,
 			},
 		}
-		trinodriver.RegisterCustomClient(customHTTPClientName, httpClient)
+		httpClientErr = trinodriver.RegisterCustomClient(customHTTPClientName, httpClient)
 	})
+	return httpClientErr
 }
 
 func buildConfig() (*trinodriver.Config, error) {

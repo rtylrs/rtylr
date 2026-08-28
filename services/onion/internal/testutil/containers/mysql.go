@@ -103,6 +103,7 @@ func applySQLDir(ctx context.Context, dsn, dir string) error {
 	defer db.Close()
 
 	for _, file := range files {
+		// #nosec G304 -- Test setup reads the validated migration files returned by sqlFiles.
 		body, err := os.ReadFile(file)
 		if err != nil {
 			return err

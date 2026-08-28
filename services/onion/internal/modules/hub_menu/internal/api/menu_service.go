@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/application"
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	hubmenuv1 "github.com/voxire/voxie/gen/go/hub/menu/v1"
@@ -24,7 +25,7 @@ func NewMenuAPI(service *application.Service) *MenuAPI {
 }
 
 func (a *MenuAPI) ListMenu(ctx context.Context, _ *hubmenuv1.ListMenuRequest) (*hubmenuv1.ListMenuResponse, error) {
-	businessID, err := authenticatedBusinessID(ctx)
+	businessID, err := requireMenuPermission(ctx, "menu:menus:view")
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +37,7 @@ func (a *MenuAPI) ListMenu(ctx context.Context, _ *hubmenuv1.ListMenuRequest) (*
 }
 
 func (a *MenuAPI) UpdateMenu(ctx context.Context, req *hubmenuv1.UpdateMenuRequest) (*hubmenuv1.UpdateMenuResponse, error) {
-	businessID, err := authenticatedBusinessID(ctx)
+	businessID, err := requireMenuPermission(ctx, "menu:menus:edit")
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +51,7 @@ func (a *MenuAPI) UpdateMenu(ctx context.Context, req *hubmenuv1.UpdateMenuReque
 }
 
 func (a *MenuAPI) ListMenuBanners(ctx context.Context, _ *hubmenuv1.ListMenuBannersRequest) (*hubmenuv1.ListMenuBannersResponse, error) {
-	businessID, err := authenticatedBusinessID(ctx)
+	businessID, err := requireMenuPermission(ctx, "menu:branding:edit")
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +67,7 @@ func (a *MenuAPI) ListMenuBanners(ctx context.Context, _ *hubmenuv1.ListMenuBann
 }
 
 func (a *MenuAPI) CreateMenuBanner(ctx context.Context, req *hubmenuv1.CreateMenuBannerRequest) (*hubmenuv1.CreateMenuBannerResponse, error) {
-	businessID, err := authenticatedBusinessID(ctx)
+	businessID, err := requireMenuPermission(ctx, "menu:branding:edit")
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +83,7 @@ func (a *MenuAPI) CreateMenuBanner(ctx context.Context, req *hubmenuv1.CreateMen
 }
 
 func (a *MenuAPI) UpdateMenuBanner(ctx context.Context, req *hubmenuv1.UpdateMenuBannerRequest) (*hubmenuv1.UpdateMenuBannerResponse, error) {
-	businessID, err := authenticatedBusinessID(ctx)
+	businessID, err := requireMenuPermission(ctx, "menu:branding:edit")
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +99,7 @@ func (a *MenuAPI) UpdateMenuBanner(ctx context.Context, req *hubmenuv1.UpdateMen
 }
 
 func (a *MenuAPI) DeleteMenuBanner(ctx context.Context, req *hubmenuv1.DeleteMenuBannerRequest) (*hubmenuv1.DeleteMenuBannerResponse, error) {
-	businessID, err := authenticatedBusinessID(ctx)
+	businessID, err := requireMenuPermission(ctx, "menu:branding:edit")
 	if err != nil {
 		return nil, err
 	}
@@ -118,6 +119,14 @@ func authenticatedBusinessID(ctx context.Context) (int64, error) {
 		return 0, onekiterrors.PermissionDenied()
 	}
 	return businessID, nil
+}
+
+func requireMenuPermission(ctx context.Context, permission string) (int64, error) {
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || authUser == nil || !authPkg.HasAppPermission(authUser, authorization.AppMenu, permission) {
+		return 0, onekiterrors.PermissionDenied()
+	}
+	return authenticatedBusinessID(ctx)
 }
 
 func createBannerInput(req *hubmenuv1.CreateMenuBannerRequest) (domain.BannerInput, error) {

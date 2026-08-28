@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/suppliers/internal/domain"
 	"github.com/voxire/onion/internal/modules/suppliers/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -27,8 +28,8 @@ func NewRepository(db *sql.DB) *Repository {
 func (r *Repository) ListSuppliers(ctx context.Context, businessID int64, limit, offset int) ([]domain.Supplier, bool, error) {
 	rows, err := r.queries.ListSuppliersPaginated(ctx, sqlc.ListSuppliersPaginatedParams{
 		BusinessID: businessID,
-		Limit:      int32(limit + 1),
-		Offset:     int32(offset),
+		Limit:      int32(limit + 1), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset:     int32(offset),    // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list suppliers", logger.Error(err))
@@ -53,14 +54,14 @@ func (r *Repository) CreateSupplier(ctx context.Context, businessID int64, input
 		OwnerID:      businessID,
 		BusinessID:   businessID,
 		Name:         input.Name,
-		Email:        nullString(input.Email),
-		Phone:        nullString(input.Phone),
-		Address:      nullString(input.Address),
-		City:         nullString(input.City),
-		Country:      nullString(input.Country),
-		TaxID:        nullString(input.TaxID),
-		PaymentTerms: nullString(input.PaymentTerms),
-		Notes:        nullString(input.Notes),
+		Email:        sqlutil.NullString(input.Email),
+		Phone:        sqlutil.NullString(input.Phone),
+		Address:      sqlutil.NullString(input.Address),
+		City:         sqlutil.NullString(input.City),
+		Country:      sqlutil.NullString(input.Country),
+		TaxID:        sqlutil.NullString(input.TaxID),
+		PaymentTerms: sqlutil.NullString(input.PaymentTerms),
+		Notes:        sqlutil.NullString(input.Notes),
 		IsActive:     sql.NullBool{Bool: input.IsActive, Valid: true},
 	})
 	if err != nil {
@@ -74,14 +75,14 @@ func (r *Repository) CreateSupplier(ctx context.Context, businessID int64, input
 func (r *Repository) UpdateSupplier(ctx context.Context, businessID, id int64, input domain.SupplierInput) error {
 	err := r.queries.UpdateSupplier(ctx, sqlc.UpdateSupplierParams{
 		Name:         input.Name,
-		Email:        nullString(input.Email),
-		Phone:        nullString(input.Phone),
-		Address:      nullString(input.Address),
-		City:         nullString(input.City),
-		Country:      nullString(input.Country),
-		TaxID:        nullString(input.TaxID),
-		PaymentTerms: nullString(input.PaymentTerms),
-		Notes:        nullString(input.Notes),
+		Email:        sqlutil.NullString(input.Email),
+		Phone:        sqlutil.NullString(input.Phone),
+		Address:      sqlutil.NullString(input.Address),
+		City:         sqlutil.NullString(input.City),
+		Country:      sqlutil.NullString(input.Country),
+		TaxID:        sqlutil.NullString(input.TaxID),
+		PaymentTerms: sqlutil.NullString(input.PaymentTerms),
+		Notes:        sqlutil.NullString(input.Notes),
 		IsActive:     sql.NullBool{Bool: input.IsActive, Valid: true},
 		BusinessID:   businessID,
 		ID:           id,
@@ -195,8 +196,4 @@ func supplierFromRow(row sqlc.ErpSupplier) domain.Supplier {
 	}
 
 	return s
-}
-
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
 }

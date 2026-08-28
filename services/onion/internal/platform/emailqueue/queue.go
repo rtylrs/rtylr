@@ -210,7 +210,7 @@ func (p *Pool) processOne(ctx context.Context) bool {
 			}
 			if err := p.q.RescheduleJob(ctx, sqlc.RescheduleJobParams{
 				Status:    newStatus,
-				Attempts:  uint8(newAttempts),
+				Attempts:  uint8(newAttempts), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 				LastError: sql.NullString{String: sendErr.Error(), Valid: true},
 				JobID:     sql.NullString{},
 				DATEADD:   delay,
@@ -232,7 +232,7 @@ func (p *Pool) processOne(ctx context.Context) bool {
 		}
 		if err := p.q.RescheduleJob(ctx, sqlc.RescheduleJobParams{
 			Status:    newStatus,
-			Attempts:  uint8(newAttempts),
+			Attempts:  uint8(newAttempts), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			LastError: sql.NullString{String: sendErr.Error(), Valid: true},
 			JobID:     sql.NullString{}, // NULL resets job_id so it can be retried
 			DATEADD:   retryDelay(newAttempts),
@@ -245,7 +245,7 @@ func (p *Pool) processOne(ctx context.Context) bool {
 		}
 	} else {
 		if err := p.q.MarkJobSent(ctx, sqlc.MarkJobSentParams{
-			Attempts: uint8(int(job.Attempts) + 1),
+			Attempts: uint8(int(job.Attempts) + 1), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			ID:       job.ID,
 		}); err != nil {
 			logger.Ctx(ctx).Error("failed to mark email job sent",

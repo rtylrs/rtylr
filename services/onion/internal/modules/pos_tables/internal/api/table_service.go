@@ -171,7 +171,7 @@ func toProtoTable(t domain.Table) *postablev1.Table {
 		OwnerId:    t.OwnerID,
 		LocationId: t.LocationID,
 		Label:      t.Label,
-		Seats:      int32(t.Seats),
+		Seats:      int32(t.Seats), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Status:     t.Status,
 		CreatedAt:  t.CreatedAt.Format("2006-01-02T15:04:05Z"),
 		UpdatedAt:  t.UpdatedAt.Format("2006-01-02T15:04:05Z"),

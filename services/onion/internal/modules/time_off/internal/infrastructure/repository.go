@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/time_off/internal/domain"
 	"github.com/voxire/onion/internal/modules/time_off/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -43,7 +43,7 @@ func (r *Repository) ListTimeOffRequests(ctx context.Context, businessID int64) 
 		t.Type = string(row.Type)
 		t.StartDate = row.StartDate
 		t.EndDate = row.EndDate
-		t.DaysCount = parseDecimal(row.DaysCount)
+		t.DaysCount = sqlutil.ParseDecimal(row.DaysCount)
 		if row.Status.Valid {
 			t.Status = string(row.Status.HrTimeOffRequestsStatus)
 		}
@@ -119,15 +119,3 @@ func parseDate(s string) time.Time {
 
 // parseDecimal converts a DB decimal string to float64, logging corrupt
 // values instead of silently coercing them to 0.
-func parseDecimal(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse time-off decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}

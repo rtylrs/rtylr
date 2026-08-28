@@ -7,6 +7,7 @@ import (
 	"github.com/voxire/onion/internal/modules/workspaces/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	flowsettingv1 "github.com/voxire/voxie/gen/go/flow/setting/v1"
 )
 
@@ -29,14 +30,18 @@ func (a *SettingAPI) GetUserSettings(ctx context.Context, _ *flowsettingv1.GetUs
 		return nil, workspaceInternalError(ctx, "GetUserSettings failed", err)
 	}
 
-	return &flowsettingv1.GetUserSettingsResponse{
+	response := &flowsettingv1.GetUserSettingsResponse{
 		TaskAssigned:       s.TaskAssigned,
 		TaskComments:       s.TaskComments,
 		Mentions:           s.Mentions,
 		StatusChanges:      s.StatusChanges,
 		WeeklyDigest:       s.WeeklyDigest,
 		EmailNotifications: s.EmailNotifications,
-	}, nil
+	}
+	if s.SidebarPreferencesJSON != "" {
+		response.SidebarPreferences = &s.SidebarPreferencesJSON
+	}
+	return response, nil
 }
 
 func (a *SettingAPI) UpdateUserSettings(ctx context.Context, req *flowsettingv1.UpdateUserSettingsRequest) (*flowsettingv1.UpdateUserSettingsResponse, error) {
@@ -44,15 +49,31 @@ func (a *SettingAPI) UpdateUserSettings(ctx context.Context, req *flowsettingv1.
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
 	}
+	if err := requireFlowPermission(ctx, "flow:settings:manage"); err != nil {
+		return nil, err
+	}
+	if _, businessErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID); businessErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
+
+	sidebarPreferencesJSON := req.GetSidebarPreferences()
+	if req.SidebarPreferences == nil {
+		current, err := a.Service.GetUserSettings(ctx, authUser.UserID)
+		if err != nil {
+			return nil, workspaceInternalError(ctx, "GetUserSettings before update failed", err)
+		}
+		sidebarPreferencesJSON = current.SidebarPreferencesJSON
+	}
 
 	if err := a.Service.UpdateUserSettings(ctx, domain.UserSettings{
-		UserID:             authUser.UserID,
-		TaskAssigned:       req.GetTaskAssigned(),
-		TaskComments:       req.GetTaskComments(),
-		Mentions:           req.GetMentions(),
-		StatusChanges:      req.GetStatusChanges(),
-		WeeklyDigest:       req.GetWeeklyDigest(),
-		EmailNotifications: req.GetEmailNotifications(),
+		UserID:                 authUser.UserID,
+		TaskAssigned:           req.GetTaskAssigned(),
+		TaskComments:           req.GetTaskComments(),
+		Mentions:               req.GetMentions(),
+		StatusChanges:          req.GetStatusChanges(),
+		WeeklyDigest:           req.GetWeeklyDigest(),
+		EmailNotifications:     req.GetEmailNotifications(),
+		SidebarPreferencesJSON: sidebarPreferencesJSON,
 	}); err != nil {
 		return nil, workspaceInternalError(ctx, "UpdateUserSettings failed", err)
 	}

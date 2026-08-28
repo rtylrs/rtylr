@@ -20,9 +20,7 @@ const (
 )
 
 func invalidatePayrollScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(payrollScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(payrollScope, businessID))
 }
 
 type repository interface {

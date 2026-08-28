@@ -6,10 +6,13 @@ import (
 )
 
 const (
-	PaddleAPIKeyEnvVar        = "PADDLE_API_KEY"
+	// #nosec G101 -- These are environment variable names, not secret values.
+	PaddleAPIKeyEnvVar = "PADDLE_API_KEY"
+	// #nosec G101 -- These are environment variable names, not secret values.
 	PaddleWebhookSecretEnvVar = "PADDLE_WEBHOOK_SECRET"
-	PaddleClientTokenEnvVar   = "PADDLE_CLIENT_TOKEN"
-	PaddleSandboxEnvVar       = "PADDLE_SANDBOX"
+	// #nosec G101 -- These are environment variable names, not secret values.
+	PaddleClientTokenEnvVar = "PADDLE_CLIENT_TOKEN"
+	PaddleSandboxEnvVar     = "PADDLE_SANDBOX"
 )
 
 func GetPaddleAPIKey() string {

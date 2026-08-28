@@ -56,6 +56,9 @@ func (h *ListExpenseCategoriesHandler) Serve(ctx context.Context, _ *ListExpense
 	if device.User == nil {
 		return ListExpenseCategoriesResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireFinancePermission(ctx, "finance:expenses:view"); err != nil {
+		return ListExpenseCategoriesResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {
@@ -110,6 +113,9 @@ func (h *CreateExpenseCategoryHandler) Serve(ctx context.Context, req *CreateExp
 
 	if device.User == nil {
 		return CreateExpenseCategoryResponse{}, onekiterrors.PermissionDenied()
+	}
+	if err := requireFinancePermission(ctx, "finance:expenses:create"); err != nil {
+		return CreateExpenseCategoryResponse{}, err
 	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)

@@ -11,6 +11,19 @@ import (
 )
 
 func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.Service) {
+	serverHttp.RegisterPOSTWithValidation[handlers.VoidOrderApprovalRequest, handlers.VoidOrderApprovalResponse](
+		ctx, router, handlers.ApproveVoidOrderRoutes(), &handlers.ApproveVoidOrderHandler{Service: service},
+	)
+	serverHttp.RegisterPOSTWithValidation[handlers.VoidOrderApprovalRequest, handlers.VoidOrderApprovalResponse](
+		ctx, router, handlers.OverrideVoidOrderRoutes(), &handlers.OverrideVoidOrderHandler{Service: service},
+	)
+	serverHttp.RegisterPOSTWithValidation[handlers.ProcessRefundRequest, handlers.ProcessRefundResponse](
+		ctx, router, handlers.ApproveRefundOrderRoutes(), &handlers.ApproveRefundOrderHandler{Service: service},
+	)
+	serverHttp.RegisterPOSTWithValidation[handlers.ProcessRefundRequest, handlers.ProcessRefundResponse](
+		ctx, router, handlers.OverrideRefundOrderRoutes(), &handlers.OverrideRefundOrderHandler{Service: service},
+	)
+
 	serverHttp.RegisterPOSTWithValidation[handlers.PayOrderRequest, handlers.PayOrderResponse](
 		ctx, router, handlers.PayOrderRoutes(),
 		&handlers.PayOrderHandler{Service: service},
@@ -19,4 +32,5 @@ func RegisterRoutes(ctx context.Context, router *chi.Mux, service *application.S
 	router.Post("/pos/payments/webhook", handlers.PaddlePOSWebhookHTTPHandler(service))
 
 	router.Get("/pos/ws", handlers.ServePOSWebSocket)
+	router.Post("/pos/ws-ticket", handlers.IssuePOSWebSocketTicket)
 }

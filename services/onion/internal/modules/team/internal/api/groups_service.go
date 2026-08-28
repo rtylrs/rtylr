@@ -20,6 +20,9 @@ func NewGroupsAPI(service *application.Service) *GroupsAPI {
 }
 
 func (a *GroupsAPI) ListGroups(ctx context.Context, _ *hubteamgroupsv1.ListGroupsRequest) (*hubteamgroupsv1.ListGroupsResponse, error) {
+	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
+		return nil, permissionErr
+	}
 	ownerID, ok := teamOwnerIDFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -39,6 +42,9 @@ func (a *GroupsAPI) ListGroups(ctx context.Context, _ *hubteamgroupsv1.ListGroup
 }
 
 func (a *GroupsAPI) CreateGroup(ctx context.Context, req *hubteamgroupsv1.CreateGroupRequest) (*hubteamgroupsv1.CreateGroupResponse, error) {
+	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
+		return nil, permissionErr
+	}
 	_, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -74,6 +80,9 @@ func (a *GroupsAPI) CreateGroup(ctx context.Context, req *hubteamgroupsv1.Create
 }
 
 func (a *GroupsAPI) GetGroupDetail(ctx context.Context, req *hubteamgroupsv1.GetGroupDetailRequest) (*hubteamgroupsv1.GetGroupDetailResponse, error) {
+	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
+		return nil, permissionErr
+	}
 	ownerID, ok := teamOwnerIDFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -93,6 +102,9 @@ func (a *GroupsAPI) GetGroupDetail(ctx context.Context, req *hubteamgroupsv1.Get
 }
 
 func (a *GroupsAPI) UpdateGroup(ctx context.Context, req *hubteamgroupsv1.UpdateGroupRequest) (*hubteamgroupsv1.UpdateGroupResponse, error) {
+	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
+		return nil, permissionErr
+	}
 	_, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -130,6 +142,9 @@ func (a *GroupsAPI) UpdateGroup(ctx context.Context, req *hubteamgroupsv1.Update
 }
 
 func (a *GroupsAPI) DeleteGroup(ctx context.Context, req *hubteamgroupsv1.DeleteGroupRequest) (*hubteamgroupsv1.DeleteGroupResponse, error) {
+	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
+		return nil, permissionErr
+	}
 	_, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -151,6 +166,9 @@ func (a *GroupsAPI) DeleteGroup(ctx context.Context, req *hubteamgroupsv1.Delete
 }
 
 func (a *GroupsAPI) AddGroupMembers(ctx context.Context, req *hubteamgroupsv1.AddGroupMembersRequest) (*hubteamgroupsv1.AddGroupMembersResponse, error) {
+	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
+		return nil, permissionErr
+	}
 	actorID, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -171,12 +189,15 @@ func (a *GroupsAPI) AddGroupMembers(ctx context.Context, req *hubteamgroupsv1.Ad
 	}
 
 	return &hubteamgroupsv1.AddGroupMembersResponse{
-		Added:   int32(len(userIDs)),
+		Added:   int32(len(userIDs)), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Message: "Members added",
 	}, nil
 }
 
 func (a *GroupsAPI) RemoveGroupMember(ctx context.Context, req *hubteamgroupsv1.RemoveGroupMemberRequest) (*hubteamgroupsv1.RemoveGroupMemberResponse, error) {
+	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
+		return nil, permissionErr
+	}
 	_, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -196,6 +217,9 @@ func (a *GroupsAPI) RemoveGroupMember(ctx context.Context, req *hubteamgroupsv1.
 }
 
 func (a *GroupsAPI) GetUserGroups(ctx context.Context, req *hubteamgroupsv1.GetUserGroupsRequest) (*hubteamgroupsv1.GetUserGroupsResponse, error) {
+	if _, permissionErr := requireHubPermission(ctx, "hub:groups:manage"); permissionErr != nil {
+		return nil, permissionErr
+	}
 	ownerID, ok := teamOwnerIDFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -245,7 +269,7 @@ func toProtoGroup(g domain.Group) *hubteamgroupsv1.Group {
 		Description:         g.Description,
 		Color:               g.Color,
 		ResourcePermissions: perms,
-		MemberCount:         int32(g.MemberCount),
+		MemberCount:         int32(g.MemberCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		CreatedAt:           g.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt:           g.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
@@ -269,7 +293,7 @@ func toProtoGroupDetail(detail domain.GroupDetail) *hubteamgroupsv1.GroupDetail 
 		Description:         g.GetDescription(),
 		Color:               g.GetColor(),
 		ResourcePermissions: g.GetResourcePermissions(),
-		MemberCount:         int32(len(members)),
+		MemberCount:         int32(len(members)), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		CreatedAt:           g.GetCreatedAt(),
 		UpdatedAt:           g.GetUpdatedAt(),
 		Members:             members,

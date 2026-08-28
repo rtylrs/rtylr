@@ -54,10 +54,10 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} \
     -o /app/api ./cmd/api
 
 # Final stage — minimal image
-FROM alpine:3.20
+FROM alpine:3.22
 
 RUN apk add --no-cache ca-certificates tzdata
-RUN addgroup -S onion && adduser -S -G onion onion
+RUN addgroup -S app && adduser -S -G app app
 
 WORKDIR /app
 
@@ -65,9 +65,8 @@ COPY --from=builder /app/api /app/api
 
 EXPOSE 9999
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD wget -q -O /dev/null http://127.0.0.1:9999/health || exit 1
+USER app
 
-USER onion
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["wget", "--spider", "--quiet", "http://127.0.0.1:9999/health"]
 
 CMD ["/app/api"]

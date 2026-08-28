@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/security/internal/application"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	hubsecurityv1 "github.com/voxire/voxie/gen/go/hub/security/v1"
 )
@@ -27,12 +26,12 @@ type GetSettingsResponse struct {
 }
 
 func (h *GetSettingsHandler) Serve(ctx context.Context, _ *GetSettingsRequest) (GetSettingsResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return GetSettingsResponse{}, onekiterrors.PermissionDenied()
+	device, authErr := requireSecurityPermission(ctx)
+	if authErr != nil {
+		return GetSettingsResponse{}, authErr
 	}
 
-	settings, err := h.Service.GetSettings(ctx, device.User.UserID)
+	settings, err := h.Service.GetSettings(ctx, device.UserID)
 	if err != nil {
 		return GetSettingsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get security settings")
 	}
@@ -69,12 +68,12 @@ type Toggle2FAResponse struct {
 }
 
 func (h *Toggle2FAHandler) Serve(ctx context.Context, req *Toggle2FARequest) (Toggle2FAResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return Toggle2FAResponse{}, onekiterrors.PermissionDenied()
+	device, authErr := requireSecurityPermission(ctx)
+	if authErr != nil {
+		return Toggle2FAResponse{}, authErr
 	}
 
-	if err := h.Service.SetTwoFactor(ctx, device.User.UserID, req.Enabled); err != nil {
+	if err := h.Service.SetTwoFactor(ctx, device.UserID, req.Enabled); err != nil {
 		return Toggle2FAResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to update 2FA settings")
 	}
 
@@ -105,13 +104,13 @@ type LoginHistoryResponse struct {
 }
 
 func (h *LoginHistoryHandler) Serve(ctx context.Context, req *LoginHistoryRequest) (LoginHistoryResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return LoginHistoryResponse{}, onekiterrors.PermissionDenied()
+	device, authErr := requireSecurityPermission(ctx)
+	if authErr != nil {
+		return LoginHistoryResponse{}, authErr
 	}
 
 	page, pageSize := application.NormalizeLoginHistoryPagination(req.Page, req.PageSize)
-	entries, total, hasMore, err := h.Service.GetLoginHistory(ctx, device.User.UserID, page, pageSize)
+	entries, total, hasMore, err := h.Service.GetLoginHistory(ctx, device.UserID, page, pageSize)
 	if err != nil {
 		return LoginHistoryResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to get login history")
 	}
@@ -131,9 +130,9 @@ func (h *LoginHistoryHandler) Serve(ctx context.Context, req *LoginHistoryReques
 
 	return LoginHistoryResponse{
 		History:  payloads,
-		Total:    int32(total),
-		Page:     int32(page),
-		PageSize: int32(pageSize),
+		Total:    int32(total),    // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Page:     int32(page),     // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		PageSize: int32(pageSize), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		HasMore:  hasMore,
 	}, nil
 }
@@ -149,12 +148,12 @@ type (
 )
 
 func (h *InvalidateSessionsHandler) Serve(ctx context.Context, _ *InvalidateSessionsRequest) (InvalidateSessionsResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return InvalidateSessionsResponse{}, onekiterrors.PermissionDenied()
+	device, authErr := requireSecurityPermission(ctx)
+	if authErr != nil {
+		return InvalidateSessionsResponse{}, authErr
 	}
 
-	if err := h.Service.InvalidateAllSessions(ctx, device.User.UserID); err != nil {
+	if err := h.Service.InvalidateAllSessions(ctx, device.UserID); err != nil {
 		return InvalidateSessionsResponse{}, onekiterrors.New(http.StatusInternalServerError, "Failed to invalidate sessions")
 	}
 

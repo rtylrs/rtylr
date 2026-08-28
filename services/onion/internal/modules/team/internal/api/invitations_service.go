@@ -24,12 +24,12 @@ func NewInvitationsAPI(service *application.Service) *InvitationsAPI {
 }
 
 func (a *InvitationsAPI) InviteUser(ctx context.Context, req *hubteaminvitationsv1.InviteUserRequest) (*hubteaminvitationsv1.InviteUserResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return nil, onekiterrors.PermissionDenied()
+	device, permissionErr := requireHubPermission(ctx, "hub:team:invite")
+	if permissionErr != nil {
+		return nil, permissionErr
 	}
 
-	actorID := device.User.UserID
+	actorID := device.UserID
 	apps := req.GetApps()
 	if apps == nil {
 		apps = []string{}
@@ -39,13 +39,28 @@ func (a *InvitationsAPI) InviteUser(ctx context.Context, req *hubteaminvitations
 	if role == "" {
 		role = domain.RoleStaff
 	}
+	appAssignments, assignmentErr := appAssignmentsFromProto(req.GetAppAssignments())
+	if assignmentErr != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, assignmentErr.Error())
+	}
+	groupIDs := append([]int64{}, req.GetGroupIds()...)
+	password := req.GetPassword()
+	provisioningMode := req.GetProvisioningMode()
+	if provisioningMode == "direct_credentials" && password == "" {
+		password = req.GetTemporaryPassword()
+	}
 
-	userID, token, err := a.Service.InviteUser(ctx, actorID, device.User.BusinessID, domain.InviteUserInput{
-		Email:    req.GetEmail(),
-		FullName: req.GetFullName(),
-		Password: req.GetPassword(),
-		Apps:     apps,
-		Role:     role,
+	userID, token, err := a.Service.InviteUser(ctx, actorID, device.BusinessID, domain.InviteUserInput{
+		Email:            req.GetEmail(),
+		Username:         req.GetUsername(),
+		FullName:         req.GetFullName(),
+		Password:         password,
+		Apps:             apps,
+		Role:             role,
+		ProvisioningMode: provisioningMode,
+		DashRole:         req.GetDashRole(),
+		AppAssignments:   appAssignments,
+		GroupIDs:         groupIDs,
 	})
 	if err != nil {
 		switch {
@@ -57,12 +72,16 @@ func (a *InvitationsAPI) InviteUser(ctx context.Context, req *hubteaminvitations
 			return nil, onekiterrors.New(http.StatusNotFound, "User not found")
 		case strings.Contains(strings.ToLower(err.Error()), "invalid role"):
 			return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
+		case strings.Contains(strings.ToLower(err.Error()), "username") || strings.Contains(strings.ToLower(err.Error()), "direct credentials"):
+			return nil, onekiterrors.New(http.StatusBadRequest, err.Error())
 		default:
 			return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to invite user")
 		}
 	}
 
-	if req.GetPassword() == "" && token != "" {
+	recordSeatChangeAsync(ctx, a.Service, actorID, device.BusinessID)
+
+	if password == "" && token != "" {
 		inviteLink := config.AuthAppURL + "/invite/" + token
 		if emailErr := a.Service.EnqueueInviteEmail(ctx, req.GetEmail(), inviteLink); emailErr != nil {
 			logger.Ctx(ctx).Warn("failed to enqueue invite email", logger.Error(emailErr))
@@ -102,6 +121,9 @@ func (a *InvitationsAPI) AcceptInvite(ctx context.Context, req *hubteaminvitatio
 }
 
 func (a *InvitationsAPI) BulkInvite(ctx context.Context, req *hubteaminvitationsv1.BulkInviteRequest) (*hubteaminvitationsv1.BulkInviteResponse, error) {
+	if _, permissionErr := requireHubPermission(ctx, "hub:team:invite"); permissionErr != nil {
+		return nil, permissionErr
+	}
 	_, ownerID, ok := teamManagerFromCtx(ctx, a.Service)
 	if !ok {
 		return nil, onekiterrors.PermissionDenied()
@@ -126,12 +148,23 @@ func (a *InvitationsAPI) BulkInvite(ctx context.Context, req *hubteaminvitations
 	if apps == nil {
 		apps = []string{}
 	}
+	appAssignments, assignmentErr := appAssignmentsFromProto(req.GetAppAssignments())
+	if assignmentErr != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, assignmentErr.Error())
+	}
+	groupIDs := append([]int64{}, req.GetGroupIds()...)
+	if req.GetGroupId() > 0 {
+		groupIDs = append(groupIDs, req.GetGroupId())
+	}
 
 	results, err := a.Service.BulkInvite(ctx, ownerID, businessID, domain.BulkInviteInput{
-		Emails:  emails,
-		Role:    role,
-		Apps:    apps,
-		GroupID: req.GetGroupId(),
+		Emails:         emails,
+		Role:           role,
+		Apps:           apps,
+		DashRole:       req.GetDashRole(),
+		AppAssignments: appAssignments,
+		GroupIDs:       groupIDs,
+		GroupID:        req.GetGroupId(),
 	})
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Bulk invite failed")

@@ -21,14 +21,20 @@ func NewRepository(db *sql.DB) *Repository {
 // dynamic-query: squirrel
 func (r *Repository) Search(ctx context.Context, businessID int64, query string) ([]domain.Customer, error) {
 	query = strings.TrimSpace(query)
-	if query == "" {
-		return []domain.Customer{}, nil
-	}
 	searchTerm := searchutil.BooleanPrefixQuery(query)
 
 	// dynamic-query: squirrel (MATCH ... AGAINST via parameterized raw SQL)
 	// cross-schema read from crm_customers (customers module)
-	rows, err := r.pool.QueryContext(ctx, `
+	var rows *sql.Rows
+	var err error
+	if query == "" {
+		rows, err = r.pool.QueryContext(ctx, `
+SELECT id, business_id, first_name, last_name, email, phone
+FROM crm_customers
+WHERE business_id = ?
+ORDER BY first_name LIMIT 20`, businessID)
+	} else {
+		rows, err = r.pool.QueryContext(ctx, `
 SELECT id, business_id, first_name, last_name, email, phone
 FROM crm_customers
 WHERE business_id = ?
@@ -38,6 +44,7 @@ WHERE business_id = ?
     OR (? <> '' AND MATCH(first_name, last_name, email, phone) AGAINST (? IN BOOLEAN MODE))
   )
 ORDER BY first_name LIMIT 20`, businessID, query, query, searchTerm, searchTerm)
+	}
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to search POS customers", logger.Error(err))
 		return nil, err

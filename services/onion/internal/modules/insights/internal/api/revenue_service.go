@@ -18,7 +18,7 @@ func NewRevenueAPI(service *application.Service) *RevenueAPI {
 }
 
 func (a *RevenueAPI) GetRevenueOverview(ctx context.Context, req *insightsrevenuev1.GetRevenueOverviewRequest) (*insightsrevenuev1.GetRevenueOverviewResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (a *RevenueAPI) GetRevenueOverview(ctx context.Context, req *insightsrevenu
 }
 
 func (a *RevenueAPI) GetRevenueByApp(ctx context.Context, _ *insightsrevenuev1.GetRevenueByAppRequest) (*insightsrevenuev1.GetRevenueByAppResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (a *RevenueAPI) GetRevenueByApp(ctx context.Context, _ *insightsrevenuev1.G
 }
 
 func (a *RevenueAPI) GetRevenueComparison(ctx context.Context, req *insightsrevenuev1.GetRevenueComparisonRequest) (*insightsrevenuev1.GetRevenueComparisonResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:dashboard:view")
 	if err != nil {
 		return nil, err
 	}

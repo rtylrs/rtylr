@@ -1,3 +1,4 @@
+-- cross-schema read from pos, finance, crm, erp, and hr — source timestamps version cached insights.
 -- name: GetInsightsGeneration :one
 -- A generation token changes whenever any source table used by Insights changes.
 -- The token is read before constructing a cached key, so writes naturally

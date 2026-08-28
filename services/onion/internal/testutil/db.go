@@ -64,4 +64,6 @@ func envOr(key, def string) string {
 const OwnerID int64 = 1001
 
 // BusinessID is the fixture business scoping used across all integration tests.
-const BusinessID int64 = 2001
+// The fixture intentionally uses the canonical owner/business identity until
+// the repository suite has a separate multi-business fixture for every module.
+const BusinessID int64 = OwnerID

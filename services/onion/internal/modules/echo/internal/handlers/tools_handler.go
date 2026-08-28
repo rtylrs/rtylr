@@ -167,6 +167,7 @@ func (h *ToolDecisionHandler) Serve(ctx context.Context, req *ToolDecisionReques
 		}
 	}
 
+	// nosemgrep: trailofbits.go.invalid-usage-of-modified-variable.invalid-usage-of-modified-variable
 	output, executed, duration, err := echoapp.ExecuteToolWithTimeout(ctx, h.executorChain(), tool.Name, req.Input)
 	if err != nil {
 		h.logDecision(ctx, req, tool, "execution_failed", false)

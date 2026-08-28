@@ -47,7 +47,7 @@ func (h *RecordVisitHandler) Serve(ctx context.Context, req *RecordVisitRequest)
 		return RecordVisitResponse{}, onekiterrors.PermissionDenied()
 	}
 	if req.AwardPoints {
-		if err := requireCRMManager(ctx); err != nil {
+		if err := requireCRMFeaturePermission(ctx, "crm:customers:edit"); err != nil {
 			return RecordVisitResponse{}, err
 		}
 	}

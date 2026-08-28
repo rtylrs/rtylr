@@ -218,7 +218,7 @@ func (h *betterStackHandler) Enabled(_ context.Context, level slog.Level) bool {
 	return level >= h.level
 }
 
-func (h *betterStackHandler) Handle(_ context.Context, record slog.Record) error {
+func (h *betterStackHandler) Handle(ctx context.Context, record slog.Record) error {
 	payload := slogbetterstack.DefaultConverter(false, nil, h.attrs, h.groups, &record)
 	body, err := json.Marshal([]map[string]any{payload})
 	if err != nil {
@@ -232,11 +232,12 @@ func (h *betterStackHandler) Handle(_ context.Context, record slog.Record) error
 	}
 	h.delivery.pending.Add(1)
 	h.delivery.mu.Unlock()
+	deliveryCtx := context.WithoutCancel(ctx)
 	go func() {
 		defer h.delivery.pending.Done()
 		// Request contexts may be canceled as soon as the request completes. Log
 		// delivery must outlive the request so Flush can account for it.
-		_ = h.send(context.Background(), h.endpoint, h.token, h.timeout, body)
+		_ = h.send(deliveryCtx, h.endpoint, h.token, h.timeout, body)
 	}()
 	return nil
 }

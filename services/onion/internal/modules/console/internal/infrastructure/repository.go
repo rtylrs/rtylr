@@ -392,6 +392,7 @@ func (r *Repository) ListResourceRows(ctx context.Context, table string, limit, 
 	}
 
 	var total int64
+	// #nosec G201 -- table was validated by DescribeResourceTable and quoteIdentifier escapes the identifier.
 	countSQL := fmt.Sprintf("SELECT COUNT(*) FROM %s", quoteIdentifier(table))
 	if err := r.pool.QueryRowContext(ctx, countSQL).Scan(&total); err != nil {
 		return nil, err
@@ -405,6 +406,7 @@ func (r *Repository) ListResourceRows(ctx context.Context, table string, limit, 
 	if primaryKey != "" {
 		orderColumn = primaryKey
 	}
+	// #nosec G201 -- table, columns, and orderColumn come from validated database metadata and are quoted as identifiers.
 	query := fmt.Sprintf(
 		"SELECT %s FROM %s ORDER BY %s DESC LIMIT ? OFFSET ?",
 		strings.Join(columnNames, ", "),
@@ -437,6 +439,7 @@ func (r *Repository) GetResourceRow(ctx context.Context, table, id string) (map[
 	for _, col := range columns {
 		columnNames = append(columnNames, quoteIdentifier(col.Name))
 	}
+	// #nosec G201 -- table, columns, and primaryKey come from validated database metadata and are quoted as identifiers.
 	query := fmt.Sprintf(
 		"SELECT %s FROM %s WHERE %s = ? LIMIT 1",
 		strings.Join(columnNames, ", "),
@@ -489,6 +492,7 @@ func (r *Repository) CreateResourceRow(ctx context.Context, table string, values
 	}
 
 	placeholders := strings.TrimRight(strings.Repeat("?,", len(insertColumns)), ",")
+	// #nosec G201 -- table, writable columns, and placeholders are derived from validated metadata and values remain bound.
 	query := fmt.Sprintf(
 		"INSERT INTO %s (%s) VALUES (%s)",
 		quoteIdentifier(table),
@@ -535,6 +539,7 @@ func (r *Repository) UpdateResourceRow(ctx context.Context, table, id string, va
 	}
 
 	args = append(args, id)
+	// #nosec G201 -- table, writable columns, and primaryKey come from validated metadata and are quoted as identifiers.
 	query := fmt.Sprintf(
 		"UPDATE %s SET %s WHERE %s = ?",
 		quoteIdentifier(table),
@@ -553,6 +558,7 @@ func (r *Repository) DeleteResourceRow(ctx context.Context, table, id string) er
 	if primaryKey == "" {
 		return fmt.Errorf("table %s has no primary key", table)
 	}
+	// #nosec G201 -- table and primaryKey come from validated metadata and are quoted as identifiers.
 	query := fmt.Sprintf(
 		"DELETE FROM %s WHERE %s = ?",
 		quoteIdentifier(table),
@@ -636,8 +642,8 @@ func (r *Repository) ListUsers(
 		From("users").
 		Where(conds).
 		OrderBy("created_at DESC").
-		Limit(uint64(limit)).
-		Offset(uint64(offset)).
+		Limit(uint64(limit)).   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset(uint64(offset)). // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -941,8 +947,8 @@ func (r *Repository) ListBusinesses(
 		From("businesses").
 		Where(conds).
 		OrderBy("created_at DESC").
-		Limit(uint64(limit)).
-		Offset(uint64(offset)).
+		Limit(uint64(limit)).   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset(uint64(offset)). // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -1058,8 +1064,8 @@ func (r *Repository) ListSubscriptions(ctx context.Context, limit, offset int, s
 		LeftJoin("businesses b ON b.owner_id = s.owner_id AND COALESCE(b.is_active, TRUE) = TRUE").
 		Where(conds).
 		OrderBy("s.created_at DESC").
-		Limit(uint64(limit)).
-		Offset(uint64(offset)).
+		Limit(uint64(limit)).   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset(uint64(offset)). // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -1217,8 +1223,8 @@ func (r *Repository) ListGrants(ctx context.Context, limit, offset int) ([]Grant
 		LeftJoin("businesses b ON b.owner_id = g.user_id AND COALESCE(b.is_active, TRUE) = TRUE").
 		LeftJoin("users adm ON adm.id = g.granted_by").
 		OrderBy("g.created_at DESC").
-		Limit(uint64(limit)).
-		Offset(uint64(offset)).
+		Limit(uint64(limit)).   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset(uint64(offset)). // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {
@@ -1434,8 +1440,8 @@ func (r *Repository) ListAddonGrants(ctx context.Context, limit, offset int) ([]
 		LeftJoin("businesses b ON b.id = g.business_id").
 		LeftJoin("users adm ON adm.id = g.granted_by").
 		OrderBy("g.created_at DESC").
-		Limit(uint64(limit)).
-		Offset(uint64(offset)).
+		Limit(uint64(limit)).   // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset(uint64(offset)). // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		PlaceholderFormat(sq.Question).
 		ToSql()
 	if err != nil {

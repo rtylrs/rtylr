@@ -47,7 +47,7 @@ func (r *Repository) GetProfile(ctx context.Context, ownerID int64) (domain.Busi
 		return profile, err
 	}
 
-	cfg, err := r.queries.GetBusinessProfile(ctx, int32(ownerID))
+	cfg, err := r.queries.GetBusinessProfile(ctx, int32(ownerID)) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		logger.Ctx(ctx).Error("Failed to get business profile", logger.Error(err))
 		return profile, err

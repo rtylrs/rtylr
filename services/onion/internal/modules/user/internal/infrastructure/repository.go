@@ -2,9 +2,15 @@ package infrastructure
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/binary"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/voxire/onion/internal/modules/user/internal/domain"
@@ -93,6 +99,99 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*domain.
 		row.IsConsoleAdmin, row.IsBanned,
 		row.TokenEpoch,
 	), nil
+}
+
+func (r *Repository) GetUserByIdentifier(ctx context.Context, identifier string) (*domain.User, error) {
+	row, err := r.queries.GetUserByIdentifier(ctx, sqlc.GetUserByIdentifierParams{
+		Email: identifier,
+		LOWER: identifier,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return userFromRow(
+		row.ID, sql.NullInt64{}, row.Email, row.PasswordHash,
+		row.FullName, row.SignupIpAddress, row.SignupDeviceInfo,
+		row.CreatedAt, row.UpdatedAt,
+		row.IsConsoleAdmin, false,
+		row.TokenEpoch,
+	), nil
+}
+
+func (r *Repository) CreateEmailVerificationCode(ctx context.Context, email string) (string, error) {
+	user, err := r.GetUserByEmail(ctx, strings.ToLower(strings.TrimSpace(email)))
+	if err != nil {
+		return "", err
+	}
+	var randomBytes [4]byte
+	if _, err := rand.Read(randomBytes[:]); err != nil {
+		return "", err
+	}
+	code := fmt.Sprintf("%06d", binary.BigEndian.Uint32(randomBytes[:])%1_000_000)
+	hash := sha256.Sum256([]byte(code))
+	_, err = r.db.ExecContext(ctx, `
+		INSERT INTO user_email_verification_tokens (user_id, token_hash, expires_at)
+		VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE))`,
+		user.ID, hex.EncodeToString(hash[:]))
+	if err != nil {
+		return "", err
+	}
+	return code, nil
+}
+
+func (r *Repository) ConsumeEmailVerificationCode(ctx context.Context, token string) error {
+	code := strings.TrimSpace(token)
+	if len(code) != 6 {
+		return errors.New("invalid email verification code")
+	}
+	if _, err := strconv.Atoi(code); err != nil {
+		return errors.New("invalid email verification code")
+	}
+	hash := sha256.Sum256([]byte(code))
+	hashText := hex.EncodeToString(hash[:])
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	rollback := func(cause error) error {
+		_ = tx.Rollback()
+		return cause
+	}
+	var userID int64
+	var tokenID int64
+	err = tx.QueryRowContext(ctx, `
+		SELECT id, user_id
+		FROM user_email_verification_tokens
+		WHERE token_hash = ? AND consumed_at IS NULL AND expires_at > NOW()
+		ORDER BY id DESC
+		LIMIT 1
+		FOR UPDATE`, hashText).Scan(&tokenID, &userID)
+	if errors.Is(err, sql.ErrNoRows) {
+		return rollback(errors.New("invalid or expired email verification code"))
+	}
+	if err != nil {
+		return rollback(err)
+	}
+	if _, err = tx.ExecContext(ctx, `
+		UPDATE user_email_verification_tokens SET consumed_at = NOW() WHERE id = ?`, tokenID); err != nil {
+		return rollback(err)
+	}
+	if _, err = tx.ExecContext(ctx, `
+		UPDATE user_provisioning_states
+		SET email_verified = TRUE,
+		    state = CASE WHEN password_change_required THEN 'pending_activation' ELSE 'active' END,
+		    updated_at = NOW()
+		WHERE user_id = ?`, userID); err != nil {
+		return rollback(err)
+	}
+	if _, err = tx.ExecContext(ctx, `
+		UPDATE authorization_business_members
+		SET status = 'active', authorization_version = authorization_version + 1, updated_at = NOW()
+		WHERE user_id = ? AND status IN ('pending', 'suspended')`, userID); err != nil {
+		return rollback(err)
+	}
+	return tx.Commit()
 }
 
 // EmailExists reports whether a user row with the given email exists. The

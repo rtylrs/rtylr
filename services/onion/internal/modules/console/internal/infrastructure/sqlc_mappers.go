@@ -108,7 +108,7 @@ func upsertSubscriptionParams(params SubscriptionWriteParams) sqlc.UpsertSubscri
 		OwnerID:              params.OwnerID,
 		PlanID:               params.PlanID,
 		Status:               sqlc.NullSubscriptionsStatus{SubscriptionsStatus: sqlc.SubscriptionsStatus(params.Status), Valid: true},
-		SeatCount:            int32(params.SeatCount),
+		SeatCount:            int32(params.SeatCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		TrialEndsAt:          params.TrialEndsAt,
 		NextBillingDate:      params.NextBillingDate,
 		CurrentPeriodEndsAt:  params.CurrentPeriodEndsAt,
@@ -184,7 +184,7 @@ func nullInt32FromInt(value int) sql.NullInt32 {
 	if value <= 0 {
 		return sql.NullInt32{}
 	}
-	return sql.NullInt32{Int32: int32(value), Valid: true}
+	return sql.NullInt32{Int32: int32(value), Valid: true} // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func nullTimeFromPtr(value *time.Time) sql.NullTime {

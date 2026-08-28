@@ -21,21 +21,33 @@ func NewPermissionsAPI(service *application.Service) *PermissionsAPI {
 }
 
 func (a *PermissionsAPI) UpdatePermissions(ctx context.Context, req *hubteampermissionsv1.UpdatePermissionsRequest) (*hubteampermissionsv1.UpdatePermissionsResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	device, permissionErr := requireHubPermission(ctx, "hub:team:edit")
+	if permissionErr != nil {
+		return nil, permissionErr
+	}
+	if req.GetApps() != nil && !authPkg.HasDashboardPermission(device, "hub:licenses:manage") {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
 	appsSlice := req.GetApps()
+	appAssignments, assignmentErr := appAssignmentsFromProto(req.GetAppAssignments())
+	if assignmentErr != nil {
+		return nil, onekiterrors.New(http.StatusBadRequest, assignmentErr.Error())
+	}
 
-	if err := a.Service.UpdatePermissions(ctx, device.User.UserID, device.User.BusinessID, domain.UpdatePermissionsInput{
-		UserID:   req.GetUserId(),
-		FullName: req.FullName,
-		Apps:     &appsSlice,
-		Role:     domain.Role(req.GetRole()),
+	if err := a.Service.UpdatePermissions(ctx, device.UserID, device.BusinessID, domain.UpdatePermissionsInput{
+		UserID:         req.GetUserId(),
+		FullName:       req.FullName,
+		Apps:           &appsSlice,
+		Role:           domain.Role(req.GetRole()),
+		DashRole:       req.GetDashRole(),
+		AppAssignments: appAssignments,
+		GroupIDs:       req.GetGroupIds(),
 	}); err != nil {
 		switch {
 		case errors.Is(err, domain.ErrForbidden):
+			return nil, onekiterrors.PermissionDenied()
+		case errors.Is(err, domain.ErrDelegationCeiling):
 			return nil, onekiterrors.PermissionDenied()
 		case errors.Is(err, domain.ErrUserNotFound), errors.Is(err, domain.ErrPermissionNotFound):
 			return nil, onekiterrors.New(http.StatusNotFound, "Permission not found")

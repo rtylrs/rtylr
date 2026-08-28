@@ -18,7 +18,7 @@ func NewCustomerAPI(service *application.Service) *CustomerAPI {
 }
 
 func (a *CustomerAPI) GetCustomerAnalytics(ctx context.Context, _ *insightscustomerv1.GetCustomerAnalyticsRequest) (*insightscustomerv1.GetCustomerAnalyticsResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:customers:view")
 	if err != nil {
 		return nil, err
 	}
@@ -37,9 +37,10 @@ func (a *CustomerAPI) GetCustomerAnalytics(ctx context.Context, _ *insightscusto
 		retention = (float64(kpis.Active) / float64(kpis.Total)) * 100
 	}
 
+	// #nosec G115 -- Analytics counters are database-backed non-negative values mapped to bounded protobuf fields.
 	return &insightscustomerv1.GetCustomerAnalyticsResponse{
 		Analytics: &insightscustomerv1.CustomerAnalytics{
-			Total:            int32(kpis.Total),
+			Total:            int32(kpis.Total), // #nosec G115 -- Analytics counters are database-backed non-negative values mapped to bounded protobuf fields.
 			NewThisPeriod:    int32(kpis.NewThisMonth),
 			RetentionRate:    retention,
 			ChurnRate:        churnRate,
@@ -49,7 +50,7 @@ func (a *CustomerAPI) GetCustomerAnalytics(ctx context.Context, _ *insightscusto
 }
 
 func (a *CustomerAPI) GetChurnAnalysis(ctx context.Context, _ *insightscustomerv1.GetChurnAnalysisRequest) (*insightscustomerv1.GetChurnAnalysisResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:customers:view")
 	if err != nil {
 		return nil, err
 	}
@@ -63,14 +64,14 @@ func (a *CustomerAPI) GetChurnAnalysis(ctx context.Context, _ *insightscustomerv
 	if len(windows) > 0 {
 		w := windows[0]
 		analysis.ChurnRate = w.ChurnPct
-		analysis.ChurnedCount = int32(w.ChurnedCount)
+		analysis.ChurnedCount = int32(w.ChurnedCount) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 
 	return &insightscustomerv1.GetChurnAnalysisResponse{Analysis: analysis}, nil
 }
 
 func (a *CustomerAPI) GetLTVAnalysis(ctx context.Context, _ *insightscustomerv1.GetLTVAnalysisRequest) (*insightscustomerv1.GetLTVAnalysisResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:customers:view")
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +87,7 @@ func (a *CustomerAPI) GetLTVAnalysis(ctx context.Context, _ *insightscustomerv1.
 		segments = append(segments, &insightscustomerv1.LTVSegment{
 			Segment:       b.Label,
 			AvgLtv:        mid,
-			CustomerCount: int32(b.CustomerCount),
+			CustomerCount: int32(b.CustomerCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		})
 	}
 
@@ -98,7 +99,7 @@ func (a *CustomerAPI) GetLTVAnalysis(ctx context.Context, _ *insightscustomerv1.
 }
 
 func (a *CustomerAPI) GetTopCustomers(ctx context.Context, req *insightscustomerv1.GetTopCustomersRequest) (*insightscustomerv1.GetTopCustomersResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:customers:view")
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +115,7 @@ func (a *CustomerAPI) GetTopCustomers(ctx context.Context, req *insightscustomer
 			Id:         row.CustomerID,
 			Name:       row.Name,
 			TotalSpent: minorToMajor(row.LifetimeSpendMinorUnits),
-			OrderCount: int32(row.OrderCount),
+			OrderCount: int32(row.OrderCount), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		})
 	}
 

@@ -55,7 +55,7 @@ func messageToProto(message domain.ConversationMessage) *hubmemoryv1.ChatMessage
 		Role:       message.Role,
 		Content:    message.Content,
 		CreatedAt:  message.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		TokensUsed: int32(message.TokensUsed),
+		TokensUsed: int32(message.TokensUsed), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	}
 }
 

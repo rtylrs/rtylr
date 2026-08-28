@@ -54,9 +54,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateBillsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(billsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(billsScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.Bill, error) {
@@ -86,7 +84,7 @@ func (s *Service) ListPaginated(ctx context.Context, businessID int64, limit, of
 
 func (s *Service) ListPage(ctx context.Context, businessID, page, pageSize int64) (BillPage, error) {
 	page, pageSize, offset := normalizeListPage(page, pageSize)
-	bills, err := s.repo.ListPaginated(ctx, businessID, int32(pageSize+1), offset)
+	bills, err := s.repo.ListPaginated(ctx, businessID, int32(pageSize+1), offset) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	if err != nil {
 		return BillPage{}, err
 	}
@@ -100,7 +98,7 @@ func (s *Service) ListPage(ctx context.Context, businessID, page, pageSize int64
 
 func normalizeListPage(page, pageSize int64) (int64, int64, int32) {
 	normalized := billsListPolicy.Normalize(page, pageSize)
-	return normalized.Number, normalized.Size, int32(normalized.Offset)
+	return normalized.Number, normalized.Size, int32(normalized.Offset) // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func (s *Service) GetBill(ctx context.Context, businessID, id int64) (domain.Bill, error) {

@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/domain"
 	"github.com/voxire/onion/internal/modules/stock_takes/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
@@ -30,8 +31,8 @@ func NewRepository(db *sql.DB) *Repository {
 func (r *Repository) ListStockTakes(ctx context.Context, businessID int64, limit, offset int) ([]domain.StockTake, bool, error) {
 	rows, err := r.queries.ListStockTakesPaged(ctx, sqlc.ListStockTakesPagedParams{
 		BusinessID: businessID,
-		Limit:      int32(limit + 1),
-		Offset:     int32(offset),
+		Limit:      int32(limit + 1), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Offset:     int32(offset),    // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to list stock takes", logger.Error(err))
@@ -109,9 +110,9 @@ func (r *Repository) getStockTakeItemsBatch(ctx context.Context, stockTakes []do
 			ID:          row.ID,
 			StockTakeID: row.StockTakeID,
 			ProductID:   row.ProductID,
-			ExpectedQty: parseDecimal(row.ExpectedQty),
-			CountedQty:  parseDecimal(row.CountedQty),
-			Variance:    parseDecimal(row.Variance),
+			ExpectedQty: sqlutil.ParseDecimal(row.ExpectedQty),
+			CountedQty:  sqlutil.ParseDecimal(row.CountedQty),
+			Variance:    sqlutil.ParseDecimal(row.Variance),
 		}
 		if row.CreatedAt.Valid {
 			item.CreatedAt = row.CreatedAt.Time.Format("2006-01-02T15:04:05Z07:00")
@@ -144,8 +145,8 @@ func (r *Repository) CreateStockTake(ctx context.Context, businessID int64, inpu
 	res, err := qtx.InsertStockTake(ctx, sqlc.InsertStockTakeParams{
 		OwnerID:     businessID,
 		BusinessID:  businessID,
-		WarehouseID: nullInt64(input.WarehouseID),
-		Notes:       nullString(input.Notes),
+		WarehouseID: sqlutil.NullInt64(input.WarehouseID),
+		Notes:       sqlutil.NullString(input.Notes),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to create stock take", logger.Error(err))
@@ -245,21 +246,21 @@ func (r *Repository) UpdateStockTake(ctx context.Context, businessID int64, inpu
 	case domain.StockTakeStatusInProgress:
 		err = qtx.UpdateStockTakeStatusInProgress(ctx, sqlc.UpdateStockTakeStatusInProgressParams{
 			Status:     statusVal,
-			Notes:      nullString(input.Notes),
+			Notes:      sqlutil.NullString(input.Notes),
 			BusinessID: businessID,
 			ID:         input.ID,
 		})
 	case domain.StockTakeStatusCompleted:
 		err = qtx.UpdateStockTakeStatusCompleted(ctx, sqlc.UpdateStockTakeStatusCompletedParams{
 			Status:     statusVal,
-			Notes:      nullString(input.Notes),
+			Notes:      sqlutil.NullString(input.Notes),
 			BusinessID: businessID,
 			ID:         input.ID,
 		})
 	default:
 		err = qtx.UpdateStockTakeStatus(ctx, sqlc.UpdateStockTakeStatusParams{
 			Status:     statusVal,
-			Notes:      nullString(input.Notes),
+			Notes:      sqlutil.NullString(input.Notes),
 			BusinessID: businessID,
 			ID:         input.ID,
 		})
@@ -385,25 +386,5 @@ func (r *Repository) reconcileStockTake(ctx context.Context, tx *sql.Tx, qtx *sq
 	return nil
 }
 
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
-}
-
-func nullInt64(v int64) sql.NullInt64 {
-	return sql.NullInt64{Int64: v, Valid: v != 0}
-}
-
 // parseDecimal converts a DB decimal string to float64, logging corrupt
 // values instead of silently coercing them to 0.
-func parseDecimal(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse stock-take decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}

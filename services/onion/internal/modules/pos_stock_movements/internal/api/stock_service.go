@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_stock_movements/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	posstockv1 "github.com/voxire/voxie/gen/go/pos/stock/v1"
@@ -22,7 +23,7 @@ func NewStockAPI(service *application.Service) *StockAPI {
 }
 
 func (a *StockAPI) ListStockMovements(ctx context.Context, req *posstockv1.ListStockMovementsRequest) (*posstockv1.ListStockMovementsResponse, error) {
-	businessID, _, err := authenticatedStockActor(ctx)
+	businessID, _, err := requireStockPermission(ctx, "pos:reports:view")
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +44,7 @@ func (a *StockAPI) ListStockMovements(ctx context.Context, req *posstockv1.ListS
 }
 
 func (a *StockAPI) ReceiveStock(ctx context.Context, req *posstockv1.ReceiveStockRequest) (*posstockv1.ReceiveStockResponse, error) {
-	businessID, device, err := authenticatedStockActor(ctx)
+	businessID, device, err := requireStockPermission(ctx, "pos:employees:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +68,7 @@ func (a *StockAPI) ReceiveStock(ctx context.Context, req *posstockv1.ReceiveStoc
 }
 
 func (a *StockAPI) AdjustStock(ctx context.Context, req *posstockv1.AdjustStockRequest) (*posstockv1.AdjustStockResponse, error) {
-	businessID, device, err := authenticatedStockActor(ctx)
+	businessID, device, err := requireStockPermission(ctx, "pos:employees:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +95,7 @@ func (a *StockAPI) AdjustStock(ctx context.Context, req *posstockv1.AdjustStockR
 }
 
 func (a *StockAPI) WasteStock(ctx context.Context, req *posstockv1.WasteStockRequest) (*posstockv1.WasteStockResponse, error) {
-	businessID, device, err := authenticatedStockActor(ctx)
+	businessID, device, err := requireStockPermission(ctx, "pos:employees:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +119,7 @@ func (a *StockAPI) WasteStock(ctx context.Context, req *posstockv1.WasteStockReq
 }
 
 func (a *StockAPI) TransferStock(ctx context.Context, req *posstockv1.TransferStockRequest) (*posstockv1.TransferStockResponse, error) {
-	businessID, device, err := authenticatedStockActor(ctx)
+	businessID, device, err := requireStockPermission(ctx, "pos:employees:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +144,7 @@ func (a *StockAPI) TransferStock(ctx context.Context, req *posstockv1.TransferSt
 }
 
 func (a *StockAPI) ListInventory(ctx context.Context, req *posstockv1.ListInventoryRequest) (*posstockv1.ListInventoryResponse, error) {
-	businessID, _, err := authenticatedStockActor(ctx)
+	businessID, _, err := requireStockPermission(ctx, "pos:reports:view")
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +165,7 @@ func (a *StockAPI) ListInventory(ctx context.Context, req *posstockv1.ListInvent
 }
 
 func (a *StockAPI) LowStock(ctx context.Context, req *posstockv1.LowStockRequest) (*posstockv1.LowStockResponse, error) {
-	businessID, _, err := authenticatedStockActor(ctx)
+	businessID, _, err := requireStockPermission(ctx, "pos:reports:view")
 	if err != nil {
 		return nil, err
 	}
@@ -184,9 +185,9 @@ func (a *StockAPI) LowStock(ctx context.Context, req *posstockv1.LowStockRequest
 	return &posstockv1.LowStockResponse{Items: payloads}, nil
 }
 
-func authenticatedStockActor(ctx context.Context) (int64, authPkg.Device, error) {
+func requireStockPermission(ctx context.Context, permission string) (int64, authPkg.Device, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.User == nil || !authPkg.HasAppPermission(device.User, authorization.AppPOS, permission) {
 		return 0, device, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)

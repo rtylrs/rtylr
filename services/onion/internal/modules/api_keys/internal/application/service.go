@@ -16,6 +16,7 @@ import (
 const (
 	apiKeysScope = "api_keys"
 	apiKeysTTL   = 5 * time.Minute
+	// #nosec G101 -- This is a public display prefix for generated API keys, not a secret.
 	apiKeyPrefix = "rtylr_api_k1_"
 )
 
@@ -36,9 +37,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateAPIKeysScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(apiKeysScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(apiKeysScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, businessID int64) ([]domain.APIKey, error) {

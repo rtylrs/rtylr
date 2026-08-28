@@ -45,9 +45,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateHRSetupScope(ctx context.Context, ownerID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(hrSetupScope, ownerID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(hrSetupScope, ownerID))
 }
 
 type setupStatus struct {

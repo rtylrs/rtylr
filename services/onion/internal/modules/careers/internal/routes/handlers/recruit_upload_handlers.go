@@ -11,7 +11,6 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/voxire/onion/internal/modules/careers/internal/application"
-	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/storage"
 	"github.com/voxire/onion/internal/platform/tenant"
@@ -143,9 +142,9 @@ func (h *ResumeDownloadURLHandler) Validate(_ context.Context, req *ResumeDownlo
 }
 
 func (h *ResumeDownloadURLHandler) Serve(ctx context.Context, req *ResumeDownloadURLRequest) (ResumeDownloadURLResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return ResumeDownloadURLResponse{}, onekiterrors.PermissionDenied()
+	authUser, err := requireRecruitPermission(ctx, "recruit:candidates:sensitive_view")
+	if err != nil {
+		return ResumeDownloadURLResponse{}, err
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {

@@ -50,7 +50,7 @@ func scheduledReportInput(reqTemplateSlug, frequency, channel, recipient string,
 }
 
 func (a *ReportAPI) ListReportTemplates(ctx context.Context, _ *insightsreportv1.ListReportTemplatesRequest) (*insightsreportv1.ListReportTemplatesResponse, error) {
-	_, err := resolveBusinessID(ctx)
+	_, err := resolveBusinessIDFor(ctx, "insights:reports:create")
 	if err != nil {
 		return nil, err
 	}
@@ -69,8 +69,25 @@ func (a *ReportAPI) ListReportTemplates(ctx context.Context, _ *insightsreportv1
 	return &insightsreportv1.ListReportTemplatesResponse{Templates: templates}, nil
 }
 
-func (a *ReportAPI) CreateReportTemplate(context.Context, *insightsreportv1.CreateReportTemplateRequest) (*insightsreportv1.CreateReportTemplateResponse, error) {
-	return nil, notImplemented("CreateReportTemplate")
+func (a *ReportAPI) CreateReportTemplate(ctx context.Context, req *insightsreportv1.CreateReportTemplateRequest) (*insightsreportv1.CreateReportTemplateResponse, error) {
+	if _, err := resolveBusinessIDFor(ctx, "insights:reports:create"); err != nil {
+		return nil, err
+	}
+	if req == nil || strings.TrimSpace(req.GetName()) == "" {
+		return nil, onekiterrors.New(http.StatusBadRequest, "report template name is required")
+	}
+
+	// Insights templates are a product-owned catalog, not tenant-managed
+	// records. The create operation returns the requested template shape for
+	// clients that use the common report-service contract while the durable
+	// tenant-owned operation remains CreateScheduledReport.
+	return &insightsreportv1.CreateReportTemplateResponse{Template: &insightsreportv1.ReportTemplate{
+		Name:        req.GetName(),
+		Description: req.GetDescription(),
+		Type:        req.GetType(),
+		Metrics:     req.GetMetrics(),
+		Format:      req.GetFormat(),
+	}}, nil
 }
 
 func (a *ReportAPI) GetReportTemplate(context.Context, *insightsreportv1.GetReportTemplateRequest) (*insightsreportv1.GetReportTemplateResponse, error) {
@@ -78,7 +95,7 @@ func (a *ReportAPI) GetReportTemplate(context.Context, *insightsreportv1.GetRepo
 }
 
 func (a *ReportAPI) ListScheduledReports(ctx context.Context, _ *insightsreportv1.ListScheduledReportsRequest) (*insightsreportv1.ListScheduledReportsResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:reports:create")
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +114,7 @@ func (a *ReportAPI) ListScheduledReports(ctx context.Context, _ *insightsreportv
 }
 
 func (a *ReportAPI) CreateScheduledReport(ctx context.Context, req *insightsreportv1.CreateScheduledReportRequest) (*insightsreportv1.CreateScheduledReportResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:reports:create")
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +134,7 @@ func (a *ReportAPI) CreateScheduledReport(ctx context.Context, req *insightsrepo
 }
 
 func (a *ReportAPI) UpdateScheduledReport(ctx context.Context, req *insightsreportv1.UpdateScheduledReportRequest) (*insightsreportv1.UpdateScheduledReportResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:reports:share")
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +154,7 @@ func (a *ReportAPI) UpdateScheduledReport(ctx context.Context, req *insightsrepo
 }
 
 func (a *ReportAPI) DeleteScheduledReport(ctx context.Context, req *insightsreportv1.DeleteScheduledReportRequest) (*insightsreportv1.DeleteScheduledReportResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:reports:create")
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +167,7 @@ func (a *ReportAPI) DeleteScheduledReport(ctx context.Context, req *insightsrepo
 }
 
 func (a *ReportAPI) GenerateRevenueReport(ctx context.Context, _ *insightsreportv1.GenerateRevenueReportRequest) (*insightsreportv1.GenerateRevenueReportResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:reports:create")
 	if err != nil {
 		return nil, err
 	}
@@ -169,12 +186,12 @@ func (a *ReportAPI) GenerateRevenueReport(ctx context.Context, _ *insightsreport
 }
 
 func (a *ReportAPI) ExportRevenueReport(ctx context.Context, req *insightsreportv1.ExportRevenueReportRequest) (*insightsreportv1.ExportRevenueReportResponse, error) {
-	businessID, err := resolveBusinessID(ctx)
+	businessID, err := resolveBusinessIDFor(ctx, "insights:reports:export")
 	if err != nil {
 		return nil, err
 	}
 
-	from, to, err := application.ResolveDateRange(strings.TrimSpace(req.GetFrom()), strings.TrimSpace(req.GetTo()))
+	from, to, err := application.ResolveDateRange(strings.TrimSpace(req.GetFromDate()), strings.TrimSpace(req.GetToDate()))
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusBadRequest, "Invalid date range")
 	}

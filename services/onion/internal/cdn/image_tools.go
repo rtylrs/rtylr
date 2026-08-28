@@ -129,7 +129,14 @@ func (c *CDN) imageAnalyze(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Surrogate-Key", "cdn-file-"+id)
 	if metric == "info" {
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write(out)
+		var payload json.RawMessage
+		if err := json.Unmarshal(out, &payload); err != nil {
+			http.Error(w, "invalid image analysis response", http.StatusInternalServerError)
+			return
+		}
+		if err := json.NewEncoder(w).Encode(payload); err != nil {
+			logger.Ctx(r.Context()).Warn("cdn: failed to encode image analysis response", logger.Error(err))
+		}
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -185,7 +192,8 @@ func (c *CDN) runImageAnalysis(r *http.Request, storageKey, metric string) ([]by
 		}
 	}
 
-	// #nosec G204 -- mediaEngine is a configured binary path; args are fixed metric names and temp paths.
+	// #nosec G204 G702 -- mediaEngine is a configured binary path; args are fixed metric names and temp paths.
+	// nosemgrep: go.lang.security.audit.dangerous-exec-command.dangerous-exec-command
 	cmd := exec.CommandContext(execCtx, c.mediaEngine, args...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {

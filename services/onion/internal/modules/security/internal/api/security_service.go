@@ -2,11 +2,13 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/voxire/onion/internal/modules/security/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	hubsecurityv1 "github.com/voxire/voxie/gen/go/hub/security/v1"
 )
 
@@ -18,13 +20,24 @@ func NewSecurityAPI(service *application.Service) *SecurityAPI {
 	return &SecurityAPI{Service: service}
 }
 
-func (a *SecurityAPI) GetSecurityState(ctx context.Context, _ *hubsecurityv1.GetSecurityStateRequest) (*hubsecurityv1.GetSecurityStateResponse, error) {
+func requireSecurityPermission(ctx context.Context) (*authPkg.AuthUser, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.User == nil || !authPkg.HasDashboardPermission(device.User, "hub:security:manage") {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	return device.User, nil
+}
+
+func (a *SecurityAPI) GetSecurityState(ctx context.Context, _ *hubsecurityv1.GetSecurityStateRequest) (*hubsecurityv1.GetSecurityStateResponse, error) {
+	user, authErr := requireSecurityPermission(ctx)
+	if authErr != nil {
+		return nil, authErr
+	}
+	if _, businessErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID); businessErr != nil {
 		return nil, onekiterrors.PermissionDenied()
 	}
 
-	settings, err := a.Service.GetSettings(ctx, device.User.UserID)
+	settings, err := a.Service.GetSettings(ctx, user.UserID)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get security settings")
 	}
@@ -43,22 +56,24 @@ func (a *SecurityAPI) GetSecurityState(ctx context.Context, _ *hubsecurityv1.Get
 	return &hubsecurityv1.GetSecurityStateResponse{
 		State: &hubsecurityv1.SecurityState{
 			TwoFactorEnabled: settings.TwoFactorEnabled,
+			MfaRequired:      settings.MFARequired,
+			MfaEnrolled:      settings.MFAEnrolled,
 			ActiveSessions:   sessions,
 		},
 	}, nil
 }
 
 func (a *SecurityAPI) LoginHistory(ctx context.Context, req *hubsecurityv1.LoginHistoryRequest) (*hubsecurityv1.LoginHistoryResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return nil, onekiterrors.PermissionDenied()
+	user, authErr := requireSecurityPermission(ctx)
+	if authErr != nil {
+		return nil, authErr
 	}
 
 	page, pageSize := application.NormalizeLoginHistoryPagination(
 		int64(req.GetPage()),
 		int64(req.GetPageSize()),
 	)
-	entries, total, hasMore, err := a.Service.GetLoginHistory(ctx, device.User.UserID, page, pageSize)
+	entries, total, hasMore, err := a.Service.GetLoginHistory(ctx, user.UserID, page, pageSize)
 	if err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to get login history")
 	}
@@ -78,20 +93,20 @@ func (a *SecurityAPI) LoginHistory(ctx context.Context, req *hubsecurityv1.Login
 
 	return &hubsecurityv1.LoginHistoryResponse{
 		History:  payloads,
-		Total:    int32(total),
-		Page:     int32(page),
-		PageSize: int32(pageSize),
+		Total:    int32(total),    // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		Page:     int32(page),     // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
+		PageSize: int32(pageSize), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		HasMore:  hasMore,
 	}, nil
 }
 
 func (a *SecurityAPI) InvalidateSessions(ctx context.Context, _ *hubsecurityv1.InvalidateSessionsRequest) (*hubsecurityv1.InvalidateSessionsResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return nil, onekiterrors.PermissionDenied()
+	user, authErr := requireSecurityPermission(ctx)
+	if authErr != nil {
+		return nil, authErr
 	}
 
-	if err := a.Service.InvalidateAllSessions(ctx, device.User.UserID); err != nil {
+	if err := a.Service.InvalidateAllSessions(ctx, user.UserID); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to invalidate sessions")
 	}
 
@@ -99,12 +114,12 @@ func (a *SecurityAPI) InvalidateSessions(ctx context.Context, _ *hubsecurityv1.I
 }
 
 func (a *SecurityAPI) Update2FA(ctx context.Context, req *hubsecurityv1.Update2FARequest) (*hubsecurityv1.Update2FAResponse, error) {
-	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
-		return nil, onekiterrors.PermissionDenied()
+	user, authErr := requireSecurityPermission(ctx)
+	if authErr != nil {
+		return nil, authErr
 	}
 
-	if err := a.Service.SetTwoFactor(ctx, device.User.UserID, req.GetEnabled()); err != nil {
+	if err := a.Service.SetTwoFactor(ctx, user.UserID, req.GetEnabled()); err != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to update 2FA settings")
 	}
 
@@ -114,4 +129,63 @@ func (a *SecurityAPI) Update2FA(ctx context.Context, req *hubsecurityv1.Update2F
 	}
 
 	return &hubsecurityv1.Update2FAResponse{Message: msg}, nil
+}
+
+func (a *SecurityAPI) BeginMFAEnrollment(ctx context.Context, _ *hubsecurityv1.BeginMFAEnrollmentRequest) (*hubsecurityv1.BeginMFAEnrollmentResponse, error) {
+	user, authErr := requireSecurityPermission(ctx)
+	if authErr != nil {
+		return nil, authErr
+	}
+
+	secret, uri, err := a.Service.BeginMFAEnrollment(ctx, user.UserID)
+	if err != nil {
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to begin MFA enrollment")
+	}
+	return &hubsecurityv1.BeginMFAEnrollmentResponse{Secret: secret, OtpauthUri: uri}, nil
+}
+
+func (a *SecurityAPI) CompleteMFAEnrollment(ctx context.Context, req *hubsecurityv1.CompleteMFAEnrollmentRequest) (*hubsecurityv1.CompleteMFAEnrollmentResponse, error) {
+	user, authErr := requireSecurityPermission(ctx)
+	if authErr != nil {
+		return nil, authErr
+	}
+
+	recoveryCodes, err := a.Service.CompleteMFAEnrollment(ctx, user.UserID, req.GetCode())
+	if err != nil {
+		if errors.Is(err, application.ErrMFAInvalidCode) || errors.Is(err, application.ErrMFAEnrollmentMissing) {
+			return nil, onekiterrors.New(http.StatusBadRequest, "MFA code is invalid or enrollment has expired")
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to complete MFA enrollment")
+	}
+	return &hubsecurityv1.CompleteMFAEnrollmentResponse{Verified: true, RecoveryCodes: recoveryCodes}, nil
+}
+
+func (a *SecurityAPI) VerifyMFA(ctx context.Context, req *hubsecurityv1.VerifyMFARequest) (*hubsecurityv1.VerifyMFAResponse, error) {
+	user, authErr := requireSecurityPermission(ctx)
+	if authErr != nil {
+		return nil, authErr
+	}
+
+	if err := a.Service.VerifyMFA(ctx, user.UserID, req.GetCode()); err != nil {
+		if errors.Is(err, application.ErrMFAInvalidCode) {
+			return nil, onekiterrors.New(http.StatusUnauthorized, "MFA code is invalid")
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to verify MFA")
+	}
+	return &hubsecurityv1.VerifyMFAResponse{Verified: true}, nil
+}
+
+func (a *SecurityAPI) UseMFARecoveryCode(ctx context.Context, req *hubsecurityv1.UseMFARecoveryCodeRequest) (*hubsecurityv1.UseMFARecoveryCodeResponse, error) {
+	user, authErr := requireSecurityPermission(ctx)
+	if authErr != nil {
+		return nil, authErr
+	}
+
+	if err := a.Service.UseMFARecoveryCode(ctx, user.UserID, req.GetCode()); err != nil {
+		if errors.Is(err, application.ErrMFAInvalidCode) {
+			return nil, onekiterrors.New(http.StatusUnauthorized, "MFA recovery code is invalid")
+		}
+		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to verify MFA recovery code")
+	}
+	return &hubsecurityv1.UseMFARecoveryCodeResponse{Verified: true}, nil
 }

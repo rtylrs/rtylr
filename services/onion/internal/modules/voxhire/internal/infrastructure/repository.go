@@ -187,7 +187,41 @@ func autoMigrate(ctx context.Context, db *sql.DB) {
 	}
 }
 
+var allowedVoxhireSchemaColumns = map[[2]string]string{
+	{"voxhire_talent_applications", "current_role"}:         "current_role VARCHAR(255)",
+	{"voxhire_talent_applications", "desired_roles"}:        "desired_roles TEXT",
+	{"voxhire_talent_applications", "salary_expectation"}:   "salary_expectation VARCHAR(128)",
+	{"voxhire_talent_applications", "work_authorization"}:   "work_authorization VARCHAR(255)",
+	{"voxhire_talent_applications", "work_history"}:         "work_history TEXT",
+	{"voxhire_talent_applications", "education"}:            "education TEXT",
+	{"voxhire_talent_applications", "cv_processing_status"}: "cv_processing_status VARCHAR(32) NOT NULL DEFAULT 'pending'",
+	{"voxhire_talent_applications", "cv_processing_error"}:  "cv_processing_error TEXT",
+	{"voxhire_talent_applications", "cv_extracted_text"}:    "cv_extracted_text MEDIUMTEXT",
+	{"voxhire_talent_applications", "cv_summary"}:           "cv_summary TEXT",
+	{"voxhire_talent_applications", "cv_profile_json"}:      "cv_profile_json TEXT",
+	{"voxhire_talent_applications", "cv_processed_at"}:      "cv_processed_at TIMESTAMP NULL",
+	{"voxire_career_applications", "cv_processing_status"}:  "cv_processing_status VARCHAR(32) NOT NULL DEFAULT 'pending'",
+	{"voxire_career_applications", "cv_processing_error"}:   "cv_processing_error TEXT",
+	{"voxire_career_applications", "cv_extracted_text"}:     "cv_extracted_text MEDIUMTEXT",
+	{"voxire_career_applications", "cv_summary"}:            "cv_summary TEXT",
+	{"voxire_career_applications", "cv_profile_json"}:       "cv_profile_json TEXT",
+	{"voxire_career_applications", "cv_processed_at"}:       "cv_processed_at TIMESTAMP NULL",
+	{"voxire_career_applications", "review_rating"}:         "review_rating TINYINT NOT NULL DEFAULT 0",
+	{"voxire_career_applications", "review_notes"}:          "review_notes TEXT",
+	{"voxire_career_applications", "next_step"}:             "next_step VARCHAR(255)",
+	{"voxire_career_applications", "reviewed_at"}:           "reviewed_at TIMESTAMP NULL",
+}
+
 func ensureColumn(ctx context.Context, db *sql.DB, tableName, columnName, ddl string) {
+	allowedDDL, ok := allowedVoxhireSchemaColumns[[2]string{tableName, columnName}]
+	if !ok || allowedDDL != ddl {
+		logger.Ctx(ctx).Error("Rejected unknown voxhire schema change",
+			logger.String("table", tableName),
+			logger.String("column", columnName),
+		)
+		return
+	}
+
 	var count int
 	err := db.QueryRowContext(ctx, `
 		SELECT COUNT(*)
@@ -207,7 +241,8 @@ func ensureColumn(ctx context.Context, db *sql.DB, tableName, columnName, ddl st
 	if count > 0 {
 		return
 	}
-	if _, err := db.ExecContext(ctx, fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s", tableName, ddl)); err != nil {
+	// nosemgrep: go.lang.security.audit.database.string-formatted-query.string-formatted-query
+	if _, err := db.ExecContext(ctx, fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s", tableName, allowedDDL)); err != nil {
 		logger.Ctx(ctx).Warn("Failed to add column for voxhire auto-migrate",
 			logger.String("table", tableName),
 			logger.String("column", columnName),

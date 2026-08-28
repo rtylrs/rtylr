@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_equipment/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -33,7 +34,7 @@ func (r *Repository) CreateEquipmentRequest(ctx context.Context, businessID int6
 		EmployeeID:   params.EmployeeID,
 		ItemName:     params.ItemName,
 		Quantity:     params.Quantity,
-		Reason:       nullString(params.Reason),
+		Reason:       sqlutil.NullString(params.Reason),
 		NeededByDate: nullTimeFromDateStr(params.NeededByDate),
 	})
 	if err != nil {
@@ -128,8 +129,8 @@ func (r *Repository) UpdateEquipmentRequestStatus(ctx context.Context, businessI
 	return r.queries.UpdateEquipmentRequestStatus(ctx, sqlc.UpdateEquipmentRequestStatusParams{
 		Status:               status,
 		CurrentApprovalLevel: level,
-		ApprovedBy:           nullInt64(approvedBy),
-		RejectionReason:      nullString(reason),
+		ApprovedBy:           sqlutil.NullInt64(approvedBy),
+		RejectionReason:      sqlutil.NullString(reason),
 		BusinessID:           businessID,
 		ID:                   id,
 	})
@@ -141,12 +142,12 @@ func (r *Repository) CreateAsset(ctx context.Context, businessID int64, params d
 		BusinessID:    businessID,
 		Name:          params.Name,
 		Category:      params.Category,
-		SerialNumber:  nullString(params.SerialNumber),
-		LocationID:    nullInt64(params.LocationID),
+		SerialNumber:  sqlutil.NullString(params.SerialNumber),
+		LocationID:    sqlutil.NullInt64(params.LocationID),
 		Status:        "available",
 		PurchaseDate:  nullTimeFromDateStr(params.PurchaseDate),
 		PurchasePrice: nullStringFromMinorUnits(params.PurchasePriceMinorUnits),
-		Notes:         nullString(params.Notes),
+		Notes:         sqlutil.NullString(params.Notes),
 	})
 	if err != nil {
 		return nil, err
@@ -276,14 +277,6 @@ func assetFromRow(row sqlc.HrAsset) domain.AssetRecord {
 		CreatedAt:               row.CreatedAt,
 		UpdatedAt:               row.UpdatedAt,
 	}
-}
-
-func nullInt64(v int64) sql.NullInt64 {
-	return sql.NullInt64{Int64: v, Valid: v != 0}
-}
-
-func nullString(v string) sql.NullString {
-	return sql.NullString{String: v, Valid: v != ""}
 }
 
 func nullTimeFromDateStr(s string) sql.NullTime {

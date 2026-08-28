@@ -208,8 +208,8 @@ func TestGetUserBusinessIDAndRole_UnknownUserReturnsZeroValues(t *testing.T) {
 	ctx := context.Background()
 
 	businessID, role, err := repo.GetUserBusinessIDAndRole(ctx, 0)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	if !errors.Is(err, domain.ErrUserNotFound) {
+		t.Fatalf("expected ErrUserNotFound, got %v", err)
 	}
 	if businessID != 0 {
 		t.Errorf("expected business_id=0 for unknown user, got %d", businessID)

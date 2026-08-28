@@ -14,19 +14,19 @@ WHERE id = ? AND business_id = ?;
 
 -- name: DeleteBill :execresult
 DELETE FROM finance_bills
-WHERE id = ? AND business_id = ?;
+WHERE id = ? AND business_id = ? AND status <> 'paid';
 
 -- name: CreateBill :execresult
 INSERT INTO finance_bills (owner_id, business_id, supplier_id, supplier_name, purchase_order_id, amount, currency, due_date, status, description)
 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: UpdateBill :exec
+-- name: UpdateBill :execresult
 UPDATE finance_bills
 SET supplier_id = ?, supplier_name = ?, purchase_order_id = ?, amount = ?, currency = ?, due_date = ?, status = ?, description = ?
-WHERE id = ? AND business_id = ?;
+WHERE id = ? AND business_id = ? AND status = sqlc.arg(current_status) AND status <> 'paid';
 
 -- name: SumBillsByStatus :one
-SELECT COALESCE(SUM(CAST(amount AS REAL)), 0) AS total
+SELECT COALESCE(SUM(CAST(amount AS DECIMAL(14,2))), 0) AS total
 FROM finance_bills
 WHERE business_id = ? AND status = ?;
 

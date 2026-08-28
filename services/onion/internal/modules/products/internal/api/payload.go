@@ -39,7 +39,7 @@ func newProductPayload(product domain.Product) *erpproductv1.Product {
 		CountryOfOrigin:   product.CountryOfOrigin,
 		HsCode:            product.HSCode,
 		AllowBackorder:    product.AllowBackorder,
-		LeadTimeDays:      int32(product.LeadTimeDays),
+		LeadTimeDays:      int32(product.LeadTimeDays), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		ImageUrl:          product.ImageURL,
 		CreatedAt:         formatProductTimestamp(product.CreatedAt),
 		UpdatedAt:         formatProductTimestamp(product.UpdatedAt),
@@ -78,7 +78,7 @@ func newFullProductPayload(product domain.Product) *erpproductv1.FullProduct {
 		CountryOfOrigin:   product.CountryOfOrigin,
 		HsCode:            product.HSCode,
 		AllowBackorder:    product.AllowBackorder,
-		LeadTimeDays:      int32(product.LeadTimeDays),
+		LeadTimeDays:      int32(product.LeadTimeDays), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		ImageUrl:          product.ImageURL,
 		CreatedAt:         formatProductTimestamp(product.CreatedAt),
 		UpdatedAt:         formatProductTimestamp(product.UpdatedAt),

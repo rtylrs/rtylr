@@ -22,6 +22,9 @@ func NewInvoicesAPI(service *application.Service) *InvoicesAPI {
 }
 
 func (a *InvoicesAPI) ListInvoices(ctx context.Context, req *financeinvoicesv1.ListInvoicesRequest) (*financeinvoicesv1.ListInvoicesResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:invoices:view"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := invoiceBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -66,6 +69,9 @@ func (a *InvoicesAPI) ListInvoices(ctx context.Context, req *financeinvoicesv1.L
 }
 
 func (a *InvoicesAPI) CreateInvoice(ctx context.Context, req *financeinvoicesv1.CreateInvoiceRequest) (*financeinvoicesv1.CreateInvoiceResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:invoices:create"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := invoiceBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -94,6 +100,9 @@ func (a *InvoicesAPI) CreateInvoice(ctx context.Context, req *financeinvoicesv1.
 }
 
 func (a *InvoicesAPI) GetInvoice(ctx context.Context, req *financeinvoicesv1.GetInvoiceRequest) (*financeinvoicesv1.GetInvoiceResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:invoices:view"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := invoiceBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -127,6 +136,9 @@ func (a *InvoicesAPI) GetInvoice(ctx context.Context, req *financeinvoicesv1.Get
 }
 
 func (a *InvoicesAPI) UpdateInvoice(ctx context.Context, req *financeinvoicesv1.UpdateInvoiceRequest) (*financeinvoicesv1.UpdateInvoiceResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:invoices:create"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := invoiceBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -166,6 +178,9 @@ func (a *InvoicesAPI) UpdateInvoice(ctx context.Context, req *financeinvoicesv1.
 }
 
 func (a *InvoicesAPI) UpdateInvoiceStatus(ctx context.Context, req *financeinvoicesv1.UpdateInvoiceStatusRequest) (*financeinvoicesv1.UpdateInvoiceStatusResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:invoices:create"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := invoiceBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -193,6 +208,9 @@ func (a *InvoicesAPI) UpdateInvoiceStatus(ctx context.Context, req *financeinvoi
 }
 
 func (a *InvoicesAPI) DeleteInvoice(ctx context.Context, req *financeinvoicesv1.DeleteInvoiceRequest) (*financeinvoicesv1.DeleteInvoiceResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:invoices:create"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := invoiceBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel
@@ -206,6 +224,9 @@ func (a *InvoicesAPI) DeleteInvoice(ctx context.Context, req *financeinvoicesv1.
 }
 
 func (a *InvoicesAPI) SendInvoice(ctx context.Context, req *financeinvoicesv1.SendInvoiceRequest) (*financeinvoicesv1.SendInvoiceResponse, error) {
+	if err := requireFinancePermission(ctx, "finance:invoices:send"); err != nil {
+		return nil, err
+	}
 	businessID, errModel := invoiceBusinessID(ctx)
 	if errModel != nil {
 		return nil, errModel

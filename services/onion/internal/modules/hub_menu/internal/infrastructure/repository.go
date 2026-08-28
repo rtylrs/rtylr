@@ -10,6 +10,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/domain"
 	"github.com/voxire/onion/internal/modules/hub_menu/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 	posmenuitemv1 "github.com/voxire/voxie/gen/go/pos/menu_item/v1"
 )
 
@@ -66,9 +67,9 @@ func (r *Repository) CreateBanner(ctx context.Context, ownerID, businessID int64
 		OwnerID:    ownerID,
 		BusinessID: businessID,
 		Title:      input.Title,
-		Body:       nullString(input.Body),
-		ImageUrl:   nullString(input.ImageURL),
-		LinkUrl:    nullString(input.LinkURL),
+		Body:       sqlutil.NullString(input.Body),
+		ImageUrl:   sqlutil.NullString(input.ImageURL),
+		LinkUrl:    sqlutil.NullString(input.LinkURL),
 		Position:   input.Position,
 		IsActive:   input.IsActive,
 		StartsAt:   nullTime(input.StartsAt),
@@ -84,9 +85,9 @@ func (r *Repository) CreateBanner(ctx context.Context, ownerID, businessID int64
 func (r *Repository) UpdateBanner(ctx context.Context, businessID, id int64, input domain.BannerInput) error {
 	if err := r.queries.UpdateMenuBanner(ctx, sqlc.UpdateMenuBannerParams{
 		Title:      input.Title,
-		Body:       nullString(input.Body),
-		ImageUrl:   nullString(input.ImageURL),
-		LinkUrl:    nullString(input.LinkURL),
+		Body:       sqlutil.NullString(input.Body),
+		ImageUrl:   sqlutil.NullString(input.ImageURL),
+		LinkUrl:    sqlutil.NullString(input.LinkURL),
 		Position:   input.Position,
 		IsActive:   input.IsActive,
 		StartsAt:   nullTime(input.StartsAt),
@@ -183,10 +184,6 @@ func bannerFromFields(
 		banner.UpdatedAt = updatedAt.Time
 	}
 	return banner
-}
-
-func nullString(value string) sql.NullString {
-	return sql.NullString{String: value, Valid: value != ""}
 }
 
 func nullTime(value time.Time) sql.NullTime {

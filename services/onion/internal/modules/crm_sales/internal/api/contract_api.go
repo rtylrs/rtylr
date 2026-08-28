@@ -49,7 +49,7 @@ func contractToGen(c domain.Contract) *crmsalesv1.Contract {
 		LeadId:       leadID,
 		Plan:         c.Plan,
 		Mrr:          c.MRR.String(),
-		Seats:        int32(c.Seats),
+		Seats:        int32(c.Seats), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		SignedAt:     c.SignedAt,
 		SignedByName: c.SignedByName,
 		Notes:        c.Notes,

@@ -11,6 +11,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/finance_bank_feeds/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
 
@@ -29,6 +30,11 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 	if err != nil {
 		return nil, true, err
 	}
+	authUser, ok := authPkg.GetAuthUser(ctx)
+	if !ok || !authPkg.HasAppPermission(authUser, authorization.AppFinance, "finance:bank_feeds:view") {
+		return nil, true, errors.New("permission denied")
+	}
+	includeSensitive := authPkg.HasAppPermission(authUser, authorization.AppFinance, "finance:bank_feeds:sensitive_view")
 	limit, offset, err := financeBankFeedToolPagination(input)
 	if err != nil {
 		return nil, true, err
@@ -45,7 +51,7 @@ func (m *Module) ExecuteCaretTool(ctx context.Context, name string, input map[st
 		if transaction.IsMatched() {
 			matchedCount++
 		}
-		payloads = append(payloads, financeBankFeedTransactionToolPayload(transaction))
+		payloads = append(payloads, financeBankFeedTransactionToolPayload(transaction, includeSensitive))
 	}
 
 	return map[string]any{
@@ -88,7 +94,7 @@ func financeBankFeedToolPagination(input map[string]any) (int32, int32, error) {
 	if offset > math.MaxInt32 {
 		return 0, 0, errors.New("offset is too large")
 	}
-	return int32(limit), int32(offset), nil
+	return int32(limit), int32(offset), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 }
 
 func firstFinanceBankFeedToolValue(input map[string]any, keys ...string) any {
@@ -144,20 +150,23 @@ func financeBankFeedToolInt64(value any) (int64, error) {
 	}
 }
 
-func financeBankFeedTransactionToolPayload(transaction domain.BankFeedTransaction) map[string]any {
-	return map[string]any{
+func financeBankFeedTransactionToolPayload(transaction domain.BankFeedTransaction, includeSensitive bool) map[string]any {
+	payload := map[string]any{
 		"id":                 transaction.ID,
-		"bank_account_id":    transaction.BankAccountID,
 		"amount_minor_units": transaction.AmountMinorUnits,
 		"amount":             transaction.AmountDecimal(100),
 		"currency":           transaction.Currency,
 		"occurred_at":        transaction.OccurredAt,
 		"description":        transaction.Description,
-		"external_id":        transaction.ExternalID,
-		"matched_expense_id": transaction.MatchedExpenseID,
-		"matched_invoice_id": transaction.MatchedInvoiceID,
 		"is_matched":         transaction.IsMatched(),
 		"is_credit":          transaction.IsCredit(),
 		"is_debit":           transaction.IsDebit(),
 	}
+	if includeSensitive {
+		payload["bank_account_id"] = transaction.BankAccountID
+		payload["external_id"] = transaction.ExternalID
+		payload["matched_expense_id"] = transaction.MatchedExpenseID
+		payload["matched_invoice_id"] = transaction.MatchedInvoiceID
+	}
+	return payload
 }

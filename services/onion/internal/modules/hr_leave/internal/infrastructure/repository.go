@@ -11,6 +11,7 @@ import (
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/domain"
 	"github.com/voxire/onion/internal/modules/hr_leave/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -72,7 +73,7 @@ func (r *Repository) CreateLeaveType(ctx context.Context, ownerID int64, lt doma
 		Name:                           lt.Name,
 		IsPaid:                         lt.IsPaid,
 		RequiresApproval:               lt.RequiresApproval,
-		AccrualRule:                    nullString(lt.AccrualRule),
+		AccrualRule:                    sqlutil.NullString(lt.AccrualRule),
 		AccrualAmount:                  nullStringFromFloat(lt.AccrualAmount),
 		MaxCarryoverDays:               lt.MaxCarryoverDays,
 		MinNoticeDays:                  lt.MinNoticeDays,
@@ -98,7 +99,7 @@ func (r *Repository) UpdateLeaveType(ctx context.Context, ownerID int64, lt doma
 		Name:                           lt.Name,
 		IsPaid:                         lt.IsPaid,
 		RequiresApproval:               lt.RequiresApproval,
-		AccrualRule:                    nullString(lt.AccrualRule),
+		AccrualRule:                    sqlutil.NullString(lt.AccrualRule),
 		AccrualAmount:                  nullStringFromFloat(lt.AccrualAmount),
 		MaxCarryoverDays:               lt.MaxCarryoverDays,
 		MinNoticeDays:                  lt.MinNoticeDays,
@@ -203,7 +204,7 @@ func (r *Repository) CreateLeaveRequest(ctx context.Context, ownerID int64, req 
 		StartDate:            startDate,
 		EndDate:              endDate,
 		TotalDays:            fmt.Sprintf("%.2f", req.TotalDays),
-		Notes:                nullString(req.Notes),
+		Notes:                sqlutil.NullString(req.Notes),
 		Status:               req.Status,
 		CurrentApprovalLevel: req.CurrentApprovalLevel,
 	})
@@ -277,7 +278,7 @@ func (r *Repository) CreateLeaveRequestWithBalance(ctx context.Context, ownerID 
 	result, err := qtx.CreateLeaveRequest(ctx, sqlc.CreateLeaveRequestParams{
 		OwnerID: ownerID, BusinessID: ownerID, EmployeeID: req.EmployeeID, LeaveTypeID: req.LeaveTypeID,
 		StartDate: startDate, EndDate: endDate, TotalDays: fmt.Sprintf("%.2f", req.TotalDays),
-		Notes: nullString(req.Notes), Status: req.Status, CurrentApprovalLevel: req.CurrentApprovalLevel,
+		Notes: sqlutil.NullString(req.Notes), Status: req.Status, CurrentApprovalLevel: req.CurrentApprovalLevel,
 	})
 	if err != nil {
 		return nil, err
@@ -402,7 +403,7 @@ func (r *Repository) RejectLeaveRequestWithBalance(ctx context.Context, ownerID,
 		}
 	}()
 	qtx := r.queries.WithTx(tx)
-	result, err := qtx.RejectLeaveRequest(ctx, sqlc.RejectLeaveRequestParams{RejectionReason: nullString(reason), ID: requestID, BusinessID: ownerID})
+	result, err := qtx.RejectLeaveRequest(ctx, sqlc.RejectLeaveRequestParams{RejectionReason: sqlutil.NullString(reason), ID: requestID, BusinessID: ownerID})
 	if err != nil {
 		return err
 	}
@@ -425,7 +426,7 @@ func (r *Repository) RejectLeaveRequestWithBalance(ctx context.Context, ownerID,
 // the read and this write, in which case pending days must not be adjusted.
 func (r *Repository) RejectLeaveRequest(ctx context.Context, ownerID, requestID int64, reason string) (bool, error) {
 	result, err := r.queries.RejectLeaveRequest(ctx, sqlc.RejectLeaveRequestParams{
-		RejectionReason: nullString(reason),
+		RejectionReason: sqlutil.NullString(reason),
 		ID:              requestID,
 		BusinessID:      ownerID,
 	})
@@ -786,10 +787,6 @@ func parseFloat(s string) float64 {
 		return 0
 	}
 	return f
-}
-
-func nullString(v string) sql.NullString {
-	return sql.NullString{String: v, Valid: v != ""}
 }
 
 func nullInt32(v int32) sql.NullInt32 {

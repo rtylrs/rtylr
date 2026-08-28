@@ -1,7 +1,9 @@
 package http
 
 import (
+	"bytes"
 	"context"
+	"io"
 	"net"
 	"net/http"
 	"strconv"
@@ -129,7 +131,7 @@ func RateLimitMiddleware(limit int, window time.Duration) func(http.Handler) htt
 				w.Header().Set("Content-Type", "application/json")
 				w.Header().Set("Retry-After", "60")
 				w.WriteHeader(http.StatusTooManyRequests)
-				if _, writeErr := w.Write(rateLimitExceededJSON); writeErr != nil {
+				if _, writeErr := io.Copy(w, bytes.NewReader(rateLimitExceededJSON)); writeErr != nil {
 					logger.Ctx(r.Context()).Error("Failed to write rate limit response", logger.Error(writeErr))
 				}
 

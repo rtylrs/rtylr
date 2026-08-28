@@ -8,7 +8,9 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_terminals/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 	posterminalv1 "github.com/voxire/voxie/gen/go/pos/terminal/v1"
 )
 
@@ -21,12 +23,16 @@ func NewTerminalAPI(service *application.Service) *TerminalAPI {
 }
 
 func (a *TerminalAPI) ListTerminals(ctx context.Context, _ *posterminalv1.ListTerminalsRequest) (*posterminalv1.ListTerminalsResponse, error) {
-	user, err := authenticatedTerminalUser(ctx)
+	user, err := requireTerminalPermission(ctx, "pos:terminals:manage")
 	if err != nil {
 		return nil, err
 	}
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, user.BusinessID, user.UserID)
+	if businessErr != nil {
+		return nil, onekiterrors.PermissionDenied()
+	}
 
-	terminals, listErr := a.Service.List(ctx, user.BusinessID)
+	terminals, listErr := a.Service.List(ctx, businessID)
 	if listErr != nil {
 		return nil, onekiterrors.New(http.StatusInternalServerError, "Failed to list terminals")
 	}
@@ -39,7 +45,7 @@ func (a *TerminalAPI) ListTerminals(ctx context.Context, _ *posterminalv1.ListTe
 }
 
 func (a *TerminalAPI) CreateTerminal(ctx context.Context, req *posterminalv1.CreateTerminalRequest) (*posterminalv1.CreateTerminalResponse, error) {
-	user, err := authenticatedTerminalUser(ctx)
+	user, err := requireTerminalPermission(ctx, "pos:terminals:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +70,7 @@ func (a *TerminalAPI) CreateTerminal(ctx context.Context, req *posterminalv1.Cre
 }
 
 func (a *TerminalAPI) UpdateTerminal(ctx context.Context, req *posterminalv1.UpdateTerminalRequest) (*posterminalv1.UpdateTerminalResponse, error) {
-	user, err := authenticatedTerminalUser(ctx)
+	user, err := requireTerminalPermission(ctx, "pos:terminals:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +95,7 @@ func (a *TerminalAPI) UpdateTerminal(ctx context.Context, req *posterminalv1.Upd
 }
 
 func (a *TerminalAPI) HeartbeatTerminal(ctx context.Context, req *posterminalv1.HeartbeatTerminalRequest) (*posterminalv1.HeartbeatTerminalResponse, error) {
-	user, err := authenticatedTerminalUser(ctx)
+	user, err := requireTerminalPermission(ctx, "pos:terminals:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -103,9 +109,9 @@ func (a *TerminalAPI) HeartbeatTerminal(ctx context.Context, req *posterminalv1.
 	return &posterminalv1.HeartbeatTerminalResponse{Message: "Heartbeat updated successfully"}, nil
 }
 
-func authenticatedTerminalUser(ctx context.Context) (*authPkg.AuthUser, error) {
+func requireTerminalPermission(ctx context.Context, permission string) (*authPkg.AuthUser, error) {
 	device := authPkg.DeviceCtx(ctx)
-	if device.User == nil {
+	if device.User == nil || !authPkg.HasAppPermission(device.User, authorization.AppPOS, permission) || !authPkg.HasAnyAppScope(device.User, authorization.AppPOS) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	return device.User, nil

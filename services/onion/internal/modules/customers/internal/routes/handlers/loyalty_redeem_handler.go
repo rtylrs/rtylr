@@ -49,7 +49,7 @@ func (h *RedeemPointsHandler) Serve(ctx context.Context, req *RedeemPointsReques
 	if device.User == nil {
 		return RedeemPointsResponse{}, onekiterrors.PermissionDenied()
 	}
-	if err := requireCRMManager(ctx); err != nil {
+	if err := requireCRMFeaturePermission(ctx, "crm:loyalty:manage"); err != nil {
 		return RedeemPointsResponse{}, err
 	}
 

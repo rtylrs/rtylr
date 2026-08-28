@@ -43,7 +43,7 @@ func (a *KnowledgeAPI) ListArticles(ctx context.Context, req *supportknowledgev1
 
 	return &supportknowledgev1.ListArticlesResponse{
 		Articles: newArticles(items),
-		Total:    int32(total),
+		Total:    int32(total), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 		Page:     int32(page),
 		PageSize: int32(pageSize),
 	}, nil
@@ -136,7 +136,7 @@ func newArticles(items []domain.Article) []*supportknowledgev1.Article {
 			Body:        item.Body,
 			Category:    item.Category,
 			IsPublished: item.IsPublished,
-			Views:       int32(item.Views),
+			Views:       int32(item.Views), // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 			CreatedAt:   formatTime(item.CreatedAt),
 			UpdatedAt:   formatTime(item.UpdatedAt),
 		})

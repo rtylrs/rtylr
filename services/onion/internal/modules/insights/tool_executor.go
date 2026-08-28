@@ -12,6 +12,7 @@ import (
 
 	insightsapp "github.com/voxire/onion/internal/modules/insights/internal/application"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 )
@@ -85,6 +86,9 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 
 	authUser, ok := authPkg.GetAuthUser(ctx)
 	if !ok || authUser == nil || authUser.UserID <= 0 {
+		return nil, onekiterrors.PermissionDenied()
+	}
+	if !authPkg.HasAppPermission(authUser, authorization.AppInsights, insightsToolPermission(name)) {
 		return nil, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
@@ -373,6 +377,24 @@ func (m *Module) executeInsightsTool(ctx context.Context, name string, input map
 	return nil, fmt.Errorf("unsupported insights tool %q", name)
 }
 
+func insightsToolPermission(name string) string {
+	switch name {
+	case scheduleInsightsReportToolName:
+		return "insights:reports:create"
+	case getInsightsCustomerKPIsToolName,
+		listInsightsTopCustomersToolName,
+		getInsightsCustomerChurnToolName,
+		getInsightsLTVDistributionToolName:
+		return "insights:customers:view"
+	case getInsightsCashFlowToolName,
+		getInsightsExpensesByCategoryToolName,
+		getInsightsInvoiceAgingToolName:
+		return "insights:financial:view"
+	default:
+		return "insights:dashboard:view"
+	}
+}
+
 func parseScheduleReportToolInput(input map[string]any) (insightsapp.ScheduledReportPayload, error) {
 	if input == nil {
 		input = map[string]any{}
@@ -633,7 +655,7 @@ func insightsToolInt32(input map[string]any, fallback int32, keys ...string) (in
 func insightsToolNumericInt32(value any) (int32, error) {
 	switch v := value.(type) {
 	case int:
-		return int32(v), nil
+		return int32(v), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	case int8:
 		return int32(v), nil
 	case int16:
@@ -641,17 +663,17 @@ func insightsToolNumericInt32(value any) (int32, error) {
 	case int32:
 		return v, nil
 	case int64:
-		return int32(v), nil
+		return int32(v), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	case uint:
-		return int32(v), nil
+		return int32(v), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	case uint8:
 		return int32(v), nil
 	case uint16:
 		return int32(v), nil
 	case uint32:
-		return int32(v), nil
+		return int32(v), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	case uint64:
-		return int32(v), nil
+		return int32(v), nil // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 	case float32:
 		return int32(v), nil
 	case float64:

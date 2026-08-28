@@ -10,6 +10,7 @@ import (
 
 	"github.com/voxire/onion/internal/modules/pos_users/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_users/internal/infrastructure"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/cache/cacher"
 	cacheKeys "github.com/voxire/onion/internal/platform/cache/keys"
 	"github.com/voxire/onion/internal/platform/utils/passwordutils"
@@ -21,9 +22,7 @@ const (
 )
 
 func invalidatePosUsersScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posUsersScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(posUsersScope, businessID))
 }
 
 var ErrInvalidInput = errors.New("invalid input")
@@ -116,9 +115,10 @@ func (s *Service) Deactivate(ctx context.Context, businessID, id int64) error {
 }
 
 type SetPINActor struct {
-	UserID   int64
-	IsOwner  bool
-	TeamRole string
+	UserID          int64
+	IsOwner         bool
+	TeamRole        string
+	EffectiveAccess *authorization.EffectiveAccess
 }
 
 func (s *Service) SetPIN(ctx context.Context, businessID int64, actor SetPINActor, input domain.SetPINInput) error {
@@ -178,7 +178,7 @@ func (s *Service) SetPIN(ctx context.Context, businessID int64, actor SetPINActo
 }
 
 func (s *Service) requireLocationManager(ctx context.Context, businessID int64, actor SetPINActor, locationID int64) error {
-	if actor.IsOwner || actor.TeamRole == "owner" || actor.TeamRole == "admin" {
+	if actor.EffectiveAccess != nil && hasPOSPermission(actor.EffectiveAccess, "pos:employees:manage") {
 		return nil
 	}
 	access, err := s.repo.GetMemberLocationAccess(ctx, businessID, actor.UserID, locationID)
@@ -192,6 +192,23 @@ func (s *Service) requireLocationManager(ctx context.Context, businessID int64, 
 		return nil
 	}
 	return ErrForbidden
+}
+
+func hasPOSPermission(access *authorization.EffectiveAccess, permission string) bool {
+	if access == nil {
+		return false
+	}
+	for _, app := range access.Apps {
+		if app.AppID != authorization.AppPOS || !app.Licensed || !app.HasAccess {
+			continue
+		}
+		for _, granted := range app.Permissions {
+			if granted == permission {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func roleForAccess(access *infrastructure.LocationAccess) domain.POSUserRole {
@@ -226,12 +243,18 @@ func (s *Service) VerifyPIN(ctx context.Context, businessID, locationID, userID 
 		return nil, domain.ErrInvalidPIN
 	}
 
+	authorizationVersion, err := s.repo.GetAuthorizationVersion(ctx, businessID, user.UserID)
+	if err != nil {
+		return nil, err
+	}
+
 	return &domain.VerifiedPOSUser{
-		UserID:      user.UserID,
-		POSUserID:   user.ID,
-		LocationID:  user.LocationID,
-		Role:        user.Role,
-		DisplayName: user.Name,
+		UserID:               user.UserID,
+		POSUserID:            user.ID,
+		LocationID:           user.LocationID,
+		Role:                 user.Role,
+		DisplayName:          user.Name,
+		AuthorizationVersion: authorizationVersion,
 		Capabilities: domain.Capabilities{
 			CanVoid:          user.CanVoid,
 			CanRefund:        user.CanRefund,

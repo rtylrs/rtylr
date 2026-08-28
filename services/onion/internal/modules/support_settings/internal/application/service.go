@@ -32,9 +32,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidateSupportSettingsScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(supportSettingsScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(supportSettingsScope, businessID))
 }
 
 func (s *Service) Get(ctx context.Context, businessID int64) (*domain.Settings, error) {

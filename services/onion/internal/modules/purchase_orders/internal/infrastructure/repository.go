@@ -9,15 +9,35 @@ import (
 	"strconv"
 	"time"
 
+	sq "github.com/Masterminds/squirrel"
+
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/domain"
 	"github.com/voxire/onion/internal/modules/purchase_orders/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 	"github.com/voxire/onion/internal/platform/stock_core"
 )
 
 type Repository struct {
 	queries *sqlc.Queries
 	pool    *sql.DB
+}
+
+type purchaseOrderReceiptLine struct {
+	item  sqlc.ErpPurchaseOrderItem
+	delta float64
+}
+
+type purchaseOrderInventoryLedgerEntry struct {
+	ProductID      int64
+	QuantityChange string
+	QuantityBefore string
+	QuantityAfter  string
+	OwnerID        int64
+	BusinessID     int64
+	ReferenceID    int64
+	CreatedBy      int64
+	Notes          string
 }
 
 func NewRepository(db *sql.DB) *Repository {
@@ -27,6 +47,65 @@ func NewRepository(db *sql.DB) *Repository {
 		queries: sqlc.New(pool),
 		pool:    pool,
 	}
+}
+
+type purchaseOrderItemReceivedUpdate struct {
+	ID       int64
+	Quantity string
+}
+
+func updatePurchaseOrderItemsReceived(ctx context.Context, tx *sql.Tx, purchaseOrderID int64, updates []purchaseOrderItemReceivedUpdate) error {
+	if len(updates) == 0 {
+		return nil
+	}
+
+	caseExpr := sq.Case()
+	ids := make([]int64, 0, len(updates))
+	for _, update := range updates {
+		caseExpr = caseExpr.When(sq.Expr("id = ?", update.ID), update.Quantity)
+		ids = append(ids, update.ID)
+	}
+	query, args, err := sq.Update("erp_purchase_order_items").
+		Set("quantity_received", caseExpr).
+		Where(sq.Eq{"purchase_order_id": purchaseOrderID, "id": ids}).
+		ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = tx.ExecContext(ctx, query, args...)
+	return err
+}
+
+func insertPurchaseOrderInventoryLedger(ctx context.Context, tx *sql.Tx, entries []purchaseOrderInventoryLedgerEntry) error {
+	if len(entries) == 0 {
+		return nil
+	}
+
+	insert := sq.Insert("erp_inventory_transactions").Columns(
+		"owner_id", "business_id", "product_id", "type", "quantity_change", "quantity_before", "quantity_after",
+		"reference_id", "reference_type", "created_by", "notes",
+	)
+	for _, entry := range entries {
+		insert = insert.Values(
+			entry.OwnerID,
+			entry.BusinessID,
+			entry.ProductID,
+			sqlc.ErpInventoryTransactionsType(domain.InventoryTypePurchase),
+			entry.QuantityChange,
+			entry.QuantityBefore,
+			entry.QuantityAfter,
+			sqlutil.NullInt64(entry.ReferenceID),
+			sqlutil.NullString("purchase_order"),
+			sqlutil.NullInt64(entry.CreatedBy),
+			sqlutil.NullString(entry.Notes),
+		)
+	}
+	query, args, err := insert.ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = tx.ExecContext(ctx, query, args...)
+	return err
 }
 
 func (r *Repository) ListPurchaseOrders(ctx context.Context, businessID int64, status string, limit, offset int32) ([]domain.PurchaseOrder, error) {
@@ -96,12 +175,12 @@ func (r *Repository) GetPurchaseOrderItems(ctx context.Context, purchaseOrderID 
 		item.ID = row.ID
 		item.PurchaseOrderID = row.PurchaseOrderID
 		item.ProductID = row.ProductID
-		item.QuantityOrdered = parseDecimal(row.QuantityOrdered)
-		item.UnitCost = parseDecimal(row.UnitCost)
-		item.TotalCost = parseDecimal(row.TotalCost)
+		item.QuantityOrdered = sqlutil.ParseDecimal(row.QuantityOrdered)
+		item.UnitCost = sqlutil.ParseDecimal(row.UnitCost)
+		item.TotalCost = sqlutil.ParseDecimal(row.TotalCost)
 
 		if row.QuantityReceived.Valid {
-			item.QuantityReceived = parseDecimal(row.QuantityReceived.String)
+			item.QuantityReceived = sqlutil.ParseDecimal(row.QuantityReceived.String)
 		}
 
 		items = append(items, item)
@@ -152,8 +231,8 @@ func (r *Repository) CreatePurchaseOrder(ctx context.Context, businessID int64, 
 		TaxAmount:        sql.NullString{String: strconv.FormatFloat(input.TaxAmount, 'f', 2, 64), Valid: true},
 		Total:            sql.NullString{String: strconv.FormatFloat(total, 'f', 2, 64), Valid: true},
 		ExpectedDelivery: expectedDelivery,
-		Notes:            nullString(input.Notes),
-		CreatedBy:        nullInt64(createdBy),
+		Notes:            sqlutil.NullString(input.Notes),
+		CreatedBy:        sqlutil.NullInt64(createdBy),
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to insert purchase order", logger.Error(err))
@@ -382,6 +461,8 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		receivedByID[item.ID] = item.QuantityReceived
 	}
 	fullyReceived := true
+	receiptLines := make([]purchaseOrderReceiptLine, 0, len(items))
+	receivedUpdates := make([]purchaseOrderItemReceivedUpdate, 0, len(items))
 	for _, it := range items {
 		ordered, perr := strconv.ParseFloat(it.QuantityOrdered, 64)
 		if perr != nil {
@@ -411,13 +492,23 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 		if delta < 0 {
 			return fmt.Errorf("received quantity for item %d cannot decrease from %v", it.ID, previous)
 		}
+		receiptLines = append(receiptLines, purchaseOrderReceiptLine{item: it, delta: delta})
+		receivedUpdates = append(receivedUpdates, purchaseOrderItemReceivedUpdate{
+			ID:       it.ID,
+			Quantity: strconv.FormatFloat(qty, 'f', -1, 64),
+		})
+	}
+	if err = updatePurchaseOrderItemsReceived(ctx, tx, poID, receivedUpdates); err != nil {
+		return err
+	}
 
-		if err = qtx.UpdatePurchaseOrderItemReceived(ctx, sqlc.UpdatePurchaseOrderItemReceivedParams{QuantityReceived: nullString(strconv.FormatFloat(qty, 'f', -1, 64)), PurchaseOrderID: poID, ID: it.ID}); err != nil {
-			return err
-		}
-		if delta == 0 {
+	legacyEntries := make([]purchaseOrderInventoryLedgerEntry, 0, len(receiptLines))
+	for _, line := range receiptLines {
+		if line.delta == 0 {
 			continue
 		}
+		it := line.item
+		delta := line.delta
 
 		before, after, merr := stock_core.ApplyMovementTx(ctx, tx, stock_core.Movement{
 			OwnerID:       businessID,
@@ -436,22 +527,17 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 			return err
 		}
 
-		// Legacy ledger row (read-compat).
-		if _, err = qtx.InsertInventoryTransactionWithRef(ctx, sqlc.InsertInventoryTransactionWithRefParams{
+		legacyEntries = append(legacyEntries, purchaseOrderInventoryLedgerEntry{
 			OwnerID:        createdBy,
 			BusinessID:     businessID,
 			ProductID:      it.ProductID,
-			Type:           sqlc.ErpInventoryTransactionsType(domain.InventoryTypePurchase),
 			QuantityChange: strconv.FormatFloat(delta, 'f', -1, 64),
 			QuantityBefore: strconv.FormatFloat(before, 'f', -1, 64),
 			QuantityAfter:  strconv.FormatFloat(after, 'f', -1, 64),
-			ReferenceID:    nullInt64(poID),
-			ReferenceType:  nullString("purchase_order"),
-			CreatedBy:      nullInt64(createdBy),
-			Notes:          nullString(fmt.Sprintf("received from purchase order %d", poID)),
-		}); err != nil {
-			return err
-		}
+			ReferenceID:    poID,
+			CreatedBy:      createdBy,
+			Notes:          fmt.Sprintf("received from purchase order %d", poID),
+		})
 
 		if _, err = tx.ExecContext(ctx, `
 			INSERT INTO inventory_cost_layers
@@ -460,6 +546,9 @@ func (r *Repository) ReceivePurchaseOrder(ctx context.Context, businessID, poID,
 			businessID, businessID, it.ProductID, locID, delta, it.UnitCost, poID); err != nil {
 			return err
 		}
+	}
+	if err = insertPurchaseOrderInventoryLedger(ctx, tx, legacyEntries); err != nil {
+		return err
 	}
 
 	nextStatus := domain.POStatusPartial
@@ -491,15 +580,15 @@ func purchaseOrderFromRow(row sqlc.ErpPurchaseOrder) domain.PurchaseOrder {
 	}
 
 	if row.Subtotal.Valid {
-		po.Subtotal = parseDecimal(row.Subtotal.String)
+		po.Subtotal = sqlutil.ParseDecimal(row.Subtotal.String)
 	}
 
 	if row.TaxAmount.Valid {
-		po.TaxAmount = parseDecimal(row.TaxAmount.String)
+		po.TaxAmount = sqlutil.ParseDecimal(row.TaxAmount.String)
 	}
 
 	if row.Total.Valid {
-		po.Total = parseDecimal(row.Total.String)
+		po.Total = sqlutil.ParseDecimal(row.Total.String)
 	}
 
 	if row.ExpectedDelivery.Valid {
@@ -529,25 +618,5 @@ func purchaseOrderFromRow(row sqlc.ErpPurchaseOrder) domain.PurchaseOrder {
 	return po
 }
 
-func nullString(s string) sql.NullString {
-	return sql.NullString{String: s, Valid: s != ""}
-}
-
-func nullInt64(v int64) sql.NullInt64 {
-	return sql.NullInt64{Int64: v, Valid: v != 0}
-}
-
 // parseDecimal converts a DB decimal string to float64, logging (rather than
 // silently swallowing) corrupt values so bad money/quantity data surfaces.
-func parseDecimal(s string) float64 {
-	if s == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse purchase-order decimal from database",
-			logger.String("value", s), logger.Error(err))
-		return 0
-	}
-	return f
-}

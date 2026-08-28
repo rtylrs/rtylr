@@ -39,6 +39,14 @@ func (r *Repository) Get(ctx context.Context, businessID, id int64) (domain.Bill
 }
 
 func (r *Repository) Delete(ctx context.Context, businessID, id int64) error {
+	bill, err := r.Get(ctx, businessID, id)
+	if err != nil {
+		return err
+	}
+	if bill.IsPaid() {
+		return domain.ErrPaidBillImmutable
+	}
+
 	res, err := r.queries.DeleteBill(ctx, sqlc.DeleteBillParams{ID: id, BusinessID: businessID})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to delete bill", logger.Error(err))
@@ -95,6 +103,8 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 	status := input.Status
 	if status == "" {
 		status = "pending"
+	} else if status != "pending" {
+		return 0, domain.ErrInvalidStatusTransition
 	}
 	currency := input.Currency
 	if currency == "" {
@@ -128,13 +138,29 @@ func (r *Repository) Create(ctx context.Context, businessID int64, input domain.
 }
 
 func (r *Repository) Update(ctx context.Context, businessID, id int64, input domain.BillInput) error {
+	current, err := r.Get(ctx, businessID, id)
+	if err != nil {
+		return err
+	}
+	if current.IsPaid() {
+		return domain.ErrPaidBillImmutable
+	}
+	nextStatus := input.Status
+	if nextStatus == "" {
+		nextStatus = current.Status
+	}
+	if err := domain.ValidateBillStatusTransition(current.Status, nextStatus); err != nil {
+		return err
+	}
+	input.Status = nextStatus
+
 	dueDate, err := time.Parse("2006-01-02", input.DueDate)
 	if err != nil && input.DueDate != "" {
 		logger.Ctx(ctx).Error("Failed to parse due_date", logger.Error(err))
 		return err
 	}
 
-	err = r.queries.UpdateBill(ctx, sqlc.UpdateBillParams{
+	res, err := r.queries.UpdateBill(ctx, sqlc.UpdateBillParams{
 		SupplierID:      sql.NullInt64{Int64: input.SupplierID, Valid: input.SupplierID != 0},
 		SupplierName:    input.SupplierName,
 		PurchaseOrderID: nullableInt64FromInput(input.PurchaseOrderID),
@@ -143,12 +169,20 @@ func (r *Repository) Update(ctx context.Context, businessID, id int64, input dom
 		DueDate:         dueDate,
 		Status:          sqlc.NullFinanceBillsStatus{FinanceBillsStatus: sqlc.FinanceBillsStatus(input.Status), Valid: input.Status != ""},
 		Description:     nullableString(input.Description),
+		CurrentStatus:   sqlc.NullFinanceBillsStatus{FinanceBillsStatus: sqlc.FinanceBillsStatus(current.Status), Valid: true},
 		ID:              id,
 		BusinessID:      businessID,
 	})
 	if err != nil {
 		logger.Ctx(ctx).Error("Failed to update bill", logger.Error(err))
 		return err
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return domain.ErrBillNotFound
 	}
 
 	return nil

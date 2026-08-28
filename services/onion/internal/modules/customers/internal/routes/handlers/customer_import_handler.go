@@ -68,7 +68,7 @@ func (h *ImportCustomersHandler) Serve(ctx context.Context, req *ImportCustomers
 	}
 	// Bulk-inserting PII is destructive/policy-changing, same as export,
 	// delete and merge.
-	if err := requireCRMManager(ctx); err != nil {
+	if err := requireCRMFeaturePermission(ctx, "crm:customers:create"); err != nil {
 		return ImportCustomersResponse{}, err
 	}
 

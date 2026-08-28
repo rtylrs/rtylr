@@ -3,9 +3,9 @@ package api_test
 import (
 	"testing"
 
-	flowlabelv2 "github.com/voxire/voxie/gen/go/flow/label/v2"
-
 	"github.com/voxire/onion/internal/modules/workspaces/internal/api"
+	"github.com/voxire/onion/internal/testutil"
+	flowlabelv2 "github.com/voxire/voxie/gen/go/flow/label/v2"
 )
 
 // SetTaskLabels mutates a task through the label service, so it takes the same
@@ -22,7 +22,7 @@ func TestLabelV2_ViewerCannotSetTaskLabels(t *testing.T) {
 	taskID := f.newTask(t)
 
 	_, err := labelV2.SetTaskLabels(ctxAs(roleViewerID),
-		&flowlabelv2.SetTaskLabelsRequest{TaskId: taskID, LabelIds: []int64{101}})
+		&flowlabelv2.SetTaskLabelsRequest{TaskId: testutil.Int64Ptr(taskID), LabelIds: []int64{101}})
 
 	assertPermissionDenied(t, err, "viewer SetTaskLabels via v2")
 }
@@ -33,7 +33,7 @@ func TestLabelV2_MemberCanSetTaskLabels(t *testing.T) {
 	taskID := f.newTask(t)
 
 	if _, err := labelV2.SetTaskLabels(ctxAs(roleMemberID),
-		&flowlabelv2.SetTaskLabelsRequest{TaskId: taskID, LabelIds: []int64{101}}); err != nil {
+		&flowlabelv2.SetTaskLabelsRequest{TaskId: testutil.Int64Ptr(taskID), LabelIds: []int64{101}}); err != nil {
 		t.Fatalf("member SetTaskLabels via v2: expected success, got %v", err)
 	}
 }

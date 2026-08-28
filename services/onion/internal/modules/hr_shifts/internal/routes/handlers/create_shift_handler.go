@@ -66,6 +66,9 @@ func (h *CreateShiftHandler) Serve(ctx context.Context, req *CreateShiftRequest)
 	if device.IsAnonymous || device.User == nil {
 		return CreateShiftResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requireShiftPermission(ctx); err != nil {
+		return CreateShiftResponse{}, err
+	}
 
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
 	if bizErr != nil {

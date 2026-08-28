@@ -27,7 +27,10 @@ SCHEMAS_DIR="$PROJECT_ROOT/internal/platform/database/schemas"
 source "$SCHEMAS_DIR/migration_order.sh"
 
 mysql_cmd() {
+    # The CLI otherwise negotiates latin1, which cannot represent the emoji
+    # defaults used by flow/schema.sql and other schemas.
     MYSQL_PWD="$DB_PASSWORD" mysql \
+        --default-character-set=utf8mb4 \
         --host="$DB_HOST" \
         --port="$DB_PORT" \
         --user="$DB_USER" \
@@ -63,9 +66,25 @@ FAILED=0
 OUTPUT_FILE="$(mktemp)"
 trap 'rm -f "$OUTPUT_FILE"' EXIT
 
-apply_file() {
+deferred_migrations=(
+    "hr_time/zz_flow_client_key_tenant_scope.sql"
+    "shared/zz_role_access_v2_integrity.sql"
+)
+
+is_deferred() {
     local filename="$1"
-    local path="$2"
+    local deferred
+    for deferred in "${deferred_migrations[@]}"; do
+        if [ "$filename" = "$deferred" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+apply_migration() {
+    local filename="$1"
+    local file_path="$2"
 
     if already_applied "$filename"; then
         echo "  ✓ $filename (already applied)"
@@ -74,11 +93,13 @@ apply_file() {
     fi
 
     echo "  → $filename"
-    if mysql_cmd < "$path" >"$OUTPUT_FILE" 2>&1; then
-        grep -v "Warning:" "$OUTPUT_FILE" || true
+    if mysql_cmd < "$file_path" >"$OUTPUT_FILE" 2>&1; then
+        # Keep affected-row output and server warnings visible to the operator.
+        # Warnings are part of the migration evidence and must not be hidden.
+        cat "$OUTPUT_FILE"
     else
         local status=$?
-        grep -v "Warning:" "$OUTPUT_FILE" || true
+        cat "$OUTPUT_FILE"
         echo "    ✗ $filename failed; it was not recorded as applied" >&2
         FAILED=$((FAILED + 1))
         echo ""
@@ -97,10 +118,19 @@ apply_file() {
 
 for dir in "${SCHEMA_MIGRATION_DIRS[@]}"; do
     schema_dir="$SCHEMAS_DIR/$dir"
-    [ -d "$schema_dir" ] || continue
+    if [ ! -d "$schema_dir" ]; then
+        continue
+    fi
+
     for f in "$schema_dir"/*.sql; do
         [ -f "$f" ] || continue
-        apply_file "$dir/$(basename "$f")" "$f"
+        filename="$dir/$(basename "$f")"
+
+        if is_deferred "$filename"; then
+            continue
+        fi
+
+        apply_migration "$filename" "$f"
     done
 done
 
@@ -108,7 +138,16 @@ done
 # canonical schema set so module changes can build on shared tables.
 shopt -s nullglob
 for f in "$PROJECT_ROOT"/internal/modules/*/sql/migration_*.sql; do
-    apply_file "${f#"$PROJECT_ROOT/"}" "$f"
+    apply_migration "${f#"$PROJECT_ROOT/"}" "$f"
+done
+
+# Apply cross-schema migrations after all owning schemas exist. Their
+# application-level preflight checks still fail closed on invalid data.
+for filename in "${deferred_migrations[@]}"; do
+    file_path="$SCHEMAS_DIR/$filename"
+    if [ -f "$file_path" ]; then
+        apply_migration "$filename" "$file_path"
+    fi
 done
 
 echo ""

@@ -15,7 +15,7 @@ func TestCheckout_Create_ReturnsPositiveID(t *testing.T) {
 	input := domain.CheckoutCreateInput{
 		SessionID:     "sess-abc-123",
 		CustomerEmail: "test@example.com",
-		Items:         `[{"product_id":1,"qty":2}]`,
+		Items:         `[{"product_id":5201,"qty":2}]`,
 		Subtotal:      50.0,
 		Tax:           5.0,
 		Total:         55.0,
@@ -227,7 +227,7 @@ func TestCheckout_Create_WithItems_PositiveID(t *testing.T) {
 	db := testutil.OpenDB(t)
 	repo := infrastructure.NewRepository(db)
 	id, err := repo.Create(context.Background(), testutil.OwnerID, testutil.OwnerID, domain.CheckoutCreateInput{
-		Items:    `[{"product_id":5,"qty":3},{"product_id":10,"qty":1}]`,
+		Items:    `[{"product_id":5201,"qty":3},{"product_id":5202,"qty":1}]`,
 		Subtotal: 90.0,
 		Tax:      9.0,
 		Total:    99.0,

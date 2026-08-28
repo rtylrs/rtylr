@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/warehouses/internal/application"
 	"github.com/voxire/onion/internal/modules/warehouses/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	erpwarehousev1 "github.com/voxire/voxie/gen/go/erp/warehouse/v1"
@@ -22,7 +23,7 @@ func NewWarehouseAPI(service *application.Service) *WarehouseAPI {
 }
 
 func (a *WarehouseAPI) ListWarehouses(ctx context.Context, _ *erpwarehousev1.ListWarehousesRequest) (*erpwarehousev1.ListWarehousesResponse, error) {
-	ownerID, err := warehouseOwnerID(ctx)
+	ownerID, err := warehouseOwnerID(ctx, "erp:warehouses:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +39,7 @@ func (a *WarehouseAPI) ListWarehouses(ctx context.Context, _ *erpwarehousev1.Lis
 }
 
 func (a *WarehouseAPI) CreateWarehouse(ctx context.Context, req *erpwarehousev1.CreateWarehouseRequest) (*erpwarehousev1.CreateWarehouseResponse, error) {
-	ownerID, err := warehouseOwnerID(ctx)
+	ownerID, err := warehouseOwnerID(ctx, "erp:warehouses:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +60,7 @@ func (a *WarehouseAPI) CreateWarehouse(ctx context.Context, req *erpwarehousev1.
 }
 
 func (a *WarehouseAPI) UpdateWarehouse(ctx context.Context, req *erpwarehousev1.UpdateWarehouseRequest) (*erpwarehousev1.UpdateWarehouseResponse, error) {
-	ownerID, err := warehouseOwnerID(ctx)
+	ownerID, err := warehouseOwnerID(ctx, "erp:warehouses:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +84,7 @@ func (a *WarehouseAPI) UpdateWarehouse(ctx context.Context, req *erpwarehousev1.
 }
 
 func (a *WarehouseAPI) DeleteWarehouse(ctx context.Context, req *erpwarehousev1.DeleteWarehouseRequest) (*erpwarehousev1.DeleteWarehouseResponse, error) {
-	ownerID, err := warehouseOwnerID(ctx)
+	ownerID, err := warehouseOwnerID(ctx, "erp:warehouses:manage")
 	if err != nil {
 		return nil, err
 	}
@@ -93,10 +94,10 @@ func (a *WarehouseAPI) DeleteWarehouse(ctx context.Context, req *erpwarehousev1.
 	return &erpwarehousev1.DeleteWarehouseResponse{Message: "Warehouse deleted successfully"}, nil
 }
 
-func warehouseOwnerID(ctx context.Context) (int64, error) {
+func warehouseOwnerID(ctx context.Context, permission string) (int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok {
-		return 0, warehouseStatusError(http.StatusUnauthorized, "unauthorized")
+	if !ok || authUser == nil || !authPkg.HasAppPermission(authUser, authorization.AppERP, permission) {
+		return 0, onekiterrors.PermissionDenied()
 	}
 	ownerID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {

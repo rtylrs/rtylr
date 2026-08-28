@@ -13,6 +13,7 @@ import (
 	authPkg "github.com/voxire/onion/internal/platform/auth"
 	"github.com/voxire/onion/internal/platform/logger"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
+	"github.com/voxire/onion/internal/platform/tenant"
 )
 
 func ExportPayrollRoutes() []string { return []string{"/hr/payroll/runs/{id}/export"} }
@@ -32,6 +33,13 @@ func (h *ExportPayrollHandler) Serve(ctx context.Context, _ *ExportPayrollReques
 	if device.IsAnonymous || device.User == nil {
 		return ExportPayrollResponse{}, onekiterrors.PermissionDenied()
 	}
+	if err := requirePayrollPermission(ctx, "hr:payroll:manage"); err != nil {
+		return ExportPayrollResponse{}, err
+	}
+	businessID, businessErr := tenant.ResolveBusinessID(ctx, device.User.BusinessID, device.User.UserID)
+	if businessErr != nil {
+		return ExportPayrollResponse{}, onekiterrors.PermissionDenied()
+	}
 
 	idStr := chi.URLParamFromCtx(ctx, "id")
 	runID, parseErr := strconv.ParseInt(idStr, 10, 64)
@@ -39,7 +47,7 @@ func (h *ExportPayrollHandler) Serve(ctx context.Context, _ *ExportPayrollReques
 		return ExportPayrollResponse{}, onekiterrors.New(http.StatusBadRequest, "Invalid payroll run id")
 	}
 
-	err := h.Service.ExportPayrollToFinance(ctx, device.User.UserID, runID)
+	err := h.Service.ExportPayrollToFinance(ctx, businessID, runID)
 	if err != nil {
 		if errors.Is(err, domain.ErrPayrollRunNotFound) {
 			return ExportPayrollResponse{}, onekiterrors.New(http.StatusNotFound, "Payroll run not found")

@@ -8,6 +8,7 @@ import (
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/application"
 	"github.com/voxire/onion/internal/modules/pos_menu/internal/domain"
 	authPkg "github.com/voxire/onion/internal/platform/auth"
+	"github.com/voxire/onion/internal/platform/authorization"
 	"github.com/voxire/onion/internal/platform/onekiterrors"
 	"github.com/voxire/onion/internal/platform/tenant"
 	posmenuitemv1 "github.com/voxire/voxie/gen/go/pos/menu_item/v1"
@@ -22,7 +23,7 @@ func NewMenuItemAPI(service *application.Service) *MenuItemAPI {
 }
 
 func (a *MenuItemAPI) ListMenuItems(ctx context.Context, _ *posmenuitemv1.ListMenuItemsRequest) (*posmenuitemv1.ListMenuItemsResponse, error) {
-	businessID, err := authenticatedMenuBusinessID(ctx)
+	_, businessID, err := requireMenuPermission(ctx, "menu:menus:view")
 	if err != nil {
 		return nil, err
 	}
@@ -69,14 +70,9 @@ func toPublicProtoMenuItem(item domain.MenuItem) *posmenuitemv1.MenuItem {
 }
 
 func (a *MenuItemAPI) CreateMenuItem(ctx context.Context, req *posmenuitemv1.CreateMenuItemRequest) (*posmenuitemv1.CreateMenuItemResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok || !authPkg.HasAnyRole(authUser, "owner", "admin", "console_admin", "menu_manager") {
-		return nil, onekiterrors.PermissionDenied()
-	}
-
-	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
-	if bizErr != nil {
-		return nil, onekiterrors.PermissionDenied()
+	authUser, businessID, err := requireMenuPermission(ctx, "menu:menus:edit")
+	if err != nil {
+		return nil, err
 	}
 
 	name := strings.TrimSpace(req.GetName())
@@ -99,11 +95,7 @@ func (a *MenuItemAPI) CreateMenuItem(ctx context.Context, req *posmenuitemv1.Cre
 }
 
 func (a *MenuItemAPI) UpdateMenuItem(ctx context.Context, req *posmenuitemv1.UpdateMenuItemRequest) (*posmenuitemv1.UpdateMenuItemResponse, error) {
-	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok || !authPkg.HasAnyRole(authUser, "owner", "admin", "console_admin", "menu_manager") {
-		return nil, onekiterrors.PermissionDenied()
-	}
-	businessID, err := authenticatedMenuBusinessID(ctx)
+	_, businessID, err := requireMenuPermission(ctx, "menu:menus:edit")
 	if err != nil {
 		return nil, err
 	}
@@ -126,16 +118,16 @@ func (a *MenuItemAPI) UpdateMenuItem(ctx context.Context, req *posmenuitemv1.Upd
 	return &posmenuitemv1.UpdateMenuItemResponse{Message: "Menu item updated successfully"}, nil
 }
 
-func authenticatedMenuBusinessID(ctx context.Context) (int64, error) {
+func requireMenuPermission(ctx context.Context, permission string) (*authPkg.AuthUser, int64, error) {
 	authUser, ok := authPkg.GetAuthUser(ctx)
-	if !ok || authUser == nil {
-		return 0, onekiterrors.PermissionDenied()
+	if !ok || authUser == nil || !authPkg.HasAppPermission(authUser, authorization.AppMenu, permission) {
+		return nil, 0, onekiterrors.PermissionDenied()
 	}
 	businessID, bizErr := tenant.ResolveBusinessID(ctx, authUser.BusinessID, authUser.UserID)
 	if bizErr != nil {
-		return 0, onekiterrors.PermissionDenied()
+		return nil, 0, onekiterrors.PermissionDenied()
 	}
-	return businessID, nil
+	return authUser, businessID, nil
 }
 
 func toProtoMenuItem(item domain.MenuItem) *posmenuitemv1.MenuItem {

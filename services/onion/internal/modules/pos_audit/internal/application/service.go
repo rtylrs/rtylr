@@ -34,9 +34,7 @@ func NewService(_ context.Context, db *sql.DB) *Service {
 }
 
 func invalidatePosAuditScope(ctx context.Context, businessID int64) {
-	if cache := cacher.GetRedisCache(); cache != nil {
-		cache.DeleteByPattern(ctx, cacheKeys.ScopedPrefix(posAuditScope, businessID))
-	}
+	cacher.InvalidateScope(ctx, cacheKeys.ScopedPrefix(posAuditScope, businessID))
 }
 
 func (s *Service) List(ctx context.Context, filter domain.AuditLogFilter) ([]domain.AuditLog, error) {
@@ -65,7 +63,7 @@ func (s *Service) ListPage(ctx context.Context, filter domain.AuditLogFilter) (d
 			}
 
 			page := domain.AuditLogPage{Logs: logs}
-			if int32(len(logs)) > pageSize {
+			if int32(len(logs)) > pageSize { // #nosec G115 -- Reviewed width conversion uses validated application limits and the established database or contract field width.
 				last := logs[pageSize-1]
 				page.Logs = logs[:pageSize]
 				page.NextCursor = cursor.EncodeCreatedAtID(cursor.CreatedAtID{CreatedAt: last.CreatedAt, ID: last.ID})

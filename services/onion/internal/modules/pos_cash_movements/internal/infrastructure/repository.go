@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"strconv"
 
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/domain"
 	"github.com/voxire/onion/internal/modules/pos_cash_movements/internal/infrastructure/persistence/sqlc"
 	"github.com/voxire/onion/internal/platform/logger"
+	"github.com/voxire/onion/internal/platform/sqlutil"
 )
 
 type Repository struct {
@@ -43,7 +43,7 @@ func (r *Repository) ListBySession(ctx context.Context, businessID, sessionID in
 			SessionID:  row.SessionID,
 			EmployeeID: row.EmployeeID,
 			Type:       string(row.Type),
-			Amount:     decimalToFloat(row.Amount),
+			Amount:     sqlutil.DecimalToFloat(row.Amount),
 			CreatedAt:  row.CreatedAt.Time,
 		}
 		if row.TerminalID.Valid {
@@ -90,7 +90,7 @@ func (r *Repository) Create(ctx context.Context, input domain.CreateCashMovement
 		SessionID:  input.SessionID,
 		EmployeeID: input.EmployeeID,
 		Type:       sqlc.PosCashMovementsType(input.Type),
-		Amount:     floatToDecimal(input.Amount),
+		Amount:     sqlutil.FloatToDecimal(input.Amount),
 		Reason:     reason,
 		ApprovedBy: approvedBy,
 	})
@@ -99,30 +99,4 @@ func (r *Repository) Create(ctx context.Context, input domain.CreateCashMovement
 		return 0, err
 	}
 	return result.LastInsertId()
-}
-
-func decimalToFloat(s any) float64 {
-	var str string
-	switch v := s.(type) {
-	case string:
-		str = v
-	case []byte:
-		str = string(v)
-	default:
-		str = fmt.Sprintf("%v", s)
-	}
-	if str == "" {
-		return 0
-	}
-	f, err := strconv.ParseFloat(str, 64)
-	if err != nil {
-		logger.Global().Warn("failed to parse cash-movement decimal from database",
-			logger.String("value", str), logger.Error(err))
-		return 0
-	}
-	return f
-}
-
-func floatToDecimal(f float64) string {
-	return fmt.Sprintf("%.2f", f)
 }
