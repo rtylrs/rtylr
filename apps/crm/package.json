@@ -18,6 +18,7 @@
     "@voxire/i18n": "workspace:*",
     "@voxire/observability": "workspace:*",
     "@voxire/permissions": "workspace:*",
+    "@voxire/types": "workspace:*",
     "@voxire/ui": "workspace:*",
     "axios": "^1.19.0",
     "lucide-react": "^1.8.0",

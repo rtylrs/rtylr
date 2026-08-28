@@ -17,6 +17,7 @@
     "@voxire/i18n": "workspace:*",
     "@voxire/observability": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",
+    "@voxire/types": "workspace:*",
     "@voxire/ui": "workspace:*",
     "lucide-react": "^1.8.0",
     "motion": "^12.38.0"
