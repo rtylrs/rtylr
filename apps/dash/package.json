@@ -23,6 +23,7 @@
     "@voxire/i18n": "workspace:*",
     "@voxire/menu": "workspace:*",
     "@voxire/observability": "workspace:*",
+    "@voxire/permissions": "workspace:*",
     "@voxire/tailwind-config": "workspace:*",
     "@voxire/ui": "workspace:*",
     "@voxire/voxie": "workspace:*",

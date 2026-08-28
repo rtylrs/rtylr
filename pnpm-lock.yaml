@@ -485,6 +485,9 @@ importers:
       '@voxire/observability':
         specifier: workspace:*
         version: link:../../packages/observability
+      '@voxire/permissions':
+        specifier: workspace:*
+        version: link:../../packages/permissions
       '@voxire/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
